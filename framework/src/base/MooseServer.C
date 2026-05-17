@@ -24,6 +24,7 @@
 #include "Parser.h"
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
+#include "Distribution.h"
 #include "ActionWarehouse.h"
 #include "MaterialPropertyRegistry.h"
 #include "MaterialBase.h"
@@ -50,7 +51,9 @@
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app),
     _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this)),
-    _formatting_tab_size(0)
+    _formatting_tab_size(0),
+    _dist_plot_num_points(200),
+    _dist_plot_quantile_bound(1e-3)
 {
   // add all implemented server capabilities to notify client in initialize
   enableFullSync();
@@ -1872,18 +1875,31 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int li
   if (!problem)
     return true;
 
-  // return without any plots added when request is not from function block
-  if (!problem->hasFunction(object_name))
-    return true;
+  // check problem to build function plot if request is from function block
+  if (problem->hasFunction(object_name))
+    buildFuncPlotResponse(plottingResponses, *problem, object_name, object_type);
 
+  // check problem to build PDF and CDF plots if request is in distribution
+  else if (problem->hasDistribution(object_name))
+    buildDistPlotResponses(plottingResponses, *problem, object_name, object_type);
+
+  return true;
+}
+
+void
+MooseServer::buildFuncPlotResponse(wasp::DataArray & plottingResponses,
+                                   FEProblemBase & problem,
+                                   const std::string & object_name,
+                                   const std::string & object_type)
+{
   // get function from problem and return with no plots added if wrong type
-  const auto * pw_func = dynamic_cast<const PiecewiseBase *>(&problem->getFunction(object_name));
+  const auto * pw_func = dynamic_cast<const PiecewiseBase *>(&problem.getFunction(object_name));
   if (!pw_func)
-    return true;
+    return;
 
   // return without adding plot response objects when function size is zero
   if (pw_func->functionSize() == 0)
-    return true;
+    return;
 
   // walk over piecewise function and gather keys and values for line graph
   std::vector<double> graph_keys, graph_vals;
@@ -1895,16 +1911,71 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int li
 
   // build CustomPlot object from function data then serialize for response
   std::string plot_title = object_name + " " + object_type + " Function";
+  std::string x_axis_label = "abscissa values";
+  std::string y_axis_label = "ordinate values";
   wasp::CustomPlot plot_object;
-  buildLineGraphPlot(plot_object, plot_title, graph_keys, graph_vals);
+  buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
   plottingResponses.push_back(wasp::serializeCustomPlot(plot_object));
+}
 
-  return true;
+void
+MooseServer::buildDistPlotResponses(wasp::DataArray & plottingResponses,
+                                    FEProblemBase & problem,
+                                    const std::string & object_name,
+                                    const std::string & object_type)
+{
+  // get distribution from problem that is registered for given object name
+  const Distribution & dist = problem.getDistribution(object_name);
+
+  // pick plot x-range using quantiles to be generic for distribution types
+  const double min_x = dist.quantile(_dist_plot_quantile_bound);
+  const double max_x = dist.quantile(1.0 - _dist_plot_quantile_bound);
+  const double del_x = (max_x - min_x) / (_dist_plot_num_points - 1);
+
+  // return without any plots added if any calculated values are not finite
+  if (!std::isfinite(min_x) || !std::isfinite(max_x) || max_x <= min_x || !std::isfinite(del_x))
+    return;
+
+  // use uniform grid of x-axis graph keys to sample plot values for y-axis
+  std::vector<double> graph_keys(_dist_plot_num_points);
+  std::vector<double> pdf_values(_dist_plot_num_points);
+  std::vector<double> cdf_values(_dist_plot_num_points);
+
+  // calculate PDF values and CDF values for each key within range of graph
+  for (std::size_t i = 0; i < _dist_plot_num_points; i++)
+  {
+    graph_keys[i] = min_x + (i * del_x);
+    pdf_values[i] = dist.pdf(graph_keys[i]);
+    cdf_values[i] = dist.cdf(graph_keys[i]);
+
+    // return without any plots added if any PDF or CDF value is not finite
+    if (!std::isfinite(pdf_values[i]) || !std::isfinite(cdf_values[i]))
+      return;
+  }
+
+  // lambda to build CustomPlot object for distribution and add to response
+  auto add_dist_to_plot = [&](const std::string & dist_type, const std::vector<double> & graph_vals)
+  {
+    std::string plot_title = object_name + " " + object_type + " " + dist_type + " Distribution";
+    std::string x_axis_label = "x values";
+    std::string y_axis_label = dist_type + " values";
+    wasp::CustomPlot plot_object;
+    buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
+    plottingResponses.push_back(wasp::serializeCustomPlot(plot_object));
+  };
+
+  // build CustomPlot object for PDF values, serialize, and add to response
+  add_dist_to_plot("PDF", pdf_values);
+
+  // build CustomPlot object for CDF values, serialize, and add to response
+  add_dist_to_plot("CDF", cdf_values);
 }
 
 void
 MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
                                 const std::string & plot_title,
+                                const std::string & x_axis_label,
+                                const std::string & y_axis_label,
                                 const std::vector<double> & graph_keys,
                                 const std::vector<double> & graph_vals)
 {
@@ -1918,6 +1989,8 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   double pad_factor = 0.05;
   double pad_x_axis = (max_key - min_key) * pad_factor;
   double pad_y_axis = (max_val - min_val) * pad_factor;
+  if (pad_y_axis == 0)
+    pad_y_axis = pad_factor;
   min_key -= pad_x_axis;
   max_key += pad_x_axis;
   min_val -= pad_y_axis;
@@ -1930,7 +2003,7 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   plot_object.legend().visible(false);
 
   // plot x-axis
-  plot_object.x1Axis().label("abscissa values");
+  plot_object.x1Axis().label(x_axis_label);
   plot_object.x1Axis().rangeMin(min_key);
   plot_object.x1Axis().rangeMax(max_key);
   plot_object.x1Axis().scaleType(wasp::CustomPlot::stLinear);
@@ -1939,7 +2012,7 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   plot_object.x1Axis().tickLabelFont().pointsize(16);
 
   // plot y-axis
-  plot_object.y1Axis().label("ordinate values");
+  plot_object.y1Axis().label(y_axis_label);
   plot_object.y1Axis().rangeMin(min_val);
   plot_object.y1Axis().rangeMax(max_val);
   plot_object.y1Axis().scaleType(wasp::CustomPlot::stLinear);
