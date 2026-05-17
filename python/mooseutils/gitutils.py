@@ -88,10 +88,12 @@ def git_ls_files(working_dir=os.getcwd(), recurse_submodules=False, exclude=None
     cmd = ["git", "ls-files"]
     if recurse_submodules:
         cmd.append("--recurse-submodules")
-    if exclude is not None:
-        cmd += ["--exclude", exclude]
     out = set()
     for fname in mooseutils.check_output(cmd, cwd=working_dir).split("\n"):
+        # git's --exclude option only applies to untracked files (with --others),
+        # so filter tracked paths here instead.
+        if exclude is not None and exclude in fname:
+            continue
         out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 
@@ -237,7 +239,9 @@ def git_committers(loc=os.getcwd(), *args):
     cmd = ["git", "shortlog", "-s"]
     for argument in args:
         cmd += argument
-    cmd += ["--", loc]
+    # Explicit revision is required: when stdin is not a TTY (e.g. invoked from a
+    # subprocess), git shortlog without a revision reads from stdin instead of HEAD.
+    cmd += ["HEAD", "--", loc]
     committers = mooseutils.check_output(cmd, encoding="utf-8")
     counts = collections.defaultdict(int)
     for line in committers.splitlines():
