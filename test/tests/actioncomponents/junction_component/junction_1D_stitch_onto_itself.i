@@ -8,6 +8,7 @@
     radius = 1
 
     # optional parameters
+    block = 'cyl1'
     position = '0 0 0'
     direction = '1 0 0'
   []
@@ -19,6 +20,7 @@
     radius = 1
 
     # optional parameters
+    block = 'cyl2'
     position = '1 0 0'
     direction = '0 1 0'
   []
@@ -38,6 +40,7 @@
     radius = 1
 
     # optional parameters
+    block = 'cyl3'
     position = '1 1 0'
     direction = '-1 0 0'
   []
@@ -45,7 +48,7 @@
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_bottom_right
+    first_component = cyl2
     second_component = cyl3
     first_boundary = 'cyl2_right'
     second_boundary = 'cyl3_left'
@@ -59,6 +62,7 @@
     radius = 1
 
     # optional parameters
+    block = 'cyl4'
     position = '0 1 0'
     direction = '0 -1 0'
   []
@@ -66,7 +70,7 @@
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_top_right
+    first_component = cyl3
     second_component = cyl4
     first_boundary = 'cyl3_right'
     second_boundary = 'cyl4_left'
@@ -76,8 +80,8 @@
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_top_left
-    second_component = junction_top_left
+    first_component = cyl4
+    second_component = cyl1
     first_boundary = 'cyl4_right'
     second_boundary = 'cyl1_left'
     junction_method = stitch_meshes

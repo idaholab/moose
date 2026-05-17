@@ -8,7 +8,8 @@
     radius = 1
 
     # optional parameters
-    position = '0 0 0'
+    block = 'cyl1'
+    position = '0.25 0 0'
     direction = '1 0 0'
   []
   [cyl2]
@@ -19,7 +20,8 @@
     radius = 1
 
     # optional parameters
-    position = '1 0 0'
+    block = 'cyl2'
+    position = '1 0.25 0'
     direction = '0 1 0'
   []
   [junction_bottom_right]
@@ -39,14 +41,15 @@
     radius = 1
 
     # optional parameters
-    position = '1 1 0'
+    block = 'cyl3'
+    position = '0.75 1 0'
     direction = '-1 0 0'
   []
   [junction_top_right]
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_bottom_right
+    first_component = cyl2
     second_component = cyl3
     first_boundary = 'cyl2_right'
     second_boundary = 'cyl3_left'
@@ -61,14 +64,15 @@
     radius = 1
 
     # optional parameters
-    position = '0 1 0'
+    block = 'cyl4'
+    position = '0 0.75 0'
     direction = '0 -1 0'
   []
   [junction_top_left]
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_top_right
+    first_component = cyl3
     second_component = cyl4
     first_boundary = 'cyl3_right'
     second_boundary = 'cyl4_left'
@@ -79,11 +83,15 @@
     type = JunctionComponent
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
-    first_component = junction_top_left
-    second_component = junction_top_left
+    first_component = cyl4
+    second_component = cyl1
     first_boundary = 'cyl4_right'
     second_boundary = 'cyl1_left'
     junction_method = extrude_boundary
     n_elem_normal = 4
   []
+[]
+
+[GlobalParams]
+  verbose = true
 []

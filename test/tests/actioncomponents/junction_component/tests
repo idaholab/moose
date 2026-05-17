@@ -2,7 +2,7 @@
   issues = '#31158'
   design = "JunctionComponent.md"
   [1D]
-    requirement = "The system shall be able to connect two 1D meshes"
+    requirement = "The system shall be able to connect two 1D component's meshes"
     [fill]
       type = Exodiff
       input = 'junction_1D_fill.i'
@@ -19,7 +19,7 @@
     []
   []
   [2D]
-    requirement = "The system shall be able to connect two 2D meshes"
+    requirement = "The system shall be able to connect two 2D component's meshes"
     [fill]
       type = Exodiff
       input = 'junction_2D_fill.i'
@@ -36,7 +36,7 @@
     []
   []
   [3D]
-    requirement = "The system shall be able to connect two 3D meshes"
+    requirement = "The system shall be able to connect two 3D component's meshes"
     [fill]
       type = Exodiff
       input = 'junction_3D_fill.i'
@@ -50,6 +50,23 @@
       exodiff = 'junction_3D_stitch_in.e'
       cli_args = '--mesh-only junction_3D_stitch_in.e'
       requirement = 'by stitching the touching boundaries.'
+    []
+  []
+  [loop]
+    requirement = "The system shall be able to connect several components into a loop"
+    [fill]
+      type = Exodiff
+      input = 'junction_1D_fill_onto_itself.i'
+      exodiff = 'junction_1D_fill_onto_itself_in.e'
+      cli_args = '--mesh-only junction_1D_fill_onto_itself_in.e'
+      detail = 'by meshing the space between them,'
+    []
+    [stitch]
+      type = Exodiff
+      input = 'junction_1D_stitch_onto_itself.i'
+      exodiff = 'junction_1D_stitch_onto_itself_in.e'
+      cli_args = '--mesh-only junction_1D_stitch_onto_itself_in.e'
+      detail = 'by stitching the touching boundaries.'
     []
   []
 []
