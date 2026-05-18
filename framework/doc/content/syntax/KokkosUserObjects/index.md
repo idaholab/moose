@@ -60,12 +60,14 @@ A reducer also requires two more hook methods to be defined in your derived obje
 They have the following signatures:
 
 ```cpp
-KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
-KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+template <typename Derived>
+KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+template <typename Derived>
+KOKKOS_FUNCTION void init(Real * result) const;
 ```
 
 `join()` can be considered as a replacement of `threadJoin()` in the original MOOSE objects.
-It combines the values of `source` into `result` and should typically implement the same reduction operation with `execute()`.
+It combines the values of `source` into `result` and should typically implement the same reduction operation with `reduce()`.
 `init()` can be considered as a replacement of `initialize()` in the original MOOSE objects where you used to initialize your reduction variables.
 It initializes the Kokkos internal buffer on GPU.
 Note that initializing `_reduction_buffer` has no effect on GPU and thus is not required.
@@ -92,7 +94,7 @@ The reporter values defined by Kokkos-MOOSE postprocessors, vector postprocessor
 ### Performance Considerations id=reducer_atomic
 
 The [Kokkos Reducer concept](https://kokkos.org/kokkos-core-wiki/API/core/builtinreducers/ReducerConcept.html) leveraged to implement Kokkos-MOOSE reducers is suitable for small arrays and "dense" reduction operations.
-Assume you are reducing a large array, where a single call to `execute()` only accumulates values to one or a few entries of the array at most.
+Assume you are reducing a large array, where a single call to `reduce()` only accumulates values to one or a few entries of the array at most.
 This can be considered as a "sparse" reduction operation and is not suitable for a reducer.
 A massively-parallel reduction is implemented by many partial reductions where many temporary buffers are internally created and initialized.
 Even though most of the entries of a temporary buffer are unused in each partial reduction, it still has to initialize and join all the entries.

@@ -21,8 +21,10 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
-  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
 
 protected:
   virtual void initialize() override;
@@ -57,8 +59,9 @@ KokkosElementStatistics::reduce(Datum & datum, Real * result) const
   result[4]++;
 }
 
-KOKKOS_FUNCTION inline void
-KokkosElementStatistics::join(ReducerLoop, Real * result, const Real * source) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosElementStatistics::join(Real * result, const Real * source) const
 {
   result[0] = Kokkos::max(result[0], source[0]);
   result[1] = Kokkos::min(result[1], source[1]);
@@ -67,8 +70,9 @@ KokkosElementStatistics::join(ReducerLoop, Real * result, const Real * source) c
   result[4] += source[4];
 }
 
-KOKKOS_FUNCTION inline void
-KokkosElementStatistics::init(ReducerLoop, Real * result) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosElementStatistics::init(Real * result) const
 {
   result[0] = Kokkos::Experimental::finite_min_v<Real>;
   result[1] = Kokkos::Experimental::finite_max_v<Real>;
