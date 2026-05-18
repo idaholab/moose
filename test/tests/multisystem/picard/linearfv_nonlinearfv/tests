@@ -8,5 +8,6 @@
     exodiff = 'same_input_out.e'
     recover = false # we need to use no_restore for the fullsolvemultiapp
     max_threads = 1 # see libmesh issue #3808
+    absent_out = 'Option left'
   []
 []
