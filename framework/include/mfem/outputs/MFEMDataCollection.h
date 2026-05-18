@@ -36,6 +36,8 @@ protected:
   /// Mesh set of output variables are defined on. May differ from main problem mesh if SubMesh
   /// variables are in use.
   mfem::ParMesh & _pmesh;
+  /// List of variables to show
+  const std::vector<VariableName> & _shown;
   /// List of variables to hide
   const std::vector<VariableName> & _hidden;
 };
