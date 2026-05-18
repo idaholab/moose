@@ -9,7 +9,6 @@
 
 #include "LinearFVScalarAdvection.h"
 #include "MooseLinearVariableFV.h"
-#include "NSFVUtils.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", LinearFVScalarAdvection);
@@ -23,7 +22,9 @@ LinearFVScalarAdvection::validParams()
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
-  params += Moose::FV::advectedInterpolationParameter();
+  params.addRequiredParam<InterpolationMethodName>(
+      "advected_interp_method_name",
+      "Name of the FVInterpolationMethod to use for the advected quantity.");
   params.addParam<MooseFunctorName>("u_slip", "The slip-velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The slip-velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The slip-velocity in the z direction.");
@@ -32,39 +33,44 @@ LinearFVScalarAdvection::validParams()
 
 LinearFVScalarAdvection::LinearFVScalarAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _adv_interp_method(getFVAdvectedInterpolationMethod(
+        getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _volumetric_face_flux(0.0),
     _u_slip(isParamValid("u_slip") ? &getFunctor<ADReal>("u_slip") : nullptr),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
     _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr),
     _add_slip_model(isParamValid("u_slip") ? true : false)
 {
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+  if (_adv_interp_method.needsGradients())
+    _var.computeCellGradients(_adv_interp_method.gradientLimiter());
 }
 
 Real
 LinearFVScalarAdvection::computeElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _volumetric_face_flux * _current_face_area;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.first * _volumetric_face_flux * _current_face_area;
 }
 
 Real
 LinearFVScalarAdvection::computeNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _volumetric_face_flux * _current_face_area;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.second * _volumetric_face_flux * _current_face_area;
 }
 
 Real
 LinearFVScalarAdvection::computeElemRightHandSideContribution()
 {
-  return 0.0;
+  return _adv_interp_result.rhs_face_value * _volumetric_face_flux * _current_face_area;
 }
 
 Real
 LinearFVScalarAdvection::computeNeighborRightHandSideContribution()
 {
-  return 0.0;
+  return -_adv_interp_result.rhs_face_value * _volumetric_face_flux * _current_face_area;
 }
 
 Real
@@ -127,8 +133,28 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
     _volumetric_face_flux += velocity_slip_vel_vec * face_info->normal();
   }
 
-  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
-  // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _volumetric_face_flux);
+  // Only internal faces need advected interpolation results; boundary contributions are handled
+  // through the linear FV boundary conditions.
+  if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
+    return;
+
+  const auto state = determineState();
+  const auto & elem_info = *_current_face_info->elemInfo();
+  const auto & neighbor_info = *_current_face_info->neighborInfo();
+
+  const Real elem_value = _var.getElemValue(elem_info, state);
+  const Real neighbor_value = _var.getElemValue(neighbor_info, state);
+  if (_adv_interp_method.needsGradients())
+  {
+    const auto limiter_type = _adv_interp_method.gradientLimiter();
+    _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
+    _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
+  }
+
+  _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
+                                                              elem_value,
+                                                              neighbor_value,
+                                                              &_elem_grad_storage,
+                                                              &_neighbor_grad_storage,
+                                                              _volumetric_face_flux);
 }
