@@ -76,6 +76,27 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+  [min_mod]
+    type = FVAdvectedMinmodWeightBased
+  []
+  [venkatakrishnan]
+    type = FVAdvectedVenkatakrishnanDeferredCorrection
+  []
+  [skewness-corrected]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
 
   [u_advection_stress]
@@ -84,7 +105,7 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'x'
     use_nonorthogonal_correction = false
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
     u = vel_x
     v = vel_y
@@ -102,7 +123,7 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'y'
     use_nonorthogonal_correction = false
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
     u = vel_x
     v = vel_y

@@ -76,10 +76,32 @@ walls = 'right left top bottom'
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+  [min_mod]
+    type = FVAdvectedMinmodWeightBased
+  []
+  [venkatakrishnan]
+    type = FVAdvectedVenkatakrishnanDeferredCorrection
+  []
+  [skewness-corrected]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
+    advected_interp_method_name = upwind
     mu = ${mu}
     momentum_component = 'x'
     use_nonorthogonal_correction = false
@@ -102,6 +124,7 @@ walls = 'right left top bottom'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
+    advected_interp_method_name = upwind
     mu = ${mu}
     momentum_component = 'y'
     use_nonorthogonal_correction = false

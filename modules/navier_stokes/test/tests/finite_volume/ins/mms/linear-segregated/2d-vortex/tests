@@ -18,4 +18,20 @@
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     max_threads = 1 # see libmesh issue #3808
   []
+  [vortex-vanleer]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexVanLeer
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and pressure with Van Leer momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [vortex-venkatakrishnan]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexVenkatakrishnan
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and pressure with Venkatakrishnan momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
