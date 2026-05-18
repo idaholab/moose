@@ -57,3 +57,10 @@ private:
 };
 
 void to_json(nlohmann::json & json, const RestartableDataReporter::Value & value);
+
+// The pointer member of Value is ephemeral (repopulated by execute()), so only
+// store params to avoid writing uninitialized padding bytes from the raw struct.
+template <>
+void dataStore(std::ostream & stream, RestartableDataReporter::Value & v, void * context);
+template <>
+void dataLoad(std::istream & stream, RestartableDataReporter::Value & v, void * context);
