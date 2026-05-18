@@ -9,7 +9,6 @@
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMCurlCurlPartial]
@@ -23,7 +22,6 @@
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     abs_zero = 1e-6
   []
@@ -34,7 +32,6 @@
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
     abs_zero = 1e-6
@@ -92,7 +89,6 @@
     abs_zero = 8e-10
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMDiffusionMatFree]
@@ -107,7 +103,6 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     abs_zero = 5e-10
     capabilities = 'mfem'
-    max_parallel = 1
     recover = false
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
@@ -163,7 +158,6 @@
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
@@ -180,7 +174,6 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -201,7 +194,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     valgrind = none
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -223,7 +215,6 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     valgrind = none
-    max_parallel = 1
     recover = false
     restep = false
   []
@@ -236,7 +227,6 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -261,7 +251,6 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
