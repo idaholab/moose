@@ -1,0 +1,13 @@
+[Tests]
+  design = 'SteadyAndAdjoint.md UserObjects/index.md'
+  issues = '#32935'
+
+  [forward_and_adjoint]
+    type = CSVDiff
+    input = forward_and_adjoint.i
+    csvdiff = forward_and_adjoint_out.csv
+    recover = false
+    requirement = 'The system shall honor user-specified execution ordering of user objects '
+                  'during both the forward and adjoint stages of a steady adjoint solve.'
+  []
+[]
