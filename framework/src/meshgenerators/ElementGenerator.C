@@ -12,6 +12,8 @@
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/face_c0polygon.h"
+#include "libmesh/cell_c0polyhedron.h"
 
 #include "MooseEnum.h"
 
