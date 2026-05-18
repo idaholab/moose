@@ -482,7 +482,15 @@ AdvancedExtruderGenerator::generate()
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
-    mesh->delete_remote_elements();
+    input->delete_remote_elements();
+  if (input->n_nodes() != input->max_node_id())
+    input->renumber_nodes_and_elements();
+
+  if (input->n_nodes() != input->max_node_id())
+    mooseError(
+        "You must allow renumbering, because the extruded mesh should be contiguously numbered. "
+        "Alternatively, you can use a separate mesh generator (MeshRepairGenerator with the "
+        "renumber_contiguously parameter for example) to renumber the nodes contiguously.");
 
   unsigned int total_num_layers;
   unsigned int total_num_elevations;
@@ -1335,9 +1343,10 @@ AdvancedExtruderGenerator::generate()
             const auto num_sides = elem->n_sides();
             std::vector<std::shared_ptr<libMesh::Polygon>> sides;
             sides.reserve(2 + num_sides);
-            if (2 + num_sides > 27)
-              mooseError("Too many sides in polygons to extrude it. Max number of the prism "
-                         "polyhedral sides: 27");
+            if (2 * elem->n_nodes() > libMesh::C0Polygon::max_n_nodes)
+              mooseError("Too many nodes in polygons to extrude it. Max number of the prism "
+                         "polyhedral nodes after extrusion: " +
+                         std::to_string(libMesh::C0Polygon::max_n_nodes));
             // Make a copy of the original element to use as a side
             auto new_ptr = std::make_shared<libMesh::C0Polygon>(num_sides);
             for (const auto node_i : make_range(elem->n_nodes()))
