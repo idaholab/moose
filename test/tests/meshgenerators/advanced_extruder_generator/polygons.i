@@ -6,19 +6,22 @@
     nx = 2
     ny = 3
   []
+  # we need to renumber manually as the extruder relies on contiguous node indexing
+  [renumber]
+    type = MeshRepairGenerator
+    input = gmg
+    renumber_contiguously = true
+  []
   [feg]
     type = AdvancedExtruderGenerator
-    input = gmg
+    input = renumber
     direction = '0 0 1'
     num_layers = 1
     heights = 1
     top_boundary = 100
     bottom_boundary = 200
   []
-  [output_tetrahedralization]
-    type = ElementsToTetrahedronsConverter
-    input = 'feg'
-  []
+  # disallow renumbering for the sampling to be consistent
   allow_renumbering = false
 []
 
