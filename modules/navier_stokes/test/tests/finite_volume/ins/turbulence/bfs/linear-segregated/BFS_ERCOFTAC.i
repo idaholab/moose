@@ -102,11 +102,32 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+  [min_mod]
+    type = FVAdvectedMinmodWeightBased
+  []
+  [venkatakrishnan]
+    type = FVAdvectedVenkatakrishnanDeferredCorrection
+  []
+  [skewness-corrected]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -131,7 +152,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
