@@ -857,6 +857,9 @@ AdvancedExtruderGenerator::generate()
   // fix that.
   input->comm().max(next_side_id);
 
+  // Map to keep track of polygon sides of polygonal prisms
+  std::map<std::array<unsigned int, 3>, std::shared_ptr<libMesh::Polygon>> poly_extruded_sides;
+
   // Build the extruded elements
   for (const auto & elem : input->element_ptr_range())
   {
@@ -1369,6 +1372,21 @@ AdvancedExtruderGenerator::generate()
             // Form the vertical sides
             for (const auto side_i : make_range(num_sides))
             {
+              // If the side already exists, use that
+              std::array<unsigned int, 3> side_key = {
+                  current_layer,
+                  static_cast<unsigned int>(
+                      std::min(elem->node_ptr(side_i)->id(),
+                               elem->node_ptr((side_i + 1) % num_sides)->id())),
+                  static_cast<unsigned int>(
+                      std::max(elem->node_ptr(side_i)->id(),
+                               elem->node_ptr((side_i + 1) % num_sides)->id()))};
+              if (poly_extruded_sides.count(side_key))
+              {
+                sides.push_back(poly_extruded_sides[side_key]);
+                continue;
+              }
+
               // They are all quads, but constructor expects polygons
               auto vert_side = std::make_shared<libMesh::C0Polygon>(4);
               vert_side->set_node(
@@ -1383,6 +1401,8 @@ AdvancedExtruderGenerator::generate()
                                   mesh->node_ptr(elem->node_ptr(side_i)->id() +
                                                  ((current_layer + 1) * orig_nodes)));
               sides.push_back(vert_side);
+
+              poly_extruded_sides.insert(std::make_pair(side_key, vert_side));
             }
             mooseAssert(sides.size() == 2 + num_sides, "Unexpected size of side vector");
 

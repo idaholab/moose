@@ -89,8 +89,8 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     _transparency(getParam<Real>("transparency")),
     _nl_sys_num(libMesh::invalid_uint),
     _variable(getParam<VariableName>("variable")),
-    _max(isParamValid("max") ? getParam<Real>("max") : 1),
-    _min(isParamValid("min") ? getParam<Real>("min") : 0),
+    _max(isParamValid("max") ? getParam<Real>("max") : std::numeric_limits<Real>::max()),
+    _min(isParamValid("min") ? getParam<Real>("min") : -std::numeric_limits<Real>::max()),
     _out_bounds_shade(getParam<Real>("out_bounds_shade"))
 {
   if (!MooseUtils::absoluteFuzzyEqual(
@@ -98,7 +98,7 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     paramWarning("first_axis", "The two axis are not orthogonal");
 }
 
-// Funtion for making the _mesh_function object.
+// Function for making the _mesh_function object.
 void
 PNGOutput::makeMeshFunc()
 {
