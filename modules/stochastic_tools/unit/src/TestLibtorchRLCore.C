@@ -105,6 +105,30 @@ TEST(LibtorchRLCoreTest, ValueEstimatorComputesGAETargets)
   EXPECT_NEAR(targets.value_targets[1], 3.7, 1e-12);
 }
 
+TEST(LibtorchRLCoreTest, ValueEstimatorMasksTerminalTransitions)
+{
+  Moose::LibtorchArtificialNeuralNet value_network("value", 1, 1, {}, {"linear"});
+  auto value_params = value_network.named_parameters();
+  value_params[0].value().data().fill_(1.0);
+  value_params[1].value().data().fill_(0.0);
+
+  LibtorchRLTrajectoryBuffer::Trajectory trajectory;
+  trajectory.observations = {{1.0}, {2.0}};
+  trajectory.next_observations = {{2.0}, {3.0}};
+  trajectory.rewards = {0.5, 1.0};
+  trajectory.terminals = {false, true};
+
+  LibtorchRLValueEstimator estimator(0.9, 0.95);
+  const auto targets = estimator.estimate(trajectory, value_network);
+
+  ASSERT_EQ(targets.advantages.size(), 2u);
+  ASSERT_EQ(targets.value_targets.size(), 2u);
+  EXPECT_NEAR(targets.advantages[0], 0.445, 1e-12);
+  EXPECT_NEAR(targets.advantages[1], -1.0, 1e-12);
+  EXPECT_NEAR(targets.value_targets[0], 1.445, 1e-12);
+  EXPECT_NEAR(targets.value_targets[1], 1.0, 1e-12);
+}
+
 TEST(LibtorchRLCoreTest, PPOLossUsesStoredLogProbabilityAndValueTarget)
 {
   Moose::LibtorchActorNeuralNet policy_network("policy", 1, 1, {}, {"linear"});

@@ -156,6 +156,9 @@ LibtorchRLTrajectoryBuffer::validateTrajectory(const Trajectory & trajectory)
   if (trajectory.log_probabilities.size() != num_steps)
     mooseError("RL trajectory log probabilities must match the reward sequence length.");
 
+  if (!trajectory.terminals.empty() && trajectory.terminals.size() != num_steps)
+    mooseError("RL trajectory terminal flags must match the reward sequence length.");
+
   if (!trajectory.value_targets.empty() && trajectory.value_targets.size() != num_steps)
     mooseError("RL trajectory value targets must match the reward sequence length.");
 
