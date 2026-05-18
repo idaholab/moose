@@ -1,6 +1,8 @@
 
 !include header_and_mesh.i
 
+turbulence_advected_interp_method = ${advected_interp_method}
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
   previous_nl_solution_required = true
@@ -125,7 +127,7 @@
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
-    advected_interp_method_name = ${advected_interp_method}
+    advected_interp_method_name = ${turbulence_advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -157,7 +159,7 @@
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
-    advected_interp_method_name = ${advected_interp_method}
+    advected_interp_method_name = ${turbulence_advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]

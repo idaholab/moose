@@ -37,6 +37,19 @@
     max_threads = 1 # see libmesh issue #3808
     requirement = 'For the same Reynolds number but scaled density over viscosity ratio, the system shall be able to yield the same results than a benchmark case for a channel flow.'
   []
+  [channel_ERCOFTAC_linear_turbulence_advection_vanleer]
+    design = 'LinearFVTurbulentAdvection.md'
+    issues = '#31965'
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    cli_args = 'turbulence_advected_interp_method=vanLeer Outputs/file_base=channel_ERCOFTAC_vanleer_out'
+    prereq = 'channel_ERCOFTAC_linear_scaled_Re'
+    csvdiff = 'channel_ERCOFTAC_vanleer_out_line_center_channel_0001.csv channel_ERCOFTAC_vanleer_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_vanleer_out_side_bottom_0001.csv channel_ERCOFTAC_vanleer_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization and van Leer turbulent advection interpolation.'
+  []
   [channel_ERCOFTAC_linear_physics]
     design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md'
     issues = '#29846 #29175'
@@ -50,6 +63,19 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization and using the shorthand Physics syntax.'
+  []
+  [channel_ERCOFTAC_linear_physics_turbulence_advection_minmod]
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md'
+    issues = '#31965'
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC-physics.i'
+    cli_args = 'turbulence_advected_interp_method=min_mod Outputs/file_base=channel_ERCOFTAC-physics_minmod_out'
+    prereq = 'channel_ERCOFTAC_linear_physics'
+    csvdiff = 'channel_ERCOFTAC-physics_minmod_out_line_center_channel_0001.csv channel_ERCOFTAC-physics_minmod_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC-physics_minmod_out_side_bottom_0001.csv channel_ERCOFTAC-physics_minmod_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization and minmod turbulent advection interpolation using the shorthand Physics syntax.'
   []
   [channel_ERCOFTAC_symmetry]
     design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
