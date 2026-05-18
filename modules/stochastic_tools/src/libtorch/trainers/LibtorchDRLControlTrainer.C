@@ -495,6 +495,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
         _average_reward_over_timestep_window
             ? extractWindowAveragedSequence(reward_sample, num_transitions)
             : extractDownsampledSequence(reward_sample, _timestep_window, num_transitions);
+    // Full-solve rollout states are discarded after transfer, so GAE must stop at the boundary.
+    trajectory.terminals.assign(num_transitions, false);
+    trajectory.terminals.back() = true;
 
     _trajectory_buffer.addTrajectory(std::move(trajectory));
   }

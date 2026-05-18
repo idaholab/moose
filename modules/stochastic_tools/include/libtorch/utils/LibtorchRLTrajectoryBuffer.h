@@ -36,6 +36,8 @@ public:
     std::vector<std::vector<Real>> log_probabilities;
     /// Scalar rewards for each transition.
     std::vector<Real> rewards;
+    /// Terminal flags for each transition. A true value cuts value bootstrapping at that step.
+    std::vector<bool> terminals;
     /// Critic targets aligned with each transition.
     std::vector<Real> value_targets;
     /// Advantage estimates aligned with each transition.
