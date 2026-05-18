@@ -119,15 +119,7 @@ length = 0.5
     axial_heat_rate = axial_heat_rate
   []
 
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [T_ic]
     type = ConstantIC
@@ -135,11 +127,6 @@ length = 0.5
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.125
-  []
 
   [P_ic]
     type = ConstantIC

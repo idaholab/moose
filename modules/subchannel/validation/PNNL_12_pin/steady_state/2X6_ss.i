@@ -65,15 +65,7 @@ P_out = 101325 # Pa
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC
@@ -89,11 +81,6 @@ P_out = 101325 # Pa
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.012065
-  []
 
   [P_ic]
     type = ConstantIC
