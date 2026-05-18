@@ -29,8 +29,10 @@ ActionComponent::ActionComponent(const InputParameters & params)
   : Action(params),
     InputParametersChecksUtils<ActionComponent>(this),
     _dimension(libMesh::invalid_uint),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _connected_components(std::make_shared<std::set<ActionComponent *>>())
 {
+  _connected_components->insert(this);
 }
 
 void
@@ -83,4 +85,20 @@ ActionComponent::checkRequiredTasks() const
           "' but this task is not registered to the derived class. Registered tasks for "
           "this Component are: " +
           Moose::stringify(registered_tasks));
+}
+
+void
+ActionComponent::addConnectedComponent(ActionComponent & component)
+{
+  // Already in the same group
+  if (_connected_components == component._connected_components)
+    return;
+
+  // Hold a reference to the other group before we re-point its members
+  auto other_group = component._connected_components;
+  _connected_components->insert(other_group->begin(), other_group->end());
+
+  // Every former member of the other group now shares this group's set
+  for (auto * member : *other_group)
+    member->_connected_components = _connected_components;
 }

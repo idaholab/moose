@@ -134,7 +134,8 @@ JunctionComponent::addMeshGenerators()
     // Fairly easy to stitch this
     if (dimension_first == dimension_second)
     {
-      if (getParam<ComponentName>("first_component") != getParam<ComponentName>("second_component"))
+      if (first_component.getCurrentTopLevelMeshGeneratorName() !=
+          second_component.getCurrentTopLevelMeshGeneratorName())
       { // Stitch the two meshes
         InputParameters params = _factory.getValidParams("StitchMeshGenerator");
         params.set<std::vector<MeshGeneratorName>>("inputs") = {
@@ -153,7 +154,6 @@ JunctionComponent::addMeshGenerators()
       {
         // Handles case of needing to close a mesh. Using StitchBoundaryMeshGenerator prevents
         // issues with element overlap.
-
         InputParameters params = _factory.getValidParams("StitchBoundaryMeshGenerator");
         params.set<MeshGeneratorName>("input") =
             first_component.getCurrentTopLevelMeshGeneratorName();
@@ -311,6 +311,8 @@ JunctionComponent::addMeshGenerators()
         mesh_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{first_boundary, name() + "_bspline_start_node"}};
       mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      // TODO: remove this once we understand why it errors without
+      mesh_stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
       mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
       _app.getMeshGeneratorSystem().addMeshGenerator(
@@ -320,8 +322,12 @@ JunctionComponent::addMeshGenerators()
       InputParameters boundary_stitcher_params =
           _factory.getValidParams("StitchBoundaryMeshGenerator");
       boundary_stitcher_params.set<MeshGeneratorName>("input") = name() + "_mesh_stitcher";
-      boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
-          "stitch_boundaries_pairs") = {{name() + "_aeg_top_boundary", second_boundary}};
+      if (dimension_first > 1)
+        boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
+            "stitch_boundaries_pairs") = {{name() + "_aeg_top_boundary", second_boundary}};
+      else
+        boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
+            "stitch_boundaries_pairs") = {{name() + "_bspline_end_node", second_boundary}};
       boundary_stitcher_params.set<bool>("show_info") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);
@@ -332,8 +338,11 @@ JunctionComponent::addMeshGenerators()
     mooseError("junction_method specified is invalid!");
 
   _top_mg_name = _mg_names.back();
-  first_component.setCurrentTopLevelMeshGeneratorName(_top_mg_name);
-  second_component.setCurrentTopLevelMeshGeneratorName(_top_mg_name);
+  first_component.addConnectedComponent(second_component);
+  // Sets it for all connected components
+  // Connected might not be the right abstraction here. It's more like "included in a common mesh"
+  for (auto * component : first_component.getConnectedComponents())
+    component->setCurrentTopLevelMeshGeneratorName(_top_mg_name);
 
   // For now this is a safe choice. We might want to decide otherwise once we
   // do mixed-dimensions. Build the junction with the dimension of the first component?

@@ -64,6 +64,15 @@ public:
   /// Return the dimension of the component
   unsigned int dimension() const { return _dimension; }
 
+  /// Merge another component's group into this component's group. The group is shared
+  /// (via a shared_ptr) by every component in it, so a single call connects both sides.
+  void addConnectedComponent(ActionComponent & component);
+  /// Get all components connected to the component group of this component (including itself)
+  const std::set<ActionComponent *> & getConnectedComponents() const
+  {
+    return *_connected_components;
+  }
+
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
   // to be defining an object of every type
@@ -124,4 +133,8 @@ protected:
 
   /// Manually keeps track of the tasks required by each component as tasks cannot be inherited
   std::set<std::string> _required_tasks;
+
+  /// Group of components that share a common mesh after junctioning. The shared_ptr is shared by
+  /// every member of the group so connectivity updates are visible from any member.
+  std::shared_ptr<std::set<ActionComponent *>> _connected_components;
 };
