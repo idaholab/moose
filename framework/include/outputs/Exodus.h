@@ -207,4 +207,7 @@ private:
 
   /// Flag to output HDF5 format (when available) in Exodus
   bool _write_hdf5;
+
+  /// Maximum length of untruncated names in Exodus output
+  unsigned int _max_output_name_length;
 };

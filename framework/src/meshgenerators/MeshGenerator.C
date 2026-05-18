@@ -360,6 +360,9 @@ MeshGenerator::generateInternal()
       if (mesh->mesh_dimension() == 1)
         exio.write_as_dimension(3);
 
+      // Avoid truncating names
+      exio.set_max_name_length(80);
+
       // Default to non-HDF5 output for wider compatibility
       exio.set_hdf5_writing(false);
 
