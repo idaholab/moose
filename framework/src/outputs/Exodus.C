@@ -209,8 +209,9 @@ Exodus::outputSetup()
       return;
   }
 
-  auto serialize = [this](auto & moose_mesh)
+  auto serialize = [this](SubProblem & problem)
   {
+    auto & moose_mesh = problem.mesh();
     auto & lm_mesh = moose_mesh.getMesh();
     // Exodus is serial output so that we have to gather everything to "zero".
     lm_mesh.gather_to_zero();
@@ -224,10 +225,14 @@ Exodus::outputSetup()
       // elements will have neighbors that they didn't previously have
       moose_mesh.markFiniteVolumeInfoDirty();
       // And similarly we have both new nodes and new elements for the node to element map
-      moose_mesh.possiblyRebuildNodeToElemMap();
+      const bool map_rebuilt = moose_mesh.possiblyRebuildNodeToElemMap();
+      // If the map was rebuilt then we need to reinitialize geometric search data to re-add things
+      // like "quadrature" nodes
+      if (map_rebuilt)
+        problem.reinitGeomSearch();
     }
   };
-  serialize(_problem_ptr->mesh());
+  serialize(*_problem_ptr);
 
   // We need to do the same thing for displaced mesh to make them consistent.
   // In general, it is a good idea to make the reference mesh and the displaced mesh
@@ -239,7 +244,7 @@ Exodus::outputSetup()
   // Here we assume that the displaced mesh and the reference mesh are identical except
   // coordinations.
   if (_problem_ptr->getDisplacedProblem())
-    serialize(_problem_ptr->getDisplacedProblem()->mesh());
+    serialize(*_problem_ptr->getDisplacedProblem());
 
   // Create the ExodusII_IO object
   _exodus_io_ptr = std::make_unique<ExodusII_IO>(_es_ptr->get_mesh());

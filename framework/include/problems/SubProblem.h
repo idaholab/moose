@@ -513,9 +513,17 @@ public:
    */
   virtual void clearDiracInfo() = 0;
 
-  // Geom Search
+  /**
+   * update geometric search data
+   */
   virtual void
   updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) = 0;
+
+  /**
+   * reinitialize this object's geometric search data, e.g. do things like clear and re-add
+   * quadrature nodes
+   */
+  void reinitGeomSearch();
 
   virtual GeometricSearchData & geomSearchData() = 0;
 

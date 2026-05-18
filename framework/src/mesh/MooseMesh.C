@@ -618,7 +618,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   return called_prepare_for_use;
 }
 
-void
+bool
 MooseMesh::possiblyRebuildNodeToElemMap()
 {
   // *Rebuild* the node to element map. I emphasize rebuild because if it has not been built
@@ -626,12 +626,13 @@ MooseMesh::possiblyRebuildNodeToElemMap()
   if (!_node_to_elem_map_built)
   {
     mooseAssert(_node_to_elem_map.empty(), "If it hasn't been built, it better well be empty");
-    return;
+    return false;
   }
 
   _node_to_elem_map.clear();
   _node_to_elem_map_built = false;
   internalNodeToElemMap();
+  return true;
 }
 
 void

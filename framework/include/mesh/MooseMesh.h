@@ -1550,8 +1550,10 @@ public:
 
   /**
    * rebuild the node to element map if it's been requsted previously
+   * @returns Whether the map was re-built, or equivalently whether the map had been requested
+   * previously
    */
-  void possiblyRebuildNodeToElemMap();
+  bool possiblyRebuildNodeToElemMap();
 
 protected:
   /// Deprecated (DO NOT USE)
