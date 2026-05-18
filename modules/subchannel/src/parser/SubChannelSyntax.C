@@ -17,13 +17,17 @@ namespace SubChannel
 void
 associateSyntax(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
+  registerSyntax("SubChannelAddInitialConditionsAction", "SubChannel");
   registerSyntax("SubChannelAddVariablesAction", "SubChannel");
   registerSyntax("SubChannelCreateProblemAction", "SubChannel");
 
+  registerTask("sch:add_default_ic", false);
   registerTask("sch:build_subchannel_mesh", false);
 
   try
   {
+    syntax.addDependency("sch:add_default_ic", "add_ics_physics");
+    syntax.addDependency("add_constraint", "sch:add_default_ic");
     syntax.addDependency("sch:build_subchannel_mesh", "check_copy_nodal_vars");
   }
   catch (CyclicDependencyException<std::string> & e)

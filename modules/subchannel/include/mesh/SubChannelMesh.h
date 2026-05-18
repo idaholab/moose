@@ -268,11 +268,11 @@ protected:
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
-  /// Bundle inlet flow area
+  /// Undeformed bundle inlet flow area
   Real _assembly_flow_area;
-  /// Bundle inlet wetted perimeter
+  /// Undeformed bundle inlet wetted perimeter
   Real _assembly_wetted_perimeter;
-  /// Bundle-average hydraulic diameter
+  /// Undeformed bundle-average hydraulic diameter
   Real _assembly_hydraulic_diameter;
 
   /// number of axial cells

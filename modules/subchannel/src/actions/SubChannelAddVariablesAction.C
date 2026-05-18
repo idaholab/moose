@@ -14,15 +14,8 @@
 #include "FEProblemBase.h"
 #include "SubChannelApp.h"
 #include "AddMeshGeneratorAction.h"
-#include "AddICAction.h"
-#include "AddInitialConditionAction.h"
-#include "MooseUtils.h"
-#include "QuadSubChannelMesh.h"
-#include "SubChannelMesh.h"
-#include "TriSubChannelMesh.h"
 
 registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "add_aux_variable");
-registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "add_ic");
 
 InputParameters
 SubChannelAddVariablesAction::validParams()
@@ -61,12 +54,6 @@ SubChannelAddVariablesAction::addAuxVariable(const std::string & var_name,
 void
 SubChannelAddVariablesAction::act()
 {
-  if (_current_task == "add_ic")
-  {
-    addInitialConditions();
-    return;
-  }
-
   bool pin_mesh_exist = false;
   bool duct_mesh_exist = false;
 
@@ -153,77 +140,4 @@ SubChannelAddVariablesAction::act()
 
   for (const auto & var_info : vars_to_add)
     addAuxVariable(var_info.first, var_info.second);
-}
-
-void
-SubChannelAddVariablesAction::addInitialConditions()
-{
-  const auto * const quad_mesh = dynamic_cast<const QuadSubChannelMesh *>(_mesh.get());
-  const auto * const tri_mesh = dynamic_cast<const TriSubChannelMesh *>(_mesh.get());
-  const auto * const subchannel_mesh = quad_mesh ? static_cast<const SubChannelMesh *>(quad_mesh)
-                                                 : static_cast<const SubChannelMesh *>(tri_mesh);
-
-  if (!subchannel_mesh)
-    mooseError("The SubChannel action requires a SubChannelMesh when adding default ICs.");
-
-  if (quad_mesh)
-  {
-    addInitialCondition("SCMQuadFlowAreaIC", "subchannel_S_IC", SubChannelApp::SURFACE_AREA);
-    addInitialCondition(
-        "SCMQuadWettedPerimIC", "subchannel_w_perim_IC", SubChannelApp::WETTED_PERIMETER);
-  }
-  else
-  {
-    addInitialCondition("SCMTriFlowAreaIC", "subchannel_S_IC", SubChannelApp::SURFACE_AREA);
-    addInitialCondition(
-        "SCMTriWettedPerimIC", "subchannel_w_perim_IC", SubChannelApp::WETTED_PERIMETER);
-  }
-
-  if (subchannel_mesh->pinMeshExist() && !hasInitialCondition(SubChannelApp::PIN_DIAMETER))
-  {
-    auto params = _factory.getValidParams("ConstantIC");
-    params.set<VariableName>("variable") = SubChannelApp::PIN_DIAMETER;
-    params.set<Real>("value") = subchannel_mesh->getPinDiameter();
-    _problem->addInitialCondition("ConstantIC", "subchannel_Dpin_IC", params);
-  }
-}
-
-void
-SubChannelAddVariablesAction::addInitialCondition(const std::string & type,
-                                                  const std::string & name,
-                                                  const VariableName & var_name)
-{
-  if (hasInitialCondition(var_name))
-    return;
-
-  auto params = _factory.getValidParams(type);
-  params.set<VariableName>("variable") = var_name;
-  _problem->addInitialCondition(type, name, params);
-}
-
-bool
-SubChannelAddVariablesAction::hasInitialCondition(const VariableName & var_name) const
-{
-  const auto targets_variable = [&var_name](const MooseObjectAction * action)
-  {
-    const auto & params = action->getObjectParams();
-    return params.isParamValid("variable") && params.get<VariableName>("variable") == var_name;
-  };
-
-  for (const auto * action : _awh.getActions<AddInitialConditionAction>())
-    if (targets_variable(action))
-      return true;
-
-  for (const auto * action : _awh.getActions<AddICAction>())
-  {
-    if (targets_variable(action))
-      return true;
-
-    std::vector<std::string> path;
-    MooseUtils::tokenize<std::string>(action->parameters().blockFullpath(), path, 1, "/");
-    if (path.size() >= 2 && path[path.size() - 2] == var_name)
-      return true;
-  }
-
-  return false;
 }
