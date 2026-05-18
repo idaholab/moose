@@ -10,9 +10,12 @@
 #pragma once
 
 #include "MathFVUtils.h"
+#include "MooseEnum.h"
 
 class MooseObject;
 class InputParameters;
+class FEProblemBase;
+class Factory;
 
 namespace Moose
 {
@@ -39,6 +42,25 @@ InputParameters interpolationParameters();
 
 namespace NS
 {
+/**
+ * @return the advected interpolation methods supported by FVInterpolationMethod objects.
+ */
+MooseEnum fvAdvectedInterpolationMethods(const std::string & default_method = "upwind");
+
+/**
+ * @return the FVInterpolationMethod object type for an advected interpolation method name.
+ * Returns an empty string when no FVInterpolationMethod equivalent is supported.
+ */
+std::string fvAdvectedInterpolationMethodType(const std::string & method_name);
+
+/**
+ * Add the FVInterpolationMethod object for an advected interpolation method name, if absent.
+ * The method name must be supported by fvAdvectedInterpolationMethodType().
+ */
+void addFVAdvectedInterpolationMethod(FEProblemBase & problem,
+                                      Factory & factory,
+                                      const std::string & method_name);
+
 /**
  * Checks to see whether the porosity value jumps from one side to the other of the provided face
  * @param porosity the porosity

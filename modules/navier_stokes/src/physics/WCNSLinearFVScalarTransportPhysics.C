@@ -9,6 +9,7 @@
 
 #include "WCNSLinearFVScalarTransportPhysics.h"
 #include "WCNSFVFlowPhysicsBase.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVScalarTransportPhysics);
@@ -20,6 +21,8 @@ WCNSLinearFVScalarTransportPhysics::validParams()
   InputParameters params = WCNSFVScalarTransportPhysicsBase::validParams();
   params.addClassDescription("Define the Navier Stokes weakly-compressible scalar field transport "
                              "equation(s) using the linear finite volume discretization");
+  params.set<MooseEnum>("passive_scalar_advection_interpolation") =
+      NS::fvAdvectedInterpolationMethods();
   params.addParam<bool>("use_nonorthogonal_correction",
                         true,
                         "If the nonorthogonal correction should be used when computing the normal "
@@ -87,13 +90,15 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
 void
 WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
+  const std::string method_name = getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), method_name);
+
   const std::string kernel_type = "LinearFVScalarAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  params.set<InterpolationMethodName>("advected_interp_method_name") = method_name;
   setSlipVelocityParams(params);
 
   for (const auto & vname : _passive_scalar_names)

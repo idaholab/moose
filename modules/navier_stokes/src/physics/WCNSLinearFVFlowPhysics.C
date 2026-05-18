@@ -14,6 +14,7 @@
 #include "RhieChowMassFlux.h"
 #include "INSFVTimeKernel.h"
 #include "MapConversionUtils.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
@@ -28,6 +29,8 @@ WCNSLinearFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible equations with the linear "
       "solver implementation of the SIMPLE scheme");
+  params.set<MooseEnum>("momentum_advection_interpolation") =
+      NS::fvAdvectedInterpolationMethods();
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
@@ -243,7 +246,8 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
 void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
-  addMomentumAdvectionInterpolationMethod();
+  const std::string momentum_advection_method_name = _momentum_advection_interpolation;
+  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), momentum_advection_method_name);
 
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
@@ -258,7 +262,7 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<InterpolationMethodName>("advected_interp_method_name") =
-      static_cast<std::string>(_momentum_advection_interpolation);
+      momentum_advection_method_name;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
   params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
 
@@ -272,34 +276,6 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
-}
-
-void
-WCNSLinearFVFlowPhysics::addMomentumAdvectionInterpolationMethod()
-{
-  const auto method_name = static_cast<std::string>(_momentum_advection_interpolation);
-  if (getProblem().hasFVInterpolationMethod(method_name))
-    return;
-
-  std::string method_type;
-  if (method_name == "average" || method_name == "skewness-corrected")
-    method_type = "FVGeometricAverage";
-  else if (method_name == "upwind")
-    method_type = "FVAdvectedUpwind";
-  else if (method_name == "vanLeer")
-    method_type = "FVAdvectedVanLeerWeightBased";
-  else if (method_name == "min_mod")
-    method_type = "FVAdvectedMinmodWeightBased";
-  else if (method_name == "venkatakrishnan")
-    method_type = "FVAdvectedVenkatakrishnanDeferredCorrection";
-  else
-    paramError("momentum_advection_interpolation",
-               "Linear FV momentum advection supports 'average', 'skewness-corrected', 'upwind', "
-               "'vanLeer', 'min_mod', and 'venkatakrishnan' through FVInterpolationMethod "
-               "objects.");
-
-  InputParameters params = getFactory().getValidParams(method_type);
-  getProblem().addFVInterpolationMethod(method_type, method_name, params);
 }
 
 void

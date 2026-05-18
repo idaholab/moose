@@ -15,6 +15,7 @@
 #include "INSFVTurbulentViscosityWallFunction.h"
 #include "INSFVTKESourceSink.h"
 #include "NSFVBase.h"
+#include "NSFVUtils.h"
 
 registerWCNSFVTurbulenceBaseTasks("NavierStokesApp", WCNSLinearFVTurbulencePhysics);
 registerMooseAction("NavierStokesApp", WCNSLinearFVTurbulencePhysics, "add_functor_material");
@@ -176,20 +177,24 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
 void
 WCNSLinearFVTurbulencePhysics::addKEpsilonAdvection()
 {
+  const std::string tke_method_name = getParam<MooseEnum>("tke_advection_interpolation");
+  const std::string tked_method_name = getParam<MooseEnum>("tked_advection_interpolation");
+
+  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), tke_method_name);
+  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), tked_method_name);
+
   const std::string kernel_type = "LinearFVTurbulentAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
 
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("tke_advection_interpolation");
+  params.set<InterpolationMethodName>("advected_interp_method_name") = tke_method_name;
   params.set<LinearVariableName>("variable") = _tke_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_advection", params);
   params.set<LinearVariableName>("variable") = _tked_name;
   params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("tked_advection_interpolation");
+  params.set<InterpolationMethodName>("advected_interp_method_name") = tked_method_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tked_advection", params);
 }
 

@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVUtils.h"
+#include "FEProblemBase.h"
+#include "Factory.h"
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
@@ -54,6 +56,45 @@ interpolationParameters()
 
 namespace NS
 {
+MooseEnum
+fvAdvectedInterpolationMethods(const std::string & default_method)
+{
+  return MooseEnum("average skewness-corrected upwind vanLeer min_mod venkatakrishnan",
+                   default_method);
+}
+
+std::string
+fvAdvectedInterpolationMethodType(const std::string & method_name)
+{
+  if (method_name == "average" || method_name == "skewness-corrected")
+    return "FVGeometricAverage";
+  if (method_name == "upwind")
+    return "FVAdvectedUpwind";
+  if (method_name == "vanLeer")
+    return "FVAdvectedVanLeerWeightBased";
+  if (method_name == "min_mod")
+    return "FVAdvectedMinmodWeightBased";
+  if (method_name == "venkatakrishnan")
+    return "FVAdvectedVenkatakrishnanDeferredCorrection";
+
+  return "";
+}
+
+void
+addFVAdvectedInterpolationMethod(FEProblemBase & problem,
+                                 Factory & factory,
+                                 const std::string & method_name)
+{
+  if (problem.hasFVInterpolationMethod(method_name))
+    return;
+
+  const auto method_type = fvAdvectedInterpolationMethodType(method_name);
+  mooseAssert(!method_type.empty(), "Unsupported advected interpolation method");
+
+  InputParameters params = factory.getValidParams(method_type);
+  problem.addFVInterpolationMethod(method_type, method_name, params);
+}
+
 template <class T>
 std::tuple<bool, T, T>
 isPorosityJumpFace(const Moose::FunctorBase<T> & porosity,
