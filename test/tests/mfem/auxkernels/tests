@@ -11,7 +11,6 @@
     requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM auxvariables.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMScalarTimeAverageAux]
@@ -30,7 +29,6 @@
     requirement = 'The system shall have the ability to take a running time average of an MFEM variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -49,7 +47,6 @@
     requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
@@ -64,7 +61,6 @@
     requirement = 'The system shall have the ability to project the cross product of two gridfunctions onto an MFEM vector auxvariable'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []

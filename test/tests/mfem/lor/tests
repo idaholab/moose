@@ -16,7 +16,6 @@
     capabilities = 'mfem & method!=dbg & platform=linux'
     compute_devices = 'cpu cuda'
     valgrind = heavy
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
     min_slots = 2 # memory heavy
@@ -33,7 +32,6 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     abs_zero = 1e-6
   []
@@ -51,7 +49,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     valgrind = heavy
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     abs_zero = 1e-6
   []
@@ -71,7 +68,6 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
