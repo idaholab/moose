@@ -61,7 +61,7 @@ protected:
   std::unique_ptr<mfem::Solver> _solver;
 
   /// Preconditioner to be used for the problem
-  MFEMSolverBase * _preconditioner;
+  std::shared_ptr<MFEMSolverBase> _preconditioner;
 
 private:
   friend class MFEMProblemSolve;
