@@ -482,7 +482,12 @@ AdvancedExtruderGenerator::generate()
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
+  {
     input->delete_remote_elements();
+    // This should be a no-op, and yet, it's needed for two THM tests
+    mesh->delete_remote_elements();
+  }
+
   if (input->n_nodes() != input->max_node_id())
     input->renumber_nodes_and_elements();
 

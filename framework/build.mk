@@ -125,7 +125,9 @@ ifneq ($(libmesh_static),yes)
   # See conf_vars.mk
   png_LIB          := $(libPNG_LIBS)
   libmesh_CXXFLAGS += $(libPNG_INCLUDE)
+ifneq ($(png_LIB),)
   libmesh_CXXFLAGS += -DMOOSE_HAVE_LIBPNG=yes
+endif
 endif
 
 # If $(libmesh_CXX) is an mpiXXX compiler script, use -show
