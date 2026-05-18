@@ -308,59 +308,34 @@ body{
 }
 
 h1 {
-    font-size:200%;
-    font-weight:500;
-    margin-top:24px;
-    margin-bottom: 12px;
+    font-size: 2.5rem;
 }
 
-h1:first-of-type{
-    margin-top:48px;
-}
-
-h2{
-    font-size:180%;
-    font-weight:400;
-    padding-bottom: 0;
-    margin-bottom: 0;
+h2 {
+    font-size: 2rem;
 }
 
 h3 {
-    font-size:160%;
-    font-weight:20000;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    font-size: 1.5rem;
 }
 
 h4 {
-    font-size:140%;
-    font-weight:300;
-    margin-bottom:6px;
+    font-size: 1.25rem;
 }
 
 h5 {
-    font-size:120%;
-    font-weight:100;
-    margin-bottom:6px;
+    font-size: 1.1rem;
 }
 
 h6 {
-    font-size:100%;
-    font-weight:100;
-    margin-bottom:6px;
-}
-
-h1 + p,
-h2 + p,
-h3 + p,
-h4 + p,
-h5 + p,
-h6 + pg{
-    margin-top:0;
+    font-size: 1rem;
 }
 
 ul {
-     margin-left:1.5rem;
+    padding-inline-start: 30px;
+}
+ul ul {
+    padding-inline-start: 25px;
 }
 
 div.moose-pysyntax-class .moose-pysyntax-member-heading,
@@ -541,7 +516,7 @@ ul.moose-list-inputs{
 }
 
 li{
-    padding-left:15px;
+    padding-left:5px;
 }
 
 .collapsible li{
@@ -1253,7 +1228,7 @@ div.moose-mega-menu-content{
       color: white;
    }
  }
- 
+
  .collapsible-header .moose-parameter-header-default,
  .collapsible-header .moose-parameter-header-description,
  .collapsible-header .moose-collection-description {
