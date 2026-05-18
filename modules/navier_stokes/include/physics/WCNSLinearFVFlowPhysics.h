@@ -46,6 +46,7 @@ private:
    */
   void addMomentumTimeKernels() override;
   void addMomentumFluxKernels();
+  void addMomentumAdvectionInterpolationMethod();
   virtual void addMomentumPressureKernels() override;
   virtual void addMomentumGravityKernels() override;
   virtual void addMomentumFrictionKernels() override;
