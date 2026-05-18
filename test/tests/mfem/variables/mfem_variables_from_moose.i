@@ -72,9 +72,39 @@
   end_time = 1.0
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/VariableSetupTest
+[VectorPostprocessors]
+  [line_sample_scalar_var]
+    type = MFEMLineValueSampler
+    variable = 'scalar_var'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 11
   []
+  [line_sample_vector_var]
+    type = MFEMLineValueSampler
+    variable = 'vector_var'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 11
+  []
+  [line_sample_scalar_auxvar]
+    type = MFEMLineValueSampler
+    variable = 'scalar_auxvar'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 11
+  []
+  [line_sample_vector_auxvar]
+    type = MFEMLineValueSampler
+    variable = 'vector_auxvar'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 11
+  []
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  file_base = OutputData/MFEMVariableSetupFromMOOSEVariables/var
+  csv = true
 []

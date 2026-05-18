@@ -74,11 +74,20 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'submesh_potential'
+    start_point = '0 -0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DomainPotential
-    vtk_format = ASCII
-    submesh = wire
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/DomainPotential/domain_potential
   []
 []

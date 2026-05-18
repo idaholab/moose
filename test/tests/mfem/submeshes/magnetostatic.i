@@ -119,3 +119,21 @@
     vtk_format = ASCII
   []
 []
+
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'electric_potential'
+    start_point = '0 0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
+[Outputs]
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/Magnetostatic/electric_potential
+  []
+[]

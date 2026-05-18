@@ -2,14 +2,15 @@
   design = 'syntax/Problem/index.md'
   issues = '#29632'
   [MFEMVariableSetupFromMOOSEVariables]
-    type = XMLDiff
+    type = CSVDiff
     input = mfem_variables_from_moose.i
-    xmldiff = 'OutputData/VariableSetupTest/Run0/Cycle000000/data.pvtu
-                OutputData/VariableSetupTest/Run0/Cycle000001/data.pvtu'
+    csvdiff = 'OutputData/MFEMVariableSetupFromMOOSEVariables/var_line_sample_scalar_var_0001.csv
+                OutputData/MFEMVariableSetupFromMOOSEVariables/var_line_sample_vector_var_0001.csv
+                OutputData/MFEMVariableSetupFromMOOSEVariables/var_line_sample_scalar_auxvar_0001.csv
+                OutputData/MFEMVariableSetupFromMOOSEVariables/var_line_sample_vector_auxvar_0001.csv'
     requirement = 'The system shall have the ability to add an MFEM variable from a user specification of a MOOSE variable, inferring the finite element space.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
