@@ -40,11 +40,14 @@ MFEMSolverBase::setPreconditioner(T & solver)
   if (isParamSetByUser("preconditioner"))
   {
     if (!_preconditioner)
-      _preconditioner =
-          &const_cast<MFEMSolverBase &>(getMFEMProblem().getMFEMObject<MFEMSolverBase>(
-              "MFEMSolverBase", getParam<MFEMSolverName>("preconditioner")));
+    {
+      auto & pre = const_cast<MFEMSolverBase &>(getMFEMProblem().getMFEMObject<MFEMSolverBase>(
+          "MFEMSolverBase", getParam<MFEMSolverName>("preconditioner")));
+      // Take shared ownership so the preconditioner outlives the solver
+      _preconditioner = std::static_pointer_cast<MFEMSolverBase>(pre.shared_from_this());
+    }
 
-    if (dynamic_cast<const MFEMEigensolverBase *>(_preconditioner))
+    if (dynamic_cast<const MFEMEigensolverBase *>(_preconditioner.get()))
       mooseError("Eigensolvers cannot be used as preconditioners.");
 
     auto & mfem_pre = _preconditioner->getSolver();
