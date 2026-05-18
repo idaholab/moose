@@ -78,6 +78,10 @@ AzimuthalBlockSplitGenerator::generate()
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
+  // We'll be querying the mesh for subdomain ids
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
+
   // Check the order of the input mesh's elements
   // Meanwhile, record the vertex average of each element for future comparison
   unsigned short order = 0;
@@ -413,10 +417,21 @@ AzimuthalBlockSplitGenerator::generate()
                (p_cent_azi >= _start_angle || p_cent_azi <= _end_angle))
         elem->subdomain_id() = _new_block_ids[block_id_index];
     }
+
   // Assign new Block Names if applicable
   for (unsigned int i = 0; i < _new_block_names.size(); i++)
     mesh.subdomain_name(_new_block_ids[i]) = _new_block_names[i];
+
   MeshTools::Modification::rotate(mesh, -90.0, 0.0, 0.0);
+
+  // Workaround - the point locator clear should be done in rotate()
+  mesh.clear_point_locator();
+
+  // The rotate() could unset this (because spatial_dimension() can be
+  // changed) but let's unset to be sure our subdomain changes get
+  // recached.
+  mesh.unset_has_cached_elem_data();
+
   for (unsigned int i = 0; i < _azimuthal_angle_meta.size(); i++)
     _azimuthal_angle_meta[i] = (_azimuthal_angle_meta[i] - 90.0 <= -180.0)
                                    ? (_azimuthal_angle_meta[i] + 270.0)
