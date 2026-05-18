@@ -67,7 +67,6 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -212,6 +211,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = ${advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -248,6 +248,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]

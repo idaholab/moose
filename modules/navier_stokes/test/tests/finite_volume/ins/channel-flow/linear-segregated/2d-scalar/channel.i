@@ -133,7 +133,7 @@ k2 = 0.2
   [s1_advection]
     type = LinearFVScalarAdvection
     variable = scalar1
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [s1_diffusion]
@@ -145,7 +145,7 @@ k2 = 0.2
   [s2_diffusion]
     type = LinearFVScalarAdvection
     variable = scalar2
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [s2_conduction]

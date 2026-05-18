@@ -162,7 +162,7 @@ k_d = 1
   # Mixture phase equation
   [mixture_ins_phase_2_advection]
     type = LinearFVScalarAdvection
-    advected_interp_method = upwind
+    advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
     u_slip = vel_slip_x
     v_slip = vel_slip_y
