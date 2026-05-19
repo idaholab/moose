@@ -131,7 +131,7 @@ protected:
                                                          const unsigned int comp = 0) const;
   /**
    * Accumulate or set local nodal residual contribution to tagged vectors
-   * @param add The flag whether to add or set the local residual
+   * @param add Whether to add or set the local residual
    * @param local_re The local nodal residual contribution
    * @param node The contiguous node ID
    * @param comp The variable component
@@ -169,7 +169,7 @@ protected:
                                                        const unsigned int comp = 0) const;
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
-   * @param add The flag whether to add or set the local residual
+   * @param add Whether to add or set the local Jacobian
    * @param local_ke The local nodal Jacobian contribution
    * @param node The contiguous node ID
    * @param jvar The variable number for column
@@ -183,7 +183,7 @@ protected:
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices using automatic
    * differentiation (AD)
-   * @param add The flag whether to add or set the local residual
+   * @param add Whether to add or set the local Jacobian
    * @param local_ke The local elemental Jacobian contribution
    * @param node The contiguous node ID
    * @param comp The variable component

@@ -112,7 +112,7 @@ NonlinearSystemBase::setKokkosInitialSolution()
 
   systems.copyToDevice();
 
-  for (auto nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
+  for (auto & nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->presetSolution(tag);
 
   Kokkos::fence();
@@ -168,7 +168,8 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
         needed_fe_var_vector_tags);
   }
 
-  // Copy vectors and cache variable values at element quadature points
+  // Copy solution vectors and residuals and cache variable values at element quadature
+  // points
 
   for (auto & system : systems)
   {
@@ -204,13 +205,13 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
     // Compute kernels
 
-    for (auto kernel : kernels.getActiveObjects())
+    for (auto & kernel : kernels.getActiveObjects())
       kernel->computeResidual();
 
-    for (auto nodal_kernel : nodal_kernels.getActiveObjects())
+    for (auto & nodal_kernel : nodal_kernels.getActiveObjects())
       nodal_kernel->computeResidual();
 
-    for (auto ibc : integrated_bcs.getActiveObjects())
+    for (auto & ibc : integrated_bcs.getActiveObjects())
       ibc->computeResidual();
   }
 
@@ -235,15 +236,15 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 }
 
 void
-NonlinearSystemBase::computeKokkosNodalBCs(const std::set<TagID> & tags)
+NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 {
-  TIME_SECTION("computeKokkosNodalBC", 1);
+  TIME_SECTION("computeKokkosNodalBCsResidual", 1);
 
   // Get warehouses
 
   const auto & nodal_bcs = _kokkos_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0);
 
-  if (!nodal_bcs.size())
+  if (!nodal_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -259,7 +260,7 @@ NonlinearSystemBase::computeKokkosNodalBCs(const std::set<TagID> & tags)
 
   nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
-  // Copy vectors
+  // Copy solution vectors and residuals
 
   for (auto & system : systems)
   {
@@ -278,7 +279,7 @@ NonlinearSystemBase::computeKokkosNodalBCs(const std::set<TagID> & tags)
 
     // Compute kernels
 
-    for (auto nbc : nodal_bcs.getActiveObjects())
+    for (auto & nbc : nodal_bcs.getActiveObjects())
       nbc->computeResidual();
   }
 
@@ -311,7 +312,8 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   const auto & integrated_bcs = _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0);
   const auto & nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0);
 
-  if (!kernels.size() && !nodal_kernels.size() && !integrated_bcs.size() && !nodal_bcs.size())
+  if (!kernels.hasActiveObjects() && !nodal_kernels.hasActiveObjects() &&
+      !integrated_bcs.hasActiveObjects() && !nodal_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -348,7 +350,8 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
         needed_fe_var_vector_tags);
   }
 
-  // Copy vectors and cache variable values at element quadature points
+  // Copy solution vectors, initialize matrices, and cache variable values at element quadature
+  // points
 
   for (auto & system : systems)
   {
@@ -384,16 +387,16 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
     // Compute kernels
 
-    for (auto kernel : kernels.getActiveObjects())
+    for (auto & kernel : kernels.getActiveObjects())
       kernel->computeJacobian();
 
-    for (auto nodal_kernel : nodal_kernels.getActiveObjects())
+    for (auto & nodal_kernel : nodal_kernels.getActiveObjects())
       nodal_kernel->computeJacobian();
 
-    for (auto ibc : integrated_bcs.getActiveObjects())
+    for (auto & ibc : integrated_bcs.getActiveObjects())
       ibc->computeJacobian();
 
-    for (auto nbc : nodal_bcs.getActiveObjects())
+    for (auto & nbc : nodal_bcs.getActiveObjects())
       nbc->computeJacobian();
   }
 
@@ -423,8 +426,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 {
   TIME_SECTION("computeKokkosResidualAndJacobian", 1);
 
-  if (!_kokkos_kernels.size() && !_kokkos_nodal_kernels.size() && !_kokkos_integrated_bcs.size() &&
-      !_kokkos_nodal_bcs.size())
+  if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_kernels.hasActiveObjects() &&
+      !_kokkos_integrated_bcs.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -462,7 +465,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
         needed_fe_var_vector_tags);
   }
 
-  // Copy vectors and cache variable values at element quadature points
+  // Copy solution vectors and residuals, initialize matrices, and cache variable values at element
+  // quadature points
 
   for (auto & system : systems)
   {
@@ -498,17 +502,17 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
     // Compute kernels
 
-    for (auto kernel : _kokkos_kernels.getActiveObjects())
+    for (auto & kernel : _kokkos_kernels.getActiveObjects())
       kernel->computeResidualAndJacobian();
 
-    for (auto nodal_kernel : _kokkos_nodal_kernels.getActiveObjects())
+    for (auto & nodal_kernel : _kokkos_nodal_kernels.getActiveObjects())
       nodal_kernel->computeResidualAndJacobian();
 
-    for (auto ibc : _kokkos_integrated_bcs.getActiveObjects())
+    for (auto & ibc : _kokkos_integrated_bcs.getActiveObjects())
       ibc->computeResidualAndJacobian();
 
     /// Nodal BC residuals are computed separately
-    for (auto nbc : _kokkos_nodal_bcs.getActiveObjects())
+    for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
       nbc->computeJacobian();
   }
 
