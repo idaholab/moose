@@ -55,6 +55,7 @@ runs:
             print_and_run conda activate "$MOOSE_CONDA_ENV"
           else
             echo "Not souring Conda environment"
+          fi
         fi
         EOF
 
