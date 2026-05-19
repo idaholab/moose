@@ -42,6 +42,11 @@ runs:
         }
         EOF
 
+        if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+          UTILS_PATH_WSL="$(wslpath -w "$UTILS_PATH")"
+          UTILS_PATH="$UTILS_PATH_WSL"
+        fi
+
         echo "BASH_ENV=${UTILS_PATH}" >> "$GITHUB_ENV"
 
         echo "::endgroup::"
