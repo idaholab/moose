@@ -29,8 +29,7 @@ WCNSLinearFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible equations with the linear "
       "solver implementation of the SIMPLE scheme");
-  params.set<MooseEnum>("momentum_advection_interpolation") =
-      NS::fvAdvectedInterpolationMethods();
+  params.set<MooseEnum>("momentum_advection_interpolation") = NS::fvAdvectedInterpolationMethods();
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
