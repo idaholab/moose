@@ -45,7 +45,7 @@ runs:
         echo "::group::Configure git line endings"
         if [ "$RUNNER_OS" = "Windows" ]; then
           source $MOOSE_UTILS_PATH
-          print_and_run "${{ steps.determine_git.outputs.git }}" config --global --add safe.directory "$GITHUB_WORKSPACE"
+          print_and_run "${{ steps.determine_git.outputs.git }}" config --global core.autocrlf false
         fi
         echo "::endgroup::"
     - uses: actions/checkout@v6
