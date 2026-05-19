@@ -29,11 +29,14 @@ runs:
         source $MOOSE_UTILS_PATH
 
         echo "::group::Setting environment"
-        if [ "${{ inputs.source_env }}" == "true" ]; then
-          source /moose_env.sh
-          echo "Sourced /moose_env.sh environmnt"
-        else
-          echo "Not sourcing /moose_env.sh environmnt"
+        # Source /moose_env.sh for docker
+        if [ -f /moose_env.sh ]; then
+          if [ "${{ inputs.source_env }}" == "true" ]; then
+            source /moose_env.sh
+            echo "Sourced /moose_env.sh environmnt"
+          else
+            echo "Not sourcing /moose_env.sh environenvironmentmnt"
+          fi
         fi
         echo "::endgroup::"
 
