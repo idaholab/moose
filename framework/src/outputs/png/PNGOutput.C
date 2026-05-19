@@ -414,6 +414,25 @@ PNGOutput::makePNG()
   // Open the file with write and bit modes.
   fp = fopen(png_file.str().c_str(), "wb");
 
+  // Verify the libpng we are linked against at runtime matches the headers we
+  // were compiled against. PNG_LIBPNG_VER is major*10000 + minor*100 + release;
+  // libpng only guarantees ABI within the same major.minor, so a mismatch there
+  // can cause png_create_write_struct to segfault rather than fail cleanly.
+  const png_uint_32 runtime_libpng_ver = png_access_version_number();
+  if (runtime_libpng_ver / 100 != PNG_LIBPNG_VER / 100)
+  {
+    mooseWarning("PNG output skipped for ",
+                 png_file.str(),
+                 ": runtime libpng version ",
+                 runtime_libpng_ver,
+                 " is ABI-incompatible with the version ",
+                 static_cast<png_uint_32>(PNG_LIBPNG_VER),
+                 " used at compile time.");
+    if (fp != nullptr)
+      fclose(fp);
+    return;
+  }
+
   pngp = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (!pngp)
     mooseError("Failed to make the pointer string for the png.");
