@@ -13,8 +13,8 @@ runs:
     - name: Setup utilities
       shell: ${{ inputs.shell }}
       run: |
-        UTILS_TMP_DIR="${RUNNER_TEMP:-$TMPDIR}"
-        UTILS_PATH="${UTILS_TMP_DIR}/utils.sh"
+        UTILS_TMP_DIR="${RUNNER_TEMP:-/tmp}"
+        UTILS_PATH="${UTILS_TMP_DIR}/moose_action_utils.sh"
         cat > "$UTILS_PATH" << 'EOF'
         function prefix_pwd()
         {
@@ -38,4 +38,4 @@ runs:
           return $?
         }
         EOF
-        echo "BASH_ENV=${UTILS_TMP_DIR}/utils.sh" >> "$GITHUB_ENV"
+        echo "BASH_ENV=${UTILS_PATH}" >> "$GITHUB_ENV"
