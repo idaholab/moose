@@ -15,6 +15,8 @@ runs:
   steps:
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
+      with:
+        shell: ${{ inputs.shell }}
     - name: Setup conda
       shell: ${{ inputs.shell }}
       run: |
