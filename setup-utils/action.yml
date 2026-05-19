@@ -31,6 +31,8 @@ runs:
           local new_pwd=${p/#$work_dir/WORK/}
           local docker_work_dir=/__w/
           new_pwd=${p/#$docker_work_dir/WORK_DOCKER/}
+          local wsl_work_dir="/mnt/d/a/"
+          new_pwd=${p/#$wsl_work_dir/WORK_WSL/}
           echo "${new_pwd}"
         }
 
