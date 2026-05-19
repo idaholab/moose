@@ -16,7 +16,7 @@ from . import common
 from ..base import components, renderers, Extension
 from ..common import exceptions, write
 from ..tree import html, pages, tokens
-from . import core, heading
+from . import core, heading, content
 
 LOG = logging.getLogger(__name__)
 
@@ -367,6 +367,23 @@ class NavigationExtension(Extension):
         ul = html.Tag(parent, "ul", class_="sidenav", id_=id_)
         self._createNavigation(ul, page, mega=False)
 
+    def _sourceLinkURL(self, name, page):
+        """
+        Look up the directory ``name`` in the content extension's ``source_links``
+        configuration and return a URL to that target page, relative to ``page``.
+        Returns None if the content extension is not loaded, no mapping exists,
+        or the target page cannot be found.
+        """
+        for ext in self.translator.extensions:
+            if isinstance(ext, content.ContentExtension):
+                link = ext.get("source_links", {}).get(name)
+                if link:
+                    target = self.translator.findPage(link, throw_on_zero=False)
+                    if target is not None:
+                        return target.relativeDestination(page)
+                return None
+        return None
+
     def _addBreadcrumbs(self, container, page):
         """
         Inserts breadcrumb links at the top of the page.
@@ -402,8 +419,21 @@ class NavigationExtension(Extension):
                         div, "a", href=url, class_="breadcrumb", string=current.name
                     )
                 else:
-                    span = html.Tag(div, "span", class_="breadcrumb")
-                    html.String(span, content=current.name)
+                    # No index.md for this directory: fall back to the content
+                    # extension's source_links mapping (e.g. "actions" ->
+                    # "source/actions/Action.md") so the breadcrumb is still clickable.
+                    link_url = self._sourceLinkURL(current.name, page)
+                    if link_url is not None:
+                        html.Tag(
+                            div,
+                            "a",
+                            href=link_url,
+                            class_="breadcrumb",
+                            string=current.name,
+                        )
+                    else:
+                        span = html.Tag(div, "span", class_="breadcrumb")
+                        html.String(span, content=current.name)
 
             elif isinstance(current, pages.File) and current.name != "index.md":
                 url = os.path.relpath(
