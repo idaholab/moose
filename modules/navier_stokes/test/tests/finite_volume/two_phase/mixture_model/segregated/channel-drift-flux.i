@@ -59,18 +59,6 @@ k_d = 1
   [upwind]
     type = FVAdvectedUpwind
   []
-  [vanLeer]
-    type = FVAdvectedVanLeerWeightBased
-  []
-  [min_mod]
-    type = FVAdvectedMinmodWeightBased
-  []
-  [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
-  []
-  [skewness-corrected]
-    type = FVGeometricAverage
-  []
 []
 
 [LinearFVKernels]

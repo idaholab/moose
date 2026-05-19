@@ -52,23 +52,11 @@ turbulence_advected_interp_method = ${advected_interp_method}
 []
 
 [FVInterpolationMethods]
-  [average]
-    type = FVGeometricAverage
-  []
   [upwind]
     type = FVAdvectedUpwind
   []
   [vanLeer]
     type = FVAdvectedVanLeerWeightBased
-  []
-  [min_mod]
-    type = FVAdvectedMinmodWeightBased
-  []
-  [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
-  []
-  [skewness-corrected]
-    type = FVGeometricAverage
   []
 []
 

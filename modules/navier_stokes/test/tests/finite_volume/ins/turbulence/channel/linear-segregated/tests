@@ -43,7 +43,6 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     cli_args = 'turbulence_advected_interp_method=vanLeer Outputs/file_base=channel_ERCOFTAC_vanleer_out'
-    prereq = 'channel_ERCOFTAC_linear_scaled_Re'
     csvdiff = 'channel_ERCOFTAC_vanleer_out_line_center_channel_0001.csv channel_ERCOFTAC_vanleer_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_vanleer_out_side_bottom_0001.csv channel_ERCOFTAC_vanleer_out_side_top_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
@@ -70,7 +69,6 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC-physics.i'
     cli_args = 'turbulence_advected_interp_method=min_mod Outputs/file_base=channel_ERCOFTAC-physics_minmod_out'
-    prereq = 'channel_ERCOFTAC_linear_physics'
     csvdiff = 'channel_ERCOFTAC-physics_minmod_out_line_center_channel_0001.csv channel_ERCOFTAC-physics_minmod_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC-physics_minmod_out_side_bottom_0001.csv channel_ERCOFTAC-physics_minmod_out_side_top_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet

@@ -14,9 +14,8 @@
     [simple_vanleer_scalar_advection]
       type = 'Exodiff'
       input = channel.i
-      cli_args = 'scalar_advected_interp_method=vanLeer'
-      exodiff = 'channel_out.e'
-      prereq = 'channel/simple'
+      cli_args = 'scalar_advected_interp_method=vanLeer Outputs/file_base=channel_vanleer_out'
+      exodiff = 'channel_vanleer_out.e'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
       detail = "using the kernel-based syntax with a van Leer scalar advection interpolation,"
@@ -32,9 +31,8 @@
     [physics_minmod_scalar_advection]
       type = 'Exodiff'
       input = channel-physics.i
-      cli_args = 'scalar_advected_interp_method=min_mod'
-      exodiff = 'channel-physics_out.e'
-      prereq = 'channel/physics'
+      cli_args = 'scalar_advected_interp_method=min_mod Outputs/file_base=channel-physics_minmod_out'
+      exodiff = 'channel-physics_minmod_out.e'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
       detail = "using the shorthand Physics syntax with a minmod scalar advection interpolation."

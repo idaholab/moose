@@ -90,8 +90,9 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
 void
 WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
-  const std::string method_name = getParam<MooseEnum>("passive_scalar_advection_interpolation");
-  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), method_name);
+  const auto & interpolation_method = getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), interpolation_method);
+  const std::string method_name = interpolation_method;
 
   const std::string kernel_type = "LinearFVScalarAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);

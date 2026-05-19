@@ -43,42 +43,54 @@ InputParameters interpolationParameters();
 namespace NS
 {
 /**
- * @return the advected interpolation methods supported by FVInterpolationMethod objects.
+ * Builds the advected interpolation methods supported by FVInterpolationMethod objects.
  */
-MooseEnum fvAdvectedInterpolationMethods(const std::string & default_method = "upwind");
+MooseEnum fvAdvectedInterpolationMethods();
 
 /**
- * @return the FVInterpolationMethod object type for an advected interpolation method name.
- * Returns an empty string when no FVInterpolationMethod equivalent is supported.
+ * Gets the FVInterpolationMethod object type for an advected interpolation method.
+ * @param interpolation_method The interpolation method enum to query
+ *
+ * Errors when no FVInterpolationMethod equivalent is supported.
  */
-std::string fvAdvectedInterpolationMethodType(const std::string & method_name);
+std::string fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method);
 
 /**
  * Add the FVInterpolationMethod object for an advected interpolation method name, if absent.
+ * @param problem The problem to which the interpolation method should be added
+ * @param factory The factory used to build interpolation method parameters
+ * @param interpolation_method The interpolation method enum to add
+ *
  * The method name must be supported by fvAdvectedInterpolationMethodType().
  */
 void addFVAdvectedInterpolationMethod(FEProblemBase & problem,
                                       Factory & factory,
-                                      const std::string & method_name);
+                                      const MooseEnum & interpolation_method);
 
 /**
- * @return the face interpolation methods supported by FVInterpolationMethod objects.
+ * Builds the face interpolation methods supported by FVInterpolationMethod objects.
  */
 MooseEnum fvFaceInterpolationMethods();
 
 /**
- * @return the FVInterpolationMethod object type for a face interpolation method name.
- * Returns an empty string when no FVInterpolationMethod equivalent is supported.
+ * Gets the FVInterpolationMethod object type for a face interpolation method name.
+ * @param interpolation_method The interpolation method enum to query
+ *
+ * Errors when no FVInterpolationMethod equivalent is supported.
  */
-std::string fvFaceInterpolationMethodType(const std::string & method_name);
+std::string fvFaceInterpolationMethodType(const MooseEnum & interpolation_method);
 
 /**
  * Add the FVInterpolationMethod object for a face interpolation method name, if absent.
+ * @param problem The problem to which the interpolation method should be added
+ * @param factory The factory used to build interpolation method parameters
+ * @param interpolation_method The interpolation method enum to add
+ *
  * The method name must be supported by fvFaceInterpolationMethodType().
  */
 void addFVFaceInterpolationMethod(FEProblemBase & problem,
                                   Factory & factory,
-                                  const std::string & method_name);
+                                  const MooseEnum & interpolation_method);
 
 /**
  * Checks to see whether the porosity value jumps from one side to the other of the provided face

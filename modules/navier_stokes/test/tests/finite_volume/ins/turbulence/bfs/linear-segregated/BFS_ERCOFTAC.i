@@ -102,23 +102,8 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
 []
 
 [FVInterpolationMethods]
-  [average]
-    type = FVGeometricAverage
-  []
   [upwind]
     type = FVAdvectedUpwind
-  []
-  [vanLeer]
-    type = FVAdvectedVanLeerWeightBased
-  []
-  [min_mod]
-    type = FVAdvectedMinmodWeightBased
-  []
-  [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
-  []
-  [skewness-corrected]
-    type = FVGeometricAverage
   []
 []
 
