@@ -218,7 +218,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   // Close and restore vectors
 
   {
-    TIME_SECTION("KokkosCopy", 1);
+    TIME_SECTION("KokkosClose", 1);
 
     for (auto & system : systems)
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
@@ -286,7 +286,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
   // Close and restore vectors
 
   {
-    TIME_SECTION("KokkosCopy", 1);
+    TIME_SECTION("KokkosClose", 1);
 
     for (auto & system : systems)
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
@@ -359,7 +359,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
     {
-      TIME_SECTION("KokkosPreallocate", 1);
+      TIME_SECTION("KokkosCopy", 1);
       system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
     {
@@ -403,7 +403,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   // Close and restore vectors and matrices
 
   {
-    TIME_SECTION("KokkosCopy", 1);
+    TIME_SECTION("KokkosClose", 1);
 
     for (auto & system : systems)
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
@@ -474,7 +474,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
     {
-      TIME_SECTION("KokkosPreallocateAndCopy", 1);
+      TIME_SECTION("KokkosCopy", 1);
       system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
     {
@@ -519,7 +519,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   // Close and restore vectors and matrices
 
   {
-    TIME_SECTION("KokkosCopy", 1);
+    TIME_SECTION("KokkosClose", 1);
 
     for (auto & system : systems)
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
