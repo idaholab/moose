@@ -302,6 +302,11 @@ public:
    * @param[out] dh_dT   derivative of specific enthalpy w.r.t. temperature
    */
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  virtual void h_from_p_T(const ADReal & p,
+                          const ADReal & T,
+                          ADReal & h,
+                          ADReal & dh_dp,
+                          ADReal & dh_dT) const override;
 
   /**
    * Molar mass

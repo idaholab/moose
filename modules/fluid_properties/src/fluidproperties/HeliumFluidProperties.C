@@ -422,6 +422,18 @@ HeliumFluidProperties::h_from_p_T(
   dh_dT = _cp;
 }
 
+void
+HeliumFluidProperties::h_from_p_T(const ADReal & /*pressure*/,
+                                  const ADReal & temperature,
+                                  ADReal & h,
+                                  ADReal & dh_dp,
+                                  ADReal & dh_dT) const
+{
+  h = _cp * temperature;
+  dh_dp = 0.0;
+  dh_dT = _cp;
+}
+
 Real
 HeliumFluidProperties::molarMass() const
 {
