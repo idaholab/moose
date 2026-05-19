@@ -992,7 +992,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     _msm_node_id_start = start;
   }
   dof_id_type next_node_id = *_msm_node_id_start;
-  // Element IDs use the same starting offset: node and element IDs are separate namespaces, and
+  // Element IDs use the same starting offset: node and element IDs are separately numbered, and
   // element count per clip (n triangles) is always <= node count (n+1), so per_rank_bound covers
   // both.
   dof_id_type next_elem_id = next_node_id;
@@ -1011,7 +1011,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
-    // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
+    // Define expression for getting sub-elements nodes (for sub-dividing secondary and primary
+    // elements)
     auto get_sub_elem_nodes = [](const ElemType type,
                                  const unsigned int sub_elem) -> std::vector<unsigned int>
     {

@@ -21,14 +21,12 @@ MortarSegmentMeshReporter::validParams()
       "Reports mortar segment mesh statistics (element counts and volume statistics) for all "
       "mortar interfaces. One entry per primary-secondary subdomain pair is appended to each "
       "output vector.");
-  params.addRequiredParam<bool>(
-      "on_displaced", "Whether to report statistics for the displaced mortar interfaces.");
   return params;
 }
 
 MortarSegmentMeshReporter::MortarSegmentMeshReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _on_displaced(getParam<bool>("on_displaced")),
+    _on_displaced(getParam<bool>("use_displaced_mesh")),
     _secondary_lower_n_elems(declareValueByName<std::vector<unsigned int>>(
         "secondary_lower_n_elems", REPORTER_MODE_ROOT)),
     _secondary_lower_max_volume(

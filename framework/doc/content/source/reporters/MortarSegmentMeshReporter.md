@@ -25,7 +25,7 @@ with one entry per primary-secondary subdomain pair, appended in the order the i
 iterated internally.
 
 By default the reporter operates on the undisplaced mesh. Set
-[!param](/Reporters/MortarSegmentMeshReporter/on_displaced) to `true` to instead collect
+[!param](/Reporters/MortarSegmentMeshReporter/use_displaced_mesh) to `true` to instead collect
 statistics from the displaced mortar interfaces.
 
 ## Example Input File Syntax

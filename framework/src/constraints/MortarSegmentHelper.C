@@ -244,6 +244,10 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
       cleaned_poly.push_back(curr_pt);
   }
 
+  mooseAssert(
+      cleaned_poly.size() <= 8,
+      "Our distributed mesh numbering scheme assumes that we have at most 8 nodes resulting from "
+      "clipping the projection of the primary sub-element onto the secondary sub-element");
   return cleaned_poly;
 }
 

@@ -68,7 +68,7 @@
   [mortar_stats]
     type = MortarSegmentMeshReporter
     execute_on = INITIAL
-    on_displaced = false
+    use_displaced_mesh = false
   []
 []
 
