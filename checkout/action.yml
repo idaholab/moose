@@ -23,11 +23,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v6
-      name: Checkout
-      with:
-        fetch-depth: 0
-        eol: lf
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
     - name: "Determine git"
@@ -44,6 +39,19 @@ runs:
         echo "$out"
         echo "$out" >> $GITHUB_OUTPUT
         echo "::endgroup::"
+    - name: Configure git line endings
+      shell: bash
+      run: |
+        echo "::group::Configure git line endings"
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          source $MOOSE_UTILS_PATH
+          print_and_run "${{ steps.determine_git.outputs.git }}" config --global --add safe.directory "$GITHUB_WORKSPACE"
+        fi
+        echo "::endgroup::"
+    - uses: actions/checkout@v6
+      name: Checkout
+      with:
+        fetch-depth: 0
     #
     # Input checks
     #
