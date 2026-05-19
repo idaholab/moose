@@ -33,9 +33,8 @@ class TestAnisotropicDiffusion2DOrthogonal(unittest.TestCase):
 class TestAnisotropicDiffusion2DHarmonic(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
-            "anisotropic-diffusion-2d.i",
+            "anisotropic-diffusion-2d-harmonic.i",
             5,
-            "LinearFVKernels/diffusion/coeff_interp_method=harmonic",
             file_base="anisotropic-diffusion-2d-harmonic_csv",
         )
 

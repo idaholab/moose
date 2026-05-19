@@ -11,8 +11,14 @@ fully anisotropic diffusion case.
 
 The diagonal tensor may be interpolated from adjacent cell values with the
 [!param](/LinearFVKernels/LinearFVAnisotropicDiffusion/coeff_interp_method) parameter and an
-object declared in the `[FVInterpolationMethods]` block described in [FVInterpolationMethod.md].
+interpolation method in the `[FVInterpolationMethods]` block described in [FVInterpolationMethod.md].
 If no interpolation method is supplied, the tensor functor is evaluated directly on the face.
+Common choices are [FVGeometricAverage.md] for arithmetic averaging and [FVHarmonicAverage.md] for
+harmonic averaging:
+
+!listing test/tests/linearfvkernels/anisotropic-diffusion/anisotropic-diffusion-2d.i block=FVInterpolationMethods
+
+!listing test/tests/linearfvkernels/anisotropic-diffusion/anisotropic-diffusion-2d-harmonic.i
 
 The implementation in this kernel is based on the derivation in [!cite](liu2015finite). The
 contributions of the system matrix and right hand side can be derived using the divergence

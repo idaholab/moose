@@ -34,6 +34,21 @@ The kernels created for free flow for the pressure correction equation:
 - [LinearFVAnisotropicDiffusion.md] for the pressure diffusion term
 - [LinearFVDivergence.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
 
+## Selecting interpolation methods
+
+The linear finite volume Physics syntax provides shortcut parameters for the interpolation methods
+used by the kernels it creates. The
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/momentum_advection_interpolation)
+parameter selects the momentum advection interpolation used by [LinearWCNSFVMomentumFlux.md].
+The supported choices are `average`, `upwind`, `vanLeer`, `min_mod`, and `venkatakrishnan`.
+
+The
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_diffusion_interpolation)
+parameter selects the interpolation used by [LinearFVAnisotropicDiffusion.md] for the pressure
+correction diffusion tensor. The supported choices are `average` and `harmonic`.
+
+Use these shortcut parameters directly in the Physics block. For direct kernel syntax, add the
+interpolation methods in `[FVInterpolationMethods]` and pass their names to the kernels.
 
 ## Automatically defined variables
 

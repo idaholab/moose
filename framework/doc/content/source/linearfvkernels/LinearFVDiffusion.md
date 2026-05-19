@@ -55,8 +55,8 @@ the boundary conditions may be applied multiple times. This warning applies to a
 
 By default the diffusion coefficient functor is evaluated directly on each face. You can instead
 select an interpolation method through the [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method)
-parameter and an object declared in the `[FVInterpolationMethods]` block described in
-[FVInterpolationMethod.md].
+parameter and a method in the `[FVInterpolationMethods]` block described in
+[FVInterpolationMethod.md]. Common choices are [FVGeometricAverage.md] and [FVHarmonicAverage.md].
 
 !listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=harm
 
