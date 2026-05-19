@@ -61,7 +61,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
-    abs_zero = 1e-8
     recover = false
   []
   [MFEMDiffusionMatFree]
@@ -197,7 +196,7 @@
     input = irrotational.i
     csvdiff = 'OutputData/Irrotational.csv'
     requirement = 'The system shall have the ability to solve for an irrotational vortex in two dimensions using MFEM.'
-    abs_zero = 1e-6
+    abs_zero = 2e-7
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
@@ -207,7 +206,6 @@
     input = darcy.i
     csvdiff = 'OutputData/Darcy.csv'
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
-    abs_zero = 5e-5
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
