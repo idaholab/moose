@@ -9,6 +9,10 @@
       exodiff = 'junction_1D_fill_in.e'
       cli_args = '--mesh-only junction_1D_fill_in.e'
       detail = 'by meshing the space between them,'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
     []
     [stitch]
       type = Exodiff
@@ -16,6 +20,8 @@
       exodiff = 'junction_1D_stitch_in.e'
       cli_args = '--mesh-only junction_1D_stitch_in.e'
       detail = 'by stitching the touching boundaries.'
+      # mesh generation test
+      recover = false
     []
   []
   [2D]
@@ -26,6 +32,10 @@
       exodiff = 'junction_2D_fill_in.e'
       cli_args = '--mesh-only junction_2D_fill_in.e'
       detail = 'by meshing the space between them,'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
     []
     [stitch]
       type = Exodiff
@@ -33,6 +43,8 @@
       exodiff = 'junction_2D_stitch_in.e'
       cli_args = '--mesh-only junction_2D_stitch_in.e'
       detail = 'by stitching the touching boundaries.'
+      # mesh generation test
+      recover = false
     []
   []
   [3D]
@@ -42,14 +54,20 @@
       input = 'junction_3D_fill.i'
       exodiff = 'junction_3D_fill_in.e'
       cli_args = '--mesh-only junction_3D_fill_in.e'
-      requirement = 'by meshing the space between them.'
+      detail = 'by meshing the space between them.'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
     []
     [stitch]
       type = Exodiff
       input = 'junction_3D_stitch.i'
       exodiff = 'junction_3D_stitch_in.e'
       cli_args = '--mesh-only junction_3D_stitch_in.e'
-      requirement = 'by stitching the touching boundaries.'
+      detail = 'by stitching the touching boundaries.'
+      # mesh generation test
+      recover = false
     []
   []
   [loop]
@@ -60,6 +78,10 @@
       exodiff = 'junction_1D_fill_onto_itself_in.e'
       cli_args = '--mesh-only junction_1D_fill_onto_itself_in.e'
       detail = 'by meshing the space between them,'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
     []
     [stitch]
       type = Exodiff
@@ -67,6 +89,8 @@
       exodiff = 'junction_1D_stitch_onto_itself_in.e'
       cli_args = '--mesh-only junction_1D_stitch_onto_itself_in.e'
       detail = 'by stitching the touching boundaries.'
+      # mesh generation test
+      recover = false
     []
   []
 []

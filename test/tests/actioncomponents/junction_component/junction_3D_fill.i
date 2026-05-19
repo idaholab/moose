@@ -31,6 +31,7 @@
     first_boundary = 'cyl1_top_boundary'
     second_boundary = 'cyl2_bottom_boundary'
     n_elem_normal = 4
+    junction_method = 'extrude_boundary'
 
     verbose = true
   []
