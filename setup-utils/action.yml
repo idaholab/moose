@@ -27,13 +27,19 @@ runs:
         function prefix_pwd()
         {
           local p="${PWD}/"
-          local work_dir="/home/runner/work/"
-          p=${p/#$work_dir/WORK/}
-          local docker_work_dir=/__w/
-          p=${p/#$docker_work_dir/WORK_DOCKER/}
-          local wsl_work_dir="/mnt/d/a/"
-          p=${p/#$wsl_work_dir/WORK_WSL/}
-          echo "${p}"
+          local -A replacements=(
+            ["/home/runner/work/"]="WORK"
+            ["/d/a/"]="WORK"
+            ["/__w/"]="WORK_DOCKER"
+            ["/mnt/d/a/"]="WORK_WSL"
+            [""]
+          )
+
+          for prefix in "${!replacements[@]}"; do
+            p="${p/#$prefix/${replacements[$prefix]}/}"
+          done
+
+          echo "$p"
         }
 
         function print_command()
