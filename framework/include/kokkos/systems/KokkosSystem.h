@@ -711,7 +711,7 @@ System::getVectorQpGradFace(const ElementInfo info,
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
   auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
 
-  Real3 grad;
+  Real3 grad = 0;
 
   for (unsigned int i = 0; i < n_dofs; ++i)
     grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
@@ -733,7 +733,7 @@ System::getVectorQpADGradFace(const ElementInfo info,
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
   auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
 
-  ADReal3 grad;
+  ADReal3 grad = ADReal(0);
 
   for (unsigned int i = 0; i < n_dofs; ++i)
     grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) *
