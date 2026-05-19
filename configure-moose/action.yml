@@ -5,6 +5,10 @@ inputs:
   args:
     description: "Arguments to pass to configure"
     required: true
+  shell:
+    description: "The shell to use; defaults to bash"
+    required: false
+    default: bash
   source_env:
     description: Whether or not to source the moose environment
     type: boolean
@@ -17,9 +21,13 @@ runs:
   steps:
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
+      with:
+        shell: ${{ inputs.shell }}
     - name: Configure
-      shell: bash
+      shell: ${{ inputs.shell }}
       run: |
+        source $MOOSE_UTILS_PATH
+
         echo "::group::Setting environment"
         if [ "${{ inputs.source_env }}" == "true" ]; then
           source /moose_env.sh
