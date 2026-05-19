@@ -42,7 +42,7 @@ runs:
         echo "::group::Setting environment"
 
         BUILD_JOBS="${{ inputs.jobs }}"
-        if [ -n "$MOOSE_JOBS" ]; then
+        if [ -n "${MOOSE_JOBS:-}" ]; then
           echo "Build jobs: ${MOOSE_JOBS} (from MOOSE_JOBS)"
           BUILD_JOBS="$MOOSE_JOBS"
         else
