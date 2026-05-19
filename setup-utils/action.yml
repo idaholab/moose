@@ -1,11 +1,17 @@
 name: Setup utils
 description: Setup action utilities
 
+inputs:
+  shell:
+    description: "The shell to use; default: bash"
+    required: false
+    default: bash
+
 runs:
   using: composite
   steps:
     - name: Setup utilities
-      shell: bash
+      shell: ${{ inputs.shell }}
       run: |
         UTILS_PATH="$RUNNER_TEMP/utils.sh"
         cat > "$UTILS_PATH" << 'EOF'
