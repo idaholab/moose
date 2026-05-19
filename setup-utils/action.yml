@@ -20,10 +20,10 @@ runs:
       run: |
         echo "::group::Setup utilities"
 
-        UTILS_PATH="${RUNNER_TEMP:-/tmp}/moose_action_utils.sh"
-        echo "Writing utils to $UTILS_PATH"
+        MOOSE_UTILS_PATH="${RUNNER_TEMP:-/tmp}/moose_action_utils.sh"
+        echo "Writing utils to $MOOSE_UTILS_PATH"
 
-        cat > "$UTILS_PATH" << 'EOF'
+        cat > "$MOOSE_UTILS_PATH" << 'EOF'
         #!/bin/bash
         function prefix_pwd()
         {
@@ -71,10 +71,9 @@ runs:
         EOF
 
         if [ -n "${WSL_DISTRO_NAME:-}" ]; then
-          UTILS_PATH_WSL="$(wslpath -w "$UTILS_PATH")"
-          UTILS_PATH="$UTILS_PATH_WSL"
+          MOOSE_UTILS_PATH="$(wslpath -w "$MOOSE_UTILS_PATH")"
         fi
 
-        echo "BASH_ENV=${UTILS_PATH}" >> "$GITHUB_ENV"
+        echo "MOOSE_UTILS_PATH=${MOOSE_UTILS_PATH}" >> "$GITHUB_ENV"
 
         echo "::endgroup::"

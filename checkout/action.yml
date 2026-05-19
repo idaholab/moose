@@ -69,6 +69,7 @@ runs:
       run: |
         echo "::group::Fix git ownership"
         if [ "$(whoami)" == "root" ]; then
+          source $MOOSE_UTILS_PATH
           print_and_run git config --global --add safe.directory "$GITHUB_WORKSPACE"
         else
           echo "Not running as root; nothing to fix"
@@ -124,6 +125,7 @@ runs:
       shell: bash
       run: |
         echo "::group::Checkout base branch"
+        source $MOOSE_UTILS_PATH
         pr_base_branch="${{ inputs.pr_base_branch }}"
         print_and_run "${{ steps.determine_git.outputs.git }}" checkout -b test "origin/${pr_base_branch}"
         echo "::endgroup::"
@@ -132,6 +134,7 @@ runs:
       shell: bash
       run: |
         echo "::group::Checkout base at commit"
+        source $MOOSE_UTILS_PATH
         pr_base_sha="${{ inputs.pr_base_sha }}"
         print_and_run "${{ steps.determine_git.outputs.git }}" checkout -b test "$pr_base_sha"
         echo "::endgroup::"
@@ -144,6 +147,7 @@ runs:
       shell: bash
       id: pr_pull_pull_request
       run: |
+        source $MOOSE_UTILS_PATH
         pr_head_sha="${{ github.event.pull_request.head.sha }}"
         pr_number="${{ github.event.pull_request.number }}"
 

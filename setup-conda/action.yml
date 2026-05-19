@@ -20,6 +20,8 @@ runs:
     - name: Setup conda
       shell: ${{ inputs.shell }}
       run: |
+        source $MOOSE_UTILS_PATH
+
         MINIFORGE_DIR="${HOME}/miniforge"
         CONDA_ENV=test
 
@@ -61,9 +63,4 @@ runs:
 
         echo "::group::List environment"
         print_and_run conda list
-        echo "::endgroup::"
-
-        echo "::group::Export conda environment"
-        echo "MOOSE_MINIFORGE_DIR=${MINIFORGE_DIR}" << $GITHUB_ENV
-        echo "MOOSE_CONDA_ENV=${CONDA_ENV}" << $GITHUB_ENV
         echo "::endgroup::"

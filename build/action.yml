@@ -39,6 +39,8 @@ runs:
     - name: Build
       shell: ${{ inputs.shell }}
       run: |
+        source $MOOSE_UTILS_PATH
+
         echo "::group::Setting environment"
 
         BUILD_JOBS="${{ inputs.jobs }}"
