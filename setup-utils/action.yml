@@ -70,10 +70,6 @@ runs:
         fi
         EOF
 
-        if [ -n "${WSL_DISTRO_NAME:-}" ]; then
-          MOOSE_UTILS_PATH="$(wslpath -w "$MOOSE_UTILS_PATH")"
-        fi
-
         echo "MOOSE_UTILS_PATH=${MOOSE_UTILS_PATH}" >> "$GITHUB_ENV"
 
         echo "::endgroup::"
