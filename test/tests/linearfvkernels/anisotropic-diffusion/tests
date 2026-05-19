@@ -8,6 +8,13 @@
     requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [mms-anisotropic-diffusion-2d-harmonic]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestAnisotropicDiffusion2DHarmonic
+    requirement = 'The system shall display second-order convergence for anisotropic diffusion problems with harmonic diffusion tensor interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
+    max_threads = 1 # see libmesh issue #3808
+  []
   [mms-anisotropic-diffusion-2d-nonorthogonal]
     type = MMSTest
     input = 'test.py'
