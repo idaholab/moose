@@ -1,0 +1,18 @@
+name: Set up WSL
+description: Use Vampire/setup-wsl to set up WSL
+
+runs:
+  using: composite
+  steps:
+    - name: Set up WSL
+      uses: Vampire/setup-wsl@d1da7f2c0322a5ee4f24975344f67fc0f5baf364
+      with:
+        distribution: Ubuntu-24.04
+        update: 'true'
+    - name: Clean WSL packages
+      shell: wsl-bash {0}
+      run: |
+        echo "::group::Clean WSL packages"
+        apt-get autoremove -y
+        apt-get clean
+        echo "::endgroup::"
