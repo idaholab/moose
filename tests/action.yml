@@ -19,19 +19,20 @@ inputs:
     type: boolean
     required: false
     default: true
-  # disable_pedantic:
-  #   description: "Set to disable --pedantic-checks; default: TESTS_DISABLE_PEDANTIC environment variable or false"
-  #   type: boolean
-  #   required: false
-  #   default: "${{ github.env.DISABLE_PEDANTIC }}"
+  shell:
+    description: "The shell to use; default: bash"
+    required: false
+    default: bash
 
 runs:
   using: composite
   steps:
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
+      with:
+        shell: ${{ inputs.shell }}
     - name: Build
-      shell: bash
+      shell: ${{ inputs.shell }}
       run: |
         echo "::group::Setting environment"
 
@@ -58,6 +59,6 @@ runs:
           echo "::endgroup::"
         fi
 
-        echo "::group::Run tests: ./run_tests -j $TEST_JOBS ${{ inputs.args }}"
-        print_and_run ./run_tests -j "$TEST_JOBS" ${{ inputs.args }}
+        echo "::group::Run tests"
+        print_and_run ./run_tests -j "$TEST_JOBS" --longest-jobs=20 ${{ inputs.args }}
         echo "::endgroup::"
