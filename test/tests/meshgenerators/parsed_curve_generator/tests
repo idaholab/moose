@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/ParsedCurveGenerator.md'
-  issues = '#22848 #30337'
+  issues = '#22848 #30337 #32950'
   [open_curve]
     type = 'Exodiff'
     input = 'parsed_curve_open.i'
@@ -67,6 +67,14 @@
     cli_args = '--mesh-only parsed_curve_closed_edge4_in.e
                 Mesh/pcg/edge_element_type=EDGE4'
     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with cubic elements.'
+    recover = false
+  []
+  [closed_curve_single_section]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    cli_args = "Mesh/pcg/section_bounding_t_values='0.0 ${fparse 2.0*pi}' Mesh/pcg/nums_segments=20 --mesh-only parsed_curve_closed_single_in.e"
+    exodiff = 'parsed_curve_closed_single_in.e'
+    requirement = 'The system shall generate a closed loop curve mesh, with coincident starting and ending points and specified using abscissa drawn from a single user-specified interval.'
     recover = false
   []
   [forced_closed_curve]
