@@ -94,15 +94,7 @@ P_out = 4.923e6 # Pa
     filename = "power_profile.txt" #type in name of file that describes radial power profile
   []
 
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [T_ic]
     type = ConstantIC

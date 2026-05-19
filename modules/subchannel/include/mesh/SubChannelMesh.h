@@ -137,14 +137,40 @@ public:
   virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const = 0;
 
   /**
-   * Return the pitch between 2 subchannels
+   * Return the undeformed pitch between 2 subchannels
    */
   virtual const Real & getPitch() const { return _pitch; }
 
   /**
-   * Return Pin diameter
+   * Return undeformed Pin diameter
    */
   virtual const Real & getPinDiameter() const { return _pin_diameter; }
+
+  /**
+   * Return undeformed bundle inlet flow area
+   */
+  Real getAssemblyFlowArea() const { return _assembly_flow_area; }
+
+  /**
+   * Return undeformed bundle inlet wetted perimeter
+   */
+  Real getAssemblyWettedPerimeter() const { return _assembly_wetted_perimeter; }
+
+  /**
+   * Return undeformed bundle-average hydraulic diameter
+   */
+  Real getAssemblyHydraulicDiameter() const { return _assembly_hydraulic_diameter; }
+
+  /**
+   * Return undeformed flow area for a subchannel at an axial location, including any blockage
+   * reduction
+   */
+  virtual Real getSubchannelFlowArea(unsigned int i_chan, Real z) const = 0;
+
+  /**
+   * Return undeformed wetted perimeter for a subchannel
+   */
+  virtual Real getSubchannelWettedPerimeter(unsigned int i_chan) const = 0;
 
   /**
    * Return a sign for the crossflow given a subchannel index and local neighbor index
@@ -243,6 +269,12 @@ protected:
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
+  /// Undeformed bundle inlet flow area
+  Real _assembly_flow_area;
+  /// Undeformed bundle inlet wetted perimeter
+  Real _assembly_wetted_perimeter;
+  /// Undeformed bundle-average hydraulic diameter
+  Real _assembly_hydraulic_diameter;
 
   /// number of axial cells
   unsigned int _n_cells;

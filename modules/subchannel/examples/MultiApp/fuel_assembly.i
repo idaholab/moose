@@ -129,19 +129,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [ICs]
   # Geometry
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = ${fuel_pin_diameter}
-  []
 
   # Operating conditions
   [q_prime_IC]

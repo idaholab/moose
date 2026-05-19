@@ -85,21 +85,8 @@ num_cells = 40
 []
 
 [ICs]
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 5.84e-3
-  []
 
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_ic]
     type = SCMTriPowerIC

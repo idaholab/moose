@@ -74,16 +74,6 @@ heated_length = 1.0
 []
 
 [ICs]
-    [S_IC]
-        type = SCMQuadFlowAreaIC
-        variable = S
-    []
-
-    [w_perim_IC]
-        type = SCMQuadWettedPerimIC
-        variable = w_perim
-    []
-
     [q_prime_IC]
         type = SCMQuadPowerIC
         variable = q_prime
@@ -95,12 +85,6 @@ heated_length = 1.0
         type = ConstantIC
         variable = T
         value = ${T_in}
-    []
-
-    [Dpin_ic]
-        type = ConstantIC
-        variable = Dpin
-        value = 0.00950
     []
 
     [P_ic]

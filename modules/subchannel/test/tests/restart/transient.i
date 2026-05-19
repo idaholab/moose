@@ -120,15 +120,7 @@ P_out = 4.923e6 # Pa
 []
 
 [ICs]
-  [S_ic]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
-  [w_perim_ic]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_ic]
     type = SCMQuadPowerIC
