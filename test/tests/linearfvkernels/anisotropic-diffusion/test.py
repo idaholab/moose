@@ -30,6 +30,31 @@ class TestAnisotropicDiffusion2DOrthogonal(unittest.TestCase):
             self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
 
 
+class TestAnisotropicDiffusion2DHarmonic(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial(
+            "anisotropic-diffusion-2d.i",
+            5,
+            "LinearFVKernels/diffusion/coeff_interp_method=harmonic",
+            file_base="anisotropic-diffusion-2d-harmonic_csv",
+        )
+
+        fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
+        fig.plot(
+            df1,
+            label="l2error",
+            marker="o",
+            markersize=8,
+            num_fitted_points=3,
+            slope_precision=1,
+        )
+        fig.save("2d-linear-fv-anisotropic-diffusion-harmonic.png")
+
+        for _, value in fig.label_to_slope.items():
+            print("The current slope: ", value)
+            self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
+
+
 class TestAnisotropicDiffusion2DNonorthogonal(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
