@@ -1,0 +1,55 @@
+name: Setup conda
+description: Set up conda and install the given packages
+
+inputs:
+  packages:
+    description: "The packages to install"
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - uses: idaholab/moose/setup-utils@actions
+      name: Setup utils
+    - name: Setup conda
+      run: |
+        echo "::group::Install Miniconda"
+        print_and_run curl -L -o /tmp/miniforge.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+        print_and_run bash /tmp/miniforge.sh -b -p ${HOME}/miniforge
+        print_and_run rm /tmp/miniforge.sh
+        echo "::endgroup::"
+
+        echo "::group::Update Conda"
+        print_and_run source $HOME/miniforge/etc/profile.d/conda.sh
+        print_and_run conda update --all --yes --quiet
+        echo "::endgroup::"
+
+        echo "::group::Clean base environment"
+        print_and_run conda clean --all --yes --quiet
+        echo "::endgroup::"
+
+        echo "::group::Show base packages"
+        print_and_run conda list
+        echo "::endgroup::"
+
+        echo "::group::Add INL channel"
+        print_and_run conda config --add channels https://conda.software.inl.gov/public
+        echo "::endgroup::"
+
+        echo "::group::Create environment"
+        print_and_run conda create --yes --quiet -n test ${{ inputs.packages }}
+        echo "::endgroup::"
+
+        echo "::group::Clean environment"
+        print_and_run conda clean --all --yes --quiet
+        echo "::endgroup::"
+
+        echo "::group::Activate environment"
+        set +u
+        print_and_run conda activate test
+        echo "::endgroup::"
+
+        echo "::group::List environment"
+        print_and_run conda list
+        echo "::endgroup::"
