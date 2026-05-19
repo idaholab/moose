@@ -474,9 +474,9 @@ PNGOutput::makePNG()
   DenseVector<Number> dv(0);
 
   // Loop through to create the image.
-  for (const auto iy : make_range(_resolution))
+  for (const auto iy : make_range((unsigned int)height))
   {
-    for (const auto ix : make_range(_resolution))
+    for (const auto ix : make_range((unsigned int)width + 1))
     {
       // Move along the axis from the center
       // Center the point in the pixel
