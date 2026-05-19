@@ -92,7 +92,7 @@ runs:
       run: |
         echo "::group::Check pr_base_branch"
         pr_base_branch="${{ inputs.pr_base_branch }}"
-        if ! ${{ steps.determine_git.outputs.git }} show-ref --verify --quiet "refs/remotes/origin/${pr_base_branch}"; then
+        if ! "${{ steps.determine_git.outputs.git }}" show-ref --verify --quiet "refs/remotes/origin/${pr_base_branch}"; then
           echo "::error::Input pr_base_branch=${pr_base_branch} branch does not exist"
           exit 1
         fi
@@ -101,7 +101,7 @@ runs:
 
         echo "::group::Check pr_target_branch"
         pr_target_branch="${{ inputs.pr_target_branch }}"
-        if ! ${{ steps.determine_git.outputs.git }} show-ref --verify --quiet "refs/remotes/origin/${pr_target_branch}"; then
+        if ! "${{ steps.determine_git.outputs.git }}" show-ref --verify --quiet "refs/remotes/origin/${pr_target_branch}"; then
           echo "::error::Input pr_target_branch=${pr_target_branch} branch does not exist"
           exit 1
         fi
@@ -125,7 +125,7 @@ runs:
       run: |
         echo "::group::Checkout base branch"
         pr_base_branch="${{ inputs.pr_base_branch }}"
-        print_and_run ${{ steps.determine_git.outputs.git }} checkout -b test "origin/${pr_base_branch}"
+        print_and_run "${{ steps.determine_git.outputs.git }}" checkout -b test "origin/${pr_base_branch}"
         echo "::endgroup::"
     - name: "PR: Checkout base at commit"
       if: github.event_name == 'pull_request' && inputs.pr_base_sha != ''
@@ -133,7 +133,7 @@ runs:
       run: |
         echo "::group::Checkout base at commit"
         pr_base_sha="${{ inputs.pr_base_sha }}"
-        print_and_run ${{ steps.determine_git.outputs.git }} checkout -b test "$pr_base_sha"
+        print_and_run "${{ steps.determine_git.outputs.git }}" checkout -b test "$pr_base_sha"
         echo "::endgroup::"
 
     #
@@ -148,11 +148,11 @@ runs:
         pr_number="${{ github.event.pull_request.number }}"
 
         echo "::group::Fetch pull request"
-        print_and_run ${{ steps.determine_git.outputs.git }} fetch origin "refs/pull/${pr_number}/head"
+        print_and_run "${{ steps.determine_git.outputs.git }}" fetch origin "refs/pull/${pr_number}/head"
         echo "::endgroup::"
 
         echo "::group::Check pull request head"
-        if [ "$(${{ steps.determine_git.outputs.git }} rev-parse FETCH_HEAD)" != "$pr_head_sha" ]; then
+        if [ "$("${{ steps.determine_git.outputs.git }}" rev-parse FETCH_HEAD)" != "$pr_head_sha" ]; then
           echo "::error::Pull request head has changed"
           exit 1
         fi
@@ -162,10 +162,10 @@ runs:
 
         echo "::group::Merging ${from_repo} into base"
 
-        print_and_run ${{ steps.determine_git.outputs.git }} config user.name "github-actions[bot]"
-        print_and_run ${{ steps.determine_git.outputs.git }} config user.email "github-actions[bot]@users.noreply.github.com"
+        print_and_run "${{ steps.determine_git.outputs.git }}" config user.name "github-actions[bot]"
+        print_and_run "${{ steps.determine_git.outputs.git }}" config user.email "github-actions[bot]@users.noreply.github.com"
         pull_passed=0
-        print_and_run ${{ steps.determine_git.outputs.git }} merge FETCH_HEAD && pull_passed=1
+        print_and_run "${{ steps.determine_git.outputs.git }}" merge FETCH_HEAD && pull_passed=1
         echo "::endgroup::"
 
         if [ $pull_passed == 0 ]; then
@@ -176,10 +176,10 @@ runs:
         base_sha="${{ inputs.pr_base_sha }}"
         if [ -z "$base_sha" ]; then
           echo "::group::Determine new pull request base"
-          base_sha="$(${{ steps.determine_git.outputs.git }} rev-parse "origin/${{ inputs.pr_base_branch }}")"
-          git_log="$(${{ steps.determine_git.outputs.git }} log "${base_sha}..${pr_head_sha}" --format="%H")"
+          base_sha="$("${{ steps.determine_git.outputs.git }}" rev-parse "origin/${{ inputs.pr_base_branch }}")"
+          git_log="$("${{ steps.determine_git.outputs.git }}" log "${base_sha}..${pr_head_sha}" --format="%H")"
           for commit_sha in $git_log; do
-            if $(${{ steps.determine_git.outputs.git }} merge-base --is-ancestor "$commit_sha" "origin/${{ github.base_ref }}"); then
+            if $("${{ steps.determine_git.outputs.git }}" merge-base --is-ancestor "$commit_sha" "origin/${{ github.base_ref }}"); then
               base_sha="$commit_sha"
               break
             fi
@@ -216,7 +216,7 @@ runs:
           echo "::error::Invalid base_sha=${base_sha}"
           exit 1
         fi
-        if ! ${{ steps.determine_git.outputs.git }} rev-parse --verify "$base_sha" > /dev/null; then
+        if ! "${{ steps.determine_git.outputs.git }}" rev-parse --verify "$base_sha" > /dev/null; then
           echo "::error::Output base_sha=${base_sha} commit does not exist"
           exit 1
         fi
@@ -228,9 +228,9 @@ runs:
         echo "::endgroup::"
 
         echo "::group::Show base commit"
-        ${{ steps.determine_git.outputs.git }} log -1 "$base_sha"
+        "${{ steps.determine_git.outputs.git }}" log -1 "$base_sha"
         echo "::endgroup::"
 
         echo "::group::Show new commits"
-        ${{ steps.determine_git.outputs.git }} log --pretty="format:%h %d %s, %ar by %aN" "${base_sha}..HEAD"
+        "${{ steps.determine_git.outputs.git }}" log --pretty="format:%h %d %s, %ar by %aN" "${base_sha}..HEAD"
         echo "::endgroup::"
