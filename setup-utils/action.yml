@@ -1,20 +1,13 @@
 name: Setup utils
 description: Setup action utilities
 
-inputs:
-  shell:
-    description: "The shell to use; default: bash"
-    required: false
-    default: bash
-
 runs:
   using: composite
   steps:
     - name: Setup utilities
-      shell: ${{ inputs.shell }}
+      shell: bash
       run: |
-        UTILS_TMP_DIR="${RUNNER_TEMP:-/tmp}"
-        UTILS_PATH="${UTILS_TMP_DIR}/moose_action_utils.sh"
+        UTILS_PATH="${RUNNER_TEMP}/moose_action_utils.sh"
         cat > "$UTILS_PATH" << 'EOF'
         function prefix_pwd()
         {
