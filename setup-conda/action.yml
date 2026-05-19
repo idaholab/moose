@@ -5,7 +5,10 @@ inputs:
   packages:
     description: "The packages to install"
     required: true
-
+  shell:
+    description: "The shell to use; defaults to bash"
+    required: false
+    default: bash
 
 runs:
   using: composite
@@ -13,6 +16,7 @@ runs:
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
     - name: Setup conda
+      shell: ${{ inputs.shell }}
       run: |
         echo "::group::Install Miniconda"
         print_and_run curl -L -o /tmp/miniforge.sh https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
