@@ -27,6 +27,7 @@ runs:
       name: Checkout
       with:
         fetch-depth: 0
+        eol: lf
     - uses: idaholab/moose/setup-utils@actions
       name: Setup utils
     - name: "Determine git"
