@@ -6887,10 +6887,6 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // settings, including setting matrix prefixes. This must occur before petscSetOptions
   initPetscOutputAndSomeSolverSettings();
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
-      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
-#else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
@@ -6902,7 +6898,6 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
     Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
     _is_petsc_options_inserted = true;
   }
-#endif
 
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
