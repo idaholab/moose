@@ -66,5 +66,4 @@ private:
 
   /// Whether to use an additional slip velocity to compute the face flux
   bool _add_slip_model;
-
 };

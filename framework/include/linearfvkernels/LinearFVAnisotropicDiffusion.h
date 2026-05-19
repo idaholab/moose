@@ -17,7 +17,8 @@
  * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
  * volume method to a linear system.
  */
-class LinearFVAnisotropicDiffusion : public LinearFVFluxKernel, public FVInterpolationMethodInterface
+class LinearFVAnisotropicDiffusion : public LinearFVFluxKernel,
+                                     public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();

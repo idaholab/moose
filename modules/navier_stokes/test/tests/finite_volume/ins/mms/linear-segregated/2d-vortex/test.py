@@ -50,6 +50,7 @@ class TestVortexOrthogonal(unittest.TestCase):
     def test(self):
         check_vortex_convergence("", "vortex-average")
 
+
 class TestVortexVanLeer(unittest.TestCase):
     def test(self):
         check_vortex_convergence("advected_interp_method=vanLeer", "vortex-vanleer")
@@ -66,6 +67,7 @@ class TestVortexUpwind(unittest.TestCase):
             pressure_tol=0.3,
         )
 
+
 class TestVortexMinMod(unittest.TestCase):
     def test(self):
         check_vortex_convergence("advected_interp_method=min_mod", "vortex-minmod")
@@ -77,6 +79,7 @@ class TestVortexVenkatakrishnan(unittest.TestCase):
             "advected_interp_method=venkatakrishnan",
             "vortex-venkatakrishnan",
         )
+
 
 def check_vortex_nonorthogonal_convergence(cli_args, file_base, **kwargs):
     nonorthogonal_args = (
@@ -92,6 +95,7 @@ def check_vortex_nonorthogonal_convergence(cli_args, file_base, **kwargs):
         **kwargs,
     )
 
+
 class TestVortexNonorthogonal(unittest.TestCase):
     def test(self):
         check_vortex_nonorthogonal_convergence(
@@ -99,12 +103,13 @@ class TestVortexNonorthogonal(unittest.TestCase):
             "vortex-nonorthogonal-average",
         )
 
+
 class TestVortexNonorthogonalVanLeer(unittest.TestCase):
     def test(self):
         check_vortex_nonorthogonal_convergence(
-            "advected_interp_method=vanLeer",
-            "vortex-nonorthogonal-vanleer"
+            "advected_interp_method=vanLeer", "vortex-nonorthogonal-vanleer"
         )
+
 
 class TestVortexNonorthogonalUpwind(unittest.TestCase):
     def test(self):
@@ -114,22 +119,24 @@ class TestVortexNonorthogonalUpwind(unittest.TestCase):
             velocity_order=1.0,
             velocity_tol=0.3,
             pressure_order=1.0,
-            pressure_tol=0.3
+            pressure_tol=0.3,
         )
+
 
 class TestVortexNonorthogonalMinMod(unittest.TestCase):
     def test(self):
         check_vortex_nonorthogonal_convergence(
-            "advected_interp_method=min_mod",
-            "vortex-nonorthogonal-minmod"
+            "advected_interp_method=min_mod", "vortex-nonorthogonal-minmod"
         )
+
 
 class TestVortexNonorthogonalVenkatakrishnan(unittest.TestCase):
     def test(self):
         check_vortex_nonorthogonal_convergence(
             "advected_interp_method=venkatakrishnan",
-            "vortex-nonorthogonal-venkatakrishnan"
+            "vortex-nonorthogonal-venkatakrishnan",
         )
+
 
 if __name__ == "__main__":
     unittest.main(__name__, verbosity=2)

@@ -126,16 +126,16 @@ LinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 Real
 LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  return (computeInternalStressRHSContribution() + _adv_interp_result.rhs_face_value *
-                                                   _face_mass_flux) *
+  return (computeInternalStressRHSContribution() +
+          _adv_interp_result.rhs_face_value * _face_mass_flux) *
          _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  return -(computeInternalStressRHSContribution() + _adv_interp_result.rhs_face_value *
-                                                    _face_mass_flux) *
+  return -(computeInternalStressRHSContribution() +
+           _adv_interp_result.rhs_face_value * _face_mass_flux) *
          _current_face_area;
 }
 
