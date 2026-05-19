@@ -21,7 +21,6 @@ runs:
       shell: ${{ inputs.shell }}
       run: |
         source $MOOSE_UTILS_PATH
-
         MINIFORGE_DIR="${HOME}/miniforge"
         CONDA_ENV=test
 
@@ -37,7 +36,7 @@ runs:
         echo "::endgroup::"
 
         echo "::group::Clean base environment"
-        print_and_run conda clean --all --yes --quiet
+        print_and_run conda clean --all --yes
         echo "::endgroup::"
 
         echo "::group::Show base packages"
@@ -53,7 +52,7 @@ runs:
         echo "::endgroup::"
 
         echo "::group::Clean environment"
-        print_and_run conda clean --all --yes --quiet
+        print_and_run conda clean --all --yes
         echo "::endgroup::"
 
         echo "::group::Activate environment"
