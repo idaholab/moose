@@ -19,11 +19,6 @@ inputs:
     type: boolean
     required: false
     default: true
-  source_conda:
-    description: Whether or not to source the Conda environment if it exists
-    type: boolean
-    required: false
-    default: true
   error_all:
     description: "Whether or not to set ADDITIONAL_CPPFLAGS='-Wall -Wextra -Werror' (default: true)"
     type: boolean
@@ -62,17 +57,6 @@ runs:
           else
             echo "Not sourcing /moose_env.sh environenvironmentmnt"
           fi
-        fi
-
-        # Source conda
-        if [ -n "${MOOSE_CONDA_ENV:-?}" ];
-          if [ "${{ inputs.source_conda }} == "true" ]; then
-            echo "Sourcing Conda environment ${MOOSE_CONDA_ENV} from ${MOOSE_MINIFORGE_DIR}"
-            print_and_run source "${MOOSE_MINIFORGE_DIR}/etc/profile.d/conda.sh"
-            set +u
-            print_and_run conda activate "$MOOSE_CONDA_ENV"
-          else
-            echo "Not souring Conda environment"
         fi
 
         if [ "${{ inputs.error_all }}" == "true" ]; then
