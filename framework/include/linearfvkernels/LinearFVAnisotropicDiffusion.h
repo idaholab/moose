@@ -10,12 +10,14 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
+#include "FVFaceInterpolationMethod.h"
+#include "FVInterpolationMethodInterface.h"
 
 /**
  * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
  * volume method to a linear system.
  */
-class LinearFVAnisotropicDiffusion : public LinearFVFluxKernel
+class LinearFVAnisotropicDiffusion : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();
@@ -57,8 +59,16 @@ protected:
    */
   Real computeFluxRHSContribution();
 
+  /**
+   * Returns the diagonal diffusion tensor interpolated to the current face.
+   */
+  RealVectorValue faceDiffusionTensor() const;
+
   /// The functor for the diagonal diffusion tensor (diagonal entries arranged in a vector)
   const Moose::Functor<RealVectorValue> & _diffusion_tensor;
+
+  /// Optional interpolation method for the diagonal diffusion tensor components
+  const FVFaceInterpolationMethod * _coeff_interp_method;
 
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
