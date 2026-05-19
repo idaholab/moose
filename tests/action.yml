@@ -56,6 +56,8 @@ runs:
           fi
         fi
 
+        export MOOSE_TERM_FORMAT=tpnsc
+
         echo "::endgroup::"
 
         if [ -n "${{ inputs.dir }}" ]; then
@@ -65,5 +67,5 @@ runs:
         fi
 
         echo "::group::Run tests"
-        print_and_run ./run_tests -j "$TEST_JOBS" --longest-jobs=20 ${{ inputs.args }}
+        print_and_run ./run_tests -j "$TEST_JOBS" -t --longest-jobs=20 ${{ inputs.args }}
         echo "::endgroup::"
