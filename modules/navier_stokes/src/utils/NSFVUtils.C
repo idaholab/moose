@@ -13,6 +13,7 @@
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
+#include "MooseError.h"
 #include "MooseUtils.h"
 
 namespace Moose
@@ -33,8 +34,7 @@ setInterpolationMethods(const MooseObject & obj,
   else if (velocity_interp_method_in == "rc")
     velocity_interp_method = InterpMethod::RhieChow;
   else
-    obj.mooseError("Unrecognized interpolation type ",
-                   static_cast<std::string>(velocity_interp_method_in));
+    obj.mooseError("Unrecognized interpolation type ", std::string(velocity_interp_method_in));
 
   return need_more_ghosting;
 }
@@ -57,39 +57,39 @@ interpolationParameters()
 namespace NS
 {
 MooseEnum
-fvAdvectedInterpolationMethods(const std::string & default_method)
+fvAdvectedInterpolationMethods()
 {
-  return MooseEnum("average skewness-corrected upwind vanLeer min_mod venkatakrishnan",
-                   default_method);
+  return MooseEnum("average upwind vanLeer min_mod venkatakrishnan", "upwind");
 }
 
 std::string
-fvAdvectedInterpolationMethodType(const std::string & method_name)
+fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method)
 {
-  if (method_name == "average" || method_name == "skewness-corrected")
+  const std::string method_name = interpolation_method;
+  if (interpolation_method == "average")
     return "FVGeometricAverage";
-  if (method_name == "upwind")
+  if (interpolation_method == "upwind")
     return "FVAdvectedUpwind";
-  if (method_name == "vanLeer")
+  if (interpolation_method == "vanLeer")
     return "FVAdvectedVanLeerWeightBased";
-  if (method_name == "min_mod")
+  if (interpolation_method == "min_mod")
     return "FVAdvectedMinmodWeightBased";
-  if (method_name == "venkatakrishnan")
+  if (interpolation_method == "venkatakrishnan")
     return "FVAdvectedVenkatakrishnanDeferredCorrection";
 
-  return "";
+  mooseError("Unsupported linear FV advected interpolation method '", method_name, "'.");
 }
 
 void
 addFVAdvectedInterpolationMethod(FEProblemBase & problem,
                                  Factory & factory,
-                                 const std::string & method_name)
+                                 const MooseEnum & interpolation_method)
 {
+  const std::string method_name = interpolation_method;
   if (problem.hasFVInterpolationMethod(method_name))
     return;
 
-  const auto method_type = fvAdvectedInterpolationMethodType(method_name);
-  mooseAssert(!method_type.empty(), "Unsupported advected interpolation method");
+  const auto method_type = fvAdvectedInterpolationMethodType(interpolation_method);
 
   InputParameters params = factory.getValidParams(method_type);
   problem.addFVInterpolationMethod(method_type, method_name, params);
@@ -102,26 +102,27 @@ fvFaceInterpolationMethods()
 }
 
 std::string
-fvFaceInterpolationMethodType(const std::string & method_name)
+fvFaceInterpolationMethodType(const MooseEnum & interpolation_method)
 {
-  if (method_name == "average")
+  const std::string method_name = interpolation_method;
+  if (interpolation_method == "average")
     return "FVGeometricAverage";
-  if (method_name == "harmonic")
+  if (interpolation_method == "harmonic")
     return "FVHarmonicAverage";
 
-  return "";
+  mooseError("Unsupported linear FV face interpolation method '", method_name, "'.");
 }
 
 void
 addFVFaceInterpolationMethod(FEProblemBase & problem,
                              Factory & factory,
-                             const std::string & method_name)
+                             const MooseEnum & interpolation_method)
 {
+  const std::string method_name = interpolation_method;
   if (problem.hasFVInterpolationMethod(method_name))
     return;
 
-  const auto method_type = fvFaceInterpolationMethodType(method_name);
-  mooseAssert(!method_type.empty(), "Unsupported face interpolation method");
+  const auto method_type = fvFaceInterpolationMethodType(interpolation_method);
 
   InputParameters params = factory.getValidParams(method_type);
   problem.addFVInterpolationMethod(method_type, method_name, params);

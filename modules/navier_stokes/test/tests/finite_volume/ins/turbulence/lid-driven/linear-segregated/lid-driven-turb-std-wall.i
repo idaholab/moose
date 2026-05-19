@@ -87,23 +87,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [FVInterpolationMethods]
-  [average]
-    type = FVGeometricAverage
-  []
   [upwind]
     type = FVAdvectedUpwind
-  []
-  [vanLeer]
-    type = FVAdvectedVanLeerWeightBased
-  []
-  [min_mod]
-    type = FVAdvectedMinmodWeightBased
-  []
-  [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
-  []
-  [skewness-corrected]
-    type = FVGeometricAverage
   []
 []
 

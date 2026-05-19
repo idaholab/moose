@@ -215,8 +215,9 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
 
     if (isParamValid("pressure_diffusion_interpolation"))
     {
-      const std::string method_name = getParam<MooseEnum>("pressure_diffusion_interpolation");
-      NS::addFVFaceInterpolationMethod(getProblem(), getFactory(), method_name);
+      const auto & interpolation_method = getParam<MooseEnum>("pressure_diffusion_interpolation");
+      NS::addFVFaceInterpolationMethod(getProblem(), getFactory(), interpolation_method);
+      const std::string method_name = interpolation_method;
       params.set<InterpolationMethodName>("coeff_interp_method") = method_name;
     }
 
@@ -258,7 +259,8 @@ void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
   const std::string momentum_advection_method_name = _momentum_advection_interpolation;
-  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), momentum_advection_method_name);
+  NS::addFVAdvectedInterpolationMethod(
+      getProblem(), getFactory(), _momentum_advection_interpolation);
 
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
