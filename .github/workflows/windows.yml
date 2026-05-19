@@ -1,0 +1,236 @@
+name: "Windows"
+
+on:
+  # Daily at 2AM
+  schedule:
+    - cron: "0 2 * * *"
+      timezone: "America/Denver"
+  # Allow manual trigger
+  workflow_dispatch:
+  # On PRs with "CI: windows" label
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+    branches: [next]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Prepare
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'ci: windows') ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule'
+    runs-on: ubuntu-slim
+    outputs:
+      # Base SHA for this event
+      base_sha: ${{ steps.checkout.outputs.base_sha }}
+      # Whether or not to build a given packages
+      moose_dev_install: ${{ steps.package_context.outputs.moose_dev_conda_install }}
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        id: checkout
+      - name: Get package versions
+        shell: bash
+        id: package_context
+        run: |
+          echo "::group::Install versioner dependencies"
+          pip install --no-cache --break-system-packages pyyaml jinja2
+          echo "::endgroup::"
+
+          echo "::group::Parse packages"
+          packages=("moose-dev")
+          outputs=()
+          for package in "${packages[@]}"; do
+            conda_install="$(./scripts/versioner.py "$package" --json | jq -r '.conda.install')"
+            package_var="${package//-/_}"
+            outputs+=("${package_var}_conda_install=${conda_install}")
+          done
+          echo "::endgroup::"
+
+          echo "::group::Output"
+          for entry in "${outputs[@]}"; do
+            echo "$entry" >> $GITHUB_OUTPUT
+            echo "$entry"
+          done
+          echo "::endgroup::"
+
+  wsl_conda_moose_dev_moose_test:
+    name: "WSL Conda moose-dev: moose test"
+    if: >-
+      !cancelled() && needs.prepare.result == 'success'
+    needs: [prepare]
+    runs-on: windows-2025-vs2026
+    env:
+      WSLENV: GITHUB_ENV/p:RUNNER_TEMP/p:MOOSE_UTILS_PATH
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
+      - name: Set up WSL
+        uses: idaholab/moose/set-up-wsl@actions
+      - name: Install Conda moose-dev
+        uses: idaholab/moose/setup-conda@actions
+        with:
+          shell: wsl-bash {0}
+          packages: moose-dev=${{ needs.prepare.outputs.moose_dev_install }}
+      - name: Configure --with-kokkos
+        uses: idaholab/moose/configure-moose@actions
+        with:
+          shell: wsl-bash {0}
+          args: --with-kokkos
+      - name: Build moose test
+        uses: idaholab/moose/build@actions
+        with:
+          shell: wsl-bash {0}
+          dir: test
+          jobs: 3
+      - name: Check capabilities
+        uses: idaholab/moose/check-capabilities@actions
+        with:
+          shell: wsl-bash {0}
+          executable: test/moose_test-opt
+          capabilities: |
+            ad_size=64
+            amr
+            compiler=gcc
+            !cuda
+            dlopen
+            dof_id_bytes=8
+            !libtorch
+            kokkos
+            !mfem
+            mumps
+            nanoflann
+            !neml2
+            netgen
+            openmp
+            parmetis
+            platform=linux
+            ptscotch
+            strumpack
+            superlu
+            !tecplot
+            unique_id
+            vtk
+      - name: Test moose test
+        uses: idaholab/moose/tests@actions
+        with:
+          shell: wsl-bash {0}
+          dir: test
+
+  wsl_conda_moose_dev_modules:
+    name: "WSL Conda moose-dev: modules"
+    if: >-
+      !cancelled() && needs.prepare.result == 'success'
+    needs: [prepare]
+    runs-on: windows-2025-vs2026
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - chemical_reactions
+          - contact
+          - electromagnetics
+          - external_petsc_solver
+          - fluid_properties
+          - fsi
+          - functional_expansion_tools
+          - geochemistry
+          - heat_transfer
+          - level_set
+          # - misc
+          - navier_stokes
+          - optimization
+          - peridynamics
+          - phase_field
+          - porous_flow
+          - ray_tracing
+          - rdg
+          - reactor
+          - scalar_transport
+          - solid_mechanics
+          - solid_properties
+          - stochastic_tools
+          - subchannel
+          - thermal_hydraulics
+          - xfem
+    env:
+      WSLENV: GITHUB_ENV/p:RUNNER_TEMP/p:MOOSE_UTILS_PATH
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
+      - name: Set up WSL
+        uses: idaholab/moose/set-up-wsl@actions
+      - name: Install Conda moose-dev
+        uses: idaholab/moose/setup-conda@actions
+        with:
+          shell: wsl-bash {0}
+          packages: moose-dev=${{ needs.prepare.outputs.moose_dev_install }}
+      - name: Configure --with-kokkos
+        uses: idaholab/moose/configure-moose@actions
+        with:
+          shell: wsl-bash {0}
+          args: --with-kokkos
+      - name: Build ${{ matrix.module }}
+        uses: idaholab/moose/build@actions
+        with:
+          shell: wsl-bash {0}
+          dir: modules/${{ matrix.module }}
+          jobs: 3
+      - name: Test ${{ matrix.module }}
+        uses: idaholab/moose/tests@actions
+        with:
+          shell: wsl-bash {0}
+          dir: modules/${{ matrix.module }}
+
+  # To be enabled once tests pass; current fails:
+  #   mooseutils/tests.civet_results
+  #   MooseDocs/test/commands.check
+  #   TestHarness/tests.ignore
+  #   MooseDocs/test/common.get_pages
+  #   MooseDocs/test/extensions.all/appsyntax
+  #   MooseDocs/test/extensions.all/listing
+  #   MooseDocs/test/extensions.all/ifelse
+  # wsl_conda_moose_dev_python:
+  #   name: "WSL Conda moose-dev: python"
+  #   if: >-
+  #     !cancelled() && needs.prepare.result == 'success'
+  #   needs: [prepare]
+  #   runs-on: windows-2025-vs2026
+  #   env:
+  #     WSLENV: GITHUB_ENV/p:RUNNER_TEMP/p:MOOSE_UTILS_PATH
+  #   steps:
+  #     - uses: idaholab/moose/checkout@actions
+  #       name: Checkout
+  #       with:
+  #         pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
+  #     - name: Set up WSL
+  #       uses: idaholab/moose/set-up-wsl@actions
+  #     - name: Install Conda moose-dev
+  #       uses: idaholab/moose/setup-conda@actions
+  #       with:
+  #         shell: wsl-bash {0}
+  #         packages: moose-dev=${{ needs.prepare.outputs.moose_dev_install }}
+  #     - name: Configure --with-kokkos
+  #       uses: idaholab/moose/configure-moose@actions
+  #       with:
+  #         shell: wsl-bash {0}
+  #         args: --with-kokkos
+  #     - name: Build moose test
+  #       uses: idaholab/moose/build@actions
+  #       with:
+  #         shell: wsl-bash {0}
+  #         dir: test
+  #         jobs: 3
+  #     - name: Test python
+  #       uses: idaholab/moose/tests@actions
+  #       with:
+  #         shell: wsl-bash {0}
+  #         dir: python
