@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#32699'
+
+  [dirichlet]
+    type = Exodiff
+    input = 'kokkos_2d_ad_diffusion_test.i'
+    exodiff = 'kokkos_2d_ad_diffusion_test_out.e'
+    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions using automatic differentation.'
+    design = 'KokkosADDiffusion.md KokkosADDirichletBC.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [neumann]
+    type = Exodiff
+    input = 'kokkos_2d_ad_diffusion_neumannbc_test.i'
+    exodiff = 'kokkos_2d_ad_diffusion_neumannbc_test_out.e'
+    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions using automatic differentation.'
+    design = 'KokkosADDiffusion.md KokkosADNeumannBC.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_2d_ad_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false'
+    recover = false
+    requirement = 'The Kokkos system shall provide an exact Jacobian using automatic differentation.'
+    design = 'framework_stp.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

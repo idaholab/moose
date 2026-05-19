@@ -13,6 +13,8 @@
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 
+using CoupleableKey = Moose::Kokkos::Variable::CoupleableKey;
+
 Moose::Kokkos::Variable
 Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
                                            const std::string & tag_name,
@@ -34,10 +36,10 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
-    variable.init({var}, tag, {});
+    variable.init(*var, tag);
   }
   else
-    variable.init({_c_parameters.defaultCoupledValue(var_name, comp)}, {});
+    variable.init({_c_parameters.defaultCoupledValue(var_name, comp)}, CoupleableKey{});
 
   return variable;
 }
@@ -52,7 +54,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
 
   if (isCoupled(var_name))
   {
-    std::vector<const MooseVariableBase *> vars;
+    std::vector<const MooseVariableFieldBase *> vars;
 
     for (unsigned int comp = 0; comp < components; ++comp)
     {
@@ -71,7 +73,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
-    variable.init({vars}, tag, {});
+    variable.init(vars, tag);
   }
   else
   {
@@ -80,7 +82,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
     for (unsigned int comp = 0; comp < components; ++comp)
       default_values[comp] = _c_parameters.defaultCoupledValue(var_name, comp);
 
-    variable.init(default_values, {});
+    variable.init(default_values, CoupleableKey{});
   }
 
   return variable;
@@ -91,7 +93,7 @@ Coupleable::kokkosZeroVariable() const
 {
   Moose::Kokkos::Variable variable;
 
-  variable.init({0}, {});
+  variable.init({0}, CoupleableKey{});
 
   return variable;
 }
@@ -457,6 +459,371 @@ Moose::Kokkos::VariableValue
 Coupleable::kokkosCoupledNodalDots(const std::string & var_name) const
 {
   return kokkosCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagValueByName(const std::string & var_name,
+                                                const std::string & tag_name,
+                                                unsigned int comp) const
+{
+  auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
+
+  return Moose::Kokkos::ADVariableValue(variable);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagValuesByName(const std::string & var_name,
+                                                 const std::string & tag_name) const
+{
+  auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
+
+  return Moose::Kokkos::ADVariableValue(variable);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledVectorTagGradientByName(const std::string & var_name,
+                                                   const std::string & tag_name,
+                                                   unsigned int comp) const
+{
+  auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
+
+  return Moose::Kokkos::ADVariableGradient(variable);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledVectorTagGradientsByName(const std::string & var_name,
+                                                    const std::string & tag_name) const
+{
+  auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
+
+  return Moose::Kokkos::ADVariableGradient(variable);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagNodalValueByName(const std::string & var_name,
+                                                     const std::string & tag_name,
+                                                     unsigned int comp) const
+{
+  auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
+
+  if (!variable.nodal())
+    mooseError("Cannot get nodal values from the coupled variable '",
+               var_name,
+               "', because the associated variable is not nodal.");
+
+  return Moose::Kokkos::ADVariableValue(variable, true);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagNodalValuesByName(const std::string & var_name,
+                                                      const std::string & tag_name) const
+{
+  auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
+
+  if (!variable.nodal())
+    mooseError("Cannot get nodal values from the coupled variable '",
+               var_name,
+               "', because the associated variable is not nodal.");
+
+  return Moose::Kokkos::ADVariableValue(variable, true);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagDofValueByName(const std::string & var_name,
+                                                   const std::string & tag_name,
+                                                   unsigned int comp) const
+{
+  auto variable = kokkosCoupledVectorTagVariable(var_name, tag_name, comp);
+
+  return Moose::Kokkos::ADVariableValue(variable, true);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagDofValuesByName(const std::string & var_name,
+                                                    const std::string & tag_name) const
+{
+  auto variable = kokkosCoupledVectorTagVariables(var_name, tag_name);
+
+  return Moose::Kokkos::ADVariableValue(variable, true);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagValue(const std::string & var_name,
+                                          const std::string & tag_param_name,
+                                          unsigned int comp) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagValueByName(var_name, tag_name, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagValues(const std::string & var_name,
+                                           const std::string & tag_param_name) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagValuesByName(var_name, tag_name);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledVectorTagGradient(const std::string & var_name,
+                                             const std::string & tag_param_name,
+                                             unsigned int comp) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagGradientByName(var_name, tag_name, comp);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledVectorTagGradients(const std::string & var_name,
+                                              const std::string & tag_param_name) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagGradientsByName(var_name, tag_name);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagNodalValue(const std::string & var_name,
+                                               const std::string & tag_param_name,
+                                               unsigned int comp) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagNodalValueByName(var_name, tag_name, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagNodalValues(const std::string & var_name,
+                                                const std::string & tag_param_name) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagNodalValuesByName(var_name, tag_name);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagDofValue(const std::string & var_name,
+                                             const std::string & tag_param_name,
+                                             unsigned int comp) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagDofValueByName(var_name, tag_name, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledVectorTagDofValues(const std::string & var_name,
+                                              const std::string & tag_param_name) const
+{
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return kokkosADCoupledVectorTagDofValuesByName(var_name, tag_name);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValue(const std::string & var_name, unsigned int comp) const
+{
+  return _c_nodal ? kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_TAG, comp)
+                  : kokkosADCoupledVectorTagValueByName(var_name, Moose::SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValues(const std::string & var_name) const
+{
+  return _c_nodal ? kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_TAG)
+                  : kokkosADCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradient(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagGradientByName(var_name, Moose::SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradients(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagGradientsByName(var_name, Moose::SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValue(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValues(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValue(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagDofValueByName(var_name, Moose::SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValues(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagDofValuesByName(var_name, Moose::SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValueOld(const std::string & var_name, unsigned int comp) const
+{
+  return _c_nodal
+             ? kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp)
+             : kokkosADCoupledVectorTagValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValuesOld(const std::string & var_name) const
+{
+  return _c_nodal ? kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::OLD_SOLUTION_TAG)
+                  : kokkosADCoupledVectorTagValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradientOld(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagGradientByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradientsOld(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagGradientsByName(var_name, Moose::OLD_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValueOld(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValuesOld(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValueOld(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagDofValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValuesOld(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagDofValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValueOlder(const std::string & var_name, unsigned int comp) const
+{
+  return _c_nodal
+             ? kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp)
+             : kokkosADCoupledVectorTagValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledValuesOlder(const std::string & var_name) const
+{
+  return _c_nodal ? kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::OLDER_SOLUTION_TAG)
+                  : kokkosADCoupledVectorTagValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradientOlder(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagGradientByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableGradient
+Coupleable::kokkosADCoupledGradientsOlder(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagGradientsByName(var_name, Moose::OLDER_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValueOlder(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalValuesOlder(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValueOlder(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagDofValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDofValuesOlder(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagDofValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDot(const std::string & var_name, unsigned int comp) const
+{
+  return _c_nodal
+             ? kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp)
+             : kokkosADCoupledVectorTagValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledDots(const std::string & var_name) const
+{
+  return _c_nodal ? kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_DOT_TAG)
+                  : kokkosADCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalDot(const std::string & var_name, unsigned int comp) const
+{
+  return kokkosADCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
+}
+
+Moose::Kokkos::ADVariableValue
+Coupleable::kokkosADCoupledNodalDots(const std::string & var_name) const
+{
+  return kokkosADCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
 }
 
 Moose::Kokkos::Scalar<const Real>

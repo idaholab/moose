@@ -31,7 +31,8 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 {
   TIME_SECTION("computeKokkosAuxKernel", 3);
 
-  if (!_kokkos_elemental_aux_storage[type].size() && !_kokkos_nodal_aux_storage[type].size())
+  if (!_kokkos_elemental_aux_storage[type].hasActiveObjects() &&
+      !_kokkos_nodal_aux_storage[type].hasActiveObjects())
     return;
 
   auto & systems = _fe_problem.getKokkosSystems();
@@ -104,10 +105,10 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
     // Compute auxiliary kernels
 
-    for (auto nodal : _kokkos_nodal_aux_storage[type].getActiveObjects())
+    for (auto & nodal : _kokkos_nodal_aux_storage[type].getActiveObjects())
       nodal->compute();
 
-    for (auto elemental : _kokkos_elemental_aux_storage[type].getActiveObjects())
+    for (auto & elemental : _kokkos_elemental_aux_storage[type].getActiveObjects())
       elemental->compute();
   }
 

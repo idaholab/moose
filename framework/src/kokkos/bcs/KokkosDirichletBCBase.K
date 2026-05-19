@@ -12,30 +12,36 @@
 namespace Moose::Kokkos
 {
 
+template <bool is_ad>
 InputParameters
-DirichletBCBase::validParams()
+DirichletBCBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = NodalBC::validParams();
+  InputParameters params = Base::validParams();
   params.addParam<bool>(
       "preset", true, "Whether or not to preset the BC (apply the value before the solve begins).");
   return params;
 }
 
-DirichletBCBase::DirichletBCBase(const InputParameters & parameters)
-  : NodalBC(parameters), _preset(getParam<bool>("preset"))
+template <bool is_ad>
+DirichletBCBaseTempl<is_ad>::DirichletBCBaseTempl(const InputParameters & parameters)
+  : Base(parameters), _preset(this->template getParam<bool>("preset"))
 {
 }
 
+template <bool is_ad>
 void
-DirichletBCBase::presetSolution(TagID tag)
+DirichletBCBaseTempl<is_ad>::presetSolution(TagID tag)
 {
   _solution_tag = tag;
 
   Policy policy(0, numKokkosBoundaryNodes());
 
-  auto dispatcher = DispatcherRegistry::build<PresetLoop>(this, type());
+  auto dispatcher = DispatcherRegistry::build<PresetLoop>(this, this->type());
 
   dispatcher->parallelFor(policy);
 }
+
+template class DirichletBCBaseTempl<false>;
+template class DirichletBCBaseTempl<true>;
 
 } // namespace Moose::Kokkos

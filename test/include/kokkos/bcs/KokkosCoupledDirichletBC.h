@@ -49,8 +49,10 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosCoupledDirichletBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _c * _u(datum, qp) + _u(datum, qp) * _u(datum, qp) + _v(datum, qp) * _v(datum, qp) -
-         _value;
+  Real u = _u(datum, qp);
+  Real v = _v(datum, qp);
+
+  return _c * u + u * u + v * v - _value;
 }
 
 template <typename Derived>

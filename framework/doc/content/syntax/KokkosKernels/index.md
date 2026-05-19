@@ -8,12 +8,12 @@ Before reading this documentation, consider reading the following materials firs
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE.
 
 !alert note
-Kokkos-MOOSE kernels do not support coupling with scalar variables and automatic differention yet.
+Kokkos-MOOSE kernels do not support coupling with scalar variables yet.
 
 The Kokkos-MOOSE kernels are designed to resemble the original MOOSE kernels as much as possible for easier porting and adaptation.
 However, some differences still exist due to the fundamentally different programming paradigm between CPU and GPU.
 You can create your own kernel by subclassing `Moose::Kokkos::Kernel` as is done in the original MOOSE by inheriting `Kernel`.
-However, your kernel should now be registered with either `registerKokkosKernel()` or `registerKokkosResidualObject()` instead of `registerMooseObject()`.
+However, your kernel should now be registered with `registerKokkosResidualObject()` instead of `registerMooseObject()`.
 Also, the signatures of hook methods are different.
 In the original MOOSE, the following virtual functions should or optionally have been overriden:
 
@@ -47,8 +47,7 @@ KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                               AssemblyDatum & datum) const;
 ```
 
-The template argument `Derived` corresponds to your object type, and you can safely cast `this` pointer to the `Derived` type statically in your base class.
-It can be useful for implementing polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion, as you can directly call the derived class methods using the cast pointer.
+The template argument `Derived` can be used for implementing static polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion by statically casting `this` pointer to the derived type and directly calling the derived class methods using the cast pointer.
 
 Analogously to the original MOOSE, `computeQpResidual()` must be provided in the derived class, and the definition of `computeQpJacobian()` and `computeQpOffDiagJacobian()` are optional.
 The optional methods have default definitions in the base class, and redefining them in the derived class hides the base class definitions.
@@ -99,13 +98,13 @@ KokkosDiffusion::computeQpJacobian(const unsigned int i,
 }
 ```
 
-See the following source codes of `KokkosCoupledForce` for another example of a kernel:
+See the following source codes of `KokkosBodyForce` for another example of a kernel:
 
-!listing framework/include/kokkos/kernels/KokkosCoupledForce.h id=kokkos-force-header
-         caption=The `KokkosCoupledForce` header file.
+!listing framework/include/kokkos/kernels/KokkosBodyForce.h id=kokkos-force-header
+         caption=The `KokkosBodyForce` header file.
 
-!listing framework/src/kokkos/kernels/KokkosCoupledForce.K id=kokkos-force-source language=cpp
-         caption=The `KokkosCoupledForce` source file.
+!listing framework/src/kokkos/kernels/KokkosBodyForce.K id=kokkos-force-source language=cpp
+         caption=The `KokkosBodyForce` source file.
 
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
@@ -197,6 +196,21 @@ See the following source codes of `KokkosCoupledTimeDerivative` for an example o
 
 !listing framework/src/kokkos/kernels/KokkosCoupledTimeDerivative.K id=kokkos-time-derivative-source language=cpp
          caption=The `KokkosCoupledTimeDerivative` source file.
+
+## Automatic Differentiation id=kokkos_ad_kernel
+
+Kokkos-MOOSE kernels also support [automatic differentiation (AD)](automatic_differentiation/index.md).
+AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with `registerKokkosADResidualObject()`.
+AD kernels require `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
+
+```cpp
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int i,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
+```
+
+`computeQpJacobian()` and `computeQpOffDiagJacobian()` are unused, as AD automatically assembles the Jacobian.
 
 !syntax list /Kernels objects=True actions=False subsystems=False
 

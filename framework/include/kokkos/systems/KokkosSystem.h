@@ -287,10 +287,20 @@ public:
    * @param tag The vector tag
    * @returns The DOF value
    */
-  KOKKOS_FUNCTION Real & getVectorDofValue(dof_id_type dof, TagID tag) const
+  KOKKOS_FUNCTION Real & getVectorDofValue(const dof_id_type dof, const TagID tag) const
   {
     return _vectors[tag][dof];
   }
+  /**
+   * Get the DOF value of a tagged vector for automatic differentiation (AD)
+   * @param dof The local DOF index
+   * @param tag The vector tag
+   * @param seed The derivative seed
+   * @returns The DOF AD value with optional seed derivative
+   */
+  KOKKOS_FUNCTION ADReal getVectorDofADValue(const dof_id_type dof,
+                                             const TagID tag,
+                                             const Real seed) const;
   /**
    * Get the quadrature value of a variable from a tagged vector
    * @param info The element information object
@@ -299,11 +309,29 @@ public:
    * @param tag The vector tag
    * @returns The quadrature value
    */
-  KOKKOS_FUNCTION Real &
-  getVectorQpValue(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
+  KOKKOS_FUNCTION Real & getVectorQpValue(const ElementInfo info,
+                                          const dof_id_type qp,
+                                          const unsigned int var,
+                                          const TagID tag) const
   {
     return _qp_solutions[tag](info.subdomain, var)[qp];
   }
+  /**
+   * Get the quadrature value of a variable from a tagged vector for automatic differentiation (AD)
+   * @param info The element information object
+   * @param offset The offset into the global quadrature point index
+   * @param qp The local quadrature point index
+   * @param var The variable number
+   * @param tag The vector tag
+   * @param seed The derivative seed
+   * @returns The quadrature AD value
+   */
+  KOKKOS_FUNCTION ADReal getVectorQpADValue(const ElementInfo info,
+                                            const dof_id_type offset,
+                                            const dof_id_type qp,
+                                            const unsigned int var,
+                                            const TagID tag,
+                                            const Real seed) const;
   /**
    * Get the quadrature gradient of a variable from a tagged vector
    * @param info The element information object
@@ -312,11 +340,32 @@ public:
    * @param tag The vector tag
    * @returns The quadrature gradient
    */
-  KOKKOS_FUNCTION Real3 &
-  getVectorQpGrad(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
+  KOKKOS_FUNCTION Real3 & getVectorQpGrad(const ElementInfo info,
+                                          const dof_id_type qp,
+                                          const unsigned int var,
+                                          const TagID tag) const
   {
     return _qp_solutions_grad[tag](info.subdomain, var)[qp];
   }
+  /**
+   * Get the quadrature gradient of a variable from a tagged vector for automatic differentiation
+   * (AD)
+   * @param info The element information object
+   * @param jacobian The inverse Jacobian matrix
+   * @param offset The offset into the global quadrature point index
+   * @param qp The local quadrature point index
+   * @param var The variable number
+   * @param tag The vector tag
+   * @param seed The derivative seed
+   * @returns The quadrature AD gradient
+   */
+  KOKKOS_FUNCTION ADReal3 getVectorQpADGrad(const ElementInfo info,
+                                            const Real33 jacobian,
+                                            const dof_id_type offset,
+                                            const dof_id_type qp,
+                                            const unsigned int var,
+                                            const TagID tag,
+                                            const Real seed) const;
   /**
    * Get the face quadrature value of a variable from a tagged vector
    * @param info The element information object
@@ -331,6 +380,23 @@ public:
                                             const unsigned int qp,
                                             const unsigned int var,
                                             const TagID tag) const;
+  /**
+   * Get the face quadrature value of a variable from a tagged vector for automatic differentiation
+   * (AD)
+   * @param info The element information object
+   * @param side The side index
+   * @param qp The local quadrature point index
+   * @param var The vriable number
+   * @param tag The vector tag
+   * @param seed The derivative seed
+   * @returns The face quadrature AD value
+   */
+  KOKKOS_FUNCTION ADReal getVectorQpADValueFace(const ElementInfo info,
+                                                const unsigned int side,
+                                                const unsigned int qp,
+                                                const unsigned int var,
+                                                const TagID tag,
+                                                const Real seed) const;
   /**
    * Get the face quadrature gradient of a variable from a tagged vector
    * @param info The element information object
@@ -347,6 +413,25 @@ public:
                                             const unsigned int qp,
                                             const unsigned int var,
                                             const TagID tag) const;
+  /**
+   * Get the face quadrature gradient of a variable from a tagged vector for automatic
+   * differentiation (AD)
+   * @param info The element information object
+   * @param side The side index
+   * @param jacobian The inverse Jacobian matrix
+   * @param qp The local quadrature point index
+   * @param var The variable number
+   * @param tag The vector tag
+   * @param seed The derivative seed
+   * @returns The face quadrature AD gradient
+   */
+  KOKKOS_FUNCTION ADReal3 getVectorQpADGradFace(const ElementInfo info,
+                                                const unsigned int side,
+                                                const Real33 jacobian,
+                                                const unsigned int qp,
+                                                const unsigned int var,
+                                                const TagID tag,
+                                                const Real seed) const;
   /**
    * Get an entry from a tagged matrix
    * @param row The local row index
@@ -512,9 +597,75 @@ private:
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
+KOKKOS_FUNCTION inline ADReal
+System::getVectorDofADValue(const dof_id_type dof, TagID tag, const Real seed) const
+{
+  ADReal value = _vectors[tag][dof];
+
+  if (seed != 0)
+    value.derivatives().insert(_local_to_global_dof_index[dof]) = seed;
+
+  return value;
+}
+
+KOKKOS_FUNCTION inline ADReal
+System::getVectorQpADValue(const ElementInfo info,
+                           const dof_id_type offset,
+                           const dof_id_type qp,
+                           const unsigned int var,
+                           const TagID tag,
+                           const Real seed) const
+{
+  ADReal value = 0;
+
+  if (seed == 0)
+    value = getVectorQpValue(info, offset + qp, var, tag);
+  else
+  {
+    auto fe = _var_fe_types[var];
+    auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+    auto & phi = kokkosAssembly().getPhi(info.subdomain, info.type, fe);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      value += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * phi(i, qp);
+  }
+
+  return value;
+}
+
+KOKKOS_FUNCTION inline ADReal3
+System::getVectorQpADGrad(const ElementInfo info,
+                          const Real33 jacobian,
+                          const dof_id_type offset,
+                          const dof_id_type qp,
+                          const unsigned int var,
+                          const TagID tag,
+                          const Real seed) const
+{
+  ADReal3 grad;
+
+  if (seed == 0)
+    grad = getVectorQpGrad(info, offset + qp, var, tag);
+  else
+  {
+    auto fe = _var_fe_types[var];
+    auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+    auto & grad_phi = kokkosAssembly().getGradPhi(info.subdomain, info.type, fe);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) *
+              (jacobian * grad_phi(i, qp));
+  }
+
+  return grad;
+}
+
 KOKKOS_FUNCTION inline Real
-System::getVectorQpValueFace(
-    ElementInfo info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const
+System::getVectorQpValueFace(const ElementInfo info,
+                             const unsigned int side,
+                             const unsigned int qp,
+                             const unsigned int var,
+                             const TagID tag) const
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
@@ -527,13 +678,34 @@ System::getVectorQpValueFace(
 
   return value;
 }
+
+KOKKOS_FUNCTION inline ADReal
+System::getVectorQpADValueFace(const ElementInfo info,
+                               const unsigned int side,
+                               const unsigned int qp,
+                               const unsigned int var,
+                               const TagID tag,
+                               const Real seed) const
+{
+  auto fe = _var_fe_types[var];
+  auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
+
+  ADReal value = 0;
+
+  for (unsigned int i = 0; i < n_dofs; ++i)
+    value += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) * phi(i, qp);
+
+  return value;
+}
+
 KOKKOS_FUNCTION inline Real3
-System::getVectorQpGradFace(ElementInfo info,
-                            unsigned int side,
-                            Real33 jacobian,
-                            unsigned int qp,
-                            unsigned int var,
-                            TagID tag) const
+System::getVectorQpGradFace(const ElementInfo info,
+                            const unsigned int side,
+                            const Real33 jacobian,
+                            const unsigned int qp,
+                            const unsigned int var,
+                            const TagID tag) const
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
@@ -543,6 +715,28 @@ System::getVectorQpGradFace(ElementInfo info,
 
   for (unsigned int i = 0; i < n_dofs; ++i)
     grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
+            (jacobian * grad_phi(i, qp));
+
+  return grad;
+}
+
+KOKKOS_FUNCTION inline ADReal3
+System::getVectorQpADGradFace(const ElementInfo info,
+                              const unsigned int side,
+                              const Real33 jacobian,
+                              const unsigned int qp,
+                              const unsigned int var,
+                              const TagID tag,
+                              const Real seed) const
+{
+  auto fe = _var_fe_types[var];
+  auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
+
+  ADReal3 grad = ADReal(0);
+
+  for (unsigned int i = 0; i < n_dofs; ++i)
+    grad += getVectorDofADValue(getElemLocalDofIndex(info.id, i, var), tag, seed) *
             (jacobian * grad_phi(i, qp));
 
   return grad;

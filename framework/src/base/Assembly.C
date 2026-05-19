@@ -3788,6 +3788,16 @@ Assembly::elementVolume(const Elem * elem) const
 }
 
 void
+Assembly::saveLocalADArray(std::vector<ADReal> & re,
+                           unsigned int i,
+                           unsigned int ntest,
+                           const ADRealEigenVector & v) const
+{
+  for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
+    re[i] += v(j);
+}
+
+void
 Assembly::addCachedJacobian(GlobalDataKey)
 {
 #ifndef NDEBUG

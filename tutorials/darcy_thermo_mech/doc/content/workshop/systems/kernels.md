@@ -65,7 +65,7 @@ where $\psi_i$ are the test functions and $u_h$ is the finite element solution.
 
 ## ADDiffusion.h
 
-!listing ADDiffusion.h
+!listing include/kernels/ADDiffusion.h
 
 !---
 

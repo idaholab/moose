@@ -37,6 +37,10 @@ public:
    */
   ~Matrix() { destroy(); }
   /**
+   * Get PETSc matrix handle
+   */
+  Mat mat() { return _matrix; }
+  /**
    * Free all data and reset
    */
   void destroy();
