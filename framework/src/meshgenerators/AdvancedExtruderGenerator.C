@@ -515,6 +515,7 @@ AdvancedExtruderGenerator::generate()
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
   unique_id_type orig_unique_ids = input->parallel_max_unique_id();
+  unsigned int num_extra_nodes = 0;
 #endif
 
   unsigned int order = 1;
@@ -826,9 +827,8 @@ AdvancedExtruderGenerator::generate()
         // a useful map to preserve.
         const unique_id_type uid = (current_node_layer == 0)
                                        ? node->unique_id()
-                                       : orig_unique_ids +
-                                             (current_node_layer - 1) * (orig_nodes + orig_elem) +
-                                             node->id();
+                                       : orig_unique_ids + (current_node_layer - 1) * +orig_elem +
+                                             current_node_layer * orig_nodes + node->id();
 
         new_node->set_unique_id(uid);
 #endif
@@ -1415,7 +1415,17 @@ AdvancedExtruderGenerator::generate()
             std::unique_ptr<libMesh::Node> mid_elem_node;
             new_elem = std::make_unique<libMesh::C0Polyhedron>(sides, mid_elem_node);
             if (mid_elem_node)
+            {
               mesh->add_node(std::move(mid_elem_node));
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+              // Number it at the end for convenience
+              num_extra_nodes++;
+              unsigned int total_new_node_layers = total_num_layers * order;
+              unsigned int last_uid = orig_unique_ids + (total_new_node_layers - 1) * orig_elem +
+                                      total_new_node_layers * orig_nodes + num_extra_nodes;
+              new_elem->set_unique_id(last_uid);
+#endif
+            }
 
             break;
           }
@@ -1432,9 +1442,8 @@ AdvancedExtruderGenerator::generate()
         // a useful map to preserve.
         const unique_id_type uid = (current_layer == 0)
                                        ? elem->unique_id()
-                                       : orig_unique_ids +
-                                             (current_layer - 1) * (orig_nodes + orig_elem) +
-                                             orig_nodes + elem->id();
+                                       : orig_unique_ids + (current_layer - 1) * orig_elem +
+                                             current_layer * orig_nodes + orig_nodes + elem->id();
 
         new_elem->set_unique_id(uid);
 #endif
@@ -1585,7 +1594,7 @@ AdvancedExtruderGenerator::generate()
   // Note: Number of element layers is one less than number of node layers
   unsigned int total_new_node_layers = total_num_layers * order;
   unsigned int new_unique_ids = orig_unique_ids + (total_new_node_layers - 1) * orig_elem +
-                                total_new_node_layers * orig_nodes;
+                                total_new_node_layers * orig_nodes + num_extra_nodes;
   mesh->set_next_unique_id(new_unique_ids);
 #endif
 
