@@ -13,7 +13,11 @@ runs:
     - name: Setup utilities
       shell: ${{ inputs.shell }}
       run: |
+        echo "::group::Setup utilities"
+
         UTILS_PATH="$RUNNER_TEMP/utils.sh"
+        echo "Writing utils to $UTILS_PATH"
+
         cat > "$UTILS_PATH" << 'EOF'
         function prefix_pwd()
         {
@@ -37,4 +41,7 @@ runs:
           return $?
         }
         EOF
+
         echo "BASH_ENV=${UTILS_PATH}" >> "$GITHUB_ENV"
+
+        echo "::endgroup::"
