@@ -38,7 +38,8 @@ runs:
 
         function print_command()
         {
-          echo -e "\033[33m$(prefix_pwd)\033[0m: \033[34m$*\033[0m"
+          local command_escaped=${*//\\b/\\\\b}
+          echo -e "\033[33m$(prefix_pwd)\033[0m: \033[34m${command_escaped}\033[0m"
         }
 
         function print_and_run()
