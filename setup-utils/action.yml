@@ -15,7 +15,7 @@ runs:
       run: |
         echo "::group::Setup utilities"
 
-        UTILS_PATH="$RUNNER_TEMP/utils.sh"
+        UTILS_PATH="${RUNNER_TEMP:-/tmp}/moose_action_utils.sh"
         echo "Writing utils to $UTILS_PATH"
 
         cat > "$UTILS_PATH" << 'EOF'
