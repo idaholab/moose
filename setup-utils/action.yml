@@ -24,6 +24,7 @@ runs:
         echo "Writing utils to $UTILS_PATH"
 
         cat > "$UTILS_PATH" << 'EOF'
+        #!/bin/bash
         function prefix_pwd()
         {
           local p="${PWD}/"
@@ -32,7 +33,6 @@ runs:
             ["/d/a/"]="WORK"
             ["/__w/"]="WORK_DOCKER"
             ["/mnt/d/a/"]="WORK_WSL"
-            [""]
           )
 
           for prefix in "${!replacements[@]}"; do
