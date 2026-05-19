@@ -227,9 +227,15 @@ Exodus::outputSetup()
       // And similarly we have both new nodes and new elements for the node to element map
       const bool map_rebuilt = moose_mesh.possiblyRebuildNodeToElemMap();
       // If the map was rebuilt then we need to reinitialize geometric search data to re-add things
-      // like "quadrature" nodes
+      // like "quadrature" nodes to that map. And GeometricSearch::reinit calls
+      // MooseMesh::clearQuadratureNodes which clears its _quadrature_nodes but does not clear them
+      // from its _bnd_nodes which is what we iterate over when doing nearest node location in the
+      // geometric search. So we also need to rebuild _bnd_nodes to erase the old quadrature nodes
       if (map_rebuilt)
+      {
+        moose_mesh.buildNodeList();
         problem.reinitGeomSearch();
+      }
     }
   };
   serialize(*_problem_ptr);
