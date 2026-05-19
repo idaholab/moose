@@ -35,6 +35,11 @@ WCNSLinearFVFlowPhysics::validParams()
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
   params.renameParam("orthogonality_correction", "use_nonorthogonal_correction", "");
+  params.addParam<MooseEnum>(
+      "pressure_diffusion_interpolation",
+      NS::fvFaceInterpolationMethods(),
+      "Optional FVInterpolationMethod shortcut for the pressure correction diffusion tensor.");
+  params.addParamNamesToGroup("pressure_diffusion_interpolation", "Numerical scheme");
   params.set<unsigned short>("ghost_layers") = 1;
 
   // This will be adapted based on the dimension
@@ -208,6 +213,13 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
     params.set<LinearVariableName>("variable") = _pressure_name;
     params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
+
+    if (isParamValid("pressure_diffusion_interpolation"))
+    {
+      const std::string method_name = getParam<MooseEnum>("pressure_diffusion_interpolation");
+      NS::addFVFaceInterpolationMethod(getProblem(), getFactory(), method_name);
+      params.set<InterpolationMethodName>("coeff_interp_method") = method_name;
+    }
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
   }

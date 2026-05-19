@@ -62,6 +62,25 @@ void addFVAdvectedInterpolationMethod(FEProblemBase & problem,
                                       const std::string & method_name);
 
 /**
+ * @return the face interpolation methods supported by FVInterpolationMethod objects.
+ */
+MooseEnum fvFaceInterpolationMethods();
+
+/**
+ * @return the FVInterpolationMethod object type for a face interpolation method name.
+ * Returns an empty string when no FVInterpolationMethod equivalent is supported.
+ */
+std::string fvFaceInterpolationMethodType(const std::string & method_name);
+
+/**
+ * Add the FVInterpolationMethod object for a face interpolation method name, if absent.
+ * The method name must be supported by fvFaceInterpolationMethodType().
+ */
+void addFVFaceInterpolationMethod(FEProblemBase & problem,
+                                  Factory & factory,
+                                  const std::string & method_name);
+
+/**
  * Checks to see whether the porosity value jumps from one side to the other of the provided face
  * @param porosity the porosity
  * @param fi the face to inspect for porosity jumps

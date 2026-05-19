@@ -95,6 +95,38 @@ addFVAdvectedInterpolationMethod(FEProblemBase & problem,
   problem.addFVInterpolationMethod(method_type, method_name, params);
 }
 
+MooseEnum
+fvFaceInterpolationMethods()
+{
+  return MooseEnum("average harmonic");
+}
+
+std::string
+fvFaceInterpolationMethodType(const std::string & method_name)
+{
+  if (method_name == "average")
+    return "FVGeometricAverage";
+  if (method_name == "harmonic")
+    return "FVHarmonicAverage";
+
+  return "";
+}
+
+void
+addFVFaceInterpolationMethod(FEProblemBase & problem,
+                             Factory & factory,
+                             const std::string & method_name)
+{
+  if (problem.hasFVInterpolationMethod(method_name))
+    return;
+
+  const auto method_type = fvFaceInterpolationMethodType(method_name);
+  mooseAssert(!method_type.empty(), "Unsupported face interpolation method");
+
+  InputParameters params = factory.getValidParams(method_type);
+  problem.addFVInterpolationMethod(method_type, method_name, params);
+}
+
 template <class T>
 std::tuple<bool, T, T>
 isPorosityJumpFace(const Moose::FunctorBase<T> & porosity,
