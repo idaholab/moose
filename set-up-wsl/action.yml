@@ -9,10 +9,16 @@ runs:
       with:
         distribution: Ubuntu-24.04
         update: 'true'
+    - uses: idaholab/moose/setup-utils@actions
+      name: Setup utils
+      with:
+        shell: wsl-bash {0}
     - name: Clean WSL packages
       shell: wsl-bash {0}
       run: |
         echo "::group::Clean WSL packages"
-        apt-get autoremove -y
-        apt-get clean
+        source $MOOSE_UTILS_PATH
+        print_and_run apt-get autoremove -y
+        print_and_run apt-get clean
+        print_and_run rm -rf /var/lib/apt/lists/*
         echo "::endgroup::"
