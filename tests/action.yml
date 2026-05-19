@@ -57,6 +57,7 @@ runs:
         fi
 
         export MOOSE_TERM_FORMAT=tpnsc
+        export DISPLAY=
 
         echo "::endgroup::"
 
