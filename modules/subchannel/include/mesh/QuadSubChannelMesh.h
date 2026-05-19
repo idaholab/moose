@@ -30,7 +30,7 @@ public:
   void buildMesh() override;
 
   /**
-   * Compute bundle-average inlet hydraulic quantities from generated mesh geometry
+   * Compute undeformed bundle-average inlet hydraulic quantities from generated mesh geometry
    */
   void computeAssemblyHydraulicParameters();
 

@@ -137,12 +137,12 @@ public:
   virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const = 0;
 
   /**
-   * Return the pitch between 2 subchannels
+   * Return the undeformed pitch between 2 subchannels
    */
   virtual const Real & getPitch() const { return _pitch; }
 
   /**
-   * Return Pin diameter
+   * Return undeformed Pin diameter
    */
   virtual const Real & getPinDiameter() const { return _pin_diameter; }
 
@@ -162,12 +162,13 @@ public:
   Real getAssemblyHydraulicDiameter() const { return _assembly_hydraulic_diameter; }
 
   /**
-   * Return flow area for a subchannel at an axial location
+   * Return undeformed flow area for a subchannel at an axial location, including any blockage
+   * reduction
    */
   virtual Real getSubchannelFlowArea(unsigned int i_chan, Real z) const = 0;
 
   /**
-   * Return wetted perimeter for a subchannel
+   * Return undeformed wetted perimeter for a subchannel
    */
   virtual Real getSubchannelWettedPerimeter(unsigned int i_chan) const = 0;
 

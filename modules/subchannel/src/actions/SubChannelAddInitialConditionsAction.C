@@ -37,24 +37,26 @@ SubChannelAddInitialConditionsAction::act()
 {
   const auto * const quad_mesh = dynamic_cast<const QuadSubChannelMesh *>(_mesh.get());
   const auto * const tri_mesh = dynamic_cast<const TriSubChannelMesh *>(_mesh.get());
-  const auto * const subchannel_mesh = quad_mesh ? static_cast<const SubChannelMesh *>(quad_mesh)
-                                                 : static_cast<const SubChannelMesh *>(tri_mesh);
+  const bool is_quad = quad_mesh != nullptr;
+  const bool is_tri = tri_mesh != nullptr;
+  const SubChannelMesh * subchannel_mesh = nullptr;
 
-  if (!subchannel_mesh)
-    mooseError("The SubChannel action requires a SubChannelMesh when adding default ICs.");
-
-  if (quad_mesh)
+  if (is_quad)
   {
+    subchannel_mesh = quad_mesh;
     addInitialCondition("SCMQuadFlowAreaIC", "subchannel_S_IC", SubChannelApp::SURFACE_AREA);
     addInitialCondition(
         "SCMQuadWettedPerimIC", "subchannel_w_perim_IC", SubChannelApp::WETTED_PERIMETER);
   }
-  else
+  else if (is_tri)
   {
+    subchannel_mesh = tri_mesh;
     addInitialCondition("SCMTriFlowAreaIC", "subchannel_S_IC", SubChannelApp::SURFACE_AREA);
     addInitialCondition(
         "SCMTriWettedPerimIC", "subchannel_w_perim_IC", SubChannelApp::WETTED_PERIMETER);
   }
+  else
+    return;
 
   if (subchannel_mesh->pinMeshExist() && !hasInitialCondition(SubChannelApp::PIN_DIAMETER))
   {
