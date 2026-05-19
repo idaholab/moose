@@ -311,8 +311,9 @@ ParsedCurveGenerator::tSectionSpaceDefiner(const Real t_start,
   while (t_space_id + 1 < t_sect_space.size() && binary_search_counter <= max_binary_search)
   {
     binary_search_counter++;
-    if (euclideanDistance(pt_sect_space[t_space_id], pt_sect_space[t_space_id + 1]) >
-        target_fine_interval)
+    const auto distance_space_max =
+        euclideanDistance(pt_sect_space[t_space_id], pt_sect_space[t_space_id + 1]);
+    if (distance_space_max > target_fine_interval)
     {
       const Real new_t_value = (t_sect_space[t_space_id] + t_sect_space[t_space_id + 1]) / 2.0;
       t_sect_space.insert(t_sect_space.begin() + t_space_id + 1, new_t_value);
@@ -320,9 +321,17 @@ ParsedCurveGenerator::tSectionSpaceDefiner(const Real t_start,
     }
     else
     {
-      dis_sect_space.push_back(
-          dis_sect_space.back() +
-          euclideanDistance(pt_sect_space[t_space_id], pt_sect_space[t_space_id + 1]));
+      if (distance_space_max > 0)
+        dis_sect_space.push_back(dis_sect_space.back() + distance_space_max);
+      else if (is_closed_loop)
+        dis_sect_space.push_back(
+            dis_sect_space.back() +
+            euclideanDistance(pt_sect_space.front(), pointCalculator((t_start + t_end) / 2.0)));
+      else
+        mooseError("Error in distance calculation when spacing nodes in section from t=",
+                   t_start,
+                   " to t=",
+                   t_end);
       t_space_id++;
     }
   }
@@ -332,6 +341,8 @@ ParsedCurveGenerator::tSectionSpaceDefiner(const Real t_start,
         "Maximum oversampling points number has been exceeded. Please consider adding more t "
         "values into 'section_bounding_t_values' or increase 'max_oversample_number_factor'.");
   const Real total_dis_seg = dis_sect_space.back();
+  mooseAssert(total_dis_seg > 0, "Expected non zero distance");
+
   // Normalization to make the normalized length of the curve equals to number of segments
   for (auto & dist : dis_sect_space)
     dist = dist / total_dis_seg * (Real)num_segments;
