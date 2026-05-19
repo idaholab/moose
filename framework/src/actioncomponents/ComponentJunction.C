@@ -8,20 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "JunctionComponent.h"
+#include "ComponentJunction.h"
 #include "MooseUtils.h"
 
-registerMooseAction("MooseApp", JunctionComponent, "add_mesh_generator");
-// JunctionComponent is an example of ComponentPhysicsInterface
-registerMooseAction("MooseApp", JunctionComponent, "init_component_physics");
-// JunctionComponent is an example of ComponentMaterialPropertyInterface
-registerMooseAction("MooseApp", JunctionComponent, "add_material");
-// JunctionComponent is an example of ComponentInitialConditionInterface
-registerMooseAction("MooseApp", JunctionComponent, "check_integrity");
-registerActionComponent("MooseApp", JunctionComponent);
+registerMooseAction("MooseApp", ComponentJunction, "add_mesh_generator");
+// ComponentJunction is an example of ComponentPhysicsInterface
+registerMooseAction("MooseApp", ComponentJunction, "init_component_physics");
+// ComponentJunction is an example of ComponentMaterialPropertyInterface
+registerMooseAction("MooseApp", ComponentJunction, "add_material");
+// ComponentJunction is an example of ComponentInitialConditionInterface
+registerMooseAction("MooseApp", ComponentJunction, "check_integrity");
+registerActionComponent("MooseApp", ComponentJunction);
 
 InputParameters
-JunctionComponent::validParams()
+ComponentJunction::validParams()
 {
   InputParameters params = ActionComponent::validParams();
   params += ComponentPhysicsInterface::validParams();
@@ -80,7 +80,7 @@ JunctionComponent::validParams()
   return params;
 }
 
-JunctionComponent::JunctionComponent(const InputParameters & params)
+ComponentJunction::ComponentJunction(const InputParameters & params)
   : ActionComponent(params),
     ComponentPhysicsInterface(params),
     ComponentMaterialPropertyInterface(params),
@@ -112,7 +112,7 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
 }
 
 void
-JunctionComponent::addMeshGenerators()
+ComponentJunction::addMeshGenerators()
 {
   auto & first_component =
       _awh.getAction<ActionComponent>(getParam<ComponentName>("first_component"));
@@ -351,7 +351,7 @@ JunctionComponent::addMeshGenerators()
 }
 
 void
-JunctionComponent::checkIntegrity()
+ComponentJunction::checkIntegrity()
 {
   ComponentInitialConditionInterface::checkIntegrity();
   ComponentBoundaryConditionInterface::checkIntegrity();

@@ -21,7 +21,7 @@
  * ActionComponent to connect two components. The connection options are based on the mesh
  * generators available in the framework.
  */
-class JunctionComponent : public virtual ActionComponent,
+class ComponentJunction : public virtual ActionComponent,
                           public ComponentPhysicsInterface,
                           public ComponentMaterialPropertyInterface,
                           public ComponentInitialConditionInterface,
@@ -29,7 +29,7 @@ class JunctionComponent : public virtual ActionComponent,
 {
 public:
   static InputParameters validParams();
-  JunctionComponent(const InputParameters & params);
+  ComponentJunction(const InputParameters & params);
 
 protected:
   virtual void addMeshGenerators() override;

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31158'
-  design = "JunctionComponent.md"
+  design = "ComponentJunction.md"
   [1D]
     requirement = "The system shall be able to connect two 1D component's meshes"
     [fill]

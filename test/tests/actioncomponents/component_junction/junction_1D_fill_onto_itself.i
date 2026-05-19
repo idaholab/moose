@@ -25,7 +25,7 @@
     direction = '0 1 0'
   []
   [junction_bottom_right]
-    type = JunctionComponent
+    type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
     first_boundary = 'cyl1_right'
@@ -46,9 +46,7 @@
     direction = '-1 0 0'
   []
   [junction_top_right]
-    type = JunctionComponent
-    # for now we have to treat those like mesh generators
-    # and write down the name of the last component with the others as inputs
+    type = ComponentJunction
     first_component = cyl2
     second_component = cyl3
     first_boundary = 'cyl2_right'
@@ -69,9 +67,7 @@
     direction = '0 -1 0'
   []
   [junction_top_left]
-    type = JunctionComponent
-    # for now we have to treat those like mesh generators
-    # and write down the name of the last component with the others as inputs
+    type = ComponentJunction
     first_component = cyl3
     second_component = cyl4
     first_boundary = 'cyl3_right'
@@ -80,9 +76,7 @@
     n_elem_normal = 4
   []
   [junction_bottom_left]
-    type = JunctionComponent
-    # for now we have to treat those like mesh generators
-    # and write down the name of the last component with the others as inputs
+    type = ComponentJunction
     first_component = cyl4
     second_component = cyl1
     first_boundary = 'cyl4_right'

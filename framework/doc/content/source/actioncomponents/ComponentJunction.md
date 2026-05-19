@@ -1,8 +1,8 @@
-# JunctionComponent
+# ComponentJunction
 
-!syntax description /ActionComponents/JunctionComponent
+!syntax description /ActionComponents/ComponentJunction
 
-The `JunctionComponent` is an [ActionComponent.md] which creates a contiguous junction
+The `ComponentJunction` is an [ActionComponent.md] which creates a contiguous junction
 between two components.
 The following methods are currently supported to join these two components at boundaries selected on each component:
 
@@ -22,8 +22,8 @@ This components inherits from the following interfaces to help facilitate the de
 - [ComponentBoundaryConditionInterface.md] to define boundary conditions for the variables defined on that component
 
 
-!syntax parameters /ActionComponents/JunctionComponent
+!syntax parameters /ActionComponents/ComponentJunction
 
-!syntax inputs /ActionComponents/JunctionComponent
+!syntax inputs /ActionComponents/ComponentJunction
 
-!syntax children /ActionComponents/JunctionComponent
+!syntax children /ActionComponents/ComponentJunction

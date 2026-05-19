@@ -25,7 +25,7 @@
     direction = '0 1 0'
   []
   [junction_bottom_right]
-    type = JunctionComponent
+    type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
     first_boundary = 'cyl1_right'
@@ -45,7 +45,7 @@
     direction = '-1 0 0'
   []
   [junction_top_right]
-    type = JunctionComponent
+    type = ComponentJunction
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
     first_component = cyl2
@@ -67,7 +67,7 @@
     direction = '0 -1 0'
   []
   [junction_top_left]
-    type = JunctionComponent
+    type = ComponentJunction
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
     first_component = cyl3
@@ -77,7 +77,7 @@
     junction_method = stitch_meshes
   []
   [junction_bottom_left]
-    type = JunctionComponent
+    type = ComponentJunction
     # for now we have to treat those like mesh generators
     # and write down the name of the last component with the others as inputs
     first_component = cyl4
