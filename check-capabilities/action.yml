@@ -1,0 +1,67 @@
+name: Check capabilities
+description: Checks the capabilities of a MOOSE application
+
+inputs:
+  executable:
+    description: "Path to the executable, relative to the repository root"
+    required: true
+  capabilities:
+    description: The capabilities to check; should be a newline separated list
+    required: false
+  shell:
+    description: "The shell to use; default: bash"
+    required: false
+    default: bash
+
+runs:
+  using: composite
+  steps:
+    - uses: idaholab/moose/setup-utils@actions
+      name: Setup utils
+      with:
+        shell: ${{ inputs.shell }}
+    - name: Check capabilities
+      shell: ${{ inputs.shell }}
+      run: |
+        source $MOOSE_UTILS_PATH
+
+        echo "::group::Show capabilities"
+        print_and_run "${{ inputs.executable }}" --show-capabilities
+        echo "::endgroup::"
+
+        echo "::group::Check capabilities"
+
+        readarray -t capabilities <<< "${{ inputs.capabilities }}"
+
+        check_summary=()
+        check_failed=
+
+        for capability in "${capabilities[@]}"; do
+          command=("${{ inputs.capabilities }}" "--check-capabilities='$capability'")
+          return_code=0
+          if ! print_and_run "${command[@]}"; then
+            return_code="$?"
+          fi
+          result_str=""
+          if [ "$return_code" == "0" ]; then
+            result_str="     OK"
+          elif [ "$return_code" == "77" ]; then
+            result_str="MISSING"
+            check_failed=1
+          else
+            result_str="   FAIL"
+            check_failed=1
+          fi
+          check_summary+=("$result_str $capability")
+        done
+
+
+        echo "::group::Check capabilities result"
+        for result in "${check_summary[@]}"; do
+          echo "$result"
+        done
+        echo "::endgroup::"
+
+        if [ -n "$check_failed" ]; then
+          exit 1
+        fi
