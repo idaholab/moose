@@ -1,6 +1,6 @@
 [Tests]
-  design = 'SIMPLE.md'
-  issues = '#27280'
+  design = 'SIMPLE.md LinearFVAnisotropicDiffusion.md WCNSLinearFVFlowPhysics.md'
+  issues = '#27280 #31965'
   [momentum-pressure]
     type = 'Exodiff'
     input = 'lid-driven-segregated.i'
@@ -22,5 +22,29 @@
     max_threads = 1 # see libmesh issue #3808
     # Until k-eps is merged, cannot do wall BC for moving wall
     rel_err = 0.53
+  []
+  [momentum-pressure-physics-average-pressure-diffusion-interpolation]
+    type = 'Exodiff'
+    input = 'lid-driven-segregated-physics.i'
+    cli_args = 'Physics/NavierStokes/FlowSegregated/flow/pressure_diffusion_interpolation=average Outputs/file_base=lid-driven-segregated-physics-average-pressure-diffusion_out'
+    exodiff = 'lid-driven-segregated-physics-average-pressure-diffusion_out.e'
+    prereq = 'momentum-pressure-physics'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm, the linear finite volume system, the shorthand Physics syntax, and average pressure diffusion interpolation.'
+    recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
+    capabilities = 'method!=dbg'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [momentum-pressure-physics-harmonic-pressure-diffusion-interpolation]
+    type = 'Exodiff'
+    input = 'lid-driven-segregated-physics.i'
+    cli_args = 'Physics/NavierStokes/FlowSegregated/flow/pressure_diffusion_interpolation=harmonic Outputs/file_base=lid-driven-segregated-physics-harmonic-pressure-diffusion_out'
+    exodiff = 'lid-driven-segregated-physics-harmonic-pressure-diffusion_out.e'
+    prereq = 'momentum-pressure-physics-average-pressure-diffusion-interpolation'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm, the linear finite volume system, the shorthand Physics syntax, and harmonic pressure diffusion interpolation.'
+    recover = false # we don't support recovery for SIMPLE yet
+    valgrind = heavy
+    capabilities = 'method!=dbg'
+    max_threads = 1 # see libmesh issue #3808
   []
 []
