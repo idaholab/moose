@@ -28,12 +28,12 @@ runs:
         {
           local p="${PWD}/"
           local work_dir="/home/runner/work/"
-          local new_pwd=${p/#$work_dir/WORK/}
+          p=${p/#$work_dir/WORK/}
           local docker_work_dir=/__w/
-          new_pwd=${p/#$docker_work_dir/WORK_DOCKER/}
+          p=${p/#$docker_work_dir/WORK_DOCKER/}
           local wsl_work_dir="/mnt/d/a/"
-          new_pwd=${p/#$wsl_work_dir/WORK_WSL/}
-          echo "${new_pwd}"
+          p=${p/#$wsl_work_dir/WORK_WSL/}
+          echo "${p}"
         }
 
         function print_command()
