@@ -268,18 +268,13 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   mooseAssert(_test_var_names.size() == _trial_var_names.size(),
               "Number of test and trial variables must be the same for block matrix assembly.");
 
-  switch (_assembly_level)
+  if (_assembly_level == mfem::AssemblyLevel::LEGACY)
+    FormSystemMatrix(op, trueX, trueRHS);
+  else
   {
-    case mfem::AssemblyLevel::LEGACY:
-      FormSystemMatrix(op, trueX, trueRHS);
-      break;
-    default:
-      mooseAssert(_test_var_names.size() == 1,
-                  "Non-legacy assembly is only supported for single-variable systems");
-      mooseAssert(
-          _test_var_names.size() == _trial_var_names.size(),
-          "Non-legacy assembly is only supported for single test and trial variable systems");
-      FormSystemOperator(op, trueX, trueRHS);
+    mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+                "Non-legacy assembly is only supported for single test and trial variable systems");
+    FormSystemOperator(op, trueX, trueRHS);
   }
 }
 

@@ -43,6 +43,8 @@ public:
   Moose::MFEM::TimeDerivativeMap time_derivative_map;
   Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
 
+  std::string mode_separator{"_"};
+
   std::shared_ptr<MFEMRefinementMarker> refiner;
 
   MPI_Comm comm;

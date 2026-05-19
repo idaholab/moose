@@ -13,6 +13,8 @@
 
 #include "MFEMObject.h"
 
+class MFEMProblemSolve;
+
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */
@@ -34,13 +36,21 @@ public:
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
+  /// Sets an already-assembled operator on the wrapped solver. Used by callers that
+  /// manage operator assembly themselves (e.g. the eigenproblem operator), bypassing
+  /// the bilinear-form-based updateSolver() path.
+  virtual void setOperator(mfem::OperatorHandle & op);
+
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
+  /// For eigensolvers, this method calls the underlying Solve method
+  virtual void solve() { mooseError("'solve' method not used in this solver type."); }
+
+protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver() = 0;
 
-protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 
@@ -51,7 +61,10 @@ protected:
   std::unique_ptr<mfem::Solver> _solver;
 
   /// Preconditioner to be used for the problem
-  MFEMSolverBase * _preconditioner;
+  std::shared_ptr<MFEMSolverBase> _preconditioner;
+
+private:
+  friend class MFEMProblemSolve;
 };
 
 inline mfem::Solver &
