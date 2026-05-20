@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ComputeLagrangianStressCauchy.h"
-#include "DerivativeMaterialPropertyNameInterface.h"
 
 /// Provide the Cauchy stress via an objective integration of a small stress
 ///
@@ -25,8 +24,7 @@
 /// update with an objective integration, providing _cauchy_stress
 /// and _cauchy_jacobian properties
 ///
-class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy,
-                                         public DerivativeMaterialPropertyNameInterface
+class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy
 {
 public:
   static InputParameters validParams();
@@ -77,6 +75,15 @@ protected:
   /// d(dL)/dF, stored by the strain calculator
   const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
 
+  /// d(dW)/dF from the strain calculator, consumed by Jaumann
+  const MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
+
+  /// Polar-decomposition rotation R of F_actual (and its old value and derivative),
+  /// published by the strain calculator. Consumed by the Green-Naghdi rate.
+  const MaterialProperty<RankTwoTensor> & _rotation;
+  const MaterialProperty<RankTwoTensor> & _rotation_old;
+  const MaterialProperty<RankFourTensor> & _d_rotation_d_F;
+
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad;
 
@@ -90,21 +97,6 @@ protected:
     Jaumann,
     GreenNaghdi
   } _rate;
-
-  /// Whether we need to perform polar decomposition
-  const bool _polar_decomp;
-
-  /// Current rotation, i.e. R in polar decomposition F = RU
-  MaterialProperty<RankTwoTensor> * _rotation;
-
-  /// Rotation at the begining of this step
-  const MaterialProperty<RankTwoTensor> * _rotation_old;
-
-  /// Derivative of rotation w.r.t. the deformation gradient
-  MaterialProperty<RankFourTensor> * _d_rotation_d_def_grad;
-
-  /// Current stretch, i.e. U in polar decomposition F = RU
-  MaterialProperty<RankTwoTensor> * _stretch;
 
 private:
   /// Objective update using the Truesdell rate
@@ -128,7 +120,4 @@ private:
 
   /// Compute the consistent tangent
   RankFourTensor cauchyJacobian(const RankFourTensor & Jinv, const RankFourTensor & U) const;
-
-  /// Perform polar decomposition
-  void polarDecomposition();
 };

@@ -69,11 +69,17 @@ protected:
   /// (`dd`, `dw`) tensors. Used by the Rashid options where `dd != sym(dL)` and
   /// `dw != skew(dL)`.
   void setQpIncrementalStrains(const RankTwoTensor & dd, const RankTwoTensor & dw);
-  /// Dispatcher: compute (Δd, Δw, d(Δl)/d(f^{-1})) for the active kinematic approximation.
+  /// Dispatcher: compute (Δd, Δw, d(Δl)/d(f^{-1}), d(Δw)/d(f^{-1})) for the active
+  /// kinematic approximation. The vorticity derivative is returned separately so the
+  /// Jaumann objective rate can chain its own Jacobian without re-projecting from dL.
   void computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
                                         RankTwoTensor & dd,
                                         RankTwoTensor & dw,
-                                        RankFourTensor & d_dL_d_f_inv);
+                                        RankFourTensor & d_dL_d_f_inv,
+                                        RankFourTensor & d_dw_d_f_inv);
+  /// Compute and publish the polar decomposition of _F_actual at the current qp
+  /// (R, U, dR/dF). Consumed by the Green-Naghdi objective rate.
+  void computeQpPolarDecomposition();
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
   /// Calculate the unstabilized (alpha-weighted) deformation gradient at the quadrature point
@@ -155,9 +161,23 @@ protected:
   /// Stored so downstream consumers do not bake in the linear-approximation assumption.
   MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
 
+  /// Derivative of the vorticity increment Δw with respect to F_{n+1}. Consumed by the
+  /// Jaumann objective rate so it can produce a consistent Jacobian regardless of which
+  /// kinematic_approximation the strain calculator is using.
+  MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
+
   /// Derivative of F_{n+1} with respect to the displacement gradient.
   /// Identity for backward Euler; will become alpha * Identity for the generalized midpoint rule.
   MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
+
+  /// Polar decomposition R of the (alpha-weighted, F-bar-stabilized) deformation gradient
+  /// F at this qp. Stateful so the Green-Naghdi rate can read R_n via getMaterialPropertyOld.
+  MaterialProperty<RankTwoTensor> & _rotation;
+  const MaterialProperty<RankTwoTensor> & _rotation_old;
+  /// Stretch U from the same polar decomposition.
+  MaterialProperty<RankTwoTensor> & _stretch;
+  /// Derivative of R with respect to F.
+  MaterialProperty<RankFourTensor> & _d_rotation_d_F;
 
   /// Partial derivative of the F-bar-stabilized deformation gradient with respect to the
   /// unstabilized (per-qp local) deformation gradient. Equals IdentityFour when F-bar is off.
@@ -182,20 +202,24 @@ private:
   void computeLinearIncrement(const RankTwoTensor & f_inv,
                               RankTwoTensor & dd,
                               RankTwoTensor & dw,
-                              RankFourTensor & d_dL_d_f_inv) const;
+                              RankFourTensor & d_dL_d_f_inv,
+                              RankFourTensor & d_dw_d_f_inv) const;
   /// Quadratic approximation: dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2.
   void computeQuadraticIncrement(const RankTwoTensor & f_inv,
                                  RankTwoTensor & dd,
                                  RankTwoTensor & dw,
-                                 RankFourTensor & d_dL_d_f_inv) const;
+                                 RankFourTensor & d_dL_d_f_inv,
+                                 RankFourTensor & d_dw_d_f_inv) const;
   /// Rashid's approximate symmetric+skew formulas.
   void computeRashidApproximateIncrement(const RankTwoTensor & f_inv,
                                          RankTwoTensor & dd,
                                          RankTwoTensor & dw,
-                                         RankFourTensor & d_dL_d_f_inv) const;
+                                         RankFourTensor & d_dL_d_f_inv,
+                                         RankFourTensor & d_dw_d_f_inv) const;
   /// "Exact" via polar decomposition of f^{-1} + matrix logs.
   void computeRashidEigenIncrement(const RankTwoTensor & f_inv,
                                    RankTwoTensor & dd,
                                    RankTwoTensor & dw,
-                                   RankFourTensor & d_dL_d_f_inv) const;
+                                   RankFourTensor & d_dL_d_f_inv,
+                                   RankFourTensor & d_dw_d_f_inv) const;
 };
