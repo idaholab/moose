@@ -1,17 +1,40 @@
-gcc: "13.3.1"
-clang: "19"
-minimum_gcc: "9.0.0"
-maximum_gcc: "13.3.1"
-minimum_clang: "14.0.6"
-maximum_clang: "19"
-python_default: "3.13"
-minimum_python: "3.10"
-maximum_python: "3.13"
-mpich: "4.3.0"
-openmpi: "5.0.7"
-petsc: "3.23.4"
-apptainer_rockylinux: "8.10"
-apptainer_mpich: "4.3.1"
+# gcc versions
+conda_gcc: "14.3.0"
 apptainer_gcc: "13.3.1"
-default_mpi: "mpich"
+apptainer_gcc_min: "9.2.1"
+all_gcc: "9.2.1, 13.3.1, 14.3.0"
+
+# clang versions
+conda_clang: "19.1.7"
+apptainer_clang: "20.1.8"
+all_clang: "9.1.7, 20.1.8"
+
+# python versions
+python_default: "3.14"
+all_python: "3.10 - 3.14"
 python_packages: "packaging pyaml jinja2"
+
+# mpich versions
+apptainer_rocky8_mpich: "5.0.1"
+apptainer_rocky9_mpich: "4.3.2"
+conda_mpich: "5.0.1"
+all_mpich: "4.3.2, 5.0.1"
+
+# openmpi versions
+apptainer_openmpi: "5.0.10"
+conda_openmpi: "5.0.10"
+all_openmpi: "5.0.10"
+
+# default MPI
+default_mpi: "mpich"
+
+# other apptainer versions
+apptainer_code_server: "4.118.0"
+apptainer_cuda: "12.9.1"
+apptainer_libtorch: "2.11.0"
+apptainer_python: "3.14.4"
+apptainer_rocky8: "8.10"
+apptainer_rocky9: "9.7"
+
+# other versions
+vtk: "9.6.1"

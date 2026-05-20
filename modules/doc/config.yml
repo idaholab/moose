@@ -89,7 +89,7 @@ Extensions:
         menu:
             Training: training/index.md
             Getting Started:
-                Installing MOOSE: getting_started/installation/index.md
+                Installation: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
                 Examples and Tutorials: getting_started/examples_and_tutorials/index.md
                 NCRC Applications: help/inl/applications.md
@@ -271,5 +271,6 @@ Extensions:
     MooseDocs.extensions.analytics:
         active: True
         google_measurement_id: G-RH7BY5XXNW
+    MooseDocs.extensions.gitutils: default
     # Used to create a reference/example page for the tagging extension (see PR #25388)
     MooseDocs.extensions.tagging: !include modules/electromagnetics/doc/config.yml Extensions MooseDocs.extensions.tagging
