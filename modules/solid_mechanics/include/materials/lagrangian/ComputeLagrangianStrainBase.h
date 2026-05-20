@@ -47,12 +47,33 @@ public:
   ComputeLagrangianStrainBase(const InputParameters & parameters);
   virtual void initialSetup() override;
 
+  /// Approximation used to convert the inverse incremental deformation gradient `f^{-1}`
+  /// into the increment in the spatial velocity gradient (and its symmetric / skew parts).
+  /// See `rashid_project/plan_outline.pdf` section 2.
+  enum class KinematicApproximation
+  {
+    Linear,             ///< dL = I - f^{-1}
+    Quadratic,          ///< dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2
+    RashidApproximate,  ///< Rashid's symmetric+skew formulas
+    RashidEigen         ///< "Exact": polar decomposition + matrix logs
+  };
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;
-  /// Calculate the strains based on the spatial velocity gradient
+  /// Calculate the strains based on the spatial velocity gradient. The sym/skew split is
+  /// trivial; kept as a public helper for backward compatibility with the linear-only path.
   virtual void computeQpIncrementalStrains(const RankTwoTensor & dL);
+  /// Update strain / vorticity / mechanical-strain bookkeeping from already-split
+  /// (`dd`, `dw`) tensors. Used by the Rashid options where `dd != sym(dL)` and
+  /// `dw != skew(dL)`.
+  void setQpIncrementalStrains(const RankTwoTensor & dd, const RankTwoTensor & dw);
+  /// Dispatcher: compute (Δd, Δw, d(Δl)/d(f^{-1})) for the active kinematic approximation.
+  void computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
+                                        RankTwoTensor & dd,
+                                        RankTwoTensor & dw,
+                                        RankFourTensor & d_dL_d_f_inv);
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
   /// Calculate the unstabilized (alpha-weighted) deformation gradient at the quadrature point
@@ -82,6 +103,9 @@ protected:
 
   /// Generalized-midpoint weight for the deformation gradient (1.0 = backward Euler, 0.5 = midpoint)
   const Real _alpha;
+
+  /// Selected approximation for the spatial velocity gradient increment.
+  const KinematicApproximation _kinematic_approximation;
 
   // The eigenstrains
   std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -152,4 +176,26 @@ protected:
 
   /// Rotation increment for "old" materials inheriting from ComputeStressBase
   MaterialProperty<RankTwoTensor> & _rotation_increment;
+
+private:
+  /// Linear approximation: dL = I - f^{-1}.
+  void computeLinearIncrement(const RankTwoTensor & f_inv,
+                              RankTwoTensor & dd,
+                              RankTwoTensor & dw,
+                              RankFourTensor & d_dL_d_f_inv) const;
+  /// Quadratic approximation: dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2.
+  void computeQuadraticIncrement(const RankTwoTensor & f_inv,
+                                 RankTwoTensor & dd,
+                                 RankTwoTensor & dw,
+                                 RankFourTensor & d_dL_d_f_inv) const;
+  /// Rashid's approximate symmetric+skew formulas.
+  void computeRashidApproximateIncrement(const RankTwoTensor & f_inv,
+                                         RankTwoTensor & dd,
+                                         RankTwoTensor & dw,
+                                         RankFourTensor & d_dL_d_f_inv) const;
+  /// "Exact" via polar decomposition of f^{-1} + matrix logs.
+  void computeRashidEigenIncrement(const RankTwoTensor & f_inv,
+                                   RankTwoTensor & dd,
+                                   RankTwoTensor & dw,
+                                   RankFourTensor & d_dL_d_f_inv) const;
 };

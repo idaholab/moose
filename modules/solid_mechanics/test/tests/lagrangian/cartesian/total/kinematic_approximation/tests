@@ -1,0 +1,45 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/materials/lagrangian/ComputeLagrangianStrain.md'
+  [linear]
+    type = CSVDiff
+    input = 'jactest.i'
+    cli_args = 'GlobalParams/kinematic_approximation=linear Outputs/file_base=linear_out'
+    csvdiff = 'linear_out.csv'
+    abs_zero = 1e-9
+    requirement = 'The linear kinematic_approximation (dL = I - f^{-1}) reproduces the '
+                  'closed-form (dd, dw) for a known F = R*U deformation (rotation by 0.3 about z '
+                  'times a diagonal stretch).'
+  []
+  [quadratic]
+    type = CSVDiff
+    input = 'jactest.i'
+    cli_args = 'GlobalParams/kinematic_approximation=quadratic Outputs/file_base=quadratic_out'
+    csvdiff = 'quadratic_out.csv'
+    abs_zero = 1e-9
+    requirement = 'The quadratic kinematic_approximation (one more Taylor term of -log f^{-1}) '
+                  'reproduces the closed-form (dd, dw) for the same F = R*U deformation.'
+  []
+  [rashid_approximate]
+    type = CSVDiff
+    input = 'jactest.i'
+    cli_args = 'GlobalParams/kinematic_approximation=rashid_approximate '
+               'Outputs/file_base=rashid_approximate_out'
+    csvdiff = 'rashid_approximate_out.csv'
+    abs_zero = 1e-9
+    requirement = 'The rashid_approximate kinematic_approximation reproduces the closed-form '
+                  '(dd, dw) for the same F = R*U deformation: dd is diagonal (the symmetric '
+                  'cross-coupling A_12 vanishes for this F) and dw_12 = -theta/(2 sin theta) * '
+                  '2 sin theta = -theta evaluated via the axial-vector formula.'
+  []
+  [rashid_eigen]
+    type = CSVDiff
+    input = 'jactest.i'
+    cli_args = 'GlobalParams/kinematic_approximation=rashid_eigen Outputs/file_base=rashid_eigen_out'
+    csvdiff = 'rashid_eigen_out.csv'
+    abs_zero = 1e-9
+    requirement = 'The rashid_eigen kinematic_approximation (polar decomposition + matrix logs) '
+                  'reproduces the closed-form (dd, dw) for the same F = R*U deformation: '
+                  'dd = R log(U) R^T and dw = log R = 0.3 * skew(e_z).'
+  []
+[]

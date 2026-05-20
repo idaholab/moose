@@ -41,4 +41,124 @@
                   'the explicit F-bar tangent and removed kernel-side alpha parameter together '
                   'unlock.'
   []
+  [jacobian_large_no_stab_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization with the quadratic kinematic approximation.'
+  []
+  [jacobian_large_with_stab_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization and the quadratic kinematic approximation.'
+  []
+  [jacobian_large_no_stab_alpha05_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
+               "GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization, the generalized midpoint rule (alpha = 0.5), and the '
+                  'quadratic kinematic approximation.'
+  []
+  [jacobian_large_with_stab_alpha05_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
+                  'the quadratic kinematic approximation.'
+  []
+  [jacobian_large_no_stab_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false "
+               "GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization with the Rashid approximate kinematic formulas.'
+  []
+  [jacobian_large_with_stab_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization and the Rashid approximate kinematic formulas.'
+  []
+  [jacobian_large_no_stab_alpha05_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
+               "GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization, the generalized midpoint rule (alpha = 0.5), and '
+                  'the Rashid approximate kinematic formulas.'
+  []
+  [jacobian_large_with_stab_alpha05_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
+                  'the Rashid approximate kinematic formulas.'
+  []
+  [jacobian_large_no_stab_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false "
+               "GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization with the Rashid eigen (polar-decomposition + matrix log) '
+                  'kinematic approximation.'
+  []
+  [jacobian_large_with_stab_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization and the Rashid eigen kinematic approximation.'
+  []
+  [jacobian_large_no_stab_alpha05_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
+               "GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization, the generalized midpoint rule (alpha = 0.5), and '
+                  'the Rashid eigen kinematic approximation.'
+  []
+  [jacobian_large_with_stab_alpha05_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
+                  'the Rashid eigen kinematic approximation.'
+  []
 []
