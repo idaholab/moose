@@ -141,7 +141,12 @@
       type = PythonUnitTest
       input = test_tagging.py
       min_slots = 2 # uses threads
-      detail = "support documentation tags for filtering, and"
+      detail = "support documentation tags for filtering,"
+    []
+    [navigation]
+      type = PythonUnitTest
+      input = test_navigation.py
+      detail = "linking breadcrumb directories to configured source pages, and"
     []
     [versioner]
       type = PythonUnitTest
