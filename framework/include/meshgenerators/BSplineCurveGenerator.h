@@ -46,6 +46,8 @@ protected:
   const unsigned int _order;
   /// number of edge elements on the curve
   const unsigned int _num_elements;
+  /// vector of the names of the boundaries at the ends of the spline curve
+  std::vector<BoundaryName> _node_set_boundaries;
 
   // Alternative geometry input: use boundary centroids (and boundary average normals)
   /// If 'start_mesh' parameter is set, reference to input mesh providing the starting boundary
