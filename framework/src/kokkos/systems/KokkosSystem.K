@@ -21,7 +21,8 @@ namespace Moose::Kokkos
 {
 
 System::System(SystemBase & system)
-  : MeshHolder(*system.mesh().getKokkosMesh()),
+  : PerfGraphInterface(system.feProblem().getMooseApp().perfGraph(), "KokkosSystem"),
+    MeshHolder(*system.mesh().getKokkosMesh()),
     AssemblyHolder(system.feProblem().kokkosAssembly()),
     _system(system),
     _mesh(system.mesh()),
@@ -348,7 +349,11 @@ System::sync(const MemcpyType dir)
     {
       auto & matrix = _system.getMatrix(tag);
 
-      _matrices[tag].create(matrix, *this);
+      {
+        TIME_SECTION("MatSetPreallocation", 1);
+        _matrices[tag].create(matrix, *this);
+      }
+
       _matrices[tag] = 0;
     }
 
@@ -364,7 +369,10 @@ System::sync(const MemcpyType dir)
       _vectors[tag].close();
 
     for (auto tag : _active_matrix_tags)
+    {
+      TIME_SECTION("MatSetValues", 1);
       _matrices[tag].close();
+    }
   }
 }
 

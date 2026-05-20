@@ -30,8 +30,10 @@ public:
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
 
 protected:
   dof_id_type _node_id = libMesh::DofObject::invalid_id;
@@ -53,8 +55,9 @@ KokkosNodalMaxValueId::reduce(Datum & datum, Real * result) const
   }
 }
 
-KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::join(ReducerLoop, Real * result, const Real * source) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosNodalMaxValueId::join(Real * result, const Real * source) const
 {
   if (source[0] > result[0])
   {
@@ -63,8 +66,9 @@ KokkosNodalMaxValueId::join(ReducerLoop, Real * result, const Real * source) con
   }
 }
 
-KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::init(ReducerLoop, Real * result) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosNodalMaxValueId::init(Real * result) const
 {
   result[0] = Kokkos::Experimental::finite_min_v<Real>;
 }

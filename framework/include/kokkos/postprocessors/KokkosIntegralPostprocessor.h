@@ -26,9 +26,10 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
-
-  KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
 
 protected:
   const bool _average;
@@ -55,10 +56,9 @@ KokkosIntegralPostprocessor<Base>::reduce(Datum & datum, Real * result) const
 }
 
 template <typename Base>
+template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::join(typename Base::ReducerLoop,
-                                        Real * result,
-                                        const Real * source) const
+KokkosIntegralPostprocessor<Base>::join(Real * result, const Real * source) const
 {
   result[0] += source[0];
 
@@ -67,8 +67,9 @@ KokkosIntegralPostprocessor<Base>::join(typename Base::ReducerLoop,
 }
 
 template <typename Base>
+template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::init(typename Base::ReducerLoop, Real * result) const
+KokkosIntegralPostprocessor<Base>::init(Real * result) const
 {
   result[0] = 0;
 

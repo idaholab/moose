@@ -48,12 +48,14 @@ public:
     ::Kokkos::abort("Default reduce() should never be called. Make sure you properly redefined "
                     "this method in your class without typos.");
   }
-  KOKKOS_FUNCTION void join(ReducerLoop, Real * /* result */, const Real * /* source */) const
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * /* result */, const Real * /* source */) const
   {
     ::Kokkos::abort("Default join() should never be called. Make sure you properly redefined this "
                     "method in your class without typos.");
   }
-  KOKKOS_FUNCTION void init(ReducerLoop, Real * /* result */) const
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * /* result */) const
   {
     ::Kokkos::abort("Default init() should never be called. Make sure you properly redefined this "
                     "method in your class without typos.");

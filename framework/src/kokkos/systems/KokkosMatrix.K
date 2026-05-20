@@ -78,6 +78,8 @@ Matrix::close()
 
   LibmeshPetscCallQ(
       MatSetValuesCOO(_matrix, _is_host ? _val.hostData() : _val.deviceData(), ADD_VALUES));
+
+  ::Kokkos::fence();
 }
 
 } // namespace Moose::Kokkos

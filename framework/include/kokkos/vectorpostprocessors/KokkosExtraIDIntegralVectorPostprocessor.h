@@ -32,8 +32,10 @@ public:
   virtual void compute() override;
   virtual void finalize() override;
 
-  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
   template <typename Derived>
   KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
   template <typename Derived>
@@ -76,10 +78,9 @@ protected:
   static constexpr unsigned int _cache_size = 10;
 };
 
-KOKKOS_FUNCTION inline void
-KokkosExtraIDIntegralVectorPostprocessor::join(ReducerLoop,
-                                               Real * result,
-                                               const Real * source) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosExtraIDIntegralVectorPostprocessor::join(Real * result, const Real * source) const
 {
   auto size = _vector_size * (_nvar + _nprop + _average);
 
@@ -87,8 +88,9 @@ KokkosExtraIDIntegralVectorPostprocessor::join(ReducerLoop,
     result[i] += source[i];
 }
 
-KOKKOS_FUNCTION inline void
-KokkosExtraIDIntegralVectorPostprocessor::init(ReducerLoop, Real * result) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosExtraIDIntegralVectorPostprocessor::init(Real * result) const
 {
   auto size = _vector_size * (_nvar + _nprop + _average);
 

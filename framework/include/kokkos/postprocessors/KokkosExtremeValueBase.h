@@ -29,8 +29,10 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void
   computeExtremeValue(const unsigned int qp, Datum & datum, Real * result) const;
-  KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
 
 protected:
   /**
@@ -67,10 +69,9 @@ KokkosExtremeValueBase<Base>::computeExtremeValue(const unsigned int qp,
 }
 
 template <typename Base>
+template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::join(typename Base::ReducerLoop,
-                                   Real * result,
-                                   const Real * source) const
+KokkosExtremeValueBase<Base>::join(Real * result, const Real * source) const
 {
   auto rpv = Kokkos::make_pair(result[0], result[1]);
   auto spv = Kokkos::make_pair(source[0], source[1]);
@@ -88,8 +89,9 @@ KokkosExtremeValueBase<Base>::join(typename Base::ReducerLoop,
 }
 
 template <typename Base>
+template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::init(typename Base::ReducerLoop, Real * result) const
+KokkosExtremeValueBase<Base>::init(Real * result) const
 {
   if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
   {

@@ -15,6 +15,7 @@
 #include "KokkosAssembly.h"
 
 #include "SystemBase.h"
+#include "PerfGraphInterface.h"
 
 #include "libmesh/communicator.h"
 
@@ -30,7 +31,7 @@ class NodalBCBase;
  * The Kokkos system class. Each nonlinear and auxiliary system in MOOSE has a corresponding Kokkos
  * system.
  */
-class System : public MeshHolder, public AssemblyHolder
+class System : public PerfGraphInterface, public MeshHolder, public AssemblyHolder
 {
 public:
   /**

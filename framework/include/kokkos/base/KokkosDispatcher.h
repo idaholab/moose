@@ -160,9 +160,12 @@ public:
   ///@{
   KOKKOS_FUNCTION void join(value_type result, const value_type source) const
   {
-    _functor_device.join(Operation{}, result, source);
+    _functor_device.template join<Object>(result, source);
   }
-  KOKKOS_FUNCTION void init(value_type result) const { _functor_device.init(Operation{}, result); }
+  KOKKOS_FUNCTION void init(value_type result) const
+  {
+    _functor_device.template init<Object>(result);
+  }
   ///@}
 
 private:

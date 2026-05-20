@@ -334,7 +334,7 @@ The vtable lookup itself incurs overheads, and using function pointers prevents 
 GPU compilers heavily rely on the inlining to generate an optimized code, and being unable to inline functions will likely lead to a performance hit.
 Therefore, any polymorphism on GPU should be implemented statically.
 
-While not directly being used in Kokkos-MOOSE, the most famous static polymorphism design pattern is the Curiously Recurring Template Pattern (CRTP).
+While not directly used in Kokkos-MOOSE, the most famous static polymorphism design pattern is the Curiously Recurring Template Pattern (CRTP).
 The CRTP is a programming idiom that involves a class template inheriting from a template instantiation of itself, which is a technique used to achieve static (compile-time) polymorphism.
 The following pseudo-codes demonstrate a typical template method pattern implemented with the dynamic polymorphism and its equivalent implementation with the static polymorphism using the CRTP:
 
