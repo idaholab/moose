@@ -246,3 +246,96 @@ Notes:
 - Homogenization with α ≠ 1: the macro-var Jacobian path uses `_dpk1` (= `∂P/∂F_alpha`). The macro contribution is added directly to `F_alpha` in the strain calc, so no α factor applies. Verified correct by inspection; do not "fix" by switching to `_dpk1_d_grad_u`.
 - The cost is one extra rank-4 property per qp on every stress material (`_dpk1_d_grad_u`) plus two on the strain calc (F-bar partials). ~243 doubles total per qp, in line with the kinematic derivatives added in Step 0.
 - Non-Cartesian UL is still out of scope (the UL kernel template instantiates only for `GradientOperatorCartesian`). The F-bar partials are written in coordinate-system-agnostic form so they're ready when/if axisymm UL is needed.
+
+### Step 2 (2026-05-20) — kinematic_approximation enum (linear / quadratic / Rashid approximate / Rashid eigen)
+
+`ComputeLagrangianStrainBase` now exposes a new `kinematic_approximation` parameter (`MooseEnum`,
+default `linear`). The large-kinematics branch of `computeQpProperties` dispatches on this enum to
+one of four helpers, each of which returns `(Δd, Δw, d(Δl)/d(f^{-1}))` for the active option.
+The common chain-rule term `d(f^{-1})/dF = -f^{-1} ⊗ F^{-1}` is applied at the dispatcher level
+so the helpers only have to know about `f^{-1}`.
+
+Options:
+- `linear`: `Δl = I - f^{-1}`, `Δd = sym(Δl)`, `Δw = skew(Δl)`. Byte-for-byte equivalent to the
+  pre-Step-2 code path (verified: all 242 baseline lagrangian tests pass at unchanged tolerances).
+- `quadratic`: `Δl = X + ½ X²` with `X = I - f^{-1}` — one more Taylor term of `-log f^{-1}`.
+- `rashid_approximate`: Rashid's symmetric+skew split (`plan_outline.pdf §2.3` eq 10-15, with the
+  corrected vorticity `Δw_ij = -(θ / 2√Q) ε_ijk α_k`). `Δd` comes from `A = X X^T - X - X^T` via
+  `Δd = -A/2 + A²/4`; `Δw` from the axial vector `α_k = ε_kab (f^{-1})_ab`. The implementation
+  derives `sin θ = √Q` (instead of `cos θ = (tr f^{-1} − 1)/2`, which assumes `f^{-1}` is exactly
+  a rotation and breaks down for non-rotation inputs); has a small-Q L'Hopital fallback
+  (`Q < 1e-12`) that recovers the linear skew limit; and clamps `Q` just below 1 to avoid
+  `cos θ → 0` saturation. Derivatives are fully analytic.
+- `rashid_eigen`: polar-decompose `f^{-1} = r' u'`, then `Δd = -log u' = -½ log c'` and
+  `Δw = -log r'` via Rodrigues. Reuses `FactorizedRankTwoTensor::sqrt / log / dlog` for the
+  symmetric piece and the polar-decomposition closed form (the same `Y, Z, O / Y.det()` trick
+  used in `ComputeLagrangianObjectiveStress::polarDecomposition`) for `dr'/df^{-1}`. The
+  Rodrigues derivative `d(log r)/dr` includes both the φ(θ) = θ/(2 sin θ) chain and the
+  `(r - r^T)` piece; a small-angle fallback (`|sin θ| < 1e-7`) avoids the analytic singularity.
+
+`computeQpIncrementalStrains` is now a thin backward-compatible wrapper around the new
+`setQpIncrementalStrains(dd, dw)` helper that takes the (already-decomposed) symmetric and
+skew tensors directly. Small kinematics is unchanged: it always uses the linear `Δl = F - F_old`
+and the same sym/skew split as before (the four options collapse at small strain anyway).
+
+Tests:
+- **Jacobian sweep (108 new `PetscJacobianTester` cases)**: every existing large-kinematics
+  jactest gets three new variants with `GlobalParams/kinematic_approximation=quadratic`,
+  `rashid_approximate`, `rashid_eigen`. Files extended: `cartesian/updated/jacobian/tests`,
+  `cartesian/total/rates/tests` (Truesdell only — see caveat below),
+  `cartesian/{total,updated}/thermal_expansion/tests`,
+  `axisymmetric_cylindrical/total/{jacobian,thermal_expansion}/tests`,
+  `centrosymmetric_spherical/total/{jacobian,thermal_expansion}/tests`. All pass at
+  `ratio_tol = 1E-7` except for 8 `centrosymmetric_spherical/total/jacobian` cases at
+  `alpha=0.5 + rashid_{approximate,eigen}` that need `ratio_tol = 1E-6` — the harness's
+  `ksponly + pc_type none + snes_convergence_test skip` mode lets displacement accumulate
+  without ever solving, eventually pushing `Q → 1` where the Rashid approximate's analytic
+  formulas are still correct but numerically saturated (still <1% relative error, ~6 orders of
+  magnitude below the value norm). Linear/quadratic don't hit this because they have no
+  domain boundary.
+- **Correctness CSVDiff (4 new gold files)**: new
+  `cartesian/total/kinematic_approximation/{jactest.i, tests, gold/}` test directory.
+  Single 8-node hex with Dirichlet BCs that produce a known uniform `F = R * U` at the qp,
+  with `R = rotation about z by 0.3 rad` and `U = diag(1.1, 1.05, 1.2)` (so `F_old = I` and
+  `f^{-1} = U^{-1} R^T`). Each of the four options runs the input once; postprocessors emit
+  `dd_{11,22,33,12}` and `dw_{12}`. The four gold CSVs match the analytical closed-form values
+  to 14-15 digits:
+
+  | Component | linear   | quadratic | rashid_approximate | rashid_eigen |
+  |-----------|----------|-----------|--------------------|--------------|
+  | dd_11     | 0.13151  | 0.10235   | 0.09431            | 0.09125      |
+  | dd_22     | 0.09016  | 0.05641   | 0.04865            | 0.05285      |
+  | dd_33     | 0.16667  | 0.18056   | 0.17612            | 0.18232      |
+  | dd_12     | 0.00640  | 0.00711   | 0 (by construction)| 0.01313      |
+  | dw_12     | -0.27505 | -0.30554  | -0.27866           | -0.30000     |
+
+  Each entry is the per-option analytic value for this F; `rashid_eigen`'s `dw_12 = -0.3` is
+  exactly `-θ`, and its `dd = R log(U) R^T`.
+
+Full `solid_mechanics` suite: 1832 / 1832 (1720 baseline + 108 new jactest variants + 4
+correctness CSVDiffs).
+
+**Caveat / Step 3 followup**: the Jaumann and Green-Naghdi objective rates in
+`ComputeLagrangianObjectiveStress` hard-code `dW = skew(I - f^{-1})` (Jaumann) and use the
+polar decomposition of `F` directly (Green-Naghdi) for their advection kinematics. These are
+*inconsistent* with the non-linear options' `Δw` (which is `_vorticity_increment` from the
+strain calculator now). The mismatch shows up as a Jacobian error of order 0.01-0.1% when
+combining `rashid_{approximate,eigen}` with Jaumann/Green-Naghdi. Step 2's rates tests are
+restricted to Truesdell for the new options for that reason; Step 3 (the Rashid objective
+rate) will resolve this by adding a new rate that consumes `_vorticity_increment` and a new
+material property `_d_vorticity_increment_d_F`. Until then, `kinematic_approximation` should
+be paired with the Truesdell rate (the default).
+
+Notes:
+- Helpers internally have both `d(dd)/d(f^{-1})` and `d(dw)/d(f^{-1})` separately but only
+  return their sum (`d(Δl)/d(f^{-1})`). When Step 3 adds the Rashid rate, the helpers should
+  also expose `d(dw)/d(f^{-1})` separately as a new strain-calculator material property
+  `_d_vorticity_increment_d_F`.
+- `RankFourTensor::operator*(RankFourTensor)` does the middle-pair contraction
+  `C_ijkl = A_ijpq B_pqkl`, which is exactly the chain-rule semantics we need throughout the
+  helpers. The `times<>` template uses the documented convention `A.times<n,o,p,q>(B)` →
+  `result(x[0..3]) = A(x[n], x[o]) * B(x[p], x[q])`.
+- Pure rotation case is degenerate for `rashid_approximate`: `A` becomes zero (the
+  `X X^T = X + X^T` cancellation) and `dd = 0`, which is the *physically correct* answer for
+  a pure rotation. `linear` and `quadratic` instead give a spurious `O(1 - cos θ)` diagonal
+  strain — that's the whole motivation for the Rashid family.

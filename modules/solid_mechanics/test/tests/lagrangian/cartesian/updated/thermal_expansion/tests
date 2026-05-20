@@ -57,4 +57,64 @@
                "Kernels/sdz/use_displaced_mesh=true"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
   []
+  [jacobian_large_no_stab_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
+  [jacobian_large_no_stab_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
+  [jacobian_large_no_stab_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
+  [jacobian_large_with_stab_quadratic]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=quadratic"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
+  [jacobian_large_with_stab_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=rashid_approximate"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
+  [jacobian_large_with_stab_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true GlobalParams/kinematic_approximation=rashid_eigen"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
+  []
 []

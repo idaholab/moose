@@ -104,4 +104,67 @@
     requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
                   "midpoint rule (alpha=0.5)"
   []
+  [truesdell_jacobian_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+                  "approximation. Jaumann and Green-Naghdi are not validated against the new "
+                  "options because their hard-coded skew(dL) / polar-rotation increments do not "
+                  "track the helper-produced (dd, dw) split; Step 3 will add a Rashid-specific "
+                  "rate that consumes the helper output directly."
+  []
+  [truesdell_jacobian_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the Rashid approximate "
+                  "kinematic formulas."
+  []
+  [truesdell_jacobian_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the Rashid eigen "
+                  "(polar-decomposition + matrix log) kinematic approximation."
+  []
+  [truesdell_jacobian_alpha05_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the quadratic kinematic approximation."
+  []
+  [truesdell_jacobian_alpha05_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the Rashid approximate kinematic formulas."
+  []
+  [truesdell_jacobian_alpha05_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
+  []
 []
