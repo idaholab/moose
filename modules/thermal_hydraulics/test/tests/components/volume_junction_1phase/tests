@@ -115,6 +115,12 @@
     []
   []
 
+  [components_convergence]
+    type = RunApp
+    input = 'components_convergence.i'
+    requirement = 'The system shall allow usage of the Convergence system for a VolumeJunction1Phase component.'
+  []
+
   # Tests conservation of mass and energy for 1-phase flow.
   [conservation_1phase]
     type = 'CSVDiff'
@@ -122,7 +128,7 @@
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
     restep = false # Test is prescribed to abort on failed timestep
-    requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
+    requirement = 'The system shall conserve mass and energy when a VolumeJunction1Phase component is used'
   []
   # error checking
   [err.missing_ics]
