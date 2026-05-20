@@ -50,7 +50,7 @@
     [polyhedra_prisms]
       type = Exodiff
       input = 'polyhedra_prisms.i'
-      cli_args = '--mesh-only'
+      cli_args = 'Mesh/final_generator=convert --mesh-only'
       exodiff= 'polyhedra_prisms_in.e'
       recover = false
       detail = 'polygonal prisms, represented as polyhedra, from user-specified nodes and faces,'
@@ -58,7 +58,7 @@
     [polyhedra_platonic]
       type = Exodiff
       input = 'polyhedra_platonic.i'
-      cli_args = '--mesh-only'
+      cli_args = 'Mesh/final_generator=convert --mesh-only'
       exodiff= 'polyhedra_platonic_in.e'
       recover = false
       detail = 'the platonic polyhedra from user-specified nodes and faces,'
@@ -66,7 +66,7 @@
     [polyhedra_archimedean]
       type = Exodiff
       input = 'polyhedra_archimedean.i'
-      cli_args = '--mesh-only'
+      cli_args = 'Mesh/final_generator=convert --mesh-only'
       exodiff= 'polyhedra_archimedean_in.e'
       recover = false
       detail = 'the archimedean polyhedra from user-specified nodes and faces.'
