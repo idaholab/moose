@@ -64,7 +64,6 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
 void
 MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E)
 {
-
   mfem::Vector e_hat(normalizedCrossProduct(_k_c, _k_a));
   std::complex<mfem::real_t> zi(0., 1.);
 

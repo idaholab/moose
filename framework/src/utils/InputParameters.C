@@ -1102,17 +1102,37 @@ InputParameters::applyParameters(const InputParameters & common,
   }
 
   // Loop through the coupled variables
-  for (std::set<std::string>::const_iterator it = common.coupledVarsBegin();
-       it != common.coupledVarsEnd();
-       ++it)
+  for (const auto & var_name : common._coupled_vars)
   {
-    // Variable name
-    const std::string var_name = *it;
-
     // Continue to next variable, if the current is in list of  excluded parameters
     if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
       continue;
 
+    applyCoupledVar(common, var_name);
+  }
+}
+
+void
+InputParameters::applyCommonUserSetParameters(const InputParameters & common,
+                                              const std::vector<std::string> & exclude,
+                                              const bool allow_private)
+{
+  for (const auto & it : common)
+  {
+    const std::string & common_name = it.first;
+    if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
+      continue;
+    if (!common.isParamSetByUser(common_name))
+      continue;
+    applyParameter(common, common_name, allow_private);
+  }
+
+  for (const auto & var_name : common._coupled_vars)
+  {
+    if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
+      continue;
+    if (!common.isParamSetByUser(var_name))
+      continue;
     applyCoupledVar(common, var_name);
   }
 }
@@ -1181,8 +1201,7 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
 void
 InputParameters::applyParameter(const InputParameters & common,
                                 const std::string & common_name,
-                                bool allow_private,
-                                bool override_default)
+                                bool allow_private)
 {
   // Disable the display of deprecated message when applying common parameters, this avoids a dump
   // of messages
@@ -1199,7 +1218,7 @@ InputParameters::applyParameter(const InputParameters & common,
   // Extract the properties from the common parameter
   const bool common_exist = common._values.find(common_name) != common._values.end();
   const bool common_priv = allow_private ? false : common.isPrivate(common_name);
-  const bool common_valid = common.isParamValid(common_name) || override_default;
+  const bool common_valid = common.isParamValid(common_name);
 
   /* In order to apply a common parameter 4 statements must be satisfied
    * (1) A local parameter must exist with the same name as the common parameter

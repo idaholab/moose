@@ -100,6 +100,7 @@
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
     capabilities = 'method!=dbg'
+    prereq = 'volumetric_eigenstrain_increase'
   []
   [hcp_volumetric_eigenstrain_decrease]
     type = 'CSVDiff'

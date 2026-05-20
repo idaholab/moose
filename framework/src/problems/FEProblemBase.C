@@ -9402,32 +9402,16 @@ FEProblemBase::addOutput(const std::string & object_type,
   // Add a pointer to the FEProblemBase class
   parameters.addPrivateParam<FEProblemBase *>("_fe_problem_base", this);
 
-  // Create common parameter exclude list
-  std::vector<std::string> exclude;
-  if (object_type == "Console")
-  {
-    exclude.push_back("execute_on");
+  // --show-input should enable the display of the input file on the screen
+  if (object_type == "Console" && _app.getParam<bool>("show_input") &&
+      parameters.get<bool>("output_screen"))
+    parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
-    // --show-input should enable the display of the input file on the screen
-    if (_app.getParam<bool>("show_input") && parameters.get<bool>("output_screen"))
-      parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
-  }
-  // Need this because Checkpoint::validParams changes the default value of
-  // execute_on
-  else if (object_type == "Checkpoint")
-    exclude.push_back("execute_on");
-
-  // Apply the common parameters loaded with Outputs input syntax
+  // Apply only user-set parameters from the common [Outputs] block so that
+  // each output type's own defaults are not overridden by common defaults.
   const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
-    parameters.applyParameters(*common, exclude);
-  if (common && std::find(exclude.begin(), exclude.end(), "execute_on") != exclude.end() &&
-      common->isParamSetByUser("execute_on") && object_type != "Console")
-    mooseInfoRepeated(
-        "'execute_on' parameter specified in [Outputs] block is ignored for object '" +
-        object_name +
-        "'.\nDefine this object in its own sub-block of [Outputs] to modify its "
-        "execution schedule.");
+    parameters.applyCommonUserSetParameters(*common);
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")

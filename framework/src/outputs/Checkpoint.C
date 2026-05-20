@@ -36,11 +36,6 @@ Checkpoint::validParams()
   // Get the parameters from the base classes
   InputParameters params = FileOutput::validParams();
 
-  // Controls whether the checkpoint will actually run. Should only ever be changed by the
-  // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
-  // is received.
-  params.addPrivateParam<CheckpointType>("checkpoint_type", CheckpointType::USER_CREATED);
-
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
   // Typical checkpoint options
@@ -53,10 +48,6 @@ Checkpoint::validParams()
   params.addParam<Real>(
       "wall_time_interval", 3600, "The target wall time interval (in seconds) at which to output");
 
-  // Parameter to turn off wall time checkpoints
-  params.addParam<bool>(
-      "wall_time_checkpoint", true, "Whether to enable checkpoints based on elapsed wall time");
-
   // Since it makes the most sense to write checkpoints at the end of time steps,
   // change the default value of execute_on to TIMESTEP_END
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -67,7 +58,6 @@ Checkpoint::validParams()
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
-    _checkpoint_type(getParam<CheckpointType>("checkpoint_type")),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix"))
 {
@@ -81,10 +71,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   // 'The --output-wall-time-interval parameter is necessary for testing
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
-
-  // We want to do this here so it overrides --output-wall-time-interval
-  if (!getParam<bool>("wall_time_checkpoint"))
-    _wall_time_interval = std::numeric_limits<Real>::max();
 }
 
 std::string
@@ -130,14 +116,6 @@ Checkpoint::shouldOutput()
   const bool should_output_wall_time = _wall_time_since_last_output >= _wall_time_interval;
   if (should_output_wall_time)
     return true;
-
-  // At this point, we have checked all automatic checkpoint options. If none
-  // of those triggered, then the only way a checkpoint will still be written
-  // is if the user defined it. If the checkpoint is purely system-created,
-  // go ahead and return false (circumvents default time_step_interval = 1 for
-  // auto checkpoints).
-  if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
-    return false;
 
   // Check if the checkpoint should "normally" output, i.e. if it was created
   // through the input file
@@ -265,38 +243,25 @@ Checkpoint::checkpointInfo() const
   static const unsigned int console_field_width = 27;
   std::stringstream checkpoint_info;
 
-  std::string interval_info;
-  if (getParam<bool>("wall_time_checkpoint"))
-  {
-    std::stringstream interval_info_ss;
-    interval_info_ss << "Every " << std::defaultfloat << _wall_time_interval << " s";
-    interval_info = interval_info_ss.str();
-  }
-  else
-    interval_info = "Disabled";
+  std::stringstream interval_info_ss;
+  interval_info_ss << "Every " << std::defaultfloat << _wall_time_interval << " s";
+  const std::string interval_info = interval_info_ss.str();
 
   checkpoint_info << std::left << std::setw(console_field_width)
                   << "  Wall Time Interval:" << interval_info << "\n";
 
-  std::string user_info;
-  if (_checkpoint_type == CheckpointType::SYSTEM_CREATED)
-    user_info = "Disabled";
-  else
-    user_info = "Outputs/" + name();
+  const std::string user_info = "Outputs/" + name();
+
+  checkpoint_info << std::left << std::setw(console_field_width) << "  Checkpoint:" << user_info
+                  << "\n";
 
   checkpoint_info << std::left << std::setw(console_field_width)
-                  << "  User Checkpoint:" << user_info << "\n";
-
-  if (!((interval_info == "Disabled") && (user_info == "Disabled")))
-  {
-    checkpoint_info << std::left << std::setw(console_field_width)
-                    << "  # Checkpoints Kept:" << std::to_string(_num_files) << "\n";
-    std::string exec_on_values = "";
-    for (const auto & item : _execute_on)
-      exec_on_values += item.name() + " ";
-    checkpoint_info << std::left << std::setw(console_field_width)
-                    << "  Execute On:" << exec_on_values << "\n";
-  }
+                  << "  # Checkpoints Kept:" << std::to_string(_num_files) << "\n";
+  std::string exec_on_values = "";
+  for (const auto & item : _execute_on)
+    exec_on_values += item.name() + " ";
+  checkpoint_info << std::left << std::setw(console_field_width)
+                  << "  Execute On:" << exec_on_values << "\n";
 
   return checkpoint_info;
 }

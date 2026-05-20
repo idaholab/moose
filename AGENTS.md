@@ -55,8 +55,14 @@ The test: Every changed line should trace directly to the user's request.
 
 - Never delete correct preexisting code comments.
 - Add comments when the code alone does not make clear what's happening.
+- Use ASCII characters.
 
-## 5. Goal-Driven Execution
+## 5. Tool Use
+
+- Prefer builtin tools over bash commands whenever possible in the vein of
+  reducing permission prompting.
+
+## 6. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 

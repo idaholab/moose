@@ -45,6 +45,8 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
   constructSolver();
 }
 
+MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
+
 void
 MFEMHypreBoomerAMG::constructSolver()
 {
@@ -74,6 +76,7 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     lor_solver->GetSolver().SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
 
+    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
     if (_mfem_fespace && !mfem::HypreUsingGPU())
       lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
 

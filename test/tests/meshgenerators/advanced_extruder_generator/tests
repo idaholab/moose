@@ -1,4 +1,5 @@
 [Tests]
+  design = 'AdvancedExtruderGenerator.md'
   [test]
     type = 'Exodiff'
     input = 'gen_extrude.i'
@@ -7,7 +8,6 @@
     recover = false
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#13276 #3554 #5634'
   []
   [test_flip]
@@ -18,7 +18,6 @@
     recover = false
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs in the reverse direction'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#13276 #3554 #5634 #21162'
   []
   [test_boundary]
@@ -29,7 +28,6 @@
     recover = false
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap interface boundaries'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#21852'
   []
   [test_bias]
@@ -41,7 +39,6 @@
     recover = false
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, with biased axial element sizes, and swap subdomain IDs'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#21852'
   []
   [prepare_mesh]
@@ -50,7 +47,6 @@
 
     requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
     issues = '#15944 #15936 #15823'
-    design = 'AdvancedExtruderGenerator.md'
   []
   [elem_flip]
     type = 'Exodiff'
@@ -61,7 +57,6 @@
     recover = false
 
     requirement = 'The system shall be able to fix the negative-volume elements by flipping them during extrusion.'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#21162'
     mesh_mode = 'REPLICATED'
   []
@@ -74,7 +69,6 @@
     recover = false
 
     requirement = 'The system shall be able to fix the negative-volume second order elements by flipping them during extrusion.'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#21162'
     mesh_mode = 'REPLICATED'
   []
@@ -86,7 +80,6 @@
     recover = false
 
     requirement = 'The system shall be able to use the result from AdvancedExtruderGenerator in subsequent mesh generators'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#16902'
     allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
@@ -96,7 +89,6 @@
     exodiff = 'advanced_extruder_with_element_extra_integer_swap_out.e'
 
     requirement = 'The system shall be able to retain and swap element extra integers during extrusion.'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#18087'
   []
   [mixed_extrude]
@@ -118,7 +110,6 @@
     recover = false
 
     requirement = 'The system shall be able to retain and swap boundary ids during extrusion.'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#21852'
     skip = 'Pending libmesh PR #4121 being merged'
   []
@@ -130,14 +121,22 @@
     recover = false
 
     requirement = 'The system shall be able to helically extrude a 2D mesh into a twisted 3D mesh.'
-    design = 'AdvancedExtruderGenerator.md'
     issues = '#25486'
   []
+  [radial_growth]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = "Mesh/extrude/end_radial_extent='${fparse 2 * sqrt(2)}' --mesh-only straight_radial_growth_in.e"
+    exodiff = 'straight_radial_growth_in.e'
+    recover = false
 
-  [errors]
-    requirement = 'The system shall error'
+    requirement = 'The system shall be able to extrude a mesh and linearly increase its radial extent as it is being extruded.'
+    issues = '#3554 #31112'
+  []
+
+  [general_errors]
+    requirement = 'The system shall error.'
     issues = '#22117'
-    design = 'AdvancedExtruderGenerator.md'
     [bad_subdomain_swap]
       type = RunException
       input = advanced_extruder_with_boundary_swap.i
@@ -167,14 +166,81 @@
       expect_err = 'The block \'1234\' was not found within the mesh'
     []
   []
+  [parameter_errors]
+    requirement = 'The system shall error if'
+    issues = '#31112'
+    [param_heights]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/heights='1 2 3' --mesh-only"
+      expect_err = 'heights cannot be set if extruding along curve!'
+      detail = 'the extrusion layer heights are specified along with a curve to extrude along,'
+    []
+    [param_biases]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/biases='1 2 3' --mesh-only"
+      expect_err = 'biases cannot be set if extruding along curve!'
+      detail = 'the extrusion layer biases are specified along with a curve to extrude along,'
+    []
+    [param_num_layers]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/num_layers='1 2 3' --mesh-only"
+      expect_err = 'num_layers cannot be set if extruding along curve!'
+      detail = 'the number of layers for each extrusion height are specified along with a curve to extrude along,'
+    []
+    [param_direction]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/direction='1 2 3' --mesh-only"
+      expect_err = 'direction cannot be set if extruding along curve!'
+      detail = 'the extrusion direction is specified along with a curve to extrude along,'
+    []
+  []
   [named_boundaries]
     type = Exodiff
     input = named_boundaries.i
     exodiff = named_boundaries_in.e
     issues = '#29908'
-    design = 'AdvancedExtruderGenerator.md'
     requirement = 'The system shall be able to assign names to the top and bottom boundaries of an extrusion.'
     cli_args = '--mesh-only'
     recover = false
+  []
+  [extrude_along_2D_curve]
+    type = Exodiff
+    input = 'extrude_along_curve_2D.i'
+    exodiff = 'extrude_along_curve_2D_in.e'
+    cli_args = '--mesh-only extrude_along_curve_2D_in.e'
+    recover = false
+    issues = '#31112'
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve.'
+  []
+  [extrude_along_2D_curve_cubic_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC --mesh-only extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    recover = false
+    issues = '#31112'
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion.'
+  []
+  [extrude_along_2D_curve_cubic_growth_var_drdt]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC Mesh/ext_along_curve/start_radial_growth_rate=1 Mesh/ext_along_curve/end_radial_growth_rate=2 --mesh-only extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    recover = false
+    issues = '#31112'
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion and prescribed radial growth rates at each endpoint.'
+  []
+  [extrude_along_2D_curve_linear_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_linear_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=LINEAR --mesh-only extrude_with_expansion_2D_curve_linear_growth_in.e'
+    recover = false
+    issues = '#31112'
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
   []
 []

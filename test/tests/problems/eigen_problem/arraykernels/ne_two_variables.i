@@ -93,6 +93,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = 'timestep_end'
+  [out]
+    type = CSV
+    execute_on = 'timestep_end'
+  []
 []

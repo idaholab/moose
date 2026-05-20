@@ -9,6 +9,8 @@
 
 ### Plant Overview
 
+!! Intentional comment to provide extra spacing
+
 Argonne National Laboratory (ANL)'s Experimental Breeder Reactor II (EBR-II) was a liquid-metal cooled reactor with a sodium-bonded metallic fuel core. EBR-II was rated for a thermal power of 62.5 MW with an electric output of approximately 20 MW. A schematic of the reactor and the primary sodium flow paths are shown in [fig:schematic]. All major primary system components were submerged in the primary tank, which contained approximately $340 m^3$ of liquid sodium at $371^o C$. Two primary pumps inside this pool provided sodium to the two inlet plena of the core. Sub-assemblies in the inner core received sodium from the high-pressure inlet plenum, accounting for approximately $85\%$ of the total primary flow. The blanket and reflector sub-assemblies in the outer blanket region received sodium from the low-pressure inlet plenum. Hot sodium exited the sub-assemblies into a common upper plenum, where it mixed before passing into the intermediate heat exchanger (IHX).
 
 !media subchannel/v&v/EBR-II/EBR-II_primary_tank.png
@@ -21,6 +23,8 @@ The reactor-vessel grid-plenum sub-assembly accommodated 637 hexagonal sub-assem
 SCM results are compared with data measured in the XX09 instrumented sub-assembly. More particularly, the code calculations are compared against temperature profile measurements in various axial elevations and the transient temperature evolution of the peak temperature in the central subchannel.
 
 ### Instrumented sub-assemblies
+
+!! Intentional comment to provide extra spacing
 
 The SHRT-17 test is a protected LOF test. This test was initiated by a trip of the primary and intermediate pumps under the rated-power of 57.3MW. The reactor was scrammed at the same time as the pump trips. As flow dissipated in the primary system after the pump trips, cooling of the core transitions from forced to natural circulation, while temperature and flow rate converge to an equilibrium state.
 
@@ -42,6 +46,8 @@ This work utilizes data measured by the instrumented sub-assembly XX09. XX09 was
 
 ### Boundary conditions
 
+!! Intentional comment to provide extra spacing
+
 The values for the inlet mass flow rate, power, and inlet coolant temperature are specified in the EBR-II SHRT benchmark [!cite](summer2012benchmark). The value of outlet pressure has been approximated based on the operation conditions of the EBR-II before the transients. These values represent the steady state conditions leading to the transients.
 
 | Experimental steady-state parameters |
@@ -62,6 +68,8 @@ During the SHRT transients, the mass flow rate and power vary. The normalized po
     caption=Transient boundary conditions
 
 ### Improvements
+
+!! Intentional comment to provide extra spacing
 
 The subchannel module SCM (formely known as Pronghorn-SC) results, were improved by two successive off-line corrections. The first correction involved calculating a more realistic radial and axial pin power profile, using a Serpent-2 simulation of the EBR-II core. The second correction involved calculating the heat flux from the edge subchannels to the inner duct of the thimble, using a Pronghorn-FV simulation and applying this heat flux in the SCM simulations. This presentation doesn't include the Pronghorn correction and focuses only on open source codes results (SCM standalone calculations). Further information can be found in [!cite](tano2024validation).
 
@@ -138,6 +146,8 @@ The Functions block defines the shape of the axial power profile:
 !listing /validation/EBR-II/XX09_SCM_SS17.i block=Functions language=moose
 
 ### Transient BC's
+
+!! Intentional comment to provide extra spacing
 
 For the transient case the user needs to provide transient boundary conditions:
 

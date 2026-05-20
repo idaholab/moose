@@ -86,7 +86,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   type = TriSubChannel1PhaseProblem
   fp = sodium
   P_out = ${P_out}
-  CT = 1.0
 
   # Solver parameters
   n_blocks = 10
@@ -98,11 +97,13 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   P_tol = 1.0e-4
   T_tol = 1.0e-8
 
-  # Heat Transfer Correlations
+  # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
   friction_closure = 'Cheng'
+  # Turbulent mixing Correlation
+  mixing_closure = 'cheng_todreas'
 
   # Output
   compute_density = true
@@ -120,6 +121,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

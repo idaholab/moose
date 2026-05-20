@@ -1,4 +1,4 @@
-# M. Fontana, et All,
+# M. Fontana, et al,
 # "Temperature distribution in the duct wall and at the exit of a 19-pin simulated lmfbr fuel assembly (ffm bundle 2a),
 # "Nuclear Technology, vol. 24, no. 2, pp. 176-200, 1974.
 T_in = 588.5
@@ -39,8 +39,6 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
-  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -48,18 +46,22 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
   # friction model
   friction_closure = 'cheng'
   full_output = true
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

@@ -69,7 +69,7 @@
             2.2 3.1 0'
     function_name = gsimple
     g_order = SIMPLE
-    outputs = exodus
+    outputs = 'out'
   [../]
   [./crosstermbarrier_low]
     type = CrossTermBarrierFunctionMaterial
@@ -79,7 +79,7 @@
             2.2 3.1 0'
     function_name = glow
     g_order = LOW
-    outputs = exodus
+    outputs = 'out'
   [../]
 []
 
@@ -95,6 +95,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = final
+  [out]
+    type = Exodus
+    execute_on = final
+  []
 []

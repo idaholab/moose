@@ -80,8 +80,6 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.08
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -94,6 +92,7 @@ P_out = 14.72e6 # Pa
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
   full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -103,6 +102,11 @@ P_out = 14.72e6 # Pa
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
     correction_factor = none
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.08
+    CT = 2.6
   []
 []
 

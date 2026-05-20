@@ -67,6 +67,8 @@ output_execute_on = 'INITIAL NONLINEAR TIMESTEP_END'
 []
 
 [Outputs]
-  csv = true
-  execute_on = ${output_execute_on}
+  [out]
+    execute_on = ${output_execute_on}
+    type = CSV
+  []
 []

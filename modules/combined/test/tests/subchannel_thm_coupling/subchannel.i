@@ -51,7 +51,6 @@ heated_length = 1.0
   fp = Sodium
   n_blocks = 1
   P_out = report_pressure_outlet
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -65,6 +64,7 @@ heated_length = 1.0
   interpolation_scheme = 'upwind'
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'Cheng'
+  mixing_closure = 'Cheng_Todreas'
 []
 
 [SCMClosures]
@@ -73,6 +73,10 @@ heated_length = 1.0
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [Cheng_Todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

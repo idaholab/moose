@@ -317,6 +317,13 @@ void dontAddCommonKSPOptions(FEProblemBase & fe_problem);
 void dontAddCommonSNESOptions(FEProblemBase & fe_problem);
 
 /**
+ * Prefixed variant: suppress common SNES options for the system identified by \p prefix
+ * (e.g. "v_sys_"). Adds the prefixed flag/key names to the blocklist so that setSolverOptions
+ * and setConvergedReasonFlags skip them for that system.
+ */
+void dontAddCommonSNESOptions(FEProblemBase & fe_problem, const std::string & prefix);
+
+/**
  * Create a matrix from a binary file. Note that the returned libMesh matrix wrapper will not
  * destroy the created matrix on destruction. \p petsc_mat must be destroyed manually via \p
  * MatDestroy

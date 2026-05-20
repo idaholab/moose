@@ -36,4 +36,6 @@ protected:
   const TriSubChannelMesh * const _tri_sch_mesh;
   /// Pointer to the quad lattice mesh
   const QuadSubChannelMesh * const _quad_sch_mesh;
+  /// Whether the triangular assembly has wire-wrap geometry
+  const bool _has_wire_wrap;
 };

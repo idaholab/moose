@@ -25,6 +25,7 @@
 class SinglePhaseFluidProperties;
 class SCMFrictionClosureBase;
 class SCMHTCClosureBase;
+class SCMMixingClosureBase;
 
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
@@ -87,6 +88,18 @@ public:
     return computeAddedHeatDuct(i_ch, iz);
   }
 
+  /// Outlet pressure postprocessor value
+  const PostprocessorValue & _P_out;
+
+  /// Get outlet pressure
+  const PostprocessorValue & getOutletPressure() const { return _P_out; }
+
+  /// Non-owning pointer to fluid properties user object
+  const SinglePhaseFluidProperties * _fp;
+
+  /// Get fluid properties object
+  const SinglePhaseFluidProperties * getSinglePhaseFluidProperties() const { return _fp; }
+
 protected:
   /// Pure virtual: daughters provide different implementations
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const = 0;
@@ -102,8 +115,10 @@ protected:
   void computeMdot(int iblock);
   /// Computes turbulent crossflow per gap for block iblock
   void computeWijPrime(int iblock);
-  /// Computes turbulent mixing coefficient
-  virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy) = 0;
+  /// Computes and validates the turbulent mixing parameter
+  Real computeMixingParameter(unsigned int i_gap, unsigned int iz) const;
+  /// Computes and validates the sweep-flow mixing parameter
+  Real computeSweepFlowMixingParameter(unsigned int i_gap, unsigned int iz) const;
   /// Computes Pressure Drop per channel for block iblock
   void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock
@@ -209,10 +224,8 @@ protected:
   bool _converged;
   /// Time step
   Real _dt;
-  /// Outlet Pressure
-  const PostprocessorValue & _P_out;
   /// Turbulent modeling parameter used in axial momentum equation
-  const Real & _CT;
+  Real _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
   /// Convergence tolerance for the temperature loop in internal solve
@@ -242,11 +255,10 @@ protected:
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin
   bool _deformation = false;
-
-  /// Fluid properties object
-  const SinglePhaseFluidProperties * _fp;
   /// Friction closure object
   const SCMFrictionClosureBase * _friction_closure;
+  /// Turbulent Mixing closure object
+  const SCMMixingClosureBase * _mixing_closure;
   /// HTC closure objects
   const SCMHTCClosureBase * _pin_HTC_closure;
   const SCMHTCClosureBase * _duct_HTC_closure;

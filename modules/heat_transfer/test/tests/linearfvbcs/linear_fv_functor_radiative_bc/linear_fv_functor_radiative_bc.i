@@ -91,6 +91,8 @@ k     = 1.0      # Thermal conductivity [W/(m-K)]
 
 [Outputs]
   file_base = 'linear_fv_functor_radiative_bc_hot_body_out'
-  csv = true
-  execute_on = final
+  [csv]
+    type = CSV
+    execute_on = final
+  []
 []

@@ -235,6 +235,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   auto set_solver_params = [this, &ex](const SolverSystem & sys)
   {
     const auto prefix = sys.prefix();
+    if (dynamic_cast<const LinearSystem *>(&sys))
+      Moose::PetscSupport::dontAddCommonSNESOptions(_problem, prefix);
     Moose::PetscSupport::storePetscOptions(_problem, prefix, ex);
     Moose::PetscSupport::setConvergedReasonFlags(_problem, prefix);
 

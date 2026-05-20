@@ -48,6 +48,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = 'NONLINEAR'
+  [out]
+    type = CSV
+    execute_on = 'NONLINEAR'
+  []
 []

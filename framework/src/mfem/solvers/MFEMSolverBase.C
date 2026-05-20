@@ -11,6 +11,7 @@
 
 #include "MFEMSolverBase.h"
 #include "MFEMProblem.h"
+#include "MFEMEigensolverBase.h"
 
 InputParameters
 MFEMSolverBase::validParams()
@@ -39,12 +40,18 @@ MFEMSolverBase::setPreconditioner(T & solver)
   if (isParamSetByUser("preconditioner"))
   {
     if (!_preconditioner)
-      _preconditioner =
-          &const_cast<MFEMSolverBase &>(getMFEMProblem().getMFEMObject<MFEMSolverBase>(
-              "MFEMSolverBase", getParam<MFEMSolverName>("preconditioner")));
+    {
+      auto & pre = const_cast<MFEMSolverBase &>(getMFEMProblem().getMFEMObject<MFEMSolverBase>(
+          "MFEMSolverBase", getParam<MFEMSolverName>("preconditioner")));
+      // Take shared ownership so the preconditioner outlives the solver
+      _preconditioner = std::static_pointer_cast<MFEMSolverBase>(pre.shared_from_this());
+    }
+
+    if (dynamic_cast<const MFEMEigensolverBase *>(_preconditioner.get()))
+      mooseError("Eigensolvers cannot be used as preconditioners.");
 
     auto & mfem_pre = _preconditioner->getSolver();
-    if constexpr (std::is_base_of_v<mfem::HypreSolver, T>)
+    if constexpr (std::is_base_of_v<mfem::HypreSolver, T> || std::is_same_v<mfem::HypreAME, T>)
       if (auto * const hypre_pre = dynamic_cast<mfem::HypreSolver *>(&mfem_pre))
         solver.SetPreconditioner(*hypre_pre);
       else
@@ -59,6 +66,15 @@ template void MFEMSolverBase::setPreconditioner(mfem::GMRESSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
+template void MFEMSolverBase::setPreconditioner(mfem::HypreLOBPCG &);
+template void MFEMSolverBase::setPreconditioner(mfem::HypreAME &);
+
+void
+MFEMSolverBase::setOperator(mfem::OperatorHandle & op)
+{
+  mooseAssert(_solver, "setOperator called before the solver was constructed");
+  _solver->SetOperator(*op);
+}
 
 void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const

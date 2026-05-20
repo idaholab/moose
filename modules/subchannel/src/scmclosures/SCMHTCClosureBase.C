@@ -9,6 +9,7 @@
 
 #include "SCMHTCClosureBase.h"
 #include "SCM.h"
+#include "SubChannelApp.h"
 
 InputParameters
 SCMHTCClosureBase::validParams()
@@ -20,6 +21,9 @@ SCMHTCClosureBase::validParams()
 SCMHTCClosureBase::SCMHTCClosureBase(const InputParameters & parameters)
   : SCMClosureBase(parameters)
 {
+  if (_subproblem.hasVariable(SubChannelApp::PIN_DIAMETER))
+    _Dpin_soln =
+        std::make_unique<SolutionHandle>(_subproblem.getVariable(0, SubChannelApp::PIN_DIAMETER));
 }
 
 NusseltPreInfo
@@ -34,14 +38,18 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
   const bool is_duct = (nusselt_args.i_pin == std::numeric_limits<unsigned int>::max());
   if (!is_duct)
   {
-    auto Dpin_soln = SolutionHandle(_subproblem.getVariable(0, "Dpin"));
-    const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-    if (Dpin_soln(pin_node) > 0)
-      D = Dpin_soln(pin_node);
+    if (_Dpin_soln)
+    {
+      const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
+      if ((*_Dpin_soln)(pin_node) > 0)
+        D = (*_Dpin_soln)(pin_node);
+      else
+        mooseError(name(),
+                   "The diameter of the pin is equal or smaller than zero, "
+                   "please initialize the auxiliary variable Dpin.");
+    }
     else
-      mooseError(name(),
-                 "The diameter of the pin is equal or smaller than zero, "
-                 "please initialize the auxiliary variable Dpin.");
+      D = _subchannel_mesh.getPinDiameter();
   }
   else
     D = _subchannel_mesh.getPinDiameter();
@@ -68,4 +76,18 @@ SCMHTCClosureBase::computeHTC(const FrictionStruct & friction_args,
   auto Nu = computeNusseltNumber(friction_args, nusselt_args);
   auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
   return Nu * k / Dh_i;
+}
+
+Real
+SCMHTCClosureBase::blendTurbulentNusseltNumber(const NusseltPreInfo & info,
+                                               const Real turbulent_nusselt) const
+{
+  if (info.Re <= info.ReL)
+    return info.laminar_Nu;
+
+  if (info.Re >= info.ReT)
+    return turbulent_nusselt;
+
+  const Real weight = (info.Re - info.ReL) / (info.ReT - info.ReL);
+  return weight * turbulent_nusselt + (1.0 - weight) * info.laminar_Nu;
 }

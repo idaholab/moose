@@ -11,7 +11,10 @@
 
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
+#include "MFEMEigenproblem.h"
+#include "EigenproblemEquationSystem.h"
 #include "EquationSystemProblemOperator.h"
+#include "EigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -38,14 +41,24 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    if (_mfem_problem.num_type == MFEMProblem::NumericType::REAL)
+    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
     {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
-      addProblemOperator(std::move(problem_operator));
+      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      {
+        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
+      else
+      {
+        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+        auto problem_operator =
+            std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+        addProblemOperator(std::move(problem_operator));
+      }
     }
-    else if (_mfem_problem.num_type == MFEMProblem::NumericType::COMPLEX)
+    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
       auto problem_operator =

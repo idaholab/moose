@@ -96,9 +96,9 @@ public:
    * Override of ExternalProblem::addVariable. Sets a
    * MFEM grid function (and time derivative, for transient problems) to be used in the MFEM solve.
    */
-  void addVariable(const std::string & var_type,
-                   const std::string & var_name,
-                   InputParameters & parameters) override;
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & var_name,
+                           InputParameters & parameters) override;
 
   /**
    * Adds one MFEM GridFunction to be used in the MFEM solve.
@@ -224,9 +224,9 @@ public:
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
    */
-  void addMFEMSolver(const std::string & user_object_name,
-                     const std::string & name,
-                     InputParameters & parameters);
+  virtual void addMFEMSolver(const std::string & user_object_name,
+                             const std::string & name,
+                             InputParameters & parameters);
 
   /**
    * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
@@ -343,6 +343,20 @@ public:
   }
 
   /**
+   * Enumerates the supported numeric representations for MFEM variables and operators.
+   */
+  enum class NumericType
+  {
+    REAL,
+    COMPLEX
+  };
+
+  /**
+   * Retrieve the numeric type of the problem.
+   */
+  NumericType getNumericType() const { return _num_type; }
+
+  /**
    * Retrieve an MFEM object from the warehouse by system and name.
    */
   template <typename T>
@@ -355,25 +369,16 @@ public:
    */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
-  /**
-   * Enumerates the supported numeric representations for MFEM variables and operators.
-   */
-  enum class NumericType
-  {
-    REAL,
-    COMPLEX
-  };
-
-  /**
-   * The numeric representation currently active for this problem.
-   */
-  NumericType num_type;
-
 protected:
   /**
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
   MFEMProblemData _problem_data;
+
+  /**
+   * The numeric representation currently active for this problem.
+   */
+  NumericType _num_type;
 };
 
 template <typename T>

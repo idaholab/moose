@@ -43,28 +43,13 @@ SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & /*friction_args
   if (pre.Pr < 0.7 || pre.Pr > 1.6e2)
     flagSolutionWarning("Prandtl number (Pr) out of range for the Dittus-Boelter correlation.");
 
-  // Laminar regime
-  if (pre.Re <= pre.ReL)
-    return pre.laminar_Nu;
-
-  // Blend transitional/turbulent using precomputed thresholds
-  auto blended_Nu = [&](Real NuT) -> Real
-  {
-    if (pre.Re >= pre.ReT)
-      return NuT;
-
-    const auto denom = (pre.ReT - pre.ReL);
-    const auto w = (pre.Re - pre.ReL) / denom;
-    return w * NuT + (1.0 - w) * pre.laminar_Nu;
-  };
-
   const auto corr = computeCorrectionFactor(pre.poD);
   const Real psi = corr.psi;
   const Real b = corr.b;
   auto NuT = 0.023 * std::pow(pre.Re, 0.8) * std::pow(pre.Pr, b);
   NuT *= psi;
 
-  return blended_Nu(NuT);
+  return blendTurbulentNusseltNumber(pre, NuT);
 }
 
 SCMHTCDittusBoelter::CorrectionResult

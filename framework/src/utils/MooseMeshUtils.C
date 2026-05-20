@@ -278,8 +278,7 @@ meshCentroidCalculator(const MeshBase & mesh)
 {
   Point centroid_pt = Point(0.0, 0.0, 0.0);
   Real vol_tmp = 0.0;
-  for (const auto & elem :
-       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     Real elem_vol = elem->volume();
     centroid_pt += (elem->true_centroid()) * elem_vol;
@@ -355,6 +354,21 @@ boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh)
   mesh.comm().sum(volume_sum);
 
   return volume_weighted_normal_sum / volume_sum;
+}
+
+Real
+computeMaxDistanceToAxis(const MeshBase & mesh,
+                         const Point & origin,
+                         const RealVectorValue & direction)
+{
+  Real distance = 0;
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(direction.norm_sq(), 1),
+              "Direction should be normalized");
+  for (const auto & node : mesh.node_ptr_range())
+    if (const auto dist_node = (*node - origin).cross(direction).norm(); dist_node > distance)
+      distance = dist_node;
+  mesh.comm().max(distance);
+  return distance;
 }
 
 std::unordered_map<dof_id_type, dof_id_type>
@@ -501,6 +515,9 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
 BoundaryID
 getNextFreeBoundaryID(MeshBase & input_mesh)
 {
+  if (!input_mesh.preparation().has_boundary_id_sets)
+    input_mesh.get_boundary_info().regenerate_id_sets();
+
   auto boundary_ids = input_mesh.get_boundary_info().get_boundary_ids();
   if (boundary_ids.empty())
     return 0;
@@ -1249,8 +1266,17 @@ copyIntoMesh(MeshGenerator & mg,
     // Note: if performance becomes an issue, this is overkill for just getting the max node id
     std::set<subdomain_id_type> source_ids;
     std::set<subdomain_id_type> dest_ids;
+
+    // We need source subdomain ids already cached; libMesh will
+    // scream otherwise
     source.subdomain_ids(source_ids, true);
+
+    // Our destination is non-const, so we can fix any missing caches
+    if (!destination.preparation().has_cached_elem_data)
+      destination.cache_elem_data();
+
     destination.subdomain_ids(dest_ids, true);
+
     mooseAssert(source_ids.size(), "Should have a subdomain");
     mooseAssert(dest_ids.size(), "Should have a subdomain");
     unsigned int max_dest_bid = *dest_ids.rbegin();

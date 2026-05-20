@@ -66,5 +66,9 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type=Exodus
+    file_base=tosub_parent_out_sub0 # Hack the naming system
+    max_output_name_length = 32 # For old gold file
+  []
 []

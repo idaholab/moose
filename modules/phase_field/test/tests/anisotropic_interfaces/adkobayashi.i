@@ -74,7 +74,7 @@
     expression = 'm:=alpha/pi * atan(gamma * (T_e - T)); 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * '
                'w^2'
     derivative_order = 1
-    outputs = exodus
+    outputs = 'out'
   []
   [material]
     type = ADInterfaceOrientationMaterial
@@ -103,7 +103,8 @@
 []
 
 [Outputs]
-  exodus = true
-  perf_graph = true
-  execute_on = 'INITIAL FINAL'
+  [out]
+    type = Exodus
+    execute_on = 'INITIAL FINAL'
+  []
 []

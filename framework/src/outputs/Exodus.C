@@ -84,6 +84,25 @@ Exodus::validParams()
   // files that non-HDF5 Moose builds can't read)
   params.addParam<bool>("write_hdf5", false, "Enables HDF5 output format for Exodus files.");
 
+  // Set output of names to be truncated to a certain character count.
+  // libMesh+ExodusII currently supports up to 80, so we would like to
+  // default to that to avoid truncation when possible.
+  //
+  // We used to truncate at 32, so we make this user-configurable to
+  // make it easier to match old gold files.
+  //
+  // We're still defaulting to 32 until our apps in CI start using
+  // this option (and/or re-golding) downstream.
+  //
+  // If someone tries to set truncation at less than 32 they're
+  // probably making a mistake.
+  params.addRangeCheckedParam<unsigned int>("max_output_name_length",
+                                            32,
+                                            "32<=max_output_name_length<=80",
+                                            "Maximum length for names in Exodus file output.");
+
+  params.addParamNamesToGroup("write_hdf5 max_output_name_length", "Advanced");
+
   // Need a layer of geometric ghosting for mesh serialization
   params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC);
@@ -105,7 +124,8 @@ Exodus::Exodus(const InputParameters & parameters)
     _output_dimension(getParam<MooseEnum>("output_dimension").getEnum<OutputDimension>()),
     _discontinuous(getParam<bool>("discontinuous")),
     _side_discontinuous(getParam<bool>("side_discontinuous")),
-    _write_hdf5(getParam<bool>("write_hdf5"))
+    _write_hdf5(getParam<bool>("write_hdf5")),
+    _max_output_name_length(getParam<unsigned int>("max_output_name_length"))
 {
   if (isParamValid("use_problem_dimension"))
   {
@@ -230,6 +250,8 @@ Exodus::outputSetup()
   {
     _exodus_io_ptr->set_hdf5_writing(false);
   }
+
+  _exodus_io_ptr->set_max_name_length(_max_output_name_length);
 
   if (_side_discontinuous)
     _exodus_io_ptr->write_added_sides(true);

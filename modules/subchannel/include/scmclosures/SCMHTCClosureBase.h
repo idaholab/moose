@@ -12,6 +12,8 @@
 #include "SCMClosureBase.h"
 #include "SubChannel1PhaseProblem.h"
 
+#include <memory>
+
 /// structure that holds the needed data to calculate intermediate data needed to calculate the Nusselt number.
 struct NusseltPreInfo
 {
@@ -54,4 +56,11 @@ public:
   Real computeHTC(const FrictionStruct & friction_info,
                   const NusseltStruct & nusselt_info,
                   const Real conduction_k) const;
+
+protected:
+  /// Blends turbulent Nusselt number through the transition range using the base laminar value.
+  Real blendTurbulentNusseltNumber(const NusseltPreInfo & nusselt_info,
+                                   const Real turbulent_nusselt) const;
+
+  std::unique_ptr<SolutionHandle> _Dpin_soln;
 };
