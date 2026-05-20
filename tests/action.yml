@@ -57,7 +57,11 @@ runs:
         fi
 
         export MOOSE_TERM_FORMAT=tmpnsc
-        export DISPLAY=
+
+        if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+          export DISPLAY=
+          export MPLBACKEND=Agg
+        fi
 
         echo "::endgroup::"
 
