@@ -66,6 +66,9 @@ protected:
   /// If true calculate the deformation gradient derivatives for F_bar
   const bool _stabilize_strain;
 
+  /// Generalized-midpoint weight. Must match the strain calculator's alpha.
+  const Real _kinematic_alpha;
+
   /// Prepend to the material properties
   const std::string _base_name;
 
@@ -95,8 +98,13 @@ protected:
   /// The inverse deformation gradient
   const MaterialProperty<RankTwoTensor> & _F_inv;
 
-  /// The actual (stabilized) deformation gradient
+  /// The actual (stabilized) deformation gradient. With the generalized midpoint rule this is the
+  /// alpha-weighted F, NOT the literal F at n+1.
   const MaterialProperty<RankTwoTensor> & _F;
+
+  /// The literal deformation gradient at n+1 (I + grad u_{n+1}), independent of alpha and F-bar.
+  /// Used by the UL kernel to convert spatial gradients to reference-frame gradients.
+  const MaterialProperty<RankTwoTensor> & _F_actual;
 
   /// Derivative of the spatial velocity gradient increment w.r.t. F_{n+1}
   const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;

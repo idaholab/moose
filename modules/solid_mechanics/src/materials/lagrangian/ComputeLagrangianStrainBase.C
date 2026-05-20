@@ -19,6 +19,12 @@ ComputeLagrangianStrainBase<G>::baseParams()
   params.addParam<bool>(
       "large_kinematics", false, "Use large displacement kinematics in the kernel.");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
+  params.addRangeCheckedParam<Real>(
+      "alpha",
+      1.0,
+      "alpha >= 0.5 & alpha <= 1.0",
+      "Generalized midpoint weight for the deformation gradient. 1.0 = backward Euler (default), "
+      "0.5 = midpoint rule (matches Abaqus/Implicit).");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", {}, "List of eigenstrains to account for");
   params.addParam<std::vector<MaterialPropertyName>>(
@@ -43,6 +49,7 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
+    _alpha(getParam<Real>("alpha")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _eigenstrains_old(_eigenstrain_names.size()),
@@ -55,6 +62,7 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
         declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
     _vorticity_increment(declareProperty<RankTwoTensor>(_base_name + "vorticity_increment")),
     _F_ust(declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_actual(declareProperty<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
     _F_avg(declareProperty<RankTwoTensor>(_base_name + "average_deformation_gradient")),
     _F(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
@@ -69,6 +77,16 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _homogenization_contributions(_homogenization_gradient_names.size()),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment"))
 {
+  // Couple old displacements only when the simulation is transient. With a Steady executioner
+  // there is no "previous step", and the generalized midpoint rule treats the old state as
+  // the undeformed reference (u_n = 0, grad u_n = 0, so F_n = I). The (1 - alpha) contribution
+  // is then identically zero and we skip it in computeQpUnstabilizedDeformationGradient.
+  if (_fe_problem.isTransient())
+  {
+    _disp_old = coupledValuesOld("displacements");
+    _grad_disp_old = coupledGradientsOld("displacements");
+  }
+
   // Setup eigenstrains
   for (auto i : make_range(_eigenstrain_names.size()))
   {
@@ -140,8 +158,9 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
   }
 
-  // dF/d(grad u_{n+1}) = I^{(4)} for backward Euler. Step 1 will scale this by alpha.
-  _d_F_d_grad_u[_qp] = RankFourTensor::IdentityFour();
+  // dF/d(grad u_{n+1}) = alpha * I^{(4)} for the generalized midpoint rule
+  // (alpha = 1.0 reduces to backward Euler).
+  _d_F_d_grad_u[_qp] = _alpha * RankFourTensor::IdentityFour();
 
   computeQpIncrementalStrains(dL);
 }
@@ -184,9 +203,38 @@ template <class G>
 void
 ComputeLagrangianStrainBase<G>::computeQpUnstabilizedDeformationGradient()
 {
+  // Generalized midpoint: F^alpha_{n+1} = I + alpha * (grad u_{n+1}, u_{n+1})
+  //                                         + (1 - alpha) * (grad u_n, u_n).
+  // alpha = 1.0 reduces to backward Euler (no old contribution). With a Steady executioner
+  // the old displacement is treated as identically zero (F_n = I), so we skip the old call
+  // entirely - this lets a user run with alpha != 1 in steady mode as well.
   _F_ust[_qp].setToIdentity();
+  const bool include_old = _alpha != 1.0 && _fe_problem.isTransient();
   for (auto component : make_range(_ndisp))
+  {
     G::addGradOp(_F_ust[_qp],
+                 component,
+                 _alpha * (*_grad_disp[component])[_qp],
+                 _alpha * (*_disp[component])[_qp],
+                 _q_point[_qp]);
+    if (include_old)
+      G::addGradOp(_F_ust[_qp],
+                   component,
+                   (1.0 - _alpha) * (*_grad_disp_old[component])[_qp],
+                   (1.0 - _alpha) * (*_disp_old[component])[_qp],
+                   _q_point[_qp]);
+  }
+}
+
+template <class G>
+void
+ComputeLagrangianStrainBase<G>::computeQpActualDeformationGradient()
+{
+  // The literal deformation gradient at n+1 (no alpha weighting, no F-bar). For alpha = 1
+  // this is identical to _F_ust.
+  _F_actual[_qp].setToIdentity();
+  for (auto component : make_range(_ndisp))
+    G::addGradOp(_F_actual[_qp],
                  component,
                  (*_grad_disp[component])[_qp],
                  (*_disp[component])[_qp],
@@ -201,6 +249,7 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     computeQpUnstabilizedDeformationGradient();
+    computeQpActualDeformationGradient();
     _F[_qp] = _F_ust[_qp];
   }
 

@@ -101,8 +101,12 @@ Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                       unsigned int beta)
 {
-  // J_{alpha beta} = phi^alpha_{i, J} T_{iJkL} G^beta_{kL}
-  return gradTest(alpha).doubleContraction(_dpk1[_qp] * gradTrial(beta));
+  // J_{alpha beta} = kinematic_alpha * phi^alpha_{i, J} T_{iJkL} G^beta_{kL}
+  // The pk1_jacobian _dpk1 = dP/dF^alpha where F^alpha is the alpha-weighted F that the
+  // material consumes. The chain rule from F^alpha to grad u_{n+1} introduces the
+  // kinematic_alpha factor (= 1 for backward Euler, the default).
+  return _kinematic_alpha *
+         gradTest(alpha).doubleContraction(_dpk1[_qp] * gradTrial(beta));
 }
 
 template <class G>

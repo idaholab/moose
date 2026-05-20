@@ -77,4 +77,48 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
                   'stabilization, and Neumann BCs in 1D centrosymmetric spherical coordinates'
   []
+  [dirichlet_large_unstabilized_alpha05]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
+               "GlobalParams/alpha=0.5"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
+                  'without stabilization, Dirichlet BCs, and the generalized midpoint rule '
+                  '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
+  []
+  [dirichlet_large_stabilized_alpha05]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "GlobalParams/alpha=0.5"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
+                  'with stabilization, Dirichlet BCs, and the generalized midpoint rule '
+                  '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
+  []
+  [neumann_large_unstabilized_alpha05]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
+               "GlobalParams/alpha=0.5"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
+                  'without stabilization, Neumann BCs, and the generalized midpoint rule '
+                  '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
+  []
+  [neumann_large_stabilized_alpha05]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "GlobalParams/alpha=0.5"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
+                  'with stabilization, Neumann BCs, and the generalized midpoint rule '
+                  '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
+  []
 []

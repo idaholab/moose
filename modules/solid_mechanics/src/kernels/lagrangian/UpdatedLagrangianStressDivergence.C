@@ -120,10 +120,19 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
 
-  // Build the variation in the reference-frame displacement gradient. In the large kinematics
-  // UL formulation grad_trial is the spatial gradient of the trial function, so we pull it back
-  // through F to recover the reference-frame variation.
-  const RankTwoTensor delta_grad_u = _large_kinematics ? grad_trial * _F[_qp] : grad_trial;
+  // Build the variation in the reference-frame displacement gradient. In UL with
+  // large_kinematics, grad_trial is the spatial gradient of the trial function in the literal
+  // n+1 configuration. The pull-back to the reference frame is grad_trial * F_actual.
+  //
+  // Special case: when alpha = 1 we use _F instead, which equals F_actual when F-bar is off
+  // and equals F_stab when F-bar is on. With F-bar, the kernel relies on the "self-consistent"
+  // f^{-1}_stab * grad_trial pattern - using _F here cancels the F_stab^{-1} factor in the
+  // stored d(dL)/dF and gives the correct Newton-convergent Jacobian (the same approximation
+  // the kernel has always used for F-bar). For alpha != 1 we must use F_actual: the chain rule
+  // explicitly carries the alpha factor through _d_F_d_grad_u and needs the literal F_{n+1}
+  // for the pull-back to be mathematically correct.
+  const RankTwoTensor & F_pullback = (_kinematic_alpha == 1.0) ? _F[_qp] : _F_actual[_qp];
+  const RankTwoTensor delta_grad_u = _large_kinematics ? grad_trial * F_pullback : grad_trial;
   // Chain through the stored kinematic derivatives.
   const RankTwoTensor delta_F = _d_F_d_grad_u[_qp] * delta_grad_u;
   const RankTwoTensor delta_dL = _d_spatial_velocity_increment_d_F[_qp] * delta_F;
