@@ -67,11 +67,10 @@ protected:
   // @}
 
 private:
-  /// The unstabilized trial function gradient
+  /// The unstabilized trial function gradient. F-bar stabilization is handled explicitly in
+  /// computeQpJacobianDisplacement via the strain-calculator F-bar partials, so the UL kernel
+  /// does not need a separate gradTrialStabilized helper.
   virtual RankTwoTensor gradTrialUnstabilized(unsigned int component);
-
-  /// The stabilized trial function gradient
-  virtual RankTwoTensor gradTrialStabilized(unsigned int component);
 };
 
 template <>

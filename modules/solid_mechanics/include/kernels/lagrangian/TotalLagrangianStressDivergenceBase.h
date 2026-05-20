@@ -44,9 +44,16 @@ protected:
   /// The 1st Piola-Kirchhoff stress
   const MaterialProperty<RankTwoTensor> & _pk1;
 
-  /// The derivative of the PK1 stress with respect to the
-  /// deformation gradient
+  /// The derivative of the PK1 stress with respect to the deformation gradient (F that the
+  /// stress material consumed, i.e. the alpha-weighted F under the generalized midpoint rule).
+  /// Used by the homogenization macro-var Jacobian path, which couples to F directly.
   const MaterialProperty<RankFourTensor> & _dpk1;
+
+  /// The derivative of the PK1 stress with respect to the displacement gradient (grad u_{n+1}).
+  /// Equals _dpk1 * _d_F_d_grad_u, populated in ComputeLagrangianStressBase::computeQpProperties.
+  /// Used by the TL displacement Jacobian so the kernel does not need to know about the
+  /// generalized-alpha kinematic policy.
+  const MaterialProperty<RankFourTensor> & _dpk1_d_grad_u;
 
 private:
   /// The unstabilized trial function gradient

@@ -24,7 +24,8 @@ TotalLagrangianStressDivergenceBase<G>::TotalLagrangianStressDivergenceBase(
     const InputParameters & parameters)
   : LagrangianStressDivergenceBase(parameters),
     _pk1(getMaterialPropertyByName<RankTwoTensor>(_base_name + "pk1_stress")),
-    _dpk1(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian"))
+    _dpk1(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian")),
+    _dpk1_d_grad_u(getMaterialPropertyByName<RankFourTensor>(_base_name + "dpk1_d_grad_u"))
 {
 }
 
@@ -101,12 +102,10 @@ Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                       unsigned int beta)
 {
-  // J_{alpha beta} = kinematic_alpha * phi^alpha_{i, J} T_{iJkL} G^beta_{kL}
-  // The pk1_jacobian _dpk1 = dP/dF^alpha where F^alpha is the alpha-weighted F that the
-  // material consumes. The chain rule from F^alpha to grad u_{n+1} introduces the
-  // kinematic_alpha factor (= 1 for backward Euler, the default).
-  return _kinematic_alpha *
-         gradTest(alpha).doubleContraction(_dpk1[_qp] * gradTrial(beta));
+  // J_{alpha beta} = phi^alpha_{i, J} T_{iJkL} G^beta_{kL}
+  // _dpk1_d_grad_u = d(PK1)/d(grad u_{n+1}) already incorporates the generalized-alpha
+  // kinematic policy via _d_F_d_grad_u (see ComputeLagrangianStressBase::computeQpProperties).
+  return gradTest(alpha).doubleContraction(_dpk1_d_grad_u[_qp] * gradTrial(beta));
 }
 
 template <class G>

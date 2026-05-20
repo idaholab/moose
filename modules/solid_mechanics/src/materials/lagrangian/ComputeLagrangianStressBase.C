@@ -28,7 +28,10 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _cauchy_stress(declareProperty<RankTwoTensor>(_base_name + "cauchy_stress")),
     _cauchy_jacobian(declareProperty<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _pk1_stress(declareProperty<RankTwoTensor>(_base_name + "pk1_stress")),
-    _pk1_jacobian(declareProperty<RankFourTensor>(_base_name + "pk1_jacobian"))
+    _pk1_jacobian(declareProperty<RankFourTensor>(_base_name + "pk1_jacobian")),
+    _dpk1_d_grad_u(declareProperty<RankFourTensor>(_base_name + "dpk1_d_grad_u")),
+    _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_deformation_gradient_d_grad_displacement"))
 {
 }
 
@@ -42,4 +45,8 @@ void
 ComputeLagrangianStressBase::computeQpProperties()
 {
   computeQpStressUpdate();
+  // Chain the kinematic policy into the PK1 Jacobian so the TL kernel consumes a single
+  // d(PK1)/d(grad u) property and doesn't need to know about the generalized-alpha weighting.
+  // For alpha = 1 (default) this is _pk1_jacobian itself.
+  _dpk1_d_grad_u[_qp] = _pk1_jacobian[_qp] * _d_F_d_grad_u[_qp];
 }

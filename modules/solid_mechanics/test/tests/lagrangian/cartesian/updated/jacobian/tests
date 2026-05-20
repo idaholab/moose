@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+  [jacobian_large_no_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization (default alpha = 1.0).'
+  []
+  [jacobian_large_with_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization (default alpha = 1.0). Exercises the new explicit '
+                  'F-bar tangent path that replaced the self-consistent f^{-1} * grad_trial '
+                  'approximation.'
+  []
+  [jacobian_large_no_stab_alpha05]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'without stabilization and the generalized midpoint rule (alpha = 0.5).'
+  []
+  [jacobian_large_with_stab_alpha05]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/alpha=0.5"
+    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+                  'with F-bar stabilization and the generalized midpoint rule (alpha = 0.5). '
+                  'This case specifically exercises the combined F-bar + alpha != 1 chain that '
+                  'the explicit F-bar tangent and removed kernel-side alpha parameter together '
+                  'unlock.'
+  []
+[]
