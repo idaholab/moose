@@ -18,4 +18,13 @@
     requirement = 'The system shall assert that a UserObject getter was called too early when a UserObject is requested before UserObjects have been constructed.'
     issues = '#28131'
   []
+
+  [get_vector_postprocessor_too_early]
+    type = RunException
+    input = get_vector_postprocessor_too_early.i
+    capabilities = 'method=dbg'
+    expect_err = "A VectorPostprocessor getter was called before VectorPostprocessors have been constructed"
+    requirement = 'The system shall assert that a VectorPostprocessor getter was called too early when a VectorPostprocessor is requested before VectorPostprocessors have been constructed.'
+    issues = '#28131'
+  []
 []

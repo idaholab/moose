@@ -4883,7 +4883,16 @@ FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_nam
       .queryInto(objs);
 
   if (objs.empty())
+  {
+    mooseAssert(
+        getMooseApp().actionWarehouse().isTaskComplete("add_vector_postprocessor"),
+        "A VectorPostprocessor getter was called before VectorPostprocessors have been "
+        "constructed. The requested VectorPostprocessor '" +
+            object_name +
+            "' may exist in the input file, but VectorPostprocessors are not available yet.");
+
     mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
+  }
   mooseAssert(objs.size() == 1,
               "We shouldn't find more than one vector postprocessor object for a given name");
   return *(objs[0]);
