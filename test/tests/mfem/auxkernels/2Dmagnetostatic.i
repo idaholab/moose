@@ -1,6 +1,6 @@
 [Mesh]
     type = MFEMMesh
-    file = ../mesh/2D_wire_crossection.e
+    file = ../mesh/hinomaru.e
 []
 
 [Problem]
@@ -89,7 +89,7 @@
   [B_from_gradAz]
     type = MFEMNDtoRTAux
     variable = B
-    nd_source = gradAz
+    source = gradAz
     scale_factor = 1.0
   []
 []
@@ -98,7 +98,7 @@
   [essential]
     type = MFEMScalarDirichletBC
     variable = Az
-    boundary = 1
+    boundary = outer
     coefficient = 1
   []
 []
