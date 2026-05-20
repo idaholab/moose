@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#32963'
+  design = 'source/bcs/BoundaryIntegralValueConstraint.md'
+
+  [average_value]
+    type = CSVDiff
+    input = 'boundary_integral_value_constraint.i'
+    csvdiff = 'boundary_integral_value_constraint_out.csv'
+    abs_zero = 1e-12
+    requirement = 'The system shall enforce prescribed finite element boundary average values using scalar Lagrange multipliers.'
+  []
+
+  [residual_and_jacobian_together]
+    type = CSVDiff
+    input = 'boundary_integral_value_constraint.i'
+    cli_args = 'Executioner/residual_and_jacobian_together=true Outputs/file_base=boundary_integral_value_constraint_rj_out'
+    csvdiff = 'boundary_integral_value_constraint_rj_out.csv'
+    abs_zero = 1e-12
+    requirement = 'The system shall enforce prescribed finite element boundary average values when computing the residual and Jacobian together.'
+  []
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'boundary_integral_value_constraint.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-7
+    run_sim = True
+    cli_args = 'Outputs/csv=false'
+    prereq = average_value
+    requirement = 'The system shall compute the complete saddle-point Jacobian for finite element boundary average constraints.'
+  []
+
+  [jacobian_residual_and_jacobian_together]
+    type = PetscJacobianTester
+    input = 'boundary_integral_value_constraint.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-7
+    run_sim = True
+    cli_args = 'Executioner/residual_and_jacobian_together=true Outputs/csv=false'
+    prereq = residual_and_jacobian_together
+    requirement = 'The system shall compute the complete saddle-point Jacobian for finite element boundary average constraints when computing the residual and Jacobian together.'
+  []
+[]
