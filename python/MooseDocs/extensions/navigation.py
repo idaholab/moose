@@ -424,16 +424,10 @@ class NavigationExtension(Extension):
                     # "source/actions/Action.md") so the breadcrumb is still clickable.
                     link_url = self._sourceLinkURL(current.name, page)
                     if link_url is not None:
-                        html.Tag(
-                            div,
-                            "a",
-                            href=link_url,
-                            class_="breadcrumb",
-                            string=current.name,
-                        )
+                        tag = html.Tag(div, "a", href=link_url, class_="breadcrumb")
                     else:
-                        span = html.Tag(div, "span", class_="breadcrumb")
-                        html.String(span, content=current.name)
+                        tag = html.Tag(div, "span", class_="breadcrumb")
+                    html.String(tag, content=current.name)
 
             elif isinstance(current, pages.File) and current.name != "index.md":
                 url = os.path.relpath(
