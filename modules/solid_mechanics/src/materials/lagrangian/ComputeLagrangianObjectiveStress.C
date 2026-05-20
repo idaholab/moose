@@ -31,6 +31,8 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
     _small_stress(declareProperty<RankTwoTensor>(_base_name + "small_stress")),
     _small_stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "small_stress")),
     _small_jacobian(declareProperty<RankFourTensor>(_base_name + "small_jacobian")),
+    _dcauchy_stress_d_eigenstrain(
+        declareProperty<RankFourTensor>(_base_name + "dcauchy_stress_d_eigenstrain")),
     _cauchy_stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "cauchy_stress")),
     _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
@@ -76,6 +78,9 @@ ComputeLagrangianObjectiveStress::computeQpCauchyStress()
   {
     _cauchy_stress[_qp] = _small_stress[_qp];
     _cauchy_jacobian[_qp] = _small_jacobian[_qp];
+    // Small kinematics: no objective advection. dsigma/d_eigenstrain = -small_jacobian
+    // (the negative because mechanical_strain = total_strain - eigenstrain).
+    _dcauchy_stress_d_eigenstrain[_qp] = -_small_jacobian[_qp];
   }
   else
   {
@@ -101,6 +106,10 @@ ComputeLagrangianObjectiveStress::objectiveUpdateTruesdell(const RankTwoTensor &
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dL);
+  // d_sigma/d_eigenstrain = -Jinv * small_jacobian. The negative sign comes from
+  // mechanical_strain = total_strain - eigenstrain (an eigenstrain increase reduces
+  // the mechanical strain that drives small_stress).
+  _dcauchy_stress_d_eigenstrain[_qp] = -Jinv * _small_jacobian[_qp];
 
   // Get the appropriate tangent tensor
   RankFourTensor U = stressAdvectionDerivative(S);
@@ -120,6 +129,10 @@ ComputeLagrangianObjectiveStress::objectiveUpdateJaumann(const RankTwoTensor & d
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dW);
+  // d_sigma/d_eigenstrain = -Jinv * small_jacobian. The negative sign comes from
+  // mechanical_strain = total_strain - eigenstrain (an eigenstrain increase reduces
+  // the mechanical strain that drives small_stress).
+  _dcauchy_stress_d_eigenstrain[_qp] = -Jinv * _small_jacobian[_qp];
 
   // Get the appropriate tangent tensor
   RankTwoTensor I = RankTwoTensor::Identity();
@@ -144,6 +157,10 @@ ComputeLagrangianObjectiveStress::objectiveUpdateGreenNaghdi(const RankTwoTensor
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dO);
+  // d_sigma/d_eigenstrain = -Jinv * small_jacobian. The negative sign comes from
+  // mechanical_strain = total_strain - eigenstrain (an eigenstrain increase reduces
+  // the mechanical strain that drives small_stress).
+  _dcauchy_stress_d_eigenstrain[_qp] = -Jinv * _small_jacobian[_qp];
 
   // Get the appropriate tangent tensor
   RankFourTensor d_R_d_F = (*_d_rotation_d_def_grad)[_qp];
