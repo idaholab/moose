@@ -51,8 +51,8 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _deformation_gradient_increment(
-        declareProperty<RankTwoTensor>(_base_name + "spatial_deformation_gradient_increment")),
+    _spatial_velocity_increment(
+        declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
     _vorticity_increment(declareProperty<RankTwoTensor>(_base_name + "vorticity_increment")),
     _F_ust(declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _F_avg(declareProperty<RankTwoTensor>(_base_name + "average_deformation_gradient")),
@@ -60,6 +60,10 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _F_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _f_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_incremental_deformation_gradient")),
+    _d_spatial_velocity_increment_d_F(declareProperty<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_F_d_grad_u(declareProperty<RankFourTensor>(
+        _base_name + "d_deformation_gradient_d_grad_displacement")),
     _homogenization_gradient_names(
         getParam<std::vector<MaterialPropertyName>>("homogenization_gradient_names")),
     _homogenization_contributions(_homogenization_gradient_names.size()),
@@ -114,11 +118,16 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
   // If the kernel is large deformation then we need the "actual"
   // kinematic quantities
   RankTwoTensor dL;
+  usingTensorIndices(k_, l_, m_, n_);
   if (_large_kinematics)
   {
     _F_inv[_qp] = _F[_qp].inverse();
     _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
     dL = RankTwoTensor::Identity() - _f_inv[_qp];
+
+    // d(dL)_{kl}/dF_{mn} = f^{-1}_{km} * F^{-1}_{nl} for the linear approximation dL = I - f^{-1}.
+    _d_spatial_velocity_increment_d_F[_qp] =
+        _f_inv[_qp].template times<k_, m_, n_, l_>(_F_inv[_qp]);
   }
   // For small deformations we just provide the identity
   else
@@ -126,7 +135,13 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _F_inv[_qp] = RankTwoTensor::Identity();
     _f_inv[_qp] = RankTwoTensor::Identity();
     dL = _F[_qp] - _F_old[_qp];
+
+    // d(dL)/dF = I^{(4)} when dL = F - F_old.
+    _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
   }
+
+  // dF/d(grad u_{n+1}) = I^{(4)} for backward Euler. Step 1 will scale this by alpha.
+  _d_F_d_grad_u[_qp] = RankFourTensor::IdentityFour();
 
   computeQpIncrementalStrains(dL);
 }
@@ -138,6 +153,9 @@ ComputeLagrangianStrainBase<G>::computeQpIncrementalStrains(const RankTwoTensor 
   // Get the deformation increments
   _strain_increment[_qp] = (dL + dL.transpose()) / 2.0;
   _vorticity_increment[_qp] = (dL - dL.transpose()) / 2.0;
+  // Full kinematic spatial velocity gradient increment, before any eigenstrain subtraction.
+  // The objective-rate advection in ComputeLagrangianObjectiveStress consumes this.
+  _spatial_velocity_increment[_qp] = dL;
 
   // Increment the total strain
   _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
@@ -149,9 +167,6 @@ ComputeLagrangianStrainBase<G>::computeQpIncrementalStrains(const RankTwoTensor 
 
   // Increment the mechanical strain
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
-
-  // Yes, this does make sense to do it here
-  _deformation_gradient_increment[_qp] = _vorticity_increment[_qp] + _strain_increment[_qp];
 
   // Faked rotation increment for ComputeStressBase materials
   _rotation_increment[_qp] = RankTwoTensor::Identity();

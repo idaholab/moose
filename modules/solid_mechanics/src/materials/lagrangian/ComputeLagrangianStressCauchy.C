@@ -25,7 +25,9 @@ ComputeLagrangianStressCauchy::ComputeLagrangianStressCauchy(const InputParamete
                                                      "inverse_incremental_deformation_gradient")),
     _inv_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
-    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
+    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient"))
 {
 }
 
@@ -47,9 +49,12 @@ ComputeLagrangianStressCauchy::computeQpPK1Stress()
     usingTensorIndices(i_, j_, k_, l_);
     _pk1_jacobian[_qp] = _pk1_stress[_qp].outerProduct(_inv_def_grad[_qp].transpose());
     _pk1_jacobian[_qp] -= _pk1_stress[_qp].times<i_, l_, j_, k_>(_inv_def_grad[_qp]);
+    // Chain the stored d(dL)/dF derivative explicitly instead of baking in the
+    // linear-approximation factor f^{-1} that used to appear in the middle of the
+    // tripleProductJkl call.
     _pk1_jacobian[_qp] +=
-        _F[_qp].det() * _cauchy_jacobian[_qp].tripleProductJkl(
-                            _inv_def_grad[_qp], _inv_df[_qp].transpose(), _inv_def_grad[_qp]);
+        _F[_qp].det() * (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp])
+                            .singleProductJ(_inv_def_grad[_qp]);
   }
   else
   {

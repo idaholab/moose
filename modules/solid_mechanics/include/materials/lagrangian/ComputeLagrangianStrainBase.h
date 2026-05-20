@@ -113,6 +113,14 @@ protected:
   /// Inverse incremental deformation gradient
   MaterialProperty<RankTwoTensor> & _f_inv;
 
+  /// Derivative of the spatial velocity gradient increment with respect to F_{n+1}.
+  /// Stored so downstream consumers do not bake in the linear-approximation assumption.
+  MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+
+  /// Derivative of F_{n+1} with respect to the displacement gradient.
+  /// Identity for backward Euler; will become alpha * Identity for the generalized midpoint rule.
+  MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
+
   /// Names of any extra homogenization gradients
   std::vector<MaterialPropertyName> _homogenization_gradient_names;
 

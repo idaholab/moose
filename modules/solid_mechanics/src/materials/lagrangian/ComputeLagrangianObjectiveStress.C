@@ -36,6 +36,10 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _vorticity_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "vorticity_increment")),
+    _spatial_velocity_increment(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
+    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
     _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _def_grad_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _rate(getParam<MooseEnum>("objective_rate").getEnum<ObjectiveRate>()),
@@ -92,8 +96,8 @@ ComputeLagrangianObjectiveStress::computeQpCauchyStress()
 RankTwoTensor
 ComputeLagrangianObjectiveStress::objectiveUpdateTruesdell(const RankTwoTensor & dS)
 {
-  // Get the kinematic tensor
-  RankTwoTensor dL = RankTwoTensor::Identity() - _inv_df[_qp];
+  // Use the stored full kinematic spatial velocity gradient increment.
+  const RankTwoTensor & dL = _spatial_velocity_increment[_qp];
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dL);
@@ -143,7 +147,9 @@ ComputeLagrangianObjectiveStress::objectiveUpdateGreenNaghdi(const RankTwoTensor
 
   // Get the appropriate tangent tensor
   RankFourTensor d_R_d_F = (*_d_rotation_d_def_grad)[_qp];
-  RankFourTensor d_F_d_dL = _inv_df[_qp].inverse().times<i, k, l, j>(_def_grad[_qp]);
+  // dF/d(dL) as the inverse of the stored d(dL)/dF, so this no longer hardcodes the
+  // I - f^{-1} approximation.
+  RankFourTensor d_F_d_dL = _d_spatial_velocity_increment_d_F[_qp].inverse();
   RankTwoTensor T = (*_rotation_old)[_qp].transpose() * _inv_df[_qp];
   RankFourTensor d_dO_d_dL =
       T.times<m, j, i, m, k, l>(d_R_d_F * d_F_d_dL) - dR.times<i, k, j, l>(I);
