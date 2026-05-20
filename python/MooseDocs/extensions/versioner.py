@@ -11,10 +11,10 @@ import os
 import re
 import threading
 import sys
+from typing import Optional
 
 import MooseDocs
 from ..common import exceptions
-from ..tree import tokens
 from . import core, command
 
 # Needed to load the Versioner
@@ -54,6 +54,7 @@ class VersionerExtension(command.CommandExtension):
         self.requires(core, command)
         self.addCommand(reader, VersionerCodeReplace())
         self.addCommand(reader, VersionerVersionReplace())
+        self.addCommand(reader, VersionerFullVersionReplace())
         self.addCommand(reader, VersionerCondaVersionReplace())
 
     def getVersion(self, package_name, versioner_keys, must_exist=True):
@@ -130,18 +131,47 @@ class VersionerCodeReplace(command.CommandComponent):
 class VersionerReplaceBase(command.CommandComponent):
     COMMAND = "versioner"
 
+    VERSIONER_KEYS: Optional[list[str]] = None
+    """
+    Keys in the Versioner to use for creating the token.
+
+    Set in derived classes.
+    """
+
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["package"] = (None, "The package to get the version of")
+        settings["package"] = (None, "The package to get the version of.")
+        settings["url"] = (
+            None,
+            "If provided, prefix the version with the url to create a link.",
+        )
+        settings["prefix"] = (None, "Prefix to add to the version.")
         return settings
 
-    def createTokenBase(self, parent, info, package, settings, versioner_keys):
+    def createToken(self, parent, info, page, settings):
         package = settings.get("package")
         if package is None:
             raise exceptions.MooseDocsException('Missing required option "package"')
-        version = self.extension.getVersion(package, versioner_keys, True)
-        tokens.String(parent, content=str(version))
+
+        assert isinstance(self.VERSIONER_KEYS, list)
+        assert all(isinstance(v, str) for v in self.VERSIONER_KEYS)
+        version = str(self.extension.getVersion(package, self.VERSIONER_KEYS, True))
+
+        if (prefix := settings["prefix"]) is not None:
+            assert isinstance(prefix, str)
+            version = f"{prefix}{version}"
+
+        if (url := settings["url"]) is not None:
+            assert isinstance(url, str)
+            core.Link(
+                parent,
+                url=f"{url.rstrip('/')}/{version}",
+                string=version,
+            )
+        else:
+            core.Word(parent, content=version)
+
         return parent
 
 
@@ -150,16 +180,29 @@ class VersionerVersionReplace(VersionerReplaceBase):
     In-line versioner version replacement.
 
     Markdown Syntax:
-        This is a sentence with moose-dev version [!versioner!version package=moose-dev]
+        This is a sentence with petsc version [!versioner!version package=petsc]
 
     yields:
-        "This is a sentence with moose-dev version abcd123"
+        "This is a sentence with petsc version v1.1.1"
     """
 
     SUBCOMMAND = "version"
+    VERSIONER_KEYS = ["version"]
 
-    def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ["full_version"])
+
+class VersionerFullVersionReplace(VersionerReplaceBase):
+    """
+    In-line versioner version replacement.
+
+    Markdown Syntax:
+        This is a sentence with petsc version [!versioner!full-version package=petsc]
+
+    yields:
+        "This is a sentence with petsc version v1.1.1_0"
+    """
+
+    SUBCOMMAND = "full-version"
+    VERSIONER_KEYS = ["full-version"]
 
 
 class VersionerCondaVersionReplace(VersionerReplaceBase):
@@ -167,13 +210,11 @@ class VersionerCondaVersionReplace(VersionerReplaceBase):
     In-line versioner conda version replacement.
 
     Markdown Syntax:
-        This is a sentence with moose-dev version [!versioner!conda_version package=moose-dev]
+        This is a sentence with moose-dev version [!versioner!conda-version package=moose-dev]
 
     yields:
         "This is a sentence with moose-dev version 2024.01.01"
     """
 
-    SUBCOMMAND = "conda_version"
-
-    def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ["conda", "install"])
+    SUBCOMMAND = "conda-version"
+    VERSIONER_KEYS = ["conda", "install"]
