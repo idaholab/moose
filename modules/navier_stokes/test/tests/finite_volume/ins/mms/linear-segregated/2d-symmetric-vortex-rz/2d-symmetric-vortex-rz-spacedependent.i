@@ -118,7 +118,7 @@ advected_interp_method = 'average'
     use_deviatoric_terms = ${use_dev}
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv'
     use_nonorthogonal_correction = false

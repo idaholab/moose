@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SIMPLE.md LinearFVAnisotropicDiffusion.md WCNSLinearFVFlowPhysics.md'
+  design = 'SIMPLE.md LinearFVPressureCorrectionDiffusion.md RhieChowMassFlux.md WCNSLinearFVFlowPhysics.md'
   issues = '#27280 #31965'
   [momentum-pressure]
     type = 'Exodiff'
@@ -26,7 +26,7 @@
   [momentum-pressure-physics-harmonic-pressure-diffusion-interpolation]
     type = 'Exodiff'
     input = 'lid-driven-segregated-physics.i'
-    cli_args = 'Physics/NavierStokes/FlowSegregated/flow/pressure_diffusion_interpolation=harmonic Outputs/file_base=lid-driven-segregated-physics-harmonic-pressure-diffusion_out'
+    cli_args = 'pressure_diffusion_ainv_interp_method=harmonic Outputs/file_base=lid-driven-segregated-physics-harmonic-pressure-diffusion_out'
     exodiff = 'lid-driven-segregated-physics-harmonic-pressure-diffusion_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the SIMPLE algorithm, the linear finite volume system, the shorthand Physics syntax, and harmonic pressure diffusion interpolation.'
     recover = false # we don't support recovery for SIMPLE yet

@@ -37,7 +37,7 @@ WCNSLinearFVFlowPhysics::validParams()
   params.addParam<MooseEnum>(
       "pressure_diffusion_interpolation",
       NS::fvFaceInterpolationMethods(),
-      "Optional FVInterpolationMethod shortcut for the pressure correction diffusion tensor.");
+      "The face interpolation method for Ainv in the pressure correction diffusion term.");
   params.addParamNamesToGroup("pressure_diffusion_interpolation", "Numerical scheme");
   params.set<unsigned short>("ghost_layers") = 1;
 
@@ -204,7 +204,7 @@ void
 WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
 {
   {
-    std::string kernel_type = "LinearFVAnisotropicDiffusion";
+    std::string kernel_type = "LinearFVPressureCorrectionDiffusion";
     std::string kernel_name = prefix() + "p_diffusion";
 
     InputParameters params = getFactory().getValidParams(kernel_type);
@@ -212,14 +212,6 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
     params.set<LinearVariableName>("variable") = _pressure_name;
     params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
-
-    if (isParamValid("pressure_diffusion_interpolation"))
-    {
-      const auto & interpolation_method = getParam<MooseEnum>("pressure_diffusion_interpolation");
-      NS::addFVFaceInterpolationMethod(getProblem(), getFactory(), interpolation_method);
-      const std::string method_name = interpolation_method;
-      params.set<InterpolationMethodName>("coeff_interp_method") = method_name;
-    }
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
   }
@@ -681,6 +673,8 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("pressure_projection_method") =
       getParam<MooseEnum>("pressure_projection_method");
+  params.set<MooseEnum>("pressure_diffusion_interpolation") =
+      getParam<MooseEnum>("pressure_diffusion_interpolation");
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }

@@ -226,6 +226,12 @@ WCNSLinearFVScalarTransportPhysics::addScalarInletBC()
   }
 }
 
+unsigned short
+WCNSLinearFVScalarTransportPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+{
+  return 1;
+}
+
 void
 WCNSLinearFVScalarTransportPhysics::addScalarOutletBC()
 {
