@@ -97,10 +97,6 @@ LinearFVRobinCHTBC::computeBoundaryGradientMatrixContribution() const
 Real
 LinearFVRobinCHTBC::computeBoundaryGradientRHSContribution() const
 {
-<<<<<<< HEAD
-=======
-
->>>>>>> 1826c6d976 (Add Peter's fixup for functor evaluations at faces of neighbor-variables)
   const auto state = determineState();
   const auto current_face = singleSidedFaceArg(_current_face_info);
   const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);

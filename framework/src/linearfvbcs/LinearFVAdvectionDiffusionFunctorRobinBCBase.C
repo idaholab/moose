@@ -140,7 +140,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryGradientRHSContribu
                                : _current_face_info->neighborInfo();
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto & grad_phi = _var.gradSln(*elem_info);
+  const auto & grad_phi = _var.gradSln(*elem_info,state);
   const auto old_state = Moose::previousNonlinearState();
 
   const auto alpha = getAlpha(face, old_state);
