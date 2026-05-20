@@ -26,8 +26,9 @@
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
     seed = 5
+    num_random_seeds = 100
     num_samples = 10
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'initial multiapp_fixed_point_begin'
   []
 []
 

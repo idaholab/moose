@@ -67,34 +67,34 @@ with $q_0$. The negative values are essentially zero, if more replicates were ex
 numbers would become closer to zero.
 
 ```
-python ../../python/visualize_sobol.py main_out.json  --markdown-table \
+python ../../python/moose_stochastic_tools/visualize_sobol.py main_out.json  --markdown-table \
 --values results_results:T_avg:value --stat second_order \
 --param-names '$\gamma$' '$q_0$' '$T_0$' '$s$' \
 --number-format .3g
 ```
 
 !table id=S_T_avg caption=First-order and second-order Sobol indices for $T_{avg}$.
-| $S_{i,j}$ (5.0%, 95.0%) CI   | $\gamma$                | $q_0$                      | $T_0$                     | $s$                  |
-|:-----------------------------|:------------------------|:---------------------------|:--------------------------|:---------------------|
-| $\gamma$                     | 0.69 (0.626, 0.77)      | -                          | -                         | -                    |
-| $q_0$                        | 0.00108 (-0.122, 0.122) | 0.00737 (0.00598, 0.00892) | -                         | -                    |
-| $T_0$                        | 0.0114 (-0.126, 0.148)  | 0.00412 (-0.003, 0.0111)   | 0.0902 (0.0807, 0.102)    | -                    |
-| $s$                          | 0.00538 (-0.153, 0.16)  | 0.0039 (-0.0101, 0.018)    | 0.00353 (-0.0207, 0.0283) | 0.201 (0.181, 0.225) |
+| $S_{i,j}$ (5.0%, 95.0%) CI   | $\gamma$               | $q_0$                         | $T_0$                      | $s$                  |
+|:-----------------------------|:-----------------------|:------------------------------|:---------------------------|:---------------------|
+| $\gamma$                     | 0.687 (0.625, 0.765)   | -                             | -                          | -                    |
+| $q_0$                        | 0.0138 (-0.11, 0.138)  | 0.00735 (0.00595, 0.00887)    | -                          | -                    |
+| $T_0$                        | 0.0212 (-0.115, 0.159) | -0.000649 (-0.00788, 0.00631) | 0.0898 (0.0803, 0.101)     | -                    |
+| $s$                          | 0.0111 (-0.147, 0.171) | -0.00372 (-0.0183, 0.0107)    | -0.00414 (-0.0285, 0.0203) | 0.206 (0.186, 0.231) |
 
 ```
-python ../../python/visualize_sobol.py main_out.json  --markdown-table \
+python ../../python/moose_stochastic_tools/visualize_sobol.py main_out.json  --markdown-table \
 --values results_results:q_left:value --stat second_order \
 --param-names '$\gamma$' '$q_0$' '$T_0$' '$s$' \
 --number-format .3g
 ```
 
 !table id=S_q_left caption=First-order and second-order Sobol indices for $q_{left}$.
-| $S_{i,j}$ (5.0%, 95.0%) CI   | $\gamma$                | $q_0$                         | $T_0$                         | $s$                        |
-|:-----------------------------|:------------------------|:------------------------------|:------------------------------|:---------------------------|
-| $\gamma$                     | 0.815 (0.765, 0.874)    | -                             | -                             | -                          |
-| $q_0$                        | 0.00787 (-0.094, 0.108) | 0.0267 (0.0245, 0.0292)       | -                             | -                          |
-| $T_0$                        | 0.0188 (-0.0959, 0.132) | -0.000773 (-0.00685, 0.00532) | 0.135 (0.126, 0.145)          | -                          |
-| $s$                          | 0.011 (-0.0887, 0.109)  | 0.000268 (-0.0021, 0.00265)   | -0.000539 (-0.00844, 0.00736) | 0.00423 (0.00312, 0.00538) |
+| $S_{i,j}$ (5.0%, 95.0%) CI   | $\gamma$                | $q_0$                         | $T_0$                         | $s$                     |
+|:-----------------------------|:------------------------|:------------------------------|:------------------------------|:------------------------|
+| $\gamma$                     | 0.822 (0.771, 0.88)     | -                             | -                             | -                       |
+| $q_0$                        | 0.00132 (-0.1, 0.104)   | 0.0286 (0.0262, 0.0312)       | -                             | -                       |
+| $T_0$                        | 0.00552 (-0.108, 0.12)  | -0.00308 (-0.00887, 0.00257)  | 0.134 (0.125, 0.145)          | -                       |
+| $s$                          | 7.92e-05 (-0.0992, 0.1) | -0.00201 (-0.00447, 0.000333) | -0.000977 (-0.00868, 0.00665) | 0.0049 (0.0038, 0.0061) |
 
 The data in these two tables clearly indicates that a majority of the variance of both quantities of
 interest are due to the variance of $\gamma$, $s$ also affects $T_{avg}$ and $T_0$ affects $q_{left}$.
@@ -103,22 +103,22 @@ $T_0$. The importance of $\gamma$, $T_0$, and $s$ is further evident by the tota
 [total-effect].
 
 ```
-python ../../python/visualize_sobol.py main_out.json --markdown-table --stat total \
+python ../../python/moose_stochastic_tools/visualize_sobol.py main_out.json --markdown-table --stat total \
 --names '{"results_results:T_avg:value":"$T_{avg}$", "results_results:q_left:value":"$q_{left}$"}' \
 --param-names '$\gamma$' '$q_0$' '$T_0$' '$s$' \
 --number-format .3g
 ```
 
 !table id=total-effect caption=Total-effect Sobol indices for $T_{avg}$ and $q_{left}$.
-| $S_T$ (5.0%, 95.0%) CI   | $\gamma$             | $q_0$                    | $T_0$                 | $s$                      |
-|:-------------------------|:---------------------|:-------------------------|:----------------------|:-------------------------|
-| $T_{avg}$                | 0.707 (0.673, 0.736) | 0.0217 (-0.0861, 0.111)  | 0.115 (0.016, 0.196)  | 0.208 (0.12, 0.28)       |
-| $q_{left}$               | 0.837 (0.825, 0.848) | 0.0415 (-0.0242, 0.0999) | 0.157 (0.0988, 0.209) | 0.0137 (-0.0537, 0.0743) |
+| $S_T$ (5.0%, 95.0%) CI   | $\gamma$             | $q_0$                    | $T_0$                  | $s$                      |
+|:-------------------------|:---------------------|:-------------------------|:-----------------------|:-------------------------|
+| $T_{avg}$                | 0.699 (0.665, 0.728) | 0.0131 (-0.0955, 0.102)  | 0.108 (0.00979, 0.189) | 0.208 (0.121, 0.28)      |
+| $q_{left}$               | 0.836 (0.823, 0.846) | 0.0406 (-0.0249, 0.0979) | 0.158 (0.0999, 0.208)  | 0.0149 (-0.0517, 0.0736) |
 
 To help visualize the sensitivities, `visualize_sobol.py` can also represent it as a bar pot or heat map:
 
 ```
-python ../../python/visualize_sobol.py main_out.json --bar-plot --log-scale --stat total \
+python ../../python/moose_stochastic_tools/visualize_sobol.py main_out.json --bar-plot --log-scale --stat total \
 --names '{"results_results:T_avg:value":"$T_{avg}$", "results_results:q_left:value":"$q_{left}$"}' \
 --param-names '$\gamma$' '$q_0$' '$T_0$' '$s$'
 ```
@@ -127,7 +127,7 @@ python ../../python/visualize_sobol.py main_out.json --bar-plot --log-scale --st
        alt=Bar graph showing the sensitivity of the heat flux and the average temperature to different variables.
 
 ```
-python ../../python/visualize_sobol.py main_out.json --heatmap --log-scale --stat second_order \
+python ../../python/moose_stochastic_tools/visualize_sobol.py main_out.json --heatmap --log-scale --stat second_order \
 --names '{"results_results:T_avg:value":"$T_{avg}$", "results_results:q_left:value":"$q_{left}$"}' \
 --param-names '$\gamma$' '$q_0$' '$T_0$' '$s$'
 ```

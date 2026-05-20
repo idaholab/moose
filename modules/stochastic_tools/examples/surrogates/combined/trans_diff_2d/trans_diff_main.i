@@ -67,7 +67,7 @@
     vectorpostprocessors = results
     compute = 'mean stddev'
     ci_method = 'percentile'
-    ci_levels = '0.05'
+    ci_levels = '0.05 0.95'
   []
 []
 

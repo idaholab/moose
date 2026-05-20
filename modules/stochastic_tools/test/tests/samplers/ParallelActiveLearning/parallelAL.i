@@ -28,8 +28,9 @@
     num_parallel_proposals = 5
     num_tries = 1000
     seed = 100
+    num_random_seeds = 100
     initial_values = '0.1 0.1'
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'PRE_MULTIAPP_SETUP timestep_end'
   []
 []
 
@@ -71,6 +72,7 @@
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
     acquisition = 'expectedimprovement'
+    execute_on = 'timestep_begin'
   []
 []
 

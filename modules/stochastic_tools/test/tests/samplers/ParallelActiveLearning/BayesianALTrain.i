@@ -37,9 +37,10 @@
     num_parallel_proposals = 5
     num_tries = 100
     seed = 200
+    num_random_seeds = 100
     file_name = 'confg.csv'
     initial_values = '0.1 0.1'
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'PRE_MULTIAPP_SETUP TIMESTEP_END'
   []
 []
 
@@ -87,6 +88,7 @@
     gp_evaluator = GP_eval
     acquisition = 'BayesianPosterior'
     likelihoods = 'gaussian'
+    execute_on = timestep_begin
   []
 []
 

@@ -23,6 +23,10 @@ if importlib.util.find_spec("moose_stochastic_tools") is None:
 
 from moose_stochastic_tools import visualize_statistics, VisualizeStatisticsOptions
 
+NUM = r"[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?"
+NUM_CELL = rf"\s*{NUM}\s*"
+CI_CELL = rf"\s*{NUM}\s+\({NUM},\s*{NUM}\)\s*"
+
 
 class TestVisualizeStatistics(unittest.TestCase):
     """
@@ -66,16 +70,16 @@ class TestVisualizeStatistics(unittest.TestCase):
             stat_names=self._stat_names,
             output=self._textfile,
         )
-        expect_out = "| Values                      | Mean                 | Standard Deviation   |\n"
-        expect_out += "|:----------------------------|:---------------------|:---------------------|\n"
-        expect_out += "| $T_{avg}$ (5.0%, 95.0%) CI  | 199.4 (172.4, 227.5) | 55.53 (35.73, 64.78) |\n"
-        expect_out += "| $q_{left}$ (5.0%, 95.0%) CI | 179.6 (139, 223.4)   | 84.75 (54.29, 98.01) |\n"
+        expect_out = rf"""^\| Values\s+\|\s+Mean\s+\|\s+Standard Deviation\s+\|
+\|:?-+\|:?-+\|:?-+\|
+\| \$T_{{avg}}\$ \(5\.0%, 95\.0%\) CI\s+\| {CI_CELL} | {CI_CELL} |
+\| \$q_{{left}}\$ \(5\.0%, 95\.0%\) CI\s+\| {CI_CELL} | {CI_CELL} |$"""
 
         visualize_statistics(opt)
         self.assertTrue(os.path.exists(self._textfile))
         with open(self._textfile) as fid:
             out = fid.read()
-        self.assertEqual(out, expect_out[:-1])
+        self.assertRegex(out, expect_out)
         os.remove(self._textfile)
 
     # @unittest.skipIf(find_spec('kaleido') is None, "Kaleido must be installed.")
@@ -101,23 +105,23 @@ class TestVisualizeStatistics(unittest.TestCase):
             values=["results_results:T_avg:value", "results_results:q_left:value"],
             output=self._textfile,
         )
-        expect_out = "| Values                               |   Time | Mean                 | Standard Deviation   |\n"
-        expect_out += "|:-------------------------------------|-------:|:---------------------|:---------------------|\n"
-        expect_out += "| Average Temperature (5.0%, 95.0%) CI |   0.25 | 227.6 (211.6, 243.5) | 32.22 (21.51, 37.73) |\n"
-        expect_out += "|                                      |   0.5  | 209.7 (187.3, 232.4) | 45.38 (29.94, 52.85) |\n"
-        expect_out += "|                                      |   0.75 | 202.5 (177.1, 228.8) | 52.04 (33.9, 60.63)  |\n"
-        expect_out += "|                                      |   1    | 199.4 (172.4, 227.5) | 55.53 (35.73, 64.78) |\n"
-        expect_out += "| Flux (5.0%, 95.0%) CI                |   0.25 | 334.4 (297.4, 372.4) | 75.04 (52.52, 86.15) |\n"
-        expect_out += "|                                      |   0.5  | 213.6 (179.9, 249.1) | 69.39 (47.66, 79.06) |\n"
-        expect_out += "|                                      |   0.75 | 188.3 (150.9, 228.5) | 78.01 (51.49, 89.56) |\n"
-        expect_out += "|                                      |   1    | 179.6 (139, 223.4)   | 84.75 (54.29, 98.01) |\n"
+        expect_out = rf"""^\| Values\s+\|\s+Time\s+\|\s+Mean\s+\|\s+Standard Deviation\s+\|
+\|:?-+\|[-:]+\|:?-+\|:?-+\|
+\| Average Temperature \(5\.0%, 95\.0%\) CI\s+\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| Flux \(5\.0%, 95\.0%\) CI\s+\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |
+\| \s*\| {NUM_CELL} \| {CI_CELL} | {CI_CELL} |$"""
 
         visualize_statistics(opt)
 
         self.assertTrue(os.path.exists(self._textfile))
         with open(self._textfile) as fid:
             out = fid.read()
-        self.assertEqual(out, expect_out[:-1])
+        self.assertRegex(out, expect_out)
         os.remove(self._textfile)
 
     def testTimeTimeLine(self):

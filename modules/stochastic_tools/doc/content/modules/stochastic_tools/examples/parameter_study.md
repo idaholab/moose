@@ -177,8 +177,8 @@ The resulting distributions are for the quantities of interest: $T_{avg}$ and $q
 in [results_T_avg] and [results_q_left]. These plots were generated using the following commands:
 
 ```language=sh
-python ../../python/make_histogram.py main_out.json* -v results:T_avg:value --xlabel 'Average Temperature'
-python ../../python/make_histogram.py main_out.json* -v results:q_left:value --xlabel 'Flux'
+python ../../python/moose_stochastic_tools/make_histogram.py main_out.json* -v results:T_avg:value --xlabel 'Average Temperature'
+python ../../python/moose_stochastic_tools/make_histogram.py main_out.json* -v results:q_left:value --xlabel 'Flux'
 ```
 
 !media stochastic_tools/parameter_study/tavg_hist.png
@@ -198,7 +198,7 @@ by the StatisticsReporter object for the example heat conduction problem with 50
 This table was generated in markdown format using the following command:
 
 ```language=sh
-python ../../python/visualize_statistics.py main_out.json --markdown-table \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_out.json --markdown-table \
 --names '{"results_results:T_avg:value":"$T_{avg}$","results_results:q_left:value":"$q_{left}$"}' \
 --stat-names '{"MEAN":"Mean","STDDEV":"Standard Deviation"}'
 ```
@@ -206,13 +206,13 @@ python ../../python/visualize_statistics.py main_out.json --markdown-table \
 !table id=stats
 | Values                      | Mean                 | Standard Deviation   |
 |:----------------------------|:---------------------|:---------------------|
-| $T_{avg}$ (5.0%, 95.0%) CI  | 199.3 (198.1, 200.5) | 51.55 (50.67, 52.41) |
-| $q_{left}$ (5.0%, 95.0%) CI | 179.3 (177.4, 181.2) | 82.71 (81.24, 84.19) |
+| $T_{avg}$ (5.0%, 95.0%) CI  | 198.9 (197.7, 200)   | 50.82 (49.98, 51.66) |
+| $q_{left}$ (5.0%, 95.0%) CI | 178.5 (176.6, 180.4) | 79.97 (78.55, 81.4)  |
 
 These statistics can also be visualized with a bar plot:
 
 ```language=sh
-python ../../python/visualize_statistics.py main_out.json --bar-plot \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_out.json --bar-plot \
 --names '{"results_results:T_avg:value":"Average Temperature","results_results:q_left:value":"Flux"}' \
 --stat-names '{"MEAN":"Mean","STDDEV":"Standard Deviation"}'
 ```
@@ -254,7 +254,7 @@ The output (`main_time_out.json`) will now have statistics for all three quantit
 report this data using the following:
 
 ```language=sh
-python ../../python/visualize_statistics.py main_time_out.json  --markdown-table \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_time_out.json  --markdown-table \
 --values results_results:T_avg:value results_results:q_left:value \
 --names '{"results_results:T_avg:value":"Average Temperature","results_results:q_left:value":"Flux"}' \
 --stats MEAN STDDEV --stat-names '{"MEAN":"Mean","STDDEV":"Standard Deviation"}'
@@ -263,17 +263,17 @@ python ../../python/visualize_statistics.py main_time_out.json  --markdown-table
 !table
 | Values                               |   Time | Mean                 | Standard Deviation   |
 |:-------------------------------------|-------:|:---------------------|:---------------------|
-| Average Temperature (5.0%, 95.0%) CI |   0.25 | 228 (227.3, 228.7)   | 29.38 (28.96, 29.78) |
-|                                      |   0.5  | 209.9 (209, 210.9)   | 41.58 (40.96, 42.19) |
-|                                      |   0.75 | 202.5 (201.4, 203.7) | 47.98 (47.21, 48.74) |
-|                                      |   1    | 199.3 (198.1, 200.5) | 51.55 (50.67, 52.41) |
-| Flux (5.0%, 95.0%) CI                |   0.25 | 337.4 (335.4, 339.3) | 84 (82.56, 85.43)    |
-|                                      |   0.5  | 214.8 (213.1, 216.4) | 70.35 (69.23, 71.46) |
-|                                      |   0.75 | 188.6 (186.8, 190.3) | 76.56 (75.29, 77.82) |
-|                                      |   1    | 179.3 (177.4, 181.2) | 82.71 (81.24, 84.19) |
+| Average Temperature (5.0%, 95.0%) CI |   0.25 | 227.9 (227.2, 228.5) | 29.26 (28.85, 29.67) |
+|                                      |   0.5  | 209.7 (208.7, 210.6) | 41.22 (40.61, 41.83) |
+|                                      |   0.75 | 202.2 (201.1, 203.3) | 47.42 (46.67, 48.16) |
+|                                      |   1    | 198.9 (197.7, 200)   | 50.82 (49.98, 51.66) |
+| Flux (5.0%, 95.0%) CI                |   0.25 | 337 (335.1, 338.9)   | 81.95 (80.6, 83.31)  |
+|                                      |   0.5  | 214.3 (212.7, 215.9) | 68.32 (67.24, 69.37) |
+|                                      |   0.75 | 188 (186.2, 189.7)   | 74.18 (72.96, 75.41) |
+|                                      |   1    | 178.5 (176.6, 180.4) | 79.97 (78.55, 81.4)  |
 
 ```language=sh
-python ../../python/visualize_statistics.py main_time_out.json --line-plot \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_time_out.json --line-plot \
 --values results_results:T_avg:value results_results:q_left:value \
 --names '{"results_results:T_avg:value":"Average Temperature","results_results:q_left:value":"Flux"}' \
 --stats MEAN STDDEV --stat-names '{"MEAN":"Mean","STDDEV":"Standard Deviation"}'
@@ -283,7 +283,7 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
        alt=The evolution over time of the means and standard deviations for average temperature and heat flux.
 
 ```language=sh
-python ../../python/visualize_statistics.py main_time_out.json --line-plot \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_time_out.json --line-plot \
 --values results_results:T_vec:T --names '{"results_results:T_vec:T":"Temperature"}' \
 --stats MEAN STDDEV --stat-names '{"MEAN":"Mean","STDDEV":"Standard Deviation"}' \
 --xvalue x
@@ -324,7 +324,7 @@ The output (`main_vector_out.json`) has the statistics for each quantity represe
 previous results can be reproduced with this output. One fancy thing we can do with this new output:
 
 ```language=sh
-python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_vector_out.json --line-plot \
 --names '{"results_results:acc:T_avg:value":"Average Temperature","results_results:acc:q_left:value":"Flux"}' \
 --xvalue results_results:acc:T_avg:value \
 --stats MEAN --stat-names '{"MEAN":"Mean"}'
@@ -334,7 +334,7 @@ python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
        alt=The mean flux plotted against the mean average temperature.
 
 ```language=sh
-python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
+python ../../python/moose_stochastic_tools/visualize_statistics.py main_vector_out.json --line-plot \
 --names '{"results_results:acc:T_avg:value":"Average Temperature","results_results:acc:q_left:value":"Flux"}' \
 --xvalue results_results:acc:T_avg:value \
 --stats STDDEV --stat-names '{"STDDEV":"Standard Deviation"}'

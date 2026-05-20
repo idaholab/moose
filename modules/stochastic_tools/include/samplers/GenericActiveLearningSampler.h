@@ -35,16 +35,9 @@ public:
 
 protected:
   /// Gather all the samples
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void executeSetUp() override;
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-
-  /**
-   * Fill in the provided vector with random samples given the distributions
-   * @param vector The vector to be filled
-   * @param seed_value The seed value to generate random numbers
-   */
-  virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
@@ -54,9 +47,6 @@ protected:
 
   /// The selected sample indices to evaluate the subApp
   const std::vector<unsigned int> & _sorted_indices;
-
-  /// Ensure that the algorithm proceeds in a sequential fashion
-  int _check_step;
 
   /// Initial values of the input params to get the MCMC scheme started
   const std::vector<Real> & _initial_values;

@@ -21,7 +21,7 @@ TestDynamicNumberOfSubAppsSampler::validParams()
 
 TestDynamicNumberOfSubAppsSampler::TestDynamicNumberOfSubAppsSampler(
     const InputParameters & parameters)
-  : MonteCarloSampler(parameters), _increment_rows(getParam<dof_id_type>("increment_rows"))
+  : MonteCarloSampler(parameters)
 {
 }
 
@@ -29,4 +29,5 @@ void
 TestDynamicNumberOfSubAppsSampler::executeSetUp()
 {
   setNumberOfRows(getNumberOfRows() + _increment_rows);
+  _increment_rows = getParam<dof_id_type>("increment_rows");
 }

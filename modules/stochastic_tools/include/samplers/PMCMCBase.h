@@ -77,39 +77,36 @@ protected:
    * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
    * @param seed_value The seed for the random number generator
    */
-  virtual void proposeSamples(const unsigned int seed_value);
+  virtual void proposeSamples();
 
   // See Sampler.h for description
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  virtual void executeSetUp() override;
 
   // See Sampler.h for description
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
+   * Sample a random number between 0 and 1
+   * @param upper_bound The upper bound provided
+   * @return The required index
+   */
+  Real random();
+
+  /**
    * Sample a random index excluding a specified index
    * @param upper_bound The upper bound provided
-   * @param exclude The index to be excluded from sampling
-   * @param seed The seed of the random number generator
-   * @param req_index The required index to be filled
+   * @return The required index
    */
-  void randomIndex(const unsigned int & upper_bound,
-                   const unsigned int & exclude,
-                   const unsigned int & seed,
-                   unsigned int & req_index);
+  unsigned int randomIndex(const unsigned int & upper_bound, const unsigned int & exclude);
 
   /**
    * Sample two random indices without repitition excluding a specified index
    * @param upper_bound The upper bound provided
    * @param exclude The index to be excluded from sampling
-   * @param seed The seed of the random number generator
-   * @param req_index1 The required index 1 to be filled
-   * @param req_index2 The required index 2 to be filled
+   * @return Pair of required indices
    */
-  void randomIndexPair(const unsigned int & upper_bound,
-                       const unsigned int & exclude,
-                       const unsigned int & seed,
-                       unsigned int & req_index1,
-                       unsigned int & req_index2);
+  std::pair<unsigned int, unsigned int> randomIndexPair(const unsigned int & upper_bound,
+                                                        const unsigned int & exclude);
 
   /// Number of parallel proposals to be made and subApps to be executed
   const unsigned int _num_parallel_proposals;
@@ -128,9 +125,6 @@ protected:
 
   /// Upper bound for variance for making the next proposal
   const Real & _variance_bound;
-
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
 
   /// Initial values of the input params to get the MCMC scheme started
   const std::vector<Real> & _initial_values;
@@ -152,6 +146,12 @@ private:
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int _num_random_seeds;
+
+  /// Generator index when requesting random numbers
+  unsigned int _seed_index;
+
+  /// Running index for the random number generators
+  std::size_t _rand_index;
 
   /// Configuration values
   std::vector<std::vector<Real>> _confg_values;
