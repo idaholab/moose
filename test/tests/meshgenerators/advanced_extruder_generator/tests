@@ -141,6 +141,8 @@
     requirement = 'The system shall be able to extrude a 2D polygon mesh'
     design = 'AdvancedExtruderGenerator.md'
     issues = '#32159'
+    # no support yet for distributed polygon extrusion since sides have to be shared
+    mesh_mode = 'replicated'
   []
 
   [general_errors]

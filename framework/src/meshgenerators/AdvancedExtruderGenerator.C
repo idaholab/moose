@@ -518,6 +518,7 @@ AdvancedExtruderGenerator::generate()
   bool has_poly_midnodes = false;
 #endif
 
+  bool has_polygons = false;
   unsigned int order = 1;
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -1348,6 +1349,7 @@ AdvancedExtruderGenerator::generate()
           }
           case libMesh::C0POLYGON:
           {
+            has_polygons = true;
             const auto num_sides = elem->n_sides();
             std::vector<std::shared_ptr<libMesh::Polygon>> sides;
             sides.reserve(2 + num_sides);
@@ -1590,6 +1592,9 @@ AdvancedExtruderGenerator::generate()
       }
     }
   }
+
+  if (has_polygons && !input->is_serial())
+    mooseError("Distributed meshes are not supported when extruding polygons at this time.");
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
   // Update the value of next_unique_id based on newly created nodes and elements
