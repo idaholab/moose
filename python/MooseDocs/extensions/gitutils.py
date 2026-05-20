@@ -6,13 +6,12 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
-import datetime
+
+import subprocess
+
 import mooseutils
 import MooseDocs
-from ..base import components
 from ..common import exceptions
-from ..tree import tokens, html
 from . import command, core
 
 
@@ -72,6 +71,10 @@ class SubmoduleHashCommand(command.CommandComponent):
             None,
             "If provided, prefix the hash with the url to create a link.",
         )
+        settings["length"] = (
+            None,
+            "Length of the hash to output in order to shorten it.",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -82,27 +85,40 @@ class SubmoduleHashCommand(command.CommandComponent):
             )
 
         name = info["inline"]
-        # For submodules we pull from moose, use MOOSE_DIR
-        if name in ["large_media", "libmesh", "petsc"]:
-            check_dir = MooseDocs.MOOSE_DIR
-        # Otherwise, use ROOT_DIR (which could be an app directory)
-        else:
-            check_dir = MooseDocs.ROOT_DIR
 
-        status = mooseutils.git_submodule_info(check_dir, "--recursive")
-        sorted_items = sorted(list(status), key=len)
-        for repo in sorted_items:
-            if repo.endswith(name):
-                url = settings["url"]
-                if url is None:
-                    core.Word(parent, content=status[repo][1])
-                else:
-                    core.Link(
-                        parent,
-                        url=f"{url.rstrip('/')}/{status[repo][1]}",
-                        string=status[repo][1],
-                    )
-                return parent
+        # Search MOOSE_DIR and then ROOT_DIR (app directory)
+        check_dirs = [MooseDocs.MOOSE_DIR]
+        if MooseDocs.MOOSE_DIR != MooseDocs.ROOT_DIR:
+            check_dirs.append(MooseDocs.ROOT_DIR)
+        for check_dir in check_dirs:
+            result = subprocess.run(
+                ["git", "ls-tree", "HEAD", name],
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=check_dir,
+            )
 
-        msg = "The submodule '{}' was not located, the available submodules are: {}"
-        raise exceptions.MooseDocsException(msg, name, ", ".join(status.keys()))
+            hash = result.stdout.split()[2]
+            assert len(hash) == 40
+
+            display_hash = hash
+            if (length := settings["length"]) is not None:
+                length = int(length)
+                assert length <= 40 and length > 1
+                display_hash = hash[:length]
+
+            url = settings["url"]
+            if url is None:
+                core.Word(parent, content=display_hash)
+            else:
+                core.Link(
+                    parent,
+                    url=f"{url.rstrip('/')}/{hash}",
+                    string=display_hash,
+                )
+            return parent
+
+        raise exceptions.MooseDocsException(
+            f"The submodule '{name}' was not located in {' ,'.join(check_dirs)}"
+        )
