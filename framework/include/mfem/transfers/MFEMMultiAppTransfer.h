@@ -118,17 +118,25 @@ MFEMMultiAppTransfer::checkValidTransferProblemTypes()
 {
   // Check if source sub-apps exist, and if so, if they are of the expected type
   if (hasFromMultiApp())
+  {
     for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) &&
           getFromMultiApp()->appProblemBase(i).feBackend() != FROM_BACKEND)
-        mooseError(type(), " is not compatible with the backend of the source app.");
+        paramError("from_multi_app", type() + " is incompatible with the source app's backend.");
+  }
+  else if (getToMultiApp()->problemBase().feBackend() != FROM_BACKEND)
+    mooseError(type() + " is incompatible with this (the source) app's backend.");
 
   // Check if destination sub-apps exist, and if so, if they are of the expected type
   if (hasToMultiApp())
+  {
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getToMultiApp()->hasLocalApp(i) &&
           getToMultiApp()->appProblemBase(i).feBackend() != TO_BACKEND)
-        mooseError(type(), " is not compatible with the backend of the destination app.");
+        paramError("to_multi_app", type() + " is incompatible with the destination app's backend.");
+  }
+  else if (getFromMultiApp()->problemBase().feBackend() != TO_BACKEND)
+    mooseError(type() + " is incompatible with this (the destination) app's backend.");
 }
 
 #endif
