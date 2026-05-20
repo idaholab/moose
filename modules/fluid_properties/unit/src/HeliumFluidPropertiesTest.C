@@ -113,6 +113,7 @@ TEST_F(HeliumFluidPropertiesTest, specificInternalEnergy)
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
   ABS_TEST(_fp->e_from_p_rho(p, rho), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
 
+  // Equivalent (v,h), (p,T)
   const Real v = 1. / rho;
   const Real h = _fp->h_from_p_T(p, T);
   ABS_TEST(_fp->e_from_v_h(v, h), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
@@ -160,4 +161,16 @@ TEST_F(HeliumFluidPropertiesTest, specificEnthalpy)
 
   ABS_TEST(_fp->h_from_p_T(p, T), 2.0424142499999998e+06, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  // Derivatives
+  const ADReal T_ad = T;
+  const ADReal p_ad = p;
+  Real h, dhdT, dhdp;
+  ADReal h_ad, dhdT_ad, dhdp_ad;
+  _fp->h_from_p_T(p, T, h, dhdT, dhdp);
+  _fp->h_from_p_T(p_ad, T_ad, h_ad, dhdT_ad, dhdp_ad);
+  DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  REL_TEST(h, h_ad.value(), REL_TOL_CONSISTENCY);
+  REL_TEST(dhdT, dhdT_ad.value(), REL_TOL_CONSISTENCY);
+  REL_TEST(dhdp, dhdp_ad.value(), REL_TOL_CONSISTENCY);
 }
