@@ -135,6 +135,15 @@ protected:
   /// Identity for backward Euler; will become alpha * Identity for the generalized midpoint rule.
   MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
+  /// Partial derivative of the F-bar-stabilized deformation gradient with respect to the
+  /// unstabilized (per-qp local) deformation gradient. Equals IdentityFour when F-bar is off.
+  MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
+
+  /// Partial derivative of the F-bar-stabilized deformation gradient with respect to the
+  /// element-averaged deformation gradient F_avg (the non-local coupling). Equals zero when
+  /// F-bar is off.
+  MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
+
   /// Names of any extra homogenization gradients
   std::vector<MaterialPropertyName> _homogenization_gradient_names;
 

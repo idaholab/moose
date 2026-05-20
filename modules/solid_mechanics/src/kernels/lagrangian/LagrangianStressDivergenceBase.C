@@ -19,13 +19,6 @@ LagrangianStressDivergenceBase::validParams()
 
   params.addParam<bool>("large_kinematics", false, "Use large displacement kinematics");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
-  params.addRangeCheckedParam<Real>(
-      "alpha",
-      1.0,
-      "alpha >= 0.5 & alpha <= 1.0",
-      "Generalized midpoint weight used by the strain calculator. Must match the value on the "
-      "strain material. The kernel uses it to decide between the F-bar-self-consistent pull-back "
-      "(alpha = 1.0) and the mathematically correct alpha-weighted pull-back (alpha != 1.0).");
 
   params.addParam<std::string>("base_name", "Material property base name");
 
@@ -50,7 +43,6 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
   : JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>(parameters),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
-    _kinematic_alpha(getParam<Real>("alpha")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _alpha(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
@@ -69,6 +61,10 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
     _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _d_F_stab_d_F_ust(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
+    _d_F_stab_d_F_avg(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)

@@ -80,6 +80,16 @@ protected:
 
   /// The 1st Piola-Kirchhoff stress
   MaterialProperty<RankTwoTensor> & _pk1_stress;
-  /// The derivative of the 1st PK stress wrt the deformation gradient
+  /// The derivative of the 1st PK stress wrt the deformation gradient (F that the stress
+  /// material consumes; with the generalized midpoint rule this is the alpha-weighted F).
   MaterialProperty<RankFourTensor> & _pk1_jacobian;
+
+  /// The derivative of the 1st PK stress wrt the displacement gradient (grad u_{n+1}).
+  /// Computed in computeQpProperties as _pk1_jacobian * _d_F_d_grad_u so the TL kernel can
+  /// consume a single property without needing to know the generalized-alpha kinematic
+  /// policy. For alpha = 1 (default) it equals _pk1_jacobian.
+  MaterialProperty<RankFourTensor> & _dpk1_d_grad_u;
+
+  /// d(F)/d(grad u_{n+1}) (= alpha * IdentityFour for the generalized midpoint rule)
+  const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 };

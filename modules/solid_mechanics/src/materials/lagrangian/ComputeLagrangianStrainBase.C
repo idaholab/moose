@@ -72,6 +72,10 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
     _d_F_d_grad_u(declareProperty<RankFourTensor>(
         _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _d_F_stab_d_F_ust(declareProperty<RankFourTensor>(
+        _base_name + "d_F_stab_d_F_unstabilized")),
+    _d_F_stab_d_F_avg(declareProperty<RankFourTensor>(
+        _base_name + "d_F_stab_d_F_average")),
     _homogenization_gradient_names(
         getParam<std::vector<MaterialPropertyName>>("homogenization_gradient_names")),
     _homogenization_contributions(_homogenization_gradient_names.size()),
@@ -253,6 +257,9 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
     _F[_qp] = _F_ust[_qp];
   }
 
+  usingTensorIndices(i_, j_, k_, l_);
+  const auto I2 = RankTwoTensor::Identity();
+
   // If stabilization is on do the volumetric correction
   if (_stabilize_strain)
   {
@@ -265,9 +272,39 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
       if (_large_kinematics)
-        _F[_qp] *= std::pow(F_avg.det() / _F[_qp].det(), 1.0 / 3.0);
+      {
+        // Multiplicative F-bar: F_stab = (det F_avg / det F_ust)^{1/3} * F_ust.
+        // Chain-rule partials:
+        //   dF_stab/dF_ust = gamma * I^(4) - (gamma/3) * F_ust ⊗ F_ust^{-T}
+        //   dF_stab/dF_avg = (gamma/3) * F_ust ⊗ F_avg^{-T}
+        const Real gamma = std::pow(F_avg.det() / _F[_qp].det(), 1.0 / 3.0);
+        const auto Fust_invT = _F_ust[_qp].inverse().transpose();
+        const auto Favg_invT = F_avg.inverse().transpose();
+        _d_F_stab_d_F_ust[_qp] = gamma * RankFourTensor::IdentityFour() -
+                                 (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
+        _d_F_stab_d_F_avg[_qp] =
+            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Favg_invT);
+        _F[_qp] *= gamma;
+      }
       else
-        _F[_qp] += (F_avg.trace() - _F[_qp].trace()) * RankTwoTensor::Identity() / 3.0;
+      {
+        // Additive (trace) F-bar: F_stab = F_ust + (tr(F_avg - F_ust)/3) * I.
+        // dF_stab/dF_ust = I^(4) - (1/3) * I2 ⊗ I2  (each diagonal component pulled out).
+        // dF_stab/dF_avg = (1/3) * I2 ⊗ I2.
+        const auto outer = I2.template times<i_, j_, k_, l_>(I2);
+        _d_F_stab_d_F_ust[_qp] = RankFourTensor::IdentityFour() - (1.0 / 3.0) * outer;
+        _d_F_stab_d_F_avg[_qp] = (1.0 / 3.0) * outer;
+        _F[_qp] += (F_avg.trace() - _F[_qp].trace()) * I2 / 3.0;
+      }
+    }
+  }
+  else
+  {
+    // F-bar off: dF_stab/dF_ust = I^(4), dF_stab/dF_avg = 0.
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    {
+      _d_F_stab_d_F_ust[_qp] = RankFourTensor::IdentityFour();
+      _d_F_stab_d_F_avg[_qp].zero();
     }
   }
 }

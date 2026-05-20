@@ -201,3 +201,48 @@ Full `solid_mechanics` suite: 1716 / 1716 (1712 baseline + 4 new alpha=0.5 therm
 Notes:
 - This unblocks Step 3 (Rashid): publishing `dcauchy_stress_d_eigenstrain` as a single property is exactly the hook a Rashid subclass needs to override — it can compute the derivative directly without having to mimic the `-Jinv * small_jacobian` factorization.
 - Step 1.2 (the F-bar fix + kernel-α removal) was NOT done in this commit. It's still required to clean up the `_kinematic_alpha` kernel parameter and the hybrid F_pullback branch in the UL kernel.
+
+### Step 1.2 (2026-05-20) — explicit F-bar tangent, removed kernel-side `alpha` parameter
+
+Computed the F-bar Jacobian contribution properly in the UL kernel and encapsulated the generalized-α chain in the stress materials, eliminating the workaround `_kinematic_alpha` parameter on `LagrangianStressDivergenceBase` and the hybrid `F_pullback = (alpha == 1.0) ? _F : _F_actual` branch.
+
+Implementation:
+- **Strain calculator** publishes two new RankFourTensor properties:
+  - `_d_F_stab_d_F_ust` = local F-bar partial.
+  - `_d_F_stab_d_F_avg` = non-local (element-coupling) F-bar partial.
+  For large kinematics + F-bar on (γ = (det F_avg / det F_ust)^{1/3}):
+  - `_d_F_stab_d_F_ust = γ · I⁽⁴⁾ − (γ/3) · F_ust ⊗ F_ust^{−T}`
+  - `_d_F_stab_d_F_avg = (γ/3) · F_ust ⊗ F_avg^{−T}`
+  For small-kinematics F-bar: simple `1/3 · I ⊗ I` projections. F-bar off: identity / zero.
+- **Stress base** (`ComputeLagrangianStressBase`) publishes a new single rank-4 property `_dpk1_d_grad_u = _pk1_jacobian * _d_F_d_grad_u` computed at the end of `computeQpProperties` (after the subclass populates `_pk1_jacobian`). For α=1 (default) it equals `_pk1_jacobian`; for α=0.5 it equals `0.5 * _pk1_jacobian`. Mirrors the Step 1.1 pattern of encapsulating the kinematic-policy chain in the material so the kernel doesn't see α. PK1-direct materials (NeoHookean, Simo-Hughes, etc.) work without changes since they populate `_pk1_jacobian` through the same parent path.
+- **UL kernel `computeQpJacobianDisplacement` rewritten**:
+  ```cpp
+  delta_grad_u_local = grad_trial_unstabilized * _F_actual   // always F_actual now, no hybrid
+  delta_F_ust_local  = _d_F_d_grad_u * delta_grad_u_local    // alpha factor flows in here
+  delta_grad_u_avg   = _avg_grad_trial * _F_avg              // recover reference-frame avg
+  delta_F_avg        = _d_F_d_grad_u * delta_grad_u_avg
+  delta_F_stab       = _d_F_stab_d_F_ust * delta_F_ust_local + _d_F_stab_d_F_avg * delta_F_avg
+  delta_dL           = _d_spatial_velocity_increment_d_F * delta_F_stab
+  J                  = grad_test : (_material_jacobian * delta_dL)
+  ```
+  α flows symmetrically through both the local and non-local contributions via `_d_F_d_grad_u`. The geometric Jacobian (which was already using `gradTrialUnstabilized` directly) is unchanged.
+- **UL `gradTrialStabilized` removed** as dead code. Its formula (small-kinematics trace correction) was *incorrect* for large kinematics anyway; the F-bar is now handled explicitly in the Jacobian and `gradTrial` always returns the unstabilized version.
+- **TL kernel** `computeQpJacobianDisplacement` simplified to `gradTest : (_dpk1_d_grad_u * gradTrial)` — no `_kinematic_alpha *` prefactor. The homogenization kernel continues to use `_dpk1` (`= ∂P/∂F_alpha`) for the macro-var Jacobian, which is correct: the macro contribution is added directly to `_F` in `computeQpProperties`, so no α factor applies on that path.
+- **`alpha` parameter removed from `LagrangianStressDivergenceBase`**. Existing tests with `GlobalParams/alpha=0.5` cli_args continue to work because `GlobalParams` silently drops params the kernel doesn't have — the strain material still picks them up.
+
+Tests:
+- All 238 prior lagrangian tests pass.
+- New `lagrangian/cartesian/updated/jacobian/` directory with 4 `PetscJacobianTester` cases at `ratio_tol = 1E-7`:
+  - `jacobian_large_no_stab` (baseline α=1, no F-bar)
+  - `jacobian_large_with_stab` (α=1 + F-bar — exercises the new explicit F-bar tangent)
+  - `jacobian_large_no_stab_alpha05` (α=0.5, no F-bar)
+  - `jacobian_large_with_stab_alpha05` (α=0.5 + F-bar — the case the combined refactor specifically unlocks)
+- The `mixed_pbc_symmetry_2d` Exodiff tolerances loosened in Step 1.1 stay loosened; the Newton-path drift on near-zero quantities is a property of the rewritten temperature Jacobian, not the F-bar Jacobian, so Step 1.2 doesn't change it.
+
+Full `solid_mechanics` suite: 1720 / 1720 (1716 baseline + 4 new UL Jacobian variants).
+
+Notes:
+- The kernel base (`LagrangianStressDivergenceBase`) is now kinematics-policy-agnostic. The α and F-bar policies live entirely in the strain calculator and stress materials, which is the right separation of concerns.
+- Homogenization with α ≠ 1: the macro-var Jacobian path uses `_dpk1` (= `∂P/∂F_alpha`). The macro contribution is added directly to `F_alpha` in the strain calc, so no α factor applies. Verified correct by inspection; do not "fix" by switching to `_dpk1_d_grad_u`.
+- The cost is one extra rank-4 property per qp on every stress material (`_dpk1_d_grad_u`) plus two on the strain calc (F-bar partials). ~243 doubles total per qp, in line with the kinematic derivatives added in Step 0.
+- Non-Cartesian UL is still out of scope (the UL kernel template instantiates only for `GradientOperatorCartesian`). The F-bar partials are written in coordinate-system-agnostic form so they're ready when/if axisymm UL is needed.

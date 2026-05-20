@@ -54,7 +54,10 @@ template <class G>
 RankTwoTensor
 UpdatedLagrangianStressDivergenceBase<G>::gradTrial(unsigned int component)
 {
-  return _stabilize_strain ? gradTrialStabilized(component) : gradTrialUnstabilized(component);
+  // F-bar stabilization is handled explicitly in computeQpJacobianDisplacement via the stored
+  // partial derivatives _d_F_stab_d_F_ust and _d_F_stab_d_F_avg, so gradTrial always returns
+  // the unstabilized spatial gradient.
+  return gradTrialUnstabilized(component);
 }
 
 template <class G>
@@ -63,18 +66,6 @@ UpdatedLagrangianStressDivergenceBase<G>::gradTrialUnstabilized(unsigned int com
 {
   // Without F-bar stabilization, simply return the gradient of the trial functions
   return G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
-}
-
-template <class G>
-RankTwoTensor
-UpdatedLagrangianStressDivergenceBase<G>::gradTrialStabilized(unsigned int component)
-{
-  // The base unstabilized trial function gradient
-  const auto Gb = G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
-  // The average trial function gradient
-  const auto Ga = _avg_grad_trial[component][_j];
-  // For updated Lagrangian, the modification is always linear
-  return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();
 }
 
 template <class G>
@@ -113,40 +104,47 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned
                                                                         unsigned int beta)
 {
   const auto grad_test = gradTest(alpha);
-  const auto grad_trial = gradTrial(beta);
+  const auto grad_trial = gradTrialUnstabilized(beta);
 
   //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
-  //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} d(dL)_{kl}/d(grad u)_{mn} g^beta_{mn}
+  //  J^{alpha beta}_material = phi^alpha : T : d(dL)/d(grad u) * grad_trial
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
 
-  // Build the variation in the reference-frame displacement gradient. In UL with
-  // large_kinematics, grad_trial is the spatial gradient of the trial function in the literal
-  // n+1 configuration. The pull-back to the reference frame is grad_trial * F_actual.
-  //
-  // Special case: when alpha = 1 we use _F instead, which equals F_actual when F-bar is off
-  // and equals F_stab when F-bar is on. With F-bar, the kernel relies on the "self-consistent"
-  // f^{-1}_stab * grad_trial pattern - using _F here cancels the F_stab^{-1} factor in the
-  // stored d(dL)/dF and gives the correct Newton-convergent Jacobian (the same approximation
-  // the kernel has always used for F-bar). For alpha != 1 we must use F_actual: the chain rule
-  // explicitly carries the alpha factor through _d_F_d_grad_u and needs the literal F_{n+1}
-  // for the pull-back to be mathematically correct.
-  const RankTwoTensor & F_pullback = (_kinematic_alpha == 1.0) ? _F[_qp] : _F_actual[_qp];
-  const RankTwoTensor delta_grad_u = _large_kinematics ? grad_trial * F_pullback : grad_trial;
-  // Chain through the stored kinematic derivatives.
-  const RankTwoTensor delta_F = _d_F_d_grad_u[_qp] * delta_grad_u;
-  const RankTwoTensor delta_dL = _d_spatial_velocity_increment_d_F[_qp] * delta_F;
+  // Local contribution to delta(F_ust): pull the spatial trial gradient back through the
+  // literal n+1 deformation gradient (use_displaced_mesh = true uses F_actual, regardless
+  // of alpha or F-bar), then chain to F_ust via _d_F_d_grad_u (= alpha * I^(4)).
+  const RankTwoTensor delta_grad_u_local =
+      _large_kinematics ? grad_trial * _F_actual[_qp] : grad_trial;
+  const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * delta_grad_u_local;
+
+  // Non-local F-bar contribution to delta(F_avg): _avg_grad_trial is stored as
+  // avg(gradTrial_reference) * F_avg^{-1} (see precalculateJacobianDisplacement). Multiply
+  // by F_avg to recover the reference-frame averaged gradient, then chain to F_ust the
+  // same way.
+  RankTwoTensor delta_F_avg;
+  if (_stabilize_strain)
+  {
+    const RankTwoTensor delta_grad_u_avg =
+        _large_kinematics ? _avg_grad_trial[beta][_j] * _F_avg[_qp] : _avg_grad_trial[beta][_j];
+    delta_F_avg = _d_F_d_grad_u[_qp] * delta_grad_u_avg;
+  }
+
+  // Stabilized delta(F_stab) through the F-bar tangent. With F-bar off, the partials are
+  // _d_F_stab_d_F_ust = I^(4) and _d_F_stab_d_F_avg = 0, so this reduces to delta_F_ust_local.
+  const RankTwoTensor delta_F_stab =
+      _d_F_stab_d_F_ust[_qp] * delta_F_ust_local + _d_F_stab_d_F_avg[_qp] * delta_F_avg;
+
+  const RankTwoTensor delta_dL = _d_spatial_velocity_increment_d_F[_qp] * delta_F_stab;
 
   // The material jacobian
   Real J = grad_test.doubleContraction(_material_jacobian[_qp] * delta_dL);
 
-  // The geometric jacobian
+  // The geometric jacobian (no F-bar stabilization in this term)
   if (_large_kinematics)
   {
-    // No stablization in the geometric jacobian
-    const auto grad_trial_ust = gradTrialUnstabilized(beta);
-    J += _stress[_qp].doubleContraction(grad_test) * grad_trial_ust.trace() -
-         _stress[_qp].doubleContraction(grad_test * grad_trial_ust);
+    J += _stress[_qp].doubleContraction(grad_test) * grad_trial.trace() -
+         _stress[_qp].doubleContraction(grad_test * grad_trial);
   }
 
   return J;

@@ -66,9 +66,6 @@ protected:
   /// If true calculate the deformation gradient derivatives for F_bar
   const bool _stabilize_strain;
 
-  /// Generalized-midpoint weight. Must match the strain calculator's alpha.
-  const Real _kinematic_alpha;
-
   /// Prepend to the material properties
   const std::string _base_name;
 
@@ -111,6 +108,12 @@ protected:
 
   /// Derivative of F_{n+1} w.r.t. the displacement gradient
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
+
+  /// Partials of the F-bar-stabilized deformation gradient. Used by the UL kernel to assemble
+  /// the F-bar Jacobian contribution. For F-bar off, _d_F_stab_d_F_ust = I^(4) and
+  /// _d_F_stab_d_F_avg = 0, so the kernel chain reduces to the unstabilized case.
+  const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
+  const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
 
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;
