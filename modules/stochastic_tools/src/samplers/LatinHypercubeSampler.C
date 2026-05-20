@@ -51,7 +51,7 @@ LatinHypercubeSampler::executeTearDown()
 }
 
 Real
-LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   mooseAssert(_shufflers.size() > 0, "Shufflers have not been initialized.");
 

@@ -83,7 +83,7 @@ protected:
   virtual void executeSetUp() override;
 
   // See Sampler.h for description
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /**
    * Sample a random number between 0 and 1

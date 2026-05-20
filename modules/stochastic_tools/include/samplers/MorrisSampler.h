@@ -23,7 +23,7 @@ public:
   MorrisSampler(const InputParameters & parameters);
 
 protected:
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /**
    * Morris sampling should have a slightly different partitioning in order to keep
@@ -41,21 +41,19 @@ protected:
 
 private:
   /**
-   * Function to calculate trajectories
-   * This is only called once per trajectory (_n_rows / (_n_cols + 1))
+   * Compute _bstar for the given trajectory index. Only called when the trajectory changes.
    */
-  void updateBstar();
-
-  /// The trajectory the current _bstar represents
-  dof_id_type _curr_trajectory = std::numeric_limits<dof_id_type>::max();
+  void updateBstar(dof_id_type trajectory_index) const;
 
   ///@{
-  /// Matrices used for trajectory computation
+  /// Constant matrices used in trajectory computation (set once in constructor)
   RealEigenMatrix _b;
-  RealEigenMatrix _pstar;
   RealEigenMatrix _j;
-  RealEigenMatrix _dstar;
-  RealEigenMatrix _xstar;
-  RealEigenMatrix _bstar;
+  ///@}
+
+  ///@{
+  /// Cached trajectory index and result; mutable because computeSample is const
+  mutable dof_id_type _curr_trajectory = std::numeric_limits<dof_id_type>::max();
+  mutable RealEigenMatrix _bstar;
   ///@}
 };

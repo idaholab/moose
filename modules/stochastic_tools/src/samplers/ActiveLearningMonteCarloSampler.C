@@ -94,7 +94,7 @@ ActiveLearningMonteCarloSampler::executeSetUp()
 }
 
 Real
-ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   return _inputs_sto[row_index][col_index];
 }

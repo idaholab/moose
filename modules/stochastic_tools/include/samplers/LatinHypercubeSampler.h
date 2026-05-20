@@ -54,7 +54,7 @@ protected:
    * @return           A sample drawn from distributions[col_index] respecting
    *                   the LHS bin constraint for this row.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /// Distribution objects, one per column, whose quantile functions are sampled
   std::vector<Distribution const *> _distributions;

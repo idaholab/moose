@@ -54,7 +54,7 @@ public:
 protected:
   virtual void executeSetUp() override;
   /// Return the sample for the given row (the sample index) and column (the parameter index)
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /// Storage for distribution objects to be utilized
   std::vector<const Distribution *> _distributions;
