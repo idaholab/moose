@@ -9,8 +9,6 @@
 
 #include "ComputeLagrangianObjectiveStress.h"
 
-#include "FactorizedRankTwoTensor.h"
-
 InputParameters
 ComputeLagrangianObjectiveStress::validParams()
 {
@@ -42,18 +40,15 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
     _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_vorticity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_vorticity_increment_d_deformation_gradient")),
+    _rotation(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation")),
+    _rotation_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation")),
+    _d_rotation_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_rotation_d_deformation_gradient")),
     _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _def_grad_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _rate(getParam<MooseEnum>("objective_rate").getEnum<ObjectiveRate>()),
-    _polar_decomp(_rate == ObjectiveRate::GreenNaghdi),
-    _rotation(_polar_decomp ? &declareProperty<RankTwoTensor>(_base_name + "rotation") : nullptr),
-    _rotation_old(_polar_decomp ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotation")
-                                : nullptr),
-    _d_rotation_d_def_grad(
-        _polar_decomp ? &declareProperty<RankFourTensor>(derivativePropertyName(
-                            _base_name + "rotation", {_base_name + "deformation_gradient"}))
-                      : nullptr),
-    _stretch(_polar_decomp ? &declareProperty<RankTwoTensor>(_base_name + "stretch") : nullptr)
+    _rate(getParam<MooseEnum>("objective_rate").getEnum<ObjectiveRate>())
 {
 }
 
@@ -64,9 +59,6 @@ ComputeLagrangianObjectiveStress::initQpStatefulProperties()
 
   _small_stress[_qp].zero();
   _cauchy_stress[_qp].zero();
-
-  if (_polar_decomp)
-    (*_rotation)[_qp] = RankTwoTensor::Identity();
 }
 
 void
@@ -121,11 +113,9 @@ ComputeLagrangianObjectiveStress::objectiveUpdateTruesdell(const RankTwoTensor &
 RankTwoTensor
 ComputeLagrangianObjectiveStress::objectiveUpdateJaumann(const RankTwoTensor & dS)
 {
-  usingTensorIndices(i, j, k, l);
-
-  // Get the kinematic tensor
-  RankTwoTensor dL = RankTwoTensor::Identity() - _inv_df[_qp];
-  RankTwoTensor dW = 0.5 * (dL - dL.transpose());
+  // The kinematic tensor for Jaumann is the vorticity increment ΔW, which the strain
+  // calculator publishes for whichever kinematic_approximation the user selected.
+  const RankTwoTensor & dW = _vorticity_increment[_qp];
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dW);
@@ -134,10 +124,11 @@ ComputeLagrangianObjectiveStress::objectiveUpdateJaumann(const RankTwoTensor & d
   // the mechanical strain that drives small_stress).
   _dcauchy_stress_d_eigenstrain[_qp] = -Jinv * _small_jacobian[_qp];
 
-  // Get the appropriate tangent tensor
-  RankTwoTensor I = RankTwoTensor::Identity();
-  RankFourTensor ddW_ddL = 0.5 * (I.times<i, k, j, l>(I) - I.times<i, l, j, k>(I));
-  RankFourTensor U = stressAdvectionDerivative(S) * ddW_ddL;
+  // d(dW)/d(dL) by chain rule: d(dW)/d(F) · (d(dL)/d(F))^{-1}. For linear this collapses
+  // to the bare skew projector 0.5(I^{ikjl} - I^{iljk}) that the old code hard-coded.
+  const RankFourTensor d_dW_d_dL =
+      _d_vorticity_increment_d_F[_qp] * _d_spatial_velocity_increment_d_F[_qp].inverse();
+  const RankFourTensor U = stressAdvectionDerivative(S) * d_dW_d_dL;
   _cauchy_jacobian[_qp] = cauchyJacobian(Jinv, U);
 
   return S;
@@ -148,29 +139,39 @@ ComputeLagrangianObjectiveStress::objectiveUpdateGreenNaghdi(const RankTwoTensor
 {
   usingTensorIndices(i, j, k, l, m);
 
-  // The kinematic tensor for the Green-Naghdi rate is
-  // Omega = dot(R) R^T
-  polarDecomposition();
-  RankTwoTensor I = RankTwoTensor::Identity();
-  RankTwoTensor dR = (*_rotation)[_qp] * (*_rotation_old)[_qp].transpose() - I;
-  RankTwoTensor dO = dR * _inv_df[_qp];
+  // The kinematic tensor for the Green-Naghdi rate is dot(R) R^T. R, R_old, and dR/dF
+  // come from the strain calculator (polar decomposition of F_actual at n+1).
+  const RankTwoTensor I = RankTwoTensor::Identity();
+  const RankTwoTensor dR = _rotation[_qp] * _rotation_old[_qp].transpose() - I;
+  const RankTwoTensor dO = dR * _inv_df[_qp];
 
   // Update the Cauchy stress
   auto [S, Jinv] = advectStress(_cauchy_stress_old[_qp] + dS, dO);
-  // d_sigma/d_eigenstrain = -Jinv * small_jacobian. The negative sign comes from
-  // mechanical_strain = total_strain - eigenstrain (an eigenstrain increase reduces
-  // the mechanical strain that drives small_stress).
   _dcauchy_stress_d_eigenstrain[_qp] = -Jinv * _small_jacobian[_qp];
 
-  // Get the appropriate tangent tensor
-  RankFourTensor d_R_d_F = (*_d_rotation_d_def_grad)[_qp];
-  // dF/d(dL) as the inverse of the stored d(dL)/dF, so this no longer hardcodes the
-  // I - f^{-1} approximation.
-  RankFourTensor d_F_d_dL = _d_spatial_velocity_increment_d_F[_qp].inverse();
-  RankTwoTensor T = (*_rotation_old)[_qp].transpose() * _inv_df[_qp];
-  RankFourTensor d_dO_d_dL =
-      T.times<m, j, i, m, k, l>(d_R_d_F * d_F_d_dL) - dR.times<i, k, j, l>(I);
-  RankFourTensor U = stressAdvectionDerivative(S) * d_dO_d_dL;
+  // Tangent: chain d(dO)/d(F) -> d(F)/d(dL). dO depends on F through R = polar(F) and
+  // through inv_df = F_old · F^{-1}; both contributions need to flow through the strain
+  // calculator's d(dL)/d(F) so the chain stays consistent across all
+  // kinematic_approximation options.
+  const RankFourTensor & d_R_d_F = _d_rotation_d_F[_qp];
+  const RankFourTensor d_F_d_dL = _d_spatial_velocity_increment_d_F[_qp].inverse();
+  const RankTwoTensor T = _rotation_old[_qp].transpose() * _inv_df[_qp];
+
+  // d(inv_df)/d(F) = -inv_df ⊗ F^{-T} (from d(F^{-1})/dF = -F^{-1} ⊗ F^{-T} and
+  // inv_df = F_old · F^{-1}). For the linear kinematic approximation this combines
+  // with the d_F_d_dL inverse to yield -I^(4), recovering the old
+  // "-dR.times<i,k,j,l>(I)" shortcut byte-for-byte. For non-linear options the chain
+  // through the strain calculator's d(dL)/dF stays consistent.
+  const RankFourTensor d_invdf_d_F =
+      -_inv_df[_qp].times<i, k, l, j>(_inv_def_grad[_qp]);
+  const RankFourTensor d_invdf_d_dL = d_invdf_d_F * d_F_d_dL;
+  // d(dO)/d(inv_df) = dR_ip * δ_jq, written as dR.times<i, k, j, l>(I) (output ijkl with
+  // (k, l) as the inv_df indices).
+  const RankFourTensor d_dO_d_invdf = dR.times<i, k, j, l>(I);
+
+  const RankFourTensor d_dO_d_dL =
+      T.times<m, j, i, m, k, l>(d_R_d_F * d_F_d_dL) + d_dO_d_invdf * d_invdf_d_dL;
+  const RankFourTensor U = stressAdvectionDerivative(S) * d_dO_d_dL;
   _cauchy_jacobian[_qp] = cauchyJacobian(Jinv, U);
 
   return S;
@@ -210,19 +211,3 @@ ComputeLagrangianObjectiveStress::cauchyJacobian(const RankFourTensor & Jinv,
   return Jinv * (_small_jacobian[_qp] - U);
 }
 
-void
-ComputeLagrangianObjectiveStress::polarDecomposition()
-{
-  FactorizedRankTwoTensor C = _def_grad[_qp].transpose() * _def_grad[_qp];
-  (*_stretch)[_qp] = MathUtils::sqrt(C).get();
-  RankTwoTensor Uinv = MathUtils::sqrt(C).inverse().get();
-  (*_rotation)[_qp] = _def_grad[_qp] * Uinv;
-
-  // Derivative of rotation w.r.t. the deformation gradient
-  RankTwoTensor I = RankTwoTensor::Identity();
-  RankTwoTensor Y = (*_stretch)[_qp].trace() * I - (*_stretch)[_qp];
-  RankTwoTensor Z = (*_rotation)[_qp] * Y;
-  RankTwoTensor O = Z * (*_rotation)[_qp].transpose();
-  usingTensorIndices(i, j, k, l);
-  (*_d_rotation_d_def_grad)[_qp] = (O.times<i, k, l, j>(Y) - Z.times<i, l, k, j>(Z)) / Y.det();
-}

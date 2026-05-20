@@ -112,10 +112,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = "Truesdell tangent is exact within rtol of 1e-7 with the quadratic kinematic "
-                  "approximation. Jaumann and Green-Naghdi are not validated against the new "
-                  "options because their hard-coded skew(dL) / polar-rotation increments do not "
-                  "track the helper-produced (dd, dw) split; Step 3 will add a Rashid-specific "
-                  "rate that consumes the helper output directly."
+                  "approximation."
   []
   [truesdell_jacobian_rashid_approximate]
     type = PetscJacobianTester
@@ -166,5 +163,128 @@
     difference_tol = 1E10
     requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
+  []
+  [jaumann_jacobian_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+                  "approximation, by consuming the vorticity increment and its derivative from "
+                  "the strain calculator."
+  []
+  [jaumann_jacobian_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the Rashid approximate "
+                  "kinematic formulas."
+  []
+  [jaumann_jacobian_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the Rashid eigen kinematic "
+                  "approximation."
+  []
+  [jaumann_jacobian_alpha05_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the quadratic kinematic approximation."
+  []
+  [jaumann_jacobian_alpha05_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the Rashid approximate kinematic formulas."
+  []
+  [jaumann_jacobian_alpha05_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
+  []
+  [green_naghdi_jacobian_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+                  "approximation. The rotation R and dR/dF are now published by the strain "
+                  "calculator, so this variant exercises the new strain-calc-published "
+                  "polar-decomposition path."
+  []
+  [green_naghdi_jacobian_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the Rashid approximate "
+                  "kinematic formulas."
+  []
+  [green_naghdi_jacobian_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the Rashid eigen "
+                  "kinematic approximation."
+  []
+  [green_naghdi_jacobian_alpha05_quadratic]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=quadratic'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+                  "midpoint rule (alpha=0.5) and the quadratic kinematic approximation."
+  []
+  [green_naghdi_jacobian_alpha05_rashid_approximate]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_approximate'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+                  "midpoint rule (alpha=0.5) and the Rashid approximate kinematic formulas."
+  []
+  [green_naghdi_jacobian_alpha05_rashid_eigen]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi GlobalParams/alpha=0.5 '
+               'GlobalParams/kinematic_approximation=rashid_eigen'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+                  "midpoint rule (alpha=0.5) and the Rashid eigen kinematic approximation."
   []
 []

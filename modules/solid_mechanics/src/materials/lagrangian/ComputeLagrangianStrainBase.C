@@ -84,8 +84,15 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _f_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_incremental_deformation_gradient")),
     _d_spatial_velocity_increment_d_F(declareProperty<RankFourTensor>(
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_vorticity_increment_d_F(declareProperty<RankFourTensor>(
+        _base_name + "d_vorticity_increment_d_deformation_gradient")),
     _d_F_d_grad_u(declareProperty<RankFourTensor>(
         _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _rotation(declareProperty<RankTwoTensor>(_base_name + "rotation")),
+    _rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotation")),
+    _stretch(declareProperty<RankTwoTensor>(_base_name + "stretch")),
+    _d_rotation_d_F(declareProperty<RankFourTensor>(
+        _base_name + "d_rotation_d_deformation_gradient")),
     _d_F_stab_d_F_ust(declareProperty<RankFourTensor>(
         _base_name + "d_F_stab_d_F_unstabilized")),
     _d_F_stab_d_F_avg(declareProperty<RankFourTensor>(
@@ -130,6 +137,7 @@ ComputeLagrangianStrainBase<G>::initQpStatefulProperties()
   _total_strain[_qp].zero();
   _mechanical_strain[_qp].zero();
   _F[_qp].setToIdentity();
+  _rotation[_qp].setToIdentity();
 }
 
 template <class G>
@@ -161,18 +169,20 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
 
     // Dispatch to the active kinematic-approximation helper. Each helper returns
-    // dd (= Δd), dw (= Δw), and d(Δl)/d(f^{-1}) for Δl = dd + dw.
+    // dd (= Δd), dw (= Δw), and the f^{-1}-derivatives of dL = dd + dw and of dw alone.
     RankTwoTensor dd, dw;
-    RankFourTensor d_dL_d_f_inv;
-    computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv);
+    RankFourTensor d_dL_d_f_inv, d_dw_d_f_inv;
+    computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
 
     // Common chain rule: d(f^{-1})_{pq}/dF_{mn} = -f^{-1}_{pm} * F^{-1}_{nq}.
     usingTensorIndices(p_, q_, m_, n_);
     const RankFourTensor d_f_inv_d_F =
         -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
     _d_spatial_velocity_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
+    _d_vorticity_increment_d_F[_qp] = d_dw_d_f_inv * d_f_inv_d_F;
 
     setQpIncrementalStrains(dd, dw);
+    computeQpPolarDecomposition();
   }
   // For small deformations we just provide the identity (and always linear)
   else
@@ -181,11 +191,46 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _f_inv[_qp] = RankTwoTensor::Identity();
     const RankTwoTensor dL = _F[_qp] - _F_old[_qp];
 
-    // d(dL)/dF = I^{(4)} when dL = F - F_old.
+    // d(dL)/dF = I^{(4)} when dL = F - F_old. d(dW)/dF = the skew projector.
     _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
+    {
+      usingTensorIndices(i_, j_, k_, l_);
+      const auto I2 = RankTwoTensor::Identity();
+      _d_vorticity_increment_d_F[_qp] =
+          0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, k_, i_, l_>(I2));
+    }
+
+    // Small kinematics: R = I, U = I, dR/dF = 0. Defensive defaults; GN is not used here.
+    _rotation[_qp].setToIdentity();
+    _stretch[_qp].setToIdentity();
+    _d_rotation_d_F[_qp].zero();
 
     setQpIncrementalStrains(0.5 * (dL + dL.transpose()), 0.5 * (dL - dL.transpose()));
   }
+}
+
+template <class G>
+void
+ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition()
+{
+  // Polar decomposition F = R · U of the alpha-weighted, F-bar-stabilized deformation
+  // gradient at this qp. We decompose _F rather than _F_actual because the rest of the
+  // kernel/rate chain treats _F as the spatial frame; using _F here matches the pre-3.1
+  // GN rate exactly (it read _def_grad, which is _F via ComputeLagrangianStressCauchy).
+  const RankTwoTensor & F = _F[_qp];
+  FactorizedRankTwoTensor C(F.transpose() * F);
+  _stretch[_qp] = MathUtils::sqrt(C).get();
+  const RankTwoTensor U_inv = MathUtils::sqrt(C).inverse().get();
+  _rotation[_qp] = F * U_inv;
+
+  // dR/dF closed form. See ComputeLagrangianObjectiveStress.C:221-227.
+  const auto I = RankTwoTensor::Identity();
+  const RankTwoTensor Y = _stretch[_qp].trace() * I - _stretch[_qp];
+  const RankTwoTensor Z = _rotation[_qp] * Y;
+  const RankTwoTensor O = Z * _rotation[_qp].transpose();
+  usingTensorIndices(i_, j_, k_, l_);
+  _d_rotation_d_F[_qp] =
+      (O.template times<i_, k_, l_, j_>(Y) - Z.template times<i_, l_, k_, j_>(Z)) / Y.det();
 }
 
 template <class G>
@@ -194,21 +239,22 @@ ComputeLagrangianStrainBase<G>::computeQpLargeKinematicIncrement(
     const RankTwoTensor & f_inv,
     RankTwoTensor & dd,
     RankTwoTensor & dw,
-    RankFourTensor & d_dL_d_f_inv)
+    RankFourTensor & d_dL_d_f_inv,
+    RankFourTensor & d_dw_d_f_inv)
 {
   switch (_kinematic_approximation)
   {
     case KinematicApproximation::Linear:
-      computeLinearIncrement(f_inv, dd, dw, d_dL_d_f_inv);
+      computeLinearIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
       break;
     case KinematicApproximation::Quadratic:
-      computeQuadraticIncrement(f_inv, dd, dw, d_dL_d_f_inv);
+      computeQuadraticIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
       break;
     case KinematicApproximation::RashidApproximate:
-      computeRashidApproximateIncrement(f_inv, dd, dw, d_dL_d_f_inv);
+      computeRashidApproximateIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
       break;
     case KinematicApproximation::RashidEigen:
-      computeRashidEigenIncrement(f_inv, dd, dw, d_dL_d_f_inv);
+      computeRashidEigenIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
       break;
   }
 }
@@ -252,7 +298,8 @@ void
 ComputeLagrangianStrainBase<G>::computeLinearIncrement(const RankTwoTensor & f_inv,
                                                        RankTwoTensor & dd,
                                                        RankTwoTensor & dw,
-                                                       RankFourTensor & d_dL_d_f_inv) const
+                                                       RankFourTensor & d_dL_d_f_inv,
+                                                       RankFourTensor & d_dw_d_f_inv) const
 {
   // Δl = I - f^{-1}, so Δd = sym(Δl), Δw = skew(Δl).
   const RankTwoTensor dL = RankTwoTensor::Identity() - f_inv;
@@ -260,6 +307,11 @@ ComputeLagrangianStrainBase<G>::computeLinearIncrement(const RankTwoTensor & f_i
   dw = 0.5 * (dL - dL.transpose());
   // d(Δl)/d(f^{-1}) = -I^{(4)}.
   d_dL_d_f_inv = -RankFourTensor::IdentityFour();
+  // d(Δw)/d(f^{-1}) = - skew projector on f^{-1} = -(1/2)(I^{ikjl} - I^{iljk}).
+  usingTensorIndices(i_, j_, m_, n_);
+  const auto I2 = RankTwoTensor::Identity();
+  d_dw_d_f_inv =
+      -0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, m_, i_, n_>(I2));
 }
 
 template <class G>
@@ -267,7 +319,8 @@ void
 ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & f_inv,
                                                           RankTwoTensor & dd,
                                                           RankTwoTensor & dw,
-                                                          RankFourTensor & d_dL_d_f_inv) const
+                                                          RankFourTensor & d_dL_d_f_inv,
+                                                          RankFourTensor & d_dw_d_f_inv) const
 {
   // Δl = X + (1/2) X^2 with X = I - f^{-1} (one more Taylor term of -log f^{-1}).
   const RankTwoTensor X = RankTwoTensor::Identity() - f_inv;
@@ -282,6 +335,8 @@ ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & 
   const RankFourTensor dXX_dX =
       I2.template times<i_, m_, n_, j_>(X) + X.template times<i_, m_, j_, n_>(I2);
   d_dL_d_f_inv = -RankFourTensor::IdentityFour() - 0.5 * dXX_dX;
+  // dw = (1/2)(dL - dL^T), so d(dw)_{ij}/d... = (1/2)(d(dL)_{ij}/d... - d(dL)_{ji}/d...).
+  d_dw_d_f_inv = 0.5 * (d_dL_d_f_inv - d_dL_d_f_inv.transposeIj());
 }
 
 template <class G>
@@ -290,7 +345,8 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
     const RankTwoTensor & f_inv,
     RankTwoTensor & dd,
     RankTwoTensor & dw,
-    RankFourTensor & d_dL_d_f_inv) const
+    RankFourTensor & d_dL_d_f_inv,
+    RankFourTensor & d_dw_d_f_inv) const
 {
   // See plan_outline.pdf §2.3 (eq 10-15, with the corrected vorticity).
   // X = I - f^{-1}.  Symmetric part: A = X X^T - X - X^T,  Δd = -A/2 + A^2/4.
@@ -346,7 +402,6 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
   // which matches sym/skew of the linear approximation. d(Δw)/d(f^{-1}) is the
   // antisymmetrizer (1/2)(δ_im δ_jn - δ_jm δ_in).
   const Real small_Q = 1.0e-12;
-  RankFourTensor d_dw_dfinv;
   if (Q < small_Q)
   {
     // Δw_ij = -(1/2) ε_ijk α_k
@@ -359,7 +414,7 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
         dw(i, j) = -0.5 * v;
       }
     // d(Δw)/d(f^{-1}) = -(1/2)(δ_{im} δ_{jn} - δ_{jm} δ_{in})
-    d_dw_dfinv = -0.5 * (I4 - I2.template times<j_, m_, i_, n_>(I2));
+    d_dw_d_f_inv = -0.5 * (I4 - I2.template times<j_, m_, i_, n_>(I2));
   }
   else
   {
@@ -409,12 +464,12 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
             for (unsigned int k = 0; k < 3; ++k)
               dE_dfinv +=
                   PermutationTensor::eps(i, j, k) * PermutationTensor::eps(k, m, n);
-            d_dw_dfinv(i, j, m, n) = dc_dfinv * E_ij + coeff * dE_dfinv;
+            d_dw_d_f_inv(i, j, m, n) = dc_dfinv * E_ij + coeff * dE_dfinv;
           }
       }
   }
 
-  d_dL_d_f_inv = d_dd_dfinv + d_dw_dfinv;
+  d_dL_d_f_inv = d_dd_dfinv + d_dw_d_f_inv;
 }
 
 template <class G>
@@ -422,7 +477,8 @@ void
 ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor & f_inv,
                                                             RankTwoTensor & dd,
                                                             RankTwoTensor & dw,
-                                                            RankFourTensor & d_dL_d_f_inv) const
+                                                            RankFourTensor & d_dL_d_f_inv,
+                                                            RankFourTensor & d_dw_d_f_inv) const
 {
   // See plan_outline.pdf §2.4. Polar-decompose f^{-1} = r' u', with u' symmetric positive
   // definite and r' a proper rotation. Then Δd = -log u', Δw = -log r' (skew).
@@ -487,9 +543,9 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
     d_logr_d_r = psi * dphi_outer_A + phi * (RankFourTensor::IdentityFour() - swap_ij);
   }
   dw = -log_r;
-  const RankFourTensor d_dw_d_finv = -(d_logr_d_r * d_r_d_finv);
+  d_dw_d_f_inv = -(d_logr_d_r * d_r_d_finv);
 
-  d_dL_d_f_inv = d_dd_d_finv + d_dw_d_finv;
+  d_dL_d_f_inv = d_dd_d_finv + d_dw_d_f_inv;
 }
 
 template <class G>

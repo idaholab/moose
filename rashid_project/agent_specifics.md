@@ -17,7 +17,7 @@ I put together `plan_outline.pdf` to describe how to go about doing this.  Basic
     2. Remove the `alpha` parameter from `LagrangianStressDivergenceBase` and the hybrid `F_pullback = (_kinematic_alpha == 1.0) ? _F : _F_actual` branch in `UpdatedLagrangianStressDivergenceBase::computeQpJacobianDisplacement` by computing the F-bar Jacobian contribution properly.  Store `∂F_stab/∂F_ust` and `∂F_stab/∂F_avg` as new RankFourTensor material properties in `ComputeLagrangianStrainBase`; rewrite the UL kernel to always pull back through `_F_actual` and add the explicit element-coupling `δF_avg` term using `_avg_grad_trial`; audit and bring `UpdatedLagrangianStressDivergence::gradTrialStabilized` (currently the small-kinematics trace form, even for large kinematics) in line with the strain calculator's actual F-bar formula; bake `α` into `_pk1_jacobian` at the stress-material level so the TL kernel can drop its `_kinematic_alpha *` prefactor as well.  Add a new `lagrangian/cartesian/updated/.../jacobian_large_with_stab_alpha05` PetscJacobianTester to lock in the case the new F-bar tangent specifically enables.
 2. Provide the suite of deformation/vorticity increment calculators as described in Section 2 of `plan_outline.pdf`.
 3. Update the Lagrangian objective rate system to add the Rashid model and take advantage of what we did in the previous step, specifically:
-    1. Alter the calculation of the Green-Naghdi rate to use the new kinematic quantities we setup in Step 2.
+    1. Alter the calculation of the Jaumann and Green-Naghdi rate to use the new kinematic quantities we setup in Step 2.  Make sure tests pass.
     2. Add a new subclass to actually calculate the Rashid rate, as we can't cast it into a linear form like we can with the existing options.
 4. Update the physics action for solid mechanics to provide default sets of these new material options to make it easy to setup different material options:
     1. Default Lagrangian behavior with objective rates (alpha = 1.0, linear kinematic approximation, Truesdell rate)
@@ -339,3 +339,75 @@ Notes:
   `X X^T = X + X^T` cancellation) and `dd = 0`, which is the *physically correct* answer for
   a pure rotation. `linear` and `quadratic` instead give a spurious `O(1 - cos θ)` diagonal
   strain — that's the whole motivation for the Rashid family.
+
+### Step 3.1 (2026-05-20) — Jaumann & Green-Naghdi rates consume strain-calc kinematics
+
+`ComputeLagrangianObjectiveStress` no longer recomputes its own kinematic
+quantities. Two new strain-calculator publications fed the refactor:
+
+1. **`d_vorticity_increment_d_deformation_gradient`** (a.k.a. `_d_vorticity_increment_d_F`)
+   — each `kinematic_approximation` helper now returns `d(Δw)/d(f^{-1})` as a
+   fourth out-parameter; the dispatcher chains it through the existing
+   `d(f^{-1})/dF = -f^{-1} ⊗ F^{-1}` and publishes the rank-4. For small
+   kinematics the published value is the skew projector
+   `0.5(I^{ikjl} - I^{iljk})`.
+2. **Polar decomposition of `_F`** — added `_rotation` (stateful, init to I),
+   `_rotation_old`, `_stretch`, and `_d_rotation_d_deformation_gradient`
+   (`_d_rotation_d_F`). Uses the same `FactorizedRankTwoTensor::sqrt(F^T F)`
+   + `Y = tr(U) I − U; Z = R Y; O = Z R^T; dR/dF = (O.times<i,k,l,j>(Y) −
+   Z.times<i,l,k,j>(Z)) / Y.det()` algebra the rate used to do inline. We
+   decompose `_F` (alpha-weighted, F-bar-stabilized) rather than `_F_actual`
+   so the linear case is byte-for-byte equivalent to the pre-3.1 GN code
+   (which read `_def_grad` from `ComputeLagrangianStressCauchy`, which
+   resolves to `_F`).
+
+Rate-side changes:
+- **Jaumann** now reads `_vorticity_increment[_qp]` for the value and builds
+  `d(dW)/d(dL) = _d_vorticity_increment_d_F · (_d_spatial_velocity_increment_d_F)^{-1}`
+  for the tangent. The old hardcoded `dL = I - _inv_df`, skew split, and
+  `ddW_ddL = 0.5(I^{ikjl} - I^{iljk})` are gone. For linear the chain
+  collapses to the bare skew projector → byte-for-byte equivalence.
+- **Green-Naghdi** reads `_rotation`, `_rotation_old`, `_d_rotation_d_F` from
+  the strain calc. The Jacobian now correctly chains both d(dO)/d(F) paths
+  (rotation and inv_df) through `_d_spatial_velocity_increment_d_F`:
+  ```
+  d(dO)/d(dL) = T.times<...>(d_R_d_F · d_F_d_dL)
+              + d(dO)/d(inv_df) · d(inv_df)/d(F) · d(F)/d(dL)
+  ```
+  where `d(inv_df)/d(F) = -inv_df ⊗ F^{-T}` is computed inline. The
+  pre-3.1 shortcut `- dR.times<i,k,j,l>(I)` was the *linear-only* collapse of
+  the second term (since `d(inv_df)/d(dL) = -I^(4)` only for the linear
+  approximation); the explicit chain now works for all four
+  `kinematic_approximation` options.
+- Removed `polarDecomposition()` method, `_polar_decomp` flag, conditional
+  `_rotation` / `_stretch` / `_d_rotation_d_def_grad` declarations, and the
+  `DerivativeMaterialPropertyNameInterface` base from `ComputeLagrangianObjectiveStress`.
+  Verified by grep: nothing outside the class consumed those properties.
+
+Tests:
+- All 354 prior lagrangian tests pass byte-for-byte (Jaumann / GN linear
+  path is unchanged at machine precision, confirmed for `jaumann_jacobian`,
+  `green_naghdi_jacobian`, `*_shear`, `*_rotation`, and
+  `mixed_pbc_symmetry_2d`).
+- 12 new `PetscJacobianTester` cases in `cartesian/total/rates/tests` at
+  `ratio_tol = 1E-7` — `{jaumann, green_naghdi} × {alpha=1, alpha=0.5}
+  × {quadratic, rashid_approximate, rashid_eigen}`. All pass.
+- Truesdell variants' "deferred caveat" requirement text scrubbed since
+  Jaumann/GN now polymorphic too.
+
+Full `solid_mechanics` suite: 1844 / 1844 (1832 baseline + 12 new Jacobian
+variants).
+
+Notes:
+- The `dR/dF` closed-form algebra (`Y, Z, O / Y.det()`) now appears in the
+  strain calc (new, for F) and inside `computeRashidEigenIncrement` (existing,
+  for `f^{-1}`). Pure code duplication. Step 3.2 should extract a
+  `MathUtils::polarRotationDerivative(R, U)` utility. Low priority; both
+  callers are short.
+- We pay one extra polar decomp per qp per step on all large-kinematics
+  simulations (Truesdell / Jaumann users now also do it). Cost is negligible
+  vs the rest of the simulation; full suite still ~95 s.
+- `_d_spatial_velocity_increment_d_F.inverse()` is now called by both
+  Jaumann and Green-Naghdi (it was already called by GN). For non-linear
+  options at extreme deformation this could become conditioned. Not seen in
+  the 1844-test sweep; flagged for revisit if it ever shows up.
