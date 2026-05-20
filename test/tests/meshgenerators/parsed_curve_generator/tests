@@ -130,20 +130,19 @@
     requirement = 'The system shall generate closed 2D curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
     recover = false
   []
-  # Won't work until the libmesh fix is in place
-  # [xy_delaunay_curve_edge3]
-  #   type = 'Exodiff'
-  #   input = 'xy_curve.i'
-  #   exodiff = 'xy_curve_edge3_in.e'
-  #   cli_args = '--mesh-only xy_curve_edge3_in.e
-  #               Mesh/pcg/edge_element_type=EDGE3
-  #               Mesh/hole1/edge_element_type=EDGE3
-  #               Mesh/hole2/edge_element_type=EDGE3
-  #               Mesh/xydg/tri_element_type=TRI6
-  #               Mesh/xydg/add_nodes_per_boundary_segment=0'
-  #   requirement = 'The system shall generate closed 2D quadratic curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
-  #   recover = false
-  # []
+  [xy_delaunay_curve_edge3]
+    type = 'Exodiff'
+    input = 'xy_curve.i'
+    exodiff = 'xy_curve_edge3_in.e'
+    cli_args = '--mesh-only xy_curve_edge3_in.e
+                Mesh/pcg/edge_element_type=EDGE3
+                Mesh/hole1/edge_element_type=EDGE3
+                Mesh/hole2/edge_element_type=EDGE3
+                Mesh/xydg/tri_element_type=TRI6
+                Mesh/xydg/add_nodes_per_boundary_segment=0'
+    requirement = 'The system shall generate closed 2D quadratic curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
+    recover = false
+  []
   [err_crossed_curve]
     type = 'RunException'
     input = 'err_cross.i'
