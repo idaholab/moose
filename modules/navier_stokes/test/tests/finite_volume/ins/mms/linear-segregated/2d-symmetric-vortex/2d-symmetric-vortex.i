@@ -98,7 +98,7 @@ advected_interp_method = 'average'
     source_density = forcing_v
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv' # Functor created in the RhieChowMassFlux UO
     use_nonorthogonal_correction = false

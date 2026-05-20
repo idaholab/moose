@@ -63,7 +63,7 @@ k_d = 1
 
 [LinearFVKernels]
   [flow_p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
     variable = pressure
