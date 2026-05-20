@@ -103,7 +103,7 @@ protected:
    */
   unsigned currentPointCachedID();
 
-  ///< Current element
+  /// Current element
   const Elem * const & _current_elem;
 
   /// Coordinate system

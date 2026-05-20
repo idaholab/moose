@@ -11,6 +11,7 @@
 #include "MooseMesh.h"
 #include "MooseEnum.h"
 #include "DiracKernelBase.h"
+#include "MooseBase.h"
 
 // LibMesh
 #include "libmesh/point_locator_base.h"
@@ -115,7 +116,8 @@ const Elem *
 DiracKernelInfo::findPoint(const Point & p,
                            const MooseMesh & mesh,
                            const std::set<SubdomainID> & blocks,
-                           const PointNotFoundBehavior point_not_found_behavior)
+                           const PointNotFoundBehavior point_not_found_behavior,
+                           const MooseBase & consumer)
 {
   // If the PointLocator has never been created, do so now.  NOTE - WE
   // CAN'T DO THIS if findPoint() is only called on some processors,
@@ -129,7 +131,7 @@ DiracKernelInfo::findPoint(const Point & p,
   // Check that the PointLocator is ready to start locating points.
   // So far I do not have any tests that trip this...
   if (_point_locator->initialized() == false)
-    mooseError("Error, PointLocator is not initialized!");
+    consumer.mooseError("PointLocator is not initialized!");
 
   // Note: The PointLocator object returns NULL when the Point is not
   // found within the Mesh.  This is not considered to be an error as
@@ -156,15 +158,15 @@ DiracKernelInfo::findPoint(const Point & p,
     switch (point_not_found_behavior)
     {
       case PointNotFoundBehavior::ERROR:
-        ::mooseError(msg.str());
+        consumer.mooseError(msg.str());
         break;
       case PointNotFoundBehavior::WARNING:
-        mooseDoOnce(::mooseWarning(msg.str() + "This message will not be repeated."));
+        mooseDoOnce(consumer.mooseWarning(msg.str() + "This message will not be repeated."));
         break;
       case PointNotFoundBehavior::IGNORE:
         break;
       default:
-        ::mooseError("Internal enum error.");
+        consumer.mooseError("Internal enum error.");
     }
   }
 

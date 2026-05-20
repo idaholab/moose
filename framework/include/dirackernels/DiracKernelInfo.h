@@ -19,6 +19,7 @@
 
 // Forward declarations
 class MooseMesh;
+class MooseBase;
 
 namespace libMesh
 {
@@ -76,7 +77,7 @@ public:
    */
   void updatePointLocator(const MooseMesh & mesh);
 
-  // @{ Point-not-found behavior
+  /// Point-not-found behavior
   CreateMooseEnumClass(PointNotFoundBehavior, ERROR, WARNING, IGNORE);
 
   /**
@@ -86,11 +87,13 @@ public:
    * @param mesh the mesh with elements to look at
    * @param blocks block restriction to find the element in
    * @param point_not_found_behavior what to do if the point is not found
+   * @param consumer the object calling calling this routine
    */
   const Elem * findPoint(const Point & p,
                          const MooseMesh & mesh,
                          const std::set<SubdomainID> & blocks,
-                         const PointNotFoundBehavior point_not_found_behavior);
+                         const PointNotFoundBehavior point_not_found_behavior,
+                         const MooseBase & consumer);
 
 protected:
   /**
