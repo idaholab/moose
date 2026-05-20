@@ -12,10 +12,15 @@ in the specified blocks.
 
 ## Per-block quadrature types
 
-In addition to specifying custom quadrature orders per block via `custom_orders`, it is also possible
-to specify a custom quadrature +type+ per block using the `custom_types` parameter. The `custom_types`
-list must have the same number of entries as `custom_blocks`. If `custom_types` is omitted, the global
-`type` is used for all custom blocks, preserving existing behaviour.
+In addition to specifying custom quadrature orders per block via
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_orders), it is also possible
+to specify a custom quadrature +type+ per block using the
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) parameter. The
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) list must have the same
+number of entries as [!param](/Executioner/Quadrature/SetupQuadratureAction/custom_blocks). If
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) is omitted, the global
+[!param](/Executioner/Quadrature/SetupQuadratureAction/type) is used for all custom blocks,
+preserving existing behaviour.
 
 The following example specifies both a custom order and a custom quadrature type for two subdomains:
 ```text
