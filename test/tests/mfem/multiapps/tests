@@ -12,7 +12,7 @@
                   OutputData/dt_from_parent_sub/Run0/Run0.pvd
                   OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
       detail = "with a time step governed by the MFEM parent application,"
-      capabilities = 'mfem & platform=linux'
+      capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
