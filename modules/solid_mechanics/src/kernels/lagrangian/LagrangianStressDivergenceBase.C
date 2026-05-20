@@ -93,6 +93,14 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
       _deigenstrain_dargs[i].push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
           eigenstrain_name, _coupled_moose_vars[i]->name()));
+
+  // The direct-chain temperature off-diagonal Jacobian needs d_sigma/d_eigenstrain. Only
+  // fetch it when eigenstrains are coupled -- otherwise the temperature Jacobian short-
+  // circuits to zero and this property would be a needless dependency that other Cauchy-
+  // providing materials would have to publish.
+  if (!getParam<std::vector<MaterialPropertyName>>("eigenstrain_names").empty())
+    _dcauchy_stress_d_eigenstrain =
+        &getMaterialPropertyByName<RankFourTensor>(_base_name + "dcauchy_stress_d_eigenstrain");
 }
 
 void

@@ -120,4 +120,11 @@ protected:
 
   /// Eigenstrain derivatives wrt generate coupleds
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _deigenstrain_dargs;
+
+  /// Derivative of the Cauchy stress with respect to the eigenstrain (published by
+  /// ComputeLagrangianObjectiveStress; can be overridden by other Cauchy-providing
+  /// materials). Only fetched when eigenstrains are coupled, since only the temperature
+  /// off-diagonal Jacobian needs it. Will be nullptr otherwise; subclasses that consume
+  /// it must guard accordingly.
+  const MaterialProperty<RankFourTensor> * _dcauchy_stress_d_eigenstrain = nullptr;
 };

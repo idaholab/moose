@@ -113,18 +113,31 @@ template <class G>
 Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianTemperature(unsigned int cvar)
 {
-  usingTensorIndices(i_, j_, k_, l_);
   // Multiple eigenstrains may depend on the same coupled var
   RankTwoTensor total_deigen;
   for (const auto deigen_darg : _deigenstrain_dargs[cvar])
     total_deigen += (*deigen_darg)[_qp];
 
-  const auto A = _f_inv[_qp].inverse();
-  const auto B = _F_inv[_qp].inverse();
-  const auto U = 0.5 * (A.template times<i_, k_, l_, j_>(B) + A.template times<i_, l_, k_, j_>(B));
+  // No eigenstrain → no temperature coupling. Short-circuit before dereferencing the
+  // d_sigma/d_eigenstrain property (only fetched when eigenstrains are coupled; see
+  // LagrangianStressDivergenceBase ctor).
+  if (total_deigen.L2norm() == 0.0)
+    return 0.0;
 
-  return -(_dpk1[_qp] * U * total_deigen).doubleContraction(gradTest(_alpha)) *
-         _temperature->phi()[_j][_qp];
+  // Direct chain through the constitutive update. The stress material publishes
+  //   d_sigma/d_eigenstrain   (= -Jinv * small_jacobian for the objective-rate path,
+  //                            with the sign convention that an eigenstrain increase
+  //                            reduces the mechanical strain).
+  // We then wrap to PK1 the same way the residual does:
+  //   dP/dT = det(F) * dsigma/dT * F^{-T}   (large kinematics)
+  //   dP/dT = dsigma/dT                     (small kinematics, P == sigma by convention)
+  const RankTwoTensor dsigma_dT = (*_dcauchy_stress_d_eigenstrain)[_qp] * total_deigen;
+  RankTwoTensor dP_dT;
+  if (_large_kinematics)
+    dP_dT = _F[_qp].det() * dsigma_dT * _F_inv[_qp].transpose();
+  else
+    dP_dT = dsigma_dT;
+  return dP_dT.doubleContraction(gradTest(_alpha)) * _temperature->phi()[_j][_qp];
 }
 
 template <class G>

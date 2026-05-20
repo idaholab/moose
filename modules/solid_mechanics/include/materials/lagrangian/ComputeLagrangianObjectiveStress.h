@@ -52,6 +52,13 @@ protected:
   /// The updated small algorithmic tangent
   MaterialProperty<RankFourTensor> & _small_jacobian;
 
+  /// Derivative of the Cauchy stress with respect to the eigenstrain at this step,
+  /// d_sigma/d_eigenstrain = -Jinv_obj * small_jacobian. The kernel consumes this single
+  /// rank-4 property to assemble the temperature off-diagonal Jacobian; future Cauchy-
+  /// providing materials that don't go through the objective-rate path can publish this
+  /// property with their own derivative.
+  MaterialProperty<RankFourTensor> & _dcauchy_stress_d_eigenstrain;
+
   /// We need the old Cauchy stress to do the objective integration
   const MaterialProperty<RankTwoTensor> & _cauchy_stress_old;
 
