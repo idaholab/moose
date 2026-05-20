@@ -41,11 +41,8 @@ MFEMNDtoRTAux::MFEMNDtoRTAux(const InputParameters & parameters)
   const mfem::ParFiniteElementSpace * source_fes = _nd_source_var.ParFESpace();
   const mfem::ParFiniteElementSpace * target_fes = _result_var.ParFESpace();
 
-  if (!source_fes)
-    paramError("source", "The source ND variable has no valid ParFiniteElementSpace.");
-
-  if (!target_fes)
-    mooseError("The target RT variable has no valid ParFiniteElementSpace.");
+  mooseAssert(source_fes, "The source variable has no valid ParFiniteElementSpace.");
+  mooseAssert(target_fes, "The target variable has no valid ParFiniteElementSpace.");
 
   const mfem::FiniteElementCollection * source_fec = source_fes->FEColl();
   const mfem::FiniteElementCollection * target_fec = target_fes->FEColl();
