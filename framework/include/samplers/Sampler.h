@@ -134,6 +134,11 @@ public:
   }
 
   /**
+   * Return a single sample value by global row and column index.
+   */
+  Real getSample(dof_id_type row_index, dof_id_type col_index) const;
+
+  /**
    * Return the parallel communicator
    */
   libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
@@ -188,7 +193,7 @@ protected:
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const = 0;
 
   // The following methods are advanced methods that should not be needed by application developers,
   // but exist for special cases.

@@ -176,7 +176,7 @@ ParallelSubsetSimulation::executeSetUp()
 }
 
 Real
-ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
+ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
   const dof_id_type n = row_index * getNumberOfCols() + col_index;

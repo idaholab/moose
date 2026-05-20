@@ -62,7 +62,7 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
 }
 
 Real
-CartesianProductSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+CartesianProductSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   return _cp_ptr->computeValue(row_index, col_index);
 }

@@ -38,7 +38,7 @@ public:
 
 protected:
   virtual void executeSetUp() override;
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /// Number of samples per subset
   const unsigned int & _num_samplessub;

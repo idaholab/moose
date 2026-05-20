@@ -356,6 +356,15 @@ Sampler::getRandl(std::size_t n, unsigned int lower, unsigned int upper, unsigne
   return _generators[index]->randl(n, lower, upper);
 }
 
+Real
+Sampler::getSample(dof_id_type row_index, dof_id_type col_index) const
+{
+  mooseAssert(row_index >= _local_row_begin && row_index < _local_row_end,
+              "Requested row " + std::to_string(row_index) + " is not local to this processor.");
+  mooseAssert(col_index < _n_cols, "Column index out of range.");
+  return computeSample(row_index, col_index);
+}
+
 dof_id_type
 Sampler::getNumberOfRows() const
 {

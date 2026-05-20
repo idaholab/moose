@@ -174,7 +174,7 @@ AdaptiveImportanceSampler::executeSetUp()
 }
 
 Real
-AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index) const
 {
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }
