@@ -22,9 +22,16 @@ This components inherits from the following interfaces to help facilitate the de
 
 ## Additional details on the extrude_boundary option
 
+To find the name of the boundaries to stitch, we recommend setting the `verbose` parameter on both the
+[!param](/ActionComponents/ComponentJunction/first_component) and [!param](/ActionComponents/ComponentJunction/second_component),
+and examining their intermediate mesh.
+
+
 The `extrude_boundary` option has the following characteristics:
 
 - The spline curve guiding the extrusion uses the `direction` attribute of the components to set its beginnning and end-direction.
+- Thus, only components that either inherit from the `ComponentMeshTransformHelper` class or that have a `direction`
+  input parameter are supported at this time.
 - These directions should be pointing towards the outside of the component.
 - The spline curve guiding the extrusion is created by the [BSplineCurveGenerator.md]. It connected the centroids of the
   two component boundaries.

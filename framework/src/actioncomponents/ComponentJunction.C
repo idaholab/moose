@@ -174,21 +174,32 @@ ComponentJunction::addMeshGenerators()
   else if (_junction_method == "extrude_boundary")
   {
     //
-    // This method is set to use a B-Spline to draw a 1D curve between
+    // This junction method is set to use a B-Spline to draw a 1D curve between, then extrude along
+    // that spline
     //
 
-    if (!dynamic_cast<ComponentMeshTransformHelper>(_awh.getAction<ActionComponent>(first_component.name())))
-      paramError("first_component", "Only components inheriting from 'ComponentMeshTransformerHelper' are supported at this time");
-    if (!dynamic_cast<ComponentMeshTransformHelper>(_awh.getAction<ActionComponent>(second_component.name())))
-      paramError("second_component", "Only components inheriting from 'ComponentMeshTransformerHelper' are supported at this time");
-    const auto & first_component_cmth =
-        _awh.getAction<ComponentMeshTransformHelper>(first_component.name());
-    const auto & second_component_cmth =
-        _awh.getAction<ComponentMeshTransformHelper>(second_component.name());
-    // TODO: modify the spline curve generator to figure out the direction so we can support other
-    // component types
     // find start and end directions (may need to take the negative of the end direction).
     // obey user parameters if set
+    // TODO: modify the spline curve generator to figure out the direction so we can support other
+    // component types
+    // TODO: this really should be the surface direction, not the component direction. Maybe all
+    // this should be deleted and replaced by logic in the Spline curve generator instead.
+    auto get_direction = [this](const auto & component, const auto & param_name) -> RealVectorValue
+    {
+      const auto & cname = component.name();
+      if (dynamic_cast<const ComponentMeshTransformHelper *>(
+              &_awh.getAction<ActionComponent>(cname)))
+        return _awh.getAction<ComponentMeshTransformHelper>(cname).direction();
+      else if (component.isParamValid("direction"))
+        return component.template getParam<RealVectorValue>("direction");
+      else
+        paramError(param_name,
+                   "Only components inheriting from 'ComponentMeshTransformerHelper' or with a "
+                   "'direction' parameter are supported at this time");
+    };
+
+    RealVectorValue start_direction = get_direction(first_component, "first_component");
+    RealVectorValue end_direction = get_direction(second_component, "second_component");
 
     InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
     bspline_params.set<RealVectorValue>("start_direction") = start_direction;
