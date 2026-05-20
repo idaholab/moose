@@ -62,8 +62,10 @@ ComponentJunction::validParams()
 
   // Parameters for the 1D spline joining the two components (serving as an extrusion guide for
   // 2,3D)
-  params.addRangeCheckedParam<libMesh::Real>(
-      "sharpness", "sharpness>0 & sharpness<=1", "Sharpness of curve bend.");
+  params.addRangeCheckedParam<libMesh::Real>("sharpness",
+                                             "sharpness>0 & sharpness<=1",
+                                             "Sharpness of curve bend. See BSplineCurveGenerator "
+                                             "for explanation of the meaning given to sharpness");
   params.addParam<unsigned int>(
       "num_cps",
       6,
@@ -175,20 +177,18 @@ ComponentJunction::addMeshGenerators()
     // This method is set to use a B-Spline to draw a 1D curve between
     //
 
-    // not all action components are guaranteed to inherit from ComponentMeshTransformerHelper,
-    // which we need to specify the direction.
+    if (!dynamic_cast<ComponentMeshTransformHelper>(_awh.getAction<ActionComponent>(first_component.name())))
+      paramError("first_component", "Only components inheriting from 'ComponentMeshTransformerHelper' are supported at this time");
+    if (!dynamic_cast<ComponentMeshTransformHelper>(_awh.getAction<ActionComponent>(second_component.name())))
+      paramError("second_component", "Only components inheriting from 'ComponentMeshTransformerHelper' are supported at this time");
+    const auto & first_component_cmth =
+        _awh.getAction<ComponentMeshTransformHelper>(first_component.name());
+    const auto & second_component_cmth =
+        _awh.getAction<ComponentMeshTransformHelper>(second_component.name());
     // TODO: modify the spline curve generator to figure out the direction so we can support other
     // component types
-    const auto & first_component_cmth =
-        _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("first_component"));
-    const auto & second_component_cmth =
-        _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("second_component"));
-
     // find start and end directions (may need to take the negative of the end direction).
     // obey user parameters if set
-
-    RealVectorValue start_direction = first_component_cmth.direction();
-    RealVectorValue end_direction = second_component_cmth.direction();
 
     InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
     bspline_params.set<RealVectorValue>("start_direction") = start_direction;
@@ -317,7 +317,7 @@ ComponentJunction::addMeshGenerators()
           _enforce_all_nodes_match_on_boundaries;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_mesh_stitcher", mesh_stitcher_params);
-      _mg_names.push_back(name() + "_mesh_stitcher");
+      _mg_names.push_back(name() + "_stitcher");
 
       InputParameters boundary_stitcher_params =
           _factory.getValidParams("StitchBoundaryMeshGenerator");

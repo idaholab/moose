@@ -4,12 +4,11 @@
 
 The `ComponentJunction` is an [ActionComponent.md] which creates a contiguous junction
 between two components.
-The following methods are currently supported to join these two components at boundaries selected on each component:
+The following [!param](/ActionComponents/ComponentJunction/junction_method) options are currently supported to join these two components at boundaries selected on each component:
 
 - `stitch_meshes` when the two components are already in contact, forming a conformal but not yet "stitched" mesh
 - `extrude_boundary` for extruding one boundary towards the other and stitching the extruded volume onto both surfaces.
-  This can only be done if the two surfaces have the same meshes. A spline curve following the direction of the components
-  guides this extrusion.
+  See additional information below.
 
 There is currently no support for joining two components when the boundary meshes would not be conformal if they were
 in contact.
@@ -21,6 +20,21 @@ This components inherits from the following interfaces to help facilitate the de
 - [ComponentInitialConditionInterface.md] to define initial conditions for the variables defined on that component
 - [ComponentBoundaryConditionInterface.md] to define boundary conditions for the variables defined on that component
 
+## Additional details on the extrude_boundary option
+
+The `extrude_boundary` option has the following characteristics:
+
+- The spline curve guiding the extrusion uses the `direction` attribute of the components to set its beginnning and end-direction.
+- These directions should be pointing towards the outside of the component.
+- The spline curve guiding the extrusion is created by the [BSplineCurveGenerator.md]. It connected the centroids of the
+  two component boundaries.
+- The extrusion of the first component surface follows this spline curve. It is then stitched to the second component surface.
+- Thus, extruding one surface onto the other can only be done if the meshes of the two surfaces would be conformal if they were
+  translated and rotated (using the rotation from one component direction to the other) to be in contact.
+
+It is the responsibility of the user to check that the extruded mesh does not overlap with other parts of the mesh (from other components
+for example). A [MeshDiagnosticsGenerator.md] can be connected to the final generator of the `ComponentJunction` by setting its input
+to `<junction_name>_stitcher`.
 
 !syntax parameters /ActionComponents/ComponentJunction
 

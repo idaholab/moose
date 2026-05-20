@@ -638,7 +638,7 @@ AdvancedExtruderGenerator::generate()
             // previous point in extrusion curve
             const Node * P_prev = extrusion_curve->node_ptr(k - 1);
 
-            // Quantites for the previous position of the extruded node
+            // Quantities for the previous position of the extruded node
             const auto old_node = orig_node_to_previous + *node;
             RealVectorValue b_vec = old_node - *P_prev;
             Real node_distance_to_curve = b_vec.norm();

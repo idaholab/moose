@@ -81,8 +81,9 @@ BSplineCurveGenerator::validParams()
   params.addClassDescription(
       "This BSplineMeshGenerator object is designed to generate a mesh of a curve that consists of "
       "EDGE2, EDGE3, or EDGE4 elements drawn using an open uniform B-Spline.");
-  params.addParam<std::vector<BoundaryName>>(
-      "edge_nodesets", std::vector<BoundaryName>(), "Nodesets on both edges of the spline curve");
+  params.addParam<std::vector<BoundaryName>>("edge_nodesets",
+                                             std::vector<BoundaryName>(),
+                                             "Nodeset name to give each edge of the spline curve");
 
   return params;
 }
