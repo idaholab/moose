@@ -37,7 +37,10 @@ runs:
         check_summary=()
         check_failed=
         for capability in "${capabilities[@]}"; do
-          command=("${{ inputs.capabilities }}" "--check-capabilities='$capability'")
+          if [ -z "$capability" ]; then
+            continue
+          fi
+          command=("${{ inputs.executable }}" "--check-capabilities='$capability'")
           return_code=0
           if ! print_and_run "${command[@]}"; then
             return_code="$?"
@@ -60,8 +63,6 @@ runs:
         for result in "${check_summary[@]}"; do
           echo "$result"
         done
-        if [ -n "$check_failed" ]; then
-        fi
         echo "::endgroup::"
 
         if [ -n "$check_failed" ]; then
