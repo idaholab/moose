@@ -116,12 +116,20 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned
   const auto grad_trial = gradTrial(beta);
 
   //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
-  //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} f^{-1}_{km} g^beta_{ml}
+  //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} d(dL)_{kl}/d(grad u)_{mn} g^beta_{mn}
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
 
+  // Build the variation in the reference-frame displacement gradient. In the large kinematics
+  // UL formulation grad_trial is the spatial gradient of the trial function, so we pull it back
+  // through F to recover the reference-frame variation.
+  const RankTwoTensor delta_grad_u = _large_kinematics ? grad_trial * _F[_qp] : grad_trial;
+  // Chain through the stored kinematic derivatives.
+  const RankTwoTensor delta_F = _d_F_d_grad_u[_qp] * delta_grad_u;
+  const RankTwoTensor delta_dL = _d_spatial_velocity_increment_d_F[_qp] * delta_F;
+
   // The material jacobian
-  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * (_f_inv[_qp] * grad_trial));
+  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * delta_dL);
 
   // The geometric jacobian
   if (_large_kinematics)

@@ -55,6 +55,10 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
                                                     "inverse_incremental_deformation_gradient")),
     _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_deformation_gradient_d_grad_displacement")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)

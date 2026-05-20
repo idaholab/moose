@@ -13,6 +13,7 @@
 #include "DerivativeMaterialInterface.h"
 #include "JvarMapInterface.h"
 #include "StabilizationUtils.h"
+#include "RankFourTensorForward.h"
 
 /// Base class of the "Lagrangian" kernel system
 ///
@@ -96,6 +97,12 @@ protected:
 
   /// The actual (stabilized) deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;
+
+  /// Derivative of the spatial velocity gradient increment w.r.t. F_{n+1}
+  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+
+  /// Derivative of F_{n+1} w.r.t. the displacement gradient
+  const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;

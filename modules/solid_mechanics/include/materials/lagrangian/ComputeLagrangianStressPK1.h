@@ -42,6 +42,10 @@ private:
 protected:
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
+  /// Inverse deformation gradient
+  const MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;
+  /// d(spatial velocity gradient increment)/dF
+  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
 };
