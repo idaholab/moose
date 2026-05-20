@@ -42,4 +42,12 @@
     requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 2D '
                   'axisymmetric cylindrical coordinates, with stabilization, including cross-terms'
   []
+  # alpha=0.5 thermal expansion in non-Cartesian coordinates is a known Step 1 limitation:
+  # the temperature off-diagonal Jacobian in TotalLagrangianStressDivergenceBase::
+  # computeQpJacobianTemperature uses a linear chain U built from f_alpha/F_alpha. For
+  # alpha=1 this matches FD for both Cartesian and non-Cartesian. For alpha=0.5 it matches
+  # FD in Cartesian (see test/tests/lagrangian/cartesian/total/thermal_expansion for the
+  # alpha=0.5 variant) but not in axisymmetric / centrosymmetric coordinates, because the
+  # gradTest there picks up a coordinate-system hoop contribution that the U formula does
+  # not. Fix deferred to a later step.
 []

@@ -76,4 +76,32 @@
     difference_tol = 1E10
     requirement = "Green-Naghdi tangent is exact within rtol of 1e-7"
   []
+  [truesdell_jacobian_alpha05]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell GlobalParams/alpha=0.5'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5)"
+  []
+  [jaumann_jacobian_alpha05]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann GlobalParams/alpha=0.5'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+                  "rule (alpha=0.5)"
+  []
+  [green_naghdi_jacobian_alpha05]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi '
+               'GlobalParams/alpha=0.5'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+                  "midpoint rule (alpha=0.5)"
+  []
 []

@@ -55,8 +55,10 @@ protected:
   virtual void computeQpIncrementalStrains(const RankTwoTensor & dL);
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
-  /// Calculate the unstabilized deformation gradient at the quadrature point
+  /// Calculate the unstabilized (alpha-weighted) deformation gradient at the quadrature point
   virtual void computeQpUnstabilizedDeformationGradient();
+  /// Calculate the actual deformation gradient at n+1 (no alpha weighting, no F-bar)
+  virtual void computeQpActualDeformationGradient();
   /// Calculate the unstabilized and optionally the stabilized deformation gradients
   virtual void computeDeformationGradient();
 
@@ -64,6 +66,10 @@ protected:
   const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
+  /// Old displacement values for the generalized midpoint rule
+  std::vector<const VariableValue *> _disp_old;
+  /// Old displacement gradients for the generalized midpoint rule
+  std::vector<const VariableGradient *> _grad_disp_old;
 
   /// Material system base name
   const std::string _base_name;
@@ -73,6 +79,9 @@ protected:
 
   /// If true stabilize the strains with F_bar
   const bool _stabilize_strain;
+
+  /// Generalized-midpoint weight for the deformation gradient (1.0 = backward Euler, 0.5 = midpoint)
+  const Real _alpha;
 
   // The eigenstrains
   std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -94,8 +103,13 @@ protected:
   /// Vorticity increment
   MaterialProperty<RankTwoTensor> & _vorticity_increment;
 
-  /// The unstabilized deformation gradient
+  /// The unstabilized (alpha-weighted) deformation gradient
   MaterialProperty<RankTwoTensor> & _F_ust;
+
+  /// The literal deformation gradient at n+1 (I + grad u_{n+1}). Equals _F_ust when alpha = 1.
+  /// Needed by the UL kernel for the spatial-to-reference pull-back, since the spatial frame is
+  /// always at n+1 regardless of alpha.
+  MaterialProperty<RankTwoTensor> & _F_actual;
 
   // The average deformation gradient over the element for F-bar stabilization. Note that the
   // average deformation gradient is undefined if stabilization is not active.

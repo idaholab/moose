@@ -60,3 +60,29 @@ Consumers updated to use the stored derivatives instead of inline `f`/`f^{-1}` f
 Full `solid_mechanics` test suite green (1697/1697). All 219 lagrangian tests pass.
 
 Gotcha encountered: the original `_spatial_velocity_increment` was eigenstrain-subtracted (mechanical), which is the wrong quantity for objective-rate advection. The Cartesian thermal-expansion jacobian tests hid this because their `jactest.i` has no temperature BCs and the eigenstrain is zero at the test state. Only the axisymmetric thermal-expansion jacobian tests, which set `T_left=0, T_right=1`, exposed it.
+
+### Step 1 (2026-05-20) — generalized midpoint deformation gradient
+
+`ComputeLagrangianStrainBase` now accepts a range-checked `alpha` parameter (default 1.0, range [0.5, 1.0]) and computes the deformation gradient via the generalized midpoint rule:
+  `F^alpha_{n+1} = I + alpha * (grad u_{n+1}, u_{n+1}) + (1 - alpha) * (grad u_n, u_n)`
+The two contributions are accumulated with two `addGradOp` calls, so the existing coordinate-system polymorphism (Cartesian / axisymmetric / centrosymmetric) is preserved. With a Steady executioner the old contribution is treated as identically zero (F_n = I) so the alpha rule works in both transient and steady mode.
+
+`_d_F_d_grad_u` is now populated as `alpha * IdentityFour` instead of `IdentityFour`. The strain calculator also declares a new property `actual_deformation_gradient` = `I + grad u_{n+1}` (no alpha weighting, no F-bar), since the UL kernel's spatial-to-reference pull-back needs the literal F at n+1 when `alpha != 1`.
+
+Kernel changes:
+- `LagrangianStressDivergenceBase` gets its own `alpha` parameter (defaults to 1.0). The user is expected to set `alpha` via `GlobalParams` so both the kernel and the strain material see the same value.
+- `UpdatedLagrangianStressDivergenceBase::computeQpJacobianDisplacement` picks `_F_actual` for the spatial pull-back when `_kinematic_alpha != 1.0` and stays on `_F` (the alpha-weighted, F-bar-stabilized F) when `_kinematic_alpha == 1.0`. The alpha=1 branch preserves the pre-Step-0 "self-consistent f^{-1} * grad_trial" pattern that F-bar tests rely on; the alpha != 1 branch uses the literal F at n+1 so the chain rule is mathematically correct.
+- `TotalLagrangianStressDivergenceBase::computeQpJacobianDisplacement` multiplies the existing `gradTest : (_dpk1 * gradTrial)` by `_kinematic_alpha`, since `_dpk1 = dP/dF_alpha` and the chain to grad u_{n+1} carries an alpha factor.
+
+Test additions (15 total):
+- `lagrangian/axisymmetric_cylindrical/total/jacobian` — 4 alpha=0.5 variants (dirichlet/neumann × stab/no-stab).
+- `lagrangian/centrosymmetric_spherical/total/jacobian` — 4 alpha=0.5 variants.
+- `lagrangian/cartesian/total/rates` — 3 alpha=0.5 variants (truesdell, jaumann, green_naghdi).
+- `lagrangian/cartesian/total/thermal_expansion` — 2 alpha=0.5 variants (with and without stab).
+- `lagrangian/cartesian/total/generalized_alpha` — new directory with two correctness CSVDiff tests (alpha=0.5 and alpha=1.0). A single-element 3D uniaxial extension with linearly-ramped Dirichlet BC checks that the postprocessor-read `F^alpha_{11}` matches `1 + alpha*(0.01*t_n) + (1-alpha)*(0.01*t_{n-1})` exactly and that `F^actual_{11}` matches `1 + 0.01*t_n`.
+
+Known limitation flagged in `lagrangian/axisymmetric_cylindrical/total/thermal_expansion/tests`: the temperature off-diagonal Jacobian in `TotalLagrangianStressDivergenceBase::computeQpJacobianTemperature` uses a linear-chain `U = sym(f_alpha ⊗ F_alpha)` that matches FD for `alpha=1` in any coordinate system and for `alpha=0.5` in Cartesian, but does NOT match FD for `alpha=0.5` in axisymmetric/centrosymmetric coordinates (the gradTest there picks up a hoop term that the U formula does not account for). A proper fix needs a more careful re-derivation of the eigenstrain-to-PK1 chain for alpha != 1 in non-Cartesian coordinates; deferred.
+
+Full `solid_mechanics` suite green: 1712 / 1712 (1697 baseline + 15 new alpha=0.5 / correctness tests).
+
+Tip for future steps: `_kinematic_alpha != 1` requires the user to set `alpha` on BOTH the strain material and the kernel. Recommend setting via `GlobalParams/alpha=0.5` so both pick it up automatically — this is the pattern the new test cli_args follow.
