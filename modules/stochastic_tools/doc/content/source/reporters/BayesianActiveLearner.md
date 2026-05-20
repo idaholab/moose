@@ -1,5 +1,7 @@
 # BayesianActiveLearner
 
+!if! function=hasCapability('libtorch')
+
 !syntax description /Reporters/BayesianActiveLearner
 
 ## Description
@@ -14,3 +16,8 @@ The `BayesianActiveLearner` derives off of [GenericActiveLearner](GenericActiveL
 !syntax inputs /Reporters/BayesianActiveLearner
 
 !syntax children /Reporters/BayesianActiveLearner
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

@@ -6,12 +6,15 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #include "AdaptiveMonteCarloDecision.h"
 #include "Sampler.h"
 #include "DenseMatrix.h"
 #include "AdaptiveMonteCarloUtils.h"
 #include "StochasticToolsUtils.h"
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+#include "ActiveLearningGPDecision.h"
+#endif
 
 registerMooseObject("StochasticToolsApp", AdaptiveMonteCarloDecision);
 
@@ -46,10 +49,18 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _check_step(std::numeric_limits<int>::max()),
     _local_comm(_sampler.getLocalComm()),
     _gp_used(isParamValid("gp_decision")),
+#ifdef MOOSE_LIBTORCH_ENABLED
     _gp_training_samples(
         _gp_used ? &getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples()
                  : nullptr)
+#else
+    _gp_training_samples(nullptr)
+#endif
 {
+#ifndef MOOSE_LIBTORCH_ENABLED
+  if (_gp_used)
+    paramError("gp_decision", "The 'gp_decision' parameter requires libtorch.");
+#endif
 
   // Check whether the selected sampler is an adaptive sampler or not
   if (!_ais && !_pss)

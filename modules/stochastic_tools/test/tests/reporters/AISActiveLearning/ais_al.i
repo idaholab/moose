@@ -27,6 +27,7 @@
     inputs_reporter = 'adaptive_MC/inputs'
     use_absolute_value = true
     flag_sample = 'conditional/flag_sample'
+    num_random_seeds = 1000
     seed = 9874
   []
 []

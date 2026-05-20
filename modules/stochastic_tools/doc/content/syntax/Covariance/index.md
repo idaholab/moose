@@ -1,5 +1,7 @@
 # Covariance System
 
+!if! function=hasCapability('libtorch')
+
 ## Overview
 
 Some surrogate models allow for a covariance function (often referred to as kernel functions or simply kernels) to project the input parameters into a different input space. The Gaussian process surrogate is an example of such a surrogate. These covariance functions can be defined in the `[Covariance]` block.
@@ -58,3 +60,8 @@ outputs at once by handling the covariance between the outputs as well.
 !syntax list /Covariance objects=False actions=False subsystems=True
 
 !syntax list /Covariance objects=False actions=True subsystems=False
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

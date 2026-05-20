@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "ActiveLearningGaussianProcess.h"
 
@@ -33,6 +34,10 @@ ActiveLearningGaussianProcess::validParams()
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
+  params.addParam<MooseEnum>(
+      "optimizer",
+      MooseEnum("adam=0 legacy_adam=1", "adam"),
+      "The Adam optimizer semantics to use for Gaussian process hyperparameter tuning.");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
       0,
@@ -49,15 +54,21 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
     CovarianceInterface(parameters),
     SurrogateModelInterface(this),
     _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _training_data(declareModelData<RealEigenMatrix>("_training_data")),
+    _training_params(declareModelData<torch::Tensor>("_training_params")),
+    _training_data(declareModelData<torch::Tensor>("_training_data")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate")))
+        getParam<Real>("learning_rate"),
+        0.9,
+        0.999,
+        1e-7,
+        1e-4,
+        getParam<MooseEnum>("optimizer")
+            .getEnum<StochasticTools::GaussianProcess::OptimizerType>()))
 {
   _gp.initialize(getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),
                  getParam<std::vector<std::string>>("tune_parameters"),
@@ -79,29 +90,37 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   if (inputs.empty())
     mooseError("There is no data for retraining.");
 
-  _training_params.setZero(outputs.size(), inputs[0].size());
-  _training_data.setZero(outputs.size(), 1);
+  const auto input_size = inputs[0].size();
+  std::vector<Real> flat_inputs;
+  flat_inputs.reserve(outputs.size() * input_size);
 
-  for (unsigned int i = 0; i < outputs.size(); ++i)
+  for (const auto & input : inputs)
   {
-    _training_data(i, 0) = outputs[i];
-    for (unsigned int j = 0; j < inputs[i].size(); ++j)
-      _training_params(i, j) = inputs[i][j];
+    if (input.size() != input_size)
+      mooseError("All active learning retraining inputs must have the same dimension.");
+    flat_inputs.insert(flat_inputs.end(), input.begin(), input.end());
   }
+
+  _training_params =
+      LibtorchUtils::vectorToTensorCopy(flat_inputs, {long(outputs.size()), long(input_size)});
+  _training_data = LibtorchUtils::vectorToTensorCopy(outputs, {long(outputs.size()), 1});
+
+  LibtorchUtils::moveToLibtorchDevice(_training_params, _app.getLibtorchDevice());
+  LibtorchUtils::moveToLibtorchDevice(_training_data, _app.getLibtorchDevice());
 
   // Standardize (center and scale) training params
   if (_standardize_params)
     _gp.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.paramStandardizer().set(0, 1, inputs[0].size());
+    _gp.paramStandardizer().set(0, 1, input_size);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
     _gp.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.dataStandardizer().set(0, 1, inputs[0].size());
+    _gp.dataStandardizer().set(0, 1);
 
   // Setup the covariance
   _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
@@ -122,6 +141,11 @@ ActiveLearningGaussianProcess::getTrainingStandardizer() const
 void
 ActiveLearningGaussianProcess::getNormTrainingOuts(std::vector<Real> & norm_training_outs) const
 {
+  norm_training_outs.resize(_training_data.size(0));
+  const auto training_data = LibtorchUtils::toCPUContiguous(_training_data);
+  const auto data_accessor = training_data.accessor<Real, 2>();
   for (unsigned int i = 0; i < norm_training_outs.size(); ++i)
-    norm_training_outs[i] = _training_data(i, 0);
+    norm_training_outs[i] = data_accessor[i][0];
 }
+
+#endif

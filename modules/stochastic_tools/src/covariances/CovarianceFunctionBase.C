@@ -6,8 +6,51 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "CovarianceFunctionBase.h"
+#include "LibtorchUtils.h"
+
+namespace
+{
+
+torch::Tensor
+makeScalarHyperParameter(const Real value)
+{
+  return torch::tensor(value, torch::TensorOptions().dtype(at::kDouble));
+}
+
+torch::Tensor
+makeVectorHyperParameter(const std::vector<Real> & value)
+{
+  return LibtorchUtils::vectorToTensorCopy(value, {long(value.size())});
+}
+
+torch::Tensor &
+insertHyperParameter(std::unordered_map<std::string, torch::Tensor> & hyperparameters,
+                     std::unordered_set<std::string> & tunable_hp,
+                     const std::string & prefixed_name,
+                     torch::Tensor tensor,
+                     const bool is_tunable)
+{
+  if (is_tunable)
+    tunable_hp.insert(prefixed_name);
+  return hyperparameters.emplace(prefixed_name, std::move(tensor)).first->second;
+}
+
+} // namespace
+
+bool
+CovarianceFunctionBase::isScalarHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 0;
+}
+
+bool
+CovarianceFunctionBase::isVectorHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 1;
+}
 
 InputParameters
 CovarianceFunctionBase::validParams()
@@ -39,8 +82,8 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
 }
 
 bool
-CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                                        const RealEigenMatrix & /*x*/,
+CovarianceFunctionBase::computedKdhyper(torch::Tensor & /*dKdhp*/,
+                                        const torch::Tensor & /*x*/,
                                         const std::string & /*hyper_param_name*/,
                                         unsigned int /*ind*/) const
 {
@@ -48,26 +91,24 @@ CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
              "computedKdhyper() to compute gradient.");
 }
 
-const Real &
+torch::Tensor &
 CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
                                               const Real value,
                                               const bool is_tunable)
 {
   const auto prefixed_name = _name + ":" + name;
-  if (is_tunable)
-    _tunable_hp.insert(prefixed_name);
-  return _hp_map_real.emplace(prefixed_name, value).first->second;
+  return insertHyperParameter(
+      _hyperparameters, _tunable_hp, prefixed_name, makeScalarHyperParameter(value), is_tunable);
 }
 
-const std::vector<Real> &
+torch::Tensor &
 CovarianceFunctionBase::addVectorRealHyperParameter(const std::string & name,
-                                                    const std::vector<Real> value,
+                                                    const std::vector<Real> & value,
                                                     const bool is_tunable)
 {
   const auto prefixed_name = _name + ":" + name;
-  if (is_tunable)
-    _tunable_hp.insert(prefixed_name);
-  return _hp_map_vector_real.emplace(prefixed_name, value).first->second;
+  return insertHyperParameter(
+      _hyperparameters, _tunable_hp, prefixed_name, makeVectorHyperParameter(value), is_tunable);
 }
 
 bool
@@ -80,51 +121,47 @@ CovarianceFunctionBase::isTunable(const std::string & name) const
 
   if (_tunable_hp.find(name) != _tunable_hp.end())
     return true;
-  else if (_hp_map_real.find(name) != _hp_map_real.end() ||
-           _hp_map_vector_real.find(name) != _hp_map_vector_real.end())
+  else if (_hyperparameters.find(name) != _hyperparameters.end())
     mooseError("We found hyperparameter ", name, " but it was not declared tunable!");
 
   return false;
 }
 
 void
-CovarianceFunctionBase::loadHyperParamMap(
-    const std::unordered_map<std::string, Real> & map,
-    const std::unordered_map<std::string, std::vector<Real>> & vec_map)
+CovarianceFunctionBase::loadHyperParamMap(const HyperParameterMap & map)
 {
   // First, load the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-    dependent_covar->loadHyperParamMap(map, vec_map);
+    dependent_covar->loadHyperParamMap(map);
 
   // Then we load the hyperparameters of this object
-  for (auto & iter : _hp_map_real)
+  for (auto & iter : _hyperparameters)
   {
-    const auto & map_iter = map.find(iter.first);
-    if (map_iter != map.end())
-      iter.second = map_iter->second;
-  }
-  for (auto & iter : _hp_map_vector_real)
-  {
-    const auto & map_iter = vec_map.find(iter.first);
-    if (map_iter != vec_map.end())
-      iter.second = map_iter->second;
+    const auto map_iter = map.find(iter.first);
+    if (map_iter == map.end())
+      continue;
+
+    if (!isScalarHyperParameter(map_iter->second) && !isVectorHyperParameter(map_iter->second))
+      mooseError(
+          "Unsupported hyperparameter rank ", map_iter->second.dim(), " for ", iter.first, ".");
+
+    iter.second = map_iter->second.clone();
   }
 }
 
 void
-CovarianceFunctionBase::buildHyperParamMap(
-    std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
+CovarianceFunctionBase::buildHyperParamMap(HyperParameterMap & map) const
 {
   // First, add the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-    dependent_covar->buildHyperParamMap(map, vec_map);
+    dependent_covar->buildHyperParamMap(map);
 
   // At the end we just append the hyperparameters this object owns
-  for (const auto & iter : _hp_map_real)
-    map[iter.first] = iter.second;
-  for (const auto & iter : _hp_map_vector_real)
-    vec_map[iter.first] = iter.second;
+  for (const auto & iter : _hyperparameters)
+    if (!isScalarHyperParameter(iter.second) && !isVectorHyperParameter(iter.second))
+      mooseError("Unsupported hyperparameter rank ", iter.second.dim(), " for ", iter.first, ".");
+    else
+      map[iter.first] = iter.second.clone();
 }
 
 bool
@@ -141,22 +178,26 @@ CovarianceFunctionBase::getTuningData(const std::string & name,
   min = 1e-9;
   max = 1e9;
 
-  if (_hp_map_real.find(name) != _hp_map_real.end())
-  {
-    size = 1;
-    return true;
-  }
-  else if (_hp_map_vector_real.find(name) != _hp_map_vector_real.end())
-  {
-    const auto & vector_value = _hp_map_vector_real.find(name);
-    size = vector_value->second.size();
-    return true;
-  }
-  else
+  const auto tensor_value = _hyperparameters.find(name);
+  if (tensor_value == _hyperparameters.end())
   {
     size = 0;
     return false;
   }
+
+  if (isScalarHyperParameter(tensor_value->second))
+  {
+    size = 1;
+    return true;
+  }
+
+  if (isVectorHyperParameter(tensor_value->second))
+  {
+    size = tensor_value->second.numel();
+    return true;
+  }
+
+  mooseError("Unsupported hyperparameter rank ", tensor_value->second.dim(), " for ", name, ".");
 }
 
 void
@@ -169,3 +210,5 @@ CovarianceFunctionBase::dependentCovarianceTypes(
     name_type_map.insert(std::make_pair(dependent_covar->name(), dependent_covar->type()));
   }
 }
+
+#endif
