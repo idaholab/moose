@@ -122,17 +122,6 @@ CutMeshByLevelSetGeneratorBase::generate()
         "input",
         "Only 3D meshes are supported. Use XYMeshLineCutter for 2D meshes if applicable. Mixed "
         "dimensional meshes are not supported at the moment.");
-
-  if (_cut_interface == CutInterfaceElement::TETRAHEDRA)
-    return generateCutWithTetrahedra();
-  else
-    return generateCutWithPolyhedra();
-}
-
-std::unique_ptr<MeshBase>
-CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
-{
-  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
   if (!_cut_face_name.empty())
@@ -159,6 +148,18 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
   {
     _cut_face_id = MooseMeshUtils::getNextFreeBoundaryID(mesh);
   }
+
+  if (_cut_interface == CutInterfaceElement::TETRAHEDRA)
+    return generateCutWithTetrahedra();
+  else
+    return generateCutWithPolyhedra();
+}
+
+std::unique_ptr<MeshBase>
+CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
+{
+  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
+  ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
   // Subdomain ID for new utility blocks must be new
   // Find sid shifts
@@ -333,32 +334,6 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
-
-  // Resolve cut face boundary id / name (same logic as the tetrahedra path)
-  if (!_cut_face_name.empty())
-  {
-    if (MooseMeshUtils::hasBoundaryName(mesh, _cut_face_name))
-    {
-      const boundary_id_type exist_cut_face_id =
-          MooseMeshUtils::getBoundaryID(_cut_face_name, mesh);
-      if (_cut_face_id != -1 && _cut_face_id != exist_cut_face_id)
-        paramError("cut_face_id",
-                   "The cut face boundary name and id are both provided, but they are inconsistent "
-                   "with an existing boundary name which has a different id.");
-      else
-        _cut_face_id = exist_cut_face_id;
-    }
-    else
-    {
-      if (_cut_face_id == -1)
-        _cut_face_id = MooseMeshUtils::getNextFreeBoundaryID(mesh);
-      mesh.get_boundary_info().sideset_name(_cut_face_id) = _cut_face_name;
-    }
-  }
-  else if (_cut_face_id == -1)
-  {
-    _cut_face_id = MooseMeshUtils::getNextFreeBoundaryID(mesh);
-  }
 
   // Subdomain IDs for new utility blocks must be new.
   // - Polyhedron-converted elements get their subdomain id shifted by sid_shift_base so the
