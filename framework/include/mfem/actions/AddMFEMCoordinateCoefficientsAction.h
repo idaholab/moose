@@ -13,6 +13,12 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * This action allow to introduce MFEM Coordinate coefficient
+ * objects, that construct and expose built-in scalar coefficients
+ * providers through the '[Coordinates]' block.
+ */
+
 class AddMFEMCoordinateCoefficientsAction : public MooseObjectAction
 {
 public:

@@ -33,7 +33,7 @@ private:
   const mfem::real_t _eps;
 };
 
-} // anonymous namespace
+}
 
 InputParameters
 Cylindrical::validParams()
