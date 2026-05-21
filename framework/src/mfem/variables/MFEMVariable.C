@@ -59,23 +59,34 @@ MFEMVariable::buildGridFunction()
 void
 MFEMVariable::declareCoefficients()
 {
+  // Get continuity type to
+  const MFEMFESpace & mfem_fespace = getFESpace();
+  const int cont_type = mfem_fespace.getFEC()->GetContType();
   if (getFESpace().isScalar())
   {
     getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         name(), getGridFunction().get());
-    getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
-        name() + "_grad", getGridFunction().get());
+    // If gradient is well-defined on this variable, create auxiliary coefficient
+    if (cont_type == mfem::FiniteElementCollection::CONTINUOUS)
+      getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
+          name() + "_grad", getGridFunction().get());
   }
   else
   {
     getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         name(), getGridFunction().get());
-    getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
-        name() + "_curl", getGridFunction().get());
-    getMFEMProblem().getCoefficients().declareScalar<mfem::DivergenceGridFunctionCoefficient>(
-        name() + "_div", getGridFunction().get());
     getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
         name() + "_mag", getMFEMProblem().getCoefficients().getVectorCoefficient(name()));
+    // If curl is well-defined on this variable, create auxiliary coefficient
+    if (cont_type == mfem::FiniteElementCollection::TANGENTIAL ||
+        cont_type == mfem::FiniteElementCollection::CONTINUOUS)
+      getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
+          name() + "_curl", getGridFunction().get());
+    // If divergence is well-defined on this variable, create auxiliary coefficient
+    if (cont_type == mfem::FiniteElementCollection::NORMAL ||
+        cont_type == mfem::FiniteElementCollection::CONTINUOUS)
+      getMFEMProblem().getCoefficients().declareScalar<mfem::DivergenceGridFunctionCoefficient>(
+          name() + "_div", getGridFunction().get());
   }
 }
 
