@@ -35,6 +35,24 @@
         valgrind = none # see #31360
         capabilities = 'netgen'
       []
+      [plane_cut_poly]
+        type = 'Exodiff'
+        input = 'plane_cut_poly.i'
+        exodiff = 'plane_cut_poly_in.e'
+        cli_args = '--mesh-only plane_cut_poly_in.e'
+        mesh_mode = 'REPLICATED'
+        recover = false
+        detail = 'cut a 3D HEX8 mesh by a plane level set using C0POLYHEDRON elements at the interface, then convert the polyhedra to TET4 for output.'
+      []
+      [cylinder_cut_poly]
+        type = 'Exodiff'
+        input = 'cylinder_cut_poly.i'
+        exodiff = 'cylinder_cut_poly_in.e'
+        cli_args = '--mesh-only cylinder_cut_poly_in.e'
+        mesh_mode = 'REPLICATED'
+        recover = false
+        detail = 'cut a 3D HEX8 mesh by a cylindrical level set using C0POLYHEDRON elements at the interface, then convert the polyhedra to TET4 for output.'
+      []
     []
   # Does not need error tests as they have been covered by CutMeshByPlaneGenerator
 []

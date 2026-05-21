@@ -30,9 +30,10 @@ CutMeshByLevelSetGeneratorBase::validParams()
   params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh that needs to be trimmed.");
-  params.addParam<MooseEnum>("cut_interface",
-                             getCutInterfaceElementOptions(),
-                             "Which type of element to use at the interface between elements and the cut");
+  params.addParam<MooseEnum>(
+      "cut_interface",
+      MooseEnum(getCutInterfaceElementOptions(), "TETRAHEDRA"),
+      "Which type of element to use at the interface between elements and the cut");
 
   params.addParam<bool>(
       "generate_transition_layer",
