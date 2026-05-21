@@ -1426,7 +1426,7 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
 TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
 {
   // Create two CSGBase objects to join together into a single root
-  // Both of these CSGBase objects will contain the same surface based on its member data
+  // Both of these CSGBase objects will contain the identical surface based on its member data
   // Upon joining these CSGBases, the identical surface will be discarded and not inserted
   // into the combined CSGBase object
 
@@ -1445,7 +1445,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
   // CSGBase 3: deep copy of base2, used in following error check
   auto base3 = base2->clone();
 
-  // Joining: without setting ignore_identical_components to true, an error should occur
+  // Joining: without setting ignore_identical_components to true, an error should occur because the
+  // surface name already exists
   {
     Moose::UnitUtils::assertThrows([&base1, &base3]()
                                    { base1->joinOtherBase(std::move(base3), false); },
@@ -1457,8 +1458,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
   auto base4 = base2->clone();
   auto & surf = base4->getSurfaceByName("s1");
   base4->addTransformation(surf, TransformationType::SCALE, std::make_tuple(10, 10, 10));
-  // Joining: with ignore_identical_components set to true, an error still occur occur becuase the
-  // two surfaces are not identical
+  // Joining: with ignore_identical_components set to true, an error still occurs because the
+  // two surfaces are not identical (different transformations) even though they have the same name
   {
     Moose::UnitUtils::assertThrows([&base1, &base4]()
                                    { base1->joinOtherBase(std::move(base4), true); },
@@ -1487,7 +1488,7 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
 TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsUniverseFill)
 {
   // Create two CSGBase objects to join together into a single root
-  // Both of these CSGBase objects will contain the same cell based on its member data
+  // Both of these CSGBase objects will contain the identical cell based on its member data
   // Upon joining these CSGBases, the identical cell will be discarded and not inserted
   // into the combined CSGBase object
 
@@ -1499,7 +1500,6 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsUniverseFill)
   auto c1 = base1->createCell("c1", fill_univ1, empty_region, &add_to_univ1);
 
   // CSGBase 2: clone of CSGBase 1 but cell belongs to a renamed universe
-  // belongs to a universe that is different from CSGBase 1
   std::unique_ptr<CSGBase> base2 = base1->clone();
   auto & add_to_univ2 = base2->getUniverseByName("add_to_univ1");
   base2->renameUniverse(add_to_univ2, "add_to_univ2");
@@ -1507,7 +1507,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsUniverseFill)
   // CSGBase 3: deep copy of base2, used in following error check.
   auto base3 = base2->clone();
 
-  // Joining: without setting ignore_identical_components to true, an error should occur
+  // Joining: without setting ignore_identical_components to true, an error should occur because the
+  // cell name already exists
   {
     Moose::UnitUtils::assertThrows([&base1, &base3]()
                                    { base1->joinOtherBase(std::move(base3), false); },
@@ -1519,8 +1520,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsUniverseFill)
   auto base4 = base2->clone();
   auto & cell = base4->getCellByName("c1");
   base4->addTransformation(cell, TransformationType::SCALE, std::make_tuple(10, 10, 10));
-  // Joining: with ignore_identical_components set to true, an error still occur occur becuase the
-  // two cells are not identical
+  // Joining: with ignore_identical_components set to true, an error still occurs because the
+  // two cells are not identical (different transformations) even though they have the same name
   {
     Moose::UnitUtils::assertThrows([&base1, &base4]()
                                    { base1->joinOtherBase(std::move(base4), true); },
@@ -1555,7 +1556,7 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsUniverseFill)
 TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
 {
   // Create two CSGBase objects to join together into a single root
-  // Both of these CSGBase objects will contain the same cell based on its member data
+  // Both of these CSGBase objects will contain the identical cell based on its member data
   // Upon joining these CSGBases, the identical cell will be discarded and not inserted
   // into the combined CSGBase object
 
@@ -1573,7 +1574,6 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
   auto c1 = base1->createCell("c1", fill_lat, empty_region, &add_to_univ1);
 
   // CSGBase 2: clone of CSGBase 1 but cell belongs to a renamed universe
-  // belongs to a universe that is different from CSGBase 1
   std::unique_ptr<CSGBase> base2 = base1->clone();
   auto & add_to_univ2 = base2->getUniverseByName("add_to_univ1");
   base2->renameUniverse(add_to_univ2, "add_to_univ2");
@@ -1581,7 +1581,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
   // CSGBase 3: deep copy of base2, used in following error check
   auto base3 = base2->clone();
 
-  // Joining: without setting ignore_identical_components to true, an error should occur
+  // Joining: without setting ignore_identical_components to true, an error should occur because the
+  // cell name already exists
   {
     Moose::UnitUtils::assertThrows([&base1, &base3]()
                                    { base1->joinOtherBase(std::move(base3), false); },
@@ -1593,8 +1594,9 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
   auto base4 = base2->clone();
   auto & lat_univ_rename = base4->getUniverseByName("lat_univ");
   base4->renameUniverse(lat_univ_rename, "lat_univ_rename");
-  // Joining: with ignore_identical_components set to true, an error still occur occur becuase the
-  // two fill lattices are not identical
+  // Joining: with ignore_identical_components set to true, an error still occurs because the
+  // two fill lattices' elements do not contain the same universe even though they have the same
+  // name
   {
     Moose::UnitUtils::assertThrows([&base1, &base4]()
                                    { base1->joinOtherBase(std::move(base4), true); },
@@ -1602,12 +1604,12 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
   }
 
   // CSGBase 5: deep copy of base2, but lattice outer is renamed and is no longer identical to
-  // original lattice
+  // original lattice's outer
   auto base5 = base2->clone();
   auto & outer_univ_rename = base5->getUniverseByName("outer_univ");
   base5->renameUniverse(outer_univ_rename, "outer_univ_rename");
-  // Joining: with ignore_identical_components set to true, an error still occur occur becuase the
-  // two fill lattices are not identical
+  // Joining: with ignore_identical_components set to true, an error still occurs because the
+  // two fill lattices do not have the same outer universe even though they have the same name
   {
     Moose::UnitUtils::assertThrows([&base1, &base5]()
                                    { base1->joinOtherBase(std::move(base5), true); },
@@ -1644,7 +1646,7 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalCellsLatticeFill)
 TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalUniverses)
 {
   // Create two CSGBase objects to join together into a single root
-  // Both of these CSGBase objects will contain the same universe based on its member data
+  // Both of these CSGBase objects will contain the identical universe based on its member data
   // Upon joining these CSGBases, the identical universe will be discarded and not inserted
   // into the combined CSGBase object
 
@@ -1664,7 +1666,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalUniverses)
   auto base3 = base2->clone();
   auto base1_copy = base1->clone();
 
-  // Joining: without setting ignore_identical_components to true, an error should occur
+  // Joining: without setting ignore_identical_components to true, an error should occur because the
+  // universe name already exits
   {
     Moose::UnitUtils::assertThrows([&base1_copy, &base3]()
                                    { base1_copy->joinOtherBase(std::move(base3), false); },
@@ -1677,8 +1680,8 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalUniverses)
   auto & fill_univ_transform = base4->getUniverseByName("fill_univ");
   base4->addTransformation(
       fill_univ_transform, TransformationType::SCALE, std::make_tuple(10, 10, 10));
-  // Joining: with ignore_identical_components set to true, an error still occur occur becuase the
-  // two universes are not identical
+  // Joining: with ignore_identical_components set to true, an error still occurs because the
+  // two universes are not identical even though they have the same name
   {
     Moose::UnitUtils::assertThrows([&base1, &base4]()
                                    { base1->joinOtherBase(std::move(base4), true); },

@@ -910,9 +910,11 @@ CoreMeshGenerator::generateCSG()
     csg_obj->createCell(dummy_cell_name, empty_region, &dummy_univ);
   }
 
-  // Combine all bases from AssemblyMG inputs into this base. Root universes from
-  // inputs are renamed to a new universe name. These universes and their cells
-  // will be discarded, so that only the infinite assembly universes are retained.
+  // Combine all bases from AssemblyMG inputs into this base. We expect each AssemblyMG
+  // input to contain a root universe with a single cell that constrains the assembly based
+  // on the FEM boundary. Root universes from inputs are renamed to a new universe name.
+  // These universes and their cells will be discarded, so that only the infinite assembly
+  // universes are retained.
   std::unordered_map<unsigned int, std::string> univ_id_names;
   std::vector<std::string> univs_to_discard;
   for (const auto i : index_range(_inputs))
@@ -957,7 +959,7 @@ CoreMeshGenerator::generateCSG()
 
   // Define universe that fills region outside of lattice. For an explicity
   // defined outer ring, this is a material outer corresponding to the region ID
-  // of the ring region. Otherwise, the outer defined as a universe filled with void
+  // of the ring region. Otherwise, the outer is defined as a universe containing a void cell
   if (_mesh_periphery)
   {
     std::string region_name = "rgmb_region_" + std::to_string(_periphery_region_id);
@@ -969,7 +971,11 @@ CoreMeshGenerator::generateCSG()
     csg_obj->setLatticeOuter(core_lattice, outer_univ);
   }
 
-  // Define lattice cell
+  // Define lattice cell, with the lattice surrounded by a bounding circle whose radius is
+  // determined by the mesh periphery radius. If no mesh periphery is defined, the radius will be (N
+  // + 1) times the assembly pitch of the lattice, where N is the number of rings for a hexagonal
+  // lattice or half the number of assembly widths that span a square lattice. This ensures that the
+  // ring radius completely surrounds the underlying lattice.
   std::string lat_cell_name = name() + "_lattice_cell";
   const auto ring_radius =
       _mesh_periphery ? _outer_circle_radius : (universe_pattern.size() + 2) / 2. * assembly_pitch;
