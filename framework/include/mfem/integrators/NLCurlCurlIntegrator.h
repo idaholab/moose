@@ -26,8 +26,7 @@ class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator
 {
 public:
   NLCurlCurlIntegrator(mfem::Coefficient & k,
-                       mfem::Coefficient & dk_dcurlu,
-                       const mfem::GridFunction * gf,
+                       mfem::Coefficient & curlu_dk_dcurlu,
                        const mfem::IntegrationRule * ir = nullptr);
 
   virtual void AssembleElementVector(const mfem::FiniteElement & el,
@@ -40,9 +39,6 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::CurlGridFunctionCoefficient _curlu_vec;      // curl u
-  MFEMVectorMagnitudeCoefficient _curlu;             // |curl u|
-  mfem::ProductCoefficient _curlu_dk_dcurlu_coef;    // |curl u| dk/d|curl u|
   mfem::SumCoefficient _k_plus_curlu_dk_dcurlu_coef; // (k + |curl u| dk/d|curl u|)
   mfem::CurlCurlIntegrator _curlcurl_res_integ;      // (k(|curl u|) curl u, curl phi_j)
   mfem::CurlCurlIntegrator

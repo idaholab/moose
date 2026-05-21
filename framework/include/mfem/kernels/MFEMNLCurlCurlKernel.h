@@ -28,8 +28,7 @@ public:
 
 protected:
   mfem::Coefficient & _k_coef;
-  mfem::Coefficient & _dk_dcurlu_coeff;
-  mfem::ParGridFunction & _trial_var;
+  mfem::Coefficient & _curlu_dk_dcurlu_coeff;
 };
 
 #endif

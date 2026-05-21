@@ -28,7 +28,7 @@ MFEMNLCurlCurlKernel::validParams()
   params.addParam<MFEMScalarCoefficientName>(
       "k_coefficient", "1.", "Name of the nonlinear coefficient k(|\\nabla x u|).");
   params.addParam<MFEMScalarCoefficientName>(
-      "dk_dcurlu_coefficient",
+      "curlu_dk_dcurlu_coefficient",
       "0.",
       "Name of coefficient representing the partial derivative of the coefficient k(|\\nabla "
       "\\times u|) with respect to the "
@@ -39,15 +39,14 @@ MFEMNLCurlCurlKernel::validParams()
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _dk_dcurlu_coeff(getScalarCoefficient("dk_dcurlu_coefficient")),
-    _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
+    _curlu_dk_dcurlu_coeff(getScalarCoefficient("curlu_dk_dcurlu_coefficient"))
 {
 }
 
 mfem::NonlinearFormIntegrator *
 MFEMNLCurlCurlKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _dk_dcurlu_coeff, &_trial_var);
+  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _curlu_dk_dcurlu_coeff);
 }
 
 #endif

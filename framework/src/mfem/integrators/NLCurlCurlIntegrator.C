@@ -14,13 +14,9 @@
 namespace Moose::MFEM
 {
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
-                                           mfem::Coefficient & dk_dcurlu,
-                                           const mfem::GridFunction * gf,
+                                           mfem::Coefficient & curlu_dk_dcurlu,
                                            const mfem::IntegrationRule * ir)
-  : _curlu_vec(gf),
-    _curlu(_curlu_vec),
-    _curlu_dk_dcurlu_coef(_curlu, dk_dcurlu),
-    _k_plus_curlu_dk_dcurlu_coef(k, _curlu_dk_dcurlu_coef),
+  : _k_plus_curlu_dk_dcurlu_coef(k, curlu_dk_dcurlu),
     _curlcurl_res_integ(k, ir),
     _curlcurl_jac_integ(_k_plus_curlu_dk_dcurlu_coef, ir)
 {
