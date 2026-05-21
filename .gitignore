@@ -171,6 +171,7 @@ moose/include/base/Precompiled.h.gch
 
 # test garbagge
 *.FAILED.txt
+test/tests/predictors/tangent_predictor/tangent_predictor_restart_cp/
 
 # eclipse garbage
 .project

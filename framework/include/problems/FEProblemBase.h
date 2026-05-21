@@ -1873,6 +1873,11 @@ public:
    */
   virtual void predictorCleanup(NumericVector<libMesh::Number> & ghosted_solution);
 
+  /**
+   * Notify active predictors that the current timestep was accepted.
+   */
+  void predictorTimestepAccepted();
+
   virtual void computeBounds(libMesh::NonlinearImplicitSystem & sys,
                              NumericVector<libMesh::Number> & lower,
                              NumericVector<libMesh::Number> & upper);
