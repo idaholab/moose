@@ -8687,7 +8687,7 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // Just like we reinitialized our geometric search objects, we also need to reinitialize our
   // mortar meshes. Note that this needs to happen after DisplacedProblem::meshChanged because the
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
-  updateMortarMesh();
+  _mortar_data->meshChanged();
 
   // Nonlinear systems hold the mortar mesh functors. The domains of definition of the mortar
   // functors might have changed when the mesh changed.

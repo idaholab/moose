@@ -22,6 +22,7 @@
 #include "libmesh/int_range.h"
 
 // C++ includes
+#include <optional>
 #include <set>
 #include <memory>
 #include <vector>
@@ -156,7 +157,35 @@ public:
   void buildMortarSegmentMesh3d();
 
   /**
-   * Outputs mesh statistics for mortar segment mesh
+   * Statistics for one primary-secondary subdomain pair.
+   * Secondary/primary lower-d stats reflect local data (all data for replicated meshes).
+   */
+  struct MsmSubdomainStats
+  {
+    SubdomainID primary_subd_id;
+    SubdomainID secondary_subd_id;
+    std::size_t secondary_lower_n_elems;
+    Real secondary_lower_max_volume;
+    Real secondary_lower_min_volume;
+    Real secondary_lower_median_volume;
+    std::size_t primary_lower_n_elems;
+    Real primary_lower_max_volume;
+    Real primary_lower_min_volume;
+    Real primary_lower_median_volume;
+    std::size_t msm_n_elems;
+    Real msm_max_volume;
+    Real msm_min_volume;
+    Real msm_median_volume;
+  };
+
+  /**
+   * Computes mortar segment mesh statistics and returns one entry per subdomain pair.
+   * Must be called collectively on all ranks.
+   */
+  std::vector<MsmSubdomainStats> computeMsmStatistics();
+
+  /**
+   * Prints mortar segment mesh statistics to console (calls computeMsmStatistics internally)
    */
   void msmStatistics();
 
@@ -164,6 +193,12 @@ public:
    * Clears the mortar segment mesh and accompanying data structures
    */
   void clear();
+
+  /**
+   * Invalidates the cached MSM node/element ID starting offset so that the next call to
+   * buildMortarSegmentMesh3d() recomputes it via allgather. Call this when mesh topology changes.
+   */
+  void meshChanged() { _msm_node_id_start = std::nullopt; }
 
   /**
    * returns whether this object is on the displaced mesh
@@ -342,6 +377,16 @@ public:
 
 private:
   /**
+   * Write the mortar segment mesh to exodus
+   */
+  void outputMortarMesh();
+
+  /**
+   * @returns A string uniquely identifying this mortar interface
+   */
+  std::string mortarInterfaceName() const;
+
+  /**
    * build the \p _mortar_interface_coupling data
    */
   void buildCouplingInformation();
@@ -518,6 +563,11 @@ private:
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;
+
+  /// Cached per-rank starting ID for 3D MSM nodes/elements. nullopt forces recomputation on next
+  /// buildMortarSegmentMesh3d() call. Reset by meshChanged() on topology change so the allgather
+  /// is skipped for displaced-mesh residual updates that only move nodes.
+  std::optional<dof_id_type> _msm_node_id_start;
 
   /// Debugging container for printing information about fraction of successful projections for
   /// secondary nodes. If !_debug then this should always be empty

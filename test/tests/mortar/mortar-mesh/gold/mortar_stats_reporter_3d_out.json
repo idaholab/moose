@@ -1,0 +1,89 @@
+{
+    "reporters": {
+        "mortar_stats": {
+            "type": "MortarSegmentMeshReporter",
+            "values": {
+                "msm_max_volume": {
+                    "type": "std::vector<double>"
+                },
+                "msm_median_volume": {
+                    "type": "std::vector<double>"
+                },
+                "msm_min_volume": {
+                    "type": "std::vector<double>"
+                },
+                "msm_n_elems": {
+                    "type": "std::vector<unsigned int>"
+                },
+                "primary_lower_max_volume": {
+                    "type": "std::vector<double>"
+                },
+                "primary_lower_median_volume": {
+                    "type": "std::vector<double>"
+                },
+                "primary_lower_min_volume": {
+                    "type": "std::vector<double>"
+                },
+                "primary_lower_n_elems": {
+                    "type": "std::vector<unsigned int>"
+                },
+                "secondary_lower_max_volume": {
+                    "type": "std::vector<double>"
+                },
+                "secondary_lower_median_volume": {
+                    "type": "std::vector<double>"
+                },
+                "secondary_lower_min_volume": {
+                    "type": "std::vector<double>"
+                },
+                "secondary_lower_n_elems": {
+                    "type": "std::vector<unsigned int>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mortar_stats": {
+                "msm_max_volume": [
+                    0.006944444444444445
+                ],
+                "msm_median_volume": [
+                    0.0017361111111111106
+                ],
+                "msm_min_volume": [
+                    0.0008680555555555546
+                ],
+                "msm_n_elems": [
+                    120
+                ],
+                "primary_lower_max_volume": [
+                    0.006944444444444448
+                ],
+                "primary_lower_median_volume": [
+                    0.006944444444444444
+                ],
+                "primary_lower_min_volume": [
+                    0.006944444444444442
+                ],
+                "primary_lower_n_elems": [
+                    36
+                ],
+                "secondary_lower_max_volume": [
+                    0.015625
+                ],
+                "secondary_lower_median_volume": [
+                    0.015625
+                ],
+                "secondary_lower_min_volume": [
+                    0.015625
+                ],
+                "secondary_lower_n_elems": [
+                    16
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        }
+    ]
+}

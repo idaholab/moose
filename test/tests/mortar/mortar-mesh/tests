@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#32862'
+  design = 'AutomaticMortarGeneration.md'
+  [mortar_stats_reporter]
+    requirement = 'The system shall be able to report mortar segment mesh statistics for a spatially'
+    [2d]
+      type = JSONDiff
+      input = 'mortar_stats_reporter.i'
+      jsondiff = 'mortar_stats_reporter_out.json'
+      keep_reporter_types = true
+      detail = 'two dimensional or'
+    []
+    [3d]
+      type = JSONDiff
+      input = 'mortar_stats_reporter_3d.i'
+      jsondiff = 'mortar_stats_reporter_3d_out.json'
+      keep_reporter_types = true
+      skip_keys = 'number_of_parts part'
+      detail = 'three dimensional mortar mesh.'
+    []
+  []
+  [mortar_segment_mesh]
+    requirement = 'When requested through a mortar constraint, the system shall be able to write out a spatially'
+    [2d]
+      type = Exodiff
+      input = mortar_stats_reporter.i
+      exodiff = mortar_stats_reporter_2_1_undisplaced_mortar_segment_mesh.e
+      prereq = 'mortar_stats_reporter/2d'
+      should_execute = False
+      detail = 'two dimensional or'
+    []
+    [3d]
+      type = Exodiff
+      input = mortar_stats_reporter_3d.i
+      exodiff = mortar_stats_reporter_3d_107_2_undisplaced_mortar_segment_mesh.e
+      prereq = 'mortar_stats_reporter/3d'
+      should_execute = False
+      detail = 'three dimensional mortar mesh.'
+    []
+  []
+[]
