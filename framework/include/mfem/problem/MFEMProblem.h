@@ -17,7 +17,6 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include <memory>
 
 #include <map>
 
