@@ -23,7 +23,8 @@ number of entries as [!param](/Executioner/Quadrature/SetupQuadratureAction/cust
 preserving existing behaviour.
 
 The following example specifies both a custom order and a custom quadrature type for two subdomains:
-```text
+
+```moose
 [Executioner]
   [Quadrature]
     type = GAUSS
