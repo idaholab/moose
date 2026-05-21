@@ -38,6 +38,12 @@ LibtorchDRLControl::validParams()
   params.addParam<Real>(
       "smoother", 1.0, "Relaxation factor applied when smoothing control updates.");
 
+  params.addParam<std::vector<Real>>(
+      "control_offsets",
+      {},
+      "Optional constant offsets added to each policy signal before setting the controlled "
+      "parameter. This can be used to train a policy on deviations from a nominal signal.");
+
   params.addParam<bool>(
       "stochastic",
       true,
@@ -64,6 +70,10 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
         "previous_control_signal", std::vector<Real>(_control_names.size(), 0.0))),
     _current_smoothed_signal(declareRestartableData<std::vector<Real>>(
         "current_smoothed_signal", std::vector<Real>(_control_names.size(), 0.0))),
+    _control_offsets(isParamSetByUser("control_offsets")
+                         ? getParam<std::vector<Real>>("control_offsets")
+                         : std::vector<Real>(_control_names.size(), 0.0)),
+    _has_control_offsets(isParamSetByUser("control_offsets")),
     _policy_generator(Moose::makeLibtorchCPUGenerator()),
     _policy_generator_state(declareRestartableData<std::vector<std::uint8_t>>(
         "policy_generator_state", std::vector<std::uint8_t>())),
@@ -79,6 +89,10 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 
   if (isParamValid("seed"))
     setPolicySampleSeed(getParam<unsigned int>("seed"));
+
+  if (_control_offsets.size() != _control_names.size())
+    paramError("control_offsets",
+               "The number of control offsets must match the number of controlled parameters.");
 
   savePolicyGeneratorState();
 }
@@ -137,6 +151,8 @@ LibtorchDRLControl::execute()
   if (!_actor_nn)
   {
     mooseAssert(!_nn, "LibtorchDRLControl should not store a non-actor controller network.");
+    if (_has_control_offsets)
+      applyControlSignals();
     return;
   }
 
@@ -180,11 +196,25 @@ LibtorchDRLControl::execute()
         _previous_control_signal[i] +
         _smoother * (_current_control_signals[i] - _previous_control_signal[i]);
 
-  for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
-    setControllableValueByName<Real>(_control_names[control_i],
-                                     _current_smoothed_signal[control_i]);
+  applyControlSignals();
 
   _observation_history.advanceHistory(_current_observation, _old_observations);
+}
+
+Real
+LibtorchDRLControl::computeControlOffset(const unsigned int control_i) const
+{
+  return _control_offsets[control_i];
+}
+
+void
+LibtorchDRLControl::applyControlSignals()
+{
+  for (const auto control_i : index_range(_control_names))
+  {
+    const Real applied_signal = computeControlOffset(control_i) + _current_smoothed_signal[control_i];
+    setControllableValueByName<Real>(_control_names[control_i], applied_signal);
+  }
 }
 
 void

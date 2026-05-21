@@ -58,6 +58,12 @@ public:
   void setPolicySampleSeed(uint64_t seed);
 
 protected:
+  /// Apply the current smoothed control signals, including optional offsets.
+  void applyControlSignals();
+
+  /// Return the offset to add to a control signal at the current time.
+  Real computeControlOffset(unsigned int control_i) const;
+
   /// The log probability of control signals from the last evaluation of the controller
   std::vector<Real> & _current_control_signal_log_probabilities;
 
@@ -65,6 +71,11 @@ protected:
   std::vector<Real> & _previous_control_signal;
   /// The current smoothed control signal applied to the controllable parameters.
   std::vector<Real> & _current_smoothed_signal;
+
+  /// Constant offsets added to each control signal before it is applied.
+  std::vector<Real> _control_offsets;
+  /// Whether any offset data was provided by the user.
+  bool _has_control_offsets;
 
   /// Actor network used when the controller operates as a stochastic policy.
   std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
