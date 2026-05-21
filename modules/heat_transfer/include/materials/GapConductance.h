@@ -137,3 +137,20 @@ protected:
   Point & _p1;
   Point & _p2;
 };
+
+template <>
+inline void
+dataStore(std::ostream & stream, GapConductance::GAP_GEOMETRY & v, void * ctx)
+{
+  auto stored = static_cast<int>(v);
+  dataStore(stream, stored, ctx);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, GapConductance::GAP_GEOMETRY & v, void * ctx)
+{
+  int loaded;
+  dataLoad(stream, loaded, ctx);
+  v = static_cast<GapConductance::GAP_GEOMETRY>(loaded);
+}

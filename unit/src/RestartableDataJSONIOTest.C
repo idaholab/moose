@@ -108,7 +108,7 @@ dataStore(std::ostream &, CustomData &, void *)
 }
 
 void
-dataLoad(std::ostream &, CustomData &, void *)
+dataLoad(std::istream &, CustomData &, void *)
 {
 }
 

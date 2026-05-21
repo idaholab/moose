@@ -164,34 +164,34 @@ dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context)
   {
     // Store 1 so that we know that this pinfo really exists!
     unsigned int i = 1;
-    storeHelper(stream, i, context);
+    dataStore(stream, i, context);
 
-    storeHelper(stream, pinfo->_elem, context);
+    dataStore(stream, pinfo->_elem, context);
     // Not storing the side element as we will need to recreate it on load
-    storeHelper(stream, pinfo->_side_num, context);
-    storeHelper(stream, pinfo->_normal, context);
-    storeHelper(stream, pinfo->_distance, context);
-    storeHelper(stream, pinfo->_tangential_distance, context);
-    storeHelper(stream, pinfo->_closest_point, context);
-    storeHelper(stream, pinfo->_closest_point_ref, context);
-    storeHelper(stream, pinfo->_closest_point_on_face_ref, context);
-    storeHelper(stream, pinfo->_off_edge_nodes, context);
-    storeHelper(stream, pinfo->_side_phi, context);
-    storeHelper(stream, pinfo->_side_grad_phi, context);
-    storeHelper(stream, pinfo->_dxyzdxi, context);
-    storeHelper(stream, pinfo->_dxyzdeta, context);
-    storeHelper(stream, pinfo->_d2xyzdxideta, context);
-    storeHelper(stream, pinfo->_starting_elem, context);
-    storeHelper(stream, pinfo->_starting_side_num, context);
-    storeHelper(stream, pinfo->_starting_closest_point_ref, context);
-    storeHelper(stream, pinfo->_incremental_slip, context);
-    storeHelper(stream, pinfo->_accumulated_slip, context);
-    storeHelper(stream, pinfo->_frictional_energy, context);
-    storeHelper(stream, pinfo->_contact_force, context);
-    storeHelper(stream, pinfo->_lagrange_multiplier, context);
-    storeHelper(stream, pinfo->_lagrange_multiplier_slip, context);
-    storeHelper(stream, pinfo->_mech_status, context);
-    storeHelper(stream, pinfo->_mech_status_old, context);
+    dataStore(stream, pinfo->_side_num, context);
+    dataStore(stream, pinfo->_normal, context);
+    dataStore(stream, pinfo->_distance, context);
+    dataStore(stream, pinfo->_tangential_distance, context);
+    dataStore(stream, pinfo->_closest_point, context);
+    dataStore(stream, pinfo->_closest_point_ref, context);
+    dataStore(stream, pinfo->_closest_point_on_face_ref, context);
+    dataStore(stream, pinfo->_off_edge_nodes, context);
+    dataStore(stream, pinfo->_side_phi, context);
+    dataStore(stream, pinfo->_side_grad_phi, context);
+    dataStore(stream, pinfo->_dxyzdxi, context);
+    dataStore(stream, pinfo->_dxyzdeta, context);
+    dataStore(stream, pinfo->_d2xyzdxideta, context);
+    dataStore(stream, pinfo->_starting_elem, context);
+    dataStore(stream, pinfo->_starting_side_num, context);
+    dataStore(stream, pinfo->_starting_closest_point_ref, context);
+    dataStore(stream, pinfo->_incremental_slip, context);
+    dataStore(stream, pinfo->_accumulated_slip, context);
+    dataStore(stream, pinfo->_frictional_energy, context);
+    dataStore(stream, pinfo->_contact_force, context);
+    dataStore(stream, pinfo->_lagrange_multiplier, context);
+    dataStore(stream, pinfo->_lagrange_multiplier_slip, context);
+    dataStore(stream, pinfo->_mech_status, context);
+    dataStore(stream, pinfo->_mech_status_old, context);
 
     // Don't need frictional_energy_old, accumulated_slip_old, contact_force_old, or
     // locked_this_step
@@ -201,7 +201,7 @@ dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context)
   {
     // Store 0 so that we know that this pinfo is NULL
     unsigned int i = 0;
-    storeHelper(stream, i, context);
+    dataStore(stream, i, context);
   }
 }
 
@@ -214,39 +214,39 @@ dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context)
 
   // First, see if this is supposed to be NULL
   unsigned int i = 0;
-  loadHelper(stream, i, context);
+  dataLoad(stream, i, context);
   if (i)
   {
     pinfo = new PenetrationInfo();
 
-    loadHelper(stream, pinfo->_elem, context);
-    loadHelper(stream, pinfo->_side_num, context);
+    dataLoad(stream, pinfo->_elem, context);
+    dataLoad(stream, pinfo->_side_num, context);
     // Rebuild the side element.
     pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num).release();
 
-    loadHelper(stream, pinfo->_normal, context);
-    loadHelper(stream, pinfo->_distance, context);
-    loadHelper(stream, pinfo->_tangential_distance, context);
-    loadHelper(stream, pinfo->_closest_point, context);
-    loadHelper(stream, pinfo->_closest_point_ref, context);
-    loadHelper(stream, pinfo->_closest_point_on_face_ref, context);
-    loadHelper(stream, pinfo->_off_edge_nodes, context);
-    loadHelper(stream, pinfo->_side_phi, context);
-    loadHelper(stream, pinfo->_side_grad_phi, context);
-    loadHelper(stream, pinfo->_dxyzdxi, context);
-    loadHelper(stream, pinfo->_dxyzdeta, context);
-    loadHelper(stream, pinfo->_d2xyzdxideta, context);
-    loadHelper(stream, pinfo->_starting_elem, context);
-    loadHelper(stream, pinfo->_starting_side_num, context);
-    loadHelper(stream, pinfo->_starting_closest_point_ref, context);
-    loadHelper(stream, pinfo->_incremental_slip, context);
-    loadHelper(stream, pinfo->_accumulated_slip, context);
-    loadHelper(stream, pinfo->_frictional_energy, context);
-    loadHelper(stream, pinfo->_contact_force, context);
-    loadHelper(stream, pinfo->_lagrange_multiplier, context);
-    loadHelper(stream, pinfo->_lagrange_multiplier_slip, context);
-    loadHelper(stream, pinfo->_mech_status, context);
-    loadHelper(stream, pinfo->_mech_status_old, context);
+    dataLoad(stream, pinfo->_normal, context);
+    dataLoad(stream, pinfo->_distance, context);
+    dataLoad(stream, pinfo->_tangential_distance, context);
+    dataLoad(stream, pinfo->_closest_point, context);
+    dataLoad(stream, pinfo->_closest_point_ref, context);
+    dataLoad(stream, pinfo->_closest_point_on_face_ref, context);
+    dataLoad(stream, pinfo->_off_edge_nodes, context);
+    dataLoad(stream, pinfo->_side_phi, context);
+    dataLoad(stream, pinfo->_side_grad_phi, context);
+    dataLoad(stream, pinfo->_dxyzdxi, context);
+    dataLoad(stream, pinfo->_dxyzdeta, context);
+    dataLoad(stream, pinfo->_d2xyzdxideta, context);
+    dataLoad(stream, pinfo->_starting_elem, context);
+    dataLoad(stream, pinfo->_starting_side_num, context);
+    dataLoad(stream, pinfo->_starting_closest_point_ref, context);
+    dataLoad(stream, pinfo->_incremental_slip, context);
+    dataLoad(stream, pinfo->_accumulated_slip, context);
+    dataLoad(stream, pinfo->_frictional_energy, context);
+    dataLoad(stream, pinfo->_contact_force, context);
+    dataLoad(stream, pinfo->_lagrange_multiplier, context);
+    dataLoad(stream, pinfo->_lagrange_multiplier_slip, context);
+    dataLoad(stream, pinfo->_mech_status, context);
+    dataLoad(stream, pinfo->_mech_status_old, context);
 
     // Don't need frictional_energy_old, accumulated_slip_old, contact_force_old, or
     // locked_this_step

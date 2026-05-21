@@ -49,13 +49,26 @@ dataLoad(std::istream & stream, std::unique_ptr<DataType> & v, void * context)
 void
 dataStore(std::ostream & stream, DataStorage & v, void * context)
 {
-  storeHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataStore(stream, static_cast<UniqueStorage<DataType> &>(v), context);
 }
 
 void
 dataLoad(std::istream & stream, DataStorage & v, void * context)
 {
-  loadHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataLoad(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+}
+
+TEST(DataIOTest, signedChar)
+{
+  signed char stored = -42;
+  std::stringstream stream;
+  dataStore(stream, stored, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  signed char loaded = 0;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_EQ(stored, loaded);
 }
 
 TEST(DataIOTest, uniqueStorage)

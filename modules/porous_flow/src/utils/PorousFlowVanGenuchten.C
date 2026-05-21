@@ -9,9 +9,56 @@
 
 #include "PorousFlowVanGenuchten.h"
 #include "PorousFlowCubic.h"
+#include "DataIO.h"
 
 namespace PorousFlowVanGenuchten
 {
+void
+dataStore(std::ostream & stream, LowCapillaryPressureExtension & extension, void * context)
+{
+  auto strategy =
+      static_cast<std::underlying_type_t<LowCapillaryPressureExtension::ExtensionStrategy>>(
+          extension.strategy);
+  ::dataStore(stream, strategy, context);
+  ::dataStore(stream, extension.S, context);
+  ::dataStore(stream, extension.Pc, context);
+  ::dataStore(stream, extension.dPc, context);
+}
+
+void
+dataLoad(std::istream & stream, LowCapillaryPressureExtension & extension, void * context)
+{
+  std::underlying_type_t<LowCapillaryPressureExtension::ExtensionStrategy> strategy;
+  ::dataLoad(stream, strategy, context);
+  extension.strategy = static_cast<LowCapillaryPressureExtension::ExtensionStrategy>(strategy);
+  ::dataLoad(stream, extension.S, context);
+  ::dataLoad(stream, extension.Pc, context);
+  ::dataLoad(stream, extension.dPc, context);
+}
+
+void
+dataStore(std::ostream & stream, HighCapillaryPressureExtension & extension, void * context)
+{
+  auto strategy =
+      static_cast<std::underlying_type_t<HighCapillaryPressureExtension::ExtensionStrategy>>(
+          extension.strategy);
+  ::dataStore(stream, strategy, context);
+  ::dataStore(stream, extension.S, context);
+  ::dataStore(stream, extension.Pc, context);
+  ::dataStore(stream, extension.dPc, context);
+}
+
+void
+dataLoad(std::istream & stream, HighCapillaryPressureExtension & extension, void * context)
+{
+  std::underlying_type_t<HighCapillaryPressureExtension::ExtensionStrategy> strategy;
+  ::dataLoad(stream, strategy, context);
+  extension.strategy = static_cast<HighCapillaryPressureExtension::ExtensionStrategy>(strategy);
+  ::dataLoad(stream, extension.S, context);
+  ::dataLoad(stream, extension.Pc, context);
+  ::dataLoad(stream, extension.dPc, context);
+}
+
 Real
 effectiveSaturation(Real p, Real alpha, Real m)
 {
