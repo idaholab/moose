@@ -182,6 +182,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _update_counter(_update_frequency),
     _timestep_window(getParam<unsigned int>("timestep_window")),
     _observation_history(_input_timesteps),
+    _sampler(LibtorchRLMiniBatchSampler()),
     _value_estimator(_decay_factor, _lambda_factor),
     _ppo_loss(_clip_param, _entropy_coeff)
 {
