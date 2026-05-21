@@ -9,6 +9,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "Standardizer.h"
+#include "DataIO.h"
 
 namespace StochasticTools
 {
@@ -115,18 +116,18 @@ Standardizer::getScaled(torch::Tensor & input) const
 
 /// Helper for dataStore
 void
-Standardizer::storeHelper(std::ostream & stream, void * context) const
+Standardizer::dataStore(std::ostream & stream, void * context) const
 {
   const auto mean = LibtorchUtils::toCPUContiguous(_mean);
   const auto stdev = LibtorchUtils::toCPUContiguous(_stdev);
   auto mean_accessor = mean.accessor<Real, 1>();
   auto stdev_accessor = stdev.accessor<Real, 1>();
   unsigned int n = mean.size(0);
-  dataStore(stream, n, context);
+  ::dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, mean_accessor[ii], context);
+    ::dataStore(stream, mean_accessor[ii], context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, stdev_accessor[ii], context);
+    ::dataStore(stream, stdev_accessor[ii], context);
 }
 
 } // StochasticTools namespace
@@ -135,7 +136,7 @@ template <>
 void
 dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context)
 {
-  standardizer.storeHelper(stream, context);
+  standardizer.dataStore(stream, context);
 }
 
 template <>

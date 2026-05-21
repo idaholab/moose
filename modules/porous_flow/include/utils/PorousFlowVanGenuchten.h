@@ -12,6 +12,8 @@
 #include "MooseTypes.h"
 #include "libmesh/utility.h"
 
+#include <iosfwd>
+
 /**
  * van Genuchten effective saturation, capillary pressure and relative
  * permeability functions.
@@ -229,6 +231,11 @@ struct HighCapillaryPressureExtension
   HighCapillaryPressureExtension(const ExtensionStrategy & strategy, Real S, Real Pc, Real dPc)
     : strategy(strategy), S(S), Pc(Pc), dPc(dPc){};
 };
+
+void dataStore(std::ostream & stream, LowCapillaryPressureExtension & extension, void * context);
+void dataLoad(std::istream & stream, LowCapillaryPressureExtension & extension, void * context);
+void dataStore(std::ostream & stream, HighCapillaryPressureExtension & extension, void * context);
+void dataLoad(std::istream & stream, HighCapillaryPressureExtension & extension, void * context);
 
 /**
  * Hysteretic capillary pressure function (Eqn(1) of Doughty2007) with extensions (page5 and Fig1 of

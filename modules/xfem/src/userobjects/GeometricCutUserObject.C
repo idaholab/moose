@@ -145,7 +145,43 @@ GeometricCutUserObject::threadJoin(const UserObject & y)
   }
 }
 
-// custom data load and data store methods for structs with std::vector members
+// custom data load and data store methods for geometric cut structs
+template <>
+inline void
+dataStore(std::ostream & stream, Xfem::CutEdge & ce, void * context)
+{
+  dataStore(stream, ce._id1, context);
+  dataStore(stream, ce._id2, context);
+  dataStore(stream, ce._distance, context);
+  dataStore(stream, ce._host_side_id, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, Xfem::CutEdge & ce, void * context)
+{
+  dataLoad(stream, ce._id1, context);
+  dataLoad(stream, ce._id2, context);
+  dataLoad(stream, ce._distance, context);
+  dataLoad(stream, ce._host_side_id, context);
+}
+
+template <>
+inline void
+dataStore(std::ostream & stream, Xfem::CutNode & cn, void * context)
+{
+  dataStore(stream, cn._id, context);
+  dataStore(stream, cn._host_id, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, Xfem::CutNode & cn, void * context)
+{
+  dataLoad(stream, cn._id, context);
+  dataLoad(stream, cn._host_id, context);
+}
+
 template <>
 inline void
 dataStore(std::ostream & stream, Xfem::CutFace & cf, void * context)

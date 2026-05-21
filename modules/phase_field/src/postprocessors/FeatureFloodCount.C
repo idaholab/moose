@@ -35,27 +35,27 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
    * Note that _local_ids is not stored here. It's not needed for restart, and not needed
    * during the parallel merge operation
    */
-  storeHelper(stream, feature._ghosted_ids, context);
-  storeHelper(stream, feature._halo_ids, context);
-  storeHelper(stream, feature._disjoint_halo_ids, context);
-  storeHelper(stream, feature._periodic_nodes, context);
-  storeHelper(stream, feature._var_index, context);
-  storeHelper(stream, feature._id, context);
-  storeHelper(stream, feature._bboxes, context);
-  storeHelper(stream, feature._orig_ids, context);
-  storeHelper(stream, feature._min_entity_id, context);
-  storeHelper(stream, feature._vol_count, context);
-  storeHelper(stream, feature._centroid, context);
-  storeHelper(stream, feature._status, context);
-  storeHelper(stream, feature._boundary_intersection, context);
+  dataStore(stream, feature._ghosted_ids, context);
+  dataStore(stream, feature._halo_ids, context);
+  dataStore(stream, feature._disjoint_halo_ids, context);
+  dataStore(stream, feature._periodic_nodes, context);
+  dataStore(stream, feature._var_index, context);
+  dataStore(stream, feature._id, context);
+  dataStore(stream, feature._bboxes, context);
+  dataStore(stream, feature._orig_ids, context);
+  dataStore(stream, feature._min_entity_id, context);
+  dataStore(stream, feature._vol_count, context);
+  dataStore(stream, feature._centroid, context);
+  dataStore(stream, feature._status, context);
+  dataStore(stream, feature._boundary_intersection, context);
 }
 
 template <>
 void
 dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
 {
-  storeHelper(stream, bbox.min(), context);
-  storeHelper(stream, bbox.max(), context);
+  dataStore(stream, bbox.min(), context);
+  dataStore(stream, bbox.max(), context);
 }
 
 template <>
@@ -66,27 +66,27 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
    * Note that _local_ids is not loaded here. It's not needed for restart, and not needed
    * during the parallel merge operation
    */
-  loadHelper(stream, feature._ghosted_ids, context);
-  loadHelper(stream, feature._halo_ids, context);
-  loadHelper(stream, feature._disjoint_halo_ids, context);
-  loadHelper(stream, feature._periodic_nodes, context);
-  loadHelper(stream, feature._var_index, context);
-  loadHelper(stream, feature._id, context);
-  loadHelper(stream, feature._bboxes, context);
-  loadHelper(stream, feature._orig_ids, context);
-  loadHelper(stream, feature._min_entity_id, context);
-  loadHelper(stream, feature._vol_count, context);
-  loadHelper(stream, feature._centroid, context);
-  loadHelper(stream, feature._status, context);
-  loadHelper(stream, feature._boundary_intersection, context);
+  dataLoad(stream, feature._ghosted_ids, context);
+  dataLoad(stream, feature._halo_ids, context);
+  dataLoad(stream, feature._disjoint_halo_ids, context);
+  dataLoad(stream, feature._periodic_nodes, context);
+  dataLoad(stream, feature._var_index, context);
+  dataLoad(stream, feature._id, context);
+  dataLoad(stream, feature._bboxes, context);
+  dataLoad(stream, feature._orig_ids, context);
+  dataLoad(stream, feature._min_entity_id, context);
+  dataLoad(stream, feature._vol_count, context);
+  dataLoad(stream, feature._centroid, context);
+  dataLoad(stream, feature._status, context);
+  dataLoad(stream, feature._boundary_intersection, context);
 }
 
 template <>
 void
 dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
 {
-  loadHelper(stream, bbox.min(), context);
-  loadHelper(stream, bbox.max(), context);
+  dataLoad(stream, bbox.min(), context);
+  dataLoad(stream, bbox.max(), context);
 }
 
 // Utility routines
@@ -1186,7 +1186,7 @@ FeatureFloodCount::mergeSets()
         ++it1;
 
     } // it1 loop
-  }   // map loop
+  } // map loop
 }
 
 void
@@ -1437,12 +1437,14 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
   return return_value;
 }
 
-Real FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
+Real
+FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
 {
   return _step_threshold;
 }
 
-Real FeatureFloodCount::getConnectingThreshold(std::size_t /*current_index*/) const
+Real
+FeatureFloodCount::getConnectingThreshold(std::size_t /*current_index*/) const
 {
   return _step_connecting_threshold;
 }
@@ -2260,6 +2262,40 @@ updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
   for (const auto node_n : make_range(elem.n_nodes()))
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, FeatureFloodCount::Status & v, void * ctx)
+{
+  auto stored = static_cast<unsigned char>(v);
+  dataStore(stream, stored, ctx);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, FeatureFloodCount::Status & v, void * context)
+{
+  unsigned char loaded;
+  dataLoad(stream, loaded, context);
+  v = static_cast<FeatureFloodCount::Status>(v);
+}
+
+template <>
+void
+dataStore(std::ostream & stream, FeatureFloodCount::BoundaryIntersection & v, void * ctx)
+{
+  auto stored = static_cast<unsigned char>(v);
+  dataStore(stream, stored, ctx);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, FeatureFloodCount::BoundaryIntersection & v, void * context)
+{
+  unsigned char loaded;
+  dataLoad(stream, loaded, context);
+  v = static_cast<FeatureFloodCount::BoundaryIntersection>(v);
 }
 
 // Constants

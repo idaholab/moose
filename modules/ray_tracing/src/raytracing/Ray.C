@@ -716,22 +716,22 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
   mooseAssert(context, "Missing RayTracingStudy context");
   mooseAssert(static_cast<RayTracingStudy *>(context) == &ray->study(), "Different study");
 
-  storeHelper(stream, ray->_id, context);
-  storeHelper(stream, ray->_current_point, context);
-  storeHelper(stream, ray->_direction, context);
+  dataStore(stream, ray->_id, context);
+  dataStore(stream, ray->_current_point, context);
+  dataStore(stream, ray->_direction, context);
   auto current_elem_id = ray->currentElem() ? ray->currentElem()->id() : DofObject::invalid_id;
-  storeHelper(stream, current_elem_id, context);
-  storeHelper(stream, ray->_current_incoming_side, context);
-  storeHelper(stream, ray->_trajectory_changed, context);
-  storeHelper(stream, ray->_end_set, context);
-  storeHelper(stream, ray->_should_continue, context);
-  storeHelper(stream, ray->_processor_crossings, context);
-  storeHelper(stream, ray->_intersections, context);
-  storeHelper(stream, ray->_trajectory_changes, context);
-  storeHelper(stream, ray->_distance, context);
-  storeHelper(stream, ray->_max_distance, context);
-  storeHelper(stream, ray->_data, context);
-  storeHelper(stream, ray->_aux_data, context);
+  dataStore(stream, current_elem_id, context);
+  dataStore(stream, ray->_current_incoming_side, context);
+  dataStore(stream, ray->_trajectory_changed, context);
+  dataStore(stream, ray->_end_set, context);
+  dataStore(stream, ray->_should_continue, context);
+  dataStore(stream, ray->_processor_crossings, context);
+  dataStore(stream, ray->_intersections, context);
+  dataStore(stream, ray->_trajectory_changes, context);
+  dataStore(stream, ray->_distance, context);
+  dataStore(stream, ray->_max_distance, context);
+  dataStore(stream, ray->_data, context);
+  dataStore(stream, ray->_aux_data, context);
 }
 
 void
@@ -741,29 +741,29 @@ dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
   RayTracingStudy * study = static_cast<RayTracingStudy *>(context);
 
   RayID id;
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
   ray = study->acquireRayInternal(id,
                                   /* data_size = */ 0,
                                   /* aux_data_size = */ 0,
                                   /* reset = */ true,
                                   RayTracingStudy::AcquireRayInternalKey());
 
-  loadHelper(stream, ray->_current_point, context);
-  loadHelper(stream, ray->_direction, context);
+  dataLoad(stream, ray->_current_point, context);
+  dataLoad(stream, ray->_direction, context);
   dof_id_type current_elem_id;
-  loadHelper(stream, current_elem_id, context);
+  dataLoad(stream, current_elem_id, context);
   ray->_current_elem = study->meshBase().query_elem_ptr(current_elem_id);
-  loadHelper(stream, ray->_current_incoming_side, context);
-  loadHelper(stream, ray->_trajectory_changed, context);
-  loadHelper(stream, ray->_end_set, context);
-  loadHelper(stream, ray->_should_continue, context);
-  loadHelper(stream, ray->_processor_crossings, context);
-  loadHelper(stream, ray->_intersections, context);
-  loadHelper(stream, ray->_trajectory_changes, context);
-  loadHelper(stream, ray->_distance, context);
-  loadHelper(stream, ray->_max_distance, context);
-  loadHelper(stream, ray->_data, context);
-  loadHelper(stream, ray->_aux_data, context);
+  dataLoad(stream, ray->_current_incoming_side, context);
+  dataLoad(stream, ray->_trajectory_changed, context);
+  dataLoad(stream, ray->_end_set, context);
+  dataLoad(stream, ray->_should_continue, context);
+  dataLoad(stream, ray->_processor_crossings, context);
+  dataLoad(stream, ray->_intersections, context);
+  dataLoad(stream, ray->_trajectory_changes, context);
+  dataLoad(stream, ray->_distance, context);
+  dataLoad(stream, ray->_max_distance, context);
+  dataLoad(stream, ray->_data, context);
+  dataLoad(stream, ray->_aux_data, context);
 
   if (ray->hasTraced())
     mooseAssert(!study->currentlyGenerating() && !study->currentlyPropagating(),
