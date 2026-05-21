@@ -23,9 +23,5 @@
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="ascii"/>
 </PCellData>
 <Piece Source="proc000000.vtu"/>
-<Piece Source="proc000001.vtu"/>
-<Piece Source="proc000002.vtu"/>
-<Piece Source="proc000003.vtu"/>
-<Piece Source="proc000004.vtu"/>
 </PUnstructuredGrid>
 </VTKFile>
