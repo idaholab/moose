@@ -14,7 +14,7 @@
 
 /**
  * \f[
- * (k(\nabla x \vec u) \vec \nabla x \vec u, \vec \nabla x \vec v)
+ * (k(|\nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
  */
 class MFEMNLCurlCurlKernel : public MFEMKernel
@@ -28,7 +28,7 @@ public:
 
 protected:
   mfem::Coefficient & _k_coef;
-  mfem::VectorCoefficient & _dk_dcu_coeff;
+  mfem::Coefficient & _dk_dcurlu_coeff;
   mfem::ParGridFunction & _trial_var;
 };
 

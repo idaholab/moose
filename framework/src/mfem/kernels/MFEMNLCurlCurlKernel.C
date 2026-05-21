@@ -19,24 +19,27 @@ InputParameters
 MFEMNLCurlCurlKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription("Adds the domain integrator to an MFEM problem for the nonlinear form "
-                             "$(k(\\vec \\nabla x \\vec u) \\vec \\nabla x \\vec u, \\vec \\nabla x \\vec v)_\\Omega "
-                             "arising from the weak form of the non-linear operator "
-                             "$- \\vec \\nabla x (k(\\vec \\nabla x u) \\vec\\nabla x u)$.");
+  params.addClassDescription(
+      "Adds the domain integrator to an MFEM problem for the nonlinear form "
+      "$(k(|\\vec \\nabla \\times \\vec u|) \\vec \\nabla \\times \\vec u, \\vec \\nabla \\times "
+      "\\vec v)_\\Omega "
+      "arising from the weak form of the non-linear operator "
+      "$- \\vec \\nabla \\times (k(|\\vec \\nabla \\times u|) \\vec\\nabla \\times u)$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "k_coefficient", "1.", "Name of property for nonlinear diffusivity coefficient k(\\nabla x u).");
-  params.addParam<MFEMVectorCoefficientName>(
-      "dk_dcu_coefficient",
+      "k_coefficient", "1.", "Name of the nonlinear coefficient k(|\\nabla x u|).");
+  params.addParam<MFEMScalarCoefficientName>(
+      "dk_dcurlu_coefficient",
       "0.",
-      "Name of property partial derivative of diffusivity coefficient k(\\nabla x u) with respect to the "
-      "curl of the trial variable u.");
+      "Name of coefficient representing the partial derivative of the coefficient k(|\\nabla "
+      "\\times u|) with respect to the "
+      "magnitude of the curl of the trial variable u.");
   return params;
 }
 
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _dk_dcu_coeff(getVectorCoefficient("dk_dcu_coefficient")),
+    _dk_dcurlu_coeff(getScalarCoefficient("dk_dcurlu_coefficient")),
     _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
 {
 }
@@ -44,7 +47,7 @@ MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
 mfem::NonlinearFormIntegrator *
 MFEMNLCurlCurlKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _dk_dcu_coeff, &_trial_var);
+  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _dk_dcurlu_coeff, &_trial_var);
 }
 
 #endif

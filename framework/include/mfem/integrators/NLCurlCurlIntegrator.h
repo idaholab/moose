@@ -13,19 +13,20 @@
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
+#include "MFEMVectorMagnitudeCoefficient.h"
 
 namespace Moose::MFEM
 {
 /**
  * \f[
- * (k(\nabla x \vec u) \vec \nabla x \vec u, \vec \nabla x \vec v)
+ * (k(|\nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
  */
 class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator
 {
 public:
   NLCurlCurlIntegrator(mfem::Coefficient & k,
-                       mfem::VectorCoefficient & dk_dcu,
+                       mfem::Coefficient & dk_dcurlu,
                        const mfem::GridFunction * gf,
                        const mfem::IntegrationRule * ir = nullptr);
 
@@ -39,10 +40,13 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::CurlGridFunctionCoefficient _curl_trial;
-  mfem::InnerProductCoefficient _a2;
-  mfem::SumCoefficient _jac_coeff;
-  mfem::CurlCurlIntegrator _curlcurl_res_integ, _curlcurl_jac_integ;
+  mfem::CurlGridFunctionCoefficient _curlu_vec;      // curl u
+  MFEMVectorMagnitudeCoefficient _curlu;             // |curl u|
+  mfem::ProductCoefficient _curlu_dk_dcurlu_coef;    // |curl u| dk/d|curl u|
+  mfem::SumCoefficient _k_plus_curlu_dk_dcurlu_coef; // (k + |curl u| dk/d|curl u|)
+  mfem::CurlCurlIntegrator _curlcurl_res_integ;      // (k(|curl u|) curl u, curl phi_j)
+  mfem::CurlCurlIntegrator
+      _curlcurl_jac_integ; // ([k(|curl u|) + |curl u| dk/d|curl u|] curl phi_i, curl phi_j)
 };
 }
 
