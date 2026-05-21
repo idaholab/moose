@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#27280 #28951 #29150'
-  design = 'SIMPLE.md PIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md'
+  issues = '#27280 #28951 #29150 #31965'
+  design = 'SIMPLE.md PIMPLE.md LinearFVDivergence.md LinearWCNSFVMomentumFlux.md LinearFVMomentumPressure.md LinearFVPressureCorrectionDiffusion.md LinearFVEnergyAdvection.md LinearFVMomentumBoussinesq.md PressureDrop.md ParsedPostprocessor.md'
   [momentum-pressure]
     type = 'Exodiff'
     input = 2d-velocity-pressure.i
@@ -9,6 +9,50 @@
                   "channel using the SIMPLE algorithm using the linear finite volume system."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
+  []
+  [pressure-drop-advection]
+    requirement = "The system shall be able to solve a laminar channel flow using direct "
+                  "linear finite volume kernels and present spatial convergence for pressure drop using"
+    [upwind]
+      type = 'MMSTest'
+      input = pressure_drop_advection_convergence.py
+      test_case = TestPressureDropAdvectionUpwind
+      detail = 'upwind momentum advection interpolation,'
+      min_parallel = 2
+      heavy = true
+    []
+    [average]
+      type = 'MMSTest'
+      input = pressure_drop_advection_convergence.py
+      test_case = TestPressureDropAdvectionAverage
+      detail = 'arithmetic average momentum advection interpolation,'
+      min_parallel = 2
+      heavy = true
+    []
+    [vanleer]
+      type = 'MMSTest'
+      input = pressure_drop_advection_convergence.py
+      test_case = TestPressureDropAdvectionVanLeer
+      detail = 'van Leer momentum advection interpolation,'
+      min_parallel = 2
+      heavy = true
+    []
+    [minmod]
+      type = 'MMSTest'
+      input = pressure_drop_advection_convergence.py
+      test_case = TestPressureDropAdvectionMinmod
+      detail = 'minmod momentum advection interpolation,'
+      min_parallel = 2
+      heavy = true
+    []
+    [venkatakrishnan]
+      type = 'MMSTest'
+      input = pressure_drop_advection_convergence.py
+      test_case = TestPressureDropAdvectionVenkatakrishnan
+      detail = 'and Venkatakrishnan-based linear upwind momentum advection interpolation.'
+      min_parallel = 2
+      heavy = true
+    []
   []
   [energy_boussinesq]
     type = 'Exodiff'
