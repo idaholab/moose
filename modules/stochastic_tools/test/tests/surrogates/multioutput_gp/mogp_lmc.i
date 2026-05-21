@@ -90,9 +90,9 @@
 [Covariance]
   [covar]
     type = SquaredExponentialCovariance
-    signal_variance = 2.76658083
+    signal_variance = 0.711441
     noise_variance = 0.0
-    length_factor = '3.67866381 2.63421705'
+    length_factor = '53.5829 6.92861'
   []
   [lmc]
     type = LMC

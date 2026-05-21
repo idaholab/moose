@@ -30,8 +30,9 @@
     num_parallel_proposals = 2
     initial_values = '0.1 0.1'
     file_name = 'confg.csv'
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'PRE_MULTIAPP_SETUP timestep_end'
     seed = 2547
+    num_random_seeds = 100
   []
 []
 
@@ -76,6 +77,7 @@
     output_value = constant/reporter_transfer:average:value
     sampler = sample
     likelihoods = 'gaussian'
+    execute_on = 'timestep_begin'
   []
 []
 

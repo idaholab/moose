@@ -27,8 +27,8 @@ public:
   virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
 
 protected:
-  /// Gather all the samples
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+  /// Gather all the samples once per timestep
+  virtual void executeSetUp() override;
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
@@ -47,9 +47,6 @@ private:
 
   /// The maximum number of GP fails
   const unsigned int _num_batch;
-
-  /// Ensure that the sampler proceeds in a sequential fashion
-  int _check_step;
 
   /// Number of samples requested
   const int & _num_samples;

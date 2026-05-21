@@ -75,7 +75,7 @@ TestSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
     setNumberOfRandomSeeds(1980);
 
   if (_use_rand)
-    return getRand();
+    return getRand(row_index * getNumberOfCols() + col_index);
   else
     return ((row_index + 1) * 10) + col_index;
 }

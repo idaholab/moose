@@ -9,6 +9,8 @@
 
 #include "LatinHypercubeSampler.h"
 #include "Distribution.h"
+#include "MooseRandomPerturbation.h"
+
 registerMooseObjectAliased("StochasticToolsApp", LatinHypercubeSampler, "LatinHypercube");
 
 InputParameters
@@ -33,68 +35,40 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
 
   setNumberOfRows(getParam<dof_id_type>("num_rows"));
   setNumberOfCols(distribution_names.size());
-  setNumberOfRandomSeeds(2 * distribution_names.size());
-
-  // The use of MooseRandom in this Sampler is fairly complex. There are two sets of random
-  // generators. The first set (n = number columns) is used to generate the random probability
-  // within each bin of the Latin hypercube sample. The second set (n) is used to shuffle the
-  // probability values. Mainly due to how the shuffle operates, it is necessary for the management
-  // of advancement of the generators to be handled manually.
-  setAutoAdvanceGenerators(false);
+  // Generator 0: within-bin uniform draws. Generator 1: column shuffler seeds.
+  setNumberOfRandomSeeds(2);
 }
 
 void
-LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
+LatinHypercubeSampler::executeTearDown()
 {
-  // All calls to the generators occur in here. Calls to the random number generators
-  // (i.e., getRand) are complete by the end of this function.
-
-  // Flag to indicate what vector index to use in computeSample method
-  _is_local = mode == Sampler::SampleMode::LOCAL;
-
-  const Real bin_size = 1. / getNumberOfRows();
-  _probabilities.resize(getNumberOfCols());
-  if (mode == Sampler::SampleMode::GLOBAL)
+  _shufflers.clear();
+  for (const auto col : make_range(getNumberOfCols()))
   {
-    for (dof_id_type col = 0; col < getNumberOfCols(); ++col)
-    {
-      std::vector<Real> & local = _probabilities[col];
-      local.resize(getNumberOfRows());
-      for (dof_id_type row = 0; row < getNumberOfRows(); ++row)
-      {
-        const auto lower = row * bin_size;
-        const auto upper = (row + 1) * bin_size;
-        local[row] = getRand(col) * (upper - lower) + lower;
-      }
-      shuffle(local, col + getNumberOfCols(), CommMethod::NONE);
-    }
-  }
-
-  else
-  {
-    for (dof_id_type col = 0; col < getNumberOfCols(); ++col)
-    {
-      std::vector<Real> & local = _probabilities[col];
-      local.resize(getNumberOfLocalRows());
-      advanceGenerator(col, getLocalRowBegin());
-      for (dof_id_type row = getLocalRowBegin(); row < getLocalRowEnd(); ++row)
-      {
-        const auto lower = row * bin_size;
-        const auto upper = (row + 1) * bin_size;
-        local[row - getLocalRowBegin()] = getRand(col) * (upper - lower) + lower;
-      }
-      advanceGenerator(col, getNumberOfRows() - getLocalRowEnd());
-
-      // Do not advance generator for shuffle, the shuffle handles it
-      shuffle(local, col + getNumberOfCols(), CommMethod::SEMI_LOCAL);
-    }
+    const auto seed = getRandl(col, 0, std::numeric_limits<uint32_t>::max(), 1);
+    _shufflers.push_back(std::make_unique<MooseRandomPerturbation>(seed, getNumberOfRows()));
   }
 }
 
 Real
 LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  // NOTE: All calls to generators (getRand, etc.) occur in sampleSetup
-  auto row = _is_local ? row_index - getLocalRowBegin() : row_index;
-  return _distributions[col_index]->quantile(_probabilities[col_index][row]);
+  mooseAssert(_shufflers.size() > 0, "Shufflers have not been initialized.");
+
+  // Divide [0,1] into N equal bins of width 1/N.
+  const Real bin_size = 1. / getNumberOfRows();
+
+  // Map row_index to a shuffled bin via the column's bijective permutation.
+  // Because permute() is a bijection on [0, N), each row gets a distinct bin,
+  // which is the core LHS stratification guarantee.
+  const auto bin = _shufflers[col_index]->permute(row_index);
+
+  // Draw a uniform random point within the selected bin.
+  const auto lower = bin * bin_size;
+  const auto upper = (bin + 1) * bin_size;
+  const Real probability =
+      getRand(row_index * getNumberOfCols() + col_index) * (upper - lower) + lower;
+
+  // Transform the probability through the inverse CDF to obtain the sample value.
+  return _distributions[col_index]->quantile(probability);
 }

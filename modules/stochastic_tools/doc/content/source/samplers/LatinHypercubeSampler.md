@@ -12,6 +12,23 @@ This sampler implements the Latin hypercube strategy presented in [!cite](mckay1
 > $X_{kj},\,j=l,\ldots,N$. These form the $X_k$, component, $k=l,\ldots,K$, in $X_i,\,i =
 > 1,\ldots,N$. The components of the various $X_k$'s are matched at random.
 
+### Column Shuffling
+
+The stratification guarantee requires that each column be a permutation of the $N$ bins.
+Classically this is achieved with a Fisher-Yates shuffle, which produces an unbiased permutation
+but requires materializing all $N$ indices before any sample can be drawn.
+
+This implementation instead uses a keyed pseudo-random perturbation based on a balanced
+[Feistel network](https://en.wikipedia.org/wiki/Feistel_cipher).
+Given a seed and $N$, the network defines a deterministic bijection on $[0,N)$, so the bin
+assigned to any row can be computed independently without building or storing the full permutation.
+This makes the sampler embarrassingly parallel and allows samples to be evaluated in any order or
+subset, which is particularly useful in distributed and on-demand sampling settings.
+
+The trade-off is that the permutations produced by the Feistel network are not guaranteed to be
+uniformly distributed over all $N!$ possible permutations (unlike Fisher-Yates), though in
+practice the statistical quality is sufficient for sampling applications.
+
 ## Example Input File Syntax
 
 The following input file creates a Latin hypercube sample from two uniform distributions with

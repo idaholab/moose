@@ -180,11 +180,6 @@ public:
   KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
 
   /**
-   * Deprecated, will be removed
-   */
-  KOKKOS_FUNCTION void reinit() {}
-
-  /**
    * Set local parallelization option
    * @param local_thread_id The current local thread ID
    * @param num_local_threads The number of local threads
@@ -389,6 +384,7 @@ public:
                 const unsigned int comp = 0)
     : Datum(elem, side, assembly, systems),
       _tag(ivar.tag()),
+      _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
@@ -415,6 +411,7 @@ public:
                 const unsigned int comp = 0)
     : Datum(node, assembly, systems),
       _tag(ivar.tag()),
+      _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
@@ -437,6 +434,11 @@ public:
    * @returns The number of local DOFs
    */
   KOKKOS_FUNCTION unsigned int n_jdofs() const { return _n_jdofs; }
+  /**
+   * Get the system number of variable
+   * @returns The system number of variable
+   */
+  KOKKOS_FUNCTION unsigned int sys() const { return _sys; }
   /**
    * Get the variable number
    * @returns The variable number
@@ -467,12 +469,26 @@ public:
    * @returns The variable FE type ID
    */
   KOKKOS_FUNCTION unsigned int jfe() const { return _jfe; }
+  /**
+   * Set whether to compute derivatives for automatic differentiation (AD)
+   * @param flag Whether to compute derivatives
+   */
+  KOKKOS_FUNCTION void do_derivatives(const bool flag) { _do_derivatives = flag; }
+  /**
+   * Get whether to compute derivatives for automatic differentiation (AD)
+   * @returns Whether to compute derivatives
+   */
+  KOKKOS_FUNCTION bool do_derivatives() const { return _do_derivatives; }
 
 protected:
   /**
    * Solution tag ID
    */
   const TagID _tag;
+  /**
+   * System number
+   */
+  const unsigned int _sys;
   /**
    * Variable numbers
    */
@@ -485,6 +501,10 @@ protected:
    * Number of local DOFs
    */
   const unsigned int _n_idofs = 1, _n_jdofs = 1;
+  /**
+   * Whether to compute derivatives for automatic differentiation (AD)
+   */
+  bool _do_derivatives = true;
 };
 
 } // namespace Moose::Kokkos

@@ -5065,13 +5065,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
         exec_type == EXEC_SUBDOMAIN || exec_type == EXEC_NONLINEAR || exec_type == EXEC_LINEAR))
     customSetup(exec_type);
 
-  // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
-  // construction makes the first Sampler::execute() call. This ensures that the random number
-  // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
-  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here
-  // then it is not in the correct state for other objects.
-  if (exec_type != EXEC_INITIAL)
-    executeSamplers(exec_type);
+  executeSamplers(exec_type);
 
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);

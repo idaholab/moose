@@ -16,13 +16,13 @@ namespace Moose::Kokkos
 {
 
 void
-Variable::init(const MooseVariableBase & variable, const TagName & tag_name)
+Variable::init(const MooseVariableFieldBase & variable, const TagName & tag_name)
 {
   init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
 }
 
 void
-Variable::init(const MooseVariableBase & variable, const TagID tag)
+Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
 {
   _initialized = true;
   _coupled = true;
@@ -30,23 +30,54 @@ Variable::init(const MooseVariableBase & variable, const TagID tag)
   _components = variable.count();
   _tag = tag;
 
+  _moose_var.createHost(_components);
   _var.create(_components);
   _sys.create(_components);
 
   for (unsigned int comp = 0; comp < _components; ++comp)
   {
+    _moose_var[comp] = &variable;
     _var[comp] = variable.number() + comp;
     _sys[comp] = variable.sys().number();
   }
 
   _var.copyToDevice();
   _sys.copyToDevice();
+
+  const auto & problem = variable.sys().feProblem();
+
+  if (problem.vectorTagExists(Moose::SOLUTION_DOT_TAG))
+    _dot = tag == problem.getVectorTagID(Moose::SOLUTION_DOT_TAG);
+
+  if (problem.vectorTagExists(Moose::OLD_SOLUTION_TAG))
+    _old = tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
+
+  if (problem.vectorTagExists(Moose::OLDER_SOLUTION_TAG))
+    _old = _old || tag == problem.getVectorTagID(Moose::OLDER_SOLUTION_TAG);
 }
 
 void
-Variable::init(const std::vector<const MooseVariableBase *> & variables,
-               const TagID tag,
-               CoupleableKey)
+Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagName & tag_name)
+{
+  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()),
+       variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<const MooseVariableFieldBase *> & variables,
+               const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
+{
+  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()), tag);
+}
+
+void
+Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
 {
   _initialized = true;
   _coupled = true;
@@ -54,6 +85,7 @@ Variable::init(const std::vector<const MooseVariableBase *> & variables,
   _components = variables.size();
   _tag = tag;
 
+  _moose_var.createHost(_components);
   _var.create(_components);
   _sys.create(_components);
 
@@ -61,12 +93,24 @@ Variable::init(const std::vector<const MooseVariableBase *> & variables,
   {
     _nodal = _nodal && variables[comp]->isNodal();
 
+    _moose_var[comp] = variables[comp];
     _var[comp] = variables[comp]->number();
     _sys[comp] = variables[comp]->sys().number();
   }
 
   _var.copyToDevice();
   _sys.copyToDevice();
+
+  const auto & problem = variables[0]->sys().feProblem();
+
+  if (problem.vectorTagExists(Moose::SOLUTION_DOT_TAG))
+    _dot = tag == problem.getVectorTagID(Moose::SOLUTION_DOT_TAG);
+
+  if (problem.vectorTagExists(Moose::OLD_SOLUTION_TAG))
+    _old = tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
+
+  if (problem.vectorTagExists(Moose::OLDER_SOLUTION_TAG))
+    _old = _old || tag == problem.getVectorTagID(Moose::OLDER_SOLUTION_TAG);
 }
 
 void

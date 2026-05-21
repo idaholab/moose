@@ -9,7 +9,7 @@
 
 #include "KokkosEigenDirichletBC.h"
 
-registerKokkosBoundaryCondition("MooseApp", KokkosEigenDirichletBC);
+registerKokkosResidualObject("MooseApp", KokkosEigenDirichletBC);
 
 InputParameters
 KokkosEigenDirichletBC::validParams()

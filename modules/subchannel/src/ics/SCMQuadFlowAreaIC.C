@@ -9,9 +9,7 @@
 
 #include "SCMQuadFlowAreaIC.h"
 
-#include "SubChannelMesh.h"
 #include "QuadSubChannelMesh.h"
-#include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMQuadFlowAreaIC);
 
@@ -24,56 +22,13 @@ SCMQuadFlowAreaIC::validParams()
   return params;
 }
 
-SCMQuadFlowAreaIC::SCMQuadFlowAreaIC(const InputParameters & params)
-  : QuadSubChannelBaseIC(params), _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_mesh))
+SCMQuadFlowAreaIC::SCMQuadFlowAreaIC(const InputParameters & params) : QuadSubChannelBaseIC(params)
 {
 }
 
 Real
 SCMQuadFlowAreaIC::value(const Point & p)
 {
-  Real standard_area, rod_area, additional_area;
-  auto pitch = _mesh.getPitch();
-  auto pin_diameter = _mesh.getPinDiameter();
-  auto side_gap = _mesh.getSideGap();
-  auto z_blockage = _mesh.getZBlockage();
-  auto index_blockage = _mesh.getIndexBlockage();
-  auto reduction_blockage = _mesh.getReductionBlockage();
   auto i = _mesh.getSubchannelIndexFromPoint(p);
-  auto subch_type = _mesh.getSubchannelType(i);
-
-  if (subch_type == EChannelType::CORNER)
-  {
-    standard_area = 0.25 * pitch * pitch;
-    rod_area = 0.25 * 0.25 * M_PI * pin_diameter * pin_diameter;
-    additional_area = pitch * side_gap + side_gap * side_gap;
-  }
-  else if (subch_type == EChannelType::EDGE)
-  {
-    standard_area = 0.5 * pitch * pitch;
-    rod_area = 0.5 * 0.25 * M_PI * pin_diameter * pin_diameter;
-    additional_area = pitch * side_gap;
-  }
-  else
-  {
-    standard_area = pitch * pitch;
-    rod_area = 0.25 * M_PI * pin_diameter * pin_diameter;
-    additional_area = 0.0;
-  }
-
-  /// Calculate subchannel area
-  auto subchannel_area = standard_area + additional_area - rod_area;
-
-  /// Apply area reduction on subchannels affected by blockage
-  auto index = 0;
-  for (const auto & i_blockage : index_blockage)
-  {
-    if (i == i_blockage && (p(2) >= z_blockage.front() && p(2) <= z_blockage.back()))
-    {
-      return reduction_blockage[index] * subchannel_area;
-    }
-    index++;
-  }
-
-  return subchannel_area;
+  return _mesh.getSubchannelFlowArea(i, p(2));
 }

@@ -61,14 +61,6 @@ mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
   [T_ic]
     type = ConstantIC
     variable = T

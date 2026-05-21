@@ -89,7 +89,7 @@ example is expensive in terms of computation time, the same samples are used
 to train the other surrogates as well.
 It is not visible, but the sampler prepares 216 parameter vectors altogether.
 
-!listing surrogates/combined/trans_diff_2d/trans_diff_trainer.i block=Samplers  
+!listing surrogates/combined/trans_diff_2d/trans_diff_trainer.i block=Samplers
 
 The objects in blocks `Controls`, `MultiApps`, `Transfers` and `Reporters`
 are responsible for managing the communication between the trainer and sub-applications,
@@ -125,7 +125,7 @@ using a [LatinHypercubeSampler.md] object in the `Samplers` block.
 Since the surrogate models are orders of magnitude faster, $100,000$ samples are
 prepared for testing (compared to $216$ used for training).
 
-!listing surrogates/combined/trans_diff_2d/trans_diff_surr.i block=Samplers  
+!listing surrogates/combined/trans_diff_2d/trans_diff_surr.i block=Samplers
 
 Next, the necessary objects are created in the `Surrogates` block using the
 information available within the corresponding restartable data files.
@@ -192,19 +192,19 @@ and in [statistical_moments_min] for the minimum temperature of the system.
 !table id=statistical_moments_max caption=The mean and standard deviation of the maximum temperature obtained using the surrogates and a reference full-order model.
 | Model | Number of samples | Mean | 95% CI | Std. Dev. | 95% CI |
 | :- | - | - | - | - | - |
-| Full-order model (reference) | 2,000 | 396.74 | \[395.90, 397.58\] | 22.86 | \[22.36, 23.33\] |
-| Nearest Point Surrogate | 100,000 | 396.87 | \[396.74, 396.99\] | 23.57 | \[23.50, 23.64\] |
-| Polynomial Chaos Surrogate | 100,000 | 396.77 | \[396.65, 396.88\] | 22.85 | \[22.78, 22.92\] |
-| Polynomial Regression Surrogate | 100,000 | 396.77 | \[396.65, 396.88\] | 22.85 | \[22.78, 22.93\] |
+| Full-order model (reference) | 2,000 | 396.74 | \[395.91, 397.59\] | 22.70 | \[22.19, 23.18\] |
+| Nearest Point Surrogate | 100,000 | 396.86 | \[396.74, 396.99\] | 23.66 | \[23.58, 23.72\] |
+| Polynomial Chaos Surrogate | 100,000 | 396.76 | \[396.64, 396.88\] | 22.94 | \[22.87, 23.01\] |
+| Polynomial Regression Surrogate | 100,000 | 396.76 | \[396.64, 396.88\] | 22.94 | \[22.87, 23.01\] |
 
 
 !table id=statistical_moments_min caption=The mean and standard deviation of the minimum temperature obtained using the surrogates and a reference full-order model.
 | Model | Number of samples | Mean | 95% CI | Std. Dev. | 95% CI |
 | :- | - | - | - | - | - |
-| Full-order model (reference) | 2,000 | 260.66 | \[259.94, 261.38\] | 19.30 | \[18.96, 19.64\] |
-| Nearest Point Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.77 | \[19.72, 19.82\] |
-| Polynomial Chaos Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.17 | \[19.12, 19.21\] |
-| Polynomial Regression Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.17 | \[19.12, 19.22\] |
+| Full-order model (reference) | 2,000 | 260.69 | \[259.99, 261.39\] | 19.40 | \[19.04, 19.74\] |
+| Nearest Point Surrogate | 100,000 | 260.51 | \[260.41, 260.61\] | 19.66 | \[19.61, 19.71\] |
+| Polynomial Chaos Surrogate | 100,000 | 260.52 | \[260.42, 260.61\] | 19.05 | \[19.01, 19.10\] |
+| Polynomial Regression Surrogate | 100,000 | 260.52 | \[260.42, 260.61\] | 19.06 | \[19.01, 19.11\] |
 
 Even though there are small differences in the mean values, it can be concluded that all three of the surrogates managed to
 give the correct answer. The differences between the full-order model and surrogates are statistically insignificant.

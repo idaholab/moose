@@ -1825,11 +1825,7 @@ public:
   void saveLocalADArray(std::vector<ADReal> & re,
                         unsigned int i,
                         unsigned int ntest,
-                        const ADRealEigenVector & v) const
-  {
-    for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
-      re[i] += v(j);
-  }
+                        const ADRealEigenVector & v) const;
 
   /**
    * Helper function for assembling diagonal Jacobian contriubutions on local

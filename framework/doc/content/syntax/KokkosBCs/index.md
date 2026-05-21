@@ -8,12 +8,11 @@ Before reading this documentation, consider reading the following materials firs
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE,
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE.
 
-!alert note
-Kokkos-MOOSE boundary conditions do not support automatic differention yet.
-
 The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well.
-You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with either `registerKokkosBoundaryCondition()` or `registerKokkosResidualObject()`.
-Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail.
+You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with `registerKokkosResidualObject()`.
+[Automatic differentiation (AD)](automatic_differentiation/index.md) versions of boundary conditions are also available and can be derived and registered in an analogous manner with the [AD kernels](syntax/KokkosKernels/index.md#kokkos_ad_kernel).
+
+Integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail.
 See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
 
 !listing framework/include/kokkos/bcs/KokkosCoupledVarNeumannBC.h id=kokkos-neumann-header
@@ -42,7 +41,7 @@ To keep the consistency between interfaces, however, it is still passed as an ar
 `_current_node`, which is a pointer to the current libMesh node object, does not have a direct replacement.
 Instead, the node index can be queried by `datum.node()` and used to retrieve mesh data from the Kokkos mesh object.
 The node coordinate can also be obtained by `datum.q_point(qp)`.
-As a result, the following residual function in `DirichletBCBase`:
+As a result, the following residual function:
 
 ```cpp
 Real
@@ -52,7 +51,7 @@ DirichletBCBase::computeQpResidual()
 }
 ```
 
-becomes the following in `Moose::Kokkos::DirichletBCBase`:
+becomes the following:
 
 ```cpp
 template <typename Derived>

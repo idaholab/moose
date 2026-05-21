@@ -20,6 +20,7 @@
 #include "MultiApp.h"
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
+#include "MooseRandomStateless.h"
 
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
@@ -138,22 +139,6 @@ public:
   libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
 
 protected:
-  /**
-   * Enum describing the type of parallel communication to perform.
-   *
-   * Some routines require specific communication methods that not all processors
-   * see, these IDs will determine how that routine is performed:
-   *  - NONE routine is not distrubuted and things all can happen locally
-   *  - LOCAL routine is distributed on all processors
-   *  - SEMI_LOCAL routine is distributed only on processors that own rows
-   */
-  enum CommMethod
-  {
-    NONE = 0,
-    LOCAL = 1,
-    SEMI_LOCAL = 2
-  };
-
   // The following methods are the basic methods that should be utilized my most application
   // developers that are creating a custom Sampler.
 
@@ -175,24 +160,27 @@ protected:
   void setNumberOfRandomSeeds(std::size_t number);
 
   /**
-   * Get the next random number from the generator.
+   * Get nth random number from the generator.
+   * @param n 0-based index of the random number to generate
    * @param index The index of the seed, by default this is zero. To add additional seeds
    *              indices call the setNumberOfRequiedRandomSeeds method.
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
-  Real getRand(unsigned int index = 0);
+  Real getRand(std::size_t n, unsigned int index = 0) const;
 
   /**
-   * Get the next random integer from the generator within the specified range [lower, upper)
-   * @param index The index of the seed, by default this is zero. To add additional seeds
-   *              indices call the setNumberOfRequiedRandomSeeds method.
+   * Get nth random integer from the generator within the specified range [lower, upper)
+   * @param n 0-based index of the random number to generate
    * @param lower Lower bounds
    * @param upper Upper bounds
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
    *
    * @return A integer for the random number
    */
-  uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
+  unsigned int
+  getRandl(std::size_t n, unsigned int lower, unsigned int upper, unsigned int index = 0) const;
 
   /**
    * Base class must override this method to supply the sample distribution data.
@@ -201,17 +189,6 @@ protected:
    * @return The value for the given row and column.
    */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
-
-  ///@{
-  /**
-   * Setup method called prior and after looping through distributions.
-   *
-   * These methods should not be called directly, each is automatically called by the public
-   * getGlobalSamples() or getLocalSamples() methods.
-   */
-  virtual void sampleSetUp(const SampleMode /*mode*/) {}
-  virtual void sampleTearDown(const SampleMode /*mode*/) {}
-  ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
   // but exist for special cases.
@@ -241,43 +218,22 @@ protected:
 
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
-   *
-   * TODO: This should be updated if the If the random number generator is updated to type that
-   * supports native advancing.
    */
   virtual void advanceGenerators(const dof_id_type count);
   virtual void advanceGenerator(const unsigned int seed_index, const dof_id_type count);
   void setAutoAdvanceGenerators(const bool state);
-
-  /**
-   * Helper for shuffling a vector of data in-place; the default assumes data is distributed
-   *
-   * NOTE: This will advance the generator by the size of the supplied vector.
-   */
-  template <typename T>
-  void shuffle(std::vector<T> & data,
-               const std::size_t seed_index = 0,
-               const CommMethod method = CommMethod::LOCAL);
 
   //@{
   /**
    * Callbacks for before and after execute.
    *
    * These were added to support of dynamic sampler sizes. Recall that execute is simply to advance
-   * the state of the generator such that the next sample will be unique. These methods allow
+   * the state of the generators such that the next sample will be unique. These methods allow
    * operations before and after the call to generator advancement.
    */
   virtual void executeSetUp() {}
   virtual void executeTearDown() {}
   ///@}
-
-  //@{
-  /**
-   * Here we save/restore generator states
-   */
-  void saveGeneratorState() { _generator.saveState(); }
-  void restoreGeneratorState() { _generator.restoreState(); }
-  //@}
 
   /**
    * This is where the sampler partitioning is defined. It is NOT recommended to
@@ -311,11 +267,8 @@ private:
                                         const std::string & name,
                                         InputParameters & parameters);
   /**
-   * Store the state of the MooseRandom generator so that new calls to
-   * getGlobalSamples/getLocalSamples methods will create new numbers.
-   *
-   * The execute() method is called in the init() method of this class and
-   * FEProblemBase::executeSamplers; it should not be called elsewhere.
+   * Advance MooseRandomStateless generators so that new calls to
+   * sample methods will create new numbers.
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
@@ -330,8 +283,8 @@ private:
    */
   void advanceGeneratorsInternal(const dof_id_type count);
 
-  /// Random number generator, don't give users access. Control it via the interface from this class.
-  MooseRandom _generator;
+  /// Random number generators, don't give users access. Control it via the interface from this class.
+  std::vector<std::unique_ptr<MooseRandomStateless>> _generators;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;
@@ -382,15 +335,3 @@ private:
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;
 };
-
-template <typename T>
-void
-Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, const CommMethod method)
-{
-  if (method == CommMethod::NONE)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, nullptr);
-  else if (method == CommMethod::LOCAL)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, &_communicator);
-  else if (method == CommMethod::SEMI_LOCAL)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, &_local_comm);
-}

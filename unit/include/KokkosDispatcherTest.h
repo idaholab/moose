@@ -55,13 +55,15 @@ public:
       result[i] += (i + 1) * tid;
   }
 
-  KOKKOS_FUNCTION void join(TestLoop, Real * result, const Real * source) const
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const
   {
     for (unsigned int i = 0; i < _n; ++i)
       result[i] += source[i];
   }
 
-  KOKKOS_FUNCTION void init(TestLoop, Real * result) const
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const
   {
     for (unsigned int i = 0; i < _n; ++i)
       result[i] = 0;

@@ -35,6 +35,14 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 
 An example usage of displacement can be found [here](areva_fctf.md).
 
+### Geometric auxiliary variable initialization
+
+When the `[SubChannel]` problem syntax is present, SCM also adds default initial conditions for the geometry auxiliary variables. The subchannel flow area `S` is initialized by [SCMQuadFlowAreaIC.md](SCMQuadFlowAreaIC.md) or [SCMTriFlowAreaIC.md](SCMTriFlowAreaIC.md), and the subchannel wetted perimeter `w_perim` is initialized by [SCMQuadWettedPerimIC.md](SCMQuadWettedPerimIC.md) or [SCMTriWettedPerimIC.md](SCMTriWettedPerimIC.md), depending on whether the input uses a quadrilateral or triangular subchannel mesh. These initial conditions compute undeformed geometry from the corresponding subchannel mesh.
+
+If a pin mesh is present, SCM also initializes `Dpin` with a constant value equal to the pin diameter specified by the subchannel mesh generator. These default initial conditions are only added when no initial condition has already been provided for the same variable. User-provided initial conditions, including custom initial condition kernels, take precedence over the SCM defaults.
+
+The default `S` and `w_perim` values represent the mesh-generator geometry. If `Dpin` or `displacement` is initialized to values that differ from the undeformed mesh geometry, the solver detects the deformation and recomputes the subchannel flow area, wetted perimeter, and gap before solving.
+
 ### Flags
 
 Enabling the boolean flag [!param](/Problem/QuadSubChannel1PhaseProblem/full_output) in the `[SubChannel]` problem creates the additional auxvariables:
@@ -64,7 +72,7 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 The variable `q_prime` is created on: the fuel pin mesh if a pin mesh is present otherwise on the subchannel mesh
 
 !alert note
-In general, the pin diameter is defined by the mesh and provided by the user through the mesh generator objects. As a result, it is assumed to be constant for all fuel pins. If a pin mesh is present, the auxiliary variable `Dpin` is automatically created. Typically, the user must initialize `Dpin` to the pin diameter specified in the mesh generators [!param](/Mesh/SCMTriSubChannelMeshGenerator/pin_diameter), [!param](/Mesh/SCMQuadSubChannelMeshGenerator/pin_diameter), to avoid confusion and ensure consistency. This enforces the assumption that all fuel pins share the same diameter. The initial conditions used to compute geometric quantities—such as flow area and wetted perimeter—also rely on this assumption of uniform pin diameter and use pin diameter value from the mesh. If different pin diameters are required, the user can override this behavior by manually defining `Dpin` using a custom initial condition. In that case, the solver detects the variation and recomputes the geometric properties (surface area, wetted perimeter, and gap) before each time step.
+In general, the pin diameter is defined by the mesh and provided by the user through the mesh generator objects. As a result, it is assumed to be constant for all fuel pins. If a pin mesh is present, the auxiliary variable `Dpin` is automatically created and initialized to the mesh-generator pin diameter. This enforces the assumption that all fuel pins share the same diameter. If different pin diameters are required, the user can override this behavior by manually defining `Dpin` using a custom initial condition. In that case, the solver detects the variation and recomputes the geometric properties (surface area, wetted perimeter, and gap) before each time step.
 
 ## Duct mesh
 

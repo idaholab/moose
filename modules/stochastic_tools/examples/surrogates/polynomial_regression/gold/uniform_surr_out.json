@@ -15,11 +15,11 @@
             "values": {
                 "pc_max_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "pc_max_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 }
             }
         },
@@ -38,11 +38,11 @@
             "values": {
                 "pr_max_res_pr_max_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "pr_max_res_pr_max_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 }
             }
         }
@@ -51,16 +51,16 @@
         {
             "pc_max_res": {
                 "pc_max": [
-                    301.20921978639444,
-                    301.20921978639444,
-                    301.20921978639444,
-                    301.20921978639444,
-                    301.20921978639444
+                    301.2092198581574,
+                    301.2092198581574,
+                    301.2092198581574,
+                    301.2092198581574,
+                    301.2092198581574
                 ]
             },
             "pc_max_stats": {
                 "pc_max_MEAN": [
-                    301.20921978639444,
+                    301.2092198581574,
                     []
                 ],
                 "pc_max_STDDEV": [
@@ -70,20 +70,20 @@
             },
             "pr_max_res": {
                 "pr_max": [
-                    295.71995044516314,
-                    303.9902317244653,
-                    304.7564391965112,
-                    310.3367526430951,
-                    294.9091916038445
+                    303.12031604074934,
+                    294.0537036919613,
+                    309.8446537660086,
+                    306.08421546139243,
+                    295.87186490136196
                 ]
             },
             "pr_max_stats": {
                 "pr_max_res_pr_max_MEAN": [
-                    301.9425131226158,
+                    301.7949507722947,
                     []
                 ],
                 "pr_max_res_pr_max_STDDEV": [
-                    6.5338060579219945,
+                    6.707494978533452,
                     []
                 ]
             },

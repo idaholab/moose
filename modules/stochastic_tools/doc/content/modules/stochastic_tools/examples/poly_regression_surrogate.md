@@ -109,7 +109,7 @@ the polynomial regression model is trained using samples from a [LatinHypercubeS
 It is visible that the number of sample (`num_rows`) is set in the [LatinHypercubeSampler.md]
 to match the number of samples in the tensor-product quadrature set of [QuadratureSampler.md].
 
-!listing surrogates/polynomial_regression/normal_train.i block=Samplers  
+!listing surrogates/polynomial_regression/normal_train.i block=Samplers
 
 The objects in blocks `Controls`, `MultiApps`, `Transfers` and `Reporters`
 are responsible for managing the communication between master and sub-applications,
@@ -147,7 +147,7 @@ using [LatinHypercubeSampler.md] defined in the `Samplers` block.
 Since the surrogate models are orders of magnitude faster
 than the full-order model, $100,000$ samples are selected for testing (compared to $6,560$ used for training).
 
-!listing surrogates/polynomial_regression/normal_surr.i block=Samplers  
+!listing surrogates/polynomial_regression/normal_surr.i block=Samplers
 
 As a next step, two object are created in the `Surrogates` block for the two surrogate modeling techniques.
 Both of them are constructed using the information available within the corresponding `.rd` files.
@@ -176,8 +176,8 @@ The statistical moments obtained by the execution of the
 !table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models assuming uniform parameter distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
-| $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3234 | 301.3220 |
-| $\sigma_{T_{max}}$ | 5.9585 | 5.9586 | 5.9625 | 5.9655 |
+| $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3192 | 301.3194 |
+| $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9532 | 5.9545 |
 
 It can be observed that the polynomial chaos surrogate gives results closer to the reference values.
 It is also visible that by increasing the polynomial order for the regression, the accuracy
@@ -199,8 +199,8 @@ The statistical moments of the results from testing the
 !table id=stats_normal caption=Comparison of the statistical moments from different surrogate models assuming normal distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
-| $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.5663 | 301.5810 |
-| $\sigma_{T_{max}}$ | 10.0011 | 10.1125 | 11.2912 | 30.1675 |
+| $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.6920 | 301.9456 |
+| $\sigma_{T_{max}}$ | 10.0011 | 10.1124 | 10.6208 | 39.5150 |
 
 It is visible that polynomial chaos surrogate gives the closest results to the reference values.
 Furthermore, the increase in the polynomial degree

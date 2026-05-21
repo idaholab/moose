@@ -347,6 +347,11 @@ public:
   void computeResidualAndJacobianInternal(const std::set<TagID> & vector_tags,
                                           const std::set<TagID> & matrix_tags);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void computeKokkosResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                        const std::set<TagID> & matrix_tags);
+#endif
+
   /**
    * Form a residual vector for a given tag
    */
@@ -775,34 +780,43 @@ protected:
    */
   void computeResidualInternal(const std::set<TagID> & tags);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Compute residual with Kokkos objects
    */
-#ifdef MOOSE_KOKKOS_ENABLED
   void computeKokkosResidual(const std::set<TagID> & tags);
-  void computeKokkosNodalBCs(const std::set<TagID> & tags);
+  /**
+   * Compute Kokkos nodal BCs
+   */
+  void computeKokkosNodalBCsResidual(const std::set<TagID> & tags);
 #endif
 
   /**
    * Enforces nodal boundary conditions. The boundary condition will be implemented
    * in the residual using all the tags in the system.
    */
-  void computeNodalBCs(NumericVector<Number> & residual);
+  void computeNodalBCsResidual(NumericVector<Number> & residual);
 
   /**
    * Form a residual for BCs that at least has one of the given tags.
    */
-  void computeNodalBCs(NumericVector<Number> & residual, const std::set<TagID> & tags);
+  void computeNodalBCsResidual(NumericVector<Number> & residual, const std::set<TagID> & tags);
 
   /**
    * Form multiple tag-associated residual vectors for the given tags.
    */
-  void computeNodalBCs(const std::set<TagID> & tags);
+  void computeNodalBCsResidual(const std::set<TagID> & tags);
 
   /**
-   * compute the residual and Jacobian for nodal boundary conditions
+   * Compute the Jacobian for nodal boundary conditions
    */
-  void computeNodalBCsResidualAndJacobian();
+  void computeNodalBCsJacobian(const std::set<TagID> & tags);
+
+  /**
+   * Compute the residual and Jacobian together for nodal boundary conditions
+   */
+  void computeNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags);
 
   /**
    * Form multiple matrices for all the tags. Users should not call this func directly.

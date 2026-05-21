@@ -30,8 +30,10 @@ public:
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void join(Real * result, const Real * source) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void init(Real * result) const;
 };
 
 template <typename Derived>
@@ -42,14 +44,16 @@ KokkosNodalSum::reduce(Datum & datum, Real * result) const
     result[0] += static_cast<const Derived *>(this)->computeValue(0, datum);
 }
 
-KOKKOS_FUNCTION inline void
-KokkosNodalSum::join(ReducerLoop, Real * result, const Real * source) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosNodalSum::join(Real * result, const Real * source) const
 {
   result[0] += source[0];
 }
 
-KOKKOS_FUNCTION inline void
-KokkosNodalSum::init(ReducerLoop, Real * result) const
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosNodalSum::init(Real * result) const
 {
   result[0] = 0;
 }

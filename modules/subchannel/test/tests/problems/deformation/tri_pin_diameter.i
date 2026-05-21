@@ -67,14 +67,6 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
     variable = Dpin
     value = 5.84e-3
   []
-  [S_IC]
-    type = SCMTriFlowAreaIC
-    variable = S
-  []
-  [w_perim_IC]
-    type = SCMTriWettedPerimIC
-    variable = w_perim
-  []
   [T_ic]
     type = ConstantIC
     variable = T

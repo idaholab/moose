@@ -160,9 +160,12 @@ public:
   ///@{
   KOKKOS_FUNCTION void join(value_type result, const value_type source) const
   {
-    _functor_device.join(Operation{}, result, source);
+    _functor_device.template join<Object>(result, source);
   }
-  KOKKOS_FUNCTION void init(value_type result) const { _functor_device.init(Operation{}, result); }
+  KOKKOS_FUNCTION void init(value_type result) const
+  {
+    _functor_device.template init<Object>(result);
+  }
   ///@}
 
 private:
@@ -391,17 +394,28 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
 
-#define registerKokkosKernel(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosKernelAliased(app, classname, alias)                                         \
-  registerKokkosResidualObjectAliased(app, classname, alias)
+// AD Kernel, NodalKernel, BC
 
-#define registerKokkosNodalKernel(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosNodalKernelAliased(app, classname, alias)                                    \
-  registerKokkosResidualObjectAliased(app, classname, alias)
+#define callRegisterKokkosADResidualObjectFunction(classname, objectname)                          \
+  static char registerKokkosADResidualObject##classname()                                          \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_ad_residual_object_##classname, __COUNTER__) =        \
+      registerKokkosADResidualObject##classname()
 
-#define registerKokkosBoundaryCondition(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosBoundaryConditionAliased(app, classname, alias)                              \
-  registerKokkosResidualObjectAliased(app, classname, alias)
+#define registerKokkosADResidualObject(app, classname)                                             \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosADResidualObjectFunction(classname, #classname)
+
+#define registerKokkosADResidualObjectAliased(app, classname, alias)                               \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosADResidualObjectFunction(classname, alias)
 
 // Material
 

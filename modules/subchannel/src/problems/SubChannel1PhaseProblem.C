@@ -2733,33 +2733,33 @@ SubChannel1PhaseProblem::externalSolve()
     return;
   Real power_in = 0.0;
   Real power_out = 0.0;
-  Real Total_surface_area = 0.0;
-  Real Total_wetted_perimeter = 0.0;
+  Real viscosity_in = 0.0;
   Real mass_flow_in = 0.0;
   Real mass_flow_out = 0.0;
   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
-    Total_surface_area += (*_S_flow_soln)(node_in);
-    Total_wetted_perimeter += (*_w_perim_soln)(node_in);
-    power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+    const Real mdot_in = (*_mdot_soln)(node_in);
+    power_in += mdot_in * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
-    mass_flow_in += (*_mdot_soln)(node_in);
+    viscosity_in += mdot_in * (*_mu_soln)(node_in);
+    mass_flow_in += mdot_in;
     mass_flow_out += (*_mdot_soln)(node_out);
   }
   auto h_bulk_out = power_out / mass_flow_out;
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
-  Real bulk_Dh = 4.0 * Total_surface_area / Total_wetted_perimeter;
-  Real inlet_mu = (*_mu_soln)(_subchannel_mesh.getChannelNode(0, 0));
-  Real bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * Total_surface_area);
+  Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+  Real inlet_mu = viscosity_in / mass_flow_in;
+  Real bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * _subchannel_mesh.getAssemblyFlowArea());
   if (_verbose_subchannel)
   {
     _console << " ======================================= " << std::endl;
     _console << " ======== Subchannel Print Outs ======== " << std::endl;
     _console << " ======================================= " << std::endl;
-    _console << "Total flow area :" << Total_surface_area << " m^2" << std::endl;
+    _console << "Total flow area :" << _subchannel_mesh.getAssemblyFlowArea() << " m^2"
+             << std::endl;
     _console << "Assembly hydraulic diameter :" << bulk_Dh << " m" << std::endl;
     _console << "Assembly Re number :" << bulk_Re << " [-]" << std::endl;
     _console << "Bulk coolant temperature at outlet :" << T_bulk_out << " K" << std::endl;

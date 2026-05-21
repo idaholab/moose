@@ -11,12 +11,13 @@
 
 #include "KokkosDirichletBCBase.h"
 
-class KokkosDirichletBC : public Moose::Kokkos::DirichletBCBase
+template <bool is_ad>
+class KokkosDirichletBCTempl : public Moose::Kokkos::DirichletBCBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  KokkosDirichletBC(const InputParameters & parameters);
+  KokkosDirichletBCTempl(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
   {
@@ -26,3 +27,6 @@ public:
 protected:
   const Moose::Kokkos::Scalar<const Real> _value;
 };
+
+typedef KokkosDirichletBCTempl<false> KokkosDirichletBC;
+typedef KokkosDirichletBCTempl<true> KokkosADDirichletBC;

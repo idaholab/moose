@@ -9,7 +9,7 @@
 
 #include "KokkosHeatConductionTimeDerivative.h"
 
-registerKokkosKernel("HeatTransferApp", KokkosHeatConductionTimeDerivative);
+registerKokkosResidualObject("HeatTransferApp", KokkosHeatConductionTimeDerivative);
 
 InputParameters
 KokkosHeatConductionTimeDerivative::validParams()

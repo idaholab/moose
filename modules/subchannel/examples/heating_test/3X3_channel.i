@@ -57,10 +57,6 @@ n_cells = 20
 []
 
 [ICs]
-  [S_IC]
-    type = SCMQuadFlowAreaIC
-    variable = S
-  []
 
   [T_ic]
     type = ConstantIC
@@ -68,10 +64,6 @@ n_cells = 20
     value = ${T_in}
   []
 
-  [w_perim_IC]
-    type = SCMQuadWettedPerimIC
-    variable = w_perim
-  []
 
   [q_prime_IC]
     type = SCMQuadPowerIC

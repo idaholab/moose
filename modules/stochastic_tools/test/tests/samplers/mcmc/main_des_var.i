@@ -34,8 +34,9 @@
     prior_distributions = 'left right'
     num_parallel_proposals = 5
     file_name = 'confg.csv'
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'PRE_MULTIAPP_SETUP TIMESTEP_END'
     seed = 2547
+    num_random_seeds = 100
     initial_values = '0.1 0.1'
     previous_state = 'mcmc_reporter/inputs'
     previous_state_var = 'mcmc_reporter/variance'
@@ -79,6 +80,7 @@
     output_value = constant/reporter_transfer:average:value
     sampler = sample
     likelihoods = 'gaussian'
+    execute_on = 'timestep_begin'
   []
 []
 

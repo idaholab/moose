@@ -359,6 +359,9 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::vector<std::string>
 SamplerFullSolveMultiApp::getCommandLineArgs(const unsigned int local_app)
 {
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+    return FullSolveMultiApp::getCommandLineArgs(local_app);
+
   std::vector<std::string> args;
 
   // With multiple processors per app, there are no local rows for non-root processors

@@ -11,6 +11,7 @@
 
 #include "Action.h"
 #include "MooseEnum.h"
+#include "MooseTypes.h"
 
 /**
  * Action that adds SubChannel variables needs for the solve
