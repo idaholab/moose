@@ -5,6 +5,9 @@
 An Adams predictor is automatically added by MOOSE for the [AB2PredictorCorrector.md]
 time stepping/integration scheme.
 
+For a standalone second-order predictor that is exact for solution histories
+that are quadratic in time, see [QuadraticPredictor.md].
+
 The formula for the update by Adams' predictor is:
 
 !equation
