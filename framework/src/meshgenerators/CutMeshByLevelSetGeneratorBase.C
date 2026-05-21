@@ -17,6 +17,8 @@
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/cell_tet4.h"
+#include "libmesh/cell_c0polyhedron.h"
+#include "libmesh/face_c0polygon.h"
 
 // C++ includes
 #include <cmath>
@@ -82,6 +84,8 @@ CutMeshByLevelSetGeneratorBase::CutMeshByLevelSetGeneratorBase(const InputParame
         getParam<SubdomainName>("converted_tet_element_subdomain_name_suffix")),
     _converted_pyramid_element_subdomain_name_suffix(
         getParam<SubdomainName>("converted_pyramid_element_subdomain_name_suffix")),
+    _converted_poly_element_subdomain_name_suffix(
+        getParam<SubdomainName>("converted_poly_element_subdomain_name_suffix")),
     _input(getMeshByName(_input_name))
 {
   _cut_face_id = isParamValid("cut_face_id") ? getParam<boundary_id_type>("cut_face_id") : -1;
@@ -326,6 +330,365 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
 std::unique_ptr<MeshBase>
 CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
 {
+  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
+  ReplicatedMesh & mesh = *replicated_mesh_ptr;
+
+  // Resolve cut face boundary id / name (same logic as the tetrahedra path)
+  if (!_cut_face_name.empty())
+  {
+    if (MooseMeshUtils::hasBoundaryName(mesh, _cut_face_name))
+    {
+      const boundary_id_type exist_cut_face_id =
+          MooseMeshUtils::getBoundaryID(_cut_face_name, mesh);
+      if (_cut_face_id != -1 && _cut_face_id != exist_cut_face_id)
+        paramError("cut_face_id",
+                   "The cut face boundary name and id are both provided, but they are inconsistent "
+                   "with an existing boundary name which has a different id.");
+      else
+        _cut_face_id = exist_cut_face_id;
+    }
+    else
+    {
+      if (_cut_face_id == -1)
+        _cut_face_id = MooseMeshUtils::getNextFreeBoundaryID(mesh);
+      mesh.get_boundary_info().sideset_name(_cut_face_id) = _cut_face_name;
+    }
+  }
+  else if (_cut_face_id == -1)
+  {
+    _cut_face_id = MooseMeshUtils::getNextFreeBoundaryID(mesh);
+  }
+
+  // Subdomain IDs for new utility blocks must be new.
+  // - Polyhedron-converted elements get their subdomain id shifted by sid_shift_base so the
+  //   shifted subdomain can be renamed via _converted_poly_element_subdomain_name_suffix.
+  // - Original elements that are fully outside (or whose retained side is just a face on the
+  //   cut) are moved to block_id_to_remove for later deletion.
+  const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
+  const auto block_id_to_remove = sid_shift_base * 2;
+
+  // First pass: classify each active element
+  std::set<subdomain_id_type> original_subdomain_ids;
+  std::vector<dof_id_type> elems_to_cut;
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
+       elem_it++)
+  {
+    Elem * elem = *elem_it;
+    original_subdomain_ids.emplace(elem->subdomain_id());
+
+    const unsigned int n_vertices = elem->n_vertices();
+    unsigned int n_in = 0;
+    unsigned int n_out = 0;
+    for (unsigned int i = 0; i < n_vertices; i++)
+    {
+      const auto rel = pointLevelSetRelation(*(elem->node_ptr(i)));
+      if (rel == PointLevelSetRelationIndex::level_set_in_side)
+        n_in++;
+      else if (rel == PointLevelSetRelationIndex::level_set_out_side)
+        n_out++;
+    }
+
+    if (n_in == 0)
+    {
+      // The element has no volume strictly on the retained side -> remove it. If it happens
+      // to share a face flush with the cut, the neighbor on the retained side will handle
+      // assigning _cut_face_id on its matching face.
+      elem->subdomain_id() = block_id_to_remove;
+    }
+    else if (n_out == 0)
+    {
+      // Element is entirely retained as-is. Any face whose nodes are all on the level set is
+      // by definition the cut face for this element -> assign _cut_face_id to it.
+      for (const auto s : make_range(elem->n_sides()))
+      {
+        auto side = elem->side_ptr(s);
+        bool all_on = true;
+        for (const auto n : make_range(side->n_nodes()))
+          if (pointLevelSetRelation(*(side->node_ptr(n))) !=
+              PointLevelSetRelationIndex::on_level_set)
+          {
+            all_on = false;
+            break;
+          }
+        if (all_on)
+          boundary_info.add_side(elem, s, _cut_face_id);
+      }
+    }
+    else
+    {
+      // Mixed: this element will be cut into a polyhedron
+      if (elem->default_order() != Order::FIRST)
+        mooseError("Only first order elements are supported for cutting.");
+      elems_to_cut.push_back(elem->id());
+    }
+  }
+
+  // Second pass: build a polyhedron for each cut element. Nodes created on the cutting surface
+  // are deduplicated across elements so shared edges produce a single node.
+  std::vector<const Node *> new_on_plane_nodes;
+  const auto bdry_side_list = boundary_info.build_side_list();
+  for (const auto & elem_id : elems_to_cut)
+    polyhedronElemCutter(
+        mesh, bdry_side_list, elem_id, sid_shift_base, block_id_to_remove, new_on_plane_nodes);
+
+  // Rename shifted subdomains so polyhedron-converted blocks are identifiable
+  for (const auto & subdomain_id : original_subdomain_ids)
+  {
+    const subdomain_id_type new_sid = subdomain_id + sid_shift_base;
+    if (!MooseMeshUtils::hasSubdomainID(mesh, new_sid))
+      continue;
+    const SubdomainName new_name =
+        (mesh.subdomain_name(subdomain_id).empty() ? std::to_string(subdomain_id)
+                                                   : mesh.subdomain_name(subdomain_id)) +
+        '_' + _converted_poly_element_subdomain_name_suffix;
+    if (MooseMeshUtils::hasSubdomainName(mesh, new_name))
+      paramError("converted_poly_element_subdomain_name_suffix",
+                 "This suffix for converted C0POLYHEDRON elements results in a subdomain name, " +
+                     new_name +
+                     ", that already exists in the mesh. Please choose a different "
+                     "suffix.");
+    mesh.subdomain_name(new_sid) = new_name;
+  }
+
+  // Delete the elements marked for removal
+  for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
+       elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
+       elem_it++)
+    mesh.delete_elem(*elem_it);
+
+  mesh.contract();
+  mesh.unset_is_prepared();
+  return std::move(_input);
+}
+
+void
+CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
+    ReplicatedMesh & mesh,
+    const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+    const dof_id_type elem_id,
+    const subdomain_id_type sid_shift_base,
+    const subdomain_id_type & block_id_to_remove,
+    std::vector<const Node *> & new_on_plane_nodes)
+{
+  Elem * orig_elem = mesh.elem_ptr(elem_id);
+  const unsigned int n_orig_sides = orig_elem->n_sides();
+
+  // Collect boundary ids on each side of the original element so we can re-attach them to
+  // the matching sides of the new polyhedron.
+  std::vector<std::vector<boundary_id_type>> elem_side_list;
+  MooseMeshElementConversionUtils::elementBoundaryInfoCollector(
+      bdry_side_list, elem_id, n_orig_sides, elem_side_list);
+
+  // Polygon sides of the new polyhedron, plus an index back into elem_side_list. The index -1
+  // marks the new face that lies on the cut surface (it inherits _cut_face_id).
+  std::vector<std::shared_ptr<libMesh::Polygon>> new_polygons;
+  std::vector<int> new_polygon_to_orig_side;
+
+  // Each face that is genuinely cut contributes a directed cut edge to the new cut face. We
+  // collect them here and chain them into a closed polygon below.
+  std::vector<std::pair<const Node *, const Node *>> cut_edges;
+
+  for (const auto face_i : make_range(n_orig_sides))
+  {
+    auto side_ptr = orig_elem->side_ptr(face_i);
+    const unsigned int n_face_nodes = side_ptr->n_nodes();
+
+    // Classify each face node with respect to the level set
+    std::vector<PointLevelSetRelationIndex> rels(n_face_nodes);
+    unsigned int n_in = 0, n_out = 0, n_on = 0;
+    for (const auto n : make_range(n_face_nodes))
+    {
+      rels[n] = pointLevelSetRelation(*(side_ptr->node_ptr(n)));
+      if (rels[n] == PointLevelSetRelationIndex::level_set_in_side)
+        n_in++;
+      else if (rels[n] == PointLevelSetRelationIndex::level_set_out_side)
+        n_out++;
+      else
+        n_on++;
+    }
+
+    // Face is entirely outside (no retained or on-cut node): drop it.
+    if (n_in == 0 && n_on == 0)
+      continue;
+
+    // Face is entirely on the level set: it becomes (part of) the new cut face. This only
+    // happens when an element is cut while having an entire face exactly on the level set.
+    if (n_in == 0 && n_out == 0)
+    {
+      auto polygon = std::make_shared<libMesh::C0Polygon>(n_face_nodes);
+      for (const auto i : make_range(n_face_nodes))
+        polygon->set_node(i, const_cast<Node *>(side_ptr->node_ptr(i)));
+      new_polygons.push_back(polygon);
+      new_polygon_to_orig_side.push_back(-1);
+      continue;
+    }
+
+    // Face is entirely retained (no out nodes): copy it as-is.
+    if (n_out == 0)
+    {
+      auto polygon = std::make_shared<libMesh::C0Polygon>(n_face_nodes);
+      for (const auto i : make_range(n_face_nodes))
+        polygon->set_node(i, const_cast<Node *>(side_ptr->node_ptr(i)));
+      new_polygons.push_back(polygon);
+      new_polygon_to_orig_side.push_back(static_cast<int>(face_i));
+      continue;
+    }
+
+    // Mixed face: clip it against the "retained" half-space using a Sutherland-Hodgman-style
+    // walk. While walking we also record the entry/exit cut vertices so we can later
+    // assemble them into the cut face.
+    std::vector<const Node *> new_face_nodes;
+    const Node * cut_entry = nullptr; // crossing out of the retained side
+    const Node * cut_exit = nullptr;  // crossing back into the retained side
+
+    unsigned int prev_idx = n_face_nodes - 1;
+    bool prev_retained = (rels[prev_idx] != PointLevelSetRelationIndex::level_set_out_side);
+
+    for (const auto curr_idx : make_range(n_face_nodes))
+    {
+      const Node * curr_node = side_ptr->node_ptr(curr_idx);
+      const bool curr_retained = (rels[curr_idx] != PointLevelSetRelationIndex::level_set_out_side);
+
+      if (prev_retained && curr_retained)
+      {
+        new_face_nodes.push_back(curr_node);
+      }
+      else if (prev_retained && !curr_retained)
+      {
+        const Node * prev_node = side_ptr->node_ptr(prev_idx);
+        if (rels[prev_idx] == PointLevelSetRelationIndex::on_level_set)
+        {
+          // prev_node is already on the level set - it was added in the previous iteration
+          // and is itself the cut entry point.
+          cut_entry = prev_node;
+        }
+        else
+        {
+          const Point cross_pt = pointPairLevelSetInterception(*prev_node, *curr_node);
+          const Node * cross_node = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, cross_pt);
+          new_face_nodes.push_back(cross_node);
+          cut_entry = cross_node;
+        }
+      }
+      else if (!prev_retained && curr_retained)
+      {
+        const Node * prev_node = side_ptr->node_ptr(prev_idx);
+        if (rels[curr_idx] == PointLevelSetRelationIndex::on_level_set)
+        {
+          new_face_nodes.push_back(curr_node);
+          cut_exit = curr_node;
+        }
+        else
+        {
+          const Point cross_pt = pointPairLevelSetInterception(*prev_node, *curr_node);
+          const Node * cross_node = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, cross_pt);
+          new_face_nodes.push_back(cross_node);
+          new_face_nodes.push_back(curr_node);
+          cut_exit = cross_node;
+        }
+      }
+      // else: both outside, drop this edge
+
+      prev_idx = curr_idx;
+      prev_retained = curr_retained;
+    }
+
+    // Three or more retained vertices yield a valid clipped face. The size-2 case (a single
+    // edge shared with the cut, e.g. the face touches the cut along one of its edges) does
+    // not contribute a 2D face to the retained polyhedron but still contributes a cut edge.
+    if (new_face_nodes.size() >= 3)
+    {
+      auto polygon = std::make_shared<libMesh::C0Polygon>(new_face_nodes.size());
+      for (const auto i : index_range(new_face_nodes))
+        polygon->set_node(i, const_cast<Node *>(new_face_nodes[i]));
+      new_polygons.push_back(polygon);
+      new_polygon_to_orig_side.push_back(static_cast<int>(face_i));
+    }
+
+    if (cut_entry && cut_exit && cut_entry != cut_exit)
+      cut_edges.push_back(std::make_pair(cut_entry, cut_exit));
+  }
+
+  // Chain the per-face cut edges into a single closed polygon for the new cut face. Each face
+  // contributes one directed edge but neighbouring faces may walk in opposite directions, so
+  // we accept either orientation at each step.
+  if (!cut_edges.empty())
+  {
+    if (cut_edges.size() < 3)
+      mooseError("Cut face for element ",
+                 elem_id,
+                 " has fewer than 3 vertices; the cut geometry is degenerate.");
+
+    std::vector<const Node *> cut_face_nodes;
+    std::vector<bool> used(cut_edges.size(), false);
+    cut_face_nodes.push_back(cut_edges[0].first);
+    cut_face_nodes.push_back(cut_edges[0].second);
+    used[0] = true;
+
+    while (cut_face_nodes.size() < cut_edges.size())
+    {
+      const Node * tail = cut_face_nodes.back();
+      bool found_next = false;
+      for (const auto j : index_range(cut_edges))
+      {
+        if (used[j])
+          continue;
+        if (cut_edges[j].first == tail)
+        {
+          cut_face_nodes.push_back(cut_edges[j].second);
+          used[j] = true;
+          found_next = true;
+          break;
+        }
+        if (cut_edges[j].second == tail)
+        {
+          cut_face_nodes.push_back(cut_edges[j].first);
+          used[j] = true;
+          found_next = true;
+          break;
+        }
+      }
+      if (!found_next)
+        mooseError("Unable to chain cut face edges into a closed polygon for element ", elem_id);
+    }
+
+    auto cut_polygon = std::make_shared<libMesh::C0Polygon>(cut_face_nodes.size());
+    for (const auto i : index_range(cut_face_nodes))
+      cut_polygon->set_node(i, const_cast<Node *>(cut_face_nodes[i]));
+    new_polygons.push_back(cut_polygon);
+    new_polygon_to_orig_side.push_back(-1);
+  }
+
+  if (new_polygons.size() < 4)
+    mooseError("Polyhedron from cutting element ",
+               elem_id,
+               " has fewer than 4 faces; the cut geometry is degenerate.");
+
+  // Build the polyhedron. The C0Polyhedron constructor may need a mid-element node if it
+  // can't tetrahedralize from the boundary alone; if so, we have to add that node to the mesh.
+  std::unique_ptr<Node> mid_elem_node;
+  auto polyhedron = std::make_unique<libMesh::C0Polyhedron>(new_polygons, mid_elem_node);
+  polyhedron->subdomain_id() = orig_elem->subdomain_id() + sid_shift_base;
+  Elem * new_elem = mesh.add_elem(std::move(polyhedron));
+  if (mid_elem_node)
+    mesh.add_node(std::move(mid_elem_node));
+
+  // Re-attach boundary ids: each new polygon either matches an original side (inheriting its
+  // boundary ids) or is the new cut face (gets _cut_face_id).
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  for (const auto new_side_i : index_range(new_polygons))
+  {
+    const int orig_side = new_polygon_to_orig_side[new_side_i];
+    if (orig_side < 0)
+      boundary_info.add_side(new_elem, new_side_i, _cut_face_id);
+    else
+      for (const auto & bdry_id : elem_side_list[orig_side])
+        boundary_info.add_side(new_elem, new_side_i, bdry_id);
+  }
+
+  // Mark the original element for deletion in the cleanup pass
+  orig_elem->subdomain_id() = block_id_to_remove;
 }
 
 CutMeshByLevelSetGeneratorBase::PointLevelSetRelationIndex

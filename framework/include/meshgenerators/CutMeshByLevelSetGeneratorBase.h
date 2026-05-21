@@ -54,6 +54,9 @@ protected:
   /// The suffix to be added to the original subdomain name for the subdomains containing the
   /// elements converted to PYRAMID5.
   const SubdomainName _converted_pyramid_element_subdomain_name_suffix;
+  /// The suffix to be added to the original subdomain name for the subdomains containing the
+  /// elements converted to C0POLYHEDRON.
+  const SubdomainName _converted_poly_element_subdomain_name_suffix;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
   /// function parser object describing the level set
@@ -95,6 +98,27 @@ protected:
                       const dof_id_type elem_id,
                       const subdomain_id_type & block_id_to_remove,
                       std::vector<const Node *> & new_on_plane_nodes);
+
+  /**
+   * Replace an element crossed by the level set with a single C0Polyhedron that occupies
+   * the retained ("inside") portion of the element. The original element is marked with
+   * @p block_id_to_remove for later deletion.
+   * @param mesh The mesh to be modified
+   * @param bdry_side_list A list that contains the boundary information of the original mesh
+   * @param elem_id The id of the element to be cut
+   * @param sid_shift_base subdomain id shift applied to the new polyhedron so its subdomain
+   * can be renamed later
+   * @param block_id_to_remove The subdomain id assigned to the original element so it gets
+   * deleted after all elements have been processed
+   * @param new_on_plane_nodes A vector recording pointers to nodes already created on the
+   * cutting surface (so shared edges between cut elements do not produce duplicate nodes)
+   */
+  void polyhedronElemCutter(ReplicatedMesh & mesh,
+                            const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                            const dof_id_type elem_id,
+                            const subdomain_id_type sid_shift_base,
+                            const subdomain_id_type & block_id_to_remove,
+                            std::vector<const Node *> & new_on_plane_nodes);
 
   /**
    * Check if a position on a plane has already been used as a node in the mesh. If so, return the
