@@ -46,6 +46,9 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
   mfem::Hypre::Init();
   // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
   libMesh::libMeshPrivateData::_n_threads = 1;
+#ifdef LIBMESH_HAVE_OPENMP
+  omp_set_num_threads(1);
+#endif
   setMesh();
 }
 
