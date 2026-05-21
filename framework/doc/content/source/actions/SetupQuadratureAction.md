@@ -40,4 +40,3 @@ More information about quadratures may be found on the
 [Quadrature syntax documentation](syntax/Executioner/Quadrature/index.md).
 
 !syntax parameters /Executioner/Quadrature/SetupQuadratureAction
-```
