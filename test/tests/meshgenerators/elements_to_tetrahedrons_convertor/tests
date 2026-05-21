@@ -7,7 +7,7 @@
       type = 'Exodiff'
       input = 'simple_convert.i'
       exodiff = 'simple_hex_convert_in.e'
-      cli_args = '--mesh-only simple_hex_convert_in.e 
+      cli_args = '--mesh-only simple_hex_convert_in.e
                   Mesh/gmg/elem_type=HEX8'
       mesh_mode = 'REPLICATED'
       recover = false
@@ -94,16 +94,16 @@
       type = 'RunException'
       input = 'simple_convert.i'
       cli_args = '--mesh-only simple_convert_err.e
-                  Mesh/gmg/elem_type=HEX8 
+                  Mesh/gmg/elem_type=HEX8
                   Mesh/parallel_type=distributed'
-      expect_err = 'Input is not a replicated mesh'
+      expect_err = 'Input is mesh not serialized, which is required'
       mesh_mode = 'REPLICATED'
       detail = 'if the input mesh to be converted is not a replicated mesh.'
     []
     [err_non_3d]
       type = 'RunException'
       input = 'hex_prism_convert.i'
-      cli_args = '--mesh-only hex_prism_convert_err.e 
+      cli_args = '--mesh-only hex_prism_convert_err.e
                   Mesh/final_generator=convert
                   Mesh/convert/input=accg'
       expect_err = 'Only 3D meshes are supported'

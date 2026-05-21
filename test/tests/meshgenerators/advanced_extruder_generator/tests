@@ -133,6 +133,17 @@
     requirement = 'The system shall be able to extrude a mesh and linearly increase its radial extent as it is being extruded.'
     issues = '#3554 #31112'
   []
+  [polygons]
+    type = CSVDiff
+    input = 'polygons.i'
+    csvdiff = 'polygons_out_div_out_0001.csv'
+    recover = false
+    requirement = 'The system shall be able to extrude a 2D polygon mesh'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#32159'
+    # no support yet for distributed polygon extrusion since sides have to be shared
+    mesh_mode = 'replicated'
+  []
 
   [general_errors]
     requirement = 'The system shall error.'
