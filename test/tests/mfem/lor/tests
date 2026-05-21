@@ -19,7 +19,6 @@
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    max_threads = 1
     min_slots = 2 # memory heavy
     abs_zero = 5e-7
   []
