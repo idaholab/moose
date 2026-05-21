@@ -150,12 +150,23 @@ CutMeshByLevelSetGeneratorBase::generate()
   }
 
   if (_cut_interface == CutInterfaceElement::TETRAHEDRA)
-    return generateCutWithTetrahedra();
+    generateCutWithTetrahedra();
   else
-    return generateCutWithPolyhedra();
+    generateCutWithPolyhedra();
+
+  // Delete the elements marked for removal
+  for (auto elem_it = mesh.active_subdomain_elements_begin(_block_id_to_remove);
+       elem_it != mesh.active_subdomain_elements_end(_block_id_to_remove);
+       elem_it++)
+    mesh.delete_elem(*elem_it);
+
+  mesh.contract();
+  mesh.unset_is_prepared();
+
+  return std::move(_input);
 }
 
-std::unique_ptr<MeshBase>
+void
 CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
@@ -164,7 +175,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
   // Subdomain ID for new utility blocks must be new
   // Find sid shifts
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
-  const auto block_id_to_remove = sid_shift_base * 3;
+  _block_id_to_remove = sid_shift_base * 3;
 
   // For the boolean value in the pair, true means the element is crossed by the cutting plane
   // false means the element is on the remaining side
@@ -187,7 +198,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
         elem_vertices_counter++;
     }
     if (elem_vertices_counter == n_vertices)
-      (*elem_it)->subdomain_id() = block_id_to_remove;
+      (*elem_it)->subdomain_id() = _block_id_to_remove;
     else
     {
       // Check if any elements to be processed are not first order
@@ -226,7 +237,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
         {
           if (mesh.elem_ptr(elem_info.first)->neighbor_ptr(i_side) != nullptr &&
               mesh.elem_ptr(elem_info.first)->neighbor_ptr(i_side)->subdomain_id() !=
-                  block_id_to_remove &&
+                  _block_id_to_remove &&
               std::find(cross_and_remained_elems_pre_convert.begin(),
                         cross_and_remained_elems_pre_convert.end(),
                         std::make_pair(mesh.elem_ptr(elem_info.first)->neighbor_ptr(i_side)->id(),
@@ -263,7 +274,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
   MooseMeshElementConversionUtils::convert3DMeshToAllTet4(mesh,
                                                           cross_and_remained_elems_pre_convert,
                                                           converted_elems_ids_to_cut,
-                                                          block_id_to_remove,
+                                                          _block_id_to_remove,
                                                           false);
 
   // Make the transition layer if applicable
@@ -290,8 +301,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
   // Cut the TET4 Elements
   for (const auto & converted_elems_id_to_cut : converted_elems_ids_to_cut)
   {
-    tet4ElemCutter(
-        mesh, bdry_side_list, converted_elems_id_to_cut, block_id_to_remove, new_on_plane_nodes);
+    tet4ElemCutter(mesh, bdry_side_list, converted_elems_id_to_cut, new_on_plane_nodes);
   }
 
   // If a transition layer is generated, we need to add some subdomain names
@@ -315,21 +325,12 @@ CutMeshByLevelSetGeneratorBase::generateCutWithTetrahedra()
     }
   }
 
-  // delete the original elements that were converted
+  // mark the original elements replaced by transition elements for deletion
   for (const auto & elem_id : transition_elems_list)
-    mesh.elem_ptr(elem_id)->subdomain_id() = block_id_to_remove;
-  // Delete the block to remove
-  for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
-       elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
-       elem_it++)
-    mesh.delete_elem(*elem_it);
-
-  mesh.contract();
-  mesh.unset_is_prepared();
-  return std::move(_input);
+    mesh.elem_ptr(elem_id)->subdomain_id() = _block_id_to_remove;
 }
 
-std::unique_ptr<MeshBase>
+void
 CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
@@ -339,9 +340,9 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
   // - Polyhedron-converted elements get their subdomain id shifted by sid_shift_base so the
   //   shifted subdomain can be renamed via _converted_poly_element_subdomain_name_suffix.
   // - Original elements that are fully outside (or whose retained side is just a face on the
-  //   cut) are moved to block_id_to_remove for later deletion.
+  //   cut) are moved to _block_id_to_remove for later deletion.
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
-  const auto block_id_to_remove = sid_shift_base * 2;
+  _block_id_to_remove = sid_shift_base * 2;
 
   // First pass: classify each active element
   std::set<subdomain_id_type> original_subdomain_ids;
@@ -370,7 +371,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
       // The element has no volume strictly on the retained side -> remove it. If it happens
       // to share a face flush with the cut, the neighbor on the retained side will handle
       // assigning _cut_face_id on its matching face.
-      elem->subdomain_id() = block_id_to_remove;
+      elem->subdomain_id() = _block_id_to_remove;
     }
     else if (n_out == 0)
     {
@@ -405,8 +406,7 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
   std::vector<const Node *> new_on_plane_nodes;
   const auto bdry_side_list = boundary_info.build_side_list();
   for (const auto & elem_id : elems_to_cut)
-    polyhedronElemCutter(
-        mesh, bdry_side_list, elem_id, sid_shift_base, block_id_to_remove, new_on_plane_nodes);
+    polyhedronElemCutter(mesh, bdry_side_list, elem_id, sid_shift_base, new_on_plane_nodes);
 
   // Rename shifted subdomains so polyhedron-converted blocks are identifiable
   for (const auto & subdomain_id : original_subdomain_ids)
@@ -426,16 +426,6 @@ CutMeshByLevelSetGeneratorBase::generateCutWithPolyhedra()
                      "suffix.");
     mesh.subdomain_name(new_sid) = new_name;
   }
-
-  // Delete the elements marked for removal
-  for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
-       elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
-       elem_it++)
-    mesh.delete_elem(*elem_it);
-
-  mesh.contract();
-  mesh.unset_is_prepared();
-  return std::move(_input);
 }
 
 void
@@ -444,7 +434,6 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
     const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
     const dof_id_type elem_id,
     const subdomain_id_type sid_shift_base,
-    const subdomain_id_type & block_id_to_remove,
     std::vector<const Node *> & new_on_plane_nodes)
 {
   Elem * orig_elem = mesh.elem_ptr(elem_id);
@@ -754,7 +743,7 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
   }
 
   // Mark the original element for deletion in the cleanup pass
-  orig_elem->subdomain_id() = block_id_to_remove;
+  orig_elem->subdomain_id() = _block_id_to_remove;
 }
 
 CutMeshByLevelSetGeneratorBase::PointLevelSetRelationIndex
@@ -830,7 +819,6 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
     ReplicatedMesh & mesh,
     const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
     const dof_id_type elem_id,
-    const subdomain_id_type & block_id_to_remove,
     std::vector<const Node *> & new_on_plane_nodes)
 {
   // Retrieve boundary information for the mesh
@@ -885,7 +873,7 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
   // Remove the element if all the nodes are outside the plane
   else if (tet4_nodes_inside_plane.size() == 0)
   {
-    mesh.elem_ptr(elem_id)->subdomain_id() = block_id_to_remove;
+    mesh.elem_ptr(elem_id)->subdomain_id() = _block_id_to_remove;
     if (tet4_nodes_on_plane.size() == 3)
     {
       // I think the neighboring element will be handled,
@@ -1053,7 +1041,7 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
     else
       mooseError("Unexpected scenario.");
 
-    mesh.elem_ptr(elem_id)->subdomain_id() = block_id_to_remove;
+    mesh.elem_ptr(elem_id)->subdomain_id() = _block_id_to_remove;
   }
 
   for (auto & elem_tet4 : elems_tet4)

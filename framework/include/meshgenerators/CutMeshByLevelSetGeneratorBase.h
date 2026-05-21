@@ -62,10 +62,13 @@ protected:
   /// function parser object describing the level set
   SymFunctionPtr _func_level_set;
 
+  /// Subdomain ID assigned to the elements that will be deleted
+  SubdomainID _block_id_to_remove;
+
   /// Cut the mesh using tetrahedral elements to decompose elements cut by the surface
-  std::unique_ptr<MeshBase> generateCutWithTetrahedra();
+  void generateCutWithTetrahedra();
   /// Cut the mesh converting cuting down elements at the surface to polyhedra
-  std::unique_ptr<MeshBase> generateCutWithPolyhedra();
+  void generateCutWithPolyhedra();
 
   /**
    * Evaluate whether a point is on the level set, inside or outside the level set.
@@ -89,27 +92,23 @@ protected:
    * @param mesh The mesh to be modified
    * @param bdry_side_list A list that contains the boundary information of the original mesh
    * @param elem_id The id of the element to be cut
-   * @param block_id_to_remove The subdomain id of the part of the element to be removed
    * @param new_on_plane_nodes A vector to record the pointers to the newly created nodes on the
    * cutting plane
    */
   void tet4ElemCutter(ReplicatedMesh & mesh,
                       const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                       const dof_id_type elem_id,
-                      const subdomain_id_type & block_id_to_remove,
                       std::vector<const Node *> & new_on_plane_nodes);
 
   /**
    * Replace an element crossed by the level set with a single C0Polyhedron that occupies
    * the retained ("inside") portion of the element. The original element is marked with
-   * @p block_id_to_remove for later deletion.
+   * _block_id_to_remove for later deletion.
    * @param mesh The mesh to be modified
    * @param bdry_side_list A list that contains the boundary information of the original mesh
    * @param elem_id The id of the element to be cut
    * @param sid_shift_base subdomain id shift applied to the new polyhedron so its subdomain
    * can be renamed later
-   * @param block_id_to_remove The subdomain id assigned to the original element so it gets
-   * deleted after all elements have been processed
    * @param new_on_plane_nodes A vector recording pointers to nodes already created on the
    * cutting surface (so shared edges between cut elements do not produce duplicate nodes)
    */
@@ -117,7 +116,6 @@ protected:
                             const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                             const dof_id_type elem_id,
                             const subdomain_id_type sid_shift_base,
-                            const subdomain_id_type & block_id_to_remove,
                             std::vector<const Node *> & new_on_plane_nodes);
 
   /**
