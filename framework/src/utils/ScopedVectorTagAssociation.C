@@ -20,10 +20,7 @@ ScopedVectorTagAssociation::ScopedVectorTagAssociation(NonlinearSystemBase & nl,
 {
 }
 
-ScopedVectorTagAssociation::~ScopedVectorTagAssociation()
-{
-  restore();
-}
+ScopedVectorTagAssociation::~ScopedVectorTagAssociation() { restore(); }
 
 void
 ScopedVectorTagAssociation::associate(libMesh::NumericVector<Number> & vector)
