@@ -63,4 +63,16 @@
     recover = false
     restep = false
   []
+  [MFEMNDtoRTAux]
+    type = CSVDiff
+    input = 2Dmagnetostatic.i
+    csvdiff = '2DMagnetostatic_line_sample_0001.csv'
+    design = 'MFEMNDtoRTAux.md'
+    issues = '#32922'
+    requirement = 'The system shall have the ability to map between 2D Nedelec and Raviart-Thomas MFEM variables'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
 []
