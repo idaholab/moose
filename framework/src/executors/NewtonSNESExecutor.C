@@ -204,6 +204,12 @@ NewtonSNESExecutor::run()
     mooseError("NewtonSNESExecutor: multiple nonlinear systems currently require "
                "'nl_preconditioning' to be set.");
 
+  // Ensure the PETSc options database is populated before SNESSetFromOptions() runs inside
+  // setupSNES(). Without this, petscSetOptions() called from the first FEProblemBase::solve()
+  // during the NPC sub-solve would clear and re-insert options with used=false, causing PETSc to
+  // report options like -outer_snes_monitor as unused at finalization even though they are active.
+  _fe_problem.insertPetscOptionsIfNeeded();
+
   // SNES setup also calls buildMatNest()
   if (!_snes_setup_done)
     setupSNES();

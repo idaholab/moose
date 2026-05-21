@@ -2559,6 +2559,15 @@ public:
    */
   bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
 
+  /**
+   * Insert PETSc options into the database if not already done. This should be called the first
+   * time before any FooBarSetFromOptions() run as the FooBar consumers will mark the inserted PETSc
+   * options as used, preventing unused options warnings from appearing at the end of the
+   * simulation. If petscSetOptions is later called outside this interface, which has the previously
+   * inserted guard, then the used flags of the FooBar consumers will be reset
+   */
+  void insertPetscOptionsIfNeeded();
+
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
 #endif
@@ -3423,9 +3432,7 @@ protected:
 
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions _petsc_option_data_base;
-#endif
 
   /// If or not PETSc options have been added to database
   bool _is_petsc_options_inserted;

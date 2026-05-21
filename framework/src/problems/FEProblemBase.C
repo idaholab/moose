@@ -6891,13 +6891,8 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    // Insert options for all systems all at once
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
+
+  insertPetscOptionsIfNeeded();
 
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
@@ -6925,10 +6920,18 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPop());
-#endif
+}
+
+void
+FEProblemBase::insertPetscOptionsIfNeeded()
+{
+  if (_is_petsc_options_inserted)
+    return;
+
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
+  _is_petsc_options_inserted = true;
 }
 
 void
@@ -7041,30 +7044,18 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   // Set custom convergence criteria
   Moose::PetscSupport::petscSetDefaults(*this);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
-      options, solver_params)); // Make sure the PETSc options are setup for this app
-#else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
 
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  insertPetscOptionsIfNeeded();
 
   if (_solve)
     currentLinearSystem().solve();
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPop());
-#endif
 }
 
 bool
