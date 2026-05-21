@@ -14,7 +14,10 @@
 #include "MFEMCoordinateCoefficients.h"
 
 #include <memory>
-
+/**
+ * Class to build and expose built-in scalar MFEM Coefficients for
+ * cylindrical or axisymmetric MFEM formulations.
+ */
 class Cylindrical : public MFEMCoordinateCoefficients
 {
 public:
@@ -23,11 +26,12 @@ public:
   Cylindrical(const InputParameters & parameters);
 
   virtual void build() override;
-
+  ///Pointer getter for built-in coefficients
   virtual const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const override;
-
+  ///Pointer getters for coefficients in coordinate systems with radial dependence
   virtual const mfem::Coefficient * getRadialCoefficient() const override { return _r_coeff.get(); }
 
+  ///Specific getters for MFEM built-in coefficients in cylindrical coordinates
   virtual const mfem::Coefficient * getInverseRadialCoefficient() const override
   {
     return _inv_r_coeff.get();
@@ -44,6 +48,7 @@ public:
   }
 
 protected:
+  ///MFEM Coefficients for cylindrical coordinate objects owned by this class
   std::unique_ptr<mfem::Coefficient> _r_coeff;
   std::unique_ptr<mfem::Coefficient> _inv_r_coeff;
   std::unique_ptr<mfem::Coefficient> _two_pi_r_coeff;

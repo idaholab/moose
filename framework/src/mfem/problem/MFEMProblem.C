@@ -756,3 +756,5 @@ MFEMProblem::hasMFEMObject(const std::string & system, const std::string & name)
       .queryInto(objs);
   return !objs.empty();
 }
+
+#endif
