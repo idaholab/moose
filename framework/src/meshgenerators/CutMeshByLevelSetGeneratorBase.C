@@ -629,11 +629,81 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
         mooseError("Unable to chain cut face edges into a closed polygon for element ", elem_id);
     }
 
-    auto cut_polygon = std::make_shared<libMesh::C0Polygon>(cut_face_nodes.size());
-    for (const auto i : index_range(cut_face_nodes))
-      cut_polygon->set_node(i, const_cast<Node *>(cut_face_nodes[i]));
-    new_polygons.push_back(cut_polygon);
-    new_polygon_to_orig_side.push_back(-1);
+    // The cut polygon is planar when the level set is locally planar inside the element, but
+    // for curved level sets (e.g. spheres, cylinders away from their axis) the chained
+    // vertices generally are not coplanar. libMesh's C0Polyhedron requires every face to be
+    // planar (in debug it asserts this and refuses to build the element), so detect the
+    // non-planar case and triangulate the cut face into a fan of planar triangles around a
+    // Steiner point projected onto the level set.
+    bool cut_face_planar = (cut_face_nodes.size() <= 3);
+    if (cut_face_nodes.size() > 3)
+    {
+      const Point p0 = static_cast<Point>(*cut_face_nodes[0]);
+      const Point p1 = static_cast<Point>(*cut_face_nodes[1]);
+      const Point p_last = static_cast<Point>(*cut_face_nodes.back());
+      const Point n_i = (p1 - p0).cross(p0 - p_last).unit();
+      cut_face_planar = true;
+      for (std::size_t k = 2; k + 1 < cut_face_nodes.size(); ++k)
+      {
+        const Point d_n = static_cast<Point>(*cut_face_nodes[k]) - p0;
+        if (std::abs(d_n * n_i) > libMesh::TOLERANCE * d_n.norm())
+        {
+          cut_face_planar = false;
+          break;
+        }
+      }
+    }
+
+    if (cut_face_planar)
+    {
+      Moose::out << "elem " << elem_id << " PLANAR size=" << cut_face_nodes.size() << std::endl;
+      auto cut_polygon = std::make_shared<libMesh::C0Polygon>(cut_face_nodes.size());
+      for (const auto i : index_range(cut_face_nodes))
+        cut_polygon->set_node(i, const_cast<Node *>(cut_face_nodes[i]));
+      new_polygons.push_back(cut_polygon);
+      new_polygon_to_orig_side.push_back(-1);
+    }
+    else
+    {
+      Moose::out << "elem " << elem_id << " NONPLANAR size=" << cut_face_nodes.size() << std::endl;
+      // Steiner point: the linear average of the chained cut vertices, then projected onto
+      // the level set by bisecting toward a vertex of the original element that sits on the
+      // opposite side of the level set.
+      Point center_lin(0, 0, 0);
+      for (const auto * n : cut_face_nodes)
+        center_lin += static_cast<Point>(*n);
+      center_lin /= static_cast<Real>(cut_face_nodes.size());
+
+      Point center_on_ls = center_lin;
+      const Real center_val = levelSetEvaluator(center_lin);
+      if (!MooseUtils::absoluteFuzzyEqual(center_val, 0.0))
+      {
+        const Node * ref = nullptr;
+        const auto target = (center_val < 0) ? PointLevelSetRelationIndex::level_set_out_side
+                                             : PointLevelSetRelationIndex::level_set_in_side;
+        for (const auto i : make_range(orig_elem->n_nodes()))
+          if (pointLevelSetRelation(*(orig_elem->node_ptr(i))) == target)
+          {
+            ref = orig_elem->node_ptr(i);
+            break;
+          }
+        if (!ref)
+          mooseError("Cannot project the cut face center onto the level set for element ", elem_id);
+        center_on_ls = pointPairLevelSetInterception(center_lin, *ref);
+      }
+
+      const Node * steiner = nonDuplicateNodeCreator(mesh, new_on_plane_nodes, center_on_ls);
+      for (const auto i : index_range(cut_face_nodes))
+      {
+        const auto j = (i + 1) % cut_face_nodes.size();
+        auto tri = std::make_shared<libMesh::C0Polygon>(3);
+        tri->set_node(0, const_cast<Node *>(steiner));
+        tri->set_node(1, const_cast<Node *>(cut_face_nodes[i]));
+        tri->set_node(2, const_cast<Node *>(cut_face_nodes[j]));
+        new_polygons.push_back(tri);
+        new_polygon_to_orig_side.push_back(-1);
+      }
+    }
   }
 
   if (new_polygons.size() < 4)
@@ -643,8 +713,28 @@ CutMeshByLevelSetGeneratorBase::polyhedronElemCutter(
 
   // Build the polyhedron. The C0Polyhedron constructor may need a mid-element node if it
   // can't tetrahedralize from the boundary alone; if so, we have to add that node to the mesh.
+  // The constructor will throw libMesh::NotImplemented (in debug) when the retained region is
+  // fundamentally non-convex (e.g. a cell whose retained side carries a spherical dimple),
+  // since libMesh's polyhedron representation requires convex polyhedra. Translate that into a
+  // MOOSE-level error that points the user at the actual cause.
   std::unique_ptr<Node> mid_elem_node;
-  auto polyhedron = std::make_unique<libMesh::C0Polyhedron>(new_polygons, mid_elem_node);
+  std::unique_ptr<libMesh::C0Polyhedron> polyhedron;
+  try
+  {
+    polyhedron = std::make_unique<libMesh::C0Polyhedron>(new_polygons, mid_elem_node);
+  }
+  catch (const libMesh::NotImplemented &)
+  {
+    mooseError(
+        "Element ",
+        elem_id,
+        " produces a non-convex polyhedron after cutting. C0POLYHEDRON elements must be convex, "
+        "so this cut cannot be represented with cut_interface = polyhedra. This typically "
+        "happens when the retained side of the level set has concave geometry within an element "
+        "(e.g. retaining the outside of a sphere). Either retain the convex side of the level "
+        "set, refine the mesh enough that each cell's retained geometry is convex, or switch to "
+        "cut_interface = tetrahedra.");
+  }
   polyhedron->subdomain_id() = orig_elem->subdomain_id() + sid_shift_base;
   Elem * new_elem = mesh.add_elem(std::move(polyhedron));
   if (mid_elem_node)
