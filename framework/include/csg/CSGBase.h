@@ -1029,13 +1029,6 @@ private:
   const CSGEngUnitList & getEngUnitList() const { return _eng_unit_list; }
 
   /**
-   * @brief Get a non-const reference to the CSGEngUnitList object
-   *
-   * @return CSGEngUnitList
-   */
-  CSGEngUnitList & getEngUnitList() { return _eng_unit_list; }
-
-  /**
    * @brief join a separate CSGSurfaceList object to this one
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
@@ -1149,21 +1142,21 @@ private:
 
   // Returns the CSGSurfaceEngUnit pointer if surf is an eng unit, nullptr otherwise.
   // Usable as a boolean check or to access the eng unit directly.
-  const CSGSurfaceEngUnit * isSurfaceEngUnit(const CSGSurface & surf) const
+  const CSGSurfaceEngUnit * surfaceToEngUnit(const CSGSurface & surf) const
   {
     return dynamic_cast<const CSGSurfaceEngUnit *>(&surf);
   }
 
   // Returns the CSGCellEngUnit pointer if cell is an eng unit, nullptr otherwise.
   // Usable as a boolean check or to access the eng unit directly.
-  const CSGCellEngUnit * isCellEngUnit(const CSGCell & cell) const
+  const CSGCellEngUnit * cellToEngUnit(const CSGCell & cell) const
   {
     return dynamic_cast<const CSGCellEngUnit *>(&cell);
   }
 
   // Returns the CSGUniverseEngUnit pointer if univ is an eng unit, nullptr otherwise.
   // Usable as a boolean check or to access the eng unit directly.
-  const CSGUniverseEngUnit * isUniverseEngUnit(const CSGUniverse & univ) const
+  const CSGUniverseEngUnit * universeToEngUnit(const CSGUniverse & univ) const
   {
     return dynamic_cast<const CSGUniverseEngUnit *>(&univ);
   }
