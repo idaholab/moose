@@ -22,7 +22,7 @@ g = 9.81
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x vel_y'
         pressure_variable = 'pressure'
@@ -47,7 +47,7 @@ g = 9.81
         momentum_advection_interpolation = 'upwind'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'

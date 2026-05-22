@@ -12,10 +12,11 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 #include "Executioner.h"
+#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVTimeDerivative.h"
 #include "LinearWCNSFVMomentumFlux.h"
-#include "SharpInterfaceRhieChowMassFlux.h"
+#include "LinearWCNSFVConservativeMomentumFlux.h"
 
 #include <iostream>
 #include <limits>
@@ -287,6 +288,9 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   // different momentum components
   std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
 
+  if (auto * conservative_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo))
+    conservative_rc->updateContinuityErrorField();
+
   LinearImplicitSystem & momentum_system_0 =
       libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
 
@@ -316,9 +320,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     // We assemble the matrix and the right hand side
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
 
-    // Still need to relax the right hand side with the same vector
-    NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-    NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
+    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
 
     std::unique_ptr<NumericVector<Number>> predictor_rhs_base;
     std::unique_ptr<NumericVector<Number>> predictor_explicit_force;
@@ -456,6 +458,7 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
   auto other_elemental_residual = solution.zero_clone();
   auto advection_residual = solution.zero_clone();
   auto stress_residual = solution.zero_clone();
+  std::vector<std::pair<std::string, std::unique_ptr<NumericVector<Number>>>> elemental_kernel_residuals;
   time_residual->zero();
   other_elemental_residual->zero();
   advection_residual->zero();
@@ -468,6 +471,14 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
       .condition<AttribSystem>("LinearFVElementalKernel")
       .condition<AttribThread>(0)
       .queryInto(elemental_kernels);
+
+  elemental_kernel_residuals.reserve(elemental_kernels.size());
+  for (auto * kernel : elemental_kernels)
+  {
+    auto kernel_residual = solution.zero_clone();
+    kernel_residual->zero();
+    elemental_kernel_residuals.emplace_back(kernel->name(), std::move(kernel_residual));
+  }
 
   for (const auto & elem_info : _problem.mesh().elemInfoVector())
   {
@@ -482,8 +493,9 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
     const auto dof = dofs[0];
     const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
 
-    for (auto * kernel : elemental_kernels)
+    for (const auto kernel_i : index_range(elemental_kernels))
     {
+      auto * kernel = elemental_kernels[kernel_i];
       const auto & blocks = kernel->blockIDs();
       if (!blocks.empty() && !blocks.count(subdomain_id))
         continue;
@@ -494,6 +506,8 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
           kernel->computeMatrixContribution() * solution(dof) -
           kernel->computeRightHandSideContribution();
 
+      elemental_kernel_residuals[kernel_i].second->add(dof, residual_contribution);
+
       if (dynamic_cast<LinearFVTimeDerivative *>(kernel))
         time_residual->add(dof, residual_contribution);
       else
@@ -502,6 +516,7 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
   }
 
   std::vector<LinearWCNSFVMomentumFlux *> momentum_flux_kernels;
+  std::vector<LinearWCNSFVConservativeMomentumFlux *> conservative_momentum_flux_kernels;
   {
     std::vector<LinearFVFluxKernel *> flux_kernels;
     _problem.theWarehouse()
@@ -514,6 +529,9 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
     for (auto * kernel : flux_kernels)
       if (auto * momentum_flux = dynamic_cast<LinearWCNSFVMomentumFlux *>(kernel))
         momentum_flux_kernels.push_back(momentum_flux);
+      else if (auto * conservative_momentum_flux =
+                   dynamic_cast<LinearWCNSFVConservativeMomentumFlux *>(kernel))
+        conservative_momentum_flux_kernels.push_back(conservative_momentum_flux);
   }
 
   for (const auto * fi : _problem.mesh().faceInfo())
@@ -536,12 +554,26 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
       kernel->accumulateCurrentFaceResidualContributions(
           solution, *advection_residual, *stress_residual);
     }
+
+    for (auto * kernel : conservative_momentum_flux_kernels)
+    {
+      const auto & blocks = kernel->blockIDs();
+      if (!blocks.empty() && !blocks.count(elem_subdomain) && !blocks.count(neighbor_subdomain))
+        continue;
+
+      kernel->setupFaceData(fi);
+      kernel->setCurrentFaceArea(face_area);
+      kernel->accumulateCurrentFaceResidualContributions(
+          solution, *advection_residual, *stress_residual);
+    }
   }
 
   time_residual->close();
   other_elemental_residual->close();
   advection_residual->close();
   stress_residual->close();
+  for (auto & kernel_term : elemental_kernel_residuals)
+    kernel_term.second->close();
   if (explicit_force)
     explicit_force->close();
 
@@ -598,12 +630,222 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
   _console << "  Predictor term breakdown:" << std::endl;
   print_term_summary("time_term_residual", *time_residual);
   print_term_summary("other_elemental_residual", *other_elemental_residual);
+  for (const auto & kernel_term : elemental_kernel_residuals)
+    print_term_summary("elemental_kernel[" + kernel_term.first + "]", *kernel_term.second);
   print_term_summary("face_advection_residual", *advection_residual);
   print_term_summary("face_stress_residual", *stress_residual);
   if (explicit_force)
     print_term_summary("explicit_force_rhs", *explicit_force);
   print_term_summary("reconstructed_residual", *reconstructed_residual);
   print_term_summary("unexplained_residual", *unexplained_residual);
+
+  const auto find_max_abs_dof =
+      [&](const NumericVector<Number> & term_vector) -> std::pair<const ElemInfo *, Real>
+  {
+    const ElemInfo * max_elem_info = nullptr;
+    Real max_value = 0.0;
+
+    for (const auto & elem_info : _problem.mesh().elemInfoVector())
+    {
+      if (!elem_info)
+        continue;
+
+      const auto & dofs = elem_info->dofIndices()[momentum_sys_num];
+      if (dofs.empty())
+        continue;
+
+      const auto dof = dofs[0];
+      const Real value = term_vector(dof);
+      if (!max_elem_info || std::abs(value) > std::abs(max_value))
+      {
+        max_elem_info = elem_info;
+        max_value = value;
+      }
+    }
+
+    return std::make_pair(max_elem_info, max_value);
+  };
+
+  const auto print_cell_face_breakdown =
+      [&](const ElemInfo * target_elem_info, const std::string & label, const Real total_value)
+  {
+    if (!target_elem_info)
+      return;
+
+    const Elem * const target_elem = target_elem_info->elem();
+    mooseAssert(target_elem, "Expected a valid target element in predictor audit");
+    const auto target_dof = target_elem_info->dofIndices()[momentum_sys_num][0];
+    auto * conservative_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo);
+
+    _console << "  " << label << ": cell_id=" << target_elem->id()
+             << " dof=" << target_dof << " centroid=" << Moose::stringify(target_elem_info->centroid())
+             << " time_residual=" << (*time_residual)(target_dof)
+             << " other_elemental_residual=" << (*other_elemental_residual)(target_dof)
+             << " face_advection_residual=" << (*advection_residual)(target_dof)
+             << " face_stress_residual=" << (*stress_residual)(target_dof)
+             << " reconstructed_residual=" << (*reconstructed_residual)(target_dof)
+             << " unexplained_residual=" << (*unexplained_residual)(target_dof)
+             << " total_cell_advection_residual=" << total_value;
+
+    if (conservative_rc)
+    {
+      _console << " cell_rhou="
+               << conservative_rc->debugCurrentMomentumComponent(*target_elem_info, system_i)
+               << " cell_u_from_rhou="
+               << conservative_rc->debugCurrentVelocityComponent(*target_elem_info, system_i)
+               << " cell_pre_writeback_rhou="
+               << conservative_rc->debugLastWritebackPreMomentumComponent(*target_elem_info,
+                                                                           system_i)
+               << " cell_pressure_delta_u="
+               << conservative_rc->debugLastWritebackPressureDeltaVelocityComponent(
+                      *target_elem_info, system_i)
+               << " cell_pressure_delta_rhou="
+               << conservative_rc->debugLastWritebackPressureDeltaMomentumComponent(
+                      *target_elem_info, system_i)
+               << " cell_post_writeback_rhou="
+               << conservative_rc->debugLastWritebackPostMomentumComponent(*target_elem_info,
+                                                                            system_i)
+               << " cell_hbya_live=" << conservative_rc->debugCellHbyARaw(system_i, target_dof)
+               << " cell_ainv_live=" << conservative_rc->debugCellAinvRaw(system_i, target_dof)
+               << " cell_pred_base_live="
+               << conservative_rc->debugLivePredictorBaseRawComponent(*target_elem_info, system_i)
+               << " cell_pred_base_cached="
+               << conservative_rc->debugCachedPredictorBaseRawComponent(*target_elem_info,
+                                                                        system_i)
+               << " cell_pred_base_uview="
+               << conservative_rc->debugDerivedVelocityPredictorBaseRawComponent(*target_elem_info,
+                                                                                  system_i)
+               << " cell_hbya_uview="
+               << conservative_rc->debugDerivedVelocityPredictorHbyAComponent(*target_elem_info,
+                                                                               system_i)
+               << " pred_cache_used=" << conservative_rc->debugUsingCachedPredictorOperator();
+    }
+
+    _console << std::endl;
+
+    for (const auto * fi : _problem.mesh().faceInfo())
+    {
+      if (!fi)
+        continue;
+
+      const bool target_is_elem = fi->elemPtr() == target_elem;
+      const bool target_is_neighbor = fi->neighborPtr() == target_elem;
+      if (!target_is_elem && !target_is_neighbor)
+        continue;
+
+      const auto elem_subdomain = fi->elem().subdomain_id();
+      const auto neighbor_subdomain =
+          fi->neighborPtr() ? fi->neighbor().subdomain_id() : elem_subdomain;
+      const Real face_area = fi->faceArea() * fi->faceCoord();
+
+      bool printed_face_header = false;
+      for (auto * kernel : momentum_flux_kernels)
+      {
+        const auto & blocks = kernel->blockIDs();
+        if (!blocks.empty() && !blocks.count(elem_subdomain) && !blocks.count(neighbor_subdomain))
+          continue;
+
+        kernel->setupFaceData(fi);
+        kernel->setCurrentFaceArea(face_area);
+
+        if (!printed_face_header)
+        {
+          _console << "    face_id=" << fi->id()
+                   << " centroid=" << Moose::stringify(fi->faceCentroid())
+                   << " normal=" << Moose::stringify(fi->normal())
+                   << " type=" << (fi->neighborPtr() ? "internal" : "boundary") << std::endl;
+          printed_face_header = true;
+        }
+
+        if (!fi->neighborPtr())
+        {
+          _console << "      kernel=" << kernel->name()
+                   << " boundary contribution not expanded in audit" << std::endl;
+          continue;
+        }
+
+        const auto elem_dof = fi->elemInfo()->dofIndices()[momentum_sys_num][0];
+        const auto neighbor_dof = fi->neighborInfo()->dofIndices()[momentum_sys_num][0];
+        const Real elem_value = solution(elem_dof);
+        const Real neighbor_value = solution(neighbor_dof);
+        const auto coeffs = kernel->currentAdvectedInterpCoeffs();
+        const Real mass_flux = kernel->currentFaceMassFlux();
+        const Real rhs_face_value = kernel->currentAdvectedRHSFaceValue();
+        const Real elem_contribution =
+            (coeffs.first * elem_value + coeffs.second * neighbor_value -
+             rhs_face_value * mass_flux) *
+            face_area;
+        const Real target_contribution = target_is_elem ? elem_contribution : -elem_contribution;
+
+        _console << "      kernel=" << kernel->name() << " elem_id=" << fi->elem().id()
+                 << " neighbor_id=" << fi->neighbor().id() << " elem_value=" << elem_value
+                 << " neighbor_value=" << neighbor_value << " face_mass_flux=" << mass_flux
+                 << " interp=(" << coeffs.first << ", " << coeffs.second << ")"
+                 << " rhs_face_value=" << rhs_face_value
+                 << " target_cell_contribution=" << target_contribution;
+
+        if (conservative_rc)
+        {
+          _console << " outer_phi=" << conservative_rc->storedOuterIterationPhi(*fi)
+                   << " outer_rho_phi=" << conservative_rc->storedOuterIterationRhoPhiIntegrated(*fi)
+                   << " vof_alpha_phi=" << conservative_rc->vofAlphaPhiLimitedIntegrated(*fi)
+                   << " vof_rho_phi=" << conservative_rc->vofRhoPhiIntegrated(*fi)
+                   << " vof_base=" << conservative_rc->vofBaseGasRhoPhiIntegrated(*fi)
+                   << " vof_alpha_corr=" << conservative_rc->vofAlphaCorrectionRhoPhiIntegrated(*fi)
+                   << " pred_mass=" << conservative_rc->storedPredictorConvectiveMassFlux(*fi)
+                   << " corrected_phi=" << conservative_rc->storedCorrectedFacePhi(*fi)
+                   << " hbya_phi=" << conservative_rc->storedGenericHbyAVolumetricPhi(*fi)
+                   << " raw_rc=" << conservative_rc->rawRhieChowMassFlux(*fi)
+                   << " pred_cache_used=" << conservative_rc->debugUsingCachedPredictorOperator();
+        }
+
+        _console << std::endl;
+      }
+    }
+  };
+
+  if (const auto [target_elem_info, target_value] = find_max_abs_dof(*advection_residual);
+      target_elem_info)
+    print_cell_face_breakdown(
+        target_elem_info, "Worst-cell face advection breakdown", target_value);
+
+  if (_rc_uo)
+  {
+    const auto courant_audit = _rc_uo->maxCourantAudit(_problem.dt());
+    if (courant_audit.has_worst_face)
+    {
+      const FaceInfo * worst_face = nullptr;
+      for (const auto * fi : _rc_uo->flowFacesForAudit())
+        if (fi && fi->id() == courant_audit.worst_face_id)
+        {
+          worst_face = fi;
+          break;
+        }
+
+      if (worst_face)
+      {
+        _console << "  Worst-CFL face audit target: face_id=" << worst_face->id()
+                 << " centroid=" << Moose::stringify(worst_face->faceCentroid())
+                 << " normal=" << Moose::stringify(worst_face->normal()) << std::endl;
+
+        if (worst_face->elemInfo())
+        {
+          const auto elem_dof = worst_face->elemInfo()->dofIndices()[momentum_sys_num][0];
+          print_cell_face_breakdown(worst_face->elemInfo(),
+                                    "Worst-CFL-face elem-cell breakdown",
+                                    (*advection_residual)(elem_dof));
+        }
+
+        if (worst_face->neighborInfo())
+        {
+          const auto neighbor_dof = worst_face->neighborInfo()->dofIndices()[momentum_sys_num][0];
+          print_cell_face_breakdown(worst_face->neighborInfo(),
+                                    "Worst-CFL-face neighbor-cell breakdown",
+                                    (*advection_residual)(neighbor_dof));
+        }
+      }
+    }
+  }
 
 }
 
@@ -787,7 +1029,11 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // Compute the coupling fields between the momentum and pressure equations.
   // The first argument makes sure the pressure gradient is staged at the first
   // iteration
-  _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
+  if (auto * conservative_rc =
+          dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo))
+    conservative_rc->computeConservativeHbyA(subtract_updated_pressure, _print_fields);
+  else
+    _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
 
   // We set the preconditioner/controllable parameters for the pressure equations through
   // petsc options. Linear tolerances will be overridden within the solver.

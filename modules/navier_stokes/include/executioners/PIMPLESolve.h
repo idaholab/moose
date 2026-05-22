@@ -41,7 +41,7 @@ protected:
                   const bool recompute_face_mass_flux,
                   const SolverParams & solver_params) override;
 
-  Real pisoAbsoluteTolerance() const;
+  bool hasPISOAbsoluteTerminationCriterion() const;
   bool shouldContinuePISOIterations(const unsigned int piso_iteration_counter,
                                     const Real stage_residual,
                                     const Real first_stage_residual) const;

@@ -52,7 +52,7 @@ specific blocker that must be resolved before claiming `interFoam`-style parity.
 
 ### What Is Implemented
 
-- `SharpInterfaceVOFMULESCorrector` now owns published face-flux state for donor, high-order,
+- `ConservativeSharpInterfaceVOFMULESCorrector` now owns published face-flux state for donor, high-order,
   correction, limited alpha flux, and accumulated `rho_phi`.
 - `ReducedPressurePIMPLESolve` now supports dedicated volume-fraction systems and alpha subcycling.
 - A first `interFoam`-style split exists:
@@ -67,7 +67,7 @@ specific blocker that must be resolved before claiming `interFoam`-style parity.
 
 ### What The New Debugging Found
 
-Instrumentation was added directly to `SharpInterfaceVOFMULESCorrector` to dump, on selected
+Instrumentation was added directly to `ConservativeSharpInterfaceVOFMULESCorrector` to dump, on selected
 interface faces:
 
 - donor flux
@@ -207,7 +207,7 @@ What was confirmed:
 
 What was changed from that audit:
 
-- the internal-face hydrostatic correction in `SharpInterfaceRhieChowMassFlux` now uses the same
+- the internal-face hydrostatic correction in `ConservativeSharpInterfaceRhieChowMassFluxBase` now uses the same
   face matrix coefficient as the stock pressure-diffusion operator instead of an approximate
   projected `snGrad(rho)` form
 - on the same representative face, the published explicit hydrostatic source flux now matches the
@@ -402,7 +402,7 @@ path.
   - `alpha_phi_corr`
   - `alpha_phi_limited`
   - `rho_phi`
-- Refactor the current `SharpInterfaceVOFMULESCorrector` into a more complete alpha transport
+- Refactor the current `ConservativeSharpInterfaceVOFMULESCorrector` into a more complete alpha transport
   driver object.
 - Separate the following computations cleanly:
   - donor flux construction
@@ -413,11 +413,11 @@ path.
 
 ### Files Likely Affected
 
-- `modules/navier_stokes/include/userobjects/SharpInterfaceVOFMULESCorrector.h`
-- `modules/navier_stokes/src/userobjects/SharpInterfaceVOFMULESCorrector.C`
+- `modules/navier_stokes/include/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.h`
+- `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.C`
 - `modules/navier_stokes/include/utils/`
-- `modules/navier_stokes/include/physics/WCNSLinearFVSharpInterfaceVOFPhysics.h`
-- `modules/navier_stokes/src/physics/WCNSLinearFVSharpInterfaceVOFPhysics.C`
+- `modules/navier_stokes/include/physics/WCNSLinearFVConservativeSharpInterfaceVOFPhysics.h`
+- `modules/navier_stokes/src/physics/WCNSLinearFVConservativeSharpInterfaceVOFPhysics.C`
 
 ### Acceptance Criteria
 
@@ -480,8 +480,8 @@ ratio free-surface scenarios.
 
 ### Files Likely Affected
 
-- `modules/navier_stokes/include/userobjects/SharpInterfaceVOFMULESCorrector.h`
-- `modules/navier_stokes/src/userobjects/SharpInterfaceVOFMULESCorrector.C`
+- `modules/navier_stokes/include/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.h`
+- `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.C`
 - `modules/navier_stokes/test/tests/finite_volume/sharp_interface/vof_mules/*`
 
 ### Acceptance Criteria
@@ -632,14 +632,14 @@ Validate the algorithm in the correct order before relying on the full dam-break
 ### Alpha Transport Driver
 
 - Expand:
-  - `modules/navier_stokes/include/userobjects/SharpInterfaceVOFMULESCorrector.h`
-  - `modules/navier_stokes/src/userobjects/SharpInterfaceVOFMULESCorrector.C`
+  - `modules/navier_stokes/include/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.h`
+  - `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceVOFMULESCorrector.C`
 
 ### VOF Physics Wiring
 
 - Update:
-  - `modules/navier_stokes/include/physics/WCNSLinearFVSharpInterfaceVOFPhysics.h`
-  - `modules/navier_stokes/src/physics/WCNSLinearFVSharpInterfaceVOFPhysics.C`
+  - `modules/navier_stokes/include/physics/WCNSLinearFVConservativeSharpInterfaceVOFPhysics.h`
+  - `modules/navier_stokes/src/physics/WCNSLinearFVConservativeSharpInterfaceVOFPhysics.C`
 
 ### Executioner Orchestration
 
@@ -789,8 +789,8 @@ handoff rather than more local tuning. The goal is to make the state produced at
    - remove fallback paths that reconstruct the pressure correction indirectly from relaxed cell
      gradients
 
-5. `modules/navier_stokes/include/userobjects/SharpInterfaceRhieChowMassFlux.h`
-6. `modules/navier_stokes/src/userobjects/SharpInterfaceRhieChowMassFlux.C`
+5. `modules/navier_stokes/include/userobjects/ConservativeSharpInterfaceRhieChowMassFluxBase.h`
+6. `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceRhieChowMassFluxBase.C`
    - replace the current post-`pEqn` cell writeback with the local analog of
      `U = HbyA + rAU*reconstruct((phig - pEqnFlux)/rAUf)`
    - make that writeback consume the exact face `phig` and exact pressure-equation flux, not the
@@ -798,7 +798,7 @@ handoff rather than more local tuning. The goal is to make the state produced at
 
 7. `modules/navier_stokes/src/linearfvbcs/LinearFVPressureFluxBC.C`
 8. `modules/navier_stokes/src/linearfvbcs/LinearFVPressureSymmetryBC.C`
-9. `modules/navier_stokes/src/physics/WCNSLinearFVSharpInterfaceFlowPhysics.C`
+9. `modules/navier_stokes/src/physics/WCNSLinearFVConservativeSharpInterfaceFlowPhysics.C`
    - port `constrainPressure` semantics, not just its algebra
    - make pressure BC assembly consume a cached per-patch `snGrad(p)` state set immediately
      before the pressure solve, analogous to `fixedFluxPressure::updateCoeffs(snGradp)`
@@ -824,7 +824,7 @@ handoff rather than more local tuning. The goal is to make the state produced at
 ### Recommended Implementation Order
 
 1. `RhieChowMassFlux.*`
-2. `SharpInterfaceRhieChowMassFlux.*`
+2. `ConservativeSharpInterfaceRhieChowMassFluxBase.*`
 3. pressure BC files
 4. `ReducedPressurePIMPLESolve.C`
 5. `LinearAssemblySegregatedSolve.C`
@@ -840,7 +840,7 @@ Highest-value target:
 The remaining `1000:1` dam-break instability is now isolated enough that the next work should
 proceed as a literal post-`pEqn` handoff port instead of more BC tuning.
 
-1. `modules/navier_stokes/src/userobjects/SharpInterfaceRhieChowMassFlux.C`
+1. `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceRhieChowMassFluxBase.C`
    - stop using the corrected face-velocity field as the source of truth for cell `U`
    - restore cell writeback to the local analog of
      `U = HbyA + rAU*reconstruct((phig - pEqnFlux)/rAUf)`
@@ -860,7 +860,7 @@ proceed as a literal post-`pEqn` handoff port instead of more BC tuning.
    - audit `|phi - phi(U)|` after each writeback stage and treat internal mismatch, not outlet
      flux, as the primary acceptance gate
 
-5. `modules/navier_stokes/src/userobjects/SharpInterfaceRhieChowMassFlux.C`
+5. `modules/navier_stokes/src/userobjects/ConservativeSharpInterfaceRhieChowMassFluxBase.C`
    - once the reconstruct-based writeback is in place, rebuild the corrected outlet face cache from
      the final written-back cell field plus the solved face-normal flux, not the other way around
 

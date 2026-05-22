@@ -24,7 +24,8 @@ namespace FV
 void
 relaxMatrix(SparseMatrix<Number> & matrix,
             const Real relaxation_parameter,
-            NumericVector<Number> & diff_diagonal)
+            NumericVector<Number> & diff_diagonal,
+            const bool enforce_diagonal_dominance)
 {
   PetscMatrix<Number> * mat = dynamic_cast<PetscMatrix<Number> *>(&matrix);
   mooseAssert(mat, "This should be a PetscMatrix!");
@@ -62,16 +63,24 @@ relaxMatrix(SparseMatrix<Number> & matrix,
   std::vector<Real> new_diagonal(local_size, 0.0);
 
   {
-    PetscVectorReader diff_diga_reader(*diff_diag);
+    PetscVectorReader diagonal_reader(*diff_diag);
     for (const auto row_i : make_range(local_size))
     {
       const unsigned int global_index = matrix.row_start() + row_i;
+      const Real original_diagonal = diagonal_reader(global_index);
+
+      if (!enforce_diagonal_dominance)
+      {
+        new_diagonal[row_i] = inverse_relaxation * original_diagonal;
+        continue;
+      }
+
       std::vector<numeric_index_type> indices;
       std::vector<Real> values;
       mat->get_row(global_index, indices, values);
       const Real abs_sum = std::accumulate(
           values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
-      const Real abs_diagonal = std::abs(diff_diga_reader(global_index));
+      const Real abs_diagonal = std::abs(original_diagonal);
       new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     }
   }

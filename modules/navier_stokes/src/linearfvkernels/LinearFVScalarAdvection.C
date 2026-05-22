@@ -107,7 +107,7 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
 
   // Caching the velocity on the face which will be reused in the advection term's matrix and right
   // hand side contributions
-  _volumetric_face_flux = _mass_flux_provider.getVolumetricFaceFlux(*face_info);
+  _volumetric_face_flux = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(*face_info);
 
   // Adjust volumetric face flux using the slip velocity
   // TODO: add boundaries

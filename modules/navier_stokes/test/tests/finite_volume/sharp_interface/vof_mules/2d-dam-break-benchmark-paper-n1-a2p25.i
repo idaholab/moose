@@ -45,9 +45,9 @@ c_alpha = 0.01
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
-        velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'rhou rhov'
         pressure_variable = 'pressure'
 
         compressibility = 'incompressible'
@@ -74,7 +74,7 @@ c_alpha = 0.01
         momentum_advection_interpolation = 'upwind'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'
@@ -156,7 +156,7 @@ c_alpha = 0.01
   volume_fraction_petsc_options_value = 'lu'
 
   pin_pressure = true
-  pressure_pin_point = '${fparse 0.5 * domain_dims_x} ${domain_dims_y} 0.0'
+  pressure_pin_point = '${domain_dims_x} ${domain_dims_y} 0.0'
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2

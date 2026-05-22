@@ -54,6 +54,22 @@ public:
     RealVectorValue worst_face_normal;
   };
 
+  struct MaxCourantAudit
+  {
+    Real max_courant = 0.0;
+    bool has_worst_cell = false;
+    dof_id_type worst_cell_id = DofObject::invalid_id;
+    Point worst_cell_centroid;
+    Real worst_cell_volume = 0.0;
+    Real worst_cell_flux_sum = 0.0;
+    bool has_worst_face = false;
+    dof_id_type worst_face_id = DofObject::invalid_id;
+    Point worst_face_centroid;
+    RealVectorValue worst_face_normal;
+    Real worst_face_volumetric_flux = 0.0;
+    Real worst_face_integrated_flux = 0.0;
+  };
+
   static InputParameters validParams();
   RhieChowMassFlux(const InputParameters & params);
 
@@ -62,6 +78,10 @@ public:
 
   /// Get the volumetric face flux (used in advection terms)
   virtual Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+  /// Get the volumetric face flux to be used by the VOF transport solve. By default this is the
+  /// same as the generic volumetric face flux, but sharp-interface implementations may freeze a
+  /// lagged transport state for the duration of the alpha solve.
+  virtual Real getVOFTransportVolumetricFaceFlux(const FaceInfo & fi) const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -79,6 +99,10 @@ public:
   Real exactInternalPressureEquationFlux(const FaceInfo & fi, const Function & exact_pressure) const;
   /// Access the currently stored pressure-equation face flux.
   Real storedPressureEquationFlux(const FaceInfo & fi) const;
+  /// Debug accessors for the discrete internal-face pressure diffusion operator pieces.
+  Real debugPressureElemMatrixContribution(const FaceInfo & fi) const;
+  Real debugPressureNeighborMatrixContribution(const FaceInfo & fi) const;
+  Real debugPressureElemRHSContribution(const FaceInfo & fi) const;
   /// Signed sum of boundary mass fluxes for audit purposes.
   Real boundaryMassFluxImbalance() const;
   /// Maximum absolute boundary mass flux for audit purposes.
@@ -87,6 +111,8 @@ public:
   Real faceMassFluxL2Norm() const;
   /// Maximum face-flux Courant number over active flow cells for the supplied timestep.
   virtual Real maxCourant(const Real dt) const;
+  /// Detailed audit of the cell/face responsible for the maximum face-flux Courant number.
+  virtual MaxCourantAudit maxCourantAudit(const Real dt) const;
   /// Access the active flow faces used by this Rhie-Chow object for audit postprocessors.
   const std::vector<const FaceInfo *> & flowFacesForAudit() const { return _flow_face_info; }
   /// Compare the stored volumetric face fluxes against the flux implied by the current
@@ -100,6 +126,10 @@ public:
   Real cellHbyARaw(const unsigned int system_i, const dof_id_type dof) const;
   /// Debug accessor for the current cell Ainv state.
   Real cellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
+  /// Null-safe debug accessor for the current cell HbyA state.
+  Real debugCellHbyARaw(const unsigned int system_i, const dof_id_type dof) const;
+  /// Null-safe debug accessor for the current cell Ainv state.
+  Real debugCellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
   /// Cache the assembled/relaxed momentum predictor operator for one component.
   void cacheMomentumPredictorOperator(const unsigned int system_i,
                                       const NumericVector<Number> * rhs_override = nullptr,
@@ -173,6 +203,9 @@ protected:
   Real boundaryNormalAinv(const FaceInfo * fi) const;
   /// Determine whether a boundary face belongs to an adjustable fixed-flux pressure patch.
   bool isAdjustablePressureBoundaryFace(const FaceInfo * fi) const;
+  /// Compute the face flux contributed by the solved pressure equation in the
+  /// native pressure-correction space used by this Rhie-Chow object.
+  virtual Real computeDiscretePressureFaceFlux(const FaceInfo * fi) const;
 
   /// Accessor for the cached set of flow faces used by this Rhie-Chow object.
   const std::vector<const FaceInfo *> & flowFaceInfo() const { return _flow_face_info; }
@@ -233,10 +266,26 @@ protected:
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _HbyA_flux;
 
   /**
-   * Explicit predictor-side face flux entering the pressure equation, i.e. the local analog of
-   * OpenFOAM's phiHbyA after any local predictor-source additions.
+   * Explicit predictor-side face flux entering the pressure equation in the native
+   * pressure-correction sign convention. The accepted transport-face flux is therefore formed as
+   * -_phiHbyA_flux + _pressure_equation_flux.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _phiHbyA_flux;
+
+  /**
+   * Predictor-side face flux in the same native pressure-correction space consumed by the
+   * pressure equation and pressure boundary-condition updates. For stock RC this matches
+   * _phiHbyA_flux directly; sharp/conservative paths may publish a volumetric face flux here, but
+   * it is still a pressure-correction-space predictor quantity, not the accepted transport phi.
+   */
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_flux;
+
+  /**
+   * Predictor-side face mass flux used by momentum-advection kernels that need a frozen rhoPhi
+   * family instead of the live corrected face mass flux.
+   */
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>
+      _pressure_predictor_mass_flux;
 
   /**
    * Explicit face-force contribution entering the pressure corrector, i.e. the local analog of
@@ -255,6 +304,13 @@ protected:
    * for the momentum equation.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
+
+  /**
+   * Face diffusion tensor in the native pressure-correction space. For stock RC this matches the
+   * density-weighted face Ainv, while sharp/conservative paths may publish raw face rAUf here.
+   */
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _pressure_Ainv;
 
   /**
    * We hold on to the cell-based 1/A vectors so that we can easily reconstruct the

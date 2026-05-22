@@ -63,6 +63,7 @@ public:
   /// Audit accessors for the currently prepared face state.
   Real currentFaceMassFlux() const { return _face_mass_flux; }
   std::pair<Real, Real> currentAdvectedInterpCoeffs() const { return _advected_interp_coeffs; }
+  Real currentAdvectedRHSFaceValue() const { return _advected_rhs_face_value; }
 
 protected:
   /// Computes the matrix contribution of the advective flux on the element side of current face

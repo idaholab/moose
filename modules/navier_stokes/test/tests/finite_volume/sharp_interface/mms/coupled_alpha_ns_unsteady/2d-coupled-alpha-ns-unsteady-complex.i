@@ -23,7 +23,7 @@ mu_g = 1.0e-2
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x vel_y'
         pressure_variable = 'pressure'
@@ -51,7 +51,7 @@ mu_g = 1.0e-2
         momentum_advection_interpolation = 'average'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'
@@ -244,7 +244,7 @@ mu_g = 1.0e-2
     execute_on = 'timestep_end'
   []
   [L2delta_u]
-    type = SharpInterfacePressureCoupledVelocityError
+    type = ConservativeSharpInterfacePressureCoupledVelocityError
     rhie_chow_user_object = ins_rhie_chow_interpolator
     component = x
     exact_velocity = exact_u
@@ -252,7 +252,7 @@ mu_g = 1.0e-2
     execute_on = 'timestep_end'
   []
   [L2delta_v]
-    type = SharpInterfacePressureCoupledVelocityError
+    type = ConservativeSharpInterfacePressureCoupledVelocityError
     rhie_chow_user_object = ins_rhie_chow_interpolator
     component = y
     exact_velocity = exact_v
@@ -281,7 +281,7 @@ mu_g = 1.0e-2
     execute_on = 'timestep_end'
   []
   [L2vol_phi_consistency]
-    type = SharpInterfaceVolumetricFluxConsistencyError
+    type = ConservativeSharpInterfaceVolumetricFluxConsistencyError
     final_face_flux = corrected_face_phi
     vel_x = vel_x
     vel_y = vel_y
@@ -289,21 +289,21 @@ mu_g = 1.0e-2
     execute_on = 'timestep_end'
   []
   [L2predictor_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = ins_rhie_chow_interpolator
     quantity = predictor_operator
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2correction_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = ins_rhie_chow_interpolator
     quantity = pressure_correction
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2total_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = ins_rhie_chow_interpolator
     quantity = total
     vel_x = vel_x

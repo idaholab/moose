@@ -20,7 +20,7 @@ u_in = 1.0
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x'
         pressure_variable = 'pressure'
@@ -50,7 +50,7 @@ u_in = 1.0
         momentum_advection_interpolation = 'upwind'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'

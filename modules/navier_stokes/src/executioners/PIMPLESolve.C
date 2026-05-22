@@ -29,7 +29,7 @@ PIMPLESolve::validParams()
       "piso_absolute_tolerance",
       -1.0,
       "Absolute residual tolerance for terminating the inner PISO loop early. If this is <= 0, "
-      "pressure_absolute_tolerance is used.");
+      "the inner loop executes the full number of requested additional PISO corrections.");
   params.addRangeCheckedParam<Real>(
       "piso_relative_tolerance",
       0.0,
@@ -48,10 +48,10 @@ PIMPLESolve::PIMPLESolve(Executioner & ex)
 {
 }
 
-Real
-PIMPLESolve::pisoAbsoluteTolerance() const
+bool
+PIMPLESolve::hasPISOAbsoluteTerminationCriterion() const
 {
-  return _piso_absolute_tolerance > 0.0 ? _piso_absolute_tolerance : _pressure_absolute_tolerance;
+  return _piso_absolute_tolerance > 0.0;
 }
 
 bool
@@ -62,7 +62,7 @@ PIMPLESolve::shouldContinuePISOIterations(const unsigned int piso_iteration_coun
   if (piso_iteration_counter >= _num_piso_iterations)
     return false;
 
-  if (stage_residual <= pisoAbsoluteTolerance())
+  if (hasPISOAbsoluteTerminationCriterion() && stage_residual <= _piso_absolute_tolerance)
     return false;
 
   if (_piso_relative_tolerance > 0.0 &&

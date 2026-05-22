@@ -37,7 +37,7 @@ c_alpha = 0.01
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x vel_y'
         pressure_variable = 'pressure'
@@ -67,7 +67,7 @@ c_alpha = 0.01
         momentum_advection_interpolation = 'upwind'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'

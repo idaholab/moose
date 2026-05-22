@@ -21,7 +21,7 @@ mu_g = 1.0e-3
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x vel_y'
         pressure_variable = 'pressure'
@@ -46,7 +46,7 @@ mu_g = 1.0e-3
         momentum_advection_interpolation = 'average'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'
@@ -162,13 +162,13 @@ mu_g = 1.0e-3
     quantity = internal_l2
   []
   [correction_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = 'ins_rhie_chow_interpolator'
     quantity = pressure_correction
     metric = l2
   []
   [total_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = 'ins_rhie_chow_interpolator'
     quantity = total
     metric = l2

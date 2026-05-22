@@ -46,6 +46,7 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
   if (_reduced_pimple_solve.adjustMomentumPressureTimeStepEnabled() && dt_to_take > 0.0)
   {
     const Real courant = _reduced_pimple_solve.momentumPressureCourant(dt_to_take);
+    const auto courant_audit = _reduced_pimple_solve.momentumPressureCourantAudit(dt_to_take);
     const Real required_dt = _reduced_pimple_solve.constrainedMomentumPressureDT(dt_to_take);
     const Real adjusted_dt = std::max(required_dt, _dtmin);
 
@@ -57,12 +58,27 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
                << courant;
       if (required_dt < _dtmin)
         _console << ", requested dt " << required_dt << " is below dtmin=" << _dtmin;
+      if (courant_audit.has_worst_cell)
+      {
+        _console << ", worst cell id=" << courant_audit.worst_cell_id
+                 << " centroid=" << courant_audit.worst_cell_centroid
+                 << " volume=" << courant_audit.worst_cell_volume
+                 << " flux_sum=" << courant_audit.worst_cell_flux_sum;
+        if (courant_audit.has_worst_face)
+          _console << ", worst face id=" << courant_audit.worst_face_id
+                   << " face_centroid=" << courant_audit.worst_face_centroid
+                   << " face_normal=" << courant_audit.worst_face_normal
+                   << " face_phi=" << courant_audit.worst_face_volumetric_flux
+                   << " face_flux=" << courant_audit.worst_face_integrated_flux;
+      }
+      _console << _reduced_pimple_solve.momentumPressureWorstFaceSharpDiagnostics(courant_audit);
       _console << ")" << std::endl;
       dt_to_take = adjusted_dt;
     }
   }
 
   TransientBase::takeStep(dt_to_take);
+  _reduced_pimple_solve.commitAcceptedTimestepTransportHistory();
 }
 
 Real

@@ -51,10 +51,10 @@ The stability requirement is stronger than formula-level agreement:
 
 Current code:
 
-- `SharpInterfaceRhieChowMassFlux::addMomentumPredictorExplicitForcing`
-- `SharpInterfaceRhieChowMassFlux::populateMomentumPredictorPressureForceFaceField`
-- `SharpInterfaceRhieChowMassFlux::populateMomentumPredictorBodyForceFaceField`
-- `SharpInterfaceRhieChowMassFlux::reconstructFixedFaceNormalScalarToCellVector`
+- `RhieChowMassFlux::addMomentumPredictorExplicitForcing`
+- `ConservativeSharpInterfaceRhieChowMassFluxBase::populateMomentumPredictorPressureForceFaceField`
+- `ConservativeSharpInterfaceRhieChowMassFluxBase::populateMomentumPredictorBodyForceFaceField`
+- `ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceVectorFieldToCellSourceDensity`
 
 Current behavior:
 
@@ -89,7 +89,7 @@ Current behavior:
 
 Current code:
 
-- `SharpInterfaceRhieChowMassFlux::updateAdditionalPressureFluxFunctors`
+- `ConservativeSharpInterfaceRhieChowMassFlux::updateAdditionalPressureFluxFunctors`
 
 Current behavior:
 
@@ -107,9 +107,9 @@ This is the cleanest part of the current implementation.
 Current code:
 
 - `ReducedPressurePIMPLESolve::preparePressureCorrectorState`
-- `WCNSLinearFVSharpInterfaceFlowPhysics::addInletBC`
-- `WCNSLinearFVSharpInterfaceFlowPhysics::addOutletBC`
-- `WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC`
+- `WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addInletBC`
+- `WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addOutletBC`
+- `WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallsBC`
 
 Current behavior:
 
@@ -124,7 +124,7 @@ This is intentionally aligned with the intended contract.
 
 Current code:
 
-- `WCNSLinearFVSharpInterfaceFlowPhysics::addPressureCorrectionKernels`
+- `WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addPressureCorrectionKernels`
 - `ReducedPressurePIMPLESolve::correctVelocityOnce`
 
 Current behavior:
@@ -141,7 +141,7 @@ face flux object.
 
 Current code:
 
-- `SharpInterfaceRhieChowMassFlux::updatePressureCoupledVelocityCorrectionFaceField`
+- `ConservativeSharpInterfaceRhieChowMassFlux::updateConservativePressureCoupledVelocityCorrectionFaceField`
 - `RhieChowMassFlux::computeFaceMassFlux` through the RC interface
 
 Current behavior:
@@ -155,9 +155,8 @@ Current behavior:
 
 Current code:
 
-- `SharpInterfaceRhieChowMassFlux::reconstructMatchedPressureCoupledCellCorrectionSource`
-- `SharpInterfaceRhieChowMassFlux::matchedSourcePressureCoupledCellVelocityDelta`
-- `SharpInterfaceRhieChowMassFlux::computeProvisionalCellVelocity`
+- `ConservativeSharpInterfaceRhieChowMassFlux::reconstructPressureCoupledCellVelocityDelta`
+- `ConservativeSharpInterfaceRhieChowMassFlux::computeCellVelocity`
 
 Current behavior:
 

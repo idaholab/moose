@@ -1,12 +1,17 @@
 #pragma once
 
 #include "PIMPLESolve.h"
+#include "RhieChowMassFlux.h"
+
+#include "libmesh/point.h"
 
 #include <string>
+#include <unordered_set>
+#include <vector>
 
-class SharpInterfaceRhieChowMassFlux;
-class SharpInterfaceCurvatureCalculator;
-class SharpInterfaceVOFMULESCorrector;
+class ConservativeSharpInterfaceRhieChowMassFlux;
+class ConservativeSharpInterfaceCurvatureCalculator;
+class ConservativeSharpInterfaceVOFMULESCorrector;
 
 /**
  * PIMPLE solve object with explicit hooks for additional reduced-pressure /
@@ -21,7 +26,11 @@ public:
 
   bool solve() override;
   Real momentumPressureCourant(const Real dt) const;
+  RhieChowMassFlux::MaxCourantAudit momentumPressureCourantAudit(const Real dt) const;
+  std::string momentumPressureWorstFaceSharpDiagnostics(
+      const RhieChowMassFlux::MaxCourantAudit & audit) const;
   Real constrainedMomentumPressureDT(const Real dt) const;
+  void commitAcceptedTimestepTransportHistory() const;
   bool adjustMomentumPressureTimeStepEnabled() const
   {
     return _adjust_momentum_pressure_time_step;
@@ -35,6 +44,8 @@ protected:
                   const SolverParams & solver_params) override;
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) override;
+  void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
+                                            NumericVector<Number> & rhs) override;
   std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   bool auditMomentumPredictorRebuild() const override;
 
@@ -50,6 +61,8 @@ private:
   void preparePressureCorrectorState(const bool subtract_updated_pressure);
   void reconstructPressureCoupledStateFromCurrentPressure(const bool subtract_updated_pressure);
   void dumpPressureOuterDebugState(const std::string & stage_label);
+  void dumpPressureDebugFaces(const std::string & stage_label);
+  void resolvePressureDebugFaceIds();
   void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
   void advanceMomentumOuterIterationHistory() const;
   void advanceVolumeFractionOuterIterationHistory() const;
@@ -61,7 +74,7 @@ private:
   std::vector<std::pair<unsigned int, Real>> solveVolumeFractionSystems(
       const SolverParams & solver_params);
   void clampVolumeFractionSystems();
-  SharpInterfaceVOFMULESCorrector * sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
+  ConservativeSharpInterfaceVOFMULESCorrector * sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
 
   std::pair<unsigned int, Real>
   correctVelocityOnce(const bool subtract_updated_pressure,
@@ -72,13 +85,15 @@ private:
                                const bool relax_pressure_for_next_predictor,
                                const SolverParams & solver_params);
   void finalizePressureCorrectionStage();
+  void publishPressureCorrectedTransportState(const std::string & stage_label);
+  void relaxPressureFieldForNextPredictor();
   std::pair<unsigned int, Real>
   correctStartupContinuityOnce(const bool subtract_updated_pressure,
                                const bool recompute_face_mass_flux,
                                const SolverParams & solver_params);
 
-  SharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
-  SharpInterfaceCurvatureCalculator * sharpInterfaceCurvature() const;
+  ConservativeSharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
+  ConservativeSharpInterfaceCurvatureCalculator * sharpInterfaceCurvature() const;
 
   const std::vector<SolverSystemName> _volume_fraction_system_names;
   const bool _has_volume_fraction_systems;
@@ -102,6 +117,12 @@ private:
   const unsigned int _dump_pressure_outer_debug_start_timestep;
   const unsigned int _dump_pressure_outer_debug_end_timestep;
   const unsigned int _dump_pressure_outer_debug_max_outer_iterations;
+  std::unordered_set<dof_id_type> _pressure_debug_face_ids;
+  const std::vector<Point> _pressure_debug_face_points;
+  bool _pressure_debug_face_ids_resolved = false;
+  const bool _audit_momentum_predictor_rebuild;
+  const unsigned int _audit_momentum_predictor_rebuild_start_timestep;
+  const unsigned int _audit_momentum_predictor_rebuild_end_timestep;
   unsigned int _current_piso_iteration = 0;
   std::string _startup_pressure_initialization;
   const bool _suppress_explicit_hydrostatic_flux_during_seeded_startup;

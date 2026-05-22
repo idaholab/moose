@@ -37,7 +37,7 @@ probe_half_width = ${fparse 1.5 * cell_dx}
 
 [Physics]
   [NavierStokes]
-    [SharpInterfaceFlowSegregated]
+    [ConservativeSharpInterfaceFlowSegregated]
       [flow]
         velocity_variable = 'vel_x vel_y'
         pressure_variable = 'pressure'
@@ -63,7 +63,7 @@ probe_half_width = ${fparse 1.5 * cell_dx}
         momentum_advection_interpolation = 'average'
       []
     []
-    [SharpInterfaceVOFSegregated]
+    [ConservativeSharpInterfaceVOFSegregated]
       [vof]
         coupled_flow_physics = 'flow'
         volume_fraction_variable = 'alpha'
@@ -192,7 +192,7 @@ probe_half_width = ${fparse 1.5 * cell_dx}
     execute_on = 'TIMESTEP_END'
   []
   [correction_branch_consistency]
-    type = SharpInterfaceFluxBranchConsistencyError
+    type = ConservativeSharpInterfaceFluxBranchConsistencyError
     rhie_chow_user_object = 'ins_rhie_chow_interpolator'
     quantity = pressure_correction
     metric = l2
