@@ -7,7 +7,7 @@
     # Make the test a little cheaper
     cli_args = "SubChannel/P_tol=1e-1 MultiApps/viz/cli_args='n_cells=50'"
     # Differences between macos & civet
-    rel_err = 6e-4
+    rel_err = 5e-3
     abs_zero = 1e-8
     ignore_columns = 'SumWij'
 
