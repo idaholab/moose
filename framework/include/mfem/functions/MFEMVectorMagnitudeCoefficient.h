@@ -26,11 +26,6 @@ public:
   /// Set the time for internally stored coefficients
   void SetTime(mfem::real_t t) override;
 
-  /// Reset the vector coefficient
-  void SetVectorCoefficient(mfem::VectorCoefficient & vec_coef) { _vec_coef = &vec_coef; }
-  /// Return the vector coefficient
-  mfem::VectorCoefficient * GetVectorCoefficient() const { return _vec_coef; }
-
   /// Evaluate the vector coefficient magnitude at @a ip.
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 
