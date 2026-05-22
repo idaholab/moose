@@ -93,16 +93,16 @@
   [nodal_sample]
     type = MFEMLineValueSampler
     variable = 'received_nodal'
-    start_point = '0.0 0.0 0.0'
-    end_point = '1.0 1.0 0.0'
+    start_point = '0.01 0.01 0.0'
+    end_point = '0.99 0.99 0.0'
     num_points = 14
     execute_on = TIMESTEP_END
   []
   [elem_sample]
     type = MFEMLineValueSampler
     variable = 'received_elem'
-    start_point = '0.0 0.0 0.0'
-    end_point = '1.0 1.0 0.0'
+    start_point = '0.01 0.01 0.0'
+    end_point = '0.99 0.99 0.0'
     num_points = 14
     execute_on = TIMESTEP_END
   []
