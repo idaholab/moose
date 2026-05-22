@@ -9,7 +9,7 @@
 !equation
 \int_{\Gamma} \left(u - \phi_0\right) \, d\Gamma = 0
 
-on a boundary $\Gamma$ using a first-order scalar Lagrange multiplier variable. This makes the
+on a boundary $\Gamma$ using a `SCALAR` Lagrange multiplier variable. This makes the
 average value of the finite element variable `u` on the specified `boundary` equal to `phi0`.
 The variable supplied to [!param](/BCs/BoundaryIntegralValueConstraint/lambda) must use
 `family = SCALAR` and `order = FIRST`.
@@ -17,6 +17,13 @@ The variable supplied to [!param](/BCs/BoundaryIntegralValueConstraint/lambda) m
 The object assembles both the field-variable equation and the scalar Lagrange multiplier equation,
 so no separate `ScalarKernel` is required for the Lagrange multiplier variable. It is the finite
 element boundary analogue of [FVBoundaryIntegralValueConstraint.md].
+
+The scalar Lagrange multiplier $\lambda$ has the physical meaning of the uniform boundary loading
+needed to enforce the average value constraint. For example, in a mechanical problem where $u$ is a
+displacement field, $\lambda$ represents the uniform traction applied on $\Gamma$ to enforce the
+prescribed average displacement. In a heat-conduction problem where $u$ is temperature, $\lambda$
+represents the uniform boundary source term or flux needed to enforce the prescribed average
+temperature.
 
 !alert warning
 This constraint introduces a saddle-point block with zero diagonal terms. Use a preconditioner that

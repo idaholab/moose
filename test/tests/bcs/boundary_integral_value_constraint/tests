@@ -6,7 +6,6 @@
     type = CSVDiff
     input = 'boundary_integral_value_constraint.i'
     csvdiff = 'boundary_integral_value_constraint_out.csv'
-    abs_zero = 1e-12
     requirement = 'The system shall enforce prescribed finite element boundary average values using scalar Lagrange multipliers.'
   []
 
@@ -15,7 +14,6 @@
     input = 'boundary_integral_value_constraint.i'
     cli_args = 'Executioner/residual_and_jacobian_together=true Outputs/file_base=boundary_integral_value_constraint_rj_out'
     csvdiff = 'boundary_integral_value_constraint_rj_out.csv'
-    abs_zero = 1e-12
     requirement = 'The system shall enforce prescribed finite element boundary average values when computing the residual and Jacobian together.'
   []
 

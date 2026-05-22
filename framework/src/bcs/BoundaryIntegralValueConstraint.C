@@ -57,31 +57,20 @@ BoundaryIntegralValueConstraint::computeResidual()
 }
 
 void
-BoundaryIntegralValueConstraint::computeJacobian()
-{
-  // The field equation has no diagonal dependence from this constraint, but we still assemble the
-  // zero block so the matrix structure is complete.
-  IntegratedBC::computeJacobian();
-  computeScalarJacobian();
-}
-
-void
 BoundaryIntegralValueConstraint::computeOffDiagJacobian(const unsigned int jvar)
 {
   if (jvar == _var.number())
-  {
-    computeJacobian();
-    computeScalarFieldJacobian(jvar);
-  }
-  else
-    IntegratedBC::computeOffDiagJacobian(jvar);
+    computeScalarFieldJacobian();
 }
 
 void
 BoundaryIntegralValueConstraint::computeOffDiagJacobianScalar(const unsigned int jvar)
 {
   if (jvar == _lambda_var.number())
+  {
+    computeScalarJacobian();
     computeFieldScalarJacobian();
+  }
 }
 
 void
@@ -91,11 +80,14 @@ BoundaryIntegralValueConstraint::computeResidualAndJacobian()
 
   if (_is_implicit)
   {
-    computeJacobian();
+    IntegratedBC::computeJacobian();
+    computeScalarJacobian();
+
     // The residual-and-Jacobian-together path bypasses ComputeFullJacobianThread, so assemble the
     // scalar off-diagonal blocks here.
     computeFieldScalarJacobian();
-    computeScalarFieldJacobian(_var.number());
+    prepareShapes(_var.number());
+    computeScalarFieldJacobian();
   }
 }
 
@@ -141,15 +133,8 @@ BoundaryIntegralValueConstraint::computeFieldScalarJacobian()
 }
 
 void
-BoundaryIntegralValueConstraint::computeScalarFieldJacobian(const unsigned int jvar)
+BoundaryIntegralValueConstraint::computeScalarFieldJacobian()
 {
-  if (jvar != _var.number())
-    return;
-
-  // _phi is bound to the assembly's _phi_face slot, which holds whichever variable was last
-  // prepared. Re-prepare _var so _phi corresponds to _var.
-  prepareShapes(jvar);
-
   mooseAssert(_lambda_var.dofIndices().size() == 1, "The lambda variable should have one dof");
 
   DenseMatrix<Real> jacobian(1, _phi.size());

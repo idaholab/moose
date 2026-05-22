@@ -34,7 +34,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual void computeResidual() override;
-  virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
   virtual void computeResidualAndJacobian() override;
@@ -49,7 +48,7 @@ protected:
   void computeFieldScalarJacobian();
 
   /// Compute the Jacobian contribution from the field variable to the Lagrange multiplier equation
-  void computeScalarFieldJacobian(unsigned int jvar);
+  void computeScalarFieldJacobian();
 
   /// The value that the boundary average of the field variable is constrained to
   const PostprocessorValue & _phi0;
