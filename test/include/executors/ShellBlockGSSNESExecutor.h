@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include "SNESExecutor.h"
+#include "SNESNPCExecutor.h"
 #include "MooseEnum.h"
+
+class NewtonSNESExecutor;
 
 /**
  * Test executor that wraps a SNESSHELL to perform a block Gauss-Seidel sweep over
@@ -20,20 +22,25 @@
  * sweep_type = multiplicative           forward sweep only (1..N)
  * sweep_type = symmetric_multiplicative forward then backward sweep (1..N, N-1..1)
  */
-class ShellBlockGSSNESExecutor : public SNESExecutor
+class ShellBlockGSSNESExecutor : public SNESNPCExecutor
 {
 public:
   static InputParameters validParams();
   ShellBlockGSSNESExecutor(const InputParameters & params);
+  virtual ~ShellBlockGSSNESExecutor();
 
   virtual Result run() override;
+  virtual PetscErrorCode applyBA(Mat A, Vec X, Vec Y) override;
 
 protected:
   virtual void setupSNES() override;
 
 private:
-  std::vector<SNESExecutor *> _sub_snes;
+  std::vector<NewtonSNESExecutor *> _sub_snes;
   const MooseEnum _sweep_type;
+  Vec _block_residual = nullptr;
+  Vec _block_update = nullptr;
 
   static PetscErrorCode shellSolveCallback(SNES snes, Vec x);
+  PetscErrorCode applyBlockUpdate(Mat A, Vec rhs, Vec Y, PetscInt i);
 };

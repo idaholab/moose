@@ -17,7 +17,7 @@
 #include <petscsnes.h>
 
 class FEProblemBase;
-class SNESExecutor;
+class SNESNPCExecutor;
 
 /**
  * Abstract base for Executor-derived classes that own a PETSc SNES object.
@@ -37,13 +37,13 @@ public:
   SNESExecutor(const InputParameters & params);
   virtual ~SNESExecutor();
 
-  /// Return the owned SNES for NPC wiring by a parent executor.
-  SNES getSNES();
+  /// Return the owned SNES
+  virtual SNES getSNES();
 
 protected:
   FEProblemBase & _fe_problem;
 
-  /// Owned PETSc SNES
+  /// Owned PETSc SNES. If this wraps a libMesh nonlinar solve this should always be nullptr
   SNES _snes = nullptr;
 
   /// VecNest wrapping per-system solution Vecs.  Built once in setupSNES().
@@ -53,7 +53,7 @@ protected:
   Vec _vec_func = nullptr;
 
   /// Optional nonlinear preconditioner executor.  Non-null when nl_preconditioning is set.
-  SNESExecutor * _npc_executor = nullptr;
+  SNESNPCExecutor * _npc_executor = nullptr;
 
   /// Create and configure the SNES.  Called lazily on the first run().
   virtual void setupSNES() = 0;
