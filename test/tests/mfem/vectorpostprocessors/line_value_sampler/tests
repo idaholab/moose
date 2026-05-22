@@ -4,6 +4,7 @@
   [MFEMLineValueSamplerDiffusion]
     type = CSVDiff
     input = line_value_sampler_diffusion.i
+    cli_args = Outputs/active=
     csvdiff = 'line_value_sampler_diffusion_out_line_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate scalars at points along a line using MFEM.'
     capabilities = 'mfem'
@@ -13,6 +14,7 @@
   [MFEMLineValueSamplerCurlCurl]
     type = CSVDiff
     input = line_value_sampler_curlcurl.i
+    cli_args = Outputs/active=
     csvdiff = 'line_value_sampler_curlcurl_out_line_sample_0001.csv'
     requirement = 'The system shall have the ability to interpolate vectors at points along a line using MFEM.'
     capabilities = 'mfem'
