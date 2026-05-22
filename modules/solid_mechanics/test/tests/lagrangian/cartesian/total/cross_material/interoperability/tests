@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
+  [manual_TaylorExpansion]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'TaylorExpansion.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics"
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion"
+  []
+  [manual_EigenSolution]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'EigenSolution.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics"
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution"
+  []
+[]
