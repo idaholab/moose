@@ -1,12 +1,12 @@
-# FERegularization
+# DisplacementRegularization
 
-!syntax description /Kernels/FERegularization
+!syntax description /Kernels/DisplacementRegularization
 
 ## Description
 
-`FERegularization` adds a finite-element regularization term to a scalar field. The
-kernel is provided by `SolidMechanicsApp`, but the operator is not tied to a specific
-constitutive model or contact formulation.
+`DisplacementRegularization` adds a regularization term to one displacement component in
+the solid mechanics displacement equation. For vector-valued displacement variables, add
+one scalar kernel per component.
 
 !alert warning title=Second-derivative FE data required
 This kernel evaluates second derivatives of the trial and test functions. Use an FE
@@ -20,8 +20,8 @@ quadratic Lagrange elements. This is non-conforming for a standalone biharmonic 
 but the kernel is used as a regularization contribution rather than as a conforming
 biharmonic discretization.
 
-For variable $u$, test function $v$, coefficient $k$, and mesh dimension $d$, the
-supported options are
+For displacement component $u$, test function $v$, coefficient $k$, and mesh dimension
+$d$, the supported options are
 
 !equation
 R_i^{\mathrm{HuHu}} = \int_\Omega k \, u_{,jk} v_{i,jk} \, d\Omega ,
@@ -36,12 +36,13 @@ R_i^{\mathrm{HuHu-LuLu}} =
 \int_\Omega k \left( u_{,jk} v_{i,jk} - c_L \Delta u \Delta v_i \right) d\Omega .
 
 Here $u_{,jk}$ and $v_{i,jk}$ are Hessian components, $\Delta u$ and
-$\Delta v_i$ are Laplacians, and $c_L$ is [!param](/Kernels/FERegularization/lulu_factor).
-The names HuHu and LuLu follow terminology used for third-medium contact regularization,
-but the kernel is a general finite-element regularization operator.
+$\Delta v_i$ are Laplacians, and $c_L$ is [!param](/Kernels/DisplacementRegularization/lulu_factor).
+The names HuHu and LuLu follow terminology used for third-medium contact regularization
+[!cite](frederiksen2025improved,bluhm2021internal), but the kernel only contributes the
+regularization term and is not tied to contact-specific infrastructure.
 
-For [!param](/Kernels/FERegularization/regularization) set to `huhu_lulu`,
-[!param](/Kernels/FERegularization/lulu_factor) defaults to $1 / d$. Values larger
+For [!param](/Kernels/DisplacementRegularization/regularization) set to `huhu_lulu`,
+[!param](/Kernels/DisplacementRegularization/lulu_factor) defaults to $1 / d$. Values larger
 than $1 / d$ are accepted with a warning because they may cause negative strain-energy
 contributions.
 
@@ -55,13 +56,13 @@ component:
 ```text
 [Kernels]
   [regularize_x]
-    type = FERegularization
+    type = DisplacementRegularization
     variable = disp_x
     regularization = huhu_lulu
     coefficient = 1
   []
   [regularize_y]
-    type = FERegularization
+    type = DisplacementRegularization
     variable = disp_y
     regularization = huhu_lulu
     coefficient = 1
@@ -71,21 +72,12 @@ component:
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/fe_regularization/fe_regularization_default_factor.i block=Kernels
+!listing modules/solid_mechanics/test/tests/displacement_regularization/displacement_regularization_default_factor.i block=Kernels
 
-## References
+!syntax parameters /Kernels/DisplacementRegularization
 
-- Frederiksen, A. H., Dalklint, A., Sigmund, O., and Poulios, K. (2025). "Improved
-  third medium formulation for 3D topology optimization with contact." Computer Methods in
-  Applied Mechanics and Engineering, 436, Article 117595.
-  [doi:10.1016/j.cma.2024.117595](https://doi.org/10.1016/j.cma.2024.117595)
-- Bluhm, G. L., Sigmund, O., and Poulios, K. (2021). "Internal contact modeling for
-  finite strain topology optimization." Computational Mechanics, 67, 1099-1114.
-  [doi:10.1007/s00466-021-01974-x](https://doi.org/10.1007/s00466-021-01974-x)
-- [Third medium contact method](https://en.wikipedia.org/wiki/Third_medium_contact_method)
+!syntax inputs /Kernels/DisplacementRegularization
 
-!syntax parameters /Kernels/FERegularization
+!syntax children /Kernels/DisplacementRegularization
 
-!syntax inputs /Kernels/FERegularization
-
-!syntax children /Kernels/FERegularization
+!bibtex bibliography

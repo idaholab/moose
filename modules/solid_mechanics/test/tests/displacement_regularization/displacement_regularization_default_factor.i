@@ -1,6 +1,4 @@
-reg_kernel = ADFERegularization
-regularization_type = huhu_lulu
-forcing_scale = 0.5
+reg_kernel = DisplacementRegularization
 
 [GlobalParams]
   symbol_names = 'c'
@@ -31,13 +29,13 @@ forcing_scale = 0.5
   # diffusion term keeps this test problem well posed while the regularization block
   # exercises the HuHu/LuLu residual and Jacobian contributions.
   [diffusion]
-    type = ADDiffusion
+    type = Diffusion
     variable = u
   []
   [regularization]
     type = ${reg_kernel}
     variable = u
-    regularization = ${regularization_type}
+    regularization = huhu_lulu
     coefficient = 1
   []
   [body_force]
@@ -64,7 +62,7 @@ forcing_scale = 0.5
   []
   [forcing_func]
     type = ParsedFunction
-    expression = '${forcing_scale} * 16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
+    expression = '0.5 * 16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
   []
 []
 

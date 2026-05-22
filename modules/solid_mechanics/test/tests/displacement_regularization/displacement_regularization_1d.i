@@ -1,4 +1,4 @@
-reg_kernel = FERegularization
+reg_kernel = DisplacementRegularization
 
 [Mesh]
   type = GeneratedMesh

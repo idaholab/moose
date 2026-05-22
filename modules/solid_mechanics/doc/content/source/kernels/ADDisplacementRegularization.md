@@ -1,12 +1,12 @@
-# ADFERegularization
+# ADDisplacementRegularization
 
-!syntax description /Kernels/ADFERegularization
+!syntax description /Kernels/ADDisplacementRegularization
 
 ## Description
 
-`ADFERegularization` is the automatic-differentiation version of
-[FERegularization.md]. It supports the same HuHu, LuLu, and HuHu-LuLu finite-element
-regularization options and computes Jacobian contributions through MOOSE's AD
+`ADDisplacementRegularization` is the automatic-differentiation version of
+[DisplacementRegularization.md]. It supports the same HuHu, LuLu, and HuHu-LuLu
+displacement regularization options and computes Jacobian contributions through MOOSE's AD
 infrastructure.
 
 !alert warning title=Second-derivative FE data required
@@ -21,7 +21,7 @@ quadratic Lagrange elements. This is non-conforming for a standalone biharmonic 
 but the kernel is used as a regularization contribution rather than as a conforming
 biharmonic discretization.
 
-For `regularization = huhu_lulu`, [!param](/Kernels/ADFERegularization/lulu_factor)
+For `regularization = huhu_lulu`, [!param](/Kernels/ADDisplacementRegularization/lulu_factor)
 defaults to $1 / d$, where $d$ is the mesh dimension. Values larger than $1 / d$
 are accepted with a warning because they may cause negative strain-energy contributions.
 
@@ -31,10 +31,10 @@ problems.
 
 ## Example Input File Syntax
 
-!listing modules/solid_mechanics/test/tests/fe_regularization/ad_fe_regularization_default_factor.i block=Kernels
+!listing modules/solid_mechanics/test/tests/displacement_regularization/ad_displacement_regularization_default_factor.i block=Kernels
 
-!syntax parameters /Kernels/ADFERegularization
+!syntax parameters /Kernels/ADDisplacementRegularization
 
-!syntax inputs /Kernels/ADFERegularization
+!syntax inputs /Kernels/ADDisplacementRegularization
 
-!syntax children /Kernels/ADFERegularization
+!syntax children /Kernels/ADDisplacementRegularization

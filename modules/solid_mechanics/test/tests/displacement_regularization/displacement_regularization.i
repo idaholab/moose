@@ -1,4 +1,4 @@
-reg_kernel = FERegularization
+reg_kernel = DisplacementRegularization
 regularization_type = huhu
 forcing_scale = 1
 lulu_factor = 0.5

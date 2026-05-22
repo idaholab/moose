@@ -9,20 +9,30 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
-enum class FERegularizationType
+enum class DisplacementRegularizationType
 {
   Huhu,
   Lulu,
   HuhuLulu
 };
 
-namespace FERegularizationTools
+namespace DisplacementRegularizationTools
 {
 MooseEnum regularizationType();
-FERegularizationType regularizationType(const MooseEnum & regularization);
+DisplacementRegularizationType regularizationType(const MooseEnum & regularization);
 Real defaultLuluFactor(const unsigned int dim);
+
+template <bool is_ad, typename Variable>
+const GenericVariableSecond<is_ad> &
+secondSln(Variable & var)
+{
+  if constexpr (is_ad)
+    return var.adSecondSln();
+  else
+    return var.secondSln();
+}
 
 /// Hessian-Hessian contraction: \sum_{j,k} u_{,jk} v_{,jk}.
 template <typename SolutionSecond, typename TestSecond>
@@ -57,43 +67,44 @@ auto
 regularization(const SolutionSecond & second_u,
                const TestSecond & second_test,
                const unsigned int dim,
-               const FERegularizationType type,
+               const DisplacementRegularizationType type,
                const Real lulu_factor)
 {
   switch (type)
   {
-    case FERegularizationType::Huhu:
+    case DisplacementRegularizationType::Huhu:
       return huhu(second_u, second_test, dim);
-    case FERegularizationType::Lulu:
+    case DisplacementRegularizationType::Lulu:
       return lulu(second_u, second_test, dim);
-    case FERegularizationType::HuhuLulu:
+    case DisplacementRegularizationType::HuhuLulu:
       // HuHu-LuLu keeps the Hessian contraction and subtracts a scaled Laplacian contraction.
       return huhu(second_u, second_test, dim) - lulu_factor * lulu(second_u, second_test, dim);
   }
 
-  mooseError("Unknown FE regularization type.");
+  mooseError("Unknown displacement regularization type.");
 }
 }
 
 /**
- * Adds FE regularization terms based on Hessian and Laplacian contractions of one scalar field.
+ * Adds displacement regularization terms based on Hessian and Laplacian contractions of one scalar
+ * displacement component.
  *
  * Vector-valued mechanics variables are regularized component-wise by adding one kernel per
  * displacement component.
  */
-class FERegularization : public Kernel
+template <bool is_ad>
+class DisplacementRegularizationTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  FERegularization(const InputParameters & parameters);
+  DisplacementRegularizationTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Selected regularization contraction.
-  const FERegularizationType _regularization_type;
+  const DisplacementRegularizationType _regularization_type;
   /// User coefficient multiplying the selected regularization term.
   const Real _coefficient;
   /// Mesh dimension used in Hessian and Laplacian contractions.
@@ -101,9 +112,25 @@ protected:
   /// LuLu correction factor used only by HuHu-LuLu.
   const Real _lulu_factor;
   /// Second derivatives of the nonlinear variable.
-  const VariableSecond & _second_u;
-  /// Second derivatives of trial functions.
-  const VariablePhiSecond & _second_phi;
+  const GenericVariableSecond<is_ad> & _second_u;
   /// Second derivatives of test functions.
   const VariableTestSecond & _second_test;
+
+  usingGenericKernelMembers;
 };
+
+class DisplacementRegularization : public DisplacementRegularizationTempl<false>
+{
+public:
+  static InputParameters validParams();
+
+  DisplacementRegularization(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpJacobian() override;
+
+  /// Second derivatives of trial functions.
+  const VariablePhiSecond & _second_phi;
+};
+
+typedef DisplacementRegularizationTempl<true> ADDisplacementRegularization;
