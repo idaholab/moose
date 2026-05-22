@@ -129,9 +129,6 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
     const Real A1prime = (std::sqrt(3.0) / 4.0) * Utility::pow<2>(pitch) -
                          libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
 
-    // wire-wrapped subchannel flow area
-    const Real A1 = A1prime - libMesh::pi * Utility::pow<2>(wire_diameter) / 8.0 / std::cos(theta);
-
     // empirical constant for mixing parameter
     Real Cm = 0.0;
     Real CmL_constant = 0.0;
@@ -167,7 +164,7 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
     }
 
     // mixing parameter
-    beta = Cm * std::sqrt(Ar1 / A1) * std::tan(theta);
+    beta = Cm * std::sqrt(Ar1 / A1prime) * std::tan(theta);
   }
   return beta;
 }
@@ -248,8 +245,6 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     const Real A2prime =
         pitch * (w - pin_diameter / 2.0) - libMesh::pi * Utility::pow<2>(pin_diameter) / 8.0;
 
-    const Real A2 = A2prime - libMesh::pi * Utility::pow<2>(wire_diameter) / 8.0 / std::cos(theta);
-
     // empirical constant for mixing parameter
     Real Cs = 0.0;
     Real CsL_constant = 0.0;
@@ -285,7 +280,7 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     }
 
     // Sweep-flow coefficient used only by the peripheral enthalpy calculation.
-    beta = Cs * std::sqrt(Ar2 / A2) * std::tan(theta);
+    beta = Cs * std::sqrt(Ar2 / A2prime) * std::tan(theta);
   }
 
   return beta;
