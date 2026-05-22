@@ -827,7 +827,7 @@ public:
    */
   virtual void
   addDistribution(const std::string & type, const std::string & name, InputParameters & parameters);
-  virtual bool hasDistribution(const std::string & name);
+  virtual bool hasDistribution(const std::string & name) const;
   virtual Distribution & getDistribution(const std::string & name);
 
   /**

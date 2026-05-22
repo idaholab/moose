@@ -1843,7 +1843,7 @@ MooseServer::gatherExtensionResponses(wasp::DataArray & extensionResponses,
 }
 
 bool
-MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character)
+MooseServer::gatherPlottingResponses(wasp::DataArray & plotting_responses, int line, int character)
 {
   // return without adding any plot response objects if parser root is null
   auto root_ptr = queryRoot();
@@ -1877,17 +1877,17 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int li
 
   // check problem to build function plot if request is from function block
   if (problem->hasFunction(object_name))
-    buildFuncPlotResponse(plottingResponses, *problem, object_name, object_type);
+    buildFuncPlotResponse(plotting_responses, *problem, object_name, object_type);
 
   // check problem to build PDF and CDF plots if request is in distribution
   else if (problem->hasDistribution(object_name))
-    buildDistPlotResponses(plottingResponses, *problem, object_name, object_type);
+    buildDistPlotResponses(plotting_responses, *problem, object_name, object_type);
 
   return true;
 }
 
 void
-MooseServer::buildFuncPlotResponse(wasp::DataArray & plottingResponses,
+MooseServer::buildFuncPlotResponse(wasp::DataArray & plotting_responses,
                                    FEProblemBase & problem,
                                    const std::string & object_name,
                                    const std::string & object_type)
@@ -1915,11 +1915,11 @@ MooseServer::buildFuncPlotResponse(wasp::DataArray & plottingResponses,
   std::string y_axis_label = "ordinate values";
   wasp::CustomPlot plot_object;
   buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
-  plottingResponses.push_back(wasp::serializeCustomPlot(plot_object));
+  plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
 }
 
 void
-MooseServer::buildDistPlotResponses(wasp::DataArray & plottingResponses,
+MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
                                     FEProblemBase & problem,
                                     const std::string & object_name,
                                     const std::string & object_type)
@@ -1961,7 +1961,7 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plottingResponses,
     std::string y_axis_label = dist_type + " values";
     wasp::CustomPlot plot_object;
     buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
-    plottingResponses.push_back(wasp::serializeCustomPlot(plot_object));
+    plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
   };
 
   // build CustomPlot object for PDF values, serialize, and add to response

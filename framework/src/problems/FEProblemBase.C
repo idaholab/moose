@@ -2825,7 +2825,7 @@ FEProblemBase::addDistribution(const std::string & type,
 }
 
 bool
-FEProblemBase::hasDistribution(const std::string & name)
+FEProblemBase::hasDistribution(const std::string & name) const
 {
   std::vector<Distribution *> objs;
   theWarehouse()

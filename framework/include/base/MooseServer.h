@@ -366,33 +366,33 @@ private:
 
   /**
    * Build CustomPlot extension responses when method name is plotting.
-   * @param plottingResponses - array to fill with CustomPlot responses
+   * @param plotting_responses - array for CustomPlot responses to fill
    * @param line - zero-based line to use for logic of custom extension
    * @param character - zero-based column for logic of custom extension
    * @return - true if request successfully handled with response built
    */
-  bool gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character);
+  bool gatherPlottingResponses(wasp::DataArray & plotting_responses, int line, int character);
 
   /**
    * Gather function data, build CustomPlot object, and add to responses.
-   * @param plottingResponses - array for filling with CustomPlot objects
+   * @param plotting_responses - array to be filled by CustomPlot objects
    * @param problem - problem to query warehouses when building plot data
    * @param object_name - name of request object to use for problem query
    * @param object_type - type of request object to use in title for plot
    */
-  void buildFuncPlotResponse(wasp::DataArray & plottingResponses,
+  void buildFuncPlotResponse(wasp::DataArray & plotting_responses,
                              FEProblemBase & problem,
                              const std::string & object_name,
                              const std::string & object_type);
 
   /**
    * Compute PDF and CDF, build CustomPlot objects, and add to responses.
-   * @param plottingResponses - array for filling with CustomPlot objects
+   * @param plotting_responses - array to be filled by CustomPlot objects
    * @param problem - problem to query warehouses when building plot data
    * @param object_name - name of request object to use for problem query
    * @param object_type - type of request object to use in title for plot
    */
-  void buildDistPlotResponses(wasp::DataArray & plottingResponses,
+  void buildDistPlotResponses(wasp::DataArray & plotting_responses,
                               FEProblemBase & problem,
                               const std::string & object_name,
                               const std::string & object_type);
