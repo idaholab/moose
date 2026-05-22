@@ -19,8 +19,7 @@ MFEMVectorMagnitudeCoefficient::MFEMVectorMagnitudeCoefficient(mfem::VectorCoeff
 void
 MFEMVectorMagnitudeCoefficient::SetTime(mfem::real_t t)
 {
-  if (_vec_coef)
-    _vec_coef->SetTime(t);
+  _vec_coef->SetTime(t);
   this->mfem::Coefficient::SetTime(t);
 }
 
