@@ -182,9 +182,9 @@ void
 MortarInterfaceWarehouse::meshChanged()
 {
   for (auto & mortar_pair : _mortar_interfaces)
-    mortar_pair.second->meshChanged();
+    mortar_pair.second.amg->meshChanged();
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    mortar_pair.second->meshChanged();
+    mortar_pair.second.amg->meshChanged();
   update();
 }
 
