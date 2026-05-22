@@ -130,11 +130,6 @@ public:
     return false;
   }
 
-  /**
-   * Return the parallel communicator
-   */
-  libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
-
 protected:
   // The following methods are the basic methods that should be utilized my most application
   // developers that are creating a custom Sampler.
@@ -241,9 +236,6 @@ protected:
   const dof_id_type _min_procs_per_row;
   /// The maximum number of processors that are associated with a set of rows
   const dof_id_type _max_procs_per_row;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator _local_comm;
 
 private:
   ///@{

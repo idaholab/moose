@@ -122,9 +122,6 @@ protected:
   /// Current output values
   const std::vector<Real> * _output_value;
 
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator & _local_comm;
-
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
 };

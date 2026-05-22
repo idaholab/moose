@@ -31,8 +31,7 @@ BiFidelityActiveLearningGPDecision::BiFidelityActiveLearningGPDecision(
     _sampler(getSampler("sampler")),
     _outputs_lf(getReporterValue<std::vector<Real>>("outputs_lf", REPORTER_MODE_DISTRIBUTED)),
     _lf_corrected(declareValue<std::vector<Real>>("lf_corrected",
-                                                  std::vector<Real>(sampler().getNumberOfRows()))),
-    _local_comm(_sampler.getLocalComm())
+                                                  std::vector<Real>(sampler().getNumberOfRows())))
 {
 }
 
@@ -55,8 +54,11 @@ BiFidelityActiveLearningGPDecision::facilitateDecision()
 void
 BiFidelityActiveLearningGPDecision::preNeedSample()
 {
-  _outputs_lf_batch = _outputs_lf;
-  _local_comm.allgather(_outputs_lf_batch);
+  mooseAssert(_outputs_lf.size() >= _sampler.getNumberOfLocalRows(), "Incorrectly sized outputs.");
+  _outputs_lf_batch.assign(_outputs_lf.begin(),
+                           _outputs_lf.begin() + _sampler.getNumberOfLocalRows());
+  _communicator.allgather(_outputs_lf_batch);
+
   // Accumulate inputs and outputs if we previously decided we needed a sample
   if (_t_step > 1 && _decision)
   {

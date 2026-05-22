@@ -127,9 +127,6 @@ Sampler::reinit()
   _local_row_begin = _rank_config.first.first_local_sim_index;
   _local_row_end = _local_row_begin + _n_local_rows;
 
-  // Create communicator that only has processors with rows
-  _communicator.split(_n_local_rows > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
-
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
 }
