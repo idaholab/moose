@@ -117,7 +117,7 @@
     type = MFEMParaViewDataCollection
     file_base = OutputData/MagnetostaticSimplified
     vtk_format = ASCII
-    scalar_coefficients = 'electric_potential b_field_mag b_field_div'
+    scalar_coefficients = 'electric_potential a_field_curl_mag electric_potential_grad_mag b_field_mag b_field_div'
     vector_coefficients = 'a_field_curl electric_potential_grad'
   []
 []

@@ -68,8 +68,13 @@ MFEMVariable::declareCoefficients()
         name(), getGridFunction().get());
     // If gradient is well-defined on this variable, create auxiliary coefficient
     if (cont_type == mfem::FiniteElementCollection::CONTINUOUS)
+    {
       getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
           name() + "_grad", getGridFunction().get());
+      getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
+          name() + "_grad_mag",
+          getMFEMProblem().getCoefficients().getVectorCoefficient(name() + "_grad"));
+    }
   }
   else
   {
@@ -80,8 +85,13 @@ MFEMVariable::declareCoefficients()
     // If curl is well-defined on this variable, create auxiliary coefficient
     if (cont_type == mfem::FiniteElementCollection::TANGENTIAL ||
         cont_type == mfem::FiniteElementCollection::CONTINUOUS)
+    {
       getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
           name() + "_curl", getGridFunction().get());
+      getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
+          name() + "_curl_mag",
+          getMFEMProblem().getCoefficients().getVectorCoefficient(name() + "_curl"));
+    }
     // If divergence is well-defined on this variable, create auxiliary coefficient
     if (cont_type == mfem::FiniteElementCollection::NORMAL ||
         cont_type == mfem::FiniteElementCollection::CONTINUOUS)
