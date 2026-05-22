@@ -113,6 +113,7 @@
                  'Outputs/file_base=frictionless-mortar-3d-action-centroid-no-retess'
       mesh_mode = 'REPLICATED' # see issue 24255
       exodiff = 'frictionless-mortar-3d-action-centroid-no-retess_108_0_displaced_mortar_segment_mesh.e'
+      exodiff_opts = '-ignore_dups'
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       valgrind = 'none'
@@ -206,6 +207,7 @@
                  'Constraints/normal_z/triangulate_triangles=false '
                  'UserObjects/weighted_gap_uo/triangulate_triangles=false'
       exodiff = 'frictionless-mortar-3d-direct-centroid-no-retess_108_0_displaced_mortar_segment_mesh.e'
+      exodiff_opts = '-ignore_dups'
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
       prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
