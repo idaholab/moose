@@ -67,9 +67,9 @@ protected:
   /// Curve mesh to extrude along
   std::unique_ptr<MeshBase> & _extrusion_curve;
   /// Extrusion direction to follow at the start (first layer) of the extrusion
-  const libMesh::Point _start_extrusion_direction;
+  const RealVectorValue _start_extrusion_direction;
   /// Extrusion direction for the final layer of the extrusion
-  const libMesh::Point _end_extrusion_direction;
+  const RealVectorValue _end_extrusion_direction;
   /// Whether we are extruding along a curve
   bool _extrude_along_curve;
 

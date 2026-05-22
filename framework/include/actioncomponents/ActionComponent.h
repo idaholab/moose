@@ -36,6 +36,15 @@ public:
   /// - this could be a mesh generator in the [Mesh] block
   /// - or a mesh generator created by the component
   const std::vector<MeshGeneratorName> & meshGeneratorNames() const { return _mg_names; }
+  /// Return the name of the final mesh generator that contains this component
+  /// This may not be one of the mesh generators of the component. If the component's mesh is combined
+  /// with or stitched to another component, the combiner/stitcher would be the final mesh generator
+  MeshGeneratorName getCurrentTopLevelMeshGeneratorName() const { return _top_mg_name; }
+  /// Set the name of the final mesh generator that contains this component
+  void setCurrentTopLevelMeshGeneratorName(const MeshGeneratorName & mg_name)
+  {
+    _top_mg_name = mg_name;
+  }
 
   /// Returns the subdomains for the component mesh, if any
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -54,6 +63,15 @@ public:
 
   /// Return the dimension of the component
   unsigned int dimension() const { return _dimension; }
+
+  /// Merge another component's group into this component's group. The group is shared
+  /// (via a shared_ptr) by every component in it, so a single call connects both sides.
+  void addConnectedComponent(ActionComponent & component);
+  /// Get all components connected to the component group of this component (including itself)
+  const std::set<ActionComponent *> & getConnectedComponents() const
+  {
+    return *_connected_components;
+  }
 
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
@@ -101,6 +119,8 @@ protected:
 
   /// Name(s) of the final mesh generator(s) creating the mesh for the component
   std::vector<MeshGeneratorName> _mg_names;
+  /// Name of the top-most mesh generator in the hierarchy of MGs on top of the ones generating this component
+  MeshGeneratorName _top_mg_name;
 
   /// Names of the blocks the component is comprised of
   std::vector<SubdomainName> _blocks;
@@ -113,4 +133,8 @@ protected:
 
   /// Manually keeps track of the tasks required by each component as tasks cannot be inherited
   std::set<std::string> _required_tasks;
+
+  /// Group of components that share a common mesh after junctioning. The shared_ptr is shared by
+  /// every member of the group so connectivity updates are visible from any member.
+  std::shared_ptr<std::set<ActionComponent *>> _connected_components;
 };

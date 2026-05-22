@@ -117,6 +117,7 @@ libmesh_static  := $(shell $(libmesh_LIBTOOL) --config | grep build_old_libs | c
 
 #
 # libPNG Definition
+# Note: MOOSE_HAVE_LIBPNG will only be set if you run ./configure
 #
 png_LIB         :=
 # There is a linking problem where we have undefined symbols in the png library on Linux

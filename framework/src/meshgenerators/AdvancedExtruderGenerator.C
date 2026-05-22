@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
 #include "MathUtils.h"
+#include "GeometryUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/function_base.h"
@@ -20,6 +21,7 @@
 #include "libmesh/cell_hex8.h"
 #include "libmesh/cell_hex20.h"
 #include "libmesh/cell_hex27.h"
+#include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
@@ -29,6 +31,7 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_tri6.h"
 #include "libmesh/face_tri7.h"
+#include "libmesh/face_c0polygon.h"
 #include "libmesh/libmesh_logging.h"
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_modification.h"
@@ -104,12 +107,12 @@ AdvancedExtruderGenerator::validParams()
       "extrusion_curve",
       "Name of the mesh generator providing the line mesh curve to be extruded along. The "
       "extrusion path follows the node order in the line mesh");
-  params.addParam<Point>(
+  params.addParam<RealVectorValue>(
       "start_extrusion_direction",
       "A vector that points in the starting direction for extruding along a curve. This vector "
       "should be the tangent vector at the FIRST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
-  params.addParam<Point>(
+  params.addParam<RealVectorValue>(
       "end_extrusion_direction",
       "A vector that points in the ending direction for extruding along a curve. This vector "
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
@@ -178,10 +181,10 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
     _extrusion_curve(getMesh("extrusion_curve", true)),
     _start_extrusion_direction(isParamValid("start_extrusion_direction")
-                                   ? getParam<Point>("start_extrusion_direction").unit()
+                                   ? getParam<RealVectorValue>("start_extrusion_direction").unit()
                                    : Point(0, 0, 0)),
     _end_extrusion_direction(isParamValid("end_extrusion_direction")
-                                 ? getParam<Point>("end_extrusion_direction").unit()
+                                 ? getParam<RealVectorValue>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
     _has_top_boundary(isParamValid("top_boundary")),
@@ -480,7 +483,20 @@ AdvancedExtruderGenerator::generate()
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
+  {
+    input->delete_remote_elements();
+    // This should be a no-op, and yet, it's needed for two THM tests
     mesh->delete_remote_elements();
+  }
+
+  if (input->n_nodes() != input->max_node_id())
+    input->renumber_nodes_and_elements();
+
+  if (input->n_nodes() != input->max_node_id())
+    mooseError(
+        "You must allow renumbering, because the extruded mesh should be contiguously numbered. "
+        "Alternatively, you can use a separate mesh generator (MeshRepairGenerator with the "
+        "renumber_contiguously parameter for example) to renumber the nodes contiguously.");
 
   unsigned int total_num_layers;
   unsigned int total_num_elevations;
@@ -500,8 +516,10 @@ AdvancedExtruderGenerator::generate()
 
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
   unique_id_type orig_unique_ids = input->parallel_max_unique_id();
+  bool has_poly_midnodes = false;
 #endif
 
+  bool has_polygons = false;
   unsigned int order = 1;
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -563,8 +581,9 @@ AdvancedExtruderGenerator::generate()
     if (_extrude_along_curve)
       reference_direction =
           _start_extrusion_direction.norm_sq() > 0
-              ? RealVectorValue(_start_extrusion_direction)
-              : (*(extrusion_curve->node_ptr(1)) - *(extrusion_curve->node_ptr(0))).unit();
+              ? _start_extrusion_direction
+              : RealVectorValue(
+                    (*(extrusion_curve->node_ptr(1)) - *(extrusion_curve->node_ptr(0))).unit());
     else
       reference_direction = _direction;
 
@@ -613,6 +632,8 @@ AdvancedExtruderGenerator::generate()
 
       // In first layer we also add the base nodes, hence the "plus one"
       unsigned int num_heights_at_elevation = order * num_layers + (e == 0 ? 1 : 0);
+      // Keep track of the plane normal to the extrusion
+      RealVectorValue prev_intersecting_plane_normal_vec = _start_extrusion_direction;
 
       // k is the element layer ordering within each elevation layer
       for (const auto k : make_range(num_heights_at_elevation))
@@ -636,13 +657,13 @@ AdvancedExtruderGenerator::generate()
             // previous point in extrusion curve
             const Node * P_prev = extrusion_curve->node_ptr(k - 1);
 
-            // Convenience vectors
-            RealVectorValue a_vec = *P_current - *P_prev;
-            RealVectorValue b_vec = orig_node_to_previous + *node - *P_prev;
-            Real prev_node_distance_to_spline = b_vec.norm();
+            // Quantities for the previous position of the extruded node
+            const auto old_node = orig_node_to_previous + *node;
+            RealVectorValue b_vec = old_node - *P_prev;
+            Real node_distance_to_curve = b_vec.norm();
 
             // Node does not lie exactly on the extrusion curve we are following
-            if (prev_node_distance_to_spline > libMesh::TOLERANCE)
+            if (node_distance_to_curve > libMesh::TOLERANCE)
             {
               // normal vector to the plane to extrude the point into
               RealVectorValue intersecting_plane_normal_vec;
@@ -651,7 +672,8 @@ AdvancedExtruderGenerator::generate()
               if (k == 1)
               {
                 const auto P_next = extrusion_curve->node_ptr(k + 1);
-                intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+                intersecting_plane_normal_vec =
+                    0.5 * (_start_extrusion_direction + (*P_next - *P_current).unit());
               }
               else if (k < order * num_layers - 1)
               {
@@ -660,26 +682,46 @@ AdvancedExtruderGenerator::generate()
                 intersecting_plane_normal_vec = *P_next - *P_prev;
               }
               else
+              {
                 intersecting_plane_normal_vec = (_end_extrusion_direction.norm_sq() > 0)
-                                                    ? RealVectorValue(_end_extrusion_direction)
-                                                    : (*P_current - *P_prev);
+                                                    ? _end_extrusion_direction
+                                                    : RealVectorValue(*P_current - *P_prev);
+              }
               intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm();
 
-              // normal vector to the current plane
-              RealVectorValue current_plane_normal_vec = a_vec.cross(b_vec);
-              current_plane_normal_vec /= current_plane_normal_vec.norm();
+              Point new_node_point;
+              // If the extrusion direction and the previous plane normal are aligned,
+              // we can't define a rotation axis. We simply translate the points
+              if (MooseUtils::absoluteFuzzyEqual(
+                      prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec)
+                          .norm_sq(),
+                      0))
+                new_node_point = old_node + *P_current - *P_prev;
+              // We use a rotation from the previous extrusion plane normal to the current one
+              // We have tried in the past:
+              // - assuming (P_prev, P_current, old_node, current_node) are coplanar
+              // - assuming (P_prev, P_current) and (old_node, current_node) are parallel
+              // Both result in a slight deformation of the shape during extrusion.
+              else
+              {
+                auto axis = prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec);
+                const auto sin_th = axis.norm();
+                axis /= sin_th;
+                Real cos_th = prev_intersecting_plane_normal_vec * intersecting_plane_normal_vec;
+                // Rodrigues formula for rotation
+                const auto new_v = cos_th * b_vec + axis.cross(b_vec) * sin_th +
+                                   axis * (axis * b_vec) * (1. - cos_th);
 
-              // calculate the line of intersection's slope
-              RealVectorValue dir_along_line =
-                  current_plane_normal_vec.cross(intersecting_plane_normal_vec);
-              dir_along_line /= dir_along_line.norm();
+                mooseAssert(MooseUtils::absoluteFuzzyEqual(new_v.norm(), b_vec.norm()),
+                            "Radial extent be conserved");
+                new_node_point = *P_current + new_v;
+              }
 
-              libMesh::Point new_node_point =
-                  *P_current + prev_node_distance_to_spline * dir_along_line;
               orig_node_to_current = new_node_point - *node;
 
               step_size = (orig_node_to_current - orig_node_to_previous).norm();
               step_size_at_axis = (*P_current - *P_prev).norm();
+              prev_intersecting_plane_normal_vec = intersecting_plane_normal_vec;
             }
             // Point is on the axis of the line
             else
@@ -812,9 +854,8 @@ AdvancedExtruderGenerator::generate()
         const unique_id_type uid = (current_node_layer == 0)
                                        ? node->unique_id()
                                        : orig_unique_ids +
-                                             (current_node_layer - 1) * (orig_nodes + orig_elem) +
+                                             (current_node_layer - 1) * (orig_elem + orig_nodes) +
                                              node->id();
-
         new_node->set_unique_id(uid);
 #endif
 
@@ -846,6 +887,9 @@ AdvancedExtruderGenerator::generate()
   // some processors may have underestimated the next_side_id; let's
   // fix that.
   input->comm().max(next_side_id);
+
+  // Map to keep track of polygon sides of polygonal prisms
+  std::map<std::array<unsigned int, 3>, std::shared_ptr<libMesh::Polygon>> poly_extruded_sides;
 
   // Build the extruded elements
   for (const auto & elem : input->element_ptr_range())
@@ -1328,6 +1372,91 @@ AdvancedExtruderGenerator::generate()
 
             break;
           }
+          case libMesh::C0POLYGON:
+          {
+            has_polygons = true;
+            const auto num_sides = elem->n_sides();
+            std::vector<std::shared_ptr<libMesh::Polygon>> sides;
+            sides.reserve(2 + num_sides);
+            if (2 * elem->n_nodes() > libMesh::C0Polygon::max_n_nodes)
+              mooseError("Too many nodes in polygons to extrude it. Max number of the prism "
+                         "polyhedral nodes after extrusion: " +
+                         std::to_string(libMesh::C0Polygon::max_n_nodes));
+            // Make a copy of the original element to use as a side
+            auto new_ptr = std::make_shared<libMesh::C0Polygon>(num_sides);
+            for (const auto node_i : make_range(elem->n_nodes()))
+            {
+              // This one will be oriented outwards, it should be OK though, polyhedron code does
+              // not mind
+              new_ptr->set_node(
+                  node_i,
+                  mesh->node_ptr(elem->node_ptr(node_i)->id() + (current_layer * orig_nodes)));
+            }
+            sides.push_back(new_ptr);
+            // Form the next horizontal side
+            auto translated_side = std::make_shared<libMesh::C0Polygon>(num_sides);
+            for (const auto node_i : make_range(elem->n_nodes()))
+              translated_side->set_node(node_i,
+                                        mesh->node_ptr(elem->node_ptr(node_i)->id() +
+                                                       ((current_layer + 1) * orig_nodes)));
+            sides.push_back(translated_side);
+
+            // Form the vertical sides
+            for (const auto side_i : make_range(num_sides))
+            {
+              // If the side already exists, use that
+              std::array<unsigned int, 3> side_key = {
+                  current_layer,
+                  static_cast<unsigned int>(
+                      std::min(elem->node_ptr(side_i)->id(),
+                               elem->node_ptr((side_i + 1) % num_sides)->id())),
+                  static_cast<unsigned int>(
+                      std::max(elem->node_ptr(side_i)->id(),
+                               elem->node_ptr((side_i + 1) % num_sides)->id()))};
+              if (poly_extruded_sides.count(side_key))
+              {
+                sides.push_back(poly_extruded_sides[side_key]);
+                continue;
+              }
+
+              // They are all quads, but constructor expects polygons
+              auto vert_side = std::make_shared<libMesh::C0Polygon>(4);
+              vert_side->set_node(
+                  0, mesh->node_ptr(elem->node_ptr(side_i)->id() + (current_layer * orig_nodes)));
+              vert_side->set_node(1,
+                                  mesh->node_ptr(elem->node_ptr((side_i + 1) % num_sides)->id() +
+                                                 (current_layer * orig_nodes)));
+              vert_side->set_node(2,
+                                  mesh->node_ptr(elem->node_ptr((side_i + 1) % num_sides)->id() +
+                                                 ((current_layer + 1) * orig_nodes)));
+              vert_side->set_node(3,
+                                  mesh->node_ptr(elem->node_ptr(side_i)->id() +
+                                                 ((current_layer + 1) * orig_nodes)));
+              sides.push_back(vert_side);
+
+              poly_extruded_sides.insert(std::make_pair(side_key, vert_side));
+            }
+            mooseAssert(sides.size() == 2 + num_sides, "Unexpected size of side vector");
+
+            // Create the element from the sides, let libMesh figure out the orientation
+            std::unique_ptr<libMesh::Node> mid_elem_node;
+            new_elem = std::make_unique<libMesh::C0Polyhedron>(sides, mid_elem_node);
+            if (mid_elem_node)
+            {
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+              // Number it at the end for convenience
+              // use the element ID to be able to set in parallel
+              unsigned int total_new_node_layers = total_num_layers * order;
+              unsigned int last_uid = orig_unique_ids + (total_new_node_layers - 1) * orig_elem +
+                                      total_new_node_layers * orig_nodes + elem->unique_id();
+              mid_elem_node->set_unique_id(last_uid);
+              has_poly_midnodes = true;
+#endif
+              mesh->add_node(std::move(mid_elem_node));
+            }
+
+            break;
+          }
           default:
             mooseError("Extrusion is not implemented for element type " + Moose::stringify(etype));
         }
@@ -1342,7 +1471,7 @@ AdvancedExtruderGenerator::generate()
         const unique_id_type uid = (current_layer == 0)
                                        ? elem->unique_id()
                                        : orig_unique_ids +
-                                             (current_layer - 1) * (orig_nodes + orig_elem) +
+                                             (current_layer - 1) * (orig_elem + orig_nodes) +
                                              orig_nodes + elem->id();
 
         new_elem->set_unique_id(uid);
@@ -1489,12 +1618,18 @@ AdvancedExtruderGenerator::generate()
     }
   }
 
+  if (has_polygons && !input->is_serial())
+    mooseError("Distributed meshes are not supported when extruding polygons at this time.");
+
 #ifdef LIBMESH_ENABLE_UNIQUE_ID
   // Update the value of next_unique_id based on newly created nodes and elements
   // Note: Number of element layers is one less than number of node layers
   unsigned int total_new_node_layers = total_num_layers * order;
   unsigned int new_unique_ids = orig_unique_ids + (total_new_node_layers - 1) * orig_elem +
                                 total_new_node_layers * orig_nodes;
+  // Maximum case for the unique ids: all poly elements have a midnode
+  if (has_poly_midnodes)
+    new_unique_ids += orig_elem;
   mesh->set_next_unique_id(new_unique_ids);
 #endif
 

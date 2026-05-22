@@ -136,6 +136,16 @@ public:
     return *p;
   }
   template <class T>
+  T & getAction(const std::string & name)
+  {
+    return const_cast<T &>(static_cast<const ActionWarehouse *>(this)->getAction<T>(name));
+  }
+
+  /**
+   * Retrieve a Physics with its name and the desired type.
+   * @param name The action name.
+   */
+  template <class T>
   T * getPhysics(const std::string & name) const
   {
     auto physics = const_cast<T *>(&getAction<T>(name));

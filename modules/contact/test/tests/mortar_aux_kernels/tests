@@ -161,7 +161,7 @@
   []
   [block-dynamics-aux-fretting-wear-test-projection_angle]
     type = 'Exodiff'
-    exodiff = 'mortar_segment_mesh.e'
+    exodiff = 'block-dynamics-aux-fretting-wear-test-projection_angle_20_10_displaced_mortar_segment_mesh.e'
     input = 'block-dynamics-aux-fretting-wear-test-projection_angle.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4

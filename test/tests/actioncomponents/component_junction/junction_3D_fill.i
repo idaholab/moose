@@ -1,0 +1,53 @@
+[ActionComponents]
+  combine_component_meshes = false
+  [cyl1]
+    type = CylinderComponent
+    dimension = 3
+    length = 1
+    n_axial = 2
+    radius = 1
+    n_sectors = 2
+
+    # optional parameters
+    direction = '0 1 0'
+    position = '0 0 0'
+  []
+  [cyl2]
+    type = CylinderComponent
+    dimension = 3
+    length = 1
+    n_axial = 2
+    radius = 1
+    n_sectors = 2
+
+    # optional parameters
+    direction = '1 0 0'
+    position = '4 4 0'
+  []
+  [junction]
+    type = ComponentJunction
+    first_component = cyl1
+    second_component = cyl2
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
+    n_elem_normal = 4
+    junction_method = 'extrude_boundary'
+
+    verbose = true
+  []
+[]
+
+[Mesh]
+  [diag]
+    type = MeshDiagnosticsGenerator
+    input = junction_stitcher
+    examine_element_overlap = WARNING
+    examine_element_types = WARNING
+    examine_element_volumes = WARNING
+    examine_non_conformality = WARNING
+    examine_sidesets_orientation = WARNING
+    examine_non_matching_edges = WARNING
+    search_for_adaptivity_nonconformality = WARNING
+    check_local_jacobian = WARNING
+  []
+[]

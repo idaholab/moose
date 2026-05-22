@@ -89,13 +89,12 @@
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
     capabilities = 'ad_size>=150'
-    exodiff = 'mortar_segment_mesh.e'
+    exodiff = 'frictionless-mortar-3d_108_0_displaced_mortar_segment_mesh.e'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
                'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
                'Constraints/normal_z/debug_mesh=true UserObjects/weighted_gap_uo/debug_mesh=true'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
-    max_parallel = 1
     prereq = 'frictionless-mortar-3d'
   []
   [frictional-mortar-3d]

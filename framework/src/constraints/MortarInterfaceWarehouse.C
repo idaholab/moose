@@ -151,6 +151,16 @@ MortarInterfaceWarehouse::update()
 }
 
 void
+MortarInterfaceWarehouse::meshChanged()
+{
+  for (auto & mortar_pair : _mortar_interfaces)
+    mortar_pair.second->meshChanged();
+  for (auto & mortar_pair : _displaced_mortar_interfaces)
+    mortar_pair.second->meshChanged();
+  update();
+}
+
+void
 MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 {
   // Clear exiting data

@@ -23,6 +23,7 @@
 #include "libmesh/cell_tet4.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/cell_pyramid5.h"
+#include "libmesh/cell_c0polyhedron.h"
 
 using namespace libMesh;
 
@@ -214,6 +215,66 @@ pyramidElemSplitter(MeshBase & mesh,
     {
       elems_Tet4[i]->set_extra_integer(j, exist_extra_ids[j]);
     }
+}
+
+void
+polyhedronElemSplitter(MeshBase & mesh,
+                       const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                       const dof_id_type elem_id,
+                       std::vector<dof_id_type> & converted_elems_ids)
+{
+  auto elem = mesh.elem_ptr(elem_id);
+  // Build boundary information of the mesh
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  // Create a list of sidesets involving the element to be split
+  std::vector<std::vector<boundary_id_type>> elem_side_list;
+  elementBoundaryInfoCollector(bdry_side_list, elem_id, elem->n_sides(), elem_side_list);
+
+  const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
+  std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
+
+  // Record all the element extra integers of the original quad element
+  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    exist_extra_ids[j] = elem->get_extra_integer(j);
+
+  // Split the polygon using its tetrahedralization
+  const auto poly = dynamic_cast<C0Polyhedron *>(elem);
+  Node * v_avg_node = nullptr;
+  // Currently the only extra node ever use to tetrahedralize
+  if (dynamic_cast<C0Polyhedron *>(elem))
+    v_avg_node =
+        mesh.add_point(elem->vertex_average(), mesh.max_node_id() + elem_id, elem->processor_id());
+
+  std::vector<Elem *> elems_Tet4;
+  for (const auto tri_i : make_range(poly->n_subelements()))
+  {
+    const auto tri_indices = poly->subelement(tri_i);
+
+    auto new_elem = std::make_unique<Tet4>();
+    for (const auto i : make_range(4))
+      if (tri_indices[i] >= 0)
+        new_elem->set_node(i, const_cast<Node *>(elem->node_ptr(tri_indices[i])));
+      else
+        new_elem->set_node(i, v_avg_node);
+
+    new_elem->subdomain_id() = elem->subdomain_id();
+    elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
+    converted_elems_ids.push_back(elems_Tet4.back()->id());
+
+    // Get subelement to side map
+    const auto tet_face_indices = poly->subelement_sides_to_poly_sides(tri_i);
+
+    // Add the sides of the tets to the relevant boundaries
+    for (unsigned int j = 0; j < 4; j++)
+      if (tet_face_indices[j] < int(elem->n_sides()))
+        for (const auto & side_info : elem_side_list[tet_face_indices[j]])
+          boundary_info.add_side(elems_Tet4.back(), j, side_info);
+  }
+
+  // Retain element extra integers
+  for (const auto i : make_range(poly->n_subelements()))
+    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+      elems_Tet4[i]->set_extra_integer(j, exist_extra_ids[j]);
 }
 
 std::vector<unsigned int>
@@ -621,6 +682,14 @@ convert3DMeshToAllTet4(MeshBase & mesh,
                           elem_to_process.first,
                           elem_to_process.second ? converted_elems_ids_to_track
                                                  : converted_elems_ids_to_retain);
+        mesh.elem_ptr(elem_to_process.first)->subdomain_id() = block_id_to_remove;
+        break;
+      case ElemType::C0POLYHEDRON:
+        polyhedronElemSplitter(mesh,
+                               bdry_side_list,
+                               elem_to_process.first,
+                               elem_to_process.second ? converted_elems_ids_to_track
+                                                      : converted_elems_ids_to_retain);
         mesh.elem_ptr(elem_to_process.first)->subdomain_id() = block_id_to_remove;
         break;
       case ElemType::TET4:

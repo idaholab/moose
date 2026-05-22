@@ -85,4 +85,6 @@ ComponentMeshTransformHelper::addMeshGenerators()
         "TransformGenerator", name() + "_translated", params);
     _mg_names.push_back(name() + "_translated");
   }
+
+  setCurrentTopLevelMeshGeneratorName(_mg_names.back());
 }
