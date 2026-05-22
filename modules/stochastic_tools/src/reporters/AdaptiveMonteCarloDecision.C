@@ -47,7 +47,6 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
     _pss(dynamic_cast<const ParallelSubsetSimulation *>(&_sampler)),
     _check_step(std::numeric_limits<int>::max()),
-    _local_comm(_sampler.getLocalComm()),
     _gp_used(isParamValid("gp_decision")),
 #ifdef MOOSE_LIBTORCH_ENABLED
     _gp_training_samples(
@@ -161,10 +160,13 @@ AdaptiveMonteCarloDecision::execute()
     DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
 
     // Get the accepted samples outputs across all the procs from the previous step
-    _output_required = (_pss->getUseAbsoluteValue())
-                           ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value)
-                           : _output_value;
-    _local_comm.allgather(_output_required);
+    mooseAssert(_output_value.size() >= _sampler.getNumberOfLocalRows(),
+                "Incorrectly sized outputs.");
+    _output_required.assign(_output_value.begin(),
+                            _output_value.begin() + _sampler.getNumberOfLocalRows());
+    if (_pss->getUseAbsoluteValue())
+      _output_required = AdaptiveMonteCarloUtils::computeVectorABS(_output_required);
+    _communicator.allgather(_output_required);
 
     // These are the subsequent subsets which use Markov Chain Monte Carlo sampling scheme
     if (subset > 0)

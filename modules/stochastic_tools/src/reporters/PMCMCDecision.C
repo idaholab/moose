@@ -55,7 +55,6 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _output_value(isParamValid("output_value") ? &getReporterValue<std::vector<Real>>(
                                                      "output_value", REPORTER_MODE_DISTRIBUTED)
                                                : nullptr),
-    _local_comm(_sampler.getLocalComm()),
     _check_step(std::numeric_limits<int>::max())
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
@@ -168,8 +167,11 @@ PMCMCDecision::execute()
   DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
   if (!usingGP())
   {
-    (*_outputs_required) = *_output_value;
-    _local_comm.allgather((*_outputs_required));
+    mooseAssert(_output_value->size() >= _sampler.getNumberOfLocalRows(),
+                "Incorrectly sized outputs.");
+    _outputs_required->assign(_output_value->begin(),
+                              _output_value->begin() + _sampler.getNumberOfLocalRows());
+    _communicator.allgather((*_outputs_required));
   }
 
   // Compute the evidence and transitimkon vectors
