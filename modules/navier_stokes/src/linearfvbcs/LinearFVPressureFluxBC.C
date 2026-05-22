@@ -89,8 +89,7 @@ LinearFVPressureFluxBC::computeBoundaryAinv() const
   for (const auto i : make_range(_dim))
     normal_ainv += normal(i) * normal(i) * face_ainv(i);
 
-  return std::max(face_ainv(0), 1e-8);
-  // return std::max(normal_ainv, 1e-8);
+  return std::max(normal_ainv, 1e-8);
 }
 
 Real
