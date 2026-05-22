@@ -121,6 +121,5 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   csv = true
 []
