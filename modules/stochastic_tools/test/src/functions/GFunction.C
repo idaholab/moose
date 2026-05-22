@@ -46,7 +46,7 @@ GFunction::execute()
   _values.reserve(_sampler.getNumberOfLocalRows());
   for (dof_id_type r = _sampler.getLocalRowBegin(); r < _sampler.getLocalRowEnd(); ++r)
   {
-    std::vector<Real> x = _sampler.getNextLocalRow();
+    std::vector<Real> x = _sampler.getSampleRow(r);
     Real y = 1;
     for (std::size_t i = 0; i < _q_vector.size(); ++i)
       y *= (std::abs(4 * x[i] - 2) + _q_vector[i]) / (1 + _q_vector[i]);

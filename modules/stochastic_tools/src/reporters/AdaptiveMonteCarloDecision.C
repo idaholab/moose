@@ -133,7 +133,7 @@ AdaptiveMonteCarloDecision::execute()
         Here, it is decided whether or not to accept a proposed sample by the
         AdaptiveImportanceSampler.C sampler depending upon the model output_value. */
       _inputs = output_limit_reached
-                    ? StochasticTools::reshapeVector(_sampler.getNextLocalRow(), 1, true)
+                    ? StochasticTools::reshapeVector(_sampler.getSampleRow(0), 1, true)
                     : _prev_val;
       if (output_limit_reached)
         _prev_val = _inputs;
@@ -144,7 +144,7 @@ AdaptiveMonteCarloDecision::execute()
       /* This is the sampling phase of the Adaptive Importance Sampling algorithm.
         Here, all proposed samples by the AdaptiveImportanceSampler.C sampler are accepted since
         the importance distribution traning phase is finished. */
-      _inputs = StochasticTools::reshapeVector(_sampler.getNextLocalRow(), 1, true);
+      _inputs = StochasticTools::reshapeVector(_sampler.getSampleRow(0), 1, true);
       _prev_val_out[0] = tmp;
     }
   }
@@ -158,14 +158,7 @@ AdaptiveMonteCarloDecision::execute()
     const unsigned int offset = sub_ind * _sampler.getNumberOfRows();
     const unsigned int count_max = 1 / _pss->getSubsetProbability();
 
-    DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
-    for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
-    {
-      const auto data = _sampler.getNextLocalRow();
-      for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-        data_in(ss, j) = data[j];
-    }
-    _local_comm.sum(data_in.get_values());
+    DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
 
     // Get the accepted samples outputs across all the procs from the previous step
     _output_required = (_pss->getUseAbsoluteValue())

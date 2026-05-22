@@ -55,12 +55,6 @@ private:
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
 
   /**
-   * Helper function for updating _row_data and _local_row_index.
-   * This allows multiple calls to the same row index
-   */
-  void updateRowData(dof_id_type local_index);
-
-  /**
    * Helper for getting StochasticToolsTransfer objects.
    *
    * This is a copy from SamplerFullSolveMultiapp, but the alternative is to create an intermediate
@@ -76,9 +70,4 @@ private:
   /// inner vector is for the number of sub-apps. The later is 1 for this object, but it is included
   /// in case that changes in the future or in child classes
   std::vector<std::vector<std::unique_ptr<Backup>>> _batch_backup;
-
-  /// Current row of data updated by updateRowData. Used by transfers and setting command line args
-  std::vector<Real> _row_data;
-  /// Current local index representing _row_data
-  dof_id_type _local_row_index = std::numeric_limits<dof_id_type>::max();
 };
