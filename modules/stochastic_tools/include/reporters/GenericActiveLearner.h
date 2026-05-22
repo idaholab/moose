@@ -308,14 +308,7 @@ GenericActiveLearnerTempl<SamplerType>::execute()
     return;
   }
 
-  DenseMatrix<Real> data_in(_al_sampler.getNumberOfRows(), _al_sampler.getNumberOfCols());
-  for (dof_id_type ss = _al_sampler.getLocalRowBegin(); ss < _al_sampler.getLocalRowEnd(); ++ss)
-  {
-    const auto data = _al_sampler.getNextLocalRow();
-    for (unsigned int j = 0; j < _al_sampler.getNumberOfCols(); ++j)
-      data_in(ss, j) = data[j];
-  }
-  _communicator.sum(data_in.get_values());
+  DenseMatrix<Real> data_in = _al_sampler.getGlobalSamples();
   _output_comm = _output_value;
   _communicator.allgather(_output_comm);
 

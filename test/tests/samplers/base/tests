@@ -30,7 +30,7 @@
       input = global_vs_local.i
       recover = false
       allow_test_objects = true
-      cli_args = 'Samplers/sample/use_rand=true Postprocessors/test/test_type=rand_global_vs_next'
+      cli_args = 'Samplers/sample/use_rand=true Postprocessors/test/test_type=rand_global_vs_row'
       max_parallel = 1 # by design, see SamplerTester
 
       detail = "that operates with a row-based iteration scheme."
@@ -169,11 +169,11 @@
 
       detail = "if the number of entries in the local sample matrix exceeds the maximum allowed, and"
     []
-    [getNextLocalRow_max]
+    [getSampleRow_max]
       type = RunException
       input = errors.i
       expect_err = "The number of entries in the std::vector \([0-9]+\) exceeds the allowed limit of [0-9]+."
-      cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getNextLocalRow"
+      cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getSampleRow"
 
       detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed."
     []
@@ -199,11 +199,11 @@
 
       detail = "the local sample matrix;"
     []
-    [getNextLocalRow]
+    [getSampleRow]
       type = RunException
       input = errors.i
       allow_test_objects = true
-      cli_args = 'Samplers/sample/error_test=reinit_getNextLocalRow'
+      cli_args = 'Samplers/sample/error_test=reinit_getSampleRow'
       expect_err = "A call to '.*?' was made after initialization"
 
       detail = "the local sample matrix row;"

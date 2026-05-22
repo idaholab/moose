@@ -83,7 +83,7 @@ AdaptiveImportanceStats::execute()
     const Real tmp = _ais.getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
     const bool output_limit_reached = tmp >= _ais.getOutputLimit();
     Real prod1 = output_limit_reached ? 1.0 : 0.0;
-    std::vector<Real> input1 = _ais.getNextLocalRow();
+    std::vector<Real> input1 = _ais.getSampleRow(0);
     Real input_tmp = 0.0;
     for (dof_id_type ss = 0; ss < _ais.getNumberOfCols(); ++ss)
     {

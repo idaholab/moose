@@ -58,12 +58,11 @@ StochasticMatrix::StochasticMatrix(const InputParameters & parameters)
 void
 StochasticMatrix::execute()
 {
-  for (dof_id_type i = 0; i < _sampler.getNumberOfLocalRows(); ++i)
-  {
-    std::vector<Real> data = _sampler.getNextLocalRow();
-    for (std::size_t j = 0; j < data.size(); ++j)
-      (*_sample_vectors[j])[i] = data[j];
-  }
+  for (dof_id_type i = 0, global_i = _sampler.getLocalRowBegin();
+       i < _sampler.getNumberOfLocalRows();
+       ++i, ++global_i)
+    for (std::size_t j = 0; j < _sampler.getNumberOfCols(); ++j)
+      (*_sample_vectors[j])[i] = _sampler.getSample(global_i, j);
 }
 
 ReporterName

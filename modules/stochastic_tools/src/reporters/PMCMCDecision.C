@@ -165,14 +165,7 @@ PMCMCDecision::execute()
   }
 
   // Gather inputs and outputs from the sampler and subApps
-  DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
-  for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
-  {
-    const auto data = _sampler.getNextLocalRow();
-    for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-      data_in(ss, j) = data[j];
-  }
-  _local_comm.sum(data_in.get_values());
+  DenseMatrix<Real> data_in = _sampler.getGlobalSamples();
   if (!usingGP())
   {
     (*_outputs_required) = *_output_value;
