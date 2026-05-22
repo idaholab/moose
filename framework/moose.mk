@@ -557,7 +557,7 @@ moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(MOOSE_KOKKO
 # the output because they are printed many times
 CHECK_PROCESS_SUBSTITUTION := $(shell bash -c 'echo hello > >(cat)')
 ifeq ($(CHECK_PROCESS_SUBSTITUTION),hello)
-  SILENCE_SOME_WARNINGS = 1> >(cat >&1) 2> >(grep -Ev "could not create compact unwind for|duplicate -rpath" >&2)
+  SILENCE_SOME_WARNINGS = 1> >(cat >&1) 2> >(grep -Ev "could not create compact unwind for|duplicate -rpath|^(ld: warning: )+[[:space:]]*$$|^$$" >&2)
 endif
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
