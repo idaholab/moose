@@ -71,4 +71,22 @@ protected:
 
   /// Desired interior node locations
   std::vector<Point> _interior_points;
+
+  /// Thickness of an optional boundary-layer ring grown inward from the outer boundary
+  const Real _outer_boundary_layer_thickness;
+
+  /// Number of element layers in the outer boundary-layer ring
+  const unsigned int _outer_boundary_layer_num;
+
+  /// Bias factor for the layer thicknesses in the outer boundary-layer ring
+  const Real _outer_boundary_layer_bias;
+
+  /// Per-hole boundary-layer ring thicknesses (grown outward from each hole)
+  const std::vector<Real> _holes_boundary_layer_thickness;
+
+  /// Per-hole boundary-layer ring layer counts
+  const std::vector<unsigned int> _holes_boundary_layer_num;
+
+  /// Per-hole boundary-layer ring bias factors
+  const std::vector<Real> _holes_boundary_layer_bias;
 };
