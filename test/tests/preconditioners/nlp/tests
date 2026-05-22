@@ -8,4 +8,39 @@
     requirement = 'The system shall be able to solve two decoupled diffusion problems using an outer Newton-Krylov nonlinear solver with block Gauss-Seidel nonlinear preconditioning using sub Newton-Krylov nonlinear solvers.'
     cli_args = '--executor'
   []
+  [off_diagonal_coupling]
+    requirement = 'The system shall be able to solve two physics, each with a coupling term, using'
+    [linear]
+      type = CSVDiff
+      input = off_diag_coupling_linear_fsp.i
+      csvdiff = off_diag_coupling_linear_fsp_csv.csv
+      cli_args = '--executor'
+      detail = 'a monolithic Newton-Krylov method with a linear symmetric multiplicative field split preconditioner or'
+    []
+    [nonlinear]
+      type = CSVDiff
+      input = off_diag_coupling_nlp.i
+      csvdiff = off_diag_coupling_nlp_csv.csv
+      cli_args = '--executor'
+      detail = 'a Newton-Krylov method with a nonlinear symmetric multiplicative field split preconditioner.'
+    []
+  []
+  [single_dof_off_diagonal_coupling]
+    requirement = 'The system shall be able to solve a 2x2 system using, as a nonlinear preconditioner,'
+    [multiplicative]
+      type = CSVDiff
+      input = one_dof_block_nlp.i
+      csvdiff = one_dof_block_nlp_csv.csv
+      cli_args = '--executor'
+      detail = 'standard multiplicative Gauss-Seidel sweeping or'
+    []
+    [symmetric_multiplicative]
+      type = CSVDiff
+      input = one_dof_block_nlp.i
+      csvdiff = one_dof_block_nlp_csv.csv
+      cli_args = '--executor Executors/shell_pc/sweep_type=symmetric_multiplicative'
+      detail = 'symmetric multiplicative sweeping.'
+      prereq = 'single_dof_off_diagonal_coupling/multiplicative'
+    []
+  []
 []

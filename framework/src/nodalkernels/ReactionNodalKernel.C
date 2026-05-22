@@ -12,29 +12,40 @@
 #include "Function.h"
 
 registerMooseObject("MooseApp", ReactionNodalKernel);
+registerMooseObject("MooseApp", ADReactionNodalKernel);
 
+template <bool is_ad>
 InputParameters
-ReactionNodalKernel::validParams()
+ReactionNodalKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = NodalKernel::validParams();
+  InputParameters params = GenericNodalKernel<is_ad>::validParams();
   params.addClassDescription("Implements a simple consuming reaction term at nodes");
   params.addParam<Real>("coeff", 1., "A coefficient for multiplying the reaction term");
   return params;
 }
 
-ReactionNodalKernel::ReactionNodalKernel(const InputParameters & parameters)
-  : NodalKernel(parameters), _coeff(getParam<Real>("coeff"))
+template <bool is_ad>
+ReactionNodalKernelTempl<is_ad>::ReactionNodalKernelTempl(const InputParameters & parameters)
+  : GenericNodalKernel<is_ad>(parameters), _coeff(this->template getParam<Real>("coeff"))
 {
 }
 
-Real
-ReactionNodalKernel::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+ReactionNodalKernelTempl<is_ad>::computeQpResidual()
 {
   return _coeff * _u[_qp];
 }
 
+template <bool is_ad>
 Real
-ReactionNodalKernel::computeQpJacobian()
+ReactionNodalKernelTempl<is_ad>::computeQpJacobian()
 {
+  mooseAssert(!is_ad,
+              "In ADReactionNodalKernel, computeQpJacobian should not be called. Check "
+              "computeJacobian implementation.");
   return _coeff;
 }
+
+template class ReactionNodalKernelTempl<false>;
+template class ReactionNodalKernelTempl<true>;

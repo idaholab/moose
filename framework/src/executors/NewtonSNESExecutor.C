@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "NonlinearSystemBase.h"
+#include "SNESNPCExecutor.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/petsc_solver_exception.h"
@@ -53,7 +54,30 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
     paramError("nonlinear_system_names", "Empty string passed?");
 
   for (const auto & nl_sys_name : nl_sys_names)
-    _nl_sys_nums.push_back(_fe_problem.nlSysNum(nl_sys_name));
+  {
+    const auto sys_num = _fe_problem.nlSysNum(nl_sys_name);
+    _nl_sys_nums.push_back(sys_num);
+    const auto & sys = _fe_problem.getNonlinearSystemBase(sys_num);
+    Moose::PetscSupport::storePetscOptions(_fe_problem, sys.prefix(), *this);
+    auto & solver_params = _fe_problem.solverParams(sys_num);
+    solver_params._prefix = sys.prefix();
+    solver_params._solver_sys_num = sys_num;
+  }
+
+  if (_nl_sys_nums.size() > 0)
+  {
+    // Need full Jacobian in order to actually compute cross-system coupling
+    _fe_problem.setCoupling(Moose::COUPLING_FULL);
+    for (const auto i : index_range(_nl_sys_nums))
+      for (const auto j : index_range(_nl_sys_nums))
+      {
+        if (i == j)
+          continue;
+        const TagID tag =
+            _fe_problem.addMatrixTag("NPC_J_" + std::to_string(i) + "_" + std::to_string(j));
+        _off_diag_mats[{i, j}] = {nullptr, tag};
+      }
+  }
 
   if (isParamValid("convergence_names"))
   {
@@ -68,23 +92,12 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
   }
 
   Moose::PetscSupport::setESLinearSolverParams(_fe_problem.es(), *this);
-
-  for (const auto sys_num : _nl_sys_nums)
-  {
-    const auto & sys = _fe_problem.getNonlinearSystemBase(sys_num);
-    Moose::PetscSupport::storePetscOptions(_fe_problem, sys.prefix(), *this);
-    auto & solver_params = _fe_problem.solverParams(sys_num);
-    solver_params._prefix = sys.prefix();
-    solver_params._solver_sys_num = sys_num;
-  }
 }
 
 NewtonSNESExecutor::~NewtonSNESExecutor()
 {
   if (_jac_shell)
     PetscCallAbort(this->comm().get(), MatDestroy(&_jac_shell));
-  if (_work)
-    PetscCallAbort(this->comm().get(), VecDestroy(&_work));
   if (_mat_nest)
     PetscCallAbort(this->comm().get(), MatDestroy(&_mat_nest));
 }
@@ -139,8 +152,6 @@ NewtonSNESExecutor::setupSNES()
                     MatCreateShell(this->comm().get(), m, n, M, N, this, &_jac_shell));
   LibmeshPetscCallA(this->comm().get(),
                     MatShellSetOperation(_jac_shell, MATOP_MULT, (PetscErrorCodeFn *)shellMatMult));
-
-  LibmeshPetscCallA(this->comm().get(), VecDuplicate(_vec_sol, &_work));
 
   LibmeshPetscCallA(this->comm().get(),
                     SNESSetJacobian(_snes, _jac_shell, _mat_nest, outerJacobianCallback, this));
@@ -232,11 +243,10 @@ NewtonSNESExecutor::run()
 void
 NewtonSNESExecutor::allocateOffDiagMats()
 {
-  const auto n_sys = _fe_problem.numNonlinearSystems();
-  for (const auto i : make_range(n_sys))
+  for (const auto i : index_range(_nl_sys_nums))
   {
     auto & sys_i = _fe_problem.getNonlinearSystemBase(_nl_sys_nums[i]);
-    for (const auto j : make_range(n_sys))
+    for (const auto j : index_range(_nl_sys_nums))
     {
       if (i == j)
         continue;
@@ -255,11 +265,10 @@ NewtonSNESExecutor::allocateOffDiagMats()
       LibmeshPetscCallA(_fe_problem.comm().get(),
                         MatSetOption(mat->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE));
 
-      const TagID tag =
-          _fe_problem.addMatrixTag("NPC_J_" + std::to_string(i) + "_" + std::to_string(j));
+      const std::pair<unsigned int, unsigned int> key{i, j};
+      auto & [our_mat, tag] = libmesh_map_find(_off_diag_mats, key);
       sys_i.associateMatrixToTag(*mat, tag);
-
-      _off_diag_mats[{i, j}] = {std::move(mat), tag};
+      our_mat = std::move(mat);
     }
   }
 }
@@ -342,27 +351,13 @@ PetscErrorCode
 NewtonSNESExecutor::shellMatMult(Mat m, Vec X, Vec Y)
 {
   void * ctx;
-  KSP sub_ksp;
 
   PetscFunctionBegin;
   PetscCall(MatShellGetContext(m, &ctx));
   auto * ex = static_cast<NewtonSNESExecutor *>(ctx);
-
-  // W = J_global * X
-  PetscCall(MatMult(ex->_mat_nest, X, ex->_work));
-
-  // Y_i = J_i^{-1} * W_i for each field (non-overlapping: write directly, no summing)
-  const unsigned int n_sys = ex->_nl_sys_nums.size();
-  for (const auto i : make_range(n_sys))
-  {
-    const auto nl_sys_num = ex->_nl_sys_nums[i];
-    Vec W_i, Y_i;
-    PetscCall(VecNestGetSubVec(ex->_work, i, &W_i));
-    PetscCall(VecNestGetSubVec(Y, i, &Y_i));
-    auto sub_snes = ex->_fe_problem.getNonlinearSystem(nl_sys_num).getSNES();
-    PetscCall(SNESGetKSP(sub_snes, &sub_ksp));
-    PetscCall(KSPSolve(sub_ksp, W_i, Y_i));
-  }
+  mooseAssert(ex->_npc_executor,
+              "Should not be using a shell matrix without a nonlinear preconditioner");
+  PetscCall(ex->_npc_executor->applyBA(ex->_mat_nest, X, Y));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -411,4 +406,26 @@ NewtonSNESExecutor::outerJacobianCallback(SNES /*snes*/, Vec /*x*/, Mat /*A*/, M
   }
 
   PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+SNES
+NewtonSNESExecutor::getSNES()
+{
+  if (_nl_sys_nums.size() != 1)
+    mooseError("Ambiguous call to getSNES()");
+
+  // We cannot rely on caching this during some setup routine because libMesh destroys its SNES at
+  // the end of each nonlinear solve. For similar reasons we cannot have _snes point to this because
+  // then at destruction time we'll attempt to destroy through a pointer to garbage since the SNES
+  // was already destroyed at the end of the solve
+  return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]).getSNES();
+}
+
+System &
+NewtonSNESExecutor::getSystem()
+{
+  if (_nl_sys_nums.size() != 1)
+    mooseError("Ambiguous call to getSystem()");
+
+  return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]).system();
 }

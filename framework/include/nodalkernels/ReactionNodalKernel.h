@@ -9,22 +9,28 @@
 
 #pragma once
 
-#include "NodalKernel.h"
+#include "GenericNodalKernel.h"
 
 /**
  * Represents a nodal reaction term equivalent to $a * u$
  */
-class ReactionNodalKernel : public NodalKernel
+template <bool is_ad>
+class ReactionNodalKernelTempl : public GenericNodalKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ReactionNodalKernel(const InputParameters & parameters);
+  ReactionNodalKernelTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   /// An optional input-file supplied rate coefficient
   const Real _coeff;
+
+  usingGenericNodalKernelMembers;
 };
+
+typedef ReactionNodalKernelTempl<false> ReactionNodalKernel;
+typedef ReactionNodalKernelTempl<true> ADReactionNodalKernel;

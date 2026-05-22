@@ -35,6 +35,12 @@ public:
   virtual ~NewtonSNESExecutor();
 
   virtual Result run() override;
+  virtual SNES getSNES() override;
+
+  /**
+   * @returns the libMesh system corresponding to the index \p i
+   */
+  libMesh::System & getSystem();
 
 protected:
   virtual void setupSNES() override;
@@ -68,19 +74,18 @@ private:
   // shell machinery for an outer SNES
   //
 
-  /// Shell matrix representing multiplication of the nonlinear preconditioner
-  /// and the full Jacobian. I think of it as representing B*A, where B is what
-  /// PETSc typically uses to denote the preconditioner (*not* what MOOSE calls
-  /// the preconditioning matrix P, but something more like P^{-1}). Precisely,
-  /// this will apply block_diag(J_i^{-1}) * J_global -- the Jacobian of the
-  /// field-split-preconditioned residual F_NP(x) = x - NPC(x), where NPC(x) is
-  /// x - block_diag(J_i^{-1}) * R(x), e.g. the result of the nonlinear
-  /// preconditioner is an updated solution vector and the outer Newton solver
-  /// is solving a fixed point problem.
+  /// Shell matrix representing multiplication of the linearized nonlinear
+  /// preconditioner and the full Jacobian. I think of it as representing B*A,
+  /// where B is what PETSc typically uses to denote the preconditioner (*not*
+  /// what MOOSE calls the preconditioning matrix P, but something more like
+  /// P^{-1}). The nonlinear preconditioner supplies the exact block application
+  /// used by this shell matrix.
   Mat _jac_shell = nullptr;
 
-  /// Work VecNest for W = J_global * v inside shellMatMult.
-  Vec _work = nullptr;
-
+  /**
+   * Shell routine associated with the _jac_shell that will forward to the nonlinear preconditioner
+   * for applying the preconditioning at the linearized operator level and for applying our global
+   * MatNest Jacobian
+   */
   static PetscErrorCode shellMatMult(Mat m, Vec X, Vec Y);
 };

@@ -2990,8 +2990,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeJacobianInternal", 3);
 
-  _fe_problem.setCurrentNonlinearSystem(number());
-
   // Make matrix ready to use
   activateAllMatrixTags();
 

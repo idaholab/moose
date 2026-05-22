@@ -3196,6 +3196,13 @@ Assembly::cacheJacobianWithoutConstraints(const Residuals & residuals,
     const auto & column_indices = sparse_derivatives.nude_indices();
     const auto & raw_derivatives = sparse_derivatives.nude_data();
 
+    if (column_indices.size() == 0)
+    {
+      // Lots of algorithms have issues without explicit allocation of the diagonal
+      cacheJacobian(row_index, row_index, 0, {}, matrix_tags);
+      continue;
+    }
+
     for (std::size_t j = 0; j < column_indices.size(); ++j)
       cacheJacobian(
           row_index, column_indices[j], raw_derivatives[j] * scaling_factor, {}, matrix_tags);
