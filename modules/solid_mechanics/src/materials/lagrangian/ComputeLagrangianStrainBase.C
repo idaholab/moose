@@ -71,6 +71,10 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
+    _rotated_mechanical_strain(
+        declareProperty<RankTwoTensor>(_base_name + "rotated_mechanical_strain")),
+    _rotated_mechanical_strain_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotated_mechanical_strain")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _spatial_velocity_increment(
         declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
@@ -136,6 +140,7 @@ ComputeLagrangianStrainBase<G>::initQpStatefulProperties()
 {
   _total_strain[_qp].zero();
   _mechanical_strain[_qp].zero();
+  _rotated_mechanical_strain[_qp].zero();
   _F[_qp].setToIdentity();
   _rotation[_qp].setToIdentity();
 }
@@ -288,6 +293,38 @@ ComputeLagrangianStrainBase<G>::setQpIncrementalStrains(const RankTwoTensor & dd
 
   // Increment the mechanical strain
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+
+  // Additionally maintain the rotated mechanical-strain accumulator,
+  // ε_n+1 = r̂ (ε_n + Δd) r̂^T, where r̂ = exp(Δw) via Rodrigues. This matches the
+  // mechanical_strain output convention of `ComputeFiniteStrain` and is consumed only
+  // by aux variables — the stress chain still uses the un-rotated `_mechanical_strain`
+  // above. In small kinematics dw is small and r̂ ≈ I + dw + ½ dw², which contributes
+  // only second-order corrections (equivalent to no rotation for small strain).
+  RankTwoTensor r_hat;
+  if (_large_kinematics)
+  {
+    const Real theta2 = 0.5 * dw.doubleContraction(dw);
+    const Real theta = std::sqrt(theta2);
+    Real f, g;
+    const Real small_theta = 1.0e-7;
+    if (theta < small_theta)
+    {
+      f = 1.0 - theta2 / 6.0;
+      g = 0.5 - theta2 / 24.0;
+    }
+    else
+    {
+      f = std::sin(theta) / theta;
+      g = (1.0 - std::cos(theta)) / theta2;
+    }
+    r_hat = RankTwoTensor::Identity() + f * dw + g * dw * dw;
+  }
+  else
+  {
+    r_hat = RankTwoTensor::Identity();
+  }
+  _rotated_mechanical_strain[_qp] =
+      r_hat * (_rotated_mechanical_strain_old[_qp] + _strain_increment[_qp]) * r_hat.transpose();
 
   // Faked rotation increment for ComputeStressBase materials
   _rotation_increment[_qp] = RankTwoTensor::Identity();
@@ -481,7 +518,14 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
                                                             RankFourTensor & d_dw_d_f_inv) const
 {
   // See plan_outline.pdf §2.4. Polar-decompose f^{-1} = r' u', with u' symmetric positive
-  // definite and r' a proper rotation. Then Δd = -log u', Δw = -log r' (skew).
+  // definite and r' a proper rotation. The PDF's identity `log f^{-1} = -log d - log w`
+  // only holds when log u and log r commute (i.e. for non-rotating deformation); in general
+  // the right stretch of f^{-1} is u' = R · U^{-1} · R^T where R, U are the right polar of f.
+  // So -log(u') = R · log U · R^T is the *spatial-frame* log strain, not the co-rotated
+  // log U. We compute it that way first, then rotate by r' = R^T to land in the n-frame
+  // so that _strain_increment = log U exactly. This is the strain measure the Rashid
+  // objective stress update consumes (eq. 22, σ_{n+1} = r̂ (σ_n + Δσ) r̂^T expects Δσ
+  // in the n-frame).
   usingTensorIndices(a_, b_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
 
@@ -491,17 +535,17 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   const RankTwoTensor u_inv = MathUtils::sqrt(cprime).inverse().get();
   const RankTwoTensor r = f_inv * u_inv;
 
-  // ---- Δd = -log u = -(1/2) log c' ----
+  // ---- intermediate Δd_spatial = -log u' = R · log U · R^T (n+1 frame) ----
   FactorizedRankTwoTensor uFact(u);
   const RankTwoTensor log_u = MathUtils::log(uFact).get();
-  dd = -log_u;
+  const RankTwoTensor dd_spatial = -log_u;
 
   // d(log u)/d(c') = (1/2) dlog(c'), and d(c')_{ab}/d(f^{-1})_{mn} = δ_{an} f_inv_{mb}
   //                                                                + δ_{bn} f_inv_{ma}.
   const RankFourTensor dlog_cprime = MathUtils::dlog(cprime);
   const RankFourTensor d_cprime_d_finv =
       I2.template times<a_, n_, m_, b_>(f_inv) + I2.template times<b_, n_, m_, a_>(f_inv);
-  const RankFourTensor d_dd_d_finv = -0.5 * (dlog_cprime * d_cprime_d_finv);
+  const RankFourTensor d_dd_spatial_d_finv = -0.5 * (dlog_cprime * d_cprime_d_finv);
 
   // ---- d(r)/d(f^{-1}) via the polar-decomposition closed form (same trick as
   //      ComputeLagrangianObjectiveStress::polarDecomposition). ----
@@ -545,7 +589,30 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   dw = -log_r;
   d_dw_d_f_inv = -(d_logr_d_r * d_r_d_finv);
 
-  d_dL_d_f_inv = d_dd_d_finv + d_dw_d_f_inv;
+  // ---- Rotate Δd from spatial back to co-rotated (n) frame: log U = r' · (R log U R^T) · r'^T,
+  //      using r' = R^T from the polar of f^{-1}. The derivative of the sandwich r'·A·r'^T
+  //      w.r.t. f^{-1} expands to three rank-4 pieces (chain rule on r' AND on A). The
+  //      6-argument `times<>(RankFourTensor)` overload uses x[0..4] (one dummy at index 4),
+  //      so we reuse the same dummy label `p2_` in each sub-contraction.
+  {
+    usingTensorIndices(i2_, j2_, m2_, n2_, p2_);
+    dd = r * dd_spatial * r.transpose();
+    const RankTwoTensor M = dd_spatial * r.transpose();  // dd · r^T   (p, j) shape
+    const RankTwoTensor N = r * dd_spatial;              // r · dd     (i, q) shape
+    // T1_{ijmn} = (dr/d_finv)_{ip,mn} · M_{pj}
+    const RankFourTensor T1 =
+        M.template times<p2_, j2_, i2_, p2_, m2_, n2_>(d_r_d_finv);
+    // T2_{ijmn} = r_{ip} · (d_dd_spatial_d_finv)_{pq,mn} · r_{jq}: contract twice over the dummy.
+    const RankFourTensor mid =
+        r.template times<i2_, p2_, p2_, j2_, m2_, n2_>(d_dd_spatial_d_finv);
+    const RankFourTensor T2 =
+        r.template times<j2_, p2_, i2_, p2_, m2_, n2_>(mid);
+    // T3_{ijmn} = N_{iq} · (dr/d_finv)_{jq,mn}
+    const RankFourTensor T3 =
+        N.template times<i2_, p2_, j2_, p2_, m2_, n2_>(d_r_d_finv);
+    const RankFourTensor d_dd_d_finv = T1 + T2 + T3;
+    d_dL_d_f_inv = d_dd_d_finv + d_dw_d_f_inv;
+  }
 }
 
 template <class G>

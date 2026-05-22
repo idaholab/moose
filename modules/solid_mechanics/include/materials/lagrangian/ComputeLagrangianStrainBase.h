@@ -124,6 +124,15 @@ protected:
   MaterialProperty<RankTwoTensor> & _mechanical_strain;
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
 
+  /// Mechanical strain accumulated with the incremental rotation r̂ = exp(Δw), matching
+  /// the convention `ComputeFiniteStrain` uses for its `mechanical_strain` output
+  /// (`ε_n+1 = r̂ · (ε_n + Δd) · r̂^T`). Provided as a separate property so the standard
+  /// `_mechanical_strain` (consumed by constitutive materials) stays un-rotated and the
+  /// objective-rate-driven stress chain is unaffected. Use this for aux-variable output
+  /// when matching the old-system convention.
+  MaterialProperty<RankTwoTensor> & _rotated_mechanical_strain;
+  const MaterialProperty<RankTwoTensor> & _rotated_mechanical_strain_old;
+
   /// Strain increment
   MaterialProperty<RankTwoTensor> & _strain_increment;
 
