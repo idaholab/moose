@@ -36,6 +36,15 @@ public:
   virtual Real computeDamping(const NumericVector<Number> & /* solution */,
                               const NumericVector<Number> & update) override;
 
+  /**
+   * Probe a damped update on the displaced mesh and report the maximum relative
+   * change in JxW. Returns false if the trial update produces a degenerate map.
+   */
+  bool probeDamping(const NumericVector<Number> & update,
+                    Real damping,
+                    Real & max_difference,
+                    std::string & error_message);
+
 protected:
   /// Thread ID
   THREAD_ID _tid;
@@ -67,4 +76,13 @@ protected:
 
   /// Maximum allowed relative increment in Jacobian
   const Real _max_jacobian_diff;
+
+  /// Whether to backtrack the trial update when probing would otherwise create a degenerate map
+  const bool _use_backtracking;
+
+  /// Multiplicative cutback applied during backtracking
+  const Real _backtrack_factor;
+
+  /// Maximum number of backtracking attempts
+  const unsigned int _max_backtrack_steps;
 };

@@ -38,4 +38,12 @@
     expect_exit_code = 0
     expect_err = 'negative Jacobian'
   []
+  [backtrack_negative_jacobian]
+    type = RunApp
+    input = 'exception_handling.i'
+    cli_args = 'Dampers/jac/use_backtracking=true'
+    max_parallel = 1
+    expect_out = 'Damping factor:'
+    requirement = "The element Jacobian damper shall optionally backtrack a trial nonlinear update to avoid generating a degenerate element map."
+  []
 []
