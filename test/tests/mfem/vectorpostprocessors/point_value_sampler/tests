@@ -21,4 +21,19 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
+  [MFEMValueSamplerPointNotFoundError]
+    type = RunException
+    input = point_value_sampler_point_not_found.i
+    expect_err = 'MFEMValueSamplerBase could not find point at'
+    requirement = "The system shall issue an error if an attempt is made to sample at a point that is not inside the mesh."
+    capabilities = 'mfem'
+  []
+  [MFEMValueSamplerBoundaryDiscontinuousWarning]
+    type = RunException
+    input = point_value_sampler_boundary_warn.i
+    expect_err = "MFEMValueSamplerBase found a point on an element boundary but the FE space is discontinuous at boundaries"
+    issues = '#32988'
+    requirement = "The system shall issue a warning if an attempt is made to sample a variable near a boundary when the variable is discontinuous across boundaries."
+    capabilities = 'mfem'
+  []
 []

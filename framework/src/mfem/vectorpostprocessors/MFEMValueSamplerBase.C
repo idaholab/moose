@@ -10,8 +10,10 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMValueSamplerBase.h"
+
 #include "MFEMProblem.h"
 #include "MFEMVectorUtils.h"
+#include "MooseError.h"
 
 #include "mfem/fem/fespace.hpp"
 
@@ -72,13 +74,29 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   _finder.Setup(_mesh);
   _finder.FindPoints(_points, _points_ordering);
 
+  bool fe_boundary_discontinuous =
+      _var.FESpace()->FEColl()->GetContType() == mfem::FiniteElementCollection::DISCONTINUOUS;
+
   // check all points were found
   mfem::Array<unsigned int> point_codes = _finder.GetCode();
   for (size_t i = 0; i < points.size(); i++)
   {
-    if (point_codes[i] > 1)
+    switch (point_codes[i])
     {
-      mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+      case 0:
+        break;
+      case 1:
+        if (fe_boundary_discontinuous)
+        {
+          mooseWarning("MFEMValueSamplerBase found a point on an element boundary but "
+                       "the FE space is discontinuous at boundaries: ",
+                       points[i],
+                       ".");
+        }
+        break;
+      default:
+        mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+        break;
     }
   }
 
