@@ -69,6 +69,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
+- Treat submodule files as first-class files in the repository; read, write,
+  and navigate them exactly as you would files in the root repository.
 
 ## 7. Goal-Driven Execution
 
