@@ -10,6 +10,32 @@ as shown below.
 This action adds the default quadrature rule to the `Problem` then adds custom requested quadratures
 in the specified blocks.
 
+## Per-block quadrature types
+
+In addition to specifying custom quadrature orders per block via
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_orders), it is also possible
+to specify a custom quadrature +type+ per block using the
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) parameter. The
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) list must have the same
+number of entries as [!param](/Executioner/Quadrature/SetupQuadratureAction/custom_blocks). If
+[!param](/Executioner/Quadrature/SetupQuadratureAction/custom_types) is omitted, the global
+[!param](/Executioner/Quadrature/SetupQuadratureAction/type) is used for all custom blocks,
+preserving existing behaviour.
+
+The following example specifies both a custom order and a custom quadrature type for two subdomains:
+
+```moose
+[Executioner]
+  [Quadrature]
+    type = GAUSS
+    order = THIRD
+    custom_blocks    = '2 3'
+    custom_orders    = 'THIRD SECOND'
+    custom_types     = 'GAUSS_LOBATTO SIMPSON'
+  []
+[]
+```
+
 More information about quadratures may be found on the
 [Quadrature syntax documentation](syntax/Executioner/Quadrature/index.md).
 
