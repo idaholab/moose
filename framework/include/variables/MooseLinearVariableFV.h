@@ -31,6 +31,7 @@ class AuxiliarySystem;
 class FVDirichletBCBase;
 class FVFluxBC;
 class LinearFVBoundaryCondition;
+class LinearFVGradientField;
 class LinearSystem;
 
 namespace libMesh
@@ -259,8 +260,8 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Pointer to the unlimited cell gradient stored by the owning concrete system
-  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
+  /// Read-only handle to the unlimited cell gradient stored by the owning concrete system
+  const LinearFVGradientField & _raw_gradient_field;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
