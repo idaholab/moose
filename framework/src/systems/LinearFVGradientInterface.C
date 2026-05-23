@@ -18,10 +18,55 @@
 #include "SystemBase.h"
 #include "MooseVariableFieldBase.h"
 #include "MooseError.h"
+#include "ElemInfo.h"
 
 #include "libmesh/numeric_vector.h"
 
 using namespace libMesh;
+
+LinearFVGradientField::LinearFVGradientField(const SystemBase & sys,
+                                             const GradientContainer & components)
+  : _sys(sys), _components(components)
+{
+}
+
+Real
+LinearFVGradientField::component(const ElemInfo & elem_info,
+                                 const unsigned int variable_number,
+                                 const unsigned int component) const
+{
+  mooseAssert(component < _components.size(), "Gradient component index out of range.");
+
+  return (*_components[component])(elem_info.dofIndices()[_sys.number()][variable_number]);
+}
+
+RealVectorValue
+LinearFVGradientField::gradient(const ElemInfo & elem_info,
+                                const unsigned int variable_number) const
+{
+  RealVectorValue value;
+  value.zero();
+
+  for (const auto component_index : make_range(_sys.mesh().dimension()))
+    value(component_index) = component(elem_info, variable_number, component_index);
+
+  return value;
+}
+
+const LinearFVGradientField &
+LinearFVGradientInterface::linearFVGradientField(
+    const Moose::FV::GradientLimiterType limiter_type) const
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return _raw_gradient_field;
+
+  const auto it = _limited_gradient_fields.find(limiter_type);
+  if (it == _limited_gradient_fields.end())
+    mooseError(
+        "Limited gradient field was requested but not initialized on system '", _sys.name(), "'.");
+
+  return *it->second;
+}
 
 void
 LinearFVGradientInterface::computeGradients()
@@ -143,6 +188,7 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
   _raw_grad_container.clear();
   _temporary_gradient.clear();
+  _limited_gradient_fields.clear();
   _raw_limited_grad_containers.clear();
   _temporary_limited_gradient.clear();
 
@@ -159,7 +205,16 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 
     initializeContainer(_raw_limited_grad_containers[limiter_type]);
     initializeContainer(_temporary_limited_gradient[limiter_type]);
+    initializeLimitedGradientField(limiter_type);
   }
+}
+
+void
+LinearFVGradientInterface::initializeLimitedGradientField(
+    const Moose::FV::GradientLimiterType limiter_type)
+{
+  _limited_gradient_fields[limiter_type] = std::make_unique<LinearFVGradientField>(
+      _sys, libmesh_map_find(_raw_limited_grad_containers, limiter_type));
 }
 
 void
@@ -191,6 +246,7 @@ LinearFVGradientInterface::requestLinearFVLimitedGradients(
   {
     initializeContainer(_raw_limited_grad_containers[limiter_type]);
     initializeContainer(_temporary_limited_gradient[limiter_type]);
+    initializeLimitedGradientField(limiter_type);
   }
 }
 
