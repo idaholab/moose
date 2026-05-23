@@ -32,6 +32,14 @@ public:
   static InputParameters validParams();
   LagrangianStressDivergenceBase(const InputParameters & parameters);
 
+  /// Mirrors `ComputeLagrangianStrainBase::FBarMode`. Replicated here (rather than included)
+  /// so this header doesn't need to pull in the templated strain header.
+  enum class FBarMode
+  {
+    Total,
+    Incremental
+  };
+
 protected:
   // Helper function to return the test function gradient which may depend on kinematics and
   // stabilization
@@ -78,6 +86,11 @@ protected:
   /// If true calculate the deformation gradient derivatives for F_bar
   const bool _stabilize_strain;
 
+  /// What F gets F-bar volumetric correction (Total vs. Incremental). Must match the strain
+  /// calc's `F_bar_mode`. Incremental mode changes how `_avg_grad_trial` is computed so the
+  /// non-local F-bar chain captures δf_avg (= avg of δF_ust · F_ust_old^{-1}) instead of δF_avg.
+  const FBarMode _F_bar_mode;
+
   /// Prepend to the material properties
   const std::string _base_name;
 
@@ -97,6 +110,11 @@ protected:
 
   /// The unmodified deformation gradient
   const MaterialProperty<RankTwoTensor> & _F_ust;
+
+  /// Old unstabilized deformation gradient. Only consulted in `F_bar_mode = incremental` for
+  /// the kernel's element-average of grad_phi · F_ust_old^{-1}. Always fetched (cheap) so the
+  /// kernel doesn't need conditional property bookkeeping.
+  const MaterialProperty<RankTwoTensor> & _F_ust_old;
 
   /// The element-average deformation gradient
   const MaterialProperty<RankTwoTensor> & _F_avg;

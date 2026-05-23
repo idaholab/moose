@@ -87,11 +87,22 @@ void
 TotalLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigned int component)
 {
   // For total Lagrangian, the averaging is taken on the reference frame regardless of geometric
-  // nonlinearity. Convenient!
+  // nonlinearity. The stored quantity is what the strain calc's `_d_F_stab_d_F_avg` contracts
+  // with: δF_avg in `F_bar_mode = total`, δf_avg in `F_bar_mode = incremental`.
+  //   total:        avg_q(grad_phi[j][q])           → δF_avg per DOF
+  //   incremental:  avg_q(grad_phi[j][q] · F_ust_old[q]^{-1})
+  //                                                  → δf_avg per DOF
+  //                 (since f_ust = F_ust · F_ust_old^{-1} and F_ust_old is fixed w.r.t. the
+  //                  current Newton iterate's disp, so δf_ust = δF_ust · F_ust_old^{-1}).
+  const bool incremental = (_F_bar_mode == FBarMode::Incremental);
   for (auto j : make_range(_phi.size()))
     _avg_grad_trial[component][j] = StabilizationUtils::elementAverage(
-        [this, component, j](unsigned int qp)
-        { return G::gradOp(component, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]); },
+        [this, component, j, incremental](unsigned int qp)
+        {
+          const RankTwoTensor g =
+              G::gradOp(component, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]);
+          return incremental ? g * _F_ust_old[qp].inverse() : g;
+        },
         _JxW,
         _coord);
 }
