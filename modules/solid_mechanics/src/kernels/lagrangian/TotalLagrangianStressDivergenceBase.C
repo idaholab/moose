@@ -25,7 +25,9 @@ TotalLagrangianStressDivergenceBase<G>::TotalLagrangianStressDivergenceBase(
   : LagrangianStressDivergenceBase(parameters),
     _pk1(getMaterialPropertyByName<RankTwoTensor>(_base_name + "pk1_stress")),
     _dpk1(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian")),
-    _dpk1_d_grad_u(getMaterialPropertyByName<RankFourTensor>(_base_name + "dpk1_d_grad_u"))
+    _dpk1_d_grad_u(getMaterialPropertyByName<RankFourTensor>(_base_name + "dpk1_d_grad_u")),
+    _dpk1_bypass_fbar(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian_bypass_fbar"))
 {
 }
 
@@ -41,7 +43,11 @@ template <class G>
 RankTwoTensor
 TotalLagrangianStressDivergenceBase<G>::gradTrial(unsigned int component)
 {
-  return _stabilize_strain ? gradTrialStabilized(component) : gradTrialUnstabilized(component);
+  // After the F_ust-wrap architectural change, pk1_jacobian = dPK1/d(F_ust) already
+  // contains the local F-bar contribution (via the σ-chain through
+  // `_d_F_stab_d_F_ust`). The trial gradient is always unstabilized; the non-local F-bar
+  // Jacobian contribution is added explicitly in `computeQpJacobianDisplacement`.
+  return gradTrialUnstabilized(component);
 }
 
 template <class G>
@@ -102,10 +108,23 @@ Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                       unsigned int beta)
 {
-  // J_{alpha beta} = phi^alpha_{i, J} T_{iJkL} G^beta_{kL}
-  // _dpk1_d_grad_u = d(PK1)/d(grad u_{n+1}) already incorporates the generalized-alpha
-  // kinematic policy via _d_F_d_grad_u (see ComputeLagrangianStressBase::computeQpProperties).
-  return gradTest(alpha).doubleContraction(_dpk1_d_grad_u[_qp] * gradTrial(beta));
+  // Local Jacobian: J_{alpha beta} = gradTest_α : (dPK1/d(grad u) · grad_phi_β). With
+  // the F_ust-wrap architectural change, pk1_jacobian = dPK1/d(F_ust) carries the
+  // local F-bar contribution through the σ chain (cauchy_jacobian · d(dL)/d(F_stab) ·
+  // d(F_stab)/d(F_ust)).
+  Real J = gradTest(alpha).doubleContraction(_dpk1_d_grad_u[_qp] * gradTrial(beta));
+
+  // Non-local F-bar Jacobian contribution. PK1 = det(F_ust) · σ · F_ust^{-T} no longer
+  // contains the non-local F-bar effect (it used to enter through F_stab in the wrap);
+  // `deltaPK1NonLocalFBar` re-introduces it through the σ-via-dL chain. Guarded on
+  // `_stabilize_strain` because `_avg_grad_trial` is only populated when F-bar is on.
+  if (_stabilize_strain)
+  {
+    const RankTwoTensor delta_F_avg = _d_F_d_grad_u[_qp] * _avg_grad_trial[beta][_j];
+    J += gradTest(alpha).doubleContraction(deltaPK1NonLocalFBar(delta_F_avg));
+  }
+
+  return J;
 }
 
 template <class G>
@@ -143,7 +162,13 @@ template <class G>
 Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianOutOfPlaneStrain()
 {
-  return _dpk1[_qp].contractionKl(2, 2, gradTest(_alpha)) * _out_of_plane_strain->phi()[_j][_qp];
+  // d(R_disp_α)/d(strain_zz_j) at qp = gradTest_α : d(PK1)/d(strain_zz_j).
+  // strain_zz feeds `_F[(2,2)]` AFTER F-bar runs in `ComputeLagrangianWPSStrain`, so
+  // strain_zz perturbations bypass F-bar's chain. Use `_dpk1_bypass_fbar` (= the
+  // pk1_jacobian variant computed with the F-bar `_d_F_stab_d_F_ust` factor REPLACED
+  // by identity in the σ chain) for a consistent Jacobian.
+  return _dpk1_bypass_fbar[_qp].contractionKl(2, 2, gradTest(_alpha)) *
+         _out_of_plane_strain->phi()[_j][_qp];
 }
 
 template class TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>;

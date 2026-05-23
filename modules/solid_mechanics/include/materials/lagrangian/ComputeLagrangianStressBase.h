@@ -83,6 +83,12 @@ protected:
   /// The derivative of the 1st PK stress wrt the deformation gradient (F that the stress
   /// material consumes; with the generalized midpoint rule this is the alpha-weighted F).
   MaterialProperty<RankFourTensor> & _pk1_jacobian;
+  /// Variant of `_pk1_jacobian` computed WITHOUT the F-bar chain factor
+  /// `_d_F_stab_d_F_ust` in the σ-via-dL contribution. Used by specialty kernels
+  /// (weak plane stress, homogenization macro_grad) whose coupled variable adds to
+  /// `_F` AFTER F-bar has run — those perturbations bypass F-bar's chain and need the
+  /// identity F-bar partial in the σ chain to give a consistent Jacobian.
+  MaterialProperty<RankFourTensor> & _pk1_jacobian_bypass_fbar;
 
   /// The derivative of the 1st PK stress wrt the displacement gradient (grad u_{n+1}).
   /// Computed in computeQpProperties as _pk1_jacobian * _d_F_d_grad_u so the TL kernel can
@@ -92,4 +98,19 @@ protected:
 
   /// d(F)/d(grad u_{n+1}) (= alpha * IdentityFour for the generalized midpoint rule)
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
+
+  /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used by the stress
+  /// materials as F in the kinematic stress-measure wraps (σ ↔ PK1 ↔ PK2) so that the
+  /// residual matches OLD's `StressDivergenceTensors`-on-displaced-mesh form. F-bar
+  /// enters only through the constitutive stress via the strain calc's F-bar'd `_f_inv`.
+  const MaterialProperty<RankTwoTensor> & _F_ust;
+
+  /// d(spatial velocity gradient increment)/d(F_stab). Used in the σ-via-dL chain to
+  /// build pk1_jacobian / cauchy_jacobian.
+  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+
+  /// d(F_stab)/d(F_ust). Multiplied into the σ chain so pk1_jacobian = dPK1/d(F_ust)
+  /// (and cauchy_jacobian = dσ/d(dL)) gets the local F-bar contribution. Equals
+  /// IdentityFour when F-bar is off.
+  const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
 };

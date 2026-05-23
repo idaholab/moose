@@ -55,10 +55,20 @@ protected:
   /// generalized-alpha kinematic policy.
   const MaterialProperty<RankFourTensor> & _dpk1_d_grad_u;
 
-private:
-  /// The unstabilized trial function gradient
+  /// Variant of `_dpk1` (= pk1_jacobian) computed WITHOUT the F-bar chain factor
+  /// `_d_F_stab_d_F_ust` in the σ-via-dL contribution. Used for coupled variables
+  /// that add to `_F` AFTER F-bar runs (out-of-plane strain in WPS, homogenization
+  /// macro_grad) — those perturbations bypass F-bar's chain, so the σ side of
+  /// `dPK1/d(F_ust)` must NOT include the F-bar local correction.
+  const MaterialProperty<RankFourTensor> & _dpk1_bypass_fbar;
+
+protected:
+  /// The unstabilized trial function gradient. Exposed (protected, not private) so
+  /// subclasses like `HomogenizedTotalLagrangianStressDivergence` can use it directly
+  /// for the macro-var ↔ disp off-diagonal Jacobian chain.
   virtual RankTwoTensor gradTrialUnstabilized(unsigned int component);
 
+private:
   /// The stabilized trial function gradient
   virtual RankTwoTensor gradTrialStabilized(unsigned int component);
 };

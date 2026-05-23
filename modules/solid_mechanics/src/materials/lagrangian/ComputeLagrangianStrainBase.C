@@ -160,9 +160,16 @@ template <class G>
 void
 ComputeLagrangianStrainBase<G>::computeQpProperties()
 {
-  // Add in the macroscale gradient contribution
+  // Add in the macroscale gradient contribution to both the stabilized `_F` (used by the
+  // strain chain via `_f_inv`) AND the unstabilized `_F_ust` (used by the new F_ust-wrap
+  // architecture in the stress materials). The homogenization gradient is a real
+  // deformation imposed via the scalar constraint, not a stabilization — it must appear
+  // in F_ust too or PK1 = det(F_ust) σ F_ust^{-T} will be missing its contribution.
   for (auto contribution : _homogenization_contributions)
+  {
     _F[_qp] += (*contribution)[_qp];
+    _F_ust[_qp] += (*contribution)[_qp];
+  }
 
   // dF/d(grad u_{n+1}) = alpha * I^{(4)} for the generalized midpoint rule
   // (alpha = 1.0 reduces to backward Euler).

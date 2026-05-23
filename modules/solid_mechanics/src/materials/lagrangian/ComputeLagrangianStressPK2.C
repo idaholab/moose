@@ -25,30 +25,85 @@ ComputeLagrangianStressPK2::ComputeLagrangianStressPK2(const InputParameters & p
 }
 
 void
-ComputeLagrangianStressPK2::computeQpPK1Stress()
+ComputeLagrangianStressPK2::computeQpCauchyStress()
 {
-  // Calculate the green-lagrange strain for the benefit of the subclasses
-  _E[_qp] = 0.5 * (_F[_qp].transpose() * _F[_qp] - RankTwoTensor::Identity());
-
-  // PK2 update
-  computeQpPK2Stress();
-
-  // Complicated wrapping, see documentation
+  // PK2 has its own σ-wrap structure: σ = (1/J_ust) F_ust · S · F_ust^T. The PK1 base's
+  // σ-chain (which assumes pk1_jacobian = constitutive dPK1/dF_stab + _d_F_stab_d_F_ust)
+  // doesn't fit here, so compute σ and cauchy_jacobian directly from S and dS/dE.
   if (_large_kinematics)
   {
-    _pk1_stress[_qp] = _F[_qp] * _S[_qp];
+    const Real J_ust = _F_ust[_qp].det();
+    _cauchy_stress[_qp] = _F_ust[_qp] * _S[_qp] * _F_ust[_qp].transpose() / J_ust;
+
+    // cauchy_jacobian = dσ/d(dL). σ depends on dL only through S(E(F_stab(dL))); the
+    // F_ust factors in the wrap are CONSTANT w.r.t. dL (F_ust does not depend on dL —
+    // dL is computed from F_stab via the kinematic helper, and F-bar relates F_stab to
+    // F_ust). So:
+    //   dσ/d(dL) = (1/J_ust) F_ust · dS/d(dL) · F_ust^T
+    //            = (1/J_ust) F_ust · _C · dE/d(F_stab) · inverse(d(dL)/d(F_stab)) · F_ust^T.
     usingTensorIndices(i_, j_, k_, l_);
-    RankFourTensor dE =
+    const auto I2 = RankTwoTensor::Identity();
+    const RankFourTensor dE_dFstab =
+        0.5 * (I2.template times<i_, l_, j_, k_>(_F[_qp].transpose()) +
+               _F[_qp].transpose().template times<i_, k_, j_, l_>(I2));
+    const RankFourTensor dE_d_dL =
+        dE_dFstab * _d_spatial_velocity_increment_d_F[_qp].inverse();
+    const RankFourTensor dS_d_dL = _C[_qp] * dE_d_dL;
+    _cauchy_jacobian[_qp] =
+        dS_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
+  }
+  else
+  {
+    _cauchy_stress[_qp] = _S[_qp];
+    _cauchy_jacobian[_qp] = _C[_qp];
+  }
+}
+
+void
+ComputeLagrangianStressPK2::computeQpPK1Stress()
+{
+  // Green-Lagrange strain uses the F-bar-stabilized F (`_F` from the strain calc) so
+  // the constitutive law receives the stabilized strain — F-bar's purpose is precisely
+  // to feed a volumetrically-corrected strain into the constitutive update.
+  _E[_qp] = 0.5 * (_F[_qp].transpose() * _F[_qp] - RankTwoTensor::Identity());
+
+  // PK2 update (constitutive)
+  computeQpPK2Stress();
+
+  // PK2 → PK1 wrap uses the *unstabilized* F so the residual matches OLD. The constitutive
+  // PK2 still carries the F-bar effect via its dependence on E (Green-Lagrange of F_stab).
+  if (_large_kinematics)
+  {
+    _pk1_stress[_qp] = _F_ust[_qp] * _S[_qp];
+    usingTensorIndices(i_, j_, k_, l_);
+    // dE/d(F_stab) (E is computed from F_stab).
+    RankFourTensor dE_dFstab =
         0.5 * (RankTwoTensor::Identity().times<i_, l_, j_, k_>(_F[_qp].transpose()) +
                _F[_qp].transpose().times<i_, k_, j_, l_>(RankTwoTensor::Identity()));
+    // Chain dE/d(F_ust) = dE/d(F_stab) · d(F_stab)/d(F_ust). With F-bar off
+    // _d_F_stab_d_F_ust = IdentityFour and this collapses to dE_dFstab.
+    const RankFourTensor dE_dFust = dE_dFstab * _d_F_stab_d_F_ust[_qp];
 
-    _pk1_jacobian[_qp] = RankTwoTensor::Identity().times<i_, k_, j_, l_>(_S[_qp].transpose()) +
-                         (_C[_qp] * dE).singleProductI(_F[_qp]);
+    // dPK1/d(F_ust) = d(F_ust)/d(F_ust) · S + F_ust · dS/d(F_ust)
+    //   d(F_ust)/d(F_ust)·S gives I × S^T (per the existing template, with S^T because
+    //   PK1 = F·S and we differentiate F).
+    //   F_ust · dS/d(F_ust) via dS/dE · dE/d(F_ust).
+    const RankFourTensor termA =
+        RankTwoTensor::Identity().times<i_, k_, j_, l_>(_S[_qp].transpose());
+    _pk1_jacobian[_qp] = termA + (_C[_qp] * dE_dFust).singleProductI(_F_ust[_qp]);
+    // Bypass-F-bar variant: same Term A; σ chain uses dE_dFstab (without
+    // _d_F_stab_d_F_ust). Used by specialty kernels whose coupled variable bypasses
+    // F-bar.
+    _pk1_jacobian_bypass_fbar[_qp] =
+        termA + (_C[_qp] * dE_dFstab).singleProductI(_F_ust[_qp]);
   }
-  // Small deformations all are equivalent
+  // Small deformations: PK1 = PK2 = σ; PK2 chain to PK1 still needs the F-bar local
+  // contribution through dE/d(F_stab) · d(F_stab)/d(F_ust). For specialty bypass paths,
+  // skip the F-bar factor.
   else
   {
     _pk1_stress[_qp] = _S[_qp];
-    _pk1_jacobian[_qp] = _C[_qp];
+    _pk1_jacobian[_qp] = _C[_qp] * _d_F_stab_d_F_ust[_qp];
+    _pk1_jacobian_bypass_fbar[_qp] = _C[_qp];
   }
 }
