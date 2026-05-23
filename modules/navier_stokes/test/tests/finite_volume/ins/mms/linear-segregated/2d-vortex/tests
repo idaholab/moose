@@ -1,6 +1,6 @@
 [Tests]
   issues = '#27280'
-  design = 'SIMPLE.md'
+  design = 'SIMPLE.md RhieChowMassFlux.md LinearFVMomentumPressure.md'
   [vortex-orthogonal]
     type = MMSTest
     input = test.py
@@ -16,6 +16,22 @@
     min_parallel = 4
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [vortex-orthogonal-reconstructed]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexOrthogonalReconstructed
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients and obtain second order spatial convergence for velocity and pressure on an orthogonal grid.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [vortex-nonorthogonal-reconstructed]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexNonorthogonalReconstructed
+    min_parallel = 4
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients and preserve second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
   []
 []

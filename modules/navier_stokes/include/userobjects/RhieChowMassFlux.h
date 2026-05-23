@@ -46,6 +46,15 @@ public:
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
+  /**
+   * Get the pressure gradient component used by the momentum predictor.
+   *
+   * The default Green-Gauss option returns the pressure variable gradient. The reconstructed option
+   * returns the pressure gradient inferred from the conservative Rhie-Chow face fluxes and the
+   * momentum relation after the first pressure correction has produced a reconstructed field.
+   */
+  Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
+
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -89,8 +98,17 @@ protected:
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
 
+  /// Whether the Rhie-Chow object should use reconstructed pressure gradients when available
+  bool useReconstructedPressureGradient() const
+  {
+    return _pressure_gradient_type == "reconstructed";
+  }
+
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
+
+  /// Update face velocities from the current conservative mass fluxes
+  void updateFaceVelocityFromMassFlux();
 
   /// Populate the face values of the H/A and 1/A fields
   void
@@ -143,6 +161,10 @@ protected:
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
+  /// Face velocity reconstructed from the conservative Rhie-Chow mass flux
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _face_velocity;
+
   /**
    * We hold on to the cell-based 1/A vectors so that we can easily reconstruct the
    * cell velocities as well.
@@ -166,6 +188,16 @@ protected:
    * Should not be used in other conditions.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
+
+  /**
+   * Pressure gradient reconstructed from the conservative face fluxes.
+   *
+   * For each cell, the velocity is recovered from the face-normal velocities with the
+   * least-squares flux reconstruction described in Aguerre et al. (2018). The reconstructed
+   * pressure gradient then follows from the cell momentum relation
+   * \f$\vec{u}_C = - (H/A)_C - (1/A)_C \nabla p_C\f$.
+   */
+  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_reconstructed;
 
   /**
    * Functor describing the density of the fluid
@@ -195,6 +227,12 @@ protected:
 
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;
+
+  /// Enumerator for the pressure gradient used in the momentum predictor
+  const MooseEnum _pressure_gradient_type;
+
+  /// Relaxation factor for reconstructed cell velocities and pressure gradients
+  const Real _reconstructed_pressure_gradient_relaxation;
 
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the

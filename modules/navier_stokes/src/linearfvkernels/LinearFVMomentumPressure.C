@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
+#include "RhieChowMassFlux.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 
@@ -23,6 +24,10 @@ LinearFVMomentumPressure::validParams()
                              "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::pressure,
                                 "The pressure variable whose gradient should be used.");
+  params.addParam<UserObjectName>(
+      "rhie_chow_user_object",
+      "Rhie-Chow mass flux user object that supplies the pressure gradient. If omitted, the "
+      "kernel uses the pressure variable Green-Gauss gradient.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -34,7 +39,10 @@ LinearFVMomentumPressure::validParams()
 LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
-    _pressure_var(getPressureVariable(NS::pressure))
+    _pressure_var(getPressureVariable(NS::pressure)),
+    _rhie_chow_mass_flux(isParamValid("rhie_chow_user_object")
+                             ? &getUserObject<RhieChowMassFlux>("rhie_chow_user_object")
+                             : nullptr)
 {
   _pressure_var.computeCellGradients();
 }
@@ -60,5 +68,8 @@ LinearFVMomentumPressure::computeMatrixContribution()
 Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
-  return -_pressure_var.gradSlnComponent(*_current_elem_info, _index) * _current_elem_volume;
+  const Real pressure_gradient =
+      _rhie_chow_mass_flux ? _rhie_chow_mass_flux->pressureGradient(*_current_elem_info, _index)
+                           : _pressure_var.gradSlnComponent(*_current_elem_info, _index);
+  return -pressure_gradient * _current_elem_volume;
 }

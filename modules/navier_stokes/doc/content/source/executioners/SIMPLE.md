@@ -81,6 +81,15 @@ the $A^{-1}H$ and $A^{-1}$ fields are interpolated to the faces in a discretized
 This correction applies the continuity constraint in an iterative manner, while ensuring the lack of
 numerical pressure checker-boarding phenomena.
 
+The cell pressure gradient used in the next momentum predictor may be taken directly from the
+Green-Gauss pressure gradient or reconstructed from the conservative face fluxes. The reconstructed
+option follows the flux-reconstruction idea of [!cite](aguerre2018oscillation): after the pressure
+correction, the Rhie-Chow face fluxes define face-normal velocities, a least-squares projection
+recovers a cell velocity, and the cell pressure gradient is inferred from
+$\vec{u}_C = -(H/A)_C - (1/A)_C \nabla p_C$. This keeps the pressure-gradient feedback consistent
+with the conservative face fluxes while preserving the default Green-Gauss behavior unless
+[!param](/UserObjects/RhieChowMassFlux/pressure_gradient_type) is set to `reconstructed`.
+
 The next guess for the velocity, however, does not necessarily respect the momentum equation. Therefore,
 the momentum prediction and pressure correction steps need to be repeated until both the momentum and
 continuity equations are satisfied.
