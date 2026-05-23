@@ -33,6 +33,9 @@ public:
   /// Returns the variable name corresponding to the time derivative of the MFEMVariable.
   inline const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
 
+  /// Declare default coefficients associated with this gridfunction
+  void declareCoefficients();
+
 protected:
   const MFEMFESpace & _fespace;
 

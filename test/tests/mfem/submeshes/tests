@@ -46,6 +46,22 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMCoupledCoefficientSource]
+    type = XMLDiff
+    input = magnetostatic.i
+    xmldiff = 'OutputData/MagnetostaticSimplified/Run0/Run0.pvd
+                OutputData/MagnetostaticSimplified/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'Kernels/inactive=auxvar_source '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/MagnetostaticSimplified '
+               'Outputs/ParaViewDataCollection/scalar_coefficients="electric_potential a_field_curl_mag electric_potential_grad_mag b_field_mag b_field_div" '
+               'Outputs/ParaViewDataCollection/vector_coefficients="a_field_curl electric_potential_grad"'               
+    ignored_items = "root['VTKFile']['UnstructuredGrid']['Piece']['PointData']['DataArray'][0]['#text']" # ignore vector potential
+    requirement = 'MOOSE shall have the ability to support source terms defined via functions of coupled variables, and output those functions for visualization.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1
+    recover = false
+  []  
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'

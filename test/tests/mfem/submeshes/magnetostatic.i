@@ -64,13 +64,20 @@
 []
 
 [Kernels]
+  inactive = coefficient_source
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = a_field
   []
-  [source]
+  [auxvar_source]
     type = MFEMMixedVectorGradientKernel
     trial_variable = electric_potential
+    variable = a_field
+    block = 1
+  []
+  [coefficient_source]
+    type = MFEMVectorFEDomainLFKernel
+    vector_coefficient = electric_potential_grad
     variable = a_field
     block = 1
   []
