@@ -29,9 +29,17 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _cauchy_jacobian(declareProperty<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _pk1_stress(declareProperty<RankTwoTensor>(_base_name + "pk1_stress")),
     _pk1_jacobian(declareProperty<RankFourTensor>(_base_name + "pk1_jacobian")),
+    _pk1_jacobian_bypass_fbar(
+        declareProperty<RankFourTensor>(_base_name + "pk1_jacobian_bypass_fbar")),
     _dpk1_d_grad_u(declareProperty<RankFourTensor>(_base_name + "dpk1_d_grad_u")),
     _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
-        _base_name + "d_deformation_gradient_d_grad_displacement"))
+        _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _F_ust(getMaterialPropertyByName<RankTwoTensor>(_base_name +
+                                                    "unstabilized_deformation_gradient")),
+    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_F_stab_d_F_ust(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized"))
 {
 }
 

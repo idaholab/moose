@@ -30,6 +30,10 @@ public:
 protected:
   /// Wrap PK2 -> PK1
   virtual void computeQpPK1Stress() override;
+  /// Wrap PK1 -> σ. Overridden here because PK2's PK1 = F_ust · S has a direct F_ust
+  /// dependence (Term A in dPK1/d(F_ust)) that PK1 base's σ-chain (which assumes
+  /// pk1_jacobian = constitutive dPK1/dF_stab) doesn't handle.
+  virtual void computeQpCauchyStress() override;
   /// Provide the PK2 stress and dPK2/dC
   virtual void computeQpPK2Stress() = 0;
 

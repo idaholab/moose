@@ -25,9 +25,7 @@ ComputeLagrangianStressCauchy::ComputeLagrangianStressCauchy(const InputParamete
                                                      "inverse_incremental_deformation_gradient")),
     _inv_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
-    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
-        _base_name + "d_spatial_velocity_increment_d_deformation_gradient"))
+    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
 {
 }
 
@@ -41,24 +39,43 @@ ComputeLagrangianStressCauchy::computeQpStressUpdate()
 void
 ComputeLagrangianStressCauchy::computeQpPK1Stress()
 {
-  // Actually do the (annoying) wrapping
+  // Wrap σ → PK1 using the *unstabilized* F (= F_actual at alpha = 1). F-bar enters
+  // only through σ via the strain calc's F-bar'd `_f_inv`, NOT through this kinematic
+  // wrap — this matches OLD's `StressDivergenceTensors`-on-displaced-mesh residual,
+  // which integrates `gradTest_spatial · σ dV` on the actual deformed mesh (so the
+  // implicit "wrap F" is F_actual, NOT the F-bar'd F).
   if (_large_kinematics)
   {
-    _pk1_stress[_qp] = _F[_qp].det() * _cauchy_stress[_qp] * _inv_def_grad[_qp].transpose();
+    const RankTwoTensor F_ust_inv = _F_ust[_qp].inverse();
+    const RankTwoTensor F_ust_invT = F_ust_inv.transpose();
+    const Real det_F_ust = _F_ust[_qp].det();
+    _pk1_stress[_qp] = det_F_ust * _cauchy_stress[_qp] * F_ust_invT;
 
     usingTensorIndices(i_, j_, k_, l_);
-    _pk1_jacobian[_qp] = _pk1_stress[_qp].outerProduct(_inv_def_grad[_qp].transpose());
-    _pk1_jacobian[_qp] -= _pk1_stress[_qp].times<i_, l_, j_, k_>(_inv_def_grad[_qp]);
-    // Chain the stored d(dL)/dF derivative explicitly instead of baking in the
-    // linear-approximation factor f^{-1} that used to appear in the middle of the
-    // tripleProductJkl call.
-    _pk1_jacobian[_qp] +=
-        _F[_qp].det() * (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp])
-                            .singleProductJ(_inv_def_grad[_qp]);
+    // Geometric pieces of dPK1/d(F_ust) (independent of F-bar):
+    const RankFourTensor geom = _pk1_stress[_qp].outerProduct(F_ust_invT) -
+                                _pk1_stress[_qp].times<i_, l_, j_, k_>(F_ust_inv);
+    // σ chain WITHOUT the F-bar `_d_F_stab_d_F_ust` factor — for specialty kernels
+    // whose coupled variable adds to F_ust AFTER F-bar (WPS strain_zz, homogenization
+    // macro_grad), so the perturbation bypasses F-bar's chain.
+    const RankFourTensor sigma_chain_no_fbar =
+        det_F_ust *
+        (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp])
+            .singleProductJ(F_ust_inv);
+    _pk1_jacobian_bypass_fbar[_qp] = geom + sigma_chain_no_fbar;
+    // σ chain WITH the F-bar chain — the default `_pk1_jacobian` for disp Jacobian.
+    _pk1_jacobian[_qp] =
+        geom +
+        det_F_ust * (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp] *
+                     _d_F_stab_d_F_ust[_qp])
+                        .singleProductJ(F_ust_inv);
   }
   else
   {
+    // Small kinematics: PK1 = σ (no wrap). The F-bar chain enters via
+    // `_d_F_stab_d_F_ust` for the disp Jacobian path; specialty paths bypass it.
     _pk1_stress[_qp] = _cauchy_stress[_qp];
-    _pk1_jacobian[_qp] = _cauchy_jacobian[_qp];
+    _pk1_jacobian[_qp] = _cauchy_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
+    _pk1_jacobian_bypass_fbar[_qp] = _cauchy_jacobian[_qp];
   }
 }

@@ -59,6 +59,18 @@ protected:
   // Derivatives of the residual w.r.t. the out-of-plane strain
   virtual Real computeQpJacobianOutOfPlaneStrain() = 0;
 
+  /// Non-local F-bar contribution to δPK1 at the current `_qp`, given the perturbation
+  /// `delta_F_avg` of the element-average F. Implements the shared chain
+  ///   δF_stab_NL = _d_F_stab_d_F_avg · δF_avg
+  ///   δdL_NL    = _d_spatial_velocity_increment_d_F · δF_stab_NL
+  ///   δσ_NL     = _cauchy_jacobian · δdL_NL
+  ///   δPK1_NL   = det(F_ust) · δσ_NL · F_ust^{-T}    (large kinematics)
+  ///             = δσ_NL                               (small kinematics, PK1 == σ)
+  /// Returns zero when F-bar is off (`!_stabilize_strain`). Used by the TL displacement
+  /// Jacobian, the WPS off-diag Jacobian, and the homogenization scalar↔disp Jacobian
+  /// — anywhere the disp perturbation chains through F-bar's non-local route.
+  RankTwoTensor deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const;
+
 protected:
   /// If true use large deformation kinematics
   const bool _large_kinematics;
@@ -111,9 +123,19 @@ protected:
 
   /// Partials of the F-bar-stabilized deformation gradient. Used by the UL kernel to assemble
   /// the F-bar Jacobian contribution. For F-bar off, _d_F_stab_d_F_ust = I^(4) and
-  /// _d_F_stab_d_F_avg = 0, so the kernel chain reduces to the unstabilized case.
+  /// _d_F_stab_d_F_avg = 0, so the kernel chain reduces to the unstabilized case. TL also
+  /// uses `_d_F_stab_d_F_avg` directly for the non-local F-bar Jacobian contribution to PK1
+  /// (since after the F_ust-wrap architectural change PK1 = det(F_ust) σ F_ust^{-T} no
+  /// longer contains the non-local F-bar effect — it has to enter through the σ-via-dL
+  /// chain explicitly).
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
+
+  /// Cauchy-stress Jacobian dσ/d(dL), published by `ComputeLagrangianStressBase` as
+  /// `cauchy_jacobian`. Used by the TL kernel to assemble the non-local F-bar Jacobian
+  /// contribution (chain: cauchy_jacobian · _d_spatial_velocity_increment_d_F ·
+  /// _d_F_stab_d_F_avg · δF_avg → δσ_NL → PK1 wrap via F_ust).
+  const MaterialProperty<RankFourTensor> & _cauchy_jacobian;
 
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;

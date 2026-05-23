@@ -65,6 +65,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
     _d_F_stab_d_F_avg(
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
+    _cauchy_jacobian(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)
@@ -133,6 +135,19 @@ Real
 LagrangianStressDivergenceBase::computeQpJacobian()
 {
   return computeQpJacobianDisplacement(_alpha, _alpha);
+}
+
+RankTwoTensor
+LagrangianStressDivergenceBase::deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const
+{
+  if (!_stabilize_strain)
+    return RankTwoTensor();
+  const RankTwoTensor delta_F_stab_nl = _d_F_stab_d_F_avg[_qp] * delta_F_avg;
+  const RankTwoTensor delta_dL_nl = _d_spatial_velocity_increment_d_F[_qp] * delta_F_stab_nl;
+  const RankTwoTensor delta_sigma_nl = _cauchy_jacobian[_qp] * delta_dL_nl;
+  if (_large_kinematics)
+    return _F_ust[_qp].det() * delta_sigma_nl * _F_ust[_qp].inverse().transpose();
+  return delta_sigma_nl;
 }
 
 Real
