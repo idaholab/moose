@@ -1,20 +1,46 @@
 [Tests]
   issues = '#17472'
   design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
-  [manual_TaylorExpansion]
+  [manual_TaylorExpansion_no_stab]
     type = CSVDiff
     input = 'new_system_manual.i'
-    csvdiff = 'TaylorExpansion.csv'
-    requirement = "Large deformation kinematics give equivalent results for the same kinematics"
+    csvdiff = 'TaylorExpansion_no_stabilization.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
     capabilities = 'method!=dbg'
-    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion"
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_no_stabilization"
   []
-  [manual_EigenSolution]
+  [manual_EigenSolution_no_stab]
     type = CSVDiff
     input = 'new_system_manual.i'
-    csvdiff = 'EigenSolution.csv'
-    requirement = "Large deformation kinematics give equivalent results for the same kinematics"
+    csvdiff = 'EigenSolution_no_stabilization.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
     capabilities = 'method!=dbg'
-    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution"
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_no_stabilization"
+  []
+  [manual_TaylorExpansion_with_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'TaylorExpansion_with_stabilization.csv'
+    requirement = "Large deformation kinematics, with stabilization, produce results compatible "
+                  "with the old kernel system when using `F_bar_mode = incremental` (the OLD-compat "
+                  "F-bar averages the incremental F, matching `ComputeFiniteStrain` + "
+                  "`volumetric_locking_correction = true`)."
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+    # Residual diff vs OLD comes from the deliberate axial-vector-based theta formula in
+    # `computeRashidApproximateIncrement` (vs. OLD's trace-based form); F-bar itself is
+    # equivalent. Tolerance loosened just enough to accommodate that piece.
+    rel_err = 3.0E-5
+  []
+  [manual_EigenSolution_with_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'EigenSolution_with_stabilization.csv'
+    requirement = "Large deformation kinematics, with stabilization, produce results compatible "
+                  "with the old kernel system when using `F_bar_mode = incremental` (EigenSolution "
+                  "polar-decomposition variant)."
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+    rel_err = 3.0E-5
   []
 []

@@ -67,5 +67,21 @@
       cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
       detail = 'for large displacements, with stabilization, and Neurmann BCs'
     []
+    [dirichlet_large_right_incremental]
+      type = PetscJacobianTester
+      input = 'dirichlet.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+      detail = 'for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and Dirichlet BCs'
+    []
+    [neumann_large_right_incremental]
+      type = PetscJacobianTester
+      input = 'neumann.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+      detail = 'for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and Neumann BCs'
+    []
   []
 []

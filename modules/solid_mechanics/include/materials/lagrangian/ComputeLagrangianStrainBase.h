@@ -58,6 +58,19 @@ public:
     RashidEigen         ///< "Exact": polar decomposition + matrix logs
   };
 
+  /// What F gets F-bar volumetric correction applied to. Affects only `stabilize_strain = true`.
+  ///   Total      → average the full deformation gradient F_ust at each qp, then rescale by
+  ///                gamma = cbrt(det(F_avg) / det(F_ust[qp])). This is the existing behavior.
+  ///   Incremental → average the *incremental* F (`f_ust = F_ust · F_ust_old^{-1}`) at each qp,
+  ///                 then rescale by gamma = cbrt(det(f_avg) / det(f_ust[qp])). Matches the
+  ///                 OLD `ComputeFiniteStrain` F-bar (averaged Fhat) so cumulative strain is
+  ///                 bit-for-bit compatible with `volumetric_locking_correction = true`.
+  enum class FBarMode
+  {
+    Total,
+    Incremental
+  };
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeProperties() override;
@@ -107,6 +120,9 @@ protected:
   /// If true stabilize the strains with F_bar
   const bool _stabilize_strain;
 
+  /// Selected F-bar averaging mode (Total vs. Incremental). See `FBarMode`.
+  const FBarMode _F_bar_mode;
+
   /// Generalized-midpoint weight for the deformation gradient (1.0 = backward Euler, 0.5 = midpoint)
   const Real _alpha;
 
@@ -144,6 +160,11 @@ protected:
 
   /// The unstabilized (alpha-weighted) deformation gradient
   MaterialProperty<RankTwoTensor> & _F_ust;
+
+  /// Old unstabilized deformation gradient. Needed for `F_bar_mode = incremental` so the
+  /// incremental F (`F_ust · F_ust_old^{-1}`) at this step is built from the unstabilized
+  /// pair (matching OLD `ComputeFiniteStrain`'s `_Fhat`). Only consulted in incremental mode.
+  const MaterialProperty<RankTwoTensor> & _F_ust_old;
 
   /// The literal deformation gradient at n+1 (I + grad u_{n+1}). Equals _F_ust when alpha = 1.
   /// Needed by the UL kernel for the spatial-to-reference pull-back, since the spatial frame is

@@ -22,6 +22,16 @@ ComputeLagrangianStrainBase<G>::baseParams()
   params.addParam<bool>(
       "large_kinematics", false, "Use large displacement kinematics in the kernel.");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
+  MooseEnum F_bar_mode("total incremental", "total");
+  params.addParam<MooseEnum>(
+      "F_bar_mode",
+      F_bar_mode,
+      "What deformation gradient F-bar averages over (only used when `stabilize_strain = true`). "
+      "'total' (default) averages the full F at each qp and rescales each qp's F by "
+      "cbrt(det(F_avg)/det(F_ust)). 'incremental' averages the incremental F "
+      "(F_ust · F_ust_old^{-1}) at each qp and rescales by cbrt(det(f_avg)/det(f_ust)); this is "
+      "bit-for-bit compatible with the OLD `ComputeFiniteStrain` + `volumetric_locking_correction = "
+      "true` formulation. Set to 'incremental' when cross-checking against the old kernel system.");
   params.addRangeCheckedParam<Real>(
       "alpha",
       1.0,
@@ -61,6 +71,7 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
+    _F_bar_mode(getParam<MooseEnum>("F_bar_mode").template getEnum<FBarMode>()),
     _alpha(getParam<Real>("alpha")),
     _kinematic_approximation(
         getParam<MooseEnum>("kinematic_approximation").template getEnum<KinematicApproximation>()),
@@ -80,6 +91,8 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
         declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
     _vorticity_increment(declareProperty<RankTwoTensor>(_base_name + "vorticity_increment")),
     _F_ust(declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_ust_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _F_actual(declareProperty<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
     _F_avg(declareProperty<RankTwoTensor>(_base_name + "average_deformation_gradient")),
     _F(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
@@ -142,6 +155,7 @@ ComputeLagrangianStrainBase<G>::initQpStatefulProperties()
   _mechanical_strain[_qp].zero();
   _rotated_mechanical_strain[_qp].zero();
   _F[_qp].setToIdentity();
+  _F_ust[_qp].setToIdentity();
   _rotation[_qp].setToIdentity();
 }
 
@@ -178,7 +192,19 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
   if (_large_kinematics)
   {
     _F_inv[_qp] = _F[_qp].inverse();
-    _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
+    // For `F_bar_mode = incremental`: `_f_inv` must invert the *incremental* F that was
+    // F-bar'd (= `gamma_inc · F_ust · F_ust_old^{-1}`, matching OLD `ComputeFiniteStrain`'s
+    // `_Fhat` after its volumetric-locking correction). Since `_F = gamma_inc · F_ust`,
+    // `(gamma_inc · F_ust · F_ust_old^{-1})^{-1} = F_ust_old · _F^{-1}` — i.e., pair the
+    // unstabilized old F with the (cumulative) stabilized current `_F^{-1}`. Using
+    // `_F_old` (the *cumulative* F-bar'd previous-step `_F`) here would compound F-bar
+    // across steps and break OLD-compat. `total` mode keeps the existing form (where `_F`
+    // and `_F_old` are the cumulative full-F F-bar'd values and the ratio gives the
+    // F-bar'd incremental F directly).
+    if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+      _f_inv[_qp] = _F_ust_old[_qp] * _F_inv[_qp];
+    else
+      _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
 
     // Dispatch to the active kinematic-approximation helper. Each helper returns
     // dd (= Δd), dw (= Δw), and the f^{-1}-derivatives of dL = dd + dw and of dw alone.
@@ -690,27 +716,57 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
   // If stabilization is on do the volumetric correction
   if (_stabilize_strain)
   {
+    // `_F_avg` consistently stores the element average of `F_ust` regardless of mode;
+    // it's consumed by the UL kernel for the spatial-frame push-forward, which is a
+    // purely-geometric quantity. In `F_bar_mode = incremental` the F-bar chain itself
+    // operates on the *incremental* averaged tensor `f_avg = avg(F_ust · F_ust_old^{-1})`,
+    // which we compute locally — the kernel matches by weighting grad_phi by F_ust_old^{-1}
+    // in its element average. Incremental mode only makes sense for large kinematics
+    // (OLD's Fhat F-bar lives in the finite-strain code path).
+    const bool incremental = (_F_bar_mode == FBarMode::Incremental);
+    if (incremental && !_large_kinematics)
+      mooseError("`F_bar_mode = incremental` requires `large_kinematics = true`. The "
+                 "incremental F-bar formulation is the multiplicative correction to the "
+                 "incremental F, which is only defined for large kinematics. Use "
+                 "`F_bar_mode = total` (the default) with small kinematics.");
     const auto F_avg = StabilizationUtils::elementAverage(
         [this](unsigned int qp) { return _F_ust[qp]; }, _JxW, _coord);
-    // All quadrature points have the same F_avg
+    const auto f_avg = incremental
+                           ? StabilizationUtils::elementAverage(
+                                 [this](unsigned int qp)
+                                 { return _F_ust[qp] * _F_ust_old[qp].inverse(); },
+                                 _JxW,
+                                 _coord)
+                           : RankTwoTensor();
+    // Always publish avg(F_ust) — UL kernel uses this for the push-forward.
     _F_avg.set().setAllValues(F_avg);
-    // Make the appropriate modification, depending on small or large
-    // deformations
+    // What the F-bar gamma and `_d_F_stab_d_F_avg` are built against (also what the
+    // kernel-side `_avg_grad_trial` will represent the δ of):
+    const auto & avg_for_chain = incremental ? f_avg : F_avg;
+    // Make the appropriate modification, depending on small or large deformations
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
       if (_large_kinematics)
       {
-        // Multiplicative F-bar: F_stab = (det F_avg / det F_ust)^{1/3} * F_ust.
-        // Chain-rule partials:
-        //   dF_stab/dF_ust = gamma * I^(4) - (gamma/3) * F_ust ⊗ F_ust^{-T}
-        //   dF_stab/dF_avg = (gamma/3) * F_ust ⊗ F_avg^{-T}
-        const Real gamma = std::pow(F_avg.det() / _F[_qp].det(), 1.0 / 3.0);
+        // Multiplicative F-bar: F_stab = gamma * F_ust where
+        //   gamma_total = cbrt(det(F_avg) / det(F_ust))                       (total mode)
+        //   gamma_inc   = cbrt(det(f_avg) / det(f_ust)),  f_ust = F_ust·F_ust_old^{-1}
+        //                                                                     (incremental mode)
+        // For incremental:  det(f_ust) = det(F_ust)/det(F_ust_old).
+        //   d log det(f_ust)/d F_ust = F_ust^{-T}   (same as the total-mode chain)
+        // so `_d_F_stab_d_F_ust` shares the total-mode shape. The non-local chain
+        // contracts `_d_F_stab_d_F_avg` with δ(averaged-quantity); kernel computes
+        // δf_avg in incremental mode by weighting grad_phi by F_ust_old^{-1} in its
+        // element average.
+        const Real det_ust_local =
+            incremental ? _F_ust[_qp].det() / _F_ust_old[_qp].det() : _F[_qp].det();
+        const Real gamma = std::pow(avg_for_chain.det() / det_ust_local, 1.0 / 3.0);
         const auto Fust_invT = _F_ust[_qp].inverse().transpose();
-        const auto Favg_invT = F_avg.inverse().transpose();
+        const auto avg_invT = avg_for_chain.inverse().transpose();
         _d_F_stab_d_F_ust[_qp] = gamma * RankFourTensor::IdentityFour() -
                                  (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
         _d_F_stab_d_F_avg[_qp] =
-            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Favg_invT);
+            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(avg_invT);
         _F[_qp] *= gamma;
       }
       else

@@ -19,6 +19,14 @@ LagrangianStressDivergenceBase::validParams()
 
   params.addParam<bool>("large_kinematics", false, "Use large displacement kinematics");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
+  MooseEnum F_bar_mode("total incremental", "total");
+  params.addParam<MooseEnum>(
+      "F_bar_mode",
+      F_bar_mode,
+      "Which F gets the F-bar volumetric correction (must match the strain calc's setting). "
+      "'total' (default) reproduces existing behavior; 'incremental' makes the F-bar element-"
+      "average operate on the incremental F so cumulative strain matches OLD's "
+      "`ComputeFiniteStrain` + `volumetric_locking_correction = true`.");
 
   params.addParam<std::string>("base_name", "Material property base name");
 
@@ -43,6 +51,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
   : JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>(parameters),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
+    _F_bar_mode(getParam<MooseEnum>("F_bar_mode") == "incremental" ? FBarMode::Incremental
+                                                                    : FBarMode::Total),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _alpha(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
@@ -50,6 +60,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _avg_grad_trial(_ndisp),
     _F_ust(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_ust_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name +
+                                                           "unstabilized_deformation_gradient")),
     _F_avg(getMaterialPropertyByName<RankTwoTensor>(_base_name + "average_deformation_gradient")),
     _f_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name +
                                                     "inverse_incremental_deformation_gradient")),
