@@ -21,6 +21,7 @@
 #include <vector>
 
 class SystemBase;
+class ElemInfo;
 
 namespace libMesh
 {
@@ -29,13 +30,44 @@ class NumericVector;
 }
 
 /**
+ * Read-only handle to a cell-centered linear finite-volume gradient field stored on a system.
+ */
+class LinearFVGradientField
+{
+public:
+  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
+
+  LinearFVGradientField(const SystemBase & sys, const GradientContainer & components);
+
+  /// Access the underlying component vectors keyed by spatial direction.
+  const GradientContainer & components() const { return _components; }
+
+  /// Read one gradient component for a variable at an element.
+  Real
+  component(const ElemInfo & elem_info, unsigned int variable_number, unsigned int component) const;
+
+  /// Read the full gradient for a variable at an element.
+  RealVectorValue gradient(const ElemInfo & elem_info, unsigned int variable_number) const;
+
+private:
+  /// System whose dof map indexes this gradient field.
+  const SystemBase & _sys;
+
+  /// Component vectors keyed by spatial direction.
+  const GradientContainer & _components;
+};
+
+/**
  * Shared storage and allocation logic for linear finite-volume cell gradients for
  * variables in the system attribute of this class
  */
 class LinearFVGradientInterface
 {
 public:
-  LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
+  LinearFVGradientInterface(SystemBase & sys)
+    : _sys(sys), _raw_gradient_field(_sys, _raw_grad_container)
+  {
+  }
 
   /**
    * Access the stored raw cell-centered gradient components.
@@ -46,6 +78,20 @@ public:
   {
     return _raw_grad_container;
   }
+
+  /**
+   * Access the default raw Green-Gauss cell-centered gradient field.
+   * @return Read-only field handle backed by the system-owned raw gradient storage.
+   */
+  const LinearFVGradientField & linearFVGradientField() const { return _raw_gradient_field; }
+
+  /**
+   * Access the raw or limited cell-centered gradient field.
+   * @param limiter_type The limiter type whose gradient field is being requested.
+   * @return Read-only field handle backed by system-owned gradient storage.
+   */
+  const LinearFVGradientField &
+  linearFVGradientField(const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Request storage and assembly of limiter-specific cell gradients.
@@ -135,6 +181,8 @@ protected:
   void initializeContainer(
       std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & container) const;
 
+  void initializeLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type);
+
   /// Reference to the system object
   SystemBase & _sys;
 
@@ -143,6 +191,9 @@ protected:
 
   /// Persisted raw cell-centered gradient components keyed by spatial direction.
   std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> _raw_grad_container;
+
+  /// Read-only field handle for the raw Green-Gauss gradient storage.
+  LinearFVGradientField _raw_gradient_field;
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
@@ -155,6 +206,10 @@ protected:
   std::unordered_map<Moose::FV::GradientLimiterType,
                      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>>
       _raw_limited_grad_containers;
+
+  /// Read-only field handles for persisted limited gradient storage.
+  std::unordered_map<Moose::FV::GradientLimiterType, std::unique_ptr<LinearFVGradientField>>
+      _limited_gradient_fields;
 
   /// Scratch storage for limited gradients assembled during the current compute pass.
   std::unordered_map<Moose::FV::GradientLimiterType,
