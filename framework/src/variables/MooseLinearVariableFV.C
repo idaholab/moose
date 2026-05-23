@@ -36,14 +36,14 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
-const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-linearFVGradientContainer(SystemBase & sys)
+const LinearFVGradientField &
+rawLinearFVGradientField(SystemBase & sys)
 {
   if (auto * const linear_system = dynamic_cast<LinearSystem *>(&sys))
-    return linear_system->linearFVGradientContainer();
+    return linear_system->linearFVGradientField();
 
   if (auto * const auxiliary_system = dynamic_cast<AuxiliarySystem *>(&sys))
-    return auxiliary_system->linearFVGradientContainer();
+    return auxiliary_system->linearFVGradientField();
 
   mooseError("The assigned system is not a linear or an auxiliary system. Linear variables can "
              "only be assigned to linear or auxiliary systems.");
@@ -67,7 +67,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _needs_cell_gradients(false),
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
-    _grad_container(linearFVGradientContainer(this->_sys)),
+    _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
@@ -163,10 +163,12 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const Sta
 
   if (_needs_cell_gradients)
   {
+    const auto & gradient_components = _raw_gradient_field.components();
+    const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
+
     _cell_gradient.zero();
     for (const auto i : make_range(this->_mesh.dimension()))
-      _cell_gradient(i) =
-          (*_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
+      _cell_gradient(i) = (*gradient_components[i])(dof);
   }
 
   return _cell_gradient;
@@ -179,9 +181,10 @@ MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
 {
   mooseAssert(_needs_cell_gradients,
               "Gradient component requested without calling computeCellGradients().");
-  mooseAssert(component < _grad_container.size(), "Gradient component index out of range.");
+  const auto & gradient_components = _raw_gradient_field.components();
+  mooseAssert(component < gradient_components.size(), "Gradient component index out of range.");
 
-  return (*_grad_container[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
+  return (*gradient_components[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
 }
 
 template <typename OutputType>
@@ -206,12 +209,13 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     gradientStateError(state);
 
   _cell_gradient.zero();
-  const auto & limited_grad_container =
-      _linear_system ? _linear_system->linearFVLimitedGradientContainer(limiter_type)
-                     : _auxiliary_system->linearFVLimitedGradientContainer(limiter_type);
+  const auto & limited_gradient_field =
+      _linear_system ? _linear_system->linearFVGradientField(limiter_type)
+                     : _auxiliary_system->linearFVGradientField(limiter_type);
+  const auto & gradient_components = limited_gradient_field.components();
+  const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
   for (const auto i : make_range(this->_mesh.dimension()))
-    _cell_gradient(i) =
-        (*limited_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
+    _cell_gradient(i) = (*gradient_components[i])(dof);
 
   return _cell_gradient;
 }
