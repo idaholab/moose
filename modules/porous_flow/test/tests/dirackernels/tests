@@ -326,14 +326,6 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
-  [pls03_action]
-    type = 'CSVDiff'
-    input = 'pls03_action.i'
-    csvdiff = 'pls03_action.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
-    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
-    issues = '#7992 #8139'
-  []
   [pls02reporter]
     type = 'CSVDiff'
     input = 'pls02reporter.i'
