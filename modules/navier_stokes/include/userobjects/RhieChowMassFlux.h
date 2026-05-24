@@ -24,6 +24,7 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
+class LinearFVGradientField;
 namespace libMesh
 {
 class Elem;
@@ -55,6 +56,9 @@ public:
    */
   Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
 
+  /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientField & pressureGradientField() const;
+
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -84,7 +88,7 @@ public:
    * @param momentum_system_numbers The numbers of these systems
    */
   void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   const LinearSystem & pressure_system,
+                                   LinearSystem & pressure_system,
                                    const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
@@ -97,6 +101,9 @@ protected:
   /// Select the right pressure gradient field and return a reference to the container
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
+
+  /// Get the registered pressure gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
   /// Whether the Rhie-Chow object should use reconstructed pressure gradients when available
   bool useReconstructedPressureGradient() const
@@ -217,7 +224,10 @@ protected:
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
-  const LinearSystem * _pressure_system;
+  LinearSystem * _pressure_system;
+
+  /// Pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientField * _pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
