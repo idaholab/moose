@@ -68,6 +68,50 @@ LinearFVGradientInterface::linearFVGradientField(
   return *it->second;
 }
 
+LinearFVGradientField &
+LinearFVGradientInterface::registerFVGradient(
+    const unsigned int variable_number,
+    const Moose::FV::LinearFVGradientSchemeType scheme_type,
+    const Moose::FV::GradientLimiterType limiter_type,
+    const std::string &)
+{
+  if (scheme_type != Moose::FV::LinearFVGradientSchemeType::GreenGauss)
+    mooseError("Unsupported linear FV gradient scheme requested on system '", _sys.name(), "'.");
+
+  auto * const variable =
+      dynamic_cast<MooseVariableFieldBase *>(_sys.variableWarehouse().getVariable(variable_number));
+  if (!variable)
+    mooseError("Linear FV gradients were requested for variable number ",
+               variable_number,
+               " on system '",
+               _sys.name(),
+               "', but no field variable with that number exists on the system.");
+
+  _requested_gradient_variables.insert(variable_number);
+
+  if (_raw_grad_container.empty() && _sys.currentSolution())
+  {
+    initializeContainer(_raw_grad_container);
+    initializeContainer(_temporary_gradient);
+    for (const auto limiter_type : _requested_limited_gradient_types)
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+
+      initializeContainer(_raw_limited_grad_containers[limiter_type]);
+      initializeContainer(_temporary_limited_gradient[limiter_type]);
+      if (!_limited_gradient_fields.count(limiter_type))
+        initializeLimitedGradientField(limiter_type);
+    }
+  }
+
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return _raw_gradient_field;
+
+  requestLinearFVLimitedGradients(limiter_type, variable_number);
+  return *libmesh_map_find(_limited_gradient_fields, limiter_type);
+}
+
 void
 LinearFVGradientInterface::computeGradients()
 {
@@ -98,7 +142,7 @@ LinearFVGradientInterface::computeGradients()
                                   fe_problem.mesh().ownedFaceInfoEnd());
 
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        fe_problem, _sys, temporary_gradient);
+        fe_problem, _sys, temporary_gradient, _requested_gradient_variables);
     Threads::parallel_reduce(face_info_range, gradient_face_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
@@ -113,7 +157,7 @@ LinearFVGradientInterface::computeGradients()
                                   fe_problem.mesh().ownedElemInfoEnd());
 
     ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        fe_problem, _sys, temporary_gradient);
+        fe_problem, _sys, temporary_gradient, _requested_gradient_variables);
     Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
@@ -165,11 +209,20 @@ LinearFVGradientInterface::computeGradients()
 bool
 LinearFVGradientInterface::needsLinearFVGradientStorage() const
 {
+  if (!_requested_gradient_variables.empty())
+    return true;
+
   for (const auto * const field_var : _sys.variableWarehouse().fieldVariables())
     if (field_var->needsGradientVectorStorage())
       return true;
 
   return false;
+}
+
+bool
+LinearFVGradientInterface::hasRegisteredFVGradient(const unsigned int variable_number) const
+{
+  return _requested_gradient_variables.count(variable_number);
 }
 
 void
@@ -188,9 +241,11 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
   _raw_grad_container.clear();
   _temporary_gradient.clear();
-  _limited_gradient_fields.clear();
-  _raw_limited_grad_containers.clear();
-  _temporary_limited_gradient.clear();
+
+  for (auto & limiter_container_pair : _raw_limited_grad_containers)
+    limiter_container_pair.second.clear();
+  for (auto & limiter_container_pair : _temporary_limited_gradient)
+    limiter_container_pair.second.clear();
 
   if (!needsLinearFVGradientStorage())
     return;
@@ -205,7 +260,8 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 
     initializeContainer(_raw_limited_grad_containers[limiter_type]);
     initializeContainer(_temporary_limited_gradient[limiter_type]);
-    initializeLimitedGradientField(limiter_type);
+    if (!_limited_gradient_fields.count(limiter_type))
+      initializeLimitedGradientField(limiter_type);
   }
 }
 
@@ -233,7 +289,7 @@ LinearFVGradientInterface::requestLinearFVLimitedGradients(
                _sys.name(),
                "', but no field variable with that number exists on the system.");
 
-  if (!variable->needsGradientVectorStorage())
+  if (!variable->needsGradientVectorStorage() && !hasRegisteredFVGradient(variable_number))
     mooseError("Limited gradients were requested for variable '",
                variable->name(),
                "' on system '",
@@ -241,12 +297,15 @@ LinearFVGradientInterface::requestLinearFVLimitedGradients(
                "', but regular gradients were not requested for that variable.");
 
   _requested_limited_gradient_variables[limiter_type].insert(variable_number);
+  _raw_limited_grad_containers[limiter_type];
+
+  if (!_limited_gradient_fields.count(limiter_type))
+    initializeLimitedGradientField(limiter_type);
 
   if (_requested_limited_gradient_types.insert(limiter_type).second && !_raw_grad_container.empty())
   {
     initializeContainer(_raw_limited_grad_containers[limiter_type]);
     initializeContainer(_temporary_limited_gradient[limiter_type]);
-    initializeLimitedGradientField(limiter_type);
   }
 }
 
