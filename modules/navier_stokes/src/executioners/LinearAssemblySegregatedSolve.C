@@ -12,6 +12,7 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 #include "Executioner.h"
+#include "MooseLinearVariableFV.h"
 
 using namespace libMesh;
 
@@ -109,6 +110,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   : SIMPLESolveBase(ex),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+    _pressure_gradient_field(nullptr),
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
@@ -371,11 +373,38 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 void
 LinearAssemblySegregatedSolve::initialSetup()
 {
+  if (_should_solve_pressure)
+    registerPressureGradient();
+
   if (_cht.enabled())
   {
     _cht.deduceCHTBoundaryCoupling();
     _cht.setupConjugateHeatTransferContainers();
   }
+}
+
+void
+LinearAssemblySegregatedSolve::registerPressureGradient()
+{
+  const auto & pressure_vars = _pressure_system.getVariables(0);
+  if (pressure_vars.size() != 1)
+    mooseError("Expected exactly one pressure variable in system '", _pressure_system.name(), "'.");
+
+  auto * const pressure_var = dynamic_cast<MooseLinearVariableFVReal *>(pressure_vars.front());
+  if (!pressure_var)
+    mooseError("The pressure variable in system '",
+               _pressure_system.name(),
+               "' must be a MooseLinearVariableFVReal.");
+
+  pressure_var->computeCellGradients();
+  _pressure_gradient_field = &_pressure_system.linearFVGradientField();
+}
+
+void
+LinearAssemblySegregatedSolve::updatePressureGradient()
+{
+  mooseAssert(_pressure_gradient_field, "The pressure gradient field must be registered first.");
+  _pressure_system.updateFVGradient(*_pressure_gradient_field);
 }
 
 std::pair<unsigned int, Real>
@@ -536,7 +565,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   _pressure_system.setSolution(pressure_current_solution);
 
   // We recompute the updated pressure gradient
-  _pressure_system.computeGradients();
+  updatePressureGradient();
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
@@ -677,7 +706,7 @@ LinearAssemblySegregatedSolve::solve()
     // Initialize pressure gradients, after this we just reuse the last ones from each
     // iteration
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      _pressure_system.computeGradients();
+      updatePressureGradient();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
