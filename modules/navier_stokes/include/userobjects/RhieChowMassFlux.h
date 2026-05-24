@@ -24,6 +24,7 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
+class LinearFVGradientField;
 namespace libMesh
 {
 class Elem;
@@ -45,6 +46,9 @@ public:
 
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+
+  /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientField & pressureGradientField() const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -75,7 +79,7 @@ public:
    * @param momentum_system_numbers The numbers of these systems
    */
   void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   const LinearSystem & pressure_system,
+                                   LinearSystem & pressure_system,
                                    const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
@@ -88,6 +92,9 @@ protected:
   /// Select the right pressure gradient field and return a reference to the container
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
+
+  /// Get the registered pressure gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -185,7 +192,10 @@ protected:
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
-  const LinearSystem * _pressure_system;
+  LinearSystem * _pressure_system;
+
+  /// Pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientField * _pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
