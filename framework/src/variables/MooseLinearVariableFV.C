@@ -36,6 +36,21 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
+MooseEnum
+linearFVGradientMethods()
+{
+  return MooseEnum("green-gauss", "green-gauss");
+}
+
+Moose::FV::LinearFVGradientSchemeType
+selectLinearFVGradientMethod(const std::string & method)
+{
+  if (method == "green-gauss")
+    return Moose::FV::LinearFVGradientSchemeType::GreenGauss;
+
+  mooseError("Linear FV gradient method '", method, "' is not currently supported.");
+}
+
 const LinearFVGradientField &
 rawLinearFVGradientField(SystemBase & sys)
 {
@@ -58,6 +73,10 @@ MooseLinearVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
+  params.addParam<MooseEnum>("gradient_method",
+                             linearFVGradientMethods(),
+                             "Default gradient computation method to register when a consumer "
+                             "requests gradients from this variable.");
   return params;
 }
 
@@ -68,6 +87,8 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
     _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
+    _default_gradient_scheme_type(
+        selectLinearFVGradientMethod(this->template getParam<MooseEnum>("gradient_method"))),
     _venkatakrishnan_limited_gradient_field(nullptr),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
@@ -105,9 +126,9 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
   _needs_cell_gradients = true;
 
   if (_linear_system)
-    _linear_system->registerFVGradient(this->_var_num);
+    _linear_system->registerFVGradient(this->_var_num, _default_gradient_scheme_type);
   else
-    _auxiliary_system->registerFVGradient(this->_var_num);
+    _auxiliary_system->registerFVGradient(this->_var_num, _default_gradient_scheme_type);
 }
 
 template <typename OutputType>
@@ -134,12 +155,11 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
 
   _needs_cell_gradients = true;
 
-  auto & gradient_field =
-      _linear_system
-          ? _linear_system->registerFVGradient(
-                this->_var_num, Moose::FV::LinearFVGradientSchemeType::GreenGauss, limiter_type)
-          : _auxiliary_system->registerFVGradient(
-                this->_var_num, Moose::FV::LinearFVGradientSchemeType::GreenGauss, limiter_type);
+  auto & gradient_field = _linear_system
+                              ? _linear_system->registerFVGradient(
+                                    this->_var_num, _default_gradient_scheme_type, limiter_type)
+                              : _auxiliary_system->registerFVGradient(
+                                    this->_var_num, _default_gradient_scheme_type, limiter_type);
   setLimitedGradientField(limiter_type, gradient_field);
 }
 
