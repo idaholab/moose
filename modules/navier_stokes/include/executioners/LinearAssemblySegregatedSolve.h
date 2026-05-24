@@ -14,6 +14,8 @@
 #include "SIMPLESolveBase.h"
 #include "CHTHandler.h"
 
+class LinearFVGradientField;
+
 /**
  * Common base class for segregated solvers for the Navier-Stokes
  * equations with linear FV assembly routines. Once the nonlinear
@@ -108,7 +110,10 @@ protected:
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
 
-  /// Explicitly update all registered pressure gradient fields.
+  /// Register the pressure gradient field requested by SIMPLE consumers.
+  void registerPressureGradient();
+
+  /// Explicitly update the registered pressure gradient field.
   void updatePressureGradient();
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
@@ -138,6 +143,8 @@ protected:
 
   /// Number of pressure corrector solves performed without recomputing the preconditioner
   unsigned int _pressure_pc_solve_counter;
+  /// Pressure gradient field used by the SIMPLE pressure coupling.
+  const LinearFVGradientField * _pressure_gradient_field;
 
   /// The number of the system corresponding to the energy equation
   const unsigned int _energy_sys_number;
