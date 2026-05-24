@@ -51,6 +51,16 @@ selectLinearFVGradientMethod(const std::string & method)
   mooseError("Linear FV gradient method '", method, "' is not currently supported.");
 }
 
+std::size_t
+limitedGradientFieldCacheIndex(const Moose::FV::GradientLimiterType limiter_type)
+{
+  const auto limiter_index = static_cast<int>(limiter_type);
+  if (limiter_index < 0 || limiter_index >= 1)
+    mooseError("Unsupported linear FV limited gradient type.");
+
+  return static_cast<std::size_t>(limiter_index);
+}
+
 const LinearFVGradientField &
 rawLinearFVGradientField(SystemBase & sys)
 {
@@ -89,7 +99,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
     _default_gradient_scheme_type(
         selectLinearFVGradientMethod(this->template getParam<MooseEnum>("gradient_method"))),
-    _venkatakrishnan_limited_gradient_field(nullptr),
+    _limited_gradient_field_cache{},
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
@@ -168,14 +178,10 @@ void
 MooseLinearVariableFV<OutputType>::setLimitedGradientField(
     const Moose::FV::GradientLimiterType limiter_type, const LinearFVGradientField & field)
 {
-  switch (limiter_type)
-  {
-    case Moose::FV::GradientLimiterType::Venkatakrishnan:
-      _venkatakrishnan_limited_gradient_field = &field;
-      return;
-    case Moose::FV::GradientLimiterType::None:
-      mooseError("Cannot cache a limited gradient field for the unlimited gradient type.");
-  }
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    mooseError("Cannot cache a limited gradient field for the unlimited gradient type.");
+
+  _limited_gradient_field_cache[limitedGradientFieldCacheIndex(limiter_type)] = &field;
 }
 
 template <typename OutputType>
@@ -183,15 +189,13 @@ const LinearFVGradientField &
 MooseLinearVariableFV<OutputType>::limitedGradientField(
     const Moose::FV::GradientLimiterType limiter_type) const
 {
-  switch (limiter_type)
-  {
-    case Moose::FV::GradientLimiterType::Venkatakrishnan:
-      if (_venkatakrishnan_limited_gradient_field)
-        return *_venkatakrishnan_limited_gradient_field;
-      break;
-    case Moose::FV::GradientLimiterType::None:
-      mooseError("The unlimited gradient field was requested through limitedGradientField().");
-  }
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    mooseError("The unlimited gradient field was requested through limitedGradientField().");
+
+  const auto * const limited_gradient_field =
+      _limited_gradient_field_cache[limitedGradientFieldCacheIndex(limiter_type)];
+  if (limited_gradient_field)
+    return *limited_gradient_field;
 
   mooseError("Limited gradients were requested for variable '",
              this->name(),
