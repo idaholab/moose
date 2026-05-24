@@ -12,7 +12,6 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 #include "Executioner.h"
-#include "MooseLinearVariableFV.h"
 
 using namespace libMesh;
 
@@ -128,9 +127,12 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   : SIMPLESolveBase(ex),
     _pressure_sys_number(_problem.linearSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getLinearSystem(_pressure_sys_number)),
+<<<<<<< HEAD
     _pressure_pc_recompute_frequency(getParam<unsigned int>("pressure_pc_recompute_frequency")),
     _pressure_pc_solve_counter(0),
     _pressure_gradient_field(nullptr),
+=======
+>>>>>>> 70d1f72d45d (Clean up RC UO. (#32999))
     _energy_sys_number(_has_energy_system
                            ? _problem.linearSysNum(getParam<SolverSystemName>("energy_system"))
                            : libMesh::invalid_uint),
@@ -393,9 +395,6 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 void
 LinearAssemblySegregatedSolve::initialSetup()
 {
-  if (_should_solve_pressure)
-    registerPressureGradient();
-
   if (_cht.enabled())
   {
     _cht.deduceCHTBoundaryCoupling();
@@ -404,27 +403,10 @@ LinearAssemblySegregatedSolve::initialSetup()
 }
 
 void
-LinearAssemblySegregatedSolve::registerPressureGradient()
-{
-  const auto & pressure_vars = _pressure_system.getVariables(0);
-  if (pressure_vars.size() != 1)
-    mooseError("Expected exactly one pressure variable in system '", _pressure_system.name(), "'.");
-
-  auto * const pressure_var = dynamic_cast<MooseLinearVariableFVReal *>(pressure_vars.front());
-  if (!pressure_var)
-    mooseError("The pressure variable in system '",
-               _pressure_system.name(),
-               "' must be a MooseLinearVariableFVReal.");
-
-  pressure_var->computeCellGradients();
-  _pressure_gradient_field = &_pressure_system.linearFVGradientField();
-}
-
-void
 LinearAssemblySegregatedSolve::updatePressureGradient()
 {
-  mooseAssert(_pressure_gradient_field, "The pressure gradient field must be registered first.");
-  _pressure_system.updateFVGradient(*_pressure_gradient_field);
+  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
+  _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
 }
 
 std::pair<unsigned int, Real>
