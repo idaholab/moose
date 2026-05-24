@@ -29,6 +29,18 @@ template <typename T>
 class NumericVector;
 }
 
+namespace Moose
+{
+namespace FV
+{
+/// Linear finite-volume gradient schemes supported by system-owned gradient fields.
+enum class LinearFVGradientSchemeType
+{
+  GreenGauss
+};
+}
+}
+
 /**
  * Read-only handle to a cell-centered linear finite-volume gradient field stored on a system.
  */
@@ -84,6 +96,19 @@ public:
    * @return Read-only field handle backed by the system-owned raw gradient storage.
    */
   const LinearFVGradientField & linearFVGradientField() const { return _raw_gradient_field; }
+
+  /**
+   * Register a system-owned linear FV gradient field and return its field handle.
+   *
+   * The returned handle is intended to be cached by setup-time consumers so assembly does not need
+   * string or map lookups.
+   */
+  LinearFVGradientField & registerFVGradient(
+      unsigned int variable_number,
+      Moose::FV::LinearFVGradientSchemeType scheme_type =
+          Moose::FV::LinearFVGradientSchemeType::GreenGauss,
+      Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None,
+      const std::string & name = "");
 
   /**
    * Access the raw or limited cell-centered gradient field.
@@ -178,6 +203,8 @@ protected:
 
   bool needsLinearFVGradientStorage() const;
 
+  bool hasRegisteredFVGradient(unsigned int variable_number) const;
+
   void initializeContainer(
       std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & container) const;
 
@@ -194,6 +221,9 @@ protected:
 
   /// Read-only field handle for the raw Green-Gauss gradient storage.
   LinearFVGradientField _raw_gradient_field;
+
+  /// Variable numbers requesting raw system-owned gradient fields.
+  std::unordered_set<unsigned int> _requested_gradient_variables;
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;

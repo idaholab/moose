@@ -18,6 +18,8 @@
 #include "libmesh/threads.h"
 #include "libmesh/system.h"
 
+#include <unordered_set>
+
 class FEProblemBase;
 class SystemBase;
 
@@ -44,7 +46,8 @@ public:
   ComputeLinearFVGreenGaussGradientFaceThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient);
+      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
+      const std::unordered_set<unsigned int> & requested_gradient_variables);
 
   /**
    * Splitting constructor.
@@ -88,4 +91,7 @@ protected:
   /// Cache for the temporary gradient being built. It is needed because in certain scenarios the
   /// old gradient is used while assembling the replacement gradient.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
+
+  /// Variables registered directly on the system for gradient computation.
+  const std::unordered_set<unsigned int> & _requested_gradient_variables;
 };
