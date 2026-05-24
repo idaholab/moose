@@ -137,6 +137,7 @@ public:
   using LinearFVGradientInterface::linearFVLimitedGradientContainer;
   using LinearFVGradientInterface::registerFVGradient;
   using LinearFVGradientInterface::requestLinearFVLimitedGradients;
+  using LinearFVGradientInterface::updateFVGradient;
 
   virtual void compute(ExecFlagType type) override;
 
