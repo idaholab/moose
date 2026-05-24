@@ -68,6 +68,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
     _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
+    _venkatakrishnan_limited_gradient_field(nullptr),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
@@ -99,6 +100,18 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 
 template <typename OutputType>
 void
+MooseLinearVariableFV<OutputType>::computeCellGradients()
+{
+  _needs_cell_gradients = true;
+
+  if (_linear_system)
+    _linear_system->registerFVGradient(this->_var_num);
+  else
+    _auxiliary_system->registerFVGradient(this->_var_num);
+}
+
+template <typename OutputType>
+void
 MooseLinearVariableFV<OutputType>::computeCellGradients(
     const Moose::FV::GradientLimiterType limiter_type)
 {
@@ -113,12 +126,56 @@ void
 MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
     const Moose::FV::GradientLimiterType limiter_type)
 {
-  computeCellGradients();
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+  {
+    computeCellGradients();
+    return;
+  }
 
-  if (_linear_system)
-    _linear_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
-  else
-    _auxiliary_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
+  _needs_cell_gradients = true;
+
+  auto & gradient_field =
+      _linear_system
+          ? _linear_system->registerFVGradient(
+                this->_var_num, Moose::FV::LinearFVGradientSchemeType::GreenGauss, limiter_type)
+          : _auxiliary_system->registerFVGradient(
+                this->_var_num, Moose::FV::LinearFVGradientSchemeType::GreenGauss, limiter_type);
+  setLimitedGradientField(limiter_type, gradient_field);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::setLimitedGradientField(
+    const Moose::FV::GradientLimiterType limiter_type, const LinearFVGradientField & field)
+{
+  switch (limiter_type)
+  {
+    case Moose::FV::GradientLimiterType::Venkatakrishnan:
+      _venkatakrishnan_limited_gradient_field = &field;
+      return;
+    case Moose::FV::GradientLimiterType::None:
+      mooseError("Cannot cache a limited gradient field for the unlimited gradient type.");
+  }
+}
+
+template <typename OutputType>
+const LinearFVGradientField &
+MooseLinearVariableFV<OutputType>::limitedGradientField(
+    const Moose::FV::GradientLimiterType limiter_type) const
+{
+  switch (limiter_type)
+  {
+    case Moose::FV::GradientLimiterType::Venkatakrishnan:
+      if (_venkatakrishnan_limited_gradient_field)
+        return *_venkatakrishnan_limited_gradient_field;
+      break;
+    case Moose::FV::GradientLimiterType::None:
+      mooseError("The unlimited gradient field was requested through limitedGradientField().");
+  }
+
+  mooseError("Limited gradients were requested for variable '",
+             this->name(),
+             "' without calling computeCellLimitedGradients().");
 }
 
 template <typename OutputType>
@@ -209,9 +266,7 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     gradientStateError(state);
 
   _cell_gradient.zero();
-  const auto & limited_gradient_field =
-      _linear_system ? _linear_system->linearFVGradientField(limiter_type)
-                     : _auxiliary_system->linearFVGradientField(limiter_type);
+  const auto & limited_gradient_field = limitedGradientField(limiter_type);
   const auto & gradient_components = limited_gradient_field.components();
   const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
   for (const auto i : make_range(this->_mesh.dimension()))

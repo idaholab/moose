@@ -23,6 +23,8 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
+#include <unordered_map>
+
 template <typename>
 class MooseLinearVariableFV;
 
@@ -97,7 +99,7 @@ public:
   /**
    * Switch to request cell gradient computations.
    */
-  void computeCellGradients() { _needs_cell_gradients = true; }
+  void computeCellGradients();
 
   /**
    * Switch to request cell gradient computations with an optional gradient limiter.
@@ -243,6 +245,12 @@ protected:
   /// Throw an error when somebody requests gradients at a non-current solution state
   [[noreturn]] void gradientStateError(const StateArg & state) const;
 
+  void setLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type,
+                               const LinearFVGradientField & field);
+
+  const LinearFVGradientField &
+  limitedGradientField(const Moose::FV::GradientLimiterType limiter_type) const;
+
   /**
    * Setup the boundary to Dirichlet BC map
    */
@@ -262,6 +270,9 @@ protected:
 
   /// Read-only handle to the unlimited cell gradient stored by the owning concrete system
   const LinearFVGradientField & _raw_gradient_field;
+
+  /// Read-only handle to the Venkatakrishnan-limited cell gradient.
+  const LinearFVGradientField * _venkatakrishnan_limited_gradient_field;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
