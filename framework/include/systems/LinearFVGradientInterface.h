@@ -182,6 +182,11 @@ protected:
   /// Compute and store the unlimited gradient field with each registered scheme.
   void updateBaseGradientField();
 
+  /// Compute unlimited gradients for variables registered to one scheme.
+  void
+  updateBaseGradientFieldForScheme(Moose::FV::LinearFVGradientSchemeType scheme_type,
+                                   const std::unordered_set<unsigned int> & gradient_variables);
+
   /// Compute and store a requested limited gradient field.
   void updateLimitedGradient(const Moose::FV::GradientLimiterType limiter_type);
 
