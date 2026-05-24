@@ -183,6 +183,7 @@ protected:
   void updateBaseGradientField();
 
   /// Compute unlimited gradients for variables registered to one scheme.
+  /// New producers should be added here without changing cached field access by consumers.
   void
   updateBaseGradientFieldForScheme(Moose::FV::LinearFVGradientSchemeType scheme_type,
                                    const std::unordered_set<unsigned int> & gradient_variables);
@@ -266,6 +267,7 @@ protected:
       _registered_gradient_schemes;
 
   /// Variable numbers keyed by the scheme that produces their base gradients.
+  /// This keeps producer selection per variable while consumers keep direct field handles.
   std::unordered_map<Moose::FV::LinearFVGradientSchemeType, std::unordered_set<unsigned int>>
       _registered_gradient_scheme_variables;
 
