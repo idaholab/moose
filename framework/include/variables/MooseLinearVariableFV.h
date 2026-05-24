@@ -23,6 +23,7 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
+#include <array>
 #include <unordered_map>
 
 template <typename>
@@ -282,8 +283,8 @@ protected:
   /// Default gradient scheme registered when consumers request gradients from this variable.
   const Moose::FV::LinearFVGradientSchemeType _default_gradient_scheme_type;
 
-  /// Read-only handle to the Venkatakrishnan-limited cell gradient.
-  const LinearFVGradientField * _venkatakrishnan_limited_gradient_field;
+  /// Read-only limited-gradient field handles keyed by GradientLimiterType values.
+  std::array<const LinearFVGradientField *, 1> _limited_gradient_field_cache;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
