@@ -25,9 +25,14 @@
 using namespace libMesh;
 
 LinearFVGradientField::LinearFVGradientField(const SystemBase & sys,
-                                             const GradientContainer & components)
-  : _sys(sys), _components(components)
+                                             const GradientContainer & components,
+                                             const Moose::FV::LinearFVGradientFieldType field_type,
+                                             const Moose::FV::GradientLimiterType limiter_type)
+  : _sys(sys), _components(components), _field_type(field_type), _limiter_type(limiter_type)
 {
+  mooseAssert((field_type == Moose::FV::LinearFVGradientFieldType::Base) ==
+                  (limiter_type == Moose::FV::GradientLimiterType::None),
+              "Base gradient fields must have no limiter and limited fields must have one.");
 }
 
 Real
@@ -146,6 +151,11 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientField & field)
   if (_raw_grad_container.empty())
     return;
 
+  if (&field.system() != &_sys)
+    mooseError("Requested update for a linear FV gradient field from a different system than '",
+               _sys.name(),
+               "'.");
+
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
   mooseAssert(perf_graph_interface,
               "LinearFVGradientInterface requires its owning system to implement "
@@ -154,23 +164,14 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientField & field)
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
   PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
-  if (&field == &_raw_gradient_field)
+  if (!field.isLimited())
   {
     updateBaseGradientField();
     return;
   }
 
-  for (const auto & limiter_field_pair : _limited_gradient_fields)
-    if (limiter_field_pair.second.get() == &field)
-    {
-      updateBaseGradientField();
-      updateLimitedGradient(limiter_field_pair.first);
-      return;
-    }
-
-  mooseError("Requested update for a linear FV gradient field that is not registered on system '",
-             _sys.name(),
-             "'.");
+  updateBaseGradientField();
+  updateLimitedGradient(field.limiterType());
 }
 
 void
@@ -334,7 +335,10 @@ LinearFVGradientInterface::initializeLimitedGradientField(
     const Moose::FV::GradientLimiterType limiter_type)
 {
   _limited_gradient_fields[limiter_type] = std::make_unique<LinearFVGradientField>(
-      _sys, libmesh_map_find(_raw_limited_grad_containers, limiter_type));
+      _sys,
+      libmesh_map_find(_raw_limited_grad_containers, limiter_type),
+      Moose::FV::LinearFVGradientFieldType::Limited,
+      limiter_type);
 }
 
 void

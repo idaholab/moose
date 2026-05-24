@@ -38,6 +38,13 @@ enum class LinearFVGradientSchemeType
 {
   GreenGauss
 };
+
+/// Type of gradient values stored in a linear FV gradient field.
+enum class LinearFVGradientFieldType
+{
+  Base,
+  Limited
+};
 }
 }
 
@@ -49,10 +56,26 @@ class LinearFVGradientField
 public:
   using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
 
-  LinearFVGradientField(const SystemBase & sys, const GradientContainer & components);
+  LinearFVGradientField(
+      const SystemBase & sys,
+      const GradientContainer & components,
+      Moose::FV::LinearFVGradientFieldType field_type = Moose::FV::LinearFVGradientFieldType::Base,
+      Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None);
 
   /// Access the underlying component vectors keyed by spatial direction.
   const GradientContainer & components() const { return _components; }
+
+  /// System whose DOF map indexes this field.
+  const SystemBase & system() const { return _sys; }
+
+  /// Type of gradient values stored in this field.
+  Moose::FV::LinearFVGradientFieldType fieldType() const { return _field_type; }
+
+  /// Whether this field stores limited gradients.
+  bool isLimited() const { return _field_type == Moose::FV::LinearFVGradientFieldType::Limited; }
+
+  /// Limiter type for limited fields, or None for base fields.
+  Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
 
   /// Read one gradient component for a variable at an element.
   Real
@@ -67,6 +90,12 @@ private:
 
   /// Component vectors keyed by spatial direction.
   const GradientContainer & _components;
+
+  /// Type of gradient values stored in this field.
+  const Moose::FV::LinearFVGradientFieldType _field_type;
+
+  /// Limiter type for limited fields.
+  const Moose::FV::GradientLimiterType _limiter_type;
 };
 
 /**
