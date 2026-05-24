@@ -72,8 +72,7 @@ LinearFVGradientField &
 LinearFVGradientInterface::registerFVGradient(
     const unsigned int variable_number,
     const Moose::FV::LinearFVGradientSchemeType scheme_type,
-    const Moose::FV::GradientLimiterType limiter_type,
-    const std::string &)
+    const Moose::FV::GradientLimiterType limiter_type)
 {
   if (scheme_type != Moose::FV::LinearFVGradientSchemeType::GreenGauss)
     mooseError("Unsupported linear FV gradient scheme requested on system '", _sys.name(), "'.");

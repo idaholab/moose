@@ -107,8 +107,7 @@ public:
       unsigned int variable_number,
       Moose::FV::LinearFVGradientSchemeType scheme_type =
           Moose::FV::LinearFVGradientSchemeType::GreenGauss,
-      Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None,
-      const std::string & name = "");
+      Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None);
 
   /**
    * Access the raw or limited cell-centered gradient field.
