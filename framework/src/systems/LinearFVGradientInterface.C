@@ -183,55 +183,73 @@ LinearFVGradientInterface::updateBaseGradientField()
   for (auto & vec : temporary_gradient)
     vec->zero();
 
-  auto & fe_problem = _sys.feProblem();
-  const auto have_registered_gradient_variables = !_registered_gradient_schemes.empty();
-  const std::unordered_set<unsigned int> empty_gradient_variables;
-  const auto scheme_variables_it =
-      _registered_gradient_scheme_variables.find(Moose::FV::LinearFVGradientSchemeType::GreenGauss);
-  const auto & producer_gradient_variables =
-      scheme_variables_it == _registered_gradient_scheme_variables.end()
-          ? empty_gradient_variables
-          : scheme_variables_it->second;
-
-  PARALLEL_TRY
+  if (_registered_gradient_scheme_variables.empty())
   {
-    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    FaceInfoRange face_info_range(fe_problem.mesh().ownedFaceInfoBegin(),
-                                  fe_problem.mesh().ownedFaceInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        fe_problem,
-        _sys,
-        temporary_gradient,
-        producer_gradient_variables,
-        have_registered_gradient_variables);
-    Threads::parallel_reduce(face_info_range, gradient_face_thread);
+    const std::unordered_set<unsigned int> empty_gradient_variables;
+    updateBaseGradientFieldForScheme(Moose::FV::LinearFVGradientSchemeType::GreenGauss,
+                                     empty_gradient_variables);
   }
-  fe_problem.checkExceptionAndStopSolve();
-
-  for (auto & vec : temporary_gradient)
-    vec->close();
-
-  PARALLEL_TRY
-  {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
-                                  fe_problem.mesh().ownedElemInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        fe_problem,
-        _sys,
-        temporary_gradient,
-        producer_gradient_variables,
-        have_registered_gradient_variables);
-    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
-  }
-  fe_problem.checkExceptionAndStopSolve();
+  else
+    for (const auto & scheme_variables_pair : _registered_gradient_scheme_variables)
+      updateBaseGradientFieldForScheme(scheme_variables_pair.first, scheme_variables_pair.second);
 
   for (const auto i : index_range(_raw_grad_container))
     temporary_gradient[i]->close();
 
   _raw_grad_container.swap(temporary_gradient);
+}
+
+void
+LinearFVGradientInterface::updateBaseGradientFieldForScheme(
+    const Moose::FV::LinearFVGradientSchemeType scheme_type,
+    const std::unordered_set<unsigned int> & gradient_variables)
+{
+  auto & fe_problem = _sys.feProblem();
+  auto & temporary_gradient = temporaryLinearFVGradientContainer();
+  const auto have_registered_gradient_variables = !_registered_gradient_schemes.empty();
+
+  switch (scheme_type)
+  {
+    case Moose::FV::LinearFVGradientSchemeType::GreenGauss:
+    {
+      PARALLEL_TRY
+      {
+        using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+        FaceInfoRange face_info_range(fe_problem.mesh().ownedFaceInfoBegin(),
+                                      fe_problem.mesh().ownedFaceInfoEnd());
+
+        ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
+            fe_problem,
+            _sys,
+            temporary_gradient,
+            gradient_variables,
+            have_registered_gradient_variables);
+        Threads::parallel_reduce(face_info_range, gradient_face_thread);
+      }
+      fe_problem.checkExceptionAndStopSolve();
+
+      for (auto & vec : temporary_gradient)
+        vec->close();
+
+      PARALLEL_TRY
+      {
+        using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+        ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
+                                      fe_problem.mesh().ownedElemInfoEnd());
+
+        ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
+            fe_problem,
+            _sys,
+            temporary_gradient,
+            gradient_variables,
+            have_registered_gradient_variables);
+        Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
+      }
+      fe_problem.checkExceptionAndStopSolve();
+
+      return;
+    }
+  }
 }
 
 void
