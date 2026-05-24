@@ -110,9 +110,6 @@ protected:
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
 
-  /// Register the pressure gradient field requested by SIMPLE consumers.
-  void registerPressureGradient();
-
   /// Explicitly update the registered pressure gradient field.
   void updatePressureGradient();
 
@@ -143,6 +140,7 @@ protected:
 
   /// Number of pressure corrector solves performed without recomputing the preconditioner
   unsigned int _pressure_pc_solve_counter;
+
   /// Pressure gradient field used by the SIMPLE pressure coupling.
   const LinearFVGradientField * _pressure_gradient_field;
 
