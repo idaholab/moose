@@ -47,7 +47,8 @@ public:
       FEProblemBase & fe_problem,
       SystemBase & system,
       std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
-      const std::unordered_set<unsigned int> & requested_gradient_variables);
+      const std::unordered_set<unsigned int> & gradient_variables,
+      bool have_registered_gradient_variables);
 
   /**
    * Splitting constructor.
@@ -92,6 +93,9 @@ protected:
   /// old gradient is used while assembling the replacement gradient.
   std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
 
-  /// Variables registered directly on the system for gradient computation.
-  const std::unordered_set<unsigned int> & _requested_gradient_variables;
+  /// Variables this producer should compute.
+  const std::unordered_set<unsigned int> & _gradient_variables;
+
+  /// Whether any variable has registered a gradient scheme on the system.
+  const bool _have_registered_gradient_variables;
 };

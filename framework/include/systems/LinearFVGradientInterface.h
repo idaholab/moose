@@ -91,10 +91,7 @@ public:
     return _raw_grad_container;
   }
 
-  /**
-   * Access the default raw Green-Gauss cell-centered gradient field.
-   * @return Read-only field handle backed by the system-owned raw gradient storage.
-   */
+  /// Access the default unlimited cell-centered gradient field.
   const LinearFVGradientField & linearFVGradientField() const { return _raw_gradient_field; }
 
   /**
@@ -145,10 +142,19 @@ public:
   }
 
 protected:
-  /**
-   * Compute and store raw and requested limited Green-Gauss gradients for linear FV variables.
-   */
+  /// Compute and store requested unlimited and limited gradients for linear FV variables.
   void computeGradients();
+
+  /**
+   * Update a registered gradient field explicitly.
+   */
+  void updateFVGradient(const LinearFVGradientField & field);
+
+  /// Compute and store the unlimited gradient field with each registered scheme.
+  void updateBaseGradientField();
+
+  /// Compute and store a requested limited gradient field.
+  void updateLimitedGradient(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Rebuild persistent raw and temporary gradient storage after mesh/DOF changes.
@@ -218,11 +224,16 @@ protected:
   /// Persisted raw cell-centered gradient components keyed by spatial direction.
   std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> _raw_grad_container;
 
-  /// Read-only field handle for the raw Green-Gauss gradient storage.
+  /// Read-only field handle for the unlimited gradient storage.
   LinearFVGradientField _raw_gradient_field;
 
-  /// Variable numbers requesting raw system-owned gradient fields.
-  std::unordered_set<unsigned int> _requested_gradient_variables;
+  /// Registered base-gradient schemes keyed by variable number.
+  std::unordered_map<unsigned int, Moose::FV::LinearFVGradientSchemeType>
+      _registered_gradient_schemes;
+
+  /// Variable numbers keyed by the scheme that produces their base gradients.
+  std::unordered_map<Moose::FV::LinearFVGradientSchemeType, std::unordered_set<unsigned int>>
+      _registered_gradient_scheme_variables;
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
