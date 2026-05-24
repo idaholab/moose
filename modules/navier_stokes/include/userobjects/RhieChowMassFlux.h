@@ -188,8 +188,13 @@ protected:
   /// Pointer to the pressure system
   LinearSystem * _pressure_system;
 
+<<<<<<< HEAD
   /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
   const LinearFVGradientReader * _pressure_gradient_field;
+=======
+  /// Pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientField * _pressure_gradient_field;
+>>>>>>> 70d1f72d45d (Clean up RC UO. (#32999))
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
