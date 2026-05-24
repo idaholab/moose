@@ -17,14 +17,16 @@ ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradient
     FEProblemBase & fe_problem,
     SystemBase & system,
     std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
-    const std::unordered_set<unsigned int> & requested_gradient_variables)
+    const std::unordered_set<unsigned int> & gradient_variables,
+    const bool have_registered_gradient_variables)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _system(system),
     _libmesh_system(system.system()),
     _system_number(_libmesh_system.number()),
     _temporary_gradient(temporary_gradient),
-    _requested_gradient_variables(requested_gradient_variables)
+    _gradient_variables(gradient_variables),
+    _have_registered_gradient_variables(have_registered_gradient_variables)
 {
 }
 
@@ -36,7 +38,8 @@ ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradient
     _libmesh_system(x._libmesh_system),
     _system_number(x._system_number),
     _temporary_gradient(x._temporary_gradient),
-    _requested_gradient_variables(x._requested_gradient_variables)
+    _gradient_variables(x._gradient_variables),
+    _have_registered_gradient_variables(x._have_registered_gradient_variables)
 {
 }
 
@@ -48,7 +51,6 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
 
   // Computing this size can be very expensive so we only want to do it once
   unsigned int size = 0;
-  const bool have_registered_gradient_variables = !_requested_gradient_variables.empty();
 
   for (const auto & variable : _system.getVariables(_tid))
   {
@@ -56,9 +58,8 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
     if (!_current_var)
       continue;
 
-    if (_current_var->needsGradientVectorStorage() ||
-        (have_registered_gradient_variables &&
-         _requested_gradient_variables.count(_current_var->number())))
+    if (_have_registered_gradient_variables ? _gradient_variables.count(_current_var->number())
+                                            : _current_var->needsGradientVectorStorage())
     {
       if (!size)
         size = range.size();

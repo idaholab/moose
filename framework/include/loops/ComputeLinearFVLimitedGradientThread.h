@@ -26,8 +26,8 @@ class SystemBase;
 
 /**
  * Compute limited cell gradients for linear FV variables.
- * This thread currently supports limited gradients produced by scaling the raw Green-Gauss
- * gradients with a per-cell limiter coefficient (e.g. Venkatakrishnan).
+ * This thread currently supports limited gradients produced by scaling the unlimited gradients
+ * with a per-cell limiter coefficient (e.g. Venkatakrishnan).
  */
 class ComputeLinearFVLimitedGradientThread
 {
@@ -36,7 +36,7 @@ public:
    * Class constructor.
    * @param fe_problem Reference to the problem
    * @param system The system whose variables are assembled by this thread.
-   * @param raw_gradient The raw gradient container used as limiter input.
+   * @param raw_gradient The unlimited gradient container used as limiter input.
    * @param temporary_limited_gradient Scratch storage for limited gradients being assembled
    * (used as output as well, but later swapped with another container).
    * @param limiter_type The type of the limiter which should be computed.
@@ -82,7 +82,7 @@ protected:
   /// Global system number in the libMesh equation system.
   const unsigned int _system_number;
 
-  /// Reference to the raw gradient storage used as input for limiting.
+  /// Reference to the unlimited gradient storage used as input for limiting.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & _raw_gradient;
 
   /// The type of the limiter we requested

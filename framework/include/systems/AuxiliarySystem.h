@@ -139,6 +139,7 @@ public:
   using LinearFVGradientInterface::linearFVLimitedGradientContainer;
   using LinearFVGradientInterface::registerFVGradient;
   using LinearFVGradientInterface::requestLinearFVLimitedGradients;
+  using LinearFVGradientInterface::updateFVGradient;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();
