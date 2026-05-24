@@ -25,8 +25,17 @@ public:
 
   virtual mfem::DataCollection & getDataCollection() override { return _pv_dc; }
 
+  /// Register user-specified scalar coefficients to the DataCollection
+  void
+  registerScalarCoefficients(std::vector<MFEMScalarCoefficientName> & scalar_coefficient_names);
+  /// Register user-specified vector coefficients to the DataCollection
+  void
+  registerVectorCoefficients(std::vector<MFEMVectorCoefficientName> & vector_coefficient_names);
+
 protected:
   mfem::ParaViewDataCollection _pv_dc;
+  std::vector<MFEMScalarCoefficientName> _scalar_coefficient_names;
+  std::vector<MFEMVectorCoefficientName> _vector_coefficient_names;
   const bool _high_order_output;
   const unsigned int _refinements;
   const mfem::VTKFormat _vtk_format;
