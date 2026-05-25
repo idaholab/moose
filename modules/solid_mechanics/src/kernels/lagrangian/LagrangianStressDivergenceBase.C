@@ -58,6 +58,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _ndisp(coupledComponents("displacements")),
     _disp_nums(_ndisp),
     _avg_grad_trial(_ndisp),
+    _avg_grad_spatial_phi(_ndisp),
+    _avg_test_phi_cross(3, std::vector<std::vector<std::vector<Real>>>(3)),
     _F_ust(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _F_ust_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name +

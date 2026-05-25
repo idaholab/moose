@@ -36,10 +36,36 @@ protected:
   virtual RankTwoTensor gradTest(unsigned int component) override;
   virtual RankTwoTensor gradTrial(unsigned int component) override;
   virtual void precalculateJacobianDisplacement(unsigned int component) override;
+  virtual void precalculateResidual() override;
+  virtual void precalculateJacobian() override;
+  virtual void precalculateOffDiagJacobian(unsigned int jvar) override;
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) override;
   virtual Real computeQpJacobianTemperature(unsigned int cvar) override;
   virtual Real computeQpJacobianOutOfPlaneStrain() override;
+
+  /// Compute element-averaged spatial gradient of test functions for component `_alpha`,
+  /// filling `_avg_grad_spatial_test`. Used for the OLD-compat B-bar volumetric correction.
+  void computeAverageGradientSpatialTest();
+
+  /// Compute element-averaged spatial gradient of trial functions for component `beta`,
+  /// filling `_avg_grad_spatial_phi[beta]`. Used for the B-bar Jacobian contribution.
+  void computeAverageGradientSpatialPhi(unsigned int beta);
+
+  /// Compute element-averaged cross product `(grad_x test_i)_{b1} · (grad_x phi_j)_{b2}` for
+  /// `b1, b2 ∈ {_alpha, beta}` (4 combinations), filling `_avg_test_phi_cross[b1][b2][i][j]`.
+  /// Used by the non-local B-bar Jacobian contribution from d(avg_grad_spatial_test)/dU.
+  /// `beta` is the displacement component of the trial-side variable in this Jacobian column;
+  /// only the four (`_alpha`, `_alpha`), (`_alpha`, beta), (beta, `_alpha`), (beta, beta) entries
+  /// are populated (others are left untouched / unread).
+  void computeAvgTestPhiCross(unsigned int beta);
+
+  /// (grad_x test_i)_component at the current `_qp`, where the push-forward uses
+  /// the unstabilized F (= F_actual at alpha = 1), consistent with the PK1 wrap.
+  Real gradXTestComponent(unsigned int component) const;
+
+  /// (grad_x phi_j)_component at the current `_qp`, same push-forward as `gradXTestComponent`.
+  Real gradXPhiComponent(unsigned int component) const;
 
   /// The 1st Piola-Kirchhoff stress
   const MaterialProperty<RankTwoTensor> & _pk1;
