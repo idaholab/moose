@@ -27,10 +27,6 @@
                   "`volumetric_locking_correction = true`)."
     capabilities = 'method!=dbg'
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
-    # Residual diff vs OLD comes from the deliberate axial-vector-based theta formula in
-    # `computeRashidApproximateIncrement` (vs. OLD's trace-based form); F-bar itself is
-    # equivalent. Tolerance loosened just enough to accommodate that piece.
-    rel_err = 3.0E-5
   []
   [manual_EigenSolution_with_stab]
     type = CSVDiff
@@ -41,7 +37,6 @@
                   "polar-decomposition variant)."
     capabilities = 'method!=dbg'
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
-    rel_err = 3.0E-5
   []
   [manual_TaylorExpansion_plasticity]
     type = CSVDiff

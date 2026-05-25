@@ -108,10 +108,224 @@ TotalLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigne
 }
 
 template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::precalculateResidual()
+{
+  LagrangianStressDivergenceBase::precalculateResidual();
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+    computeAverageGradientSpatialTest();
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::precalculateJacobian()
+{
+  LagrangianStressDivergenceBase::precalculateJacobian();
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+  {
+    computeAverageGradientSpatialTest();
+    computeAverageGradientSpatialPhi(_alpha);
+    computeAvgTestPhiCross(_alpha);
+  }
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::precalculateOffDiagJacobian(unsigned int jvar)
+{
+  LagrangianStressDivergenceBase::precalculateOffDiagJacobian(jvar);
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+  {
+    computeAverageGradientSpatialTest();
+    for (auto beta : make_range(_ndisp))
+      if (jvar == _disp_nums[beta])
+      {
+        computeAverageGradientSpatialPhi(beta);
+        computeAvgTestPhiCross(beta);
+      }
+  }
+}
+
+template <class G>
+Real
+TotalLagrangianStressDivergenceBase<G>::gradXTestComponent(unsigned int component) const
+{
+  // (grad_x test_i)_component = (grad_X test_i)_j (F_ust^{-1})_{j, component}
+  // Push-forward via F_ust (= F_actual at alpha=1) matches the PK1 wrap.
+  if (!_large_kinematics)
+    return _grad_test[_i][_qp](component);
+  const RankTwoTensor F_inv = _F_ust[_qp].inverse();
+  Real out = 0.0;
+  for (unsigned int j = 0; j < 3; ++j)
+    out += _grad_test[_i][_qp](j) * F_inv(j, component);
+  return out;
+}
+
+template <class G>
+Real
+TotalLagrangianStressDivergenceBase<G>::gradXPhiComponent(unsigned int component) const
+{
+  if (!_large_kinematics)
+    return _grad_phi[_j][_qp](component);
+  const RankTwoTensor F_inv = _F_ust[_qp].inverse();
+  Real out = 0.0;
+  for (unsigned int j = 0; j < 3; ++j)
+    out += _grad_phi[_j][_qp](j) * F_inv(j, component);
+  return out;
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialTest()
+{
+  // _avg_grad_spatial_test[i] = (1/V_x) ∫ (grad_x test_i)_alpha dV_x
+  //                           = (∑_qp (grad_X test_i)_j (F_ust^{-1})_{j, _alpha} · J_ust · w)
+  //                             / (∑_qp J_ust · w),  w = JxW · coord
+  // For small kinematics, F_ust = I, J_ust = 1, reducing to OLD's element-averaged grad_test.
+  _avg_grad_spatial_test.assign(_test.size(), 0.0);
+  Real V_x = 0.0;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+  {
+    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real w = J * _JxW[qp] * _coord[qp];
+    V_x += w;
+    const RankTwoTensor F_inv =
+        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+    for (unsigned int i = 0; i < _test.size(); ++i)
+    {
+      Real g_x = 0.0;
+      for (unsigned int j = 0; j < 3; ++j)
+        g_x += _grad_test[i][qp](j) * F_inv(j, _alpha);
+      _avg_grad_spatial_test[i] += g_x * w;
+    }
+  }
+  for (unsigned int i = 0; i < _test.size(); ++i)
+    _avg_grad_spatial_test[i] /= V_x;
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialPhi(unsigned int beta)
+{
+  // Same structure as computeAverageGradientSpatialTest, but for trial functions and component beta.
+  _avg_grad_spatial_phi[beta].assign(_phi.size(), 0.0);
+  Real V_x = 0.0;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+  {
+    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real w = J * _JxW[qp] * _coord[qp];
+    V_x += w;
+    const RankTwoTensor F_inv =
+        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+    for (unsigned int j = 0; j < _phi.size(); ++j)
+    {
+      Real g_x = 0.0;
+      for (unsigned int k = 0; k < 3; ++k)
+        g_x += _grad_phi[j][qp](k) * F_inv(k, beta);
+      _avg_grad_spatial_phi[beta][j] += g_x * w;
+    }
+  }
+  for (unsigned int j = 0; j < _phi.size(); ++j)
+    _avg_grad_spatial_phi[beta][j] /= V_x;
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::computeAvgTestPhiCross(unsigned int beta)
+{
+  // Populate the cross-products
+  //   _avg_test_phi_cross[b1][b2][i][j] = (1/V_x) ∫ (grad_x test_i)_{b1} · (grad_x phi_j)_{b2} dV_x
+  // for the 4 combinations of (b1, b2) ∈ {_alpha, beta}. The d(avg_grad_spatial_test)/dU
+  // term in the B-bar Jacobian needs both (alpha, beta) and (beta, alpha) entries; the
+  // diagonal (alpha == beta) collapses to a single combination.
+  const unsigned int n_test = _test.size();
+  const unsigned int n_phi = _phi.size();
+  std::vector<unsigned int> bs = {_alpha};
+  if (beta != _alpha)
+    bs.push_back(beta);
+  // Zero out and resize the affected slots
+  for (auto b1 : bs)
+    for (auto b2 : bs)
+    {
+      _avg_test_phi_cross[b1][b2].assign(n_test, std::vector<Real>(n_phi, 0.0));
+    }
+  Real V_x = 0.0;
+  // Cache (grad_x test_i)_{b1} and (grad_x phi_j)_{b2} per qp to avoid recomputing for
+  // each (i, j) pair.
+  std::vector<std::vector<Real>> gx_test(bs.size(), std::vector<Real>(n_test, 0.0));
+  std::vector<std::vector<Real>> gx_phi(bs.size(), std::vector<Real>(n_phi, 0.0));
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+  {
+    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real w = J * _JxW[qp] * _coord[qp];
+    V_x += w;
+    const RankTwoTensor F_inv =
+        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+    for (unsigned int bi = 0; bi < bs.size(); ++bi)
+    {
+      const unsigned int b = bs[bi];
+      for (unsigned int i = 0; i < n_test; ++i)
+      {
+        Real g = 0.0;
+        for (unsigned int k = 0; k < 3; ++k)
+          g += _grad_test[i][qp](k) * F_inv(k, b);
+        gx_test[bi][i] = g;
+      }
+      for (unsigned int j = 0; j < n_phi; ++j)
+      {
+        Real g = 0.0;
+        for (unsigned int k = 0; k < 3; ++k)
+          g += _grad_phi[j][qp](k) * F_inv(k, b);
+        gx_phi[bi][j] = g;
+      }
+    }
+    for (unsigned int b1i = 0; b1i < bs.size(); ++b1i)
+      for (unsigned int b2i = 0; b2i < bs.size(); ++b2i)
+      {
+        const unsigned int b1 = bs[b1i];
+        const unsigned int b2 = bs[b2i];
+        auto & dest = _avg_test_phi_cross[b1][b2];
+        for (unsigned int i = 0; i < n_test; ++i)
+          for (unsigned int j = 0; j < n_phi; ++j)
+            dest[i][j] += gx_test[b1i][i] * gx_phi[b2i][j] * w;
+      }
+  }
+  for (auto b1 : bs)
+    for (auto b2 : bs)
+    {
+      auto & dest = _avg_test_phi_cross[b1][b2];
+      for (unsigned int i = 0; i < n_test; ++i)
+        for (unsigned int j = 0; j < n_phi; ++j)
+          dest[i][j] /= V_x;
+    }
+}
+
+template <class G>
 Real
 TotalLagrangianStressDivergenceBase<G>::computeQpResidual()
 {
-  return gradTest(_alpha).doubleContraction(_pk1[_qp]);
+  Real result = gradTest(_alpha).doubleContraction(_pk1[_qp]);
+
+  // OLD-compat B-bar volumetric correction (only in `F_bar_mode = incremental`, the explicit
+  // OLD-compat mode). This adds
+  //   ∫ (tr σ / 3) · (avg_grad_x test - grad_x test)_alpha dV_x
+  // expressed in reference-frame integration as
+  //   ∑_qp ((PK1 : F_ust) / 3) · (avg_grad_spatial_test[_i] - grad_x_test_alpha) · JxW · coord
+  // (the J = det(F_ust) factor is already absorbed into `PK1 : F_ust = J · tr σ`).
+  // Without this term, PK1 = det(F_ust) σ F_ust^{-T} reproduces OLD's `σ : grad_x test` term
+  // but not OLD's vol-locking correction; for uniform σ that's harmless (the integral vanishes
+  // per element) but for non-uniform σ — e.g. mixed-component Dirichlet BCs producing non-affine
+  // equilibrium with plasticity + a kinematic decomposition that gives spatially varying σ —
+  // it drives the converged displacement away from OLD's. Scoped to incremental mode because
+  // (a) that's the documented OLD-compat F-bar mode and (b) the existing `total` mode tests
+  // are calibrated to the F-bar-in-σ-only formulation (adding the B-bar term there would be
+  // a separate behavior change).
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+  {
+    const Real PK1_F_over_3 = _pk1[_qp].doubleContraction(_F_ust[_qp]) / 3.0;
+    result += PK1_F_over_3 * (_avg_grad_spatial_test[_i] - gradXTestComponent(_alpha));
+  }
+  return result;
 }
 
 template <class G>
@@ -129,10 +343,55 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
   // contains the non-local F-bar effect (it used to enter through F_stab in the wrap);
   // `deltaPK1NonLocalFBar` re-introduces it through the σ-via-dL chain. Guarded on
   // `_stabilize_strain` because `_avg_grad_trial` is only populated when F-bar is on.
+  RankTwoTensor d_PK1_NL;
   if (_stabilize_strain)
   {
     const RankTwoTensor delta_F_avg = _d_F_d_grad_u[_qp] * _avg_grad_trial[beta][_j];
-    J += gradTest(alpha).doubleContraction(deltaPK1NonLocalFBar(delta_F_avg));
+    d_PK1_NL = deltaPK1NonLocalFBar(delta_F_avg);
+    J += gradTest(alpha).doubleContraction(d_PK1_NL);
+  }
+
+  // OLD-compat B-bar volumetric correction Jacobian (only in `F_bar_mode = incremental`).
+  // The residual added the term R_extra = (PK1:F_ust)/3 · (avg_T - T_α) summed over qps.
+  // Linearizing per (i, j, α, β):
+  //   J_extra_qp = (1/3) · d(PK1:F_ust)/dU · (avg_T - T_α)
+  //              + (1/3) · (PK1:F_ust) · (d(avg_T)/dU - dT_α/dU)
+  // with derivatives in U (the trial-DOF for component β at node j):
+  //   d(PK1:F_ust)/dU|qp = (dPK1_local + dPK1_NL) : F_ust + PK1 : dF_ust_local
+  //     dPK1_local = _dpk1_d_grad_u[_qp] · gradTrial(β)             (already used above)
+  //     dPK1_NL    = d_PK1_NL                                       (cached above)
+  //     dF_ust     = gradOp(β, grad_phi_j[_qp])                     (= gradTrialUnstabilized(β))
+  //   dT_α/dU|qp  = -(grad_x test_i)_β · (grad_x phi_j)_α            (local cross)
+  //   d(avg_T)/dU = avgCross(α, β) - avgCross(β, α) - avg_T(i) · avg_grad_spatial_phi[β][j]
+  //     avgCross(b1, b2) = _avg_test_phi_cross[b1][b2][i][j]         (precomputed)
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+  {
+    const Real A_qp = _pk1[_qp].doubleContraction(_F_ust[_qp]) / 3.0;
+    const Real avg_T = _avg_grad_spatial_test[_i];
+    const Real T_alpha = gradXTestComponent(alpha);
+    const Real B = avg_T - T_alpha;
+
+    // dA/dU at this qp: combine local + non-local PK1 deriv, plus PK1 : dF_ust local.
+    const RankTwoTensor d_PK1_local = _dpk1_d_grad_u[_qp] * gradTrialUnstabilized(beta);
+    const RankTwoTensor d_F_ust = gradTrialUnstabilized(beta);
+    const Real dA_dU =
+        ((d_PK1_local + d_PK1_NL).doubleContraction(_F_ust[_qp]) +
+         _pk1[_qp].doubleContraction(d_F_ust)) /
+        3.0;
+
+    // dB/dU: -dT_α/dU + d(avg_T)/dU
+    // dT_α/dU = -(grad_x test_i)_β · (grad_x phi_j)_α  (local cross at _qp)
+    const Real T_beta_i = gradXTestComponent(beta);
+    const Real phi_alpha_j = gradXPhiComponent(alpha);
+    const Real dT_alpha_dU = -T_beta_i * phi_alpha_j;
+
+    const Real avg_cross_ab = _avg_test_phi_cross[alpha][beta][_i][_j];
+    const Real avg_cross_ba = _avg_test_phi_cross[beta][alpha][_i][_j];
+    const Real d_avg_T_dU =
+        avg_cross_ab - avg_cross_ba - avg_T * _avg_grad_spatial_phi[beta][_j];
+
+    const Real dB_dU = d_avg_T_dU - dT_alpha_dU;
+    J += dA_dU * B + A_qp * dB_dU;
   }
 
   return J;

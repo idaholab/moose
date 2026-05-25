@@ -108,6 +108,27 @@ protected:
   // node j with respect to displacement component a.
   std::vector<std::vector<RankTwoTensor>> _avg_grad_trial;
 
+  /// Element-averaged spatial (deformed-frame) gradient of test functions for the kernel's
+  /// component `_alpha`:
+  ///   _avg_grad_spatial_test[i] = (1/V_x) ∫_e (grad_x test_i)_alpha dV_x
+  /// Used for OLD-compat B-bar volumetric correction in `F_bar_mode = incremental`.
+  /// Populated by the TL kernel's `precalculateResidual` / `precalculateJacobian` overrides
+  /// when `_stabilize_strain == true`. The trial-function analog is published per (component, j)
+  /// in `_avg_grad_spatial_phi` and used by the Jacobian.
+  std::vector<Real> _avg_grad_spatial_test;
+
+  /// Element-averaged spatial gradient of trial functions per component:
+  ///   _avg_grad_spatial_phi[component][j] = (1/V_x) ∫_e (grad_x phi_j)_component dV_x
+  /// Populated alongside `_avg_grad_spatial_test` for the Jacobian's B-bar contribution.
+  std::vector<std::vector<Real>> _avg_grad_spatial_phi;
+
+  /// Element-averaged cross product (on displaced mesh) of spatial test/trial gradients:
+  ///   _avg_test_phi_cross[b1][b2][i][j] = (1/V_x) ∫_e (grad_x test_i)_{b1} · (grad_x phi_j)_{b2} dV_x
+  /// Indexed by [b1][b2] ∈ {0,1,2}². Only the (b1, b2) entries needed for the current Jacobian
+  /// call are populated by the TL kernel's `computeAvgTestPhiCross(beta)` helper. Used for the
+  /// B-bar Jacobian's non-local term (d(avg_grad_spatial_test)/dU).
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _avg_test_phi_cross;
+
   /// The unmodified deformation gradient
   const MaterialProperty<RankTwoTensor> & _F_ust;
 
