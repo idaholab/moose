@@ -79,6 +79,9 @@ protected:
   /// The Cartesian row index of the tensor component to return (tensor mode)
   const unsigned int _component_i;
 
+  /// Has the tensor column index been specified (tensor mode)?
+  const bool _has_component_j;
+
   /// The Cartesian column index of the tensor component to return (tensor mode)
   const unsigned int _component_j;
 

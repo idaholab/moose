@@ -26,74 +26,23 @@ into a 3D Cartesian tensor. This is useful when re-imposing a stored deformation
 
 Tensor mode is selected by providing 4 variable names in [!param](/Functions/Axisymmetric2D3DSolutionFunction/from_variables).
 These four names correspond to the cylindrical tensor components in the order: `rr`, `yy`, `ry`, `tt`.
-A typical usage pattern is to read components saved by [RankTwoTensorAux](https://mooseframework.inl.gov/)
+A typical usage pattern is to read components saved by `RankTwoAux`
 with suffixes `_00`, `_11`, `_01`, `_22` respectively (the naming convention for the radial-radial,
 axial-axial, radial-axial shear, and hoop-hoop components of a rank-two tensor stored in cylindrical coordinates).
 
 Each unique Cartesian component `(i, j)` is extracted by instantiating one `Axisymmetric2D3DSolutionFunction`
 with [!param](/Functions/Axisymmetric2D3DSolutionFunction/component_i) and [!param](/Functions/Axisymmetric2D3DSolutionFunction/component_j)
 set to the desired row and column (0-2). The six unique symmetric Cartesian components are then assembled
-into a rank-two tensor property (e.g., by [GenericFunctionRankTwoTensor](https://mooseframework.inl.gov/)).
+into a rank-two tensor property (e.g., by [GenericFunctionRankTwoTensor.md]).
 
 ### Example: assembling a tensor property
 
 The following pattern instantiates six functions to extract the six unique Cartesian components,
 which are then assembled into a rank-two tensor property using `GenericFunctionRankTwoTensor`:
 
-```
-[Functions]
-  [soln_xx]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 0
-    component_j = 0
-  []
-  [soln_yy]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 1
-    component_j = 1
-  []
-  [soln_zz]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 2
-    component_j = 2
-  []
-  [soln_xy]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 0
-    component_j = 1
-  []
-  [soln_yz]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 1
-    component_j = 2
-  []
-  [soln_xz]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'eigenstrain_rr eigenstrain_yy eigenstrain_ry eigenstrain_tt'
-    component_i = 0
-    component_j = 2
-  []
-[]
+!listing modules/solid_mechanics/test/tests/eigenstrain_restart/restart_3d.i block=Functions
 
-[Materials]
-  [eigenstrain_from_function]
-    type = GenericFunctionRankTwoTensor
-    tensor_name = eigenstrain
-    tensor_functions = 'soln_xx soln_yy soln_zz soln_xy soln_yz soln_xz'
-  []
-[]
-```
+!listing modules/solid_mechanics/test/tests/eigenstrain_restart/restart_3d.i block=Materials
 
 ### On-axis behavior
 
@@ -113,7 +62,7 @@ When these conditions *are* satisfied, the on-axis tensor reduces to the diagona
 ### Cross-linking
 
 For a complete 2D-to-3D eigenstrain restart workflow, see the tutorial
-[Eigenstrain Restart from 2D Axisymmetric to 3D](modules/solid_mechanics/examples/eigenstrain_restart_2d_to_3d.md optional=True).
+[Eigenstrain Restart from 2D Axisymmetric to 3D](/modules/solid_mechanics/examples/eigenstrain_restart_2d_to_3d.md optional=True).
 
 !syntax parameters /Functions/Axisymmetric2D3DSolutionFunction
 

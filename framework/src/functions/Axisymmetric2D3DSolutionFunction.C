@@ -88,10 +88,10 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(
     _component(_has_component ? getParam<unsigned int>("component") : 99999),
     _has_component_i(isParamValid("component_i")),
     _component_i(_has_component_i ? getParam<unsigned int>("component_i") : 99999),
-    _component_j(isParamValid("component_j") ? getParam<unsigned int>("component_j") : 99999),
+    _has_component_j(isParamValid("component_j")),
+    _component_j(_has_component_j ? getParam<unsigned int>("component_j") : 99999),
     _var_names(getParam<std::vector<std::string>>("from_variables"))
 {
-  const bool has_component_j = isParamValid("component_j");
   const bool tensor_mode = _var_names.size() == 4;
 
   if (_has_component && _has_component_i)
@@ -99,7 +99,10 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(
                "component (2 'from_variables') and 'component_i'/'component_j' select a tensor "
                "component (4 'from_variables')");
 
-  if (_var_names.size() != 1 && _var_names.size() != 2 && _var_names.size() != 4)
+  // Size 0 is allowed: 'from_variables' is optional and is populated in initialSetup() from the
+  // SolutionUserObject when it contains a single variable.
+  if (_var_names.size() != 0 && _var_names.size() != 1 && _var_names.size() != 2 &&
+      _var_names.size() != 4)
     mooseError("'from_variables' length must be 1, 2, or 4: 1 for a scalar field, 2 for a 2D "
                "vector field (x, y), or 4 for a rank-two tensor field (rr, yy, ry, tt)");
 
@@ -108,10 +111,10 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(
   if (!_has_component && _var_names.size() == 2)
     mooseError("Must supply 'component' if 2 variables specified in 'from_variables'");
 
-  if ((_has_component_i || has_component_j) && !tensor_mode)
+  if ((_has_component_i || _has_component_j) && !tensor_mode)
     mooseError("'component_i'/'component_j' is tensor mode only: requires 4 entries in "
                "'from_variables' (rr, yy, ry, tt)");
-  if (tensor_mode && (!_has_component_i || !has_component_j))
+  if (tensor_mode && (!_has_component_i || !_has_component_j))
     mooseError("Tensor mode (4 entries in 'from_variables') requires both 'component_i' and "
                "'component_j' to be specified");
   if (tensor_mode && (_component_i > 2 || _component_j > 2))
@@ -244,8 +247,8 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p) const
 
     const Point t_dir_3d = z_dir_3d.cross(r_dir_3d);
 
-    // R has the cylindrical basis vectors (r_hat, y_hat, t_hat) as its columns, expressed in the
-    // standard Cartesian basis, so T_cart = R T_cyl R^T maps cylindrical components to
+    // R has the cylindrical basis vectors (r_hat, axial_hat, t_hat) as its columns, expressed in
+    // the standard Cartesian basis, so T_cart = R T_cyl R^T maps cylindrical components to
     // Cartesian.
     const RankTwoTensor R =
         RankTwoTensor::initializeFromRows(RealVectorValue(r_dir_3d(0), z_dir_3d(0), t_dir_3d(0)),
@@ -254,13 +257,14 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p) const
 
     // T_cyl in basis order (r, y, t): off-axis shears T_rt and T_yt are zero by
     // axisymmetry.
-    RankTwoTensor T_cyl = RankTwoTensor::initializeFromRows(RealVectorValue(T_rr, T_ry, 0),
-                                                            RealVectorValue(T_ry, T_yy, 0),
-                                                            RealVectorValue(0, 0, T_tt));
+    const RankTwoTensor T_cyl = RankTwoTensor::initializeFromRows(RealVectorValue(T_rr, T_ry, 0),
+                                                                  RealVectorValue(T_ry, T_yy, 0),
+                                                                  RealVectorValue(0, 0, T_tt));
 
-    T_cyl.rotate(R);
+    // Rotate cylindrical components into Cartesian: T_cart = R T_cyl R^T.
+    const RankTwoTensor T_cart = T_cyl.rotated(R);
 
-    val = T_cyl(_component_i, _component_j);
+    val = T_cart(_component_i, _component_j);
   }
   else if (_has_component)
   {

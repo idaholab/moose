@@ -6,7 +6,7 @@ This tutorial demonstrates how to use axisymmetric simulations as a basis for 3D
 The workflow consists of two steps:
 
 1. Perform a 2D axisymmetric plasticity simulation and save the resulting plastic eigenstrain.
-2. Map that eigenstrain onto a 3D mesh and equilibrate the stress field using the [Axisymmetric2D3DSolutionFunction](source/functions/Axisymmetric2D3DSolutionFunction.md) tensor mode.
+2. Map that eigenstrain onto a 3D mesh and equilibrate the stress field using the [Axisymmetric2D3DSolutionFunction.md] tensor mode.
 
 This approach leverages the lower computational cost of 2D axisymmetric analysis while preserving the
 full 3D stress-strain state in the subsequent model.
@@ -15,10 +15,10 @@ full 3D stress-strain state in the subsequent model.
 
 ### Conceptual basis
 
-In small-strain plasticity, the deformation gradient is decomposed into elastic and inelastic parts:
+In small-strain plasticity, the total strain is decomposed additively into elastic and inelastic parts:
 
 \begin{equation}
-\vec{F} = \vec{F}_e \vec{F}_p
+\vec{\epsilon} = \vec{\epsilon}_e + \vec{\epsilon}_p
 \end{equation}
 
 In an elastic-plastic model, the stress depends only on the elastic strain. If we save the plastic
@@ -47,26 +47,7 @@ radial-axial shear, and hoop-hoop components).
 To verify that re-imposing the saved plastic strain recovers the original stress field,
 the following input reads the 2D result and enforces the plastic eigenstrain as a fixed material property:
 
-```
-[Materials]
-  [eigenstrain_from_solution]
-    type = GenericFunctionRankTwoTensor
-    tensor_name = eigenstrain
-    tensor_functions = 'soln_xx soln_yy soln_zz soln_xy soln_yz soln_xz'
-  []
-[]
-
-[Functions]
-  [soln_xx]
-    type = Axisymmetric2D3DSolutionFunction
-    solution = solution_uo
-    from_variables = 'reconst_eigenstrain_00 reconst_eigenstrain_11 reconst_eigenstrain_01 reconst_eigenstrain_22'
-    component_i = 0
-    component_j = 0
-  []
-  # ... five more functions for yy, zz, xy, yz, xz
-[]
-```
+!listing modules/solid_mechanics/test/tests/eigenstrain_restart/restart_3d.i block=Functions
 
 The equilibrated 2D result matches the original stress field (within solver tolerance), confirming the approach.
 
@@ -75,7 +56,7 @@ The equilibrated 2D result matches the original stress field (within solver tole
 ### Motivation
 
 Once the 2D plastic eigenstrain is confirmed, the next step is to embed it into a 3D geometry.
-The [Axisymmetric2D3DSolutionFunction](source/functions/Axisymmetric2D3DSolutionFunction.md) tensor mode
+The [Axisymmetric2D3DSolutionFunction.md] tensor mode
 automates the cylindrical-to-Cartesian rotation that was previously done by hand-written `ParsedFunction` algebra.
 
 ### Legacy approach: six hand-written ParsedFunctions
@@ -105,7 +86,7 @@ T_{yz} = \frac{T_{ry} z}{\sqrt{x^2 + z^2}}
 \end{equation}
 
 \begin{equation}
-T_{yy} = T_{yy}
+T_{yy}^{\text{cart}} = T_{yy}^{\text{cyl}}
 \end{equation}
 
 where `r = sqrt(x^2 + z^2)` is the distance from the y-axis.
@@ -205,5 +186,5 @@ aligned with the original 2D mesh, the `max_principal_stress` should match withi
 
 ## References
 
-See the [Axisymmetric2D3DSolutionFunction](source/functions/Axisymmetric2D3DSolutionFunction.md) class
+See the [Axisymmetric2D3DSolutionFunction.md] class
 documentation for details on the tensor mode, on-axis requirements, and axis-override parameters.

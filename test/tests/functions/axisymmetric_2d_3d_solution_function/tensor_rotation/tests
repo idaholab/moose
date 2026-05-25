@@ -2,15 +2,13 @@
   design = 'Axisymmetric2D3DSolutionFunction.md'
   issues = '#32880'
 
-  # --- source generators (RunApp; no gold needed) ---
-
   [source_2d]
     type = RunApp
     input = 'source_2d.i'
     recover = false
     restep = false
-    requirement = 'The system shall run a 2D RZ steady problem that writes cylindrical tensor '
-                  'components to an Exodus file for use by downstream tests.'
+    requirement = 'The system shall solve a 2D RZ steady-state diffusion problem and write '
+                  'cylindrical tensor components to an Exodus file.'
   []
 
   [source_2d_on_axis]
@@ -27,8 +25,8 @@
     input = 'source_2d_on_axis_bad.i'
     recover = false
     restep = false
-    requirement = 'The system shall run a 2D RZ steady problem with T_rr not equal to T_tt at '
-                  'the axis, providing a source for the on-axis error test.'
+    requirement = 'The system shall solve a 2D RZ steady-state problem where the on-axis '
+                  'tensor violates the condition T_rr = T_tt.'
   []
 
   [source_2d_varying]
@@ -36,11 +34,9 @@
     input = 'source_2d_varying.i'
     recover = false
     restep = false
-    requirement = 'The system shall run a 2D RZ steady problem with spatially-varying cylindrical '
-                  'tensor components for use by the analytical-reference rotation test.'
+    requirement = 'The system shall solve a 2D RZ steady-state problem and write spatially-'
+                  'varying cylindrical tensor components to an Exodus file.'
   []
-
-  # --- tensor rotation: default y-axis ---
 
   [default_axis]
     type = Exodiff
@@ -53,8 +49,6 @@
                   'Cartesian coordinates using the default symmetry axis (y-axis).'
   []
 
-  # --- tensor rotation: non-default axis (z-axis) ---
-
   [general_axis]
     type = Exodiff
     input = 'consume_3d_general_axis.i'
@@ -66,8 +60,6 @@
                   'Cartesian coordinates using a user-specified symmetry axis.'
   []
 
-  # --- on-axis: legal (T_rr == T_tt, T_ry == 0) ---
-
   [on_axis_ok]
     type = Exodiff
     input = 'consume_3d_on_axis.i'
@@ -78,8 +70,6 @@
     requirement = 'The system shall correctly evaluate a rank-two tensor at on-axis nodes when the '
                   'source tensor satisfies the axisymmetric on-axis conditions.'
   []
-
-  # --- analytical-reference test: spatially-varying source field ---
 
   [analytical_varying]
     type = CSVDiff
@@ -95,22 +85,16 @@
                   'tolerance.'
   []
 
-  # --- on-axis error: T_rr != T_tt ---
-
-  [on_axis_error]
-    requirement = 'The system shall report an error when '
-    [rr_ne_tt]
-      type = RunException
-      input = 'consume_3d_on_axis_bad.i'
-      expect_err = 'r=0 and T_rr != T_tt'
-      prereq = source_2d_on_axis_bad
-      recover = false
-      restep = false
-      detail = 'a rank-two tensor is evaluated on the axis with T_rr not equal to T_tt.'
-    []
+  [on_axis_rr_ne_tt]
+    type = RunException
+    input = 'consume_3d_on_axis_bad.i'
+    expect_err = 'r=0 and T_rr != T_tt'
+    prereq = source_2d_on_axis_bad
+    recover = false
+    restep = false
+    requirement = 'The system shall report an error when a rank-two tensor is evaluated on the '
+                  'axis with T_rr not equal to T_tt.'
   []
-
-  # --- bad parameter combinations ---
 
   [bad_params]
     requirement = 'The system shall report an error when '
