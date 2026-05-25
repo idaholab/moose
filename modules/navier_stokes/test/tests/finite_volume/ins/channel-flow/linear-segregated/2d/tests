@@ -10,6 +10,18 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [momentum-pressure-gradient-method]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    exodiff = 2d-velocity-pressure-gradient-method_out.e
+    cli_args = 'Variables/pressure/gradient_method=green-gauss Outputs/file_base=2d-velocity-pressure-gradient-method_out'
+    requirement = "The system shall allow the pressure variable in a linear finite volume SIMPLE "
+                  "solve to explicitly select the Green-Gauss gradient method used by Rhie-Chow "
+                  "and momentum pressure-gradient consumers."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
