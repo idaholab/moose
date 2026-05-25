@@ -55,7 +55,7 @@ class TestAdvection1DSymmetryGradientMethod(unittest.TestCase):
         df1 = run_spatial(
             "advection-1d-symmetry.i",
             4,
-            "Variables/u/gradient_method=green-gauss",
+            "gradient_method=gg",
             file_base="advection-1d-symmetry-gradient-method",
         )
         fig = mms.ConvergencePlot(xlabel="Element Size  ($h$)", ylabel="$L_2$ Error")

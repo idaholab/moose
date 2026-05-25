@@ -47,6 +47,7 @@
 #include "Sampler.h"
 #include "FVAdvectedInterpolationMethod.h"
 #include "FVFaceInterpolationMethod.h"
+#include "FVGradientMethod.h"
 #include "FVInterpolationMethod.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
@@ -4684,6 +4685,23 @@ FEProblemBase::addFVInterpolationMethod(const std::string & method_type,
   }
 }
 
+void
+FEProblemBase::addFVGradientMethod(const std::string & method_type,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  parallel_object_only();
+
+  addObjectParamsHelper(parameters, name);
+
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    auto method = _factory.create<FVGradientMethod>(method_type, name, parameters, tid);
+    logAdd("FVGradientMethod", name, method_type, parameters);
+    theWarehouse().add(method);
+  }
+}
+
 const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /* = 0 */) const
 {
@@ -4733,6 +4751,37 @@ FEProblemBase::hasUserObject(const std::string & name) const
       .condition<AttribName>(name)
       .queryInto(objs);
   return !objs.empty();
+}
+
+const FVGradientMethod &
+FEProblemBase::getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid) const
+{
+  std::vector<FVGradientMethod *> methods;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("FVGradientMethod")
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(name)
+      .queryInto(methods);
+
+  if (methods.empty())
+    mooseError("Unable to find FVGradientMethod with name '", name, "'");
+
+  mooseAssert(methods.size() == 1, "Expected a single FVGradientMethod per thread");
+  return *(methods[0]);
+}
+
+bool
+FEProblemBase::hasFVGradientMethod(const GradientMethodName & name) const
+{
+  std::vector<FVGradientMethod *> methods;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("FVGradientMethod")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(methods);
+  return !methods.empty();
 }
 
 const FVInterpolationMethod &

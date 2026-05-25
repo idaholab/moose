@@ -92,6 +92,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class UserObjectBase;
+class FVGradientMethod;
 class FVInterpolationMethod;
 class FVFaceInterpolationMethod;
 class FVAdvectedInterpolationMethod;
@@ -1442,6 +1443,29 @@ public:
   virtual void addFVInterpolationMethod(const std::string & method_type,
                                         const std::string & name,
                                         InputParameters & parameters);
+
+  /**
+   * Add an FV gradient method
+   * @param method_type The type of the method.
+   * @param name The name of the method.
+   * @param parameters The input parameters of the method.
+   */
+  virtual void addFVGradientMethod(const std::string & method_type,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
+   * Retrieve an FV gradient method
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVGradientMethod & getFVGradientMethod(const GradientMethodName & name,
+                                               const THREAD_ID tid = 0) const;
+
+  /**
+   * Check if an FV gradient method with a given name exists
+   */
+  bool hasFVGradientMethod(const GradientMethodName & name) const;
 
   /**
    * Retrieve an FV interpolation method

@@ -24,6 +24,7 @@
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "GradientLimiterType.h"
+#include "FVGradientMethod.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -36,19 +37,17 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
-MooseEnum
-linearFVGradientMethods()
-{
-  return MooseEnum("green-gauss", "green-gauss");
-}
-
 Moose::FV::LinearFVGradientSchemeType
-selectLinearFVGradientMethod(const std::string & method)
+selectLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
 {
-  if (method == "green-gauss")
+  if (method_name == "green-gauss")
     return Moose::FV::LinearFVGradientSchemeType::GreenGauss;
 
-  mooseError("Linear FV gradient method '", method, "' is not currently supported.");
+  const auto & fe_problem = sys.feProblem();
+  if (!fe_problem.hasFVGradientMethod(method_name))
+    mooseError("Unable to find FVGradientMethod with name '", method_name, "'");
+
+  return fe_problem.getFVGradientMethod(method_name).schemeType();
 }
 
 std::size_t
@@ -83,10 +82,11 @@ MooseLinearVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
-  params.addParam<MooseEnum>("gradient_method",
-                             linearFVGradientMethods(),
-                             "Default gradient computation method to register when a consumer "
-                             "requests gradients from this variable.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "green-gauss",
+      "Default gradient computation method to register when a consumer requests gradients from "
+      "this variable. This may be 'green-gauss' or the name of an object in [FVGradientMethods].");
   return params;
 }
 
@@ -97,8 +97,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
     _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
-    _default_gradient_scheme_type(
-        selectLinearFVGradientMethod(this->template getParam<MooseEnum>("gradient_method"))),
+    _default_gradient_method_name(this->template getParam<GradientMethodName>("gradient_method")),
     _limited_gradient_field_cache{},
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
@@ -135,10 +134,13 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 {
   _needs_cell_gradients = true;
 
+  const auto gradient_scheme_type =
+      selectLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+
   if (_linear_system)
-    _linear_system->registerFVGradient(this->_var_num, _default_gradient_scheme_type);
+    _linear_system->registerFVGradient(this->_var_num, gradient_scheme_type);
   else
-    _auxiliary_system->registerFVGradient(this->_var_num, _default_gradient_scheme_type);
+    _auxiliary_system->registerFVGradient(this->_var_num, gradient_scheme_type);
 }
 
 template <typename OutputType>
@@ -165,11 +167,14 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
 
   _needs_cell_gradients = true;
 
-  auto & gradient_field = _linear_system
-                              ? _linear_system->registerFVGradient(
-                                    this->_var_num, _default_gradient_scheme_type, limiter_type)
-                              : _auxiliary_system->registerFVGradient(
-                                    this->_var_num, _default_gradient_scheme_type, limiter_type);
+  const auto gradient_scheme_type =
+      selectLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+
+  auto & gradient_field =
+      _linear_system
+          ? _linear_system->registerFVGradient(this->_var_num, gradient_scheme_type, limiter_type)
+          : _auxiliary_system->registerFVGradient(
+                this->_var_num, gradient_scheme_type, limiter_type);
   setLimitedGradientField(limiter_type, gradient_field);
 }
 

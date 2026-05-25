@@ -280,8 +280,8 @@ protected:
   /// Read-only handle to the unlimited cell gradient stored by the owning concrete system
   const LinearFVGradientField & _raw_gradient_field;
 
-  /// Default gradient scheme registered when consumers request gradients from this variable.
-  const Moose::FV::LinearFVGradientSchemeType _default_gradient_scheme_type;
+  /// Default gradient method registered when consumers request gradients from this variable.
+  const GradientMethodName _default_gradient_method_name;
 
   /// Read-only limited-gradient field handles keyed by GradientLimiterType values.
   std::array<const LinearFVGradientField *, 1> _limited_gradient_field_cache;

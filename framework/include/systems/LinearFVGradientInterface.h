@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "GradientLimiterType.h"
+#include "LinearFVGradientTypes.h"
 
 #include "libmesh/utility.h"
 
@@ -27,25 +28,6 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
-}
-
-namespace Moose
-{
-namespace FV
-{
-/// Linear finite-volume gradient schemes supported by system-owned gradient fields.
-enum class LinearFVGradientSchemeType
-{
-  GreenGauss
-};
-
-/// Type of gradient values stored in a linear FV gradient field.
-enum class LinearFVGradientFieldType
-{
-  Base,
-  Limited
-};
-}
 }
 
 /**
