@@ -1,4 +1,5 @@
 vel = 0.1
+gradient_method = 'green-gauss'
 
 [Mesh]
   [gmg]
@@ -19,6 +20,13 @@ vel = 0.1
     type = MooseLinearVariableFVReal
     solver_sys = 'u_sys'
     initial_condition = 1.0
+    gradient_method = ${gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
   []
 []
 
