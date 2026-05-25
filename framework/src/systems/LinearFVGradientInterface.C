@@ -13,6 +13,7 @@
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "ComputeLinearFVLimitedGradientThread.h"
 #include "FEProblemBase.h"
+#include "FVGradientMethod.h"
 #include "PerfGraphInterface.h"
 #include "PerfGuard.h"
 #include "SystemBase.h"
@@ -120,6 +121,14 @@ LinearFVGradientInterface::registerFVGradient(
 
   requestLinearFVLimitedGradients(limiter_type, variable_number);
   return *libmesh_map_find(_limited_gradient_fields, limiter_type);
+}
+
+LinearFVGradientField &
+LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number,
+                                              const FVGradientMethod & method)
+{
+  _registered_gradient_method_variables[&method].insert(variable_number);
+  return registerFVGradient(variable_number, method.schemeType(), method.limiterType());
 }
 
 void
