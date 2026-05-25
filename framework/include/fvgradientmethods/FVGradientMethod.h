@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "GradientLimiterType.h"
 #include "LinearFVGradientTypes.h"
 
 /**
@@ -23,4 +24,9 @@ public:
   FVGradientMethod(const InputParameters & params);
 
   virtual Moose::FV::LinearFVGradientSchemeType schemeType() const = 0;
+
+  Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
+
+private:
+  const Moose::FV::GradientLimiterType _limiter_type;
 };
