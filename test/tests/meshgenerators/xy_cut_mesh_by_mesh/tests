@@ -57,4 +57,49 @@
                   'when they are within snap_tol of the polyline, to avoid sliver polygons.'
     cli_args = '--mesh-only snap.e'
   []
+  [errors]
+    requirement = 'The system shall error'
+    [err_non_2d_primary]
+      type = 'RunException'
+      input = 'convex_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'Only 2D meshes are supported'
+      detail = 'if the primary input mesh is not 2D,'
+      cli_args = 'Mesh/primary/dim=3 --mesh-only out.e'
+    []
+    [err_non_2d_cutter]
+      type = 'RunException'
+      input = 'convex_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'Only 2D meshes are supported'
+      detail = 'if the cutter input mesh is not 2D,'
+      cli_args = 'Mesh/cutter/dim=3 --mesh-only out.e'
+    []
+    [err_same_input]
+      type = 'RunException'
+      input = 'convex_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = "must be different from 'input'"
+      detail = 'if the input and cutter parameters point at the same mesh generator,'
+      cli_args = 'Mesh/cut/cutter=primary --mesh-only out.e'
+    []
+    [err_cutter_winds_in_primary_elem]
+      type = 'RunException'
+      input = 'convex_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'cutter polyline winds within primary element'
+      detail = 'if the cutter polyline dips into a primary element without crossing it (primary '
+               'mesh too coarse near the cutter).'
+      cli_args = 'Mesh/primary/nx=1 Mesh/primary/ny=2 --mesh-only out.e'
+    []
+    [err_cutter_fully_inside_primary_elem]
+      type = 'RunException'
+      input = 'convex_cut.i'
+      mesh_mode = 'REPLICATED'
+      expect_err = 'cutter polyline winds within primary element'
+      detail = 'if the cutter polyline is entirely contained within a single primary element '
+               '(primary mesh too coarse).'
+      cli_args = 'Mesh/primary/nx=1 Mesh/primary/ny=1 --mesh-only out.e'
+    []
+  []
 []
