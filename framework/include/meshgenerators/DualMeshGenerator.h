@@ -20,7 +20,7 @@ class BoundingBox;
 }
 
 /**
- * MeshGenerator for defining a Subdomain inside or outside of a bounding box
+ * MeshGenerator for creating dual mesh
  */
 class DualMeshGenerator : public MeshGenerator
 {
@@ -34,15 +34,6 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  /// ID location (inside of outside of box)
-  MooseEnum _location;
-
-  /// Block ID to assign to the region
-  subdomain_id_type _block_id;
-
-  /// Whether or not we apply the bounding box only for certain subdomains
-  const bool _has_restriction;
-
-  /// Bounding box for testing element centroids against
-  BoundingBox _bounding_box;
+  // Vertex tolerance for determining colinearity of adjacent sides
+  Real _boundary_node_angular_tol;
 };

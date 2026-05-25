@@ -1,15 +1,17 @@
 [Mesh]
-    [myCartMG]
-        type = CartesianMeshGenerator
-        dim = 2
-        dx = '3 3'
-        dy = '4 4'
-    []
+    [myCCMG]
+        type = ConcentricCircleMeshGenerator
 
+        num_sectors = 2
+        radii = '2'
+        rings = '4'
+        has_outer_square = false
+        preserve_volumes = false
+    []
+    
     [myDualGen]
         type = DualMeshGenerator
-        input = myCartMG
-
+        input = myCCMG
     []
 
     [SdmPerElemGen]
@@ -17,8 +19,11 @@
         input = myDualGen
     []
 
+
     [convert]
         type = ElementsToSimplicesConverter
         input = 'SdmPerElemGen'
     []
+
+
 []

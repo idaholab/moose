@@ -2,14 +2,23 @@
     [myCartMG]
         type = CartesianMeshGenerator
         dim = 2
-        dx = '3 3'
-        dy = '4 4'
+        dx = "3 3"
+        dy = "4 4"
+
+        subdomain_id = '2 6
+                        4 8'
+
     []
 
+    [cut_corner]
+        type = BlockDeletionGenerator
+        input = myCartMG
+        block = 2
+    []
+    
     [myDualGen]
         type = DualMeshGenerator
-        input = myCartMG
-
+        input = cut_corner
     []
 
     [SdmPerElemGen]
@@ -21,4 +30,6 @@
         type = ElementsToSimplicesConverter
         input = 'SdmPerElemGen'
     []
+
+
 []
