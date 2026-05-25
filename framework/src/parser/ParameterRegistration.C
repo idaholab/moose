@@ -84,6 +84,7 @@ registerParameter(DistributionName);
 registerParameter(SamplerName);
 registerParameter(UserObjectName);
 registerParameter(InterpolationMethodName);
+registerParameter(GradientMethodName);
 registerParameter(IndicatorName);
 registerParameter(MarkerName);
 registerParameter(MultiAppName);

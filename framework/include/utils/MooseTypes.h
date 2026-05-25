@@ -1213,6 +1213,9 @@ MooseDerivativeStringClass(UserObjectName);
 /// This type is used for referencing finite-volume interpolation methods
 MooseDerivativeStringClass(InterpolationMethodName);
 
+/// This type is used for referencing finite-volume gradient methods
+MooseDerivativeStringClass(GradientMethodName);
+
 /// This type is used for objects that expect an Indicator object name
 MooseDerivativeStringClass(IndicatorName);
 
