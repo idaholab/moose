@@ -8,14 +8,17 @@
 
     [myDualGen]
         type = DualMeshGenerator
-        block_id = 0
-        bottom_left = '0 0 0'
         input = myCartMG
-        top_right = '6 8 0'
+
+    []
+
+    [SdmPerElemGen]
+        type = SubdomainPerElementGenerator
+        input = myDualGen
     []
 
     [convert]
         type = ElementsToSimplicesConverter
-        input = 'myDualGen'
+        input = 'SdmPerElemGen'
     []
 []
