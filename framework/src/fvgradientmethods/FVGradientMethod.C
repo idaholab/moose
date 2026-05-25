@@ -9,6 +9,20 @@
 
 #include "FVGradientMethod.h"
 
+namespace
+{
+Moose::FV::GradientLimiterType
+selectGradientLimiter(const std::string & limiter_name)
+{
+  if (limiter_name == "none")
+    return Moose::FV::GradientLimiterType::None;
+  if (limiter_name == "venkatakrishnan")
+    return Moose::FV::GradientLimiterType::Venkatakrishnan;
+
+  mooseError("Linear FV gradient limiter '", limiter_name, "' is not currently supported.");
+}
+}
+
 InputParameters
 FVGradientMethod::validParams()
 {
@@ -17,7 +31,13 @@ FVGradientMethod::validParams()
   params.registerSystemAttributeName("FVGradientMethod");
   params.addClassDescription("Base class for defining cell-centered gradient methods used by "
                              "linear finite volume objects.");
+  params.addParam<MooseEnum>("limiter",
+                             MooseEnum("none venkatakrishnan", "none"),
+                             "Limiter to apply to gradients produced by this method.");
   return params;
 }
 
-FVGradientMethod::FVGradientMethod(const InputParameters & params) : MooseObject(params) {}
+FVGradientMethod::FVGradientMethod(const InputParameters & params)
+  : MooseObject(params), _limiter_type(selectGradientLimiter(getParam<MooseEnum>("limiter")))
+{
+}

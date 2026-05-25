@@ -277,8 +277,8 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Read-only handle to the unlimited cell gradient stored by the owning concrete system
-  const LinearFVGradientField & _raw_gradient_field;
+  /// Read-only handle to the default cell gradient stored by the owning concrete system
+  const LinearFVGradientField * _gradient_field;
 
   /// Default gradient method registered when consumers request gradients from this variable.
   const GradientMethodName _default_gradient_method_name;

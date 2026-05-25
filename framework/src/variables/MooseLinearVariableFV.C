@@ -37,17 +37,17 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
-Moose::FV::LinearFVGradientSchemeType
-selectLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
+const FVGradientMethod *
+getLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
 {
   if (method_name == "green-gauss")
-    return Moose::FV::LinearFVGradientSchemeType::GreenGauss;
+    return nullptr;
 
   const auto & fe_problem = sys.feProblem();
   if (!fe_problem.hasFVGradientMethod(method_name))
     mooseError("Unable to find FVGradientMethod with name '", method_name, "'");
 
-  return fe_problem.getFVGradientMethod(method_name).schemeType();
+  return &fe_problem.getFVGradientMethod(method_name);
 }
 
 std::size_t
@@ -96,7 +96,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _needs_cell_gradients(false),
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
-    _raw_gradient_field(rawLinearFVGradientField(this->_sys)),
+    _gradient_field(&rawLinearFVGradientField(this->_sys)),
     _default_gradient_method_name(this->template getParam<GradientMethodName>("gradient_method")),
     _limited_gradient_field_cache{},
     _sys_num(this->_sys.number()),
@@ -134,13 +134,12 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 {
   _needs_cell_gradients = true;
 
-  const auto gradient_scheme_type =
-      selectLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-
-  if (_linear_system)
-    _linear_system->registerFVGradient(this->_var_num, gradient_scheme_type);
-  else
-    _auxiliary_system->registerFVGradient(this->_var_num, gradient_scheme_type);
+  const auto * const method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+  _gradient_field =
+      method ? (_linear_system ? &_linear_system->registerFVGradient(this->_var_num, *method)
+                               : &_auxiliary_system->registerFVGradient(this->_var_num, *method))
+             : (_linear_system ? &_linear_system->registerFVGradient(this->_var_num)
+                               : &_auxiliary_system->registerFVGradient(this->_var_num));
 }
 
 template <typename OutputType>
@@ -167,8 +166,9 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
 
   _needs_cell_gradients = true;
 
+  const auto * const method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
   const auto gradient_scheme_type =
-      selectLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+      method ? method->schemeType() : Moose::FV::LinearFVGradientSchemeType::GreenGauss;
 
   auto & gradient_field =
       _linear_system
@@ -249,7 +249,7 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const Sta
 
   if (_needs_cell_gradients)
   {
-    const auto & gradient_components = _raw_gradient_field.components();
+    const auto & gradient_components = _gradient_field->components();
     const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
 
     _cell_gradient.zero();
@@ -267,7 +267,7 @@ MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
 {
   mooseAssert(_needs_cell_gradients,
               "Gradient component requested without calling computeCellGradients().");
-  const auto & gradient_components = _raw_gradient_field.components();
+  const auto & gradient_components = _gradient_field->components();
   mooseAssert(component < gradient_components.size(), "Gradient component index out of range.");
 
   return (*gradient_components[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
