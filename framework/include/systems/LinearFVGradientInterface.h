@@ -23,6 +23,7 @@
 
 class SystemBase;
 class ElemInfo;
+class FVGradientMethod;
 
 namespace libMesh
 {
@@ -116,6 +117,10 @@ public:
       Moose::FV::LinearFVGradientSchemeType scheme_type =
           Moose::FV::LinearFVGradientSchemeType::GreenGauss,
       Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None);
+
+  /// Register a system-owned linear FV gradient field produced by a named method object.
+  LinearFVGradientField & registerFVGradient(unsigned int variable_number,
+                                             const FVGradientMethod & method);
 
   /**
    * Access the raw or limited cell-centered gradient field.
@@ -252,6 +257,10 @@ protected:
   /// This keeps producer selection per variable while consumers keep direct field handles.
   std::unordered_map<Moose::FV::LinearFVGradientSchemeType, std::unordered_set<unsigned int>>
       _registered_gradient_scheme_variables;
+
+  /// Variable numbers keyed by the method object that requested their gradients.
+  std::unordered_map<const FVGradientMethod *, std::unordered_set<unsigned int>>
+      _registered_gradient_method_variables;
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
