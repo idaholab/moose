@@ -32,6 +32,16 @@ ComputeLagrangianStrainBase<G>::baseParams()
       "(F_ust · F_ust_old^{-1}) at each qp and rescales by cbrt(det(f_avg)/det(f_ust)); this is "
       "bit-for-bit compatible with the OLD `ComputeFiniteStrain` + `volumetric_locking_correction = "
       "true` formulation. Set to 'incremental' when cross-checking against the old kernel system.");
+  params.addParam<bool>(
+      "publish_rotation_increment",
+      false,
+      "If true, publish `rotation_increment = exp(vorticity_increment)` (Rodrigues) for "
+      "downstream consumers that rotate by it (e.g. `ComputeMultiPlasticityStress` with "
+      "`perform_finite_strain_rotations = true`). Default false keeps `rotation_increment = I` "
+      "(the historical behavior — the Lagrangian objective-rate machinery applies rotation "
+      "externally). Enable when wrapping plasticity that needs its internal stress state to "
+      "track the rotated Cauchy stress between steps, in tandem with `rotate_old_stress = true` "
+      "on the objective rate.");
   params.addRangeCheckedParam<Real>(
       "alpha",
       1.0,
@@ -72,6 +82,7 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _F_bar_mode(getParam<MooseEnum>("F_bar_mode").template getEnum<FBarMode>()),
+    _publish_rotation_increment(getParam<bool>("publish_rotation_increment")),
     _alpha(getParam<Real>("alpha")),
     _kinematic_approximation(
         getParam<MooseEnum>("kinematic_approximation").template getEnum<KinematicApproximation>()),
@@ -359,8 +370,20 @@ ComputeLagrangianStrainBase<G>::setQpIncrementalStrains(const RankTwoTensor & dd
   _rotated_mechanical_strain[_qp] =
       r_hat * (_rotated_mechanical_strain_old[_qp] + _strain_increment[_qp]) * r_hat.transpose();
 
-  // Faked rotation increment for ComputeStressBase materials
-  _rotation_increment[_qp] = RankTwoTensor::Identity();
+  // Published rotation increment for downstream `ComputeStressBase`-style materials. The
+  // default (identity) preserves the historical Lagrangian pipeline where the objective
+  // rate is the sole rotation source. With `publish_rotation_increment = true` we dispatch
+  // to the `kinematic_approximation`-matched formula so wrapped plasticity with
+  // `perform_finite_strain_rotations = true` rotates its `_stress` bit-for-bit like OLD's
+  // `ComputeFiniteStrain` would have done (the rate then runs in `rotate_old_stress`
+  // passthrough mode so we don't double-rotate). Specifically `rashid_approximate` uses
+  // OLD's C1/C2/C3 polynomial form (not `exp(dw)`) so the wrapped material's accumulated
+  // stress storage matches OLD's `_stress` byte-for-byte through return mapping; without
+  // this, the small (~1e-5) per-step rotation drift between `exp(dw)` and OLD's R_incr
+  // amplifies through plastic flow into ~1e-3 cumulative stress error.
+  _rotation_increment[_qp] = (_publish_rotation_increment && _large_kinematics)
+                                 ? computeQpRotationIncrement(_f_inv[_qp], dw)
+                                 : RankTwoTensor::Identity();
 }
 
 template <class G>
@@ -790,6 +813,83 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
       _d_F_stab_d_F_avg[_qp].zero();
     }
   }
+}
+
+template <class G>
+RankTwoTensor
+ComputeLagrangianStrainBase<G>::computeQpRotationIncrement(const RankTwoTensor & f_inv,
+                                                           const RankTwoTensor & dw) const
+{
+  // For `rashid_approximate` port OLD `ComputeFiniteStrain`'s C1/C2/C3 polynomial form
+  // exactly (Rashid 1993). Pairing this rotation with the wrapped material's FSR (via
+  // `_rotation_increment`) lets the constitutive's `_stress` evolution match OLD's bit-
+  // for-bit at the same converged displacement state.
+  if (_kinematic_approximation == KinematicApproximation::RashidApproximate)
+  {
+    const Real a[3] = {f_inv(1, 2) - f_inv(2, 1),
+                       f_inv(2, 0) - f_inv(0, 2),
+                       f_inv(0, 1) - f_inv(1, 0)};
+    const Real q = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) / 4.0;
+    const Real trFhatinv_1 = f_inv.trace() - 1.0;
+    const Real p = trFhatinv_1 * trFhatinv_1 / 4.0;
+    const Real C1_squared = p +
+                            3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
+                            2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q);
+    if (C1_squared <= 0.0)
+      mooseException(
+          "Cannot take square root of a number less than or equal to zero in the calculation of "
+          "C1 for the Rashid approximation for the rotation tensor.");
+    const Real C1 = std::sqrt(C1_squared);
+    Real C2;
+    if (q > 0.01)
+      C2 = (1.0 - C1) / (4.0 * q);
+    else
+      C2 = 0.125 + q * 0.03125 * (Utility::pow<2>(p) - 12.0 * (p - 1.0)) / Utility::pow<2>(p) +
+           Utility::pow<2>(q) * (p - 2.0) * (Utility::pow<2>(p) - 10.0 * p + 32.0) /
+               Utility::pow<3>(p) +
+           Utility::pow<3>(q) *
+               (1104.0 - 992.0 * p + 376.0 * Utility::pow<2>(p) - 72.0 * Utility::pow<3>(p) +
+                5.0 * Utility::pow<4>(p)) /
+               (512.0 * Utility::pow<4>(p));
+    const Real C3_test =
+        (p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) / Utility::pow<3>(p + q);
+    if (C3_test <= 0.0)
+      mooseException(
+          "Cannot take square root of a number less than or equal to zero in the calculation of "
+          "C3_test for the Rashid approximation for the rotation tensor.");
+    const Real C3 = 0.5 * std::sqrt(C3_test);
+    RankTwoTensor R_incr;
+    R_incr.addIa(C1);
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        R_incr(i, j) += C2 * a[i] * a[j];
+    R_incr(0, 1) += C3 * a[2];
+    R_incr(0, 2) -= C3 * a[1];
+    R_incr(1, 0) -= C3 * a[2];
+    R_incr(1, 2) += C3 * a[0];
+    R_incr(2, 0) += C3 * a[1];
+    R_incr(2, 1) -= C3 * a[0];
+    return R_incr.transpose();
+  }
+
+  // For `rashid_eigen`, `linear`, `quadratic`: r̂ = exp(dw) via Rodrigues. For RashidEigen,
+  // dw is the matrix log of the polar-decomposition R, so exp(dw) recovers that R bit-for-bit
+  // — equivalent to OLD `ComputeFiniteStrain`'s EigenSolution rotation.
+  const Real theta2 = 0.5 * dw.doubleContraction(dw);
+  const Real theta = std::sqrt(theta2);
+  Real f, g;
+  const Real small_theta = 1.0e-7;
+  if (theta < small_theta)
+  {
+    f = 1.0 - theta2 / 6.0;
+    g = 0.5 - theta2 / 24.0;
+  }
+  else
+  {
+    f = std::sin(theta) / theta;
+    g = (1.0 - std::cos(theta)) / theta2;
+  }
+  return RankTwoTensor::Identity() + f * dw + g * dw * dw;
 }
 
 template class ComputeLagrangianStrainBase<GradientOperatorCartesian>;

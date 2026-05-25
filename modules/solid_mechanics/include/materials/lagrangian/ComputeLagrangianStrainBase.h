@@ -123,6 +123,17 @@ protected:
   /// Selected F-bar averaging mode (Total vs. Incremental). See `FBarMode`.
   const FBarMode _F_bar_mode;
 
+  /// If true, publish `_rotation_increment = exp(_vorticity_increment)` (Rodrigues) instead
+  /// of the default identity. Enables OLD-compatible plasticity through `ComputeLagrangianWrappedStress`:
+  /// wrapped materials with `perform_finite_strain_rotations = true` (e.g.
+  /// `ComputeMultiPlasticityStress`) will rotate their internal `_stress` each step, so the
+  /// next step's return mapping reads `_stress_old = σ_cauchy_old` (matching OLD's
+  /// `ComputeFiniteStrain` pipeline). Pair with `rotate_old_stress = true` on the
+  /// objective rate so the rate skips its outer rotation (the wrapped material already
+  /// applied it) and doesn't double-rotate. Default false preserves the existing pipeline
+  /// where the rate alone applies rotation.
+  const bool _publish_rotation_increment;
+
   /// Generalized-midpoint weight for the deformation gradient (1.0 = backward Euler, 0.5 = midpoint)
   const Real _alpha;
 
@@ -252,4 +263,14 @@ private:
                                    RankTwoTensor & dw,
                                    RankFourTensor & d_dL_d_f_inv,
                                    RankFourTensor & d_dw_d_f_inv) const;
+
+  /// Rotation increment matched to the active `_kinematic_approximation`, suitable for
+  /// publishing as `_rotation_increment` so downstream `ComputeStressBase`-style materials
+  /// see the OLD-compatible rotation. For `RashidApproximate` this ports OLD
+  /// `ComputeFiniteStrain`'s C1/C2/C3 polynomial Rodrigues approximation (bit-for-bit OLD
+  /// TaylorExpansion); for `RashidEigen` and `Linear` / `Quadratic` it returns `exp(dw)`
+  /// via the Rodrigues block (exact rotation around the dw axis — bit-exact for RashidEigen,
+  /// which has no OLD counterpart for the linear/quadratic cases).
+  RankTwoTensor computeQpRotationIncrement(const RankTwoTensor & f_inv,
+                                           const RankTwoTensor & dw) const;
 };
