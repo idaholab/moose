@@ -1,0 +1,60 @@
+[Tests]
+  design = 'meshgenerators/XYCutMeshByMeshGenerator.md'
+  issues = '#28000'
+  [convex_cut_inside_tri]
+    type = 'Exodiff'
+    input = 'convex_cut.i'
+    exodiff = 'convex_cut_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to cut a 2D mesh using the outer boundary of another '
+                  'mesh as the cut curve and remove the elements inside the cutter, triangulating '
+                  'the clipped pieces.'
+    cli_args = '--mesh-only convex_cut_in.e'
+  []
+  [convex_cut_outside_tri]
+    type = 'Exodiff'
+    input = 'convex_cut.i'
+    exodiff = 'convex_cut_out.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to keep only the portion of the primary mesh inside '
+                  'the cutter (REMOVE_OUTSIDE mode).'
+    cli_args = 'Mesh/cut/mode=REMOVE_OUTSIDE --mesh-only convex_cut_out.e'
+  []
+  [convex_cut_keep_both_tri]
+    type = 'Exodiff'
+    input = 'convex_cut.i'
+    exodiff = 'convex_cut_both.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to split a 2D mesh into two subdomains along the '
+                  'cutter polyline, keeping both sides (KEEP_BOTH mode).'
+    cli_args = 'Mesh/cut/mode=KEEP_BOTH --mesh-only convex_cut_both.e'
+  []
+  [convex_cut_inside_poly]
+    type = 'Exodiff'
+    input = 'convex_cut_poly.i'
+    exodiff = 'convex_cut_poly.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to cut a 2D mesh using another mesh, emitting '
+                  'C0POLYGON elements for the clipped pieces, then convert to TRI3 for output.'
+    cli_args = '--mesh-only convex_cut_poly.e'
+  []
+  [snap]
+    type = 'Exodiff'
+    input = 'snap.i'
+    exodiff = 'snap.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to snap primary mesh nodes onto the cutter polyline '
+                  'when they are within snap_tol of the polyline, to avoid sliver polygons.'
+    cli_args = '--mesh-only snap.e'
+  []
+[]
