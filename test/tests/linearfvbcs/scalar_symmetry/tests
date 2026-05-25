@@ -18,6 +18,14 @@
     max_threads = 1 # see libmesh issue #3808
   []
 
+  [advection-1d-symmetry-gradient-method]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestAdvection1DSymmetryGradientMethod
+    requirement = 'The system shall allow a linear finite volume variable to explicitly select the Green-Gauss gradient method when gradients are consumed by a two-term linear finite volume advection boundary condition.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [diffusion-2d-symmetry]
     type = MMSTest
     input = 'test.py'
