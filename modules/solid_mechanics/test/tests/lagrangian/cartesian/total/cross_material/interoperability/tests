@@ -43,4 +43,27 @@
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
     rel_err = 3.0E-5
   []
+  [manual_TaylorExpansion_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_plasticity.i'
+    csvdiff = 'TaylorExpansion_plasticity.csv'
+    requirement = "Large deformation kinematics with plasticity produces results compatible with "
+                  "the old system (rashid_approximate kinematic / OLD TaylorExpansion decomp). The "
+                  "test demonstrates that NEW's Lagrangian pipeline (TL kernel + ComputeLagrangianStrain "
+                  "+ ComputeLagrangianWrappedStress around ComputeMultiPlasticityStress) tracks the OLD "
+                  "system (StressDivergenceTensors on displaced mesh + ComputeFiniteStrain + "
+                  "ComputeMultiPlasticityStress) at the rashid_approximate / TaylorExpansion polynomial "
+                  "rotation level."
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_plasticity GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
+  [manual_EigenSolution_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_plasticity.i'
+    csvdiff = 'EigenSolution_plasticity.csv'
+    requirement = "Large deformation kinematics with plasticity produces results identical to the "
+                  "old system (rashid_eigen kinematic / OLD EigenSolution decomp) when the strain "
+                  "calc publishes a real rotation_increment and the rate runs in rotate_old_stress "
+                  "passthrough mode."
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_plasticity GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
 []
