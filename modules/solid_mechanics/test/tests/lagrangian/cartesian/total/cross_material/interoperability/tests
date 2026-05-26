@@ -61,4 +61,46 @@
                   "passthrough mode."
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_plasticity GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
   []
+  [manual_small_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_small_plasticity.i'
+    csvdiff = 'small_plasticity.csv'
+    requirement = "Small-deformation kinematics + volumetric_locking_correction + plasticity through "
+                  "the manually-wired NEW pipeline (ComputeLagrangianStrain with `large_kinematics = "
+                  "false, stabilize_strain = true` + ComputeLagrangianWrappedStress with "
+                  "`rotate_old_stress = false` + ComputeMultiPlasticityStress) produces stable, "
+                  "repeatable results. Provides the gold for the `action_small_plasticity` test."
+    cli_args = "Outputs/compare/file_base=small_plasticity"
+  []
+  [action_small_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'small_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` configures the small-"
+                  "deformation Lagrangian pipeline (large_kinematics = false, no incremental F-bar, "
+                  "no published rotation increment, wrap with `rotate_old_stress = false`) and "
+                  "reproduces the manually-wired small-strain plasticity test bit-for-bit."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+               "Functions/pullx/expression='t*0.01' Functions/pully/expression='t*0.0025' "
+               "Functions/pullz/expression='t*0.001' "
+               "Outputs/compare/file_base=small_plasticity"
+  []
+  [action_TaylorExpansion_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'TaylorExpansion_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` reproduces the manually-wired "
+                  "NEW-system + TaylorExpansion + ComputeMultiPlasticityStress test bit-for-bit, "
+                  "demonstrating that a one-flag flip on an OLD-style input drives the Lagrangian "
+                  "pipeline with identical results."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/decomposition_method=TaylorExpansion Outputs/compare/file_base=TaylorExpansion_plasticity"
+  []
+  [action_EigenSolution_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'EigenSolution_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` reproduces the manually-wired "
+                  "NEW-system + EigenSolution + ComputeMultiPlasticityStress test bit-for-bit."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/decomposition_method=EigenSolution Outputs/compare/file_base=EigenSolution_plasticity"
+  []
 []
