@@ -33,6 +33,7 @@ typedef MooseLinearVariableFV<Real> MooseLinearVariableFVReal;
 class AuxiliarySystem;
 class FVDirichletBCBase;
 class FVFluxBC;
+class FVGradientMethod;
 class LinearFVBoundaryCondition;
 class LinearFVGradientField;
 class LinearSystem;
@@ -98,24 +99,29 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Switch to request cell gradient computations.
+   * Switch to request cell gradient computations with the default gradient method.
    */
-  void computeCellGradients();
+  const LinearFVGradientField & computeCellGradients();
 
   /**
-   * Switch to request cell gradient computations with an optional gradient limiter.
-   *
-   * `GradientLimiterType::None` is equivalent to requesting the regular gradients only.
+   * Switch to request cell gradient computations with a specific gradient method.
    */
-  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
+  const LinearFVGradientField & computeCellGradients(const FVGradientMethod & method);
 
   /**
-   * Switch to request limited cell gradient computations.
+   * Compatibility bridge for interpolation methods that still request gradients by limiter.
    *
-   * Limited gradients are stored in limiter-specific containers on the system and are computed
-   * using the raw cell gradients.
+   * `GradientLimiterType::None` requests the default gradient method. Other limiters require the
+   * default gradient method to use the same limiter.
    */
-  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+  const LinearFVGradientField &
+  computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
+
+  /**
+   * Compatibility bridge for consumers that still request limited gradients by limiter.
+   */
+  const LinearFVGradientField &
+  computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /// Access the default gradient field registered by computeCellGradients().
   const LinearFVGradientField & linearFVGradientField() const { return *_gradient_field; }
@@ -137,11 +143,31 @@ public:
   VectorValue<Real> gradSln(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
+   * Get the variable gradient from a cached gradient field at a cell center.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param state State argument describing which solution state to evaluate
+   * @param field Gradient field returned by computeCellGradients()
+   */
+  VectorValue<Real> gradSln(const ElemInfo & elem_info,
+                            const StateArg & state,
+                            const LinearFVGradientField & field) const;
+
+  /**
    * Get one raw gradient component at a cell center without materializing the full gradient.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param component The gradient component to retrieve
    */
   Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
+
+  /**
+   * Get one gradient component from a cached gradient field at a cell center.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param component The gradient component to retrieve
+   * @param field Gradient field returned by computeCellGradients()
+   */
+  Real gradSlnComponent(const ElemInfo & elem_info,
+                        unsigned int component,
+                        const LinearFVGradientField & field) const;
 
   /**
    * Get either the raw or limited gradient at a cell center.
@@ -169,6 +195,15 @@ public:
    * @param state State argument describing which solution state to evaluate
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
+
+  /**
+   * Compute interpolated gradient from a cached gradient field on the provided face.
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument describing which solution state to evaluate
+   * @param field Gradient field returned by computeCellGradients()
+   */
+  VectorValue<Real>
+  gradSln(const FaceInfo & fi, const StateArg & state, const LinearFVGradientField & field) const;
 
   /**
    * Compute interpolated raw/limited gradient on the provided face.
@@ -249,6 +284,8 @@ protected:
   /// Throw an error when somebody requests gradients at a non-current solution state
   [[noreturn]] void gradientStateError(const StateArg & state) const;
 
+  const LinearFVGradientField & registerCellGradientMethod(const FVGradientMethod & method);
+
   void setLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type,
                                const LinearFVGradientField & field);
 
@@ -275,10 +312,13 @@ protected:
   /// Read-only handle to the default cell gradient stored by the owning concrete system
   const LinearFVGradientField * _gradient_field;
 
+  /// Gradient field handles keyed by the methods that produced them.
+  std::unordered_map<const FVGradientMethod *, const LinearFVGradientField *> _gradient_field_cache;
+
   /// Default gradient method registered when consumers request gradients from this variable.
   const GradientMethodName _default_gradient_method_name;
 
-  /// Read-only limited-gradient field handles keyed by GradientLimiterType values.
+  /// Compatibility cache for limiter-based consumers; method-based consumers should cache fields.
   std::array<const LinearFVGradientField *, 1> _limited_gradient_field_cache;
 
   /// Holder for all the data associated with the "main" element. The data in this is
