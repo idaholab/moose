@@ -21,7 +21,10 @@ public:
 
   FVGreenGaussGradient(const InputParameters & params);
 
-  void computeGradient(SystemBase & system,
-                       GradientContainer & output_gradient,
-                       const std::unordered_set<unsigned int> & variable_numbers) const override;
+protected:
+  void computeGradientWithoutLimiter(
+      SystemBase & system,
+      GradientContainer & output_gradient,
+      GradientContainer & scratch_gradient,
+      const std::unordered_set<unsigned int> & variable_numbers) const override;
 };
