@@ -120,6 +120,10 @@ void
 TotalLagrangianStressDivergenceBase<G>::precalculateJacobian()
 {
   LagrangianStressDivergenceBase::precalculateJacobian();
+  // Populate the per-(qp, j) local PK1 chain cache for the diagonal column (β = _alpha).
+  // Runs regardless of `_stabilize_strain` because the local chain is always needed; the
+  // helper itself only touches `_avg_grad_trial` when stab is on.
+  populateLocalPK1Cache(_alpha);
   if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
   {
     computeAverageGradientSpatialTest();
@@ -133,15 +137,61 @@ void
 TotalLagrangianStressDivergenceBase<G>::precalculateOffDiagJacobian(unsigned int jvar)
 {
   LagrangianStressDivergenceBase::precalculateOffDiagJacobian(jvar);
-  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
-  {
-    computeAverageGradientSpatialTest();
-    for (auto beta : make_range(_ndisp))
-      if (jvar == _disp_nums[beta])
+  // Populate the per-(qp, j) local PK1 chain cache for the matched off-diagonal β.
+  for (auto beta : make_range(_ndisp))
+    if (jvar == _disp_nums[beta])
+    {
+      populateLocalPK1Cache(beta);
+      if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
       {
+        computeAverageGradientSpatialTest();
         computeAverageGradientSpatialPhi(beta);
         computeAvgTestPhiCross(beta);
       }
+      break;
+    }
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
+{
+  const unsigned int n_qp = _qrule->n_points();
+  const unsigned int n_phi = _phi.size();
+  _dpk1_grad_trial_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
+  _grad_trial_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
+  if (_stabilize_strain)
+    _delta_PK1_NL_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
+
+  for (unsigned int qp = 0; qp < n_qp; ++qp)
+  {
+    const RankFourTensor & dpk1 = _dpk1_d_grad_u[qp];
+    const RankFourTensor & dFdGU = _d_F_d_grad_u[qp];
+    for (unsigned int j = 0; j < n_phi; ++j)
+    {
+      // gradTrial == gradTrialUnstabilized in TL (line ~50); single cache feeds both consumers.
+      const RankTwoTensor grad_trial =
+          G::gradOp(beta, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]);
+      _grad_trial_cache[qp][j] = grad_trial;
+      _dpk1_grad_trial_cache[qp][j] = dpk1 * grad_trial;
+      if (_stabilize_strain)
+      {
+        // Compose the full non-local F-bar PK1 perturbation:
+        //   δσ_NL = _D_nl_cache[qp] · (_d_F_d_grad_u[qp] · _avg_grad_trial[β][j])
+        //   δPK1_NL = det(F_ust) · δσ_NL · F_ust^{-T}   (large kinematics)
+        //           = δσ_NL                              (small kinematics)
+        // `_D_nl_cache` / `_F_ust_det_cache` / `_F_ust_inv_T_cache` are refreshed in
+        // `prepareFBarCaches()` which runs in `LagrangianStressDivergenceBase::precalculate*`
+        // before this method is called.
+        const RankTwoTensor delta_F_avg = dFdGU * _avg_grad_trial[beta][j];
+        const RankTwoTensor delta_sigma_nl = _D_nl_cache[qp] * delta_F_avg;
+        if (_large_kinematics)
+          _delta_PK1_NL_cache[qp][j] =
+              _F_ust_det_cache[qp] * delta_sigma_nl * _F_ust_inv_T_cache[qp];
+        else
+          _delta_PK1_NL_cache[qp][j] = delta_sigma_nl;
+      }
+    }
   }
 }
 
@@ -333,22 +383,23 @@ Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                       unsigned int beta)
 {
-  // Local Jacobian: J_{alpha beta} = gradTest_α : (dPK1/d(grad u) · grad_phi_β). With
-  // the F_ust-wrap architectural change, pk1_jacobian = dPK1/d(F_ust) carries the
-  // local F-bar contribution through the σ chain (cauchy_jacobian · d(dL)/d(F_stab) ·
-  // d(F_stab)/d(F_ust)).
-  Real J = gradTest(alpha).doubleContraction(_dpk1_d_grad_u[_qp] * gradTrial(beta));
+  // Cache gradTest(α) — used twice below, cheap-but-not-free `G::gradOp`.
+  const RankTwoTensor grad_test = gradTest(alpha);
 
-  // Non-local F-bar Jacobian contribution. PK1 = det(F_ust) · σ · F_ust^{-T} no longer
-  // contains the non-local F-bar effect (it used to enter through F_stab in the wrap);
-  // `deltaPK1NonLocalFBar` re-introduces it through the σ-via-dL chain. Guarded on
-  // `_stabilize_strain` because `_avg_grad_trial` is only populated when F-bar is on.
+  // Local Jacobian: J_{alpha beta} = gradTest_α : (dPK1/d(grad u) · grad_phi_β). The
+  // R4·R2 chain `_dpk1_d_grad_u[qp] · gradTrial(β)` depends only on (qp, j); it was
+  // precomputed once per (qp, j) by `populateLocalPK1Cache(β)` in the column-level
+  // precalculate hook.
+  Real J = grad_test.doubleContraction(_dpk1_grad_trial_cache[_qp][_j]);
+
+  // Non-local F-bar Jacobian contribution. The fully wrapped δPK1_NL per (qp, j) is
+  // precomputed in `populateLocalPK1Cache(β)` (it depends only on (qp, j) since β is
+  // fixed for the column) — no per-(_i, _j) R4·R2 chain or 3x3 inverse here.
   RankTwoTensor d_PK1_NL;
   if (_stabilize_strain)
   {
-    const RankTwoTensor delta_F_avg = _d_F_d_grad_u[_qp] * _avg_grad_trial[beta][_j];
-    d_PK1_NL = deltaPK1NonLocalFBar(delta_F_avg);
-    J += gradTest(alpha).doubleContraction(d_PK1_NL);
+    d_PK1_NL = _delta_PK1_NL_cache[_qp][_j];
+    J += grad_test.doubleContraction(d_PK1_NL);
   }
 
   // OLD-compat B-bar volumetric correction Jacobian (only in `F_bar_mode = incremental`).
@@ -358,9 +409,9 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
   //              + (1/3) · (PK1:F_ust) · (d(avg_T)/dU - dT_α/dU)
   // with derivatives in U (the trial-DOF for component β at node j):
   //   d(PK1:F_ust)/dU|qp = (dPK1_local + dPK1_NL) : F_ust + PK1 : dF_ust_local
-  //     dPK1_local = _dpk1_d_grad_u[_qp] · gradTrial(β)             (already used above)
-  //     dPK1_NL    = d_PK1_NL                                       (cached above)
-  //     dF_ust     = gradOp(β, grad_phi_j[_qp])                     (= gradTrialUnstabilized(β))
+  //     dPK1_local = _dpk1_grad_trial_cache[_qp][_j]      (cached above)
+  //     dPK1_NL    = d_PK1_NL                             (cached above)
+  //     dF_ust     = _grad_trial_cache[_qp][_j]           (cached unstabilized trial)
   //   dT_α/dU|qp  = -(grad_x test_i)_β · (grad_x phi_j)_α            (local cross)
   //   d(avg_T)/dU = avgCross(α, β) - avgCross(β, α) - avg_T(i) · avg_grad_spatial_phi[β][j]
   //     avgCross(b1, b2) = _avg_test_phi_cross[b1][b2][i][j]         (precomputed)
@@ -372,8 +423,8 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
     const Real B = avg_T - T_alpha;
 
     // dA/dU at this qp: combine local + non-local PK1 deriv, plus PK1 : dF_ust local.
-    const RankTwoTensor d_PK1_local = _dpk1_d_grad_u[_qp] * gradTrialUnstabilized(beta);
-    const RankTwoTensor d_F_ust = gradTrialUnstabilized(beta);
+    const RankTwoTensor & d_PK1_local = _dpk1_grad_trial_cache[_qp][_j];
+    const RankTwoTensor & d_F_ust = _grad_trial_cache[_qp][_j];
     const Real dA_dU = ((d_PK1_local + d_PK1_NL).doubleContraction(_F_ust[_qp]) +
                         _pk1[_qp].doubleContraction(d_F_ust)) /
                        3.0;

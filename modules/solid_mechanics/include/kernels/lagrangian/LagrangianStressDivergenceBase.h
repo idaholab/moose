@@ -77,7 +77,17 @@ protected:
   /// Returns zero when F-bar is off (`!_stabilize_strain`). Used by the TL displacement
   /// Jacobian, the WPS off-diag Jacobian, and the homogenization scalar↔disp Jacobian
   /// — anywhere the disp perturbation chains through F-bar's non-local route.
+  ///
+  /// Consumes per-qp caches populated by `prepareFBarCaches()` so the inner (test, trial)
+  /// loop pays only one R4·R2 (and, in the large-kinematics branch, one R2·R2·R2 PK1 wrap)
+  /// per call instead of three R4·R2 chains plus a per-call 3x3 inverse and determinant.
   RankTwoTensor deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const;
+
+  /// Refresh `_F_ust_det_cache`, `_F_ust_inv_T_cache`, and `_D_nl_cache` for the current
+  /// element if they aren't already current. No-op when F-bar is off. Idempotent across
+  /// the multiple `precalculate{,OffDiag}Jacobian` calls a single element receives during
+  /// one Jacobian assembly pass.
+  void prepareFBarCaches();
 
 protected:
   /// If true use large deformation kinematics
@@ -191,4 +201,24 @@ protected:
   /// off-diagonal Jacobian needs it. Will be nullptr otherwise; subclasses that consume
   /// it must guard accordingly.
   const MaterialProperty<RankFourTensor> * _dcauchy_stress_d_eigenstrain = nullptr;
+
+  /// Element pointer for which the F-bar caches below are valid; nullptr means the cache
+  /// is stale and must be refreshed by `prepareFBarCaches()`.
+  const libMesh::Elem * _fbar_cache_elem = nullptr;
+
+  /// `det(F_ust)` per qp on the current element. Populated only when
+  /// `_stabilize_strain && _large_kinematics`.
+  std::vector<Real> _F_ust_det_cache;
+
+  /// `F_ust^{-T}` per qp on the current element. Populated only when
+  /// `_stabilize_strain && _large_kinematics`.
+  std::vector<RankTwoTensor> _F_ust_inv_T_cache;
+
+  /// Composed non-local F-bar operator per qp:
+  ///   _D_nl_cache[qp] = _cauchy_jacobian[qp]
+  ///                   · _d_spatial_velocity_increment_d_F[qp]
+  ///                   · _d_F_stab_d_F_avg[qp]
+  /// so that `deltaPK1NonLocalFBar(δF_avg)` collapses to one R4·R2 contraction
+  /// instead of three. Populated only when `_stabilize_strain`.
+  std::vector<RankFourTensor> _D_nl_cache;
 };

@@ -97,4 +97,30 @@ protected:
 private:
   /// The stabilized trial function gradient
   virtual RankTwoTensor gradTrialStabilized(unsigned int component);
+
+  /// Populate the per-(qp, j) caches consumed by `computeQpJacobianDisplacement`. β is fixed
+  /// across a single Jacobian column, so the R4·R2 chain `_dpk1_d_grad_u[qp] · gradTrial(β)`,
+  /// the cached unstabilized trial gradient, and (when `_stabilize_strain == true`) the fully
+  /// wrapped non-local F-bar PK1 perturbation can all be computed once per (qp, j) instead
+  /// of once per (qp, _i, _j). Called from `precalculateJacobian` (with β = `_alpha`) and
+  /// `precalculateOffDiagJacobian(jvar)` (with the matched β).
+  void populateLocalPK1Cache(unsigned int beta);
+
+  /// `_dpk1_d_grad_u[qp] · gradTrial(β)` per (qp, j) for the current Jacobian column's β.
+  /// Used by the main local PK1 chain and (in `F_bar_mode = incremental`) the B-bar
+  /// Jacobian's local PK1 derivative — `gradTrial == gradTrialUnstabilized` in TL so a
+  /// single cache covers both consumers.
+  std::vector<std::vector<RankTwoTensor>> _dpk1_grad_trial_cache;
+
+  /// Cached `gradTrialUnstabilized(β)` per (qp, j) for the current column. Used by the
+  /// B-bar Jacobian branch (`F_bar_mode = incremental`). Cheap to store and avoids the
+  /// per-(_i, _j) `G::gradOp` call.
+  std::vector<std::vector<RankTwoTensor>> _grad_trial_cache;
+
+  /// Fully wrapped non-local F-bar contribution to δPK1 per (qp, j) for the current column:
+  ///   _D_nl_cache[qp] · (_d_F_d_grad_u[qp] · _avg_grad_trial[β][j])
+  /// then PK1-wrapped via `_F_ust_det_cache[qp]` / `_F_ust_inv_T_cache[qp]` in large
+  /// kinematics. Populated only when `_stabilize_strain == true`; replaces the per-call
+  /// `deltaPK1NonLocalFBar(...)` invocation in TL's displacement Jacobian.
+  std::vector<std::vector<RankTwoTensor>> _delta_PK1_NL_cache;
 };
