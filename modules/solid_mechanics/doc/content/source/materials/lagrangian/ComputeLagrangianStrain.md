@@ -15,7 +15,11 @@ the stress equilibrium problem for large deformation simulations.
 The `stabilize_strain` averages the volumetric/dilatational part
 of these strain measures  using an [$\bar{F}$ stabilization](Stabilization.md) approach
 to prevent locking of linear quad and hex elements for problems experiencing incompressible
-deformation.  This class also adds in the extra deformation gradient imposed by the
+deformation.  The `F_bar_mode` parameter selects whether the volumetric correction averages the
+*total* deformation gradient (default, `total`) or the *incremental* deformation gradient
+(`incremental`, required to reproduce the legacy [`ComputeFiniteStrain`](/ComputeFiniteStrain.md)
+volumetric correction); see [stabilization](Stabilization.md) for details.
+This class also adds in the extra deformation gradient imposed by the
 [homogenization](Homogenization.md) system.
 
 The calculations differ somewhat between small and large deformation kinematic theory.
@@ -30,7 +34,7 @@ Step-by-step the class:
 2. If `stabilize_strain` is set, average the volumetric parts of the deformation gradient, as described in the [stabilization](Stabilization.md) documentation.
 3. If active, add the extra gradient to this displacement-based deformation gradient calculated in the [ComputeLagrangianHomogenizedLagrangianStrain](ComputeLagrangianHomogenizedLagrangianStrain).
 4. For large deformations only, calculate the kinematic tensors used to define the equilibrium problem in the right frame of reference in the kernels.  For small deformations these measures are set to the identity.
-5. Calculate the increment in the spatial velocity gradient: $\Delta l_{ij} = \delta_{ij} - F^{(n)}_{iK} F^{(n+1)-1}_{Kj}$ for large deformations and $\Delta l_{ij} = F_{ij}^{(new)} - F_{ij}^{(old)}$ for small deformations.
+5. Calculate the increment in the spatial velocity gradient.  The default `kinematic_approximation = linear` gives $\Delta l_{ij} = \delta_{ij} - F^{(n)}_{iK} F^{(n+1)-1}_{Kj}$ for large deformations and $\Delta l_{ij} = F_{ij}^{(new)} - F_{ij}^{(old)}$ for small deformations.  Three other approximations are available for large deformations; see the [kinematic approximations page](/solid_mechanics/KinematicApproximations.md).
 6. Calculate the total strain increment as $\Delta d_{ij} = \frac{1}{2} \left( l_{ij} + l_{ji} \right)$.
 7. Sum up and subtract the eigenstrain increment over the step to fine the mechanical strain increment, $\Delta \varepsilon_{ij} = \Delta d_{ij} - \Delta \varepsilon_{ij}^{(eigen)}$.
 8. Use the previous step values of total and mechanical strain to calculate the updated strain values: $d_{ij}^{(new)} = d_{ij}^{(old)} + \Delta d_{ij}$ and $\varepsilon_{ij} = \varepsilon_{ij}^{(old)} + \Delta \varepsilon_{ij}$.

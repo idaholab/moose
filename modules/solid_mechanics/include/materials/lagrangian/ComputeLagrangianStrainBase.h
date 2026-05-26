@@ -52,10 +52,10 @@ public:
   /// See `rashid_project/plan_outline.pdf` section 2.
   enum class KinematicApproximation
   {
-    Linear,             ///< dL = I - f^{-1}
-    Quadratic,          ///< dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2
-    RashidApproximate,  ///< Rashid's symmetric+skew formulas
-    RashidEigen         ///< "Exact": polar decomposition + matrix logs
+    Linear,            ///< dL = I - f^{-1}
+    Quadratic,         ///< dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2
+    RashidApproximate, ///< Rashid's symmetric+skew formulas
+    RashidEigen        ///< "Exact": polar decomposition + matrix logs
   };
 
   /// What F gets F-bar volumetric correction applied to. Affects only `stabilize_strain = true`.

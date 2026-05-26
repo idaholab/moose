@@ -40,7 +40,6 @@ protected:
   /// wrap structure PK1 = F_ust · S with direct F_ust dependence) can override it.
   virtual void computeQpCauchyStress();
 
-
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
   /// Inverse F-bar-stabilized deformation gradient (= _F^{-1}). Kept for any internal

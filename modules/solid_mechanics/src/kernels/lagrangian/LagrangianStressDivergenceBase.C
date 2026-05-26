@@ -52,7 +52,7 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _F_bar_mode(getParam<MooseEnum>("F_bar_mode") == "incremental" ? FBarMode::Incremental
-                                                                    : FBarMode::Total),
+                                                                   : FBarMode::Total),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _alpha(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
@@ -69,8 +69,7 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
                                                     "inverse_incremental_deformation_gradient")),
     _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _F_actual(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
+    _F_actual(getMaterialPropertyByName<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
     _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
     _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
@@ -79,8 +78,7 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
     _d_F_stab_d_F_avg(
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
-    _cauchy_jacobian(
-        getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
+    _cauchy_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)

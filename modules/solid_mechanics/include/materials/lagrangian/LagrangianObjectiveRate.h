@@ -33,8 +33,7 @@ public:
   /// Perform the objective stress update at the host's current quadrature point.
   /// `dS` is the constitutive small-stress increment (`_small_stress -
   /// _small_stress_old`).
-  virtual void update(ComputeLagrangianObjectiveStress & host,
-                      const RankTwoTensor & dS) const = 0;
+  virtual void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const = 0;
 };
 
 /// Intermediate base for rates that fit the linear template
@@ -43,8 +42,8 @@ class LagrangianLinearObjectiveRate : public LagrangianObjectiveRate
 {
 protected:
   /// Apply the linear advection to a stress, returning `(advected_stress, Jinv)`.
-  static std::tuple<RankTwoTensor, RankFourTensor>
-  advectStress(const RankTwoTensor & S0, const RankTwoTensor & dQ);
+  static std::tuple<RankTwoTensor, RankFourTensor> advectStress(const RankTwoTensor & S0,
+                                                                const RankTwoTensor & dQ);
 
   /// Build the J tensor that defines the linear advection.
   static RankFourTensor updateTensor(const RankTwoTensor & dQ);
@@ -61,22 +60,19 @@ protected:
 class LagrangianTruesdellRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
 };
 
 class LagrangianJaumannRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
 };
 
 class LagrangianGreenNaghdiRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
 };
 
 /// Rashid rate: σ_{n+1} = r̂ (σ_n + Δσ) r̂^T  with r̂ = exp(Δw).
@@ -84,17 +80,14 @@ public:
 class LagrangianRashidRate : public LagrangianObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
 
 private:
   /// Rodrigues exponential of a skew 3x3 tensor W and its derivative dR/dW.
   /// W is treated as unconstrained for the chain rule; the upstream
   /// `_d_vorticity_increment_d_F` projects out non-skew perturbations.
-  static RankTwoTensor rotationFromVorticity(const RankTwoTensor & W,
-                                             RankFourTensor & dR_dW);
+  static RankTwoTensor rotationFromVorticity(const RankTwoTensor & W, RankFourTensor & dR_dW);
 };
 
 /// Build the concrete rate strategy that matches the user's enum choice.
-std::unique_ptr<LagrangianObjectiveRate>
-createObjectiveRate(const MooseEnum & rate_enum);
+std::unique_ptr<LagrangianObjectiveRate> createObjectiveRate(const MooseEnum & rate_enum);

@@ -60,9 +60,8 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
     // The middle factor `_d_F_stab_d_F_ust` is IdentityFour when F-bar is off, so the
     // first line collapses to the original PK1-jacobian chain.
     // Common geometric pieces (independent of F-bar):
-    const RankFourTensor dsigma_dF_geom =
-        _pk1_stress[_qp].times<i_, n_, j_, m_>(I) / J_ust -
-        _cauchy_stress[_qp].times<i_, j_, n_, m_>(F_ust_inv);
+    const RankFourTensor dsigma_dF_geom = _pk1_stress[_qp].times<i_, n_, j_, m_>(I) / J_ust -
+                                          _cauchy_stress[_qp].times<i_, j_, n_, m_>(F_ust_inv);
     // dsigma_dF with the constitutive PK1 jacobian chained via F-bar (default path).
     RankFourTensor dsigma_dF =
         (_pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
@@ -71,8 +70,7 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
 
     // Bypass-F-bar variant: σ chain without the `_d_F_stab_d_F_ust` factor. Same
     // geometric pieces; constitutive PK1 jacobian used directly.
-    RankFourTensor dsigma_dF_no_fbar =
-        _pk1_jacobian[_qp].singleProductJ(_F_ust[_qp]) / J_ust;
+    RankFourTensor dsigma_dF_no_fbar = _pk1_jacobian[_qp].singleProductJ(_F_ust[_qp]) / J_ust;
     dsigma_dF_no_fbar += dsigma_dF_geom;
 
     // Update _pk1_jacobian and publish the bypass variant.

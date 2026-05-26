@@ -53,8 +53,8 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
         _base_name + "d_vorticity_increment_d_deformation_gradient")),
     _rotation(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation")),
     _rotation_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation")),
-    _d_rotation_d_F(getMaterialPropertyByName<RankFourTensor>(
-        _base_name + "d_rotation_d_deformation_gradient")),
+    _d_rotation_d_F(getMaterialPropertyByName<RankFourTensor>(_base_name +
+                                                              "d_rotation_d_deformation_gradient")),
     _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _def_grad_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _rate_strategy(createObjectiveRate(getParam<MooseEnum>("objective_rate"))),

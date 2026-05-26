@@ -30,7 +30,8 @@ ComputeLagrangianStrainBase<G>::baseParams()
       "'total' (default) averages the full F at each qp and rescales each qp's F by "
       "cbrt(det(F_avg)/det(F_ust)). 'incremental' averages the incremental F "
       "(F_ust · F_ust_old^{-1}) at each qp and rescales by cbrt(det(f_avg)/det(f_ust)); this is "
-      "bit-for-bit compatible with the OLD `ComputeFiniteStrain` + `volumetric_locking_correction = "
+      "bit-for-bit compatible with the OLD `ComputeFiniteStrain` + `volumetric_locking_correction "
+      "= "
       "true` formulation. Set to 'incremental' when cross-checking against the old kernel system.");
   params.addParam<bool>(
       "publish_rotation_increment",
@@ -48,8 +49,7 @@ ComputeLagrangianStrainBase<G>::baseParams()
       "alpha >= 0.5 & alpha <= 1.0",
       "Generalized midpoint weight for the deformation gradient. 1.0 = backward Euler (default), "
       "0.5 = midpoint rule (matches Abaqus/Implicit).");
-  MooseEnum kinematic_approximation(
-      "linear quadratic rashid_approximate rashid_eigen", "linear");
+  MooseEnum kinematic_approximation("linear quadratic rashid_approximate rashid_eigen", "linear");
   params.addParam<MooseEnum>(
       "kinematic_approximation",
       kinematic_approximation,
@@ -114,17 +114,15 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
         _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
     _d_vorticity_increment_d_F(declareProperty<RankFourTensor>(
         _base_name + "d_vorticity_increment_d_deformation_gradient")),
-    _d_F_d_grad_u(declareProperty<RankFourTensor>(
-        _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _d_F_d_grad_u(
+        declareProperty<RankFourTensor>(_base_name + "d_deformation_gradient_d_grad_displacement")),
     _rotation(declareProperty<RankTwoTensor>(_base_name + "rotation")),
     _rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotation")),
     _stretch(declareProperty<RankTwoTensor>(_base_name + "stretch")),
-    _d_rotation_d_F(declareProperty<RankFourTensor>(
-        _base_name + "d_rotation_d_deformation_gradient")),
-    _d_F_stab_d_F_ust(declareProperty<RankFourTensor>(
-        _base_name + "d_F_stab_d_F_unstabilized")),
-    _d_F_stab_d_F_avg(declareProperty<RankFourTensor>(
-        _base_name + "d_F_stab_d_F_average")),
+    _d_rotation_d_F(
+        declareProperty<RankFourTensor>(_base_name + "d_rotation_d_deformation_gradient")),
+    _d_F_stab_d_F_ust(declareProperty<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
+    _d_F_stab_d_F_avg(declareProperty<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
     _homogenization_gradient_names(
         getParam<std::vector<MaterialPropertyName>>("homogenization_gradient_names")),
     _homogenization_contributions(_homogenization_gradient_names.size()),
@@ -225,8 +223,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
 
     // Common chain rule: d(f^{-1})_{pq}/dF_{mn} = -f^{-1}_{pm} * F^{-1}_{nq}.
     usingTensorIndices(p_, q_, m_, n_);
-    const RankFourTensor d_f_inv_d_F =
-        -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
+    const RankFourTensor d_f_inv_d_F = -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
     _d_spatial_velocity_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
     _d_vorticity_increment_d_F[_qp] = d_dw_d_f_inv * d_f_inv_d_F;
 
@@ -284,12 +281,11 @@ ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition()
 
 template <class G>
 void
-ComputeLagrangianStrainBase<G>::computeQpLargeKinematicIncrement(
-    const RankTwoTensor & f_inv,
-    RankTwoTensor & dd,
-    RankTwoTensor & dw,
-    RankFourTensor & d_dL_d_f_inv,
-    RankFourTensor & d_dw_d_f_inv)
+ComputeLagrangianStrainBase<G>::computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
+                                                                 RankTwoTensor & dd,
+                                                                 RankTwoTensor & dw,
+                                                                 RankFourTensor & d_dL_d_f_inv,
+                                                                 RankFourTensor & d_dw_d_f_inv)
 {
   switch (_kinematic_approximation)
   {
@@ -403,8 +399,7 @@ ComputeLagrangianStrainBase<G>::computeLinearIncrement(const RankTwoTensor & f_i
   // d(Δw)/d(f^{-1}) = - skew projector on f^{-1} = -(1/2)(I^{ikjl} - I^{iljk}).
   usingTensorIndices(i_, j_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
-  d_dw_d_f_inv =
-      -0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, m_, i_, n_>(I2));
+  d_dw_d_f_inv = -0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, m_, i_, n_>(I2));
 }
 
 template <class G>
@@ -555,8 +550,7 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
             const Real dc_dfinv = dc_pref * eps_alpha;
             Real dE_dfinv = 0.0;
             for (unsigned int k = 0; k < 3; ++k)
-              dE_dfinv +=
-                  PermutationTensor::eps(i, j, k) * PermutationTensor::eps(k, m, n);
+              dE_dfinv += PermutationTensor::eps(i, j, k) * PermutationTensor::eps(k, m, n);
             d_dw_d_f_inv(i, j, m, n) = dc_dfinv * E_ij + coeff * dE_dfinv;
           }
       }
@@ -653,19 +647,15 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   {
     usingTensorIndices(i2_, j2_, m2_, n2_, p2_);
     dd = r * dd_spatial * r.transpose();
-    const RankTwoTensor M = dd_spatial * r.transpose();  // dd · r^T   (p, j) shape
-    const RankTwoTensor N = r * dd_spatial;              // r · dd     (i, q) shape
+    const RankTwoTensor M = dd_spatial * r.transpose(); // dd · r^T   (p, j) shape
+    const RankTwoTensor N = r * dd_spatial;             // r · dd     (i, q) shape
     // T1_{ijmn} = (dr/d_finv)_{ip,mn} · M_{pj}
-    const RankFourTensor T1 =
-        M.template times<p2_, j2_, i2_, p2_, m2_, n2_>(d_r_d_finv);
+    const RankFourTensor T1 = M.template times<p2_, j2_, i2_, p2_, m2_, n2_>(d_r_d_finv);
     // T2_{ijmn} = r_{ip} · (d_dd_spatial_d_finv)_{pq,mn} · r_{jq}: contract twice over the dummy.
-    const RankFourTensor mid =
-        r.template times<i2_, p2_, p2_, j2_, m2_, n2_>(d_dd_spatial_d_finv);
-    const RankFourTensor T2 =
-        r.template times<j2_, p2_, i2_, p2_, m2_, n2_>(mid);
+    const RankFourTensor mid = r.template times<i2_, p2_, p2_, j2_, m2_, n2_>(d_dd_spatial_d_finv);
+    const RankFourTensor T2 = r.template times<j2_, p2_, i2_, p2_, m2_, n2_>(mid);
     // T3_{ijmn} = N_{iq} · (dr/d_finv)_{jq,mn}
-    const RankFourTensor T3 =
-        N.template times<i2_, p2_, j2_, p2_, m2_, n2_>(d_r_d_finv);
+    const RankFourTensor T3 = N.template times<i2_, p2_, j2_, p2_, m2_, n2_>(d_r_d_finv);
     const RankFourTensor d_dd_d_finv = T1 + T2 + T3;
     d_dL_d_f_inv = d_dd_d_finv + d_dw_d_f_inv;
   }
@@ -754,13 +744,13 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
                  "`F_bar_mode = total` (the default) with small kinematics.");
     const auto F_avg = StabilizationUtils::elementAverage(
         [this](unsigned int qp) { return _F_ust[qp]; }, _JxW, _coord);
-    const auto f_avg = incremental
-                           ? StabilizationUtils::elementAverage(
-                                 [this](unsigned int qp)
-                                 { return _F_ust[qp] * _F_ust_old[qp].inverse(); },
-                                 _JxW,
-                                 _coord)
-                           : RankTwoTensor();
+    const auto f_avg =
+        incremental
+            ? StabilizationUtils::elementAverage([this](unsigned int qp)
+                                                 { return _F_ust[qp] * _F_ust_old[qp].inverse(); },
+                                                 _JxW,
+                                                 _coord)
+            : RankTwoTensor();
     // Always publish avg(F_ust) — UL kernel uses this for the push-forward.
     _F_avg.set().setAllValues(F_avg);
     // What the F-bar gamma and `_d_F_stab_d_F_avg` are built against (also what the
@@ -786,8 +776,9 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
         const Real gamma = std::pow(avg_for_chain.det() / det_ust_local, 1.0 / 3.0);
         const auto Fust_invT = _F_ust[_qp].inverse().transpose();
         const auto avg_invT = avg_for_chain.inverse().transpose();
-        _d_F_stab_d_F_ust[_qp] = gamma * RankFourTensor::IdentityFour() -
-                                 (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
+        _d_F_stab_d_F_ust[_qp] =
+            gamma * RankFourTensor::IdentityFour() -
+            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
         _d_F_stab_d_F_avg[_qp] =
             (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(avg_invT);
         _F[_qp] *= gamma;
@@ -826,9 +817,8 @@ ComputeLagrangianStrainBase<G>::computeQpRotationIncrement(const RankTwoTensor &
   // for-bit at the same converged displacement state.
   if (_kinematic_approximation == KinematicApproximation::RashidApproximate)
   {
-    const Real a[3] = {f_inv(1, 2) - f_inv(2, 1),
-                       f_inv(2, 0) - f_inv(0, 2),
-                       f_inv(0, 1) - f_inv(1, 0)};
+    const Real a[3] = {
+        f_inv(1, 2) - f_inv(2, 1), f_inv(2, 0) - f_inv(0, 2), f_inv(0, 1) - f_inv(1, 0)};
     const Real q = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) / 4.0;
     const Real trFhatinv_1 = f_inv.trace() - 1.0;
     const Real p = trFhatinv_1 * trFhatinv_1 / 4.0;

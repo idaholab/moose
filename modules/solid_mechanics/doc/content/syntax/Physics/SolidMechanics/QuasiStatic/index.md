@@ -54,6 +54,57 @@ Note that there are many variations for the calculation of the stress divergence
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
 | Add the optional homogenization constraints | Adds all objects required to impose the [homogenization constraints](Homogenization.md) | `constraint_types` : MooseEnum controlling whether `strain` or `stress` constraints and imposed, `targets` : Functions providing the time-dependent targets  |
 
+## Compatibility Mode id=compatibility-mode
+
+Setting `compatibility_mode = true` configures the
+[Lagrangian (new) kernel system](LagrangianKernelTheory.md) to reproduce the
+legacy [`StressDivergenceTensors`](/StressDivergenceTensors.md) +
+[`ComputeFiniteStrain`](/ComputeFiniteStrain.md) +
+[`ComputeStressBase`](Stresses.md)-style pipeline bit-for-bit.  Use it to port an
+existing OLD-system input to the new kernels by flipping a single flag, without
+rewriting the rest of the block.
+
+When `compatibility_mode = true`, the action automatically wires up the
+combination of strain, kernel, and material settings that reproduces the legacy
+update.  [compat_table] summarizes the wiring.
+
+!table id=compat_table caption=Mapping from OLD-style parameters to NEW-system settings under `compatibility_mode = true`
+| OLD-style parameter or quantity                    | NEW-system equivalent set automatically                                              |
+|----------------------------------------------------|--------------------------------------------------------------------------------------|
+| (implied)                                          | `new_system = true`, `formulation = TOTAL`                                           |
+| `decomposition_method = TaylorExpansion`           | `kinematic_approximation = rashid_approximate` on the strain calculator              |
+| `decomposition_method = EigenSolution`             | `kinematic_approximation = rashid_eigen` on the strain calculator                    |
+| `decomposition_method = HughesWinget`              | Rejected at construction (no NEW equivalent)                                         |
+| `volumetric_locking_correction = true` (FINITE)    | `F_bar_mode = incremental` on the strain calc *and* the kernel                       |
+| user's `ComputeStressBase`-style stress material   | Auto-wrapped with [`ComputeLagrangianWrappedStress`](/ComputeLagrangianWrappedStress.md) using `objective_rate = rashid` and `rotate_old_stress = true` |
+| (implied for the wrapped material's FSR)           | `publish_rotation_increment = true` on the strain calc (when `strain = FINITE`)      |
+| `generate_output = stress_*`                       | Redirected to read from `cauchy_stress_*`                                            |
+| `generate_output = mechanical_strain_*`            | Redirected to read from `rotated_mechanical_strain_*`                                |
+
+The user's stress material continues to be the OLD-style
+[`ComputeStressBase`](Stresses.md) descendant (e.g.
+[`ComputeMultiPlasticityStress`](/ComputeMultiPlasticityStress.md)); the action
+adds the wrapper material around it.  See
+[`ComputeLagrangianObjectiveStress`](/ComputeLagrangianObjectiveStress.md) for
+the Rashid rate and [the kinematic approximations page](/solid_mechanics/KinematicApproximations.md)
+for the `rashid_approximate` / `rashid_eigen` increments.
+
+The action enforces several constraints in compatibility mode:
+
+- `formulation = UPDATED` is rejected; the OLD-system equivalence is only
+  defined for the total Lagrangian formulation.
+- `decomposition_method = HughesWinget` is rejected at construction because the
+  Lagrangian kernel system has no `HughesWinget` counterpart.
+- `strain = SMALL` leaves `F_bar_mode` at its default `total` value; the strain
+  calculator rejects `incremental` for small kinematics.
+
+### Example Input
+
+The following uses compatibility mode to drive an OLD-style finite-strain
+plasticity model through the Lagrangian kernels:
+
+!listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/cross_material/interoperability/new_system_action.i block=Physics/SolidMechanics/QuasiStatic
+
 !alert warning If the using the `Physics/SolidMechanics/QuasiStatic` with
 `automatic_eigenstrain_names = true`, the eigenstrain_names will be populated
 under restrictive conditions for classes such as
