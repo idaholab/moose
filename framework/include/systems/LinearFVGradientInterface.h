@@ -52,7 +52,7 @@ public:
   /// Whether this field stores limited gradients.
   bool isLimited() const { return _limiter_type != Moose::FV::GradientLimiterType::None; }
 
-  /// Limiter type for limited fields, or None for base fields.
+  /// Limiter type for limited fields, or None for unlimited fields.
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
 
   /// Read one gradient component for a variable at an element.
@@ -69,25 +69,25 @@ private:
   /// Component vectors keyed by spatial direction.
   const GradientContainer & _components;
 
-  /// Limiter type for limited fields.
+  /// Limiter type for this field; None means unlimited.
   const Moose::FV::GradientLimiterType _limiter_type;
 };
 
 /**
- * Shared storage and allocation logic for linear finite-volume cell gradients for
- * variables in the system attribute of this class
+ * Shared registration, storage, update, and allocation logic for system-owned linear
+ * finite-volume cell gradients.
  */
 class LinearFVGradientInterface
 {
 public:
   LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
 
-  /// Register a system-owned linear FV gradient field produced by a named method object.
+  /// Register a system-owned linear FV gradient field produced by a method object.
   LinearFVGradientField & registerFVGradient(unsigned int variable_number,
                                              const FVGradientMethod & method);
 
 protected:
-  /// Compute and store requested unlimited and limited gradients for linear FV variables.
+  /// Update all registered linear FV gradient fields.
   void computeGradients();
 
   /**
