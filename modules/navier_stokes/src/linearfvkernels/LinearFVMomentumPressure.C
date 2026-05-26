@@ -12,7 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
-#include "RhieChowMassFlux.h"
+#include "FVGradientMethod.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 
@@ -24,10 +24,10 @@ LinearFVMomentumPressure::validParams()
                              "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::pressure,
                                 "The pressure variable whose gradient should be used.");
-  params.addParam<UserObjectName>(
-      "rhie_chow_user_object",
-      "Rhie-Chow mass flux user object that supplies the pressure gradient. If omitted, the "
-      "kernel uses the pressure variable Green-Gauss gradient.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "Gradient method to use for the pressure gradient in this kernel. If omitted, the pressure "
+      "variable's default gradient method is used.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -40,10 +40,7 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
-    _pressure_gradient_field(_pressure_var.computeCellGradients()),
-    _rhie_chow_mass_flux(isParamValid("rhie_chow_user_object")
-                             ? &getUserObject<RhieChowMassFlux>("rhie_chow_user_object")
-                             : nullptr)
+    _pressure_gradient_field(registerPressureGradientField())
 {
 }
 
@@ -59,6 +56,22 @@ LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
   return *ptr;
 }
 
+const LinearFVGradientField &
+LinearFVMomentumPressure::registerPressureGradientField()
+{
+  if (!isParamValid("gradient_method"))
+    return _pressure_var.computeCellGradients();
+
+  const auto & method_name = getParam<GradientMethodName>("gradient_method");
+  if (method_name == "green-gauss" && !_fe_problem.hasFVGradientMethod(method_name))
+    _fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
+
+  if (!_fe_problem.hasFVGradientMethod(method_name))
+    paramError("gradient_method", "Unable to find FVGradientMethod with name '", method_name, "'.");
+
+  return _pressure_var.computeCellGradients(_fe_problem.getFVGradientMethod(method_name));
+}
+
 Real
 LinearFVMomentumPressure::computeMatrixContribution()
 {
@@ -69,8 +82,6 @@ Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
   const Real pressure_gradient =
-      _rhie_chow_mass_flux
-          ? _rhie_chow_mass_flux->pressureGradient(*_current_elem_info, _index)
-          : _pressure_var.gradSlnComponent(*_current_elem_info, _index, _pressure_gradient_field);
+      _pressure_var.gradSlnComponent(*_current_elem_info, _index, _pressure_gradient_field);
   return -pressure_gradient * _current_elem_volume;
 }

@@ -47,17 +47,35 @@ public:
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
-  /**
-   * Get the pressure gradient component used by the momentum predictor.
-   *
-   * The default option returns the registered pressure gradient field. The reconstructed option
-   * returns the pressure gradient inferred from the conservative Rhie-Chow face fluxes and the
-   * momentum relation after the first pressure correction has produced a reconstructed field.
-   */
-  Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
-
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
   const LinearFVGradientField & pressureGradientField() const;
+
+  /// Mark the registered pressure gradient field update as a base-gradient update.
+  void preparePressureGradientUpdate();
+
+  /// Whether reconstructed cell velocities are ready for the gradient method to consume.
+  bool hasReconstructedCellVelocity() const;
+
+  /// Get one reconstructed cell velocity component at a cell center.
+  Real reconstructedCellVelocity(const ElemInfo & elem_info, unsigned int component) const;
+
+  /// Get one cell-centered H/A component from the last H/A assembly.
+  Real HbyA(const ElemInfo & elem_info, unsigned int component) const;
+
+  /// Get one cell-centered 1/A component from the last H/A assembly.
+  Real Ainv(const ElemInfo & elem_info, unsigned int component) const;
+
+  /// Relaxation factor for reconstructed cell velocities and pressure gradients.
+  Real reconstructedPressureGradientRelaxation() const
+  {
+    return _reconstructed_pressure_gradient_relaxation;
+  }
+
+  /// Variable number of the pressure variable reconstructed by this object.
+  unsigned int pressureVariableNumber() const;
+
+  /// Whether a subdomain is part of the flow blocks handled by this object.
+  bool hasFlowBlock(const SubdomainID subdomain_id) const { return hasBlocks(subdomain_id); }
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -105,11 +123,8 @@ protected:
   /// Get the registered pressure gradient component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
 
-  /// Whether the Rhie-Chow object should use reconstructed pressure gradients when available
-  bool useReconstructedPressureGradient() const
-  {
-    return _pressure_gradient_type == "reconstructed";
-  }
+  /// Whether the registered pressure gradient field is produced by the reconstructed method.
+  bool usingReconstructedPressureGradientMethod() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -190,6 +205,9 @@ protected:
   /// Vector of body force term names
   std::vector<std::vector<std::string>> _body_force_kernel_names;
 
+  /// Optional momentum pressure kernel whose registered pressure gradient field should be reused.
+  const std::string _momentum_pressure_kernel_name;
+
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
    * Should not be used in other conditions.
@@ -197,14 +215,15 @@ protected:
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
 
   /**
-   * Pressure gradient reconstructed from the conservative face fluxes.
+   * Cell velocity reconstructed from the conservative face fluxes.
    *
    * For each cell, the velocity is recovered from the face-normal velocities with the
-   * least-squares flux reconstruction described in Aguerre et al. (2018). The reconstructed
-   * pressure gradient then follows from the cell momentum relation
-   * \f$\vec{u}_C = - (H/A)_C - (1/A)_C \nabla p_C\f$.
+   * least-squares flux reconstruction described in Aguerre et al. (2018).
    */
-  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_reconstructed;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_cell_velocity;
+
+  /// Whether _reconstructed_cell_velocity should be exposed through FVReconstructedPressureGradient.
+  bool _reconstructed_cell_velocity_ready;
 
   /**
    * Functor describing the density of the fluid
@@ -237,9 +256,6 @@ protected:
 
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;
-
-  /// Enumerator for the pressure gradient used in the momentum predictor
-  const MooseEnum _pressure_gradient_type;
 
   /// Relaxation factor for reconstructed cell velocities and pressure gradients
   const Real _reconstructed_pressure_gradient_relaxation;

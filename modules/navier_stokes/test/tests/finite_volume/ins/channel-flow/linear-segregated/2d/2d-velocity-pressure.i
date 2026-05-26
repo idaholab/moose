@@ -27,6 +27,7 @@ pressure_gradient_method = 'green-gauss'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    momentum_pressure_kernel = u_pressure
   []
 []
 
@@ -45,13 +46,16 @@ pressure_gradient_method = 'green-gauss'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
-    gradient_method = ${pressure_gradient_method}
   []
 []
 
 [FVGradientMethods]
   [gg]
     type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    rhie_chow_user_object = rc
   []
 []
 
@@ -83,12 +87,14 @@ pressure_gradient_method = 'green-gauss'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusion

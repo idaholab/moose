@@ -382,6 +382,7 @@ void
 LinearAssemblySegregatedSolve::updatePressureGradient()
 {
   mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
+  _rc_uo->preparePressureGradientUpdate();
   _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
 }
 

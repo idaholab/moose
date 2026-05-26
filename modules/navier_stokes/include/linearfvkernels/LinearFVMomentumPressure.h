@@ -12,16 +12,13 @@
 #include "LinearFVElementalKernel.h"
 
 class LinearFVGradientField;
-class RhieChowMassFlux;
 
 /**
  * Kernel that adds the component of the pressure gradient in the momentum
  * equations to the right hand side.
  *
- * By default the gradient is the Green-Gauss gradient stored by the pressure variable. When a
- * RhieChowMassFlux object is supplied, the kernel asks that object for the gradient instead, which
- * lets SIMPLE use the same Green-Gauss/reconstructed pressure-gradient choice in the momentum
- * predictor and in the Rhie-Chow H/A construction.
+ * The gradient is the field registered by this kernel. Rhie-Chow can query the kernel for this
+ * field so the momentum predictor and H/A construction use the same pressure gradient.
  */
 class LinearFVMomentumPressure : public LinearFVElementalKernel
 {
@@ -38,8 +35,14 @@ public:
 
   virtual Real computeRightHandSideContribution() override;
 
+  /// Pressure gradient field used by this kernel.
+  const LinearFVGradientField & pressureGradientField() const { return _pressure_gradient_field; }
+
 protected:
   MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
+
+  /// Register the pressure gradient field used by this kernel.
+  const LinearFVGradientField & registerPressureGradientField();
 
   /// Index x|y|z of the momentum equation component
   const unsigned int _index;
@@ -47,9 +50,6 @@ protected:
   /// Pointer to the linear finite volume pressure variable
   MooseLinearVariableFV<Real> & _pressure_var;
 
-  /// Pressure gradient field used when no Rhie-Chow object supplies one.
+  /// Pressure gradient field used by this kernel.
   const LinearFVGradientField & _pressure_gradient_field;
-
-  /// Optional Rhie-Chow object supplying alternate pressure gradients
-  const RhieChowMassFlux * const _rhie_chow_mass_flux;
 };

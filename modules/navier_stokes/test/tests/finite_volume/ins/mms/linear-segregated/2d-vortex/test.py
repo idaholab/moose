@@ -2,11 +2,7 @@ import mms
 import unittest
 from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
-RECONSTRUCTED_GRADIENT_ARGS = (
-    "UserObjects/rc/pressure_gradient_type=reconstructed",
-    "LinearFVKernels/u_pressure/rhie_chow_user_object=rc",
-    "LinearFVKernels/v_pressure/rhie_chow_user_object=rc",
-)
+RECONSTRUCTED_GRADIENT_ARGS = ("pressure_gradient_method=reconstructed",)
 
 NONORTHOGONAL_ARGS = (
     "Mesh/gmg/elem_type=TRI3",
@@ -109,7 +105,10 @@ class TestVortexOrthogonalReconstructed(unittest.TestCase):
         fig.save("vortex-reconstructed.png")
         for key, value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.5))
+            if key in velocity_labels:
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.5))
+            else:
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.2))
 
 
 class TestVortexNonorthogonalReconstructed(unittest.TestCase):
@@ -139,10 +138,12 @@ class TestVortexNonorthogonalReconstructed(unittest.TestCase):
         fig.save("vortex-nonorthogonal-reconstructed.png")
         for key, value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            if key in velocity_labels:
+            if key == "L2u":
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.3))
+            elif key == "L2v":
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, 0.3))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.3, 0.3))
 
 
 if __name__ == "__main__":

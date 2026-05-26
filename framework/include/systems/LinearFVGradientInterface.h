@@ -38,10 +38,9 @@ class LinearFVGradientField
 public:
   using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
 
-  LinearFVGradientField(
-      const SystemBase & sys,
-      const GradientContainer & components,
-      Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None);
+  LinearFVGradientField(const SystemBase & sys,
+                        const GradientContainer & components,
+                        const FVGradientMethod & method);
 
   /// Access the underlying component vectors keyed by spatial direction.
   const GradientContainer & components() const { return _components; }
@@ -49,11 +48,14 @@ public:
   /// System whose DOF map indexes this field.
   const SystemBase & system() const { return _sys; }
 
+  /// Method object that produces this field.
+  const FVGradientMethod & method() const { return _method; }
+
   /// Whether this field stores limited gradients.
-  bool isLimited() const { return _limiter_type != Moose::FV::GradientLimiterType::None; }
+  bool isLimited() const { return limiterType() != Moose::FV::GradientLimiterType::None; }
 
   /// Limiter type for limited fields, or None for unlimited fields.
-  Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
+  Moose::FV::GradientLimiterType limiterType() const;
 
   /// Read one gradient component for a variable at an element.
   Real
@@ -69,8 +71,8 @@ private:
   /// Component vectors keyed by spatial direction.
   const GradientContainer & _components;
 
-  /// Limiter type for this field; None means unlimited.
-  const Moose::FV::GradientLimiterType _limiter_type;
+  /// Method object that produces this field.
+  const FVGradientMethod & _method;
 };
 
 /**

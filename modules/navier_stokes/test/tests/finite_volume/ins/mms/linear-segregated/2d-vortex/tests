@@ -23,7 +23,7 @@
     input = test.py
     test_case = TestVortexOrthogonalReconstructed
     min_parallel = 2
-    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients and obtain second order spatial convergence for velocity and pressure on an orthogonal grid.'
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients in the momentum predictor and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
   []
   [vortex-nonorthogonal-reconstructed]
@@ -31,7 +31,7 @@
     input = test.py
     test_case = TestVortexNonorthogonalReconstructed
     min_parallel = 4
-    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients and preserve second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients in the momentum predictor and preserve at least first order spatial convergence on a nonorthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
   []
 []

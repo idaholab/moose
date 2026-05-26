@@ -3,10 +3,10 @@
 This object adds the $-\nabla p$ term to the right hand side of
 the Navier Stokes momentum equations.
 
-By default, the gradient is the Green-Gauss gradient from the pressure variable. For linear SIMPLE
-solves, [!param](/LinearFVKernels/LinearFVMomentumPressure/rhie_chow_user_object) may be supplied so
-the kernel uses the pressure-gradient selection from [RhieChowMassFlux.md], including reconstructed
-pressure gradients when enabled there.
+The gradient comes from this kernel's `gradient_method` parameter, or from the pressure variable's
+default gradient method when that parameter is omitted. For linear SIMPLE solves,
+[RhieChowMassFlux.md] can reuse this kernel's pressure gradient field through its
+`momentum_pressure_kernel` parameter so the momentum predictor and H/A construction stay consistent.
 
 !syntax parameters /LinearFVKernels/LinearFVMomentumPressure
 

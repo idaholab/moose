@@ -17,7 +17,10 @@
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
+#include "LinearFVGradientInterface.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVMomentumPressure.h"
+#include "FVReconstructedPressureGradient.h"
 #include "FVUtils.h"
 
 // libMesh includes
@@ -66,13 +69,11 @@ RhieChowMassFlux::validParams()
                              MooseEnum("standard consistent", "standard"),
                              "The method to use in the pressure projection for Ainv - "
                              "standard (SIMPLE) or consistent (SIMPLEC)");
-  params.addParam<MooseEnum>(
-      "pressure_gradient_type",
-      MooseEnum("green_gauss reconstructed", "green_gauss"),
-      "Pressure gradient used by compatible momentum pressure kernels. 'green_gauss' uses the "
-      "standard pressure variable gradient. 'reconstructed' uses the conservative face fluxes to "
-      "reconstruct cell velocities and then infers the pressure gradient from the SIMPLE momentum "
-      "relation.");
+  params.addParam<std::string>(
+      "momentum_pressure_kernel",
+      "",
+      "Momentum pressure kernel whose registered pressure gradient field should also be used by "
+      "Rhie-Chow when constructing H/A.");
   params.addRangeCheckedParam<Real>(
       "reconstructed_pressure_gradient_relaxation",
       0.02,
@@ -98,12 +99,13 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
     _body_force_kernel_names(
         getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
+    _momentum_pressure_kernel_name(getParam<std::string>("momentum_pressure_kernel")),
+    _reconstructed_cell_velocity_ready(false),
     _rho(getFunctor<Real>(NS::density)),
     _pressure_system(nullptr),
     _pressure_gradient_field(nullptr),
     _global_pressure_system_number(0),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
-    _pressure_gradient_type(getParam<MooseEnum>("pressure_gradient_type")),
     _reconstructed_pressure_gradient_relaxation(
         getParam<Real>("reconstructed_pressure_gradient_relaxation"))
 {
@@ -153,7 +155,30 @@ RhieChowMassFlux::linkMomentumPressureSystems(
                _pressure_system->name(),
                "' must be a MooseLinearVariableFVReal.");
 
-  _pressure_gradient_field = &pressure_var->computeCellGradients();
+  if (_momentum_pressure_kernel_name.empty())
+    _pressure_gradient_field = &pressure_var->computeCellGradients();
+  else
+  {
+    std::vector<LinearFVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribName>(_momentum_pressure_kernel_name)
+        .queryInto(kernels);
+
+    if (kernels.size() != 1)
+      paramError("momentum_pressure_kernel",
+                 "The kernel with the given name could not be found or multiple instances were "
+                 "identified.");
+
+    const auto * const pressure_kernel = dynamic_cast<const LinearFVMomentumPressure *>(kernels[0]);
+    if (!pressure_kernel)
+      paramError("momentum_pressure_kernel",
+                 "The provided kernel should be of type LinearFVMomentumPressure.");
+
+    _pressure_gradient_field = &pressure_kernel->pressureGradientField();
+  }
 
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
@@ -172,7 +197,8 @@ RhieChowMassFlux::meshChanged()
   _Ainv.clear();
   _face_velocity.clear();
   _face_mass_flux.clear();
-  _grad_p_reconstructed.clear();
+  _reconstructed_cell_velocity.clear();
+  _reconstructed_cell_velocity_ready = false;
   setupMeshInformation();
 }
 
@@ -338,21 +364,6 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
 }
 
-Real
-RhieChowMassFlux::pressureGradient(const ElemInfo & elem_info, const unsigned int component) const
-{
-  mooseAssert(component < _dim,
-              "Requested pressure gradient component exceeds the mesh dimension.");
-
-  if (useReconstructedPressureGradient() && !_grad_p_reconstructed.empty())
-  {
-    const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-    return (*_grad_p_reconstructed[component])(elem_dof);
-  }
-
-  return pressureGradientField().component(elem_info, _p->number(), component);
-}
-
 const LinearFVGradientField &
 RhieChowMassFlux::pressureGradientField() const
 {
@@ -361,6 +372,56 @@ RhieChowMassFlux::pressureGradientField() const
         "The pressure gradient field has not been registered for RhieChowMassFlux '", name(), "'.");
 
   return *_pressure_gradient_field;
+}
+
+void
+RhieChowMassFlux::preparePressureGradientUpdate()
+{
+  _reconstructed_cell_velocity_ready = false;
+}
+
+bool
+RhieChowMassFlux::hasReconstructedCellVelocity() const
+{
+  return _reconstructed_cell_velocity_ready && !_reconstructed_cell_velocity.empty();
+}
+
+Real
+RhieChowMassFlux::reconstructedCellVelocity(const ElemInfo & elem_info,
+                                            const unsigned int component) const
+{
+  mooseAssert(component < _dim,
+              "Requested reconstructed cell velocity component exceeds the mesh dimension.");
+  mooseAssert(hasReconstructedCellVelocity(), "Reconstructed cell velocity is not ready.");
+
+  const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][_p->number()];
+  return (*_reconstructed_cell_velocity[component])(elem_dof);
+}
+
+Real
+RhieChowMassFlux::HbyA(const ElemInfo & elem_info, const unsigned int component) const
+{
+  mooseAssert(component < _dim, "Requested HbyA component exceeds the mesh dimension.");
+  mooseAssert(component < _HbyA_raw.size(), "HbyA data is not ready.");
+
+  const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+  return (*_HbyA_raw[component])(elem_dof);
+}
+
+Real
+RhieChowMassFlux::Ainv(const ElemInfo & elem_info, const unsigned int component) const
+{
+  mooseAssert(component < _dim, "Requested Ainv component exceeds the mesh dimension.");
+  mooseAssert(component < _Ainv_raw.size(), "Ainv data is not ready.");
+
+  const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+  return (*_Ainv_raw[component])(elem_dof);
+}
+
+unsigned int
+RhieChowMassFlux::pressureVariableNumber() const
+{
+  return _p->number();
 }
 
 Real
@@ -485,20 +546,19 @@ RhieChowMassFlux::updateFaceVelocityFromMassFlux()
 void
 RhieChowMassFlux::computeCellVelocity()
 {
-  if (useReconstructedPressureGradient())
+  if (usingReconstructedPressureGradientMethod())
   {
     updateFaceVelocityFromMassFlux();
 
-    if (_grad_p_reconstructed.empty())
+    if (_reconstructed_cell_velocity.empty())
     {
-      _grad_p_reconstructed.resize(_dim);
+      _reconstructed_cell_velocity.resize(_dim);
       for (const auto component : make_range(_dim))
-        _grad_p_reconstructed[component] =
-            _momentum_implicit_systems[component]->current_local_solution->zero_clone();
+        _reconstructed_cell_velocity[component] = _pressure_system->currentSolution()->zero_clone();
     }
 
-    for (auto & grad_vec : _grad_p_reconstructed)
-      grad_vec->zero();
+    for (auto & velocity_vec : _reconstructed_cell_velocity)
+      velocity_vec->zero();
 
     const auto & pressure_gradient = pressureGradientComponents();
     const auto & mesh = _fe_problem.mesh();
@@ -549,20 +609,21 @@ RhieChowMassFlux::computeCellVelocity()
 
       for (const auto component : make_range(_dim))
       {
-        const auto dof = elem_info->dofIndices()[_global_momentum_system_numbers[component]][0];
-        const Real HbyA = (*_HbyA_raw[component])(dof);
-        const Real Ainv = (*_Ainv_raw[component])(dof);
-        const Real pressure_grad = (*pressure_gradient[component])(dof);
-        const Real reconstructed_grad =
-            Ainv != 0.0 ? (-reconstructed_velocity(component) - HbyA) / Ainv : pressure_grad;
+        const auto momentum_dof =
+            elem_info->dofIndices()[_global_momentum_system_numbers[component]][0];
+        const auto pressure_dof =
+            elem_info->dofIndices()[_global_pressure_system_number][_p->number()];
+        const Real HbyA = (*_HbyA_raw[component])(momentum_dof);
+        const Real Ainv = (*_Ainv_raw[component])(momentum_dof);
+        const Real pressure_grad = (*pressure_gradient[component])(pressure_dof);
         const Real base_velocity = -HbyA - Ainv * pressure_grad;
         const Real alpha = _reconstructed_pressure_gradient_relaxation;
         const Real new_velocity =
             (1.0 - alpha) * base_velocity + alpha * reconstructed_velocity(component);
-        const Real new_grad = (1.0 - alpha) * pressure_grad + alpha * reconstructed_grad;
 
-        _momentum_implicit_systems[component]->solution->set(dof, new_velocity);
-        _grad_p_reconstructed[component]->set(dof, new_grad);
+        _momentum_implicit_systems[component]->solution->set(momentum_dof, new_velocity);
+        _reconstructed_cell_velocity[component]->set(pressure_dof,
+                                                     reconstructed_velocity(component));
       }
     }
 
@@ -574,8 +635,11 @@ RhieChowMassFlux::computeCellVelocity()
           *_momentum_implicit_systems[system_i]->current_local_solution);
     }
 
-    for (auto & grad_vec : _grad_p_reconstructed)
-      grad_vec->close();
+    for (auto & velocity_vec : _reconstructed_cell_velocity)
+      velocity_vec->close();
+
+    _reconstructed_cell_velocity_ready = true;
+    _pressure_system->updateFVGradient(pressureGradientField());
 
     return;
   }
@@ -911,9 +975,6 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
-  if (useReconstructedPressureGradient() && !_grad_p_reconstructed.empty())
-    return _grad_p_reconstructed;
-
   if (updated_pressure)
   {
     _grad_p_current.clear();
@@ -932,4 +993,10 @@ const std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::pressureGradientComponents() const
 {
   return pressureGradientField().components();
+}
+
+bool
+RhieChowMassFlux::usingReconstructedPressureGradientMethod() const
+{
+  return dynamic_cast<const FVReconstructedPressureGradient *>(&pressureGradientField().method());
 }

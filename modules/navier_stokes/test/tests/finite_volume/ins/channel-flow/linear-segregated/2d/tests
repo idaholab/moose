@@ -26,7 +26,7 @@
     type = 'Exodiff'
     input = 2d-velocity-pressure.i
     exodiff = 2d-velocity-pressure-reconstructed-gradient_out.e
-    cli_args = 'UserObjects/rc/pressure_gradient_type=reconstructed LinearFVKernels/u_pressure/rhie_chow_user_object=rc LinearFVKernels/v_pressure/rhie_chow_user_object=rc Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out'
+    cli_args = 'pressure_gradient_method=reconstructed Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out'
     requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
                   "channel using the SIMPLE algorithm with reconstructed pressure gradients in the "
                   "linear finite volume momentum predictor."
