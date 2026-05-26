@@ -109,7 +109,16 @@ if [[ $(uname) == Darwin ]]; then
     "$PREFIX"/lib/cmake/scalapack-*/scalapack-targets.cmake
   # scalapack-targets.cmake also embeds absolute paths from the CI build machine
   # that conda relocation doesn't reach; strip any -rpath/-L not under $PREFIX
-  perl -i -pe "s|-Wl,-rpath,(?!\Q${PREFIX}\E)\S+||g; s|-L(?!\Q${PREFIX}\E)/\S+||g" \
+  # Stop at CMake list/string delimiters so the closing quote is preserved,
+  # then trim the resulting CMake link item for CMP0004.
+  perl -i -pe '
+    s|-Wl,-rpath,(?!\Q$ENV{PREFIX}\E)[^[:space:]";]+||g;
+    s|-L(?!\Q$ENV{PREFIX}\E)/[^[:space:]";]+||g;
+    if (/^[[:space:]]*INTERFACE_LINK_LIBRARIES[[:space:]]+"/) {
+      s/(INTERFACE_LINK_LIBRARIES[[:space:]]*")[[:space:];]+/$1/;
+      s/[[:space:];]+(")$/$1/;
+    }
+  ' \
     "$PREFIX"/lib/cmake/scalapack-*/scalapack-targets.cmake
 fi
 
