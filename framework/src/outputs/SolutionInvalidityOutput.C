@@ -45,9 +45,12 @@ SolutionInvalidityOutput::SolutionInvalidityOutput(const InputParameters & param
 bool
 SolutionInvalidityOutput::shouldOutput()
 {
-  // solver could have failed before any iteration completed, thus before a sync
   // Note: if this happens in other cases, we should just sync if solutionInvalidity is not synced
-  if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED)
+  // FAILED: solver could have failed before any iteration completed, thus before a sync
+  // FINAL: we could have hit a solution invalidity on EXEC_FINAL and there are no solver steps
+  // or multiapp fixed point iterations after to cause a sync.
+  if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED ||
+      _problem_ptr->getCurrentExecuteOnFlag() == EXEC_FINAL)
     _solution_invalidity.syncIteration();
   // At the known end of a simulation, always output the total summary if anything happened
   if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED ||
