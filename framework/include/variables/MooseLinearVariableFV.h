@@ -43,14 +43,6 @@ template <typename>
 class NumericVector;
 }
 
-namespace Moose
-{
-namespace FV
-{
-enum class LinearFVGradientSchemeType;
-}
-}
-
 /// This class provides variable solution interface for linear
 /// finite volume problems.
 /// This class is designed to store gradient information when enabled.

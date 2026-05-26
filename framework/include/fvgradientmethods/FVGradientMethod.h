@@ -10,8 +10,20 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "MooseTypes.h"
 #include "GradientLimiterType.h"
-#include "LinearFVGradientTypes.h"
+
+#include <memory>
+#include <unordered_set>
+#include <vector>
+
+class SystemBase;
+
+namespace libMesh
+{
+template <typename T>
+class NumericVector;
+}
 
 /**
  * Registered base class for linear FV gradient methods.
@@ -19,11 +31,16 @@
 class FVGradientMethod : public MooseObject
 {
 public:
+  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
+
   static InputParameters validParams();
 
   FVGradientMethod(const InputParameters & params);
 
-  virtual Moose::FV::LinearFVGradientSchemeType schemeType() const = 0;
+  /// Compute unlimited gradients; the system applies limiterType() afterward if requested.
+  virtual void computeGradient(SystemBase & system,
+                               GradientContainer & output_gradient,
+                               const std::unordered_set<unsigned int> & variable_numbers) const = 0;
 
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
 

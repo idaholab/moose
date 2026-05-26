@@ -21,5 +21,7 @@ public:
 
   FVGreenGaussGradient(const InputParameters & params);
 
-  Moose::FV::LinearFVGradientSchemeType schemeType() const override;
+  void computeGradient(SystemBase & system,
+                       GradientContainer & output_gradient,
+                       const std::unordered_set<unsigned int> & variable_numbers) const override;
 };
