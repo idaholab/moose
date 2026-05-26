@@ -68,6 +68,7 @@
       detail = 'for large displacements, with stabilization, and Neurmann BCs'
     []
     [dirichlet_large_right_incremental]
+      issues = '#33005'
       type = PetscJacobianTester
       input = 'dirichlet.i'
       ratio_tol = 1E-7
@@ -76,6 +77,7 @@
       detail = 'for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and Dirichlet BCs'
     []
     [neumann_large_right_incremental]
+      issues = '#33005'
       type = PetscJacobianTester
       input = 'neumann.i'
       ratio_tol = 1E-7

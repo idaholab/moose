@@ -43,6 +43,7 @@
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_no_stab_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -55,6 +56,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_with_stab_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -67,6 +69,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_no_stab_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -77,6 +80,7 @@
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms'
   []
   [jacobian_large_no_stab_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -87,6 +91,7 @@
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms'
   []
   [jacobian_large_no_stab_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -97,6 +102,7 @@
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms'
   []
   [jacobian_large_with_stab_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -107,6 +113,7 @@
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_with_stab_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -117,6 +124,7 @@
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_with_stab_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -127,6 +135,7 @@
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_no_stab_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -139,6 +148,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_no_stab_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -151,6 +161,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_no_stab_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -163,6 +174,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_with_stab_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -175,6 +187,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_with_stab_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6
@@ -187,6 +200,7 @@
                   'using the generalized midpoint rule (alpha=0.5)'
   []
   [jacobian_large_with_stab_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 5e-6

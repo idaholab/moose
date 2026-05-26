@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#17472'
+  issues = '#33005'
   design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
   [manual_TaylorExpansion_no_stab]
     type = CSVDiff

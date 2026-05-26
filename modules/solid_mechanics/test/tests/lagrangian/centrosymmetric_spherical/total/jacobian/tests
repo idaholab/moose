@@ -78,6 +78,7 @@
                   'stabilization, and Neumann BCs in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_unstabilized_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -89,6 +90,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -100,6 +102,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_unstabilized_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -111,6 +114,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_alpha05]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -122,6 +126,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_unstabilized_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -132,6 +137,7 @@
                   'coordinates'
   []
   [dirichlet_large_unstabilized_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -142,6 +148,7 @@
                   'coordinates'
   []
   [dirichlet_large_unstabilized_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -152,6 +159,7 @@
                   'coordinates'
   []
   [dirichlet_large_stabilized_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -161,6 +169,7 @@
                   'stabilization, and Dirichlet BCs in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -170,6 +179,7 @@
                   'stabilization, and Dirichlet BCs in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -179,6 +189,7 @@
                   'stabilization, and Dirichlet BCs in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_unstabilized_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -189,6 +200,7 @@
                   'coordinates'
   []
   [neumann_large_unstabilized_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -199,6 +211,7 @@
                   'coordinates'
   []
   [neumann_large_unstabilized_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -209,6 +222,7 @@
                   'coordinates'
   []
   [neumann_large_stabilized_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -218,6 +232,7 @@
                   'stabilization, and Neumann BCs in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -227,6 +242,7 @@
                   'stabilization, and Neumann BCs in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -236,6 +252,7 @@
                   'stabilization, and Neumann BCs in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_unstabilized_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -247,6 +264,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_unstabilized_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-6
@@ -258,6 +276,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_unstabilized_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-6
@@ -269,6 +288,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-7
@@ -280,6 +300,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-6
@@ -291,6 +312,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [dirichlet_large_stabilized_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'dirichlet.i'
     ratio_tol = 1E-6
@@ -302,6 +324,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_unstabilized_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -313,6 +336,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_unstabilized_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-6
@@ -324,6 +348,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_unstabilized_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-6
@@ -335,6 +360,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_alpha05_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-7
@@ -346,6 +372,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_alpha05_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-6
@@ -357,6 +384,7 @@
                   '(alpha=0.5) in 1D centrosymmetric spherical coordinates'
   []
   [neumann_large_stabilized_alpha05_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'neumann.i'
     ratio_tol = 1E-6

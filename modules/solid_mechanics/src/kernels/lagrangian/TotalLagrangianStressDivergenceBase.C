@@ -99,8 +99,7 @@ TotalLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigne
     _avg_grad_trial[component][j] = StabilizationUtils::elementAverage(
         [this, component, j, incremental](unsigned int qp)
         {
-          const RankTwoTensor g =
-              G::gradOp(component, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]);
+          const RankTwoTensor g = G::gradOp(component, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]);
           return incremental ? g * _F_ust_old[qp].inverse() : g;
         },
         _JxW,
@@ -207,7 +206,8 @@ template <class G>
 void
 TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialPhi(unsigned int beta)
 {
-  // Same structure as computeAverageGradientSpatialTest, but for trial functions and component beta.
+  // Same structure as computeAverageGradientSpatialTest, but for trial functions and component
+  // beta.
   _avg_grad_spatial_phi[beta].assign(_phi.size(), 0.0);
   Real V_x = 0.0;
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
@@ -374,10 +374,9 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
     // dA/dU at this qp: combine local + non-local PK1 deriv, plus PK1 : dF_ust local.
     const RankTwoTensor d_PK1_local = _dpk1_d_grad_u[_qp] * gradTrialUnstabilized(beta);
     const RankTwoTensor d_F_ust = gradTrialUnstabilized(beta);
-    const Real dA_dU =
-        ((d_PK1_local + d_PK1_NL).doubleContraction(_F_ust[_qp]) +
-         _pk1[_qp].doubleContraction(d_F_ust)) /
-        3.0;
+    const Real dA_dU = ((d_PK1_local + d_PK1_NL).doubleContraction(_F_ust[_qp]) +
+                        _pk1[_qp].doubleContraction(d_F_ust)) /
+                       3.0;
 
     // dB/dU: -dT_α/dU + d(avg_T)/dU
     // dT_α/dU = -(grad_x test_i)_β · (grad_x phi_j)_α  (local cross at _qp)
@@ -387,8 +386,7 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
 
     const Real avg_cross_ab = _avg_test_phi_cross[alpha][beta][_i][_j];
     const Real avg_cross_ba = _avg_test_phi_cross[beta][alpha][_i][_j];
-    const Real d_avg_T_dU =
-        avg_cross_ab - avg_cross_ba - avg_T * _avg_grad_spatial_phi[beta][_j];
+    const Real d_avg_T_dU = avg_cross_ab - avg_cross_ba - avg_T * _avg_grad_spatial_phi[beta][_j];
 
     const Real dB_dU = d_avg_T_dU - dT_alpha_dU;
     J += dA_dU * B + A_qp * dB_dU;

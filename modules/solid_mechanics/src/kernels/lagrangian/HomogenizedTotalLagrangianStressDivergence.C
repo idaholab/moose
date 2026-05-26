@@ -276,8 +276,7 @@ HomogenizedTotalLagrangianStressDivergence::computeScalarQpOffDiagJacobian(
     // F_ust through both LOCAL (`_d_F_stab_d_F_ust`) and NON-LOCAL
     // (`_d_F_stab_d_F_avg · δF_avg`) routes. The old `Real(_m == _alpha) *
     // gradTrial(_m, _n)` form captured only the F-bar-off case correctly.
-    const RankTwoTensor delta_F_ust_local =
-        _d_F_d_grad_u[_qp] * gradTrialUnstabilized(_alpha);
+    const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * gradTrialUnstabilized(_alpha);
     RankTwoTensor delta_F_stab = _d_F_stab_d_F_ust[_qp] * delta_F_ust_local;
     if (_stabilize_strain)
     {

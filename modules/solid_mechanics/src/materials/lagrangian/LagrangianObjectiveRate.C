@@ -19,8 +19,7 @@
 // ============================================================================
 
 std::tuple<RankTwoTensor, RankFourTensor>
-LagrangianLinearObjectiveRate::advectStress(const RankTwoTensor & S0,
-                                            const RankTwoTensor & dQ)
+LagrangianLinearObjectiveRate::advectStress(const RankTwoTensor & S0, const RankTwoTensor & dQ)
 {
   const RankFourTensor J = updateTensor(dQ);
   const RankFourTensor Jinv = J.inverse();
@@ -87,8 +86,7 @@ LagrangianJaumannRate::update(ComputeLagrangianObjectiveStress & host,
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor d_dW_d_dL =
-      host._d_vorticity_increment_d_F[qp] *
-      host._d_spatial_velocity_increment_d_F[qp].inverse();
+      host._d_vorticity_increment_d_F[qp] * host._d_spatial_velocity_increment_d_F[qp].inverse();
   const RankFourTensor U = stressAdvectionDerivative(S) * d_dW_d_dL;
   host._cauchy_jacobian[qp] = cauchyJacobian(Jinv, host._small_jacobian[qp], U);
   host._cauchy_stress[qp] = S;
@@ -116,8 +114,7 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
   const RankFourTensor d_F_d_dL = host._d_spatial_velocity_increment_d_F[qp].inverse();
   const RankTwoTensor T = host._rotation_old[qp].transpose() * host._inv_df[qp];
 
-  const RankFourTensor d_invdf_d_F =
-      -host._inv_df[qp].times<i, k, l, j>(host._inv_def_grad[qp]);
+  const RankFourTensor d_invdf_d_F = -host._inv_df[qp].times<i, k, l, j>(host._inv_def_grad[qp]);
   const RankFourTensor d_invdf_d_dL = d_invdf_d_F * d_F_d_dL;
   const RankFourTensor d_dO_d_invdf = dR.times<i, k, j, l>(I);
 
@@ -133,8 +130,7 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
 // ============================================================================
 
 RankTwoTensor
-LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W,
-                                            RankFourTensor & dR_dW)
+LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTensor & dR_dW)
 {
   // For a skew W in 3D, θ = √((W : W) / 2). R = exp(W) via Rodrigues:
   //   R = I + f(θ) W + g(θ) W²,  f = sin θ / θ,  g = (1 − cos θ) / θ².
@@ -193,8 +189,7 @@ LagrangianRashidRate::update(ComputeLagrangianObjectiveStress & host,
 
   // r̂ = exp(Δw) and its derivative.
   RankFourTensor d_rhat_d_dW;
-  const RankTwoTensor rhat = rotationFromVorticity(host._vorticity_increment[qp],
-                                                   d_rhat_d_dW);
+  const RankTwoTensor rhat = rotationFromVorticity(host._vorticity_increment[qp], d_rhat_d_dW);
   const RankTwoTensor rhatT = rhat.transpose();
 
   // σ_{n+1} = r̂ (σ_n + Δσ) r̂^T   (eq. 22)
@@ -226,8 +221,8 @@ LagrangianRashidRate::update(ComputeLagrangianObjectiveStress & host,
   //   T2_{ijkl} = (r̂ S)_{im} · (d_rhat_d_dL)_{jmkl}
   // Implemented as RankTwoTensor.times<m, j, i, m, k, l>(RankFourTensor) contractions
   // (the templated contracted form: dummy index `m_` repeated).
-  const RankTwoTensor SR = S_inner * rhatT;            // S r̂^T  (shape (m, j))
-  const RankTwoTensor RS = rhat * S_inner;             // r̂ S    (shape (i, m))
+  const RankTwoTensor SR = S_inner * rhatT; // S r̂^T  (shape (m, j))
+  const RankTwoTensor RS = rhat * S_inner;  // r̂ S    (shape (i, m))
   const RankFourTensor T1 = SR.times<m_, j_, i_, m_, k_, l_>(d_rhat_d_dL);
   const RankFourTensor T2 = RS.times<i_, m_, j_, m_, k_, l_>(d_rhat_d_dL);
 

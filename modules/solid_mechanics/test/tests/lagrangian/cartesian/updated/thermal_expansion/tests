@@ -58,6 +58,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_no_stab_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7
@@ -68,6 +69,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_no_stab_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7
@@ -78,6 +80,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_no_stab_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7
@@ -88,6 +91,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_with_stab_quadratic]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7
@@ -98,6 +102,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_with_stab_rashid_approximate]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7
@@ -108,6 +113,7 @@
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the updated Lagrangian formulation'
   []
   [jacobian_large_with_stab_rashid_eigen]
+    issues = '#33005'
     type = PetscJacobianTester
     input = 'jactest.i'
     ratio_tol = 1E-7

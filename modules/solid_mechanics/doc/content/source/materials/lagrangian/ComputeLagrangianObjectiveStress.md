@@ -66,8 +66,8 @@ matrix $\hat{T}_{ijkl}$.
 The conversion process in `ComputeLagrangianObjectiveStress` must solve this
 equation to find the updated Cauchy stress for an arbitrary kinematic
 measure $Q$.
-It turns out this update is linear and the solution for the updated Cauchy stress
-is
+For the Truesdell, Jaumann, and Green-Naghdi rates this update is linear and the solution
+for the updated Cauchy stress is
 \begin{equation}
       \sigma_{ij}=J_{ijmn}^{-1}\left(\sigma_{mn}^{n}+\Delta s_{mn}\right)
 \end{equation}
@@ -90,6 +90,13 @@ this tensor on the Cauchy stress, i.e.
       U_{mnkl} = \frac{\partial J_{mnst}}{\partial\Delta l_{kl}}\sigma_{st}
 \end{equation}
 The two tensors $Q_{ij}$ and $U_{ijkl}$ then fully-define a particular objective rate.
+The Rashid rate described below does not fit this linear template and instead provides
+its own update directly.
+
+The increments $\Delta l_{ij}$ and $\Delta w_{ij}$ consumed by these rates are supplied by
+[`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) and depend on the active
+[kinematic approximation](/solid_mechanics/KinematicApproximations.md).
+The four rates here work with any of the four approximations.
 
 !alert warning
 All directional components of the constitutive model should be advected using the selected
@@ -101,9 +108,9 @@ common case of scalar internal variables, as these have no associated direction.
 
 ## Specific Objective Rates
 
-The `ComputeLagrangianObjectiveStress` class choices between different objective rates with the `objective_rate`
-input parameter.  Currently there are two choices for implemented rates: the (default) Truesdell rate, `truesdell`,
-and the Jaumnn rate, `jaumann`.
+The `ComputeLagrangianObjectiveStress` class chooses between different objective rates with the `objective_rate`
+input parameter.  Currently there are four choices for implemented rates: the (default) Truesdell rate, `truesdell`,
+the Jaumann rate, `jaumann`, the Green-Naghdi rate, `green_naghdi`, and the Rashid rate, `rashid`.
 
 ### The Truesdell Rate of the Cauchy Stress
 
@@ -161,6 +168,42 @@ where
   Y = \text{trace}(U) I - U, \quad Z = R Y.
 \end{equation}
 
+### The Rashid Rate of the Cauchy Stress
+
+The Rashid rate [!cite](rashid1993incremental) does not fit the linear advection template
+used by the three rates above.  Instead, it rotates the incrementally-updated Cauchy stress
+by a finite rotation built from the incremental vorticity:
+\begin{equation}
+   \sigma_{ij}^{(n+1)} = \hat{R}_{ik} \left( \sigma_{kl}^{(n)} + \Delta s_{kl} \right) \hat{R}_{jl}, \quad
+   \hat{R} = \exp\left(\Delta w\right)
+\end{equation}
+where $\Delta w$ is the incremental vorticity supplied by
+[`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) consistent with the active
+[kinematic approximation](/solid_mechanics/KinematicApproximations.md).
+The matrix exponential of the skew tensor $\Delta w$ is evaluated in closed form by Rodrigues'
+formula, so any number of integration steps reproduces the correct rotation exactly.
+
+The Rashid rate is selected by `objective_rate = rashid`.
+
+This rate is the integration used by the legacy [`StressDivergenceTensors`](/StressDivergenceTensors.md)
++ [`ComputeFiniteStrain`](/ComputeFiniteStrain.md) pipeline.  Pairing
+`objective_rate = rashid` with `kinematic_approximation = rashid_approximate` or
+`rashid_eigen` on the strain calculator reproduces the legacy update bit-for-bit; see
+the [QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
+for the automatic wiring.
+
+The algorithmic tangent is the sum of three contributions:
+\begin{equation}
+   T_{ijkl} = \frac{\partial \hat{R}_{im}}{\partial \Delta l_{kl}} S_{mn} \hat{R}_{jn}
+            + \hat{R}_{im} S_{mn} \frac{\partial \hat{R}_{jn}}{\partial \Delta l_{kl}}
+            + \hat{R}_{im} \hat{R}_{jn} \hat{T}_{mnpq} \frac{\partial \Delta d_{pq}}{\partial \Delta l_{kl}}
+\end{equation}
+with $S = \sigma^{(n)} + \Delta s$, and the eigenstrain coupling needed by
+[`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md) is
+\begin{equation}
+   \frac{\partial \sigma_{ij}}{\partial \varepsilon^{(eigen)}_{kl}} = - \hat{R}_{ik} \hat{R}_{jl} \hat{T}_{klmn}.
+\end{equation}
+
 ## Problems With Objective Rates
 
 There are several well-known problems associated with integrating objective rates to provide large deformation constitutive models
@@ -197,9 +240,12 @@ final stress tensor.
 
 This $90^\circ$ rotation without additional stretch is not a typical simulation.  More often, a simulation would be deforming the material
 during the large rotations, which in turn requires a smaller time step to accurately resolve the material deformation itself.  However, this
-example does illustrate one of the shortcomings of this particular implementation of objective integration.
-Note this is not a generic shortcoming of objective rates, other integration approaches can achieve exact rotational kinematics
-regardless of the time increment, including one of the options in the base solid mechanics kernels [!cite](rashid1993incremental).
+example does illustrate one of the shortcomings of this particular implementation of objective integration for the Truesdell, Jaumann, and
+Green-Naghdi rates.
+Note this is not a generic shortcoming of objective rates: the `rashid` option in this class
+integrates the rotational kinematics by closed-form matrix exponential of the incremental vorticity
+[!cite](rashid1993incremental) and so reproduces the correct rotation exactly regardless of the
+time increment.
 
 ### Large shears
 
@@ -220,5 +266,12 @@ For problems where the material will undergo very large stretches or a combinati
 should consider defining the constitutive response with a hyperelastic formulation, for example using the
 [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md) or [`ComputeLagrangianStressPK2`](ComputeLagrangianStressPK2.md)
 base classes.
+
+When porting an input from the legacy [`StressDivergenceTensors`](/StressDivergenceTensors.md) +
+[`ComputeFiniteStrain`](/ComputeFiniteStrain.md) pipeline and bit-for-bit agreement with the
+old results is desired, use `objective_rate = rashid` and pair the strain calculator with
+`kinematic_approximation = rashid_approximate` or `rashid_eigen`.  The
+[QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
+configures this combination automatically.
 
 !bibtex bibliography

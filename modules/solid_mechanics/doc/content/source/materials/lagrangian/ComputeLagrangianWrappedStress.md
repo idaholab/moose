@@ -29,6 +29,18 @@ For this materials users should consider writing a custom wrapper or
 transitioning the material model to inherit from the new
 material system [base classes](NewMaterialSystem.md).
 
+To reproduce the legacy [`StressDivergenceTensors`](/StressDivergenceTensors.md) +
+[`ComputeFiniteStrain`](/ComputeFiniteStrain.md) pipeline bit-for-bit with this
+wrapper, use `objective_rate = rashid` and pair the strain calculator with
+`kinematic_approximation = rashid_approximate` (matches OLD
+`decomposition_method = TaylorExpansion`) or `rashid_eigen` (matches OLD
+`decomposition_method = EigenSolution`).  Set `rotate_old_stress = true` on the
+wrapper and `publish_rotation_increment = true` on the strain calculator so the
+wrapped material's finite-strain rotation operates on the correctly-rotated old
+Cauchy stress.  The
+[QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
+wires all of this automatically when porting an OLD-style input.
+
 ## Example Input File Syntax
 
 The user provides only the name of the stress and Jacobian `MaterialProperty`

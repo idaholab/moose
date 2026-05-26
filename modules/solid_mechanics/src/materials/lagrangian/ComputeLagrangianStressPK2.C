@@ -43,14 +43,11 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
     //            = (1/J_ust) F_ust · _C · dE/d(F_stab) · inverse(d(dL)/d(F_stab)) · F_ust^T.
     usingTensorIndices(i_, j_, k_, l_);
     const auto I2 = RankTwoTensor::Identity();
-    const RankFourTensor dE_dFstab =
-        0.5 * (I2.template times<i_, l_, j_, k_>(_F[_qp].transpose()) +
-               _F[_qp].transpose().template times<i_, k_, j_, l_>(I2));
-    const RankFourTensor dE_d_dL =
-        dE_dFstab * _d_spatial_velocity_increment_d_F[_qp].inverse();
+    const RankFourTensor dE_dFstab = 0.5 * (I2.template times<i_, l_, j_, k_>(_F[_qp].transpose()) +
+                                            _F[_qp].transpose().template times<i_, k_, j_, l_>(I2));
+    const RankFourTensor dE_d_dL = dE_dFstab * _d_spatial_velocity_increment_d_F[_qp].inverse();
     const RankFourTensor dS_d_dL = _C[_qp] * dE_d_dL;
-    _cauchy_jacobian[_qp] =
-        dS_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
+    _cauchy_jacobian[_qp] = dS_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
   }
   else
   {
@@ -94,8 +91,7 @@ ComputeLagrangianStressPK2::computeQpPK1Stress()
     // Bypass-F-bar variant: same Term A; σ chain uses dE_dFstab (without
     // _d_F_stab_d_F_ust). Used by specialty kernels whose coupled variable bypasses
     // F-bar.
-    _pk1_jacobian_bypass_fbar[_qp] =
-        termA + (_C[_qp] * dE_dFstab).singleProductI(_F_ust[_qp]);
+    _pk1_jacobian_bypass_fbar[_qp] = termA + (_C[_qp] * dE_dFstab).singleProductI(_F_ust[_qp]);
   }
   // Small deformations: PK1 = PK2 = σ; PK2 chain to PK1 still needs the F-bar local
   // contribution through dE/d(F_stab) · d(F_stab)/d(F_ust). For specialty bypass paths,
