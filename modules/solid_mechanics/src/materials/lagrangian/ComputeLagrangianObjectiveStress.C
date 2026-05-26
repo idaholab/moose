@@ -95,10 +95,10 @@ ComputeLagrangianObjectiveStress::computeQpCauchyStress()
       // `_rotation_increment`) has already produced the correctly-rotated cumulative Cauchy
       // stress. Use `_small_stress` directly and discard the rate's own outer rotation of
       // the stress. `_cauchy_jacobian` from the rate's chain rule is still correct because
-      // it computes `d σ_cauchy / d(dL)` from `_small_jacobian = dΔσ_const/dε` plus the
-      // same rotation-derivative terms — algebraically the same chain whether we view σ as
-      // produced by the rate's `R · (σ_old + Δσ_const) · R^T` formula or by the wrapped
-      // material's `R · (s_old + Δσ_const) · R^T = small_stress` storage.
+      // it computes `d sigma_cauchy / d(dL)` from `_small_jacobian = dDeltasigma_const/deps` plus
+      // the same rotation-derivative terms -- algebraically the same chain whether we view sigma as
+      // produced by the rate's `R * (sigma_old + Deltasigma_const) * R^T` formula or by the wrapped
+      // material's `R * (s_old + Deltasigma_const) * R^T = small_stress` storage.
       _cauchy_stress[_qp] = _small_stress[_qp];
     }
   }

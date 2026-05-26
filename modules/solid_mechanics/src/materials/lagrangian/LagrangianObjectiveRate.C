@@ -132,9 +132,9 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
 RankTwoTensor
 LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTensor & dR_dW)
 {
-  // For a skew W in 3D, θ = √((W : W) / 2). R = exp(W) via Rodrigues:
-  //   R = I + f(θ) W + g(θ) W²,  f = sin θ / θ,  g = (1 − cos θ) / θ².
-  // For θ → 0, fall back to the Taylor expansion: R ≈ I + W + W²/2.
+  // For a skew W in 3D, theta = sqrt((W : W) / 2). R = exp(W) via Rodrigues:
+  //   R = I + f(theta) W + g(theta) W^2,  f = sin theta / theta,  g = (1 - cos theta) / theta^2.
+  // For theta -> 0, fall back to the Taylor expansion: R ~= I + W + W^2/2.
   const Real theta2 = 0.5 * W.doubleContraction(W);
   const Real theta = std::sqrt(theta2);
   const auto I2 = RankTwoTensor::Identity();
@@ -159,9 +159,9 @@ LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTen
   }
   const RankTwoTensor R = I2 + f * W + g * W2;
 
-  // dR_ij/dW_mn = (df/dθ · dθ/dW_mn) W_ij + f · δ_im δ_jn
-  //             + (dg/dθ · dθ/dW_mn) (W²)_ij + g · (δ_im W_nj + W_im δ_jn)
-  // dθ/dW_mn = W_mn / (2θ)   (from d(θ²)/dW = W).
+  // dR_ij/dW_mn = (df/dtheta * dtheta/dW_mn) W_ij + f * delta_im delta_jn
+  //             + (dg/dtheta * dtheta/dW_mn) (W^2)_ij + g * (delta_im W_nj + W_im delta_jn)
+  // dtheta/dW_mn = W_mn / (2theta)   (from d(theta^2)/dW = W).
   usingTensorIndices(i_, j_, m_, n_);
   const RankFourTensor d_W2_dW =
       I2.template times<i_, m_, n_, j_>(W) + W.template times<i_, m_, j_, n_>(I2);
@@ -169,12 +169,13 @@ LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTen
   if (theta >= small_theta)
   {
     const Real inv_2theta = 1.0 / (2.0 * theta);
-    // (df/dθ · W_mn / (2θ)) · W_ij  → (df/dθ · inv_2θ) · W ⊗ W (output indices ij,mn).
+    // (df/dtheta * W_mn / (2theta)) * W_ij  -> (df/dtheta * inv_2theta) * W (x) W (output indices
+    // ij,mn).
     dR += (df_dth * inv_2theta) * W.template times<i_, j_, m_, n_>(W);
     dR += (dg_dth * inv_2theta) * W2.template times<i_, j_, m_, n_>(W);
   }
-  // (For θ < small_theta the dθ-dependent contributions are O(θ) → 0; the
-  //  identity + W² parts above cover the small-angle limit cleanly.)
+  // (For theta < small_theta the dtheta-dependent contributions are O(theta) -> 0; the
+  //  identity + W^2 parts above cover the small-angle limit cleanly.)
 
   dR_dW = dR;
   return R;
@@ -187,47 +188,47 @@ LagrangianRashidRate::update(ComputeLagrangianObjectiveStress & host,
   usingTensorIndices(i_, j_, k_, l_, m_, n_);
   const unsigned int qp = host._qp;
 
-  // r̂ = exp(Δw) and its derivative.
+  // r_hat = exp(Deltaw) and its derivative.
   RankFourTensor d_rhat_d_dW;
   const RankTwoTensor rhat = rotationFromVorticity(host._vorticity_increment[qp], d_rhat_d_dW);
   const RankTwoTensor rhatT = rhat.transpose();
 
-  // σ_{n+1} = r̂ (σ_n + Δσ) r̂^T   (eq. 22)
+  // sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T   (eq. 22)
   const RankTwoTensor S_inner = host._cauchy_stress_old[qp] + dS;
   host._cauchy_stress[qp] = rhat * S_inner * rhatT;
 
-  // J^{-1}_{ijkl} = r̂_ik r̂_jl   (eq. 24), the rank-4 (r̂ ⊗ r̂) sandwich. Used for
+  // J^{-1}_{ijkl} = r_hat_ik r_hat_jl   (eq. 24), the rank-4 (r_hat (x) r_hat) sandwich. Used for
   // the eigenstrain Jacobian and as the "outer" operator for the constitutive
   // piece. We name the dummy "middle pair" k, l here (output indices i, j, k, l)
-  // — when chained via RankFourTensor::operator*, the k, l contract against
+  // -- when chained via RankFourTensor::operator*, the k, l contract against
   // small_jacobian's first pair, as desired.
   const RankFourTensor J_inv = rhat.times<i_, k_, j_, l_>(rhat);
 
-  // dσ/d(eigenstrain) = -J^{-1} : small_jacobian.
+  // dsigma/d(eigenstrain) = -J^{-1} : small_jacobian.
   // (mechanical_strain = total_strain - eigenstrain, hence the minus.)
   host._dcauchy_stress_d_eigenstrain[qp] = -(J_inv * host._small_jacobian[qp]);
 
-  // Chain rule pieces for dσ/d(dL):
-  //   d(Δw)/d(dL) = _d_vorticity_increment_d_F · inverse(_d_spatial_velocity_increment_d_F)
-  //   d(Δd)/d(dL) = I^(4) − d(Δw)/d(dL)   (Δd + Δw = dL by construction).
-  //   d(r̂)/d(dL)  = d(r̂)/d(Δw) · d(Δw)/d(dL).
+  // Chain rule pieces for dsigma/d(dL):
+  //   d(Deltaw)/d(dL) = _d_vorticity_increment_d_F * inverse(_d_spatial_velocity_increment_d_F)
+  //   d(Deltad)/d(dL) = I^(4) - d(Deltaw)/d(dL)   (Deltad + Deltaw = dL by construction).
+  //   d(r_hat)/d(dL)  = d(r_hat)/d(Deltaw) * d(Deltaw)/d(dL).
   const RankFourTensor d_F_d_dL = host._d_spatial_velocity_increment_d_F[qp].inverse();
   const RankFourTensor d_dW_d_dL = host._d_vorticity_increment_d_F[qp] * d_F_d_dL;
   const RankFourTensor d_dD_d_dL = RankFourTensor::IdentityFour() - d_dW_d_dL;
   const RankFourTensor d_rhat_d_dL = d_rhat_d_dW * d_dW_d_dL;
 
-  // Rotation pieces of dσ/d(dL):
-  //   T1_{ijkl} = (d_rhat_d_dL)_{imkl} · (S r̂^T)_{mj}
-  //   T2_{ijkl} = (r̂ S)_{im} · (d_rhat_d_dL)_{jmkl}
+  // Rotation pieces of dsigma/d(dL):
+  //   T1_{ijkl} = (d_rhat_d_dL)_{imkl} * (S r_hat^T)_{mj}
+  //   T2_{ijkl} = (r_hat S)_{im} * (d_rhat_d_dL)_{jmkl}
   // Implemented as RankTwoTensor.times<m, j, i, m, k, l>(RankFourTensor) contractions
   // (the templated contracted form: dummy index `m_` repeated).
-  const RankTwoTensor SR = S_inner * rhatT; // S r̂^T  (shape (m, j))
-  const RankTwoTensor RS = rhat * S_inner;  // r̂ S    (shape (i, m))
+  const RankTwoTensor SR = S_inner * rhatT; // S r_hat^T  (shape (m, j))
+  const RankTwoTensor RS = rhat * S_inner;  // r_hat S    (shape (i, m))
   const RankFourTensor T1 = SR.times<m_, j_, i_, m_, k_, l_>(d_rhat_d_dL);
   const RankFourTensor T2 = RS.times<i_, m_, j_, m_, k_, l_>(d_rhat_d_dL);
 
-  // Constitutive piece: J^{-1} : (small_jacobian · d(Δd)/d(dL))
-  // = (r̂ ⊗ r̂)_{ijmn} (small_jacobian · d_dD_d_dL)_{mnkl}.
+  // Constitutive piece: J^{-1} : (small_jacobian * d(Deltad)/d(dL))
+  // = (r_hat (x) r_hat)_{ijmn} (small_jacobian * d_dD_d_dL)_{mnkl}.
   const RankFourTensor T3 = J_inv * (host._small_jacobian[qp] * d_dD_d_dL);
 
   host._cauchy_jacobian[qp] = T1 + T2 + T3;

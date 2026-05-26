@@ -1,4 +1,4 @@
-# Simple 3D test — same kinematics + plasticity as `new_system_manual_plasticity.i` but driven
+# Simple 3D test -- same kinematics + plasticity as `new_system_manual_plasticity.i` but driven
 # through the QuasiStatic Physics action's `compatibility_mode = true` shim. The action sees an
 # OLD-style block (strain = FINITE, volumetric_locking_correction = true, decomposition_method)
 # and configures the Lagrangian kernels + ComputeLagrangianWrappedStress + the right

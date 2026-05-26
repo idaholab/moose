@@ -67,20 +67,20 @@ protected:
   // Derivatives of the residual w.r.t. the out-of-plane strain
   virtual Real computeQpJacobianOutOfPlaneStrain() = 0;
 
-  /// Non-local F-bar contribution to δPK1 at the current `_qp`, given the perturbation
+  /// Non-local F-bar contribution to deltaPK1 at the current `_qp`, given the perturbation
   /// `delta_F_avg` of the element-average F. Implements the shared chain
-  ///   δF_stab_NL = _d_F_stab_d_F_avg · δF_avg
-  ///   δdL_NL    = _d_spatial_velocity_increment_d_F · δF_stab_NL
-  ///   δσ_NL     = _cauchy_jacobian · δdL_NL
-  ///   δPK1_NL   = det(F_ust) · δσ_NL · F_ust^{-T}    (large kinematics)
-  ///             = δσ_NL                               (small kinematics, PK1 == σ)
+  ///   deltaF_stab_NL = _d_F_stab_d_F_avg * deltaF_avg
+  ///   deltadL_NL    = _d_spatial_velocity_increment_d_F * deltaF_stab_NL
+  ///   deltasigma_NL     = _cauchy_jacobian * deltadL_NL
+  ///   deltaPK1_NL   = det(F_ust) * deltasigma_NL * F_ust^{-T}    (large kinematics)
+  ///             = deltasigma_NL                               (small kinematics, PK1 == sigma)
   /// Returns zero when F-bar is off (`!_stabilize_strain`). Used by the TL displacement
-  /// Jacobian, the WPS off-diag Jacobian, and the homogenization scalar↔disp Jacobian
-  /// — anywhere the disp perturbation chains through F-bar's non-local route.
+  /// Jacobian, the WPS off-diag Jacobian, and the homogenization scalar<->disp Jacobian
+  /// -- anywhere the disp perturbation chains through F-bar's non-local route.
   ///
   /// Consumes per-qp caches populated by `prepareFBarCaches()` so the inner (test, trial)
-  /// loop pays only one R4·R2 (and, in the large-kinematics branch, one R2·R2·R2 PK1 wrap)
-  /// per call instead of three R4·R2 chains plus a per-call 3x3 inverse and determinant.
+  /// loop pays only one R4*R2 (and, in the large-kinematics branch, one R2*R2*R2 PK1 wrap)
+  /// per call instead of three R4*R2 chains plus a per-call 3x3 inverse and determinant.
   RankTwoTensor deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const;
 
   /// Refresh `_F_ust_det_cache`, `_F_ust_inv_T_cache`, and `_D_nl_cache` for the current
@@ -98,7 +98,7 @@ protected:
 
   /// What F gets F-bar volumetric correction (Total vs. Incremental). Must match the strain
   /// calc's `F_bar_mode`. Incremental mode changes how `_avg_grad_trial` is computed so the
-  /// non-local F-bar chain captures δf_avg (= avg of δF_ust · F_ust_old^{-1}) instead of δF_avg.
+  /// non-local F-bar chain captures deltaf_avg (= avg of deltaF_ust * F_ust_old^{-1}) instead of deltaF_avg.
   const FBarMode _F_bar_mode;
 
   /// Prepend to the material properties
@@ -120,7 +120,7 @@ protected:
 
   /// Element-averaged spatial (deformed-frame) gradient of test functions for the kernel's
   /// component `_alpha`:
-  ///   _avg_grad_spatial_test[i] = (1/V_x) ∫_e (grad_x test_i)_alpha dV_x
+  ///   _avg_grad_spatial_test[i] = (1/V_x) int_e (grad_x test_i)_alpha dV_x
   /// Used for OLD-compat B-bar volumetric correction in `F_bar_mode = incremental`.
   /// Populated by the TL kernel's `precalculateResidual` / `precalculateJacobian` overrides
   /// when `_stabilize_strain == true`. The trial-function analog is published per (component, j)
@@ -128,13 +128,13 @@ protected:
   std::vector<Real> _avg_grad_spatial_test;
 
   /// Element-averaged spatial gradient of trial functions per component:
-  ///   _avg_grad_spatial_phi[component][j] = (1/V_x) ∫_e (grad_x phi_j)_component dV_x
+  ///   _avg_grad_spatial_phi[component][j] = (1/V_x) int_e (grad_x phi_j)_component dV_x
   /// Populated alongside `_avg_grad_spatial_test` for the Jacobian's B-bar contribution.
   std::vector<std::vector<Real>> _avg_grad_spatial_phi;
 
   /// Element-averaged cross product (on displaced mesh) of spatial test/trial gradients:
-  ///   _avg_test_phi_cross[b1][b2][i][j] = (1/V_x) ∫_e (grad_x test_i)_{b1} · (grad_x phi_j)_{b2} dV_x
-  /// Indexed by [b1][b2] ∈ {0,1,2}². Only the (b1, b2) entries needed for the current Jacobian
+  ///   _avg_test_phi_cross[b1][b2][i][j] = (1/V_x) int_e (grad_x test_i)_{b1} * (grad_x phi_j)_{b2} dV_x
+  /// Indexed by [b1][b2] in {0,1,2}^2. Only the (b1, b2) entries needed for the current Jacobian
   /// call are populated by the TL kernel's `computeAvgTestPhiCross(beta)` helper. Used for the
   /// B-bar Jacobian's non-local term (d(avg_grad_spatial_test)/dU).
   std::vector<std::vector<std::vector<std::vector<Real>>>> _avg_test_phi_cross;
@@ -143,7 +143,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _F_ust;
 
   /// Old unstabilized deformation gradient. Only consulted in `F_bar_mode = incremental` for
-  /// the kernel's element-average of grad_phi · F_ust_old^{-1}. Always fetched (cheap) so the
+  /// the kernel's element-average of grad_phi * F_ust_old^{-1}. Always fetched (cheap) so the
   /// kernel doesn't need conditional property bookkeeping.
   const MaterialProperty<RankTwoTensor> & _F_ust_old;
 
@@ -174,16 +174,16 @@ protected:
   /// the F-bar Jacobian contribution. For F-bar off, _d_F_stab_d_F_ust = I^(4) and
   /// _d_F_stab_d_F_avg = 0, so the kernel chain reduces to the unstabilized case. TL also
   /// uses `_d_F_stab_d_F_avg` directly for the non-local F-bar Jacobian contribution to PK1
-  /// (since after the F_ust-wrap architectural change PK1 = det(F_ust) σ F_ust^{-T} no
-  /// longer contains the non-local F-bar effect — it has to enter through the σ-via-dL
+  /// (since after the F_ust-wrap architectural change PK1 = det(F_ust) sigma F_ust^{-T} no
+  /// longer contains the non-local F-bar effect -- it has to enter through the sigma-via-dL
   /// chain explicitly).
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
 
-  /// Cauchy-stress Jacobian dσ/d(dL), published by `ComputeLagrangianStressBase` as
+  /// Cauchy-stress Jacobian dsigma/d(dL), published by `ComputeLagrangianStressBase` as
   /// `cauchy_jacobian`. Used by the TL kernel to assemble the non-local F-bar Jacobian
-  /// contribution (chain: cauchy_jacobian · _d_spatial_velocity_increment_d_F ·
-  /// _d_F_stab_d_F_avg · δF_avg → δσ_NL → PK1 wrap via F_ust).
+  /// contribution (chain: cauchy_jacobian * _d_spatial_velocity_increment_d_F *
+  /// _d_F_stab_d_F_avg * deltaF_avg -> deltasigma_NL -> PK1 wrap via F_ust).
   const MaterialProperty<RankFourTensor> & _cauchy_jacobian;
 
   /// Temperature, if provided.  This is used only to get the trial functions
@@ -216,9 +216,9 @@ protected:
 
   /// Composed non-local F-bar operator per qp:
   ///   _D_nl_cache[qp] = _cauchy_jacobian[qp]
-  ///                   · _d_spatial_velocity_increment_d_F[qp]
-  ///                   · _d_F_stab_d_F_avg[qp]
-  /// so that `deltaPK1NonLocalFBar(δF_avg)` collapses to one R4·R2 contraction
+  ///                   * _d_spatial_velocity_increment_d_F[qp]
+  ///                   * _d_F_stab_d_F_avg[qp]
+  /// so that `deltaPK1NonLocalFBar(deltaF_avg)` collapses to one R4*R2 contraction
   /// instead of three. Populated only when `_stabilize_strain`.
   std::vector<RankFourTensor> _D_nl_cache;
 };

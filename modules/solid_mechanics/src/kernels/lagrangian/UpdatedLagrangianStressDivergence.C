@@ -43,7 +43,7 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
 
   // The UL push-forward in `precalculateJacobianDisplacement` uses `_F_avg` (= avg(F_ust))
   // for the spatial-to-reference frame mapping; combining it with the incremental F-bar
-  // chain (which expects `_avg_grad_trial` to represent δf_avg, not δF_avg) hasn't been
+  // chain (which expects `_avg_grad_trial` to represent deltaf_avg, not deltaF_avg) hasn't been
   // worked out yet. Use Total Lagrangian for incremental F-bar.
   if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
     mooseError("`F_bar_mode = incremental` is not yet supported with the UpdatedLagrangian "

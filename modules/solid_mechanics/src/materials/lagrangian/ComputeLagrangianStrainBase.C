@@ -29,7 +29,7 @@ ComputeLagrangianStrainBase<G>::baseParams()
       "What deformation gradient F-bar averages over (only used when `stabilize_strain = true`). "
       "'total' (default) averages the full F at each qp and rescales each qp's F by "
       "cbrt(det(F_avg)/det(F_ust)). 'incremental' averages the incremental F "
-      "(F_ust · F_ust_old^{-1}) at each qp and rescales by cbrt(det(f_avg)/det(f_ust)); this is "
+      "(F_ust * F_ust_old^{-1}) at each qp and rescales by cbrt(det(f_avg)/det(f_ust)); this is "
       "bit-for-bit compatible with the OLD `ComputeFiniteStrain` + `volumetric_locking_correction "
       "= "
       "true` formulation. Set to 'incremental' when cross-checking against the old kernel system.");
@@ -39,7 +39,7 @@ ComputeLagrangianStrainBase<G>::baseParams()
       "If true, publish `rotation_increment = exp(vorticity_increment)` (Rodrigues) for "
       "downstream consumers that rotate by it (e.g. `ComputeMultiPlasticityStress` with "
       "`perform_finite_strain_rotations = true`). Default false keeps `rotation_increment = I` "
-      "(the historical behavior — the Lagrangian objective-rate machinery applies rotation "
+      "(the historical behavior -- the Lagrangian objective-rate machinery applies rotation "
       "externally). Enable when wrapping plasticity that needs its internal stress state to "
       "track the rotated Cauchy stress between steps, in tandem with `rotate_old_stress = true` "
       "on the objective rate.");
@@ -186,8 +186,8 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
   // Add in the macroscale gradient contribution to both the stabilized `_F` (used by the
   // strain chain via `_f_inv`) AND the unstabilized `_F_ust` (used by the new F_ust-wrap
   // architecture in the stress materials). The homogenization gradient is a real
-  // deformation imposed via the scalar constraint, not a stabilization — it must appear
-  // in F_ust too or PK1 = det(F_ust) σ F_ust^{-T} will be missing its contribution.
+  // deformation imposed via the scalar constraint, not a stabilization -- it must appear
+  // in F_ust too or PK1 = det(F_ust) sigma F_ust^{-T} will be missing its contribution.
   for (auto contribution : _homogenization_contributions)
   {
     _F[_qp] += (*contribution)[_qp];
@@ -202,9 +202,9 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
   {
     _F_inv[_qp] = _F[_qp].inverse();
     // For `F_bar_mode = incremental`: `_f_inv` must invert the *incremental* F that was
-    // F-bar'd (= `gamma_inc · F_ust · F_ust_old^{-1}`, matching OLD `ComputeFiniteStrain`'s
-    // `_Fhat` after its volumetric-locking correction). Since `_F = gamma_inc · F_ust`,
-    // `(gamma_inc · F_ust · F_ust_old^{-1})^{-1} = F_ust_old · _F^{-1}` — i.e., pair the
+    // F-bar'd (= `gamma_inc * F_ust * F_ust_old^{-1}`, matching OLD `ComputeFiniteStrain`'s
+    // `_Fhat` after its volumetric-locking correction). Since `_F = gamma_inc * F_ust`,
+    // `(gamma_inc * F_ust * F_ust_old^{-1})^{-1} = F_ust_old * _F^{-1}` -- i.e., pair the
     // unstabilized old F with the (cumulative) stabilized current `_F^{-1}`. Using
     // `_F_old` (the *cumulative* F-bar'd previous-step `_F`) here would compound F-bar
     // across steps and break OLD-compat. `total` mode keeps the existing form (where `_F`
@@ -216,7 +216,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
       _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
 
     // Dispatch to the active kinematic-approximation helper. Each helper returns
-    // dd (= Δd), dw (= Δw), and the f^{-1}-derivatives of dL = dd + dw and of dw alone.
+    // dd (= Deltad), dw (= Deltaw), and the f^{-1}-derivatives of dL = dd + dw and of dw alone.
     RankTwoTensor dd, dw;
     RankFourTensor d_dL_d_f_inv, d_dw_d_f_inv;
     computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
@@ -259,7 +259,7 @@ template <class G>
 void
 ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition()
 {
-  // Polar decomposition F = R · U of the alpha-weighted, F-bar-stabilized deformation
+  // Polar decomposition F = R * U of the alpha-weighted, F-bar-stabilized deformation
   // gradient at this qp. We decompose _F rather than _F_actual because the rest of the
   // kernel/rate chain treats _F as the spatial frame; using _F here matches the pre-3.1
   // GN rate exactly (it read _def_grad, which is _F via ComputeLagrangianStressCauchy).
@@ -335,11 +335,11 @@ ComputeLagrangianStrainBase<G>::setQpIncrementalStrains(const RankTwoTensor & dd
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
 
   // Additionally maintain the rotated mechanical-strain accumulator,
-  // ε_n+1 = r̂ (ε_n + Δd) r̂^T, where r̂ = exp(Δw) via Rodrigues. This matches the
-  // mechanical_strain output convention of `ComputeFiniteStrain` and is consumed only
-  // by aux variables — the stress chain still uses the un-rotated `_mechanical_strain`
-  // above. In small kinematics dw is small and r̂ ≈ I + dw + ½ dw², which contributes
-  // only second-order corrections (equivalent to no rotation for small strain).
+  // eps_n+1 = r_hat (eps_n + Deltad) r_hat^T, where r_hat = exp(Deltaw) via Rodrigues. This matches
+  // the mechanical_strain output convention of `ComputeFiniteStrain` and is consumed only by aux
+  // variables -- the stress chain still uses the un-rotated `_mechanical_strain` above. In small
+  // kinematics dw is small and r_hat ~= I + dw + 1/2 dw^2, which contributes only second-order
+  // corrections (equivalent to no rotation for small strain).
   RankTwoTensor r_hat;
   if (_large_kinematics)
   {
@@ -390,13 +390,13 @@ ComputeLagrangianStrainBase<G>::computeLinearIncrement(const RankTwoTensor & f_i
                                                        RankFourTensor & d_dL_d_f_inv,
                                                        RankFourTensor & d_dw_d_f_inv) const
 {
-  // Δl = I - f^{-1}, so Δd = sym(Δl), Δw = skew(Δl).
+  // Deltal = I - f^{-1}, so Deltad = sym(Deltal), Deltaw = skew(Deltal).
   const RankTwoTensor dL = RankTwoTensor::Identity() - f_inv;
   dd = 0.5 * (dL + dL.transpose());
   dw = 0.5 * (dL - dL.transpose());
-  // d(Δl)/d(f^{-1}) = -I^{(4)}.
+  // d(Deltal)/d(f^{-1}) = -I^{(4)}.
   d_dL_d_f_inv = -RankFourTensor::IdentityFour();
-  // d(Δw)/d(f^{-1}) = - skew projector on f^{-1} = -(1/2)(I^{ikjl} - I^{iljk}).
+  // d(Deltaw)/d(f^{-1}) = - skew projector on f^{-1} = -(1/2)(I^{ikjl} - I^{iljk}).
   usingTensorIndices(i_, j_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
   d_dw_d_f_inv = -0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, m_, i_, n_>(I2));
@@ -410,14 +410,14 @@ ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & 
                                                           RankFourTensor & d_dL_d_f_inv,
                                                           RankFourTensor & d_dw_d_f_inv) const
 {
-  // Δl = X + (1/2) X^2 with X = I - f^{-1} (one more Taylor term of -log f^{-1}).
+  // Deltal = X + (1/2) X^2 with X = I - f^{-1} (one more Taylor term of -log f^{-1}).
   const RankTwoTensor X = RankTwoTensor::Identity() - f_inv;
   const RankTwoTensor dL = X + 0.5 * X * X;
   dd = 0.5 * (dL + dL.transpose());
   dw = 0.5 * (dL - dL.transpose());
 
-  // dX/d(f^{-1}) = -I^{(4)}, and d(X^2)_{ij}/dX_{mn} = δ_{im} X_{nj} + X_{im} δ_{jn}.
-  // So d(Δl)/d(f^{-1}) = -I^{(4)} - (1/2) (δ_{im} X_{nj} + X_{im} δ_{jn}).
+  // dX/d(f^{-1}) = -I^{(4)}, and d(X^2)_{ij}/dX_{mn} = delta_{im} X_{nj} + X_{im} delta_{jn}.
+  // So d(Deltal)/d(f^{-1}) = -I^{(4)} - (1/2) (delta_{im} X_{nj} + X_{im} delta_{jn}).
   usingTensorIndices(i_, j_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
   const RankFourTensor dXX_dX =
@@ -436,11 +436,11 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
     RankFourTensor & d_dL_d_f_inv,
     RankFourTensor & d_dw_d_f_inv) const
 {
-  // See plan_outline.pdf §2.3 (eq 10-15, with the corrected vorticity).
-  // X = I - f^{-1}.  Symmetric part: A = X X^T - X - X^T,  Δd = -A/2 + A^2/4.
-  // Skew part (from the rotation tensor): α_i = ε_ijk (f^{-1})_jk,
-  //   cos θ = (tr(f^{-1}) - 1)/2, sin θ = √(1 - cos²θ),  Q = (1/4) α·α,
-  //   Δw_ij = -(θ / (2√Q)) ε_ijk α_k.
+  // See plan_outline.pdf Sec.2.3 (eq 10-15, with the corrected vorticity).
+  // X = I - f^{-1}.  Symmetric part: A = X X^T - X - X^T,  Deltad = -A/2 + A^2/4.
+  // Skew part (from the rotation tensor): alpha_i = eps_ijk (f^{-1})_jk,
+  //   cos theta = (tr(f^{-1}) - 1)/2, sin theta = sqrt(1 - cos^2theta),  Q = (1/4) alpha*alpha,
+  //   Deltaw_ij = -(theta / (2sqrtQ)) eps_ijk alpha_k.
   usingTensorIndices(i_, j_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
   const auto I4 = RankFourTensor::IdentityFour();
@@ -452,15 +452,15 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
   dd = -0.5 * A + 0.25 * A * A;
 
   // dX/d(f^{-1}) = -I^{(4)}.
-  // d(X X^T)_{ij}/dX_{mn} = δ_{im} X_{jn} + X_{in} δ_{jm}  (from (X X^T)_{ij} = X_{ik} X_{jk}).
-  // d(X^T)_{ij}/dX_{mn} = δ_{jm} δ_{in}.
-  // → d(A)/d(f^{-1}) = -[d(X X^T)/dX] + I^{(4)} + (transposed I^{(4)}).
+  // d(X X^T)_{ij}/dX_{mn} = delta_{im} X_{jn} + X_{in} delta_{jm}  (from (X X^T)_{ij} = X_{ik}
+  // X_{jk}). d(X^T)_{ij}/dX_{mn} = delta_{jm} delta_{in}.
+  // -> d(A)/d(f^{-1}) = -[d(X X^T)/dX] + I^{(4)} + (transposed I^{(4)}).
   const RankFourTensor d_XXt_dX =
       I2.template times<i_, m_, j_, n_>(X) + X.template times<i_, n_, j_, m_>(I2);
   const RankFourTensor d_Xt_dX = I2.template times<j_, m_, i_, n_>(I2);
   const RankFourTensor dA_dfinv = -d_XXt_dX + I4 + d_Xt_dX;
 
-  // d(A^2)_{ij}/dA_{mn} = δ_{im} A_{nj} + A_{im} δ_{jn}.
+  // d(A^2)_{ij}/dA_{mn} = delta_{im} A_{nj} + A_{im} delta_{jn}.
   const RankFourTensor d_AA_dA =
       I2.template times<i_, m_, n_, j_>(A) + A.template times<i_, m_, j_, n_>(I2);
   const RankFourTensor d_AA_dfinv = d_AA_dA * dA_dfinv;
@@ -468,7 +468,7 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
   RankFourTensor d_dd_dfinv = -0.5 * dA_dfinv + 0.25 * d_AA_dfinv;
 
   // ---- skew part ----
-  // α_i = ε_ijk (f^{-1})_jk  (axial vector of f^{-1}'s skew part, doubled).
+  // alpha_i = eps_ijk (f^{-1})_jk  (axial vector of f^{-1}'s skew part, doubled).
   RealVectorValue alpha;
   for (unsigned int i = 0; i < 3; ++i)
   {
@@ -478,21 +478,22 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
         ai += PermutationTensor::eps(i, j, k) * f_inv(j, k);
     alpha(i) = ai;
   }
-  // Derive θ from the axial vector's magnitude rather than from tr(f^{-1}): the trace
+  // Derive theta from the axial vector's magnitude rather than from tr(f^{-1}): the trace
   // formula assumes f^{-1} is exactly a rotation, which is only true in the limit. Here
-  // sin θ = √Q (Q = |skew part|²/4); a true rotation matches both, and an arbitrary f^{-1}
+  // sin theta = sqrtQ (Q = |skew part|^2/4); a true rotation matches both, and an arbitrary f^{-1}
   // is projected onto its nearest "rotation-like" interpretation.
   const Real Q_raw = 0.25 * (alpha * alpha);
-  // Clamp Q just below 1 so cos θ stays strictly positive (θ → π/2 is unphysical for one step).
+  // Clamp Q just below 1 so cos theta stays strictly positive (theta -> pi/2 is unphysical for one
+  // step).
   const Real Q = std::min(Q_raw, 1.0 - 1.0e-12);
 
-  // Small-angle fallback: when sin θ → 0, θ/(2√Q) → 1/2 (L'Hopital) and Δw → -α/2,
-  // which matches sym/skew of the linear approximation. d(Δw)/d(f^{-1}) is the
-  // antisymmetrizer (1/2)(δ_im δ_jn - δ_jm δ_in).
+  // Small-angle fallback: when sin theta -> 0, theta/(2sqrtQ) -> 1/2 (L'Hopital) and Deltaw ->
+  // -alpha/2, which matches sym/skew of the linear approximation. d(Deltaw)/d(f^{-1}) is the
+  // antisymmetrizer (1/2)(delta_im delta_jn - delta_jm delta_in).
   const Real small_Q = 1.0e-12;
   if (Q < small_Q)
   {
-    // Δw_ij = -(1/2) ε_ijk α_k
+    // Deltaw_ij = -(1/2) eps_ijk alpha_k
     for (unsigned int i = 0; i < 3; ++i)
       for (unsigned int j = 0; j < 3; ++j)
       {
@@ -501,7 +502,7 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
           v += PermutationTensor::eps(i, j, k) * alpha(k);
         dw(i, j) = -0.5 * v;
       }
-    // d(Δw)/d(f^{-1}) = -(1/2)(δ_{im} δ_{jn} - δ_{jm} δ_{in})
+    // d(Deltaw)/d(f^{-1}) = -(1/2)(delta_{im} delta_{jn} - delta_{jm} delta_{in})
     d_dw_d_f_inv = -0.5 * (I4 - I2.template times<j_, m_, i_, n_>(I2));
   }
   else
@@ -520,19 +521,20 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
         dw(i, j) = coeff * v;
       }
 
-    // Build d(Δw)/d(f^{-1}) analytically.
-    //   Δw_ij = c(f^{-1}) * E_ij(f^{-1}),  E_ij = ε_ijk α_k,  c = -θ/(2 sin θ).
+    // Build d(Deltaw)/d(f^{-1}) analytically.
+    //   Deltaw_ij = c(f^{-1}) * E_ij(f^{-1}),  E_ij = eps_ijk alpha_k,  c = -theta/(2 sin theta).
     //
-    //   dα_k/d(f^{-1})_{mn} = ε_{kmn}  (Levi-Civita is constant).
-    //   dQ/d(f^{-1})_{mn} = (1/2) α_k ε_{kmn}.
-    //   With sin θ = √Q : dsin θ/d(f^{-1})_{mn} = α_k ε_{kmn} / (4 sin θ).
-    //   dθ/d(f^{-1})_{mn} = dsin θ/d(f^{-1})_{mn} / cos θ.
-    //   dc/dθ = -(sin θ - θ cos θ)/(2 sin² θ); dc/d(f^{-1})_{mn} = dc/dθ * dθ/d(f^{-1})_{mn}
-    //     = (θ cos θ - sin θ) α_k ε_{kmn} / (8 sin³ θ cos θ).
-    //   dE_ij/d(f^{-1})_{mn} = ε_{ijk} ε_{kmn}.
+    //   dalpha_k/d(f^{-1})_{mn} = eps_{kmn}  (Levi-Civita is constant).
+    //   dQ/d(f^{-1})_{mn} = (1/2) alpha_k eps_{kmn}.
+    //   With sin theta = sqrtQ : dsin theta/d(f^{-1})_{mn} = alpha_k eps_{kmn} / (4 sin theta).
+    //   dtheta/d(f^{-1})_{mn} = dsin theta/d(f^{-1})_{mn} / cos theta.
+    //   dc/dtheta = -(sin theta - theta cos theta)/(2 sin^2 theta); dc/d(f^{-1})_{mn} = dc/dtheta *
+    //   dtheta/d(f^{-1})_{mn}
+    //     = (theta cos theta - sin theta) alpha_k eps_{kmn} / (8 sin^3 theta cos theta).
+    //   dE_ij/d(f^{-1})_{mn} = eps_{ijk} eps_{kmn}.
     //
     // Final:
-    //   d(Δw)_{ij}/d(f^{-1})_{mn} = (dc/d(f^{-1})_{mn}) * E_ij + c * dE_ij/d(f^{-1})_{mn}.
+    //   d(Deltaw)_{ij}/d(f^{-1})_{mn} = (dc/d(f^{-1})_{mn}) * E_ij + c * dE_ij/d(f^{-1})_{mn}.
     const Real dc_pref =
         (theta * cos_theta - sin_theta) / (8.0 * sin_theta * sin_theta * sin_theta * cos_theta);
     for (unsigned int i = 0; i < 3; ++i)
@@ -567,15 +569,15 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
                                                             RankFourTensor & d_dL_d_f_inv,
                                                             RankFourTensor & d_dw_d_f_inv) const
 {
-  // See plan_outline.pdf §2.4. Polar-decompose f^{-1} = r' u', with u' symmetric positive
+  // See plan_outline.pdf Sec.2.4. Polar-decompose f^{-1} = r' u', with u' symmetric positive
   // definite and r' a proper rotation. The PDF's identity `log f^{-1} = -log d - log w`
   // only holds when log u and log r commute (i.e. for non-rotating deformation); in general
-  // the right stretch of f^{-1} is u' = R · U^{-1} · R^T where R, U are the right polar of f.
-  // So -log(u') = R · log U · R^T is the *spatial-frame* log strain, not the co-rotated
+  // the right stretch of f^{-1} is u' = R * U^{-1} * R^T where R, U are the right polar of f.
+  // So -log(u') = R * log U * R^T is the *spatial-frame* log strain, not the co-rotated
   // log U. We compute it that way first, then rotate by r' = R^T to land in the n-frame
   // so that _strain_increment = log U exactly. This is the strain measure the Rashid
-  // objective stress update consumes (eq. 22, σ_{n+1} = r̂ (σ_n + Δσ) r̂^T expects Δσ
-  // in the n-frame).
+  // objective stress update consumes (eq. 22, sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T
+  // expects Deltasigma in the n-frame).
   usingTensorIndices(a_, b_, m_, n_);
   const auto I2 = RankTwoTensor::Identity();
 
@@ -585,13 +587,13 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   const RankTwoTensor u_inv = MathUtils::sqrt(cprime).inverse().get();
   const RankTwoTensor r = f_inv * u_inv;
 
-  // ---- intermediate Δd_spatial = -log u' = R · log U · R^T (n+1 frame) ----
+  // ---- intermediate Deltad_spatial = -log u' = R * log U * R^T (n+1 frame) ----
   FactorizedRankTwoTensor uFact(u);
   const RankTwoTensor log_u = MathUtils::log(uFact).get();
   const RankTwoTensor dd_spatial = -log_u;
 
-  // d(log u)/d(c') = (1/2) dlog(c'), and d(c')_{ab}/d(f^{-1})_{mn} = δ_{an} f_inv_{mb}
-  //                                                                + δ_{bn} f_inv_{ma}.
+  // d(log u)/d(c') = (1/2) dlog(c'), and d(c')_{ab}/d(f^{-1})_{mn} = delta_{an} f_inv_{mb}
+  //                                                                + delta_{bn} f_inv_{ma}.
   const RankFourTensor dlog_cprime = MathUtils::dlog(cprime);
   const RankFourTensor d_cprime_d_finv =
       I2.template times<a_, n_, m_, b_>(f_inv) + I2.template times<b_, n_, m_, a_>(f_inv);
@@ -606,18 +608,19 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   const RankFourTensor d_r_d_finv =
       (O.template times<i_, k_, l_, j_>(Y) - Z.template times<i_, l_, k_, j_>(Z)) / Y.det();
 
-  // ---- Δw = -log r via Rodrigues. ----
-  // log r = φ(θ) (r - r^T) with φ(θ) = θ/(2 sin θ),  cos θ = (tr r - 1)/2.
+  // ---- Deltaw = -log r via Rodrigues. ----
+  // log r = phi(theta) (r - r^T) with phi(theta) = theta/(2 sin theta),  cos theta = (tr r - 1)/2.
   const Real cos_theta = MathUtils::clamp(0.5 * (r.trace() - 1.0), -1.0, 1.0);
   const Real sin2 = std::max(1.0 - cos_theta * cos_theta, 0.0);
   const Real sin_theta = std::sqrt(sin2);
   const Real theta = std::acos(cos_theta);
   const RankTwoTensor A = r - r.transpose();
 
-  // d(log r)_{ij}/d(r)_{mn} = (dφ/dr_{mn}) A_{ij} + φ (δ_{im} δ_{jn} - δ_{jm} δ_{in}).
-  //   dφ/dr_{mn} = (dφ/dθ)(dθ/d cos θ)(d cos θ/dr_{mn})
-  //              = ψ δ_{mn}, where ψ = (θ cos θ - sin θ)/(4 sin³ θ).
-  // Small-angle: φ → 1/2, ψ → -1/12, so d(log r)/dr → (1/2)(I^(4) - swap_ij).
+  // d(log r)_{ij}/d(r)_{mn} = (dphi/dr_{mn}) A_{ij} + phi (delta_{im} delta_{jn} - delta_{jm}
+  // delta_{in}).
+  //   dphi/dr_{mn} = (dphi/dtheta)(dtheta/d cos theta)(d cos theta/dr_{mn})
+  //              = psi delta_{mn}, where psi = (theta cos theta - sin theta)/(4 sin^3 theta).
+  // Small-angle: phi -> 1/2, psi -> -1/12, so d(log r)/dr -> (1/2)(I^(4) - swap_ij).
   const Real small_sin = 1.0e-7;
   RankFourTensor d_logr_d_r;
   RankTwoTensor log_r;
@@ -632,29 +635,30 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
     const Real phi = theta / (2.0 * sin_theta);
     const Real psi = (theta * cos_theta - sin_theta) / (4.0 * sin_theta * sin2);
     log_r = phi * A;
-    // (dφ/dr)_{mn} = ψ δ_{mn} → outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) * ψ.
+    // (dphi/dr)_{mn} = psi delta_{mn} -> outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) * psi.
     const RankFourTensor dphi_outer_A = A.template times<i_, j_, m_, n_>(I2);
     d_logr_d_r = psi * dphi_outer_A + phi * (RankFourTensor::IdentityFour() - swap_ij);
   }
   dw = -log_r;
   d_dw_d_f_inv = -(d_logr_d_r * d_r_d_finv);
 
-  // ---- Rotate Δd from spatial back to co-rotated (n) frame: log U = r' · (R log U R^T) · r'^T,
-  //      using r' = R^T from the polar of f^{-1}. The derivative of the sandwich r'·A·r'^T
+  // ---- Rotate Deltad from spatial back to co-rotated (n) frame: log U = r' * (R log U R^T) *
+  // r'^T,
+  //      using r' = R^T from the polar of f^{-1}. The derivative of the sandwich r'*A*r'^T
   //      w.r.t. f^{-1} expands to three rank-4 pieces (chain rule on r' AND on A). The
   //      6-argument `times<>(RankFourTensor)` overload uses x[0..4] (one dummy at index 4),
   //      so we reuse the same dummy label `p2_` in each sub-contraction.
   {
     usingTensorIndices(i2_, j2_, m2_, n2_, p2_);
     dd = r * dd_spatial * r.transpose();
-    const RankTwoTensor M = dd_spatial * r.transpose(); // dd · r^T   (p, j) shape
-    const RankTwoTensor N = r * dd_spatial;             // r · dd     (i, q) shape
-    // T1_{ijmn} = (dr/d_finv)_{ip,mn} · M_{pj}
+    const RankTwoTensor M = dd_spatial * r.transpose(); // dd * r^T   (p, j) shape
+    const RankTwoTensor N = r * dd_spatial;             // r * dd     (i, q) shape
+    // T1_{ijmn} = (dr/d_finv)_{ip,mn} * M_{pj}
     const RankFourTensor T1 = M.template times<p2_, j2_, i2_, p2_, m2_, n2_>(d_r_d_finv);
-    // T2_{ijmn} = r_{ip} · (d_dd_spatial_d_finv)_{pq,mn} · r_{jq}: contract twice over the dummy.
+    // T2_{ijmn} = r_{ip} * (d_dd_spatial_d_finv)_{pq,mn} * r_{jq}: contract twice over the dummy.
     const RankFourTensor mid = r.template times<i2_, p2_, p2_, j2_, m2_, n2_>(d_dd_spatial_d_finv);
     const RankFourTensor T2 = r.template times<j2_, p2_, i2_, p2_, m2_, n2_>(mid);
-    // T3_{ijmn} = N_{iq} · (dr/d_finv)_{jq,mn}
+    // T3_{ijmn} = N_{iq} * (dr/d_finv)_{jq,mn}
     const RankFourTensor T3 = N.template times<i2_, p2_, j2_, p2_, m2_, n2_>(d_r_d_finv);
     const RankFourTensor d_dd_d_finv = T1 + T2 + T3;
     d_dL_d_f_inv = d_dd_d_finv + d_dw_d_f_inv;
@@ -732,8 +736,8 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
     // `_F_avg` consistently stores the element average of `F_ust` regardless of mode;
     // it's consumed by the UL kernel for the spatial-frame push-forward, which is a
     // purely-geometric quantity. In `F_bar_mode = incremental` the F-bar chain itself
-    // operates on the *incremental* averaged tensor `f_avg = avg(F_ust · F_ust_old^{-1})`,
-    // which we compute locally — the kernel matches by weighting grad_phi by F_ust_old^{-1}
+    // operates on the *incremental* averaged tensor `f_avg = avg(F_ust * F_ust_old^{-1})`,
+    // which we compute locally -- the kernel matches by weighting grad_phi by F_ust_old^{-1}
     // in its element average. Incremental mode only makes sense for large kinematics
     // (OLD's Fhat F-bar lives in the finite-strain code path).
     const bool incremental = (_F_bar_mode == FBarMode::Incremental);
@@ -751,10 +755,10 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
                                                  _JxW,
                                                  _coord)
             : RankTwoTensor();
-    // Always publish avg(F_ust) — UL kernel uses this for the push-forward.
+    // Always publish avg(F_ust) -- UL kernel uses this for the push-forward.
     _F_avg.set().setAllValues(F_avg);
     // What the F-bar gamma and `_d_F_stab_d_F_avg` are built against (also what the
-    // kernel-side `_avg_grad_trial` will represent the δ of):
+    // kernel-side `_avg_grad_trial` will represent the delta of):
     const auto & avg_for_chain = incremental ? f_avg : F_avg;
     // Make the appropriate modification, depending on small or large deformations
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -763,13 +767,13 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
       {
         // Multiplicative F-bar: F_stab = gamma * F_ust where
         //   gamma_total = cbrt(det(F_avg) / det(F_ust))                       (total mode)
-        //   gamma_inc   = cbrt(det(f_avg) / det(f_ust)),  f_ust = F_ust·F_ust_old^{-1}
+        //   gamma_inc   = cbrt(det(f_avg) / det(f_ust)),  f_ust = F_ust*F_ust_old^{-1}
         //                                                                     (incremental mode)
         // For incremental:  det(f_ust) = det(F_ust)/det(F_ust_old).
         //   d log det(f_ust)/d F_ust = F_ust^{-T}   (same as the total-mode chain)
         // so `_d_F_stab_d_F_ust` shares the total-mode shape. The non-local chain
-        // contracts `_d_F_stab_d_F_avg` with δ(averaged-quantity); kernel computes
-        // δf_avg in incremental mode by weighting grad_phi by F_ust_old^{-1} in its
+        // contracts `_d_F_stab_d_F_avg` with delta(averaged-quantity); kernel computes
+        // deltaf_avg in incremental mode by weighting grad_phi by F_ust_old^{-1} in its
         // element average.
         const Real det_ust_local =
             incremental ? _F_ust[_qp].det() / _F_ust_old[_qp].det() : _F[_qp].det();
@@ -786,8 +790,8 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
       else
       {
         // Additive (trace) F-bar: F_stab = F_ust + (tr(F_avg - F_ust)/3) * I.
-        // dF_stab/dF_ust = I^(4) - (1/3) * I2 ⊗ I2  (each diagonal component pulled out).
-        // dF_stab/dF_avg = (1/3) * I2 ⊗ I2.
+        // dF_stab/dF_ust = I^(4) - (1/3) * I2 (x) I2  (each diagonal component pulled out).
+        // dF_stab/dF_avg = (1/3) * I2 (x) I2.
         const auto outer = I2.template times<i_, j_, k_, l_>(I2);
         _d_F_stab_d_F_ust[_qp] = RankFourTensor::IdentityFour() - (1.0 / 3.0) * outer;
         _d_F_stab_d_F_avg[_qp] = (1.0 / 3.0) * outer;
@@ -862,9 +866,9 @@ ComputeLagrangianStrainBase<G>::computeQpRotationIncrement(const RankTwoTensor &
     return R_incr.transpose();
   }
 
-  // For `rashid_eigen`, `linear`, `quadratic`: r̂ = exp(dw) via Rodrigues. For RashidEigen,
+  // For `rashid_eigen`, `linear`, `quadratic`: r_hat = exp(dw) via Rodrigues. For RashidEigen,
   // dw is the matrix log of the polar-decomposition R, so exp(dw) recovers that R bit-for-bit
-  // — equivalent to OLD `ComputeFiniteStrain`'s EigenSolution rotation.
+  // -- equivalent to OLD `ComputeFiniteStrain`'s EigenSolution rotation.
   const Real theta2 = 0.5 * dw.doubleContraction(dw);
   const Real theta = std::sqrt(theta2);
   Real f, g;

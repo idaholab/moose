@@ -105,7 +105,7 @@ protected:
   /// Strategy that implements the chosen objective rate.
   std::unique_ptr<LagrangianObjectiveRate> _rate_strategy;
 
-  /// If true, the rate's `update()` runs in passthrough mode — it skips its own outer
+  /// If true, the rate's `update()` runs in passthrough mode -- it skips its own outer
   /// rotation and sets `_cauchy_stress = _small_stress` directly. Used in tandem with the
   /// strain calculator's `publish_rotation_increment = true` to delegate the rotation of
   /// the stress state to the wrapped material's `_perform_finite_strain_rotations = true`

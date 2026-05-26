@@ -59,9 +59,9 @@ public:
   };
 
   /// What F gets F-bar volumetric correction applied to. Affects only `stabilize_strain = true`.
-  ///   Total      → average the full deformation gradient F_ust at each qp, then rescale by
+  ///   Total      -> average the full deformation gradient F_ust at each qp, then rescale by
   ///                gamma = cbrt(det(F_avg) / det(F_ust[qp])). This is the existing behavior.
-  ///   Incremental → average the *incremental* F (`f_ust = F_ust · F_ust_old^{-1}`) at each qp,
+  ///   Incremental -> average the *incremental* F (`f_ust = F_ust * F_ust_old^{-1}`) at each qp,
   ///                 then rescale by gamma = cbrt(det(f_avg) / det(f_ust[qp])). Matches the
   ///                 OLD `ComputeFiniteStrain` F-bar (averaged Fhat) so cumulative strain is
   ///                 bit-for-bit compatible with `volumetric_locking_correction = true`.
@@ -82,7 +82,7 @@ protected:
   /// (`dd`, `dw`) tensors. Used by the Rashid options where `dd != sym(dL)` and
   /// `dw != skew(dL)`.
   void setQpIncrementalStrains(const RankTwoTensor & dd, const RankTwoTensor & dw);
-  /// Dispatcher: compute (Δd, Δw, d(Δl)/d(f^{-1}), d(Δw)/d(f^{-1})) for the active
+  /// Dispatcher: compute (Deltad, Deltaw, d(Deltal)/d(f^{-1}), d(Deltaw)/d(f^{-1})) for the active
   /// kinematic approximation. The vorticity derivative is returned separately so the
   /// Jaumann objective rate can chain its own Jacobian without re-projecting from dL.
   void computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
@@ -127,7 +127,7 @@ protected:
   /// of the default identity. Enables OLD-compatible plasticity through `ComputeLagrangianWrappedStress`:
   /// wrapped materials with `perform_finite_strain_rotations = true` (e.g.
   /// `ComputeMultiPlasticityStress`) will rotate their internal `_stress` each step, so the
-  /// next step's return mapping reads `_stress_old = σ_cauchy_old` (matching OLD's
+  /// next step's return mapping reads `_stress_old = sigma_cauchy_old` (matching OLD's
   /// `ComputeFiniteStrain` pipeline). Pair with `rotate_old_stress = true` on the
   /// objective rate so the rate skips its outer rotation (the wrapped material already
   /// applied it) and doesn't double-rotate. Default false preserves the existing pipeline
@@ -151,9 +151,9 @@ protected:
   MaterialProperty<RankTwoTensor> & _mechanical_strain;
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
 
-  /// Mechanical strain accumulated with the incremental rotation r̂ = exp(Δw), matching
+  /// Mechanical strain accumulated with the incremental rotation r_hat = exp(Deltaw), matching
   /// the convention `ComputeFiniteStrain` uses for its `mechanical_strain` output
-  /// (`ε_n+1 = r̂ · (ε_n + Δd) · r̂^T`). Provided as a separate property so the standard
+  /// (`eps_n+1 = r_hat * (eps_n + Deltad) * r_hat^T`). Provided as a separate property so the standard
   /// `_mechanical_strain` (consumed by constitutive materials) stays un-rotated and the
   /// objective-rate-driven stress chain is unaffected. Use this for aux-variable output
   /// when matching the old-system convention.
@@ -173,7 +173,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _F_ust;
 
   /// Old unstabilized deformation gradient. Needed for `F_bar_mode = incremental` so the
-  /// incremental F (`F_ust · F_ust_old^{-1}`) at this step is built from the unstabilized
+  /// incremental F (`F_ust * F_ust_old^{-1}`) at this step is built from the unstabilized
   /// pair (matching OLD `ComputeFiniteStrain`'s `_Fhat`). Only consulted in incremental mode.
   const MaterialProperty<RankTwoTensor> & _F_ust_old;
 
@@ -202,7 +202,7 @@ protected:
   /// Stored so downstream consumers do not bake in the linear-approximation assumption.
   MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
 
-  /// Derivative of the vorticity increment Δw with respect to F_{n+1}. Consumed by the
+  /// Derivative of the vorticity increment Deltaw with respect to F_{n+1}. Consumed by the
   /// Jaumann objective rate so it can produce a consistent Jacobian regardless of which
   /// kinematic_approximation the strain calculator is using.
   MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
@@ -269,7 +269,7 @@ private:
   /// see the OLD-compatible rotation. For `RashidApproximate` this ports OLD
   /// `ComputeFiniteStrain`'s C1/C2/C3 polynomial Rodrigues approximation (bit-for-bit OLD
   /// TaylorExpansion); for `RashidEigen` and `Linear` / `Quadratic` it returns `exp(dw)`
-  /// via the Rodrigues block (exact rotation around the dw axis — bit-exact for RashidEigen,
+  /// via the Rodrigues block (exact rotation around the dw axis -- bit-exact for RashidEigen,
   /// which has no OLD counterpart for the linear/quadratic cases).
   RankTwoTensor computeQpRotationIncrement(const RankTwoTensor & f_inv,
                                            const RankTwoTensor & dw) const;

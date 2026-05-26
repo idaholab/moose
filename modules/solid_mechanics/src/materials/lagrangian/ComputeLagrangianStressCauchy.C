@@ -39,10 +39,10 @@ ComputeLagrangianStressCauchy::computeQpStressUpdate()
 void
 ComputeLagrangianStressCauchy::computeQpPK1Stress()
 {
-  // Wrap σ → PK1 using the *unstabilized* F (= F_actual at alpha = 1). F-bar enters
-  // only through σ via the strain calc's F-bar'd `_f_inv`, NOT through this kinematic
-  // wrap — this matches OLD's `StressDivergenceTensors`-on-displaced-mesh residual,
-  // which integrates `gradTest_spatial · σ dV` on the actual deformed mesh (so the
+  // Wrap sigma -> PK1 using the *unstabilized* F (= F_actual at alpha = 1). F-bar enters
+  // only through sigma via the strain calc's F-bar'd `_f_inv`, NOT through this kinematic
+  // wrap -- this matches OLD's `StressDivergenceTensors`-on-displaced-mesh residual,
+  // which integrates `gradTest_spatial * sigma dV` on the actual deformed mesh (so the
   // implicit "wrap F" is F_actual, NOT the F-bar'd F).
   if (_large_kinematics)
   {
@@ -55,14 +55,14 @@ ComputeLagrangianStressCauchy::computeQpPK1Stress()
     // Geometric pieces of dPK1/d(F_ust) (independent of F-bar):
     const RankFourTensor geom = _pk1_stress[_qp].outerProduct(F_ust_invT) -
                                 _pk1_stress[_qp].times<i_, l_, j_, k_>(F_ust_inv);
-    // σ chain WITHOUT the F-bar `_d_F_stab_d_F_ust` factor — for specialty kernels
+    // sigma chain WITHOUT the F-bar `_d_F_stab_d_F_ust` factor -- for specialty kernels
     // whose coupled variable adds to F_ust AFTER F-bar (WPS strain_zz, homogenization
     // macro_grad), so the perturbation bypasses F-bar's chain.
     const RankFourTensor sigma_chain_no_fbar =
         det_F_ust *
         (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp]).singleProductJ(F_ust_inv);
     _pk1_jacobian_bypass_fbar[_qp] = geom + sigma_chain_no_fbar;
-    // σ chain WITH the F-bar chain — the default `_pk1_jacobian` for disp Jacobian.
+    // sigma chain WITH the F-bar chain -- the default `_pk1_jacobian` for disp Jacobian.
     _pk1_jacobian[_qp] =
         geom + det_F_ust * (_cauchy_jacobian[_qp] * _d_spatial_velocity_increment_d_F[_qp] *
                             _d_F_stab_d_F_ust[_qp])
@@ -70,7 +70,7 @@ ComputeLagrangianStressCauchy::computeQpPK1Stress()
   }
   else
   {
-    // Small kinematics: PK1 = σ (no wrap). The F-bar chain enters via
+    // Small kinematics: PK1 = sigma (no wrap). The F-bar chain enters via
     // `_d_F_stab_d_F_ust` for the disp Jacobian path; specialty paths bypass it.
     _pk1_stress[_qp] = _cauchy_stress[_qp];
     _pk1_jacobian[_qp] = _cauchy_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
