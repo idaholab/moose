@@ -14,6 +14,7 @@
 #include "SystemBase.h"
 #include "LinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "MathFVUtils.h"
@@ -37,17 +38,17 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
-const FVGradientMethod *
+const FVGradientMethod &
 getLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
 {
-  if (method_name == "green-gauss")
-    return nullptr;
+  auto & fe_problem = sys.feProblem();
+  if (method_name == "green-gauss" && !fe_problem.hasFVGradientMethod(method_name))
+    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
 
-  const auto & fe_problem = sys.feProblem();
   if (!fe_problem.hasFVGradientMethod(method_name))
     mooseError("Unable to find FVGradientMethod with name '", method_name, "'");
 
-  return &fe_problem.getFVGradientMethod(method_name);
+  return fe_problem.getFVGradientMethod(method_name);
 }
 
 std::size_t
@@ -60,18 +61,6 @@ limitedGradientFieldCacheIndex(const Moose::FV::GradientLimiterType limiter_type
   return static_cast<std::size_t>(limiter_index);
 }
 
-const LinearFVGradientField &
-rawLinearFVGradientField(SystemBase & sys)
-{
-  if (auto * const linear_system = dynamic_cast<LinearSystem *>(&sys))
-    return linear_system->linearFVGradientField();
-
-  if (auto * const auxiliary_system = dynamic_cast<AuxiliarySystem *>(&sys))
-    return auxiliary_system->linearFVGradientField();
-
-  mooseError("The assigned system is not a linear or an auxiliary system. Linear variables can "
-             "only be assigned to linear or auxiliary systems.");
-}
 }
 
 template <typename OutputType>
@@ -96,7 +85,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _needs_cell_gradients(false),
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
-    _gradient_field(&rawLinearFVGradientField(this->_sys)),
+    _gradient_field(nullptr),
     _default_gradient_method_name(this->template getParam<GradientMethodName>("gradient_method")),
     _limited_gradient_field_cache{},
     _sys_num(this->_sys.number()),
@@ -134,12 +123,9 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 {
   _needs_cell_gradients = true;
 
-  const auto * const method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  _gradient_field =
-      method ? (_linear_system ? &_linear_system->registerFVGradient(this->_var_num, *method)
-                               : &_auxiliary_system->registerFVGradient(this->_var_num, *method))
-             : (_linear_system ? &_linear_system->registerFVGradient(this->_var_num)
-                               : &_auxiliary_system->registerFVGradient(this->_var_num));
+  const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+  _gradient_field = _linear_system ? &_linear_system->registerFVGradient(this->_var_num, method)
+                                   : &_auxiliary_system->registerFVGradient(this->_var_num, method);
 }
 
 template <typename OutputType>
@@ -166,15 +152,16 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
 
   _needs_cell_gradients = true;
 
-  const auto * const method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  const auto gradient_scheme_type =
-      method ? method->schemeType() : Moose::FV::LinearFVGradientSchemeType::GreenGauss;
+  const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
+  if (method.limiterType() != limiter_type)
+    mooseError("Variable '",
+               this->name(),
+               "' requested limited gradients with a limiter that differs from its "
+               "gradient_method. Set the limiter on the [FVGradientMethods] object instead.");
 
-  auto & gradient_field =
-      _linear_system
-          ? _linear_system->registerFVGradient(this->_var_num, gradient_scheme_type, limiter_type)
-          : _auxiliary_system->registerFVGradient(
-                this->_var_num, gradient_scheme_type, limiter_type);
+  auto & gradient_field = _linear_system
+                              ? _linear_system->registerFVGradient(this->_var_num, method)
+                              : _auxiliary_system->registerFVGradient(this->_var_num, method);
   setLimitedGradientField(limiter_type, gradient_field);
 }
 
