@@ -19,6 +19,102 @@
 #include <limits>
 using namespace libMesh;
 
+namespace
+{
+
+struct ConservativeSharpCellDebugKeys
+{
+  const char * cell;
+  const char * momentum;
+  const char * velocity;
+  const char * pre_writeback;
+  const char * delta_velocity;
+  const char * delta_momentum;
+  const char * post_writeback;
+  const char * hbya_live;
+  const char * ainv_live;
+  const char * predictor_live;
+  const char * predictor_cached;
+  const char * predictor_velocity_view;
+  const char * hbya_velocity_view;
+};
+
+constexpr ConservativeSharpCellDebugKeys worst_face_cell_debug_keys = {
+    "_cell_id=",
+    "_rhou",
+    "_u_from_rhou",
+    "_pre_writeback_rhou",
+    "_pressure_delta_u",
+    "_pressure_delta_rhou",
+    "_post_writeback_rhou",
+    "_hbya_live",
+    "_ainv_live",
+    "_pred_base_live",
+    "_pred_base_cached",
+    "_pred_base_uview",
+    "_hbya_uview"};
+
+constexpr ConservativeSharpCellDebugKeys pressure_debug_face_cell_debug_keys = {
+    "_cell=",
+    "_rhou",
+    "_u",
+    "_pre_rhou",
+    "_delta_u",
+    "_delta_rhou",
+    "_post_rhou",
+    "_hbya_live",
+    nullptr,
+    "_pred_live",
+    "_pred_cached",
+    "_pred_uview",
+    "_hbya_uview"};
+
+void
+appendConservativeSharpCellDebug(std::ostream & out,
+                                 const char * separator,
+                                 const char * label,
+                                 const ElemInfo * elem_info,
+                                 const std::vector<unsigned int> & momentum_system_numbers,
+                                 const ConservativeSharpInterfaceRhieChowMassFlux & sharp_rc,
+                                 const ConservativeSharpCellDebugKeys & keys)
+{
+  if (!elem_info)
+    return;
+
+  out << separator << label << keys.cell << elem_info->elem()->id();
+  for (const auto dim_i : index_range(momentum_system_numbers))
+  {
+    const auto momentum_dof = elem_info->dofIndices()[momentum_system_numbers[dim_i]][0];
+    out << separator << label << keys.momentum << dim_i << '='
+        << sharp_rc.debugCurrentMomentumComponent(*elem_info, dim_i) << separator << label
+        << keys.velocity << dim_i << '=' << sharp_rc.debugCurrentVelocityComponent(*elem_info, dim_i)
+        << separator << label << keys.pre_writeback << dim_i << '='
+        << sharp_rc.debugLastWritebackPreMomentumComponent(*elem_info, dim_i) << separator << label
+        << keys.delta_velocity << dim_i << '='
+        << sharp_rc.debugLastWritebackPressureDeltaVelocityComponent(*elem_info, dim_i)
+        << separator << label << keys.delta_momentum << dim_i << '='
+        << sharp_rc.debugLastWritebackPressureDeltaMomentumComponent(*elem_info, dim_i)
+        << separator << label << keys.post_writeback << dim_i << '='
+        << sharp_rc.debugLastWritebackPostMomentumComponent(*elem_info, dim_i) << separator << label
+        << keys.hbya_live << dim_i << '=' << sharp_rc.debugCellHbyARaw(dim_i, momentum_dof);
+
+    if (keys.ainv_live)
+      out << separator << label << keys.ainv_live << dim_i << '='
+          << sharp_rc.debugCellAinvRaw(dim_i, momentum_dof);
+
+    out << separator << label << keys.predictor_live << dim_i << '='
+        << sharp_rc.debugLivePredictorBaseRawComponent(*elem_info, dim_i) << separator << label
+        << keys.predictor_cached << dim_i << '='
+        << sharp_rc.debugCachedPredictorBaseRawComponent(*elem_info, dim_i) << separator << label
+        << keys.predictor_velocity_view << dim_i << '='
+        << sharp_rc.debugDerivedVelocityPredictorBaseRawComponent(*elem_info, dim_i) << separator
+        << label << keys.hbya_velocity_view << dim_i << '='
+        << sharp_rc.debugDerivedVelocityPredictorHbyAComponent(*elem_info, dim_i);
+  }
+}
+
+} // namespace
+
 InputParameters
 ReducedPressurePIMPLESolve::validParams()
 {
@@ -430,7 +526,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
   const Real predictor_convective_mass_flux =
       sharp_rc->storedPredictorConvectiveMassFlux(*worst_face);
   const Real predictor_convective_mass_flux_integrated = predictor_convective_mass_flux * face_measure;
-  const Real generic_hbya_phi = sharp_rc->storedGenericHbyAVolumetricPhi(*worst_face);
   const Real corrected_face_phi = sharp_rc->storedCorrectedFacePhi(*worst_face);
   const Real outer_phi = sharp_rc->storedOuterIterationPhi(*worst_face);
   const int phi_sign = signum(outer_phi);
@@ -446,58 +541,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
   const Real alpha_max_local =
       std::max(sharp_rc->debugElemAlpha(*worst_face, Moose::currentState()),
                sharp_rc->debugNeighborAlpha(*worst_face, Moose::currentState()));
-  auto * conservative_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(sharp_rc);
-  const auto append_cell_debug =
-      [this, &out, sharp_rc, conservative_rc](const char * label, const ElemInfo * elem_info)
-  {
-    if (!elem_info)
-      return;
-
-    out << ", " << label << "_cell_id=" << elem_info->elem()->id();
-    for (const auto dim_i : index_range(_momentum_systems))
-    {
-      const auto momentum_dof = elem_info->dofIndices()[_momentum_system_numbers[dim_i]][0];
-      if (conservative_rc)
-      {
-        out << ", " << label << "_rhou" << dim_i << '='
-            << conservative_rc->debugCurrentMomentumComponent(*elem_info, dim_i)
-            << ", " << label << "_u_from_rhou" << dim_i << '='
-            << conservative_rc->debugCurrentVelocityComponent(*elem_info, dim_i)
-            << ", " << label << "_pre_writeback_rhou" << dim_i << '='
-            << conservative_rc->debugLastWritebackPreMomentumComponent(*elem_info, dim_i)
-            << ", " << label << "_pressure_delta_u" << dim_i << '='
-            << conservative_rc->debugLastWritebackPressureDeltaVelocityComponent(*elem_info, dim_i)
-            << ", " << label << "_pressure_delta_rhou" << dim_i << '='
-            << conservative_rc->debugLastWritebackPressureDeltaMomentumComponent(*elem_info,
-                                                                                  dim_i)
-            << ", " << label << "_post_writeback_rhou" << dim_i << '='
-            << conservative_rc->debugLastWritebackPostMomentumComponent(*elem_info, dim_i)
-            << ", " << label << "_hbya_live" << dim_i << '='
-            << conservative_rc->debugCellHbyARaw(dim_i, momentum_dof)
-            << ", " << label << "_ainv_live" << dim_i << '='
-            << conservative_rc->debugCellAinvRaw(dim_i, momentum_dof)
-            << ", " << label << "_pred_base_live" << dim_i << '='
-            << conservative_rc->debugLivePredictorBaseRawComponent(*elem_info, dim_i)
-            << ", " << label << "_pred_base_cached" << dim_i << '='
-            << conservative_rc->debugCachedPredictorBaseRawComponent(*elem_info, dim_i)
-            << ", " << label << "_pred_base_uview" << dim_i << '='
-            << conservative_rc->debugDerivedVelocityPredictorBaseRawComponent(*elem_info, dim_i)
-            << ", " << label << "_hbya_uview" << dim_i << '='
-            << conservative_rc->debugDerivedVelocityPredictorHbyAComponent(*elem_info, dim_i);
-      }
-      else
-      {
-        out << ", " << label << "_rho_u" << dim_i << '='
-            << sharp_rc->predictorOwnedRhoUComponent(*elem_info, dim_i)
-            << ", " << label << "_u" << dim_i << '='
-            << sharp_rc->predictorOwnedVelocityComponent(*elem_info, dim_i)
-            << ", " << label << "_hbya" << dim_i << '='
-            << sharp_rc->debugCellHbyARaw(dim_i, momentum_dof)
-            << ", " << label << "_ainv" << dim_i << '='
-            << sharp_rc->debugCellAinvRaw(dim_i, momentum_dof);
-      }
-    }
-  };
   out << ", sn_grad_rho="
       << sharp_rc->debugFaceNormalDensityGradient(*worst_face, Moose::currentState())
       << ", sn_grad_rho_orthogonal_part="
@@ -537,8 +580,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
       << ", rho_over_alpha_ratio=" << safe_ratio(vof_rho_phi, vof_alpha_phi_after)
       << ", predictor_mass_over_rho_ratio="
       << safe_ratio(predictor_convective_mass_flux_integrated, vof_rho_phi)
-      << ", hbya_over_outer_phi_ratio=" << safe_ratio(generic_hbya_phi, outer_phi)
-      << ", corrected_over_hbya_ratio=" << safe_ratio(corrected_face_phi, generic_hbya_phi)
       << ", face_rho_g=" << sharp_rc->debugGasDensityFace(*worst_face, Moose::currentState())
       << ", face_rho_l=" << sharp_rc->debugLiquidDensityFace(*worst_face, Moose::currentState())
       << ", hydro_raw=" << sharp_rc->debugHydrostaticFaceMassFluxDensityRaw(*worst_face)
@@ -550,8 +591,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
       << predictor_convective_mass_flux
       << ", predictor_convective_mass_flux_integrated=" << predictor_convective_mass_flux_integrated
       << ", corrected_face_phi=" << corrected_face_phi
-      << ", generic_hbya_phi=" << generic_hbya_phi
-      << ", reference_massflux_phi=" << sharp_rc->storedReferenceMassFluxVolumetricPhi(*worst_face)
       << ", pressure_predictor_base_phi="
       << sharp_rc->storedPressurePredictorBasePhi(*worst_face)
       << ", transient_phi=" << sharp_rc->storedTransientProjectionFlux(*worst_face)
@@ -562,11 +601,22 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
       << ", pressure_corr_phi=" << sharp_rc->storedPressureCorrectionPhi(*worst_face)
       << ", face_gC=" << worst_face->gC();
 
-  if (conservative_rc)
-    out << ", conservative_pred_cache_used=" << conservative_rc->debugUsingCachedPredictorOperator();
+  out << ", conservative_pred_cache_used=" << sharp_rc->debugUsingCachedPredictorOperator();
 
-  append_cell_debug("elem", worst_face->elemInfo());
-  append_cell_debug("neighbor", worst_face->neighborInfo());
+  appendConservativeSharpCellDebug(out,
+                                   ", ",
+                                   "elem",
+                                   worst_face->elemInfo(),
+                                   _momentum_system_numbers,
+                                   *sharp_rc,
+                                   worst_face_cell_debug_keys);
+  appendConservativeSharpCellDebug(out,
+                                   ", ",
+                                   "neighbor",
+                                   worst_face->neighborInfo(),
+                                   _momentum_system_numbers,
+                                   *sharp_rc,
+                                   worst_face_cell_debug_keys);
 
   const Elem * const worst_elem = worst_face->elemPtr();
   const Elem * const worst_neighbor = worst_face->neighborPtr();
@@ -592,7 +642,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
 
     out << fi->id() << "{c=" << fi->faceCentroid() << ",n=" << fi->normal()
         << ",phi=" << sharp_rc->storedCorrectedFacePhi(*fi)
-        << ",hbya=" << sharp_rc->storedGenericHbyAVolumetricPhi(*fi)
         << ",outer_phi=" << sharp_rc->storedOuterIterationPhi(*fi)
         << ",outer_rho_phi=" << sharp_rc->storedOuterIterationRhoPhiIntegrated(*fi)
         << ",vof_alpha_phi=" << sharp_rc->vofAlphaPhiLimitedIntegrated(*fi)
@@ -621,12 +670,6 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
         << ",pred_mass_over_rho="
         << safe_ratio(sharp_rc->storedPredictorConvectiveMassFlux(*fi) * fi->faceArea() * fi->faceCoord(),
                       sharp_rc->vofRhoPhiIntegrated(*fi))
-        << ",hbya_over_outer="
-        << safe_ratio(sharp_rc->storedGenericHbyAVolumetricPhi(*fi),
-                      sharp_rc->storedOuterIterationPhi(*fi))
-        << ",corrected_over_hbya="
-        << safe_ratio(sharp_rc->storedCorrectedFacePhi(*fi),
-                      sharp_rc->storedGenericHbyAVolumetricPhi(*fi))
         << ",raw_rc=" << sharp_rc->rawRhieChowMassFlux(*fi) << '}';
   }
   if (started_stencil)
@@ -1044,8 +1087,8 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
   if (_momentum_systems.empty())
     return;
 
-  if (auto * conservative_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo))
-    conservative_rc->updateContinuityErrorField();
+  if (auto * sharp_rc = sharpInterfaceRC())
+    sharp_rc->updateContinuityErrorField();
 
   if (_rc_uo)
     _rc_uo->clearMomentumPredictorOperatorCache();
@@ -1217,9 +1260,8 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] computing HbyA" << std::endl;
-  if (auto * conservative_rc =
-          dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo))
-    conservative_rc->computeConservativeHbyA(subtract_updated_pressure, _print_fields);
+  if (auto * sharp_rc = sharpInterfaceRC())
+    sharp_rc->computeConservativeHbyA(subtract_updated_pressure, _print_fields);
   else
     _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
 
@@ -1304,7 +1346,7 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
            "predictor_scalar_body_force_u,predictor_scalar_body_force_v,predictor_scalar_body_force_w,"
            "predictor_total_force_u,predictor_total_force_v,predictor_total_force_w,"
            "predictor_rhs_u,predictor_rhs_v,predictor_rhs_w,"
-           "corr_faces,corr_uses_sharp_path,corr_singular,"
+           "corr_faces,corr_singular,"
            "corr_matrix_00,corr_matrix_01,corr_matrix_02,"
            "corr_matrix_10,corr_matrix_11,corr_matrix_12,"
            "corr_matrix_20,corr_matrix_21,corr_matrix_22,"
@@ -1312,7 +1354,6 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
            "corr_solution_0,corr_solution_1,corr_solution_2,"
            "corr_openfoam_delta_u,corr_openfoam_delta_v,corr_openfoam_delta_w,"
            "corr_smooth_delta_u,corr_smooth_delta_v,corr_smooth_delta_w,"
-           "corr_sharp_overlay_delta_u,corr_sharp_overlay_delta_v,corr_sharp_overlay_delta_w,"
            "corr_delta_u,corr_delta_v,corr_delta_w\n";
 
     PetscVectorReader pressure_reader(*_pressure_system.system().current_local_solution);
@@ -1431,8 +1472,7 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
       for (const auto value : predictor_force_debug.rhs_contribution)
         out << ',' << value;
 
-      out << ',' << corr_debug.contributing_faces << ','
-          << (corr_debug.uses_sharp_path ? 1 : 0) << ',' << (corr_debug.singular ? 1 : 0);
+      out << ',' << corr_debug.contributing_faces << ',' << (corr_debug.singular ? 1 : 0);
       for (const auto value : corr_debug.normal_matrix)
         out << ',' << value;
       for (const auto value : corr_debug.rhs)
@@ -1442,8 +1482,6 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
       for (const auto value : corr_debug.openfoam_delta_velocity)
         out << ',' << value;
       for (const auto value : corr_debug.smooth_delta_velocity)
-        out << ',' << value;
-      for (const auto value : corr_debug.sharp_overlay_delta_velocity)
         out << ',' << value;
       for (const auto value : corr_debug.delta_velocity)
         out << ',' << value;
@@ -1511,7 +1549,6 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
     return;
 
   std::ostringstream msg;
-  auto * conservative_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(sharp_rc);
   msg << name() << ": pressure_debug_faces"
       << " stage=" << stage_label
       << " ts=" << _problem.timeStep()
@@ -1538,7 +1575,6 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
         << ",vof_transport_phi=" << sharp_rc->storedVOFTransportPhi(*fi)
         << ",pred_conv_phi=" << sharp_rc->storedPredictorConvectivePhi(*fi)
         << ",pred_phi=" << sharp_rc->storedPredictorOperatorPhi(*fi)
-        << ",generic_hbya_phi=" << sharp_rc->storedGenericHbyAVolumetricPhi(*fi)
         << ",pressure_predictor_base_phi=" << sharp_rc->storedPressurePredictorBasePhi(*fi)
         << ",transient_phi=" << sharp_rc->storedTransientProjectionFlux(*fi)
         << ",cap_hydro_phi=" << sharp_rc->storedCapillaryHydrostaticFlux(*fi)
@@ -1569,50 +1605,22 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
         << ",alpha_n=" << sharp_rc->debugNeighborAlpha(*fi, Moose::currentState())
         << ",rho_e=" << sharp_rc->debugElemDensity(*fi, Moose::currentState())
         << ",rho_n=" << sharp_rc->debugNeighborDensity(*fi, Moose::currentState())
-        << ",pred_cache="
-        << (conservative_rc ? conservative_rc->debugUsingCachedPredictorOperator() : 0);
+        << ",pred_cache=" << sharp_rc->debugUsingCachedPredictorOperator();
 
-    if (conservative_rc)
-    {
-      const auto append_conservative_cell = [&](const char * label, const ElemInfo * elem_info)
-      {
-        if (!elem_info)
-          return;
-
-        msg << ',' << label << "_cell=" << elem_info->elem()->id();
-        for (const auto dim_i : index_range(_momentum_systems))
-        {
-          const auto momentum_dof = elem_info->dofIndices()[_momentum_system_numbers[dim_i]][0];
-          msg << ',' << label << "_rhou" << dim_i << '='
-              << conservative_rc->debugCurrentMomentumComponent(*elem_info, dim_i)
-              << ',' << label << "_u" << dim_i << '='
-              << conservative_rc->debugCurrentVelocityComponent(*elem_info, dim_i)
-              << ',' << label << "_pre_rhou" << dim_i << '='
-              << conservative_rc->debugLastWritebackPreMomentumComponent(*elem_info, dim_i)
-              << ',' << label << "_delta_u" << dim_i << '='
-              << conservative_rc->debugLastWritebackPressureDeltaVelocityComponent(*elem_info,
-                                                                                    dim_i)
-              << ',' << label << "_delta_rhou" << dim_i << '='
-              << conservative_rc->debugLastWritebackPressureDeltaMomentumComponent(*elem_info,
-                                                                                    dim_i)
-              << ',' << label << "_post_rhou" << dim_i << '='
-              << conservative_rc->debugLastWritebackPostMomentumComponent(*elem_info, dim_i)
-              << ',' << label << "_hbya_live" << dim_i << '='
-              << conservative_rc->debugCellHbyARaw(dim_i, momentum_dof)
-              << ',' << label << "_hbya_uview" << dim_i << '='
-              << conservative_rc->debugDerivedVelocityPredictorHbyAComponent(*elem_info, dim_i)
-              << ',' << label << "_pred_live" << dim_i << '='
-              << conservative_rc->debugLivePredictorBaseRawComponent(*elem_info, dim_i)
-              << ',' << label << "_pred_cached" << dim_i << '='
-              << conservative_rc->debugCachedPredictorBaseRawComponent(*elem_info, dim_i)
-              << ',' << label << "_pred_uview" << dim_i << '='
-              << conservative_rc->debugDerivedVelocityPredictorBaseRawComponent(*elem_info, dim_i);
-        }
-      };
-
-      append_conservative_cell("elem", fi->elemInfo());
-      append_conservative_cell("neighbor", fi->neighborInfo());
-    }
+    appendConservativeSharpCellDebug(msg,
+                                     ",",
+                                     "elem",
+                                     fi->elemInfo(),
+                                     _momentum_system_numbers,
+                                     *sharp_rc,
+                                     pressure_debug_face_cell_debug_keys);
+    appendConservativeSharpCellDebug(msg,
+                                     ",",
+                                     "neighbor",
+                                     fi->neighborInfo(),
+                                     _momentum_system_numbers,
+                                     *sharp_rc,
+                                     pressure_debug_face_cell_debug_keys);
 
     msg << '}';
   }

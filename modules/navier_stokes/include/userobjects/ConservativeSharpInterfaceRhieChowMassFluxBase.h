@@ -28,10 +28,8 @@ public:
     std::array<Real, 3> solution{{0.0, 0.0, 0.0}};
     std::array<Real, 3> openfoam_delta_velocity{{0.0, 0.0, 0.0}};
     std::array<Real, 3> smooth_delta_velocity{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> sharp_overlay_delta_velocity{{0.0, 0.0, 0.0}};
     std::array<Real, 3> delta_velocity{{0.0, 0.0, 0.0}};
     unsigned int contributing_faces = 0;
-    bool uses_sharp_path = false;
     bool singular = false;
   };
 
@@ -124,8 +122,6 @@ public:
   Real predictorOperatorFaceMassFlux(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
   Real pressureCoupledWritebackMassFlux(const FaceInfo & fi) const;
   Real storedCorrectedFacePhi(const FaceInfo & fi) const;
-  Real storedGenericHbyAVolumetricPhi(const FaceInfo & fi) const;
-  Real storedReferenceMassFluxVolumetricPhi(const FaceInfo & fi) const;
   Real storedPressurePredictorBasePhi(const FaceInfo & fi) const;
   Real storedPressureEquationVolumetricFlux(const FaceInfo & fi) const;
   Real storedPredictorOperatorPhi(const FaceInfo & fi) const;
@@ -166,9 +162,6 @@ public:
                                       const Moose::StateArg & time_arg);
   RealVectorValue reducedPressureMomentumPredictorForceDensity(
       const ElemInfo & elem_info, const Moose::StateArg & time_arg) const;
-  Real predictorOwnedRhoUComponent(const ElemInfo & elem_info, const unsigned int component) const;
-  Real predictorOwnedVelocityComponent(const ElemInfo & elem_info,
-                                       const unsigned int component) const;
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
   bool hasVOFRhoPhiFunctor() const { return _vof_rho_phi != nullptr; }
   Real vofRhoPhiMassFlux(const FaceInfo & fi) const;
@@ -217,9 +210,17 @@ protected:
 
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real predictorFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
-  virtual Real facePhysicalVelocityComponent(const FaceInfo * fi,
+  virtual Real cellPhysicalVelocityComponent(const ElemInfo & elem_info,
                                              const unsigned int component,
                                              const Moose::StateArg & time_arg) const;
+  virtual Real boundaryPhysicalVelocityComponent(const FaceInfo * fi,
+                                                 const unsigned int component,
+                                                 const Moose::StateArg & time_arg) const;
+  Real boundaryPhysicalVolumetricFluxTarget(const FaceInfo * fi,
+                                            const Moose::StateArg & time_arg) const;
+  Real facePhysicalVelocityComponent(const FaceInfo * fi,
+                                     const unsigned int component,
+                                     const Moose::StateArg & time_arg) const;
   Real interpolatedPhysicalFaceFlux(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
@@ -228,7 +229,6 @@ protected:
   RealVectorValue interpolatePressureFaceRawAinv(
       const FaceInfo * fi, const std::vector<PetscVectorReader> & raw_ainv_readers) const;
   RealVectorValue interpolateFaceRau(const FaceInfo * fi) const;
-  bool useSharpInterfaceWriteback(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   const ElemInfo * sharpInterfaceOneSidedInterpolationOwner(const FaceInfo * fi,
                                                             const Moose::StateArg & time_arg) const;
   void buildSharpFaceRawAinvReaders(
@@ -337,20 +337,7 @@ protected:
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
       const FaceScalarField & scalar_field) const;
-  RealVectorValue reconstructFaceNormalScalarToCellVectorSkippingSharpFaces(
-      const ElemInfo * elem_info,
-      const Moose::StateArg & time_arg,
-      const FaceScalarField & scalar_field) const;
-  RealVectorValue reconstructSmoothPressureCoupledCellVelocityDelta(
-      const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
-  RealVectorValue sharpInterfacePressureCoupledCellVelocityDeltaForFace(
-      const FaceInfo * fi, const ElemInfo * elem_info) const;
-  Real sharpInterfaceAverageWritebackVolumetricFlux(const FaceInfo * fi,
-                                                    const RealVectorValue & elem_delta,
-                                                    const RealVectorValue & neighbor_delta) const;
   RealVectorValue reconstructOpenFoamStylePressureCoupledCellVelocityDelta(
-      const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
-  RealVectorValue reconstructSharpInterfacePressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   virtual RealVectorValue reconstructPressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
@@ -366,10 +353,8 @@ protected:
   FaceScalarField _debug_update_hydrostatic_face_mass_flux_density_raw;
   FaceScalarField _debug_update_physical_capillary_hydrostatic_flux;
   FaceScalarField _debug_update_hydrostatic_branch_taken;
-  FaceScalarField _pressure_coupled_velocity_correction_scalar;
   FaceScalarField _pressure_coupled_cell_reconstruction_scalar;
-  std::unordered_map<dof_id_type, RealVectorValue> _sharp_interface_elem_pressure_delta;
-  std::unordered_map<dof_id_type, RealVectorValue> _sharp_interface_neighbor_pressure_delta;
+  FaceVectorField _pressure_coupled_cell_reconstruction_vector;
 
   std::vector<const FaceInfo *> _sharp_interface_face_info;
 

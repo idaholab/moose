@@ -30,7 +30,6 @@ public:
   ConservativeSharpInterfaceRhieChowMassFlux(const InputParameters & params);
 
   void initFaceMassFlux() override;
-  void updateVelocityBoundaryState() override;
   void computeCellVelocity() override;
   void updateAdditionalPressureFluxFunctors(const bool with_updated_pressure,
                                             const bool verbose) override;
@@ -60,11 +59,12 @@ public:
                                                   const unsigned int component) const;
 
 protected:
-  Real pressureBoundaryTargetFlux(const FaceInfo * fi,
-                                  const Moose::StateArg & time_arg) const override;
-  Real facePhysicalVelocityComponent(const FaceInfo * fi,
+  Real cellPhysicalVelocityComponent(const ElemInfo & elem_info,
                                      const unsigned int component,
                                      const Moose::StateArg & time_arg) const override;
+  Real boundaryPhysicalVelocityComponent(const FaceInfo * fi,
+                                         const unsigned int component,
+                                         const Moose::StateArg & time_arg) const override;
 
 private:
   void rebuildAuthoritativeVelocitySolutionFromMomentum();
@@ -92,13 +92,6 @@ private:
   Real boundaryMomentumComponentValue(const FaceInfo * fi,
                                       const unsigned int component,
                                       const Moose::StateArg & time_arg) const;
-  Real boundaryVelocityComponentValue(const FaceInfo * fi,
-                                      const unsigned int component,
-                                      const Moose::StateArg & time_arg) const;
-  Real boundaryConservativeMassFluxTarget(const FaceInfo * fi,
-                                          const Moose::StateArg & time_arg) const;
-  Real boundaryConservativeVolumetricFluxTarget(const FaceInfo * fi,
-                                                const Moose::StateArg & time_arg) const;
 
   std::vector<std::unordered_map<dof_id_type, Real>> _last_writeback_pre_momentum;
   std::vector<std::unordered_map<dof_id_type, Real>> _last_writeback_post_momentum;

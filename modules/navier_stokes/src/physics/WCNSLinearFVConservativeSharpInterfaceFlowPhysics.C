@@ -649,6 +649,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumFluxKernels()
 
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>("mass_flux_functor") = momentumTransportMassFluxFunctorName();
+
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   if (use_venkat_deferred_correction)
     params.set<InterpolationMethodName>("advected_interp_method_name") =

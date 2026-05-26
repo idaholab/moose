@@ -794,7 +794,6 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
                    << " vof_alpha_corr=" << conservative_rc->vofAlphaCorrectionRhoPhiIntegrated(*fi)
                    << " pred_mass=" << conservative_rc->storedPredictorConvectiveMassFlux(*fi)
                    << " corrected_phi=" << conservative_rc->storedCorrectedFacePhi(*fi)
-                   << " hbya_phi=" << conservative_rc->storedGenericHbyAVolumetricPhi(*fi)
                    << " raw_rc=" << conservative_rc->rawRhieChowMassFlux(*fi)
                    << " pred_cache_used=" << conservative_rc->debugUsingCachedPredictorOperator();
         }

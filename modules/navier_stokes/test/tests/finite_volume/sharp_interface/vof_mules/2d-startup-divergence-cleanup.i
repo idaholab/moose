@@ -58,11 +58,11 @@ mu_g = 1.0e-3
         liquid_dynamic_viscosity_name = 'mu_l'
         gas_dynamic_viscosity_name = 'mu_g'
 
-        advected_interp_method = 'average'
+        advected_interp_method = 'upwind'
         compression_factor = '0'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
-        use_mules_correction = false
+        use_mules_correction = true
       []
     []
   []
@@ -136,7 +136,6 @@ mu_g = 1.0e-3
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
-  skip_pressure_velocity_writeback_from_outer = 1
 
   dt = 1e-3
   num_steps = 1

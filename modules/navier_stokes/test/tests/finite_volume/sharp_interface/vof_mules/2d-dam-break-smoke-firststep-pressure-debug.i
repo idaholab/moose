@@ -2,14 +2,15 @@ rho_l = 10.0
 rho_g = 1.0
 mu_l = 1.0e-3
 mu_g = 1.0e-3
+g = 9.81
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '1.0'
-    dy = '1.0'
-    ix = '16'
+    dx = '1.6'
+    dy = '0.8'
+    ix = '32'
     iy = '16'
   []
 []
@@ -29,21 +30,26 @@ mu_g = 1.0e-3
         compressibility = 'incompressible'
         density = 'rho_mixture'
         dynamic_viscosity = 'mu_mixture'
-        gravity = '0 0 0'
+        gravity = '0 -${g} 0'
         volume_fraction_functor = 'alpha'
+        reference_pressure_point = '0 0.8 0'
         surface_tension_coefficient = '0'
         create_curvature_producer = false
 
-        initial_velocity = 'u_init v_init 0'
-        initial_pressure = '0'
+        initial_velocity = '0 0 0'
+        initial_pressure = 'pressure_init'
 
-        wall_boundaries = 'left right top bottom'
-        momentum_wall_types = 'noslip noslip noslip noslip'
+        wall_boundaries = 'left right bottom'
+        momentum_wall_types = 'noslip noslip noslip'
+
+        outlet_boundaries = 'top'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_functors = '0'
 
         orthogonality_correction = false
         momentum_two_term_bc_expansion = false
         pressure_two_term_bc_expansion = false
-        momentum_advection_interpolation = 'average'
+        momentum_advection_interpolation = 'upwind'
       []
     []
     [ConservativeSharpInterfaceVOFSegregated]
@@ -52,6 +58,7 @@ mu_g = 1.0e-3
         volume_fraction_variable = 'alpha'
         initial_volume_fraction = 'alpha_init'
         system_names = 'alpha_system'
+        volume_fraction_outlet_type = 'inlet-outlet'
 
         liquid_density_name = 'rho_l'
         gas_density_name = 'rho_g'
@@ -59,10 +66,12 @@ mu_g = 1.0e-3
         gas_dynamic_viscosity_name = 'mu_g'
 
         advected_interp_method = 'upwind'
-        compression_factor = '0'
+        compression_factor = '2'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
         use_mules_correction = true
+        n_alpha_corrections = 3
+        n_limiter_iterations = 6
       []
     []
   []
@@ -79,15 +88,11 @@ mu_g = 1.0e-3
 [Functions]
   [alpha_init]
     type = ParsedFunction
-    expression = 'if(y < 0.5, 1, 0)'
+    expression = 'if(x < 0.4 & y < 0.6, 1, 0)'
   []
-  [u_init]
+  [pressure_init]
     type = ParsedFunction
-    expression = '0.1*sin(pi*x)*sin(pi*y)'
-  []
-  [v_init]
-    type = ParsedFunction
-    expression = '0.05*sin(pi*x)*sin(pi*y)'
+    expression = 'if(x < 0.4 & y < 0.6, -(${rho_l}-${rho_g})*${g}*0.2, 0)'
   []
 []
 
@@ -99,25 +104,22 @@ mu_g = 1.0e-3
   pressure_system = 'pressure_system'
   volume_fraction_systems = 'alpha_system'
 
-  should_solve_momentum = false
-  should_solve_volume_fractions = false
-
-  momentum_equation_relaxation = 1.0
-  pressure_variable_relaxation = 1.0
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
 
   num_iterations = 1
-  num_piso_iterations = 1
+  num_piso_iterations = 0
   continue_on_max_its = true
   print_fields = false
 
-  momentum_absolute_tolerance = 1e-12
-  pressure_absolute_tolerance = 1e-12
-  volume_fraction_absolute_tolerance = '1e-12'
+  momentum_absolute_tolerance = 1e-10
+  pressure_absolute_tolerance = 1e-10
+  volume_fraction_absolute_tolerance = '1e-10'
 
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  volume_fraction_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-12
+  pressure_l_abs_tol = 1e-12
+  volume_fraction_l_abs_tol = 1e-12
 
   momentum_l_tol = 0
   pressure_l_tol = 0
@@ -131,61 +133,81 @@ mu_g = 1.0e-3
   volume_fraction_petsc_options_value = 'lu'
 
   pin_pressure = true
-  pressure_pin_point = '0.0 0.0 0.0'
-  pressure_pin_value = 0.0
+  pressure_pin_point = '0.0 0.8 0.0'
 
-  startup_pressure_initialization = 'none'
+  startup_pressure_initialization = 'projection-only'
+  startup_flux_corrections = 2
 
-  dt = 1e-3
-  num_steps = 1
+  dump_pressure_outer_debug_csv = true
+  dump_pressure_outer_debug_start_timestep = 1
+  dump_pressure_outer_debug_end_timestep = 2
+  dump_pressure_outer_debug_max_outer_iterations = 1
+  pressure_debug_face_points = '0.225 0.6 0  0.225 0.65 0  0.4 0.325 0  0.4 0.575 0'
+
+  volume_fraction_subcycles = 3
+  dt = 0.0002
+  num_steps = 2
 []
 
 [Postprocessors]
-  [cell_divergence_l2]
-    type = RhieChowCellContinuityResidual
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    metric = l2
+  [alpha_average]
+    type = ElementAverageValue
+    variable = 'alpha'
   []
-  [cell_divergence_max]
-    type = RhieChowCellContinuityResidual
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    metric = max_abs
+  [alpha_min]
+    type = ElementExtremeValue
+    variable = 'alpha'
+    value_type = min
   []
-  [face_flux_consistency_l2]
-    type = RhieChowFaceFluxConsistencyError
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    quantity = l2
+  [alpha_max]
+    type = ElementExtremeValue
+    variable = 'alpha'
+    value_type = max
   []
-  [face_flux_consistency_internal]
-    type = RhieChowFaceFluxConsistencyError
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    quantity = internal_l2
-  []
-  [correction_branch_consistency]
-    type = ConservativeSharpInterfaceFluxBranchConsistencyError
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    quantity = pressure_correction
-    metric = l2
-  []
-  [total_branch_consistency]
-    type = ConservativeSharpInterfaceFluxBranchConsistencyError
-    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-    quantity = total
-    metric = l2
+  [vel_x_min]
+    type = ElementExtremeValue
+    variable = 'vel_x'
+    value_type = min
   []
   [vel_x_max]
     type = ElementExtremeValue
     variable = 'vel_x'
     value_type = max
   []
+  [vel_y_min]
+    type = ElementExtremeValue
+    variable = 'vel_y'
+    value_type = min
+  []
   [vel_y_max]
     type = ElementExtremeValue
     variable = 'vel_y'
     value_type = max
+  []
+  [alpha_front_near]
+    type = PointValue
+    variable = 'alpha'
+    point = '0.45 0.05 0'
+  []
+  [alpha_front_mid]
+    type = PointValue
+    variable = 'alpha'
+    point = '0.75 0.05 0'
+  []
+  [alpha_front_far]
+    type = PointValue
+    variable = 'alpha'
+    point = '1.05 0.05 0'
+  []
+  [alpha_column_top]
+    type = PointValue
+    variable = 'alpha'
+    point = '0.20 0.55 0'
   []
 []
 
 [Outputs]
   execute_on = 'TIMESTEP_END'
   csv = true
+  exodus = false
 []

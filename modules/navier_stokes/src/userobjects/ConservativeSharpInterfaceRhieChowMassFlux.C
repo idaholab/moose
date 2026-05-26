@@ -516,6 +516,23 @@ ConservativeSharpInterfaceRhieChowMassFlux::initFaceMassFlux()
 }
 
 Real
+ConservativeSharpInterfaceRhieChowMassFlux::cellPhysicalVelocityComponent(
+    const ElemInfo & elem_info, const unsigned int component, const Moose::StateArg & time_arg) const
+{
+  mooseAssert(component < _vel.size(), "Velocity component index out of range.");
+
+  const auto dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
+  if (_authoritative_velocity_solution_valid &&
+      _authoritative_velocity_solution_raw.size() == _momentum_implicit_systems.size() &&
+      _authoritative_velocity_solution_raw[component])
+    return (*_authoritative_velocity_solution_raw[component])(dof);
+
+  const Real rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+  return std::abs(rho) > libMesh::TOLERANCE ? _vel[component]->getElemValue(elem_info, time_arg) / rho
+                                            : 0.0;
+}
+
+Real
 ConservativeSharpInterfaceRhieChowMassFlux::boundaryMomentumComponentValue(
     const FaceInfo * fi, const unsigned int component, const Moose::StateArg & time_arg) const
 {
@@ -523,11 +540,6 @@ ConservativeSharpInterfaceRhieChowMassFlux::boundaryMomentumComponentValue(
   mooseAssert(component < _vel.size(), "Momentum component index out of range.");
   mooseAssert(!_vel[component]->isInternalFace(*fi),
               "boundaryMomentumComponentValue should only be called on boundary faces.");
-
-  if (_velocity_boundary_state_valid && time_arg.state == Moose::currentState().state)
-    if (const auto it = _boundary_velocity_face_values[component].find(fi->id());
-        it != _boundary_velocity_face_values[component].end())
-      return it->second;
 
   if (!fi->boundaryIDs().empty())
   {
@@ -550,9 +562,14 @@ ConservativeSharpInterfaceRhieChowMassFlux::boundaryMomentumComponentValue(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFlux::boundaryVelocityComponentValue(
+ConservativeSharpInterfaceRhieChowMassFlux::boundaryPhysicalVelocityComponent(
     const FaceInfo * fi, const unsigned int component, const Moose::StateArg & time_arg) const
 {
+  if (_velocity_boundary_state_valid && time_arg.state == Moose::currentState().state)
+    if (const auto it = _boundary_velocity_face_values[component].find(fi->id());
+        it != _boundary_velocity_face_values[component].end())
+      return it->second;
+
   const Real rho_u = boundaryMomentumComponentValue(fi, component, time_arg);
 
   const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
@@ -562,94 +579,6 @@ ConservativeSharpInterfaceRhieChowMassFlux::boundaryVelocityComponentValue(
   const Real face_rho = _rho(boundary_face, time_arg);
 
   return std::abs(face_rho) > libMesh::TOLERANCE ? rho_u / face_rho : 0.0;
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFlux::boundaryConservativeMassFluxTarget(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
-{
-  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
-              "boundaryConservativeMassFluxTarget should only be called on boundary faces.");
-
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-
-  RealVectorValue face_momentum;
-  for (const auto component : index_range(_vel))
-    face_momentum(component) =
-        boundary_normal_multiplier * boundaryMomentumComponentValue(fi, component, time_arg);
-
-  return face_momentum * fi->normal();
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFlux::pressureBoundaryTargetFlux(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
-{
-  return boundaryConservativeVolumetricFluxTarget(fi, time_arg);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFlux::facePhysicalVelocityComponent(
-    const FaceInfo * fi, const unsigned int component, const Moose::StateArg & time_arg) const
-{
-  mooseAssert(fi, "FaceInfo should not be null when evaluating a conservative face velocity.");
-  mooseAssert(component < _vel.size(), "Velocity component index out of range.");
-
-  if (_vel[component]->isInternalFace(*fi))
-  {
-    const auto & elem_info = *fi->elemInfo();
-    const auto & neighbor_info = *fi->neighborInfo();
-    const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-    const auto neighbor_dof =
-        neighbor_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-
-    const Real elem_velocity =
-        _authoritative_velocity_solution_valid &&
-                _authoritative_velocity_solution_raw.size() == _momentum_implicit_systems.size() &&
-                _authoritative_velocity_solution_raw[component]
-            ? (*_authoritative_velocity_solution_raw[component])(elem_dof)
-            : ([&]()
-               {
-                 const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-                 return std::abs(elem_rho) > libMesh::TOLERANCE
-                            ? _vel[component]->getElemValue(elem_info, time_arg) / elem_rho
-                            : 0.0;
-               })();
-    const Real neighbor_velocity =
-        _authoritative_velocity_solution_valid &&
-                _authoritative_velocity_solution_raw.size() == _momentum_implicit_systems.size() &&
-                _authoritative_velocity_solution_raw[component]
-            ? (*_authoritative_velocity_solution_raw[component])(neighbor_dof)
-            : ([&]()
-               {
-                 const Real neighbor_rho = _rho(makeElemArg(neighbor_info.elem()), time_arg);
-                 return std::abs(neighbor_rho) > libMesh::TOLERANCE
-                            ? _vel[component]->getElemValue(neighbor_info, time_arg) / neighbor_rho
-                            : 0.0;
-               })();
-    return 0.5 * (elem_velocity + neighbor_velocity);
-  }
-
-  return boundaryVelocityComponentValue(fi, component, time_arg);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFlux::boundaryConservativeVolumetricFluxTarget(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
-{
-  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
-              "boundaryConservativeVolumetricFluxTarget should only be called on boundary faces.");
-
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-
-  RealVectorValue face_velocity;
-  for (const auto component : index_range(_vel))
-    face_velocity(component) =
-        boundary_normal_multiplier * boundaryVelocityComponentValue(fi, component, time_arg);
-
-  return face_velocity * fi->normal();
 }
 
 void
@@ -720,7 +649,7 @@ ConservativeSharpInterfaceRhieChowMassFlux::updateAdditionalPressureFluxFunctors
       {
         for (const auto dim_i : make_range(_dim))
         {
-          const Real boundary_value = boundaryVelocityComponentValue(fi, dim_i, time_arg);
+          const Real boundary_value = boundaryPhysicalVelocityComponent(fi, dim_i, time_arg);
           face_hbya(dim_i) =
               std::isfinite(boundary_value)
                   ? -boundary_value
@@ -824,39 +753,6 @@ ConservativeSharpInterfaceRhieChowMassFlux::updateAdditionalPressureFluxFunctors
   }
 
   _pressure_predictor_face_state_valid = true;
-}
-
-void
-ConservativeSharpInterfaceRhieChowMassFlux::updateVelocityBoundaryState()
-{
-  const auto time_arg = Moose::currentState();
-
-  for (auto & component_face_values : _boundary_velocity_face_values)
-    component_face_values.clear();
-
-  for (const auto * fi : flowFaceInfo())
-  {
-    if (_vel[0]->isInternalFace(*fi))
-      continue;
-
-    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-    const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-    RealVectorValue face_momentum;
-
-    for (const auto component : index_range(_vel))
-    {
-      _boundary_velocity_face_values[component][fi->id()] =
-          boundaryMomentumComponentValue(fi, component, time_arg);
-      face_momentum(component) =
-          boundary_normal_multiplier * _boundary_velocity_face_values[component][fi->id()];
-    }
-
-    if (!_pressure_equation_flux_valid)
-      _face_mass_flux[fi->id()] = face_momentum * fi->normal();
-  }
-
-  _velocity_boundary_state_valid = true;
-  cacheCurrentCorrectedVolumetricFlux();
 }
 
 void
@@ -1093,7 +989,7 @@ ConservativeSharpInterfaceRhieChowMassFlux::populateConservativeCouplingFunctors
         for (const auto dim_i : make_range(_dim))
         {
           const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          const Real boundary_value = boundaryVelocityComponentValue(fi, dim_i, time_arg);
+          const Real boundary_value = boundaryPhysicalVelocityComponent(fi, dim_i, time_arg);
           face_hbya(dim_i) =
               std::isfinite(boundary_value)
                   ? -boundary_value
