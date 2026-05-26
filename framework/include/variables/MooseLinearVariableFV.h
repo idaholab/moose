@@ -88,13 +88,19 @@ public:
   using typename MooseVariableField<OutputType>::DotType;
   using typename MooseVariableField<OutputType>::GradientType;
 
+  /// Input parameters for a linear finite-volume variable.
   static InputParameters validParams();
+
+  /**
+   * @param parameters Input parameters used to construct the variable.
+   */
   MooseLinearVariableFV(const InputParameters & parameters);
 
   virtual bool isFV() const override { return true; }
 
   /**
    * If the variable has a dirichlet boundary condition at face described by \p fi .
+   * @param fi Face where boundary conditions should be queried.
    */
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
@@ -105,6 +111,7 @@ public:
 
   /**
    * Register a specific gradient method on the owning system and return its field.
+   * @param method Gradient method to register for this variable.
    */
   const LinearFVGradientField & computeCellGradients(const FVGradientMethod & method);
 
@@ -113,12 +120,14 @@ public:
    *
    * `GradientLimiterType::None` requests the default gradient method. Other limiters require the
    * default gradient method to use the same limiter.
+   * @param limiter_type Limiter requested by the caller.
    */
   const LinearFVGradientField &
   computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Compatibility bridge for consumers that still request limited gradients by limiter.
+   * @param limiter_type Limiter requested by the caller.
    */
   const LinearFVGradientField &
   computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
@@ -128,6 +137,12 @@ public:
    */
   virtual bool needsGradientVectorStorage() const override { return _needs_cell_gradients; }
 
+  /**
+   * Whether face interpolation should use extrapolated boundary values.
+   * @param fi Face where the value is requested.
+   * @param elem Element on the side where the value is requested.
+   * @param state Solution state to evaluate.
+   */
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                           const Elem * elem,
                                           const Moose::StateArg & state) const override;
@@ -240,6 +255,7 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+  /// Boundary-condition map keyed by boundary ID for this variable.
   const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
   {
     return _boundary_id_to_bc;
@@ -279,13 +295,27 @@ protected:
   [[noreturn]] void adError() const;
 
   /// Throw an error when somebody requests gradients at a non-current solution state
+  /// @param state State that was requested.
   [[noreturn]] void gradientStateError(const StateArg & state) const;
 
+  /**
+   * Register and cache a gradient method for this variable.
+   * @param method Gradient method to register on the owning system.
+   */
   const LinearFVGradientField & registerCellGradientMethod(const FVGradientMethod & method);
 
+  /**
+   * Cache a limited gradient field for compatibility callers that request by limiter type.
+   * @param limiter_type Limiter used by the cached gradient field.
+   * @param field Gradient field to cache for the limiter.
+   */
   void setLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type,
                                const LinearFVGradientField & field);
 
+  /**
+   * Fetch a cached limited gradient field for compatibility callers.
+   * @param limiter_type Limiter whose cached gradient field should be returned.
+   */
   const LinearFVGradientField &
   limitedGradientField(const Moose::FV::GradientLimiterType limiter_type) const;
 
