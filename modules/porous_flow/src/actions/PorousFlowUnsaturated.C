@@ -248,7 +248,7 @@ PorousFlowUnsaturated::addUserObjects()
   PorousFlowSinglePhaseBase::addUserObjects();
 
   // Add the capillary pressure UserObject
-  addCapillaryPressureVG(_van_genuchten_m, _van_genuchten_alpha, _capillary_pressure_name);
+  addCapillaryPressureVG(_van_genuchten_m, _van_genuchten_alpha, _capillary_pressure_name, _s_res);
 
   // add Advective Flux calculator UserObjects, if required
   if (_stabilization == StabilizationEnum::KT)

@@ -78,6 +78,15 @@
     issues = "#16841"
     design = "PorousFlowUnsaturated.md"
   []
+  [unsat_residual_saturation]
+    type = CSVDiff
+    input = 'unsat_residual_saturation.i'
+    csvdiff = 'unsat_residual_saturation_out.csv'
+    rel_err = 1.0E-5
+    requirement = "The system shall correctly account for residual saturation when computing capillary pressure in the PorousFlowUnsaturated Action, so that the reported saturation is the true saturation and not the effective saturation."
+    issues = "#27765"
+    design = "PorousFlowUnsaturated.md"
+  []
   [addjoiner]
     type = RunApp
     input = addjoiner.i
