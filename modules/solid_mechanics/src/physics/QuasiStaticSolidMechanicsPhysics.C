@@ -150,9 +150,13 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
     _verbose(getParam<bool>("verbose")),
     _spherical_center_point_valid(params.isParamSetByUser("spherical_center_point")),
     _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names")),
-    _lagrangian_kernels(getParam<bool>("new_system")),
+    _compatibility_mode(getParam<bool>("compatibility_mode")),
+    _lagrangian_kernels(getParam<bool>("new_system") || _compatibility_mode),
     _lk_large_kinematics(_strain == Strain::Finite),
-    _lk_formulation(getParam<MooseEnum>("formulation").getEnum<LKFormulation>()),
+    // compatibility_mode mandates the total Lagrangian kernel; otherwise honor the user choice.
+    _lk_formulation(_compatibility_mode
+                        ? LKFormulation::Total
+                        : getParam<MooseEnum>("formulation").getEnum<LKFormulation>()),
     _lk_locking(getParam<bool>("volumetric_locking_correction")),
     _lk_homogenization(false),
     _constraint_types(getParam<MultiMooseEnum>("constraint_types")),
@@ -304,12 +308,36 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
       mooseError("The Lagrangian kernel system is not compatible with "
                  "the global_strain option.  Use the homogenization "
                  " system instead");
-    if (params.isParamSetByUser("decomposition_method"))
+    if (params.isParamSetByUser("decomposition_method") && !_compatibility_mode)
       mooseError("The decomposition_method parameter should not be used "
                  " with the Lagrangian kernel system.  Similar options "
                  " for native small deformation material models are "
                  " available as part of the ComputeLagrangianStress "
                  " material system.");
+
+    // compatibility_mode-specific checks
+    if (_compatibility_mode)
+    {
+      if (params.isParamSetByUser("formulation") &&
+          getParam<MooseEnum>("formulation").getEnum<LKFormulation>() != LKFormulation::Total)
+        paramError("formulation",
+                   "compatibility_mode requires formulation = TOTAL (the OLD kernel system is "
+                   "always total Lagrangian on the displaced mesh).");
+
+      // Validate decomposition_method <-> kinematic_approximation mapping. The NEW strain
+      // calculator's `rashid_approximate` and `rashid_eigen` reproduce OLD's `TaylorExpansion`
+      // and `EigenSolution` exactly; OLD's `HughesWinget` has no NEW counterpart.
+      if (_lk_large_kinematics)
+      {
+        const std::string decomp = getParam<MooseEnum>("decomposition_method");
+        if (decomp != "TaylorExpansion" && decomp != "EigenSolution")
+          paramError("decomposition_method",
+                     "compatibility_mode + strain = FINITE supports only "
+                     "decomposition_method = TaylorExpansion or EigenSolution; '",
+                     decomp,
+                     "' has no Lagrangian kinematic_approximation counterpart.");
+      }
+    }
   }
   else
   {
@@ -800,6 +828,23 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
                << COLOR_DEFAULT << std::flush;
 }
 
+std::string
+QuasiStaticSolidMechanicsPhysics::remapCompatOutputProp(const std::string & prop_name) const
+{
+  // The OLD pipeline publishes `stress` and `mechanical_strain` directly. The NEW pipeline
+  // publishes Cauchy stress under `cauchy_stress` and (when the strain calc is configured for
+  // OLD compatibility) the OLD-equivalent mechanical strain under `rotated_mechanical_strain`.
+  // Redirect the underlying property name so user output requests like `stress_xx` keep their
+  // OLD-style aux variable name but read from the NEW-style source.
+  if (!_compatibility_mode)
+    return prop_name;
+  if (prop_name == "stress")
+    return "cauchy_stress";
+  if (prop_name == "mechanical_strain")
+    return "rotated_mechanical_strain";
+  return prop_name;
+}
+
 void
 QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
 {
@@ -823,7 +868,8 @@ QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
                   {
                     auto type = ad_prepend + "RankTwoCartesianComponent";
                     params = _factory.getValidParams(type);
-                    params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q.second;
+                    params.set<MaterialPropertyName>("rank_two_tensor") =
+                        _base_name + remapCompatOutputProp(r2q.second);
                     params.set<unsigned int>("index_i") = a;
                     params.set<unsigned int>("index_j") = b;
 
@@ -844,7 +890,7 @@ QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
                         auto type = ad_prepend + "RankTwoDirectionalComponent";
                         params = _factory.getValidParams(type);
                         params.set<MaterialPropertyName>("rank_two_tensor") =
-                            _base_name + prop_name;
+                            _base_name + remapCompatOutputProp(prop_name);
                         params.set<MooseEnum>("invariant") = invariant;
                         params.applyParameters(parameters());
                         params.set<MaterialPropertyName>("property_name") = _base_name + out;
@@ -860,7 +906,7 @@ QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
                         auto type = ad_prepend + "RankTwoInvariant";
                         params = _factory.getValidParams(type);
                         params.set<MaterialPropertyName>("rank_two_tensor") =
-                            _base_name + prop_name;
+                            _base_name + remapCompatOutputProp(prop_name);
                         params.set<MooseEnum>("invariant") = invariant;
                         params.applyParameters(parameters());
                         params.set<MaterialPropertyName>("property_name") = _base_name + out;
@@ -879,7 +925,8 @@ QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
                       "Cannot use cylindrical component output in a spherical coordinate system.");
                 auto type = ad_prepend + "RankTwoCylindricalComponent";
                 params = _factory.getValidParams(type);
-                params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + prop_name;
+                params.set<MaterialPropertyName>("rank_two_tensor") =
+                    _base_name + remapCompatOutputProp(prop_name);
                 params.set<MooseEnum>("cylindrical_component") = component;
                 params.applyParameters(parameters());
                 params.set<MaterialPropertyName>("property_name") = _base_name + out;
@@ -895,7 +942,7 @@ QuasiStaticSolidMechanicsPhysics::actOutputMatProp()
                         auto type = ad_prepend + "RankTwoSphericalComponent";
                         params = _factory.getValidParams(type);
                         params.set<MaterialPropertyName>("rank_two_tensor") =
-                            _base_name + prop_name;
+                            _base_name + remapCompatOutputProp(prop_name);
                         params.set<MooseEnum>("spherical_component") = component;
                         params.applyParameters(parameters());
                         params.set<MaterialPropertyName>("property_name") = _base_name + out;
@@ -970,7 +1017,56 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
         _homogenization_strain_name};
   }
 
+  // OLD-compat configuration: map decomposition_method → kinematic_approximation, switch the
+  // F-bar to incremental mode (matches OLD `ComputeFiniteStrain`'s `_Fhat` F-bar), and have
+  // the strain calc publish a real rotation_increment so the wrapped ComputeStressBase
+  // material's FSR rotates correctly across steps.
+  if (_compatibility_mode)
+  {
+    if (_lk_large_kinematics)
+    {
+      const std::string decomp = getParam<MooseEnum>("decomposition_method");
+      if (decomp == "TaylorExpansion")
+        params.set<MooseEnum>("kinematic_approximation") = "rashid_approximate";
+      else if (decomp == "EigenSolution")
+        params.set<MooseEnum>("kinematic_approximation") = "rashid_eigen";
+      // HughesWinget rejected in the ctor; SMALL strain ignores kinematic_approximation.
+    }
+
+    // OLD's `volumetric_locking_correction = true` in incremental finite strain maps to
+    // `F_bar_mode = incremental` on the NEW strain calc. The strain calc rejects
+    // `incremental` for small kinematics — for SMALL + locking we leave `F_bar_mode` at its
+    // default (`total`), which is the additive trace correction (matches OLD's small-strain
+    // B-bar in the locked-flag-equivalent form).
+    if (_lk_locking && _lk_large_kinematics)
+      params.set<MooseEnum>("F_bar_mode") = "incremental";
+
+    // Only meaningful with FINITE — in SMALL the wrap runs in passthrough-off mode and the
+    // rotation increment isn't consumed downstream.
+    params.set<bool>("publish_rotation_increment") = _lk_large_kinematics;
+  }
+
   _problem->addMaterial(type, name() + "_strain", params);
+
+  // OLD-compat configuration: auto-add ComputeLagrangianWrappedStress around the user's
+  // ComputeStressBase-style stress material. `input_stress = "stress"` and
+  // `input_jacobian = "Jacobian_mult"` default to the property names every
+  // ComputeStressBase descendant publishes.
+  if (_compatibility_mode)
+  {
+    const std::string wrap_type = "ComputeLagrangianWrappedStress";
+    auto wrap_params = _factory.getValidParams(wrap_type);
+    if (isParamValid("base_name"))
+      wrap_params.set<std::string>("base_name") = getParam<std::string>("base_name");
+    wrap_params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
+    wrap_params.set<bool>("large_kinematics") = _lk_large_kinematics;
+    wrap_params.set<MooseEnum>("objective_rate") = "rashid";
+    // FINITE: the wrap runs in passthrough mode (the wrapped material's FSR already produced
+    // the correctly-rotated cumulative Cauchy stress, fed by our published rotation_increment).
+    // SMALL: nothing to rotate, plain Cauchy passthrough via the rate's small-kinematics branch.
+    wrap_params.set<bool>("rotate_old_stress") = _lk_large_kinematics;
+    _problem->addMaterial(wrap_type, name() + "_compatibility_wrap", wrap_params);
+  }
 
   // Add the homogenization strain calculator
   if (_lk_homogenization)
@@ -1149,6 +1245,12 @@ QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
     params.set<bool>("stabilize_strain") = _lk_locking;
     if (_lk_homogenization)
       params.set<bool>("off_diagonal_jacobian") = _lk_h_off_jac;
+    // Match the strain calc's F-bar mode on the kernel — the TL kernel's OLD-compat B-bar
+    // residual is gated on `F_bar_mode = incremental && stabilize_strain`. Setting it on
+    // both keeps the kernel and the strain material on the same F-bar formulation. Only
+    // applicable to large kinematics (the strain calc rejects `incremental` for small).
+    if (_compatibility_mode && _lk_locking && _lk_large_kinematics)
+      params.set<MooseEnum>("F_bar_mode") = "incremental";
   }
   else
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;

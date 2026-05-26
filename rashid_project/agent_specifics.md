@@ -23,7 +23,6 @@ I put together `plan_outline.pdf` to describe how to go about doing this.  Basic
     1. Default Lagrangian behavior with objective rates (alpha = 1.0, linear kinematic approximation, Truesdell rate)
     2. Old kernel style Rashid model (alpha = 1.0, "rashid" kinematics, Rashid objective rate).
     3. Old kernel style Rashid model with "eigen" decomposition (alpha = 1.0, "exact" kinematics, Rashid objective rate).
-    4. Abaqus/Implicit (alpha = 0.5, linear kinematics, Jaumann rate).
 
 We'll work on this one step at a time.
 
