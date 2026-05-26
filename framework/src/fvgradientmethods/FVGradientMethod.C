@@ -55,29 +55,26 @@ FVGradientMethod::computeGradient(SystemBase & system,
                                   GradientContainer & scratch_gradient,
                                   const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  if (_limiter_type == Moose::FV::GradientLimiterType::None)
-  {
-    for (auto & vec : output_gradient)
-      vec->zero();
+  auto & pre_limiter_gradient =
+      _limiter_type == Moose::FV::GradientLimiterType::None ? output_gradient : scratch_gradient;
+  auto & method_scratch_gradient =
+      _limiter_type == Moose::FV::GradientLimiterType::None ? scratch_gradient : output_gradient;
 
-    computeGradientWithoutLimiter(system, output_gradient, scratch_gradient, variable_numbers);
+  if (_limiter_type != Moose::FV::GradientLimiterType::None)
+    mooseAssert(scratch_gradient.size() == output_gradient.size(),
+                "Scratch and output gradient containers must have the same size.");
 
-    for (auto & vec : output_gradient)
-      vec->close();
-
-    return;
-  }
-
-  mooseAssert(scratch_gradient.size() == output_gradient.size(),
-              "Scratch and output gradient containers must have the same size.");
-
-  for (auto & vec : scratch_gradient)
+  for (auto & vec : pre_limiter_gradient)
     vec->zero();
 
-  computeGradientWithoutLimiter(system, scratch_gradient, output_gradient, variable_numbers);
+  computeGradientWithoutLimiter(
+      system, pre_limiter_gradient, method_scratch_gradient, variable_numbers);
 
-  for (auto & vec : scratch_gradient)
+  for (auto & vec : pre_limiter_gradient)
     vec->close();
+
+  if (_limiter_type == Moose::FV::GradientLimiterType::None)
+    return;
 
   for (auto & vec : output_gradient)
     vec->zero();
@@ -90,7 +87,7 @@ FVGradientMethod::computeGradient(SystemBase & system,
   PARALLEL_TRY
   {
     ComputeLinearFVLimitedGradientThread limited_gradient_thread(
-        fe_problem, system, scratch_gradient, output_gradient, _limiter_type, variable_numbers);
+        fe_problem, system, pre_limiter_gradient, output_gradient, _limiter_type, variable_numbers);
     Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
