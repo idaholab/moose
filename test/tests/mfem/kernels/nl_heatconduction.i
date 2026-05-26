@@ -68,6 +68,20 @@ alpha = 1e-2
   []
 []
 
+[Solvers]
+  [nl]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 30
+    abs_tol = 1.0e-5
+    rel_tol = 1.0e-5
+    print_level = 1
+  []
+  [main]
+    type = MFEMMUMPS
+    print_level = 0
+  []
+[]
+
 [Kernels]
   [nl_diffusion]
     type = MFEMNLDiffusionKernel
@@ -86,11 +100,6 @@ alpha = 1e-2
   []
 []
 
-[Solver]
-  type = MFEMMUMPS
-  print_level = 0
-[]
-
 [Executioner]
   type = MFEMTransient
   device = cpu
@@ -98,11 +107,6 @@ alpha = 1e-2
   dt = 1e-2
   start_time = 0.0
   end_time = 0.5
-
-  nl_max_its = 30
-  nl_abs_tol = 1.0e-5
-  nl_rel_tol = 1.0e-5
-  print_level = 1
 []
 
 [VectorPostprocessors]

@@ -89,7 +89,7 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    const std::string & name,
                                    InputParameters & parameters)
 {
-  addObject<MFEMSolverBase>(user_object_name, name, parameters);
+  addObject<Moose::MFEM::SolverBase>(user_object_name, name, parameters);
 }
 
 void
@@ -117,25 +117,17 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  getProblemData().jacobian_solver =
-      addObject<MFEMSolverBase>(user_object_name, name, parameters).front();
-}
+  auto object = addObject<Moose::MFEM::SolverBase>(user_object_name, name, parameters).front();
 
-void
-MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
-                                    mfem::real_t nl_abs_tol,
-                                    mfem::real_t nl_rel_tol,
-                                    unsigned int print_level)
-{
-  // TODO: allow users to specify other mfem::IterativeSolvers
-  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
-
-  // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(nl_rel_tol);
-  nl_solver->SetAbsTol(nl_abs_tol);
-  nl_solver->SetMaxIter(nl_max_its);
-  nl_solver->SetPrintLevel(print_level);
-  getProblemData().nonlinear_solver = nl_solver;
+  if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(object))
+    getProblemData().jacobian_solver = lin_solver;
+  else if (auto nonlinear_solver =
+               std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(object);
+           nonlinear_solver)
+    getProblemData().nonlinear_solver = nonlinear_solver;
+  else
+    mooseError(
+        "Unsupported MFEM solver object type '", user_object_name, "' for solver '", name, "'.");
 }
 
 void

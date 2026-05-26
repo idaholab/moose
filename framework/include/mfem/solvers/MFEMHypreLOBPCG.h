@@ -16,7 +16,7 @@
 /**
  * Class for the Hypre LOBPCG eigensolver
  */
-class MFEMHypreLOBPCG : public MFEMEigensolverBase
+class MFEMHypreLOBPCG : public Moose::MFEM::EigensolverBase
 {
 public:
   static InputParameters validParams();

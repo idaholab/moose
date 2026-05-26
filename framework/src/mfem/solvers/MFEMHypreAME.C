@@ -17,13 +17,14 @@ registerMooseObject("MooseApp", MFEMHypreAME);
 InputParameters
 MFEMHypreAME::validParams()
 {
-  InputParameters params = MFEMEigensolverBase::validParams();
+  InputParameters params = Moose::MFEM::EigensolverBase::validParams();
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
 
   return params;
 }
 
-MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters) : MFEMEigensolverBase(parameters)
+MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
+  : Moose::MFEM::EigensolverBase(parameters)
 {
   constructSolver();
 }

@@ -16,18 +16,23 @@ namespace Moose::MFEM
 NLBoundaryConvectiveHeatFluxIntegrator::NLBoundaryConvectiveHeatFluxIntegrator(
     mfem::Coefficient & k,
     mfem::Coefficient & dk_du,
+    mfem::Coefficient & duinf_du,
     mfem::Coefficient & gf_offset,
     mfem::Coefficient & gf)
-  : _shifted_gf_coef(gf, gf_offset, 1.0, -1.0), // u-u_inf
-    _k_uinf_coef(k, gf_offset),                 // k(u)*u_inf
-    _net_flux_du_coef(dk_du, _shifted_gf_coef), // dk/du*(u-u_inf)
+  : _shifted_gf_coef(gf, gf_offset, 1.0, -1.0),  // u-u_inf
+    _k_uinf_coef(k, gf_offset),                  // k(u)*u_inf
+    _net_flux_du_coef(dk_du, _shifted_gf_coef),  // dk/du*(u-u_inf)
+    _k_duinf_du_coef(k, duinf_du),               // k(u) * du_inf/du
+    _duinf_du_flux_coef(-1.0, _k_duinf_du_coef), // -k(u) * du_inf/du
     _inwards_flux(_k_uinf_coef),
     _outwards_flux(k),
     _jacobian_k_component(k),
-    _jacobian_dk_du_component(_net_flux_du_coef)
+    _jacobian_dk_du_component(_net_flux_du_coef),
+    _jacobian_duinf_du_component(_duinf_du_flux_coef)
 {
   _jacobian_action.AddIntegrator(&_jacobian_k_component);
   _jacobian_action.AddIntegrator(&_jacobian_dk_du_component);
+  _jacobian_action.AddIntegrator(&_jacobian_duinf_du_component);
 }
 
 void

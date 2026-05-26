@@ -160,8 +160,10 @@ coil_conductivity = 1.0
   []
 []
 
-[Solver]
-  type = MFEMSuperLU
+[Solvers]
+  [main]
+    type = MFEMSuperLU
+  []
 []
 
 [Executioner]

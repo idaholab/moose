@@ -15,13 +15,13 @@ conjunction with Low-Order-Refined (LOR) preconditioning.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion_eigenproblem.i block=Preconditioner Solver
+!listing test/tests/mfem/kernels/diffusion_eigenproblem.i block=Preconditioner Solvers
 
-!syntax parameters /Solver/MFEMHypreLOBPCG
+!syntax parameters /Solvers/MFEMHypreLOBPCG
 
-!syntax inputs /Solver/MFEMHypreLOBPCG
+!syntax inputs /Solvers/MFEMHypreLOBPCG
 
-!syntax children /Solver/MFEMHypreLOBPCG
+!syntax children /Solvers/MFEMHypreLOBPCG
 
 !if-end!
 

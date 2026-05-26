@@ -7,10 +7,10 @@
 []
 
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/full_solve_parent
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = TIMESTEP_END
+    file_base = full_solve_parent
   []
 []
 
@@ -20,6 +20,6 @@
     execute_on = timestep_begin
     input_files = full_solve.i
     keep_full_output_history = true
-    cli_args = 'Executioner/dt=0.01;Outputs/ParaViewDataCollection/file_base=OutputData/full_solve_sub;MultiApps/active='
+    cli_args = 'Executioner/dt=0.01;Outputs/CSV/file_base=full_solve_sub;MultiApps/active='
   []
 []

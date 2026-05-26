@@ -47,12 +47,14 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreAME
-  preconditioner = ams
-  print_level = 0
-  l_tol = 1e-8
-  l_max_its = 100
+[Solvers]
+  [AME]
+    type = MFEMHypreAME
+    preconditioner = ams
+    print_level = 0
+    l_tol = 1e-8
+    l_max_its = 100
+  []
 []
 
 [Executioner]

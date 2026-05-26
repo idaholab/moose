@@ -23,7 +23,8 @@ EigenproblemESProblemOperator::Solve()
   if (GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("Eigenproblems are only supported in single-variable systems");
 
-  auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver);
+  auto eigensolver =
+      std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
   eigensolver->setMassMatrix(_mass_rhs);
   eigensolver->setOperator(GetEquationSystem()->_jacobian);
   eigensolver->solve();
@@ -39,7 +40,7 @@ EigenproblemESProblemOperator::BuildEquationSystemOperator()
 
 void
 EigenproblemESProblemOperator::RecoverEigenproblemSolution(
-    Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver)
+    Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::EigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
   eigensolver->getEigenvalues(eigenvalues);

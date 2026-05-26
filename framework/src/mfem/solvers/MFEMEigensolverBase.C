@@ -12,10 +12,12 @@
 #include "MFEMEigensolverBase.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMEigensolverBase::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+EigensolverBase::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
 
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
@@ -26,9 +28,10 @@ MFEMEigensolverBase::validParams()
   return params;
 }
 
-MFEMEigensolverBase::MFEMEigensolverBase(const InputParameters & parameters)
-  : MFEMSolverBase(parameters), _num_modes(getMFEMProblem().getParam<int>("num_modes"))
+EigensolverBase::EigensolverBase(const InputParameters & parameters)
+  : LinearSolverBase(parameters), _num_modes(getMFEMProblem().getParam<int>("num_modes"))
 {
+}
 }
 
 #endif

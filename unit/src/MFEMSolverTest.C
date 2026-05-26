@@ -69,7 +69,7 @@ public:
    * Based on mfem/tests/unit/linalg/test_direct_solvers.cpp.
    */
   template <typename SolverType>
-  void testDiffusionSolve(MFEMSolverBase & solver, mfem::real_t tol)
+  void testDiffusionSolve(Moose::MFEM::LinearSolverBase & solver, mfem::real_t tol)
   {
     mfem::ParMesh pmesh = makeMesh();
     int order = 3;

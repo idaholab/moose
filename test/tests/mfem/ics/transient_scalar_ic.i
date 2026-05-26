@@ -87,9 +87,11 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
+[Solvers]
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+  []
 []
 
 [Executioner]
@@ -98,7 +100,6 @@
   dt = 2.0
   start_time = 0.0
   end_time = 2.0
-  nl_abs_tol = 1e-12 # Problem is solved by IC
 []
 
 [Outputs]

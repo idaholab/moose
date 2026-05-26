@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreLOBPCG);
 InputParameters
 MFEMHypreLOBPCG::validParams()
 {
-  InputParameters params = MFEMEigensolverBase::validParams();
+  InputParameters params = Moose::MFEM::EigensolverBase::validParams();
 
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
@@ -26,7 +26,7 @@ MFEMHypreLOBPCG::validParams()
 }
 
 MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
-  : MFEMEigensolverBase(parameters)
+  : Moose::MFEM::EigensolverBase(parameters)
 {
   constructSolver();
 }

@@ -16,7 +16,7 @@
 /**
  * Class for the HypreAME eigensolver
  */
-class MFEMHypreAME : public MFEMEigensolverBase
+class MFEMHypreAME : public Moose::MFEM::EigensolverBase
 {
 public:
   static InputParameters validParams();

@@ -5,7 +5,7 @@
 ## Overview
 
 Action called to add a linear preconditioner to an MFEM problem, parsing content inside a
-[`Preconditioner`](MFEMSolverBase.md) block in the user input. Only has an effect if
+[`Preconditioner`](syntax/Preconditioner/index.md) block in the user input. Only has an effect if
 the `Problem` type is set to [MFEMProblem.md].
 
 ## Example Input File Syntax

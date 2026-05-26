@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMGMRESSolver);
 InputParameters
 MFEMGMRESSolver::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the generalized minimal residual method.");
 
@@ -30,7 +30,8 @@ MFEMGMRESSolver::validParams()
   return params;
 }
 
-MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

@@ -36,7 +36,7 @@ MFEMEigenvaluesPostprocessor::initialize()
 void
 MFEMEigenvaluesPostprocessor::execute()
 {
-  auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(
+  auto eigensolver = std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(
       getMFEMProblem().getProblemData().jacobian_solver);
   if (!eigensolver)
     mooseError("The solver is not an eigensolver, cannot retrieve eigenvalues.");

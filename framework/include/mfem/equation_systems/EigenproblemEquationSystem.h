@@ -13,8 +13,6 @@
 
 #include "EquationSystem.h"
 
-class MFEMEigensolverBase;
-
 namespace Moose::MFEM
 {
 

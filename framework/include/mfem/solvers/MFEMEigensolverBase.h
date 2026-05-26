@@ -11,17 +11,19 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 
+namespace Moose::MFEM
+{
 /**
  * Base class for eigensolvers.
  */
-class MFEMEigensolverBase : public MFEMSolverBase
+class EigensolverBase : public LinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMEigensolverBase(const InputParameters & parameters);
+  EigensolverBase(const InputParameters & parameters);
 
   /// Sets the operator for the eigensolver in derived classes
   virtual void setOperator(mfem::OperatorHandle & op) override = 0;
@@ -42,5 +44,6 @@ protected:
   /// Number of eigenmodes to compute
   int _num_modes;
 };
+}
 
 #endif
