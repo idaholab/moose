@@ -80,13 +80,13 @@ BoundaryIntegralValueConstraint::computeResidualAndJacobian()
 
   if (_is_implicit)
   {
+    prepareShapes(_var.number());
     IntegratedBC::computeJacobian();
     computeScalarJacobian();
 
     // The residual-and-Jacobian-together path bypasses ComputeFullJacobianThread, so assemble the
     // scalar off-diagonal blocks here.
     computeFieldScalarJacobian();
-    prepareShapes(_var.number());
     computeScalarFieldJacobian();
   }
 }
