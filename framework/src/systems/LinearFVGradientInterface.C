@@ -9,8 +9,6 @@
 
 #include "LinearFVGradientInterface.h"
 
-#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
-#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "ComputeLinearFVLimitedGradientThread.h"
 #include "FEProblemBase.h"
 #include "FVGradientMethod.h"
@@ -124,59 +122,6 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientField & field)
              "'.");
 }
 
-void
-LinearFVGradientInterface::updateBaseGradientFieldForScheme(
-    const Moose::FV::LinearFVGradientSchemeType scheme_type,
-    const std::unordered_set<unsigned int> & gradient_variables,
-    std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
-    const bool have_registered_gradient_variables)
-{
-  auto & fe_problem = _sys.feProblem();
-
-  switch (scheme_type)
-  {
-    case Moose::FV::LinearFVGradientSchemeType::GreenGauss:
-    {
-      PARALLEL_TRY
-      {
-        using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-        FaceInfoRange face_info_range(fe_problem.mesh().ownedFaceInfoBegin(),
-                                      fe_problem.mesh().ownedFaceInfoEnd());
-
-        ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-            fe_problem,
-            _sys,
-            temporary_gradient,
-            gradient_variables,
-            have_registered_gradient_variables);
-        Threads::parallel_reduce(face_info_range, gradient_face_thread);
-      }
-      fe_problem.checkExceptionAndStopSolve();
-
-      for (auto & vec : temporary_gradient)
-        vec->close();
-
-      PARALLEL_TRY
-      {
-        using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-        ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
-                                      fe_problem.mesh().ownedElemInfoEnd());
-
-        ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-            fe_problem,
-            _sys,
-            temporary_gradient,
-            gradient_variables,
-            have_registered_gradient_variables);
-        Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
-      }
-      fe_problem.checkExceptionAndStopSolve();
-
-      return;
-    }
-  }
-}
-
 bool
 LinearFVGradientInterface::needsLinearFVGradientStorage() const
 {
@@ -234,8 +179,7 @@ LinearFVGradientInterface::updateMethodGradientStorage(LinearFVGradientFieldStor
     for (auto & vec : output_scratch)
       vec->zero();
 
-    updateBaseGradientFieldForScheme(
-        storage.method.schemeType(), storage.variable_numbers, output_scratch, true);
+    storage.method.computeGradient(_sys, output_scratch, storage.variable_numbers);
 
     for (auto & vec : output_scratch)
       vec->close();
@@ -250,8 +194,7 @@ LinearFVGradientInterface::updateMethodGradientStorage(LinearFVGradientFieldStor
   for (auto & vec : base_scratch)
     vec->zero();
 
-  updateBaseGradientFieldForScheme(
-      storage.method.schemeType(), storage.variable_numbers, base_scratch, true);
+  storage.method.computeGradient(_sys, base_scratch, storage.variable_numbers);
 
   for (auto & vec : base_scratch)
     vec->close();
