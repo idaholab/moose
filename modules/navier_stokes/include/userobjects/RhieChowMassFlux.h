@@ -50,7 +50,7 @@ public:
   /**
    * Get the pressure gradient component used by the momentum predictor.
    *
-   * The default Green-Gauss option returns the pressure variable gradient. The reconstructed option
+   * The default option returns the registered pressure gradient field. The reconstructed option
    * returns the pressure gradient inferred from the conservative Rhie-Chow face fluxes and the
    * momentum relation after the first pressure correction has produced a reconstructed field.
    */
@@ -226,7 +226,7 @@ protected:
   /// Pointer to the pressure system
   LinearSystem * _pressure_system;
 
-  /// Pressure gradient field used by compatible momentum pressure kernels.
+  /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
   const LinearFVGradientField * _pressure_gradient_field;
 
   /// Global number of the pressure system

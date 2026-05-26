@@ -350,10 +350,7 @@ RhieChowMassFlux::pressureGradient(const ElemInfo & elem_info, const unsigned in
     return (*_grad_p_reconstructed[component])(elem_dof);
   }
 
-  if (_pressure_gradient_field)
-    return _pressure_gradient_field->component(elem_info, _p->number(), component);
-
-  return _p->gradSlnComponent(elem_info, component);
+  return pressureGradientField().component(elem_info, _p->number(), component);
 }
 
 const LinearFVGradientField &
