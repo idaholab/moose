@@ -11,7 +11,6 @@
 
 #include "MooseTypes.h"
 #include "GradientLimiterType.h"
-#include "LinearFVGradientTypes.h"
 
 #include "libmesh/utility.h"
 
@@ -95,14 +94,6 @@ protected:
    * Update a registered gradient field explicitly.
    */
   void updateFVGradient(const LinearFVGradientField & field);
-
-  /// Compute unlimited gradients into a caller-provided container for variables registered to one
-  /// scheme.
-  void updateBaseGradientFieldForScheme(
-      Moose::FV::LinearFVGradientSchemeType scheme_type,
-      const std::unordered_set<unsigned int> & gradient_variables,
-      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & temporary_gradient,
-      bool have_registered_gradient_variables);
 
   /**
    * Rebuild persistent and temporary gradient storage after mesh/DOF changes.
