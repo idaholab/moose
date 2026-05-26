@@ -37,7 +37,7 @@ public:
 };
 
 /// Intermediate base for rates that fit the linear template
-/// `σ_{n+1} = J(dQ)^{-1} (σ_n + Δσ)`. Provides the shared advection helpers.
+/// `sigma_{n+1} = J(dQ)^{-1} (sigma_n + Deltasigma)`. Provides the shared advection helpers.
 class LagrangianLinearObjectiveRate : public LagrangianObjectiveRate
 {
 protected:
@@ -75,8 +75,8 @@ public:
   void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
 };
 
-/// Rashid rate: σ_{n+1} = r̂ (σ_n + Δσ) r̂^T  with r̂ = exp(Δw).
-/// See `rashid_project/plan_outline.pdf` §3.2.
+/// Rashid rate: sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T  with r_hat = exp(Deltaw).
+/// See `rashid_project/plan_outline.pdf` Sec.3.2.
 class LagrangianRashidRate : public LagrangianObjectiveRate
 {
 public:

@@ -84,10 +84,10 @@ protected:
   /// material consumes; with the generalized midpoint rule this is the alpha-weighted F).
   MaterialProperty<RankFourTensor> & _pk1_jacobian;
   /// Variant of `_pk1_jacobian` computed WITHOUT the F-bar chain factor
-  /// `_d_F_stab_d_F_ust` in the σ-via-dL contribution. Used by specialty kernels
+  /// `_d_F_stab_d_F_ust` in the sigma-via-dL contribution. Used by specialty kernels
   /// (weak plane stress, homogenization macro_grad) whose coupled variable adds to
-  /// `_F` AFTER F-bar has run — those perturbations bypass F-bar's chain and need the
-  /// identity F-bar partial in the σ chain to give a consistent Jacobian.
+  /// `_F` AFTER F-bar has run -- those perturbations bypass F-bar's chain and need the
+  /// identity F-bar partial in the sigma chain to give a consistent Jacobian.
   MaterialProperty<RankFourTensor> & _pk1_jacobian_bypass_fbar;
 
   /// The derivative of the 1st PK stress wrt the displacement gradient (grad u_{n+1}).
@@ -100,17 +100,17 @@ protected:
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
   /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used by the stress
-  /// materials as F in the kinematic stress-measure wraps (σ ↔ PK1 ↔ PK2) so that the
+  /// materials as F in the kinematic stress-measure wraps (sigma <-> PK1 <-> PK2) so that the
   /// residual matches OLD's `StressDivergenceTensors`-on-displaced-mesh form. F-bar
   /// enters only through the constitutive stress via the strain calc's F-bar'd `_f_inv`.
   const MaterialProperty<RankTwoTensor> & _F_ust;
 
-  /// d(spatial velocity gradient increment)/d(F_stab). Used in the σ-via-dL chain to
+  /// d(spatial velocity gradient increment)/d(F_stab). Used in the sigma-via-dL chain to
   /// build pk1_jacobian / cauchy_jacobian.
   const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
 
-  /// d(F_stab)/d(F_ust). Multiplied into the σ chain so pk1_jacobian = dPK1/d(F_ust)
-  /// (and cauchy_jacobian = dσ/d(dL)) gets the local F-bar contribution. Equals
+  /// d(F_stab)/d(F_ust). Multiplied into the sigma chain so pk1_jacobian = dPK1/d(F_ust)
+  /// (and cauchy_jacobian = dsigma/d(dL)) gets the local F-bar contribution. Equals
   /// IdentityFour when F-bar is off.
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
 };

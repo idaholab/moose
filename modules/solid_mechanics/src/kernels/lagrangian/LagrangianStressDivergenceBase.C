@@ -165,11 +165,11 @@ LagrangianStressDivergenceBase::prepareFBarCaches()
 
   for (unsigned int qp = 0; qp < n_qp; ++qp)
   {
-    // Compose `D_nl_ijkl = cauchy_jacobian_ijab · d_dL_dF_abcd · d_F_stab_d_F_avg_cdkl`.
+    // Compose `D_nl_ijkl = cauchy_jacobian_ijab * d_dL_dF_abcd * d_F_stab_d_F_avg_cdkl`.
     // The R4 middle-pair contraction matches the chain-rule semantics we need (the
     // strain-calc helpers and the kernel already rely on this convention elsewhere).
-    _D_nl_cache[qp] = _cauchy_jacobian[qp] * _d_spatial_velocity_increment_d_F[qp] *
-                      _d_F_stab_d_F_avg[qp];
+    _D_nl_cache[qp] =
+        _cauchy_jacobian[qp] * _d_spatial_velocity_increment_d_F[qp] * _d_F_stab_d_F_avg[qp];
 
     if (_large_kinematics)
     {

@@ -127,7 +127,7 @@ HomogenizedTotalLagrangianStressDivergence::computeScalarJacobian()
       {
         const auto [k, l] = indices2;
         if (ctype == Homogenization::ConstraintType::Stress)
-          // Macro_grad ↔ macro_grad: scalar perturbation bypasses F-bar (the
+          // Macro_grad <-> macro_grad: scalar perturbation bypasses F-bar (the
           // homogenization material adds to `_F` AFTER F-bar runs), so use the
           // bypass variant of pk1_jacobian.
           _local_ke(h, m++) += dV * (_dpk1_bypass_fbar[_qp](i, j, k, l));
@@ -168,8 +168,8 @@ HomogenizedTotalLagrangianStressDivergence::computeScalarOffDiagJacobian(
   const auto jvar_size = jvar.phiSize();
   _local_ke.resize(_k_order, jvar_size);
 
-  // The scalar↔disp Jacobian needs `_avg_grad_trial[_alpha]` populated (for the
-  // non-local F-bar chain via `_d_F_stab_d_F_avg · δF_avg`). The base
+  // The scalar<->disp Jacobian needs `_avg_grad_trial[_alpha]` populated (for the
+  // non-local F-bar chain via `_d_F_stab_d_F_avg * deltaF_avg`). The base
   // `precalculateOffDiagJacobian` only does this when the off-diag jvar IS a
   // displacement; for the scalar-driven path it must be triggered explicitly.
   if (_stabilize_strain)
@@ -241,11 +241,11 @@ Real
 HomogenizedTotalLagrangianStressDivergence::computeQpOffDiagJacobianScalar(
     unsigned int /*svar_num*/)
 {
-  // d(disp residual) / d(scalar_{m,n}) = ∫ gradTest_α : d(PK1)/d(scalar_{m,n}) dV.
+  // d(disp residual) / d(scalar_{m,n}) = int gradTest_alpha : d(PK1)/d(scalar_{m,n}) dV.
   // The macro_gradient adds to `_F` AFTER F-bar runs (in
   // `ComputeLagrangianStrainBase::computeQpProperties`), so scalar perturbations
-  // bypass F-bar's chain — use `_dpk1_bypass_fbar` (pk1_jacobian with the F-bar
-  // `_d_F_stab_d_F_ust` factor REPLACED by identity in the σ chain).
+  // bypass F-bar's chain -- use `_dpk1_bypass_fbar` (pk1_jacobian with the F-bar
+  // `_d_F_stab_d_F_ust` factor REPLACED by identity in the sigma chain).
   return _dpk1_bypass_fbar[_qp].contractionKl(_m, _n, gradTest(_alpha));
 }
 
@@ -255,11 +255,11 @@ HomogenizedTotalLagrangianStressDivergence::computeScalarQpOffDiagJacobian(
 {
   if (_ctype == Homogenization::ConstraintType::Stress)
   {
-    // d(PK1_{m,n})/d(grad u_β,j) — local chain via _dpk1 (= dPK1/d(grad u) including
-    // local F-bar effect via the σ-chain through `_d_F_stab_d_F_ust`).
+    // d(PK1_{m,n})/d(grad u_beta,j) -- local chain via _dpk1 (= dPK1/d(grad u) including
+    // local F-bar effect via the sigma-chain through `_d_F_stab_d_F_ust`).
     Real J = _dpk1[_qp].contractionIj(_m, _n, gradTrial(_alpha));
 
-    // Non-local F-bar contribution to PK1 component (m, n) via the shared helper —
+    // Non-local F-bar contribution to PK1 component (m, n) via the shared helper --
     // same chain as the regular TL displacement Jacobian but contracted into the single
     // (m, n) entry rather than doubled with gradTest. Guarded on `_stabilize_strain`
     // because `_avg_grad_trial` is only populated when F-bar is on.
@@ -272,9 +272,9 @@ HomogenizedTotalLagrangianStressDivergence::computeScalarQpOffDiagJacobian(
   }
   else if (_ctype == Homogenization::ConstraintType::Strain)
   {
-    // d(F_stab_{m,n})/d(disp_α_j) — for F-bar on, the F-bar chain couples F_stab to
+    // d(F_stab_{m,n})/d(disp_alpha_j) -- for F-bar on, the F-bar chain couples F_stab to
     // F_ust through both LOCAL (`_d_F_stab_d_F_ust`) and NON-LOCAL
-    // (`_d_F_stab_d_F_avg · δF_avg`) routes. The old `Real(_m == _alpha) *
+    // (`_d_F_stab_d_F_avg * deltaF_avg`) routes. The old `Real(_m == _alpha) *
     // gradTrial(_m, _n)` form captured only the F-bar-off case correctly.
     const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * gradTrialUnstabilized(_alpha);
     RankTwoTensor delta_F_stab = _d_F_stab_d_F_ust[_qp] * delta_F_ust_local;

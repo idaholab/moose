@@ -1,13 +1,13 @@
-# Simple 3D test — small-deformation kinematics variant of `new_system_manual_plasticity.i`.
+# Simple 3D test -- small-deformation kinematics variant of `new_system_manual_plasticity.i`.
 # Manually wires the same NEW-system materials that the QuasiStatic action assembles in
 # `compatibility_mode = true` + `strain = SMALL` + `volumetric_locking_correction = true`,
 # providing the gold for the `action_small_plasticity` regression. Differences from the
 # large-kinematics version:
 #   - `large_kinematics = false`
-#   - `F_bar_mode` left at default (`total`) — the strain calc rejects `incremental` for
+#   - `F_bar_mode` left at default (`total`) -- the strain calc rejects `incremental` for
 #     small kinematics; `total` is the only valid mode there and the action picks it too.
 #   - `publish_rotation_increment` and `kinematic_approximation` omitted: both are no-ops
-#     under small kinematics (r̂ = I, the linear sym/skew split is the only path).
+#     under small kinematics (r_hat = I, the linear sym/skew split is the only path).
 #   - `rotate_old_stress = false` on the wrap (small kinematics is pure passthrough).
 #   - BC magnitudes scaled by 0.01 to keep strains inside the small-kinematics regime
 #     while still exercising plasticity (yield at strain ~ 1e-3, max strain here ~ 5e-3).

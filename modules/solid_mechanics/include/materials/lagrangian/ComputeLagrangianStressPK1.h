@@ -37,7 +37,7 @@ protected:
 
 protected:
   /// Wrap the PK stress to get the Cauchy stress. Protected so PK2 (which has its own
-  /// wrap structure PK1 = F_ust · S with direct F_ust dependence) can override it.
+  /// wrap structure PK1 = F_ust * S with direct F_ust dependence) can override it.
   virtual void computeQpCauchyStress();
 
   /// Inverse incremental deformation gradient
@@ -47,6 +47,6 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). Drives
   /// the constitutive update via the strain calc's F-bar'd `_f_inv`; NOT used for the
-  /// kinematic PK1 → σ wrap (that's `_F_ust`, declared on the base).
+  /// kinematic PK1 -> sigma wrap (that's `_F_ust`, declared on the base).
   const MaterialProperty<RankTwoTensor> & _F;
 };

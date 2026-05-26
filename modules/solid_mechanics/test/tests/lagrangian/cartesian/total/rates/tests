@@ -326,7 +326,7 @@
     cli_args = 'Materials/stress/objective_rate=rashid Outputs/file_base=rashid_rotation_out'
     csvdiff = 'rashid_rotation_out.csv'
     requirement = "Rashid response to pure rotation matches the gold (deviatoric Cauchy stress "
-                  "preserved by the exact incremental rotation r̂ = exp(Δw))."
+                  "preserved by the exact incremental rotation r_hat = exp(Deltaw))."
     abs_zero = 1e-6
   []
   [rashid_jacobian]

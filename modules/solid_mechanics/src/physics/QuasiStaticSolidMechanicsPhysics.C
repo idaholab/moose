@@ -1017,7 +1017,7 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
         _homogenization_strain_name};
   }
 
-  // OLD-compat configuration: map decomposition_method → kinematic_approximation, switch the
+  // OLD-compat configuration: map decomposition_method -> kinematic_approximation, switch the
   // F-bar to incremental mode (matches OLD `ComputeFiniteStrain`'s `_Fhat` F-bar), and have
   // the strain calc publish a real rotation_increment so the wrapped ComputeStressBase
   // material's FSR rotates correctly across steps.
@@ -1035,13 +1035,13 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
 
     // OLD's `volumetric_locking_correction = true` in incremental finite strain maps to
     // `F_bar_mode = incremental` on the NEW strain calc. The strain calc rejects
-    // `incremental` for small kinematics — for SMALL + locking we leave `F_bar_mode` at its
+    // `incremental` for small kinematics -- for SMALL + locking we leave `F_bar_mode` at its
     // default (`total`), which is the additive trace correction (matches OLD's small-strain
     // B-bar in the locked-flag-equivalent form).
     if (_lk_locking && _lk_large_kinematics)
       params.set<MooseEnum>("F_bar_mode") = "incremental";
 
-    // Only meaningful with FINITE — in SMALL the wrap runs in passthrough-off mode and the
+    // Only meaningful with FINITE -- in SMALL the wrap runs in passthrough-off mode and the
     // rotation increment isn't consumed downstream.
     params.set<bool>("publish_rotation_increment") = _lk_large_kinematics;
   }
@@ -1245,7 +1245,7 @@ QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
     params.set<bool>("stabilize_strain") = _lk_locking;
     if (_lk_homogenization)
       params.set<bool>("off_diagonal_jacobian") = _lk_h_off_jac;
-    // Match the strain calc's F-bar mode on the kernel — the TL kernel's OLD-compat B-bar
+    // Match the strain calc's F-bar mode on the kernel -- the TL kernel's OLD-compat B-bar
     // residual is gated on `F_bar_mode = incremental && stabilize_strain`. Setting it on
     // both keeps the kernel and the strain material on the same F-bar formulation. Only
     // applicable to large kinematics (the strain calc rejects `incremental` for small).

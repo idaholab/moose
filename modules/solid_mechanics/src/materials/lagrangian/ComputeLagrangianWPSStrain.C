@@ -31,7 +31,7 @@ ComputeLagrangianWPSStrain::computeDeformationGradient()
 
   // Add the out-of-plane strain to BOTH the stabilized `_F` and the unstabilized
   // `_F_ust` AFTER F-bar has run. F-bar's partials (`_d_F_stab_d_F_*`) therefore do
-  // NOT see this contribution — strain_zz bypasses F-bar's non-local chain. The WPS
+  // NOT see this contribution -- strain_zz bypasses F-bar's non-local chain. The WPS
   // kernel and the TL kernel's `computeQpJacobianOutOfPlaneStrain` use the
   // "no-F-bar" pk1_jacobian variant to handle strain_zz perturbations correctly.
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)

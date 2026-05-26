@@ -52,8 +52,8 @@ protected:
   /// filling `_avg_grad_spatial_phi[beta]`. Used for the B-bar Jacobian contribution.
   void computeAverageGradientSpatialPhi(unsigned int beta);
 
-  /// Compute element-averaged cross product `(grad_x test_i)_{b1} · (grad_x phi_j)_{b2}` for
-  /// `b1, b2 ∈ {_alpha, beta}` (4 combinations), filling `_avg_test_phi_cross[b1][b2][i][j]`.
+  /// Compute element-averaged cross product `(grad_x test_i)_{b1} * (grad_x phi_j)_{b2}` for
+  /// `b1, b2 in {_alpha, beta}` (4 combinations), filling `_avg_test_phi_cross[b1][b2][i][j]`.
   /// Used by the non-local B-bar Jacobian contribution from d(avg_grad_spatial_test)/dU.
   /// `beta` is the displacement component of the trial-side variable in this Jacobian column;
   /// only the four (`_alpha`, `_alpha`), (`_alpha`, beta), (beta, `_alpha`), (beta, beta) entries
@@ -82,43 +82,43 @@ protected:
   const MaterialProperty<RankFourTensor> & _dpk1_d_grad_u;
 
   /// Variant of `_dpk1` (= pk1_jacobian) computed WITHOUT the F-bar chain factor
-  /// `_d_F_stab_d_F_ust` in the σ-via-dL contribution. Used for coupled variables
+  /// `_d_F_stab_d_F_ust` in the sigma-via-dL contribution. Used for coupled variables
   /// that add to `_F` AFTER F-bar runs (out-of-plane strain in WPS, homogenization
-  /// macro_grad) — those perturbations bypass F-bar's chain, so the σ side of
+  /// macro_grad) -- those perturbations bypass F-bar's chain, so the sigma side of
   /// `dPK1/d(F_ust)` must NOT include the F-bar local correction.
   const MaterialProperty<RankFourTensor> & _dpk1_bypass_fbar;
 
 protected:
   /// The unstabilized trial function gradient. Exposed (protected, not private) so
   /// subclasses like `HomogenizedTotalLagrangianStressDivergence` can use it directly
-  /// for the macro-var ↔ disp off-diagonal Jacobian chain.
+  /// for the macro-var <-> disp off-diagonal Jacobian chain.
   virtual RankTwoTensor gradTrialUnstabilized(unsigned int component);
 
 private:
   /// The stabilized trial function gradient
   virtual RankTwoTensor gradTrialStabilized(unsigned int component);
 
-  /// Populate the per-(qp, j) caches consumed by `computeQpJacobianDisplacement`. β is fixed
-  /// across a single Jacobian column, so the R4·R2 chain `_dpk1_d_grad_u[qp] · gradTrial(β)`,
+  /// Populate the per-(qp, j) caches consumed by `computeQpJacobianDisplacement`. beta is fixed
+  /// across a single Jacobian column, so the R4*R2 chain `_dpk1_d_grad_u[qp] * gradTrial(beta)`,
   /// the cached unstabilized trial gradient, and (when `_stabilize_strain == true`) the fully
   /// wrapped non-local F-bar PK1 perturbation can all be computed once per (qp, j) instead
-  /// of once per (qp, _i, _j). Called from `precalculateJacobian` (with β = `_alpha`) and
-  /// `precalculateOffDiagJacobian(jvar)` (with the matched β).
+  /// of once per (qp, _i, _j). Called from `precalculateJacobian` (with beta = `_alpha`) and
+  /// `precalculateOffDiagJacobian(jvar)` (with the matched beta).
   void populateLocalPK1Cache(unsigned int beta);
 
-  /// `_dpk1_d_grad_u[qp] · gradTrial(β)` per (qp, j) for the current Jacobian column's β.
+  /// `_dpk1_d_grad_u[qp] * gradTrial(beta)` per (qp, j) for the current Jacobian column's beta.
   /// Used by the main local PK1 chain and (in `F_bar_mode = incremental`) the B-bar
-  /// Jacobian's local PK1 derivative — `gradTrial == gradTrialUnstabilized` in TL so a
+  /// Jacobian's local PK1 derivative -- `gradTrial == gradTrialUnstabilized` in TL so a
   /// single cache covers both consumers.
   std::vector<std::vector<RankTwoTensor>> _dpk1_grad_trial_cache;
 
-  /// Cached `gradTrialUnstabilized(β)` per (qp, j) for the current column. Used by the
+  /// Cached `gradTrialUnstabilized(beta)` per (qp, j) for the current column. Used by the
   /// B-bar Jacobian branch (`F_bar_mode = incremental`). Cheap to store and avoids the
   /// per-(_i, _j) `G::gradOp` call.
   std::vector<std::vector<RankTwoTensor>> _grad_trial_cache;
 
-  /// Fully wrapped non-local F-bar contribution to δPK1 per (qp, j) for the current column:
-  ///   _D_nl_cache[qp] · (_d_F_d_grad_u[qp] · _avg_grad_trial[β][j])
+  /// Fully wrapped non-local F-bar contribution to deltaPK1 per (qp, j) for the current column:
+  ///   _D_nl_cache[qp] * (_d_F_d_grad_u[qp] * _avg_grad_trial[beta][j])
   /// then PK1-wrapped via `_F_ust_det_cache[qp]` / `_F_ust_inv_T_cache[qp]` in large
   /// kinematics. Populated only when `_stabilize_strain == true`; replaces the per-call
   /// `deltaPK1NonLocalFBar(...)` invocation in TL's displacement Jacobian.
