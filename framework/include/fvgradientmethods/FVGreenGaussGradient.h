@@ -12,16 +12,28 @@
 #include "FVGradientMethod.h"
 
 /**
- * Green-Gauss cell-centered gradient method for linear finite volume variables.
+ * Green-Gauss cell-centered gradient method for linear finite-volume variables.
  */
 class FVGreenGaussGradient : public FVGradientMethod
 {
 public:
+  /// Input parameters for the Green-Gauss gradient method.
   static InputParameters validParams();
 
+  /**
+   * @param params Input parameters used to construct the Green-Gauss gradient method.
+   */
   FVGreenGaussGradient(const InputParameters & params);
 
 protected:
+  /**
+   * Compute Green-Gauss gradients before the base class applies any limiter.
+   *
+   * @param system System that owns the variables and gradient storage.
+   * @param output_gradient Component vectors where pre-limiter gradients are written.
+   * @param scratch_gradient Temporary component vectors available during the computation.
+   * @param variable_numbers Variable numbers whose gradients should be updated.
+   */
   void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & output_gradient,
