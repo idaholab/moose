@@ -7031,15 +7031,11 @@ FEProblemBase::resetState()
 }
 
 void
-FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po)
+FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num)
 {
   TIME_SECTION("solve", 1, "Solving", false);
 
   setCurrentLinearSystem(linear_sys_num);
-
-  const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
-  auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
 
   // Set custom convergence criteria
   Moose::PetscSupport::petscSetDefaults(*this);

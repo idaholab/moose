@@ -487,7 +487,7 @@ FEProblemSolve::solve()
         {
           const auto linear_sys_number =
               cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
-          _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
+          _problem.solveLinearSystem(linear_sys_number);
         }
 
         // Check convergence

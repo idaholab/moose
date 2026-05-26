@@ -449,10 +449,8 @@ public:
   /**
    * Build and solve a linear system
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
-   * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num);
 
   ///@{
   /**
