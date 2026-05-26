@@ -314,7 +314,6 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
 }
 
-Real
 const LinearFVGradientField &
 RhieChowMassFlux::pressureGradientField() const
 {
