@@ -74,6 +74,30 @@ class TestAdvection1DSymmetryGradientMethod(unittest.TestCase):
             self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
 
 
+class TestAdvection1DSymmetryTwoGradientMethods(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial(
+            "advection-1d-symmetry-two-gradient-methods.i",
+            4,
+            y_pp=["error_u", "error_v"],
+            file_base="advection-1d-symmetry-two-gradient-methods",
+        )
+        fig = mms.ConvergencePlot(xlabel="Element Size  ($h$)", ylabel="$L_2$ Error")
+        fig.plot(
+            df1,
+            label=["error_u", "error_v"],
+            marker="o",
+            markersize=8,
+            num_fitted_points=3,
+            slope_precision=1,
+        )
+        fig.save("1d-linear-fv-advection-symmetry-two-gradient-methods.png")
+
+        for _, value in fig.label_to_slope.items():
+            print("The current slope: ", value)
+            self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
+
+
 class TestDiffusion2DSymmetry(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
