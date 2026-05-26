@@ -13,6 +13,7 @@
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 
@@ -230,10 +231,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
                   "Gradient field should be registered when gradients are needed.");
 
       // Get the gradients from the adjacent cells
-      const auto grad_elem =
-          _var.gradSln(*_current_face_info->elemInfo(), state_arg, *_gradient_field);
-      const auto & grad_neighbor =
-          _var.gradSln(*_current_face_info->neighborInfo(), state_arg, *_gradient_field);
+      const auto grad_elem = _gradient_field->gradient(*_current_face_info->elemInfo());
+      const auto grad_neighbor = _gradient_field->gradient(*_current_face_info->neighborInfo());
 
       // Interpolate the two gradients to the face
       const auto interp_coeffs =
@@ -270,10 +269,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
       for (const auto dir : make_range(_dim))
       {
         const auto & gradient_field = velocityGradientField(dir);
-        grad_elem[dir] =
-            velocityVar(dir).gradSln(*_current_face_info->elemInfo(), state_arg, gradient_field);
-        grad_neighbor[dir] = velocityVar(dir).gradSln(
-            *_current_face_info->neighborInfo(), state_arg, gradient_field);
+        grad_elem[dir] = gradient_field.gradient(*_current_face_info->elemInfo());
+        grad_neighbor[dir] = gradient_field.gradient(*_current_face_info->neighborInfo());
         trace_elem += grad_elem[dir](dir);
         trace_neighbor += grad_neighbor[dir](dir);
       }
@@ -360,8 +357,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     const auto state_arg = determineState();
     mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
-    grad_contrib += _mu(face_arg, state_arg) *
-                    _var.gradSln(*elem_info, state_arg, *_gradient_field) *
+    grad_contrib += _mu(face_arg, state_arg) * _gradient_field->gradient(*elem_info) *
                     _boundary_normal_factor * correction_vector;
   }
 
@@ -382,7 +378,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     for (const auto dir : make_range(_dim))
     {
-      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info, state_arg, velocityGradientField(dir));
+      grad_elem[dir] = velocityGradientField(dir).gradient(*elem_info);
       trace_elem += grad_elem[dir](dir);
     }
 

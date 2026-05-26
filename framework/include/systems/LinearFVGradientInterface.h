@@ -22,6 +22,7 @@
 
 class SystemBase;
 class ElemInfo;
+class FaceInfo;
 class FVGradientMethod;
 
 namespace libMesh
@@ -43,10 +44,12 @@ public:
    * @param sys System that owns the variables and the gradient field storage.
    * @param components Component vectors that store the gradient values.
    * @param method Gradient method that produces the values in this field.
+   * @param variable_number Variable number whose gradient this handle reads.
    */
   LinearFVGradientField(const SystemBase & sys,
                         const GradientContainer & components,
-                        const FVGradientMethod & method);
+                        const FVGradientMethod & method,
+                        unsigned int variable_number);
 
   /// Access the underlying component vectors keyed by spatial direction.
   const GradientContainer & components() const { return _components; }
@@ -57,6 +60,9 @@ public:
   /// Method object that produces this field.
   const FVGradientMethod & method() const { return _method; }
 
+  /// Variable number whose gradients are read by this handle.
+  unsigned int variableNumber() const { return _variable_number; }
+
   /// Whether this field stores limited gradients.
   bool isLimited() const { return limiterType() != Moose::FV::GradientLimiterType::None; }
 
@@ -64,20 +70,23 @@ public:
   Moose::FV::GradientLimiterType limiterType() const;
 
   /**
-   * Read one gradient component for a variable at an element.
+   * Read one gradient component at an element.
    * @param elem_info Element whose cell-centered gradient should be read.
-   * @param variable_number Variable number whose gradient should be read.
    * @param component Spatial component of the gradient.
    */
-  Real
-  component(const ElemInfo & elem_info, unsigned int variable_number, unsigned int component) const;
+  Real component(const ElemInfo & elem_info, unsigned int component) const;
 
   /**
-   * Read the full gradient for a variable at an element.
+   * Read the full gradient at an element.
    * @param elem_info Element whose cell-centered gradient should be read.
-   * @param variable_number Variable number whose gradient should be read.
    */
-  RealVectorValue gradient(const ElemInfo & elem_info, unsigned int variable_number) const;
+  RealVectorValue gradient(const ElemInfo & elem_info) const;
+
+  /**
+   * Read the full gradient interpolated to a face.
+   * @param fi Face whose interpolated gradient should be read.
+   */
+  RealVectorValue gradient(const FaceInfo & fi) const;
 
 private:
   /// System whose dof map indexes this gradient field.
@@ -88,6 +97,9 @@ private:
 
   /// Method object that produces this field.
   const FVGradientMethod & _method;
+
+  /// Variable number whose gradients are read by this handle.
+  const unsigned int _variable_number;
 };
 
 /**
@@ -161,8 +173,8 @@ protected:
     /// Scratch space the method can use for pre-limiter values or composed method calls.
     GradientContainer method_scratch;
 
-    /// Field handle returned to consumers and backed by values.
-    std::unique_ptr<LinearFVGradientField> field;
+    /// Field handles returned to consumers and backed by values, keyed by variable number.
+    std::unordered_map<unsigned int, std::unique_ptr<LinearFVGradientField>> fields;
   };
 
   /**
