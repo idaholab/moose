@@ -41,13 +41,12 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
                                    getParam<InterpolationMethodName>("coeff_interp_method"))
                              : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
+    _gradient_field(_use_nonorthogonal_correction ? &_var.computeCellGradients() : nullptr),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0),
     _cached_face_diffusivity(false),
     _face_diffusivity(0.0)
 {
-  if (_use_nonorthogonal_correction)
-    _var.computeCellGradients();
 }
 
 Real
@@ -140,10 +139,12 @@ LinearFVDiffusion::computeFluxRHSContribution()
   if (_use_nonorthogonal_correction && !_cached_rhs_contribution)
   {
     const auto state = determineState();
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
 
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state);
-    const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state);
+    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state, *_gradient_field);
+    const auto & grad_neighbor =
+        _var.gradSln(*_current_face_info->neighborInfo(), state, *_gradient_field);
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs =
@@ -220,8 +221,10 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
     const auto correction_vector =
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
-    grad_contrib += _diffusion_coeff(face_arg, state) * _var.gradSln(*elem_info, state) *
-                    boundary_normal_multiplier * correction_vector * _current_face_area;
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    grad_contrib += _diffusion_coeff(face_arg, state) *
+                    _var.gradSln(*elem_info, state, *_gradient_field) * boundary_normal_multiplier *
+                    correction_vector * _current_face_area;
   }
 
   return grad_contrib;

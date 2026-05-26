@@ -11,6 +11,8 @@
 
 #include "LinearFVFluxKernel.h"
 
+class LinearFVGradientField;
+
 /**
  * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
  * volume method to a linear system.
@@ -66,6 +68,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction on boundary, this is mostly used
   /// to disable boundary contributions to the right hand side.
   const bool _use_nonorthogonal_correction_on_boundary;
+
+  /// Gradient field used for internal and boundary anisotropic diffusion corrections.
+  const LinearFVGradientField & _gradient_field;
 
   /// The cached matrix contribution
   Real _flux_matrix_contribution;
