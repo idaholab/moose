@@ -28,17 +28,26 @@ public:
   virtual void apply(NumericVector<Number> & sln) override;
 
 protected:
-  /// Accepted solution at the previous solution time, u^{n-1}.
+  /// Older accepted solution used in the quadratic history.
   NumericVector<Number> & _older_solution;
 
-  /// Accepted solution at the solution time before that, u^{n-2}.
+  /// Oldest accepted solution used in the quadratic history.
   NumericVector<Number> & _oldest_solution;
 
-  /// Time step from u^{n-2} to u^{n-1}; used as h2 in the Lagrange formula.
+  /// Older time-step size used in the quadratic history.
   Real & _dt_older;
 
   /// Previous accepted time-step size saved during history rotation.
   Real & _dt_storage;
+
+  /// Time for _older_solution.
+  Real & _older_solution_time;
+
+  /// Time for _oldest_solution.
+  Real & _oldest_solution_time;
+
+  /// Time storage matching the nonlinear system's older solution vector.
+  Real & _solution_older_time_storage;
 
   /// Number of accepted solution states seen by the predictor history.
   unsigned int & _history_size;

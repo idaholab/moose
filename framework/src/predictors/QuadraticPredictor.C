@@ -9,6 +9,7 @@
 
 #include "QuadraticPredictor.h"
 #include "NonlinearSystem.h"
+#include "MooseUtils.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -29,6 +30,9 @@ QuadraticPredictor::QuadraticPredictor(const InputParameters & parameters)
     _oldest_solution(_nl.addVector("quadratic_predictor_oldest_solution", true, libMesh::GHOSTED)),
     _dt_older(declareRestartableData<Real>("dt_older", 0)),
     _dt_storage(declareRestartableData<Real>("dt_storage", 0)),
+    _older_solution_time(declareRestartableData<Real>("older_solution_time", 0)),
+    _oldest_solution_time(declareRestartableData<Real>("oldest_solution_time", 0)),
+    _solution_older_time_storage(declareRestartableData<Real>("solution_older_time_storage", 0)),
     _history_size(declareRestartableData<unsigned int>("history_size", 0))
 {
 }
@@ -50,6 +54,10 @@ QuadraticPredictor::timestepSetup()
   _dt_older = _dt_storage;
   _dt_storage = _dt_old;
 
+  _oldest_solution_time = _older_solution_time;
+  _older_solution_time = _solution_older_time_storage;
+  _solution_older_time_storage = _fe_problem.timeOld();
+
   if (_history_size < 3)
     ++_history_size;
 }
@@ -62,6 +70,11 @@ QuadraticPredictor::shouldApply()
 
   if (_dt <= 0 || _dt_old <= 0 || _dt_older <= 0 || _history_size < 3)
     return false;
+
+  for (const auto skip_time_old : _skip_times_old)
+    if (MooseUtils::absoluteFuzzyEqual(_older_solution_time, skip_time_old, _timestep_tolerance) ||
+        MooseUtils::absoluteFuzzyEqual(_oldest_solution_time, skip_time_old, _timestep_tolerance))
+      return false;
 
   return true;
 }

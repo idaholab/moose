@@ -10,6 +10,11 @@ solution vectors to provide the initial guess for a transient solve. With
 quadratic prediction is applied. With [!param](/Executioner/Predictor/QuadraticPredictor/scale)
 set to 0, the predictor leaves the current initial guess unchanged.
 
+For nonlinear problems with quasistatic load increments, the predictor may
+provide a better Newton starting point; depending on the problem, this can allow
+larger load increments and/or fewer Newton iterations without changing the
+accepted implicit solution.
+
 The prediction is exact for solution histories that are quadratic in time once
 enough old solutions and time-step sizes are available. For nonuniform time
 steps, the extrapolation uses the corresponding solution times rather than

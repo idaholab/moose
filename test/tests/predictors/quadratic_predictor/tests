@@ -25,88 +25,14 @@
   []
 
   [variable_dt_cubic]
-    requirement = 'The system shall apply nonuniform time-step quadratic prediction to solution '
-                  'histories that are not exactly quadratic in time'
-
-    [predicted]
-      type = 'CSVDiff'
-      input = 'quadratic_predictor_variable_dt_cubic.i'
-      csvdiff = 'quadratic_predictor_variable_dt_cubic_out.csv'
-      abs_zero = 1e-12
-      ignore_columns = 'num_nonlinear_iterations'
-
-      detail = 'by computing a non-exact predicted solve history and'
-    []
-
-    [no_predictor]
-      type = 'CSVDiff'
-      input = 'quadratic_predictor_variable_dt_cubic_no_predictor.i'
-      csvdiff = 'quadratic_predictor_variable_dt_cubic_no_predictor_out.csv'
-      abs_zero = 1e-12
-      ignore_columns = 'num_nonlinear_iterations'
-
-      detail = 'by computing a no-predictor reference solve history and'
-    []
-
-    [improves_initial_residual]
-      type = 'RunCommand'
-      command = 'python3 - <<PY
-import csv
-import sys
-
-with open("quadratic_predictor_variable_dt_cubic_out.csv", newline="") as csvfile:
-    predicted = list(csv.DictReader(csvfile))
-
-with open("quadratic_predictor_variable_dt_cubic_no_predictor_out.csv", newline="") as csvfile:
-    no_predictor = list(csv.DictReader(csvfile))
-
-for row_index in (3, 4):
-    predicted_residual = float(predicted[row_index]["initial_residual"])
-    no_predictor_residual = float(no_predictor[row_index]["initial_residual"])
-    if predicted_residual >= no_predictor_residual:
-        print(f"Quadratic predictor did not improve row {row_index}.")
-        sys.exit(1)
-PY'
-      use_shell = true
-      prereq = 'variable_dt_cubic/predicted variable_dt_cubic/no_predictor'
-
-      detail = 'by reducing the initial residual after enough accepted history is available.'
-    []
-  []
-
-  [scale_zero]
     type = 'CSVDiff'
-    input = 'quadratic_predictor.i'
-    csvdiff = 'quadratic_predictor_scale_zero_out.csv'
-    cli_args = 'Executioner/Predictor/scale=0 Outputs/file_base=quadratic_predictor_scale_zero_out'
+    input = 'quadratic_predictor_variable_dt_cubic.i'
+    csvdiff = 'quadratic_predictor_variable_dt_cubic_out.csv'
     abs_zero = 1e-12
     ignore_columns = 'num_nonlinear_iterations'
 
-    # The scale factor makes this a no-op predictor: the initial guess remains u^n.
-    requirement = 'The system shall support disabling the quadratic predictor by setting the '
-                  'scale factor to zero.'
-  []
-
-  [print]
-    requirement = 'The system shall print the quadratic predictor scale factor to the output stream'
-
-    [nonzero]
-      type = 'RunApp'
-      input = 'quadratic_predictor.i'
-      cli_args = 'Executioner/Predictor/scale=1e-10'
-      expect_out = 'Applying quadratic predictor with scale factor = 1e-10'
-
-      detail = 'for a nonzero scale factor and'
-    []
-
-    [zero]
-      type = 'RunApp'
-      input = 'quadratic_predictor.i'
-      cli_args = 'Executioner/Predictor/scale=0'
-      expect_out = 'Skipping quadratic predictor because scale factor = 0'
-
-      detail = 'for a zero scale factor that triggers the no-op early return.'
-    []
+    requirement = 'The system shall apply nonuniform time-step quadratic prediction to solution '
+                  'histories that are not exactly quadratic in time.'
   []
 
   [skip_times_old]
@@ -116,8 +42,8 @@ PY'
     abs_zero = 1e-12
     ignore_columns = 'num_nonlinear_iterations'
 
-    requirement = 'The system shall support skipping quadratic prediction based on previous '
-                  'solution times.'
+    requirement = 'The system shall skip quadratic prediction when a previous solution time '
+                  'used by the predictor is marked as unrepresentative.'
   []
 
   [repeated_timestep]

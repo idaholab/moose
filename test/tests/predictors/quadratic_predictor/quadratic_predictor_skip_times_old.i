@@ -1,4 +1,5 @@
-# The step from t = 1.0 to t = 1.5 is skipped by matching skip_times_old.
+# The steps from t = 1.0 to t = 1.5 and from t = 1.5 to t = 2.0 are skipped
+# because the latter would use the solution at t = 1.0 in the quadratic history.
 
 [Mesh]
   type = GeneratedMesh
