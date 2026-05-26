@@ -66,7 +66,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
 {
   const Node * node = *node_it;
 
-  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
+  auto & ce = _fe_problem.couplingEntries(_tid);
+  const auto [i_sys, j_sys] = _fe_problem.getJacobianBlockContext();
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
@@ -87,11 +88,12 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
         const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
         for (const auto & nodal_kernel : objects)
         {
-          if (nodal_kernel->variable().number() == ivar)
+          const auto & nodal_kernel_var = nodal_kernel->variable();
+          if ((nodal_kernel_var.number() == ivar) && (nodal_kernel_var.sys().number() == i_sys))
           {
             // If this NodalKernel is acting on the jvar add it to the list and short-circuit the
             // loop
-            if (nodal_kernel->variable().number() == jvar)
+            if ((nodal_kernel_var.number() == jvar) && (nodal_kernel_var.sys().number() == j_sys))
             {
               active_involved_kernels.push_back(nodal_kernel);
               continue;
@@ -101,7 +103,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
             const std::vector<MooseVariableFEBase *> & coupled_vars =
                 nodal_kernel->getCoupledMooseVars();
             for (const auto & var : coupled_vars)
-              if (var->number() == jvar)
+              if ((var->number() == jvar) && (var->sys().number() == j_sys))
               {
                 active_involved_kernels.push_back(nodal_kernel);
                 break; // It only takes one

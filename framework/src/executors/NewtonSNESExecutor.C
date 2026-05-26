@@ -171,6 +171,12 @@ NewtonSNESExecutor::setupSNES()
   LibmeshPetscCallA(this->comm().get(), SNESSetOptionsPrefix(_snes, (this->name() + "_").c_str()));
   LibmeshPetscCallA(this->comm().get(), SNESSetFromOptions(_snes));
 
+  // Other setup
+  for (const auto nl_sys_i_num : _nl_sys_nums)
+    for (const auto nl_sys_j_num : _nl_sys_nums)
+      if (nl_sys_i_num != nl_sys_j_num)
+        _fe_problem.setFullCoupling(nl_sys_i_num, nl_sys_j_num, {});
+
   _snes_setup_done = true;
 }
 

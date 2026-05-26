@@ -6659,13 +6659,64 @@ FEProblemBase::areCoupled(const unsigned int ivar,
   return (*_cm[nl_sys])(ivar, jvar);
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
 FEProblemBase::couplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
   return _assembly[tid][nl_sys]->couplingEntries();
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+FEProblemBase::couplingEntries(const THREAD_ID tid,
+                               const unsigned int nl_sys_i_num,
+                               const unsigned int nl_sys_j_num)
+{
+  if (nl_sys_i_num == nl_sys_j_num)
+    return couplingEntries(tid, nl_sys_i_num);
+  else
+  {
+    const std::pair<unsigned int, unsigned int> key{nl_sys_i_num, nl_sys_j_num};
+    return libmesh_map_find(_system_couple_to_threaded_variable_couplings, key)[tid];
+  }
+}
+
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+FEProblemBase::couplingEntries(const THREAD_ID tid)
+{
+  return couplingEntries(tid, _nl_i_sys_num, _nl_j_sys_num);
+}
+
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+FEProblemBase::nonlocalCouplingEntries(const THREAD_ID tid)
+{
+  mooseAssert(_nl_i_sys_num == _nl_j_sys_num,
+              "Off-diagonal system block nonlocal coupling is not currently supported");
+  return nonlocalCouplingEntries(tid, _nl_i_sys_num);
+}
+
+void
+FEProblemBase::setFullCoupling(const unsigned int nl_sys_i_num,
+                               const unsigned int nl_sys_j_num,
+                               Moose::PassKey<NewtonSNESExecutor>)
+{
+  mooseAssert(nl_sys_i_num != nl_sys_j_num,
+              "Should not manually set inter-system variable coupling");
+  auto & sys_i = getNonlinearSystemBase(nl_sys_i_num);
+  auto & sys_j = getNonlinearSystemBase(nl_sys_j_num);
+  auto & all_couplings =
+      _system_couple_to_threaded_variable_couplings[std::make_pair(nl_sys_i_num, nl_sys_j_num)];
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    auto & ivars = sys_i.getVariables(tid);
+    auto & jvars = sys_j.getVariables(tid);
+    std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> thread_couplings;
+    for (auto * const ivar : ivars)
+      for (auto * const jvar : jvars)
+        thread_couplings.push_back(std::make_pair(ivar, jvar));
+    all_couplings.push_back(std::move(thread_couplings));
+  }
+}
+
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
 FEProblemBase::nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
   return _assembly[tid][nl_sys]->nonlocalCouplingEntries();
