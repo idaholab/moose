@@ -125,6 +125,9 @@ public:
    */
   void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
 
+  /// Access the default gradient field registered by computeCellGradients().
+  const LinearFVGradientField & linearFVGradientField() const { return *_gradient_field; }
+
   /**
    * Check if cell gradient computations were requested for this variable.
    */
