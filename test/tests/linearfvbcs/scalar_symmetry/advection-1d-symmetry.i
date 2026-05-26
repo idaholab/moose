@@ -28,6 +28,10 @@ gradient_method = 'green-gauss'
   [gg]
     type = FVGreenGaussGradient
   []
+  [gg_limited]
+    type = FVGreenGaussGradient
+    limiter = venkatakrishnan
+  []
 []
 
 [FVInterpolationMethods]

@@ -27,13 +27,9 @@ using namespace libMesh;
 
 LinearFVGradientField::LinearFVGradientField(const SystemBase & sys,
                                              const GradientContainer & components,
-                                             const Moose::FV::LinearFVGradientFieldType field_type,
                                              const Moose::FV::GradientLimiterType limiter_type)
-  : _sys(sys), _components(components), _field_type(field_type), _limiter_type(limiter_type)
+  : _sys(sys), _components(components), _limiter_type(limiter_type)
 {
-  mooseAssert((field_type == Moose::FV::LinearFVGradientFieldType::Base) ==
-                  (limiter_type == Moose::FV::GradientLimiterType::None),
-              "Base gradient fields must have no limiter and limited fields must have one.");
 }
 
 Real
@@ -127,8 +123,22 @@ LinearFVGradientField &
 LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number,
                                               const FVGradientMethod & method)
 {
-  _registered_gradient_method_variables[&method].insert(variable_number);
-  return registerFVGradient(variable_number, method.schemeType(), method.limiterType());
+  auto * const variable =
+      dynamic_cast<MooseVariableFieldBase *>(_sys.variableWarehouse().getVariable(variable_number));
+  if (!variable)
+    mooseError("Linear FV gradients were requested for variable number ",
+               variable_number,
+               " on system '",
+               _sys.name(),
+               "', but no field variable with that number exists on the system.");
+
+  auto & storage = methodGradientStorage(method);
+  storage.variable_numbers.insert(variable_number);
+
+  if (storage.values.empty() && _sys.currentSolution())
+    initializeMethodGradientStorage(storage);
+
+  return *storage.field;
 }
 
 void
@@ -136,7 +146,7 @@ LinearFVGradientInterface::computeGradients()
 {
   // No gradients have been requested, by now we should have set up the
   // containers to receive the gradients. Time to early return.
-  if (_raw_grad_container.empty())
+  if (_raw_grad_container.empty() && _registered_gradient_method_fields.empty())
     return;
 
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
@@ -147,23 +157,43 @@ LinearFVGradientInterface::computeGradients()
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
   PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
-  updateBaseGradientField();
+  if (!_raw_grad_container.empty())
+    updateBaseGradientField();
 
   for (const auto limiter_type : requestedLinearFVLimitedGradientTypes())
     if (limiter_type != Moose::FV::GradientLimiterType::None)
       updateLimitedGradient(limiter_type);
+
+  for (auto & method_field_pair : _registered_gradient_method_fields)
+    updateMethodGradientStorage(*method_field_pair.second);
 }
 
 void
 LinearFVGradientInterface::updateFVGradient(const LinearFVGradientField & field)
 {
-  if (_raw_grad_container.empty())
-    return;
-
   if (&field.system() != &_sys)
     mooseError("Requested update for a linear FV gradient field from a different system than '",
                _sys.name(),
                "'.");
+
+  for (auto & method_field_pair : _registered_gradient_method_fields)
+    if (method_field_pair.second->field.get() == &field)
+    {
+      auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
+      mooseAssert(perf_graph_interface,
+                  "LinearFVGradientInterface requires its owning system to implement "
+                  "PerfGraphInterface.");
+      const auto perf_id =
+          perf_graph_interface->registerTimedSection("LinearVariableFV_Gradients", 3);
+      mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
+      PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
+
+      updateMethodGradientStorage(*method_field_pair.second);
+      return;
+    }
+
+  if (_raw_grad_container.empty())
+    return;
 
   auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
   mooseAssert(perf_graph_interface,
@@ -213,9 +243,20 @@ LinearFVGradientInterface::updateBaseGradientFieldForScheme(
     const Moose::FV::LinearFVGradientSchemeType scheme_type,
     const std::unordered_set<unsigned int> & gradient_variables)
 {
+  updateBaseGradientFieldForScheme(scheme_type,
+                                   gradient_variables,
+                                   temporaryLinearFVGradientContainer(),
+                                   !_registered_gradient_schemes.empty());
+}
+
+void
+LinearFVGradientInterface::updateBaseGradientFieldForScheme(
+    const Moose::FV::LinearFVGradientSchemeType scheme_type,
+    const std::unordered_set<unsigned int> & gradient_variables,
+    std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
+    const bool have_registered_gradient_variables)
+{
   auto & fe_problem = _sys.feProblem();
-  auto & temporary_gradient = temporaryLinearFVGradientContainer();
-  const auto have_registered_gradient_variables = !_registered_gradient_schemes.empty();
 
   switch (scheme_type)
   {
@@ -272,11 +313,11 @@ LinearFVGradientInterface::updateLimitedGradient(const Moose::FV::GradientLimite
   ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
                                 fe_problem.mesh().ownedElemInfoEnd());
 
-  auto & raw_container = rawLinearFVLimitedGradientContainer(limiter_type);
-  auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
-  mooseAssert(temporary_container.size() == raw_container.size(),
+  auto & values = rawLinearFVLimitedGradientContainer(limiter_type);
+  auto & output_scratch = temporaryLinearFVLimitedGradientContainer(limiter_type);
+  mooseAssert(output_scratch.size() == values.size(),
               "Temporary and raw limited gradient containers must have the same size.");
-  for (auto & vec : temporary_container)
+  for (auto & vec : output_scratch)
     vec->zero();
 
   PARALLEL_TRY
@@ -285,22 +326,25 @@ LinearFVGradientInterface::updateLimitedGradient(const Moose::FV::GradientLimite
         fe_problem,
         _sys,
         _raw_grad_container,
-        temporary_container,
+        output_scratch,
         limiter_type,
         requestedLinearFVLimitedGradientVariables(limiter_type));
     Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
 
-  for (auto & vec : temporary_container)
+  for (auto & vec : output_scratch)
     vec->close();
 
-  raw_container.swap(temporary_container);
+  values.swap(output_scratch);
 }
 
 bool
 LinearFVGradientInterface::needsLinearFVGradientStorage() const
 {
+  if (!_registered_gradient_method_fields.empty())
+    return true;
+
   if (!_registered_gradient_schemes.empty())
     return true;
 
@@ -314,6 +358,10 @@ LinearFVGradientInterface::needsLinearFVGradientStorage() const
 bool
 LinearFVGradientInterface::hasRegisteredFVGradient(const unsigned int variable_number) const
 {
+  for (const auto & method_field_pair : _registered_gradient_method_fields)
+    if (method_field_pair.second->variable_numbers.count(variable_number))
+      return true;
+
   return _registered_gradient_schemes.count(variable_number);
 }
 
@@ -328,6 +376,97 @@ LinearFVGradientInterface::initializeContainer(
     container.push_back(_sys.currentSolution()->zero_clone());
 }
 
+LinearFVGradientInterface::LinearFVGradientFieldStorage &
+LinearFVGradientInterface::methodGradientStorage(const FVGradientMethod & method)
+{
+  auto it = _registered_gradient_method_fields.find(&method);
+  if (it != _registered_gradient_method_fields.end())
+    return *it->second;
+
+  auto storage = std::make_unique<LinearFVGradientFieldStorage>(method);
+  storage->field =
+      std::make_unique<LinearFVGradientField>(_sys, storage->values, method.limiterType());
+
+  auto & storage_ref = *storage;
+  _registered_gradient_method_fields.emplace(&method, std::move(storage));
+  return storage_ref;
+}
+
+void
+LinearFVGradientInterface::initializeMethodGradientStorage(LinearFVGradientFieldStorage & storage)
+{
+  initializeContainer(storage.values);
+  initializeContainer(storage.output_scratch);
+
+  if (storage.method.limiterType() != Moose::FV::GradientLimiterType::None)
+    initializeContainer(storage.base_scratch);
+}
+
+void
+LinearFVGradientInterface::updateMethodGradientStorage(LinearFVGradientFieldStorage & storage)
+{
+  if (storage.values.empty())
+    initializeMethodGradientStorage(storage);
+
+  if (storage.method.limiterType() == Moose::FV::GradientLimiterType::None)
+  {
+    auto & temporary_gradient = storage.output_scratch;
+    mooseAssert(temporary_gradient.size() == storage.values.size(),
+                "Temporary and raw method gradient containers must have the same size.");
+    for (auto & vec : temporary_gradient)
+      vec->zero();
+
+    updateBaseGradientFieldForScheme(
+        storage.method.schemeType(), storage.variable_numbers, temporary_gradient, true);
+
+    for (auto & vec : temporary_gradient)
+      vec->close();
+
+    storage.values.swap(temporary_gradient);
+    return;
+  }
+
+  auto & base_scratch = storage.base_scratch;
+  mooseAssert(base_scratch.size() == storage.values.size(),
+              "Base scratch and value method gradient containers must have the same size.");
+  for (auto & vec : base_scratch)
+    vec->zero();
+
+  updateBaseGradientFieldForScheme(
+      storage.method.schemeType(), storage.variable_numbers, base_scratch, true);
+
+  for (auto & vec : base_scratch)
+    vec->close();
+
+  auto & fe_problem = _sys.feProblem();
+  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+  ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
+                                fe_problem.mesh().ownedElemInfoEnd());
+
+  auto & output_scratch = storage.output_scratch;
+  mooseAssert(output_scratch.size() == storage.values.size(),
+              "Temporary and raw method gradient containers must have the same size.");
+  for (auto & vec : output_scratch)
+    vec->zero();
+
+  PARALLEL_TRY
+  {
+    ComputeLinearFVLimitedGradientThread limited_gradient_thread(fe_problem,
+                                                                 _sys,
+                                                                 base_scratch,
+                                                                 output_scratch,
+                                                                 storage.method.limiterType(),
+                                                                 storage.variable_numbers);
+    Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
+  }
+  fe_problem.checkExceptionAndStopSolve();
+
+  for (auto & vec : output_scratch)
+    vec->close();
+
+  storage.values.swap(output_scratch);
+}
+
 void
 LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
@@ -339,11 +478,30 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
   for (auto & limiter_container_pair : _temporary_limited_gradient)
     limiter_container_pair.second.clear();
 
+  for (auto & method_field_pair : _registered_gradient_method_fields)
+  {
+    method_field_pair.second->base_scratch.clear();
+    method_field_pair.second->values.clear();
+    method_field_pair.second->output_scratch.clear();
+  }
+
   if (!needsLinearFVGradientStorage())
     return;
 
-  initializeContainer(_raw_grad_container);
-  initializeContainer(_temporary_gradient);
+  bool needs_legacy_gradient_storage = !_registered_gradient_schemes.empty();
+  if (!needs_legacy_gradient_storage)
+    for (const auto * const field_var : _sys.variableWarehouse().fieldVariables())
+      if (field_var->needsGradientVectorStorage())
+      {
+        needs_legacy_gradient_storage = true;
+        break;
+      }
+
+  if (needs_legacy_gradient_storage)
+  {
+    initializeContainer(_raw_grad_container);
+    initializeContainer(_temporary_gradient);
+  }
 
   for (const auto limiter_type : _requested_limited_gradient_types)
   {
@@ -355,6 +513,9 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
     if (!_limited_gradient_fields.count(limiter_type))
       initializeLimitedGradientField(limiter_type);
   }
+
+  for (auto & method_field_pair : _registered_gradient_method_fields)
+    initializeMethodGradientStorage(*method_field_pair.second);
 }
 
 void
@@ -362,10 +523,7 @@ LinearFVGradientInterface::initializeLimitedGradientField(
     const Moose::FV::GradientLimiterType limiter_type)
 {
   _limited_gradient_fields[limiter_type] = std::make_unique<LinearFVGradientField>(
-      _sys,
-      libmesh_map_find(_raw_limited_grad_containers, limiter_type),
-      Moose::FV::LinearFVGradientFieldType::Limited,
-      limiter_type);
+      _sys, libmesh_map_find(_raw_limited_grad_containers, limiter_type), limiter_type);
 }
 
 void
