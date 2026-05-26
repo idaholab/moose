@@ -19,11 +19,5 @@ enum class LinearFVGradientSchemeType
   GreenGauss
 };
 
-/// Type of gradient values stored in a linear FV gradient field.
-enum class LinearFVGradientFieldType
-{
-  Base,
-  Limited
-};
 }
 }
