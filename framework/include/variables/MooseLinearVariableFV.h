@@ -99,12 +99,12 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Switch to request cell gradient computations with the default gradient method.
+   * Register this variable's default gradient method on the owning system and return its field.
    */
   const LinearFVGradientField & computeCellGradients();
 
   /**
-   * Switch to request cell gradient computations with a specific gradient method.
+   * Register a specific gradient method on the owning system and return its field.
    */
   const LinearFVGradientField & computeCellGradients(const FVGradientMethod & method);
 
@@ -122,9 +122,6 @@ public:
    */
   const LinearFVGradientField &
   computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
-  /// Access the default gradient field registered by computeCellGradients().
-  const LinearFVGradientField & linearFVGradientField() const { return *_gradient_field; }
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -153,7 +150,7 @@ public:
                             const LinearFVGradientField & field) const;
 
   /**
-   * Get one raw gradient component at a cell center without materializing the full gradient.
+   * Get one default gradient component at a cell center without materializing the full gradient.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param component The gradient component to retrieve
    */
@@ -170,7 +167,7 @@ public:
                         const LinearFVGradientField & field) const;
 
   /**
-   * Get either the raw or limited gradient at a cell center.
+   * Get either the default or limiter-selected compatibility gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param state State argument describing which solution state to evaluate
    * @param limiter_type The limiter type used to compute/store limited gradients
@@ -206,7 +203,7 @@ public:
   gradSln(const FaceInfo & fi, const StateArg & state, const LinearFVGradientField & field) const;
 
   /**
-   * Compute interpolated raw/limited gradient on the provided face.
+   * Compute interpolated default/limiter-selected compatibility gradient on the provided face.
    * @param fi The face for which to retrieve the gradient
    * @param state State argument describing which solution state to evaluate
    * @param limiter_type The limiter type used to compute/store limited gradients
@@ -309,7 +306,7 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Read-only handle to the default cell gradient stored by the owning concrete system
+  /// Read-only handle to the default cell gradient stored by the owning concrete system.
   const LinearFVGradientField * _gradient_field;
 
   /// Gradient field handles keyed by the methods that produced them.

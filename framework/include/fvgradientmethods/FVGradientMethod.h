@@ -27,6 +27,9 @@ class NumericVector;
 
 /**
  * Registered base class for linear FV gradient methods.
+ *
+ * Method objects produce unlimited gradients. The owning system stores the output field and applies
+ * the limiter selected by limiterType() when a limited method is requested.
  */
 class FVGradientMethod : public MooseObject
 {

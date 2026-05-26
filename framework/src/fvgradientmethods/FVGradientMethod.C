@@ -30,7 +30,8 @@ FVGradientMethod::validParams()
   params.registerBase("FVGradientMethod");
   params.registerSystemAttributeName("FVGradientMethod");
   params.addClassDescription("Base class for defining cell-centered gradient methods used by "
-                             "linear finite volume objects.");
+                             "linear finite volume objects. The method produces unlimited "
+                             "gradients and the system applies the selected limiter.");
   params.addParam<MooseEnum>("limiter",
                              MooseEnum("none venkatakrishnan", "none"),
                              "Limiter to apply to gradients produced by this method.");
