@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LagrangianStressDivergenceBase.h"
+#include "RankFourTensor.h"
 
 InputParameters
 LagrangianStressDivergenceBase::validParams()
@@ -124,6 +125,7 @@ LagrangianStressDivergenceBase::precalculateJacobian()
   _fe_problem.prepareShapes(_var.number(), _tid);
   _avg_grad_trial[_alpha].resize(_phi.size());
   precalculateJacobianDisplacement(_alpha);
+  prepareFBarCaches();
 }
 
 void
@@ -140,7 +142,43 @@ LagrangianStressDivergenceBase::precalculateOffDiagJacobian(unsigned int jvar)
       _fe_problem.prepareShapes(jvar, _tid);
       _avg_grad_trial[beta].resize(_phi.size());
       precalculateJacobianDisplacement(beta);
+      prepareFBarCaches();
     }
+}
+
+void
+LagrangianStressDivergenceBase::prepareFBarCaches()
+{
+  // Cache is element-keyed; skip the work if we've already refreshed it for this element
+  // during the current Jacobian assembly pass. The element pointer is stable across the
+  // per-column precalculate calls a single element receives.
+  if (_fbar_cache_elem == _current_elem)
+    return;
+
+  const unsigned int n_qp = _qrule->n_points();
+  _D_nl_cache.resize(n_qp);
+  if (_large_kinematics)
+  {
+    _F_ust_det_cache.resize(n_qp);
+    _F_ust_inv_T_cache.resize(n_qp);
+  }
+
+  for (unsigned int qp = 0; qp < n_qp; ++qp)
+  {
+    // Compose `D_nl_ijkl = cauchy_jacobian_ijab · d_dL_dF_abcd · d_F_stab_d_F_avg_cdkl`.
+    // The R4 middle-pair contraction matches the chain-rule semantics we need (the
+    // strain-calc helpers and the kernel already rely on this convention elsewhere).
+    _D_nl_cache[qp] = _cauchy_jacobian[qp] * _d_spatial_velocity_increment_d_F[qp] *
+                      _d_F_stab_d_F_avg[qp];
+
+    if (_large_kinematics)
+    {
+      _F_ust_det_cache[qp] = _F_ust[qp].det();
+      _F_ust_inv_T_cache[qp] = _F_ust[qp].inverse().transpose();
+    }
+  }
+
+  _fbar_cache_elem = _current_elem;
 }
 
 Real
@@ -154,11 +192,13 @@ LagrangianStressDivergenceBase::deltaPK1NonLocalFBar(const RankTwoTensor & delta
 {
   if (!_stabilize_strain)
     return RankTwoTensor();
-  const RankTwoTensor delta_F_stab_nl = _d_F_stab_d_F_avg[_qp] * delta_F_avg;
-  const RankTwoTensor delta_dL_nl = _d_spatial_velocity_increment_d_F[_qp] * delta_F_stab_nl;
-  const RankTwoTensor delta_sigma_nl = _cauchy_jacobian[_qp] * delta_dL_nl;
+  // Composed operator + cached per-qp scalars/tensors live in `_*_cache`, refreshed once
+  // per element by `prepareFBarCaches()`. Caller responsibility: `prepareFBarCaches()` has
+  // run for the current element (precalculate{,OffDiag}Jacobian both invoke it when
+  // `_stabilize_strain == true`).
+  const RankTwoTensor delta_sigma_nl = _D_nl_cache[_qp] * delta_F_avg;
   if (_large_kinematics)
-    return _F_ust[_qp].det() * delta_sigma_nl * _F_ust[_qp].inverse().transpose();
+    return _F_ust_det_cache[_qp] * delta_sigma_nl * _F_ust_inv_T_cache[_qp];
   return delta_sigma_nl;
 }
 
