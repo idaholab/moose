@@ -19,6 +19,7 @@
 #include "ActionWarehouse.h"
 #include "FEProblemBase.h"
 #include "InputParameters.h"
+#include "Distribution.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
@@ -33,6 +34,43 @@
 #include <fstream>
 #include <cstdio>
 #include <filesystem>
+#include <cmath>
+
+// implementation derived from Distribution to register for plotting checks
+class TestDistribution : public Distribution
+{
+public:
+  static InputParameters validParams()
+  {
+    InputParameters params = Distribution::validParams();
+    params.addRequiredParam<Real>("mean", "Mean of the distribution (alpha or mu)");
+    params.addRequiredParam<Real>("shape", "Shape of the distribution (beta or s)");
+    return params;
+  }
+  TestDistribution(const InputParameters & parameters)
+    : Distribution(parameters), _mean(getParam<Real>("mean")), _shape(getParam<Real>("shape"))
+  {
+  }
+  virtual Real pdf(const Real & x) const override
+  {
+    Real z = std::exp(-(x - _mean) / _shape);
+    return z / (_shape * std::pow(1.0 + z, 2));
+  }
+  virtual Real cdf(const Real & x) const override
+  {
+    return 1.0 / (1.0 + std::exp(-(x - _mean) / _shape));
+  }
+  virtual Real quantile(const Real & y) const override
+  {
+    return _mean - _shape * std::log(1.0 / y - 1.0);
+  }
+
+protected:
+  const Real & _mean;
+  const Real & _shape;
+};
+
+registerMooseObject("MooseUnitApp", TestDistribution);
 
 class MooseServerTest : public ::testing::Test
 {
@@ -351,7 +389,9 @@ protected:
                       double expect_xaxis_range_min,
                       double expect_xaxis_range_max,
                       double expect_yaxis_range_min,
-                      double expect_yaxis_range_max) const
+                      double expect_yaxis_range_max,
+                      std::size_t expect_num_plots = 1,
+                      std::size_t check_plot_index = 0) const
   {
     // build plotting extension request for server with provided parameters
     wasp::DataObject ext_request;
@@ -374,22 +414,31 @@ protected:
         wasp::lsp::dissectExtensionResponse(ext_response, response_errors, response_id, ext_array));
     EXPECT_TRUE(response_errors.str().empty());
     EXPECT_EQ(request_id, response_id);
-    EXPECT_EQ(1u, ext_array.size());
-    auto check_plot = wasp::deserializeCustomPlot(*(ext_array.at(0).to_object()));
+    EXPECT_EQ(expect_num_plots, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*(ext_array.at(check_plot_index).to_object()));
+
+    // lambda to check if vectors of doubles are equal with given tolerance
+    auto check_vecs = [](const std::vector<double> & v1, const std::vector<double> & v2, double tol)
+    {
+      ASSERT_EQ(v1.size(), v2.size());
+      for (std::size_t i = 0; i < v1.size(); i++)
+        EXPECT_NEAR(v1[i], v2[i], tol);
+    };
 
     // check dissected values of CustomPlot response object built by server
+    static const double test_tolerance = 1e-9;
     EXPECT_EQ(expect_title, check_plot->title().text());
     EXPECT_TRUE(check_plot->x1Axis().hasRangeMin());
     EXPECT_TRUE(check_plot->x1Axis().hasRangeMax());
     EXPECT_TRUE(check_plot->y1Axis().hasRangeMin());
     EXPECT_TRUE(check_plot->y1Axis().hasRangeMax());
-    EXPECT_EQ(expect_xaxis_range_min, check_plot->x1Axis().rangeMin());
-    EXPECT_EQ(expect_xaxis_range_max, check_plot->x1Axis().rangeMax());
-    EXPECT_EQ(expect_yaxis_range_min, check_plot->y1Axis().rangeMin());
-    EXPECT_EQ(expect_yaxis_range_max, check_plot->y1Axis().rangeMax());
+    EXPECT_NEAR(expect_xaxis_range_min, check_plot->x1Axis().rangeMin(), test_tolerance);
+    EXPECT_NEAR(expect_xaxis_range_max, check_plot->x1Axis().rangeMax(), test_tolerance);
+    EXPECT_NEAR(expect_yaxis_range_min, check_plot->y1Axis().rangeMin(), test_tolerance);
+    EXPECT_NEAR(expect_yaxis_range_max, check_plot->y1Axis().rangeMax(), test_tolerance);
     EXPECT_EQ(1u, check_plot->series().size());
-    EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
-    EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+    check_vecs(expect_keys, check_plot->series()[0]->keys(), test_tolerance);
+    check_vecs(expect_vals, check_plot->series()[0]->values(), test_tolerance);
   }
 
   // build watch files notification, handle using server, check diagnostics
@@ -2034,6 +2083,13 @@ time, 501, 502, 503, 504 # ignored comment
     y_index_in_file = 0
   []
 []
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = -39.8
+    shape = 2.7
+  []
+[]
 [Variables]
   [u]
   []
@@ -2233,6 +2289,77 @@ time, 501, 502, 503, 504 # ignored comment
                  expect_xaxis_range_max,
                  expect_yaxis_range_min,
                  expect_yaxis_range_max);
+
+  // continuous distribution plots sample on 200 discrete points by default
+  // so lower this to only be 12 points before requesting PDF and CDF plots
+  // then verify those 12 keys and values for each plot to simplify testing
+  moose_server->setDistPlotNumPoints(12);
+
+  // check plotting 07 - PDF for TestDistribution with mean and shape input
+  request_id = 33;
+  request_line = 52;
+  request_char = 16;
+  expect_title = "test_dist TestDistribution PDF Distribution";
+  std::size_t expect_num_plots = 2;
+  std::size_t check_plot_index = 0;
+  // clang-format off
+  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
+                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
+                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
+  expect_vals = std::vector<double>{0.000370000000, 0.001292407178, 0.004458329863, 0.014735771635,
+                                    0.042427104442, 0.084034413176, 0.084034413176, 0.042427104442,
+                                    0.014735771635, 0.004458329863, 0.001292407178, 0.000370000000};
+  // clang-format on
+  expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
+  expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
+  expect_yaxis_range_min = 0.000370000000 - ((0.084034413176 - 0.000370000000) * pad_factor);
+  expect_yaxis_range_max = 0.084034413176 + ((0.084034413176 - 0.000370000000) * pad_factor);
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max,
+                 expect_num_plots,
+                 check_plot_index);
+
+  // check plotting 08 - CDF for TestDistribution with mean and shape input
+  request_id = 34;
+  request_line = 52;
+  request_char = 16;
+  expect_title = "test_dist TestDistribution CDF Distribution";
+  expect_num_plots = 2;
+  check_plot_index = 1;
+  // clang-format off
+  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
+                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
+                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
+  expect_vals = std::vector<double>{0.001000000000, 0.003501761716, 0.012185988958, 0.041509633051,
+                                    0.131968998581, 0.347989854209, 0.652010145791, 0.868031001419,
+                                    0.958490366949, 0.987814011042, 0.996498238284, 0.999000000000};
+  // clang-format on
+  expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
+  expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
+  expect_yaxis_range_min = 0.001000000000 - ((0.999000000000 - 0.001000000000) * pad_factor);
+  expect_yaxis_range_max = 0.999000000000 + ((0.999000000000 - 0.001000000000) * pad_factor);
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max,
+                 expect_num_plots,
+                 check_plot_index);
 
   // remove csv files with data from disk that were referenced by functions
   std::remove("csv_row_basic.csv");
@@ -2537,7 +2664,7 @@ TEST_F(MooseServerTest, CompletionVariousWarehouses)
   problem->addUserObject("VerifyNodalUniqueID", "tst_usr_obj", usr_params);
 
   // check warehouse completion 01 - NonlinearVariableName type in VacuumBC
-  int request_id = 33;
+  int request_id = 35;
   int request_line = 22;
   int request_char = 20;
   std::size_t expect_count = 3;
@@ -2549,7 +2676,7 @@ label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [22.20]-[22
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 02 - AuxVariableName type param in VacuumBC
-  request_id = 34;
+  request_id = 36;
   request_line = 23;
   request_char = 20;
   expect_count = 2;
@@ -2560,7 +2687,7 @@ label: tst_aux_var text: tst_aux_var desc: from AuxiliarySys... pos: [23.20]-[23
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 03 - VariableName displacements in VacuumBC
-  request_id = 35;
+  request_id = 37;
   request_line = 24;
   request_char = 20;
   expect_count = 5;
@@ -2574,7 +2701,7 @@ label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [24.20]-[24
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 04 - MaterialName in ElementMaterialSampler
-  request_id = 36;
+  request_id = 38;
   request_line = 42;
   request_char = 15;
   expect_count = 3;
@@ -2586,7 +2713,7 @@ label: tst_matl_03 text: tst_matl_03 desc: from MaterialWare... pos: [42.15]-[42
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 05 - MaterialPropertyName type param in vpp
-  request_id = 37;
+  request_id = 39;
   request_line = 43;
   request_char = 15;
   expect_count = 6;
@@ -2601,7 +2728,7 @@ label: tst_prop_32 text: tst_prop_32 desc: from MaterialProp... pos: [43.15]-[43
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 06 - FunctionName in FunctionElementAverage
-  request_id = 38;
+  request_id = 40;
   request_line = 55;
   request_char = 15;
   expect_count = 2;
@@ -2613,7 +2740,7 @@ label: tst_con_fcn text: tst_con_fcn desc: from FunctionWare... pos: [55.15]-[55
 
   // check warehouse completion 07 - OutputName outputs in ConstantReporter
   // AutoCheckpointAction adds checkpoint / CommonOutputAction adds console
-  request_id = 39;
+  request_id = 41;
   request_line = 70;
   request_char = 14;
   expect_count = 7;
@@ -2629,7 +2756,7 @@ label: tst_outs_03 text: tst_outs_03 desc: from OutputWarehouse pos: [70.14]-[70
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
   // check warehouse completion 08 - UserObjectName type in PiecewiseLinear
-  request_id = 40;
+  request_id = 42;
   request_line = 49;
   request_char = 14;
   expect_count = 2;
@@ -2668,7 +2795,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 41;
+  int request_id = 43;
 
   // build shutdown request with the test parameters
 
