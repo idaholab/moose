@@ -42,7 +42,6 @@ public:
   LinearFVGradientField(
       const SystemBase & sys,
       const GradientContainer & components,
-      Moose::FV::LinearFVGradientFieldType field_type = Moose::FV::LinearFVGradientFieldType::Base,
       Moose::FV::GradientLimiterType limiter_type = Moose::FV::GradientLimiterType::None);
 
   /// Access the underlying component vectors keyed by spatial direction.
@@ -51,11 +50,8 @@ public:
   /// System whose DOF map indexes this field.
   const SystemBase & system() const { return _sys; }
 
-  /// Type of gradient values stored in this field.
-  Moose::FV::LinearFVGradientFieldType fieldType() const { return _field_type; }
-
   /// Whether this field stores limited gradients.
-  bool isLimited() const { return _field_type == Moose::FV::LinearFVGradientFieldType::Limited; }
+  bool isLimited() const { return _limiter_type != Moose::FV::GradientLimiterType::None; }
 
   /// Limiter type for limited fields, or None for base fields.
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
@@ -73,9 +69,6 @@ private:
 
   /// Component vectors keyed by spatial direction.
   const GradientContainer & _components;
-
-  /// Type of gradient values stored in this field.
-  const Moose::FV::LinearFVGradientFieldType _field_type;
 
   /// Limiter type for limited fields.
   const Moose::FV::GradientLimiterType _limiter_type;
@@ -175,6 +168,14 @@ protected:
   updateBaseGradientFieldForScheme(Moose::FV::LinearFVGradientSchemeType scheme_type,
                                    const std::unordered_set<unsigned int> & gradient_variables);
 
+  /// Compute unlimited gradients into a caller-provided container for variables registered to one
+  /// scheme.
+  void updateBaseGradientFieldForScheme(
+      Moose::FV::LinearFVGradientSchemeType scheme_type,
+      const std::unordered_set<unsigned int> & gradient_variables,
+      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & temporary_gradient,
+      bool have_registered_gradient_variables);
+
   /// Compute and store a requested limited gradient field.
   void updateLimitedGradient(const Moose::FV::GradientLimiterType limiter_type);
 
@@ -237,6 +238,34 @@ protected:
 
   void initializeLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type);
 
+  using GradientContainer = LinearFVGradientField::GradientContainer;
+
+  struct LinearFVGradientFieldStorage
+  {
+    LinearFVGradientFieldStorage(const FVGradientMethod & method) : method(method) {}
+
+    const FVGradientMethod & method;
+    std::unordered_set<unsigned int> variable_numbers;
+
+    /// Persistent gradient values read by consumers through field.
+    GradientContainer values;
+
+    /// Scratch space for the final output values before swapping into values.
+    GradientContainer output_scratch;
+
+    /// Scratch space for the unlimited gradient used as limiter input; empty for unlimited methods.
+    GradientContainer base_scratch;
+
+    /// Field handle returned to consumers and backed by values.
+    std::unique_ptr<LinearFVGradientField> field;
+  };
+
+  LinearFVGradientFieldStorage & methodGradientStorage(const FVGradientMethod & method);
+
+  void initializeMethodGradientStorage(LinearFVGradientFieldStorage & storage);
+
+  void updateMethodGradientStorage(LinearFVGradientFieldStorage & storage);
+
   /// Reference to the system object
   SystemBase & _sys;
 
@@ -258,9 +287,9 @@ protected:
   std::unordered_map<Moose::FV::LinearFVGradientSchemeType, std::unordered_set<unsigned int>>
       _registered_gradient_scheme_variables;
 
-  /// Variable numbers keyed by the method object that requested their gradients.
-  std::unordered_map<const FVGradientMethod *, std::unordered_set<unsigned int>>
-      _registered_gradient_method_variables;
+  /// Gradient field storages keyed by the method object that produces them.
+  std::unordered_map<const FVGradientMethod *, std::unique_ptr<LinearFVGradientFieldStorage>>
+      _registered_gradient_method_fields;
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
