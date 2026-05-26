@@ -12,6 +12,7 @@
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "AddAuxVariableAction.h"
 #include "AddVariableAction.h"
 #include "libmesh/string_to_enum.h"
 #include "BlockRestrictable.h"
@@ -274,39 +275,25 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                 Moose::stringify(species));
     }
     else if (_output_name_separator == ":")
+    {
+      _tokenized_species.resize(species.size());
       for (const auto i : index_range(species))
       {
-        _tokenized_species.resize(species.size());
         std::vector<std::string> tokens;
         MooseUtils::tokenize(species[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_species", "No ':' separator found in variable '", species[i], "'");
 
-        auto phase_index = std::find(db_phases.begin(), db_phases.end(), tokens[0]);
-        if (phase_index == db_phases.end())
-          paramError("output_species",
-                     "Phase '",
-                     tokens[0],
-                     "' of output species '",
-                     species[i],
-                     "' not found in the simulation.");
-        auto sp = db_species[std::distance(db_phases.begin(), phase_index)];
-        if (std::find(sp.begin(), sp.end(), tokens[1]) == sp.end())
-          paramError(
-              "output_species", "Species '", tokens[1], "' was not found in the simulation.");
-        _tokenized_species[i] = std::make_pair(tokens[0], tokens[1]);
+        _tokenized_species[i] =
+            validateSpeciesPair(species[i], tokens[0], tokens[1], db_phases, db_species);
       }
+    }
     else
+    {
+      _tokenized_species.resize(species.size());
       for (const auto i : index_range(species))
       {
-        _tokenized_species.resize(species.size());
-        if (species[i].find(_output_name_separator) == std::string::npos)
-          paramError("output_species",
-                     "No '",
-                     _output_name_separator,
-                     "' separator found in variable '",
-                     species[i],
-                     "'");
+        requireSeparator("output_species", species[i]);
 
         std::string found_phase;
         std::string found_species;
@@ -338,6 +325,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
 
         _tokenized_species[i] = std::make_pair(found_phase, found_species);
       }
+    }
   }
 
   if (isParamValid("output_element_potentials"))
@@ -359,16 +347,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       _tokenized_element_potentials.resize(element_potentials.size());
       for (const auto i : index_range(element_potentials))
       {
-        const auto prefix = "mu" + _output_name_separator;
-        if (element_potentials[i].rfind(prefix, 0) != 0)
-          paramError("output_element_potentials",
-                     "No '",
-                     _output_name_separator,
-                     "' separator found in variable '",
-                     element_potentials[i],
-                     "'");
-
-        const auto element_name = element_potentials[i].substr(prefix.size());
+        const auto element_name = payloadAfterPrefix(
+            "output_element_potentials", element_potentials[i], "mu" + _output_name_separator);
         if (std::find(_elements.begin(), _elements.end(), element_name) == _elements.end())
           paramError("output_element_potentials",
                      "Element '",
@@ -405,16 +385,8 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       _tokenized_vapor_species.resize(vapor_pressures.size());
       for (const auto i : index_range(vapor_pressures))
       {
-        const auto marker = "vp" + _output_name_separator;
-        if (vapor_pressures[i].rfind(marker, 0) != 0)
-          paramError("output_vapor_pressures",
-                     "No '",
-                     _output_name_separator,
-                     "' separator found in variable '",
-                     vapor_pressures[i],
-                     "'");
-
-        const auto payload = vapor_pressures[i].substr(marker.size());
+        const auto payload = payloadAfterPrefix(
+            "output_vapor_pressures", vapor_pressures[i], "vp" + _output_name_separator);
         const auto gas_phase = Thermochimica::getPhaseNamesSystem()[0];
         const auto gas_prefix = gas_phase + _output_name_separator;
         if (payload.rfind(gas_prefix, 0) != 0)
@@ -466,24 +438,11 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       _tokenized_phase_elements.resize(element_phases.size());
       for (const auto i : index_range(element_phases))
       {
-        const auto marker = "ep" + _output_name_separator;
-        if (element_phases[i].rfind(marker, 0) != 0)
-          paramError("output_element_phases",
-                     "No '",
-                     _output_name_separator,
-                     "' separator found in variable '",
-                     element_phases[i],
-                     "'");
-
-        const auto payload = element_phases[i].substr(marker.size());
+        const auto payload = payloadAfterPrefix(
+            "output_element_phases", element_phases[i], "ep" + _output_name_separator);
         const auto token_start = payload.rfind(_output_name_separator);
         if (token_start == std::string::npos)
-          paramError("output_element_phases",
-                     "No '",
-                     _output_name_separator,
-                     "' separator found in variable '",
-                     element_phases[i],
-                     "'");
+          requireSeparator("output_element_phases", element_phases[i]);
 
         const auto phase_name = payload.substr(0, token_start);
         const auto element_name = payload.substr(token_start + _output_name_separator.size());
@@ -527,35 +486,38 @@ ChemicalCompositionAction::act()
     auto params = _factory.getValidParams(aux_var_type);
     params.applySpecificParameters(parameters(), {"block"});
 
+    std::set<std::string> explicit_aux_variables;
+    for (const auto action : _awh.getActions<AddAuxVariableAction>())
+      explicit_aux_variables.insert(action->name());
+
+    auto add_aux_variable = [&](const std::string & name)
+    {
+      if (explicit_aux_variables.find(name) == explicit_aux_variables.end())
+        _problem->addAuxVariable(aux_var_type, name, params);
+    };
+
     for (const auto i : index_range(_elements))
-      _problem->addAuxVariable(aux_var_type, prefixedName(_elements[i]), params);
+      add_aux_variable(prefixedName(_elements[i]));
 
     for (const auto i : index_range(_phases))
-      _problem->addAuxVariable(aux_var_type, prefixedName(_phases[i]), params);
+      add_aux_variable(prefixedName(_phases[i]));
 
     for (const auto i : index_range(_tokenized_species))
-      _problem->addAuxVariable(aux_var_type,
-                               prefixedName(Moose::stringify(_tokenized_species[i],
-                                                             /* delim = */ _output_name_separator)),
-                               params);
+      add_aux_variable(prefixedName(Moose::stringify(_tokenized_species[i],
+                                                     /* delim = */ _output_name_separator)));
 
     for (const auto i : index_range(_tokenized_element_potentials))
-      _problem->addAuxVariable(
-          aux_var_type, prefixedName(joinName("mu", _tokenized_element_potentials[i])), params);
+      add_aux_variable(prefixedName(joinName("mu", _tokenized_element_potentials[i])));
 
     for (const auto i : index_range(_tokenized_vapor_species))
-      _problem->addAuxVariable(aux_var_type,
-                               prefixedName(joinName("vp",
-                                                     _tokenized_vapor_species[i].first,
-                                                     _tokenized_vapor_species[i].second)),
-                               params);
+      add_aux_variable(prefixedName(joinName("vp",
+                                             _tokenized_vapor_species[i].first,
+                                             _tokenized_vapor_species[i].second)));
 
     for (const auto i : index_range(_tokenized_phase_elements))
-      _problem->addAuxVariable(aux_var_type,
-                               prefixedName(joinName("ep",
-                                                     _tokenized_phase_elements[i].first,
-                                                     _tokenized_phase_elements[i].second)),
-                               params);
+      add_aux_variable(prefixedName(joinName("ep",
+                                             _tokenized_phase_elements[i].first,
+                                             _tokenized_phase_elements[i].second)));
   }
 
   //
@@ -681,6 +643,57 @@ ChemicalCompositionAction::joinName(const std::string & first,
                                     const std::string & third) const
 {
   return first + _output_name_separator + second + _output_name_separator + third;
+}
+
+std::string
+ChemicalCompositionAction::payloadAfterPrefix(const std::string & param_name,
+                                              const std::string & value,
+                                              const std::string & prefix) const
+{
+  if (value.rfind(prefix, 0) != 0)
+    separatorError(param_name, value);
+
+  return value.substr(prefix.size());
+}
+
+void
+ChemicalCompositionAction::requireSeparator(const std::string & param_name,
+                                            const std::string & value) const
+{
+  if (value.find(_output_name_separator) == std::string::npos)
+    separatorError(param_name, value);
+}
+
+void
+ChemicalCompositionAction::separatorError(const std::string & param_name,
+                                          const std::string & value) const
+{
+  paramError(
+      param_name, "No '", _output_name_separator, "' separator found in variable '", value, "'");
+}
+
+std::pair<std::string, std::string>
+ChemicalCompositionAction::validateSpeciesPair(
+    const std::string & value,
+    const std::string & phase_name,
+    const std::string & species_name,
+    const std::vector<std::string> & db_phases,
+    const std::vector<std::vector<std::string>> & db_species) const
+{
+  auto phase_index = std::find(db_phases.begin(), db_phases.end(), phase_name);
+  if (phase_index == db_phases.end())
+    paramError("output_species",
+               "Phase '",
+               phase_name,
+               "' of output species '",
+               value,
+               "' not found in the simulation.");
+
+  const auto & species = db_species[std::distance(db_phases.begin(), phase_index)];
+  if (std::find(species.begin(), species.end(), species_name) == species.end())
+    paramError("output_species", "Species '", species_name, "' was not found in the simulation.");
+
+  return std::make_pair(phase_name, species_name);
 }
 
 void

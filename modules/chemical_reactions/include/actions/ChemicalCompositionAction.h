@@ -52,6 +52,17 @@ protected:
   std::string joinName(const std::string & first, const std::string & second) const;
   std::string
   joinName(const std::string & first, const std::string & second, const std::string & third) const;
+  std::string payloadAfterPrefix(const std::string & param_name,
+                                 const std::string & value,
+                                 const std::string & prefix) const;
+  void requireSeparator(const std::string & param_name, const std::string & value) const;
+  void separatorError(const std::string & param_name, const std::string & value) const;
+  std::pair<std::string, std::string>
+  validateSpeciesPair(const std::string & value,
+                      const std::string & phase_name,
+                      const std::string & species_name,
+                      const std::vector<std::string> & db_phases,
+                      const std::vector<std::vector<std::string>> & db_species) const;
   void readCSV();
 
   /// Element names
