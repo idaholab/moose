@@ -16,6 +16,7 @@
 class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
 class LinearFVAdvectionDiffusionBC;
+class LinearFVGradientField;
 
 /**
  * Kernel that implements the stress tensor and advection terms for the momentum
@@ -131,6 +132,12 @@ protected:
   /// Velocity variables for each coordinate direction
   std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
 
+  /// Gradient field used for the kernel variable nonorthogonal correction.
+  const LinearFVGradientField * _gradient_field;
+
+  /// Gradient fields used for velocity variables in deviatoric stress terms.
+  std::array<const LinearFVGradientField *, 3> _velocity_gradient_fields;
+
   /// Coordinate system of the blocks this kernel operates on
   const Moose::CoordinateSystemType _coord_type;
 
@@ -139,4 +146,7 @@ protected:
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
+
+  /// Helper to access the velocity gradient field for a given direction
+  const LinearFVGradientField & velocityGradientField(unsigned int dir) const;
 };
