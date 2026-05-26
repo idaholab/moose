@@ -9,6 +9,12 @@
 
 #include "FVGradientMethod.h"
 
+#include "ComputeLinearFVLimitedGradientThread.h"
+#include "FEProblemBase.h"
+#include "SystemBase.h"
+
+#include "libmesh/numeric_vector.h"
+
 namespace
 {
 Moose::FV::GradientLimiterType
@@ -30,8 +36,8 @@ FVGradientMethod::validParams()
   params.registerBase("FVGradientMethod");
   params.registerSystemAttributeName("FVGradientMethod");
   params.addClassDescription("Base class for defining cell-centered gradient methods used by "
-                             "linear finite volume objects. The method produces unlimited "
-                             "gradients and the system applies the selected limiter.");
+                             "linear finite volume objects. The method produces final gradient "
+                             "values, including the selected limiter when requested.");
   params.addParam<MooseEnum>("limiter",
                              MooseEnum("none venkatakrishnan", "none"),
                              "Limiter to apply to gradients produced by this method.");
@@ -41,4 +47,54 @@ FVGradientMethod::validParams()
 FVGradientMethod::FVGradientMethod(const InputParameters & params)
   : MooseObject(params), _limiter_type(selectGradientLimiter(getParam<MooseEnum>("limiter")))
 {
+}
+
+void
+FVGradientMethod::computeGradient(SystemBase & system,
+                                  GradientContainer & output_gradient,
+                                  GradientContainer & scratch_gradient,
+                                  const std::unordered_set<unsigned int> & variable_numbers) const
+{
+  if (_limiter_type == Moose::FV::GradientLimiterType::None)
+  {
+    for (auto & vec : output_gradient)
+      vec->zero();
+
+    computeGradientWithoutLimiter(system, output_gradient, scratch_gradient, variable_numbers);
+
+    for (auto & vec : output_gradient)
+      vec->close();
+
+    return;
+  }
+
+  mooseAssert(scratch_gradient.size() == output_gradient.size(),
+              "Scratch and output gradient containers must have the same size.");
+
+  for (auto & vec : scratch_gradient)
+    vec->zero();
+
+  computeGradientWithoutLimiter(system, scratch_gradient, output_gradient, variable_numbers);
+
+  for (auto & vec : scratch_gradient)
+    vec->close();
+
+  for (auto & vec : output_gradient)
+    vec->zero();
+
+  auto & fe_problem = system.feProblem();
+  using ElemInfoRange = ComputeLinearFVLimitedGradientThread::ElemInfoRange;
+  ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
+                                fe_problem.mesh().ownedElemInfoEnd());
+
+  PARALLEL_TRY
+  {
+    ComputeLinearFVLimitedGradientThread limited_gradient_thread(
+        fe_problem, system, scratch_gradient, output_gradient, _limiter_type, variable_numbers);
+    Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
+  }
+  fe_problem.checkExceptionAndStopSolve();
+
+  for (auto & vec : output_gradient)
+    vec->close();
 }
