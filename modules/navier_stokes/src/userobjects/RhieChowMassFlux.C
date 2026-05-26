@@ -177,6 +177,15 @@ RhieChowMassFlux::linkMomentumPressureSystems(
       paramError("momentum_pressure_kernel",
                  "The provided kernel should be of type LinearFVMomentumPressure.");
 
+    if (dynamic_cast<const FVReconstructedPressureGradient *>(
+            &pressure_kernel->pressureGradientField().method()) &&
+        pressure_kernel->pressureVariableNumber() != _p->number())
+      paramError("momentum_pressure_kernel",
+                 "FVReconstructedPressureGradient can only be used for the pressure variable "
+                 "registered on RhieChowMassFlux '",
+                 name(),
+                 "'.");
+
     _pressure_gradient_field = &pressure_kernel->pressureGradientField();
   }
 

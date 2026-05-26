@@ -75,12 +75,6 @@ FVReconstructedPressureGradient::computeGradient(
 {
   const auto & rc = system.feProblem().getUserObject<RhieChowMassFlux>(_rhie_chow_user_object_name);
 
-  if (!rc.hasReconstructedCellVelocity())
-  {
-    baseGradientMethod(system).computeGradient(system, output_gradient, variable_numbers);
-    return;
-  }
-
   for (const auto variable_number : variable_numbers)
     if (variable_number != rc.pressureVariableNumber())
       mooseError("FVReconstructedPressureGradient '",
@@ -88,6 +82,12 @@ FVReconstructedPressureGradient::computeGradient(
                  "' can only be used for the pressure variable registered on RhieChowMassFlux '",
                  _rhie_chow_user_object_name,
                  "'.");
+
+  if (!rc.hasReconstructedCellVelocity())
+  {
+    baseGradientMethod(system).computeGradient(system, output_gradient, variable_numbers);
+    return;
+  }
 
   baseGradientMethod(system).computeGradient(system, output_gradient, variable_numbers);
 

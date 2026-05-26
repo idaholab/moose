@@ -38,6 +38,9 @@ public:
   /// Pressure gradient field used by this kernel.
   const LinearFVGradientField & pressureGradientField() const { return _pressure_gradient_field; }
 
+  /// Variable number of the pressure-like variable used by this kernel.
+  unsigned int pressureVariableNumber() const { return _pressure_var.number(); }
+
 protected:
   MooseLinearVariableFV<Real> & getPressureVariable(const std::string & vname);
 

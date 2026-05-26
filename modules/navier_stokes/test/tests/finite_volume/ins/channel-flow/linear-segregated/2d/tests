@@ -34,6 +34,17 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-wrong-variable]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-variable.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/pressure=wrong_pressure'
+    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is registered for a variable other than the pressure variable owned by the "
+                  "Rhie-Chow user object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
