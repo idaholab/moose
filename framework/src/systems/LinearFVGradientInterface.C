@@ -24,9 +24,15 @@ using namespace libMesh;
 
 LinearFVGradientField::LinearFVGradientField(const SystemBase & sys,
                                              const GradientContainer & components,
-                                             const Moose::FV::GradientLimiterType limiter_type)
-  : _sys(sys), _components(components), _limiter_type(limiter_type)
+                                             const FVGradientMethod & method)
+  : _sys(sys), _components(components), _method(method)
 {
+}
+
+Moose::FV::GradientLimiterType
+LinearFVGradientField::limiterType() const
+{
+  return _method.limiterType();
 }
 
 Real
@@ -146,8 +152,7 @@ LinearFVGradientInterface::methodGradientStorage(const FVGradientMethod & method
     return *it->second;
 
   auto storage = std::make_unique<LinearFVGradientFieldStorage>(method);
-  storage->field =
-      std::make_unique<LinearFVGradientField>(_sys, storage->values, method.limiterType());
+  storage->field = std::make_unique<LinearFVGradientField>(_sys, storage->values, method);
 
   auto & storage_ref = *storage;
   _registered_gradient_method_fields.emplace(&method, std::move(storage));
