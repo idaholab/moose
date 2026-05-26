@@ -9,6 +9,11 @@
 
 #include "FVGreenGaussGradient.h"
 
+#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
+#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
+#include "FEProblemBase.h"
+#include "SystemBase.h"
+
 registerMooseObject("MooseApp", FVGreenGaussGradient);
 
 InputParameters
@@ -24,8 +29,38 @@ FVGreenGaussGradient::FVGreenGaussGradient(const InputParameters & params)
 {
 }
 
-Moose::FV::LinearFVGradientSchemeType
-FVGreenGaussGradient::schemeType() const
+void
+FVGreenGaussGradient::computeGradient(
+    SystemBase & system,
+    GradientContainer & output_gradient,
+    const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  return Moose::FV::LinearFVGradientSchemeType::GreenGauss;
+  auto & fe_problem = system.feProblem();
+
+  PARALLEL_TRY
+  {
+    using FaceInfoRange = ComputeLinearFVGreenGaussGradientFaceThread::FaceInfoRange;
+    FaceInfoRange face_info_range(fe_problem.mesh().ownedFaceInfoBegin(),
+                                  fe_problem.mesh().ownedFaceInfoEnd());
+
+    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
+        fe_problem, system, output_gradient, variable_numbers, true);
+    Threads::parallel_reduce(face_info_range, gradient_face_thread);
+  }
+  fe_problem.checkExceptionAndStopSolve();
+
+  for (auto & vec : output_gradient)
+    vec->close();
+
+  PARALLEL_TRY
+  {
+    using ElemInfoRange = ComputeLinearFVGreenGaussGradientVolumeThread::ElemInfoRange;
+    ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
+                                  fe_problem.mesh().ownedElemInfoEnd());
+
+    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
+        fe_problem, system, output_gradient, variable_numbers, true);
+    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
+  }
+  fe_problem.checkExceptionAndStopSolve();
 }
