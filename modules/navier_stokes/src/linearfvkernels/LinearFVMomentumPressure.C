@@ -40,11 +40,11 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
+    _pressure_gradient_field(_pressure_var.computeCellGradients()),
     _rhie_chow_mass_flux(isParamValid("rhie_chow_user_object")
                              ? &getUserObject<RhieChowMassFlux>("rhie_chow_user_object")
                              : nullptr)
 {
-  _pressure_var.computeCellGradients();
 }
 
 MooseLinearVariableFV<Real> &
@@ -69,7 +69,8 @@ Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
   const Real pressure_gradient =
-      _rhie_chow_mass_flux ? _rhie_chow_mass_flux->pressureGradient(*_current_elem_info, _index)
-                           : _pressure_var.gradSlnComponent(*_current_elem_info, _index);
+      _rhie_chow_mass_flux
+          ? _rhie_chow_mass_flux->pressureGradient(*_current_elem_info, _index)
+          : _pressure_var.gradSlnComponent(*_current_elem_info, _index, _pressure_gradient_field);
   return -pressure_gradient * _current_elem_volume;
 }

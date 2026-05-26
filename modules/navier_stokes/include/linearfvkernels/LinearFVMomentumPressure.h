@@ -11,6 +11,7 @@
 
 #include "LinearFVElementalKernel.h"
 
+class LinearFVGradientField;
 class RhieChowMassFlux;
 
 /**
@@ -45,6 +46,9 @@ protected:
 
   /// Pointer to the linear finite volume pressure variable
   MooseLinearVariableFV<Real> & _pressure_var;
+
+  /// Pressure gradient field used when no Rhie-Chow object supplies one.
+  const LinearFVGradientField & _pressure_gradient_field;
 
   /// Optional Rhie-Chow object supplying alternate pressure gradients
   const RhieChowMassFlux * const _rhie_chow_mass_flux;
