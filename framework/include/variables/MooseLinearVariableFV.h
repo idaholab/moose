@@ -23,7 +23,6 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
-#include <array>
 #include <unordered_map>
 
 template <typename>
@@ -126,13 +125,6 @@ public:
   computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
-   * Compatibility bridge for consumers that still request limited gradients by limiter.
-   * @param limiter_type Limiter requested by the caller.
-   */
-  const LinearFVGradientField &
-  computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
-  /**
    * Check if cell gradient computations were requested for this variable.
    */
   virtual bool needsGradientVectorStorage() const override { return _needs_cell_gradients; }
@@ -182,26 +174,6 @@ public:
                         const LinearFVGradientField & field) const;
 
   /**
-   * Get either the default or limiter-selected compatibility gradient at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> gradSln(const ElemInfo & elem_info,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Get the limited gradient at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
    * Compute interpolated gradient on the provided face.
    * @param fi The face for which to retrieve the gradient
    * @param state State argument describing which solution state to evaluate
@@ -216,26 +188,6 @@ public:
    */
   VectorValue<Real>
   gradSln(const FaceInfo & fi, const StateArg & state, const LinearFVGradientField & field) const;
-
-  /**
-   * Compute interpolated default/limiter-selected compatibility gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> gradSln(const FaceInfo & fi,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Compute interpolated limited gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const FaceInfo & fi,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
@@ -305,21 +257,6 @@ protected:
   const LinearFVGradientField & registerCellGradientMethod(const FVGradientMethod & method);
 
   /**
-   * Cache a limited gradient field for compatibility callers that request by limiter type.
-   * @param limiter_type Limiter used by the cached gradient field.
-   * @param field Gradient field to cache for the limiter.
-   */
-  void setLimitedGradientField(const Moose::FV::GradientLimiterType limiter_type,
-                               const LinearFVGradientField & field);
-
-  /**
-   * Fetch a cached limited gradient field for compatibility callers.
-   * @param limiter_type Limiter whose cached gradient field should be returned.
-   */
-  const LinearFVGradientField &
-  limitedGradientField(const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
    * Setup the boundary to Dirichlet BC map
    */
   void cacheBoundaryBCMap();
@@ -344,9 +281,6 @@ protected:
 
   /// Default gradient method registered when consumers request gradients from this variable.
   const GradientMethodName _default_gradient_method_name;
-
-  /// Compatibility cache for limiter-based consumers; method-based consumers should cache fields.
-  std::array<const LinearFVGradientField *, 1> _limited_gradient_field_cache;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
