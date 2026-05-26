@@ -118,39 +118,42 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 }
 
 template <typename OutputType>
-void
+const LinearFVGradientField &
 MooseLinearVariableFV<OutputType>::computeCellGradients()
 {
-  _needs_cell_gradients = true;
-
   const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  _gradient_field = _linear_system ? &_linear_system->registerFVGradient(this->_var_num, method)
-                                   : &_auxiliary_system->registerFVGradient(this->_var_num, method);
+  const auto & field = computeCellGradients(method);
+  _gradient_field = &field;
+  return field;
 }
 
 template <typename OutputType>
-void
+const LinearFVGradientField &
+MooseLinearVariableFV<OutputType>::computeCellGradients(const FVGradientMethod & method)
+{
+  return registerCellGradientMethod(method);
+}
+
+template <typename OutputType>
+const LinearFVGradientField &
 MooseLinearVariableFV<OutputType>::computeCellGradients(
     const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
-    computeCellGradients();
+    return computeCellGradients();
   else
-    computeCellLimitedGradients(limiter_type);
+    return computeCellLimitedGradients(limiter_type);
 }
 
 template <typename OutputType>
-void
+const LinearFVGradientField &
 MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
     const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
   {
-    computeCellGradients();
-    return;
+    return computeCellGradients();
   }
-
-  _needs_cell_gradients = true;
 
   const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
   if (method.limiterType() != limiter_type)
@@ -159,10 +162,26 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
                "' requested limited gradients with a limiter that differs from its "
                "gradient_method. Set the limiter on the [FVGradientMethods] object instead.");
 
+  auto & gradient_field = computeCellGradients(method);
+  setLimitedGradientField(limiter_type, gradient_field);
+  return gradient_field;
+}
+
+template <typename OutputType>
+const LinearFVGradientField &
+MooseLinearVariableFV<OutputType>::registerCellGradientMethod(const FVGradientMethod & method)
+{
+  _needs_cell_gradients = true;
+
+  const auto it = _gradient_field_cache.find(&method);
+  if (it != _gradient_field_cache.end())
+    return *it->second;
+
   auto & gradient_field = _linear_system
                               ? _linear_system->registerFVGradient(this->_var_num, method)
                               : _auxiliary_system->registerFVGradient(this->_var_num, method);
-  setLimitedGradientField(limiter_type, gradient_field);
+  _gradient_field_cache.emplace(&method, &gradient_field);
+  return gradient_field;
 }
 
 template <typename OutputType>
@@ -231,18 +250,28 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
+  mooseAssert(_gradient_field, "Gradient requested without calling computeCellGradients().");
+  return gradSln(elem_info, state, *_gradient_field);
+}
+
+template <typename OutputType>
+VectorValue<Real>
+MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
+                                           const StateArg & state,
+                                           const LinearFVGradientField & field) const
+{
   if (state.state != 0)
     gradientStateError(state);
 
-  if (_needs_cell_gradients)
-  {
-    const auto & gradient_components = _gradient_field->components();
-    const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
+  mooseAssert(&field.system() == &this->_sys,
+              "Gradient field requested on a variable from a different system.");
 
-    _cell_gradient.zero();
-    for (const auto i : make_range(this->_mesh.dimension()))
-      _cell_gradient(i) = (*gradient_components[i])(dof);
-  }
+  const auto & gradient_components = field.components();
+  const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
+
+  _cell_gradient.zero();
+  for (const auto i : make_range(this->_mesh.dimension()))
+    _cell_gradient(i) = (*gradient_components[i])(dof);
 
   return _cell_gradient;
 }
@@ -252,9 +281,20 @@ Real
 MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
                                                     const unsigned int component) const
 {
-  mooseAssert(_needs_cell_gradients,
+  mooseAssert(_gradient_field,
               "Gradient component requested without calling computeCellGradients().");
-  const auto & gradient_components = _gradient_field->components();
+  return gradSlnComponent(elem_info, component, *_gradient_field);
+}
+
+template <typename OutputType>
+Real
+MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
+                                                    const unsigned int component,
+                                                    const LinearFVGradientField & field) const
+{
+  mooseAssert(&field.system() == &this->_sys,
+              "Gradient field requested on a variable from a different system.");
+  const auto & gradient_components = field.components();
   mooseAssert(component < gradient_components.size(), "Gradient component index out of range.");
 
   return (*gradient_components[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
@@ -278,22 +318,22 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     const StateArg & state,
     const Moose::FV::GradientLimiterType limiter_type) const
 {
-  if (state.state != 0)
-    gradientStateError(state);
-
-  _cell_gradient.zero();
-  const auto & limited_gradient_field = limitedGradientField(limiter_type);
-  const auto & gradient_components = limited_gradient_field.components();
-  const auto dof = elem_info.dofIndices()[this->_sys_num][this->_var_num];
-  for (const auto i : make_range(this->_mesh.dimension()))
-    _cell_gradient(i) = (*gradient_components[i])(dof);
-
-  return _cell_gradient;
+  return gradSln(elem_info, state, limitedGradientField(limiter_type));
 }
 
 template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
+{
+  mooseAssert(_gradient_field, "Gradient requested without calling computeCellGradients().");
+  return gradSln(fi, state, *_gradient_field);
+}
+
+template <typename OutputType>
+VectorValue<Real>
+MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi,
+                                           const StateArg & state,
+                                           const LinearFVGradientField & field) const
 {
   const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
@@ -304,13 +344,13 @@ MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg &
   const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
   const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
 
-  const auto elem_one_grad = gradSln(*elem_one, state);
+  const auto elem_one_grad = gradSln(*elem_one, state, field);
 
   // If we have a neighbor then we interpolate between the two to the face.
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = gradSln(*elem_two, state);
+    const auto elem_two_grad = gradSln(*elem_two, state, field);
     return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
   }
   else
@@ -335,26 +375,7 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     const StateArg & state,
     const Moose::FV::GradientLimiterType limiter_type) const
 {
-  const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
-  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
-              "Limited gradient requested on a face where the variable is defined on neither "
-              "side.");
-
-  const bool var_defined_on_elem = (face_type == FaceInfo::VarFaceNeighbors::BOTH) ||
-                                   (face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
-  const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
-
-  const auto elem_one_grad = limitedGradSln(*elem_one, state, limiter_type);
-
-  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = limitedGradSln(*elem_two, state, limiter_type);
-    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
-  }
-  else
-    return elem_one_grad;
+  return gradSln(fi, state, limitedGradientField(limiter_type));
 }
 
 template <typename OutputType>
