@@ -46,7 +46,6 @@
     max_parallel = 1
     recover = false
   []
-<<<<<<< HEAD
   [MFEMCoupledCoefficientSource]
     type = XMLDiff
     input = magnetostatic.i
@@ -63,7 +62,6 @@
     max_parallel = 1
     recover = false
   []
-=======
   [MFEMCoupledSubmeshVariableSource]
     type = CSVDiff
     input = submesh_av_magnetostatic.i
@@ -71,9 +69,9 @@
     requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables defined on a submesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    max_threads = 1 # # MUMPS solver failing on multiple threads
     recover = false
-  []   
->>>>>>> c8522901de (Add magnetostatic test problem using MFEM mixed form integrators with a submesh-restricted trial variable. Refs #32462)
+  []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
