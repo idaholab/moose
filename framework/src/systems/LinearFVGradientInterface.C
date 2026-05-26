@@ -17,6 +17,8 @@
 #include "MooseVariableFieldBase.h"
 #include "MooseError.h"
 #include "ElemInfo.h"
+#include "FaceInfo.h"
+#include "MathFVUtils.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -24,8 +26,9 @@ using namespace libMesh;
 
 LinearFVGradientField::LinearFVGradientField(const SystemBase & sys,
                                              const GradientContainer & components,
-                                             const FVGradientMethod & method)
-  : _sys(sys), _components(components), _method(method)
+                                             const FVGradientMethod & method,
+                                             const unsigned int variable_number)
+  : _sys(sys), _components(components), _method(method), _variable_number(variable_number)
 {
 }
 
@@ -36,26 +39,47 @@ LinearFVGradientField::limiterType() const
 }
 
 Real
-LinearFVGradientField::component(const ElemInfo & elem_info,
-                                 const unsigned int variable_number,
-                                 const unsigned int component) const
+LinearFVGradientField::component(const ElemInfo & elem_info, const unsigned int component) const
 {
   mooseAssert(component < _components.size(), "Gradient component index out of range.");
 
-  return (*_components[component])(elem_info.dofIndices()[_sys.number()][variable_number]);
+  return (*_components[component])(elem_info.dofIndices()[_sys.number()][_variable_number]);
 }
 
 RealVectorValue
-LinearFVGradientField::gradient(const ElemInfo & elem_info,
-                                const unsigned int variable_number) const
+LinearFVGradientField::gradient(const ElemInfo & elem_info) const
 {
   RealVectorValue value;
   value.zero();
 
   for (const auto component_index : make_range(_sys.mesh().dimension()))
-    value(component_index) = component(elem_info, variable_number, component_index);
+    value(component_index) = component(elem_info, component_index);
 
   return value;
+}
+
+RealVectorValue
+LinearFVGradientField::gradient(const FaceInfo & fi) const
+{
+  const auto face_type = fi.faceType(std::make_pair(_variable_number, _sys.number()));
+  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
+              "Gradient requested on a face where the variable is defined on neither side.");
+
+  const bool var_defined_on_elem = (face_type == FaceInfo::VarFaceNeighbors::BOTH) ||
+                                   (face_type == FaceInfo::VarFaceNeighbors::ELEM);
+  const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
+  const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
+
+  const auto elem_one_grad = gradient(*elem_one);
+
+  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
+    const auto elem_two_grad = gradient(*elem_two);
+    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
+  }
+  else
+    return elem_one_grad;
 }
 
 LinearFVGradientField &
@@ -74,10 +98,14 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
   auto & storage = methodGradientStorage(method);
   storage.variable_numbers.insert(variable_number);
 
+  auto & field = storage.fields[variable_number];
+  if (!field)
+    field = std::make_unique<LinearFVGradientField>(_sys, storage.values, method, variable_number);
+
   if (storage.values.empty() && _sys.currentSolution())
     initializeMethodGradientStorage(storage);
 
-  return *storage.field;
+  return *field;
 }
 
 void
@@ -106,21 +134,21 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientField & field)
                _sys.name(),
                "'.");
 
-  for (auto & method_field_pair : _registered_gradient_method_fields)
-    if (method_field_pair.second->field.get() == &field)
-    {
-      auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
-      mooseAssert(perf_graph_interface,
-                  "LinearFVGradientInterface requires its owning system to implement "
-                  "PerfGraphInterface.");
-      const auto perf_id =
-          perf_graph_interface->registerTimedSection("LinearVariableFV_Gradients", 3);
-      mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
-      PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
+  const auto method_field_pair = _registered_gradient_method_fields.find(&field.method());
+  if (method_field_pair != _registered_gradient_method_fields.end())
+  {
+    auto * const perf_graph_interface = dynamic_cast<PerfGraphInterface *>(&_sys);
+    mooseAssert(perf_graph_interface,
+                "LinearFVGradientInterface requires its owning system to implement "
+                "PerfGraphInterface.");
+    const auto perf_id =
+        perf_graph_interface->registerTimedSection("LinearVariableFV_Gradients", 3);
+    mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
+    PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
-      updateMethodGradientStorage(*method_field_pair.second);
-      return;
-    }
+    updateMethodGradientStorage(*method_field_pair->second);
+    return;
+  }
 
   mooseError("Requested update for an unregistered linear FV gradient field on system '",
              _sys.name(),
@@ -152,7 +180,6 @@ LinearFVGradientInterface::methodGradientStorage(const FVGradientMethod & method
     return *it->second;
 
   auto storage = std::make_unique<LinearFVGradientFieldStorage>(method);
-  storage->field = std::make_unique<LinearFVGradientField>(_sys, storage->values, method);
 
   auto & storage_ref = *storage;
   _registered_gradient_method_fields.emplace(&method, std::move(storage));

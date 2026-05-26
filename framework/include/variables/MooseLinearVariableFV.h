@@ -147,16 +147,6 @@ public:
   VectorValue<Real> gradSln(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
-   * Get the variable gradient from a cached gradient field at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param field Gradient field returned by computeCellGradients()
-   */
-  VectorValue<Real> gradSln(const ElemInfo & elem_info,
-                            const StateArg & state,
-                            const LinearFVGradientField & field) const;
-
-  /**
    * Get one default gradient component at a cell center without materializing the full gradient.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param component The gradient component to retrieve
@@ -164,30 +154,11 @@ public:
   Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
 
   /**
-   * Get one gradient component from a cached gradient field at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param component The gradient component to retrieve
-   * @param field Gradient field returned by computeCellGradients()
-   */
-  Real gradSlnComponent(const ElemInfo & elem_info,
-                        unsigned int component,
-                        const LinearFVGradientField & field) const;
-
-  /**
    * Compute interpolated gradient on the provided face.
    * @param fi The face for which to retrieve the gradient
    * @param state State argument describing which solution state to evaluate
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
-
-  /**
-   * Compute interpolated gradient from a cached gradient field on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param field Gradient field returned by computeCellGradients()
-   */
-  VectorValue<Real>
-  gradSln(const FaceInfo & fi, const StateArg & state, const LinearFVGradientField & field) const;
 
   virtual void initialSetup() override;
   virtual void timestepSetup() override;

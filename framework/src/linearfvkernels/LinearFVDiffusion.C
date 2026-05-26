@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("MooseApp", LinearFVDiffusion);
 
@@ -138,13 +139,11 @@ LinearFVDiffusion::computeFluxRHSContribution()
   // if the nonorthogonal correction is enabled.
   if (_use_nonorthogonal_correction && !_cached_rhs_contribution)
   {
-    const auto state = determineState();
     mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
 
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state, *_gradient_field);
-    const auto & grad_neighbor =
-        _var.gradSln(*_current_face_info->neighborInfo(), state, *_gradient_field);
+    const auto grad_elem = _gradient_field->gradient(*_current_face_info->elemInfo());
+    const auto grad_neighbor = _gradient_field->gradient(*_current_face_info->neighborInfo());
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs =
@@ -222,9 +221,8 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
     mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
-    grad_contrib += _diffusion_coeff(face_arg, state) *
-                    _var.gradSln(*elem_info, state, *_gradient_field) * boundary_normal_multiplier *
-                    correction_vector * _current_face_area;
+    grad_contrib += _diffusion_coeff(face_arg, state) * _gradient_field->gradient(*elem_info) *
+                    boundary_normal_multiplier * correction_vector * _current_face_area;
   }
 
   return grad_contrib;

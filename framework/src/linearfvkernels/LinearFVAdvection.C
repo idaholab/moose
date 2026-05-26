@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("MooseApp", LinearFVAdvection);
 
@@ -60,8 +61,8 @@ LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
   if (_adv_interp_method.needsGradients())
   {
     mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
-    _elem_grad_storage = _var.gradSln(elem_info, state, *_gradient_field);
-    _neighbor_grad_storage = _var.gradSln(neighbor_info, state, *_gradient_field);
+    _elem_grad_storage = _gradient_field->gradient(elem_info);
+    _neighbor_grad_storage = _gradient_field->gradient(neighbor_info);
   }
 
   _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
