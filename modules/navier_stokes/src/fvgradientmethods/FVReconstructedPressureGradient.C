@@ -68,9 +68,10 @@ FVReconstructedPressureGradient::baseGradientMethod(SystemBase & system) const
 }
 
 void
-FVReconstructedPressureGradient::computeGradient(
+FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & output_gradient,
+    GradientContainer & scratch_gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   const auto & rc = system.feProblem().getUserObject<RhieChowMassFlux>(_rhie_chow_user_object_name);
@@ -85,11 +86,13 @@ FVReconstructedPressureGradient::computeGradient(
 
   if (!rc.hasReconstructedCellVelocity())
   {
-    baseGradientMethod(system).computeGradient(system, output_gradient, variable_numbers);
+    baseGradientMethod(system).computeGradient(
+        system, output_gradient, scratch_gradient, variable_numbers);
     return;
   }
 
-  baseGradientMethod(system).computeGradient(system, output_gradient, variable_numbers);
+  baseGradientMethod(system).computeGradient(
+      system, output_gradient, scratch_gradient, variable_numbers);
 
   for (auto & component : output_gradient)
     component->close();

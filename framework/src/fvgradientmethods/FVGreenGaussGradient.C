@@ -30,9 +30,10 @@ FVGreenGaussGradient::FVGreenGaussGradient(const InputParameters & params)
 }
 
 void
-FVGreenGaussGradient::computeGradient(
+FVGreenGaussGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & output_gradient,
+    GradientContainer &,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   auto & fe_problem = system.feProblem();

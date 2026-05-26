@@ -21,11 +21,13 @@ public:
 
   FVReconstructedPressureGradient(const InputParameters & params);
 
-  void computeGradient(SystemBase & system,
-                       GradientContainer & output_gradient,
-                       const std::unordered_set<unsigned int> & variable_numbers) const override;
-
 private:
+  void computeGradientWithoutLimiter(
+      SystemBase & system,
+      GradientContainer & output_gradient,
+      GradientContainer & scratch_gradient,
+      const std::unordered_set<unsigned int> & variable_numbers) const override;
+
   const FVGradientMethod & baseGradientMethod(SystemBase & system) const;
 
   const UserObjectName _rhie_chow_user_object_name;

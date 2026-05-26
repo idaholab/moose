@@ -119,11 +119,11 @@ protected:
     /// Persistent gradient values read by consumers through field.
     GradientContainer values;
 
-    /// Scratch space for the final output values before swapping into values.
+    /// Scratch space where the method writes final values before swapping into values.
     GradientContainer output_scratch;
 
-    /// Scratch space for the unlimited gradient used as limiter input; empty for unlimited methods.
-    GradientContainer base_scratch;
+    /// Scratch space the method can use for pre-limiter values or composed method calls.
+    GradientContainer method_scratch;
 
     /// Field handle returned to consumers and backed by values.
     std::unique_ptr<LinearFVGradientField> field;

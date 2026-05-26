@@ -28,8 +28,9 @@ class NumericVector;
 /**
  * Registered base class for linear FV gradient methods.
  *
- * Method objects produce unlimited gradients. The owning system stores the output field and applies
- * the limiter selected by limiterType() when a limited method is requested.
+ * Method objects produce the final gradient values published by the owning system. The system
+ * provides storage and scratch space, while this base class applies limiterType() around the
+ * method-specific pre-limiter gradient computation.
  */
 class FVGradientMethod : public MooseObject
 {
@@ -40,12 +41,26 @@ public:
 
   FVGradientMethod(const InputParameters & params);
 
-  /// Compute unlimited gradients; the system applies limiterType() afterward if requested.
-  virtual void computeGradient(SystemBase & system,
-                               GradientContainer & output_gradient,
-                               const std::unordered_set<unsigned int> & variable_numbers) const = 0;
+  /// Compute final gradients, applying limiterType() when requested.
+  void computeGradient(SystemBase & system,
+                       GradientContainer & output_gradient,
+                       GradientContainer & scratch_gradient,
+                       const std::unordered_set<unsigned int> & variable_numbers) const;
 
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
+
+protected:
+  /**
+   * Compute method-specific pre-limiter gradients.
+   *
+   * scratch_gradient is available for methods that compose other methods; its contents are
+   * temporary and may be overwritten.
+   */
+  virtual void computeGradientWithoutLimiter(
+      SystemBase & system,
+      GradientContainer & output_gradient,
+      GradientContainer & scratch_gradient,
+      const std::unordered_set<unsigned int> & variable_numbers) const = 0;
 
 private:
   const Moose::FV::GradientLimiterType _limiter_type;

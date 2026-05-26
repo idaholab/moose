@@ -9,7 +9,6 @@
 
 #include "LinearFVGradientInterface.h"
 
-#include "ComputeLinearFVLimitedGradientThread.h"
 #include "FEProblemBase.h"
 #include "FVGradientMethod.h"
 #include "PerfGraphInterface.h"
@@ -165,9 +164,7 @@ LinearFVGradientInterface::initializeMethodGradientStorage(LinearFVGradientField
 {
   initializeContainer(storage.values);
   initializeContainer(storage.output_scratch);
-
-  if (storage.method.limiterType() != Moose::FV::GradientLimiterType::None)
-    initializeContainer(storage.base_scratch);
+  initializeContainer(storage.method_scratch);
 }
 
 void
@@ -176,59 +173,14 @@ LinearFVGradientInterface::updateMethodGradientStorage(LinearFVGradientFieldStor
   if (storage.values.empty())
     initializeMethodGradientStorage(storage);
 
-  if (storage.method.limiterType() == Moose::FV::GradientLimiterType::None)
-  {
-    auto & output_scratch = storage.output_scratch;
-    mooseAssert(output_scratch.size() == storage.values.size(),
-                "Output scratch and value method gradient containers must have the same size.");
-    for (auto & vec : output_scratch)
-      vec->zero();
-
-    storage.method.computeGradient(_sys, output_scratch, storage.variable_numbers);
-
-    for (auto & vec : output_scratch)
-      vec->close();
-
-    storage.values.swap(output_scratch);
-    return;
-  }
-
-  auto & base_scratch = storage.base_scratch;
-  mooseAssert(base_scratch.size() == storage.values.size(),
-              "Base scratch and value method gradient containers must have the same size.");
-  for (auto & vec : base_scratch)
-    vec->zero();
-
-  storage.method.computeGradient(_sys, base_scratch, storage.variable_numbers);
-
-  for (auto & vec : base_scratch)
-    vec->close();
-
-  auto & fe_problem = _sys.feProblem();
-  using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-  ElemInfoRange elem_info_range(fe_problem.mesh().ownedElemInfoBegin(),
-                                fe_problem.mesh().ownedElemInfoEnd());
-
   auto & output_scratch = storage.output_scratch;
   mooseAssert(output_scratch.size() == storage.values.size(),
               "Output scratch and value method gradient containers must have the same size.");
-  for (auto & vec : output_scratch)
-    vec->zero();
+  mooseAssert(storage.method_scratch.size() == storage.values.size(),
+              "Method scratch and value gradient containers must have the same size.");
 
-  PARALLEL_TRY
-  {
-    ComputeLinearFVLimitedGradientThread limited_gradient_thread(fe_problem,
-                                                                 _sys,
-                                                                 base_scratch,
-                                                                 output_scratch,
-                                                                 storage.method.limiterType(),
-                                                                 storage.variable_numbers);
-    Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
-  }
-  fe_problem.checkExceptionAndStopSolve();
-
-  for (auto & vec : output_scratch)
-    vec->close();
+  storage.method.computeGradient(
+      _sys, output_scratch, storage.method_scratch, storage.variable_numbers);
 
   storage.values.swap(output_scratch);
 }
@@ -238,7 +190,7 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
   for (auto & method_field_pair : _registered_gradient_method_fields)
   {
-    method_field_pair.second->base_scratch.clear();
+    method_field_pair.second->method_scratch.clear();
     method_field_pair.second->values.clear();
     method_field_pair.second->output_scratch.clear();
   }
