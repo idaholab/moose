@@ -23,22 +23,22 @@ NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
 }
 
 void
- NLCurlCurlIntegrator::AssembleElementVector(const mfem::FiniteElement & el,
-                                             mfem::ElementTransformation & Tr,
-                                             const mfem::Vector & elfun,
-                                             mfem::Vector & elvect)
+NLCurlCurlIntegrator::AssembleElementVector(const mfem::FiniteElement & el,
+                                            mfem::ElementTransformation & Tr,
+                                            const mfem::Vector & elfun,
+                                            mfem::Vector & elvect)
 {
   _curlcurl_res_integ.AssembleElementVector(el, Tr, elfun, elvect);
 }
 
 void
- NLCurlCurlIntegrator::AssembleElementGrad(const mfem::FiniteElement & el,
-                                           mfem::ElementTransformation & Tr,
-                                           const mfem::Vector & elfun,
-                                           mfem::DenseMatrix & elmat)
+NLCurlCurlIntegrator::AssembleElementGrad(const mfem::FiniteElement & el,
+                                          mfem::ElementTransformation & Tr,
+                                          const mfem::Vector & elfun,
+                                          mfem::DenseMatrix & elmat)
 {
   _curlcurl_jac_integ.AssembleElementGrad(el, Tr, elfun, elmat);
 }
-};
+}
 
 #endif
