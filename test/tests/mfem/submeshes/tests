@@ -130,5 +130,6 @@
     recover = false
     restep = false
     valgrind = heavy
+    min_slots = 2 # memory heavy
   []  
 []
