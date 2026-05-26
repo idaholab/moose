@@ -1455,7 +1455,7 @@ public:
                                    InputParameters & parameters);
 
   /**
-   * Add an FV gradient method with default parameters
+   * Add an FV gradient method using the method type's default input parameters.
    * @param method_type The type of the method.
    * @param name The name of the method.
    */

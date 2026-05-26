@@ -27,10 +27,9 @@ class NumericVector;
 
 /**
  * Base class for linear finite-volume cell-gradient methods.
- *
- * A method computes the gradient values that kernels and boundary conditions read from the owning
- * system. Derived classes provide the pre-limiter gradient formula, and this base class applies the
- * selected limiter before the values are published.
+ * These methods compute the gradient values that kernels and boundary conditions read from the
+ * owning system. Derived classes provide the pre-limiter gradient formula, and this base class
+ * applies the selected limiter before the values are published.
  */
 class FVGradientMethod : public MooseObject
 {
@@ -38,10 +37,11 @@ public:
   /// One vector per spatial component of the cell-centered gradient.
   using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
 
-  /// Input parameters shared by all linear finite-volume gradient methods.
+  /// Input parameters shared by all the gradient methods.
   static InputParameters validParams();
 
   /**
+   * Constructor
    * @param params Input parameters used to construct the gradient method.
    */
   FVGradientMethod(const InputParameters & params);
@@ -78,6 +78,6 @@ protected:
       const std::unordered_set<unsigned int> & variable_numbers) const = 0;
 
 private:
-  /// Limiter applied by computeGradient() after method-specific pre-limiter gradient computation.
+  /// Limiter applied after method-specific pre-limiter gradient computation.
   const Moose::FV::GradientLimiterType _limiter_type;
 };
