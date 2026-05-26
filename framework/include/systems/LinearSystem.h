@@ -134,9 +134,7 @@ public:
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
   using LinearFVGradientInterface::computeGradients;
-  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
   using LinearFVGradientInterface::registerFVGradient;
-  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
   using LinearFVGradientInterface::updateFVGradient;
 
   virtual void compute(ExecFlagType type) override;

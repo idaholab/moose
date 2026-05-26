@@ -1455,6 +1455,13 @@ public:
                                    InputParameters & parameters);
 
   /**
+   * Add an FV gradient method with default parameters
+   * @param method_type The type of the method.
+   * @param name The name of the method.
+   */
+  virtual void addFVGradientMethod(const std::string & method_type, const std::string & name);
+
+  /**
    * Retrieve an FV gradient method
    * @param name The name of the method.
    * @param tid The thread ID.

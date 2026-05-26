@@ -4702,6 +4702,13 @@ FEProblemBase::addFVGradientMethod(const std::string & method_type,
   }
 }
 
+void
+FEProblemBase::addFVGradientMethod(const std::string & method_type, const std::string & name)
+{
+  InputParameters parameters = _factory.getValidParams(method_type);
+  addFVGradientMethod(method_type, name, parameters);
+}
+
 const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /* = 0 */) const
 {
