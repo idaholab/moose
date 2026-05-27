@@ -55,6 +55,10 @@ ComputeLagrangianStressBase::computeQpProperties()
   computeQpStressUpdate();
   // Chain the kinematic policy into the PK1 Jacobian so the TL kernel consumes a single
   // d(PK1)/d(grad u) property and doesn't need to know about the generalized-alpha weighting.
-  // For alpha = 1 (default) this is _pk1_jacobian itself.
-  _dpk1_d_grad_u[_qp] = _pk1_jacobian[_qp] * _d_F_d_grad_u[_qp];
+  // For alpha = 1 (default) this is _pk1_jacobian itself. The kernel reads
+  // `_dpk1_d_grad_u` only during Jacobian assembly, so skip the R4*R4 multiply on
+  // residual-only sweeps.
+  if (_fe_problem.currentlyComputingJacobian() ||
+      _fe_problem.currentlyComputingResidualAndJacobian())
+    _dpk1_d_grad_u[_qp] = _pk1_jacobian[_qp] * _d_F_d_grad_u[_qp];
 }

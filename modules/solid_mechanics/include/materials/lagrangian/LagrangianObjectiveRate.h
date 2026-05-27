@@ -32,8 +32,13 @@ public:
 
   /// Perform the objective stress update at the host's current quadrature point.
   /// `dS` is the constitutive small-stress increment (`_small_stress -
-  /// _small_stress_old`).
-  virtual void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const = 0;
+  /// _small_stress_old`). When `need_jacobian` is false the rate computes
+  /// `_cauchy_stress` only and skips the RankFourTensor algebra feeding
+  /// `_cauchy_jacobian` / `_dcauchy_stress_d_eigenstrain` -- both are read only on
+  /// Jacobian sweeps.
+  virtual void update(ComputeLagrangianObjectiveStress & host,
+                      const RankTwoTensor & dS,
+                      bool need_jacobian) const = 0;
 };
 
 /// Intermediate base for rates that fit the linear template
@@ -60,19 +65,25 @@ protected:
 class LagrangianTruesdellRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host,
+              const RankTwoTensor & dS,
+              bool need_jacobian) const override;
 };
 
 class LagrangianJaumannRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host,
+              const RankTwoTensor & dS,
+              bool need_jacobian) const override;
 };
 
 class LagrangianGreenNaghdiRate : public LagrangianLinearObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host,
+              const RankTwoTensor & dS,
+              bool need_jacobian) const override;
 };
 
 /// Rashid rate: sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T  with r_hat = exp(Deltaw).
@@ -80,13 +91,15 @@ public:
 class LagrangianRashidRate : public LagrangianObjectiveRate
 {
 public:
-  void update(ComputeLagrangianObjectiveStress & host, const RankTwoTensor & dS) const override;
+  void update(ComputeLagrangianObjectiveStress & host,
+              const RankTwoTensor & dS,
+              bool need_jacobian) const override;
 
 private:
-  /// Rodrigues exponential of a skew 3x3 tensor W and its derivative dR/dW.
-  /// W is treated as unconstrained for the chain rule; the upstream
-  /// `_d_vorticity_increment_d_F` projects out non-skew perturbations.
-  static RankTwoTensor rotationFromVorticity(const RankTwoTensor & W, RankFourTensor & dR_dW);
+  /// Rodrigues exponential of a skew 3x3 tensor W. When `dR_dW` is non-null it is filled
+  /// with the unconstrained chain-rule derivative; otherwise the R4 algebra is skipped.
+  /// The upstream `_d_vorticity_increment_d_F` projects out non-skew perturbations.
+  static RankTwoTensor rotationFromVorticity(const RankTwoTensor & W, RankFourTensor * dR_dW);
 };
 
 /// Build the concrete rate strategy that matches the user's enum choice.

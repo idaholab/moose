@@ -30,10 +30,18 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
   // PK2 has its own sigma-wrap structure: sigma = (1/J_ust) F_ust * S * F_ust^T. The PK1 base's
   // sigma-chain (which assumes pk1_jacobian = constitutive dPK1/dF_stab + _d_F_stab_d_F_ust)
   // doesn't fit here, so compute sigma and cauchy_jacobian directly from S and dS/dE.
+  //
+  // The R4 chain for `_cauchy_jacobian` is Jacobian-only; the wrap to `_cauchy_stress` is
+  // not. Gate accordingly.
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
     const Real J_ust = _F_ust[_qp].det();
     _cauchy_stress[_qp] = _F_ust[_qp] * _S[_qp] * _F_ust[_qp].transpose() / J_ust;
+
+    if (!need_jacobian)
+      return;
 
     // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through S(E(F_stab(dL))); the
     // F_ust factors in the wrap are CONSTANT w.r.t. dL (F_ust does not depend on dL --
@@ -52,7 +60,8 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
   else
   {
     _cauchy_stress[_qp] = _S[_qp];
-    _cauchy_jacobian[_qp] = _C[_qp];
+    if (need_jacobian)
+      _cauchy_jacobian[_qp] = _C[_qp];
   }
 }
 
@@ -64,14 +73,23 @@ ComputeLagrangianStressPK2::computeQpPK1Stress()
   // to feed a volumetrically-corrected strain into the constitutive update.
   _E[_qp] = 0.5 * (_F[_qp].transpose() * _F[_qp] - RankTwoTensor::Identity());
 
-  // PK2 update (constitutive)
+  // PK2 update (constitutive). This populates `_S` (always needed) and `_C` (= dPK2/dE,
+  // Jacobian-only). PK2-subclass implementers that want to skip `_C` on residual sweeps
+  // can check `_fe_problem.currentlyComputingJacobian()` themselves; the wrap below
+  // doesn't read `_C` in the residual path.
   computeQpPK2Stress();
+
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
 
   // PK2 -> PK1 wrap uses the *unstabilized* F so the residual matches OLD. The constitutive
   // PK2 still carries the F-bar effect via its dependence on E (Green-Lagrange of F_stab).
   if (_large_kinematics)
   {
     _pk1_stress[_qp] = _F_ust[_qp] * _S[_qp];
+    if (!need_jacobian)
+      return;
+
     usingTensorIndices(i_, j_, k_, l_);
     // dE/d(F_stab) (E is computed from F_stab).
     RankFourTensor dE_dFstab =
@@ -99,6 +117,8 @@ ComputeLagrangianStressPK2::computeQpPK1Stress()
   else
   {
     _pk1_stress[_qp] = _S[_qp];
+    if (!need_jacobian)
+      return;
     _pk1_jacobian[_qp] = _C[_qp] * _d_F_stab_d_F_ust[_qp];
     _pk1_jacobian_bypass_fbar[_qp] = _C[_qp];
   }

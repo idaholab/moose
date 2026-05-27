@@ -58,17 +58,21 @@ LagrangianLinearObjectiveRate::cauchyJacobian(const RankFourTensor & Jinv,
 
 void
 LagrangianTruesdellRate::update(ComputeLagrangianObjectiveStress & host,
-                                const RankTwoTensor & dS) const
+                                const RankTwoTensor & dS,
+                                bool need_jacobian) const
 {
   const unsigned int qp = host._qp;
   const RankTwoTensor & dL = host._spatial_velocity_increment[qp];
 
   auto [S, Jinv] = advectStress(host._cauchy_stress_old[qp] + dS, dL);
+  host._cauchy_stress[qp] = S;
+  if (!need_jacobian)
+    return;
+
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor U = stressAdvectionDerivative(S);
   host._cauchy_jacobian[qp] = cauchyJacobian(Jinv, host._small_jacobian[qp], U);
-  host._cauchy_stress[qp] = S;
 }
 
 // ============================================================================
@@ -77,19 +81,23 @@ LagrangianTruesdellRate::update(ComputeLagrangianObjectiveStress & host,
 
 void
 LagrangianJaumannRate::update(ComputeLagrangianObjectiveStress & host,
-                              const RankTwoTensor & dS) const
+                              const RankTwoTensor & dS,
+                              bool need_jacobian) const
 {
   const unsigned int qp = host._qp;
   const RankTwoTensor & dW = host._vorticity_increment[qp];
 
   auto [S, Jinv] = advectStress(host._cauchy_stress_old[qp] + dS, dW);
+  host._cauchy_stress[qp] = S;
+  if (!need_jacobian)
+    return;
+
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor d_dW_d_dL =
       host._d_vorticity_increment_d_F[qp] * host._d_spatial_velocity_increment_d_F[qp].inverse();
   const RankFourTensor U = stressAdvectionDerivative(S) * d_dW_d_dL;
   host._cauchy_jacobian[qp] = cauchyJacobian(Jinv, host._small_jacobian[qp], U);
-  host._cauchy_stress[qp] = S;
 }
 
 // ============================================================================
@@ -98,7 +106,8 @@ LagrangianJaumannRate::update(ComputeLagrangianObjectiveStress & host,
 
 void
 LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
-                                  const RankTwoTensor & dS) const
+                                  const RankTwoTensor & dS,
+                                  bool need_jacobian) const
 {
   usingTensorIndices(i, j, k, l, m);
   const unsigned int qp = host._qp;
@@ -108,6 +117,10 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
   const RankTwoTensor dO = dR * host._inv_df[qp];
 
   auto [S, Jinv] = advectStress(host._cauchy_stress_old[qp] + dS, dO);
+  host._cauchy_stress[qp] = S;
+  if (!need_jacobian)
+    return;
+
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor & d_R_d_F = host._d_rotation_d_F[qp];
@@ -122,7 +135,6 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
       T.times<m, j, i, m, k, l>(d_R_d_F * d_F_d_dL) + d_dO_d_invdf * d_invdf_d_dL;
   const RankFourTensor U = stressAdvectionDerivative(S) * d_dO_d_dL;
   host._cauchy_jacobian[qp] = cauchyJacobian(Jinv, host._small_jacobian[qp], U);
-  host._cauchy_stress[qp] = S;
 }
 
 // ============================================================================
@@ -130,7 +142,7 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
 // ============================================================================
 
 RankTwoTensor
-LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTensor & dR_dW)
+LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTensor * dR_dW)
 {
   // For a skew W in 3D, theta = sqrt((W : W) / 2). R = exp(W) via Rodrigues:
   //   R = I + f(theta) W + g(theta) W^2,  f = sin theta / theta,  g = (1 - cos theta) / theta^2.
@@ -159,43 +171,50 @@ LagrangianRashidRate::rotationFromVorticity(const RankTwoTensor & W, RankFourTen
   }
   const RankTwoTensor R = I2 + f * W + g * W2;
 
+  if (!dR_dW)
+    return R;
+
   // dR_ij/dW_mn = (df/dtheta * dtheta/dW_mn) W_ij + f * delta_im delta_jn
   //             + (dg/dtheta * dtheta/dW_mn) (W^2)_ij + g * (delta_im W_nj + W_im delta_jn)
   // dtheta/dW_mn = W_mn / (2theta)   (from d(theta^2)/dW = W).
   usingTensorIndices(i_, j_, m_, n_);
   const RankFourTensor d_W2_dW =
       I2.template times<i_, m_, n_, j_>(W) + W.template times<i_, m_, j_, n_>(I2);
-  RankFourTensor dR = f * RankFourTensor::IdentityFour() + g * d_W2_dW;
+  *dR_dW = f * RankFourTensor::IdentityFour() + g * d_W2_dW;
   if (theta >= small_theta)
   {
     const Real inv_2theta = 1.0 / (2.0 * theta);
     // (df/dtheta * W_mn / (2theta)) * W_ij  -> (df/dtheta * inv_2theta) * W (x) W (output indices
     // ij,mn).
-    dR += (df_dth * inv_2theta) * W.template times<i_, j_, m_, n_>(W);
-    dR += (dg_dth * inv_2theta) * W2.template times<i_, j_, m_, n_>(W);
+    *dR_dW += (df_dth * inv_2theta) * W.template times<i_, j_, m_, n_>(W);
+    *dR_dW += (dg_dth * inv_2theta) * W2.template times<i_, j_, m_, n_>(W);
   }
   // (For theta < small_theta the dtheta-dependent contributions are O(theta) -> 0; the
   //  identity + W^2 parts above cover the small-angle limit cleanly.)
 
-  dR_dW = dR;
   return R;
 }
 
 void
 LagrangianRashidRate::update(ComputeLagrangianObjectiveStress & host,
-                             const RankTwoTensor & dS) const
+                             const RankTwoTensor & dS,
+                             bool need_jacobian) const
 {
   usingTensorIndices(i_, j_, k_, l_, m_, n_);
   const unsigned int qp = host._qp;
 
-  // r_hat = exp(Deltaw) and its derivative.
+  // r_hat = exp(Deltaw). Skip its R4 derivative when we don't need the Jacobian.
   RankFourTensor d_rhat_d_dW;
-  const RankTwoTensor rhat = rotationFromVorticity(host._vorticity_increment[qp], d_rhat_d_dW);
+  const RankTwoTensor rhat =
+      rotationFromVorticity(host._vorticity_increment[qp], need_jacobian ? &d_rhat_d_dW : nullptr);
   const RankTwoTensor rhatT = rhat.transpose();
 
   // sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T   (eq. 22)
   const RankTwoTensor S_inner = host._cauchy_stress_old[qp] + dS;
   host._cauchy_stress[qp] = rhat * S_inner * rhatT;
+
+  if (!need_jacobian)
+    return;
 
   // J^{-1}_{ijkl} = r_hat_ik r_hat_jl   (eq. 24), the rank-4 (r_hat (x) r_hat) sandwich. Used for
   // the eigenstrain Jacobian and as the "outer" operator for the constitutive

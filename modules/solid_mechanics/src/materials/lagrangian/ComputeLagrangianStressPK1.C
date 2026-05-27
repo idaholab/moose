@@ -42,12 +42,21 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
   // Wrap PK1 -> sigma using the *unstabilized* F. F-bar enters only through the constitutive
   // PK1's strain dependence (via the F-bar'd `_f_inv`); the geometric wrap uses F_ust so
   // the residual matches OLD.
+  //
+  // All RankFourTensor algebra below builds Jacobian-only quantities
+  // (`_cauchy_jacobian`, the post-multiplied `_pk1_jacobian`, and `_pk1_jacobian_bypass_fbar`).
+  // Skip them on residual-only sweeps.
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
     const RankTwoTensor F_ust_inv = _F_ust[_qp].inverse();
     const RankTwoTensor F_ust_invT = F_ust_inv.transpose();
     const Real J_ust = _F_ust[_qp].det();
     _cauchy_stress[_qp] = _pk1_stress[_qp] * _F_ust[_qp].transpose() / J_ust;
+
+    if (!need_jacobian)
+      return;
 
     usingTensorIndices(i_, j_, m_, n_);
     const auto I = RankTwoTensor::Identity();
@@ -85,6 +94,8 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
   else
   {
     _cauchy_stress[_qp] = _pk1_stress[_qp];
+    if (!need_jacobian)
+      return;
     _cauchy_jacobian[_qp] = _pk1_jacobian[_qp];
     _pk1_jacobian_bypass_fbar[_qp] = _pk1_jacobian[_qp];
     _pk1_jacobian[_qp] = _pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];

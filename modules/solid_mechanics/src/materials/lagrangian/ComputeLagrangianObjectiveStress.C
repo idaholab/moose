@@ -76,18 +76,26 @@ ComputeLagrangianObjectiveStress::computeQpCauchyStress()
 {
   computeQpSmallStress();
 
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
+
   if (!_large_kinematics)
   {
     _cauchy_stress[_qp] = _small_stress[_qp];
-    _cauchy_jacobian[_qp] = _small_jacobian[_qp];
     // Small kinematics: no objective advection. dsigma/d_eigenstrain = -small_jacobian
     // (the negative because mechanical_strain = total_strain - eigenstrain).
-    _dcauchy_stress_d_eigenstrain[_qp] = -_small_jacobian[_qp];
+    // Both Jacobian-side assignments are skipped on residual-only sweeps; the kernel
+    // consumes neither during residual assembly.
+    if (need_jacobian)
+    {
+      _cauchy_jacobian[_qp] = _small_jacobian[_qp];
+      _dcauchy_stress_d_eigenstrain[_qp] = -_small_jacobian[_qp];
+    }
   }
   else
   {
     const RankTwoTensor dS = _small_stress[_qp] - _small_stress_old[_qp];
-    _rate_strategy->update(*this, dS);
+    _rate_strategy->update(*this, dS, need_jacobian);
     if (_rotate_old_stress)
     {
       // Passthrough mode: the wrapped stress material (e.g. `ComputeMultiPlasticityStress`

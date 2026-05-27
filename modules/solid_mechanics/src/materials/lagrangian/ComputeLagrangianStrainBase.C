@@ -194,9 +194,19 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _F_ust[_qp] += (*contribution)[_qp];
   }
 
+  // Skip the Jacobian-only RankFourTensor derivative chain when no downstream consumer
+  // will read it (i.e. we're in a residual-only sweep). All of `_d_F_d_grad_u`,
+  // `_d_spatial_velocity_increment_d_F`, `_d_vorticity_increment_d_F`, and the
+  // `_d_rotation_d_F` slot of the polar decomposition feed only `*_jacobian` material
+  // properties, which the kernel consumes only during Jacobian or
+  // residual-and-Jacobian-together assembly.
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
+
   // dF/d(grad u_{n+1}) = alpha * I^{(4)} for the generalized midpoint rule
   // (alpha = 1.0 reduces to backward Euler).
-  _d_F_d_grad_u[_qp] = _alpha * RankFourTensor::IdentityFour();
+  if (need_jacobian)
+    _d_F_d_grad_u[_qp] = _alpha * RankFourTensor::IdentityFour();
 
   if (_large_kinematics)
   {
@@ -216,19 +226,25 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
       _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
 
     // Dispatch to the active kinematic-approximation helper. Each helper returns
-    // dd (= Deltad), dw (= Deltaw), and the f^{-1}-derivatives of dL = dd + dw and of dw alone.
+    // dd (= Deltad), dw (= Deltaw), and the f^{-1}-derivatives of dL = dd + dw and of dw
+    // alone. The (dd, dw) outputs are needed every iteration; the derivatives are only
+    // needed when assembling the Jacobian, but the helpers compute them inline with
+    // (dd, dw) so we accept that work and only gate the downstream R4*R4 chain below.
     RankTwoTensor dd, dw;
     RankFourTensor d_dL_d_f_inv, d_dw_d_f_inv;
     computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
 
-    // Common chain rule: d(f^{-1})_{pq}/dF_{mn} = -f^{-1}_{pm} * F^{-1}_{nq}.
-    usingTensorIndices(p_, q_, m_, n_);
-    const RankFourTensor d_f_inv_d_F = -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
-    _d_spatial_velocity_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
-    _d_vorticity_increment_d_F[_qp] = d_dw_d_f_inv * d_f_inv_d_F;
+    if (need_jacobian)
+    {
+      // Common chain rule: d(f^{-1})_{pq}/dF_{mn} = -f^{-1}_{pm} * F^{-1}_{nq}.
+      usingTensorIndices(p_, q_, m_, n_);
+      const RankFourTensor d_f_inv_d_F = -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
+      _d_spatial_velocity_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
+      _d_vorticity_increment_d_F[_qp] = d_dw_d_f_inv * d_f_inv_d_F;
+    }
 
     setQpIncrementalStrains(dd, dw);
-    computeQpPolarDecomposition();
+    computeQpPolarDecomposition(need_jacobian);
   }
   // For small deformations we just provide the identity (and always linear)
   else
@@ -237,19 +253,20 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _f_inv[_qp] = RankTwoTensor::Identity();
     const RankTwoTensor dL = _F[_qp] - _F_old[_qp];
 
-    // d(dL)/dF = I^{(4)} when dL = F - F_old. d(dW)/dF = the skew projector.
-    _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
+    if (need_jacobian)
     {
+      // d(dL)/dF = I^{(4)} when dL = F - F_old. d(dW)/dF = the skew projector.
+      _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
       usingTensorIndices(i_, j_, k_, l_);
       const auto I2 = RankTwoTensor::Identity();
       _d_vorticity_increment_d_F[_qp] =
           0.5 * (RankFourTensor::IdentityFour() - I2.template times<j_, k_, i_, l_>(I2));
-    }
 
-    // Small kinematics: R = I, U = I, dR/dF = 0. Defensive defaults; GN is not used here.
+      // Small kinematics: R = I, U = I, dR/dF = 0. Defensive defaults; GN is not used here.
+      _d_rotation_d_F[_qp].zero();
+    }
     _rotation[_qp].setToIdentity();
     _stretch[_qp].setToIdentity();
-    _d_rotation_d_F[_qp].zero();
 
     setQpIncrementalStrains(0.5 * (dL + dL.transpose()), 0.5 * (dL - dL.transpose()));
   }
@@ -257,7 +274,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
 
 template <class G>
 void
-ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition()
+ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition(bool need_jacobian)
 {
   // Polar decomposition F = R * U of the alpha-weighted, F-bar-stabilized deformation
   // gradient at this qp. We decompose _F rather than _F_actual because the rest of the
@@ -268,6 +285,9 @@ ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition()
   _stretch[_qp] = MathUtils::sqrt(C).get();
   const RankTwoTensor U_inv = MathUtils::sqrt(C).inverse().get();
   _rotation[_qp] = F * U_inv;
+
+  if (!need_jacobian)
+    return;
 
   // dR/dF closed form. See ComputeLagrangianObjectiveStress.C:221-227.
   const auto I = RankTwoTensor::Identity();
@@ -730,6 +750,13 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
   usingTensorIndices(i_, j_, k_, l_);
   const auto I2 = RankTwoTensor::Identity();
 
+  // The F-bar local/non-local derivative material properties feed only the Jacobian path
+  // (the stress materials chain them into `_pk1_jacobian`/`_cauchy_jacobian`, and the
+  // TL kernel's non-local F-bar term contracts `_d_F_stab_d_F_avg`). The residual sweep
+  // never reads them, so skip the R4 algebra when assembling a residual alone.
+  const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
+                             _fe_problem.currentlyComputingResidualAndJacobian();
+
   // If stabilization is on do the volumetric correction
   if (_stabilize_strain)
   {
@@ -778,28 +805,34 @@ ComputeLagrangianStrainBase<G>::computeDeformationGradient()
         const Real det_ust_local =
             incremental ? _F_ust[_qp].det() / _F_ust_old[_qp].det() : _F[_qp].det();
         const Real gamma = std::pow(avg_for_chain.det() / det_ust_local, 1.0 / 3.0);
-        const auto Fust_invT = _F_ust[_qp].inverse().transpose();
-        const auto avg_invT = avg_for_chain.inverse().transpose();
-        _d_F_stab_d_F_ust[_qp] =
-            gamma * RankFourTensor::IdentityFour() -
-            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
-        _d_F_stab_d_F_avg[_qp] =
-            (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(avg_invT);
+        if (need_jacobian)
+        {
+          const auto Fust_invT = _F_ust[_qp].inverse().transpose();
+          const auto avg_invT = avg_for_chain.inverse().transpose();
+          _d_F_stab_d_F_ust[_qp] =
+              gamma * RankFourTensor::IdentityFour() -
+              (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(Fust_invT);
+          _d_F_stab_d_F_avg[_qp] =
+              (gamma / 3.0) * _F_ust[_qp].template times<i_, j_, k_, l_>(avg_invT);
+        }
         _F[_qp] *= gamma;
       }
       else
       {
-        // Additive (trace) F-bar: F_stab = F_ust + (tr(F_avg - F_ust)/3) * I.
-        // dF_stab/dF_ust = I^(4) - (1/3) * I2 (x) I2  (each diagonal component pulled out).
-        // dF_stab/dF_avg = (1/3) * I2 (x) I2.
-        const auto outer = I2.template times<i_, j_, k_, l_>(I2);
-        _d_F_stab_d_F_ust[_qp] = RankFourTensor::IdentityFour() - (1.0 / 3.0) * outer;
-        _d_F_stab_d_F_avg[_qp] = (1.0 / 3.0) * outer;
+        if (need_jacobian)
+        {
+          // Additive (trace) F-bar: F_stab = F_ust + (tr(F_avg - F_ust)/3) * I.
+          // dF_stab/dF_ust = I^(4) - (1/3) * I2 (x) I2  (each diagonal component pulled out).
+          // dF_stab/dF_avg = (1/3) * I2 (x) I2.
+          const auto outer = I2.template times<i_, j_, k_, l_>(I2);
+          _d_F_stab_d_F_ust[_qp] = RankFourTensor::IdentityFour() - (1.0 / 3.0) * outer;
+          _d_F_stab_d_F_avg[_qp] = (1.0 / 3.0) * outer;
+        }
         _F[_qp] += (F_avg.trace() - _F[_qp].trace()) * I2 / 3.0;
       }
     }
   }
-  else
+  else if (need_jacobian)
   {
     // F-bar off: dF_stab/dF_ust = I^(4), dF_stab/dF_avg = 0.
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
