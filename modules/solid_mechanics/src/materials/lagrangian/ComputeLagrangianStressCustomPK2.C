@@ -39,6 +39,12 @@ ComputeLagrangianStressCustomPK2::computeQpPK1Stress()
   // residual matches the new convention.
   _pk1_stress[_qp] = _F_ust[_qp] * _pk2[_qp];
 
+  // The R4 algebra for `_pk1_jacobian` / `_pk1_jacobian_bypass_fbar` is read only on
+  // Jacobian sweeps; skip it on residual-only sweeps.
+  if (!_fe_problem.currentlyComputingJacobian() &&
+      !_fe_problem.currentlyComputingResidualAndJacobian())
+    return;
+
   // dPK1/d(F_ust) = del_ik PK2_lj  +  F_ust * dPK2/d(F_stab) * d(F_stab)/d(F_ust).
   usingTensorIndices(i_, j_, k_, l_);
   const auto I = RankTwoTensor::Identity();
@@ -59,6 +65,10 @@ ComputeLagrangianStressCustomPK2::computeQpCauchyStress()
   // depends on F_ust directly (Term A above) -- already folded into _pk1_jacobian.
   const Real J_ust = _F_ust[_qp].det();
   _cauchy_stress[_qp] = _F_ust[_qp] * _pk2[_qp] * _F_ust[_qp].transpose() / J_ust;
+
+  if (!_fe_problem.currentlyComputingJacobian() &&
+      !_fe_problem.currentlyComputingResidualAndJacobian())
+    return;
 
   // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through PK2(F_stab(dL))
   // (F_ust is constant w.r.t. dL since dL is computed from F_stab via the kinematic helper).

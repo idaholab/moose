@@ -90,9 +90,10 @@ protected:
                                         RankTwoTensor & dw,
                                         RankFourTensor & d_dL_d_f_inv,
                                         RankFourTensor & d_dw_d_f_inv);
-  /// Compute and publish the polar decomposition of _F_actual at the current qp
-  /// (R, U, dR/dF). Consumed by the Green-Naghdi objective rate.
-  void computeQpPolarDecomposition();
+  /// Compute and publish the polar decomposition of _F_actual at the current qp.
+  /// Always populates `_rotation` and `_stretch` (R and U). When `need_jacobian` is true,
+  /// additionally populates `_d_rotation_d_F`. Consumed by the Green-Naghdi objective rate.
+  void computeQpPolarDecomposition(bool need_jacobian);
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
   /// Calculate the unstabilized (alpha-weighted) deformation gradient at the quadrature point
