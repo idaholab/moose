@@ -11,6 +11,8 @@
 #include "SCM.h"
 #include "SubChannelApp.h"
 
+#include <cmath>
+
 InputParameters
 SCMHTCClosureBase::validParams()
 {
@@ -75,7 +77,10 @@ SCMHTCClosureBase::computeHTC(const FrictionStruct & friction_args,
   // Compute HTC
   auto Nu = computeNusseltNumber(friction_args, nusselt_args);
   auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
-  return Nu * k / Dh_i;
+  const auto htc = Nu * k / Dh_i;
+  if (!std::isfinite(htc) || htc < 0.0)
+    mooseError(name(), ": The heat transfer coefficient must be non-negative and finite.");
+  return htc;
 }
 
 Real
