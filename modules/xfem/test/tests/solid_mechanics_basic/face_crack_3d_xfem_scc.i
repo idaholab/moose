@@ -2,7 +2,7 @@
 [XFEM]
   geometric_cut_userobjects = 'cut_mesh'
   qrule = volfrac
-  output_cut_plane = true
+  output_cut_plane = false
 []
 
 [Reporters]
@@ -40,7 +40,7 @@
   radius_outer = '0.1'
   poissons_ratio = 0.3
   youngs_modulus = 207000
-  incremental = true
+  incremental = false
 []
 
 [Outputs]
