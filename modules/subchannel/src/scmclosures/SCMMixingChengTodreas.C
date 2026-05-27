@@ -158,6 +158,8 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
     }
     else
     {
+      // Simplified intermittency factor; see SCMMixingChengTodreas.md.
+      // Cheng and Todreas (1986) use a more detailed expression for psi.
       const Real psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
       const Real gamma = 2.0 / 3.0;
       Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
@@ -274,6 +276,8 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     }
     else
     {
+      // Simplified intermittency factor; see SCMMixingChengTodreas.md.
+      // Cheng and Todreas (1986) use a more detailed expression for psi.
       const Real psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
       const Real gamma = 2.0 / 3.0;
       Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
