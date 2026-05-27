@@ -31,6 +31,7 @@ public:
 
   virtual void initialSetup() override;
   virtual void initialize() override;
+  virtual void meshChanged() override;
 
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
@@ -73,6 +74,9 @@ protected:
 
   /// The structural mesh
   MooseMesh & _mesh;
+
+  /// Pointer to PointLocatorBase object
+  std::unique_ptr<PointLocatorBase> _pl;
 
   /// The crack front definition
   CrackFrontDefinition * _crack_front_definition;
