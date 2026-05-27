@@ -107,6 +107,7 @@ protected:
 
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
+   * The face argument is oriented from the side where this variable is defined.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor
@@ -119,7 +120,8 @@ protected:
 
   /**
    * Determine a face argument for evaluating a functor on a face. If the functor is defined on a
-   * single side, that side is selected. If it is defined on both sides, the face is left unsided.
+   * single side, that side is selected. If it is defined on both sides, the variable cell side is
+   * selected.
    * @param functor the functor whose sidedness is queried on the provided face
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type to use when building the face argument
