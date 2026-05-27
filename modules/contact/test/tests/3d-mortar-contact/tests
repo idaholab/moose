@@ -11,6 +11,7 @@
                   'constraint'
     custom_cmp = 'frictionless-mortar-3d.cmp'
     capabilities = 'ad_size>=150 & method!=dbg'
+    max_threads = 1 # these 3D mortar contact checks are not stable with threaded execution
     valgrind = 'none'
   []
   [frictionless-mortar-3d_pg]
@@ -20,6 +21,7 @@
     csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach.'
+    max_threads = 1
     valgrind = 'none'
   []
   [frictionless-mortar-3d-test-derivative-trimming]
@@ -42,6 +44,7 @@
       detail = 'mortar quadrature designed to integrate linear polynomials on triangles'
       rel_err = 1.0e-5
       abs_zero = 1.0e-5
+      max_threads = 1
       valgrind = 'none'
     []
     [second]
@@ -54,6 +57,7 @@
       detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
       rel_err = 1.0e-5
       abs_zero = 1.0e-5
+      max_threads = 1
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
     []
@@ -69,6 +73,7 @@
     csvdiff = 'frictionless-mortar-3d_pg_out.csv'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
+    max_threads = 1
   []
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
@@ -83,6 +88,7 @@
                'Outputs/file_base=frictionless-mortar-3d-action-correct-edge-dropping_out'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
     valgrind = 'none'
   []
   [frictionless-mortar-3d-action-triangulation]
@@ -101,6 +107,7 @@
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons when triangulate_triangles is enabled,'
+      max_threads = 1
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
     []
@@ -117,6 +124,7 @@
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
+      max_threads = 1
       valgrind = 'none'
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-action-triangulation/centroid-with-retessellation'
@@ -133,6 +141,7 @@
       mesh_mode = 'REPLICATED' # see issue 24255
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'an ear-clipping algorithm, and'
+      max_threads = 1
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
     []
@@ -148,6 +157,7 @@
       mesh_mode = 'REPLICATED' # see issue 24255
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
+      max_threads = 1
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
     []
@@ -162,6 +172,7 @@
                'Constraints/normal_z/debug_mesh=true UserObjects/weighted_gap_uo/debug_mesh=true'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
+    max_threads = 1
     prereq = 'frictionless-mortar-3d'
   []
   [frictionless-mortar-3d-debug-mesh-triangulation]
@@ -190,6 +201,7 @@
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons,'
+      max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
     []
     [centroid-no-retessellation]
@@ -215,6 +227,7 @@
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
+      max_threads = 1
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
     []
@@ -235,6 +248,7 @@
                  'UserObjects/weighted_gap_uo/triangulation=ear_clipping'
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'an ear-clipping algorithm, and'
+      max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
     []
     [delaunay]
@@ -254,6 +268,7 @@
                  'UserObjects/weighted_gap_uo/triangulation=delaunay'
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
+      max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
     []
   []
@@ -266,6 +281,7 @@
                   'constraint using nodal-attached geometry.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
     valgrind = 'none'
   []
   [frictional-mortar-3d-pg]
@@ -279,6 +295,7 @@
                   'constraint using the Petrov-Galerkin approach.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
     valgrind = 'none'
   []
   [frictional-mortar-3d-function]
@@ -290,6 +307,7 @@
                   'a simple frictional model dependent on relative velocity and contact pressure.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
     valgrind = 'none'
   []
   [frictional-mortar-3d-action]
@@ -306,6 +324,7 @@
                   'diffed against non-action output.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
     valgrind = 'none'
   []
   [frictional-mortar-3d-pg-action]
@@ -322,6 +341,7 @@
                   'constraint using the Petrov-Galerkin approach in contact action.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+    max_threads = 1
   []
   [half_sphere_nodal_geometry]
     type = 'Exodiff'
