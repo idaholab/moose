@@ -94,22 +94,13 @@ where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated 
 
 !! Intentional comment to provide extra spacing
 
-The MATRA based friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below. For Reynolds number ranges below $Re = 5000$, where the MATRA correlation is not applicable, SCM applies a custom extension that keeps the friction factor continuous at the transition to the MATRA correlation:
-
-\begin{equation}
-Re_c = \left(\frac{64}{0.316}\right)^{4/3},
-\quad
-\eta = \frac{Re - Re_c}{5000 - Re_c},
-\quad
-w = 3 \eta^2 - 2 \eta^3
-\end{equation}
+The MATRA based friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below.
 
 \begin{equation}
 f_w \rightarrow
 \begin{cases}
 64, & Re < 1\\
-\frac{64}{Re}, &1 \leq Re < Re_c\\
-(1 - w)\frac{64}{Re} + w 0.316 Re^{-0.25}, &Re_c \leq Re < 5000\\
+\frac{64}{Re}, &1 \leq Re<5000\\
 0.316 Re^{-0.25}, &5000 \leq Re < 30000\\
 0.184 Re^{-0.20}, &30000 \leq Re < 1e6
 \end{cases}

@@ -26,9 +26,6 @@ public:
 
   virtual Real computeFrictionFactor(const FrictionStruct & friction_info) const override;
 
-  /// Computes the MATRA friction factor extension for a quadrilateral lattice from Reynolds number.
-  static Real computeQuadLatticeFrictionFactor(const Real Re);
-
 protected:
   Real computeQuadLatticeFrictionFactor(const FrictionStruct & friction_info) const;
 
