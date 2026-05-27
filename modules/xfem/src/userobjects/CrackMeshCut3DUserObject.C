@@ -90,6 +90,8 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                                    getParam<ReporterName>("growth_reporter"), REPORTER_MODE_ROOT)
                              : nullptr)
 {
+  _pl = _mesh.getPointLocator();
+  _pl->enable_out_of_mesh_mode();
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
   if (_grow)
@@ -131,6 +133,16 @@ CrackMeshCut3DUserObject::initialSetup()
   if (_cfd)
     _crack_front_definition =
         &_fe_problem.getUserObject<CrackFrontDefinition>("crackFrontDefinition");
+}
+
+void
+CrackMeshCut3DUserObject::meshChanged()
+{
+  _console << "DBG: CrackMeshCut3DUserObject::meshChanged() fired" << std::endl;
+  // Sub-locators share dangling Elem* with the mesh's master locator after XFEM
+  // cuts elements, so rebuild whenever the FE mesh is modified.
+  _pl = _mesh.getPointLocator();
+  _pl->enable_out_of_mesh_mode();
 }
 
 void
@@ -629,9 +641,6 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
   _active_boundary.clear();
   _inactive_boundary_pos.clear();
 
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-
   unsigned int n_boundary = _boundary.size();
 
   // if the node is outside of the structural model, store its position in _boundary to
@@ -642,7 +651,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
     mooseAssert(this_node, "Node is NULL");
     Point & this_point = *this_node;
 
-    const Elem * elem = (*pl)(this_point);
+    const Elem * elem = (*_pl)(this_point);
     if (elem == nullptr)
       _inactive_boundary_pos.push_back(j);
   }
@@ -951,9 +960,7 @@ CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int /*segment
   // increment (see findActiveBoundaryDirection() and computeGrowthIncrement()), so
   // candidate_point = previous-step inactive position + active_dir * active_growth_length.
   // No adjustment is needed if the candidate is still outside the body.
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  if ((*pl)(candidate_point) == nullptr)
+  if ((*_pl)(candidate_point) == nullptr)
     return candidate_point;
 
   // Candidate has crossed into the body. Snap it to the nearest point on the body's
@@ -1198,12 +1205,8 @@ CrackMeshCut3DUserObject::refineFront()
           // that are outside the FEM mesh.  A node outside would be treated as an
           // inactive endpoint on the next step, corrupting the active boundary structure.
           if (has_inactive && (i == first_boundary_i || i == last_boundary_i))
-          {
-            std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-            pl->enable_out_of_mesh_mode();
-            if ((*pl)(x) == nullptr) // outside the FEM mesh
+            if ((*_pl)(x) == nullptr) // outside the FEM mesh
               continue;
-          }
 
           Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
           _cutter_mesh->add_node(this_node);
