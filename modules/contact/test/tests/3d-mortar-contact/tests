@@ -199,6 +199,7 @@
                  'Constraints/normal_z/triangulate_triangles=true '
                  'UserObjects/weighted_gap_uo/triangulate_triangles=true'
       map = false # the mortar segment debug mesh can contain coincident elements
+      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons,'
       max_threads = 1
@@ -225,6 +226,7 @@
                  'Constraints/normal_z/triangulate_triangles=false '
                  'UserObjects/weighted_gap_uo/triangulate_triangles=false'
       map = false # the mortar segment debug mesh can contain coincident elements
+      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
       max_threads = 1
@@ -247,6 +249,7 @@
                  'Constraints/normal_z/triangulation=ear_clipping '
                  'UserObjects/weighted_gap_uo/triangulation=ear_clipping'
       map = false # the mortar segment debug mesh can contain coincident elements
+      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'an ear-clipping algorithm, and'
       max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
@@ -267,6 +270,7 @@
                  'Constraints/normal_z/triangulation=delaunay '
                  'UserObjects/weighted_gap_uo/triangulation=delaunay'
       map = false # the mortar segment debug mesh can contain coincident elements
+      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
