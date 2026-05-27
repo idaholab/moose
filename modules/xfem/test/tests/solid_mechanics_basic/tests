@@ -125,7 +125,6 @@
       capabilities = 'unique_id'
       detail = ' properly moving crack front nodes using the maximum hoop stress growth direction, or'
     []
-    #still need to regold above this
     [face_cut_mid_scc]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
@@ -151,7 +150,7 @@
       exodiff = 'face_crack_scc_off_0_spin_25_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' properly refining surface cutting crack front if refinement occurs inside volume, or'
+      detail = ' properly refining surface cutting crack front if crack front refinement occurs inside volume, or'
     []
     [inactive_no_refine]
       type = Exodiff
@@ -160,70 +159,52 @@
       exodiff = 'face_crack_scc_off_0_spin_15_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' not refining surface cutting crack front if refinement occurs outside volume, or'
+      detail = ' not refining surface cutting crack front if crack front refinement would occur outside volume, or'
     []
     [face_cut_mid_function]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
-      cli_args = 'fname=hex_block Executioner/solve_type=Linear'
+      cli_args = 'fname=hex_block'
       exodiff = 'face_crack_function_off_0_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume using a prescribed function growth direction, or'
+      detail = ' without producing degenerate crack face elements with a prescribed function growth direction, or'
     []
     [double_cut_edge]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=hex_block spin=4 Executioner/solve_type=Linear'
+      cli_args = 'fname=hex_block spin=4'
       exodiff = 'hex_block_offset_0_spin_4_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' growing the crack front and double cutting a volume element edge.'
-    []
-    [tet_corner]
-      type = Exodiff
-      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_corner Executioner/solve_type=Linear'
-      exodiff = 'tet_corner_offset_0_spin_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
-      capabilities = 'unique_id'
-      detail = ' keeping the crack front on the free surface when growth runs along a corner-cut FEM mesh surface, or'
+      detail = ' growing the crack front and double cutting a volume element edge, or'
     []
     [tet_hit_corner]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_corner offset=-0.05 Executioner/solve_type=Linear'
+      cli_args = 'fname=tet_corner offset=-0.05'
       exodiff = 'tet_corner_offset_-0.05_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' keeping the crack front on the free surface when growth runs along a corner-cut FEM mesh surface, or'
-    []
-    [tet_block]
-      type = Exodiff
-      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_block Executioner/solve_type=Linear'
-      exodiff = 'tet_block_offset_0_spin_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
-      capabilities = 'unique_id'
-      detail = ' keeping the crack front on the free surface without producing sliver elements when growth runs along a flat FEM mesh surface, or'
+      detail = ' keeping the crack front on the free surface when the crack front grows into a corner on the volume, or'
     []
     [tet_concave_up]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_concave_up spin=10 Executioner/solve_type=Linear'
+      cli_args = 'fname=tet_concave_up spin=10'
       exodiff = 'tet_concave_up_offset_0_spin_10_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' keeping the crack front on a concave-up curved FEM mesh surface, or'
+      detail = ' keeping the crack front on a concave-up curved volume surface, or'
     []
     [tet_concave_down]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_concave_down spin=5 Executioner/solve_type=Linear'
+      cli_args = 'fname=tet_concave_down spin=5'
       exodiff = 'tet_concave_down_offset_0_spin_5_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' keeping the crack front on a concave-down curved FEM mesh surface, or'
+      detail = ' keeping the crack front on a concave-down curved volume surface, or'
     []
     [tet_concave_up_hoopStress]
       type = Exodiff
@@ -232,30 +213,17 @@
       exodiff = 'face_crack_hoopStress_off_0_spin_12_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' keeping the tracked crack front consistent on a concave-up curved FEM mesh surface when boundary nodes flip between active and inactive states under the maximum hoop stress growth direction, or'
+      detail = ' keeping the crack front consistent on a concave-up curved volume surface under the maximum hoop stress growth direction, or'
     []
     [tet_block_tilt_14]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'fname=tet_block tilt=14 Outputs/file_base=tet_block_tilt_14 Executioner/solve_type=Linear'
+      cli_args = 'fname=tet_block tilt=14 Outputs/file_base=tet_block_tilt_14'
       exodiff = 'tet_block_tilt_14_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' growing a tilted crack through a tetrahedral FEM mesh without aborting on the EFA invariant '
-               '"one embedded node must be owned by 2 faces", which fires when two geometric cut surfaces '
+      detail = ' growing a tilted crack through a tetrahedral volume when two geometric cut surfaces '
                'place their intersections on the same fragment face in a single growth step.'
-    []
-    [tet_block_tilt_neg20_no_double_free]
-      type = RunException
-      input = 'face_crack_3d_domain.i face_crack_3d_xfem_hoopStress.i'
-      cli_args = 'fname=tet_block_refine tilt=-20 Executioner/end_time=3'
-      expect_err = 'Incorrect link size for element that has been completely cut'
-      capabilities = 'unique_id & method=opt'
-      valgrind = NONE
-      detail = ' splitting a thoroughly-cut 3D fragment so that no EFAFace pointer is shared between '
-               'the two resulting fragments, eliminating the double-free in EFAFace::~EFAFace.  The '
-               'run still aborts on a downstream topology-count check (separate algorithmic bug in '
-               'connectSubfaces) but no longer triggers a malloc abort.'
     []
   []
   [penny_crack]

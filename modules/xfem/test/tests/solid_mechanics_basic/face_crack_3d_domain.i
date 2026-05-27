@@ -1,13 +1,26 @@
+# Dummy problem that does not solve equilibrium problem
+# Cracks driven by presecribed stress and strain fields.
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = true
 []
 
-rad=0.1
+rad = 0.1
 offset = 0
 spin = 0
 tilt = 0
 fname = 'tet_block'
+
+# Elastic constants used by DomainIntegral and by the compatibility strain below.
+E = 207000
+nu = 0.3
+
+# Prescribed stress field.  The default mirrors the former top_y traction ramp:
+#   sigma_yy = sigma0 + sigma_z_slope * z
+# Change these constants or sigma_yy_function to prescribe a different field.
+sigma0 = 20
+sigma_z_slope = 500
+
 [Mesh]
   #---- CUTTER MESH
   [cicle_outline]
@@ -42,6 +55,7 @@ fname = 'tet_block'
     transform = TRANSLATE
     vector_value = '${offset} 0 -0.01'
     save_with_name = mesh_cutter
+    output = true
   []
 
   #---- FEM MESH
@@ -72,83 +86,78 @@ fname = 'tet_block'
   final_generator = center
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    strain = FINITE
-    add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
+[Problem]
+  solve = false
+  kernel_coverage_check = false
+  skip_nl_system_check = true
+[]
+
+[AuxVariables]
+  # dummy displacement for DomainIntegral
+  [disp_x]
+    initial_condition=0
+  []
+  [disp_y]
+    initial_condition=0
+  []
+  [disp_z]
+    initial_condition=0
   []
 []
 
-[BCs]
-  [left_x]
-    type = DirichletBC
-    boundary = left
-    variable = disp_x
-    value = 0.0
-  []
-  [right_x]
-    type = DirichletBC
-    boundary = right
-    variable = disp_x
-    value = 0.0
-  []
-  # Ramp traction in z so KI varies along the crack front:
-  # near z=0 (surface, inactive nodes): below k_low -> no growth
-  # mid-front: transition zone -> moderate growth
-  # deepest nodes (z~0.09): above k_high -> max growth
-  [top_y]
-    type = FunctionNeumannBC
-    boundary = top
-    variable = disp_y
-    function = '20 + 500 * z'
-  []
-  [bottom_y]
-    type = DirichletBC
-    boundary = bottom
-    variable = disp_y
+[Functions]
+  [zero]
+    type = ConstantFunction
     value = 0
   []
-  [pin_z]
-    type = DirichletBC
-    boundary = pin
-    variable = disp_z
-    value = 0.0
+
+  # Nonzero prescribed Cauchy stress component.
+  [sigma_yy_function]
+    type = ParsedFunction
+    expression = '${sigma0} + ${sigma_z_slope} * z'
+  []
+
+  # A compatible small-strain tensor for DomainIntegral objects that request the
+  # elastic_strain material property.  For the default uniaxial stress field this
+  # is Hooke's-law compliance: eps_yy = sigma_yy / E,
+  # eps_xx = eps_zz = -nu * sigma_yy / E.
+  [eps_xx_function]
+    type = ParsedFunction
+    expression = '-${nu} * (${sigma0} + ${sigma_z_slope} * z) / ${E}'
+  []
+  [eps_yy_function]
+    type = ParsedFunction
+    expression = '(${sigma0} + ${sigma_z_slope} * z) / ${E}'
+  []
+  [eps_zz_function]
+    type = ParsedFunction
+    expression = '-${nu} * (${sigma0} + ${sigma_z_slope} * z) / ${E}'
   []
 []
 
 [Materials]
-  [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 207000
-    poissons_ratio = 0.3
+  [prescribed_stress]
+    type = GenericFunctionRankTwoTensor
+    tensor_name = stress
+    tensor_functions = '0 0 0 0 sigma_yy_function 0 0 0 0'
   []
-  [stress]
-    type = ComputeFiniteStrainElasticStress
+
+  # Provide the elastic_strain material property consumed by InteractionIntegral.
+  [prescribed_elastic_strain]
+    type = GenericFunctionRankTwoTensor
+    tensor_name = elastic_strain
+    tensor_functions = 'eps_xx_function 0 0 0 eps_yy_function 0 0 0 eps_zz_function'
+  []
+  # dummy strain needed by strainEnergyDensity for InteractionIntegral
+  [prescribed_mechanical_strain]
+    type = GenericConstantRankTwoTensor
+    tensor_name = mechanical_strain
+    tensor_values = '0 0 0 0 0 0 0 0 0'
   []
 []
 
 [Executioner]
   type = Transient
-
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      8'
-
-  line_search = 'none'
-
-  [Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  []
-
-  l_max_its = 100
-  l_tol = 1e-2
-
-  nl_max_its = 15
-  nl_rel_tol = 1e-5
-  nl_abs_tol = 1e-10
-
   start_time = 0.0
   dt = 1.0
   end_time = 4
