@@ -118,6 +118,7 @@
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       valgrind = 'none'
+      restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-action-triangulation/centroid-with-retessellation'
     []
     [ear_clipping]
@@ -214,6 +215,7 @@
       map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
+      restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
     []
     [ear_clipping]
