@@ -2824,6 +2824,18 @@ FEProblemBase::addDistribution(const std::string & type,
   addObject<Distribution>(type, name, parameters, /* threaded = */ false);
 }
 
+bool
+FEProblemBase::hasDistribution(const std::string & name) const
+{
+  std::vector<Distribution *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("Distribution")
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  return !objs.empty();
+}
+
 Distribution &
 FEProblemBase::getDistribution(const std::string & name)
 {

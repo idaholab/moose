@@ -45,6 +45,13 @@ public:
    */
   MooseApp & getCheckApp();
 
+  /**
+   * Override number of discrete points in continuous distribution plots.
+   * Used by plotting unit test to lower sampling resolution for testing.
+   * @param num_points - number of discrete points for distribution plots
+   */
+  void setDistPlotNumPoints(std::size_t num_points) { _dist_plot_num_points = num_points; }
+
 private:
   /**
    * SortedLocationNodes - type alias for set of nodes sorted by location
@@ -359,22 +366,50 @@ private:
 
   /**
    * Build CustomPlot extension responses when method name is plotting.
-   * @param plottingResponses - array to fill with CustomPlot responses
+   * @param plotting_responses - array for CustomPlot responses to fill
    * @param line - zero-based line to use for logic of custom extension
    * @param character - zero-based column for logic of custom extension
    * @return - true if request successfully handled with response built
    */
-  bool gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character);
+  bool gatherPlottingResponses(wasp::DataArray & plotting_responses, int line, int character);
+
+  /**
+   * Gather function data, build CustomPlot object, and add to responses.
+   * @param plotting_responses - array to be filled by CustomPlot objects
+   * @param problem - problem to query warehouses when building plot data
+   * @param object_name - name of request object to use for problem query
+   * @param object_type - type of request object to use in title for plot
+   */
+  void buildFuncPlotResponse(wasp::DataArray & plotting_responses,
+                             FEProblemBase & problem,
+                             const std::string & object_name,
+                             const std::string & object_type);
+
+  /**
+   * Compute PDF and CDF, build CustomPlot objects, and add to responses.
+   * @param plotting_responses - array to be filled by CustomPlot objects
+   * @param problem - problem to query warehouses when building plot data
+   * @param object_name - name of request object to use for problem query
+   * @param object_type - type of request object to use in title for plot
+   */
+  void buildDistPlotResponses(wasp::DataArray & plotting_responses,
+                              FEProblemBase & problem,
+                              const std::string & object_name,
+                              const std::string & object_type);
 
   /**
    * Build CustomPlot graph with provided keys, values, and plot title.
    * @param plot_object - CustomPlot object to be built into line graph
    * @param plot_title - title for plot composed of block name and type
-   * @param graph_keys - abscissa values from function for graph x-axis
-   * @param graph_vals - ordinate values from function for graph y-axis
+   * @param x_axis_label - label for x-axis of plot dependent upon type
+   * @param y_axis_label - label for y-axis of plot dependent upon type
+   * @param graph_keys - x values of function or distribution for graph
+   * @param graph_vals - y values of function or distribution for graph
    */
   void buildLineGraphPlot(wasp::CustomPlot & plot_object,
                           const std::string & plot_title,
+                          const std::string & x_axis_label,
+                          const std::string & y_axis_label,
                           const std::vector<double> & graph_keys,
                           const std::vector<double> & graph_vals);
 
@@ -475,4 +510,14 @@ private:
    * @brief _formatting_tab_size - number of indent spaces for formatting
    */
   std::size_t _formatting_tab_size;
+
+  /**
+   * @brief _dist_plot_num_points - distribution plot sampling resolution
+   */
+  std::size_t _dist_plot_num_points;
+
+  /**
+   * @brief _dist_plot_quantile_bound - epsilon to bound plot range tails
+   */
+  double _dist_plot_quantile_bound;
 };
