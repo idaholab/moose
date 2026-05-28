@@ -16,4 +16,11 @@
     requirement = 'The system shall be able to use linear finite volume variables with basic aux kernels.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [shared_gradient_method]
+    type = CSVDiff
+    input = 'shared-gradient-method.i'
+    csvdiff = 'shared-gradient-method_csv.csv'
+    requirement = 'The system shall preserve gradients for multiple linear finite volume variables sharing one named gradient method.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
