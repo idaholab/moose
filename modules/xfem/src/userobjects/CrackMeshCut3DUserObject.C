@@ -138,9 +138,6 @@ CrackMeshCut3DUserObject::initialSetup()
 void
 CrackMeshCut3DUserObject::meshChanged()
 {
-  _console << "DBG: CrackMeshCut3DUserObject::meshChanged() fired" << std::endl;
-  // Sub-locators share dangling Elem* with the mesh's master locator after XFEM
-  // cuts elements, so rebuild whenever the FE mesh is modified.
   _pl = _mesh.getPointLocator();
   _pl->enable_out_of_mesh_mode();
 }
@@ -733,13 +730,16 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
     // determine growth direction based on KI and KII at the crack front
     else if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
     {
+      // refineFront() publishes the crack-front-point count (and thus the VPP size)
+      // at the end of the previous step. Between then and now, the FEM mesh has been
+      // cut and an active crack front tip may have grown outside the body and flipped to the new
+      // inactive bookend role; in that case _active_boundary[0] is one or two nodes
+      // shorter than _crack_front_points from the ki VPP. The lookup through getFrontPointsIndex
+      // is by cutter-mesh dof_id (std::find), so it transparently skips the now inactive
+      // _crack_front_points.
       mooseAssert(_ki_vpp->size() == _kii_vpp->size(), "KI and KII VPPs must be the same size");
-      mooseAssert(_ki_vpp->size() == _active_boundary[0].size(),
-                  "the number of crack front nodes in the self-similar method should equal to the "
-                  "size of VPP defined at the crack front");
-      mooseAssert(_crack_front_points.size() == _active_boundary[0].size(),
-                  "the number of crack front nodes should be the same in _crack_front_points and "
-                  "_active_boundary[0]");
+      mooseAssert(_ki_vpp->size() == _crack_front_points.size(),
+                  "VPP size must match the crack-front-point count published by refineFront");
 
       // the node order in _active_boundary[0] and _crack_front_points may be the same or opposite,
       // their correspondence is needed
