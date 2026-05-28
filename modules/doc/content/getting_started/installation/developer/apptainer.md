@@ -13,11 +13,20 @@ The use of these environments in a HPC environment across nodes (i.e., using MPI
 This is supported on INL HPC in which case you should follow the instructions in [installation/developer/inl_hpc.md] instead.
 !alert-end!
 
-## Usage
+To begin, follow these instructions:
 
-### Enter the Environment id=enter_the_environment
+1. [#enter_the_environment]: Enter the development environment that contains the necessary dependencies for building and running an application.
+1. [#build_and_test]: Build and test an application.
 
-Multiple containerized environments exist for use. By default, we will assume the use of the `moose-dev-openmpi-x86_64` container (see [#container_listing] for a full list of available containerized environments).
+Additional information is provided in the following sections:
+
+- [#non_shell_execution]: Execute an application or command in the development environment without entering a shell within the container.
+- [#additional_usage]: Describes additional options that can be provided to Apptainer when using the development environment.
+- [#container_listing]: Describes all of the public containerized environments available for execution.
+
+## Enter the Environment id=enter_the_environment
+
+Multiple containerized environments exist for use. By default, we will assume the use of the `moose-dev-openmpi-x86_64` container (see [#container_listing] for a full list of available containerized environments). This container is sufficient for most use cases.
 
 To build and execute MOOSE and MOOSE-based applications, all that is needed is to enter the containerized environment. To enter an interactive shell inside the the containerized development environment, run the following:
 
@@ -27,26 +36,30 @@ apptainer shell oras://ghcr.io/idaholab/apptainer/moose-dev-openmpi-x86_64:__VER
 
 If a message like "apptainer: command not found" is emitted, use your system package manager (`yum`, `dnf`, `apt-get`, etc) to install [Apptainer](https://apptainer.org/) or request that is installed by your system administrator. On INL HPC systems, apptainer is made available via a module (i.e., `module load apptainer`).
 
-At this point, you are inserted within an interactive shell inside of the containerized development environment and all of the necessary dependencies for building MOOSE and MOOSE-based applications are available. You should able to change directories into the repository of your cloned application (or your MOOSE repository) and run `make` to build the application, and then `./run_tests` to test the application.
+At this point, you are inserted within an interactive shell inside of the containerized development environment and all of the necessary dependencies for building MOOSE and MOOSE-based applications are available.
 
 !alert note
 Applications built within the containerized environment can only be ran within the containerized environment. Thus, if you build an application within the shell and later forget to execute it within the shell, the application will fail to run.
 
-### Using the Environment id=using_the_environment
+## Build and Test id=build_and_test
 
-All of the commands that follow +must+ be ran within the `apptainer shell` environment described above in [#enter_the_environment].
+After following the instructions to enter the environment in [#enter_the_environment], we will next build and test MOOSE or a MOOSE-based application.
 
-#### Build and Test: MOOSE
+The commands commands that follow +must+ be ran within the `apptainer shell` environment described above in [#enter_the_environment].
+
+Follow the instructions in [#build_and_test_moose] if you are building MOOSE. Otherwise, follow the instructions in [#build_and_test_moose_application].
+
+### Build and Test: MOOSE id=build_and_test_moose
 
 !template load file=installation/developer/includes/build_test_moose.md.template moose_jobs=4
 
-#### Build and Test: MOOSE Application
+### Build and Test: MOOSE Application id=build_and_test_moose_application
 
 !template load file=installation/developer/includes/build_test_moose_app.md.template moose_jobs=4
 
-### Non-shell Execution id=non_shell_execution
+## Non-shell Execution id=non_shell_execution
 
-The instructions provided in [#enter_the_environment] allow you to enter a shell environment within the containerized development environment. You can also execute something within this environment without entering the shell (like running a MOOSE-based application).
+The instructions provided in [#enter_the_environment] allow you to enter a shell environment within the containerized development environment. You can also execute something within this environment without entering the shell (like running a built MOOSE application).
 
 For this, you can utilize the `apptainer exec` command, for example:
 
@@ -62,13 +75,11 @@ This will execute the command:
 
 within the containerized development environment.
 
-## Additional Usage
-
-### Apptainer Options id=apptainer_options
+## Additional Usage id=additional_usage
 
 The `apptainer shell` and `apptainer exec` commands described above are commonly augmented in the following ways:
 
-#### Use a Different Container
+### Use a Different Container
 
 The container name `moose-dev-openmpi-x86_64` can be changed another container, for example, `moose-dev-cuda-openmpi-x86_64`, to use the environment that has CUDA available. For example:
 
@@ -76,7 +87,7 @@ The container name `moose-dev-openmpi-x86_64` can be changed another container, 
 apptainer shell oras://ghcr.io/idaholab/apptainer/moose-dev-cuda-openmpi-x86_64:__VERSIONER_VERSION_MOOSE_DEV__
 !versioner-end!
 
-#### Use NVIDIA GPUs
+### Use NVIDIA GPUs
 
 GPUs are not available by default in the containerized environment. The command line argument `--nv` will bind in the necessary context from the host systems to enable the use of NVIDIA GPUs in the containerized environment. For example:
 
@@ -84,7 +95,7 @@ GPUs are not available by default in the containerized environment. The command 
 apptainer shell --nv oras://ghcr.io/idaholab/apptainer/moose-dev-cuda-openmpi-x86_64:__VERSIONER_VERSION_MOOSE_DEV__
 !versioner-end!
 
-#### Bind Mount Directories
+### Bind Mount Directories
 
 By default, Apptainer will make available the your home directory in the environment, and the current directory you are in. Other directories from the host system may not be available.
 
@@ -94,7 +105,7 @@ Let's say that you have a directory `/data` on your system that you want to acce
 apptainer shell -B /data oras://ghcr.io/idaholab/apptainer/moose-dev-openmpi-x86_64:__VERSIONER_VERSION_MOOSE_DEV__
 !versioner-end!
 
-#### Using Other Versions
+### Using Other Versions
 
 The suffix in the container URI (the `oras://..` component) is the container "tag". This tag represents the version. Here, we use the current version which is [!versioner!version package=moose-dev]. This tag can be replaced with an older tag to use an older version, which can be required if using a version of MOOSE that is not the latest version.
 
@@ -135,7 +146,7 @@ All of the containerized environments above contain the following installed pack
 | [libTorch](https://docs.pytorch.org/cppdocs/) | v[!package!libtorch_apptainer] | `$LIBTORCH_DIR=/opt/libtorch` |
 | [GCC](https://gcc.gnu.org/) | [!package!gcc_apptainer] | `/opt/rh` |
 | [MFEM](https://mfem.org) | [!git!submodule-hash length=7 url=https://github.com/mfem/mfem/tree](framework/contrib/mfem) | `$MFEM_DIR=/opt/mfem` |
-| [NEML2](https://applied-material-modeling.github.io/neml2/) | [!git!submodule-hash length=7 url=https://github.com/applied-material-modeling/neml2/tree](framework/contrib/neml2) | `NEML2_DIR=/opt/neml2` |
+| [NEML2](https://applied-material-modeling.github.io/neml2/) | [!git!submodule-hash length=7 url=https://github.com/applied-material-modeling/neml2/tree](framework/contrib/neml2) | `$NEML2_DIR=/opt/neml2` |
 | [PETSc](https://petsc.org/) | [!versioner!version prefix=v url=https://gitlab.com/petsc/petsc/-/tree/ package=petsc] | `$PETSC_DIR=/opt/petsc` |
 | [Python](https://www.python.org/) | [!package!python_apptainer] | `/opt/miniforge3/envs/moose/bin/python` |
 | [VTK](https://vtk.org/) | [!package!vtk] | `$VTK_DIR=/opt/vtk` |
