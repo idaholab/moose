@@ -2846,7 +2846,13 @@ FEProblemBase::getDistribution(const std::string & name)
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_distribution"),
+                "A Distribution getter was called before Distributions have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the Distribution is constructed before the object using it.");
     mooseError("Unable to find Distribution with name '" + name + "'");
+  }
   return *(objs[0]);
 }
 
@@ -2871,10 +2877,17 @@ FEProblemBase::getSampler(const std::string & name, const THREAD_ID tid)
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_sampler"),
+                "A Sampler getter was called before Samplers have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the Sampler is constructed before the object using it.");
+
     mooseError(
         "Unable to find Sampler with name '" + name +
         "', if you are attempting to access this object in the constructor of another object then "
-        "the object being retrieved must occur prior to the caller within the input file.");
+        "make sure that the Sampler is constructed before the object using it.");
+  }
   return *(objs[0]);
 }
 
