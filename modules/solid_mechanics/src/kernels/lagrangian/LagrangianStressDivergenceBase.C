@@ -115,6 +115,15 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
 }
 
 void
+LagrangianStressDivergenceBase::jacobianSetup()
+{
+  JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>::jacobianSetup();
+  // Force every Jacobian sweep to refresh the F-bar caches. See header comment for the
+  // single-element-per-rank staleness scenario this guards against.
+  _fbar_cache_elem = nullptr;
+}
+
+void
 LagrangianStressDivergenceBase::precalculateJacobian()
 {
   // Skip if we are not doing stabilization
