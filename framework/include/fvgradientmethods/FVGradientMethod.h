@@ -59,6 +59,14 @@ public:
                        GradientContainer & scratch_gradient,
                        const std::unordered_set<unsigned int> & variable_numbers) const;
 
+  /**
+   * Resolve dependencies needed by this method before gradient updates.
+   *
+   * @param system System that owns the registered gradient field.
+   * @param variable_number Variable number whose gradient is being registered.
+   */
+  virtual void setupDependencies(SystemBase & /*system*/, unsigned int /*variable_number*/) const {}
+
   /// Limiter selected for this method.
   Moose::FV::GradientLimiterType limiterType() const { return _limiter_type; }
 

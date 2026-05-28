@@ -95,6 +95,8 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
                _sys.name(),
                "', but no field variable with that number exists on the system.");
 
+  method.setupDependencies(_sys, variable_number);
+
   auto & storage = methodGradientStorage(method);
   storage.variable_numbers.insert(variable_number);
 

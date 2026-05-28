@@ -11,6 +11,8 @@
 
 #include "FVGradientMethod.h"
 
+class RhieChowMassFlux;
+
 /**
  * Pressure gradient method that uses Rhie-Chow face fluxes to reconstruct a cell-centered pressure
  * gradient for the momentum predictor.
@@ -25,6 +27,8 @@ public:
    * @param params Input parameters used to construct the reconstructed pressure-gradient method.
    */
   FVReconstructedPressureGradient(const InputParameters & params);
+
+  void setupDependencies(SystemBase & system, unsigned int variable_number) const override;
 
 private:
   /**
@@ -42,15 +46,21 @@ private:
       const std::unordered_set<unsigned int> & variable_numbers) const override;
 
   /**
-   * Find the method used before reconstructed Rhie-Chow data are available.
+   * Resolve the method used before reconstructed Rhie-Chow data are available.
    *
    * @param system Pressure system used to access registered gradient methods.
    */
-  const FVGradientMethod & baseGradientMethod(SystemBase & system) const;
+  const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
   /// Rhie-Chow user object that supplies HbyA, Ainv, and reconstructed cell velocities.
   const UserObjectName _rhie_chow_user_object_name;
 
   /// Gradient method used before reconstructed Rhie-Chow data are available.
   const GradientMethodName _base_gradient_method_name;
+
+  /// Cached gradient method used before reconstructed Rhie-Chow data are available.
+  mutable const FVGradientMethod * _base_gradient_method = nullptr;
+
+  /// Cached Rhie-Chow user object that owns the reconstructed gradients.
+  mutable const RhieChowMassFlux * _rhie_chow_user_object = nullptr;
 };

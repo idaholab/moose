@@ -42,7 +42,7 @@ FVReconstructedPressureGradient::FVReconstructedPressureGradient(const InputPara
 }
 
 const FVGradientMethod &
-FVReconstructedPressureGradient::baseGradientMethod(SystemBase & system) const
+FVReconstructedPressureGradient::resolveBaseGradientMethod(SystemBase & system) const
 {
   auto & fe_problem = system.feProblem();
   if (_base_gradient_method_name == name())
@@ -68,14 +68,35 @@ FVReconstructedPressureGradient::baseGradientMethod(SystemBase & system) const
 }
 
 void
+FVReconstructedPressureGradient::setupDependencies(SystemBase & system,
+                                                   const unsigned int variable_number) const
+{
+  if (!_base_gradient_method)
+    _base_gradient_method = &resolveBaseGradientMethod(system);
+
+  if (!_rhie_chow_user_object)
+    _rhie_chow_user_object =
+        &system.feProblem().getUserObject<RhieChowMassFlux>(_rhie_chow_user_object_name);
+
+  if (variable_number != _rhie_chow_user_object->pressureVariableNumber())
+    mooseError("FVReconstructedPressureGradient '",
+               name(),
+               "' can only be used for the pressure variable registered on RhieChowMassFlux '",
+               _rhie_chow_user_object_name,
+               "'.");
+}
+
+void
 FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & output_gradient,
     GradientContainer & scratch_gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
-  const auto & rc = system.feProblem().getUserObject<RhieChowMassFlux>(_rhie_chow_user_object_name);
+  if (!_base_gradient_method || !_rhie_chow_user_object)
+    mooseError("FVReconstructedPressureGradient '", name(), "' has not been set up.");
 
+  const auto & rc = *_rhie_chow_user_object;
   for (const auto variable_number : variable_numbers)
     if (variable_number != rc.pressureVariableNumber())
       mooseError("FVReconstructedPressureGradient '",
@@ -86,12 +107,12 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
 
   if (!rc.hasReconstructedCellVelocity())
   {
-    baseGradientMethod(system).computeGradient(
+    _base_gradient_method->computeGradient(
         system, output_gradient, scratch_gradient, variable_numbers);
     return;
   }
 
-  baseGradientMethod(system).computeGradient(
+  _base_gradient_method->computeGradient(
       system, output_gradient, scratch_gradient, variable_numbers);
 
   for (auto & component : output_gradient)
