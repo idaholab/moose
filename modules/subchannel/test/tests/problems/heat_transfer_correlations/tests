@@ -1,6 +1,6 @@
 [Tests]
-  design = 'QuadSubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
-  issues = '#31464'
+  design = 'QuadSubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md SCMHTCClosureBase.md'
+  issues = '#31464 #32889'
   [EBR-II_SHRT-17_SS]
     requirement = 'The system shall be able to model the EBR-II steady state SHRT-17 case, '
     [dittus_boelter]
@@ -50,6 +50,17 @@
       max_parallel = 1
       detail = 'using the Gnielinski correlation.'
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=gnielinski'
+    []
+    [negative_htc_error]
+      type = RunException
+      input = 'XX09_SCM_SS17.i'
+      expect_err = 'The heat transfer coefficient must be non-negative and finite\.'
+      capabilities = 'method!=dbg'
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'and reject non-physical heat transfer coefficients from HTC closures.'
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski wire_diameter=0.003 Outputs/file_base=negative_htc_error'
     []
     [kazimi_carelli]
       type = CSVDiff
