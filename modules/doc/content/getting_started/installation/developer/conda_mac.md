@@ -1,11 +1,9 @@
-# Conda Mac Development Environment
+# Developer Install: Conda (Mac)
 
 !alert note title=Feedback welcome
 These instructions were recently updated. If anything is unclear or you have suggestions for improvement, please share your feedback in this [GitHub discussion](https://github.com/idaholab/moose/discussions/32966).
 
-The following instructions describe the use of [Conda](https://docs.conda.io) to install the required dependencies for building MOOSE and a MOOSE-based application on Mac OS.
-
-The Conda development environment does not contain installed versions of MFEM, libTorch, and NEML2. If you want to use these optional packages, you will need to also install those dependencies yourself.
+The following instructions describe the use of a pre-built [Conda](https://docs.conda.io) development environment on Mac OS to build and execute MOOSE and MOOSE-based applications. The Conda development environment does not contain pre-built versions of MFEM, libTorch, and NEML2. If you want to use these optional packages, you will need to also install those dependencies yourself.
 
 ## Usage id=usage
 

@@ -3,8 +3,16 @@ In this example, we will test the MOOSE framework. You should run this example i
 ```bash
 cd ~/projects/moose
 cd test
-make -j 4
-./run_tests -j 4
+make -j {{moose_jobs}}
+./run_tests -j {{moose_jobs}}
 ```
 
 The above will compile the MOOSE test application and run the tests.
+
+You can also build and test the MOOSE combined application (which contains all of the physics modules) if you wish with the following:
+
+```bash
+cd ~/projects/moose/modules
+make -j {{moose_jobs}}
+./run_tests -j {{moose_jobs}}
+```

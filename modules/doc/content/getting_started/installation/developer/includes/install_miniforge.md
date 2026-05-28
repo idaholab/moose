@@ -43,10 +43,10 @@ To utilize this environment in other terminal windows, the command above must be
 
 All of the commands that follow +must+ be ran within a terminal window in which you have ran `conda activate moose` first as described in [#activate_environment].
 
-#### Testing MOOSE
+#### Build and Test: MOOSE
 
-!include installation/developer/includes/testing_moose.md
+!template load file=installation/developer/includes/build_test_moose.md.template moose_jobs=4
 
-#### Testing MOOSE Applications
+#### Build and Test: MOOSE Application
 
-!include installation/developer/includes/testing_moose_applications.md
+!template load file=installation/developer/includes/build_test_moose_app.md.template moose_jobs=4

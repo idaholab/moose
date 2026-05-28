@@ -1,11 +1,11 @@
-# Apptainer Development Environment
+# Developer Install: Apptainer
 
 !alert note title=Feedback welcome
 These instructions were recently updated. If anything is unclear or you have suggestions for improvement, please share your feedback in this [GitHub discussion](https://github.com/idaholab/moose/discussions/32966).
 
-The following instructions describe the use of [Apptainer](https://apptainer.org/) to execute within pre-built containers that contain all necessary dependencies (and optional dependencies) for building MOOSE and MOOSE-based applications.
+The following instructions describe the use of [Apptainer](https://apptainer.org/) to build and execute MOOSE and MOOSE-based applications within pre-built containers that contain all necessary dependencies. This install method also contains pre-built versions of the optional dependencies libTorch, MFEM, and NEML2.
 
-This is the preferred method of building MOOSE and MOOSE-based applications on Linux. These development environments contain all [installation/developer/index.md#required_dependencies] and [installation/developer/index.md#optional_dependencies] of MOOSE.
+This is the preferred method of building MOOSE and MOOSE-based applications on Linux.
 
 !alert! note title=Use on HPC
 The use of these environments in a HPC environment across nodes (i.e., using MPI to run a job on multiple nodes) is not supported out of the box. You will need your system administrator to setup cross-node MPI by binding in the host MPI into the container.
@@ -36,13 +36,13 @@ Applications built within the containerized environment can only be ran within t
 
 All of the commands that follow +must+ be ran within the `apptainer shell` environment described above in [#enter_the_environment].
 
-#### Testing MOOSE
+#### Build and Test: MOOSE
 
-!include installation/developer/includes/testing_moose.md
+!template load file=installation/developer/includes/build_test_moose.md.template moose_jobs=4
 
-#### Testing MOOSE Applications
+#### Build and Test: MOOSE Application
 
-!include installation/developer/includes/testing_moose_applications.md
+!template load file=installation/developer/includes/build_test_moose_app.md.template moose_jobs=4
 
 ### Non-shell Execution id=non_shell_execution
 
