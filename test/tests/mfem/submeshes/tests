@@ -126,7 +126,7 @@
     csvdiff = 'OutputData/HPhiMagnetodynamicNLClosedCoilCSV.csv'
     requirement = 'MOOSE shall have the ability to solve curl-curl problems with highly nonlinear scalar material properties dependend on the curl of the trial variable.'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu' # NLCurlCurlKernel not optimised for use on GPU
     recover = false
     restep = false
     valgrind = heavy
