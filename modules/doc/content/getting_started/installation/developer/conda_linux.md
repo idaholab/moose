@@ -8,9 +8,18 @@ The following instructions describe the use of a pre-built [Conda](https://docs.
 !alert note title=Use Apptainer
 The preferred method of building MOOSE and MOOSE-based applications on Linux is via [Apptainer](https://apptainer.org/). Please consider using the instructions in [installation/developer/apptainer.md] instead. The Conda development environment described here is not as reproducible as the Apptainer environment. Additionally, the Apptainer environment contains additional optional dependencies of MOOSE like MFEM, libTorch, and NEML2 that the Conda environment does not.
 
-## Usage id=usage
+To begin, follow these instructions:
 
-### Install Miniforge
+1. [#install_miniforge]: Install Miniforge to enable the creation of Conda environments.
+1. [#create_environment]: Create the Conda environment that contains the required dependencies.
+1. [#activate_environment]: Activate the created Conda environment that contains the required dependencies.
+1. [#build_and_test]: Build and test an application.
+
+After the environment has been created, you can use it again in another terminal window by repeating the instructions in [#activate_environment].
+
+If you need to update the environment, follow the instructions in [#updating].
+
+## Install Miniforge id=install_miniforge
 
 [Miniforge](https://github.com/conda-forge/miniforge) first must be installed to provide the [Conda](https://docs.conda.io) environment for installing packages. Miniforge only needs to be installed once. If you run into issues during these steps, please visit our [Conda Troubleshooting](help/faq/conda_issues.md optional=True) guide.
 

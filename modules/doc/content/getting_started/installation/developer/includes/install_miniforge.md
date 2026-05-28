@@ -18,35 +18,39 @@ Lastly, add [!ac](INL)'s public channel to gain access to [!ac](INL)'s Conda pac
 conda config --add channels https://conda.software.inl.gov/public
 ```
 
-### Create Environment
+## Create Environment id=create_environment
 
 After installing Miniforge (by following the instructions immediately above), a unique Conda environment will be created named `moose` with the packages that contain the environment:
 
 !versioner! code
-conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
+conda create -n moose-dev moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
 !versioner-end!
 
 If you are running into errors, please see our
 [troubleshooting guide for Conda](help/troubleshooting.md#condaissues optional=True).
 
-### Activate Environment id=activate_environment
+## Activate Environment id=activate_environment
 
-Now that the `moose` Conda environment has been installed, run the following to activate it:
+Now that the `moose-dev` Conda environment has been installed, run the following to activate it:
 
 ```bash
-conda activate moose
+conda activate moose-dev
 ```
 
 To utilize this environment in other terminal windows, the command above must be ran first. Once this activation command is ran, the compilers and dependencies for building MOOSE or a MOOSE-based application will be available.
 
-### Use the Environment
+## Build and Test id=build_and_test
+
+After following the instructions above to setup the environment, we will next build and test MOOSE or a MOOSE-based application.
 
 All of the commands that follow +must+ be ran within a terminal window in which you have ran `conda activate moose` first as described in [#activate_environment].
 
-#### Build and Test: MOOSE
+Follow the instructions in [#build_and_test_moose] if you are building MOOSE. Otherwise, follow the instructions in [#build_and_test_moose_application].
+
+### Build and Test: MOOSE id=build_and_test_moose
 
 !template load file=installation/developer/includes/build_test_moose.md.template moose_jobs=4
 
-#### Build and Test: MOOSE Application
+### Build and Test: MOOSE Application id=build_and_test_moose_application
 
 !template load file=installation/developer/includes/build_test_moose_app.md.template moose_jobs=4
