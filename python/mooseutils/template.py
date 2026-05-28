@@ -19,7 +19,7 @@ def apply_template_arguments(content, **template_args):
     # Convert floats to strings in template arguments
     for k, v in template_args.items():
         if isinstance(v, float):
-            if v.is_integer(): # integer params get converted to float
+            if v.is_integer():  # integer params get converted to float
                 template_args[k] = str(int(v))
             else:
                 template_args[k] = str(v)
