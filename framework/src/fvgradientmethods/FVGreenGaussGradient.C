@@ -33,10 +33,16 @@ void
 FVGreenGaussGradient::computeGradientWithoutLimiter(
     SystemBase & system,
     GradientContainer & output_gradient,
-    GradientContainer &,
+    GradientContainer & scratch_gradient,
     const std::unordered_set<unsigned int> & variable_numbers) const
 {
   auto & fe_problem = system.feProblem();
+
+  mooseAssert(scratch_gradient.size() == output_gradient.size(),
+              "Scratch and output gradient containers must have the same size.");
+
+  for (auto & vec : scratch_gradient)
+    vec->zero();
 
   PARALLEL_TRY
   {
@@ -45,12 +51,12 @@ FVGreenGaussGradient::computeGradientWithoutLimiter(
                                   fe_problem.mesh().ownedFaceInfoEnd());
 
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        fe_problem, system, output_gradient, variable_numbers);
+        fe_problem, system, scratch_gradient, variable_numbers);
     Threads::parallel_reduce(face_info_range, gradient_face_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
 
-  for (auto & vec : output_gradient)
+  for (auto & vec : scratch_gradient)
     vec->close();
 
   PARALLEL_TRY
@@ -60,7 +66,7 @@ FVGreenGaussGradient::computeGradientWithoutLimiter(
                                   fe_problem.mesh().ownedElemInfoEnd());
 
     ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        fe_problem, system, output_gradient, variable_numbers);
+        fe_problem, system, scratch_gradient, output_gradient, variable_numbers);
     Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
   }
   fe_problem.checkExceptionAndStopSolve();
