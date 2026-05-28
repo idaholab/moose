@@ -185,6 +185,7 @@
       cli_args = 'fname=tet_corner offset=-0.05'
       exodiff = 'tet_corner_offset_-0.05_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
+      # min_slots = 2 # tet meshes are slightly over 1500MB memory limits
       capabilities = 'unique_id'
       detail = ' keeping the crack front on the free surface when the crack front grows into a corner on the volume, or'
     []
@@ -194,6 +195,7 @@
       cli_args = 'fname=tet_concave_up spin=10'
       exodiff = 'tet_concave_up_offset_0_spin_10_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
+      # min_slots = 2 # tet meshes are slightly over 1500MB memory limits
       capabilities = 'unique_id'
       detail = ' keeping the crack front on a concave-up curved volume surface, or'
     []
@@ -203,6 +205,7 @@
       cli_args = 'fname=tet_concave_down spin=5'
       exodiff = 'tet_concave_down_offset_0_spin_5_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
+      # min_slots = 2 # tet meshes are slightly over 1500MB memory limits
       capabilities = 'unique_id'
       detail = ' keeping the crack front on a concave-down curved volume surface, or'
     []
@@ -212,6 +215,7 @@
       cli_args = 'fname=tet_concave_up spin=12'
       exodiff = 'face_crack_hoopStress_off_0_spin_12_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
+      # min_slots = 2 # tet meshes are slightly over 1500MB memory limits
       capabilities = 'unique_id'
       detail = ' keeping the crack front consistent on a concave-up curved volume surface under the maximum hoop stress growth direction, or'
     []
@@ -221,6 +225,7 @@
       cli_args = 'fname=tet_block tilt=14 Outputs/file_base=tet_block_tilt_14'
       exodiff = 'tet_block_tilt_14_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
+      # min_slots = 2 # tet meshes are slightly over 1500MB memory limits
       capabilities = 'unique_id'
       detail = ' growing a tilted crack through a tetrahedral volume when two geometric cut surfaces '
                'place their intersections on the same fragment face in a single growth step.'
