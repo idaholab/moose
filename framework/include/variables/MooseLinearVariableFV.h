@@ -14,7 +14,6 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
-#include "GradientLimiterType.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -109,20 +108,18 @@ public:
   const LinearFVGradientField & computeCellGradients();
 
   /**
+   * Register a named gradient method on the owning system and return its field.
+   *
+   * An empty name requests this variable's default gradient method.
+   * @param method_name Gradient method name to register for this variable.
+   */
+  const LinearFVGradientField & computeCellGradients(const GradientMethodName & method_name);
+
+  /**
    * Register a specific gradient method on the owning system and return its field.
    * @param method Gradient method to register for this variable.
    */
   const LinearFVGradientField & computeCellGradients(const FVGradientMethod & method);
-
-  /**
-   * Compatibility bridge for interpolation methods that still request gradients by limiter.
-   *
-   * `GradientLimiterType::None` requests the default gradient method. Other limiters require the
-   * default gradient method to use the same limiter.
-   * @param limiter_type Limiter requested by the caller.
-   */
-  const LinearFVGradientField &
-  computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Check if cell gradient computations were requested for this variable.
