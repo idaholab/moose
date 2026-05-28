@@ -24,12 +24,17 @@ FVAdvectedVenkatakrishnanDeferredCorrection::validParams()
       "deferred_correction_factor>=0 & deferred_correction_factor<=1",
       "Scales the deferred correction strength; 0 gives pure upwind (no deferred correction), 1 "
       "gives full deferred correction. Values < 1 can improve fixed point robustness.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "green-gauss-venkatakrishnan",
+      "Gradient method used to compute cell gradients for the high-order reconstruction.");
   return params;
 }
 
 FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCorrection(
     const InputParameters & params)
   : FVInterpolationMethod(params),
+    _gradient_method_name(getParam<GradientMethodName>("gradient_method")),
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))
 {
 }

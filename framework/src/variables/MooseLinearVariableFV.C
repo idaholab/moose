@@ -24,7 +24,6 @@
 #include "GreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
-#include "GradientLimiterType.h"
 #include "FVGradientMethod.h"
 
 #include "libmesh/numeric_vector.h"
@@ -38,12 +37,27 @@ registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
 namespace
 {
+void
+addBuiltInGradientMethodIfNeeded(FEProblemBase & fe_problem, const GradientMethodName & method_name)
+{
+  if (fe_problem.hasFVGradientMethod(method_name))
+    return;
+
+  if (method_name == "green-gauss")
+    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
+  else if (method_name == "green-gauss-venkatakrishnan")
+  {
+    auto params = fe_problem.getMooseApp().getFactory().getValidParams("FVGreenGaussGradient");
+    params.set<MooseEnum>("limiter") = "venkatakrishnan";
+    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name, params);
+  }
+}
+
 const FVGradientMethod &
 getLinearFVGradientMethod(SystemBase & sys, const GradientMethodName & method_name)
 {
   auto & fe_problem = sys.feProblem();
-  if (method_name == "green-gauss" && !fe_problem.hasFVGradientMethod(method_name))
-    fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
+  addBuiltInGradientMethodIfNeeded(fe_problem, method_name);
 
   if (!fe_problem.hasFVGradientMethod(method_name))
     mooseError("Unable to find FVGradientMethod with name '", method_name, "'");
@@ -65,7 +79,8 @@ MooseLinearVariableFV<OutputType>::validParams()
       "gradient_method",
       "green-gauss",
       "Default gradient computation method to register when a consumer requests gradients from "
-      "this variable. This may be 'green-gauss' or the name of an object in [FVGradientMethods].");
+      "this variable. This may be a built-in method name like 'green-gauss' or "
+      "'green-gauss-venkatakrishnan', or the name of an object in [FVGradientMethods].");
   return params;
 }
 
@@ -118,27 +133,19 @@ MooseLinearVariableFV<OutputType>::computeCellGradients()
 
 template <typename OutputType>
 const LinearFVGradientField &
-MooseLinearVariableFV<OutputType>::computeCellGradients(const FVGradientMethod & method)
+MooseLinearVariableFV<OutputType>::computeCellGradients(const GradientMethodName & method_name)
 {
-  return registerCellGradientMethod(method);
+  if (method_name.empty())
+    return computeCellGradients();
+
+  return computeCellGradients(getLinearFVGradientMethod(this->_sys, method_name));
 }
 
 template <typename OutputType>
 const LinearFVGradientField &
-MooseLinearVariableFV<OutputType>::computeCellGradients(
-    const Moose::FV::GradientLimiterType limiter_type)
+MooseLinearVariableFV<OutputType>::computeCellGradients(const FVGradientMethod & method)
 {
-  if (limiter_type == Moose::FV::GradientLimiterType::None)
-    return computeCellGradients();
-
-  const auto & method = getLinearFVGradientMethod(this->_sys, _default_gradient_method_name);
-  if (method.limiterType() != limiter_type)
-    mooseError("Variable '",
-               this->name(),
-               "' requested limited gradients with a limiter that differs from its "
-               "gradient_method. Set the limiter on the [FVGradientMethods] object instead.");
-
-  return computeCellGradients();
+  return registerCellGradientMethod(method);
 }
 
 template <typename OutputType>
