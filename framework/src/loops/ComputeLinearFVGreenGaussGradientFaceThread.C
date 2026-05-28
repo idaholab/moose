@@ -17,16 +17,14 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     FEProblemBase & fe_problem,
     SystemBase & system,
     std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient,
-    const std::unordered_set<unsigned int> & gradient_variables,
-    const bool have_registered_gradient_variables)
+    const std::unordered_set<unsigned int> & gradient_variables)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _system(system),
     _libmesh_system(system.system()),
     _system_number(_libmesh_system.number()),
     _temporary_gradient(temporary_gradient),
-    _gradient_variables(gradient_variables),
-    _have_registered_gradient_variables(have_registered_gradient_variables)
+    _gradient_variables(gradient_variables)
 {
 }
 
@@ -40,8 +38,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
     _temporary_gradient(x._temporary_gradient),
-    _gradient_variables(x._gradient_variables),
-    _have_registered_gradient_variables(x._have_registered_gradient_variables)
+    _gradient_variables(x._gradient_variables)
 {
 }
 
@@ -59,8 +56,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
     if (!_current_var)
       continue;
 
-    if (_have_registered_gradient_variables ? _gradient_variables.count(_current_var->number())
-                                            : _current_var->needsGradientVectorStorage())
+    if (_gradient_variables.count(_current_var->number()))
     {
       if (!size)
         size = range.size();
