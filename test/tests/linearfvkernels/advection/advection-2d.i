@@ -27,8 +27,8 @@
   [average]
     type = FVGeometricAverage
   []
-  [muscl_venkat]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
+  [muscl]
+    type = FVAdvectedMUSCLDeferredCorrection
     deferred_correction_factor = 1.0
   []
   [nvd_vanleer]
