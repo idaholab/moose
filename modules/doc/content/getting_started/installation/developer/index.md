@@ -17,7 +17,14 @@ MOOSE is hosted on [GitHub](https://github.com/idaholab/moose) and should be clo
 
 We recommend creating a `projects` directory to contain your cloned applications. Thus, the first two commands in the commands that follow will involve acting within the `projects` directory.
 
+!alert note title=Cloning on Windows
 If using Windows, first follow the installation instructions for installing WSL first in [#windows]. The following commands can then be ran within the WSL Ubuntu window so that the repository is cloned within the WSL space.
+
+!alert! note title=Cloning on INL HPC
+On INL HPC, internet access is not available on compute nodes. That is, you can only perform git operations (including the operation that follows) like `git clone`, `git push`, `git pull`, and `git fetch` on a login node.
+
+It is also suggested to clone and build applications within the scratch space instead. On INL HPC machines, your scratch directory is found at `/scratch/USERNAME` where `USERNAME` is your HPC username. File system performance on scratch is significantly faster than performance within your home directory. However, files stored within scratch may be deleted when they are more than 90 days old. Thus, be sure to copy content from scratch that you do not want to lose.
+!alert-end!
 
 To clone MOOSE, run the following commands:
 
