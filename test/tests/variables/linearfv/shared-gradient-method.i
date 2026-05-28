@@ -33,7 +33,7 @@
 
 [FVInterpolationMethods]
   [muscl]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
+    type = FVAdvectedMUSCLDeferredCorrection
     gradient_method = gg
     deferred_correction_factor = 1.0
   []

@@ -13,19 +13,19 @@
 #include "FVInterpolationMethod.h"
 
 /**
- * Multi-dimensional MUSCL reconstruction using Venkatakrishnan-limited cell gradients and
+ * Multi-dimensional MUSCL reconstruction using cell gradients from a named gradient method and
  * deferred correction.
  *
  * The matrix contribution is pure upwind; the high-order reconstruction is added to the right hand
  * side as a deferred correction.
  */
-class FVAdvectedVenkatakrishnanDeferredCorrection : public FVInterpolationMethod,
-                                                    public FVAdvectedInterpolationMethod
+class FVAdvectedMUSCLDeferredCorrection : public FVInterpolationMethod,
+                                          public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
-  FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
+  FVAdvectedMUSCLDeferredCorrection(const InputParameters & params);
 
   using FVAdvectedInterpolationMethod::advectedInterpolate;
   using FVAdvectedInterpolationMethod::advectedInterpolateValue;

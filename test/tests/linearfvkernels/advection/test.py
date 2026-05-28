@@ -54,12 +54,12 @@ class TestAdvection1DLinear(unittest.TestCase):
             self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
 
 
-class TestAdvection1DVenkatDeferred(unittest.TestCase):
+class TestAdvection1DMUSCLDeferred(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
             "advection-1d.i",
             5,
-            "LinearFVKernels/advection/advected_interp_method_name=muscl_venkat "
+            "LinearFVKernels/advection/advected_interp_method_name=muscl "
             "LinearFVBCs/outflow/use_two_term_expansion=true "
             "Convergence/linear/max_iterations=100",
             mpi=1,
@@ -75,7 +75,7 @@ class TestAdvection1DVenkatDeferred(unittest.TestCase):
             num_fitted_points=3,
             slope_precision=1,
         )
-        fig.save("1d-linear-fv-advection-venkat-deferred.png")
+        fig.save("1d-linear-fv-advection-muscl-deferred.png")
 
         for _, value in fig.label_to_slope.items():
             print("The current slope: ", value)
@@ -186,12 +186,12 @@ class TestAdvection2DLinear(unittest.TestCase):
             self.assertTrue(fuzzyEqual(value, 2.0, 0.05))
 
 
-class TestAdvection2DVenkatDeferred(unittest.TestCase):
+class TestAdvection2DMUSCLDeferred(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
             "advection-2d.i",
             5,
-            "LinearFVKernels/advection/advected_interp_method_name=muscl_venkat "
+            "LinearFVKernels/advection/advected_interp_method_name=muscl "
             "LinearFVBCs/outflow/use_two_term_expansion=true "
             "Convergence/linear/max_iterations=25 "
             "Executioner/multi_system_fixed_point_relaxation_factor=0.5",
@@ -208,7 +208,7 @@ class TestAdvection2DVenkatDeferred(unittest.TestCase):
             num_fitted_points=3,
             slope_precision=1,
         )
-        fig.save("2d-linear-fv-advection-venkat-deferred.png")
+        fig.save("2d-linear-fv-advection-muscl-deferred.png")
 
         for _, value in fig.label_to_slope.items():
             print("The current slope: ", value)

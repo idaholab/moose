@@ -9,7 +9,7 @@ The default gradient method for [MooseLinearVariableFV.md] is configured with
 method such as `green-gauss` or `green-gauss-venkatakrishnan`, or it may name a method declared in
 `[FVGradientMethods]`. Gradient-based interpolation methods can also request a named method directly,
 for example
-[!param](/FVInterpolationMethods/FVAdvectedVenkatakrishnanDeferredCorrection/gradient_method).
+[!param](/FVInterpolationMethods/FVAdvectedMUSCLDeferredCorrection/gradient_method).
 
 ## Using named gradient methods
 
