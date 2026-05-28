@@ -99,25 +99,26 @@ class SubmoduleHashCommand(command.CommandComponent):
                 cwd=check_dir,
             )
 
-            hash = result.stdout.split()[2]
-            assert len(hash) == 40
+            if result.stdout:
+                hash = result.stdout.split()[2]
+                assert len(hash) == 40
 
-            display_hash = hash
-            if (length := settings["length"]) is not None:
-                length = int(length)
-                assert length <= 40 and length > 1
-                display_hash = hash[:length]
+                display_hash = hash
+                if (length := settings["length"]) is not None:
+                    length = int(length)
+                    assert length <= 40 and length > 1
+                    display_hash = hash[:length]
 
-            url = settings["url"]
-            if url is None:
-                core.Word(parent, content=display_hash)
-            else:
-                core.Link(
-                    parent,
-                    url=f"{url.rstrip('/')}/{hash}",
-                    string=display_hash,
-                )
-            return parent
+                url = settings["url"]
+                if url is None:
+                    core.Word(parent, content=display_hash)
+                else:
+                    core.Link(
+                        parent,
+                        url=f"{url.rstrip('/')}/{hash}",
+                        string=display_hash,
+                    )
+                return parent
 
         raise exceptions.MooseDocsException(
             f"The submodule '{name}' was not located in {' ,'.join(check_dirs)}"

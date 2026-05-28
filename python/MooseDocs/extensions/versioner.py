@@ -202,7 +202,7 @@ class VersionerFullVersionReplace(VersionerReplaceBase):
     """
 
     SUBCOMMAND = "full-version"
-    VERSIONER_KEYS = ["full-version"]
+    VERSIONER_KEYS = ["full_version"]
 
 
 class VersionerCondaVersionReplace(VersionerReplaceBase):
