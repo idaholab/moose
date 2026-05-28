@@ -157,7 +157,9 @@ sigma_z_slope = 500
 []
 
 [Executioner]
+  solve_type = JFNK
   type = Transient
+  line_search = none
   start_time = 0.0
   dt = 1.0
   end_time = 4
