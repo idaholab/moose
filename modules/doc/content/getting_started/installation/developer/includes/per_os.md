@@ -1,3 +1,5 @@
+Choose the installation section that follows depending on your operating system and environment.
+
 ### Linux Install id=linux
 
 The preferred method of installation on Linux is using the pre-built development environment using Apptainer.

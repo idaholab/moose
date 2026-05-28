@@ -9,7 +9,12 @@ MOOSE requires a complex set of dependencies (see [#required_dependencies]) to b
 
 First, you need to clone MOOSE or the MOOSE-based application that you wish to build and possibly develop. For the purposes of these instructions, we will assume that you are trying to build MOOSE. However, if you were given separate instructions for obtaining a MOOSE-based application, follow those instead. If not, follow the instructions in [#cloning_moose].
 
-After obtaining a git checkout of the MOOSE or MOOSE-based application you are developing, follow the instructions based on your operating system and/or environment in [#linux], [#inl_hpc], [#mac_os], or [#windows].
+After obtaining a git checkout of the MOOSE or MOOSE-based application you are developing, follow the instructions based on your operating system and/or environment below:
+
+- [#linux]
+- [#inl_hpc]
+- [#mac_os]
+- [#windows]
 
 ## Cloning MOOSE id=cloning_moose
 
