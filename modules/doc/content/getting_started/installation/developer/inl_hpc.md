@@ -119,7 +119,7 @@ Follow the instructions in [#build_and_test_moose] if you are building MOOSE. Ot
 
 ## Run id=run
 
-The instructions above described how to build MOOSE or a MOOSE-based application. Now that the application is built and tested, let's actually use the application.
+The instructions above described how to build MOOSE or a MOOSE-based application. Now that the application is built and tested, the execution of the application to run input files will be described.
 
 The build above was performed within a containerized development environment. With this, you cannot run the built application without also doing so within the same containerized development environment. There are a few ways to do this, which will be described in this section.
 
@@ -129,20 +129,33 @@ Additionally, you will need to replace the special string `PROJECT` with the cor
 
 The common methods for running that follow are summarized as:
 
-- [#run_slurm_submission_script]: Run an application in a Slurm submission script. Often used to run large-scale simulations in the background (non-interactively).
-- [#run_ondemand_vscode]: Run an application in a VSCode window in a web browser spawned by OnDemand. Great for building inputs and quickly running them in the same session.
-- [#run_shell_execution]: Run an application within a shell in the containerized environment in a terminal session on INL HPC.
-- [#run_general_execution]: Run an application directly in a terminal session on INL HPC.
+- [#run_slurm_submission_script]
+
+  - Run an application in a Slurm submission script.
+  - Often used to run large-scale simulations in the background (non-interactively).
+
+- [#run_ondemand_vscode]
+
+  - Run an application in a VSCode window in a web browser spawned by OnDemand.
+  - Great for building inputs and quickly running them in the same session.
+
+- [#run_shell_execution]:
+
+  - Run an application within a shell in the containerized environment.
+
+- [#run_general_execution]
+
+  - Run an application directly in a terminal session.
 
 ### Run: Slurm Submission Script id=run_slurm_submission_script
 
 You can run the built application within a Slurm submission script (submitted using the `sbatch`) command. This method is most commonly used for running large-scale production jobs.
 
-In this example, there is a slight difference in how the job is executed on Teton versus the other hosts. On teton, the command `srun` is used to launch a MPI job. On the remaining hosts (Bitterroot, Sawtooth, and Windriver), the command `mpiexec` is used to launch a MPI job. Thus, we will show examples for both.
+In this example, there is a slight difference in how the job is executed on Teton versus the other hosts. On teton, the command `srun` is used to launch a parallel (MPI) job. On the remaining hosts (Bitterroot, Sawtooth, and Windriver), the command `mpiexec` is used to launch a parallel job. Thus, we will show examples for both.
 
 These examples will run a 2 process job for one hour. The configuration options found at the top of the submission script prefixed by `#SBATCH` should be customized to your needs.
 
-For Bitterroot, Sawtooth, and Windriver:
+For Bitterroot, Sawtooth, and Windriver, an example submission script is:
 
 !versioner! code language=bash
 #!/bin/bash
@@ -155,7 +168,7 @@ module load use.moose moose-dev/__VERSIONER_VERSION_MOOSE_DEV__
 mpiexec -n 2 moose-dev-exec ~/projects/moose/test/moose_test-opt -i input.i
 !versioner-end!
 
-For Teton:
+For Teton, an example submission script is:
 
 !versioner! code language=bash
 #!/bin/bash
@@ -168,16 +181,16 @@ module load use.moose moose-dev/__VERSIONER_VERSION_MOOSE_DEV__
 srun moose-dev-exec ~/projects/moose/test/moose_test-opt -i input.i
 !versioner-end!
 
-!alert note title=Must use `moose-dev-exec`
-Prepending `moose-dev-exec` before the path to the executable is required. This is a special command that executes your executable within the build environment. If you forget this your command will fail!
+The above script should be saved into a file and then submitted with the `sbatch` command.
 
-The most significant component of this submission is the addition of `moose-dev-exec` before your path to your built executable. This is a special command that executes your executable within the build environment. If you forget this your command will fail!
+!alert note title=Must use `moose-dev-exec`
+Prepending `moose-dev-exec` before the path to the executable is required. This command executes your executable within the containerized development environment. If you forget this your command will fail!
 
 ### Run: OnDemand VSCode id=run_ondemand_vscode
 
-You can also utilize an interactive VSCode window to execute the built application. See the instructions in [#build_session_ondemand_vscode] for obtaining the session and a terminal window within the VSCode window. You will likely want to request more cores than in the given instructions if running larger jobs.
+You can run the built application within an interactive VSCode window ran on a compute node and spawned with OnDemand. See the instructions in [#build_session_ondemand_vscode] for obtaining the session and a terminal window within the VSCode window. You will likely want to request more cores than in the given instructions if running larger jobs.
 
-Within the terminal window in the VSCode session, simply run your application. For example:
+Within a terminal window in the VSCode session, simply run your application. For example:
 
 ```
 mpiexec -n 4 ~/projects/moose/test/moose_test-opt -i input.i
@@ -186,7 +199,7 @@ mpiexec -n 4 ~/projects/moose/test/moose_test-opt -i input.i
 will run the input file `input.i` with a built application with 4 cores.
 
 !alert note title=Do not use `moose-dev-exec`
-It is not necessary prepend `moose-dev-exec` to the path of the executable. This is because the VSCode window is already ran within the development environment.
+You should not prepend the command `moose-dev-exec` before the path to the executable. The VSCode window is already ran within the development environment.
 
 ### Run: Shell Execution id=run_shell_execution
 
