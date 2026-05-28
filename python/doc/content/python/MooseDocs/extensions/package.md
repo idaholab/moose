@@ -4,4 +4,4 @@
 This extension has no associated syntax for [MooseDown](MooseDocs/specification.md) files.
 
 !devel example caption=Example use of inline "package" command.
-Minimum Python: [!package!minimum_python]
+Default Python: [!package!python_default]

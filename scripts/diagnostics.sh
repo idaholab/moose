@@ -313,7 +313,7 @@ source "${SCRIPT_DIR}"/functions/diagnostic_tests.sh
 
 # Get individual packages for now, until moose-mpi becomes available
 export MOOSE_PACKAGES
-MOOSE_PACKAGES="moose-build moose-libmesh-vtk moose-tools $(get_value 'default_mpi') \
+MOOSE_PACKAGES="moose-build moose-libmesh-vtk moose-tools $(get_value 'mpi_default') \
  zlib python packaging pyaml jinja2"
 
 install_conda

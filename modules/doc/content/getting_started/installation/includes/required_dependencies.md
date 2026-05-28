@@ -6,14 +6,14 @@ The required dependencies for MOOSE are as follows:
 
 A compiler for building C and C++ code. The preferred compilers are:
 
-- [GCC](https://gcc.gnu.org/): tested on versions [!package!all_gcc]
-- [Clang](https://clang.llvm.org/): tested on versions [!package!all_clang]
+- [GCC](https://gcc.gnu.org/): tested on versions [!package!gcc_all]
+- [Clang](https://clang.llvm.org/): tested on versions [!package!clang_all]
 
 ### Fortran compiler
 
 A compiler for building Fortran code. The preferred compiler is:
 
-- [GCC](https://gcc.gnu.org/): tested on versions [!package!all_gcc]
+- [GCC](https://gcc.gnu.org/): tested on versions [!package!gcc_all]
 
 ### GNU Make
 
@@ -23,8 +23,8 @@ A compiler for building Fortran code. The preferred compiler is:
 
 Message Passing Interface (MPI) is a portable message-passing standard to execute applications in parallel. The preferred implementations are:
 
-- [MPICH](https://www.mpich.org/): tested on versions [!package!all_mpich]
-- [OpenMPI](https://www.open-mpi.org/): tested on version [!package!all_openmpi]
+- [MPICH](https://www.mpich.org/): tested on versions [!package!mpich_all]
+- [OpenMPI](https://www.open-mpi.org/): tested on version [!package!openmpi_all]
 
 ### PETSc
 
@@ -48,7 +48,7 @@ If not using pre-built development environments from Apptainer, Conda, and Docke
 
 ### Python
 
-Python versions [!package!all_python] are supported.
+Python versions [!package!python_all] are supported.
 
 ### WASP
 

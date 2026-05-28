@@ -104,24 +104,24 @@ Multiple containerized environments are available for execution:
 
 - [moose-dev-openmpi-x86_64:[!versioner!version package=moose-dev]](https://github.com/idaholab/moose/pkgs/container/apptainer%2Fmoose-dev-openmpi-x86_64)
 
-  - [RockyLinux](https://rockylinux.org/) [!package!apptainer_rocky8] operating system
-  - [OpenMPI](https://www.open-mpi.org/) [!package!apptainer_openmpi], installed at `$MOOSE_OPENMPI_DIR=/opt/openmpi`
+  - [RockyLinux](https://rockylinux.org/) [!package!rocky8_apptainer] operating system
+  - [OpenMPI](https://www.open-mpi.org/) [!package!openmpi_apptainer], installed at `$MOOSE_OPENMPI_DIR=/opt/openmpi`
 
 - [moose-dev-mpich-x86_64:[!versioner!version package=moose-dev]](https://github.com/idaholab/moose/pkgs/container/apptainer%2Fmoose-dev-mpich-x86_64)
 
-  - [RockyLinux](https://rockylinux.org/) [!package!apptainer_rocky8] operating system
-  - [MPICH](https://www.mpich.org/) [!package!apptainer_rocky8_mpich], installed at `$MOOSE_MPICH_DIR=/opt/mpich`
+  - [RockyLinux](https://rockylinux.org/) [!package!rocky8_apptainer] operating system
+  - [MPICH](https://www.mpich.org/) [!package!mpich_rocky8_apptainer], installed at `$MOOSE_MPICH_DIR=/opt/mpich`
 
 - [moose-dev-rocky9-mpich-x86_64:[!versioner!version package=moose-dev]](https://github.com/idaholab/moose/pkgs/container/apptainer%2Fmoose-dev-rocky9-mpich-x86_64)
 
-  - [RockyLinux](https://rockylinux.org/) [!package!apptainer_rocky9] operating system
-  - [MPICH](https://www.mpich.org/) [!package!apptainer_rocky9_mpich], installed at `$MOOSE_MPICH_DIR=/opt/mpich`
+  - [RockyLinux](https://rockylinux.org/) [!package!rocky9_apptainer] operating system
+  - [MPICH](https://www.mpich.org/) [!package!mpich_rocky9_apptainer], installed at `$MOOSE_MPICH_DIR=/opt/mpich`
 
 - [moose-dev-cuda-openmpi-x86_64:[!versioner!version package=moose-dev]](https://github.com/idaholab/moose/pkgs/container/apptainer%2Fmoose-dev-cuda-openmpi-x86_64)
 
-  - [RockyLinux](https://rockylinux.org/) [!package!apptainer_rocky8] operating system
-  - [OpenMPI](https://www.open-mpi.org/) [!package!apptainer_openmpi], installed at `$MOOSE_OPENMPI_DIR=/opt/openmpi`
-  - [CUDA](https://developer.nvidia.com/cuda) [!package!apptainer_cuda], installed at `$CUDA_DIR=/usr/local/cuda`
+  - [RockyLinux](https://rockylinux.org/) [!package!rocky8_apptainer] operating system
+  - [OpenMPI](https://www.open-mpi.org/) [!package!openmpi_apptainer], installed at `$MOOSE_OPENMPI_DIR=/opt/openmpi`
+  - [CUDA](https://developer.nvidia.com/cuda) [!package!cuda_apptainer], installed at `$CUDA_DIR=/usr/local/cuda`
   - CUDA aware builds of OpenMPI, PETSc, libTorch, NEML2, and MFEM
 
 All of the containerized environments above contain the following installed packages:
@@ -129,14 +129,14 @@ All of the containerized environments above contain the following installed pack
 !table
 | Package | Version | Location |
 | - | - | - |
-| [code-server](https://github.com/coder/code-server) | [!package!apptainer_code_server] | `/usr/bin/code-server` |
+| [code-server](https://github.com/coder/code-server) | [!package!code_server_apptainer] | `/usr/bin/code-server` |
 | [Conduit](https://llnl-conduit.readthedocs.io) | [!git!submodule-hash length=7 url=https://github.com/llnl/conduit/tree](framework/contrib/conduit) | `$CONDUIT_DIR=/opt/conduit` |
 [libMesh](https://libmesh.github.io/) | [!git!submodule-hash length=7 url=https://github.com/libMesh/libmesh/tree](libmesh) | `$LIBMESH_DIR=/opt/libmesh` |
-| [libTorch](https://docs.pytorch.org/cppdocs/) | v[!package!apptainer_libtorch] | `$LIBTORCH_DIR=/opt/libtorch` |
-| [GCC](https://gcc.gnu.org/) | [!package!apptainer_gcc] | `/opt/rh` |
+| [libTorch](https://docs.pytorch.org/cppdocs/) | v[!package!libtorch_apptainer] | `$LIBTORCH_DIR=/opt/libtorch` |
+| [GCC](https://gcc.gnu.org/) | [!package!gcc_apptainer] | `/opt/rh` |
 | [MFEM](https://mfem.org) | [!git!submodule-hash length=7 url=https://github.com/mfem/mfem/tree](framework/contrib/mfem) | `$MFEM_DIR=/opt/mfem` |
 | [NEML2](https://applied-material-modeling.github.io/neml2/) | [!git!submodule-hash length=7 url=https://github.com/applied-material-modeling/neml2/tree](framework/contrib/neml2) | `NEML2_DIR=/opt/neml2` |
 | [PETSc](https://petsc.org/) | [!versioner!version prefix=v url=https://gitlab.com/petsc/petsc/-/tree/ package=petsc] | `$PETSC_DIR=/opt/petsc` |
-| [Python](https://www.python.org/) | [!package!apptainer_python] | `/opt/miniforge3/envs/moose/bin/python` |
+| [Python](https://www.python.org/) | [!package!python_apptainer] | `/opt/miniforge3/envs/moose/bin/python` |
 | [VTK](https://vtk.org/) | [!package!vtk] | `$VTK_DIR=/opt/vtk` |
 | [WASP](https://code.ornl.gov/neams-workbench/wasp) | [!git!submodule-hash length=7 url=https://code.ornl.gov/neams-workbench/wasp/-/tree](framework/contrib/wasp) | `$WASP_DIR=/opt/wasp` |
