@@ -44,7 +44,7 @@ Use the method as the default gradient method for a linear FV variable through
 !listing test/tests/variables/linearfv/shared-gradient-method.i block=u
 
 The same named method can also be used by a gradient-based interpolation method, such as
-[FVAdvectedVenkatakrishnanDeferredCorrection.md]:
+[FVAdvectedMUSCLDeferredCorrection.md]:
 
 !listing test/tests/variables/linearfv/shared-gradient-method.i block=muscl
 
