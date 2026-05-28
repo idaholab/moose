@@ -20,7 +20,7 @@ conda config --add channels https://conda.software.inl.gov/public
 
 ### Create Environment
 
-After installing Miniforge (by following the instructions in [#install_miniforge]), a unique Conda environment will be created named `moose` with the packages that contain the environment:
+After installing Miniforge (by following the instructions immediately above), a unique Conda environment will be created named `moose` with the packages that contain the environment:
 
 !versioner! code
 conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__

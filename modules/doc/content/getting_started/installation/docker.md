@@ -4,7 +4,7 @@ We produce two Docker images, one that is a development environment (the `moose-
 
 If you are modifying a MOOSE-based application, you should use the `moose-dev` image described in [#development-image]. Otherwise, you should use the `moose` image described in [#installed-image].
 
-These images are hosted on Docker Hub in the [idaholab](https://hub.docker.com/r/idaholab) organization and are based on [rockylinux:[!package!apptainer_rockylinux]](https://hub.docker.com/_/rockylinux) with GCC [!package!gcc_apptainer] and MPICH [!package!apptainer_mpich].
+These images are hosted on Docker Hub in the [idaholab](https://hub.docker.com/r/idaholab) organization and are based on [rockylinux:[!package!rocky8_apptainer]](https://hub.docker.com/_/rockylinux) with GCC [!package!gcc_apptainer] and MPICH [!package!mpich_rocky8_apptainer].
 
 ## Development image
 

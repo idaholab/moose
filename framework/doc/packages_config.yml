@@ -1,13 +1,15 @@
 # gcc versions
-gcc_conda: "14.3.0"
 gcc_apptainer: "13.3.1"
 gcc_apptainer_min: "9.2.1"
+gcc_conda: "14.3.0"
+gcc_min: "9.2.1"
 gcc_all: "9.2.1, 13.3.1, 14.3.0"
 
 # clang versions
-clang_conda: "19.1.7"
 clang_apptainer: "20.1.8"
-clang_all: "9.1.7, 20.1.8"
+clang_conda: "19.1.7"
+clang_min: "19.1.7"
+clang_all: "19.1.7, 20.1.8"
 
 # python versions
 python_default: "3.14"

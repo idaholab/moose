@@ -9,7 +9,7 @@ The Conda development environment does not contain installed versions of MFEM, l
 
 ## Usage id=usage
 
-### Install Miniforge id=install_miniforge
+### Install Miniforge
 
 [Miniforge](https://github.com/conda-forge/miniforge) first must be installed to provide the [Conda](https://docs.conda.io) environment for installing packages. Miniforge only needs to be installed once. If you run into issues during these steps, please visit our [Conda Troubleshooting](help/faq/conda_issues.md optional=True) guide.
 
