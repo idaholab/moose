@@ -143,6 +143,36 @@ test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -regex "[^\#~]*\.C" $(find_exc
 test_csrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.c" 2>/dev/null)
 test_fsrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.f" 2>/dev/null)
 test_f90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.f90" 2>/dev/null)
+
+### Unity Build for tests ###
+# Mirrors the src unity logic above. Reuses unity_src_dir, non_unity_dirs, and
+# app_unity_depth which are defined inside the MOOSE_UNITY=true block.
+ifeq ($(MOOSE_UNITY),true)
+ifneq ($(wildcard $(TEST_SRC_DIRS)),)
+
+test_srcsubdirs := $(shell find $(TEST_SRC_DIRS) -maxdepth $(app_unity_depth) -type d -not -path '*/.libs*')
+test_srcsubdirs_nonmaxdepth := $(shell find $(TEST_SRC_DIRS) -maxdepth $(shell expr $(app_unity_depth) - 1) -type d -not -path '*/.libs*')
+test_srcsubdirs_maxdepth := $(filter-out $(test_srcsubdirs_nonmaxdepth), $(test_srcsubdirs))
+all_test_srcsubdirs := $(shell find $(TEST_SRC_DIRS) -type d -not -path '*/.libs*')
+
+unity_test_srcsubdirs := $(filter-out $(non_unity_dirs), $(test_srcsubdirs))
+unity_test_srcsubdirs_nonmaxdepth := $(filter-out $(non_unity_dirs), $(test_srcsubdirs_nonmaxdepth))
+unity_test_srcsubdirs_maxdepth := $(filter-out $(non_unity_dirs), $(test_srcsubdirs_maxdepth))
+non_unity_test_srcsubdirs := $(filter $(non_unity_dirs), $(all_test_srcsubdirs))
+
+$(foreach srcsubdir,$(unity_test_srcsubdirs_nonmaxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_test_srcsubdirs_maxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+
+app_test_unity_srcfiles := $(foreach srcsubdir,$(unity_test_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C))
+
+unity_srcfiles += $(app_test_unity_srcfiles)
+
+app_test_non_unity_srcfiles := $(shell find $(non_unity_test_srcsubdirs) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C" $(find_excludes) 2>/dev/null)
+
+test_srcfiles := $(app_test_unity_srcfiles) $(app_test_non_unity_srcfiles)
+endif
+endif
+
 ifeq ($(LIBRARY_SUFFIX),yes)
   test_objects:= $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(test_srcfiles))
 else
