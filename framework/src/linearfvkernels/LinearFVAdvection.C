@@ -35,7 +35,7 @@ LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _gradient_field(_adv_interp_method.needsGradients()
-                        ? &_var.computeCellGradients(_adv_interp_method.gradientLimiter())
+                        ? &_var.computeCellGradients(_adv_interp_method.gradientMethodName())
                         : nullptr)
 
 {

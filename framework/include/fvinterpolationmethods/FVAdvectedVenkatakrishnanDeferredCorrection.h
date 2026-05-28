@@ -32,7 +32,7 @@ public:
 
   bool needsGradients() const override { return true; }
 
-  Moose::FV::GradientLimiterType gradientLimiter() const override { return _gradient_limiter; }
+  GradientMethodName gradientMethodName() const override { return _gradient_method_name; }
 
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
@@ -42,8 +42,8 @@ public:
                                                  Real mass_flux) const override;
 
 private:
-  Moose::FV::GradientLimiterType _gradient_limiter =
-      Moose::FV::GradientLimiterType::Venkatakrishnan;
+  /// Gradient method used for the high-order reconstruction.
+  const GradientMethodName _gradient_method_name;
   /// Scales the deferred correction strength (0 = upwind, 1 = full deferred correction).
   Real _deferred_correction_factor = 1.0;
 };

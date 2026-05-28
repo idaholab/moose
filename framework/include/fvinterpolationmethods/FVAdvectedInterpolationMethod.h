@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FaceInfo.h"
-#include "GradientLimiterType.h"
+#include "MooseTypes.h"
 #include "MooseFunctor.h"
 
 #include <utility>
@@ -97,10 +97,9 @@ public:
   virtual bool needsGradients() const { return false; }
 
   /**
-   * Limiter used by interpolations that require limited gradients.
+   * Gradient method used by interpolations that require adjacent-cell gradients.
+   *
+   * An empty name requests the variable's default gradient method.
    */
-  virtual Moose::FV::GradientLimiterType gradientLimiter() const
-  {
-    return Moose::FV::GradientLimiterType::None;
-  }
+  virtual GradientMethodName gradientMethodName() const { return ""; }
 };
