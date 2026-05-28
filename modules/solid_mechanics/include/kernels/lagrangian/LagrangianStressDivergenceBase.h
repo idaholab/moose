@@ -49,6 +49,15 @@ protected:
   // stabilization
   virtual RankTwoTensor gradTrial(unsigned int component) = 0;
 
+  /// Invalidate the F-bar caches at the start of every Jacobian assembly sweep. The
+  /// caches key on `_current_elem`, so when a rank owns only a single element the cache
+  /// would otherwise persist (and go stale) across Newton iterations: the second iteration
+  /// would see `_current_elem == _fbar_cache_elem` and skip the refresh even though the
+  /// underlying `_cauchy_jacobian` / `_d_F_stab_d_F_avg` material properties have moved.
+  /// Resetting the cache key here forces the next `prepareFBarCaches()` call to refresh
+  /// against the iteration's fresh material state.
+  virtual void jacobianSetup() override;
+
   virtual void precalculateJacobian() override;
   virtual void precalculateOffDiagJacobian(unsigned int jvar) override;
 
