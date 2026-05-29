@@ -5807,6 +5807,12 @@ FEProblemBase::hasMultiApp(const std::string & multi_app_name) const
 std::shared_ptr<MultiApp>
 FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 {
+  if (!hasMultiApp(multi_app_name))
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_multi_app"),
+                "A MultiApp getter was called before MultiApps have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the MultiApp is constructed before the object using it.");
+
   return _multi_apps.getObject(multi_app_name);
 }
 

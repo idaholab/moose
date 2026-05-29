@@ -344,10 +344,12 @@ Capabilities::registerMooseCapabilities()
 
   {
     const auto doc = "Parmetis partitioning library";
-#if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
+#if defined(LIBMESH_PETSC_HAVE_PARMETIS)
     const std::string version = QUOTE(PETSC_PKG_PARMETIS_VERSION_MAJOR) "." QUOTE(
         PETSC_PKG_PARMETIS_VERSION_MINOR) "." QUOTE(PETSC_PKG_PARMETIS_VERSION_SUBMINOR);
     add_string("parmetis", version, doc);
+#elif defined(LIBMESH_HAVE_PARMETIS)
+    have("parmetis", doc);
 #else
     petsc_missing("parmetis", doc);
 #endif

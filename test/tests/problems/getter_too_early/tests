@@ -27,4 +27,13 @@
     requirement = 'The system shall assert that a VectorPostprocessor getter was called too early when a VectorPostprocessor is requested before VectorPostprocessors have been constructed.'
     issues = '#28131'
   []
+
+  [get_multiapp_too_early]
+    type = RunException
+    input = get_multiapp_too_early.i
+    capabilities = 'method=dbg'
+    expect_err = "A MultiApp getter was called before MultiApps have been constructed"
+    requirement = "The system shall assert that a MultiApp getter was called too early when a MultiApp is requested before MultiApps have been constructed."
+    issues = '#28131'
+  []
 []
