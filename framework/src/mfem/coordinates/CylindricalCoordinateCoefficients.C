@@ -69,6 +69,53 @@ Cylindrical::build()
       _r_coeff.get(), [](mfem::real_t a) -> mfem::real_t { return a; }));
 }
 
+void
+Cylindrical::declareRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+{
+  coeffs.declareScalar<mfem::CylindricalRadialCoefficient>(coefficientName("r"));
+}
+
+void
+Cylindrical::declareInverseRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+{
+  auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
+  coeffs.declareScalar<InvShiftedCoefficient>(
+      coefficientName("inv_r"), r_coeff, static_cast<mfem::real_t>(_inv_r_eps));
+}
+
+void
+Cylindrical::declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+{
+  auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
+
+  constexpr mfem::real_t two_pi = 6.283185307179586476925286766559;
+
+  coeffs.declareScalar<mfem::TransformedCoefficient>(coefficientName("two_pi_r"),
+                                                     &r_coeff,
+                                                     [](mfem::real_t a) -> mfem::real_t
+                                                     { return two_pi * a; });
+}
+
+void
+Cylindrical::declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+{
+  auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
+
+  coeffs.declareScalar<mfem::TransformedCoefficient>(coefficientName("measure_weight"),
+                                                     &r_coeff,
+                                                     [](mfem::real_t a) -> mfem::real_t
+                                                     { return a; });
+}
+
+void
+Cylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
+{
+  this->declareRadialCoefficient(coeffs);
+  this->declareInverseRadialCoefficient(coeffs);
+  this->declareTwoPiRCoefficient(coeffs);
+  this->declareMeasureWeightCoefficient(coeffs);
+}
+
 const mfem::Coefficient *
 Cylindrical::getBuiltinCoefficient(const std::string & name) const
 {

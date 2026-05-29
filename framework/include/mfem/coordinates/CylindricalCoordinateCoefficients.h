@@ -15,8 +15,8 @@
 
 #include <memory>
 /**
- * Class to build and expose built-in scalar MFEM Coefficients for
- * cylindrical or axisymmetric MFEM formulations.
+ * Class that constructs and owns the scalar cylindrical built-in MFEM coefficients
+ * (r, 1/r, 2*pi*r, and measure weight) for cylindrical and axisymmetric MFEM formulations
  */
 class Cylindrical : public MFEMCoordinateCoefficients
 {
@@ -26,6 +26,10 @@ public:
   Cylindrical(const InputParameters & parameters);
 
   virtual void build() override;
+
+  /// Declare all cylindrical built-in scalar coefficients into the coefficient manager
+  virtual void declareCoefficients(Moose::MFEM::CoefficientManager & coeffs) override;
+
   ///Pointer getter for built-in coefficients
   virtual const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const override;
   ///Pointer getters for coefficients in coordinate systems with radial dependence
@@ -48,6 +52,12 @@ public:
   }
 
 protected:
+  /// Declare the buit-in cylindrical coefficients into the coefficient manager
+  void declareRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs);
+  void declareInverseRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs);
+  void declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coeffs);
+  void declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & coeffs);
+
   ///MFEM Coefficients for cylindrical coordinate objects owned by this class
   std::unique_ptr<mfem::Coefficient> _r_coeff;
   std::unique_ptr<mfem::Coefficient> _inv_r_coeff;

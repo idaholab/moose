@@ -13,12 +13,13 @@
 
 #include "GeneralUserObject.h"
 #include "MooseTypes.h"
+#include "CoefficientManager.h"
 #include "mfem.hpp"
 
 #include <string>
 /**
- * Abstract base class for all coordinate system coefficient providers.
- * Implemented as a MOOSE GeneralUserObject.
+ * Abstract base class for all coordinate system scalar coefficient
+ * built ins for MFEM formulations.Implemented as a MOOSE GeneralUserObject.
  */
 class MFEMCoordinateCoefficients : public GeneralUserObject
 {
@@ -27,14 +28,24 @@ public:
 
   MFEMCoordinateCoefficients(const InputParameters & parameters);
   virtual ~MFEMCoordinateCoefficients() = default;
+
   ///GeneralUserObject interface
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override {}
-  // Virtual methods to be implemented by the derived classes
+
+  // Build any coordinate dependent coefficient objects owned by this class.
   virtual void build() = 0;
-  /// Get a pointer to a built-in coefficient by name (makes built-in coefficients accessible to kernels and BCs through the '[Coordinates]' block)
+
+  /// Declare all built-in coordinate coefficients into the coefficient manager
+  virtual void declareCoefficients(Moose::MFEM::CoefficientManager & coeffs) = 0;
+
+  /// Get a pointer to a built-in coefficient by name
   virtual const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const = 0;
+
+  /// Return a fully-qualified coefficient name using this object's name as a prefix
+  std::string coefficientName(const std::string & base) const { return name() + "_" + base; }
+
   ///Pointer getters for coefficients in coordinate systems with radial dependence
   virtual const mfem::Coefficient * getRadialCoefficient() const = 0;
   virtual const mfem::Coefficient * getInverseRadialCoefficient() const = 0;
