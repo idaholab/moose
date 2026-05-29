@@ -2,7 +2,7 @@
 [XFEM]
   geometric_cut_userobjects = 'cut_mesh'
   qrule = volfrac
-  output_cut_plane = true
+  output_cut_plane = false
 []
 
 [Functions]
