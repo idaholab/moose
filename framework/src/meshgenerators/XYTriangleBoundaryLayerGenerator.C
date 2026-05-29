@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BoundaryLayerTriangleGenerator.h"
+#include "XYTriangleBoundaryLayerGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
@@ -16,10 +16,10 @@
 #include "libmesh/mesh_serializer.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", BoundaryLayerTriangleGenerator);
+registerMooseObject("MooseApp", XYTriangleBoundaryLayerGenerator);
 
 InputParameters
-BoundaryLayerTriangleGenerator::validParams()
+XYTriangleBoundaryLayerGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -76,7 +76,7 @@ BoundaryLayerTriangleGenerator::validParams()
   return params;
 }
 
-BoundaryLayerTriangleGenerator::BoundaryLayerTriangleGenerator(const InputParameters & parameters)
+XYTriangleBoundaryLayerGenerator::XYTriangleBoundaryLayerGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _thickness(getParam<Real>("thickness")),
@@ -98,7 +98,7 @@ BoundaryLayerTriangleGenerator::BoundaryLayerTriangleGenerator(const InputParame
 }
 
 std::unique_ptr<MeshBase>
-BoundaryLayerTriangleGenerator::generate()
+XYTriangleBoundaryLayerGenerator::generate()
 {
   const bool outward = (_boundary_layer_direction == BoundaryLayerDirection::OUTWARD);
 

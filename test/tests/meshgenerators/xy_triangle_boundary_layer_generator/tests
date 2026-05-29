@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/BoundaryLayerTriangleGenerator.md'
+  design = 'meshgenerators/XYTriangleBoundaryLayerGenerator.md'
   issues = '#32515'
   [test]
     requirement = "The system shall be able to "

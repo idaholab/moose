@@ -650,7 +650,7 @@ struct XYDelaunayOptions
  * Performs a 2D Delaunay triangulation (via libMesh::Poly2TriTriangulator) inside a closed boundary
  * mesh with optional holes, optionally stitches the resulting triangulation to each hole mesh that
  * requests it, and applies subdomain / boundary renumbering. This is the core algorithm shared by
- * XYDelaunayGenerator and BoundaryLayerTriangleGenerator.
+ * XYDelaunayGenerator and XYTriangleBoundaryLayerGenerator.
  * @param mg The calling mesh generator (used for paramError reporting and communicator)
  * @param boundary_mesh The closed-loop boundary mesh
  * @param hole_meshes Optional hole meshes (one mesh per hole; empty vector if no holes)

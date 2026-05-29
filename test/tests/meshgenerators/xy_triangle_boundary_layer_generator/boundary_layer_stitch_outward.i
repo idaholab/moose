@@ -2,30 +2,31 @@
   [cc]
     type = ConcentricCircleMeshGenerator
     num_sectors = 6
-    radii = '1 2'
-    rings = '2 2'
+    radii = '1'
+    rings = '2'
     has_outer_square = false
+    portion = left_half
     preserve_volumes = true
   []
-  [bdg]
-    type = BlockDeletionGenerator
-    input = 'cc'
-    block = '1'
-    new_boundary = '100'
-  []
   [boundary_layer]
-    type = BoundaryLayerTriangleGenerator
-    input = 'bdg'
+    type = XYTriangleBoundaryLayerGenerator
+    input = 'cc'
     thickness = 0.1
     num_layers = 3
     keep_input = true
-    boundary_names = '100'
-    boundary_layer_direction = 'INWARD'
   []
 []
 
 [Problem]
   solve = false
+[]
+
+[AuxVariables]
+  [unity]
+    family = MONOMIAL
+    order = CONSTANT
+    initial_condition = 1.0
+  []
 []
 
 [Executioner]
@@ -43,7 +44,7 @@
 []
 
 [Outputs]
-  file_base = 'boundary_layer_stitch_inward'
+  file_base = 'boundary_layer_stitch_outward'
   csv = true
   execute_on = 'FINAL'
 []

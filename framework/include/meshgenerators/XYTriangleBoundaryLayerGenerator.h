@@ -15,12 +15,12 @@
  * Generate a 2D layered mesh that represents a conformal boundary layer along the boundary of an
  * input 2D mesh or a 1D loop mesh.
  */
-class BoundaryLayerTriangleGenerator : public MeshGenerator
+class XYTriangleBoundaryLayerGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  BoundaryLayerTriangleGenerator(const InputParameters & parameters);
+  XYTriangleBoundaryLayerGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -46,7 +46,7 @@ protected:
   /// Optional boundary name for the interface between the generated boundary layer and the input mesh
   const BoundaryName _interface_name;
 
-  /// Optional boundary name for the surface of the generated boundary layer
+  /// Optional boundary name for the outer surface of the generated boundary layer
   const BoundaryName _surface_name;
 
   /// Optional subdomain name for the generated boundary layer

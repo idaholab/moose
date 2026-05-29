@@ -122,6 +122,11 @@ XYDelaunayGenerator::validParams()
   params.addParamNamesToGroup("interior_points interior_point_files",
                               "Mandatory mesh interior nodes");
 
+  params.addParamNamesToGroup("outer_boundary_layer_thickness outer_boundary_layer_num "
+                              "outer_boundary_layer_bias holes_boundary_layer_thickness "
+                              "holes_boundary_layer_num holes_boundary_layer_bias",
+                              "Boundary layer");
+
   return params;
 }
 
@@ -226,9 +231,9 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
        _holes_boundary_layer_bias.size()) !=
       (_holes_boundary_layer_thickness.size() || _holes_boundary_layer_num.size() ||
        _holes_boundary_layer_bias.size()))
-    paramError(
-        "holes_boundary_layer_thickness, holes_boundary_layer_num, and holes_boundary_layer_bias",
-        "All three parameters must be specified or not specified together.");
+    paramError("holes_boundary_layer_num",
+               "holes_boundary_layer_thickness, holes_boundary_layer_bias and this parameter must "
+               "be specified or not specified together.");
   if (_holes_boundary_layer_thickness.size() &&
       _holes_boundary_layer_thickness.size() != _hole_ptrs.size())
     paramError("holes_boundary_layer_thickness",

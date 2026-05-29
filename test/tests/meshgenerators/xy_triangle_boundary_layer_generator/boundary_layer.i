@@ -10,7 +10,7 @@
     is_closed_loop = true
   []
   [boundary_layer]
-    type = BoundaryLayerTriangleGenerator
+    type = XYTriangleBoundaryLayerGenerator
     input = 'outer_bdy'
     thickness = 0.3
     num_layers = 3
