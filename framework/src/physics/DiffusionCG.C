@@ -86,6 +86,8 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADBodyForce" : "BodyForce";
     else if (getProblem().hasVariable(source))
       kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
+    else if (getProblem().hasFunctor(source, 0))
+      kernel_type = _use_ad ? "ADFunctorKernel" : "FunctorKernel";
     else
       paramError("source_functor",
                  "No kernel defined for a source term in CG for the type of '",
@@ -109,6 +111,15 @@ DiffusionCG::addFEKernels()
     {
       params.set<Real>("value") = coef;
       params.set<PostprocessorName>("postprocessor") = source;
+    }
+    else if (getProblem().hasFunctor(source, 0))
+    {
+      params.set<MooseFunctorName>("functor") = source;
+      if (isParamSetByUser("source_coef"))
+        paramError("source_coef",
+                   "Setting a coefficient is not implemented with a source functor. Use an "
+                   "intermediate (parsed) functor material to define a new functors which "
+                   "multiplies the functor by the coefficient");
     }
     else
     {
