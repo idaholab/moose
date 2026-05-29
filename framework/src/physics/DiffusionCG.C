@@ -88,6 +88,8 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
     else if (getProblem().hasFunctor(source, 0))
       kernel_type = _use_ad ? "ADFunctorKernel" : "FunctorKernel";
+    else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
+      kernel_type = _use_ad ? "ADMatBodyForce" : "MatBodyForce";
     else
       paramError("source_functor",
                  "No kernel defined for a source term in CG for the type of '",
@@ -120,6 +122,16 @@ DiffusionCG::addFEKernels()
                    "Setting a coefficient is not implemented with a source functor. Use an "
                    "intermediate (parsed) functor material to define a new functors which "
                    "multiplies the functor by the coefficient");
+    }
+    else if (getProblem().getMaterialPropertyRegistry().hasProperty(source))
+    {
+      params.set<MaterialPropertyName>("material_property") = source;
+      if (isParamSetByUser("source_coef"))
+        paramError(
+            "source_coef",
+            "Setting a coefficient is not implemented with a material property source. Use an "
+            "intermediate (parsed) material to define a new functors which "
+            "multiplies the property by the coefficient");
     }
     else
     {
