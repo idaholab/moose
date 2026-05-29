@@ -88,6 +88,7 @@ packages:
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
     influential:
+      - conda/conda_build_config.yaml
       - conda/functions/retry_build.sh
       - conda/wasp
       - framework/contrib/wasp
