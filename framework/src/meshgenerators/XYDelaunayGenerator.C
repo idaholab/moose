@@ -11,6 +11,8 @@
 
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
+#include "MeshTriangulationUtils.h"
+#include "BoundaryLayerUtils.h"
 #include "MooseUtils.h"
 
 #include "libmesh/int_range.h"
@@ -263,7 +265,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 XYDelaunayGenerator::generate()
 {
-  MooseMeshUtils::XYDelaunayOptions xyd_opts;
+  MeshTriangulationUtils::XYDelaunayOptions xyd_opts;
   if (isParamValid("input_boundary_names"))
     xyd_opts.input_boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
   if (isParamValid("input_subdomain_names"))
@@ -327,16 +329,16 @@ XYDelaunayGenerator::generate()
   std::unique_ptr<MeshBase> outer_ring_clone;
   if (using_outer_layer)
   {
-    auto outer_ring = MooseMeshUtils::buildBoundaryLayerRing(*this,
-                                                             *boundary_mesh,
-                                                             xyd_opts.input_boundary_names,
-                                                             _outer_boundary_layer_num,
-                                                             _outer_boundary_layer_thickness,
-                                                             _outer_boundary_layer_bias,
-                                                             /*outward=*/false,
-                                                             _tri_elem_type,
-                                                             layer_sd_id,
-                                                             layer_sd_name);
+    auto outer_ring = BoundaryLayerUtils::buildBoundaryLayerRing(*this,
+                                                                 *boundary_mesh,
+                                                                 xyd_opts.input_boundary_names,
+                                                                 _outer_boundary_layer_num,
+                                                                 _outer_boundary_layer_thickness,
+                                                                 _outer_boundary_layer_bias,
+                                                                 /*outward=*/false,
+                                                                 _tri_elem_type,
+                                                                 layer_sd_id,
+                                                                 layer_sd_name);
     outer_ring_clone = outer_ring->clone();
     boundary_mesh = std::move(outer_ring);
     xyd_opts.input_boundary_names = {BoundaryName("1")};
@@ -352,16 +354,16 @@ XYDelaunayGenerator::generate()
     {
       const bool keep_input = (hole_i < _stitch_holes.size() && _stitch_holes[hole_i]);
       auto hole_ring =
-          MooseMeshUtils::buildBoundaryLayerRing(*this,
-                                                 *hole_meshes[hole_i],
-                                                 std::vector<BoundaryName>(),
-                                                 _holes_boundary_layer_num[hole_i],
-                                                 _holes_boundary_layer_thickness[hole_i],
-                                                 _holes_boundary_layer_bias[hole_i],
-                                                 /*outward=*/true,
-                                                 _tri_elem_type,
-                                                 layer_sd_id,
-                                                 layer_sd_name);
+          BoundaryLayerUtils::buildBoundaryLayerRing(*this,
+                                                     *hole_meshes[hole_i],
+                                                     std::vector<BoundaryName>(),
+                                                     _holes_boundary_layer_num[hole_i],
+                                                     _holes_boundary_layer_thickness[hole_i],
+                                                     _holes_boundary_layer_bias[hole_i],
+                                                     /*outward=*/true,
+                                                     _tri_elem_type,
+                                                     layer_sd_id,
+                                                     layer_sd_name);
 
       if (keep_input)
       {
@@ -435,7 +437,7 @@ XYDelaunayGenerator::generate()
     }
   }
 
-  auto result = MooseMeshUtils::triangulateWithDelaunay(
+  auto result = MeshTriangulationUtils::triangulateWithDelaunay(
       *this, std::move(boundary_mesh), std::move(hole_meshes), xyd_opts);
 
   // Stitch the outer ring clone back onto the interior triangulation at the recorded seam.

@@ -10,6 +10,7 @@
 #include "GapLineMeshGenerator.h"
 
 #include "MooseMeshUtils.h"
+#include "BoundaryLayerUtils.h"
 #include "MooseUtils.h"
 #include "CastUniquePointer.h"
 
@@ -72,7 +73,7 @@ GapLineMeshGenerator::generate()
   // Reduce the point list to only contain vertices (linear-only: no midpoints)
   std::vector<Point> reduced_pts_list;
   std::vector<Point> reduced_mid_pts_list;
-  MooseMeshUtils::collectKeyPointsFromMesh(
+  BoundaryLayerUtils::collectKeyPointsFromMesh(
       bdry_mh, reduced_pts_list, reduced_mid_pts_list, /*skip_node_reduction=*/false);
 
   // Build the input polyline mesh to drive the normal computation in generateOffsetPolyline
@@ -88,12 +89,12 @@ GapLineMeshGenerator::generate()
       dynamic_pointer_cast<UnstructuredMesh>(std::move(ply_mesh));
 
   std::vector<Point> mod_reduced_pts_list =
-      MooseMeshUtils::generateOffsetPolyline(this,
-                                             ply_mesh_u,
-                                             reduced_pts_list,
-                                             reduced_mid_pts_list,
-                                             _gap_direction == GapDirection::OUTWARD,
-                                             _thickness);
+      BoundaryLayerUtils::generateOffsetPolyline(this,
+                                                 ply_mesh_u,
+                                                 reduced_pts_list,
+                                                 reduced_mid_pts_list,
+                                                 _gap_direction == GapDirection::OUTWARD,
+                                                 _thickness);
 
   auto ply_mesh_2 = buildMeshBaseObject();
 

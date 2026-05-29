@@ -11,6 +11,7 @@
 
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
+#include "BoundaryLayerUtils.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_serializer.h"
@@ -76,7 +77,8 @@ XYTriangleBoundaryLayerGenerator::validParams()
   return params;
 }
 
-XYTriangleBoundaryLayerGenerator::XYTriangleBoundaryLayerGenerator(const InputParameters & parameters)
+XYTriangleBoundaryLayerGenerator::XYTriangleBoundaryLayerGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _thickness(getParam<Real>("thickness")),
@@ -107,16 +109,16 @@ XYTriangleBoundaryLayerGenerator::generate()
   // the end, when keep_input is true we stitch from this local pointer.
   std::unique_ptr<MeshBase> input_mesh = std::move(_input);
 
-  auto ring = MooseMeshUtils::buildBoundaryLayerRing(*this,
-                                                     *input_mesh,
-                                                     _boundary_names,
-                                                     _num_layers,
-                                                     _thickness,
-                                                     _layer_bias,
-                                                     outward,
-                                                     _tri_elem_type,
-                                                     _output_subdomain_id,
-                                                     _subdomain_name);
+  auto ring = BoundaryLayerUtils::buildBoundaryLayerRing(*this,
+                                                         *input_mesh,
+                                                         _boundary_names,
+                                                         _num_layers,
+                                                         _thickness,
+                                                         _layer_bias,
+                                                         outward,
+                                                         _tri_elem_type,
+                                                         _output_subdomain_id,
+                                                         _subdomain_name);
 
   // The ring carries boundary ids 0 ... 2*num_layers - 1; the innermost is bcid 1 and the
   // outermost is bcid (num_layers - 1) * 2. The "interface" side (touching the input mesh) is the
@@ -210,6 +212,6 @@ XYTriangleBoundaryLayerGenerator::generate()
   // passes when the user uses the mesh in contexts (e.g. boundary postprocessors) that flip this
   // flag on MooseMesh before the mesh is set.
   ring->allow_remote_element_removal(_mesh->allowRemoteElementRemoval());
-  ring->set_isnt_prepared();
+  ring->unset_is_prepared();
   return ring;
 }

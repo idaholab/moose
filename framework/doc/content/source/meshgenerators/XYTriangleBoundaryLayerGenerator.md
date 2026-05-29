@@ -25,7 +25,7 @@ This mesh generator supports both linear and quadratic elements through the [!pa
 
 The `XYTriangleBoundaryLayerGenerator` creates a layered 2D triangle mesh along the specified 1D surface of a 2D-XY mesh. It uses several meshing utility methods:
 - `MooseMeshUtils::buildPolyLineMesh()`, which enables `GapLineMeshGenerator` , to generate the polyline mesh that defines the layer boundaries of the 2D triangulated mesh to be generated, which need to be parallel to the specified 1D surface of the input mesh.
-- `MooseMeshUtils::triangulateWithDelaunay`, which enables[`XYDelaunayGenerator`](/XYDelaunayGenerator.md), to generate the 2D triangulated meshes of layers. The generation of each layer uses the two neighboring polyline meshes as the input boundary and hole meshes, respectively.
+- `MeshTriangulationUtils::triangulateWithDelaunay`, which enables[`XYDelaunayGenerator`](/XYDelaunayGenerator.md), to generate the 2D triangulated meshes of layers. The generation of each layer uses the two neighboring polyline meshes as the input boundary and hole meshes, respectively.
 - `libMesh::UnstructuredMesh::stitch_meshes()`, which enables [`StitchMeshGenerator`](/StitchMeshGenerator.md), to stitch the generated layered 2D triangulated mesh together as well as to stitch the layered 2D triangulated mesh with the input mesh if applicable.
 
 ## Examples
