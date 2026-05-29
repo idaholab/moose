@@ -41,7 +41,7 @@
     [material]
         type = MFEMGenericFunctorMaterial
         prop_names = 'radialCoef diffCoef massCoef'
-        prop_values = 'r measure_weight inv_r'
+        prop_values = 'cylindrical_r cylindrical_measure_weight cylindrical_inv_r'
         block =  1
     []
 []

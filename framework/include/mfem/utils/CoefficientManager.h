@@ -22,8 +22,6 @@
 
 #include "CoefficientMap.h"
 
-#include "MFEMCoordinateCoefficients.h"
-
 namespace Moose::MFEM
 {
 /**
@@ -35,11 +33,6 @@ class CoefficientManager
 {
 public:
   CoefficientManager() = default;
-  ///Provider for the built-in coordinate dependent coefficients
-  void setBuiltinProvider(const MFEMCoordinateCoefficients * provider)
-  {
-    _builtin_provider = provider;
-  }
 
   /// Declare an alias to an existing scalar coefficient or, if it
   /// does not exist, try interpreting the name as a number with which
@@ -183,8 +176,6 @@ private:
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;
-
-  const MFEMCoordinateCoefficients * _builtin_provider = nullptr;
 
   mfem::Coefficient & declareScalar(const std::string & name,
                                     std::shared_ptr<mfem::Coefficient> coef);
