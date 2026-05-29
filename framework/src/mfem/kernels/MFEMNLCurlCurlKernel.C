@@ -22,17 +22,20 @@ MFEMNLCurlCurlKernel::validParams()
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the nonlinear form "
       "$(k(|\\vec \\nabla \\times \\vec u|) \\vec \\nabla \\times \\vec u, \\vec \\nabla \\times "
-      "\\vec v)_\\Omega "
+      "\\vec v)_\\Omega$ "
       "arising from the weak form of the non-linear operator "
-      "$\\vec \\nabla \\times (k(|\\vec \\nabla \\times \\vec u|) \\vec\\nabla \\times \\vec u)$.");
+      "$\\vec \\nabla \\times (k(|\\vec \\nabla \\times \\vec u|) \\vec \\nabla \\times \\vec "
+      "u)$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "k_coefficient", "1.", "Name of the nonlinear coefficient k(|\\nabla x u|).");
+      "k_coefficient",
+      "1.",
+      "Name of the nonlinear coefficient $k(|\\vec\\nabla \\times \\vec u|)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "curlu_dk_dcurlu_coefficient",
       "0.",
-      "Name of coefficient representing the partial derivative of the coefficient k(|\\nabla "
-      "\\times u|) with respect to the "
-      "magnitude of the curl of the trial variable u.");
+      "Name of the coefficient representing "
+      "$|\\vec \\nabla \\times \\vec u| \\partial k(|\\nabla "
+      "\\times \\vec u|)/\\partial |\\nabla \\times \\vec u|$");
   return params;
 }
 
