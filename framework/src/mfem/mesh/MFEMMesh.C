@@ -38,7 +38,8 @@ MFEMMesh::validParams()
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
-  params.addParam<bool>("periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
+  params.addParam<bool>(
+      "periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
   params.addParam<std::vector<Real>>("translation_x",
                                      "Vector specifying translation in x direction.");
   params.addParam<std::vector<Real>>("translation_y",
@@ -112,35 +113,18 @@ void
 MFEMMesh::registerPeriodicBCs(MFEMPeriodicByVector & bc)
 {
   _periodic = true;
-  _translation_x = bc.GetPeriodicBc(0);
-  _translation_y = bc.GetPeriodicBc(1);
-  if (bc.Use3D())
-  {
-    _translation_z = bc.GetPeriodicBc(2);
-  }
+  _translations = bc.GetPeriodicBCs();
 }
 
 mfem::Mesh
 MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh & input)
 {
-  std::vector<mfem::Vector> translations(input.SpaceDimension());
+  mooseAssert(((int)_translations.size() == input.SpaceDimension()),
+              "Number of translation vectors doesn't match the space dimension");
+  mooseAssert((input.SpaceDimension() == _translations[0].Size()),
+              "Size of translation vector doesn't match the space dimension");
 
-  // // error checking. Demand that the z array is set by the user
-  mooseAssert((_translation_x.Size() == input.SpaceDimension()) and
-                  (_translation_y.Size() == input.SpaceDimension()),
-              "The translation vectors must be all set by user if using periodic BCs");
-  mooseAssert((input.SpaceDimension() == _translation_z.Size()) or (_translation_z.Size() == 0),
-              "Asked for 3D but didn't set the z vector");
-
-  translations[0] = _translation_x;
-  translations[1] = _translation_y;
-
-  if (input.SpaceDimension() == 3)
-  {
-    translations[2] = _translation_z;
-  }
-
-  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
+  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(_translations));
 }
 
 void
