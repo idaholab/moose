@@ -121,5 +121,5 @@ class SubmoduleHashCommand(command.CommandComponent):
                 return parent
 
         raise exceptions.MooseDocsException(
-            f"The submodule '{name}' was not located in {' ,'.join(check_dirs)}"
+            f"The submodule '{name}' was not located in {', '.join(check_dirs)}"
         )
