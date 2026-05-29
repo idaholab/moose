@@ -119,13 +119,13 @@ MFEMCylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
 const mfem::Coefficient *
 MFEMCylindrical::getBuiltinCoefficient(const std::string & name) const
 {
-  if (name == "r")
+  if (name == coefficientName("r"))
     return _r_coeff.get();
-  if (name == "inv_r")
+  if (name == coefficientName("inv_r"))
     return _inv_r_coeff.get();
-  if (name == "two_pi_r")
+  if (name == coefficientName("two_pi_r"))
     return _two_pi_r_coeff.get();
-  if (name == "measure_weight")
+  if (name == coefficientName("measure_weight"))
     return _measure_weight.get();
 
   return nullptr;
