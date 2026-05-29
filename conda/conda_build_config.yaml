@@ -80,7 +80,7 @@ fortran_compiler_version:
 bzip2:
   - 1
 fmt:
-  - '12.0'
+  - '12.1'
 hdf5:
   - 1.14.6
 krb5:
@@ -94,7 +94,7 @@ libcurl:
 libffi:
   - '3.5'
 libhwloc:
-  - 2.12.2
+  - 2.13.0
 libiconv:
   - 1
 libssh2:
