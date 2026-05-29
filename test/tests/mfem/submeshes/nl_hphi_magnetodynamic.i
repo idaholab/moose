@@ -80,7 +80,7 @@ e_c = 1.0
 [Functions]
   [resistivity]
     type = MFEMParsedFunction
-    expression = 'e_c * (j/j_c)^(n_val-1)'
+    expression = '(e_c/j_c) * (j/j_c)^(n_val-1)'
     symbol_names = 'j e_c j_c n_val'
     symbol_values = 'coil_induced_h_field_curl_mag ${e_c} ${j_c} ${n_value}'
   []
