@@ -10,16 +10,13 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
 #include "MFEMVectorMagnitudeCoefficient.h"
 
 namespace Moose::MFEM
 {
 /**
  * \f[
- * (k(|\nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
+ * (k(|\vec \nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
  */
 class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator

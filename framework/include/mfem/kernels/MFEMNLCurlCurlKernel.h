@@ -14,7 +14,7 @@
 
 /**
  * \f[
- * (k(|\nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
+ * (k(|\vec \nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
  */
 class MFEMNLCurlCurlKernel : public MFEMKernel

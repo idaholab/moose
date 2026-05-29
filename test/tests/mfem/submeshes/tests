@@ -120,7 +120,7 @@
   []
   [MFEMNLDomainSubMeshBoundary]
     design = 'MFEMNLCurlCurlKernel.md'
-    issues = '#33003' 
+    issues = '#33003'
     type = CSVDiff
     input = nl_hphi_magnetodynamic.i
     csvdiff = 'OutputData/HPhiMagnetodynamicNLClosedCoilCSV.csv'
@@ -131,5 +131,5 @@
     restep = false
     valgrind = heavy
     min_slots = 2 # memory heavy
-  []  
+  []
 []

@@ -11,7 +11,7 @@ Adds the domain integrator for integrating the non-linear form
 \forall \vec v \in V
 
 where $\vec u, \vec v \in H(\mathrm{curl})$ and $k$ is a scalar coefficient that may depend on the
-magnitude of the curl of the trial variable $u$.
+magnitude of the curl of the trial variable $\vec u$.
 
 This term arises from the weak form of the curl curl operator
 

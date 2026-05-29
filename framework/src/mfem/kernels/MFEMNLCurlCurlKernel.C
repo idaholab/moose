@@ -24,7 +24,7 @@ MFEMNLCurlCurlKernel::validParams()
       "$(k(|\\vec \\nabla \\times \\vec u|) \\vec \\nabla \\times \\vec u, \\vec \\nabla \\times "
       "\\vec v)_\\Omega "
       "arising from the weak form of the non-linear operator "
-      "$- \\vec \\nabla \\times (k(|\\vec \\nabla \\times u|) \\vec\\nabla \\times u)$.");
+      "$\\vec \\nabla \\times (k(|\\vec \\nabla \\times \\vec u|) \\vec\\nabla \\times \\vec u)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "k_coefficient", "1.", "Name of the nonlinear coefficient k(|\\nabla x u|).");
   params.addParam<MFEMScalarCoefficientName>(
