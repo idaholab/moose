@@ -18,10 +18,10 @@ MFEMPeriodicByVector::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params.registerBase("MFEMPeriodicByVector");
-  params.addRequiredParam<std::vector<Real>>("translation_x",
-                                             "Vector specifying translation in x direction.");
-  params.addRequiredParam<std::vector<Real>>("translation_y",
-                                             "Vector specifying translation in y direction.");
+  params.addParam<std::vector<Real>>("translation_x",
+                                     "Vector specifying translation in x direction.");
+  params.addParam<std::vector<Real>>("translation_y",
+                                     "Vector specifying translation in y direction.");
   params.addParam<std::vector<Real>>("translation_z",
                                      "Vector specifying translation in z direction.");
   return params;
@@ -35,35 +35,40 @@ MFEMPeriodicByVector::MFEMPeriodicByVector(const InputParameters & parameters)
   if (isParamSetByUser("translation_z"))
   {
     _translation_z = getParam<std::vector<Real>>("translation_z");
-    _3d = true;
   }
 }
 
-mfem::Vector
-MFEMPeriodicByVector::GetPeriodicBc(int dim)
+std::vector<mfem::Vector>
+MFEMPeriodicByVector::GetPeriodicBCs()
 {
-  // set the size from the x vector
-  mfem::Vector output(_translation_x.size());
+  std::vector<mfem::Vector> output;
 
-  if (dim == 0)
+  // check if each translation vector is populated, then convert
+  // to mfem vector and insert into the std vector which we return
+  if (_translation_x.size())
   {
-    output = _translation_x.data();
+    mfem::Vector translation_x(_translation_x.size());
+    // copy entries
+    translation_x = _translation_x.data();
+    output.push_back(translation_x);
   }
 
-  else if (dim == 1)
+  if (_translation_y.size())
   {
-    output = _translation_y.data();
+    mfem::Vector translation_y(_translation_y.size());
+    // copy entries
+    translation_y = _translation_y.data();
+    output.push_back(translation_y);
   }
 
-  else if (dim == 2)
+  if (_translation_z.size())
   {
-    output = _translation_z.data();
+    mfem::Vector translation_z(_translation_z.size());
+    // copy entries
+    translation_z = _translation_z.data();
+    output.push_back(translation_z);
   }
 
-  else
-  {
-    mooseError("Dimension should be between 0 and 2 inclusive");
-  }
   return output;
 }
 
