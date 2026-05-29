@@ -136,7 +136,7 @@ if [ -z "\$SDKROOT" ]; then
 fi
 if [ -z "\$SDKROOT" ]; then
     use_color=
-    [ -z "\$TERM" ] || [ "\$TERM" == "dumb" ] || [ -n "\$NO_COLOR" ] || use_color=1
+    [ -z "\$TERM" ] || [ "\$TERM" = "dumb" ] || [ -n "\$NO_COLOR" ] || use_color=1
     if [ -n "\$use_color" ]; then
         printf "\e[31m" >&2
     fi
