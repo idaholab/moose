@@ -18,14 +18,12 @@ class MFEMPeriodicByVector : public MooseObject
 public:
   static InputParameters validParams();
   MFEMPeriodicByVector(const InputParameters & parameters);
-  mfem::Vector GetPeriodicBc(int dim);
-  bool Use3D() const { return _3d; };
+  std::vector<mfem::Vector> GetPeriodicBCs();
 
 private:
   std::vector<Real> _translation_x;
   std::vector<Real> _translation_y;
   std::vector<Real> _translation_z;
-  bool _3d = false;
 };
 
 #endif
