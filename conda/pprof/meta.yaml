@@ -6,7 +6,7 @@ package:
 
 source:
   git_url: https://github.com/google/pprof.git
-  git_rev: a15ffb7f9dccb95074ad153aef0f1fcbb01e61e3
+  git_rev: 92041b743c966065641d7221da5403ad9a019bce
   git_depth: 1
 
 build:
