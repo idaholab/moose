@@ -9,9 +9,9 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "CylindricalCoordinateCoefficients.h"
+#include "MFEMCylindricalCoordinateCoefficients.h"
 
-registerMooseObject("MooseApp", Cylindrical);
+registerMooseObject("MooseApp", MFEMCylindrical);
 
 namespace
 {
@@ -36,7 +36,7 @@ private:
 }
 
 InputParameters
-Cylindrical::validParams()
+MFEMCylindrical::validParams()
 {
   InputParameters params = MFEMCoordinateCoefficients::validParams();
   params.addClassDescription(
@@ -44,13 +44,13 @@ Cylindrical::validParams()
   return params;
 }
 
-Cylindrical::Cylindrical(const InputParameters & parameters)
+MFEMCylindrical::MFEMCylindrical(const InputParameters & parameters)
   : MFEMCoordinateCoefficients(parameters)
 {
 }
 
 void
-Cylindrical::build()
+MFEMCylindrical::build()
 {
   if (_r_coeff)
     return;
@@ -70,13 +70,13 @@ Cylindrical::build()
 }
 
 void
-Cylindrical::declareRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+MFEMCylindrical::declareRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 {
   coeffs.declareScalar<mfem::CylindricalRadialCoefficient>(coefficientName("r"));
 }
 
 void
-Cylindrical::declareInverseRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+MFEMCylindrical::declareInverseRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 {
   auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
   coeffs.declareScalar<InvShiftedCoefficient>(
@@ -84,7 +84,7 @@ Cylindrical::declareInverseRadialCoefficient(Moose::MFEM::CoefficientManager & c
 }
 
 void
-Cylindrical::declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+MFEMCylindrical::declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 {
   auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
 
@@ -97,7 +97,7 @@ Cylindrical::declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 }
 
 void
-Cylindrical::declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & coeffs)
+MFEMCylindrical::declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 {
   auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
 
@@ -108,7 +108,7 @@ Cylindrical::declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & c
 }
 
 void
-Cylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
+MFEMCylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
 {
   this->declareRadialCoefficient(coeffs);
   this->declareInverseRadialCoefficient(coeffs);
@@ -117,7 +117,7 @@ Cylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
 }
 
 const mfem::Coefficient *
-Cylindrical::getBuiltinCoefficient(const std::string & name) const
+MFEMCylindrical::getBuiltinCoefficient(const std::string & name) const
 {
   if (name == "r")
     return _r_coeff.get();

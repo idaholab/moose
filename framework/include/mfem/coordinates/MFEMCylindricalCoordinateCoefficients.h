@@ -18,12 +18,12 @@
  * Class that constructs and owns the scalar cylindrical built-in MFEM coefficients
  * (r, 1/r, 2*pi*r, and measure weight) for cylindrical and axisymmetric MFEM formulations
  */
-class Cylindrical : public MFEMCoordinateCoefficients
+class MFEMCylindrical : public MFEMCoordinateCoefficients
 {
 public:
   static InputParameters validParams();
 
-  Cylindrical(const InputParameters & parameters);
+  MFEMCylindrical(const InputParameters & parameters);
 
   virtual void build() override;
 
