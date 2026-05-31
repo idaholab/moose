@@ -1,0 +1,83 @@
+[StochasticTools]
+[]
+
+[Distributions]
+  [mu1]
+    type = Normal
+    mean = 0.0
+    standard_deviation = 0.5
+  []
+  [mu2]
+    type = Normal
+    mean = 1
+    standard_deviation = 0.5
+  []
+[]
+
+[Samplers]
+  [sample]
+    type = ParallelSubsetSimulation
+    distributions = 'mu1 mu2'
+    num_samplessub = 4
+    num_subsets = 3
+    num_parallel_chains = 2
+    subset_probability = 0.5
+    output_reporter = 'constant/reporter_transfer:average:value'
+    inputs_reporter = 'adaptive_MC/inputs'
+    seed = 1012
+    num_random_seeds = 200
+    execute_on = 'PRE_MULTIAPP_SETUP timestep_end'
+  []
+[]
+
+[MultiApps]
+  [sub]
+    type = SamplerFullSolveMultiApp
+    input_files = sub.i
+    sampler = sample
+  []
+[]
+
+[Controls]
+  [param]
+    type = MultiAppSamplerControl
+    multi_app = sub
+    param_names = 'BCs/left/value BCs/right/value'
+    sampler = sample
+  []
+[]
+
+[Transfers]
+  [reporter_transfer]
+    type = SamplerReporterTransfer
+    from_reporter = 'average/value'
+    stochastic_reporter = 'constant'
+    from_multi_app = sub
+    sampler = sample
+  []
+[]
+
+[Reporters]
+  [constant]
+    type = StochasticReporter
+    outputs = none
+  []
+  [adaptive_MC]
+    type = AdaptiveMonteCarloDecision
+    output_value = constant/reporter_transfer:average:value
+    inputs = 'inputs'
+    sampler = sample
+    execute_on = 'timestep_begin'
+  []
+[]
+
+[Executioner]
+  type = Transient
+[]
+
+[Outputs]
+  [out]
+    type = JSON
+    execute_system_information_on = none
+  []
+[]
