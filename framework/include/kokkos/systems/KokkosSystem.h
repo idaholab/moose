@@ -213,7 +213,7 @@ public:
                                                    unsigned int i,
                                                    unsigned int var) const
   {
-    return _local_elem_dof_index[var](elem, i);
+    return _local_elem_dof_index[var](i, elem);
   }
   /**
    * Get the local DOF index of a variable for a node
@@ -239,7 +239,7 @@ public:
                                                     unsigned int i,
                                                     unsigned int var) const
   {
-    return _local_to_global_dof_index[_local_elem_dof_index[var](elem, i)];
+    return _local_to_global_dof_index[_local_elem_dof_index[var](i, elem)];
   }
   /**
    * Get the global DOF index of a variable for a node

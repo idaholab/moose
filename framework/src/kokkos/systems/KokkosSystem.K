@@ -130,7 +130,7 @@ System::setupDofs()
           std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
     }
 
-    _local_elem_dof_index[var].create(num_elems, _max_dofs_per_elem[var]);
+    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_elems);
     _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
 
     _local_node_dof_index[var].create(num_nodes);
@@ -144,8 +144,8 @@ System::setupDofs()
 
       for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
       {
-        _local_elem_dof_index[var](id, dof) = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_to_global_dof_index[_local_elem_dof_index[var](id, dof)] = dof_indices[dof];
+        _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
+        _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
       }
     }
 
