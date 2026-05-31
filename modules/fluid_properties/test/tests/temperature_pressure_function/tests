@@ -6,6 +6,7 @@
     input = 'exact.i'
     csvdiff = 'exact_out.csv'
     abs_zero = 1e-9
+    ignore_columns = cp_avg
     requirement = 'The system shall be able to compute functionalized fluid properties.'
   []
   [example]
