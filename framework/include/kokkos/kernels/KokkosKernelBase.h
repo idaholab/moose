@@ -43,7 +43,10 @@ protected:
   /**
    * Number of threads for local DOF parallelization
    */
-  const unsigned int _num_local_threads;
+  ///@{
+  const unsigned int _num_local_residual_threads = 1;
+  const unsigned int _num_local_jacobian_threads = 1;
+  ///@}
 };
 
 } // namespace Moose::Kokkos
