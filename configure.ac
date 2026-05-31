@@ -112,12 +112,36 @@ AC_ARG_WITH(kokkos,
             [kokkos_support=yes],
             [kokkos_support=no])
 
+AC_ARG_WITH(kokkos-index-size,
+            AS_HELP_STRING([--with-kokkos-index-size=ARG],[Specify Kokkos index size @<:@ARG=4 (default) or 8@:>@]))
+
+AS_IF([test "x$with_kokkos_index_size" != x && test "$kokkos_support" != yes],
+      [AC_MSG_ERROR([--with-kokkos-index-size requires --with-kokkos])])
+
 AC_MSG_RESULT([configuring with kokkos support: $kokkos_support])
 
 AS_IF([test "$kokkos_support" = yes],
       [
         AC_DEFINE(KOKKOS_ENABLED, 1, [Whether to use Kokkos-related code or not])
         AC_SUBST([kokkos_support],[true])
+
+        AS_IF([test "x$with_kokkos_index_size" = x],
+              [with_kokkos_index_size=4])
+
+        AS_CASE([$with_kokkos_index_size],
+                [4],
+                [
+                  AC_MSG_RESULT([Kokkos index size: 4 bytes])
+                  AC_DEFINE([KOKKOS_INDEX_TYPE], [uint32_t], [Kokkos index type])
+                ],
+                [8],
+                [
+                  AC_MSG_RESULT([Kokkos index size: 8 bytes])
+                  AC_DEFINE([KOKKOS_INDEX_TYPE], [uint64_t], [Kokkos index type])
+                ],
+                [
+                  AC_MSG_ERROR([invalid value for --with-kokkos-index-size: $with_kokkos_index_size (valid values are 4 or 8)])
+                ])
 
         AS_IF([test "$with_kokkos" = cpu],
               [

@@ -101,104 +101,13 @@ TEST_F(KokkosArrayTest, Array5D)
           }
 }
 
-TEST_F(KokkosArrayTest, Array1D4ByteIndex)
-{
-  Moose::Kokkos::Array<unsigned int, 1, unsigned int> array(3);
-
-  Kokkos::RangePolicy<> policy(0, 3);
-  KokkosArrayTestObject1D<unsigned int> object(array);
-  Kokkos::parallel_for(policy, object);
-
-  array.copyToHost();
-
-  for (unsigned int i = 0; i < 3; ++i)
-    EXPECT_EQ(array[i], i);
-}
-
-TEST_F(KokkosArrayTest, Array2D4ByteIndex)
-{
-  Moose::Kokkos::Array<unsigned int, 2, unsigned int> array(3, 4);
-
-  Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 4});
-  KokkosArrayTestObject2D<unsigned int> object(array);
-  Kokkos::parallel_for(policy, object);
-
-  array.copyToHost();
-
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
-    {
-      unsigned int idx = i + j * 3;
-      EXPECT_EQ(array[idx], i + j);
-    }
-}
-
-TEST_F(KokkosArrayTest, Array3D4ByteIndex)
-{
-  Moose::Kokkos::Array<unsigned int, 3, unsigned int> array(3, 4, 5);
-
-  Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 4, 5});
-  KokkosArrayTestObject3D<unsigned int> object(array);
-  Kokkos::parallel_for(policy, object);
-
-  array.copyToHost();
-
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
-      for (unsigned int k = 0; k < 5; ++k)
-      {
-        unsigned int idx = i + j * 3 + k * 3 * 4;
-        EXPECT_EQ(array[idx], i + j + k);
-      }
-}
-
-TEST_F(KokkosArrayTest, Array4D4ByteIndex)
-{
-  Moose::Kokkos::Array<unsigned int, 4, unsigned int> array(3, 4, 5, 6);
-
-  Kokkos::MDRangePolicy<Kokkos::Rank<4>> policy({0, 0, 0, 0}, {3, 4, 5, 6});
-  KokkosArrayTestObject4D<unsigned int> object(array);
-  Kokkos::parallel_for(policy, object);
-
-  array.copyToHost();
-
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
-      for (unsigned int k = 0; k < 5; ++k)
-        for (unsigned int l = 0; l < 6; ++l)
-        {
-          unsigned int idx = i + j * 3 + k * 3 * 4 + l * 3 * 4 * 5;
-          EXPECT_EQ(array[idx], i + j + k + l);
-        }
-}
-
-TEST_F(KokkosArrayTest, Array5D4ByteIndex)
-{
-  Moose::Kokkos::Array<unsigned int, 5, unsigned int> array(3, 4, 5, 6, 7);
-
-  Kokkos::MDRangePolicy<Kokkos::Rank<5>> policy({0, 0, 0, 0, 0}, {3, 4, 5, 6, 7});
-  KokkosArrayTestObject5D<unsigned int> object(array);
-  Kokkos::parallel_for(policy, object);
-
-  array.copyToHost();
-
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
-      for (unsigned int k = 0; k < 5; ++k)
-        for (unsigned int l = 0; l < 6; ++l)
-          for (unsigned int m = 0; m < 7; ++m)
-          {
-            unsigned int idx = i + j * 3 + k * 3 * 4 + l * 3 * 4 * 5 + m * 3 * 4 * 5 * 6;
-            EXPECT_EQ(array[idx], i + j + k + l + m);
-          }
-}
-
 TEST_F(KokkosArrayTest, Array2DRightLayout)
 {
-  Moose::Kokkos::Array<unsigned int, 2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> array(3, 4);
+  Moose::Kokkos::Array<unsigned int, 2, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+      array(3, 4);
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 4});
-  KokkosArrayTestObject2D<dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -213,11 +122,11 @@ TEST_F(KokkosArrayTest, Array2DRightLayout)
 
 TEST_F(KokkosArrayTest, Array3DRightLayout)
 {
-  Moose::Kokkos::Array<unsigned int, 3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> array(
-      3, 4, 5);
+  Moose::Kokkos::Array<unsigned int, 3, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+      array(3, 4, 5);
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 4, 5});
-  KokkosArrayTestObject3D<dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -233,11 +142,11 @@ TEST_F(KokkosArrayTest, Array3DRightLayout)
 
 TEST_F(KokkosArrayTest, Array4DRightLayout)
 {
-  Moose::Kokkos::Array<unsigned int, 4, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> array(
-      3, 4, 5, 6);
+  Moose::Kokkos::Array<unsigned int, 4, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+      array(3, 4, 5, 6);
 
   Kokkos::MDRangePolicy<Kokkos::Rank<4>> policy({0, 0, 0, 0}, {3, 4, 5, 6});
-  KokkosArrayTestObject4D<dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosArrayTestObject4D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -254,11 +163,11 @@ TEST_F(KokkosArrayTest, Array4DRightLayout)
 
 TEST_F(KokkosArrayTest, Array5DRightLayout)
 {
-  Moose::Kokkos::Array<unsigned int, 5, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> array(
-      3, 4, 5, 6, 7);
+  Moose::Kokkos::Array<unsigned int, 5, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+      array(3, 4, 5, 6, 7);
 
   Kokkos::MDRangePolicy<Kokkos::Rank<5>> policy({0, 0, 0, 0, 0}, {3, 4, 5, 6, 7});
-  KokkosArrayTestObject5D<dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosArrayTestObject5D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -284,7 +193,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D1D)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<1> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -304,7 +213,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D1D)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<2> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -328,7 +237,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D1D)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<3> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -354,7 +263,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D2D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<1> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -376,7 +285,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D2D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<2> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -402,7 +311,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D2D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<3> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -430,7 +339,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D3D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<1> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -454,7 +363,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D3D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<2> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -482,7 +391,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D3D)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<3> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -501,7 +410,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D3D)
 
 TEST_F(KokkosArrayTest, jaggedArray1D1D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 1, unsigned int> array(3);
+  Moose::Kokkos::JaggedArray<unsigned int, 1, 1> array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1});
@@ -509,7 +418,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D1D4ByteIndex)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<1, unsigned int> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -521,7 +430,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D1D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray2D1D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 1, unsigned int> array(3);
+  Moose::Kokkos::JaggedArray<unsigned int, 2, 1> array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1, I + 1});
@@ -529,7 +438,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D1D4ByteIndex)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<2, unsigned int> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -545,7 +454,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D1D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray3D1D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 1, unsigned int> array(3);
+  Moose::Kokkos::JaggedArray<unsigned int, 3, 1> array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1, I + 1, I + 1});
@@ -553,7 +462,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D1D4ByteIndex)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<3, unsigned int> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -570,7 +479,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D1D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray1D2D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 2, unsigned int> array(3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 1, 2> array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -579,7 +488,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D2D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<1, unsigned int> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -592,7 +501,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D2D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray2D2D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 2, unsigned int> array(3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 2, 2> array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -601,7 +510,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D2D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<2, unsigned int> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -618,7 +527,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D2D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray3D2D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 2, unsigned int> array(3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 3, 2> array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -627,7 +536,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D2D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<3, unsigned int> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -645,7 +554,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D2D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray1D3D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 3, unsigned int> array(3, 3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 1, 3> array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -655,7 +564,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D3D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<1, unsigned int> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -669,7 +578,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D3D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray2D3D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 3, unsigned int> array(3, 3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 2, 3> array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -679,7 +588,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D3D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<2, unsigned int> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -697,7 +606,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D3D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray3D3D4ByteIndex)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 3, unsigned int> array(3, 3, 3);
+  Moose::Kokkos::JaggedArray<unsigned int, 3, 3> array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -707,7 +616,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D3D4ByteIndex)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<3, unsigned int> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -726,8 +635,9 @@ TEST_F(KokkosArrayTest, jaggedArray3D3D4ByteIndex)
 
 TEST_F(KokkosArrayTest, jaggedArray1D1DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 1, 1, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1});
@@ -735,7 +645,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D1DRightLayout)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -747,8 +657,9 @@ TEST_F(KokkosArrayTest, jaggedArray1D1DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray2D1DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 2, 1, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1, I + 1});
@@ -756,7 +667,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D1DRightLayout)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -772,8 +683,9 @@ TEST_F(KokkosArrayTest, jaggedArray2D1DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray3D1DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 3, 1, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3);
 
   for (unsigned int I = 0; I < 3; ++I)
     array.reserve({I}, {I + 1, I + 1, I + 1});
@@ -781,7 +693,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D1DRightLayout)
   array.finalize();
 
   Kokkos::RangePolicy<> policy(0, 3);
-  KokkosJaggedArrayTestObject1D<3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject1D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -798,8 +710,9 @@ TEST_F(KokkosArrayTest, jaggedArray3D1DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray1D2DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 1, 2, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -808,7 +721,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D2DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -821,8 +734,9 @@ TEST_F(KokkosArrayTest, jaggedArray1D2DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray2D2DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 2, 2, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -831,7 +745,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D2DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -848,8 +762,9 @@ TEST_F(KokkosArrayTest, jaggedArray2D2DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray3D2DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 3, 2, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -858,7 +773,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D2DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<2>> policy({0, 0}, {3, 3});
-  KokkosJaggedArrayTestObject2D<3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject2D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -876,8 +791,9 @@ TEST_F(KokkosArrayTest, jaggedArray3D2DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray1D3DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 1, 3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 1, 3, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -887,7 +803,7 @@ TEST_F(KokkosArrayTest, jaggedArray1D3DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<1, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -901,8 +817,9 @@ TEST_F(KokkosArrayTest, jaggedArray1D3DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray2D3DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 2, 3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 2, 3, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -912,7 +829,7 @@ TEST_F(KokkosArrayTest, jaggedArray2D3DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<2, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
@@ -930,8 +847,9 @@ TEST_F(KokkosArrayTest, jaggedArray2D3DRightLayout)
 
 TEST_F(KokkosArrayTest, jaggedArray3D3DRightLayout)
 {
-  Moose::Kokkos::JaggedArray<unsigned int, 3, 3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT>
-      array(3, 3, 3);
+  Moose::Kokkos::
+      JaggedArray<unsigned int, 3, 3, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+          array(3, 3, 3);
 
   for (unsigned int I = 0; I < 3; ++I)
     for (unsigned int J = 0; J < 3; ++J)
@@ -941,7 +859,7 @@ TEST_F(KokkosArrayTest, jaggedArray3D3DRightLayout)
   array.finalize();
 
   Kokkos::MDRangePolicy<Kokkos::Rank<3>> policy({0, 0, 0}, {3, 3, 3});
-  KokkosJaggedArrayTestObject3D<3, dof_id_type, Moose::Kokkos::LayoutType::RIGHT> object(array);
+  KokkosJaggedArrayTestObject3D object(array);
   Kokkos::parallel_for(policy, object);
 
   array.copyToHost();
