@@ -496,7 +496,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   }
 
   else if (fnorm > initial_residual_before_preset_bcs * rtol)
-    convergedRelative = false;
+    mooseError("yes");
 
   return convergedRelative;
 }
