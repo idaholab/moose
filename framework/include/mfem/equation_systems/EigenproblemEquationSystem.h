@@ -21,7 +21,8 @@ class EigensolverBase;
 class EigenproblemEquationSystem : public EquationSystem
 {
 public:
-  EigenproblemEquationSystem() = default;
+  /// Construct with the coefficient used to scale the right-hand side of the eigenproblem equation.
+  EigenproblemEquationSystem(mfem::Coefficient & rhs_coef) : _rhs_coef(rhs_coef) {}
   ~EigenproblemEquationSystem() override = default;
 
   /// Build eigenproblem system, with essential boundary conditions accounted for
@@ -46,6 +47,7 @@ private:
   mfem::Array<int> _global_ess_markers;
   /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
   mfem::OperatorHandle _mass_rhs;
+  mfem::Coefficient & _rhs_coef;
 };
 
 } // namespace Moose::MFEM
