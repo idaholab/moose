@@ -13,7 +13,7 @@
 #include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
 
-class LinearFVGradientField;
+class LinearFVGradientReader;
 
 /**
  * Kernel that adds contributions from a diffusion term discretized using the finite volume method
@@ -78,7 +78,7 @@ protected:
   const bool _use_nonorthogonal_correction;
 
   /// Gradient field used when nonorthogonal corrections require cell gradients.
-  const LinearFVGradientField * const _gradient_field;
+  const LinearFVGradientReader * const _gradient_field;
 
   /// The cached matrix contribution
   Real _flux_matrix_contribution;

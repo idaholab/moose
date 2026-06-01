@@ -32,38 +32,38 @@ class NumericVector;
 }
 
 /**
- * Read-only handle to a cell-centered linear finite-volume gradient field stored on a system.
+ * Read-only view of one variable's cell-centered linear finite-volume gradient values.
  */
-class LinearFVGradientField
+class LinearFVGradientReader
 {
 public:
   /// One vector per spatial component of the cell-centered gradient.
   using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
 
   /**
-   * @param sys System that owns the variables and the gradient field storage.
+   * @param sys System that owns the variables and gradient values.
    * @param components Component vectors that store the gradient values.
-   * @param method Gradient method that produces the values in this field.
-   * @param variable_number Variable number whose gradient this handle reads.
+   * @param method Gradient method that produces the values read by this object.
+   * @param variable_number Variable number whose gradient this object reads.
    */
-  LinearFVGradientField(const SystemBase & sys,
-                        const GradientContainer & components,
-                        const FVGradientMethod & method,
-                        unsigned int variable_number);
+  LinearFVGradientReader(const SystemBase & sys,
+                         const GradientContainer & components,
+                         const FVGradientMethod & method,
+                         unsigned int variable_number);
 
   /// Access the underlying component vectors keyed by spatial direction.
   const GradientContainer & components() const { return _components; }
 
-  /// System whose DOF map indexes this field.
+  /// System whose DOF map indexes the stored values.
   const SystemBase & system() const { return _sys; }
 
-  /// Method object that produces this field.
+  /// Method object that produces the stored values.
   const FVGradientMethod & method() const { return _method; }
 
-  /// Variable number whose gradients are read by this handle.
+  /// Variable number whose gradients are read by this object.
   unsigned int variableNumber() const { return _variable_number; }
 
-  /// Whether this field stores limited gradients.
+  /// Whether this reader accesses limited gradients.
   bool isLimited() const { return limiterType() != Moose::FV::GradientLimiterType::None; }
 
   /// Limiter type for limited fields, or None for unlimited fields.
@@ -89,22 +89,25 @@ public:
   RealVectorValue gradient(const FaceInfo & fi) const;
 
 private:
-  /// System whose dof map indexes this gradient field.
+  /// System whose dof map indexes the stored values.
   const SystemBase & _sys;
+
+  /// System number cached for hot DOF lookups.
+  const unsigned int _system_number;
 
   /// Component vectors keyed by spatial direction.
   const GradientContainer & _components;
 
-  /// Method object that produces this field.
+  /// Method object that produces the stored values.
   const FVGradientMethod & _method;
 
-  /// Variable number whose gradients are read by this handle.
+  /// Variable number whose gradients are read by this object.
   const unsigned int _variable_number;
 };
 
 /**
- * Shared registration, storage, update, and allocation logic for system-owned linear
- * finite-volume cell gradients.
+ * Shared registration, update, and allocation logic for system-owned linear finite-volume cell
+ * gradients.
  */
 class LinearFVGradientInterface
 {
@@ -115,25 +118,28 @@ public:
   LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
 
   /**
-   * Register a system-owned linear FV gradient field produced by a method object.
-   * @param variable_number Variable number whose gradient should be stored in the field.
+   * Register a variable for system-owned linear FV gradient values produced by a method object.
+   * @param variable_number Variable number whose gradient should be stored.
    * @param method Gradient method that computes the field values.
    */
-  LinearFVGradientField & registerFVGradient(unsigned int variable_number,
-                                             const FVGradientMethod & method);
+  LinearFVGradientReader registerFVGradient(unsigned int variable_number,
+                                            const FVGradientMethod & method);
 
 protected:
+  /// One vector per spatial component of a cell-centered gradient field.
+  using GradientContainer = LinearFVGradientReader::GradientContainer;
+
   /// Update all registered linear FV gradient fields.
   void computeGradients();
 
   /**
-   * Update a registered gradient field explicitly.
-   * @param field Gradient field to update.
+   * Update a registered gradient reader explicitly.
+   * @param reader Gradient reader to update.
    */
-  void updateFVGradient(const LinearFVGradientField & field);
+  void updateFVGradient(const LinearFVGradientReader & reader);
 
   /**
-   * Rebuild persistent and temporary gradient storage after mesh/DOF changes.
+   * Rebuild cached gradient values and reusable scratch storage after mesh/DOF changes.
    */
   void rebuildLinearFVGradientStorage();
 
@@ -144,61 +150,48 @@ protected:
    * Allocate one zeroed vector per spatial component for gradient storage.
    * @param container Component-vector container to rebuild.
    */
-  void initializeContainer(
-      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & container) const;
+  void initializeContainer(GradientContainer & container) const;
 
-  /// One vector per spatial component of a cell-centered gradient field.
-  using GradientContainer = LinearFVGradientField::GradientContainer;
-
-  /// Storage owned by the system for all variables using the same gradient method.
-  struct LinearFVGradientFieldStorage
+  /// Gradient values for all variables using the same gradient method.
+  struct LinearFVGradientContainer
   {
-    /**
-     * @param method Gradient method that produces this storage's field values.
-     */
-    LinearFVGradientFieldStorage(const FVGradientMethod & method) : method(method) {}
-
-    /// Gradient method that produces this storage's field values.
-    const FVGradientMethod & method;
-
-    /// Variable numbers whose gradients are stored in this field.
+    /// Variable numbers whose gradients are stored in values.
     std::unordered_set<unsigned int> variable_numbers;
 
-    /// Persistent gradient values read by consumers through field.
+    /// Persistent gradient values read by consumers.
     GradientContainer values;
-
-    /// Scratch space where the method writes final values before swapping into values.
-    GradientContainer output_scratch;
-
-    /// Scratch space the method can use for pre-limiter values or composed method calls.
-    GradientContainer method_scratch;
-
-    /// Field handles returned to consumers and backed by values, keyed by variable number.
-    std::unordered_map<unsigned int, std::unique_ptr<LinearFVGradientField>> fields;
   };
 
   /**
-   * Find or create the storage associated with a gradient method.
-   * @param method Gradient method whose storage should be used.
+   * Find or create the container associated with a gradient method.
+   * @param method Gradient method whose container should be used.
    */
-  LinearFVGradientFieldStorage & methodGradientStorage(const FVGradientMethod & method);
+  LinearFVGradientContainer & linearFVGradientContainer(const FVGradientMethod & method);
 
   /**
-   * Allocate persistent and scratch vectors for a registered gradient method.
-   * @param storage Method storage whose vectors should be rebuilt.
+   * Allocate persistent vectors for a registered gradient method.
+   * @param container Method container whose values should be rebuilt.
    */
-  void initializeMethodGradientStorage(LinearFVGradientFieldStorage & storage);
+  void initializeLinearFVGradientValues(LinearFVGradientContainer & container);
 
   /**
    * Recompute the field values for a registered gradient method.
-   * @param storage Method storage whose values should be updated.
+   * @param method Gradient method used to update the container.
+   * @param container Method container whose values should be updated.
    */
-  void updateMethodGradientStorage(LinearFVGradientFieldStorage & storage);
+  void updateLinearFVGradientContainer(const FVGradientMethod & method,
+                                       LinearFVGradientContainer & container);
 
   /// Reference to the system object
   SystemBase & _sys;
 
-  /// Gradient field storages keyed by the method object that produces them.
-  std::unordered_map<const FVGradientMethod *, std::unique_ptr<LinearFVGradientFieldStorage>>
-      _registered_gradient_method_fields;
+  /// Reusable scratch space where a method writes replacement values before they are published.
+  GradientContainer _linear_fv_gradient_output_scratch;
+
+  /// Reusable scratch space available to the method while computing replacement values.
+  GradientContainer _linear_fv_gradient_method_scratch;
+
+  /// Gradient containers keyed by the method object that produces them.
+  std::unordered_map<const FVGradientMethod *, LinearFVGradientContainer>
+      _linear_fv_gradient_container_by_method;
 };

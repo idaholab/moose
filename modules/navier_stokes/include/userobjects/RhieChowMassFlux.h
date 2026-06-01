@@ -24,7 +24,7 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
-class LinearFVGradientField;
+class LinearFVGradientReader;
 namespace libMesh
 {
 class Elem;
@@ -48,7 +48,7 @@ public:
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
   /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
-  const LinearFVGradientField & pressureGradientField() const;
+  const LinearFVGradientReader & pressureGradientField() const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -195,7 +195,7 @@ protected:
   LinearSystem * _pressure_system;
 
   /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
-  const LinearFVGradientField * _pressure_gradient_field;
+  const LinearFVGradientReader * _pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
