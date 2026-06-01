@@ -127,12 +127,6 @@ public:
    */
   virtual bool needsGradientVectorStorage() const override { return _needs_cell_gradients; }
 
-  /**
-   * Whether face interpolation should use extrapolated boundary values.
-   * @param fi Face where the value is requested.
-   * @param elem Element on the side where the value is requested.
-   * @param state Solution state to evaluate.
-   */
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
                                           const Elem * elem,
                                           const Moose::StateArg & state) const override;

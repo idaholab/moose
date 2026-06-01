@@ -36,12 +36,6 @@ LinearFVGradientReader::LinearFVGradientReader(const SystemBase & sys,
 {
 }
 
-Moose::FV::GradientLimiterType
-LinearFVGradientReader::limiterType() const
-{
-  return _method.limiterType();
-}
-
 Real
 LinearFVGradientReader::component(const ElemInfo & elem_info, const unsigned int component) const
 {
@@ -101,11 +95,11 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
 
   method.setupDependencies(_sys, variable_number);
 
-  auto & container = linearFVGradientContainer(method);
+  auto & container = _linear_fv_gradient_container_by_method[&method];
   container.variable_numbers.insert(variable_number);
 
   if (container.values.empty() && _sys.currentSolution())
-    initializeLinearFVGradientValues(container);
+    initializeContainer(container.values);
 
   if (_linear_fv_gradient_output_scratch.empty() && _sys.currentSolution())
     initializeContainer(_linear_fv_gradient_output_scratch);
@@ -164,7 +158,7 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reade
 }
 
 bool
-LinearFVGradientInterface::needsLinearFVGradientStorage() const
+LinearFVGradientInterface::hasLinearFVGradients() const
 {
   return !_linear_fv_gradient_container_by_method.empty();
 }
@@ -179,24 +173,12 @@ LinearFVGradientInterface::initializeContainer(GradientContainer & container) co
     container.push_back(_sys.currentSolution()->zero_clone());
 }
 
-LinearFVGradientInterface::LinearFVGradientContainer &
-LinearFVGradientInterface::linearFVGradientContainer(const FVGradientMethod & method)
-{
-  return _linear_fv_gradient_container_by_method[&method];
-}
-
-void
-LinearFVGradientInterface::initializeLinearFVGradientValues(LinearFVGradientContainer & container)
-{
-  initializeContainer(container.values);
-}
-
 void
 LinearFVGradientInterface::updateLinearFVGradientContainer(const FVGradientMethod & method,
                                                            LinearFVGradientContainer & container)
 {
   if (container.values.empty())
-    initializeLinearFVGradientValues(container);
+    initializeContainer(container.values);
 
   if (_linear_fv_gradient_output_scratch.empty())
     initializeContainer(_linear_fv_gradient_output_scratch);
@@ -226,12 +208,12 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
     method_container_pair.second.values.clear();
 
-  if (!needsLinearFVGradientStorage())
+  if (!hasLinearFVGradients())
     return;
 
   initializeContainer(_linear_fv_gradient_output_scratch);
   initializeContainer(_linear_fv_gradient_method_scratch);
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-    initializeLinearFVGradientValues(method_container_pair.second);
+    initializeContainer(method_container_pair.second.values);
 }
