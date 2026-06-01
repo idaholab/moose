@@ -1,17 +1,15 @@
 # FVGreenGaussGradient
 
-!syntax description /FVGradientMethods/FVGreenGaussGradient
-
 ## Overview
 
-`FVGreenGaussGradient` computes gradients for cell-centered linear finite-volume variables using the
-Green-Gauss theorem. A gradient describes how quickly a field changes in space. For a cell $C$ with
+This method computes gradients for cell-centered linear finite-volume variables using the
+Green-Gauss theorem. For a cell $C$ with
 volume $V_C$, the method approximates the gradient of a cell-centered field $\phi$ as
 
 !equation
 \nabla \phi_C \approx \frac{1}{V_C}\sum_f \phi_f \mathbf{S}_f,
 
-where $f$ ranges over the cell faces, $\phi_f$ is the face value reconstructed from adjacent
+where $f$ ranges over the cell faces, $\phi_f$ is the face value interpolated from adjacent
 cell-centered values and boundary data, and $\mathbf{S}_f$ is the outward face area vector.
 
 Use this method when a linear FV variable or a gradient-based interpolation method needs gradients.
