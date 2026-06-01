@@ -91,7 +91,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
       "face_smoothed_alpha_gradient_functor",
       "",
       "Optional face-smoothed alpha-gradient functor produced by the curvature calculator. "
-      "When supplied, it is used in the capillary force path so the same OpenFOAM-like "
+      "When supplied, it is used in the capillary force path so the same reference-solver-like "
       "smoothing is used in both curvature and surface-tension evaluation.");
   params.addParam<MooseFunctorName>(
       "interface_unit_normal_functor",
@@ -118,11 +118,11 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   params.addParam<Real>(
       "near_interface_lower",
       0.01,
-      "Lower threshold used for the OpenFOAM-like near-interface indicator.");
+      "Lower threshold used for the reference-solver-like near-interface indicator.");
   params.addParam<Real>(
       "near_interface_upper",
       0.99,
-      "Upper threshold used for the OpenFOAM-like near-interface indicator.");
+      "Upper threshold used for the reference-solver-like near-interface indicator.");
   params.addParam<Real>(
       "minimum_density",
       1e-12,
@@ -132,7 +132,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
       "delta_n",
       1e-8,
       "Regularization added to |grad(alpha)| when constructing unit normals. This is the "
-      "direct analog of OpenFOAM's deltaN regularization term.");
+      "direct analog of reference solver's deltaN regularization term.");
 
   params.addParam<MooseFunctorName>("delta_n_name", "delta_n", "Output name for the delta_n functor.");
   params.addParam<MooseFunctorName>(
@@ -142,7 +142,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   params.addParam<MooseFunctorName>(
       "face_smoothed_alpha_gradient_name",
       "face_smoothed_alpha_gradient",
-      "Output name for the OpenFOAM-like face-smoothed alpha-gradient functor.");
+      "Output name for the reference-solver-like face-smoothed alpha-gradient functor.");
   params.addParam<MooseFunctorName>(
       "density_gradient_name", "density_gradient", "Output name for the density gradient functor.");
   params.addParam<MooseFunctorName>(
@@ -327,7 +327,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
                                     : _volume_fraction.gradient(r, t);
         const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(grad_alpha));
 
-        // This mirrors the OpenFOAM regularization nHat = grad(alpha) / (|grad(alpha)| + deltaN).
+        // This mirrors the reference solver regularization nHat = grad(alpha) / (|grad(alpha)| + deltaN).
         // When the curvature producer is active, boundary contact-angle correction has already
         // been applied to the supplied face-unit-normal functor before this fallback path is used.
         return grad_alpha / (mag_grad_alpha + _delta_n);
@@ -444,7 +444,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
         if (!used_interface_aware_face_gradient)
           grad_rho = MetaPhysicL::raw_value(_density.gradient(r, t));
 
-        // This maps directly to the OpenFOAM-style reduced-pressure face predictor term
+        // This maps directly to the reference-solver-style reduced-pressure face predictor term
         // - gh_f * snGrad(rho) after the Rhie-Chow object projects onto the face normal and
         // multiplies by rho_f * A^{-1}_{raw,f}.
         return -(gh / rho) * grad_rho;

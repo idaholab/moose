@@ -10,7 +10,7 @@
 /**
  * Face-aware dynamic wall-contact-angle producer for sharp-interface FV work.
  *
- * This material is designed to mirror OpenFOAM's dynamicAlphaContactAngle /
+ * This material is designed to mirror reference solver's dynamicAlphaContactAngle /
  * alphaContactAngle theta(U, nHat) path as closely as practical inside MOOSE.
  * It consumes the provisional face unit normal produced by the curvature
  * calculator *before* wall contact-angle correction, so the dynamic model sees

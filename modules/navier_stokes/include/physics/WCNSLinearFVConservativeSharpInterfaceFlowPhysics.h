@@ -4,7 +4,7 @@
 #include "WCNSFVTurbulencePhysics.h"
 
 /**
- * Linear-FV segregated conservative-momentum sharp-interface flow physics.
+ * Linear-FV segregated sharp-interface flow physics for the reference-parity U path.
  *
  * This class is intentionally structured as a sibling of WCNSLinearFVFlowPhysics,
  * because the stock linear-FV mixture path does not provide the extra face-flux
@@ -48,7 +48,6 @@ private:
   bool hasForchheimerFriction() const override { return false; }
 
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
-  MooseFunctorName generatedConservativeVelocityFunctorName(unsigned int component) const;
   MooseFunctorName momentumTransportMassFluxFunctorName() const;
   MooseFunctorName generatedBoundaryMomentumFunctorName(const BoundaryName & boundary,
                                                         unsigned int component,
@@ -57,8 +56,7 @@ private:
   bool shouldCreateGeometryFunctorMaterial() const;
   bool shouldCreateCurvatureProducer() const;
   bool shouldCreateDynamicContactAngleFunctorMaterial() const;
-  void addConservativeVelocityAdaptorFunctorMaterials();
-  void addConservativeBoundaryInputFunctorMaterials();
+  void addVelocityBoundaryInputFunctorMaterials();
 
   MooseFunctorName getLinearFrictionCoefName() const override
   {

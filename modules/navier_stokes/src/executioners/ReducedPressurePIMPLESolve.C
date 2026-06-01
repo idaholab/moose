@@ -17,19 +17,18 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <unordered_map>
 using namespace libMesh;
 
 namespace
 {
 
-struct ConservativeSharpCellDebugKeys
+struct SharpCellDebugKeys
 {
   const char * cell;
-  const char * momentum;
   const char * velocity;
   const char * pre_writeback;
   const char * delta_velocity;
-  const char * delta_momentum;
   const char * post_writeback;
   const char * hbya_live;
   const char * ainv_live;
@@ -39,14 +38,12 @@ struct ConservativeSharpCellDebugKeys
   const char * hbya_velocity_view;
 };
 
-constexpr ConservativeSharpCellDebugKeys worst_face_cell_debug_keys = {
+constexpr SharpCellDebugKeys worst_face_cell_debug_keys = {
     "_cell_id=",
-    "_rhou",
-    "_u_from_rhou",
-    "_pre_writeback_rhou",
+    "_u",
+    "_pre_writeback_u",
     "_pressure_delta_u",
-    "_pressure_delta_rhou",
-    "_post_writeback_rhou",
+    "_post_writeback_u",
     "_hbya_live",
     "_ainv_live",
     "_pred_base_live",
@@ -54,14 +51,12 @@ constexpr ConservativeSharpCellDebugKeys worst_face_cell_debug_keys = {
     "_pred_base_uview",
     "_hbya_uview"};
 
-constexpr ConservativeSharpCellDebugKeys pressure_debug_face_cell_debug_keys = {
+constexpr SharpCellDebugKeys pressure_debug_face_cell_debug_keys = {
     "_cell=",
-    "_rhou",
     "_u",
-    "_pre_rhou",
+    "_pre_u",
     "_delta_u",
-    "_delta_rhou",
-    "_post_rhou",
+    "_post_u",
     "_hbya_live",
     nullptr,
     "_pred_live",
@@ -70,13 +65,13 @@ constexpr ConservativeSharpCellDebugKeys pressure_debug_face_cell_debug_keys = {
     "_hbya_uview"};
 
 void
-appendConservativeSharpCellDebug(std::ostream & out,
-                                 const char * separator,
-                                 const char * label,
-                                 const ElemInfo * elem_info,
-                                 const std::vector<unsigned int> & momentum_system_numbers,
-                                 const ConservativeSharpInterfaceRhieChowMassFlux & sharp_rc,
-                                 const ConservativeSharpCellDebugKeys & keys)
+appendSharpCellDebug(std::ostream & out,
+                     const char * separator,
+                     const char * label,
+                     const ElemInfo * elem_info,
+                     const std::vector<unsigned int> & momentum_system_numbers,
+                     const ConservativeSharpInterfaceRhieChowMassFlux & sharp_rc,
+                     const SharpCellDebugKeys & keys)
 {
   if (!elem_info)
     return;
@@ -85,17 +80,14 @@ appendConservativeSharpCellDebug(std::ostream & out,
   for (const auto dim_i : index_range(momentum_system_numbers))
   {
     const auto momentum_dof = elem_info->dofIndices()[momentum_system_numbers[dim_i]][0];
-    out << separator << label << keys.momentum << dim_i << '='
-        << sharp_rc.debugCurrentMomentumComponent(*elem_info, dim_i) << separator << label
-        << keys.velocity << dim_i << '=' << sharp_rc.debugCurrentVelocityComponent(*elem_info, dim_i)
-        << separator << label << keys.pre_writeback << dim_i << '='
-        << sharp_rc.debugLastWritebackPreMomentumComponent(*elem_info, dim_i) << separator << label
+    out << separator << label << keys.velocity << dim_i << '='
+        << sharp_rc.debugCurrentVelocityComponent(*elem_info, dim_i) << separator << label
+        << keys.pre_writeback << dim_i << '='
+        << sharp_rc.debugLastWritebackPreVelocityComponent(*elem_info, dim_i) << separator << label
         << keys.delta_velocity << dim_i << '='
-        << sharp_rc.debugLastWritebackPressureDeltaVelocityComponent(*elem_info, dim_i)
-        << separator << label << keys.delta_momentum << dim_i << '='
-        << sharp_rc.debugLastWritebackPressureDeltaMomentumComponent(*elem_info, dim_i)
-        << separator << label << keys.post_writeback << dim_i << '='
-        << sharp_rc.debugLastWritebackPostMomentumComponent(*elem_info, dim_i) << separator << label
+        << sharp_rc.debugLastWritebackPressureDeltaVelocityComponent(*elem_info, dim_i) << separator
+        << label << keys.post_writeback << dim_i << '='
+        << sharp_rc.debugLastWritebackPostVelocityComponent(*elem_info, dim_i) << separator << label
         << keys.hbya_live << dim_i << '=' << sharp_rc.debugCellHbyARaw(dim_i, momentum_dof);
 
     if (keys.ainv_live)
@@ -107,9 +99,9 @@ appendConservativeSharpCellDebug(std::ostream & out,
         << keys.predictor_cached << dim_i << '='
         << sharp_rc.debugCachedPredictorBaseRawComponent(*elem_info, dim_i) << separator << label
         << keys.predictor_velocity_view << dim_i << '='
-        << sharp_rc.debugDerivedVelocityPredictorBaseRawComponent(*elem_info, dim_i) << separator
+        << sharp_rc.debugVelocityPredictorBaseRawComponent(*elem_info, dim_i) << separator
         << label << keys.hbya_velocity_view << dim_i << '='
-        << sharp_rc.debugDerivedVelocityPredictorHbyAComponent(*elem_info, dim_i);
+        << sharp_rc.debugVelocityPredictorHbyAComponent(*elem_info, dim_i);
   }
 }
 
@@ -242,6 +234,15 @@ ReducedPressurePIMPLESolve::validParams()
       "startup_flux_corrections>0",
       "Number of pressure-only startup cleanup / projection corrections applied when "
       "startup_pressure_initialization is not 'none'.");
+  params.addParam<unsigned int>(
+      "num_pressure_nonorthogonal_correctors",
+      0,
+      "Number of additional non-final pressure equation solves inside each pressure-corrector "
+      "stage. This follows reference solver's nNonOrthogonalCorrectors convention: 0 means one final "
+      "pressure solve, 1 means one non-final solve followed by one final solve, etc.");
+  params.addParam<unsigned int>(
+      "n_nonorthogonal_correctors",
+      "reference-solver-style alias for num_pressure_nonorthogonal_correctors.");
   params.addParam<bool>(
       "dump_pressure_outer_debug_csv",
       false,
@@ -296,6 +297,7 @@ ReducedPressurePIMPLESolve::validParams()
       "volume_fraction_outer_corrections "
       "startup_pressure_initialization perform_startup_hydrostatic_initialization "
       "suppress_explicit_hydrostatic_flux_during_seeded_startup startup_flux_corrections "
+      "num_pressure_nonorthogonal_correctors n_nonorthogonal_correctors "
       "dump_pressure_outer_debug_csv dump_pressure_outer_debug_start_timestep "
       "dump_pressure_outer_debug_end_timestep dump_pressure_outer_debug_max_outer_iterations "
       "pressure_debug_face_ids pressure_debug_face_points "
@@ -345,7 +347,33 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
         getParam<unsigned int>("audit_momentum_predictor_rebuild_end_timestep")),
     _suppress_explicit_hydrostatic_flux_during_seeded_startup(
         getParam<bool>("suppress_explicit_hydrostatic_flux_during_seeded_startup")),
-    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections"))
+    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections")),
+    _num_pressure_nonorthogonal_correctors([&]()
+                                           {
+                                             const bool canonical_set = parameters().isParamSetByUser(
+                                                 "num_pressure_nonorthogonal_correctors");
+                                             const bool alias_set =
+                                                 parameters().isParamSetByUser(
+                                                     "n_nonorthogonal_correctors");
+                                             const auto canonical_value =
+                                                 getParam<unsigned int>(
+                                                     "num_pressure_nonorthogonal_correctors");
+
+                                             if (!alias_set)
+                                               return canonical_value;
+
+                                             const auto alias_value =
+                                                 getParam<unsigned int>(
+                                                     "n_nonorthogonal_correctors");
+                                             if (canonical_set && alias_value != canonical_value)
+                                               paramError(
+                                                   "n_nonorthogonal_correctors",
+                                                   "Set only one of n_nonorthogonal_correctors "
+                                                   "and num_pressure_nonorthogonal_correctors, "
+                                                   "or set them to the same value.");
+
+                                             return alias_value;
+                                           }())
 {
   _startup_pressure_initialization =
       getParam<MooseEnum>("startup_pressure_initialization").operator std::string();
@@ -591,8 +619,10 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
       << predictor_convective_mass_flux
       << ", predictor_convective_mass_flux_integrated=" << predictor_convective_mass_flux_integrated
       << ", corrected_face_phi=" << corrected_face_phi
-      << ", pressure_predictor_base_phi="
+      << ", pressure_predictor_base_phi_internal="
       << sharp_rc->storedPressurePredictorBasePhi(*worst_face)
+      << ", pressure_predictor_base_phi_reference="
+      << -sharp_rc->storedPressurePredictorBasePhi(*worst_face)
       << ", transient_phi=" << sharp_rc->storedTransientProjectionFlux(*worst_face)
       << ", cap_hydro_phi=" << sharp_rc->storedCapillaryHydrostaticFlux(*worst_face)
       << ", phig_phi=" << sharp_rc->storedPhigFlux(*worst_face)
@@ -601,22 +631,22 @@ ReducedPressurePIMPLESolve::momentumPressureWorstFaceSharpDiagnostics(
       << ", pressure_corr_phi=" << sharp_rc->storedPressureCorrectionPhi(*worst_face)
       << ", face_gC=" << worst_face->gC();
 
-  out << ", conservative_pred_cache_used=" << sharp_rc->debugUsingCachedPredictorOperator();
+  out << ", sharp_pred_cache_used=" << sharp_rc->debugUsingCachedPredictorOperator();
 
-  appendConservativeSharpCellDebug(out,
-                                   ", ",
-                                   "elem",
-                                   worst_face->elemInfo(),
-                                   _momentum_system_numbers,
-                                   *sharp_rc,
-                                   worst_face_cell_debug_keys);
-  appendConservativeSharpCellDebug(out,
-                                   ", ",
-                                   "neighbor",
-                                   worst_face->neighborInfo(),
-                                   _momentum_system_numbers,
-                                   *sharp_rc,
-                                   worst_face_cell_debug_keys);
+  appendSharpCellDebug(out,
+                       ", ",
+                       "elem",
+                       worst_face->elemInfo(),
+                       _momentum_system_numbers,
+                       *sharp_rc,
+                       worst_face_cell_debug_keys);
+  appendSharpCellDebug(out,
+                       ", ",
+                       "neighbor",
+                       worst_face->neighborInfo(),
+                       _momentum_system_numbers,
+                       *sharp_rc,
+                       worst_face_cell_debug_keys);
 
   const Elem * const worst_elem = worst_face->elemPtr();
   const Elem * const worst_neighbor = worst_face->neighborPtr();
@@ -1260,10 +1290,7 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] computing HbyA" << std::endl;
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->computeConservativeHbyA(subtract_updated_pressure, _print_fields);
-  else
-    _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
+  _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
 
   if (auto * sharp_rc = sharpInterfaceRC())
   {
@@ -1273,7 +1300,7 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
     sharp_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
   }
 
-  // Mirror OpenFOAM's correctUphiBCs -> constrainPressure ordering more closely:
+  // Mirror reference solver's correctUphiBCs -> constrainPressure ordering more closely:
   // refresh the patch velocity / target-flux state from the latest momentum
   // predictor before assembling the constrained pressure boundary gradient.
   _rc_uo->updateVelocityBoundaryState();
@@ -1352,7 +1379,7 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
            "corr_matrix_20,corr_matrix_21,corr_matrix_22,"
            "corr_rhs_0,corr_rhs_1,corr_rhs_2,"
            "corr_solution_0,corr_solution_1,corr_solution_2,"
-           "corr_openfoam_delta_u,corr_openfoam_delta_v,corr_openfoam_delta_w,"
+           "corr_reference_delta_u,corr_reference_delta_v,corr_reference_delta_w,"
            "corr_smooth_delta_u,corr_smooth_delta_v,corr_smooth_delta_w,"
            "corr_delta_u,corr_delta_v,corr_delta_w\n";
 
@@ -1479,7 +1506,7 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
         out << ',' << value;
       for (const auto value : corr_debug.solution)
         out << ',' << value;
-      for (const auto value : corr_debug.openfoam_delta_velocity)
+      for (const auto value : corr_debug.reference_delta_velocity)
         out << ',' << value;
       for (const auto value : corr_debug.smooth_delta_velocity)
         out << ',' << value;
@@ -1569,16 +1596,44 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
     else
       msg << ';';
 
+    const bool internal_face = fi->neighborInfo() != nullptr;
+    const Real p_elem_matrix =
+        internal_face ? _rc_uo->debugPressureElemMatrixContribution(*fi) : 0.0;
+    const Real p_neighbor_matrix =
+        internal_face ? _rc_uo->debugPressureNeighborMatrixContribution(*fi) : 0.0;
+    const Real p_elem_rhs = internal_face ? _rc_uo->debugPressureElemRHSContribution(*fi) : 0.0;
+    const Real reference_hbya_phi = sharp_rc->storedPredictorOperatorPhi(*fi);
+    const Real reference_ddt_corr_phi = sharp_rc->storedTransientProjectionFlux(*fi);
+    const Real reference_phig_phi = sharp_rc->storedPhigFlux(*fi);
+    const Real reference_phi_hbya_before_phig = reference_hbya_phi + reference_ddt_corr_phi;
+    const Real reference_phi_hbya = reference_phi_hbya_before_phig + reference_phig_phi;
+    const Real reference_pressure_eq_phi = sharp_rc->storedPressureEquationVolumetricFlux(*fi);
+    const Real reference_final_phi = reference_phi_hbya + reference_pressure_eq_phi;
+    const Real reference_writeback_phi = reference_pressure_eq_phi + reference_phig_phi;
+
     msg << fi->id()
         << "{c=" << fi->faceCentroid()
         << ",outer_phi=" << sharp_rc->storedOuterIterationPhi(*fi)
         << ",vof_transport_phi=" << sharp_rc->storedVOFTransportPhi(*fi)
         << ",pred_conv_phi=" << sharp_rc->storedPredictorConvectivePhi(*fi)
         << ",pred_phi=" << sharp_rc->storedPredictorOperatorPhi(*fi)
-        << ",pressure_predictor_base_phi=" << sharp_rc->storedPressurePredictorBasePhi(*fi)
+        << ",pressure_predictor_base_phi_internal=" << sharp_rc->storedPressurePredictorBasePhi(*fi)
+        << ",pressure_predictor_base_phi_reference=" << -sharp_rc->storedPressurePredictorBasePhi(*fi)
         << ",transient_phi=" << sharp_rc->storedTransientProjectionFlux(*fi)
         << ",cap_hydro_phi=" << sharp_rc->storedCapillaryHydrostaticFlux(*fi)
         << ",phig_phi=" << sharp_rc->storedPhigFlux(*fi)
+        << ",reference_HbyA_phi=" << reference_hbya_phi
+        << ",reference_ddtCorr_phi=" << reference_ddt_corr_phi
+        << ",reference_phig_phi=" << reference_phig_phi
+        << ",reference_phiHbyA_before_phig=" << reference_phi_hbya_before_phig
+        << ",reference_phiHbyA=" << reference_phi_hbya
+        << ",reference_pEqn_flux=" << reference_pressure_eq_phi
+        << ",reference_final_phi=" << reference_final_phi
+        << ",reference_writeback_phi=" << reference_writeback_phi
+        << ",reference_final_phi_mismatch="
+        << sharp_rc->storedCorrectedFacePhi(*fi) - reference_final_phi
+        << ",reference_writeback_phi_mismatch="
+        << sharp_rc->storedPressureCorrectionPhi(*fi) - reference_writeback_phi
         << ",sn_grad_rho=" << sharp_rc->debugFaceNormalDensityGradient(*fi, Moose::currentState())
         << ",sn_grad_rho_orthogonal_part="
         << sharp_rc->debugFaceNormalDensityGradientOrthogonalPart(*fi, Moose::currentState())
@@ -1594,9 +1649,9 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
         << ",normal_raw_ainv=" << sharp_rc->debugFaceNormalRawAinv(*fi, Moose::currentState())
         << ",hydro_mass_flux_density_raw="
         << sharp_rc->debugHydrostaticFaceMassFluxDensityRaw(*fi)
-        << ",p_elem_matrix=" << _rc_uo->debugPressureElemMatrixContribution(*fi)
-        << ",p_neighbor_matrix=" << _rc_uo->debugPressureNeighborMatrixContribution(*fi)
-        << ",p_elem_rhs=" << _rc_uo->debugPressureElemRHSContribution(*fi)
+        << ",p_elem_matrix=" << p_elem_matrix
+        << ",p_neighbor_matrix=" << p_neighbor_matrix
+        << ",p_elem_rhs=" << p_elem_rhs
         << ",pressure_eq_phi=" << sharp_rc->storedPressureEquationVolumetricFlux(*fi)
         << ",pressure_corr_phi=" << sharp_rc->storedPressureCorrectionPhi(*fi)
         << ",corrected_face_phi=" << sharp_rc->storedCorrectedFacePhi(*fi)
@@ -1607,20 +1662,20 @@ ReducedPressurePIMPLESolve::dumpPressureDebugFaces(const std::string & stage_lab
         << ",rho_n=" << sharp_rc->debugNeighborDensity(*fi, Moose::currentState())
         << ",pred_cache=" << sharp_rc->debugUsingCachedPredictorOperator();
 
-    appendConservativeSharpCellDebug(msg,
-                                     ",",
-                                     "elem",
-                                     fi->elemInfo(),
-                                     _momentum_system_numbers,
-                                     *sharp_rc,
-                                     pressure_debug_face_cell_debug_keys);
-    appendConservativeSharpCellDebug(msg,
-                                     ",",
-                                     "neighbor",
-                                     fi->neighborInfo(),
-                                     _momentum_system_numbers,
-                                     *sharp_rc,
-                                     pressure_debug_face_cell_debug_keys);
+    appendSharpCellDebug(msg,
+                         ",",
+                         "elem",
+                         fi->elemInfo(),
+                         _momentum_system_numbers,
+                         *sharp_rc,
+                         pressure_debug_face_cell_debug_keys);
+    appendSharpCellDebug(msg,
+                         ",",
+                         "neighbor",
+                         fi->neighborInfo(),
+                         _momentum_system_numbers,
+                         *sharp_rc,
+                         pressure_debug_face_cell_debug_keys);
 
     msg << '}';
   }
@@ -1817,7 +1872,11 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
                                            _volume_fraction_l_abs_tol,
                                            1.0,
                                            _volume_fraction_min_value);
-        corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt);
+        system->computeGradients();
+        auto * curvature = sharpInterfaceCurvature();
+        if (curvature)
+          curvature->updateCurvatureMaps(_print_fields);
+        corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt, curvature);
       }
       else
         residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
@@ -1910,10 +1969,9 @@ ReducedPressurePIMPLESolve::correctVelocity(const bool /*subtract_updated_pressu
     const bool subtract_updated_pressure = piso_iteration_counter == 0;
     preparePressureCorrectorState(subtract_updated_pressure);
     dumpPressureOuterDebugState("pre_pressure_solve");
-    // Mirror the base PISO contract more closely: inner pressure iterations
-    // keep the face flux fixed and only the final stage publishes the
-    // corrected phi/U pair.
-    residual = applyPressureCorrectionStage(false, false, solver_params);
+    // reference solver's pressureCorrector publishes phi, relaxes p_rgh, and writes back
+    // U on every pimple.correct() pressure-correction pass.
+    residual = applyPressureCorrectionStage(false, true, solver_params);
     if (piso_iteration_counter == 0)
       first_stage_residual = residual.second;
     if (!shouldContinuePISOIterations(
@@ -1922,7 +1980,6 @@ ReducedPressurePIMPLESolve::correctVelocity(const bool /*subtract_updated_pressu
     piso_iteration_counter++;
   }
 
-  finalizePressureCorrectionStage();
   _current_piso_iteration = 0;
 
   return residual;
@@ -1984,15 +2041,32 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
 
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
-  const auto residuals = solvePressureCorrector();
-
-  if (recompute_face_mass_flux)
+  std::pair<unsigned int, Real> residuals{0, std::numeric_limits<Real>::quiet_NaN()};
+  unsigned int total_linear_iterations = 0;
+  for (const auto nonorthogonal_iteration :
+       make_range(_num_pressure_nonorthogonal_correctors + 1))
   {
-    _rc_uo->computeFaceMassFlux();
+    const bool final_nonorthogonal_iteration =
+        nonorthogonal_iteration == _num_pressure_nonorthogonal_correctors;
 
-    if (sharp_rc)
-      sharp_rc->applyAdditionalFaceMassFluxCorrection();
+    residuals = solvePressureCorrector();
+    total_linear_iterations += residuals.first;
+
+    auto & solved_pressure_current_solution =
+        *(_pressure_system.system().current_local_solution.get());
+    _pressure_system.setSolution(solved_pressure_current_solution);
+    _pressure_system.computeGradients();
+    _rc_uo->cachePressureEquationFlux();
+
+    if (final_nonorthogonal_iteration && recompute_face_mass_flux)
+    {
+      _rc_uo->computeFaceMassFlux();
+
+      if (sharp_rc)
+        sharp_rc->applyAdditionalFaceMassFluxCorrection();
+    }
   }
+  residuals.first = total_linear_iterations;
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
   // continuity cleanup should repair phi like CorrectPhi/pcorr, not overwrite
@@ -2038,8 +2112,7 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
   preparePressureCorrectorState(subtract_updated_pressure);
   dumpPressureOuterDebugState("pre_pressure_solve");
 
-  const auto residuals = applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
-  finalizePressureCorrectionStage();
+  const auto residuals = applyPressureCorrectionStage(recompute_face_mass_flux, true, solver_params);
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] correctVelocityOnce end"
@@ -2050,40 +2123,59 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
 
 std::pair<unsigned int, Real>
 ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_face_mass_flux,
-                                                         const bool relax_pressure_for_next_predictor,
+                                                         const bool publish_pressure_corrected_state,
                                                          const SolverParams & solver_params)
 {
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] applyPressureCorrectionStage begin"
               << " recompute_face_mass_flux=" << recompute_face_mass_flux
-              << " relax_pressure_for_next_predictor=" << relax_pressure_for_next_predictor
+              << " publish_pressure_corrected_state=" << publish_pressure_corrected_state
               << std::endl;
 
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
-  const auto residuals = solvePressureCorrector();
+  std::pair<unsigned int, Real> residuals{0, std::numeric_limits<Real>::quiet_NaN()};
+  unsigned int total_linear_iterations = 0;
 
-  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-  auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
-
-  _pressure_system.setSolution(pressure_current_solution);
-
-  _pressure_system.computeGradients();
-  _rc_uo->cachePressureEquationFlux();
-
-  if (recompute_face_mass_flux)
+  // Mirror reference solver's pimple.correctNonOrthogonal() loop. Non-final solves
+  // update the pressure field and pressure-equation flux cache only; the
+  // accepted phi/U state is published exactly once on the final solve.
+  for (const auto nonorthogonal_iteration :
+       make_range(_num_pressure_nonorthogonal_correctors + 1))
   {
-    _rc_uo->computeFaceMassFlux();
+    const bool final_nonorthogonal_iteration =
+        nonorthogonal_iteration == _num_pressure_nonorthogonal_correctors;
 
-    if (auto * sharp_rc = sharpInterfaceRC())
-      sharp_rc->applyAdditionalFaceMassFluxCorrection();
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] pressure non-orthogonal solve"
+                << " iteration=" << (nonorthogonal_iteration + 1)
+                << " final=" << final_nonorthogonal_iteration << std::endl;
+
+    residuals = solvePressureCorrector();
+    total_linear_iterations += residuals.first;
+
+    auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
+    _pressure_system.setSolution(pressure_current_solution);
+
+    _pressure_system.computeGradients();
+    _rc_uo->cachePressureEquationFlux();
+
+    if (!final_nonorthogonal_iteration)
+      continue;
+
+    if (recompute_face_mass_flux && !publish_pressure_corrected_state)
+    {
+      _rc_uo->computeFaceMassFlux();
+
+      if (auto * sharp_rc = sharpInterfaceRC())
+        sharp_rc->applyAdditionalFaceMassFluxCorrection();
+    }
+
+    if (publish_pressure_corrected_state)
+      publishPressureCorrectedTransportState("post_pressure_writeback");
   }
 
-  if (relax_pressure_for_next_predictor)
-  {
-    publishPressureCorrectedTransportState("post_pressure_writeback");
-    relaxPressureFieldForNextPredictor();
-  }
+  residuals.first = total_linear_iterations;
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] applyPressureCorrectionStage end"
@@ -2111,20 +2203,168 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedTransportState(const std::st
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->applyAdditionalFaceMassFluxCorrection();
 
+  // Match reference solver's final pressure-corrector ordering:
+  //   phi = phiHbyA + pEqn.flux();
+  //   p_rgh.relax();
+  //   U = HbyA + rAU*reconstruct((phig + pEqn.flux())/rAUf);
+  //
+  // The face flux and velocity writeback must keep using the cached pEqn.flux
+  // from the unrelaxed pressure solve. relaxPressureFieldForNextPredictor()
+  // refreshes pressure gradients for the next predictor, but does not invalidate
+  // the cached final pressure-equation flux.
+  relaxPressureFieldForNextPredictor();
+
   if (_problem.timeStep() == 1)
-    std::cerr << "[ReducedPressurePIMPLESolve] computing provisional cell velocity" << std::endl;
-  if (auto * conservative_rc = sharpInterfaceRC())
-    conservative_rc->computeCellVelocity();
-  else
-    _rc_uo->computeCellVelocity();
+    std::cerr << "[ReducedPressurePIMPLESolve] computing pressure-corrected cell velocity"
+              << std::endl;
+  _rc_uo->computeCellVelocity();
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] updating velocity boundary state" << std::endl;
   _rc_uo->updateVelocityBoundaryState();
 
+  applyReferencePressureCorrectorTail(stage_label);
+
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] dumping post-pressure debug state" << std::endl;
   dumpPressureOuterDebugState(stage_label);
+}
+
+void
+ReducedPressurePIMPLESolve::applyReferencePressureCorrectorTail(const std::string & stage_label)
+{
+  // reference solver tail after the final non-orthogonal pressure correction:
+  //   continuityErrors();
+  //   fvc::correctUf(Uf, U, phi, MRF);
+  //   fvc::makeRelative(phi, U);
+  //   p == p_rgh + rho*gh;
+  //   reference correction for p/p_rgh.
+  reportReferenceContinuityErrors(stage_label);
+  correctMovingMeshFaceVelocityAndMakeRelative();
+  updateAbsolutePressureAndReferenceState();
+}
+
+void
+ReducedPressurePIMPLESolve::reportReferenceContinuityErrors(const std::string & stage_label)
+{
+  if (!_rc_uo)
+    return;
+
+  std::unordered_map<dof_id_type, Real> cell_integrated_divergence;
+  std::unordered_map<dof_id_type, Real> cell_volume;
+  auto has_pressure_dof = [this](const ElemInfo & elem_info)
+  {
+    return elem_info.dofIndices().size() > static_cast<std::size_t>(_pressure_sys_number) &&
+           !elem_info.dofIndices()[_pressure_sys_number].empty();
+  };
+
+  for (const auto * fi : _rc_uo->flowFacesForAudit())
+  {
+    if (!fi)
+      continue;
+
+    const Real integrated_phi =
+        _rc_uo->getVolumetricFaceFlux(*fi) * fi->faceArea() * fi->faceCoord();
+
+    if (fi->elemPtr())
+    {
+      const auto & elem_info = *fi->elemInfo();
+      if (has_pressure_dof(elem_info))
+      {
+        cell_integrated_divergence[fi->elemPtr()->id()] += integrated_phi;
+        cell_volume[fi->elemPtr()->id()] = elem_info.volume() * elem_info.coordFactor();
+      }
+    }
+
+    if (fi->neighborPtr())
+    {
+      const auto & neighbor_info = *fi->neighborInfo();
+      if (has_pressure_dof(neighbor_info))
+      {
+        cell_integrated_divergence[fi->neighborPtr()->id()] -= integrated_phi;
+        cell_volume[fi->neighborPtr()->id()] =
+            neighbor_info.volume() * neighbor_info.coordFactor();
+      }
+    }
+  }
+
+  Real volume_sum = 0.0;
+  Real local_divergence_integral = 0.0;
+  Real global_divergence_integral = 0.0;
+  for (const auto & [elem_id, integrated_divergence] : cell_integrated_divergence)
+  {
+    const auto volume_it = cell_volume.find(elem_id);
+    if (volume_it == cell_volume.end() || volume_it->second <= libMesh::TOLERANCE)
+      continue;
+
+    volume_sum += volume_it->second;
+    local_divergence_integral += std::abs(integrated_divergence);
+    global_divergence_integral += integrated_divergence;
+  }
+
+  const Real dt = _problem.dt();
+  const Real local_continuity_error =
+      volume_sum > std::numeric_limits<Real>::epsilon()
+          ? dt * local_divergence_integral / volume_sum
+          : 0.0;
+  const Real global_continuity_error =
+      volume_sum > std::numeric_limits<Real>::epsilon()
+          ? dt * global_divergence_integral / volume_sum
+          : 0.0;
+  _cumulative_continuity_error += global_continuity_error;
+
+  _console << "time step continuity errors"
+           << ": stage=" << stage_label
+           << ", sum local = " << local_continuity_error
+           << ", global = " << global_continuity_error
+           << ", cumulative = " << _cumulative_continuity_error << std::endl;
+}
+
+void
+ReducedPressurePIMPLESolve::correctMovingMeshFaceVelocityAndMakeRelative()
+{
+  // This parity path currently has no Uf/MRF/moving-mesh flux state. RhieChowMassFlux explicitly
+  // reports no mesh-velocity support, so for the stationary-mesh cases this path supports,
+  // reference solver's
+  //   fvc::correctUf(Uf, U, phi, MRF);
+  //   fvc::makeRelative(phi, U);
+  // are exact no-ops.
+}
+
+void
+ReducedPressurePIMPLESolve::updateAbsolutePressureAndReferenceState()
+{
+  // The reduced-pressure path solves only the configured pressure system. There is no separate
+  // absolute pressure variable equivalent to reference solver's p == p_rgh + rho*gh in this executioner.
+  // The matching reference operation is to restore the solved reduced-pressure reference after
+  // relaxation, equivalent to reference solver's final p/p_rgh reference adjustment for this single-field
+  // representation.
+  if (!_pin_pressure || _pressure_pin_dof == libMesh::invalid_uint)
+    return;
+
+  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
+  const Real reference_shift =
+      [this, &pressure_current_solution]()
+  {
+    PetscVectorReader pressure_reader(pressure_current_solution);
+    return _pressure_pin_value - pressure_reader(_pressure_pin_dof);
+  }();
+
+  for (const auto i : make_range(pressure_current_solution.first_local_index(),
+                                 pressure_current_solution.last_local_index()))
+    pressure_current_solution.set(i, pressure_current_solution(i) + reference_shift);
+  pressure_current_solution.close();
+
+  if (auto * pressure_old_solution = _pressure_system.solutionPreviousNewton())
+  {
+    for (const auto i :
+         make_range(pressure_old_solution->first_local_index(), pressure_old_solution->last_local_index()))
+      pressure_old_solution->set(i, (*pressure_old_solution)(i) + reference_shift);
+    pressure_old_solution->close();
+  }
+
+  _pressure_system.setSolution(pressure_current_solution);
+  _pressure_system.computeGradients();
 }
 
 void
@@ -2141,17 +2381,4 @@ ReducedPressurePIMPLESolve::relaxPressureFieldForNextPredictor()
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
   _pressure_system.computeGradients();
-}
-
-void
-ReducedPressurePIMPLESolve::finalizePressureCorrectionStage()
-{
-  if (_problem.timeStep() == 1)
-    std::cerr << "[ReducedPressurePIMPLESolve] finalizePressureCorrectionStage begin" << std::endl;
-
-  publishPressureCorrectedTransportState("post_pressure_writeback");
-  relaxPressureFieldForNextPredictor();
-
-  if (_problem.timeStep() == 1)
-    std::cerr << "[ReducedPressurePIMPLESolve] finalizePressureCorrectionStage end" << std::endl;
 }

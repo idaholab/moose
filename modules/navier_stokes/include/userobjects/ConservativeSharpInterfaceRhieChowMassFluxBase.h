@@ -26,7 +26,7 @@ public:
     std::array<Real, 9> normal_matrix{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<Real, 3> rhs{{0.0, 0.0, 0.0}};
     std::array<Real, 3> solution{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> openfoam_delta_velocity{{0.0, 0.0, 0.0}};
+    std::array<Real, 3> reference_delta_velocity{{0.0, 0.0, 0.0}};
     std::array<Real, 3> smooth_delta_velocity{{0.0, 0.0, 0.0}};
     std::array<Real, 3> delta_velocity{{0.0, 0.0, 0.0}};
     unsigned int contributing_faces = 0;
@@ -92,12 +92,11 @@ public:
   void updateVelocityBoundaryState() override;
 
   /// Update the additional pressure-equation source-flux functors before the pressure solve.
-  virtual void
-  updateAdditionalPressureFluxFunctors(const bool with_updated_pressure, const bool verbose);
+  void updateAdditionalPressureFluxFunctors(const bool with_updated_pressure, const bool verbose);
 
   /// Apply the physical counterpart of the additional source fluxes to the final face mass flux.
   void applyAdditionalFaceMassFluxCorrection();
-  void computeProvisionalCellVelocity();
+  void computePressureCorrectedCellVelocity();
 
   void setSuppressExplicitHydrostaticPressureFlux(
       const bool suppress_explicit_hydrostatic_pressure_flux)
@@ -186,7 +185,7 @@ protected:
                                               const Moose::StateArg & time_arg) const;
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
-  void writeProvisionalVelocityToMomentumSolution(const Moose::StateArg & time_arg);
+  void writePressureCorrectedVelocityToMomentumSolution(const Moose::StateArg & time_arg);
   void rebuildSharpInterfaceFaceInfo();
   void cacheCurrentCorrectedVolumetricFlux();
   Real transportMassFluxDensityFromVolumetricPhi(const FaceInfo * fi,
@@ -329,7 +328,7 @@ protected:
       const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
-  PressureCorrectionReconstructionDebug reconstructOpenFoamFaceScalarToCellVectorDebug(
+  PressureCorrectionReconstructionDebug reconstructReferenceFaceScalarToCellVectorDebug(
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
       const FaceScalarField & scalar_field) const;
@@ -337,7 +336,7 @@ protected:
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
       const FaceScalarField & scalar_field) const;
-  RealVectorValue reconstructOpenFoamStylePressureCoupledCellVelocityDelta(
+  RealVectorValue reconstructReferenceStylePressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   virtual RealVectorValue reconstructPressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;

@@ -152,8 +152,10 @@ c_alpha = 0.01
   pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
 
+  should_solve_momentum = false
   num_iterations = 1
-  num_piso_iterations = 0
+  num_piso_iterations = 2
+  num_pressure_nonorthogonal_correctors = 0
   continue_on_max_its = true
   print_fields = false
 
@@ -283,5 +285,5 @@ c_alpha = 0.01
 [Outputs]
   execute_on = 'TIMESTEP_END'
   csv = true
-  exodus = false
+  exodus = true
 []

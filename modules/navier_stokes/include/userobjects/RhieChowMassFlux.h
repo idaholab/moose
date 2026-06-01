@@ -289,7 +289,7 @@ protected:
 
   /**
    * Explicit face-force contribution entering the pressure corrector, i.e. the local analog of
-   * OpenFOAM's phig term.
+   * reference solver's phig term.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _phig_flux;
 
@@ -332,7 +332,7 @@ protected:
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_equation_flux;
 
   /**
-   * Cached boundary-normal pressure gradient used to emulate OpenFOAM's constrainPressure /
+   * Cached boundary-normal pressure gradient used to emulate reference solver's constrainPressure /
    * fixedFluxPressure patch update against the current predictor flux.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>
@@ -344,7 +344,8 @@ protected:
   /// Per-face predictor source-flux adjustments used for the local adjustPhi analogue.
   std::unordered_map<dof_id_type, Real> _pressure_predictor_flux_adjustment;
 
-  /// Unadjusted predictor-side face flux prior to the local adjustPhi analogue.
+  /// Unadjusted predictor-side face flux prior to the local adjustPhi analogue, stored in the
+  /// internal pressure-correction convention. The accepted transport flux uses the negated value.
   std::unordered_map<dof_id_type, Real> _pressure_predictor_base_flux;
 
   /// Indicates whether _pressure_boundary_normal_gradient matches the latest predictor state.

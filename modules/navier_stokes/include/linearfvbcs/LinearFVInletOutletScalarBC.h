@@ -12,7 +12,7 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Linear-FV scalar analog of OpenFOAM's inletOutlet boundary condition.
+ * Linear-FV scalar analog of reference solver's inletOutlet boundary condition.
  *
  * On outflow this behaves like a zero-gradient / extrapolated outlet.
  * On backflow it switches to a prescribed boundary value.

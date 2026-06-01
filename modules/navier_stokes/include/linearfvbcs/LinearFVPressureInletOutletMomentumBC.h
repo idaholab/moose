@@ -15,10 +15,10 @@
 class ElemInfo;
 
 /**
- * Conservative rho*u variant of the pressureInletOutletVelocity boundary condition.
+ * reference-solver-style pressureInletOutletVelocity boundary condition for the sharp-interface path.
  *
- * User-facing backflow values are still specified in velocity units, but the solved variable and
- * the returned boundary values are rho*u.
+ * The historical class name is retained, but the solved variable and returned boundary values are
+ * velocity components, not rho*u.
  */
 class LinearFVPressureInletOutletMomentumBC : public LinearFVAdvectionDiffusionBC
 {
@@ -40,25 +40,19 @@ public:
 protected:
   bool isBackflow() const;
   const ElemInfo & fluidElemInfo() const;
-  Real safeDensity(Real rho) const;
-  Real fluidDensity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   Real computeOutflowBoundaryValue() const;
   Real computeOutflowBoundaryValueRHSContribution() const;
   Real computeBackflowBoundaryValue() const;
   Real computeBackflowBoundaryValueMatrixContribution() const;
   Real computeVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealGradient computeVelocityGradient(const ElemInfo & elem_info, const Moose::StateArg & state) const;
-  Real boundaryDensity() const;
 
   const unsigned int _dim;
   const MooseLinearVariableFVReal * const _u_var;
   const MooseLinearVariableFVReal * const _v_var;
   const MooseLinearVariableFVReal * const _w_var;
-  std::vector<const MooseLinearVariableFVReal *> _momentum_vars;
+  std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
   const unsigned int _index;
-  const Moose::Functor<Real> & _rho;
-  const Moose::Functor<RealVectorValue> * const _density_gradient;
   const Moose::Functor<Real> & _backflow_value;
-  const Real _minimum_density;
   const bool _two_term_expansion;
 };

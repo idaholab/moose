@@ -11,7 +11,7 @@
 #include <vector>
 
 /**
- * OpenFOAM-like curvature producer for a sharp-interface linear-FV path.
+ * reference-solver-like curvature producer for a sharp-interface linear-FV path.
  *
  * Implemented path:
  *
@@ -104,7 +104,7 @@ protected:
   const MooseEnum _delta_n_mode;
   const Real _delta_n_scale;
   const Real _delta_n_fixed_value;
-  const bool _use_openfoam_simple_curvature;
+  const bool _use_reference_simple_curvature;
   const unsigned int _n_alpha_smooth_curvature;
   const Real _contact_angle_small_det;
 

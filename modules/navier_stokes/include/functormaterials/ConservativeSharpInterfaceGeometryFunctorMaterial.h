@@ -21,7 +21,7 @@
  * - hydrostatic density-gradient cell acceleration
  * - hydrostatic momentum-source density components
  *
- * The full OpenFOAM-like curvature reconstruction path still needs a dedicated
+ * The full reference-solver-like curvature reconstruction path still needs a dedicated
  * curvature producer. For now this material can consume an externally supplied
  * curvature functor and combine it consistently with face gradients and density.
  */

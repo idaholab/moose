@@ -82,10 +82,13 @@ private:
                       const SolverParams & solver_params);
   std::pair<unsigned int, Real>
   applyPressureCorrectionStage(const bool recompute_face_mass_flux,
-                               const bool relax_pressure_for_next_predictor,
+                               const bool publish_pressure_corrected_state,
                                const SolverParams & solver_params);
-  void finalizePressureCorrectionStage();
   void publishPressureCorrectedTransportState(const std::string & stage_label);
+  void applyReferencePressureCorrectorTail(const std::string & stage_label);
+  void reportReferenceContinuityErrors(const std::string & stage_label);
+  void correctMovingMeshFaceVelocityAndMakeRelative();
+  void updateAbsolutePressureAndReferenceState();
   void relaxPressureFieldForNextPredictor();
   std::pair<unsigned int, Real>
   correctStartupContinuityOnce(const bool subtract_updated_pressure,
@@ -127,4 +130,6 @@ private:
   std::string _startup_pressure_initialization;
   const bool _suppress_explicit_hydrostatic_flux_during_seeded_startup;
   const unsigned int _startup_flux_corrections;
+  const unsigned int _num_pressure_nonorthogonal_correctors;
+  Real _cumulative_continuity_error = 0.0;
 };

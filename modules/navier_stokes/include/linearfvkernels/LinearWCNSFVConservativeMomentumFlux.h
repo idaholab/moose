@@ -119,15 +119,6 @@ protected:
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 
-  /// Density functor used to convert the conservative unknown rho*u back to velocity on faces.
-  const Moose::Functor<Real> & _rho;
-
-  /// Optional density-gradient functor used to recover grad(U) from grad(rho*u).
-  const Moose::Functor<RealVectorValue> * const _density_gradient;
-
-  /// Positive density floor used when converting rho*u to velocity-form quantities.
-  const Real _minimum_density;
-
   /// Switch to enable/disable nonorthogonal correction in the stress term
   const bool _use_nonorthogonal_correction;
 
@@ -177,29 +168,7 @@ protected:
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
 
-  /// Density floor helper.
-  Real safeDensity(Real rho) const;
-
-  /// Density gradient on a cell, or zero when no density-gradient functor is provided.
-  RealGradient densityGradient(const ElemInfo & elem_info, const Moose::StateArg & state) const;
-
-  /// Recover grad(U) from the conservative rho*u variable using the quotient rule.
-  RealGradient velocityGradient(const MooseLinearVariableFVReal & conservative_var,
-                                const ElemInfo & elem_info,
-                                const Moose::StateArg & state) const;
-
-  /// Recover grad(U) with the specified limiter for advected interpolation.
-  RealGradient velocityGradient(const MooseLinearVariableFVReal & conservative_var,
-                                const ElemInfo & elem_info,
-                                const Moose::StateArg & state,
-                                Moose::FV::GradientLimiterType limiter_type) const;
-
   /// Reusable gradient storage used when advected interpolation requires gradients.
   VectorValue<Real> _elem_grad_storage;
   VectorValue<Real> _neighbor_grad_storage;
-
-  /// Cached face-adjacent densities for the current face.
-  Real _elem_rho;
-  Real _neighbor_rho;
-  Real _face_rho;
 };

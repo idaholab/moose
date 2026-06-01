@@ -11,7 +11,7 @@
 
 #include "LinearFVElementalKernel.h"
 #include "MooseLinearVariableFV.h"
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
+#include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
 
 /**
  * Adds the reduced-pressure momentum predictor forcing reconstructed from face
@@ -32,5 +32,5 @@ protected:
 
   const unsigned int _index;
   MooseLinearVariableFV<Real> & _pressure_var;
-  const ConservativeSharpInterfaceRhieChowMassFlux & _sharp_mass_flux_provider;
+  const ConservativeSharpInterfaceRhieChowMassFluxBase & _sharp_mass_flux_provider;
 };

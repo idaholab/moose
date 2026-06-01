@@ -68,7 +68,7 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_LINEAR};
 
   params.addClassDescription(
-      "Produce OpenFOAM-like face-smoothed interface normals and cell curvature from a volume "
+      "Produce reference-solver-like face-smoothed interface normals and cell curvature from a volume "
       "fraction functor for sharp-interface linear-FV coupling. The implementation mirrors the "
       "shipped interfaceProperties path K = -div(nHatf), with optional curvature-input alpha "
       "smoothing and wall-contact-angle correction.");
@@ -77,25 +77,25 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
       "volume_fraction_functor",
       "The volume-fraction / phase-fraction functor used to reconstruct interface geometry.");
 
-  MooseEnum delta_n_mode("mesh_scaled_openfoam fixed", "mesh_scaled_openfoam");
+  MooseEnum delta_n_mode("mesh_scaled_reference fixed", "mesh_scaled_reference");
   params.addParam<MooseEnum>(
       "delta_n_mode",
       delta_n_mode,
-      "How the unit-normal regularization delta_n is chosen. 'mesh_scaled_openfoam' mirrors "
-      "OpenFOAM's deltaN = 1e-8 / cbrt(average(cellVolume)).");
+      "How the unit-normal regularization delta_n is chosen. 'mesh_scaled_reference' mirrors "
+      "reference solver's deltaN = 1e-8 / cbrt(average(cellVolume)).");
   params.addParam<Real>(
       "delta_n_scale",
       1e-8,
-      "Scale factor used when delta_n_mode = mesh_scaled_openfoam. The effective value becomes "
-      "delta_n_scale / cbrt(average cell volume), matching OpenFOAM's default "
+      "Scale factor used when delta_n_mode = mesh_scaled_reference. The effective value becomes "
+      "delta_n_scale / cbrt(average cell volume), matching reference solver's default "
       "interfaceProperties behavior.");
   params.addParam<Real>(
       "delta_n_fixed_value", 1e-8, "Fixed value used when delta_n_mode = fixed.");
 
   params.addParam<bool>(
-      "use_openfoam_simple_curvature",
+      "use_reference_simple_curvature",
       true,
-      "Use the baseline OpenFOAM simple curvature expression K = -div(nHatf). The optional "
+      "Use the baseline reference solver simple curvature expression K = -div(nHatf). The optional "
       "higher-order correction path remains intentionally unsupported in this step.");
 
   params.addParam<unsigned int>(
@@ -108,7 +108,7 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "contact_angle_boundaries",
       {},
-      "Boundary names or IDs on which the OpenFOAM-like wall contact-angle correction should be "
+      "Boundary names or IDs on which the reference-solver-like wall contact-angle correction should be "
       "applied.");
   params.addParam<std::vector<Real>>(
       "static_contact_angles_degrees",
@@ -123,13 +123,13 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params.addParam<Real>(
       "contact_angle_small_det",
       1e-12,
-      "Positive floor used when the OpenFOAM-style wall-contact-angle determinant 1 - "
+      "Positive floor used when the reference-solver-style wall-contact-angle determinant 1 - "
       "(nHat.nWall)^2 becomes very small.");
 
   params.addParam<MooseFunctorName>(
       "face_smoothed_alpha_gradient_name",
       "curvature_face_smoothed_alpha_gradient",
-      "Output name for the OpenFOAM-like face-smoothed alpha gradient functor.");
+      "Output name for the reference-solver-like face-smoothed alpha gradient functor.");
   params.addParam<MooseFunctorName>(
       "provisional_face_unit_normal_name",
       "curvature_provisional_interface_unit_normal_face",
@@ -165,7 +165,7 @@ ConservativeSharpInterfaceCurvatureCalculator::ConservativeSharpInterfaceCurvatu
     _delta_n_mode(getParam<MooseEnum>("delta_n_mode")),
     _delta_n_scale(getParam<Real>("delta_n_scale")),
     _delta_n_fixed_value(getParam<Real>("delta_n_fixed_value")),
-    _use_openfoam_simple_curvature(getParam<bool>("use_openfoam_simple_curvature")),
+    _use_reference_simple_curvature(getParam<bool>("use_reference_simple_curvature")),
     _n_alpha_smooth_curvature(getParam<unsigned int>("n_alpha_smooth_curvature")),
     _contact_angle_small_det(getParam<Real>("contact_angle_small_det")),
     _face_smoothed_alpha_gradient_name(
@@ -544,10 +544,10 @@ ConservativeSharpInterfaceCurvatureCalculator::finalize()
 void
 ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool verbose)
 {
-  if (!_use_openfoam_simple_curvature)
+  if (!_use_reference_simple_curvature)
     mooseError(
         name(),
-        ": only the baseline OpenFOAM simple curvature path is implemented in this step. "
+        ": only the baseline reference solver simple curvature path is implemented in this step. "
         "The optional higher-order correction term remains intentionally unsupported here.");
 
   updateEffectiveDeltaN();

@@ -40,7 +40,8 @@ LinearFVFaceBasedMomentumPressure::LinearFVFaceBasedMomentumPressure(const Input
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
-    _sharp_mass_flux_provider(getUserObject<ConservativeSharpInterfaceRhieChowMassFlux>("rhie_chow_user_object"))
+    _sharp_mass_flux_provider(
+        getUserObject<ConservativeSharpInterfaceRhieChowMassFluxBase>("rhie_chow_user_object"))
 {
   _pressure_var.computeCellGradients();
 }

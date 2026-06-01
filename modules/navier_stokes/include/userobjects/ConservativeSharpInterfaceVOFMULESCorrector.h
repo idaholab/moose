@@ -12,6 +12,7 @@
 
 class LinearSystem;
 class LinearFVBoundaryCondition;
+class ConservativeSharpInterfaceCurvatureCalculator;
 /**
  * Applies an explicit bounded correction to a donor/upwind alpha solve, following the same
  * bounded-flux-plus-limited-correction structure used by interFoam's MULES path.
@@ -56,7 +57,9 @@ public:
 
   void resetSubcycleFluxes();
   void invalidateOuterCorrectionFluxSeed();
-  void applyCorrection(const Real dt, const Real subcycle_fraction = 1.0);
+  void applyCorrection(const Real dt,
+                       const Real subcycle_fraction = 1.0,
+                       ConservativeSharpInterfaceCurvatureCalculator * curvature = nullptr);
   LiquidVolumeAudit liquidVolumeAudit() const;
   RhoPhiConsistencyAudit rhoPhiConsistencyAudit() const;
   Real alphaPhiWorkingBeforeIntegrated(const FaceInfo & fi) const;

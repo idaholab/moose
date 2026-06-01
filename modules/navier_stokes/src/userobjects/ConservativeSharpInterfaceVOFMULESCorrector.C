@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConservativeSharpInterfaceVOFMULESCorrector.h"
+#include "ConservativeSharpInterfaceCurvatureCalculator.h"
 #include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 
 #include "LinearFVBoundaryCondition.h"
@@ -471,7 +472,7 @@ void
 ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
 {
   _subcycle_counter = 0;
-  // Mirror OpenFOAM's createAlphaFluxes.H lifecycle: clear the working
+  // Mirror reference solver's createAlphaFluxes.H lifecycle: clear the working
   // current-solve alpha/rhoPhi accumulators, but keep the previous limited
   // correction flux stored for the next alpha solve.
   for (auto & pair : _alpha_phi_bd)
@@ -918,7 +919,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, const Real subcycle_fraction)
+ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
+    const Real dt,
+    const Real subcycle_fraction,
+    ConservativeSharpInterfaceCurvatureCalculator * const curvature)
 {
   ++_subcycle_counter;
   if (!_system || !_alpha_var || dt <= 0.0)
@@ -1240,6 +1244,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, cons
 
     current_local_solution.add(*limited_update);
     current_local_solution.close();
+    _system->computeGradients();
+
+    if (curvature)
+      curvature->updateCurvatureMaps(_debug_dump_subcycle);
 
     for (const auto i : index_range(face_corrections))
     {

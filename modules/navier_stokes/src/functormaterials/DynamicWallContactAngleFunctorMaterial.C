@@ -63,8 +63,8 @@ DynamicWallContactAngleFunctorMaterial::validParams()
 
   params.addClassDescription(
       "Create a face-aware dynamic wall-contact-angle functor using the same provisional face "
-      "unit normal seen by the OpenFOAM-style curvature reconstruction. The implemented law "
-      "matches OpenFOAM's dynamicAlphaContactAngle theta(U, nHat) form.");
+      "unit normal seen by the reference-solver-style curvature reconstruction. The implemented law "
+      "matches reference solver's dynamicAlphaContactAngle theta(U, nHat) form.");
 
   params.addRequiredParam<MooseFunctorName>(
       "provisional_interface_unit_normal_functor",
@@ -80,7 +80,7 @@ DynamicWallContactAngleFunctorMaterial::validParams()
       "contact_angle_models",
       {},
       "Per-boundary contact-angle model names. Entries equal to 'dynamic' activate the "
-      "OpenFOAM-style dynamic law on the corresponding boundary. Empty means no dynamic "
+      "reference-solver-style dynamic law on the corresponding boundary. Empty means no dynamic "
       "contact-angle boundaries are created here.");
   params.addParam<std::vector<Real>>(
       "equilibrium_contact_angles_deg",
@@ -97,12 +97,12 @@ DynamicWallContactAngleFunctorMaterial::validParams()
   params.addParam<std::vector<Real>>(
       "contact_angle_velocity_scales",
       {},
-      "Per-boundary velocity scales uTheta used by the OpenFOAM dynamic contact-angle law.");
+      "Per-boundary velocity scales uTheta used by the reference solver dynamic contact-angle law.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "velocity_component_functors",
       {},
-      "Internal velocity component functors [u, v, w] used to approximate OpenFOAM's "
+      "Internal velocity component functors [u, v, w] used to approximate reference solver's "
       "patchInternalField() for the dynamic contact-angle law.");
   params.addParam<MooseFunctorName>(
       "wall_velocity_functor",
@@ -121,7 +121,7 @@ DynamicWallContactAngleFunctorMaterial::validParams()
   params.addParam<Real>(
       "u_theta_small",
       1e-12,
-      "Positive floor below which the dynamic law falls back to theta0, matching OpenFOAM's "
+      "Positive floor below which the dynamic law falls back to theta0, matching reference solver's "
       "uTheta < SMALL behavior.");
 
   params.addParam<MooseFunctorName>(

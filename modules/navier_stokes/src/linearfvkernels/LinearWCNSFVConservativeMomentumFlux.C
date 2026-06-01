@@ -22,11 +22,12 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of the "
-                             "stress and advection terms of a conservative rho*u momentum "
-                             "equation.");
-  params.addRequiredParam<SolverVariableName>("u", "The rho*u variable in the x direction.");
-  params.addParam<SolverVariableName>("v", "The rho*v variable in the y direction.");
-  params.addParam<SolverVariableName>("w", "The rho*w variable in the z direction.");
+                             "stress and advection terms of an reference-solver-style velocity momentum "
+                             "equation. The historical object name is retained for the single "
+                             "sharp-interface parity path.");
+  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
+  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
+  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -36,18 +37,19 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
       "this overrides the Rhie-Chow user object's live face-mass-flux query so one convective "
       "flux family can be frozen for the whole outer iteration.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The diffusion coefficient.");
-  params.addRequiredParam<MooseFunctorName>(NS::density,
-                                            "The density functor used to recover velocity from "
-                                            "the conservative rho*u unknown.");
+  params.addParam<MooseFunctorName>(
+      NS::density,
+      "1",
+      "Deprecated compatibility parameter. The primary unknown is velocity; density enters through "
+      "the time coefficient and mass flux.");
   params.addParam<MooseFunctorName>(
       "density_gradient_functor",
-      "",
-      "Optional cell-centered density-gradient functor used to recover grad(U) from "
-      "the conservative rho*u variable.");
+      "0",
+      "Deprecated compatibility parameter. The primary unknown is velocity.");
   params.addParam<Real>(
       "minimum_density",
-      libMesh::TOLERANCE,
-      "Positive density floor used when converting rho*u to velocity-form quantities.");
+      0.0,
+      "Deprecated compatibility parameter. The primary unknown is velocity.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -80,11 +82,6 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
                            ? &getFunctor<Real>("mass_flux_functor")
                            : nullptr),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
-    _rho(getFunctor<Real>(NS::density)),
-    _density_gradient(getParam<MooseFunctorName>("density_gradient_functor").empty()
-                          ? nullptr
-                          : &getFunctor<RealVectorValue>("density_gradient_functor")),
-    _minimum_density(getParam<Real>("minimum_density")),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
@@ -100,10 +97,7 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
     _index(getParam<MooseEnum>("momentum_component")),
     _velocity_vars{nullptr, nullptr, nullptr},
     _coord_type(getBlockCoordSystem()),
-    _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord()),
-    _elem_rho(1.0),
-    _neighbor_rho(1.0),
-    _face_rho(1.0)
+    _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord())
 {
   // We only need gradients if the nonorthogonal correction is enabled or when we request the
   // computation of the deviatoric parts of the stress tensor.
@@ -155,50 +149,6 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
                  "In three-dimensions, the w velocity must be supplied and it must be a "
                  "MooseLinearVariableFVReal.");
   }
-}
-
-Real
-LinearWCNSFVConservativeMomentumFlux::safeDensity(const Real rho) const
-{
-  return std::max(std::abs(rho), _minimum_density);
-}
-
-RealGradient
-LinearWCNSFVConservativeMomentumFlux::densityGradient(const ElemInfo & elem_info,
-                                                      const Moose::StateArg & state) const
-{
-  if (!_density_gradient)
-    return RealGradient();
-
-  const auto elem_arg = makeElemArg(elem_info.elem());
-  return MetaPhysicL::raw_value((*_density_gradient)(elem_arg, state));
-}
-
-RealGradient
-LinearWCNSFVConservativeMomentumFlux::velocityGradient(
-    const MooseLinearVariableFVReal & conservative_var,
-    const ElemInfo & elem_info,
-    const Moose::StateArg & state) const
-{
-  const Real rho = safeDensity(_rho(makeElemArg(elem_info.elem()), state));
-  const Real conservative_value = conservative_var.getElemValue(elem_info, state);
-  const RealGradient grad_conservative = conservative_var.gradSln(elem_info, state);
-  const RealGradient grad_rho = densityGradient(elem_info, state);
-  return (grad_conservative - (conservative_value / rho) * grad_rho) / rho;
-}
-
-RealGradient
-LinearWCNSFVConservativeMomentumFlux::velocityGradient(
-    const MooseLinearVariableFVReal & conservative_var,
-    const ElemInfo & elem_info,
-    const Moose::StateArg & state,
-    Moose::FV::GradientLimiterType limiter_type) const
-{
-  const Real rho = safeDensity(_rho(makeElemArg(elem_info.elem()), state));
-  const Real conservative_value = conservative_var.getElemValue(elem_info, state);
-  const RealGradient grad_conservative = conservative_var.gradSln(elem_info, state, limiter_type);
-  const RealGradient grad_rho = densityGradient(elem_info, state);
-  return (grad_conservative - (conservative_value / rho) * grad_rho) / rho;
 }
 
 Real
@@ -257,13 +207,13 @@ LinearWCNSFVConservativeMomentumFlux::computeBoundaryRHSContribution(
 Real
 LinearWCNSFVConservativeMomentumFlux::computeInternalAdvectionElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _face_mass_flux / safeDensity(_elem_rho);
+  return _advected_interp_coeffs.first * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVConservativeMomentumFlux::computeInternalAdvectionNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _face_mass_flux / safeDensity(_neighbor_rho);
+  return _advected_interp_coeffs.second * _face_mass_flux;
 }
 
 Real
@@ -287,7 +237,7 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressMatrixContribution()
                        : _current_face_info->dCNMag();
 
     // Cache the matrix contribution
-    _stress_matrix_contribution = _mu(face_arg, determineState()) / (safeDensity(_face_rho) * d);
+    _stress_matrix_contribution = _mu(face_arg, determineState()) / d;
     _cached_matrix_contribution = true;
   }
 
@@ -311,9 +261,8 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
       const auto state_arg = determineState();
 
       // Get the gradients from the adjacent cells
-      const auto grad_elem = velocityGradient(_var, *_current_face_info->elemInfo(), state_arg);
-      const auto grad_neighbor =
-          velocityGradient(_var, *_current_face_info->neighborInfo(), state_arg);
+      const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
+      const auto grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
 
       // Interpolate the two gradients to the face
       const auto interp_coeffs =
@@ -325,10 +274,10 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
               _current_face_info->eCN();
 
       // Cache the matrix contribution
-      _stress_rhs_contribution +=
-          _mu(face_arg, state_arg) / safeDensity(_face_rho) *
-          (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
-          correction_vector;
+      _stress_rhs_contribution += _mu(face_arg, state_arg) *
+                                  (interp_coeffs.first * grad_elem +
+                                   interp_coeffs.second * grad_neighbor) *
+                                  correction_vector;
     }
     // scenario (2), we will have to account for the deviatoric parts of the stress tensor.
     if (_use_deviatoric_terms)
@@ -349,10 +298,9 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
       // Loop over every velocity component so we can form the symmetric gradient pieces
       for (const auto dir : make_range(_dim))
       {
-        grad_elem[dir] =
-            velocityGradient(velocityVar(dir), *_current_face_info->elemInfo(), state_arg);
+        grad_elem[dir] = velocityVar(dir).gradSln(*_current_face_info->elemInfo(), state_arg);
         grad_neighbor[dir] =
-            velocityGradient(velocityVar(dir), *_current_face_info->neighborInfo(), state_arg);
+            velocityVar(dir).gradSln(*_current_face_info->neighborInfo(), state_arg);
         trace_elem += grad_elem[dir](dir);
         trace_neighbor += grad_neighbor[dir](dir);
       }
@@ -365,12 +313,8 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
         Real neighbor_value = 0.0;
         const auto & radial_var = velocityVar(_rz_radial_coord);
         elem_value = radial_var.getElemValue(*_current_face_info->elemInfo(), state_arg) /
-                     safeDensity(_rho(makeElemArg(_current_face_info->elemInfo()->elem()),
-                                      state_arg)) /
                      _current_face_info->elemInfo()->centroid()(_rz_radial_coord);
         neighbor_value = radial_var.getElemValue(*_current_face_info->neighborInfo(), state_arg) /
-                         safeDensity(_rho(makeElemArg(_current_face_info->neighborInfo()->elem()),
-                                          state_arg)) /
                          _current_face_info->neighborInfo()->centroid()(_rz_radial_coord);
 
         trace_elem += elem_value;
@@ -387,7 +331,7 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
         deviatoric_vector_neighbor(dir) = grad_neighbor[dir](_index);
       }
 
-      _stress_rhs_contribution += _mu(face_arg, state_arg) / safeDensity(_face_rho) *
+      _stress_rhs_contribution += _mu(face_arg, state_arg) *
                                   (interp_coeffs.first * deviatoric_vector_elem +
                                    interp_coeffs.second * deviatoric_vector_neighbor) *
                                   _current_face_info->normal();
@@ -408,7 +352,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryMatrixContribution(
   if (!bc->includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
-    grad_contrib *= _mu(face_arg, determineState()) / safeDensity(_face_rho);
+    grad_contrib *= _mu(face_arg, determineState());
   }
 
   return grad_contrib;
@@ -423,7 +367,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!bc->includesMaterialPropertyMultiplier())
-    grad_contrib *= _mu(face_arg, determineState()) / safeDensity(_face_rho);
+    grad_contrib *= _mu(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
@@ -442,8 +386,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
     const auto state_arg = determineState();
-    grad_contrib += _mu(face_arg, state_arg) / safeDensity(_face_rho) *
-                    velocityGradient(_var, *elem_info, state_arg) *
+    grad_contrib += _mu(face_arg, state_arg) * _var.gradSln(*elem_info, state_arg) *
                     _boundary_normal_factor * correction_vector;
   }
 
@@ -463,7 +406,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
 
     for (const auto dir : make_range(_dim))
     {
-      grad_elem[dir] = velocityGradient(velocityVar(dir), *elem_info, state_arg);
+      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info, state_arg);
       trace_elem += grad_elem[dir](dir);
     }
 
@@ -471,9 +414,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
     {
       const auto & radial_var = velocityVar(_rz_radial_coord);
       const Real elem_value =
-          radial_var.getElemValue(*elem_info, state_arg) /
-          safeDensity(_rho(makeElemArg(elem_info->elem()), state_arg)) /
-          elem_info->centroid()(_rz_radial_coord);
+          radial_var.getElemValue(*elem_info, state_arg) / elem_info->centroid()(_rz_radial_coord);
       trace_elem += elem_value;
     }
 
@@ -484,7 +425,7 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
     }
 
     // We support internal boundaries too so we have to make sure the normal points always outward
-    grad_contrib += _mu(face_arg, state_arg) / safeDensity(_face_rho) * deviatoric_vector_elem *
+    grad_contrib += _mu(face_arg, state_arg) * deviatoric_vector_elem *
                     _boundary_normal_factor * _current_face_info->normal();
   }
 
@@ -496,7 +437,7 @@ LinearWCNSFVConservativeMomentumFlux::computeAdvectionBoundaryMatrixContribution
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_matrix_contrib = bc->computeBoundaryValueMatrixContribution();
-  return boundary_value_matrix_contrib * _face_mass_flux / safeDensity(_face_rho);
+  return boundary_value_matrix_contrib * _face_mass_flux;
 }
 
 Real
@@ -504,7 +445,7 @@ LinearWCNSFVConservativeMomentumFlux::computeAdvectionBoundaryRHSContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * _face_mass_flux / safeDensity(_face_rho);
+  return -boundary_value_rhs_contrib * _face_mass_flux;
 }
 
 void
@@ -516,29 +457,11 @@ LinearWCNSFVConservativeMomentumFlux::setupFaceData(const FaceInfo * face_info)
   // when the boundary is within the mesh.
   _boundary_normal_factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  const auto state = determineState();
-  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    _elem_rho = safeDensity(_rho(makeElemArg(face_info->elemPtr()), state));
-    _neighbor_rho = safeDensity(_rho(makeElemArg(face_info->neighborPtr()), state));
-    const auto face_arg = makeCDFace(*_current_face_info);
-    _face_rho = safeDensity(_rho(face_arg, state));
-  }
-  else
-  {
-    const Elem * fluid_elem = (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-                                  ? face_info->neighborPtr()
-                                  : face_info->elemPtr();
-    _elem_rho = safeDensity(_rho(makeElemArg(fluid_elem), state));
-    _neighbor_rho = _elem_rho;
-    const Moose::FaceArg face_arg = singleSidedFaceArg(_current_face_info);
-    _face_rho = safeDensity(_rho(face_arg, state));
-  }
-
   // Caching the mass flux on the face which will be reused in the advection term's matrix and
   // right hand side contributions
   if (_mass_flux_functor)
   {
+    const auto state = determineState();
     const Moose::FaceArg face_arg =
         (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
             ? makeCDFace(*_current_face_info)
@@ -553,18 +476,19 @@ LinearWCNSFVConservativeMomentumFlux::setupFaceData(const FaceInfo * face_info)
   _advected_rhs_face_value = 0.0;
   if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH && _adv_interp_method)
   {
+    const auto state = determineState();
     const auto & elem_info = *_current_face_info->elemInfo();
     const auto & neighbor_info = *_current_face_info->neighborInfo();
-    const Real elem_value = _var.getElemValue(elem_info, state) / _elem_rho;
-    const Real neighbor_value = _var.getElemValue(neighbor_info, state) / _neighbor_rho;
+    const Real elem_value = _var.getElemValue(elem_info, state);
+    const Real neighbor_value = _var.getElemValue(neighbor_info, state);
 
     VectorValue<Real> * elem_grad = nullptr;
     VectorValue<Real> * neighbor_grad = nullptr;
     if (_adv_interp_method->needsGradients())
     {
       const auto limiter_type = _adv_interp_method->gradientLimiter();
-      _elem_grad_storage = velocityGradient(_var, elem_info, state, limiter_type);
-      _neighbor_grad_storage = velocityGradient(_var, neighbor_info, state, limiter_type);
+      _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
+      _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
       elem_grad = &_elem_grad_storage;
       neighbor_grad = &_neighbor_grad_storage;
     }
