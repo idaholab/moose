@@ -35,7 +35,8 @@ CSGNPolygonUnit::evaluateSurfaceEquationAtPoint(const Point & p) const
   //
   //    x*cos(2*pi*k/N) + y*sin(2*pi*k/N) <= apothem, for all k = 0..N-1
 
-  Real max_val = -1e200; // initialize to extremely large negative (to be updated)
+  Real max_val =
+      -std::numeric_limits<Real>::max(); // initialize to extremely large negative (to be updated)
   for (int k = 0; k < _n_sides; ++k)
   {
     auto val =
@@ -67,7 +68,7 @@ CSGNPolygonUnit::expandUnit(CSGBase & base)
   //    c = 0.0
   //    d = A (apothem)
   //
-  // Surface naming scheme: [UnitName]_exp_[k]
+  // Surface naming scheme: [UnitName]_expanded_surf_[k]
 
   Real a, b; // to be calculated based on side
   Real c = 0.0;
@@ -77,7 +78,7 @@ CSGNPolygonUnit::expandUnit(CSGBase & base)
   Point p(0, 0, 0); // origin used for determining half-space
 
   // base name for surfaces
-  std::string base_name = getName() + "_exp_";
+  std::string base_name = getName() + "_expanded_surf_";
 
   for (int k = 0; k < _n_sides; ++k)
   {
@@ -87,13 +88,10 @@ CSGNPolygonUnit::expandUnit(CSGBase & base)
     std::unique_ptr<CSG::CSGPlane> s_ptr = std::make_unique<CSG::CSGPlane>(sname, a, b, c, d);
     auto & surf = base.addSurface(std::move(s_ptr));
 
-    // determine the halfspace that contains the origin for this surface
+    // determine the half-space that contains the origin for this surface
     auto hp_type = surf.getHalfspaceFromPoint(p);
-    CSGRegion hp; // halfspace region for this surface only (to be intersected below)
-    if (hp_type == CSGSurface::Halfspace::POSITIVE)
-      hp = +surf;
-    else
-      hp = -surf;
+    // half-space region for this surface only (to be intersected below)
+    auto hp = (hp_type == CSGSurface::Halfspace::POSITIVE) ? +surf : -surf;
 
     // start the region with first half-space, otherwise intersect with existing region
     if (_expanded_region.getRegionType() == CSGRegion::RegionType::EMPTY)

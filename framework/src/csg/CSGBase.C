@@ -1136,11 +1136,11 @@ CSGBase::renameEngUnit(const CSGEngUnit & unit, const std::string & name)
   // The EngUnit index stores raw pointers; because the object's name is updated in-place,
   // no index update is needed.
   if (const auto * surf = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
-    renameSurface(static_cast<const CSGSurface &>(*surf), name);
+    renameSurface(*surf, name);
   else if (const auto * cell = dynamic_cast<const CSGCellEngUnit *>(&unit))
-    renameCell(static_cast<const CSGCell &>(*cell), name);
+    renameCell(*cell, name);
   else if (const auto * univ = dynamic_cast<const CSGUniverseEngUnit *>(&unit))
-    renameUniverse(static_cast<const CSGUniverse &>(*univ), name);
+    renameUniverse(*univ, name);
   else
     mooseError(
         "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be renamed.");
@@ -1302,12 +1302,12 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   mutable_unit.expandUnit(*this);
 
   // Derived class provides the expanded region formed by the expanded surfaces
-  CSGRegion exp_region = mutable_unit.getExpandedRegion();
+  CSGRegion expanded_region = mutable_unit.getExpandedRegion();
 
   // Propagate any stored transformations from the EngUnit to all new expanded surfaces
   const auto & trans = static_cast<const CSGSurface &>(mutable_unit).getTransformations();
   if (!trans.empty())
-    for (const auto & surf_ref : exp_region.getSurfaces())
+    for (const auto & surf_ref : expanded_region.getSurfaces())
     {
       CSGSurface & mutable_surf = _surface_list.getSurface(surf_ref.get().getName());
       for (const auto & [trans_type, values] : trans)
@@ -1315,12 +1315,12 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
     }
 
   // Replace every CSGSurfaceEngUnit reference in regions of CSGCells with the expanded sub-region
-  replaceSurfaceRefsWithRegion(static_cast<const CSGSurface &>(mutable_unit), exp_region);
+  replaceSurfaceRefsWithRegion(static_cast<const CSGSurface &>(mutable_unit), expanded_region);
 
   // Remove the EngUnit (destroyed here — no more references to it after
   // replaceSurfaceRefsWithRegion)
   deleteEngUnit(unit);
-  return exp_region;
+  return expanded_region;
 }
 
 const CSGCell &
@@ -1332,13 +1332,13 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // Derived class creates the CSGCell object and any other necessary objects and adds them to
   // CSGBase, storing the result internally for retrieval via getExpandedCell()
   mutable_unit.expandUnit(*this);
-  const CSGCell & exp_cell = mutable_unit.getExpandedCell();
+  const CSGCell & expanded_cell = mutable_unit.getExpandedCell();
 
   // Propagate any stored transformations from the EngUnit to the expanded cell
   const auto & trans = static_cast<const CSGCell &>(mutable_unit).getTransformations();
   if (!trans.empty())
   {
-    CSGCell & mutable_cell = _cell_list.getCell(exp_cell.getName());
+    CSGCell & mutable_cell = _cell_list.getCell(expanded_cell.getName());
     for (const auto & [trans_type, values] : trans)
       mutable_cell.addTransformation(trans_type, values);
   }
@@ -1346,15 +1346,15 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // createCell() inside expandUnit() might add the new cell to root by default. Remove it first so
   // that replaceCellRefs can manage all universe membership cleanly — it will re-add to root only
   // if the original unit was there, preventing a duplicate insertion warning.
-  if (getRootUniverse().hasCell(exp_cell.getName()))
-    removeCellFromUniverse(getRootUniverse(), exp_cell);
+  if (getRootUniverse().hasCell(expanded_cell.getName()))
+    removeCellFromUniverse(getRootUniverse(), expanded_cell);
 
   // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
-  replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), exp_cell);
+  replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), expanded_cell);
 
   // Remove the EngUnit (destroyed here — no more references to it after replaceCellRefs)
   deleteEngUnit(unit);
-  return exp_cell;
+  return expanded_cell;
 }
 
 const CSGUniverse &
@@ -1367,23 +1367,23 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   // Derived class creates the CSGUniverse object and any other necessary objects and adds them to
   // CSGBase, storing the result internally for retrieval via getExpandedUniverse()
   mutable_unit.expandUnit(*this);
-  const CSGUniverse & exp_univ = mutable_unit.getExpandedUniverse();
+  const CSGUniverse & expanded_univ = mutable_unit.getExpandedUniverse();
 
   // Propagate any stored transformations from the EngUnit to the new expanded universe
   const auto & trans = static_cast<const CSGUniverse &>(mutable_unit).getTransformations();
   if (!trans.empty())
   {
-    CSGUniverse & mutable_univ = _universe_list.getUniverse(exp_univ.getName());
+    CSGUniverse & mutable_univ = _universe_list.getUniverse(expanded_univ.getName());
     for (const auto & [trans_type, values] : trans)
       mutable_univ.addTransformation(trans_type, values);
   }
 
   // Replace references in cell fills, lattice maps and outers, and the root universe
-  replaceUniverseRefs(static_cast<const CSGUniverse &>(mutable_unit), exp_univ);
+  replaceUniverseRefs(static_cast<const CSGUniverse &>(mutable_unit), expanded_univ);
 
   // Remove the EngUnit (destroyed here — no more references to it after replaceUniverseRefs)
   deleteEngUnit(unit);
-  return exp_univ;
+  return expanded_univ;
 }
 
 void
@@ -1550,8 +1550,8 @@ CSGBase::generateOutput() const
       // behavior and type
       csg_json["units"][unit_name]["unit_type"] = unit.getUnitType();
       csg_json["units"][unit_name]["behavior"] = unit.getBehavior();
-      csg_json["units"][unit_name]["attributes"] = {};
       // any unit-specific attributes
+      csg_json["units"][unit_name]["attributes"] = {};
       const auto & unit_attrs = unit.getAttributes();
       for (const auto & attr : unit_attrs)
         csg_json["units"][unit_name]["attributes"][attr.first] = attr.second;

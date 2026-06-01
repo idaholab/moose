@@ -537,6 +537,8 @@ public:
     static_assert(std::is_base_of_v<CSGSurface, T> || std::is_base_of_v<CSGCell, T> ||
                       std::is_base_of_v<CSGUniverse, T>,
                   "T must also derive from CSGSurface, CSGCell, or CSGUniverse");
+    // create raw pointer so we can transfer ownership to the proper type list without destroying
+    // it, and also can store the pointer in the CSGEngUnitList (non-owning list)
     T * raw = unit.get();
 
     // must check if an engineering unit of the same name (regardless of type) exists already before
