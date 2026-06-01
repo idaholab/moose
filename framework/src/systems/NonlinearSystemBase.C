@@ -3790,6 +3790,13 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
         kernel_variables.insert(scalar_fvbc->lambdaVariable().name());
   }
 
+  for (const auto & ibc : _integrated_bcs.getActiveObjects())
+  {
+    const auto additional_variables_covered = ibc->additionalROVariables();
+    kernel_variables.insert(additional_variables_covered.begin(),
+                            additional_variables_covered.end());
+  }
+
   // Check kernel coverage of subdomains (blocks) in your mesh
   if (!global_kernels_exist)
   {
