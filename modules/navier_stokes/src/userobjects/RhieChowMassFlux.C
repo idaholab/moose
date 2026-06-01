@@ -196,6 +196,9 @@ RhieChowMassFlux::linkMomentumPressureSystems(
     _momentum_implicit_systems.push_back(dynamic_cast<LinearImplicitSystem *>(&system->system()));
   }
 
+  if (usingReconstructedPressureGradientMethod())
+    checkReconstructedPressureGradientCompatibility();
+
   setupMeshInformation();
 }
 
@@ -425,6 +428,30 @@ RhieChowMassFlux::Ainv(const ElemInfo & elem_info, const unsigned int component)
 
   const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
   return (*_Ainv_raw[component])(elem_dof);
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::reconstructedCellVelocityComponents() const
+{
+  mooseAssert(hasReconstructedCellVelocity(), "Reconstructed cell velocity is not ready.");
+
+  return _reconstructed_cell_velocity;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::HbyAComponents() const
+{
+  mooseAssert(!_HbyA_raw.empty(), "HbyA data is not ready.");
+
+  return _HbyA_raw;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::AinvComponents() const
+{
+  mooseAssert(!_Ainv_raw.empty(), "Ainv data is not ready.");
+
+  return _Ainv_raw;
 }
 
 unsigned int
@@ -1008,4 +1035,34 @@ bool
 RhieChowMassFlux::usingReconstructedPressureGradientMethod() const
 {
   return dynamic_cast<const FVReconstructedPressureGradient *>(&pressureGradientField().method());
+}
+
+void
+RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
+{
+  mooseAssert(_pressure_system,
+              "The pressure system should be linked before compatibility checks.");
+
+  if (_pressure_system->nVariables() != 1)
+    mooseError(
+        "FVReconstructedPressureGradient assumes the pressure and momentum systems each have "
+        "exactly one variable so their DOF indices can be used in vector operations. Pressure "
+        "system '",
+        _pressure_system->name(),
+        "' has variables: ",
+        Moose::stringify(_pressure_system->getVariableNames()));
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    const auto * const momentum_system = _momentum_systems[system_i];
+    mooseAssert(momentum_system, "Momentum system pointer should not be null.");
+
+    if (momentum_system->nVariables() != 1)
+      mooseError("FVReconstructedPressureGradient assumes the pressure and momentum systems each "
+                 "have exactly one variable so their DOF indices can be used in vector operations. "
+                 "Momentum system '",
+                 momentum_system->name(),
+                 "' has variables: ",
+                 Moose::stringify(momentum_system->getVariableNames()));
+  }
 }

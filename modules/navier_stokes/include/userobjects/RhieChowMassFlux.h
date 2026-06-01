@@ -65,6 +65,16 @@ public:
   /// Get one cell-centered 1/A component from the last H/A assembly.
   Real Ainv(const ElemInfo & elem_info, unsigned int component) const;
 
+  /// Get the pressure-layout reconstructed cell velocity component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  reconstructedCellVelocityComponents() const;
+
+  /// Get the momentum-layout H/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
+
+  /// Get the momentum-layout 1/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & AinvComponents() const;
+
   /// Relaxation factor for reconstructed cell velocities and pressure gradients.
   Real reconstructedPressureGradientRelaxation() const
   {
@@ -125,6 +135,9 @@ protected:
 
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
+
+  /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
+  void checkReconstructedPressureGradientCompatibility() const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();

@@ -97,8 +97,9 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     mooseError("FVReconstructedPressureGradient '", name(), "' has not been set up.");
 
   const auto & rc = *_rhie_chow_user_object;
+  const auto pressure_variable_number = rc.pressureVariableNumber();
   for (const auto variable_number : variable_numbers)
-    if (variable_number != rc.pressureVariableNumber())
+    if (variable_number != pressure_variable_number)
       mooseError("FVReconstructedPressureGradient '",
                  name(),
                  "' can only be used for the pressure variable registered on RhieChowMassFlux '",
@@ -115,31 +116,35 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
   _base_gradient_method->computeGradient(
       system, output_gradient, scratch_gradient, variable_numbers);
 
-  for (auto & component : output_gradient)
-    component->close();
+  const auto dim = system.feProblem().mesh().dimension();
+  const Real alpha = rc.reconstructedPressureGradientRelaxation();
+  const auto & reconstructed_cell_velocity = rc.reconstructedCellVelocityComponents();
+  const auto & HbyA = rc.HbyAComponents();
+  const auto & Ainv = rc.AinvComponents();
 
-  auto & mesh = system.feProblem().mesh();
-  for (const auto & elem_info : mesh.elemInfoVector())
+  mooseAssert(reconstructed_cell_velocity.size() == dim,
+              "Reconstructed cell velocity container must match the mesh dimension.");
+  mooseAssert(HbyA.size() == dim, "HbyA container must match the mesh dimension.");
+  mooseAssert(Ainv.size() == dim, "Ainv container must match the mesh dimension.");
+
+  for (const auto component : make_range(dim))
   {
-    if (!rc.hasFlowBlock(elem_info->subdomain_id()))
-      continue;
+    mooseAssert(
+        reconstructed_cell_velocity[component]->size() == output_gradient[component]->size(),
+        "Reconstructed cell velocity and pressure gradient vectors must have the same size.");
+    mooseAssert(HbyA[component]->size() == output_gradient[component]->size(),
+                "HbyA and pressure gradient vectors must have the same size.");
+    mooseAssert(Ainv[component]->size() == output_gradient[component]->size(),
+                "Ainv and pressure gradient vectors must have the same size.");
 
-    for (const auto variable_number : variable_numbers)
-    {
-      const auto dof = elem_info->dofIndices()[system.number()][variable_number];
-      for (const auto component : make_range(mesh.dimension()))
-      {
-        const Real base_gradient = (*output_gradient[component])(dof);
-        const Real Ainv = rc.Ainv(*elem_info, component);
-        const Real reconstructed_gradient =
-            Ainv != 0.0 ? (-rc.reconstructedCellVelocity(*elem_info, component) -
-                           rc.HbyA(*elem_info, component)) /
-                              Ainv
-                        : base_gradient;
-        const Real alpha = rc.reconstructedPressureGradientRelaxation();
-        output_gradient[component]->set(
-            dof, (1.0 - alpha) * base_gradient + alpha * reconstructed_gradient);
-      }
-    }
+    auto & reconstructed_gradient = *scratch_gradient[component];
+    reconstructed_gradient = *reconstructed_cell_velocity[component];
+    reconstructed_gradient.scale(-1.0);
+    reconstructed_gradient.add(-1.0, *HbyA[component]);
+    reconstructed_gradient.pointwise_divide(reconstructed_gradient, *Ainv[component]);
+
+    auto & gradient = *output_gradient[component];
+    gradient.scale(1.0 - alpha);
+    gradient.add(alpha, reconstructed_gradient);
   }
 }

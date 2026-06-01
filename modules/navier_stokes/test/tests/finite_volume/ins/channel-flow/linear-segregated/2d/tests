@@ -45,6 +45,26 @@
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []
+  [reconstructed-gradient-multi-variable-pressure-system]
+    type = 'RunException'
+    input = reconstructed-gradient-multi-variable-pressure-system.i
+    cli_args = 'pressure_gradient_method=reconstructed'
+    expect_err = "Pressure system 'pressure_system' has variables"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is used with a pressure system that has more than one variable."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-multi-variable-momentum-system]
+    type = 'RunException'
+    input = reconstructed-gradient-multi-variable-momentum-system.i
+    cli_args = 'pressure_gradient_method=reconstructed'
+    expect_err = "Momentum system 'u_system' has variables"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is used with a momentum system that has more than one variable."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i
