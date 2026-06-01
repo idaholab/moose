@@ -24,15 +24,7 @@ KernelBase::validParams()
   auto params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += MaterialPropertyInterface::validParams();
-
-  params.addParam<unsigned int>("num_local_residual_threads",
-                                2,
-                                "The number of threads for additional parallelization of local "
-                                "DOFs in residual calculation.");
-  params.addParam<unsigned int>("num_local_jacobian_threads",
-                                4,
-                                "The number of threads for additional parallelization of local "
-                                "DOFs in Jacobian calculation.");
+  params += LocalParallelInterface::validParams();
 
   // Kernels always couple within their element
   params.addRelationshipManager("ElementSideNeighborLayers",
@@ -49,19 +41,9 @@ KernelBase::KernelBase(const InputParameters & parameters, Moose::VarFieldType f
   : ResidualObject(parameters, field_type),
     BlockRestrictable(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS)
-#ifdef MOOSE_ENABLE_KOKKOS_GPU
-    ,
-    _num_local_residual_threads(getParam<unsigned int>("num_local_residual_threads")),
-    _num_local_jacobian_threads(getParam<unsigned int>("num_local_jacobian_threads"))
-#endif
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
+    LocalParallelInterface(this)
 {
-#ifndef MOOSE_ENABLE_KOKKOS_GPU
-  if (isParamSetByUser("num_local_residual_threads"))
-    paramWarning("num_local_residual_threads", "Ignored when using Kokkos CPU backend.");
-  if (isParamSetByUser("num_local_jacobian_threads"))
-    paramWarning("num_local_jacobian_threads", "Ignored when using Kokkos CPU backend.");
-#endif
 }
 
 KernelBase::KernelBase(const KernelBase & object)
@@ -69,8 +51,7 @@ KernelBase::KernelBase(const KernelBase & object)
     BlockRestrictable(object, {}),
     CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
     MaterialPropertyInterface(object, {}),
-    _num_local_residual_threads(object._num_local_residual_threads),
-    _num_local_jacobian_threads(object._num_local_jacobian_threads)
+    LocalParallelInterface(object)
 {
 }
 
