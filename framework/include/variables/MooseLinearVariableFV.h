@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
+#include "LinearFVGradientInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -22,6 +23,7 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
+#include <memory>
 #include <unordered_map>
 
 template <typename>
@@ -33,7 +35,6 @@ class FVDirichletBCBase;
 class FVFluxBC;
 class FVGradientMethod;
 class LinearFVBoundaryCondition;
-class LinearFVGradientField;
 class LinearSystem;
 
 namespace libMesh
@@ -103,23 +104,23 @@ public:
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Register this variable's default gradient method on the owning system and return its field.
+   * Register this variable's default gradient method on the owning system and return its reader.
    */
-  const LinearFVGradientField & computeCellGradients();
+  const LinearFVGradientReader & computeCellGradients();
 
   /**
-   * Register a named gradient method on the owning system and return its field.
+   * Register a named gradient method on the owning system and return its reader.
    *
    * An empty name requests this variable's default gradient method.
    * @param method_name Gradient method name to register for this variable.
    */
-  const LinearFVGradientField & computeCellGradients(const GradientMethodName & method_name);
+  const LinearFVGradientReader & computeCellGradients(const GradientMethodName & method_name);
 
   /**
-   * Register a specific gradient method on the owning system and return its field.
+   * Register a specific gradient method on the owning system and return its reader.
    * @param method Gradient method to register for this variable.
    */
-  const LinearFVGradientField & computeCellGradients(const FVGradientMethod & method);
+  const LinearFVGradientReader & computeCellGradients(const FVGradientMethod & method);
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -222,7 +223,7 @@ protected:
    * Register and cache a gradient method for this variable.
    * @param method Gradient method to register on the owning system.
    */
-  const LinearFVGradientField & registerCellGradientMethod(const FVGradientMethod & method);
+  const LinearFVGradientReader & registerCellGradientMethod(const FVGradientMethod & method);
 
   /**
    * Setup the boundary to Dirichlet BC map
@@ -241,11 +242,12 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Read-only handle to the default cell gradient stored by the owning concrete system.
-  const LinearFVGradientField * _gradient_field;
+  /// Read-only reader for the default cell gradient stored by the owning concrete system.
+  const LinearFVGradientReader * _gradient_reader;
 
-  /// Gradient field handles keyed by the methods that produced them.
-  std::unordered_map<const FVGradientMethod *, const LinearFVGradientField *> _gradient_field_cache;
+  /// Gradient readers keyed by the methods that produced them.
+  std::unordered_map<const FVGradientMethod *, std::unique_ptr<LinearFVGradientReader>>
+      _gradient_readers_by_method;
 
   /// Default gradient method registered when consumers request gradients from this variable.
   const GradientMethodName _default_gradient_method_name;

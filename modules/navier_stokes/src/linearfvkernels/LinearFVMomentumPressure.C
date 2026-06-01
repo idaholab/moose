@@ -57,7 +57,7 @@ LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
   return *ptr;
 }
 
-const LinearFVGradientField &
+const LinearFVGradientReader &
 LinearFVMomentumPressure::registerPressureGradientField()
 {
   if (!isParamValid("gradient_method"))

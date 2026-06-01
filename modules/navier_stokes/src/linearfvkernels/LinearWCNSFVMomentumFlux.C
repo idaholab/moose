@@ -436,7 +436,7 @@ LinearWCNSFVMomentumFlux::velocityVar(unsigned int dir) const
   return *_velocity_vars[dir];
 }
 
-const LinearFVGradientField &
+const LinearFVGradientReader &
 LinearWCNSFVMomentumFlux::velocityGradientField(unsigned int dir) const
 {
   mooseAssert(dir < _velocity_gradient_fields.size() && _velocity_gradient_fields[dir],
