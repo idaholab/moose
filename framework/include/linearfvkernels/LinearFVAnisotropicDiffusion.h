@@ -13,7 +13,7 @@
 #include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
 
-class LinearFVGradientField;
+class LinearFVGradientReader;
 
 /**
  * Kernel that adds contributions from an anisotropic diffusion term discretized using the finite
@@ -81,7 +81,7 @@ protected:
   const bool _use_nonorthogonal_correction_on_boundary;
 
   /// Gradient field used for internal and boundary anisotropic diffusion corrections.
-  const LinearFVGradientField & _gradient_field;
+  const LinearFVGradientReader & _gradient_field;
 
   /// The cached matrix contribution
   Real _flux_matrix_contribution;
