@@ -4,26 +4,26 @@
       "fill": "poly_material",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "-tri_prism_poly_surf_exp_0",
+        "-tri_prism_poly_surf_expanded_surf_0",
         "&",
-        "-tri_prism_poly_surf_exp_1",
+        "-tri_prism_poly_surf_expanded_surf_1",
         "&",
-        "-tri_prism_poly_surf_exp_2"
+        "-tri_prism_poly_surf_expanded_surf_2"
       ],
       "region_postfix": [
-        "tri_prism_poly_surf_exp_0",
+        "tri_prism_poly_surf_expanded_surf_0",
         "-",
-        "tri_prism_poly_surf_exp_1",
+        "tri_prism_poly_surf_expanded_surf_1",
         "-",
         "&",
-        "tri_prism_poly_surf_exp_2",
+        "tri_prism_poly_surf_expanded_surf_2",
         "-",
         "&"
       ]
     }
   },
   "surfaces": {
-    "tri_prism_poly_surf_exp_0": {
+    "tri_prism_poly_surf_expanded_surf_0": {
       "coefficients": {
         "a": 1.0,
         "b": 0.0,
@@ -32,7 +32,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "tri_prism_poly_surf_exp_1": {
+    "tri_prism_poly_surf_expanded_surf_1": {
       "coefficients": {
         "a": -0.49999999999999983,
         "b": 0.8660254037844387,
@@ -41,7 +41,7 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "tri_prism_poly_surf_exp_2": {
+    "tri_prism_poly_surf_expanded_surf_2": {
       "coefficients": {
         "a": -0.5000000000000004,
         "b": -0.8660254037844384,

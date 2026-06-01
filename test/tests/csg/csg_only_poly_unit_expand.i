@@ -3,6 +3,6 @@
     type = TestPolygonUnitMeshGenerator
     apothem = 4
     num_sides = 3
-    expand = true
+    expand_unit = true
   []
 []

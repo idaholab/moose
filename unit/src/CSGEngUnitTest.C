@@ -182,9 +182,10 @@ TEST(CSGEngUnitTest, testPolygonUnitSurfaceEval)
 
   // evaluate surface equation at point: test a point inside and 4 outside (one outside each face)
   // we only need to test that it correctly determines positive vs negative evaluation
-  Point p_in(1.0, 1.0, 1.0);
+  Point p_in(4.99, 4.99, 4.99);
   ASSERT_TRUE(0.0 > sq.evaluateSurfaceEquationAtPoint(p_in));
-  std::vector<Point> p_out = {{6.0, 0.0, 0.0}, {0.0, 6.0, 0.0}, {-6.0, 0.0, 0.0}, {0.0, -6.0, 0.0}};
+  std::vector<Point> p_out = {
+      {5.01, 0.0, 0.0}, {0.0, 5.01, 0.0}, {-5.01, 0.0, 0.0}, {0.0, -5.01, 0.0}};
   for (auto p : p_out)
     ASSERT_TRUE(0.0 < sq.evaluateSurfaceEquationAtPoint(p));
 }
@@ -209,7 +210,7 @@ TEST(CSGEngUnitTest, testPolygonUnitExpansion)
   std::vector<Real> b = {0.0, 1.0, 0.0, -1.0};
   for (int k = 0; k < num_sides; k++)
   {
-    std::string name = "test_square_exp_" + std::to_string(k);
+    std::string name = "test_square_expanded_surf_" + std::to_string(k);
     std::unordered_map<std::string, Real> coeffs = {
         {"a", a[k]}, {"b", b[k]}, {"c", 0.0}, {"d", apothem}};
     exp_coeffs.emplace(name, coeffs);

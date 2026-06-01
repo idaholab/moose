@@ -1241,7 +1241,7 @@ TEST(CSGBaseTest, testSurfEngUnitExpand)
   ASSERT_FALSE(csg_obj->hasEngUnit(name));
   for (int k = 0; k < 4; ++k)
   {
-    std::string new_name = name + "_exp_" + std::to_string(k);
+    std::string new_name = name + "_expanded_surf_" + std::to_string(k);
     ASSERT_TRUE(csg_obj->hasSurface(new_name));
   }
 
@@ -1290,8 +1290,8 @@ TEST(CSGBaseTest, testUseSurfEngUnit)
   auto post_surfs = post_reg.getSurfaces();
   ASSERT_EQ(4, post_surfs.size());
   std::string reg_str_out = infixJSONToString(post_reg.toInfixJSON());
-  std::string reg_str_exp = "(-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
-                            "-polygon_unit_exp_3)";
+  std::string reg_str_exp = "(-polygon_unit_expanded_surf_0 & -polygon_unit_expanded_surf_1 & "
+                            "-polygon_unit_expanded_surf_2 & -polygon_unit_expanded_surf_3)";
   ASSERT_EQ(reg_str_exp, reg_str_out);
   ASSERT_EQ("INTERSECTION", post_reg.getRegionTypeString());
 }
@@ -1319,8 +1319,8 @@ TEST(CSGBaseTest, testUseSurfEngUnitAsPos)
   // new region should be a complement of the negative "half-space" representation
   auto post_reg = cell.getRegion();
   std::string reg_str_out = infixJSONToString(post_reg.toInfixJSON());
-  std::string reg_str_exp = "(~ (-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
-                            "-polygon_unit_exp_3))";
+  std::string reg_str_exp = "(~ (-polygon_unit_expanded_surf_0 & -polygon_unit_expanded_surf_1 & "
+                            "-polygon_unit_expanded_surf_2 & -polygon_unit_expanded_surf_3))";
   ASSERT_EQ(reg_str_exp, reg_str_out);
   ASSERT_EQ("COMPLEMENT", post_reg.getRegionTypeString());
 }
@@ -1357,9 +1357,9 @@ TEST(CSGBaseTest, testUseSurfEngUnitComplex)
   // ultimately still be an intersection
   auto post_reg = cell.getRegion();
   std::string post_reg_str_out = infixJSONToString(post_reg.toInfixJSON());
-  std::string post_reg_str_exp =
-      "(~ (-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
-      "-polygon_unit_exp_3) & -plane)";
+  std::string post_reg_str_exp = "(~ (-polygon_unit_expanded_surf_0 & "
+                                 "-polygon_unit_expanded_surf_1 & -polygon_unit_expanded_surf_2 & "
+                                 "-polygon_unit_expanded_surf_3) & -plane)";
   ASSERT_EQ(post_reg_str_exp, post_reg_str_out);
   ASSERT_EQ("INTERSECTION", post_reg.getRegionTypeString());
 }
@@ -1502,7 +1502,7 @@ TEST(CSGBaseTest, testCellEngUnitAddErrors)
   // Note - this method of adding a cell is not done in practice as it is a private method, but
   // it is being tested for sake of robustness
 
-  // trying to unit via addCellToList will raise error
+  // trying to add unit via addCellToList will raise error
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // make the unit as a normal ref to use addCellToList (not done in practice)
   const auto & cu = FakeCellEngUnit("cell_unit");
@@ -1586,8 +1586,8 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
 
   // new cell should belong to the extra universe and root
   ASSERT_TRUE(univ.hasCell(cell_expanded.getName()));
-  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell(
-      cell_expanded.getName())); // root should still not contain new cell
+  ASSERT_TRUE(
+      csg_obj->getRootUniverse().hasCell(cell_expanded.getName())); // root should contain new cell
 
   // new cell should also have the transformations applied
   std::pair<TransformationType, std::tuple<Real, Real, Real>> exp_trans = {
@@ -1600,7 +1600,7 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
 /// tests addEngUnit for universe-type units
 TEST(CSGBaseTest, testUniverseEngUnitAdd)
 {
-  // make a cell engineering unit
+  // make a universe engineering unit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_unit");
   const auto & unit = csg_obj->addEngUnit(std::move(uptr));
@@ -1714,10 +1714,10 @@ TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
 /// tests error is raised via addUniverseToList (private) for engineering units
 TEST(CSGBaseTest, testUnivEngUnitAddErrors)
 {
-  // Note - this method of adding a unievrse is not done in practice as it is a private method, but
+  // Note - this method of adding a universe is not done in practice as it is a private method, but
   // it is being tested for sake of robustness
 
-  // trying to unit via addUniverseToList will raise error
+  // trying to add unit via addUniverseToList will raise error
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // make the unit as a normal ref to use addUniverseToList (not done in practice)
   const auto & unit = FakeUnivEngUnit("universe_unit");
@@ -1908,7 +1908,7 @@ TEST(CSGBaseTest, testExpandAllUnits)
 /// to be subsequently expanded as well.
 TEST(CSGBaseTest, testExpandAllRecursive)
 {
-  // create a FakeUnivEngUnit which should cause a double recursion during expansion.
+  // create a FakeUnivEngUnit which should cause a recursion of depth 2 during expansion.
   //  - FakeUnivEngUnit will create FakeCellEngUnit
   //  - FakeCellEngUnit will create FakeSurfEngUnit
 
