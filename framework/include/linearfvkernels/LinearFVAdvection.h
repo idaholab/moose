@@ -13,7 +13,7 @@
 #include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
 
-class LinearFVGradientField;
+class LinearFVGradientReader;
 
 /**
  * Kernel that adds contributions from an advection term discretized using the finite volume method
@@ -53,7 +53,7 @@ protected:
   const FVAdvectedInterpolationMethod & _adv_interp_method;
 
   /// Gradient field used by advected interpolations that require gradients.
-  const LinearFVGradientField * const _gradient_field;
+  const LinearFVGradientReader * const _gradient_field;
 
   /// Cached weights/correction for the current face (refreshed in setupFaceData)
   FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
