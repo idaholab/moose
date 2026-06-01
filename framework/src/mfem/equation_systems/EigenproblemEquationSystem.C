@@ -43,14 +43,13 @@ EigenproblemEquationSystem::FormEigenproblemMatrix()
 void
 EigenproblemEquationSystem::FormMassMatrix()
 {
-  mfem::ConstantCoefficient one(1.0);
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-    m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+    m->AddDomainIntegrator(new mfem::MassIntegrator(_rhs_coef));
   else
-    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
+    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_rhs_coef));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the

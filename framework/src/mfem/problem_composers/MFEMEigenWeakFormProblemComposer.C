@@ -23,11 +23,12 @@ MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  if (!dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
+  auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&mfem_problem);
+  if (!eigen_problem)
     mooseError("Not an eigenvalue problem. ");
 
   mfem_problem.getProblemData().eqn_system =
-      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(eigen_problem->getRHSCoefficient());
   return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
 }
 
