@@ -14,7 +14,7 @@
 #include "SIMPLESolveBase.h"
 #include "CHTHandler.h"
 
-class LinearFVGradientField;
+class LinearFVGradientReader;
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
