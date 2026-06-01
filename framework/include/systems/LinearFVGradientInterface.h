@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "GradientLimiterType.h"
 
 #include "libmesh/utility.h"
 
@@ -59,15 +58,6 @@ public:
 
   /// Method object that produces the stored values.
   const FVGradientMethod & method() const { return _method; }
-
-  /// Variable number whose gradients are read by this object.
-  unsigned int variableNumber() const { return _variable_number; }
-
-  /// Whether this reader accesses limited gradients.
-  bool isLimited() const { return limiterType() != Moose::FV::GradientLimiterType::None; }
-
-  /// Limiter type for limited fields, or None for unlimited fields.
-  Moose::FV::GradientLimiterType limiterType() const;
 
   /**
    * Read one gradient component at an element.
@@ -144,7 +134,7 @@ protected:
   void rebuildLinearFVGradientStorage();
 
   /// Whether any linear finite-volume gradient fields have been registered on this system.
-  bool needsLinearFVGradientStorage() const;
+  bool hasLinearFVGradients() const;
 
   /**
    * Allocate one zeroed vector per spatial component for gradient storage.
@@ -161,18 +151,6 @@ protected:
     /// Persistent gradient values read by consumers.
     GradientContainer values;
   };
-
-  /**
-   * Find or create the container associated with a gradient method.
-   * @param method Gradient method whose container should be used.
-   */
-  LinearFVGradientContainer & linearFVGradientContainer(const FVGradientMethod & method);
-
-  /**
-   * Allocate persistent vectors for a registered gradient method.
-   * @param container Method container whose values should be rebuilt.
-   */
-  void initializeLinearFVGradientValues(LinearFVGradientContainer & container);
 
   /**
    * Recompute the field values for a registered gradient method.
