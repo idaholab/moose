@@ -398,38 +398,6 @@ RhieChowMassFlux::hasReconstructedCellVelocity() const
   return _reconstructed_cell_velocity_ready && !_reconstructed_cell_velocity.empty();
 }
 
-Real
-RhieChowMassFlux::reconstructedCellVelocity(const ElemInfo & elem_info,
-                                            const unsigned int component) const
-{
-  mooseAssert(component < _dim,
-              "Requested reconstructed cell velocity component exceeds the mesh dimension.");
-  mooseAssert(hasReconstructedCellVelocity(), "Reconstructed cell velocity is not ready.");
-
-  const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][_p->number()];
-  return (*_reconstructed_cell_velocity[component])(elem_dof);
-}
-
-Real
-RhieChowMassFlux::HbyA(const ElemInfo & elem_info, const unsigned int component) const
-{
-  mooseAssert(component < _dim, "Requested HbyA component exceeds the mesh dimension.");
-  mooseAssert(component < _HbyA_raw.size(), "HbyA data is not ready.");
-
-  const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-  return (*_HbyA_raw[component])(elem_dof);
-}
-
-Real
-RhieChowMassFlux::Ainv(const ElemInfo & elem_info, const unsigned int component) const
-{
-  mooseAssert(component < _dim, "Requested Ainv component exceeds the mesh dimension.");
-  mooseAssert(component < _Ainv_raw.size(), "Ainv data is not ready.");
-
-  const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
-  return (*_Ainv_raw[component])(elem_dof);
-}
-
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::reconstructedCellVelocityComponents() const
 {

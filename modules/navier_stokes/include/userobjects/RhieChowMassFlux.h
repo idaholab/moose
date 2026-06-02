@@ -56,15 +56,6 @@ public:
   /// Whether reconstructed cell velocities are ready for the gradient method to consume.
   bool hasReconstructedCellVelocity() const;
 
-  /// Get one reconstructed cell velocity component at a cell center.
-  Real reconstructedCellVelocity(const ElemInfo & elem_info, unsigned int component) const;
-
-  /// Get one cell-centered H/A component from the last H/A assembly.
-  Real HbyA(const ElemInfo & elem_info, unsigned int component) const;
-
-  /// Get one cell-centered 1/A component from the last H/A assembly.
-  Real Ainv(const ElemInfo & elem_info, unsigned int component) const;
-
   /// Get the pressure-layout reconstructed cell velocity component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> &
   reconstructedCellVelocityComponents() const;
@@ -83,9 +74,6 @@ public:
 
   /// Variable number of the pressure variable reconstructed by this object.
   unsigned int pressureVariableNumber() const;
-
-  /// Whether a subdomain is part of the flow blocks handled by this object.
-  bool hasFlowBlock(const SubdomainID subdomain_id) const { return hasBlocks(subdomain_id); }
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
