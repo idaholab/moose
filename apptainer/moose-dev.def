@@ -371,7 +371,7 @@ EOF
             fi
             # Expose the cuda headers if we haven't already
             if [[ "${CPATH:-}" != *"${CUDA_DIR}/include"* ]]; then
-                export CPATH=${CUDA_DIR}/include:${CPATH}
+                export CPATH=${CUDA_DIR}/include:${CPATH:-}
             fi
         fi
 
