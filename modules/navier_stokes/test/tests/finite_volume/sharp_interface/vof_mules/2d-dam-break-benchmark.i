@@ -49,7 +49,10 @@ c_alpha = 0.01
         volume_fraction_functor = 'alpha'
         reference_pressure_point = '0 ${domain_dims_y} 0'
         surface_tension_coefficient = '0'
-        create_curvature_producer = false
+        create_curvature_producer = true
+        curvature_delta_n_mode = 'fixed'
+        curvature_delta_n_fixed_value = 7.88307825360258e-07
+        n_alpha_smooth_curvature = 0
 
         initial_velocity = '0 0 0'
         initial_pressure = 'pressure_init'
@@ -88,6 +91,7 @@ c_alpha = 0.01
         alpha_apply_prev_corr = false
         n_alpha_corrections = 1
         n_limiter_iterations = 6
+        use_cell_summed_mules_limiter = true
       []
     []
   []
@@ -154,7 +158,7 @@ c_alpha = 0.01
 
   should_solve_momentum = false
   num_iterations = 1
-  num_piso_iterations = 2
+  num_piso_iterations = 1
   num_pressure_nonorthogonal_correctors = 0
   continue_on_max_its = true
   print_fields = false

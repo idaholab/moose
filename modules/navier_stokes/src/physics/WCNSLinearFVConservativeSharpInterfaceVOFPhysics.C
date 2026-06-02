@@ -132,7 +132,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       "guess on the next alpha solve, matching interFoam's alphaApplyPrevCorr lifecycle.");
   params.addParam<bool>(
       "use_cell_summed_mules_limiter",
-      false,
+      true,
       "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to use a classic per-cell summed MULES "
       "limiter instead of sequential face-budget depletion.");
   params.addParam<bool>("debug_dump_subcycle",
@@ -304,16 +304,23 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMaterials()
   {
     auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
     assignBlocks(params, _blocks);
-    params.set<std::vector<MooseFunctorName>>("prop_names") = {_mixture_density_name,
-                                                               _mixture_dynamic_viscosity_name};
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_liquid_density_name,
-                                                                  _liquid_dynamic_viscosity_name};
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_gas_density_name,
-                                                                  _gas_dynamic_viscosity_name};
+    params.set<std::vector<MooseFunctorName>>("prop_names") = {_mixture_density_name};
+    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_liquid_density_name};
+    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_gas_density_name};
+    params.set<MooseFunctorName>("phase_1_fraction") = _alpha_name;
+    params.set<bool>("limit_phase_fraction") = false;
+    getProblem().addMaterial(
+        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_density", params);
+
+    params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
+    assignBlocks(params, _blocks);
+    params.set<std::vector<MooseFunctorName>>("prop_names") = {_mixture_dynamic_viscosity_name};
+    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_liquid_dynamic_viscosity_name};
+    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_gas_dynamic_viscosity_name};
     params.set<MooseFunctorName>("phase_1_fraction") = _alpha_name;
     params.set<bool>("limit_phase_fraction") = true;
     getProblem().addMaterial(
-        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_properties", params);
+        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_dynamic_viscosity", params);
   }
 }
 

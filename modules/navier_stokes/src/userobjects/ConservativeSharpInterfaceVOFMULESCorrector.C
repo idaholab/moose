@@ -92,7 +92,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       "the next alpha solve, mirroring interFoam's alphaApplyPrevCorr lifecycle.");
   params.addParam<bool>(
       "use_cell_summed_mules_limiter",
-      false,
+      true,
       "Use a classic cell-summed MULES-style limiter based on per-cell positive/negative "
       "correction totals instead of sequential face-budget depletion.");
   params.addParam<Real>("min_value", 0.0, "Lower admissible volume-fraction bound.");
@@ -736,47 +736,15 @@ ConservativeSharpInterfaceVOFMULESCorrector::compressionFlux(const FaceInfo & fi
   const RealVectorValue face_unit_normal =
       face_normal_mag > 0.0 ? face_normal / face_normal_mag : RealVectorValue();
   const RealVectorValue interface_normal = MetaPhysicL::raw_value(_interface_normal(face_arg, state));
-  // Mirror the classic interFoam compression branch more closely:
-  // alphaPhi = flux(phi, alpha1) + flux(-flux(-phir, alpha2), alpha1)
-  //
-  // For an internal face, the nested compression contribution reduces to a
-  // directional product of upwind alpha1 and downwind alpha2 = 1 - alpha1.
-  // This is less aggressive than the centered alpha_f*(1-alpha_f) form and
-  // keeps the published alphaPhi/rhoPhi on mixed stencil faces aligned with
-  // the same upwind/downwind ownership as interFoam.
-  const Real phir = std::abs(_mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi)) *
-                    MetaPhysicL::raw_value(_compression_factor(face_arg, state)) *
-                    (interface_normal * face_unit_normal);
-
-  if (std::abs(phir) <= libMesh::TOLERANCE)
-    return 0.0;
-
   const Real bounded_elem_alpha = boundedAlpha(elem_alpha);
   const Real bounded_neighbor_alpha = boundedAlpha(neighbor_alpha);
-  const Real elem_alpha2 = boundedAlpha(1.0 - bounded_elem_alpha);
-  const Real neighbor_alpha2 = boundedAlpha(1.0 - bounded_neighbor_alpha);
+  const Real alpha_face = 0.5 * (bounded_elem_alpha + bounded_neighbor_alpha);
+  const Real compressive_speed =
+      std::abs(_mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi)) *
+      MetaPhysicL::raw_value(_compression_factor(face_arg, state)) *
+      (interface_normal * face_unit_normal);
 
-  // Mirror interFoam's nested compression operator explicitly:
-  //   flux(-flux(-phir, alpha2), alpha1)
-  // using the same face-value reconstruction family as the explicit alpha
-  // correction path instead of collapsing it into a single product.
-  const Real inner_alpha2 =
-      faceValueForCarrierFlux(fi,
-                              -phir,
-                              elem_alpha2,
-                              neighbor_alpha2,
-                              BoundaryFaceKind::Internal,
-                              false);
-  const Real compressive_carrier_flux = -((-phir) * inner_alpha2);
-  const Real outer_alpha1 =
-      faceValueForCarrierFlux(fi,
-                              compressive_carrier_flux,
-                              bounded_elem_alpha,
-                              bounded_neighbor_alpha,
-                              BoundaryFaceKind::Internal,
-                              false);
-
-  return compressive_carrier_flux * outer_alpha1 * faceMeasure(fi);
+  return compressive_speed * alpha_face * (1.0 - alpha_face) * faceMeasure(fi);
 }
 
 Real
@@ -1020,6 +988,48 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     }
 
     if (_use_cell_summed_mules_limiter)
+    {
+      std::unordered_map<dof_id_type, Real> local_upper_bound;
+      std::unordered_map<dof_id_type, Real> local_lower_bound;
+
+      const auto initialize_local_bounds = [&](const dof_id_type dof)
+      {
+        if (local_upper_bound.count(dof))
+          return;
+
+        local_upper_bound.emplace(dof, _min_value);
+        local_lower_bound.emplace(dof, _max_value);
+      };
+
+      const auto widen_local_bounds = [&](const dof_id_type dof, const Real alpha)
+      {
+        initialize_local_bounds(dof);
+        const Real bounded_alpha = boundedAlpha(alpha);
+        local_upper_bound[dof] = std::max(local_upper_bound[dof], bounded_alpha);
+        local_lower_bound[dof] = std::min(local_lower_bound[dof], bounded_alpha);
+      };
+
+      for (const auto & data : face_corrections)
+      {
+        initialize_local_bounds(data.elem_dof);
+        if (data.has_neighbor)
+          initialize_local_bounds(data.neighbor_dof);
+
+        if (data.boundary_kind == BoundaryFaceKind::Internal)
+        {
+          widen_local_bounds(data.elem_dof, data.neighbor_alpha);
+          widen_local_bounds(data.neighbor_dof, data.elem_alpha);
+        }
+        else if (data.boundary_kind == BoundaryFaceKind::DirichletInflow ||
+                 data.boundary_kind == BoundaryFaceKind::DirichletOutflow)
+          widen_local_bounds(data.elem_dof, data.neighbor_alpha);
+      }
+
+      for (auto & pair : local_upper_bound)
+        pair.second = std::min(pair.second, _max_value);
+      for (auto & pair : local_lower_bound)
+        pair.second = std::max(pair.second, _min_value);
+
       for (const auto limiter_it : make_range(_num_limiter_iterations))
       {
         (void)limiter_it;
@@ -1036,8 +1046,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
             return;
 
           const Real alpha = boundedAlpha(current_local_solution(dof));
-          q_pos.emplace(dof, _max_value - alpha);
-          q_neg.emplace(dof, alpha - _min_value);
+          q_pos.emplace(dof, std::max(0.0, local_upper_bound[dof] - alpha));
+          q_neg.emplace(dof, std::max(0.0, alpha - local_lower_bound[dof]));
           sum_pos.emplace(dof, 0.0);
           sum_neg.emplace(dof, 0.0);
         };
@@ -1121,6 +1131,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
         if (!changed_lambda)
           break;
       }
+    }
     else
       for (const auto limiter_it : make_range(_num_limiter_iterations))
       {
@@ -1287,12 +1298,17 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
                       published_accumulated_correction_fluxes,
                       subcycle_fraction);
 
-    for (auto & pair : _alpha_phi_corr_prev)
-      pair.second = 0.0;
+    if (_alpha_apply_prev_corr)
+      for (auto & pair : _alpha_phi_corr_prev)
+        pair.second = 0.0;
+    else
+      invalidatePreviousCorrectionFluxes();
+
     for (const auto i : index_range(published_face_corrections))
     {
-      _alpha_phi_corr_prev[published_face_corrections[i].face->id()] =
-          published_accumulated_correction_fluxes[i];
+      if (_alpha_apply_prev_corr)
+        _alpha_phi_corr_prev[published_face_corrections[i].face->id()] =
+            published_accumulated_correction_fluxes[i];
       _alpha_phi_working_before_debug[published_face_corrections[i].face->id()] =
           published_working_alpha_fluxes_before[i];
       _alpha_phi_target_debug[published_face_corrections[i].face->id()] =
@@ -1302,7 +1318,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
       _alpha_phi_lambda_debug[published_face_corrections[i].face->id()] =
           published_accepted_lambda[i];
     }
-    _previous_correction_flux_valid = true;
+    _previous_correction_flux_valid = _alpha_apply_prev_corr;
 
     if (_debug_dump_subcycle && (!_debug_only_first_subcycle || _subcycle_counter == 1))
       dumpFaceDebug(published_face_corrections,
