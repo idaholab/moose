@@ -209,8 +209,9 @@ EOF
         # Clone pytorch for build
         cd ${ROOT_BUILD_DIR}
         PYTORCH_SRC_DIR=${ROOT_BUILD_DIR}/pytorch
-        git clone --branch v${PYTORCH_VERSION} --single-branch \
-            --recursive https://github.com/pytorch/pytorch ${PYTORCH_SRC_DIR}
+        git clone --branch v${PYTORCH_VERSION} \
+            --single-branch --recurse-submodules --shallow-submodules \
+            https://github.com/pytorch/pytorch ${PYTORCH_SRC_DIR}
 
         # Create a temporary python environment for building libtorch
         LIBTORCH_BUILD_VENV=${ROOT_BUILD_DIR}/pytorch_venv
