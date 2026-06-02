@@ -1,8 +1,8 @@
 {#- Required jinja arguments                                                                  -#}
 {#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 
-{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
 {#- The files directory for this definition                                                   -#}
