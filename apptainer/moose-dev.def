@@ -191,11 +191,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         # Install uv
         UV_BIN_DIR=${UV_DIR}/bin
+        XDG_DATA_HOME=${UV_DIR}/data
         mkdir -p ${UV_BIN_DIR} ${XDG_DATA_HOME}
-        curl -LsSf https://astral.sh/uv/install.sh | XDG_DATA_HOME=${UV_DIR}/data XDG_BIN_HOME=${UV_BIN_DIR} sh
+        curl -LsSf https://astral.sh/uv/install.sh | XDG_DATA_HOME=${XDG_DATA_HOME} XDG_BIN_HOME=${UV_BIN_DIR} sh
 
         # Use uv to create a python venv and verify the version
-        XDG_DATA_HOME=${UV_DIR}/data ${UV_BIN_DIR}/uv venv ${PYTHON_DIR} --no-project --no-config --relocatable --no-cache --python "${PYTHON_VERSION%.*}"
+        XDG_DATA_HOME=${XDG_DATA_HOME} ${UV_BIN_DIR}/uv venv ${PYTHON_DIR} --no-project --no-config --relocatable --no-cache --python "${PYTHON_VERSION%.*}"
         ${PYTHON_DIR}/bin/python
         ${PYTHON_DIR}/bin/python --version | grep -q "Python ${PYTHON_VERSION}"
 
@@ -206,7 +207,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 #
 # Derived containers should be able to run "pip install ..."
 # to install additional python packages
-export XDG_DATA_HOME=${UV_DIR}/data
+export XDG_DATA_HOME=${XDG_DATA_HOME}
 export UV_PYTHON=${PYTHON_DIR}
 export UV_NO_CACHE=1
 export UV_LINK_MODE=copy
