@@ -29,9 +29,7 @@ From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-gcc:8.10-gcc13.3.1
     export LC_ALL=C
 
     # Environment from underyling docker image
-    if [ -f "/moose_env.sh" ]; then
-        source /moose_env.sh
-    fi
+    test -f /moose_env.sh && . /moose_env.sh
 
 %post
     umask 022

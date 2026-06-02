@@ -54,6 +54,8 @@
 {%- set UV_DIR = '/opt/uv' -%}
 {#- The installation location for python                                                      -#}
 {%- set PYTHON_DIR = '/opt/python' -%}
+{#- The installation location for code-server                                                 -#}
+{%- set CODE_SERVER_DIR = '/opt/code-server' -%}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
@@ -73,21 +75,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export PATH=${WASP_DIR}/bin:$PATH
 
 {%- if WITH_MFEM %}
-    if [ -d "{{ CONDUIT_DIR }}" ]; then
-        export CONDUIT_DIR={{ CONDUIT_DIR }}
-    fi
-    if [ -d "{{ MFEM_DIR }}" ]; then
-        export MFEM_DIR={{ MFEM_DIR }}
-    fi
+    test -d {{ CONDUIT_DIR }} && export CONDUIT_DIR={{ CONDUIT_DIR }}
+    test -d {{ MFEM_DIR }} && export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    if [ -d "{{ LIBTORCH_DIR }}" ]; then
-        export LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    fi
-    if [ -d "{{ NEML2_DIR }}" ]; then
-        export NEML2_DIR={{ NEML2_DIR }}
-    fi
+    test -d {{ LIBTORCH_DIR }} && export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+    test -d {{ NEML2_DIR }} && export NEML2_DIR={{ NEML2_DIR }}
 {%- endif %}
 
 {% if PROFILING is defined %}
@@ -149,20 +143,19 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
     rpm -i ${CODE_SERVER_FILE}
     rm ${CODE_SERVER_FILE}
-
     # Setup directory for code-server extensions. The extensions folder can be
     # filled by other applications as they wish to have extensions auto installed
     # by the "setup-code-server-extensions" script (in PATH)
-    mkdir /opt/code-server/extensions
+    CODE_SERVER_DIR={{ CODE_SERVER_DIR }}
+    mkdir ${CODE_SERVER_DIR}/extensions
     # Download extensions for code-server, currently just moose language support
     MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
-    cd /opt/code-server/extensions
+    cd ${CODE_SERVER_DIR}/extensions
     curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
-
     # Setup permissions for the code server extras
-    find /opt/code-server -type d -exec chmod 755 {} +
-    chmod 755 /opt/code-server/bin/*
-    chmod 644 /opt/code-server/extensions/*
+    find ${CODE_SERVER_DIR} -type d -exec chmod 755 {} +
+    chmod 755 ${CODE_SERVER_DIR}/bin/*
+    chmod 644 ${CODE_SERVER_DIR}/extensions/*
 
     # Need to expose cuda compat libs when using mpich with cuda to run mpicc
     if [ -n "$CUDA_DIR" ] && ! which ompi_info &> /dev/null; then
