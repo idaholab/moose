@@ -6,7 +6,7 @@
 #
 beautifulsoup4
 black==26.5.1
-clang-format==19.1.7
+clang-format==22.1.5
 coverage==7.13.2
 deepdiff
 git-lfs
