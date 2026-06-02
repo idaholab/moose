@@ -1170,7 +1170,7 @@ TEST(CSGBaseTest, testSurfEngUnitRenameErrors)
 /// tests error is raised via addSurface for engineering units
 TEST(CSGBaseTest, testSurfEngUnitAddErrors)
 {
-  // trying to unit via addSurface will raise error
+  // trying to add unit via addSurface will raise error
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // make the unit a surface pointer instead so that we can try to add it via addSurface
   std::unique_ptr<CSGSurface> poly_ptr = std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
