@@ -43,11 +43,10 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _accept_mult(getParam<Real>("acceptable_multiplier")),
     _accept_iters(getParam<unsigned int>("acceptable_iterations")),
     _reference_vector(nullptr),
-    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _zero_ref_type(
         getParam<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>()),
-    _reference_vector_tag_id(Moose::INVALID_TAG_ID),
-    _initialized(false)
+    _unscale_the_residual(getParam<bool>("unscale_the_residual")),
+    _reference_vector_tag_id(Moose::INVALID_TAG_ID)
 {
   if (parameters.isParamValid("reference_vector"))
   {
@@ -115,11 +114,12 @@ ReferenceResidualConvergence::initialSetup()
   const auto n_soln_vars = _soln_var_names.size();
   _variable_group_num_index.resize(n_soln_vars);
 
-  if (!_converge_on.empty())
+  const auto converge_on = getParam<std::vector<NonlinearVariableName>>("converge_on");
+  if (!converge_on.empty())
   {
     _converge_on_var.assign(n_soln_vars, false);
     for (std::size_t i = 0; i < n_soln_vars; ++i)
-      for (const auto & c : _converge_on)
+      for (const auto & c : converge_on)
         if (MooseUtils::globCompare(_soln_var_names[i], c))
         {
           _converge_on_var[i] = true;
@@ -300,7 +300,6 @@ ReferenceResidualConvergence::initialSetup()
       else
         _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
   }
-  _initialized = true;
 }
 
 void
@@ -370,9 +369,6 @@ ReferenceResidualConvergence::updateReferenceResidual()
 void
 ReferenceResidualConvergence::nonlinearConvergenceSetup()
 {
-  if (!_initialized)
-    initialSetup();
-
   updateReferenceResidual();
 
   std::ostringstream out;

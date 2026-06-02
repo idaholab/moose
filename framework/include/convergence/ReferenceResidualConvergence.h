@@ -123,8 +123,6 @@ protected:
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
 
-  /// Variables to use for individual variable convergence checks
-  std::vector<NonlinearVariableName> _converge_on;
   /// Flag for each solution variable being in 'converge_on'
   std::vector<bool> _converge_on_var;
 
@@ -139,6 +137,4 @@ protected:
 
   /// The reference vector tag id
   TagID _reference_vector_tag_id;
-
-  bool _initialized;
 };
