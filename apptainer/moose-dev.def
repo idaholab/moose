@@ -200,6 +200,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         ${PYTHON_DIR}/bin/python
         ${PYTHON_DIR}/bin/python --version | grep -q "Python ${PYTHON_VERSION}"
 
+        # Setup python development environment from uv environment
+        UV_PYTHON_DIR="$(realpath "$(dirname "$(realpath "${PYTHON_DIR}/bin/python${PYTHON_VERSION%.*}")")/..")"
+        ln -s "${UV_PYTHON_DIR}/bin/python3-config" "${PYTHON_DIR}/bin/"
+        ln -s "${UV_PYTHON_DIR}/bin/python${PYTHON_VERSION%.*}-config" "${PYTHON_DIR}/bin/"
+        ln -s "${UV_PYTHON_DIR}/include" "${PYTHON_DIR}/"
+
         # Setup helper script for running [pip, pip3]
         cat <<EOF > "${PYTHON_DIR}/bin/pip"
 #!/bin/bash
