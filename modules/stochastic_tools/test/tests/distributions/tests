@@ -87,6 +87,15 @@
 
       detail = 'normal,'
     []
+
+    [maxwellian]
+      type = CSVDiff
+      input = maxwellian.i
+      csvdiff = 'maxwellian_out.csv'
+      allow_test_objects = true
+      detail = 'maxwellian,'
+    []
+
     [truncated_normal]
       type = CSVDiff
       input = truncated_normal.i
