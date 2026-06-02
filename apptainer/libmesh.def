@@ -36,6 +36,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 %environment
     export LIBMESH_DIR={{ LIBMESH_DIR }}
+    export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
+    export VTKLIB_DIR={{ VTK_DIR }}/lib
 
 %post
     # So that piping things to tee fails
