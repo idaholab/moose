@@ -35,7 +35,7 @@ To avoid naming conflicts between units and other `CSGBase` components during th
 
 ### Unit Attributes
 
-The engineering unit attributes at a minimum are any pieces of data that are needed for a complete definition of the unit for any downstream connected codes or defining the expansion method.
+The engineering unit attributes at a minimum are any pieces of data that are needed for a complete definition of the unit for any downstream connected codes or for defining the expansion method.
 For example, the minimum required information to include in the attributes for a regular N-sided polygon is the number of sides `N` and the `apothem` (center-to-flat distance).
 These attributes are what get returned in a map using the `getAttributes()` method, which gets called when producing the [!ac](CSG) [!ac](JSON) object in [source/csg/CSGBase.md].
 
