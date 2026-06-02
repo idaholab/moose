@@ -56,8 +56,9 @@ test functions:
 Substituting these expansions back into the example weak form ([example_weak_form]) yields:
 
 !equation id=example_weak_form2
-\left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle +
-\left(\psi_i, \vec{\beta} \cdot \nabla u_h\right) - \left(\psi_i, f\right) = 0, \quad i=1,\ldots,N
+\left(\nabla\psi_i, k\nabla u_h \right) - \langle\psi_i, k\nabla u_h\cdot \hat{n} \rangle -
+\left(\nabla\psi_i, \vec{\beta} u_h\right) + \langle\psi_i, \left(\vec{\beta} u_h\right)\cdot \hat{n} \rangle -
+\left(\psi_i, f\right) = 0, \quad i=1,\ldots,N
 
 The left-hand side of the equation above is referred to as the $i^{th}$ component of
 the "residual vector," $\vec{R}_i(u_h)$.
@@ -72,7 +73,7 @@ Individual shape functions are restrictions of the global basis functions to ind
 They are analogous to the $x^n$ functions from polynomial fitting (in fact, you can use those as
 shape functions).
 
-Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Toucher
+Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Tocher
 
 Lagrange shape functions are the most common, which are interpolatory at the nodes, i.e., the
 coefficients correspond to the values of the functions at the nodes.
