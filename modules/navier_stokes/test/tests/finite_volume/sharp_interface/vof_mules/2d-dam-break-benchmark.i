@@ -12,10 +12,16 @@ mu_g = 1.48e-5
 g = 9.81
 
 initial_length = 0.05715
-domain_dims_x = ${fparse 5.0 * initial_length}
-domain_dims_y = ${fparse 1.25 * initial_length}
+aspect_ratio = 1.0
+downstream_domain_lengths = 7.0
+vertical_domain_factor = 1.25
+nx = 280
+ny = 50
 dam_x = ${initial_length}
-dam_y = ${initial_length}
+dam_y = ${fparse aspect_ratio * initial_length}
+domain_dims_x = ${fparse downstream_domain_lengths * initial_length}
+domain_dims_y = ${fparse vertical_domain_factor * dam_y}
+cell_dx = ${fparse domain_dims_x / nx}
 
 c_alpha = 0.01
 
@@ -25,8 +31,8 @@ c_alpha = 0.01
     dim = 2
     dx = '${domain_dims_x}'
     dy = '${domain_dims_y}'
-    ix = '200'
-    iy = '50'
+    ix = '${nx}'
+    iy = '${ny}'
   []
 []
 
@@ -232,6 +238,36 @@ c_alpha = 0.01
     reported_extremum_type = max
     tip_band_width = '${fparse 2.0 * domain_dims_x / 200.0}'
     threshold = 0.5
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_front_length_over_initial]
+    type = ParsedPostprocessor
+    expression = 'x / ${dam_x}'
+    pp_names = 'compute_front_length_subcell'
+    pp_symbols = 'x'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_back_column_height]
+    type = SubcellInterfacialPosition
+    volume_fraction = alpha
+    direction = y
+    extremum_type = max
+    threshold = 0.5
+    secondary_min = 0
+    secondary_max = '${fparse 2.5 * cell_dx}'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_back_column_height_over_initial]
+    type = ParsedPostprocessor
+    expression = 'h / ${dam_y}'
+    pp_names = 'compute_back_column_height'
+    pp_symbols = 'h'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [nondimensional_time_tau]
+    type = ParsedPostprocessor
+    expression = 't * sqrt(${g} / ${dam_x})'
+    use_t = true
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [total_alpha]
