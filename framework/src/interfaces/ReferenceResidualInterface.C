@@ -16,8 +16,6 @@ ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "solution_variables", "Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<AuxVariableName>>(
       "reference_residual_variables",
       "Set of variables that provide reference residuals for relative convergence check");
@@ -75,8 +73,7 @@ ReferenceResidualInterface::validParams()
                               "Acceptable convergence");
   params.addParamNamesToGroup("reference_vector reference_residual_variables",
                               "Reference residual");
-  params.addParamNamesToGroup("solution_variables group_variables",
-                              "Variables to check for convergence");
+  params.addParamNamesToGroup("group_variables", "Variables to check for convergence");
 
   return params;
 }

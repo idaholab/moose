@@ -47,15 +47,6 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _reference_vector_tag_id(Moose::INVALID_TAG_ID),
     _initialized(false)
 {
-  if (parameters.isParamValid("solution_variables"))
-  {
-    if (parameters.isParamValid("reference_vector"))
-      mooseDeprecated("The `solution_variables` parameter is deprecated, has no effect when "
-                      "the tagging system is used, and will be removed on January 1, 2020. "
-                      "Please simply delete this parameter from your input file.");
-    _soln_var_names = parameters.get<std::vector<NonlinearVariableName>>("solution_variables");
-  }
-
   if (parameters.isParamValid("reference_residual_variables") &&
       parameters.isParamValid("reference_vector"))
     mooseError(
@@ -135,29 +126,19 @@ ReferenceResidualConvergence::initialSetup()
   DefaultNonlinearConvergence::initialSetup();
 
   NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
-  AuxiliarySystem & aux_sys = _fe_problem.getAuxiliarySystem();
   System & s = nonlinear_sys.system();
-  auto & as = aux_sys.sys();
+  auto & as = _fe_problem.getAuxiliarySystem().sys();
 
-  if (_soln_var_names.empty())
-  {
-    // If the user provides reference_vector, that implies that they want the
-    // individual variables compared against their reference quantities in the
-    // tag vector. The code depends on having _soln_var_names populated,
-    // so fill that out if they didn't specify solution_variables.
-    if (_reference_vector)
-      for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-        _soln_var_names.push_back(s.variable_name(var_num));
+  // If the user provides reference_vector, that implies that they want the
+  // individual variables compared against their reference quantities in the
+  // tag vector. The code depends on having _soln_var_names populated,
+  // so fill that out if they didn't specify solution_variables.
+  if (_reference_vector)
+    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+      _soln_var_names.push_back(s.variable_name(var_num));
 
-    // If they didn't provide reference_vector, that implies that they
-    // want to skip the individual variable comparison, so leave it alone.
-  }
-  else if (_soln_var_names.size() != s.n_vars())
-    mooseError("Size of solution_variables (",
-               _soln_var_names.size(),
-               ") != number of variables in system (",
-               s.n_vars(),
-               ")");
+  // If they didn't provide reference_vector, that implies that they
+  // want to skip the individual variable comparison, so leave it alone.
 
   const auto n_soln_vars = _soln_var_names.size();
   _variable_group_num_index.resize(n_soln_vars);
@@ -468,10 +449,10 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
 
 bool
 ReferenceResidualConvergence::checkConvergenceIndividVars(
-    const Real fnorm,
+    const Real /*fnorm*/,
     const Real abstol,
     const Real rtol,
-    const Real initial_residual_before_preset_bcs)
+    const Real /*initial_residual_before_preset_bcs*/)
 {
   // Convergence is checked via:
   // 1) if group residual is less than group reference residual by relative tolerance
@@ -484,20 +465,12 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   //        convergence in an absolute way)
 
   bool convergedRelative = true;
-  if (_group_resid.size() > 0)
-  {
-    for (unsigned int i = 0; i < _group_resid.size(); ++i)
-      convergedRelative &=
-          (_group_resid[i] < _group_ref_resid[i] * rtol || _group_resid[i] < abstol ||
-           (_group_ref_resid[i] == 0.0 &&
-            ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && _group_resid[i] == 0.0) ||
-             (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE &&
-              _group_resid[i] <= rtol))));
-  }
-
-  else if (fnorm > initial_residual_before_preset_bcs * rtol)
-    convergedRelative = false;
-
+  for (unsigned int i = 0; i < _group_resid.size(); ++i)
+    convergedRelative &=
+        (_group_resid[i] < _group_ref_resid[i] * rtol || _group_resid[i] < abstol ||
+         (!_group_ref_resid[i] &&
+          ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && !_group_resid[i]) ||
+           (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE && _group_resid[i] <= rtol))));
   return convergedRelative;
 }
 
@@ -509,6 +482,10 @@ ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
                                                        const Real abstol,
                                                        std::ostringstream & oss)
 {
+  if (!_group_resid.size())
+    return DefaultNonlinearConvergence::checkRelativeConvergence(
+        it, fnorm, the_residual, rtol, abstol, oss);
+
   if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
     oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
