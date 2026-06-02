@@ -37,9 +37,6 @@ public:
   /// Retrieves the computed eigenvector corresponding to the given index
   virtual const mfem::HypreParVector & getEigenvector(int index) const = 0;
 
-  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {}
-
 protected:
   /// Number of eigenmodes to compute
   int _num_modes;

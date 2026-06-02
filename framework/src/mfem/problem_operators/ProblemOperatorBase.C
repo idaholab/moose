@@ -103,19 +103,22 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & op,
     solver.Mult(rhs, x);
     return;
   }
+  else
+  {
+    //
+    // pure linear path
+    //
 
-  if (!_problem_data.jacobian_solver)
-    mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
+    if (!_problem_data.jacobian_solver)
+      mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
 
-  prepare_linear_solver();
+    prepare_linear_solver();
 
-  mfem::NewtonSolver linear_solver_wrapper(_problem.getComm());
-  linear_solver_wrapper.SetSolver(_problem_data.jacobian_solver->getSolver());
-  linear_solver_wrapper.SetOperator(op);
-  linear_solver_wrapper.SetPrintLevel(0);
-  linear_solver_wrapper.SetMaxIter(1);
-  linear_solver_wrapper.Mult(rhs, x);
+    auto & linear_solver = _problem_data.jacobian_solver->getSolver();
+    linear_solver.Mult(rhs, x);
+  }
 }
-}
+
+} // namespace Moose::MFEM
 
 #endif

@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystem.h"
+#include "MFEMLinearSolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -702,6 +703,16 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
               ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
               : form->AddBoundaryIntegrator(std::move(integ));
         }
+}
+
+void
+EquationSystem::prepareLinearSolver(LinearSolverBase & solver)
+{
+  if (solver.isLOR())
+    solver.setupLOR(*_blfs.Get(_test_var_names.at(0)), _ess_tdof_lists.at(0));
+  mooseAssert(_linear_operator.Ptr(),
+              "If we are preparing a linear solver, we better have a linear operator");
+  solver.setOperator(_linear_operator);
 }
 
 } // namespace Moose::MFEM

@@ -49,14 +49,14 @@ MFEMGMRESSolver::constructSolver()
 }
 
 void
-MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMGMRESSolver::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
+    _preconditioner->setupLOR(a, tdofs);
     setPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)

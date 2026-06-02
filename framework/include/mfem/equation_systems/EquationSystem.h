@@ -24,6 +24,7 @@
 
 namespace Moose::MFEM
 {
+class LinearSolverBase;
 
 /**
  * Class to store weak form components (bilinear and linear forms, and optionally
@@ -76,6 +77,13 @@ public:
    * @returns Whether nonlinear integrators are present
    */
   bool nonlinear() const { return _non_linear; }
+
+  /**
+   * Propagate the assembled system operator to the given linear solver (and its preconditioner).
+   * Calls the bilinear-form overload first (a no-op for non-LOR solvers) then the operator-level
+   * overload once the assembled matrix is available.
+   */
+  void prepareLinearSolver(LinearSolverBase & solver);
 
 protected:
   /// Add coupled variable to EquationSystem.

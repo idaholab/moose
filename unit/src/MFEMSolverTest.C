@@ -102,7 +102,7 @@ public:
     mfem::Vector B, X;
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-    solver.updateSolver(a, ess_tdof_list);
+    solver.setupLOR(a, ess_tdof_list);
     auto solver_ptr = dynamic_cast<SolverType *>(&solver.getSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
@@ -398,7 +398,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::Vector B, X;
   a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-  solver.updateSolver(a, ess_tdof_list);
+  solver.setupLOR(a, ess_tdof_list);
 
   auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.getSolver());
   // Test MFEMKernel returns an integrator of the expected type

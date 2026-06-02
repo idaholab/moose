@@ -26,22 +26,20 @@ EquationSystemProblemOperator::Solve()
 {
   BuildEquationSystemOperator();
 
-  SolveWithOperator(
-      *GetEquationSystem(),
-      _true_rhs,
-      _true_x,
-      GetEquationSystem()->nonlinear(),
-      [this]()
-      {
-        if (_problem_data.jacobian_solver->isLOR() &&
-            GetEquationSystem()->GetTestVarNames().size() > 1)
-          mooseError("LOR solve is only supported for single-variable systems");
-        _problem_data.jacobian_solver->updateSolver(
-            *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
-            GetEquationSystem()->_ess_tdof_lists.at(0));
-      });
+  auto * const es = GetEquationSystem();
+  SolveWithOperator(*es,
+                    _true_rhs,
+                    _true_x,
+                    es->nonlinear(),
+                    [this, es]()
+                    {
+                      if (_problem_data.jacobian_solver->isLOR() &&
+                          es->GetTestVarNames().size() > 1)
+                        mooseError("LOR solve is only supported for single-variable systems");
+                      es->prepareLinearSolver(*_problem_data.jacobian_solver);
+                    });
 
-  GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
+  es->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
 void

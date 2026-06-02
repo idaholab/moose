@@ -36,8 +36,6 @@ public:
         EquationSystemProblemOperator::GetEquationSystem());
   }
 
-  mfem::OperatorHandle _mass_rhs;
-
 private:
   void RecoverEigenproblemSolution(GridFunctions & gridfunctions, EigensolverBase * eigensolver);
 

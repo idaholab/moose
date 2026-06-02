@@ -35,12 +35,13 @@ public:
   /// Returns this solver's preconditioner
   LinearSolverBase * getPreconditioner() { return _preconditioner.get(); };
 
-  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
+  /// Rebuild any Low-Order-Refined components from the unreduced bilinear form. Called only when
+  /// isLOR() is true, before the assembled operator is available. Default no-op; override in
+  /// solvers or preconditioners that construct their internals from the bilinear form.
+  virtual void setupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) {}
 
-  /// Sets an already-assembled operator on the wrapped solver. Used by callers that
-  /// manage operator assembly themselves (e.g. the eigenproblem operator), bypassing
-  /// the bilinear-form-based updateSolver() path.
+  /// Updates the solver at the operator level. Default implementation sets the operator on the
+  /// wrapped MFEM solver
   virtual void setOperator(mfem::OperatorHandle & op);
 
   /// Returns whether or not this solver (or its preconditioner) uses LOR

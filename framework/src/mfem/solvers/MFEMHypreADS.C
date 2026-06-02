@@ -44,7 +44,7 @@ MFEMHypreADS::constructSolver()
 }
 
 void
-MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreADS::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {

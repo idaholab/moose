@@ -51,7 +51,7 @@ MFEMHypreAMS::constructSolver()
 }
 
 void
-MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreAMS::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {

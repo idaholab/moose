@@ -49,14 +49,14 @@ MFEMHyprePCG::constructSolver()
 }
 
 void
-MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHyprePCG::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
+    _preconditioner->setupLOR(a, tdofs);
     setPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
   }
   else if (_lor)

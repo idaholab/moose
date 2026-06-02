@@ -20,13 +20,13 @@ EigenproblemESProblemOperator::Solve()
 {
   BuildEquationSystemOperator();
 
-  if (GetEquationSystem()->GetTestVarNames().size() > 1)
+  auto * const es = GetEquationSystem();
+  if (es->GetTestVarNames().size() > 1)
     mooseError("Eigenproblems are only supported in single-variable systems");
 
   auto eigensolver =
       std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
-  eigensolver->setMassMatrix(_mass_rhs);
-  eigensolver->setOperator(GetEquationSystem()->_jacobian);
+  es->prepareEigensolver(*eigensolver);
   eigensolver->solve();
   RecoverEigenproblemSolution(_problem_data.gridfunctions, eigensolver.get());
 }
@@ -35,7 +35,7 @@ void
 EigenproblemESProblemOperator::BuildEquationSystemOperator()
 {
   GetEquationSystem()->BuildEquationSystem();
-  GetEquationSystem()->BuildEigenproblemJacobian(_true_x, _mass_rhs);
+  GetEquationSystem()->BuildEigenproblemJacobian(_true_x);
 }
 
 void
