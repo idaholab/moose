@@ -332,13 +332,25 @@ ReferenceResidualConvergence::updateReferenceResidual()
       auto div = _current_nl_sys.RHS().clone();
       *div /= *ref;
       resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
+      if (_unscale_the_residual)
+      {
+        mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
+        resid /= Utility::pow<2>(_scaling_factors[i]);
+      }
     }
     else
     {
       resid = Utility::pow<2>(s.calculate_norm(_current_nl_sys.RHS(), _soln_vars[i], _norm_type));
+      if (_unscale_the_residual)
+      {
+        mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
+        resid /= Utility::pow<2>(_scaling_factors[i]);
+      }
       if (_reference_vector)
       {
-        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
+        auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
+        if (_unscale_the_residual)
+          ref_resid /= Utility::pow<2>(_scaling_factors[i]);
         _group_ref_resid[group] += Utility::pow<2>(ref_resid);
       }
     }
@@ -351,9 +363,10 @@ ReferenceResidualConvergence::updateReferenceResidual()
   {
     for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
     {
-      const auto ref_resid =
-          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], _norm_type) *
-          _scaling_factors[i];
+      auto ref_resid =
+          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], _norm_type);
+      if (!_unscale_the_residual)
+        ref_resid *= _scaling_factors[i];
       _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(ref_resid);
     }
   }

@@ -129,6 +129,9 @@ protected:
   /// Container for convergence treatment when the reference residual is zero
   const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
 
+  /// Bool to unscale the residual before convergence checks and screen output
+  const bool _unscale_the_residual;
+
   /// Flag to optionally perform normalization of residual by reference residual before or after L2 norm is computed
   bool _local_norm;
 

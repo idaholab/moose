@@ -32,6 +32,12 @@ ReferenceResidualInterface::validParams()
       "converge_on",
       {},
       "If supplied, use only these variables in the individual variable convergence check");
+  params.addParam<bool>("unscale_the_residual",
+                        false,
+                        "If set to true, utilize the variable specific residual scalar to unscale "
+                        "the residual before comparing against the absolute tolerance. This will "
+                        "also print the un-scaled residual to console. This will not change the "
+                        "relative tolerance check except for console output");
   MooseEnum Lnorm("global_L2 local_L2 global_Linf local_Linf", "global_L2");
   params.addParam<MooseEnum>(
       "normalization_type",
