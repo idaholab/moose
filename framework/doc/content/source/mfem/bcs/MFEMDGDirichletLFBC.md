@@ -5,7 +5,7 @@
 ## Overview
 
 Adds a boundary face integrator to the linear form. The DG parameters sigma and kappa can be set, but both have default values of
--1.0 and (order+1)^2 respectively.
+-1.0 and (order+1)^2 respectively. A value of $\sigma = -1$ corresponds to a symmetric interior penalty DG method.
 
 ## Example Input File Syntax
 
