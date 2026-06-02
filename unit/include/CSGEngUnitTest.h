@@ -22,17 +22,17 @@
  * testing purposes only.
  *
  * Characteristics of expanded units for testing purposes:
- *  - FakeSurfEngUnit:
+ *  - TestSurfEngUnit:
  *    - 2 surfaces (so that cell region replacement using multiple surfaces can be tested)
  *
- *  - FakeCellEngUnit:
+ *  - TestCellEngUnit:
  *    - 1 cell
- *    - at least 1 surface is FakeSurfEngUnit
+ *    - at least 1 surface is TestSurfEngUnit
  *    - cell is filled with a universe
  *    - creation of cell doesn't specify which universe it should belong to
  *
- *  - FakeUnivEngUnit:
- *    - 2 cells where one is FakeCellEngUnit and both are added to the created universe via
+ *  - TestUnivEngUnit:
+ *    - 2 cells where one is TestCellEngUnit and both are added to the created universe via
  *      different mechanisms, which will make one also be a part of root
  *    - 1 universe
  *    - 1 real surface (for cell region use)
@@ -41,11 +41,11 @@
 namespace CSG
 {
 
-class FakeSurfEngUnit : public CSGSurfaceEngUnit
+class TestSurfEngUnit : public CSGSurfaceEngUnit
 {
 public:
-  FakeSurfEngUnit(const std::string & name)
-    : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<FakeSurfEngUnit>())
+  TestSurfEngUnit(const std::string & name)
+    : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<TestSurfEngUnit>())
   {
   }
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
@@ -60,7 +60,7 @@ public:
 protected:
   std::unique_ptr<CSGSurface> clone() const override
   {
-    return std::make_unique<FakeSurfEngUnit>(*this);
+    return std::make_unique<TestSurfEngUnit>(*this);
   }
 
   void expandUnit(CSGBase & base) override
@@ -77,11 +77,11 @@ protected:
 #endif
 };
 
-class FakeCellEngUnit : public CSGCellEngUnit
+class TestCellEngUnit : public CSGCellEngUnit
 {
 public:
-  FakeCellEngUnit(const std::string & name)
-    : CSGCellEngUnit(name, MooseUtils::prettyCppType<FakeCellEngUnit>())
+  TestCellEngUnit(const std::string & name)
+    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellEngUnit>())
   {
   }
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
@@ -94,13 +94,13 @@ public:
 protected:
   std::unique_ptr<CSGCellEngUnit> clone() const override
   {
-    return std::make_unique<FakeCellEngUnit>(getName());
+    return std::make_unique<TestCellEngUnit>(getName());
   }
 
   void expandUnit(CSGBase & base) override
   {
     // use the surface unit in this one for nested units
-    std::unique_ptr<FakeSurfEngUnit> s1_ptr = std::make_unique<FakeSurfEngUnit>(getName() + "_s1");
+    std::unique_ptr<TestSurfEngUnit> s1_ptr = std::make_unique<TestSurfEngUnit>(getName() + "_s1");
     auto & s1 = base.addEngUnit(std::move(s1_ptr));
     auto & univ = base.createUniverse(getName() + "_fill_univ");
     // intentionally create a cell that doesn't specifiy a universe that it should be added to so
@@ -113,11 +113,11 @@ protected:
 #endif
 };
 
-class FakeUnivEngUnit : public CSGUniverseEngUnit
+class TestUnivEngUnit : public CSGUniverseEngUnit
 {
 public:
-  FakeUnivEngUnit(const std::string & name)
-    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<FakeUnivEngUnit>())
+  TestUnivEngUnit(const std::string & name)
+    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestUnivEngUnit>())
   {
   }
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
@@ -130,14 +130,14 @@ public:
 protected:
   std::unique_ptr<CSGUniverseEngUnit> clone() const override
   {
-    return std::make_unique<FakeUnivEngUnit>(getName());
+    return std::make_unique<TestUnivEngUnit>(getName());
   }
 
   void expandUnit(CSGBase & base) override
   {
     _expanded_universe = &base.createUniverse(getName() + "_real_univ");
     // add the cell unit to the created universe to start (should never be a part of root)
-    auto c1_prt = std::make_unique<FakeCellEngUnit>(getName() + "_c1_unit");
+    auto c1_prt = std::make_unique<TestCellEngUnit>(getName() + "_c1_unit");
     base.addEngUnit(std::move(c1_prt), _expanded_universe);
     // surface for cell region
     std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);

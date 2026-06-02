@@ -833,8 +833,8 @@ TEST(CSGBaseTest, testAddLatticeEngUnitError)
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string ele_name = "unit_element";
   std::string outer_name = "unit_outer";
-  auto uele = FakeUnivEngUnit(ele_name);
-  auto uout = FakeUnivEngUnit(outer_name);
+  auto uele = TestUnivEngUnit(ele_name);
+  auto uout = TestUnivEngUnit(outer_name);
 
   // make a lattice using these the units as elements (no outer)
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{uele, uele},
@@ -1046,8 +1046,8 @@ TEST(CSGBaseTest, testDeleteLattice)
 /**
  * Engineering Units Tests - test usage of all 3 types using:
  *  CSGSurfaceEngUnit - uses CSGNPolygonUnit
- *  CSGCellEngUnit - uses FakeCellEngUnit (which also uses FakeSurfaceEngUnit for nested units)
- *  CSGUnivEngUnit - uses FakeUnivEngUnit
+ *  CSGCellEngUnit - uses TestCellEngUnit (which also uses FakeSurfaceEngUnit for nested units)
+ *  CSGUnivEngUnit - uses TestUnivEngUnit
  */
 
 /// tests addEngUnit for surface-type units
@@ -1144,7 +1144,7 @@ TEST(CSGBaseTest, testSurfEngUnitRenameErrors)
   // with that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeCellEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestCellEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
     const auto & poly = csg_obj->getEngUnitByName<CSGNPolygonUnit>(
         eng_unit_name); // need to specify type to be able to call renameSurface
@@ -1158,7 +1158,7 @@ TEST(CSGBaseTest, testSurfEngUnitRenameErrors)
   // raise the same error as above that a unit of that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeCellEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestCellEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
     const auto & poly = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
     Moose::UnitUtils::assertThrows([&csg_obj, &poly]()
@@ -1369,7 +1369,7 @@ TEST(CSGBaseTest, testCellEngUnitAdd)
 {
   // make a cell engineering unit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  std::unique_ptr<TestCellEngUnit> cell_ptr = std::make_unique<TestCellEngUnit>("cell_unit");
   const auto & cu = csg_obj->addEngUnit(std::move(cell_ptr));
 
   // check that this is registered as a "cell" and an engineering unit in CSGBase
@@ -1394,7 +1394,7 @@ TEST(CSGBaseTest, testCellEngUnitAddToUniv)
   // make a cell engineering unit and add it to a universe right away to bypass root
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   const auto & univ = csg_obj->createUniverse("extra_univ");
-  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  std::unique_ptr<TestCellEngUnit> cell_ptr = std::make_unique<TestCellEngUnit>("cell_unit");
   csg_obj->addEngUnit(std::move(cell_ptr), &univ);
 
   // cell should not be in root
@@ -1407,7 +1407,7 @@ TEST(CSGBaseTest, testCellEngUnitRename)
 {
   // renaming allowable either through renameSurface or renameEngUnit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  std::unique_ptr<TestCellEngUnit> cell_ptr = std::make_unique<TestCellEngUnit>("cell_unit");
   const auto & cu = csg_obj->addEngUnit(std::move(cell_ptr));
 
   // starting name
@@ -1433,7 +1433,7 @@ TEST(CSGBaseTest, testCellEngUnitRenameErrors)
   auto make_csg = [&]()
   {
     auto csg_obj = std::make_unique<CSG::CSGBase>();
-    std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>(eng_unit_name);
+    std::unique_ptr<TestCellEngUnit> cu_ptr = std::make_unique<TestCellEngUnit>(eng_unit_name);
     csg_obj->addEngUnit(std::move(cu_ptr));
     auto sptr = std::make_unique<CSGSphere>("sphere", 2.0);
     auto & sph = csg_obj->addSurface(std::move(sptr));
@@ -1453,7 +1453,7 @@ TEST(CSGBaseTest, testCellEngUnitRenameErrors)
   // renaming unit via renameCell to same name as existing cell raises error
   {
     auto csg_obj = make_csg();
-    const auto & unit = csg_obj->getEngUnitByName<FakeCellEngUnit>(
+    const auto & unit = csg_obj->getEngUnitByName<TestCellEngUnit>(
         eng_unit_name); // need to specify type to be able to call renameCell
     Moose::UnitUtils::assertThrows([&csg_obj, &unit, &cell_name]()
                                    { csg_obj->renameCell(unit, cell_name); },
@@ -1474,9 +1474,9 @@ TEST(CSGBaseTest, testCellEngUnitRenameErrors)
   // with that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestSurfEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
-    const auto & unit = csg_obj->getEngUnitByName<FakeCellEngUnit>(
+    const auto & unit = csg_obj->getEngUnitByName<TestCellEngUnit>(
         eng_unit_name); // need to specify type to be able to call renameCell
     Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->renameCell(unit, "other_name"); },
                                    " is an engineering unit and a unit with name ");
@@ -1487,7 +1487,7 @@ TEST(CSGBaseTest, testCellEngUnitRenameErrors)
   // raise the same error as above that a unit of that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestSurfEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
     const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
     Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
@@ -1505,7 +1505,7 @@ TEST(CSGBaseTest, testCellEngUnitAddErrors)
   // trying to add unit via addCellToList will raise error
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // make the unit as a normal ref to use addCellToList (not done in practice)
-  const auto & cu = FakeCellEngUnit("cell_unit");
+  const auto & cu = TestCellEngUnit("cell_unit");
   Moose::UnitUtils::assertThrows([&csg_obj, &cu]() { csg_obj->addCellToList(cu); },
                                  " is a CSGCellEngUnit and must be added via addEngUnit()");
 }
@@ -1516,10 +1516,10 @@ TEST(CSGBaseTest, testCellEngUnitDelete)
   // make 2 units to delete
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string name1 = "unit1";
-  std::unique_ptr<FakeCellEngUnit> unit_ptr1 = std::make_unique<FakeCellEngUnit>(name1);
+  std::unique_ptr<TestCellEngUnit> unit_ptr1 = std::make_unique<TestCellEngUnit>(name1);
   csg_obj->addEngUnit(std::move(unit_ptr1));
   std::string name2 = "unit2";
-  std::unique_ptr<FakeCellEngUnit> unit_ptr2 = std::make_unique<FakeCellEngUnit>(name2);
+  std::unique_ptr<TestCellEngUnit> unit_ptr2 = std::make_unique<TestCellEngUnit>(name2);
   csg_obj->addEngUnit(std::move(unit_ptr2));
 
   // check that it has both registered as a cell and as an engineering unit
@@ -1546,8 +1546,8 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
 {
   std::string name = "cell_unit";
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>(name);
-  const auto & cell_unit = csg_obj->addEngUnit<FakeCellEngUnit>(std::move(cell_ptr));
+  std::unique_ptr<TestCellEngUnit> cell_ptr = std::make_unique<TestCellEngUnit>(name);
+  const auto & cell_unit = csg_obj->addEngUnit<TestCellEngUnit>(std::move(cell_ptr));
   // create an extra universe to add the cell unit to; should also still be a part of root because
   // a different universe was not specified at the time of adding the cell unit
   const auto & univ = csg_obj->createUniverse("extra_univ");
@@ -1570,7 +1570,7 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
   // expand the unit - returns the cell that was created
   auto cell_expanded = csg_obj->expandEngUnit(cell_unit);
 
-  // FakeCellEngUnit intentionally includes the creation of another engineering unit during the
+  // TestCellEngUnit intentionally includes the creation of another engineering unit during the
   // expansion process to test the handling of such nested units.
   // Expect 1 unit in base (different from original, surface-type), 1 cell, no cell units, and 2
   // additional universe (beyond root)
@@ -1602,7 +1602,7 @@ TEST(CSGBaseTest, testUniverseEngUnitAdd)
 {
   // make a universe engineering unit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_unit");
+  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>("univ_unit");
   const auto & unit = csg_obj->addEngUnit(std::move(uptr));
 
   // check that this is registered as a "universe" and an engineering unit in CSGBase
@@ -1623,7 +1623,7 @@ TEST(CSGBaseTest, testUniverseEngUnitRename)
 {
   // renaming allowable either through renameSurface or renameEngUnit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_unit");
+  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>("univ_unit");
   const auto & unit = csg_obj->addEngUnit(std::move(uptr));
 
   // starting name
@@ -1649,7 +1649,7 @@ TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
   auto make_csg = [&]()
   {
     auto csg_obj = std::make_unique<CSG::CSGBase>();
-    std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>(eng_unit_name);
+    std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>(eng_unit_name);
     csg_obj->addEngUnit(std::move(uptr));
     csg_obj->createUniverse(univ_name);
     return csg_obj;
@@ -1667,7 +1667,7 @@ TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
   // renaming unit via renameUniverse to same name as existing universe raises error
   {
     auto csg_obj = make_csg();
-    const auto & unit = csg_obj->getEngUnitByName<FakeUnivEngUnit>(
+    const auto & unit = csg_obj->getEngUnitByName<TestUnivEngUnit>(
         eng_unit_name); // need to specify type to be able to call renameUniverse
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &unit, &univ_name]() { csg_obj->renameUniverse(unit, univ_name); },
@@ -1688,9 +1688,9 @@ TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
   // unit with that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestSurfEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
-    const auto & unit = csg_obj->getEngUnitByName<FakeUnivEngUnit>(
+    const auto & unit = csg_obj->getEngUnitByName<TestUnivEngUnit>(
         eng_unit_name); // need to specify type to be able to call renameUniverse
     Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
                                    { csg_obj->renameUniverse(unit, "other_name"); },
@@ -1702,7 +1702,7 @@ TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
   // raise the same error as above that a unit of that name already exists.
   {
     auto csg_obj = make_csg();
-    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    auto unit_ptr = std::make_unique<TestSurfEngUnit>("other_name");
     csg_obj->addEngUnit(std::move(unit_ptr));
     const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
     Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
@@ -1720,7 +1720,7 @@ TEST(CSGBaseTest, testUnivEngUnitAddErrors)
   // trying to add unit via addUniverseToList will raise error
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // make the unit as a normal ref to use addUniverseToList (not done in practice)
-  const auto & unit = FakeUnivEngUnit("universe_unit");
+  const auto & unit = TestUnivEngUnit("universe_unit");
   Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->addUniverseToList(unit); },
                                  " is a CSGUniverseEngUnit and must be added via addEngUnit()");
 }
@@ -1731,10 +1731,10 @@ TEST(CSGBaseTest, testUnivEngUnitDelete)
   // make 2 units to delete
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string name1 = "unit1";
-  std::unique_ptr<FakeUnivEngUnit> unit_ptr1 = std::make_unique<FakeUnivEngUnit>(name1);
+  std::unique_ptr<TestUnivEngUnit> unit_ptr1 = std::make_unique<TestUnivEngUnit>(name1);
   csg_obj->addEngUnit(std::move(unit_ptr1));
   std::string name2 = "unit2";
-  std::unique_ptr<FakeUnivEngUnit> unit_ptr2 = std::make_unique<FakeUnivEngUnit>(name2);
+  std::unique_ptr<TestUnivEngUnit> unit_ptr2 = std::make_unique<TestUnivEngUnit>(name2);
   csg_obj->addEngUnit(std::move(unit_ptr2));
 
   // check that it has both registered as a universe and as an engineering unit
@@ -1761,8 +1761,8 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
 {
   std::string name = "univ_unit";
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>(name);
-  const auto & unit = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr));
+  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>(name);
+  const auto & unit = csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr));
   // create a cell with a fill that is the universe unit (needs surface for cell region)
   std::unique_ptr<CSGSurface> sptr = std::make_unique<CSGSphere>("sph", 3.0);
   auto & sph = csg_obj->addSurface(std::move(sptr));
@@ -1784,9 +1784,9 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   // expand the unit - returns the universe that was created
   const auto & univ_expanded = csg_obj->expandEngUnit(unit);
 
-  // FakeUnivEngUnit intentionally includes the creation of a cell engineering unit
-  // (FakeCellEngUnit) along with real CSG objects (surface and cell) during the expansion process
-  // to test the handling of such nested units (FakeCellEngUnit also creates FakeSurfEngUnit during
+  // TestUnivEngUnit intentionally includes the creation of a cell engineering unit
+  // (TestCellEngUnit) along with real CSG objects (surface and cell) during the expansion process
+  // to test the handling of such nested units (TestCellEngUnit also creates TestSurfEngUnit during
   // the expansion process). The cell-type unit  creates a surface unit during expansion.
   // However, because we are only expanding this universe engineering unit, we do not expect the
   // cell unit to expand and create another unit at this time.
@@ -1840,10 +1840,10 @@ TEST(CSGBaseTest, testUnivEngUnitExpandLattice)
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string ele_name = "unit_element";
   std::string outer_name = "unit_outer";
-  std::unique_ptr<FakeUnivEngUnit> uptr1 = std::make_unique<FakeUnivEngUnit>(ele_name);
-  std::unique_ptr<FakeUnivEngUnit> uptr2 = std::make_unique<FakeUnivEngUnit>(outer_name);
-  const auto & uele = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr1));
-  const auto & uout = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr2));
+  std::unique_ptr<TestUnivEngUnit> uptr1 = std::make_unique<TestUnivEngUnit>(ele_name);
+  std::unique_ptr<TestUnivEngUnit> uptr2 = std::make_unique<TestUnivEngUnit>(outer_name);
+  const auto & uele = csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr1));
+  const auto & uout = csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr2));
 
   // make a lattice using these universe units
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{uele, uele},
@@ -1908,15 +1908,15 @@ TEST(CSGBaseTest, testExpandAllUnits)
 /// to be subsequently expanded as well.
 TEST(CSGBaseTest, testExpandAllRecursive)
 {
-  // create a FakeUnivEngUnit which should cause a recursion of depth 2 during expansion.
-  //  - FakeUnivEngUnit will create FakeCellEngUnit
-  //  - FakeCellEngUnit will create FakeSurfEngUnit
+  // create a TestUnivEngUnit which should cause a recursion of depth 2 during expansion.
+  //  - TestUnivEngUnit will create TestCellEngUnit
+  //  - TestCellEngUnit will create TestSurfEngUnit
 
   // create just a single universe unit
   std::string name = "original_unit";
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>(name);
-  csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr));
+  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>(name);
+  csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr));
 
   // check number of expected objects before expansion: 2 univs (root + unit), 1 universe unit, &
   // no other object types
@@ -1927,14 +1927,14 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   ASSERT_EQ(0, csg_obj->getAllCells().size());
   ASSERT_EQ(0, csg_obj->getAllCellEngUnits().size());
 
-  // expand all - should expand FakeUnivEngUnit, then FakeCellEngUnit, and then FakeSurfEngUnit
+  // expand all - should expand TestUnivEngUnit, then TestCellEngUnit, and then TestSurfEngUnit
   csg_obj->expandAllEngUnits();
 
   // Expected objects after expansion
   //  - 0 units of any type
-  //  - 3 surfaces (1 from FakeUnivEngUnit and 2 from FakeCellEngUnit)
-  //  - 2 cells (1 from FakeUnivEngUnit and 1 from FakeCellEngUnit)
-  //  - 3 universes (root, 1 from FakeUnivEngUnit, and 1 from FakeCellEngUnit (used as a fill))
+  //  - 3 surfaces (1 from TestUnivEngUnit and 2 from TestCellEngUnit)
+  //  - 2 cells (1 from TestUnivEngUnit and 1 from TestCellEngUnit)
+  //  - 3 universes (root, 1 from TestUnivEngUnit, and 1 from TestCellEngUnit (used as a fill))
   ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
   ASSERT_EQ(3, csg_obj->getAllSurfaces().size());
   ASSERT_EQ(0, csg_obj->getAllSurfaceEngUnits().size());
@@ -1964,8 +1964,8 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   ASSERT_EQ(0, fill_univ.getAllCells().size()); // should not have any cells added to it
 
   // expected cell region surface names:
-  //  - exp_cell <name>_c1_unit_real_cell (created as a FakeCellEngUnit) should use the two surfaces
-  //    created by FakeSurfEngUnit when fully expanded: <name>_c1_unit_s1_s[1/2]
+  //  - exp_cell <name>_c1_unit_real_cell (created as a TestCellEngUnit) should use the two surfaces
+  //    created by TestSurfEngUnit when fully expanded: <name>_c1_unit_s1_s[1/2]
   //  - c2 cell <name>_c2 uses one real surface <name>_s1 (should never be modified after it is
   //    first created)
 
@@ -2010,8 +2010,8 @@ TEST(CSGBaseTest, testGetEngUnit)
 
   // specify the wrong unit type - should raise error
   Moose::UnitUtils::assertThrows([&csg_obj, &name]()
-                                 { csg_obj->getEngUnitByName<FakeUnivEngUnit>(name); },
-                                 "Engineering unit is not of specified type CSG::FakeUnivEngUnit");
+                                 { csg_obj->getEngUnitByName<TestUnivEngUnit>(name); },
+                                 "Engineering unit is not of specified type CSG::TestUnivEngUnit");
 
   // try to get unit using name that doesn't exist - should raise error
   Moose::UnitUtils::assertThrows(
@@ -2028,14 +2028,14 @@ TEST(CSGBaseTest, addEngUnitError)
   csg_obj->addEngUnit(std::move(poly_ptr));
 
   // try to add another engineering unit of the same derived type with the same name
-  std::unique_ptr<FakeSurfEngUnit> sptr = std::make_unique<FakeSurfEngUnit>(name);
+  std::unique_ptr<TestSurfEngUnit> sptr = std::make_unique<TestSurfEngUnit>(name);
   Moose::UnitUtils::assertThrows(
       [&csg_obj, &sptr]() { csg_obj->addEngUnit(std::move(sptr)); },
       "An engineering unit with name 'polygon_unit' already exists in geometry.");
 
   // try to add another engineering unit of a different derived type with the same name
   // should capture at the addEngUnit level
-  std::unique_ptr<FakeCellEngUnit> cptr = std::make_unique<FakeCellEngUnit>(name);
+  std::unique_ptr<TestCellEngUnit> cptr = std::make_unique<TestCellEngUnit>(name);
   Moose::UnitUtils::assertThrows(
       [&csg_obj, &cptr]() { csg_obj->addEngUnit(std::move(cptr)); },
       "An engineering unit with name 'polygon_unit' already exists in geometry.");
@@ -2062,13 +2062,13 @@ TEST(CSGBaseTest, testAddObjUnitErrors)
   /// make engineering units of each of the 3 base types
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string sname = "curly";
-  std::unique_ptr<FakeSurfEngUnit> su_ptr = std::make_unique<FakeSurfEngUnit>(sname);
+  std::unique_ptr<TestSurfEngUnit> su_ptr = std::make_unique<TestSurfEngUnit>(sname);
   auto & surf = csg_obj->addEngUnit(std::move(su_ptr));
   std::string cname = "larry";
-  std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>(cname);
+  std::unique_ptr<TestCellEngUnit> cu_ptr = std::make_unique<TestCellEngUnit>(cname);
   csg_obj->addEngUnit(std::move(cu_ptr));
   std::string uname = "moe";
-  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>(uname);
+  std::unique_ptr<TestUnivEngUnit> uu_ptr = std::make_unique<TestUnivEngUnit>(uname);
   csg_obj->addEngUnit(std::move(uu_ptr));
 
   // Try to make/add each of the real types of the same names. This should raise errors for
@@ -2385,7 +2385,7 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   // create a lattice of one universe engineering unit
-  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>("univ_in_lat");
+  std::unique_ptr<TestUnivEngUnit> uu_ptr = std::make_unique<TestUnivEngUnit>("univ_in_lat");
   auto & univ_in_lat = base1->addEngUnit(std::move(uu_ptr));
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ_in_lat}};
   std::unique_ptr<CSGCartesianLattice> lat_ptr =
@@ -2438,7 +2438,7 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   // create a lattice of one universe engineering unit
-  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>("univ_in_lat");
+  std::unique_ptr<TestUnivEngUnit> uu_ptr = std::make_unique<TestUnivEngUnit>("univ_in_lat");
   auto & univ_in_lat = base1->addEngUnit(std::move(uu_ptr));
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ_in_lat}};
   std::unique_ptr<CSGCartesianLattice> lat_ptr =
@@ -2497,7 +2497,7 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   // create a lattice of one universe engineering unit
-  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>("univ_in_lat");
+  std::unique_ptr<TestUnivEngUnit> uu_ptr = std::make_unique<TestUnivEngUnit>("univ_in_lat");
   auto & univ_in_lat = base1->addEngUnit(std::move(uu_ptr));
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ_in_lat}};
   std::unique_ptr<CSGCartesianLattice> lat_ptr =
@@ -2875,8 +2875,8 @@ TEST(CSGBaseTest, testUniverseLinking)
                                  "Universe with name univ2 is not linked to root universe.");
 
   // set the outer to a universe unit, universe should also not be linked
-  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_out");
-  const auto & univ_out = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr));
+  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>("univ_out");
+  const auto & univ_out = csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr));
   csg_obj->setLatticeOuter(lat, univ_out);
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ_out is not linked to root universe.");
@@ -2930,11 +2930,11 @@ TEST(CSGBaseTest, testCSGBaseClone)
   csg_obj->setLatticeOuter(lat, outer_univ);
   csg_obj->createCell("cell_lat_fill", lat, -csg_sphere_outer);
   // create each type of engineering unit
-  std::unique_ptr<FakeSurfEngUnit> su_ptr = std::make_unique<FakeSurfEngUnit>("surf_unit_name");
+  std::unique_ptr<TestSurfEngUnit> su_ptr = std::make_unique<TestSurfEngUnit>("surf_unit_name");
   csg_obj->addEngUnit(std::move(su_ptr));
-  std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>("cell_unit_name");
+  std::unique_ptr<TestCellEngUnit> cu_ptr = std::make_unique<TestCellEngUnit>("cell_unit_name");
   csg_obj->addEngUnit(std::move(cu_ptr));
-  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>("univ_unit_name");
+  std::unique_ptr<TestUnivEngUnit> uu_ptr = std::make_unique<TestUnivEngUnit>("univ_unit_name");
   csg_obj->addEngUnit(std::move(uu_ptr));
 
   auto csg_obj_clone = csg_obj->clone();

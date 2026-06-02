@@ -27,12 +27,12 @@ namespace CSG
 /// tests the CSGSurfaceEngUnit functionality as a CSGEngUnit and CSGSurface
 TEST(CSGEngUnitTest, testSurfUnit)
 {
-  FakeSurfEngUnit surf_unit("surf_unit");
+  TestSurfEngUnit surf_unit("surf_unit");
 
   /* Test the Engineering Unit related functionality (pre-expansion) */
   ASSERT_EQ("surf_unit", surf_unit.getName());
   ASSERT_EQ("SURFACE", surf_unit.getBehavior());
-  ASSERT_EQ("CSG::FakeSurfEngUnit", surf_unit.getUnitType());
+  ASSERT_EQ("CSG::TestSurfEngUnit", surf_unit.getUnitType());
 
   // attributes - should not cause any error (contents don't matter for this unit test)
   ASSERT_NO_THROW(surf_unit.getAttributes());
@@ -48,7 +48,7 @@ TEST(CSGEngUnitTest, testSurfUnit)
   /* Test the CSGSurface-related functionality */
 
   // getSurfaceType() should return the same as getUnitType()
-  ASSERT_EQ("CSG::FakeSurfEngUnit", surf_unit.getSurfaceType());
+  ASSERT_EQ("CSG::TestSurfEngUnit", surf_unit.getSurfaceType());
 
   // calling getCoeffs should raise error
   Moose::UnitUtils::assertThrows([&surf_unit]() { surf_unit.getCoeffs(); },
@@ -78,12 +78,12 @@ TEST(CSGEngUnitTest, testSurfUnit)
 TEST(CSGEngUnitTest, testCellUnit)
 {
   std::string name = "cell_unit";
-  FakeCellEngUnit cell_unit(name);
+  TestCellEngUnit cell_unit(name);
 
   /* Test the Engineering Unit related functionality (pre-expansion) */
   ASSERT_EQ(name, cell_unit.getName());
   ASSERT_EQ("CELL", cell_unit.getBehavior());
-  ASSERT_EQ("CSG::FakeCellEngUnit", cell_unit.getUnitType());
+  ASSERT_EQ("CSG::TestCellEngUnit", cell_unit.getUnitType());
 
   // attributes - should not cause any error (contents don't matter for this unit test)
   ASSERT_NO_THROW(cell_unit.getAttributes());
@@ -113,12 +113,12 @@ TEST(CSGEngUnitTest, testCellUnit)
 TEST(CSGEngUnitTest, testUnivUnit)
 {
   std::string name = "univ_unit";
-  FakeUnivEngUnit univ_unit(name);
+  TestUnivEngUnit univ_unit(name);
 
   /* Test the Engineering Unit related functionality (pre-expansion) */
   ASSERT_EQ(name, univ_unit.getName());
   ASSERT_EQ("UNIVERSE", univ_unit.getBehavior());
-  ASSERT_EQ("CSG::FakeUnivEngUnit", univ_unit.getUnitType());
+  ASSERT_EQ("CSG::TestUnivEngUnit", univ_unit.getUnitType());
 
   // attributes - should not cause any error (contents don't matter for this unit test)
   ASSERT_NO_THROW(univ_unit.getAttributes());
@@ -265,8 +265,8 @@ TEST(CSGEngUnitTest, testEngUnitEqual)
   // make units that differ from u1 by different features
   // update u2 so it differs from u1 by transformation
   u2.addTransformation(TransformationType::TRANSLATION, std::make_tuple(1.0, -2.0, 3.0));
-  FakeSurfEngUnit u3("thelma");           // differs from u1 by unit type (same name and behavior)
-  FakeCellEngUnit u4("thelma");           // differs from u1 by behavior
+  TestSurfEngUnit u3("thelma");           // differs from u1 by unit type (same name and behavior)
+  TestCellEngUnit u4("thelma");           // differs from u1 by behavior
   CSGNPolygonUnit u5("louise", 4.0, 1.0); // differs from u1 by name
   CSGNPolygonUnit u6("thelma", 3.0, 4.0); // differs from u1 by attributes
 
