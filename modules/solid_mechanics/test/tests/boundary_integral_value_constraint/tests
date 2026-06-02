@@ -1,0 +1,23 @@
+[Tests]
+  issues = '#32963'
+  design = 'source/bcs/BoundaryIntegralValueConstraint.md'
+
+  [mechanics_average_value]
+    type = CSVDiff
+    input = 'boundary_integral_value_constraint.i'
+    csvdiff = 'boundary_integral_value_constraint_out.csv'
+    abs_zero = 1e-12
+    requirement = 'The system shall enforce prescribed boundary average displacement values in a solid mechanics solve using scalar Lagrange multipliers.'
+  []
+
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'boundary_integral_value_constraint.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-5
+    run_sim = True
+    cli_args = 'Outputs/csv=false'
+    prereq = mechanics_average_value
+    requirement = 'The system shall compute the complete saddle-point Jacobian for boundary average constraints on displacement fields.'
+  []
+[]
