@@ -328,9 +328,11 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 
 ### Engineering Units
 
-Like surfaces and lattices, an [engineering unit](syntax/CSG/index.md#engineering-units) is created by calling the specific constructor directly to create a unique pointer.
+[Engineering units](syntax/CSG/index.md#engineering-units) are simplified objects that are defined in user-friendly domain-specific terms that can be used in a "plug-and-play" manner as a surface, cell, or universe in a [!ac](CSG) definition.
+Like surfaces and lattices, an engineering unit is defined by calling the specific constructor directly to create a unique pointer.
 This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const reference to that engineering unit.
-The `addEngUnit()` method is a templated method, meaning the specific unit type can be specified in order to get the reference returned as that type, but if not specified, a `CSGEngUnit` type will be returned.
+The `addEngUnit()` method is a templated method, meaning that the return type will be a reference to the specific unit type if requested.
+Otherwise, if a return type is not specified, a generic `CSGEngUnit` type will be returned.
 An example of creating an N-sided polygon unit is shown below.
 
 !listing CSGBaseTest.C start=define a 4-sided polygon end=addEngUnit include-end=true
@@ -345,7 +347,7 @@ For example, a standard `CSGCell` can have a region that is defined using a `CSG
 
 !listing CSGBaseTest.C start=make a cell that uses the polygon unit end=createCell include-end=true
 
-Because each engineering unit is technically derived from a basic CSG component (`CSGSurface`, `CSGCell`, and `CSGUniverse`), each engineering unit stored and managed in `CSGBase` as if were an object of that type.
+Because each engineering unit is technically derived from a basic CSG component (`CSGSurface`, `CSGCell`, and `CSGUniverse`), each engineering unit is stored and managed in `CSGBase` as if were an object of that type.
 For all rudimentary component types, any getter-type method for that component is also usable on the derived `CSGEngUnit` objects too.
 This means that calling methods like `getAllSurfaces()` or `getSurfaceByName` will include any `CSGSurfaceEngUnit` types in the query.
 Similarly, methods like `hasCell(name)` will return `true` if a `CSGCellEngUnit` has is called `name`.
@@ -357,17 +359,18 @@ Below is a table that shows which of the `CSGBase` non-getter-type methods are u
 | `addSurface`                | no | - | - |
 | `renameSurface`             | yes | - | - |
 | `deleteSurface`             | yes | - | - |
+| `createCell`                | yes, as a `CSGSurface` in the region | no | yes as a fill, but not as the "add-to" universe |
 | `renameCell`                | - | yes | - |
 | `deleteCell`                | - | yes | - |
-| `createCell`                | yes | no | yes as a fill, but not as the "add-to" universe |
 | `updateCellRegion`          | yes, as a `CSGSurface` in the region | no | - |
 | `resetCellFill`             | - | no | - |
-| `deleteUniverse`            | - | - | yes |
 | `updateCellFill`            | - | no | yes |
+| `createUniverse`            | - | yes | no |
 | `renameUniverse`            | - | - | yes |
+| `deleteUniverse`            | - | - | yes |
 | `addCell[s]ToUniverse`      | - | yes | no |
 | `removeCell[s]FromUniverse` | - | yes | no |
-| `addLattice`                | - | - | yes, as either a lattice element(s) or outer |
+| `addLattice`                | - | - | yes, can be used as either a lattice element(s) or outer for the lattice being added |
 | `setUniverseAtLatticeIndex` | - | - | yes |
 | `setLatticeUniverses`       | - | - | yes |
 | `setLatticeOuter`           | - | - | yes |
@@ -387,7 +390,7 @@ In other words, a `CSGSurface` and `CSGSurfaceEngUnit` cannot use the same name,
 
 #### Expansion
 
-Any engineering unit that is used it a geometry, can be "expanded" and replaced with the equivalent basic CSG components to define the object by calling `expandEngUnit` on any `CSGEngUnit` object.
+Any engineering unit that is used in a geometry can be "expanded" and replaced with the equivalent basic CSG components to define the object by calling `expandEngUnit` on any `CSGEngUnit` object.
 Expanding a `CSGSurfaceEngUnit` returns a `CSGRegion`, a `CSGCellEngUnit` returns a `CSGCell`, and a `CSGUniverseEngUnit` returns a `CSGUniverse`.
 During the expansion process, a unit is redefined in terms of the rudimentary components and those additional components are added to the `CSGBase` instance.
 For example, a `CSGCellEngUnit` might also need to create new `CSGSurface` objects to define the cell region or a `CSGUniverse` to use as a fill.
@@ -400,15 +403,19 @@ The code snippet below demonstrates this expansion behavior by expanding a `CSGN
 
 !alert! note title=CSGSurfaceEngUnits as Regions
 
-`CSGSurfaceEngUnit`s are intended to be used as a surface for a `CSGRegion` definition. Each derived unit type has a mechanism for determining the positive or negative half-space for that "surface" and therefore should be treated as a half-space during use. During expansion, the unit "surface" is replaced with a `CSGRegion` that defines the negative half-space of that unit. If the positive half-space was used in the `CSGRegion` definition, then the unit half-space is replaced with the complement (`~`) of the newly generated `CSGRegion`.
+`CSGSurfaceEngUnit`s are intended to be used as a surface for a `CSGRegion` definition. Each derived unit type has a mechanism for determining the positive or negative half-space for that "surface" and therefore should be treated as a half-space during use. During expansion, the unit "surface" is replaced with a `CSGRegion` that defines the negative half-space of that unit. If the positive half-space was used in the `CSGRegion` definition, then the unit half-space is replaced with the complement (`~`) of the newly generated `CSGRegion`. Upon completion of the expansion process, the `CSGRegion` that corresponds to the negative half-space of that original unit is returned.
 
 !alert-end!
 
 !alert! note title=Expanding Nested Engineering Units
 
-It is allowable to define an expansion method for an engineering unit that creates additional `CSGEngUnit` objects during the expansion process. If `expandUnit` is called on a single engineering unit, any newly generated engineering units will not be subsequently expanded. However, if `expandAllEngUnits()` is called, any additionally created `CSGEngUnit` objects will also be expanded recursively until no more `CSGEngUnit` objects remain.
+It is allowable to define an expansion method for an engineering unit that creates additional `CSGEngUnit` objects during the expansion process. If `expandUnit()` is called on a single engineering unit, any newly generated engineering units will not be subsequently expanded. However, if `expandAllEngUnits()` is called, any additionally created `CSGEngUnit` objects will also be expanded recursively until no more `CSGEngUnit` objects remain.
 
 !alert-end!
+
+If an engineering unit has [transformations](#transformations) applied to it, those transformations will be transferred to the appropriate expanded objects after expansion.
+For `CSGCellEngUnit` and `CSGUniverseEngUnit`, this means that the returned `CSGCell` and `CSGUniverse` will have the same transformations.
+For `CSGSurfaceEngUnit` types, this means that each new `CSGSurface` that is a part of the expanded `CSGRegion` will have the transformations applied.
 
 #### N-Sided Regular Polygon Unit
 
