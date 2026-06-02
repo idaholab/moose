@@ -303,16 +303,17 @@ and the shape functions.
 
 Polynomial fitting:
 
-- Form equations that the coefficients of a polynomial function must satisfy to fit
-- Solve the linear system
-- Reconstruct the fit by evaluating the polynomial defined by its coefficients
+- Choose basis functions and form equations for the expansion coefficients
+- Solve the resulting algebraic system
+- Evaluate the polynomial expansion to reconstruct the fitted function
 
 Finite Element method:
 
-- Form equations on each element to minimize the residual of an equation
-- Solve the linear system
-- Reconstruct the function
-- Re-evaluate the equation and iterate (for nonlinear equations)
+- Choose element shape functions and write the approximate solution in terms of coefficients
+- Form element weak-form residual equations by weighting the PDE residual with test functions
+- Assemble and solve the global algebraic system
+- Evaluate the finite element expansion to reconstruct the approximate solution
+- Re-evaluate the residual and iterate for nonlinear equations
 
 !---
 
@@ -347,41 +348,41 @@ where $\hat{n}$ is the outward normal vector for surface $s$. Combining [integra
 +(1)+ Write the strong form of the equation:
 
 !equation
--\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u = f
+-\nabla\cdot\left(k\nabla u\right) + \nabla\cdot\left(\vec{\beta} u\right) = f
 
 +(2)+ Rearrange to get zero on the right-hand side:
 
 !equation
--\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u - f = 0
+-\nabla\cdot\left(k\nabla u\right) + \nabla\cdot\left(\vec{\beta} u\right) - f = 0
 
 +(3)+ Multiply by the test function $\psi$:
 
 !equation
--\psi \left(\nabla\cdot k\nabla u\right) + \psi\left(\vec{\beta} \cdot \nabla u\right) - \psi f = 0
+-\psi \left(\nabla\cdot\left(k\nabla u\right)\right) + \psi\left(\nabla\cdot\left(\vec{\beta} u\right)\right) - \psi f = 0
 
 !---
 
 +(4)+ Integrate over the domain $\Omega$:
 
 !equation
-{-\int_\Omega\psi \left(\nabla\cdot k\nabla u\right)} + \int_\Omega\psi\left(\vec{\beta} \cdot \nabla u\right) - \displaystyle\int_\Omega\psi f = 0
+{-\int_\Omega\psi \left(\nabla\cdot\left(k\nabla u\right)\right)} + \int_\Omega\psi\left(\nabla\cdot\left(\vec{\beta} u\right)\right) - \displaystyle\int_\Omega\psi f = 0
 
-+(5)+ Integrate by parts and apply the divergence theorem, by using [int_and_div] on the left-most
-      term of the PDE:
++(5)+ Integrate by parts and apply the divergence theorem, by using [int_and_div] on the
+      divergence terms of the PDE:
 
 !equation
 \int_\Omega\nabla\psi\cdot k\nabla u -
 \int_{\partial\Omega} \psi \left(k\nabla u \cdot \hat{n}\right) -
-\int_\Omega\nabla\psi\left(\vec{\beta} \cdot u\right) +
-\int_{\partial\Omega} \psi \left(\vec{\beta} \cdot u \right) - \int_\Omega\psi f = 0
+\int_\Omega\nabla\psi\cdot\left(\vec{\beta} u\right) +
+\int_{\partial\Omega} \psi \left(\left(\vec{\beta} u\right)\cdot \hat{n} \right) - \int_\Omega\psi f = 0
 
 Write in inner product notation. Each term of the equation will inherit from an existing MOOSE type as shown below.
 
 !equation id=example_weak_form
 \underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
 \underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} -
-\underbrace{\left(\nabla \psi, \vec{\beta} \cdot u\right)}_{Kernel} +
-\underbrace{\langle\psi, \vec{\beta} \cdot u \rangle}_{BoundaryCondition} -
+\underbrace{\left(\nabla \psi, \vec{\beta} u\right)}_{Kernel} +
+\underbrace{\langle\psi, \left(\vec{\beta} u\right)\cdot \hat{n} \rangle}_{BoundaryCondition} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
 
 !---
@@ -392,9 +393,9 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !equation
 \underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
-\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
-\underbrace{\langle\psi, \vec{\beta} \cdot u \rangle}_{BoundaryCondition} -
-\underbrace{\left(\nabla \psi, \vec{\beta} \cdot u\right)}_{Kernel} -
+\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} -
+\underbrace{\left(\nabla \psi, \vec{\beta} u\right)}_{Kernel} +
+\underbrace{\langle\psi, \left(\vec{\beta} u\right)\cdot \hat{n} \rangle}_{BoundaryCondition} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
 
 !style-end!
@@ -403,45 +404,25 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !row!
 
-!col! width=20%
+!col! width=30%
 
-!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/force link=False
+Kernels:
+
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot link=False
 
 !col-end!
 
-!col! width=1%
+!col! width=2%
 
 $\quad$
 
 !col-end!
 
-!col! width=20%
+!col! width=30%
 
-!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=BCs link=False
+Boundary conditions:
 
-!col-end!
-
-!col! width=1%
-
-$\quad$
-
-!col-end!
-
-!col! width=20%
-
-!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/diffusion Kernels/force link=False
-
-!col-end!
-
-!col! width=1%
-
-$\quad$
-
-!col-end!
-
-!col! width=20%
-
-!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/diffusion link=False
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=BCs remove=BCs/inlet_flux link=False
 
 !col-end!
 
