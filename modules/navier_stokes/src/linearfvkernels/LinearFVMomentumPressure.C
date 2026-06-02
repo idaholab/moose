@@ -12,7 +12,6 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
-#include "FVGradientMethod.h"
 #include "LinearFVGradientInterface.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
@@ -63,14 +62,7 @@ LinearFVMomentumPressure::registerPressureGradientField()
   if (!isParamValid("gradient_method"))
     return _pressure_var.computeCellGradients();
 
-  const auto & method_name = getParam<GradientMethodName>("gradient_method");
-  if (method_name == "green-gauss" && !_fe_problem.hasFVGradientMethod(method_name))
-    _fe_problem.addFVGradientMethod("FVGreenGaussGradient", method_name);
-
-  if (!_fe_problem.hasFVGradientMethod(method_name))
-    paramError("gradient_method", "Unable to find FVGradientMethod with name '", method_name, "'.");
-
-  return _pressure_var.computeCellGradients(_fe_problem.getFVGradientMethod(method_name));
+  return _pressure_var.computeCellGradients(getParam<GradientMethodName>("gradient_method"));
 }
 
 Real

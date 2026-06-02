@@ -98,6 +98,9 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
 
   const auto & rc = *_rhie_chow_user_object;
   const auto pressure_variable_number = rc.pressureVariableNumber();
+
+  // This method replaces the pressure gradient used by Rhie-Chow, so every variable assigned to
+  // this shared method must be that pressure variable.
   for (const auto variable_number : variable_numbers)
     if (variable_number != pressure_variable_number)
       mooseError("FVReconstructedPressureGradient '",
@@ -106,6 +109,8 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
                  _rhie_chow_user_object_name,
                  "'.");
 
+  // During the first pressure-gradient update, Rhie-Chow has not yet reconstructed cell velocities
+  // from the face fluxes. Use the base method until those reconstructed velocities exist.
   if (!rc.hasReconstructedCellVelocity())
   {
     _base_gradient_method->computeGradient(
@@ -113,6 +118,8 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     return;
   }
 
+  // Start from the configured base gradient. It remains the fallback value and is also blended with
+  // the reconstructed gradient when the relaxation factor is below one.
   _base_gradient_method->computeGradient(
       system, output_gradient, scratch_gradient, variable_numbers);
 
@@ -129,6 +136,8 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
 
   for (const auto component : make_range(dim))
   {
+    // RhieChowMassFlux enforces compatible pressure and momentum systems for this reconstruction,
+    // so these component vectors can be combined with pressure-gradient component vectors directly.
     mooseAssert(
         reconstructed_cell_velocity[component]->size() == output_gradient[component]->size(),
         "Reconstructed cell velocity and pressure gradient vectors must have the same size.");
@@ -137,12 +146,16 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
     mooseAssert(Ainv[component]->size() == output_gradient[component]->size(),
                 "Ainv and pressure gradient vectors must have the same size.");
 
+    // Rearrange u_C = -(H/A)_C - (1/A)_C grad(p)_C to reconstruct the pressure gradient:
+    // grad(p)_C = (-u_C - (H/A)_C) / (1/A)_C.
     auto & reconstructed_gradient = *scratch_gradient[component];
     reconstructed_gradient = *reconstructed_cell_velocity[component];
     reconstructed_gradient.scale(-1.0);
     reconstructed_gradient.add(-1.0, *HbyA[component]);
     reconstructed_gradient.pointwise_divide(reconstructed_gradient, *Ainv[component]);
 
+    // Publish a relaxed update in the output vector:
+    // output = (1 - alpha) * base_gradient + alpha * reconstructed_gradient.
     auto & gradient = *output_gradient[component];
     gradient.scale(1.0 - alpha);
     gradient.add(alpha, reconstructed_gradient);
