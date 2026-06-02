@@ -309,8 +309,8 @@ EOF
 
         # Cleanup
         rm -rf ${NEML2_SRC_DIR} ${NEML2_BUILD_SCRIPT}
-    {%- endif %}
     )
+{%- endif %}
 
 {%- if WITH_MFEM %}
     # Build conduit
