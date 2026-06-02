@@ -87,7 +87,7 @@ CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_to
   return true;
 }
 
-const char *
+std::string
 CSGRegion::regionTypeName(const RegionType region_type)
 {
   mooseAssert(region_type == RegionType::COMPLEMENT || region_type == RegionType::INTERSECTION ||
@@ -370,7 +370,6 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
   // This will also update the _surfaces list to remove the old_surf (if present) and append the
   // surfaces from the sub-region if they are used to replace the old_surf here.
   std::vector<PostfixTokenVariant> new_tokens;
-  new_tokens.reserve(_postfix_tokens.size());
 
   for (std::size_t i = 0; i < _postfix_tokens.size(); ++i)
   {
@@ -382,7 +381,8 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
       // encountered the old_surf to be replaced, so replace with the sub_region tokens
 
       // The next token must be the Halfspace that was applied to this surface
-      mooseAssert(i + 1 < _postfix_tokens.size(),
+      mooseAssert(i + 1 < _postfix_tokens.size() &&
+                      std::holds_alternative<CSGSurface::Halfspace>(_postfix_tokens[i + 1]),
                   "Expected a Halfspace token after surface reference in postfix stream");
       const auto & hs = std::get<CSGSurface::Halfspace>(_postfix_tokens[++i]);
 
@@ -397,17 +397,15 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
     else
       new_tokens.push_back(_postfix_tokens[i]);
   }
-  _postfix_tokens = std::move(new_tokens);
+  _postfix_tokens = new_tokens;
 
-  // Update _region_type from the last operator token in the new stream
-  const auto it =
-      std::find_if(_postfix_tokens.rbegin(),
-                   _postfix_tokens.rend(),
-                   [](const auto & t) { return std::holds_alternative<RegionType>(t); });
-  if (it == _postfix_tokens.rend())
-    _region_type = _postfix_tokens.empty() ? "EMPTY" : "HALFSPACE";
+  // Update _region_type from the last token in the new stream
+  if (_postfix_tokens.empty())
+    _region_type = "EMPTY";
+  else if (const auto * rt = std::get_if<RegionType>(&_postfix_tokens.back()))
+    _region_type = regionTypeName(*rt);
   else
-    _region_type = regionTypeName(std::get<RegionType>(*it));
+    _region_type = "HALFSPACE";
 }
 
 } // namespace CSG

@@ -53,7 +53,7 @@ public:
   /**
    * @return The string associated with the given region type
    */
-  static const char * regionTypeName(const RegionType region_type);
+  static std::string regionTypeName(const RegionType region_type);
 
   /**
    * Default Constructor
