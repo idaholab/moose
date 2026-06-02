@@ -32,11 +32,12 @@ From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-gcc:8.10-gcc13.3.1
     test -f /moose_env.sh && . /moose_env.sh
 
 %post
-    umask 022
+    # Be careful about unknown variables
+    set -u
 
     # Determine rocky version
     grep -q "Rocky" /etc/os-release && IS_ROCKY=1
-    if [ -n "$IS_ROCKY" ]; then
+    if [ -n "${IS_ROCKY:-}" ]; then
         grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
         grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
     fi
@@ -48,10 +49,10 @@ From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-gcc:8.10-gcc13.3.1
 
     # Enable additional repos
     dnf install -y dnf-plugins-core
-    if [ -n "$IS_ROCKY_8" ]; then
+    if [ -n "${IS_ROCKY_8:-}" ]; then
         dnf config-manager --set-enabled powertools
         dnf install -y redhat-lsb-core.x86_64
-    elif [ -n "$IS_ROCKY_9" ]; then
+    elif [ -n "${IS_ROCKY_9:-}" ]; then
         dnf config-manager --set-enabled crb
     fi
     dnf install -y epel-release
