@@ -8,14 +8,12 @@
 {#- WASP_GIT_REMOTE: The git remote to use to get WASP                                        -#}
 
 {#- Optional jinja arguments                                                                  -#}
-{#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
 {#- CONDUIT_GIT_SHA: The git SHA to use for conduit                                           -#}
 {#- CONDUIT_GIT_REMOTE: The git remote to use to get conduit                                  -#}
 {#- CONDUIT_OPTIONS: Options to pass to conduit build                                         -#}
 {#- MFEM_GIT_SHA: The git SHA to use for MFEM                                                 -#}
 {#- MFEM_GIT_REMOTE: The git remote to use to get MFEM                                        -#}
 {#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
-{#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
@@ -29,11 +27,6 @@
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
-
-{#- Location to install miniforge3                                                            -#}
-{%- set MINIFORGE_DIR = '/opt/miniforge3' -%}
-{#- Name of the environment to create in conda                                                -#}
-{%- set MOOSE_CONDA_ENV_NAME = 'moose' -%}
 
 {#- The installation location for gperftools                                                  -#}
 {%- set GPERF_DIR = '/opt/gperftools' -%}
@@ -57,6 +50,10 @@
 {%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
 {#- The installation location for neml2                                                       -#}
 {%- set NEML2_DIR = '/opt/neml2' -%}
+{#- The installation location for uv                                                          -#}
+{%- set UV_DIR = '/opt/uv' -%}
+{#- The installation location for python                                                      -#}
+{%- set PYTHON_DIR = '/opt/python' -%}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
@@ -69,15 +66,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 %environment
-    if [ -d "{{ MINIFORGE_DIR }}" ]; then
-        export PATH={{ MINIFORGE_DIR }}/bin:$PATH
-    fi
-    if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}" ]; then
-        source {{ MINIFORGE_DIR }}/etc/profile.d/conda.sh
-        conda activate {{ MOOSE_CONDA_ENV_NAME }}
-    fi
-
-    export PATH=/opt/code-server/bin:$PATH
+    test -d {{ PYTHON_DIR }} && export PATH={{ PYTHON_DIR }}/bin
+    test -d {{ CODE_SERVER_DIR }} && export PATH={{ CODE_SERVER_DIR }}/bin:${PATH}
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
@@ -115,10 +105,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
-    MINIFORGE_DIR={{ MINIFORGE_DIR }}
     MOOSE_CONDA_ENV_NAME={{ MOOSE_CONDA_ENV_NAME }}
     MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
-    CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
     WASP_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ WASP_BUILD_SCRIPT }}
     WASP_DIR={{ WASP_DIR }}
     WASP_GIT_SHA={{ WASP_GIT_SHA }}
@@ -131,8 +119,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     GPERFTOOLS_VERSION=2.18.1
     GO_VERSION=1.26.1
 {%- endif %}
-    MINIFORGE_VERSION=26.3.2-2
-    PYTHON_VERSION=3.14
+    PYTHON_VERSION=3.14.5
     PYTORCH_VERSION=2.12.0
 
     # Special setup for OpenMPI
@@ -195,14 +182,32 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${WASP_SRC_DIR}
     export WASP_DIR
 
-    # Install miniforge in MINIFORGE_DIR
+    # Install python environment
+    UV_DIR={{ UV_DIR }}
+    PYTHON_DIR={{ PYTHON_DIR }}
     cd ${ROOT_BUILD_DIR}
-    MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
-    curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
-    bash ${MINIFORGE_SCRIPT} -b -p ${MINIFORGE_DIR}
-    rm ${MINIFORGE_SCRIPT}
-    export PATH=${MINIFORGE_DIR}/bin:$PATH
-    conda update -yq --all
+    UV_BIN_DIR=${UV_DIR}/bin
+    mkdir -p ${UV_BIN_DIR} ${XDG_DATA_HOME}
+    curl -LsSf https://astral.sh/uv/install.sh | XDG_DATA_HOME=${UV_DIR}/data XDG_BIN_HOME=${UV_BIN_DIR} sh
+    XDG_DATA_HOME=${UV_DIR}/data ${UV_BIN_DIR}/uv venv ${PYTHON_DIR} --no-project --no-config --relocatable --no-cache --python "${PYTHON_VERSION%.*}"
+    ${PYTHON_DIR}/bin/python
+    ${PYTHON_DIR}/bin/python --version | grep -q "Python ${PYTHON_VERSION}"
+    cat <<EOF > "${PYTHON_DIR}/bin/pip"
+#!/bin/bash
+# Wrapper script that forwards pip commands to uv
+#
+# Derived containers should be able to run "pip install ..."
+# to install additional python packages
+export XDG_DATA_HOME=${UV_DIR}/data
+export UV_PYTHON=${PYTHON_DIR}
+export UV_NO_CACHE=1
+export UV_LINK_MODE=copy
+${UV_BIN_DIR}/uv pip "\$@"
+EOF
+    chmod +x "${PYTHON_DIR}/bin/pip"
+    ln -s "${PYTHON_DIR}/bin/pip" "${PYTHON_DIR}/bin/pip3"
+    export PATH=${PYTHON_DIR}/bin:${PATH}
+    pip install -r /root/requirements.txt && rm /root/requirements.txt
 
 {% if WITHOUT_PYTORCH is not defined %}
     # Make ninja available for neml2 and libtorch builds
@@ -230,11 +235,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
 
     # Create a temporary python environment for building pytorch
-    PYTORCH_CONDA_ENV=pytorch_build
-    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
-    source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
+    PYTORCH_VENV=${ROOT_BUILD_DIR}/pytorch_venv
+    python -m venv ${PYTORCH_VENV}
+    source ${PYTORCH_VENV}/bin/activate
     # Make sure that pip matches the python version we requested above
-    conda install -yq pip
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
     # Require CUDA if we have cuda available
@@ -267,9 +271,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
 
     # Cleanup the python build environment
-    source deactivate
-    conda env remove -y -n ${PYTORCH_CONDA_ENV}
-    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    deactivate
+    rm -rf ${PYTORCH_VENV} ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
 
     export LIBTORCH_DIR
     cd ${ROOT_BUILD_DIR}
@@ -352,20 +355,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 {%- endif %}
 
-    # Add moose channels
-    conda config --env --add channels https://conda.software.inl.gov/public
-    # Add an alt channel if given
-    if [ -n "$CONDA_ALT_CHANNEL" ]; then
-        conda config --env --add channels ${CONDA_ALT_CHANNEL}
-    fi
-    # Create list of Conda Packages to install
-    CONDA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
-    # Install packages
-    conda create -yq -n moose python=${PYTHON_VERSION} ${CONDA_PACKAGES}
-    # Needed for coverage
-    source activate moose
-    pip3 --no-cache install lcov-cobertura
-
     # Install node.js. Requested by dschwen for bison
     dnf install -y nodejs npm
 
@@ -421,6 +410,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
+    # python requirements
+    {{ MOOSE_DIR }}/requirements.txt /root/requirements.txt
     # code-server helpers
     {{ FILES_DIR }}/opt/code-server/bin/code-server-setup-extensions /opt/code-server/bin/code-server-setup-extensions
     {{ FILES_DIR }}/opt/code-server/bin/code-server-start /opt/code-server/bin/code-server-start

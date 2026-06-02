@@ -130,6 +130,7 @@ packages:
       - apptainer/remove_channels.def
       # files that are included within moose-dev.def
       - apptainer/files/moose-dev
+      - requirements.txt
       # wasp
       - scripts/configure_wasp.sh
       - scripts/update_and_rebuild_wasp.sh
