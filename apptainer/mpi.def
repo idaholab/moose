@@ -60,7 +60,7 @@ From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-gcc:8.10-gcc13.3.1
     dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
         libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov bash-completion
+        automake cppunit-devel glpk-devel patchelf lcov bash-completion ninja-build
 
     # Clean after install
     dnf clean all

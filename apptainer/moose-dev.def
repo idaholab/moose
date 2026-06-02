@@ -199,76 +199,62 @@ ${UV_BIN_DIR}/uv pip "\$@"
 EOF
     chmod +x "${PYTHON_DIR}/bin/pip"
     ln -s "${PYTHON_DIR}/bin/pip" "${PYTHON_DIR}/bin/pip3"
-    export PATH=${PYTHON_DIR}/bin:${PATH}
-    pip install -r /root/requirements.txt && rm /root/requirements.txt
+    ${PYTHON_DIR}/bin/pip install -r /root/requirements.txt && rm /root/requirements.txt
 
 {% if WITHOUT_PYTORCH is not defined %}
-    # Make ninja available for neml2 and libtorch builds
-    dnf install -y ninja-build
+    # Build libtorch
+    (
+        set -u
 
-    # Figure out compiler and version to see if we build torch or use prebuilt torch
-    COMPILER=$(mpicxx -show | awk '{ print $1 }')
-    # Explicitly silence all warnings because the build is loud (>5MB of output...)
-    BUILD_PYTORCH_CCXXFLAGS=("-w")
-    BUILD_PYTORCH_FLAGS=()
-    if [ "$COMPILER" == "g++" ]; then
-        BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
-    elif [ "$COMPILER" == "clang++" ]; then
-        # FBGEMM requires AVX512, which we don't get with clang
-        BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
-    else
-        echo "Unknown compiler $COMPILER"
-        exit 1
-    fi
+        # Clone pytorch for build
+        cd ${ROOT_BUILD_DIR}
+        PYTORCH_SRC_DIR=${ROOT_BUILD_DIR}/pytorch
+        git clone --branch v${PYTORCH_VERSION} --single-branch \
+            --recursive https://github.com/pytorch/pytorch ${PYTORCH_SRC_DIR}
 
-    LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    # Clone pytorch for build
-    cd ${ROOT_BUILD_DIR}
-    git clone --branch v${PYTORCH_VERSION} --single-branch --recursive https://github.com/pytorch/pytorch
-    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
+        # Create a temporary python environment for building libtorch
+        LIBTORCH_BUILD_VENV=${ROOT_BUILD_DIR}/pytorch_venv
+        {{ PYTHON_DIR }}/bin/python -m venv ${LIBTORCH_BUILD_VENV}
+        source ${LIBTORCH_BUILD_VENV}/bin/activate
+        pip3 install --no-cache -r ${PYTORCH_SRC_DIR}/requirements.txt
 
-    # Create a temporary python environment for building pytorch
-    PYTORCH_VENV=${ROOT_BUILD_DIR}/pytorch_venv
-    python -m venv ${PYTORCH_VENV}
-    source ${PYTORCH_VENV}/bin/activate
-    # Make sure that pip matches the python version we requested above
-    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+        # Determine additional libtorch configure flags
+        LIBTORCH_FLAGS=()
+        # Require CUDA if we have cuda available
+        if [ -n "${CUDA_DIR:-}" ]; then
+            # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+            LIBTORCH_FLAGS+=(
+                "-DTORCH_CUDA_ARCH_LIST=8.0;8.6;8.9"
+                "-DUSE_CUDA:BOOL=ON"
+                "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}"
+            )
+        else
+            LIBTORCH_FLAGS+=("-DUSE_CUDA:BOOL=OFF")
+        fi
 
-    # Require CUDA if we have cuda available
-    if [ -n "$CUDA_DIR" ]; then
-        # 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
-        export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9"
-        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
-    else
-        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=OFF")
-    fi
-    # Build and install pytorch
-    mkdir -p $LIBTORCH_DIR/logs
-    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
-    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-    CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
-        -GNinja \
-        -DBUILD_SHARED_LIBS:BOOL=ON \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
-        -DBUILD_PYTHON:BOOL=OFF \
-        -DCMAKE_INCLUDE_PATH:PATH=${PETSC_DIR}/include \
-        -DCMAKE_LIBRARY_PATH:PATH=${PETSC_DIR}/lib \
-        -DUSE_BLAS:BOOL=ON \
-        -DBLAS:STRING=OpenBLAS \
-        -DUSE_LAPACK:BOOL=ON \
-        -DUSE_MPI:BOOL=OFF \
-        -DUSE_SYSTEM_NCCL:BOOL=ON \
-        "${BUILD_PYTORCH_FLAGS[@]}" \
-        ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
-    cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
+        # Build and install libtorch
+        LIBTORCH_DIR={{ LIBTORCH_DIR }}
+        LIBTORCH_LOGS=$LIBTORCH_DIR/logs
+        mkdir -p $LIBTORCH_LOGS
+        LIBTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/libtorch_build
+        mkdir $LIBTORCH_BUILD_DIR
+        source ${ROOT_BUILD_DIR}/configure_libtorch.sh
+        configure_libtorch \
+            "$PYTORCH_SRC_DIR" \
+            "$LIBTORCH_BUILD_DIR" \
+            "$LIBTORCH_DIR" \
+            -DCMAKE_C_FLAGS="-w" \
+            -DCMAKE_CXX_FLAGS="-w" \
+            "${LIBTORCH_FLAGS[@]}" 2>&1 | tee ${LIBTORCH_LOGS}/cmake.log
+        build_libtorch "$LIBTORCH_BUILD_DIR" "$MOOSE_JOBS" 2>&1 | tee ${LIBTORCH_LOGS}/build.log
+        install_libtorch "$LIBTORCH_BUILD_DIR" "$LIBTORCH_DIR" 2>&1 | tee ${LIBTORCH_LOGS}/install.log
 
-    # Cleanup the python build environment
-    deactivate
-    rm -rf ${PYTORCH_VENV} ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+        # Cleanup the build environment
+        deactivate
+        rm -rf ${LIBTORCH_BUILD_VENV} ${PYTORCH_SRC_DIR} ${LIBTORCH_BUILD_DIR}
+    )
 
-    export LIBTORCH_DIR
-    cd ${ROOT_BUILD_DIR}
+    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
 
     # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
     # neml2 variables
@@ -415,6 +401,8 @@ EOF
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {% if WITHOUT_PYTORCH is not defined %}
+    # libtorch
+    {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
