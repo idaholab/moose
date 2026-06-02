@@ -39,12 +39,20 @@ geometryEffectiveFaceAlphaGradient(const Moose::Functor<Real> & volume_fraction,
                                    const T & t)
 {
   const auto raw_grad_alpha =
-      face_smoothed_alpha_gradient ? (*face_smoothed_alpha_gradient)(r, t) : volume_fraction.gradient(r, t);
+      [&]() -> RealVectorValue
+      {
+        if constexpr (std::is_same_v<std::decay_t<R>, Moose::FaceArg>)
+          if (face_smoothed_alpha_gradient)
+            return (*face_smoothed_alpha_gradient)(r, t);
+
+        return volume_fraction.gradient(r, t);
+      }();
   const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(raw_grad_alpha));
   RealVectorValue effective_grad_alpha = MetaPhysicL::raw_value(raw_grad_alpha);
-  if (precomputed_interface_unit_normal)
-    effective_grad_alpha =
-        mag_grad_alpha * MetaPhysicL::raw_value((*precomputed_interface_unit_normal)(r, t));
+  if constexpr (std::is_same_v<std::decay_t<R>, Moose::FaceArg>)
+    if (precomputed_interface_unit_normal)
+      effective_grad_alpha =
+          mag_grad_alpha * MetaPhysicL::raw_value((*precomputed_interface_unit_normal)(r, t));
   return effective_grad_alpha;
 }
 }
@@ -304,8 +312,9 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
       _face_smoothed_alpha_gradient_name,
       [this](const auto & r, const auto & t) -> RealVectorValue
       {
-        if (_face_smoothed_alpha_gradient)
-          return (*_face_smoothed_alpha_gradient)(r, t);
+        if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
+          if (_face_smoothed_alpha_gradient)
+            return (*_face_smoothed_alpha_gradient)(r, t);
         return _volume_fraction.gradient(r, t);
       },
       clearance_schedule);
@@ -319,12 +328,19 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
       _interface_unit_normal_name,
       [this](const auto & r, const auto & t) -> RealVectorValue
       {
-        if (_precomputed_interface_unit_normal)
-          return (*_precomputed_interface_unit_normal)(r, t);
+        if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
+          if (_precomputed_interface_unit_normal)
+            return (*_precomputed_interface_unit_normal)(r, t);
 
-        const auto grad_alpha = _face_smoothed_alpha_gradient
-                                    ? (*_face_smoothed_alpha_gradient)(r, t)
-                                    : _volume_fraction.gradient(r, t);
+        const auto grad_alpha =
+            [&]() -> RealVectorValue
+            {
+              if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
+                if (_face_smoothed_alpha_gradient)
+                  return (*_face_smoothed_alpha_gradient)(r, t);
+
+              return _volume_fraction.gradient(r, t);
+            }();
         const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(grad_alpha));
 
         // This mirrors the reference solver regularization nHat = grad(alpha) / (|grad(alpha)| + deltaN).

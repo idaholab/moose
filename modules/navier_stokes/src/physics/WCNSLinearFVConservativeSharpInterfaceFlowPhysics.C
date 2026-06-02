@@ -774,25 +774,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumReducedPressureKer
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumFaceBasedReducedPressureKernels()
-{
-  const std::string kernel_type = "LinearFVFaceBasedMomentumPressure";
-  const std::string kernel_name = prefix() + "ins_momentum_reduced_pressure_";
-
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<VariableName>(NS::pressure) = _pressure_name;
-  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-
-  for (const auto d : make_range(dimension()))
-  {
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
-    params.set<LinearVariableName>("variable") = _velocity_names[d];
-    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
-  }
-}
-
-void
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumFrictionKernels()
 {
   unsigned int num_friction_blocks = _friction_blocks.size();

@@ -23,6 +23,20 @@ using namespace libMesh;
 namespace
 {
 
+void
+closeVectorWithTrace(const std::string & label, NumericVector<Number> * vector)
+{
+  if (!vector)
+  {
+    std::cerr << label << " vector=null" << std::endl;
+    return;
+  }
+
+  std::cerr << label << " close begin" << std::endl;
+  vector->close();
+  std::cerr << label << " close end" << std::endl;
+}
+
 struct SharpCellDebugKeys
 {
   const char * cell;
@@ -788,16 +802,40 @@ ReducedPressurePIMPLESolve::solve()
   if (startupPressureInitializationEnabled() && _problem.timeStep() == 1)
   {
     for (auto * system : _momentum_systems)
+    {
+      std::cerr << "[ReducedPressurePIMPLESolve] startup sync begin system=" << system->name()
+                << std::endl;
       synchronizeSystemState(*system);
+      std::cerr << "[ReducedPressurePIMPLESolve] startup sync end system=" << system->name()
+                << std::endl;
+    }
+    std::cerr << "[ReducedPressurePIMPLESolve] startup sync begin system="
+              << _pressure_system.name() << std::endl;
     synchronizeSystemState(_pressure_system);
+    std::cerr << "[ReducedPressurePIMPLESolve] startup sync end system=" << _pressure_system.name()
+              << std::endl;
     for (auto * system : _volume_fraction_systems)
+    {
+      std::cerr << "[ReducedPressurePIMPLESolve] startup sync begin system=" << system->name()
+                << std::endl;
       synchronizeSystemState(*system);
+      std::cerr << "[ReducedPressurePIMPLESolve] startup sync end system=" << system->name()
+                << std::endl;
+    }
 
+    std::cerr << "[ReducedPressurePIMPLESolve] startup execute begin" << std::endl;
     _problem.execute(EXEC_NONLINEAR);
+    std::cerr << "[ReducedPressurePIMPLESolve] startup execute end" << std::endl;
   }
 
   if (_should_solve_pressure)
+  {
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] startup pressure init begin" << std::endl;
     initializeStartupPressureField(solver_params);
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] startup pressure init end" << std::endl;
+  }
 
   while (simple_iteration_counter < _num_iterations)
   {
@@ -1098,7 +1136,15 @@ ReducedPressurePIMPLESolve::sharpInterfaceCurvature() const
 void
 ReducedPressurePIMPLESolve::synchronizeSystemState(LinearSystem & system) const
 {
-  system.solutionOld() = *(system.system().current_local_solution);
+  auto & current_local_solution = *(system.system().current_local_solution);
+  current_local_solution.close();
+  system.setSolution(current_local_solution);
+
+  auto & current_solution = system.solution();
+  current_solution.close();
+
+  system.solutionOld().close();
+  system.solutionOld() = current_solution;
   system.solutionOld().close();
 
   for (unsigned int state = 1;
@@ -1106,8 +1152,16 @@ ReducedPressurePIMPLESolve::synchronizeSystemState(LinearSystem & system) const
        ++state)
   {
     auto & nonlinear_state = system.solutionState(state, Moose::SolutionIterationType::Nonlinear);
+    nonlinear_state.close();
     nonlinear_state = system.solutionOld();
     nonlinear_state.close();
+  }
+
+  if (auto * previous_newton_solution = system.solutionPreviousNewton())
+  {
+    previous_newton_solution->close();
+    *previous_newton_solution = current_solution;
+    previous_newton_solution->close();
   }
 }
 
@@ -1116,6 +1170,8 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
 {
   if (_momentum_systems.empty())
     return;
+
+  std::cerr << "[ReducedPressurePIMPLESolve] startup assemble predictor begin" << std::endl;
 
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->updateContinuityErrorField();
@@ -1130,10 +1186,13 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
 
   for (const auto system_i : index_range(_momentum_systems))
   {
+    std::cerr << "[ReducedPressurePIMPLESolve] startup assemble predictor system_i=" << system_i
+              << " begin" << std::endl;
     _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
 
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+    momentum_system.update();
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
     SparseMatrix<Number> & mmat = *(momentum_system.matrix);
@@ -1147,37 +1206,58 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
     // Assemble and relax the momentum predictor exactly as in the main SIMPLE loop,
     // but stop before the linear solve so startup pressure correction can reuse the
     // same diagonal / HbyA operator without advancing momentum.
+    closeVectorWithTrace("startup predictor current_local before assembly",
+                         momentum_system.current_local_solution.get());
+    closeVectorWithTrace("startup predictor solution before assembly", &solution);
+    closeVectorWithTrace("startup predictor old before assembly",
+                         &_momentum_systems[system_i]->solutionOld());
+    closeVectorWithTrace("startup predictor previous newton before assembly",
+                         _momentum_systems[system_i]->solutionPreviousNewton());
+    closeVectorWithTrace("startup predictor rhs before assembly", &rhs);
     _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+    closeVectorWithTrace("startup predictor rhs after assembly", &rhs);
     applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
 
     if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
     {
       predictor_diagonal_raw = solution.zero_clone();
+      predictor_diagonal_raw->close();
       auto * petsc_mat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
       mooseAssert(petsc_mat,
                   "ReducedPressurePIMPLESolve startup predictor caching requires PETSc matrices.");
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor raw diagonal begin" << std::endl;
       petsc_mat->get_diagonal(*predictor_diagonal_raw);
       predictor_diagonal_raw->close();
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor raw diagonal end" << std::endl;
       _rc_uo->cacheStartupPredictorDiagonal(system_i, *predictor_diagonal_raw);
     }
 
     if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
     {
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor rhs base clone begin"
+                << std::endl;
       predictor_rhs_base = rhs.clone();
-      *predictor_rhs_base = rhs;
       predictor_rhs_base->close();
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor rhs base clone end"
+                << std::endl;
 
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor body force begin" << std::endl;
       predictor_body_force = rhs.clone();
       predictor_body_force->zero();
+      predictor_body_force->close();
       addMomentumPredictorBodyForceForcing(system_i, *predictor_body_force);
       predictor_body_force->close();
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor body force end" << std::endl;
 
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor explicit forcing begin"
+                << std::endl;
       addMomentumPredictorExplicitForcing(system_i, rhs);
 
       predictor_explicit_force = rhs.clone();
-      *predictor_explicit_force = rhs;
       predictor_explicit_force->add(-1.0, *predictor_rhs_base);
       predictor_explicit_force->close();
+      std::cerr << "[ReducedPressurePIMPLESolve] startup predictor explicit forcing end"
+                << std::endl;
     }
 
     momentum_system.update();
@@ -1187,9 +1267,12 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
                                              predictor_rhs_base.get(),
                                              predictor_explicit_force.get(),
                                              predictor_body_force.get());
+    std::cerr << "[ReducedPressurePIMPLESolve] startup assemble predictor system_i=" << system_i
+              << " end" << std::endl;
   }
 
   momentum_solver.reuse_preconditioner(false);
+  std::cerr << "[ReducedPressurePIMPLESolve] startup assemble predictor end" << std::endl;
 }
 
 void
@@ -1231,9 +1314,15 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
   if (!_momentum_systems.empty() && _rc_uo)
   {
     assembleMomentumPredictorOnly();
+    std::cerr << "[ReducedPressurePIMPLESolve] startup init face mass flux begin" << std::endl;
     _rc_uo->initFaceMassFlux();
+    std::cerr << "[ReducedPressurePIMPLESolve] startup init face mass flux end" << std::endl;
+    std::cerr << "[ReducedPressurePIMPLESolve] startup continuity corrections begin" << std::endl;
     performStartupContinuityCorrections(solver_params);
+    std::cerr << "[ReducedPressurePIMPLESolve] startup continuity corrections end" << std::endl;
+    std::cerr << "[ReducedPressurePIMPLESolve] startup final pressure sync begin" << std::endl;
     synchronizeSystemState(_pressure_system);
+    std::cerr << "[ReducedPressurePIMPLESolve] startup final pressure sync end" << std::endl;
   }
   else
   {
@@ -1247,7 +1336,9 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
       correctVelocityOnce(true, true, solver_params);
     }
   }
+  std::cerr << "[ReducedPressurePIMPLESolve] startup pressure init execute begin" << std::endl;
   _problem.execute(EXEC_NONLINEAR);
+  std::cerr << "[ReducedPressurePIMPLESolve] startup pressure init execute end" << std::endl;
 }
 
 void
@@ -1264,11 +1355,17 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
 
   for (const auto startup_it : make_range(_startup_flux_corrections))
   {
+    std::cerr << "[ReducedPressurePIMPLESolve] startup continuity correction it=" << startup_it
+              << " begin" << std::endl;
     (void)startup_it;
     (void)correctStartupContinuityOnce(true, true, solver_params);
+    std::cerr << "[ReducedPressurePIMPLESolve] startup continuity correction it=" << startup_it
+              << " end" << std::endl;
   }
 
+  std::cerr << "[ReducedPressurePIMPLESolve] startup continuity execute begin" << std::endl;
   _problem.execute(EXEC_NONLINEAR);
+  std::cerr << "[ReducedPressurePIMPLESolve] startup continuity execute end" << std::endl;
 }
 
 void
@@ -2339,16 +2436,29 @@ ReducedPressurePIMPLESolve::updateAbsolutePressureAndReferenceState()
   // The matching reference operation is to restore the solved reduced-pressure reference after
   // relaxation, equivalent to reference solver's final p/p_rgh reference adjustment for this single-field
   // representation.
-  if (!_pin_pressure || _pressure_pin_dof == libMesh::invalid_uint)
+  if (!_pin_pressure)
     return;
 
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-  const Real reference_shift =
-      [this, &pressure_current_solution]()
+  auto & pressure_comm = _pressure_system.system().comm();
+
+  dof_id_type pressure_pin_dof = _pressure_pin_dof;
+  pressure_comm.min(pressure_pin_dof);
+  if (pressure_pin_dof == DofObject::invalid_id || pressure_pin_dof == libMesh::invalid_uint)
+    return;
+
+  const auto & pressure_dof_map = _pressure_system.system().get_dof_map();
+  const processor_id_type pressure_pin_owner = pressure_dof_map.dof_owner(pressure_pin_dof);
+
+  Real pressure_pin_value = 0.0;
+  if (pressure_comm.rank() == pressure_pin_owner)
   {
     PetscVectorReader pressure_reader(pressure_current_solution);
-    return _pressure_pin_value - pressure_reader(_pressure_pin_dof);
-  }();
+    pressure_pin_value = pressure_reader(pressure_pin_dof);
+  }
+  pressure_comm.broadcast(pressure_pin_value, pressure_pin_owner);
+
+  const Real reference_shift = _pressure_pin_value - pressure_pin_value;
 
   for (const auto i : make_range(pressure_current_solution.first_local_index(),
                                  pressure_current_solution.last_local_index()))

@@ -60,7 +60,6 @@ public:
   void applyCorrection(const Real dt,
                        const Real subcycle_fraction = 1.0,
                        ConservativeSharpInterfaceCurvatureCalculator * curvature = nullptr);
-  LiquidVolumeAudit liquidVolumeAudit() const;
   RhoPhiConsistencyAudit rhoPhiConsistencyAudit() const;
   Real alphaPhiWorkingBeforeIntegrated(const FaceInfo & fi) const;
   Real alphaPhiTargetIntegrated(const FaceInfo & fi) const;
@@ -107,7 +106,6 @@ private:
   };
 
   void cacheSystemData();
-  void clampSolution() const;
   void initializeFluxStorage();
   void invalidatePreviousCorrectionFluxes();
   void publishFaceFluxes(const std::vector<FaceCorrectionData> & face_corrections,
@@ -136,12 +134,6 @@ private:
   Real donorFlux(const FaceInfo & fi) const;
   Real highOrderFaceValue(const FaceInfo & fi) const;
   Real highOrderFlux(const FaceInfo & fi) const;
-  Real faceValueForCarrierFlux(const FaceInfo & fi,
-                               Real carrier_flux,
-                               Real elem_value,
-                               Real neighbor_value,
-                               BoundaryFaceKind boundary_kind,
-                               bool use_high_order) const;
   Real venkatakrishnanFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   Real vanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   BoundaryFaceKind classifyBoundaryFace(const FaceInfo & fi,

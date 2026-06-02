@@ -64,6 +64,18 @@ public:
     Real total = 0.0;
   };
 
+  struct PressureVelocityFaceState
+  {
+    bool predictor_valid = false;
+    Real predictor_transport_phi = 0.0;
+    Real pressure_equation_phi = 0.0;
+    Real pressure_writeback_phi = 0.0;
+    Real corrected_transport_phi = 0.0;
+    Real normal_pressure_ainv = 0.0;
+    Real writeback_reconstruction_scalar = 0.0;
+    RealVectorValue writeback_reconstruction_vector;
+  };
+
   static InputParameters validParams();
 
   ConservativeSharpInterfaceRhieChowMassFluxBase(const InputParameters & params);
@@ -72,6 +84,7 @@ public:
   void initialSetup() override;
   void initialize() override;
   void initFaceMassFlux() override;
+  void cachePressureEquationFlux() override;
   void computeFaceMassFlux() override;
   void computeCellVelocity() override;
   Real getMassFlux(const FaceInfo & fi) const override;
@@ -163,7 +176,6 @@ public:
       const ElemInfo & elem_info, const Moose::StateArg & time_arg) const;
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
   bool hasVOFRhoPhiFunctor() const { return _vof_rho_phi != nullptr; }
-  Real vofRhoPhiMassFlux(const FaceInfo & fi) const;
   Real vofRhoPhiIntegrated(const FaceInfo & fi) const;
   Real vofAlphaPhiLimitedIntegrated(const FaceInfo & fi) const;
   Real vofBaseGasRhoPhiIntegrated(const FaceInfo & fi) const;
@@ -181,13 +193,18 @@ protected:
   Real pressureBoundaryTargetFlux(const FaceInfo * fi,
                                   const Moose::StateArg & time_arg) const override;
   Real pressureBoundaryNormalAinv(const FaceInfo * fi) const override;
-  Real pressureFaceScalarDiffusionCoefficient(const FaceInfo * fi,
-                                              const Moose::StateArg & time_arg) const;
+  Real pressureFaceNormalAinv(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
   void writePressureCorrectedVelocityToMomentumSolution(const Moose::StateArg & time_arg);
   void rebuildSharpInterfaceFaceInfo();
-  void cacheCurrentCorrectedVolumetricFlux();
+  void cacheCurrentCorrectedVolumetricFlux(
+      const Real degenerate_normal_pressure_ainv_tol = 0.0);
+  PressureVelocityFaceState pressureVelocityFaceState(
+      const FaceInfo * fi,
+      const Moose::StateArg & time_arg,
+      const Real degenerate_normal_pressure_ainv_tol = 0.0) const;
+  Real maxPressureFaceNormalAinv(const Moose::StateArg & time_arg) const;
   Real transportMassFluxDensityFromVolumetricPhi(const FaceInfo * fi,
                                                  const Real volumetric_phi,
                                                  const Moose::StateArg & time_arg) const;
@@ -199,10 +216,7 @@ protected:
   Real transportVolumetricPhiFromIntegratedRhoPhi(const FaceInfo * fi,
                                                   const Real integrated_rho_phi) const;
   Real publishedVOFRhoPhiIntegrated(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
-  Real publishedVOFTransportVolumetricFaceFlux(const FaceInfo * fi,
-                                               const Moose::StateArg & time_arg) const;
   Real faceAlphaRho(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
-  Real interpolatedAlphaRhoVelocityFlux(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
                                      const Moose::StateArg * limiter_state = nullptr) const;
@@ -225,9 +239,8 @@ protected:
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi,
                                          const std::vector<PetscVectorReader> & raw_ainv_readers) const;
-  RealVectorValue interpolatePressureFaceRawAinv(
+  RealVectorValue interpolatePressureFaceRau(
       const FaceInfo * fi, const std::vector<PetscVectorReader> & raw_ainv_readers) const;
-  RealVectorValue interpolateFaceRau(const FaceInfo * fi) const;
   const ElemInfo * sharpInterfaceOneSidedInterpolationOwner(const FaceInfo * fi,
                                                             const Moose::StateArg & time_arg) const;
   void buildSharpFaceRawAinvReaders(
@@ -242,10 +255,6 @@ protected:
       const std::vector<PetscVectorReader> & raw_ainv_readers,
       const std::vector<PetscVectorReader> * pressure_gradient_readers = nullptr) const;
 
-  RealVectorValue evaluateFaceVectorFunctor(const Moose::Functor<RealVectorValue> * functor,
-                                            const FaceInfo * fi,
-                                            const Moose::StateArg & time_arg,
-                                            const Moose::StateArg * limiter_state) const;
   RealVectorValue evaluateBoundaryAwareVectorFunctor(
       const Moose::Functor<RealVectorValue> * functor,
       const FaceInfo * fi,
@@ -254,17 +263,10 @@ protected:
       const Moose::Functor<RealVectorValue> * functor,
       const FaceInfo * fi,
       const Moose::StateArg & time_arg) const;
-  RealVectorValue interpolateCellBodyForceDensityToFace(
-      const Moose::Functor<RealVectorValue> * acceleration_functor,
-      const FaceInfo * fi,
-      const Moose::StateArg & time_arg) const;
   Real evaluateFaceScalarFunctor(const Moose::Functor<Real> * functor,
                                  const FaceInfo * fi,
                                  const Moose::StateArg & time_arg,
                                  const Moose::StateArg * limiter_state) const;
-  Real evaluateBoundaryAwareScalarFunctor(const Moose::Functor<Real> * functor,
-                                          const FaceInfo * fi,
-                                          const Moose::StateArg & time_arg) const;
   Real evaluateCellBasedFaceScalarFunctor(const Moose::Functor<Real> * functor,
                                           const FaceInfo * fi,
                                           const Moose::StateArg & time_arg) const;
@@ -306,10 +308,6 @@ protected:
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   bool populateMomentumPredictorPressureForceFaceField(FaceVectorField & face_field,
                                                        const Moose::StateArg & time_arg) const;
-  RealVectorValue evaluateFaceBasedMomentumPredictorPressureForceDensity(
-      const ElemInfo * elem_info,
-      const Moose::StateArg & time_arg,
-      const FaceVectorField * face_field) const;
   RealVectorValue reconstructFaceVectorFieldToCellSourceDensity(
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
@@ -320,12 +318,6 @@ protected:
       const FaceVectorField * face_field) const;
   bool populateMomentumPredictorBodyForceFaceField(FaceVectorField & face_field,
                                                    const Moose::StateArg & time_arg) const;
-  RealVectorValue evaluateMomentumPredictorBodyForceDensity(
-      const ElemInfo * elem_info,
-      const Moose::StateArg & time_arg,
-      const FaceVectorField * face_field) const;
-  RealVectorValue computeDefaultTransientProjectionFaceAcceleration(
-      const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
   PressureCorrectionReconstructionDebug reconstructReferenceFaceScalarToCellVectorDebug(

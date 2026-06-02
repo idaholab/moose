@@ -942,20 +942,39 @@ RhieChowMassFlux::computePredictorOperatorBase(const unsigned int system_i,
               "PetscMatrix.");
 
   const NumericVector<Number> & rhs = rhs_override ? *rhs_override : *(momentum_system->rhs);
-  const NumericVector<Number> & solution = *(momentum_system->current_local_solution);
+  const NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+  const NumericVector<Number> & solution = *(momentum_system->solution);
 
-  mmat->get_diagonal(diagonal_raw);
+  auto diagonal_parallel = solution.zero_clone();
+  diagonal_parallel->close();
+  mmat->get_diagonal(*diagonal_parallel);
+  diagonal_parallel->close();
+  diagonal_raw = *diagonal_parallel;
+  diagonal_raw.close();
 
   auto working_vector = solution.zero_clone();
+  working_vector->close();
   auto * working_vector_petsc = dynamic_cast<PetscVector<Number> *>(working_vector.get());
   mooseAssert(working_vector_petsc,
               "The vectors used in the RhieChowMassFlux objects need to be convertible to "
               "PetscVectors.");
 
-  mmat->vector_mult(base_raw, solution);
-  working_vector_petsc->pointwise_mult(diagonal_raw, solution);
-  base_raw.add(-1.0, *working_vector_petsc);
-  base_raw.add(-1.0, rhs);
+  auto base_parallel = solution.zero_clone();
+  base_parallel->close();
+  mmat->vector_mult(*base_parallel, solution);
+  base_parallel->close();
+  working_vector_petsc->pointwise_mult(*diagonal_parallel, solution);
+  working_vector_petsc->close();
+  base_parallel->add(-1.0, *working_vector_petsc);
+  base_parallel->close();
+  base_parallel->add(-1.0, rhs);
+  base_parallel->close();
+  base_raw = *base_parallel;
+  base_raw.close();
+
+  mooseAssert(base_raw.first_local_index() == current_local_solution.first_local_index() &&
+                  base_raw.last_local_index() == current_local_solution.last_local_index(),
+              "Predictor operator cache must use the current-local vector layout.");
 }
 
 void
@@ -984,6 +1003,8 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
 
   _cached_predictor_operator_base_raw[system_i] = current_local_solution.zero_clone();
   _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
+  _cached_predictor_operator_base_raw[system_i]->close();
+  _cached_predictor_diagonal_raw[system_i]->close();
 
   computePredictorOperatorBase(
       system_i,
@@ -994,6 +1015,7 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
   if (_split_momentum_predictor_operator)
   {
     _cached_predictor_explicit_force_raw[system_i] = current_local_solution.zero_clone();
+    _cached_predictor_explicit_force_raw[system_i]->close();
     if (explicit_force)
       *_cached_predictor_explicit_force_raw[system_i] = *explicit_force;
     else
@@ -1001,6 +1023,7 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
     _cached_predictor_explicit_force_raw[system_i]->close();
 
     _cached_predictor_body_force_raw[system_i] = current_local_solution.zero_clone();
+    _cached_predictor_body_force_raw[system_i]->close();
     if (body_force)
       *_cached_predictor_body_force_raw[system_i] = *body_force;
     else
@@ -1045,10 +1068,11 @@ RhieChowMassFlux::cacheStartupPredictorDiagonal(const unsigned int system_i,
   if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
     _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
 
-  NumericVector<Number> & current_local_solution =
-      *(_momentum_implicit_systems[system_i]->current_local_solution);
+  auto * momentum_system = _momentum_implicit_systems[system_i];
+  NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+
   _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
-  *(_cached_predictor_diagonal_raw[system_i]) = diagonal_raw;
+  *_cached_predictor_diagonal_raw[system_i] = diagonal_raw;
   _cached_predictor_diagonal_raw[system_i]->close();
 }
 

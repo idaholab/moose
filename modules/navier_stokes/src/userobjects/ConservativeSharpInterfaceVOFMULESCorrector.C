@@ -346,26 +346,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundedAlpha(const Real value) cons
   return std::min(_max_value, std::max(_min_value, value));
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector::LiquidVolumeAudit
-ConservativeSharpInterfaceVOFMULESCorrector::liquidVolumeAudit() const
-{
-  LiquidVolumeAudit audit;
-  if (!_system)
-    return audit;
-
-  audit.current = integrateLiquidVolume(*(_system->system().current_local_solution));
-  audit.timestep_old = integrateLiquidVolume(_system->solutionOld());
-
-  if (_system->hasSolutionState(1, Moose::SolutionIterationType::Nonlinear))
-  {
-    audit.previous_outer = integrateLiquidVolume(
-        _system->solutionState(1, Moose::SolutionIterationType::Nonlinear));
-    audit.has_previous_outer = true;
-  }
-
-  return audit;
-}
-
 ConservativeSharpInterfaceVOFMULESCorrector::RhoPhiConsistencyAudit
 ConservativeSharpInterfaceVOFMULESCorrector::rhoPhiConsistencyAudit() const
 {
@@ -547,41 +527,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi) cons
     donor_alpha = upwind_is_elem ? elem_alpha : boundaryValue(fi, face_type);
 
   return volumetric_flux * donor_alpha * faceMeasure(fi);
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::faceValueForCarrierFlux(const FaceInfo & fi,
-                                                         const Real carrier_flux,
-                                                         const Real elem_value,
-                                                         const Real neighbor_value,
-                                                         const BoundaryFaceKind boundary_kind,
-                                                         const bool use_high_order) const
-{
-  if (std::abs(carrier_flux) <= libMesh::TOLERANCE)
-    return boundedAlpha(elem_value);
-
-  const bool upwind_is_elem = carrier_flux >= 0.0;
-
-  if (boundary_kind == BoundaryFaceKind::Internal && fi.neighborPtr())
-  {
-    if (!use_high_order)
-      return boundedAlpha(upwind_is_elem ? elem_value : neighbor_value);
-
-    switch (_high_order_correction_scheme)
-    {
-      case HighOrderCorrectionScheme::Venkatakrishnan:
-        return venkatakrishnanFaceValue(fi, upwind_is_elem);
-      case HighOrderCorrectionScheme::VanLeer:
-        return vanLeerFaceValue(fi, upwind_is_elem);
-    }
-  }
-
-  // Keep non-coupled boundaries donor-only, matching the boundary policy used
-  // for the explicit alpha correction path.
-  if (boundary_kind == BoundaryFaceKind::DirichletOutflow)
-    return boundedAlpha(upwind_is_elem ? elem_value : neighbor_value);
-
-  return boundedAlpha(upwind_is_elem ? elem_value : neighbor_value);
 }
 
 Real
@@ -845,14 +790,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
   }
 
   return data;
-}
-
-void
-ConservativeSharpInterfaceVOFMULESCorrector::clampSolution() const
-{
-  auto & current_local_solution = *(_system->system().current_local_solution);
-  NS::FV::limitSolutionUpdate(current_local_solution, _min_value, _max_value);
-  _system->setSolution(current_local_solution);
 }
 
 void

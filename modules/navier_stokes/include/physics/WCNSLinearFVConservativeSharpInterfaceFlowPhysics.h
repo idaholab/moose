@@ -36,7 +36,6 @@ private:
   void addMomentumPressureKernels() override;
   void addMomentumGravityKernels() override;
   void addMomentumReducedPressureKernels();
-  void addMomentumFaceBasedReducedPressureKernels();
   void addMomentumFrictionKernels() override;
   void addMomentumBoussinesqKernels() override;
 

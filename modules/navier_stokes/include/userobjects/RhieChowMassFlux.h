@@ -94,7 +94,7 @@ public:
   /// Initialize the coupling fields (HbyA and Ainv)
   void initCouplingField();
   /// Cache the exact pressure-equation face flux from the current solved pressure field.
-  void cachePressureEquationFlux();
+  virtual void cachePressureEquationFlux();
   /// Evaluate the discrete internal-face pressure-equation flux for a supplied exact pressure.
   Real exactInternalPressureEquationFlux(const FaceInfo & fi, const Function & exact_pressure) const;
   /// Access the currently stored pressure-equation face flux.

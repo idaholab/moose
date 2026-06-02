@@ -154,7 +154,13 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
     else
       mooseError("Attempted access into FaceCenteredMapFunctor '",
                  this->functorName(),
-                 "' with a key that does not yet exist in the map. Make sure to fill your "
+                 "' for face id ",
+                 fi->id(),
+                 " with elem subdomain id ",
+                 fi->elem().subdomain_id(),
+                 fi->neighborPtr() ? " and neighbor subdomain id " : "",
+                 fi->neighborPtr() ? std::to_string(fi->neighborPtr()->subdomain_id()) : "",
+                 " with a key that does not yet exist in the map. Make sure to fill your "
                  "FaceCenteredMapFunctor for all elements you will attempt to access later.");
 
     return typename FaceCenteredMapFunctor<T, Map>::ValueType();

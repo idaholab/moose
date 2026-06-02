@@ -1,5 +1,6 @@
 #include "ConservativeSharpInterfaceCurvatureCalculator.h"
 
+#include "FVUtils.h"
 #include "MooseFunctorArguments.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
@@ -8,6 +9,7 @@
 
 #include <cmath>
 #include <limits>
+#include <unordered_set>
 
 registerMooseObject("NavierStokesApp", ConservativeSharpInterfaceCurvatureCalculator);
 
@@ -66,6 +68,18 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params += NonADFunctorInterface::validParams();
   params += BlockRestrictable::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_LINEAR};
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC |
+                                    Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<unsigned short>("layers") = 2;
+                                  rm_params.set<bool>("use_point_neighbors") = false;
+                                  rm_params.set<bool>("attach_geometric_early") = true;
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                });
 
   params.addClassDescription(
       "Produce reference-solver-like face-smoothed interface normals and cell curvature from a volume "
@@ -194,8 +208,6 @@ ConservativeSharpInterfaceCurvatureCalculator::ConservativeSharpInterfaceCurvatu
   }
 
   parseStaticContactAngles();
-  rebuildSharpInterfaceFaceInfo();
-  updateEffectiveDeltaN();
 }
 
 void
@@ -226,21 +238,64 @@ void
 ConservativeSharpInterfaceCurvatureCalculator::rebuildSharpInterfaceFaceInfo()
 {
   _sharp_interface_face_info.clear();
-  for (auto & fi : _fe_problem.mesh().faceInfo())
-    if (faceTouchesBlocks(fi))
+
+  std::unordered_set<dof_id_type> inserted_face_ids;
+  _sharp_interface_face_info.reserve(_moose_mesh.nFace());
+
+  const auto add_face = [this, &inserted_face_ids](const FaceInfo * const fi)
+  {
+    if (fi && isFaceGeometricallyRelevant(*fi) && inserted_face_ids.insert(fi->id()).second)
       _sharp_interface_face_info.push_back(fi);
+  };
+
+  for (const auto * fi : _moose_mesh.faceInfo())
+    add_face(fi);
+
+  _sharp_interface_face_info.shrink_to_fit();
 }
 
 bool
 ConservativeSharpInterfaceCurvatureCalculator::elemInBlocks(const Elem * elem) const
 {
-  return elem && (blockIDs().empty() || hasBlocks(elem->subdomain_id()));
+  return elem && elem != libMesh::remote_elem && (blockIDs().empty() || hasBlocks(elem->subdomain_id()));
 }
 
 bool
 ConservativeSharpInterfaceCurvatureCalculator::faceTouchesBlocks(const FaceInfo * fi) const
 {
   return elemInBlocks(fi->elemPtr()) || elemInBlocks(fi->neighborPtr());
+}
+
+bool
+ConservativeSharpInterfaceCurvatureCalculator::isFaceGeometricallyRelevant(const FaceInfo & fi) const
+{
+  if (&fi.elem() == libMesh::remote_elem)
+    return false;
+
+  bool on_active_blocks = elemInBlocks(fi.elemPtr());
+
+  if (fi.neighborPtr())
+  {
+    if (&fi.neighbor() == libMesh::remote_elem)
+      return false;
+
+    on_active_blocks = on_active_blocks || elemInBlocks(fi.neighborPtr());
+  }
+
+  if (!on_active_blocks)
+    return false;
+
+  if (!Moose::FV::onBoundary(blockIDs(), fi))
+    return true;
+
+  const auto & boundary_elem =
+      (fi.neighborPtr() && elemInBlocks(fi.neighborPtr())) ? fi.neighbor() : fi.elem();
+
+  for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
+    if (neighbor == libMesh::remote_elem)
+      return false;
+
+  return true;
 }
 
 Real
@@ -341,26 +396,6 @@ ConservativeSharpInterfaceCurvatureCalculator::interpolateCellScalarToFace(
   return 0.0;
 }
 
-RealVectorValue
-ConservativeSharpInterfaceCurvatureCalculator::interpolateCellVectorToFace(
-    const FaceInfo * fi,
-    const std::unordered_map<dof_id_type, RealVectorValue> & cell_field) const
-{
-  const bool elem_ok = elemInBlocks(fi->elemPtr()) && cell_field.count(fi->elemPtr()->id());
-  const bool neighbor_ok = fi->neighborPtr() && elemInBlocks(fi->neighborPtr()) &&
-                           cell_field.count(fi->neighborPtr()->id());
-
-  if (elem_ok && neighbor_ok)
-    return fi->gC() * cell_field.at(fi->elemPtr()->id()) +
-           (1.0 - fi->gC()) * cell_field.at(fi->neighborPtr()->id());
-  else if (elem_ok)
-    return cell_field.at(fi->elemPtr()->id());
-  else if (neighbor_ok)
-    return cell_field.at(fi->neighborPtr()->id());
-
-  return RealVectorValue();
-}
-
 void
 ConservativeSharpInterfaceCurvatureCalculator::smoothCellAlphaField(
     std::unordered_map<dof_id_type, Real> & cell_alpha) const
@@ -397,43 +432,6 @@ ConservativeSharpInterfaceCurvatureCalculator::smoothCellAlphaField(
         const Real alpha_avg = alpha_sum[pr.first] / it->second;
         pr.second = clampValue(alpha_avg, 0.0, 1.0);
       }
-  }
-}
-
-void
-ConservativeSharpInterfaceCurvatureCalculator::computeCellGradientFromCellField(
-    const std::unordered_map<dof_id_type, Real> & cell_field,
-    std::unordered_map<dof_id_type, RealVectorValue> & cell_gradient) const
-{
-  cell_gradient.clear();
-  std::unordered_map<dof_id_type, RealVectorValue> flux_sum;
-  std::unordered_map<dof_id_type, Real> element_volumes;
-
-  for (const auto * fi : _sharp_interface_face_info)
-  {
-    const Real alpha_f = interpolateCellScalarToFace(fi, cell_field);
-    const RealVectorValue face_vector_flux = alpha_f * safeUnitVector(fi->normal()) * faceMeasure(fi);
-
-    if (elemInBlocks(fi->elemPtr()))
-    {
-      const auto elem_id = fi->elemPtr()->id();
-      flux_sum[elem_id] += face_vector_flux;
-      element_volumes.emplace(elem_id, elemMeasure(fi, false));
-    }
-
-    if (elemInBlocks(fi->neighborPtr()))
-    {
-      const auto neighbor_id = fi->neighborPtr()->id();
-      flux_sum[neighbor_id] -= face_vector_flux;
-      element_volumes.emplace(neighbor_id, elemMeasure(fi, true));
-    }
-  }
-
-  for (const auto & pr : element_volumes)
-  {
-    const auto elem_id = pr.first;
-    const Real volume = pr.second;
-    cell_gradient[elem_id] = flux_sum[elem_id] / volume;
   }
 }
 
@@ -550,14 +548,20 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
         ": only the baseline reference solver simple curvature path is implemented in this step. "
         "The optional higher-order correction term remains intentionally unsupported here.");
 
+  rebuildSharpInterfaceFaceInfo();
   updateEffectiveDeltaN();
+  _face_smoothed_alpha_gradient.clear();
+  _provisional_face_unit_normal.clear();
+  _face_unit_normal.clear();
+  _curvature.clear();
 
   const auto time_arg = Moose::currentState();
   const auto limiter_time = _fe_problem.isTransient()
                                 ? Moose::StateArg(1, Moose::SolutionIterationType::Time)
                                 : Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
 
-  std::unordered_map<dof_id_type, RealVectorValue> smoothed_face_gradient;
+  CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> smoothed_alpha(
+      _moose_mesh, blockIDs(), name() + "_smoothed_alpha_work", true);
 
   if (_n_alpha_smooth_curvature)
   {
@@ -565,11 +569,8 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
     buildCellAlphaField(time_arg, cell_alpha);
     smoothCellAlphaField(cell_alpha);
 
-    std::unordered_map<dof_id_type, RealVectorValue> cell_grad_alpha;
-    computeCellGradientFromCellField(cell_alpha, cell_grad_alpha);
-
-    for (const auto * fi : _sharp_interface_face_info)
-      smoothed_face_gradient[fi->id()] = interpolateCellVectorToFace(fi, cell_grad_alpha);
+    for (const auto & pr : cell_alpha)
+      smoothed_alpha[pr.first] = pr.second;
 
     if (verbose)
       _console << name() << ": applied " << _n_alpha_smooth_curvature
@@ -581,11 +582,11 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
 
   for (const auto * fi : _sharp_interface_face_info)
   {
+    const auto face_arg = makeCenteredFaceArg(fi, &limiter_time);
     const RealVectorValue face_grad =
         _n_alpha_smooth_curvature
-            ? smoothed_face_gradient[fi->id()]
-            : MetaPhysicL::raw_value(
-                  _volume_fraction.gradient(makeCenteredFaceArg(fi, &limiter_time), time_arg));
+            ? MetaPhysicL::raw_value(smoothed_alpha.gradient(face_arg, time_arg))
+            : MetaPhysicL::raw_value(_volume_fraction.gradient(face_arg, time_arg));
 
     const Real mag_face_grad = safeMagnitude(face_grad);
     const RealVectorValue provisional_n_hat_face = face_grad / (mag_face_grad + effectiveDeltaN());
@@ -632,5 +633,26 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
     const auto flux_it = curvature_flux_sum.find(elem_id);
     const Real outward_flux = flux_it == curvature_flux_sum.end() ? 0.0 : flux_it->second;
     _curvature[elem_id] = -outward_flux / volume;
+  }
+
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    auto & face_smoothed_alpha_gradient = const_cast<Moose::Functor<RealVectorValue> &>(
+        UserObject::_subproblem.getFunctor<RealVectorValue>(
+            _face_smoothed_alpha_gradient_name, tid, name(), true));
+    face_smoothed_alpha_gradient.assign(_face_smoothed_alpha_gradient);
+
+    auto & provisional_face_unit_normal = const_cast<Moose::Functor<RealVectorValue> &>(
+        UserObject::_subproblem.getFunctor<RealVectorValue>(
+            _provisional_face_unit_normal_name, tid, name(), true));
+    provisional_face_unit_normal.assign(_provisional_face_unit_normal);
+
+    auto & face_unit_normal = const_cast<Moose::Functor<RealVectorValue> &>(
+        UserObject::_subproblem.getFunctor<RealVectorValue>(_face_unit_normal_name, tid, name(), true));
+    face_unit_normal.assign(_face_unit_normal);
+
+    auto & curvature = const_cast<Moose::Functor<Real> &>(
+        UserObject::_subproblem.getFunctor<Real>(_curvature_name, tid, name(), true));
+    curvature.assign(_curvature);
   }
 }

@@ -56,21 +56,15 @@ protected:
 
   bool elemInBlocks(const Elem * elem) const;
   bool faceTouchesBlocks(const FaceInfo * fi) const;
+  bool isFaceGeometricallyRelevant(const FaceInfo & fi) const;
   Real faceMeasure(const FaceInfo * fi) const;
   Real elemMeasure(const FaceInfo * fi, const bool neighbor) const;
 
   void buildCellAlphaField(const Moose::StateArg & time_arg,
                            std::unordered_map<dof_id_type, Real> & cell_alpha) const;
   void smoothCellAlphaField(std::unordered_map<dof_id_type, Real> & cell_alpha) const;
-  void computeCellGradientFromCellField(
-      const std::unordered_map<dof_id_type, Real> & cell_field,
-      std::unordered_map<dof_id_type, RealVectorValue> & cell_gradient) const;
-
   Real interpolateCellScalarToFace(const FaceInfo * fi,
                                    const std::unordered_map<dof_id_type, Real> & cell_field) const;
-  RealVectorValue interpolateCellVectorToFace(
-      const FaceInfo * fi,
-      const std::unordered_map<dof_id_type, RealVectorValue> & cell_field) const;
 
   Real contactAngleRadiansForFace(const FaceInfo * fi,
                                   const Moose::StateArg & time_arg,

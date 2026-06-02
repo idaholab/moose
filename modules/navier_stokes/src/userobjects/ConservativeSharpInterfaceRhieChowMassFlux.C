@@ -100,17 +100,37 @@ ConservativeSharpInterfaceRhieChowMassFlux::computePredictorOperatorBaseForSolut
               "The matrices used in ConservativeSharpInterfaceRhieChowMassFlux need to be convertible to PetscMatrix.");
 
   const NumericVector<Number> & rhs = *(momentum_system->rhs);
-  mmat->get_diagonal(diagonal_raw);
+  const NumericVector<Number> & solution = *(momentum_system->solution);
 
-  auto working_vector = solution_override.zero_clone();
+  auto solution_parallel = solution.zero_clone();
+  *solution_parallel = solution_override;
+  solution_parallel->close();
+
+  auto diagonal_parallel = solution.zero_clone();
+  diagonal_parallel->close();
+  mmat->get_diagonal(*diagonal_parallel);
+  diagonal_parallel->close();
+  diagonal_raw = *diagonal_parallel;
+  diagonal_raw.close();
+
+  auto working_vector = solution.zero_clone();
+  working_vector->close();
   auto * working_vector_petsc = dynamic_cast<PetscVector<Number> *>(working_vector.get());
   mooseAssert(working_vector_petsc,
               "The vectors used in ConservativeSharpInterfaceRhieChowMassFlux need to be convertible to PetscVectors.");
 
-  mmat->vector_mult(base_raw, solution_override);
-  working_vector_petsc->pointwise_mult(diagonal_raw, solution_override);
-  base_raw.add(-1.0, *working_vector_petsc);
-  base_raw.add(-1.0, rhs);
+  auto base_parallel = solution.zero_clone();
+  base_parallel->close();
+  mmat->vector_mult(*base_parallel, *solution_parallel);
+  base_parallel->close();
+  working_vector_petsc->pointwise_mult(*diagonal_parallel, *solution_parallel);
+  working_vector_petsc->close();
+  base_parallel->add(-1.0, *working_vector_petsc);
+  base_parallel->close();
+  base_parallel->add(-1.0, rhs);
+  base_parallel->close();
+  base_raw = *base_parallel;
+  base_raw.close();
 }
 
 void
@@ -283,6 +303,7 @@ ConservativeSharpInterfaceRhieChowMassFlux::addMomentumPredictorExplicitForcing(
         reducedPressureMomentumPredictorForceDensity(*elem_info, Moose::currentState())(system_i);
     rhs.add(dof_indices[0], force_density * elem_info->volume() * elem_info->coordFactor());
   }
+  rhs.close();
 }
 
 void
