@@ -40,6 +40,8 @@ ReferenceResidualConvergence::validParams()
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
   : DefaultNonlinearConvergence(parameters),
     ReferenceResidualInterface(this),
+    _accept_mult(getParam<Real>("acceptable_multiplier")),
+    _accept_iters(getParam<unsigned int>("acceptable_iterations")),
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _zero_ref_type(
@@ -47,31 +49,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _reference_vector_tag_id(Moose::INVALID_TAG_ID),
     _initialized(false)
 {
-  if (parameters.isParamValid("reference_residual_variables") &&
-      parameters.isParamValid("reference_vector"))
-    mooseError(
-        "You may specify either the `reference_residual_variables` "
-        "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
-        "so we recommend using `reference_vector`");
-
-  if (parameters.isParamValid("reference_residual_variables"))
-  {
-    mooseDeprecated(
-        "The save-in method for composing reference residual quantities is deprecated "
-        "and will be removed on January 1, 2020. Please use the tagging system instead; "
-        "specifically, please assign a TagName to the `reference_vector` parameter");
-
-    _ref_resid_var_names =
-        parameters.get<std::vector<AuxVariableName>>("reference_residual_variables");
-
-    if (_soln_var_names.size() != _ref_resid_var_names.size())
-      mooseError("Size of solution_variables (",
-                 _soln_var_names.size(),
-                 ") != size of reference_residual_variables (",
-                 _ref_resid_var_names.size(),
-                 ")");
-  }
-  else if (parameters.isParamValid("reference_vector"))
+  if (parameters.isParamValid("reference_vector"))
   {
     if (_fe_problem.numNonlinearSystems() > 1)
       paramError(
@@ -81,13 +59,9 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _reference_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
   }
   else
-    mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "
-              "specified, which means that no reference "
-              "quantites are set. Because of this, the standard technique of comparing the "
-              "norm of the full residual vector with its initial value will be used.");
-
-  _accept_mult = parameters.get<Real>("acceptable_multiplier");
-  _accept_iters = parameters.get<unsigned int>("acceptable_iterations");
+    paramInfo("reference_vector",
+              "No reference vector is specified. The standard absolute and relative tolerance "
+              "checks will be used instead.");
 
   const auto norm_type_enum =
       parameters.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
@@ -112,9 +86,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _local_norm = false;
   }
   else
-  {
     mooseAssert(false, "This point should not be reached.");
-  }
 
   if (_local_norm && !parameters.isParamValid("reference_vector"))
     paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");

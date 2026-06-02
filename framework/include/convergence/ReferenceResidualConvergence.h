@@ -103,8 +103,8 @@ protected:
   /// "Acceptable" absolute and relative tolerance multiplier and
   /// acceptable number of iterations.  Used when checking the
   /// convergence of individual variables.
-  Real _accept_mult;
-  unsigned int _accept_iters;
+  const Real _accept_mult;
+  const unsigned int _accept_iters;
   ///@}
 
   ///@{

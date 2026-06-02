@@ -16,9 +16,6 @@ ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<std::vector<AuxVariableName>>(
-      "reference_residual_variables",
-      "Set of variables that provide reference residuals for relative convergence check");
   params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
   params.addParam<Real>("acceptable_multiplier",
                         1.0,
@@ -71,8 +68,7 @@ ReferenceResidualInterface::validParams()
 
   params.addParamNamesToGroup("acceptable_iterations acceptable_multiplier",
                               "Acceptable convergence");
-  params.addParamNamesToGroup("reference_vector reference_residual_variables",
-                              "Reference residual");
+  params.addParamNamesToGroup("reference_vector", "Reference residual");
   params.addParamNamesToGroup("group_variables", "Variables to check for convergence");
 
   return params;
