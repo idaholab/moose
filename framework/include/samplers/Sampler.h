@@ -47,7 +47,8 @@ class Sampler : public MooseObject,
                 public PerfGraphInterface,
                 public SamplerInterface,
                 public VectorPostprocessorInterface,
-                public ReporterInterface
+                public ReporterInterface,
+                public Restartable
 {
 public:
   enum class SampleMode
@@ -272,7 +273,7 @@ private:
   void advanceGeneratorsInternal(const dof_id_type count);
 
   /// Random number generators, don't give users access. Control it via the interface from this class.
-  std::vector<std::unique_ptr<MooseRandomStateless>> _generators;
+  std::vector<std::unique_ptr<MooseRandomStateless>> & _generators;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;
@@ -299,7 +300,7 @@ private:
   bool _needs_reinit;
 
   /// Flag for initial execute to allow the first set of random numbers to be always be the same
-  bool _has_executed;
+  bool & _has_executed;
 
   /// Max number of entries for matrix returned by getGlobalSamples
   const dof_id_type _limit_get_global_samples;
