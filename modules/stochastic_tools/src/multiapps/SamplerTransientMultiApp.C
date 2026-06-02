@@ -54,7 +54,9 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
     _sampler(getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
-    _number_of_sampler_rows(_sampler.getNumberOfRows())
+    _number_of_sampler_rows(_sampler.getNumberOfRows()),
+    _batch_backup(
+        declareRestartableData<std::vector<std::vector<std::unique_ptr<Backup>>>>("batch_backup"))
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET)
     paramError("mode",
@@ -88,7 +90,7 @@ SamplerTransientMultiApp::initialSetup()
   TransientMultiApp::initialSetup();
 
   // Perform initial backup for the batch sub-applications
-  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE && !_app.isRecovering())
   {
     dof_id_type n = _rank_config.num_local_sims;
     _batch_backup.resize(n);

@@ -68,16 +68,19 @@ Sampler::Sampler(const InputParameters & parameters)
     SamplerInterface(this),
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
+    Restartable(this, "Samplers"),
     _min_procs_per_row(getParam<unsigned int>("min_procs_per_row") > n_processors()
                            ? n_processors()
                            : getParam<unsigned int>("min_procs_per_row")),
     _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
+    _generators(
+        declareRecoverableData<std::vector<std::unique_ptr<MooseRandomStateless>>>("generators")),
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),
     _initialized(false),
     _needs_reinit(true),
-    _has_executed(false),
+    _has_executed(declareRecoverableData<bool>("has_executed")),
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_row(getParam<dof_id_type>("limit_get_row")),
