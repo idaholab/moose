@@ -304,6 +304,7 @@ EOF
         NEML2_SRC_DIR=${NEML2_SRC_DIR} \
         NEML2_DIR=${NEML2_DIR} \
         LIBTORCH_DIR={{ LIBTORCH_DIR }} \
+        WASP_DIR={{ WASP_DIR }} \
             ${NEML2_BUILD_SCRIPT} \
                 --skip-submodule-update 2>&1 | tee ${NEML2_DIR}/logs/build.log
 
