@@ -46,6 +46,7 @@
     sampler = sample
     to_vector_postprocessor = storage
     from_postprocessor = avg
+    keep_solve_fail_value = true
   []
 []
 
