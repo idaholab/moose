@@ -118,4 +118,18 @@
     restep = false
     valgrind = heavy
   []
+  [MFEMNLDomainSubMeshBoundary]
+    design = 'MFEMNLCurlCurlKernel.md'
+    issues = '#33003'
+    type = CSVDiff
+    input = nl_hphi_magnetodynamic.i
+    csvdiff = 'OutputData/HPhiMagnetodynamicNLClosedCoilCSV.csv'
+    requirement = 'MOOSE shall have the ability to solve curl-curl problems with highly nonlinear scalar material properties dependend on the curl of the trial variable.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu' # NLCurlCurlKernel not optimised for use on GPU
+    recover = false
+    restep = false
+    valgrind = none # times out on heavy
+    min_slots = 3 # memory heavy
+  []
 []
