@@ -755,8 +755,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateApplicationBlockAction", "Application");
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerSyntaxTask(
-      "AddMFEMCoordinateCoefficientsAction", "Coordinates/*", "add_mfem_coordinate_coefficients");
+  registerSyntaxTask("AddMFEMCoordinateCoefficientsAction",
+                     "CoordinateSystem/*",
+                     "add_mfem_coordinate_coefficients");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask(
