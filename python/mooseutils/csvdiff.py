@@ -89,10 +89,11 @@ class CSVTools:
 
     def parseComparisonFile(self, config_file):
         """Walk through comparison file and populate/return a dictionary as best we can"""
-        # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
-        zero_params = set(["floor", "abs_zero", "absolute"])
-        tolerance_params = set(["relative", "rel_tol"])
-        custom_params = {"RELATIVE": 0.0, "ZERO": 0.0, "FIELDS": {}}
+        # A set of known parameter naming conventions. The comparison file can have these set, and we will use them.
+        zero_params = set(["floor", "abs_zero"])
+        abs_tol_params = set(["absolute", "abs_tol"])
+        rel_tol_params = set(["relative", "rel_tol"])
+        custom_params = {"ABSOLUTE": 0.0, "RELATIVE": 0.0, "ZERO": 0.0, "FIELDS": {}}
 
         config_file.seek(0)
         for a_line in config_file:
@@ -119,12 +120,20 @@ class CSVTools:
                         words.intersection(zero_params).pop(), a_line
                     )[0]
 
-                # Possible global header containing tolerance params
+                # Possible global header containing absolute tolerance params
                 if not re.match(r"^\s", a_line) and words.intersection(
-                    tolerance_params
+                    abs_tol_params
+                ):
+                    custom_params["ABSOLUTE"] = self.getParamValues(
+                        words.intersection(abs_tol_params).pop(), a_line
+                    )[0]
+
+                # Possible global header containing relative tolerance params
+                if not re.match(r"^\s", a_line) and words.intersection(
+                    rel_tol_params
                 ):
                     custom_params["RELATIVE"] = self.getParamValues(
-                        words.intersection(tolerance_params).pop(), a_line
+                        words.intersection(rel_tol_params).pop(), a_line
                     )[0]
 
                 # Possible field containing floor params
@@ -133,11 +142,19 @@ class CSVTools:
                         words.intersection(zero_params).pop(), a_line
                     )[0]
 
-                # Possible field containing tolerance params
-                if field_key and words.intersection(tolerance_params):
+                # Possible field containing absolute tolerance params
+                if field_key and words.intersection(abs_tol_params):
+                    custom_params["FIELDS"][field_key[0]]["ABSOLUTE"] = (
+                        self.getParamValues(
+                            words.intersection(abs_tol_params).pop(), a_line
+                        )[0]
+                    )
+
+                # Possible field containing relative tolerance params
+                if field_key and words.intersection(rel_tol_params):
                     custom_params["FIELDS"][field_key[0]]["RELATIVE"] = (
                         self.getParamValues(
-                            words.intersection(tolerance_params).pop(), a_line
+                            words.intersection(rel_tol_params).pop(), a_line
                         )[0]
                     )
 
@@ -155,6 +172,7 @@ class CSVSummary(CSVTools):
         CSVTools.__init__(self)
         self.files = args.summary
         self.abs_zero = float(args.abs_zero)
+        self.abs_tol = float(args.absolute_tolerance)
         self.rel_tol = float(args.relative_tolerance)
 
     def __enter__(self):
@@ -176,7 +194,7 @@ class CSVSummary(CSVTools):
             return self.getMessages()
 
         formatted_messages = [
-            "GLOBAL VARIABLES relative %s floor %s" % (self.rel_tol, self.abs_zero)
+            "GLOBAL VARIABLES absolute %s relative %s floor %s" % (self.abs_tol, self.rel_tol, self.abs_zero)
         ]
 
         field_len = []
@@ -197,7 +215,7 @@ class CSVSummary(CSVTools):
             value_count = len(table1[list(table1.keys())[0]]) - 1
             formatted_messages.insert(
                 0,
-                "TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n"
+                "TIME STEPS absolute 0 relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n"
                 % (value_count, value_count),
             )
 
@@ -206,8 +224,9 @@ class CSVSummary(CSVTools):
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
                 formatted_messages.insert(
                     0,
-                    "TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n"
+                    "TIME STEPS absolute %s relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n"
                     % (
+                        self.abs_tol,
                         self.rel_tol,
                         self.abs_zero,
                         min(value),
@@ -251,8 +270,10 @@ class CSVDiffer(CSVTools):
         self.files = args.csv_file
         self.config = args.comparison_file
         self.abs_zero = float(args.abs_zero)
+        self.abs_tol = float(args.absolute_tolerance)
         self.rel_tol = float(args.relative_tolerance)
         self.custom_columns = args.custom_columns
+        self.custom_abs_err = args.custom_abs_err
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
         self.ignore = args.ignore_fields
@@ -275,35 +296,41 @@ class CSVDiffer(CSVTools):
     # manually clear messages by calling clearDiff
     def diff(self):
         abs_zero = self.abs_zero
+        abs_tol = self.abs_tol
         rel_tol = self.rel_tol
 
         # Setup custom values based on supplied config file. Override any information
-        # in self.custom_colums (indeed, verifyArgs will not allow both --custom and
+        # in self.custom_columns (indeed, verifyArgs will not allow both --custom and
         # --config to be used together anyway)
         if self.config:
             self.__only_compare_custom = True
             custom_params = self.parseComparisonFile(self.config)
             abs_zero = custom_params.get("ZERO", abs_zero)
+            abs_tol = custom_params.get("ABSOLUTE", abs_tol)
             rel_tol = custom_params.get("RELATIVE", rel_tol)
             if self.getNumErrors():
                 return self.getMessages()
 
             self.custom_columns = []
+            self.custom_abs_err = []
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
             for field_id, value in custom_params["FIELDS"].items():
                 self.custom_columns.append(field_id)
                 self.custom_abs_zero.append(value.get("ZERO", abs_zero))
+                self.custom_abs_err.append(value.get("ABSOLUTE", abs_tol))
                 self.custom_rel_err.append(value.get("RELATIVE", rel_tol))
 
-        # Setup data structures for holding customized relative tolerance and absolute
+        # Setup data structures for holding customized tolerance and absolute
         # zero values and flag for checking variable names
+        abs_err_map = {}
         rel_err_map = {}
         abs_zero_map = {}
         found_column = {}
         if self.custom_columns:
             for i in range(0, len(self.custom_columns)):
+                abs_err_map[self.custom_columns[i]] = float(self.custom_abs_err[i])
                 rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
                 abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
                 found_column[self.custom_columns[i]] = False
@@ -388,6 +415,8 @@ class CSVDiffer(CSVTools):
                 if val1 == 0 and val2 == 0:
                     continue
 
+                abs_diff = abs(val1 - val2)
+
                 rel_diff = 0
                 if max(abs(val1), abs(val2)) > 0:
                     rel_diff = abs((val1 - val2) / max(abs(val1), abs(val2)))
@@ -396,10 +425,12 @@ class CSVDiffer(CSVTools):
                 # use the default
                 if self.custom_columns:
                     try:
+                        abs_tol = abs_err_map[key]
                         rel_tol = rel_err_map[key]
                     except:
+                        abs_tol = self.abs_tol
                         rel_tol = self.rel_tol
-                if rel_diff > rel_tol:
+                if rel_diff > rel_tol and abs_diff > abs_tol:
                     time_info = ""
                     if time_col is not None and row < len(time_col):
                         time_info = " at row %d (time = %.6g)" % (row, time_col[row])
@@ -407,14 +438,14 @@ class CSVDiffer(CSVTools):
                         time_info = " at row %d" % row
                     self.addError(
                         self.files[1],
-                        'The values in column "%s" don\'t match%s. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)'
+                        'The values in column "%s" don\'t match%s. \n\t%.3e vs. %.3e: relative diff = %.3e; absolute diff = %.3e'
                         % (
                             key.strip(),
                             time_info,
                             val1,
                             val2,
                             rel_diff,
-                            Decimal(rel_diff),
+                            abs_diff,
                         ),
                     )
                     # assume all other vals in this column are wrong too, so don't report them
@@ -456,11 +487,11 @@ def verifyArgs(args):
     # Check if all custom args are populated correctly
     unify_custom_args = [
         x
-        for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err]
+        for x in [args.custom_columns, args.custom_abs_zero, args.custom_abs_err, args.custom_rel_err]
         if x != None
     ]
-    if unify_custom_args and len(unify_custom_args) != 3:
-        problems.append("When using any --custom-* option, you must use all three")
+    if unify_custom_args and len(unify_custom_args) != 4:
+        problems.append("When using any --custom-* option, you must use all four")
     elif unify_custom_args:
         if len(set([len(x) for x in unify_custom_args])) > 1:
             problems.append(
@@ -521,10 +552,16 @@ def parseArgs(args=None):
         help="Value representing an absolute zero (default: 1e-11)",
     )
     parser.add_argument(
+        "--absolute-tolerance",
+        metavar="tolerance",
+        default="1e-10",
+        help="Value representing the acceptable absolute tolerance between comparisons (default: 1e-10)",
+    )
+    parser.add_argument(
         "--relative-tolerance",
         metavar="tolerance",
         default="5.5e-6",
-        help="Value representing the acceptable tolerance between comparisons (default: 5.5e-6)",
+        help="Value representing the acceptable relative tolerance between comparisons (default: 5.5e-6)",
     )
     parser.add_argument(
         "--custom-columns",
@@ -536,13 +573,19 @@ def parseArgs(args=None):
         "--custom-abs-zero",
         nargs="+",
         metavar="exponential",
-        help="Space separated list of corresponding exponential absolute zero values for --custom-colums",
+        help="Space separated list of corresponding exponential absolute zero values for --custom-columns",
+    )
+    parser.add_argument(
+        "--custom-abs-err",
+        nargs="+",
+        metavar="exponential",
+        help="Space separated list of corresponding acceptable exponential absolute tolerance values for --custom-columns",
     )
     parser.add_argument(
         "--custom-rel-err",
         nargs="+",
         metavar="exponential",
-        help="Space separated list of corresponding acceptable exponential tolerance values for --custom-colums",
+        help="Space separated list of corresponding acceptable exponential relative tolerance values for --custom-columns",
     )
     return verifyArgs(parser.parse_args(args))
 
