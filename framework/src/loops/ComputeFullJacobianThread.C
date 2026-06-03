@@ -40,8 +40,7 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 void
 ComputeFullJacobianThread::computeOnElement()
 {
-  auto & ce = _fe_problem.couplingEntries(_tid);
-  const auto [i_sys, j_sys] = _fe_problem.getJacobianBlockContext();
+  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFieldBase & ivariable = *(it.first);
@@ -60,22 +59,18 @@ ComputeFullJacobianThread::computeOnElement()
       // any)
       const auto & kernels = _tag_kernels->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
-      {
-        const auto & kernel_var = kernel->variable();
-        if ((kernel_var.number() == ivar) && (kernel_var.sys().number() == i_sys) &&
-            kernel->isImplicit())
+        if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
           kernel->prepareShapes(jvar);
           kernel->computeOffDiagJacobian(jvar);
         }
-      }
     }
   }
 
   /// done only when nonlocal kernels exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid, _nl.number());
     for (const auto & it : cne)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -96,15 +91,11 @@ ComputeFullJacobianThread::computeOnElement()
           std::shared_ptr<NonlocalKernel> nonlocal_kernel =
               std::dynamic_pointer_cast<NonlocalKernel>(kernel);
           if (nonlocal_kernel)
-          {
-            const auto & kernel_var = kernel->variable();
-            if ((kernel_var.number() == ivar) && (kernel_var.sys().number() == i_sys) &&
-                kernel->isImplicit())
+            if ((kernel->variable().number() == ivar) && kernel->isImplicit())
             {
               kernel->prepareShapes(jvar);
               kernel->computeNonlocalOffDiagJacobian(jvar);
             }
-          }
         }
       }
     }
@@ -148,8 +139,7 @@ ComputeFullJacobianThread::computeOnElement()
 void
 ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * lower_d_elem)
 {
-  auto & ce = _fe_problem.couplingEntries(_tid);
-  const auto [i_sys, j_sys] = _fe_problem.getJacobianBlockContext();
+  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFieldBase & ivariable = *(it.first);
@@ -185,8 +175,7 @@ ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * low
 
     const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
     for (const auto & bc : bcs)
-      if (bc->shouldApply() && (bc->variable().number() == ivar) &&
-          (bc->variable().sys().number() == i_sys) && bc->isImplicit())
+      if (bc->shouldApply() && bc->variable().number() == ivar && bc->isImplicit())
       {
         bc->prepareShapes(jvar);
         bc->computeOffDiagJacobian(jvar);
@@ -196,7 +185,7 @@ ComputeFullJacobianThread::computeOnBoundary(BoundaryID bnd_id, const Elem * low
   /// done only when nonlocal integrated_bcs exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    auto & cne = _fe_problem.nonlocalCouplingEntries(_tid, _nl.number());
     for (const auto & it : cne)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -263,7 +252,7 @@ ComputeFullJacobianThread::computeOnInterface(BoundaryID bnd_id)
 {
   if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const auto & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
     for (const auto & it : ce)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
@@ -299,7 +288,7 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
 {
   if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const auto & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
     for (const auto & it : ce)
     {
       MooseVariableFieldBase & ivariable = *(it.first);
