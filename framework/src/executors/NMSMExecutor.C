@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ShellBlockGSSNESExecutor.h"
+#include "NMSMExecutor.h"
 #include "NewtonSNESExecutor.h"
 
 #include "libmesh/petsc_solver_exception.h"
@@ -17,12 +17,16 @@
 #include <cstddef>
 #include <iterator>
 
-registerMooseObject("MooseTestApp", ShellBlockGSSNESExecutor);
+registerMooseObject("MooseApp", NMSMExecutor);
 
 InputParameters
-ShellBlockGSSNESExecutor::validParams()
+NMSMExecutor::validParams()
 {
   InputParameters params = SNESNPCExecutor::validParams();
+  params.addClassDescription(
+      "Executor implementing nonlinear block Gauss-Seidel, also called MSPIN by David Keyes for "
+      "Multiplicative Schwarz Preconditioned Inexact Newton when used as a preconditioner for an "
+      "outer Newton solver, by sweeping over a set of sub-SNES executors via a SNESSHELL.");
   params.addRequiredParam<std::vector<ExecutorName>>(
       "sub_snes_executors", "The sub-SNES executors who we will sweep over");
   MooseEnum sweep_type("multiplicative symmetric_multiplicative", "multiplicative");
@@ -33,14 +37,14 @@ ShellBlockGSSNESExecutor::validParams()
   return params;
 }
 
-ShellBlockGSSNESExecutor::ShellBlockGSSNESExecutor(const InputParameters & params)
+NMSMExecutor::NMSMExecutor(const InputParameters & params)
   : SNESNPCExecutor(params), _sweep_type(getParam<MooseEnum>("sweep_type"))
 {
   for (const auto & name : getParam<std::vector<ExecutorName>>("sub_snes_executors"))
     _sub_snes.push_back(&getExecutorByName<NewtonSNESExecutor>(name));
 }
 
-ShellBlockGSSNESExecutor::~ShellBlockGSSNESExecutor()
+NMSMExecutor::~NMSMExecutor()
 {
   if (_block_residual)
     PetscCallAbort(this->comm().get(), VecDestroy(&_block_residual));
@@ -49,7 +53,7 @@ ShellBlockGSSNESExecutor::~ShellBlockGSSNESExecutor()
 }
 
 void
-ShellBlockGSSNESExecutor::setupSNES()
+NMSMExecutor::setupSNES()
 {
   LibmeshPetscCallA(this->comm().get(), SNESCreate(this->comm().get(), &_snes));
   LibmeshPetscCallA(this->comm().get(), SNESSetType(_snes, SNESSHELL));
@@ -59,7 +63,7 @@ ShellBlockGSSNESExecutor::setupSNES()
 }
 
 Executor::Result
-ShellBlockGSSNESExecutor::run()
+NMSMExecutor::run()
 {
   auto & result = newResult();
 
@@ -77,12 +81,12 @@ ShellBlockGSSNESExecutor::run()
 
 // Will be called when this is a preconditioner
 PetscErrorCode
-ShellBlockGSSNESExecutor::shellSolveCallback(SNES snes, Vec x)
+NMSMExecutor::shellSolveCallback(SNES snes, Vec x)
 {
   PetscFunctionBegin;
   void * ctx;
   PetscCall(SNESGetApplicationContext(snes, &ctx));
-  auto * const ex = static_cast<ShellBlockGSSNESExecutor *>(ctx);
+  auto * const ex = static_cast<NMSMExecutor *>(ctx);
 
   // x is a VecNest holding the current Newton iterate (copied there by SNESApplyNPC).
   // Copy it into the libmesh solution vecs so sub-solves start from the right point.
@@ -116,7 +120,7 @@ ShellBlockGSSNESExecutor::shellSolveCallback(SNES snes, Vec x)
 }
 
 PetscErrorCode
-ShellBlockGSSNESExecutor::applyBA(Mat A, Vec X, Vec Y)
+NMSMExecutor::applyBA(Mat A, Vec X, Vec Y)
 {
   PetscFunctionBegin;
   if (!_work)
@@ -143,7 +147,7 @@ ShellBlockGSSNESExecutor::applyBA(Mat A, Vec X, Vec Y)
 }
 
 PetscErrorCode
-ShellBlockGSSNESExecutor::applyBlockUpdate(Mat A, Vec rhs, Vec Y, PetscInt i)
+NMSMExecutor::applyBlockUpdate(Mat A, Vec rhs, Vec Y, PetscInt i)
 {
   KSP sub_ksp;
   Vec rhs_i, residual_i, update_i, Y_i;
