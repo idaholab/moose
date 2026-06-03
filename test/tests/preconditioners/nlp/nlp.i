@@ -13,7 +13,7 @@
 
 [Executors]
   [shell_pc]
-    type = ShellBlockGSSNESExecutor
+    type = NMSMExecutor
     sub_snes_executors = 'sub0 sub1'
   []
   [outer]

@@ -14,20 +14,19 @@
 class NewtonSNESExecutor;
 
 /**
- * Test executor that wraps a SNESSHELL to perform a block Gauss-Seidel sweep over
- * multiple nonlinear systems.  Used to exercise the multi-system Case 3 path of
- * NewtonSNESExecutor while being honest that no named PETSc SNES type implements
- * this algorithm.
+ * Executor implementing nonlinear block Gauss-Seidel, also called MSPIN for Multiplicative Schwarz
+ * Preconditioned Inexact Newton when used as a preconditioner for an outer Newton solver, by
+ * sweeping over a set of sub-SNES executors via a SNESSHELL.
  *
  * sweep_type = multiplicative           forward sweep only (1..N)
  * sweep_type = symmetric_multiplicative forward then backward sweep (1..N, N-1..1)
  */
-class ShellBlockGSSNESExecutor : public SNESNPCExecutor
+class NMSMExecutor : public SNESNPCExecutor
 {
 public:
   static InputParameters validParams();
-  ShellBlockGSSNESExecutor(const InputParameters & params);
-  virtual ~ShellBlockGSSNESExecutor();
+  NMSMExecutor(const InputParameters & params);
+  virtual ~NMSMExecutor();
 
   virtual Result run() override;
   virtual PetscErrorCode applyBA(Mat A, Vec X, Vec Y) override;
