@@ -118,13 +118,30 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            InputParameters & parameters)
 {
   auto object = addObject<Moose::MFEM::SolverBase>(user_object_name, name, parameters).front();
+  auto & problem_data = getProblemData();
 
   if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(object))
-    getProblemData().jacobian_solver = lin_solver;
+  {
+    if (problem_data.jacobian_solver)
+      mooseError("Multiple linear solvers provided. '",
+                 problem_data.jacobian_solver->name(),
+                 "' and '",
+                 lin_solver->name(),
+                 "'");
+    problem_data.jacobian_solver = lin_solver;
+  }
   else if (auto nonlinear_solver =
                std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(object);
            nonlinear_solver)
-    getProblemData().nonlinear_solver = nonlinear_solver;
+  {
+    if (problem_data.nonlinear_solver)
+      mooseError("Multiple nonlinear solvers provided. '",
+                 problem_data.nonlinear_solver->name(),
+                 "' and '",
+                 nonlinear_solver->name(),
+                 "'");
+    problem_data.nonlinear_solver = nonlinear_solver;
+  }
   else
     mooseError(
         "Unsupported MFEM solver object type '", user_object_name, "' for solver '", name, "'.");
