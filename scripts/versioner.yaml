@@ -127,7 +127,6 @@ packages:
       - conda/conda_build_config.yaml
       # container build definitions
       - apptainer/moose-dev.def
-      - apptainer/remove_channels.def
       # files that are included within moose-dev.def
       - apptainer/files/moose-dev
       - requirements.txt
