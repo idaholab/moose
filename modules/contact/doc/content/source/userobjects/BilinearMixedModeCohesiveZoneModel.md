@@ -132,6 +132,18 @@ The damage, $\omega$, is computed as follows (we omit the nodal subscript):
 \omega = \frac{\tilde{\delta}_{m}^{f} \left( \tilde{\delta}_{m}^{\text{max}} - \tilde{\delta}_{m}^{0}\right)}{\tilde{\delta}_{m}^{\text{max}} \left( \tilde{\delta}_{m}^{f} - \tilde{\delta}_{m}^{0}\right)}.
 \end{equation}
 
+### Auxiliary output conventions
+
+The local-frame displacement jump and cohesive traction components can be output with
+[CohesiveZoneMortarUserObjectAux](/CohesiveZoneMortarUserObjectAux.md). The tangential
+displacement jump effective value is the tangential magnitude, `sqrt(t1^2 + t2^2)`.
+The cohesive traction tangential magnitude uses the same tangential norm, while the cohesive
+traction effective value is the full local traction norm, `sqrt(tn^2 + t1^2 + t2^2)`.
+
+The local traction components follow the residual sign convention used by this mortar cohesive
+zone model. With the current convention, tensile opening gives a positive local normal jump and a
+negative local normal cohesive traction.
+
 ### Viscous regularization
 
 Sudden degradation of stiffness may be give rise to the appearance of large displacements. To alleviate this problematic numerical behavior in quasti-static simulations, we include in the constitutive equations a viscous damage $\omega_{v}$ instead:
