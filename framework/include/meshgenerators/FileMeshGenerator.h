@@ -56,4 +56,7 @@ protected:
 
   /// Whether to allow renumbering (for non-exodus files) when the mesh is read and prepared for use
   const bool _allow_renumbering;
+
+  /// Wheter to allow remote element removal when the mesh is prepared for use
+  const bool _allow_remote_element_removal;
 };
