@@ -417,14 +417,15 @@ NewtonSNESExecutor::outerJacobianCallback(SNES /*snes*/, Vec /*x*/, Mat /*A*/, M
 SNES
 NewtonSNESExecutor::getSNES()
 {
-  if (_nl_sys_nums.size() != 1)
-    mooseError("Ambiguous call to getSNES()");
+  if (_nl_sys_nums.size() == 1)
+    // We cannot rely on caching this during some setup routine because libMesh destroys its SNES at
+    // the end of each nonlinear solve. For similar reasons we cannot have _snes point to this
+    // because then at destruction time we'll attempt to destroy through a pointer to garbage since
+    // the SNES was already destroyed at the end of the solve
+    return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]).getSNES();
 
-  // We cannot rely on caching this during some setup routine because libMesh destroys its SNES at
-  // the end of each nonlinear solve. For similar reasons we cannot have _snes point to this because
-  // then at destruction time we'll attempt to destroy through a pointer to garbage since the SNES
-  // was already destroyed at the end of the solve
-  return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]).getSNES();
+  // For multiple systems _snes is our PETSc-owned object; use the base-class lazy-setup path
+  return SNESExecutor::getSNES();
 }
 
 System &
