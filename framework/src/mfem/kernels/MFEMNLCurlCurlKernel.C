@@ -42,14 +42,15 @@ MFEMNLCurlCurlKernel::validParams()
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _curlu_dk_dcurlu_coeff(getScalarCoefficient("curlu_dk_dcurlu_coefficient"))
+    _curlu_dk_dcurlu_coef(getScalarCoefficient("curlu_dk_dcurlu_coefficient")),
+    _curlu_vec_coef(getVectorCoefficientByName(getTrialVariableName() + "_curl"))
 {
 }
 
 mfem::NonlinearFormIntegrator *
 MFEMNLCurlCurlKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _curlu_dk_dcurlu_coeff);
+  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _curlu_dk_dcurlu_coef, _curlu_vec_coef);
 }
 
 #endif
