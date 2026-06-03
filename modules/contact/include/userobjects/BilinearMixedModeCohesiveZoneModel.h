@@ -30,6 +30,14 @@ public:
   Real getCohesiveDamage(const Node * const node) const;
   Real getLocalDisplacementNormal(const Node * const node) const;
   Real getLocalDisplacementTangential(const Node * const node) const;
+  Real getLocalDisplacementTangentialOne(const Node * const node) const;
+  Real getLocalDisplacementTangentialTwo(const Node * const node) const;
+  Real getLocalDisplacementTangentialEffective(const Node * const node) const;
+  Real getCohesiveTractionNormal(const Node * const node) const;
+  Real getCohesiveTractionTangentialMagnitude(const Node * const node) const;
+  Real getCohesiveTractionTangentialOne(const Node * const node) const;
+  Real getCohesiveTractionTangentialTwo(const Node * const node) const;
+  Real getCohesiveTractionEffective(const Node * const node) const;
 
 protected:
   virtual void computeQpProperties() override;
@@ -54,6 +62,9 @@ protected:
 
   /// Map from degree of freedom to mode mixity ratio (AD needed?)
   std::unordered_map<const DofObject *, ADReal> _dof_to_mode_mixity_ratio;
+
+  /// Map from degree of freedom to the local-frame cohesive traction
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_local_czm_traction;
 
   /// The normal strength material property
   const MaterialProperty<Real> & _normal_strength;
