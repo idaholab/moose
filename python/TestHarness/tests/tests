@@ -25,6 +25,22 @@
     issues = '#11250 #11251'
     collections = 'FAILURE_ANALYSIS'
   []
+  [csvdiff_invalid_override]
+    type = PythonUnitTest
+    input = test_CSVDiffInvalidOverride.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall report a failure when encountering invalid override inputs for the CSV differential tester"
+    issues = '#11250'
+    collections = 'FAILURE_ANALYSIS'
+  []
+  [csvdiff_missing_gold_file]
+    type = PythonUnitTest
+    input = test_CSVDiffMissingGoldFile.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall report a failure when the gold file for the CSV differential tester is missing"
+    issues = '#12363'
+    collections = 'FAILURE_ANALYSIS'
+  []
   [diff]
     type = PythonUnitTest
     input = test_Diff.py
