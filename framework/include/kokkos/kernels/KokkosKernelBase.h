@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosResidualObject.h"
+#include "KokkosLocalParallelInterface.h"
 
 #include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
@@ -24,7 +25,8 @@ namespace Moose::Kokkos
 class KernelBase : public ResidualObject,
                    public BlockRestrictable,
                    public CoupleableMooseVariableDependencyIntermediateInterface,
-                   public MaterialPropertyInterface
+                   public MaterialPropertyInterface,
+                   public LocalParallelInterface
 {
 public:
   static InputParameters validParams();
@@ -38,12 +40,6 @@ public:
    * Copy constructor for parallel dispatch
    */
   KernelBase(const KernelBase & object);
-
-protected:
-  /**
-   * Number of threads for local DOF parallelization
-   */
-  const unsigned int _num_local_threads;
 };
 
 } // namespace Moose::Kokkos

@@ -61,7 +61,8 @@ ADKernel::computeResidualAndJacobian()
 void
 ADKernel::dispatch()
 {
-  _thread.resize(_num_local_threads, numKokkosBlockElements());
+  _thread.resize(_computing_jacobian ? _num_local_jacobian_threads : _num_local_residual_threads,
+                 numKokkosBlockElements());
 
   Policy policy(0, _thread.size());
 

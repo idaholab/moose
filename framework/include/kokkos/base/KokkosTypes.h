@@ -284,7 +284,7 @@ template <>
 KOKKOS_INLINE_FUNCTION Real
 Vector3<Real>::norm() const
 {
-  return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  return ::Kokkos::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
 template <>

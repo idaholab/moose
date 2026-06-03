@@ -59,7 +59,7 @@ enum class LayoutType
  */
 template <typename T,
           unsigned int dimension = 1,
-          typename index_type = dof_id_type,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
           LayoutType layout = LayoutType::LEFT>
 class Array;
 
@@ -110,6 +110,7 @@ class ArrayBase
   static_assert(!std::is_same_v<bool, index_type>, "Kokkos array index type must not be bool");
 
 public:
+  using unsigned_index_type = index_type;
   using signed_index_type = typename std::make_signed<index_type>::type;
 
   /**
@@ -1635,15 +1636,23 @@ public:
 };
 ///@}
 
-template <typename T, typename index_type = dof_id_type>
+template <typename T, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
 using Array1D = Array<T, 1, index_type, LayoutType::LEFT>;
-template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+template <typename T,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
 using Array2D = Array<T, 2, index_type, layout>;
-template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+template <typename T,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
 using Array3D = Array<T, 3, index_type, layout>;
-template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+template <typename T,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
 using Array4D = Array<T, 4, index_type, layout>;
-template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+template <typename T,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
 using Array5D = Array<T, 5, index_type, layout>;
 
 } // namespace Moose::Kokkos

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosBoundaryCondition.h"
+#include "KokkosLocalParallelInterface.h"
 
 #include "MaterialPropertyInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
@@ -22,7 +23,8 @@ namespace Moose::Kokkos
  */
 class IntegratedBCBase : public BoundaryCondition,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
-                         public MaterialPropertyInterface
+                         public MaterialPropertyInterface,
+                         public LocalParallelInterface
 {
 public:
   static InputParameters validParams();
@@ -36,12 +38,6 @@ public:
    * Copy constructor for parallel dispatch
    */
   IntegratedBCBase(const IntegratedBCBase & object);
-
-protected:
-  /**
-   * Number of threads for local DOF parallelization
-   */
-  const unsigned int _num_local_threads;
 };
 
 } // namespace Moose::Kokkos
