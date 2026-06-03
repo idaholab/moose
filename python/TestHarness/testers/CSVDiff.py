@@ -19,9 +19,15 @@ class CSVDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam("csvdiff", [], "A list of files to run CSVDiff on.")
         params.addParam(
+            "abs_err", 0, "Absolute error tolerance used in value comparisons."
+        )
+        params.addParam(
             "override_columns",
             [],
             "A list of variable names to customize the CSVDiff tolerances.",
+        )
+        params.addParam(
+            "override_abs_err", [], "A list of customized absolute error tolerances."
         )
         params.addParam(
             "override_rel_err", [], "A list of customized relative error tolerances."
@@ -58,6 +64,10 @@ class CSVDiff(FileTester):
             or (
                 len(self.specs["override_columns"])
                 != len(self.specs["override_abs_zero"])
+            )
+            or (
+                len(self.specs["override_abs_err"])
+                != len(self.specs["override_columns"])
             )
             or (
                 len(self.specs["override_rel_err"])
@@ -106,6 +116,9 @@ class CSVDiff(FileTester):
                 + os.path.join(self.getTestDir(), file)
             )
 
+            if self.specs.isValid("abs_err"):
+                csvdiff.append("--absolute-tolerance %s" % (self.specs["abs_err"]))
+
             if self.specs.isValid("rel_err"):
                 csvdiff.append("--relative-tolerance %s" % (self.specs["rel_err"]))
 
@@ -125,6 +138,11 @@ class CSVDiff(FileTester):
             if self.specs.isValid("override_columns"):
                 csvdiff.append(
                     "--custom-columns %s" % (" ".join(self.specs["override_columns"]))
+                )
+
+            if self.specs.isValid("override_abs_err"):
+                csvdiff.append(
+                    "--custom-abs-err %s" % (" ".join(self.specs["override_abs_err"]))
                 )
 
             if self.specs.isValid("override_rel_err"):

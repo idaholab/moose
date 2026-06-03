@@ -11,12 +11,15 @@ More documentation for the `CSVDiff` utility may be found [here](CSVDiff.md).
 
 Test configuration options are added to the `tests` file.
 
-- `abs_zero`: Sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
-  be met for a test to pass.
+- `abs_zero`: Sets an absolute zero cutoff, defaults to 1e-10.
+
+- `abs_err`: Sets an absolute tolerance, defaults to 0. If either the absolute orthe relative tolerance is met, the test passes.
 
 - `rel_err`: Sets a relative tolerance, defaults to 5.5e-6.
 
 - `override_columns`: A list of variable names to customize the `CSVDiff` tolerances
+
+- `override_abs_err`: A list of customized absolute error tolerances.
 
 - `override_rel_err`: A list of customized relative error tolerances.
 
