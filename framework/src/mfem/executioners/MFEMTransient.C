@@ -31,8 +31,6 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, getProblemOperators())
 {
-  _fixed_point_solve->setInnerSolve(_mfem_problem_solve);
-
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
@@ -64,8 +62,6 @@ MFEMTransient::init()
     problem_operator->SetGridFunctions();
     problem_operator->Init(_mfem_problem_data.f);
   }
-
-  _mfem_problem_solve.initialSetup();
 }
 
 void
@@ -88,6 +84,13 @@ MFEMTransient::takeStep(Real input_dt)
   _time -= _dt;
 
   _problem.onTimestepBegin();
+  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+  if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
+  {
+    _last_solve_converged = false;
+    return;
+  }
+  _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
@@ -102,6 +105,10 @@ MFEMTransient::takeStep(Real input_dt)
     _console << "Aborting as solve did not converge" << std::endl;
     return;
   }
+
+  _problem.execute(EXEC_TIMESTEP_END);
+  _problem.execTransfers(EXEC_TIMESTEP_END);
+  _problem.execMultiApps(EXEC_TIMESTEP_END, true);
 
   if (lastSolveConverged())
     _time_stepper->acceptStep();
