@@ -102,7 +102,6 @@ class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
-class NewtonSNESExecutor;
 
 namespace Moose
 {
@@ -245,40 +244,10 @@ public:
    */
   void trustUserCouplingMatrix();
 
-  /**
-   * @returns Variable couplings for the current Jacobian block context
-   */
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
-  couplingEntries(const THREAD_ID tid);
-
-  /**
-   * Inter-system coupling between variables for the given \p nl_sys_num
-   */
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
-
-  /**
-   * @returns Variable couplings between an arbitrary system couple
-   */
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> & couplingEntries(
-      const THREAD_ID tid, const unsigned int nl_sys_i_num, const unsigned int nl_sys_j_num);
-
-  /**
-   * Set full variable couplings between arbitrary systems. Note that we will assert that the
-   * provided system numbers are different. Inter-system coupling is handled automatically
-   */
-  void setFullCoupling(const unsigned int nl_sys_i_num,
-                       const unsigned int nl_sys_j_num,
-                       Moose::PassKey<NewtonSNESExecutor>);
-
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
-
-  /**
-   * @returns Nonlocal variable couplings for the current Jacobian block context
-   */
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
-  nonlocalCouplingEntries(const THREAD_ID tid);
 
   virtual bool hasVariable(const std::string & var_name) const override;
   // NOTE: hasAuxiliaryVariable defined in parent class
@@ -2856,12 +2825,6 @@ public:
    */
   void setJacobianBlockContext(unsigned int i_sys, unsigned int j_sys);
 
-  /**
-   * @returns the Jacobian block context where the first member of the pair is the i_sys and the
-   * second member is the j_sys
-   */
-  std::pair<unsigned int, unsigned int> getJacobianBlockContext() const;
-
   virtual unsigned int currentLinearSysNum() const override;
 
   /**
@@ -3035,13 +2998,6 @@ protected:
   MooseMesh & _mesh;
 
 private:
-  /// Map from off-diagonal system couples to their variable couplings. The key is the system number
-  /// pair. The outer index of the map value is the thread ID. The inner index corresponds to a
-  /// given thread's variable pair couplings
-  std::map<std::pair<unsigned int, unsigned int>,
-           std::vector<std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>>>>
-      _system_couple_to_threaded_variable_couplings;
-
   /// The EquationSystems object, wrapped for restart
   Restartable::ManagedValue<RestartableEquationSystems> _req;
 
@@ -3875,12 +3831,6 @@ inline void
 FEProblemBase::clearCurrentResidualVectorTags()
 {
   _current_residual_vector_tags.clear();
-}
-
-inline std::pair<unsigned int, unsigned int>
-FEProblemBase::getJacobianBlockContext() const
-{
-  return {_nl_i_sys_num, _nl_j_sys_num};
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
