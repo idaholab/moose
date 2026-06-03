@@ -1,0 +1,10 @@
+[Tests]
+  design = 'NMSMExecutor.md'
+  issues = '#32860'
+
+  [jacobian_matches_fd]
+    type = GoogleTest
+    unit_test = NMSMExecutorJacobianTest.JacobianMatchesFD
+    requirement = 'The system shall compute the Jacobian of the nonlinearly preconditioned residual for multiplicative and symmetric multiplicative nonlinear field split sweeps that matches a finite-difference approximation.'
+  []
+[]
