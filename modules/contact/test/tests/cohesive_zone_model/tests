@@ -1,6 +1,7 @@
 [Tests]
   issues = '#26283'
-  design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+  design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md '
+           'auxkernels/CohesiveZoneMortarUserObjectAux.md'
   [only_czm]
     type = Exodiff
     input = bilinear_mixed_mortar_only_czm.i
@@ -69,5 +70,194 @@
     abs_zero = 0.001
     heavy = true
     capabilities = 'method=opt'
+  []
+  [traction_curve_modeI]
+    type = CSVDiff
+    input = traction_curve_modeI.i
+    csvdiff = traction_curve_modeI_out.csv
+    requirement = 'The system shall expose normal jump, cohesive traction, and energy dissipation '
+                  'outputs for a monotonic mode-I mortar CZM loading path.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'jump_t traction_t'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_modeI_dt_refined]
+    type = CSVDiff
+    input = traction_curve_modeI.i
+    csvdiff = traction_curve_modeI_dt_refined_out.csv
+    cli_args = 'Executioner/dt=0.005 Executioner/dtmin=0.005 '
+               'Outputs/file_base=traction_curve_modeI_dt_refined_out'
+    requirement = 'The system shall produce a reproducible mode-I mortar CZM response with a '
+                  'refined time step.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'jump_t traction_t'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_modeI_mesh_refined]
+    type = CSVDiff
+    input = traction_curve_modeI.i
+    csvdiff = traction_curve_modeI_mesh_refined_out.csv
+    cli_args = 'Mesh/base/nx=2 Mesh/top/nx=2 '
+               'Outputs/file_base=traction_curve_modeI_mesh_refined_out'
+    requirement = 'The system shall produce a reproducible mode-I mortar CZM response on a '
+                  'refined interface mesh.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'jump_t traction_t'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-3 1.0e-3'
+  []
+  [traction_curve_modeI_severe_mismatch]
+    type = CSVDiff
+    input = traction_curve_modeI.i
+    csvdiff = traction_curve_modeI_severe_mismatch_out.csv
+    cli_args = 'Mesh/base/nx=5 '
+               'Outputs/file_base=traction_curve_modeI_severe_mismatch_out'
+    requirement = 'The system shall produce a reproducible mode-I mortar CZM response across a '
+                  '5-to-1 non-matching mortar interface.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
+    override_columns = 'jump_t traction_t'
+    override_rel_err = '1.0e-5 1.0e-5'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_modeII]
+    type = CSVDiff
+    input = traction_curve_modeII.i
+    csvdiff = traction_curve_modeII_out.csv
+    requirement = 'The system shall expose tangential jump and cohesive shear traction outputs for a '
+                  'mode-II dominant mortar CZM loading path.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    ignore_columns = 'mode_mixity'
+    override_columns = 'jump_n traction_n'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_mixed_power]
+    type = CSVDiff
+    input = traction_curve_mixed.i
+    csvdiff = traction_curve_mixed_out.csv
+    requirement = 'The system shall expose mixed-mode mortar CZM traction-separation response using '
+                  'the POWER_LAW criterion.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [traction_curve_mixed_bk]
+    type = CSVDiff
+    input = traction_curve_mixed.i
+    csvdiff = traction_curve_mixed_bk_out.csv
+    cli_args = 'UserObjects/czm_uo/mixed_mode_criterion=BK '
+               'Outputs/file_base=traction_curve_mixed_bk_out'
+    requirement = 'The system shall expose mixed-mode mortar CZM traction-separation response using '
+                  'the BK criterion.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [traction_cycle_modeI]
+    type = CSVDiff
+    input = traction_cycle_modeI.i
+    csvdiff = traction_cycle_modeI_out.csv
+    requirement = 'The system shall produce irreversible damage output during a mode-I mortar CZM '
+                  'load-unload-reload cycle.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [compression_shear_toggle_true]
+    type = CSVDiff
+    input = compression_shear_toggle.i
+    csvdiff = compression_shear_toggle_out.csv
+    requirement = 'The system shall suppress compressive cohesive normal traction under combined '
+                  'compression and shear when set_compressive_traction_to_zero is true.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [compression_shear_toggle_false]
+    type = CSVDiff
+    input = compression_shear_toggle.i
+    csvdiff = compression_shear_toggle_nozero_out.csv
+    cli_args = 'UserObjects/czm_uo/set_compressive_traction_to_zero=false '
+               'Outputs/file_base=compression_shear_toggle_nozero_out'
+    requirement = 'The system shall retain compressive cohesive normal traction under combined '
+                  'compression and shear when set_compressive_traction_to_zero is false.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [traction_curve_modeI_viscous]
+    type = CSVDiff
+    input = traction_curve_modeI_viscous.i
+    csvdiff = traction_curve_modeI_viscous_out.csv
+    requirement = 'The system shall expose a viscously regularized mode-I mortar CZM '
+                  'traction-separation response.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    restep = false
+  []
+  [mortar_czm_parallel]
+    type = CSVDiff
+    input = traction_curve_modeI.i
+    csvdiff = traction_curve_modeI_parallel_out.csv
+    cli_args = 'Outputs/file_base=traction_curve_modeI_parallel_out'
+    min_parallel = 4
+    max_parallel = 4
+    requirement = 'The system shall reproduce the mode-I mortar CZM output on four MPI ranks.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
+  []
+  [traction_curve_modeI_3d]
+    type = CSVDiff
+    input = traction_curve_modeI_3d.i
+    csvdiff = traction_curve_modeI_3d_out.csv
+    requirement = 'The system shall expose normal traction and negligible tangential traction outputs '
+                  'for a 3D mode-I mortar CZM loading path.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'traction_t1 traction_t2'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_modeI_3d_inclined]
+    type = CSVDiff
+    input = traction_curve_modeI_3d_inclined.i
+    csvdiff = traction_curve_modeI_3d_inclined_out.csv
+    requirement = 'The system shall expose mortar CZM traction outputs on a 45-degree inclined 3D '
+                  'mode-I interface.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+  []
+  [traction_curve_modeIII_3d]
+    type = CSVDiff
+    input = traction_curve_modeIII_3d.i
+    csvdiff = traction_curve_modeIII_3d_out.csv
+    requirement = 'The system shall expose the second tangential cohesive traction component under '
+                  'out-of-plane shear loading in 3D.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    ignore_columns = 'jump_t'
+    override_columns = 'jump_n traction_n traction_t1'
+    override_rel_err = '1.0e-6 1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4 1.0e-4'
+  []
+  [robustness_brittle_interface]
+    type = CSVDiff
+    input = robustness_brittle_interface.i
+    csvdiff = robustness_brittle_interface_out.csv
+    requirement = 'The system shall produce a finite mode-I mortar CZM response when the softening '
+                  'zone is nearly zero.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
+  []
+  [robustness_pure_shear_limit]
+    type = CSVDiff
+    input = robustness_pure_shear_limit.i
+    csvdiff = robustness_pure_shear_limit_out.csv
+    requirement = 'The system shall produce a finite dominant-shear mortar CZM response when normal '
+                  'opening is near zero.'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
   []
 []
