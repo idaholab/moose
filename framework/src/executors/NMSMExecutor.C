@@ -151,6 +151,7 @@ NMSMExecutor::applyBlockUpdate(Mat A, Vec rhs, Vec Y, PetscInt i)
 {
   KSP sub_ksp;
   Vec rhs_i, residual_i, update_i, Y_i;
+  Mat A_ii, ksp_amat;
 
   PetscFunctionBegin;
   PetscCall(VecNestGetSubVec(rhs, i, &rhs_i));
@@ -174,8 +175,16 @@ NMSMExecutor::applyBlockUpdate(Mat A, Vec rhs, Vec Y, PetscInt i)
   PetscCall(VecAXPY(residual_i, -1.0, update_i));
   PetscCall(VecZeroEntries(update_i));
 
+  PetscCall(MatNestGetSubMat(A, i, i, &A_ii));
   auto sub_snes = _sub_snes[static_cast<std::size_t>(i)]->getSNES();
   PetscCall(SNESGetKSP(sub_snes, &sub_ksp));
+  // Only set operators when the KSP doesn't already hold this matrix (e.g. after
+  // the libMesh SNES is recreated by a sub-solve and the KSP is brand-new).
+  // Calling KSPSetOperators unconditionally would mark the PC dirty and force a
+  // refactorization on every Krylov iteration even when nothing has changed.
+  PetscCall(KSPGetOperators(sub_ksp, &ksp_amat, nullptr));
+  if (ksp_amat != A_ii)
+    PetscCall(KSPSetOperators(sub_ksp, A_ii, A_ii));
   PetscCall(KSPSolve(sub_ksp, residual_i, update_i));
   PetscCall(VecAXPY(Y_i, 1.0, update_i));
 
