@@ -39,7 +39,7 @@ AddMFEMCoordinateCoefficientsAction::act()
   if (auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get()))
     coord.declareCoefficients(mfem_problem->getCoefficients());
   else
-    mooseError("Coordinates block requires MFEMProblem.");
+    mooseError("CoordinateSystem block requires MFEMProblem.");
 }
 
 #endif

@@ -25,13 +25,13 @@ where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/coordinatesystems/cylindrical_coefficients.i block=Coordinatesystem
+!listing test/tests/mfem/coordinatesystems/cylindrical_coefficients.i block=CoordinateSystem
 
-!syntax parameters /Coordinatesystems/MFEMCylindrical
+!syntax parameters /CoordinateSystem/MFEMCylindrical
 
-!syntax inputs /Coordinatesystems/MFEMCylindrical
+!syntax inputs /CoordinateSystem/MFEMCylindrical
 
-!syntax children /Coordinatesystems/MFEMCylindrical
+!syntax children /CoordinateSystem/MFEMCylindrical
 
 !if-end!
 
