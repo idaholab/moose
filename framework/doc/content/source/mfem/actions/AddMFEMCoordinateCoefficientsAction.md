@@ -12,7 +12,7 @@ This action only has an effect if the `Problem` type is set to [`MFEMProblem`](s
 
 !listing test/tests/mfem/coordinatesystems/cylindrical_coefficients.i block=CoordinateSystem
 
-!syntax parameters /Coordinatesystems/AddMFEMCoordinateCoefficientsAction
+!syntax parameters /CoordinateSystem/AddMFEMCoordinateCoefficientsAction
 
 !if-end!
 
