@@ -52,10 +52,10 @@ std::unique_ptr<MeshBase> buildBoundaryLayerRing(MeshGenerator & mg,
  * Generates a list of points offset from the input boundary polyline by a specified thickness in
  * either outward/inward direction.
  * @param mg The mesh generator calling this function, used for paramError reporting
- * @param ply_mesh_u The 1D loop polyline mesh of the original boundary; will be triangulated
- *  in-place for normal extraction
+ * @param ply_mesh_u The 1D loop polyline mesh of the original boundary; the volume it encloses will
+ * be triangulated in-place to compute the normal and define the inward/outward directions
  * @param points The vertex points of the original polyline. If empty, populated from the input
- *  mesh via collectKeyPointsFromMesh.
+ *  mesh via collectExteriorVertexPointsFromMesh.
  * @param mid_points The midpoints of the original polyline (optional to enable quadratic elements).
  * If both this and points are empty, populated from the input mesh.
  * @param outward Whether to offset in the outward (true) or inward (false) direction
@@ -73,24 +73,24 @@ std::vector<Point> generateOffsetPolyline(MeshGenerator * mg,
 /**
  * Collects key vertex points (and optional midpoints) from a meshed hole, optionally discarding
  * colinear vertices.
- * @param bdry_mh The meshed hole from which to collect key points
+ * @param bdry_mh The 2D MeshedHole object from which to collect key points
  * @param points The vector to which collected vertex points are appended (in order)
  * @param mid_points The vector to which collected midpoints are appended; only populated when the
  *  MeshedHole reports a midpoint per side AND skip_node_reduction is true
  * @param skip_node_reduction If true, retain every vertex and midpoint; if false, drop vertices
  *  that are colinear with their two neighbors and do not collect midpoints
  */
-void collectKeyPointsFromMesh(libMesh::TriangulatorInterface::MeshedHole & bdry_mh,
-                              std::vector<Point> & points,
-                              std::vector<Point> & mid_points,
-                              const bool skip_node_reduction = false);
+void collectExteriorVertexPointsFromMesh(libMesh::TriangulatorInterface::MeshedHole & bdry_mh,
+                                         std::vector<Point> & points,
+                                         std::vector<Point> & mid_points,
+                                         const bool skip_node_reduction = false);
 
 /**
- * Extracts the normal vector of the EDGE3 side of a quadratic element at a given key node index.
+ * Extracts the normal vector of the EDGE3 side of a quadratic element at a given node index.
  * @param elem The element containing the side of interest
  * @param s The side index of interest
- * @param key_node_index The index of the key node on the side at which to extract the normal vector
- * @return The normal vector at the key node index on the side of interest
+ * @param node_index The index of the node on the side at which to extract the normal vector
+ * @return The normal vector at the node index on the side of interest
  */
-Point getKeyNormal(const Elem * elem, const unsigned int s, const unsigned int key_node_index);
+Point getKeyNormal(const Elem * elem, const unsigned int s, const unsigned int node_index);
 }

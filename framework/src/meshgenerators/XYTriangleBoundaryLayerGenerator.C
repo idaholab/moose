@@ -33,9 +33,9 @@ XYTriangleBoundaryLayerGenerator::validParams()
   params.addParam<Real>(
       "layer_bias",
       1.0,
-      "The bias factor for the thickness of each layer. A value > 1 leads to thicker layers away "
-      "from the input mesh, while a value < 1 leads to thicker layers close to the input mesh. The "
-      "default value of 1 leads to uniform layer thickness.");
+      "The bias factor for the thickness of each layer of elements. A value > 1 leads to thicker "
+      "layers away from the input mesh, while a value < 1 leads to thicker layers close to the "
+      "input mesh. The default value of 1 leads to uniform layer thickness.");
 
   MooseEnum boundary_layer_direction("OUTWARD INWARD", "OUTWARD");
   params.addParam<MooseEnum>(
@@ -140,6 +140,8 @@ XYTriangleBoundaryLayerGenerator::generate()
     // Avoid bcid overlap between ring and input; renumber input's bcids out of the ring's range.
     const auto ring_bids = ring_u.get_boundary_info().get_global_boundary_ids();
     const auto inp_bids = inp_u.get_boundary_info().get_global_boundary_ids();
+    const auto max_bid = std::max(ring_bids.empty() ? boundary_id_type(0) : *ring_bids.rbegin(),
+                                  inp_bids.empty() ? boundary_id_type(0) : *inp_bids.rbegin());
     BoundaryID ext_id = 1;
     bool overlap = false;
     for (auto b : inp_bids)
@@ -147,34 +149,30 @@ XYTriangleBoundaryLayerGenerator::generate()
         overlap = true;
     if (overlap)
     {
-      const auto max_bid = std::max(ring_bids.empty() ? boundary_id_type(0) : *ring_bids.rbegin(),
-                                    inp_bids.empty() ? boundary_id_type(0) : *inp_bids.rbegin());
       BoundaryID idx = 1;
       for (auto b : inp_bids)
         inp_u.get_boundary_info().renumber_id(b, max_bid + (idx++));
       ext_id = max_bid + idx;
     }
     else
-      ext_id = MooseMeshUtils::getNextFreeBoundaryID(inp_u);
+      ext_id = max_bid + 1;
     inp_u.comm().max(ext_id);
     bool has_ext = false;
     MooseMeshUtils::addExternalBoundary(inp_u, ext_id, has_ext);
-    if (has_ext)
-    {
-      libMesh::MeshSerializer s1(ring_u), s2(inp_u);
-      // Stitch at the side of the ring that physically touches the input boundary. Keep the
-      // interface_bid tag so the interface boundary survives for downstream naming.
-      ring_u.stitch_meshes(inp_u,
-                           interface_bid,
-                           ext_id,
-                           TOLERANCE,
-                           /*clear_stitched_bcids=*/false,
-                           /*verbose=*/false,
-                           /*use_binary_search=*/true,
-                           /*enforce_all_nodes_match_on_boundaries=*/false,
-                           /*merge_boundary_nodes_all_or_nothing=*/false,
-                           /*remap_subdomain_ids=*/false);
-    }
+    mooseAssert(has_ext, "A 2D-XY mesh should have an external boundary.");
+    libMesh::MeshSerializer s1(ring_u), s2(inp_u);
+    // Stitch at the side of the ring that physically touches the input boundary. Keep the
+    // interface_bid tag so the interface boundary survives for downstream naming.
+    ring_u.stitch_meshes(inp_u,
+                         interface_bid,
+                         ext_id,
+                         TOLERANCE,
+                         /*clear_stitched_bcids=*/false,
+                         /*verbose=*/false,
+                         /*use_binary_search=*/true,
+                         /*enforce_all_nodes_match_on_boundaries=*/false,
+                         /*merge_boundary_nodes_all_or_nothing=*/false,
+                         /*remap_subdomain_ids=*/false);
   }
 
   auto & bi = ring->get_boundary_info();

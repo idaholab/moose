@@ -73,7 +73,7 @@ GapLineMeshGenerator::generate()
   // Reduce the point list to only contain vertices (linear-only: no midpoints)
   std::vector<Point> reduced_pts_list;
   std::vector<Point> reduced_mid_pts_list;
-  BoundaryLayerUtils::collectKeyPointsFromMesh(
+  BoundaryLayerUtils::collectExteriorVertexPointsFromMesh(
       bdry_mh, reduced_pts_list, reduced_mid_pts_list, /*skip_node_reduction=*/false);
 
   // Build the input polyline mesh to drive the normal computation in generateOffsetPolyline

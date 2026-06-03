@@ -44,7 +44,8 @@ buildBoundaryLayerRing(MeshGenerator & mg,
   std::set<std::size_t> bdry_id_set;
   if (!boundary_names.empty())
   {
-    auto ids = MooseMeshUtils::getBoundaryIDs(input_mesh, boundary_names, true);
+    auto ids =
+        MooseMeshUtils::getBoundaryIDs(input_mesh, boundary_names, /*generate unknown*/ false);
     bdry_id_set.insert(ids.begin(), ids.end());
   }
   TriangulatorInterface::MeshedHole bdry_mh(input_mesh, bdry_id_set);
@@ -53,10 +54,10 @@ buildBoundaryLayerRing(MeshGenerator & mg,
   // Preserve every input boundary node (including colinear interior nodes on straight edges) so
   // the ring's innermost polyline can be stitched back to the input mesh's boundary exactly when
   // keep_input is requested by a downstream caller.
-  collectKeyPointsFromMesh(bdry_mh,
-                           cur_pts,
-                           cur_mids,
-                           /*skip_node_reduction=*/true);
+  collectExteriorVertexPointsFromMesh(bdry_mh,
+                                      cur_pts,
+                                      cur_mids,
+                                      /*skip_node_reduction=*/true);
 
   // Geometric progression of incremental thicknesses. layer_thicknesses[i] is the offset
   // distance from polyline i-1 to polyline i (for i >= 1); layer_thicknesses[0] is unused.
@@ -181,7 +182,7 @@ generateOffsetPolyline(MeshGenerator * mg,
                 "If the input points are empty, the input mid_points must be also empty.");
 
     TriangulatorInterface::MeshedHole bdry_mh(*ply_mesh_u);
-    collectKeyPointsFromMesh(bdry_mh, points, mid_points);
+    collectExteriorVertexPointsFromMesh(bdry_mh, points, mid_points);
   }
   // Generate a very simple triangulation mesh so that we can get the outward normal vectors
   libMesh::Poly2TriTriangulator poly2tri(*ply_mesh_u);
@@ -319,10 +320,10 @@ generateOffsetPolyline(MeshGenerator * mg,
 }
 
 void
-collectKeyPointsFromMesh(libMesh::TriangulatorInterface::MeshedHole & bdry_mh,
-                         std::vector<Point> & points,
-                         std::vector<Point> & mid_points,
-                         const bool skip_node_reduction)
+collectExteriorVertexPointsFromMesh(libMesh::TriangulatorInterface::MeshedHole & bdry_mh,
+                                    std::vector<Point> & points,
+                                    std::vector<Point> & mid_points,
+                                    const bool skip_node_reduction)
 {
   for (const auto i : make_range(bdry_mh.n_points()))
   {
@@ -339,15 +340,18 @@ collectKeyPointsFromMesh(libMesh::TriangulatorInterface::MeshedHole & bdry_mh,
 }
 
 Point
-getKeyNormal(const Elem * elem, const unsigned int s, const unsigned int key_node_index)
+getKeyNormal(const Elem * elem, const unsigned int s, const unsigned int node_index)
 {
   const std::unique_ptr<const Elem> face = elem->build_side_ptr(s);
   mooseAssert(face->type() == ElemType::EDGE3,
               "Only elements with EDGE3 sides are supported in this function.");
+  mooseAssert(node_index < 3,
+              "The node index for an EDGE3 side should be 0, 1, or 2 (for the two vertices and the "
+              "midpoint).");
   std::unique_ptr<libMesh::FEBase> fe(
       libMesh::FEBase::build(2, libMesh::FEType(elem->default_order())));
   const std::vector<Point> & normals = fe->get_normals();
-  std::vector<Point> ref_pts = {face->reference_elem()->point(key_node_index)};
+  std::vector<Point> ref_pts = {face->reference_elem()->point(node_index)};
   fe->reinit(elem, s, TOLERANCE, &ref_pts);
   return normals[0];
 }

@@ -380,6 +380,8 @@ XYDelaunayGenerator::generate()
         // contain the same bcids on different sides.
         const auto & ring_bids = ring_u.get_boundary_info().get_global_boundary_ids();
         const auto inp_bids = inp_u.get_boundary_info().get_global_boundary_ids();
+        const auto max_bid = std::max(*ring_bids.rbegin(),
+                                      inp_bids.empty() ? boundary_id_type(0) : *inp_bids.rbegin());
         BoundaryID ext_id = 1;
         bool overlap = false;
         for (auto b : inp_bids)
@@ -387,8 +389,6 @@ XYDelaunayGenerator::generate()
             overlap = true;
         if (overlap)
         {
-          const auto max_bid = std::max(
-              *ring_bids.rbegin(), inp_bids.empty() ? boundary_id_type(0) : *inp_bids.rbegin());
           BoundaryID idx = 1;
           for (auto b : inp_bids)
           {
@@ -398,30 +398,28 @@ XYDelaunayGenerator::generate()
           ext_id = max_bid + idx;
         }
         else
-          ext_id = MooseMeshUtils::getNextFreeBoundaryID(inp_u);
+          ext_id = max_bid + 1;
         inp_u.comm().max(ext_id);
         bool has_ext = false;
         MooseMeshUtils::addExternalBoundary(inp_u, ext_id, has_ext);
-        if (has_ext)
-        {
-          const auto ring_u_ext_id =
-              std::max(MooseMeshUtils::getNextFreeBoundaryID(ring_u), BoundaryID(ext_id + 1));
-          MooseMeshUtils::changeBoundaryId(ring_u, 1, ring_u_ext_id, false);
-          if (xyd_opts.hole_boundary_inner_id_defaults.size() <= hole_i)
-            xyd_opts.hole_boundary_inner_id_defaults.resize(_hole_ptrs.size());
-          xyd_opts.hole_boundary_inner_id_defaults[hole_i] = {ring_u_ext_id};
-          // we want to keep the ring's original inner bcid (1) for later use.
-          ring_u.stitch_meshes(inp_u,
-                               1,
-                               ext_id,
-                               TOLERANCE,
-                               /*clear_stitched_bcids=*/true,
-                               _verbose_stitching,
-                               _algorithm == "BINARY",
-                               /*enforce_all_nodes_match_on_boundaries=*/false,
-                               /*merge_boundary_nodes_all_or_nothing=*/false,
-                               /*remap_subdomain_ids=*/false);
-        }
+        mooseAssert(has_ext, "A 2D-XY mesh should have an external boundary.");
+        const auto ring_u_ext_id =
+            std::max(MooseMeshUtils::getNextFreeBoundaryID(ring_u), BoundaryID(ext_id + 1));
+        MooseMeshUtils::changeBoundaryId(ring_u, 1, ring_u_ext_id, false);
+        if (xyd_opts.hole_boundary_inner_id_defaults.size() <= hole_i)
+          xyd_opts.hole_boundary_inner_id_defaults.resize(_hole_ptrs.size());
+        xyd_opts.hole_boundary_inner_id_defaults[hole_i] = {ring_u_ext_id};
+        // we want to keep the ring's original inner bcid (1) for later use.
+        ring_u.stitch_meshes(inp_u,
+                             1,
+                             ext_id,
+                             TOLERANCE,
+                             /*clear_stitched_bcids=*/true,
+                             _verbose_stitching,
+                             _algorithm == "BINARY",
+                             /*enforce_all_nodes_match_on_boundaries=*/false,
+                             /*merge_boundary_nodes_all_or_nothing=*/false,
+                             /*remap_subdomain_ids=*/false);
       }
 
       hole_meshes[hole_i] = std::move(hole_ring);
@@ -450,7 +448,12 @@ XYDelaunayGenerator::generate()
     // value so the post-stitch rename can recover it as the final outer bcid.
     const boundary_id_type ring_outermost_orig =
         boundary_id_type((_outer_boundary_layer_num - 1) * 2);
-    const boundary_id_type ring_outermost_temp = 10000;
+    // The maximum boundary ID in the outer ring is _outer_boundary_layer_num * 2 - 1, so
+    // _outer_boundary_layer_num * 2 is safe for itself. We need the maximum boundary ID of the
+    // result mesh too.
+    const boundary_id_type ring_outermost_temp =
+        std::max(boundary_id_type(_outer_boundary_layer_num * 2),
+                 MooseMeshUtils::getNextFreeBoundaryID(*result));
     libMesh::MeshTools::Modification::change_boundary_id(
         *outer_ring_clone, ring_outermost_orig, ring_outermost_temp);
 
