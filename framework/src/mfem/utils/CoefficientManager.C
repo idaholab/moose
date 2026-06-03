@@ -124,6 +124,7 @@ CoefficientManager::getScalarCoefficientPtr(const std::string & name)
 {
   if (this->_scalar_coeffs.hasCoefficient(name))
     return this->_scalar_coeffs.getCoefficientPtr(name);
+  // If name not present, check if it can be parsed cleanly into a real number
   std::istringstream ss(MooseUtils::trim(name));
   mfem::real_t real_value;
   if (ss >> real_value && ss.eof())

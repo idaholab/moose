@@ -46,15 +46,6 @@ public:
     return result;
   }
 
-  /// Track a coefficient owned elsewhere so it may be used by this map.
-  void trackCoefficient(const std::shared_ptr<T> & coeff)
-  {
-    if (std::find(this->_iterable_coefficients.cbegin(),
-                  this->_iterable_coefficients.cend(),
-                  coeff) == this->_iterable_coefficients.cend())
-      this->_iterable_coefficients.push_back(coeff);
-  }
-
   /// Add a named global coefficient. It must have been created with
   /// the `make` method on this object.
   void addCoefficient(const std::string & name, std::shared_ptr<T> coeff)

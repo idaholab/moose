@@ -50,26 +50,6 @@ MFEMCylindrical::MFEMCylindrical(const InputParameters & parameters)
 }
 
 void
-MFEMCylindrical::build()
-{
-  if (_r_coeff)
-    return;
-
-  _r_coeff = std::unique_ptr<mfem::Coefficient>(new mfem::CylindricalRadialCoefficient());
-
-  _inv_r_coeff = std::unique_ptr<mfem::Coefficient>(
-      new InvShiftedCoefficient(*_r_coeff, static_cast<mfem::real_t>(_inv_r_eps)));
-
-  constexpr mfem::real_t two_pi = 6.283185307179586476925286766559;
-
-  _two_pi_r_coeff = std::unique_ptr<mfem::Coefficient>(new mfem::TransformedCoefficient(
-      _r_coeff.get(), [](mfem::real_t a) -> mfem::real_t { return two_pi * a; }));
-
-  _measure_weight = std::unique_ptr<mfem::Coefficient>(new mfem::TransformedCoefficient(
-      _r_coeff.get(), [](mfem::real_t a) -> mfem::real_t { return a; }));
-}
-
-void
 MFEMCylindrical::declareRadialCoefficient(Moose::MFEM::CoefficientManager & coeffs)
 {
   coeffs.declareScalar<mfem::CylindricalRadialCoefficient>(coefficientName("r"));
@@ -97,38 +77,11 @@ MFEMCylindrical::declareTwoPiRCoefficient(Moose::MFEM::CoefficientManager & coef
 }
 
 void
-MFEMCylindrical::declareMeasureWeightCoefficient(Moose::MFEM::CoefficientManager & coeffs)
-{
-  auto & r_coeff = coeffs.getScalarCoefficient(coefficientName("r"));
-
-  coeffs.declareScalar<mfem::TransformedCoefficient>(coefficientName("measure_weight"),
-                                                     &r_coeff,
-                                                     [](mfem::real_t a) -> mfem::real_t
-                                                     { return a; });
-}
-
-void
 MFEMCylindrical::declareCoefficients(Moose::MFEM::CoefficientManager & coeffs)
 {
   this->declareRadialCoefficient(coeffs);
   this->declareInverseRadialCoefficient(coeffs);
   this->declareTwoPiRCoefficient(coeffs);
-  this->declareMeasureWeightCoefficient(coeffs);
-}
-
-const mfem::Coefficient *
-MFEMCylindrical::getBuiltinCoefficient(const std::string & name) const
-{
-  if (name == coefficientName("r"))
-    return _r_coeff.get();
-  if (name == coefficientName("inv_r"))
-    return _inv_r_coeff.get();
-  if (name == coefficientName("two_pi_r"))
-    return _two_pi_r_coeff.get();
-  if (name == coefficientName("measure_weight"))
-    return _measure_weight.get();
-
-  return nullptr;
 }
 
 #endif
