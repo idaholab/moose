@@ -93,7 +93,7 @@ and `c_tangential` declarations (currently lines 192–201):
 | `c_tangential_strategy` | `MooseEnum` | `"user"` | `user` (current behavior) or `physical` (velocity-scaled, linked to `c_normal_eff`) |
 | `secondary_elasticity_tensor_base_name` | `std::string` | `""` | Base name prefix of the elasticity tensor property on the secondary body; only used when `c_normal_strategy = physical` |
 | `primary_elasticity_tensor_base_name` | `std::string` | `""` | Base name prefix of the elasticity tensor property on the primary body; only used when `c_normal_strategy = physical` |
-| `elasticity_tensor_is_ad` | `bool` | `false` | Set to true if the elasticity tensor material property was declared as AD; only used when `c_normal_strategy = physical` |
+| `use_automatic_differentiation` | `bool` | `false` | Set to true if the elasticity tensor material property was declared as AD; only used when `c_normal_strategy = physical` |
 
 When `c_normal_strategy = physical`:
 - `ContactAction` emits a `paramError` if `c_normal` was explicitly set by the user
@@ -126,7 +126,7 @@ params.addParam<std::string>("primary_base_name", "",
     "Base name prefix of the elasticity_tensor material property on the primary body. "
     "Must match the base_name used on the primary material block that computes the "
     "elasticity tensor.");
-params.addParam<bool>("elasticity_tensor_is_ad", false,
+params.addParam<bool>("use_automatic_differentiation", false,
     "Whether the elasticity tensor material property was declared as an AD property. "
     "Set to true if the material block uses an AD elasticity tensor.");
 ```
@@ -141,7 +141,7 @@ const std::string pri_base = getParam<std::string>("primary_base_name");
 const std::string sec_name = sec_base.empty() ? "elasticity_tensor" : sec_base + "_elasticity_tensor";
 const std::string pri_name = pri_base.empty() ? "elasticity_tensor" : pri_base + "_elasticity_tensor";
 // dispatches to the template helper described under "New members" below
-if (_elasticity_tensor_is_ad)
+if (_use_automatic_differentiation)
   fetchElasticityTensorProperties<true>(sec_name, pri_name);
 else
   fetchElasticityTensorProperties<false>(sec_name, pri_name);
@@ -149,7 +149,7 @@ else
 
 `ContactAction` does not currently have a `base_name` parameter. Three new optional
 parameters, `secondary_elasticity_tensor_base_name`, `primary_elasticity_tensor_base_name`,
-and `elasticity_tensor_is_ad`, should be added to `ContactAction` and forwarded to the UO
+and `use_automatic_differentiation`, should be added to `ContactAction` and forwarded to the UO
 when `derive_c_from_elasticity = true`. The secondary and primary bodies may have different
 `base_name` prefixes on their respective elasticity tensor materials, so a single shared name
 is insufficient. This keeps the user from having to set these directly on the UO, which is
@@ -158,8 +158,8 @@ an implementation detail they should not need to know about.
 **New members** (added to `LMWeightedGapUserObject.h`):
 ```cpp
 const bool _derive_c_from_elasticity;
-const bool _elasticity_tensor_is_ad;
-// Exactly one pointer per side is non-null depending on _elasticity_tensor_is_ad
+const bool _use_automatic_differentiation;
+// Exactly one pointer per side is non-null depending on _use_automatic_differentiation
 const MaterialProperty<RankFourTensor>   * _elasticity_tensor_secondary    = nullptr;
 const MaterialProperty<RankFourTensor>   * _elasticity_tensor_primary      = nullptr;
 const ADMaterialProperty<RankFourTensor> * _elasticity_tensor_secondary_ad = nullptr;
@@ -192,7 +192,7 @@ void fetchElasticityTensorProperties(const std::string & sec_name,
 
 Called in the constructor as:
 ```cpp
-if (_elasticity_tensor_is_ad)
+if (_use_automatic_differentiation)
   fetchElasticityTensorProperties<true>(sec_name, pri_name);
 else
   fetchElasticityTensorProperties<false>(sec_name, pri_name);
@@ -202,7 +202,7 @@ In `computeQpIProperties`, dispatch to a second template helper so each instanti
 has a single consistent type and `auto` deduces correctly within it:
 ```cpp
 // Called from computeQpIProperties:
-if (_elasticity_tensor_is_ad)
+if (_use_automatic_differentiation)
   accumulateDerivedC<true>();
 else
   accumulateDerivedC<false>();

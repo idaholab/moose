@@ -10,10 +10,9 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "LMWeightedGapUserObject.h"
 
 #include <unordered_map>
-
-class WeightedGapUserObject;
 
 /**
  * Computes the weighted gap that will later be used to enforce the
@@ -82,6 +81,9 @@ protected:
   /// multiplier
   const Real _c;
 
+  /// When true, c is read per-node from the UO's dofToDerivedC() instead of _c
+  const bool _use_derived_c_normal;
+
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
 
@@ -109,5 +111,5 @@ protected:
   const Real * _normalization_ptr = nullptr;
 
   /// The weighted gap user object
-  const WeightedGapUserObject & _weighted_gap_uo;
+  const LMWeightedGapUserObject & _weighted_gap_uo;
 };

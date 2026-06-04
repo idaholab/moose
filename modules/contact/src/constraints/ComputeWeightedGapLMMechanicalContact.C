@@ -11,7 +11,6 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
-#include "WeightedGapUserObject.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
@@ -63,6 +62,10 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.addParam<bool>("use_derived_c_normal",
+                        false,
+                        "Read c_normal per-node from the weighted gap UO's dofToDerivedC() map "
+                        "instead of using the scalar 'c' parameter.");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
@@ -80,12 +83,13 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _secondary_disp_z(_has_disp_z ? &adCoupledValue("disp_z") : nullptr),
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _c(getParam<Real>("c")),
+    _use_derived_c_normal(getParam<bool>("use_derived_c_normal")),
     _normalize_c(getParam<bool>("normalize_c")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
-    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
+    _weighted_gap_uo(getUserObject<LMWeightedGapUserObject>("weighted_gap_uo"))
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
@@ -185,7 +189,15 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+
+  ADReal c;
+  if (_use_derived_c_normal)
+  {
+    const auto & [c_nn, ignored] = libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof);
+    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+  }
+  else
+    c = _normalize_c ? _c / *_normalization_ptr : _c;
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);

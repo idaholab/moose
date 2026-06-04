@@ -11,7 +11,6 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
-#include "WeightedVelocitiesUserObject.h"
 
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
@@ -49,6 +48,14 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   params.addRequiredParam<UserObjectName>("weighted_velocities_uo",
                                           "The weighted tangential velocities user object.");
+  params.addParam<bool>("dynamic_c_t",
+                        false,
+                        "Derive c_t per-node from c_normal_eff / (vt_mag * dt). "
+                        "During stick (vt_mag < vel_floor) falls back to c_normal_eff.");
+  params.addParam<Real>("vel_floor",
+                        1e-10,
+                        "Tangential velocity magnitude below which dynamic c_t falls back to "
+                        "c_normal_eff (stick regime guard).");
 
   return params;
 }
@@ -56,8 +63,11 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
 ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
-    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")),
+    _weighted_velocities_uo(
+        getUserObject<LMWeightedVelocitiesUserObject>("weighted_velocities_uo")),
     _c_t(getParam<Real>("c_t")),
+    _dynamic_c_t(getParam<bool>("dynamic_c_t")),
+    _vel_floor(getParam<Real>("vel_floor")),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -205,9 +215,31 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
 
-  // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  // Resolve normal reference stiffness (physical or user mode)
+  ADReal c;
+  if (_use_derived_c_normal)
+  {
+    const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
+    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+  }
+  else
+    c = _normalize_c ? _c / *_normalization_ptr : _c;
+
+  // Resolve tangential scaling
+  ADReal c_t;
+  if (_dynamic_c_t)
+  {
+    using std::sqrt;
+    const auto vt_sq = *_tangential_vel_ptr[0] * *_tangential_vel_ptr[0] +
+                       *_tangential_vel_ptr[1] * *_tangential_vel_ptr[1] + ADReal(1e-48);
+    const auto vt_mag = sqrt(vt_sq);
+    if (MetaPhysicL::raw_value(vt_mag) < _vel_floor)
+      c_t = c;
+    else
+      c_t = c / (vt_mag * _dt);
+  }
+  else
+    c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad = computeFrictionValue(contact_pressure,
@@ -280,9 +312,30 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
 
-  // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  // Resolve normal reference stiffness (physical or user mode)
+  ADReal c;
+  if (_use_derived_c_normal)
+  {
+    const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
+    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+  }
+  else
+    c = _normalize_c ? _c / *_normalization_ptr : _c;
+
+  // Resolve tangential scaling
+  ADReal c_t;
+  if (_dynamic_c_t)
+  {
+    using std::sqrt;
+    const auto vt_sq = *_tangential_vel_ptr[0] * *_tangential_vel_ptr[0] + ADReal(1e-48);
+    const auto vt_mag = sqrt(vt_sq);
+    if (MetaPhysicL::raw_value(vt_mag) < _vel_floor)
+      c_t = c;
+    else
+      c_t = c / (vt_mag * _dt);
+  }
+  else
+    c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad =
