@@ -1,6 +1,6 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = PATCH_UEL.inp
+  file = BIG_CUBE_UEL.inp
   debug = true
 
   [Partitioner]
@@ -15,11 +15,21 @@
 []
 
 [AuxVariables]
+  [pid]
+  []
   [field1]
     initial_condition = 70.0
   []
   [field2]
     initial_condition = 0.0
+  []
+[]
+
+[AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
   []
 []
 
@@ -30,8 +40,8 @@
 []
 
 [Problem]
-  extra_tag_vectors = "AbaqusUELTag"
   kernel_coverage_check = false
+  extra_tag_vectors = "AbaqusUELTag"
 []
 
 [UserObjects]
@@ -48,15 +58,6 @@
   []
 []
 
-[VectorPostprocessors]
-  [statev]
-    type = AbaqusUELStateVariables
-    uel = uel
-    split = 9
-    column_names = 'not_used SSE S11 S22 S33 S12 E11 E22 E33 E12'
-  []
-[]
-
 [Executioner]
   type = Transient
   solve_type = NEWTON
@@ -68,6 +69,5 @@
 
 [Outputs]
   exodus = true
-  csv = true
-  print_linear_residuals = false
+  hide = pid
 []
