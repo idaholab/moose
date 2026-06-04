@@ -30,7 +30,7 @@ public:
   void Eval(mfem::DenseMatrix & K,
             mfem::ElementTransformation & T,
             const mfem::IntegrationPoint & ip) override;
-  void SetTime(double t) override;
+  void SetTime(mfem::real_t t) override;
 
 protected:
   mfem::Coefficient & _k_coef;

@@ -39,21 +39,16 @@ NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
                                      const mfem::IntegrationPoint & ip)
 {
   const int dim = GetHeight();
-  K.SetSize(dim, dim);
-  K = 0.0;
-
-  const mfem::real_t k = _k_coef.Eval(T, ip);
-  const mfem::real_t curlu_dk_dcurlu = _curlu_dk_dcurlu_coef.Eval(T, ip);
-
   mfem::Vector curlu_hat(dim);
-  _curlu_hat_coef.Eval(curlu_hat, T, ip);
 
-  for (int i = 0; i < dim; ++i)
-  {
-    K(i, i) = k;
-    for (int j = 0; j < dim; ++j)
+  _curlu_hat_coef.Eval(curlu_hat, T, ip);
+  const real_t k =_k_coef.Eval(T, ip);
+  const real_t curlu_dk_dcurlu = _curlu_dk_dcurlu_coef.Eval(T, ip);
+
+  K.Diag(k, dim);
+  for (const auto i : make_range(dim))
+    for (const auto j : make_range(dim))
       K(i, j) += curlu_dk_dcurlu * curlu_hat(i) * curlu_hat(j);
-  }
 }
 
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
