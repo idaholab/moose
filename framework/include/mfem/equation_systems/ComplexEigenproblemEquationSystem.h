@@ -14,7 +14,7 @@
 #include "ComplexEquationSystem.h"
 
 class MFEMEigensolverBase;
-class MFEMEigenproblemBase;
+class MFEMEigenproblem;
 
 namespace Moose::MFEM
 {
@@ -26,7 +26,7 @@ public:
   /// Construct with the eigenproblem owning the right-hand-side coefficient. The coefficient is
   /// resolved at assembly time, since materials are not yet available when the equation
   /// system is created.
-  ComplexEigenproblemEquationSystem(MFEMEigenproblemBase & eigen_problem)
+  ComplexEigenproblemEquationSystem(MFEMEigenproblem & eigen_problem)
     : _eigen_problem(eigen_problem)
   {
   }
@@ -50,7 +50,7 @@ private:
 
   mfem::Array<int> _global_ess_markers;
   /// Eigenproblem owning the right-hand-side coefficient, queried at assembly time.
-  MFEMEigenproblemBase & _eigen_problem;
+  MFEMEigenproblem & _eigen_problem;
 };
 
 } // namespace Moose::MFEM

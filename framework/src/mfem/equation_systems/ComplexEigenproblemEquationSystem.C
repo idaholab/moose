@@ -11,7 +11,7 @@
 
 #include "ComplexEigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
-#include "MFEMEigenproblemBase.h"
+#include "MFEMEigenproblem.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -55,7 +55,8 @@ ComplexEigenproblemEquationSystem::FormEigenproblemMatrix(mfem::OperatorHandle &
   if (norm > 0 && asym > 1e-10 * norm)
     mooseError("Assembled complex eigenproblem operator is not symmetric (relative asymmetry ",
                asym / norm,
-               "). Current eigensolvers require a Hermitian form: a symmetric real part and an antisymmetric "
+               "). Current eigensolvers require a Hermitian form: a symmetric real part and an "
+               "antisymmetric "
                "imaginary part. Check the selected kernels.");
 
   op.Reset(sysmat);
@@ -65,7 +66,8 @@ void
 ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
 {
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
-  std::unique_ptr<mfem::ParSesquilinearForm> m = std::make_unique<mfem::ParSesquilinearForm>(fespace);
+  std::unique_ptr<mfem::ParSesquilinearForm> m =
+      std::make_unique<mfem::ParSesquilinearForm>(fespace);
 
   const bool use_matrix = _eigen_problem.rhsCoefficientIsMatrix();
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
@@ -93,7 +95,7 @@ ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
 
 void
 ComplexEigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
-                                                      mfem::OperatorHandle & massRHS)
+                                                             mfem::OperatorHandle & massRHS)
 {
   mooseAssert(_test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) &&
                   (_test_var_names.at(0) == _trial_var_names.at(0)),

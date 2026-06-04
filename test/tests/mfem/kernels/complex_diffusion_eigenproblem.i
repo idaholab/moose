@@ -6,7 +6,7 @@
 []
 
 [Problem]
-  type = MFEMComplexEigenproblem
+  type = MFEMEigenproblem
   numeric_type = complex
   num_modes = 5
 []
