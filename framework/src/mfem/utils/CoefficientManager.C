@@ -153,8 +153,41 @@ CoefficientManager::getVectorCoefficientPtr(const std::string & name)
 std::shared_ptr<mfem::MatrixCoefficient>
 CoefficientManager::getMatrixCoefficientPtr(const std::string & name)
 {
-  return this->_matrix_coeffs.getCoefficientPtr(name);
-  // TODO: Work out how to parse literal matrices from input.
+  if (this->_matrix_coeffs.hasCoefficient(name))
+    return this->_matrix_coeffs.getCoefficientPtr(name);
+  // If name not present, try to interpret it as a literal constant matrix. Rows are
+  // separated by ';' and entries within a row by whitespace/commas. Every row must
+  // have the same number of entries; a string with no ';' is a single row.
+  std::vector<std::string> row_strs;
+  MooseUtils::tokenize(name, row_strs, 1, ";");
+  std::vector<std::vector<mfem::real_t>> rows;
+  bool parsed = !row_strs.empty();
+  for (const auto & row_str : row_strs)
+  {
+    std::vector<mfem::real_t> row_vals;
+    if (!MooseUtils::tokenizeAndConvert(row_str, row_vals) || row_vals.empty())
+    {
+      parsed = false;
+      break;
+    }
+    rows.push_back(row_vals);
+  }
+  if (parsed)
+  {
+    for (const auto & row : rows)
+      if (row.size() != rows.front().size())
+        mooseError("Matrix coefficient literal '" + name +
+                   "' has rows with differing numbers of entries.");
+    const int nrows = static_cast<int>(rows.size());
+    const int ncols = static_cast<int>(rows.front().size());
+    mfem::DenseMatrix mat(nrows, ncols);
+    for (int i = 0; i < nrows; ++i)
+      for (int j = 0; j < ncols; ++j)
+        mat(i, j) = rows[i][j];
+    this->declareMatrix<mfem::MatrixConstantCoefficient>(name, mat);
+    return this->_matrix_coeffs.getCoefficientPtr(name);
+  }
+  mooseError("Matrix coefficient with name '" + name + "' has not been declared.");
 }
 
 mfem::Coefficient &
@@ -173,6 +206,12 @@ mfem::MatrixCoefficient &
 CoefficientManager::getMatrixCoefficient(const std::string & name)
 {
   return *this->getMatrixCoefficientPtr(name);
+}
+
+bool
+CoefficientManager::hasMatrixCoefficient(const std::string & name) const
+{
+  return this->_matrix_coeffs.hasCoefficient(name);
 }
 
 bool

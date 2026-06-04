@@ -11,33 +11,16 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
+#include "MFEMEigenproblemBase.h"
 
-class MFEMEigenproblem : public MFEMProblem
+/// Real-valued finite element eigenproblem.
+class MFEMEigenproblem : public MFEMEigenproblemBase
 {
 public:
   static InputParameters validParams();
 
   MFEMEigenproblem(const InputParameters & params);
   virtual ~MFEMEigenproblem() {}
-
-  /**
-   * Method called in AddMFEMSolverAction which will create the solver.
-   */
-  virtual void addMFEMSolver(const std::string & user_object_name,
-                             const std::string & name,
-                             InputParameters & parameters) override;
-
-  /**
-   * Override of MFEMProblem::addVariable. Sets a
-   * MFEM grid function to be used in the MFEM solve.
-   */
-  virtual void addVariable(const std::string & var_type,
-                           const std::string & var_name,
-                           InputParameters & parameters) override;
-
-  /// Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
-  mfem::Coefficient & getRHSCoefficient();
 };
 
 #endif

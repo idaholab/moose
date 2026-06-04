@@ -11,6 +11,7 @@
 
 #include "EigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
+#include "MFEMEigenproblemBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -25,7 +26,8 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   _global_ess_markers = 0;
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
+  // Set constrained DoF values on user-declared essential boundaries and collect their markers
+  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _global_ess_markers);
   trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(0));
 }
 
@@ -46,10 +48,17 @@ EigenproblemEquationSystem::FormMassMatrix()
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
+  const bool use_matrix = _eigen_problem.rhsCoefficientIsMatrix();
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-    m->AddDomainIntegrator(new mfem::MassIntegrator(_rhs_coef));
+  {
+    if (use_matrix)
+      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
+    m->AddDomainIntegrator(new mfem::MassIntegrator(_eigen_problem.getRHSCoefficient()));
+  }
   else
-    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_rhs_coef));
+    m->AddDomainIntegrator(
+        use_matrix ? new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSMatrixCoefficient())
+                   : new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
