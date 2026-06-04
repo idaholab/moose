@@ -33,7 +33,7 @@
   [NonlinearConductivity]
     type = ADParsedMaterial
     f_name = 'conductivity'
-    function = '10+500*forwardT'
+    expression = '10+500*forwardT'
     coupled_variables = 'forwardT'
   []
   [volumetric_heat]
