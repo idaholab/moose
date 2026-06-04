@@ -33,7 +33,7 @@ template <class T>
 DerivativeKernelInterface<T>::DerivativeKernelInterface(const InputParameters & parameters)
   : DerivativeMaterialInterface<T>(parameters),
     _nvar(this->_coupled_moose_vars.size()),
-    _F_name(this->template getRenamedParam<std::string>("f_name", "property_name"))
+    _F_name(this->template getParam<std::string>("property_name"))
 {
 }
 
@@ -42,12 +42,7 @@ InputParameters
 DerivativeKernelInterface<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params.addDeprecatedParam<std::string>(
-      "f_name",
-      "Base name of the free energy function F defined in a DerivativeParsedMaterial",
-      "Deprecated, use property_name");
-  // TODO Make required once deprecation is handled, see #20535
-  params.addParam<std::string>(
+  params.addRequiredParam<std::string>(
       "property_name", "Base name of the material property defined in a DerivativeParsedMaterial");
   return params;
 }
