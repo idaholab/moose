@@ -11,6 +11,7 @@
 
 #include "EigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
+#include "MFEMEigenproblemBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -47,9 +48,9 @@ EigenproblemEquationSystem::FormMassMatrix()
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-    m->AddDomainIntegrator(new mfem::MassIntegrator(_rhs_coef));
+    m->AddDomainIntegrator(new mfem::MassIntegrator(_eigen_problem.getRHSCoefficient()));
   else
-    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_rhs_coef));
+    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the

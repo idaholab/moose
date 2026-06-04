@@ -28,7 +28,7 @@ MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_probl
     mooseError("Not an eigenvalue problem. ");
 
   mfem_problem.getProblemData().eqn_system =
-      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(eigen_problem->getRHSCoefficient());
+      std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(*eigen_problem);
   return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
 }
 

@@ -31,13 +31,6 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMEigenpr
                "eigenproblems.");
 }
 
-mfem::Coefficient &
-MFEMEigenproblem::getRHSCoefficient()
-{
-  return getCoefficients().getScalarCoefficient(
-      getParam<MFEMScalarCoefficientName>("rhs_coefficient"));
-}
-
 void
 MFEMEigenproblem::addVariable(const std::string & var_type,
                               const std::string & var_name,
