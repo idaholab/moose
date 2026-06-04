@@ -94,8 +94,8 @@
 []
 
 [Solver]
-   type = MFEMMUMPS
-   print_level = 0
+  type = MFEMMUMPS
+  print_level = 0
 []
 
 [Executioner]

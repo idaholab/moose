@@ -11,8 +11,8 @@ coil_conductivity = 1.0
 []
 
 [Mesh]
-    type = MFEMMesh
-    file = ../mesh/embedded_concentric_torus.e
+  type = MFEMMesh
+  file = ../mesh/embedded_concentric_torus.e
 []
 
 [FunctorMaterials]
