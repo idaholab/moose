@@ -46,8 +46,8 @@ NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
   const mfem::real_t curlu_dk_dcurlu = _curlu_dk_dcurlu_coef.Eval(T, ip);
 
   K.Diag(k, dim);
-  for (const auto i : make_range(dim))
-    for (const auto j : make_range(dim))
+  for (int i = 0; i < dim; ++i)
+    for (int j = 0; j < dim; ++j)
       K(i, j) += curlu_dk_dcurlu * curlu_hat(i) * curlu_hat(j);
 }
 
