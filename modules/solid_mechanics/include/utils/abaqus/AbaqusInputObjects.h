@@ -302,9 +302,6 @@ struct Model : public Part, public Step
 
   /// Steps
   ObjectStore<Step> _step;
-
-  /// distributed loads specified at model scope (begin state before first step)
-  std::unordered_map<Index, std::vector<DLoad>> _dloads;
 };
 
 /**
