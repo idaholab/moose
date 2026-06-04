@@ -121,17 +121,13 @@ class CSVTools:
                     )[0]
 
                 # Possible global header containing absolute tolerance params
-                if not re.match(r"^\s", a_line) and words.intersection(
-                    abs_tol_params
-                ):
+                if not re.match(r"^\s", a_line) and words.intersection(abs_tol_params):
                     custom_params["ABSOLUTE"] = self.getParamValues(
                         words.intersection(abs_tol_params).pop(), a_line
                     )[0]
 
                 # Possible global header containing relative tolerance params
-                if not re.match(r"^\s", a_line) and words.intersection(
-                    rel_tol_params
-                ):
+                if not re.match(r"^\s", a_line) and words.intersection(rel_tol_params):
                     custom_params["RELATIVE"] = self.getParamValues(
                         words.intersection(rel_tol_params).pop(), a_line
                     )[0]
@@ -194,7 +190,8 @@ class CSVSummary(CSVTools):
             return self.getMessages()
 
         formatted_messages = [
-            "GLOBAL VARIABLES absolute %s relative %s floor %s" % (self.abs_tol, self.rel_tol, self.abs_zero)
+            "GLOBAL VARIABLES absolute %s relative %s floor %s"
+            % (self.abs_tol, self.rel_tol, self.abs_zero)
         ]
 
         field_len = []
@@ -329,11 +326,14 @@ class CSVDiffer(CSVTools):
         abs_zero_map = {}
         found_column = {}
         if self.custom_columns:
-            for i in range(0, len(self.custom_columns)):
-                abs_err_map[self.custom_columns[i]] = float(self.custom_abs_err[i])
-                rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
-                abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
-                found_column[self.custom_columns[i]] = False
+            for i, col in enumerate(self.custom_columns):
+                found_column[col] = False
+                if self.custom_abs_zero:
+                    abs_zero_map[col] = float(self.custom_abs_zero[i])
+                if self.custom_abs_err:
+                    abs_err_map[col] = float(self.custom_abs_err[i])
+                if self.custom_rel_err:
+                    rel_err_map[col] = float(self.custom_rel_err[i])
 
         # use this value to skip the rest of the tests when we've found an error
         # the order of the tests is most general to most specific, so if a general
@@ -390,13 +390,11 @@ class CSVDiffer(CSVTools):
             if key in self.ignore:
                 continue
             for row, (val1, val2) in enumerate(zip(table1[key], table2[key])):
-                # if customized tolerances specified use them otherwise
-                # use the default
-                if self.custom_columns:
-                    try:
-                        abs_zero = abs_zero_map[key]
-                    except:
-                        abs_zero = self.abs_zero
+                # use customized tolerances if specified; otherwise, default
+                abs_zero = abs_zero_map[key] if key in abs_zero_map else self.abs_zero
+                abs_tol = abs_err_map[key] if key in abs_err_map else self.abs_tol
+                rel_tol = rel_err_map[key] if key in rel_err_map else self.rel_tol
+
                 if abs(val1) < abs_zero:
                     val1 = 0
                 if abs(val2) < abs_zero:
@@ -421,15 +419,6 @@ class CSVDiffer(CSVTools):
                 if max(abs(val1), abs(val2)) > 0:
                     rel_diff = abs((val1 - val2) / max(abs(val1), abs(val2)))
 
-                # if customized tolerances specified use them otherwise
-                # use the default
-                if self.custom_columns:
-                    try:
-                        abs_tol = abs_err_map[key]
-                        rel_tol = rel_err_map[key]
-                    except:
-                        abs_tol = self.abs_tol
-                        rel_tol = self.rel_tol
                 if rel_diff > rel_tol and abs_diff > abs_tol:
                     time_info = ""
                     if time_col is not None and row < len(time_col):
@@ -485,20 +474,28 @@ def verifyArgs(args):
         )
 
     # Check if all custom args are populated correctly
-    unify_custom_args = [
-        x
-        for x in [args.custom_columns, args.custom_abs_zero, args.custom_abs_err, args.custom_rel_err]
-        if x != None
+    custom_tol_dict = {
+        "--custom-abs-zero": args.custom_abs_zero,
+        "--custom-abs-err": args.custom_abs_err,
+        "--custom-rel-err": args.custom_rel_err,
+    }
+    provided_custom_tol_params = [
+        custom_tol_dict[x] for x in custom_tol_dict if custom_tol_dict[x] != None
     ]
-    if unify_custom_args and len(unify_custom_args) != 4:
-        problems.append("When using any --custom-* option, you must use all four")
-    elif unify_custom_args:
-        if len(set([len(x) for x in unify_custom_args])) > 1:
+    n_custom_columns = len(args.custom_columns) if args.custom_columns != None else 0
+    if n_custom_columns > 0 and len(provided_custom_tol_params) == 0:
+        problems.append(
+            "If '--custom-columns' is provided, then at least one of "
+            + set(custom_tol_dict.keys())
+            + " must be provided"
+        )
+    for x in provided_custom_tol_params:
+        if len(x) != n_custom_columns:
             problems.append(
-                "All --custom-* options need to contain the same number of space separated items"
+                "If a '--custom-*' option is provided, it must have the same number of space-separated items as '--custom-columns'"
             )
 
-    if unify_custom_args and args.comparison_file:
+    if len(provided_custom_tol_params) > 0 and args.comparison_file:
         problems.append(
             "When supplying a config file (--comparison-file|-c), you can not use any --custom-* args"
         )

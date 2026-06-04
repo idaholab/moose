@@ -53,7 +53,7 @@ class TestHarnessTester(TestHarnessTestCase):
         out = self.runTests(*BASE_ARGS, "--re", "csvdiff", exit_code=128).output
         self.assertRegex(
             out,
-            r"tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)",
+            r"tests/test_harness.csvdiff.*? FAILED \(Invalid override inputs\)",
         )
 
     def ValidationTestRunException(self):

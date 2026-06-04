@@ -57,25 +57,28 @@ class CSVDiff(FileTester):
     def getOutputFiles(self, options):
         return super().getOutputFiles(options) + self.specs["csvdiff"]
 
-    # Check that override parameter lists are the same length
     def checkRunnable(self, options):
-        if (
-            (len(self.specs["override_columns"]) != len(self.specs["override_rel_err"]))
-            or (
-                len(self.specs["override_columns"])
-                != len(self.specs["override_abs_zero"])
-            )
-            or (
-                len(self.specs["override_abs_err"])
-                != len(self.specs["override_columns"])
-            )
-            or (
-                len(self.specs["override_rel_err"])
-                != len(self.specs["override_abs_zero"])
-            )
-        ):
-            self.setStatus(self.fail, "Override inputs not the same length")
-            return False
+        # Fail if either of the following conditions are met:
+        # - 'override_columns' is provided but no other 'override_*' is provided
+        # - Length of an 'override_*' parameter does not match length of 'override_columns'
+        n_custom_columns = len(self.specs["override_columns"])
+        override_tol_params = [
+            "override_abs_zero",
+            "override_abs_err",
+            "override_rel_err",
+        ]
+        n_provided_tol_params = 0
+        invalid_override_inputs = False
+        for param in override_tol_params:
+            n_entries = len(self.specs[param])
+            if n_entries > 0:
+                n_provided_tol_params += 1
+                if n_entries != n_custom_columns:
+                    invalid_override_inputs = True
+        if n_custom_columns > 0 and n_provided_tol_params == 0:
+            invalid_override_inputs = True
+        if invalid_override_inputs:
+            self.setStatus(self.fail, "Invalid override inputs")
 
         if (
             any(
