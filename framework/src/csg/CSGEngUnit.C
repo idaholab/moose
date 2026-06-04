@@ -8,12 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGEngUnit.h"
+#include "CSGBase.h"
 
 namespace CSG
 {
 
+CSGEngUnit::~CSGEngUnit() = default;
+
 CSGEngUnit::CSGEngUnit(const std::string & behavior, const std::string & unit_type)
-  : _unit_type(unit_type)
+  : _internal_base(std::make_unique<CSGBase>()), _unit_type(unit_type)
 {
   _behavior = behavior;
 }

@@ -1784,12 +1784,10 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   // expand the unit - returns the universe that was created
   const auto & univ_expanded = csg_obj->expandEngUnit(unit);
 
-  // TestUnivEngUnit intentionally includes the creation of a cell engineering unit
-  // (TestCellEngUnit) along with real CSG objects (surface and cell) during the expansion process
-  // to test the handling of such nested units (TestCellEngUnit also creates TestSurfEngUnit during
-  // the expansion process). The cell-type unit  creates a surface unit during expansion.
-  // However, because we are only expanding this universe engineering unit, we do not expect the
-  // cell unit to expand and create another unit at this time.
+  // TestUnivEngUnit creates a TestCellEngUnit and a real cell, both in the root of the internal
+  // base (which is taken to be the expanded universe). This expanded universe (root) becomes a
+  // named non-root universe in this CSGBase upon expansion and cells only belong to the expanded
+  // universe.
   //
   // Post expansion expected objects:
   //  - 2 universes: root + expanded univ
@@ -1801,8 +1799,8 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   //
   // Expected Cell/Universe tree/relationships:
   //  - original "extra_cell" should still have a univ fill but it should be the expanded universe
-  //  - generated cell engineering unit should be a part of expanded universe, but not root
-  //  - generated real cell should be a part of both the expanded universe and root
+  //  - generated cell engineering unit and real cell from unit expansion should both be a part of
+  //    expanded universe, but not root
 
   // check number and types of objects generated
   ASSERT_EQ(2, csg_obj->getAllUniverses().size());
@@ -1823,7 +1821,7 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(cell_unit_name));
   std::string real_cell_name = name + "_c2";
   ASSERT_TRUE(univ_expanded.hasCell(real_cell_name));
-  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell(real_cell_name));
+  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(real_cell_name));
 
   // new universe should also have the transformations applied
   std::pair<TransformationType, std::tuple<Real, Real, Real>> exp_trans = {
@@ -1944,7 +1942,7 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   ASSERT_EQ(0, csg_obj->getAllUniverseEngUnits().size());
 
   // Expected cell/universe relationships after expansion
-  //  - root universe should contain only a cell called <name>_c2
+  //  - root universe should be empty (no cells leaked from universe unit expansion)
   //  - expanded universe <name>_real_univ should contain <name>_c2, <name>_c1_unit_real_cell
   //    (recursively generated)
   //  - cell <name>_c1_unit_real_cell should use <name>_c1_unit_fill_univ for the cell fill
@@ -1955,8 +1953,8 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   auto exp_cell = csg_obj->getCellByName(name + "_c1_unit_real_cell");
   auto fill_univ = csg_obj->getUniverseByName(name + "_c1_unit_fill_univ");
   std::string c2_name = name + "_c2";
-  ASSERT_TRUE(root.hasCell(c2_name));
-  ASSERT_EQ(1, root.getAllCells().size()); // should contain only the one
+  ASSERT_FALSE(root.hasCell(c2_name)); // cells stay in expanded universe, not leaked to root
+  ASSERT_EQ(0, root.getAllCells().size());
   ASSERT_TRUE(exp_univ.hasCell(c2_name));
   ASSERT_TRUE(exp_univ.hasCell(name + "_c1_unit_real_cell"));
   ASSERT_EQ(2, exp_univ.getAllCells().size()); // should only contain the 2

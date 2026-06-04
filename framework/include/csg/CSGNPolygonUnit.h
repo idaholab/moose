@@ -29,7 +29,7 @@ class CSGBase;
  * intersection of the N negative half-spaces of those planes.
  *
  * Implements:
- *   - expandUnit(CSGBase &) — creates N CSGPlane surfaces in CSGBase, one per side
+ *   - expandUnit() — creates N CSGPlane surfaces in _internal_base, one per side
  *   - getExpandedRegion() — returns the intersection of the N half-spaces formed by the planes that
  *     containing the origin
  *   - evaluateSurfaceEquationAtPoint() — returns the maximum plane evaluation over
@@ -112,13 +112,11 @@ protected:
   }
 
   /**
-   * @brief Create N CSGPlane surfaces in CSGBase, one per polygon side.
+   * @brief Create N CSGPlane surfaces in _internal_base, one per polygon side.
    *
    * Stores const pointers to the registered surfaces for use in getExpandedRegion().
-   *
-   * @param base CSGBase to which the plane surfaces will be added
    */
-  void expandUnit(CSGBase & base) override;
+  void expandUnit() override;
 
 private:
   /// Number of sides of the regular polygon

@@ -29,10 +29,10 @@ class CSGBase; // forward declaration
  * the basic CSGSurface components.
  *
  * Derived classes must implement:
- *   - expandUnit(CSGBase &) — construct the equivalent CSGSurface(s) and CSGRegion formed
- *     by the surfaces that are required for defining the unit in basic CSG components and
- *     add them to CSGBase. The created CSGRegion should be a non-empty region that is
- *     assigned to _expanded_region such that it can be returned by getExpandedRegion().
+ *   - expandUnit() — construct the equivalent CSGSurface(s) and CSGRegion using
+ *     _internal_base (e.g., _internal_base->addSurface(...)). The created CSGRegion should
+ *     be a non-empty region assigned to _expanded_region so it can be returned by
+ *     getExpandedRegion(). CSGBase::expandEngUnit() joins _internal_base afterward.
  *   - evaluateSurfaceEquationAtPoint() - must implement a method to be able to pass a
  *     value to CSGSurface::getHalfspaceFromPoint() which will inform wether a point is
  *     in the positive or negative "half-space" of this "surface."
@@ -104,15 +104,14 @@ public:
 
 protected:
   /**
-   * @brief Create and add the concrete CSGSurface in the provided CSGBase.
+   * @brief Create and add the concrete CSGSurface(s) in _internal_base.
    *
    * Called exclusively by CSGBase. The implementation must:
    *   1. Construct the concrete surface (e.g., std::make_unique<CSGZCylinder>(...))
-   *   2. Add it via base.addSurface(std::move(surf)).
-   *
-   * @param base CSGBase to which the surface will be added to
+   *   2. Add it via _internal_base->addSurface(std::move(surf)).
+   *   3. Assign _expanded_region from the resulting surface half-spaces.
    */
-  void expandUnit(CSGBase & base) override = 0;
+  void expandUnit() override = 0;
 
   /**
    * @brief Return the CSGRegion formed by the expanded CSGSurfaces.

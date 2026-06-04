@@ -25,11 +25,12 @@ All engineering units have additional information retrievable with the following
 All engineering units, regardless of type, must implement the `expandUnit` method for the engineering unit.
 This method recreates the engineering unit as the corresponding rudimentary components (`CSGSurface`, `CSGCell`, `CSGUniverse`, and/or `CSGLattice`) and creates an object of the type of base component that it is being used as.
 The implementation of this method follows the same basic guidelines for implementing the `generateCSG` method described in [source/csg/CSGBase.md].
+Every `CSGEngUnit` is initialized with and owns a scratch `CSGBase` object called `_internal_base` which is the base object that should be used for implementing the expansion method.
 More details on implementing this method for each of the three types of units is below in the respective sections.
 
 !alert! note title=Naming Conventions and Restrictions
 
-To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the resulting `_expanded_cell` cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable.
+To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the expanded cell cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable. All components are created in a separate `CSGBase` object rather than the parent `CSGBase`, so conflicts with the parent's existing names are checked at after expansion (when the two bases are joined) rather than during the expansion process.
 
 !alert-end!
 
@@ -61,7 +62,7 @@ All methods that are available on `CSGSurface` objects are also available on `CS
 The implementation of the `expandUnit` method must set the value of `_expanded_region` such that it defines the "negative" half-space `CSGRegion` of the original unit.
 The `_expanded_region` is returned by `getExpandedRegion` which is called during the expansion process via `CSGBase`.
 If `expandUnit` has not been called or `_expanded_region` was not set properly in the implementation, the `getExpandedRegion` query will return an error.
-To implement this, it is expected that additional `CSGSurfaces` are generated and added to the `CSGBase` object provided.
+To implement this, it is expected that additional `CSGSurfaces` are generated and added to the `CSGBase` object provided via `_internal_base->addSurface(...)`.
 
 ### Half-space Determination Implementation
 
@@ -82,6 +83,10 @@ The `_expanded_cell` is returned by `getExpandedCell` which is called during the
 If `expandUnit` has not been called or `_expanded_cell` was not set properly in the implementation, the `getExpandedCell` query will return an error.
 To implement this, it is expected that `CSGSurfaces`, and possibly `CSGUniverses` or other `CSGCells`, are generated and added to the `CSGBase` object provided.
 
+The implementation of `expandUnit` should create exactly one `CSGCell` object that belongs to the root universe of `_internal_base`.
+This single cell will be taken as the expanded cell representation that replaces the `CSGCellEngUnit` in the parent `CSGBase` object.
+Additional nested universes, cells, and surfaces can be created in `_internal_base` to fully represent the engineering unit as necessary.
+
 ## CSGUniverseEngUnit
 
 To define a universe-like engineering unit, define a class the derives from `CSGUniverseEngUnit`.
@@ -90,16 +95,8 @@ The expectation is that a `CSGUniverseEngUnit` replaces a collection of `CSGCell
 
 ### Expansion Implementation
 
-The implementation of the `expandUnit` method must set `_expanded_universe` to a pointer to a `CSGUniverse` object that defines the equivalent geometry.
-The `_expanded_universe` is returned by `getExpandedUniverse` which is called during the expansion process via `CSGBase`.
-If `expandUnit` has not been called or `_expanded_universe` was not set properly in the implementation, the `getExpandedCell` query will return an error.
-To implement this, it is expected that `CSGCell` objects will be generated and added to the `CSGBase` object provided.
-
-!alert! note title=Cell and Universe Relationships
-
-It is important to note that when calling methods like `createCell` on the `CSGBase` object, by default the cell is added to the root universe of that `CSGBase` instance unless a `CSGUniverse` object is provided during the creation method. Therefore, when implementing the `expandUnit` method for a `CSGUniverseEngUnit` where the generated `CSGUniverse` is expected to own the collection of generated cells (rather than the root universe), it is highly recommended to provide `_expanded_universe` as the "add-to" universe during the `createCell` calls.
-
-!alert-end!
+The implementation of `expandUnit` should populate the root universe of `_internal_base` with any cells necessary for the create the expanded `CSGUniverse` definition. The root universe of `_internal_base` will become the expanded universe used in the parent `CSGBase` object.
+After populating `_internal_base` with any necessary objects, the root universe, which is named `ROOT_UNIVERSE` by default, should be renamed to represent that it is the expanded universe (e.g. `_internal_base->renameRootUniverse("X_expanded_univ")`).
 
 ## Example Implementation
 

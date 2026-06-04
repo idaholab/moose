@@ -55,7 +55,7 @@ CSGNPolygonUnit::getAttributes() const
 }
 
 void
-CSGNPolygonUnit::expandUnit(CSGBase & base)
+CSGNPolygonUnit::expandUnit()
 {
   // Polygon orientation assumes an infinite prism oriented with the z-axis.
   // The right-most face is parallel to the y-axis and is centered at the origin.
@@ -86,7 +86,7 @@ CSGNPolygonUnit::expandUnit(CSGBase & base)
     a = std::cos(2.0 * M_PI * k / _n_sides);
     b = std::sin(2.0 * M_PI * k / _n_sides);
     std::unique_ptr<CSG::CSGPlane> s_ptr = std::make_unique<CSG::CSGPlane>(sname, a, b, c, d);
-    auto & surf = base.addSurface(std::move(s_ptr));
+    auto & surf = _internal_base->addSurface(std::move(s_ptr));
 
     // determine the half-space that contains the origin for this surface
     auto hp_type = surf.getHalfspaceFromPoint(p);

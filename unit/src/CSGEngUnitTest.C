@@ -64,14 +64,13 @@ TEST(CSGEngUnitTest, testSurfUnit)
   ASSERT_EQ("new_name", surf_unit.getName());
 
   /* Test expandUnit() functionality */
-  auto csg_obj = std::make_unique<CSGBase>();
-  surf_unit.expandUnit(*csg_obj);
-  // region surfaces should be the same objects as the ones in base
+  surf_unit.expandUnit();
+  // region surfaces should be the same objects as those in the internal base
   auto reg = surf_unit.getExpandedRegion();
   auto reg_surfs = reg.getSurfaces();
   ASSERT_EQ(2, reg_surfs.size());
   for (const auto & rs : reg_surfs)
-    ASSERT_EQ(&rs.get(), &csg_obj->getSurfaceByName(rs.get().getName()));
+    ASSERT_EQ(&rs.get(), &surf_unit.getBase().getSurfaceByName(rs.get().getName()));
 }
 
 /// Test CSGCellEngUnit functionality as CSGEngUnit and CSGCell
@@ -90,7 +89,7 @@ TEST(CSGEngUnitTest, testCellUnit)
 
   // calling getExpandedCell() before expandUnit() should cause error
   Moose::UnitUtils::assertThrows([&cell_unit]() { cell_unit.getExpandedCell(); },
-                                 "getExpandedCell() cannot be called on CSGCellEngUnit");
+                                 "Either getExpandedCell() was called before expandUnit()");
 
   /* Test the CSGCell-related functionality */
   // getFillType - should be "VOID"
@@ -103,10 +102,10 @@ TEST(CSGEngUnitTest, testCellUnit)
   ASSERT_EQ(new_name, cell_unit.getName());
 
   /* Test the expandUnit() functionality */
-  auto csg_obj = std::make_unique<CSGBase>();
-  cell_unit.expandUnit(*csg_obj);
-  // check getExpandedCell is same object as cell in csg_obj
-  ASSERT_EQ(&cell_unit.getExpandedCell(), &csg_obj->getCellByName(new_name + "_real_cell"));
+  cell_unit.expandUnit();
+  // check getExpandedCell is same object as cell in the internal base
+  ASSERT_EQ(&cell_unit.getExpandedCell(),
+            &cell_unit.getBase().getCellByName(new_name + "_real_cell"));
 }
 
 /// Test CSGUniverseEngUnit functionality as CSGEngUnit and CSGUniverse
@@ -124,8 +123,9 @@ TEST(CSGEngUnitTest, testUnivUnit)
   ASSERT_NO_THROW(univ_unit.getAttributes());
 
   // calling getExpandedUniverse() before expandUnit() should cause error
-  Moose::UnitUtils::assertThrows([&univ_unit]() { univ_unit.getExpandedUniverse(); },
-                                 "getExpandedUniverse() cannot be called on CSGUniverseEngUnit");
+  Moose::UnitUtils::assertThrows(
+      [&univ_unit]() { univ_unit.getExpandedUniverse(); },
+      "Either getExpandedUniverse() has been called before expandUnit()");
 
   /* Test the CSGUniverse-related functionality */
   // no cells at all, calls to add or remove cells are disabled
@@ -137,10 +137,9 @@ TEST(CSGEngUnitTest, testUnivUnit)
   ASSERT_EQ(new_name, univ_unit.getName());
 
   /* Test the expandUnit() functionality */
-  auto csg_obj = std::make_unique<CSGBase>();
-  univ_unit.expandUnit(*csg_obj);
-  // expanded universe should be same object as one in base
-  ASSERT_EQ(&univ_unit.getExpandedUniverse(), &csg_obj->getUniverseByName(new_name + "_real_univ"));
+  univ_unit.expandUnit();
+  // getExpandedUniverse() returns the internal base's root universe; check it was renamed
+  ASSERT_TRUE(univ_unit.getBase().getRootUniverse().getName() == new_name + "_real_univ");
 }
 
 /**
@@ -199,8 +198,7 @@ TEST(CSGEngUnitTest, testPolygonUnitExpansion)
   CSGNPolygonUnit sq("test_square", num_sides, apothem);
 
   // expand the unit
-  auto csg_obj = std::make_unique<CSGBase>();
-  sq.expandUnit(*csg_obj);
+  sq.expandUnit();
   auto region = sq.getExpandedRegion();
 
   // build expected identical surface coeffients to test equality. Maps expected surface name to the
