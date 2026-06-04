@@ -14,18 +14,58 @@
 
 namespace Moose::MFEM
 {
+NLCurlCurlJacMatrixCoefficient::NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
+                                                               mfem::Coefficient & curlu_dk_dcurlu,
+                                                               mfem::VectorCoefficient & curlu_vec)
+  : mfem::MatrixCoefficient(curlu_vec.GetVDim()),
+    _k_coef(k),
+    _curlu_dk_dcurlu_coef(curlu_dk_dcurlu),
+    _curlu_hat_coef(curlu_vec, 1e-32)
+{
+}
+
+void
+NLCurlCurlJacMatrixCoefficient::SetTime(mfem::real_t t)
+{
+  MatrixCoefficient::SetTime(t);
+  _k_coef.SetTime(t);
+  _curlu_dk_dcurlu_coef.SetTime(t);
+  _curlu_hat_coef.SetTime(t);
+}
+
+void
+NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
+                                     mfem::ElementTransformation & T,
+                                     const mfem::IntegrationPoint & ip)
+{
+  const int dim = GetHeight();
+  K.SetSize(dim, dim);
+  K = 0.0;
+
+  const double k = _k_coef.Eval(T, ip);
+  const double jac2 = _curlu_dk_dcurlu_coef.Eval(T, ip);
+
+  mfem::Vector curlu_hat(dim);
+  _curlu_hat_coef.Eval(curlu_hat, T, ip);
+
+  for (int i = 0; i < dim; ++i)
+  {
+    K(i, i) = k;
+    for (int j = 0; j < dim; ++j)
+    {
+      K(i, j) += jac2 * curlu_hat(i) * curlu_hat(j);
+    }
+  }
+}
+
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
                                            mfem::Coefficient & curlu_dk_dcurlu,
                                            mfem::VectorCoefficient & curlu_vec,
                                            const mfem::IntegrationRule * ir)
-  : _curlu_hat_coef(curlu_vec, 1e-16),
-    _curlu_hat_otimes_curlu_hat(_curlu_hat_coef, _curlu_hat_coef),
-    _jac2_matrix_coef(curlu_dk_dcurlu, _curlu_hat_otimes_curlu_hat),
-    _curlcurl_res_integ(k, ir),
-    _curlcurl_jac2_integ(_jac2_matrix_coef, ir)
+  : _curlcurl_res_integ(k, ir),
+    _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec),
+    _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir)
 {
-  _curlcurl_jac_integ.AddIntegrator(&_curlcurl_res_integ);
-  _curlcurl_jac_integ.AddIntegrator(&_curlcurl_jac2_integ);
 }
 
 void

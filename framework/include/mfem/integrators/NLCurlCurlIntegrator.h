@@ -15,6 +15,30 @@
 namespace Moose::MFEM
 {
 /**
+ * Matrix coefficient for the Jacobian of NLCurlCurlIntegrator.
+ *
+ * Produces the matrix
+ *   k(|curl u|) I + |curl u| dk/d|curl u| (curl u_hat \otimes curl u_hat)
+ */
+class NLCurlCurlJacMatrixCoefficient : public mfem::MatrixCoefficient
+{
+public:
+  NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
+                                 mfem::Coefficient & curlu_dk_dcurlu,
+                                 mfem::VectorCoefficient & curlu_vec);
+
+  void Eval(mfem::DenseMatrix & K,
+            mfem::ElementTransformation & T,
+            const mfem::IntegrationPoint & ip) override;
+  void SetTime(double t) override;
+
+protected:
+  mfem::Coefficient & _k_coef;
+  mfem::Coefficient & _curlu_dk_dcurlu_coef;
+  mfem::NormalizedVectorCoefficient _curlu_hat_coef;
+};
+
+/**
  * \f[
  * (k(|\vec \nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
@@ -37,16 +61,9 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::NormalizedVectorCoefficient _curlu_hat_coef;         // curlu_hat = curlu/|curl u|
-  mfem::OuterProductCoefficient _curlu_hat_otimes_curlu_hat; // (curlu_hat \otimes curlu_hat)
-  mfem::ScalarMatrixProductCoefficient
-      _jac2_matrix_coef; //|curl u| dk/d|curl u| (curlu_hat \otimes curlu_hat)
   mfem::CurlCurlIntegrator _curlcurl_res_integ;      // (k(|curl u|) curl u, curl phi_j)
-  mfem::CurlCurlIntegrator
-      _curlcurl_jac2_integ; // |curl u| dk/d|curl u| (curlu_hat.curl phi_i, curlu_hat.curl phi_j)
-  mfem::SumIntegrator _curlcurl_jac_integ{
-      0}; // (k(|curl u|) curl phi_i, curl phi_j) + |curl u| dk/d|curl u| (curlu_hat.curl phi_i,
-          // curlu_hat.curl phi_j)
+  NLCurlCurlJacMatrixCoefficient _curlcurl_jac_matrix_coef;
+  mfem::CurlCurlIntegrator _curlcurl_jac_integ;
 };
 }
 
