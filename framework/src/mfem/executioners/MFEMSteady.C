@@ -12,9 +12,11 @@
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
 #include "MFEMEigenproblem.h"
+#include "MFEMComplexEigenproblem.h"
 #include "EigenproblemEquationSystem.h"
 #include "EquationSystemProblemOperator.h"
 #include "EigenproblemESProblemOperator.h"
+#include "ComplexEigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -45,8 +47,8 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     {
       if (auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(
-            eigen_problem->getRHSCoefficient());
+        _mfem_problem_data.eqn_system =
+            std::make_shared<Moose::MFEM::EigenproblemEquationSystem>(*eigen_problem);
         auto problem_operator =
             std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
         addProblemOperator(std::move(problem_operator));

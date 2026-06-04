@@ -11,9 +11,10 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
+#include "MFEMEigenproblemBase.h"
 
-class MFEMEigenproblem : public MFEMProblem
+/// Real-valued finite element eigenproblem.
+class MFEMEigenproblem : public MFEMEigenproblemBase
 {
 public:
   static InputParameters validParams();
