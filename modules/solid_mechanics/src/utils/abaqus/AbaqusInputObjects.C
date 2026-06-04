@@ -425,6 +425,16 @@ Step::parse(const BlockNode & block)
 {
   _dt = -1.0;
 
+  // Inherit the boundary conditions and distributed loads from the previous step (or, for the
+  // first step, from the model-level definitions). This is the Abaqus OP=MOD default: a step
+  // starts from the accumulated state, individual *Boundary/*Dload blocks add to or modify it, and
+  // OP=NEW clears it. Doing this once here - rather than inside every option block - lets multiple
+  // *Boundary/*Dload blocks within a single step accumulate instead of clobbering one another.
+  const Step & previous = _model._step.size() > 0 ? _model._step[_model._step.size() - 1]
+                                                  : static_cast<const Step &>(_model);
+  _bc_var_node_value_map = previous._bc_var_node_value_map;
+  _dloads = previous._dloads;
+
   auto option_func = [this](const std::string & key, const OptionNode & option)
   {
     if (!Step::optionFunc(key, option))
@@ -442,16 +452,13 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   // User element definitions
   if (key == "boundary")
   {
-    // copy over BC data from previous step (unless this is a model level BC or OP=NEW)
     const auto op = MooseUtils::toLower(option._header.get<std::string>("op", "mod"));
     if (op != "mod" && op != "new")
       mooseError("Unknown value for *Boundary OP=", op);
-    if (&_model != this && op == "mod")
-    {
-      const auto & previous_step =
-          _model._step.size() > 0 ? _model._step[_model._step.size() - 1] : _model;
-      _bc_var_node_value_map = previous_step._bc_var_node_value_map;
-    }
+    // OP=NEW removes all previously defined boundary conditions; OP=MOD (default) adds to/modifies
+    // the state inherited from the previous step in Step::parse().
+    if (op == "new")
+      _bc_var_node_value_map.clear();
 
     // loop over data lines
     for (const auto & data : option._data)
@@ -529,18 +536,12 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   else if (key == "dload")
   {
     // DLOAD lines apply distributed loads to elements or element sets.
-    // Support OP=MOD (default) to inherit previous step loads; OP=NEW to reset.
     const auto op = MooseUtils::toLower(option._header.get<std::string>("op", "mod"));
     if (op != "mod" && op != "new")
       mooseError("Unknown value for *Dload OP=", op);
-
-    if (&_model != this && op == "mod")
-    {
-      const auto & previous_step =
-          _model._step.size() > 0 ? _model._step[_model._step.size() - 1] : _model;
-      _dloads = previous_step._dloads;
-    }
-    else if (&_model != this && op == "new")
+    // OP=NEW removes all previously defined distributed loads; OP=MOD (default) adds to/modifies
+    // the state inherited from the previous step in Step::parse().
+    if (op == "new")
       _dloads.clear();
 
     auto parse_jdltyp = [](const std::string & token) -> int
