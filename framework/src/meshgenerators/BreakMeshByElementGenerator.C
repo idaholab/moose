@@ -77,6 +77,12 @@ BreakMeshByElementGenerator::generate()
 
   Partitioner::set_node_processor_ids(*mesh);
 
+  // New nodes were added with non-contiguous IDs (DistributedMesh's
+  // unpartitioned counter strides by n_procs+1). Renumber so that
+  // max_node_id == n_nodes, which is required by non-parallel output formats.
+  if (mesh->allow_renumbering())
+    mesh->renumber_nodes_and_elements();
+
   // We need to update the global_boundary_ids, and this is faster
   // than a full prepare_for_use()
   boundary_info.regenerate_id_sets();
