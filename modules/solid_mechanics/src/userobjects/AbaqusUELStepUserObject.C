@@ -145,6 +145,11 @@ AbaqusUELStepUserObject::timestepSetup()
           const auto * node_elem = _uel_mesh.elemPtr(pair.first);
           mooseAssert(node_elem, "Node element not found for UEL element");
 
+          // only the owning rank reads/stores per-node data: the consuming nodal kernel runs on
+          // local nodes, and the dof must be locally owned to read it from the (ghosted) vector
+          if (node_elem->processor_id() != processor_id())
+            continue;
+
           // get DOF index for the node
           var.getDofIndices(node_elem, var_dof_indices);
           mooseAssert(var_dof_indices.size() == 1,
@@ -176,6 +181,11 @@ AbaqusUELStepUserObject::timestepSetup()
           // of the timestep
           const auto * node_elem = _uel_mesh.elemPtr(pair.first);
           mooseAssert(node_elem, "Node element not found for UEL element");
+
+          // only the owning rank reads/stores per-node data: the consuming nodal BC runs on local
+          // nodes, and the dof must be locally owned to read it from the (ghosted) vector
+          if (node_elem->processor_id() != processor_id())
+            continue;
 
           // get DOF index for the node
           var.getDofIndices(node_elem, var_dof_indices);
