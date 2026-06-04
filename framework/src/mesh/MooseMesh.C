@@ -63,8 +63,13 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/elem_side_builder.h"
 
-static const int GRAIN_SIZE =
-    1; // the grain_size does not have much influence on our execution speed
+// static const int GRAIN_SIZE =
+//     1; // the grain_size does not have much influence on our execution speed
+
+// The above comment, written to explain that the extra
+// default-overriding code here is merely *pointless* rather than
+// *defective*, is incorrect; I get over 20x slowdown when trying to
+// use 64 threads on tiny meshes.
 
 using namespace libMesh;
 
@@ -1295,7 +1300,7 @@ MooseMesh::getActiveLocalElementRange()
     TIME_SECTION("getActiveLocalElementRange", 5);
 
     _active_local_elem_range = std::make_unique<ConstElemRange>(
-        getMesh().active_local_elements_begin(), getMesh().active_local_elements_end(), GRAIN_SIZE);
+        getMesh().active_local_elements_begin(), getMesh().active_local_elements_end());
   }
 
   return _active_local_elem_range.get();
@@ -1308,8 +1313,8 @@ MooseMesh::getActiveNodeRange()
   {
     TIME_SECTION("getActiveNodeRange", 5);
 
-    _active_node_range = std::make_unique<NodeRange>(
-        getMesh().active_nodes_begin(), getMesh().active_nodes_end(), GRAIN_SIZE);
+    _active_node_range =
+        std::make_unique<NodeRange>(getMesh().active_nodes_begin(), getMesh().active_nodes_end());
   }
 
   return _active_node_range.get();
@@ -1331,8 +1336,8 @@ MooseMesh::getLocalNodeRange()
   {
     TIME_SECTION("getLocalNodeRange", 5);
 
-    _local_node_range = std::make_unique<ConstNodeRange>(
-        getMesh().local_nodes_begin(), getMesh().local_nodes_end(), GRAIN_SIZE);
+    _local_node_range = std::make_unique<ConstNodeRange>(getMesh().local_nodes_begin(),
+                                                         getMesh().local_nodes_end());
   }
 
   return _local_node_range.get();
@@ -1345,8 +1350,7 @@ MooseMesh::getBoundaryNodeRange()
   {
     TIME_SECTION("getBoundaryNodeRange", 5);
 
-    _bnd_node_range =
-        std::make_unique<ConstBndNodeRange>(bndNodesBegin(), bndNodesEnd(), GRAIN_SIZE);
+    _bnd_node_range = std::make_unique<ConstBndNodeRange>(bndNodesBegin(), bndNodesEnd());
   }
 
   return _bnd_node_range.get();
@@ -1359,8 +1363,7 @@ MooseMesh::getBoundaryElementRange()
   {
     TIME_SECTION("getBoundaryElementRange", 5);
 
-    _bnd_elem_range =
-        std::make_unique<ConstBndElemRange>(bndElemsBegin(), bndElemsEnd(), GRAIN_SIZE);
+    _bnd_elem_range = std::make_unique<ConstBndElemRange>(bndElemsBegin(), bndElemsEnd());
   }
 
   return _bnd_elem_range.get();
