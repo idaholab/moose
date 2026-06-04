@@ -23,9 +23,12 @@ MFEMComplexEigenWeakFormProblemComposer::MFEMComplexEigenWeakFormProblemComposer
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 MFEMComplexEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  auto * eigen_problem = dynamic_cast<MFEMComplexEigenproblem *>(&mfem_problem);
+  auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&mfem_problem);
   if (!eigen_problem)
-    mooseError("Not a complex eigenvalue problem. ");
+    mooseError("Not an eigenvalue problem. ");
+
+  if (mfem_problem.getNumericType() != MFEMProblem::NumericType::COMPLEX)
+    mooseError("Wrong numeric type. Please set the Problem numeric type to 'complex'.");
 
   mfem_problem.getProblemData().eqn_system =
       std::make_shared<Moose::MFEM::ComplexEigenproblemEquationSystem>(*eigen_problem);

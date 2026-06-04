@@ -11,10 +11,12 @@
 
 #pragma once
 
-#include "MFEMEigenproblemBase.h"
+#include "MFEMProblem.h"
 
-/// Real-valued finite element eigenproblem.
-class MFEMEigenproblem : public MFEMEigenproblemBase
+/**
+ * Finite element eigenproblem solved with the MFEM finite element library.
+ */
+class MFEMEigenproblem : public MFEMProblem
 {
 public:
   static InputParameters validParams();
@@ -31,6 +33,9 @@ public:
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & parameters) override;
+
+  /// Returns the coefficient used to scale the right-hand side of the eigenproblem equation.
+  mfem::Coefficient & getRHSCoefficient();
 };
 
 #endif

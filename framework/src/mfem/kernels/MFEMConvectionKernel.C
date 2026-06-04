@@ -18,13 +18,14 @@ InputParameters
 MFEMConvectionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription(
-      "Adds the domain integrator to an MFEM problem for the bilinear form "
-      "$(\\vec\\beta \\cdot \\vec\\nabla u, v)_\\Omega$ "
-      "arising from the weak form of the convection operator "
-      "$\\vec\\beta \\cdot \\vec\\nabla u$.");
+  params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
+                             "$(\\vec\\beta \\cdot \\vec\\nabla u, v)_\\Omega$ "
+                             "arising from the weak form of the convection operator "
+                             "$\\vec\\beta \\cdot \\vec\\nabla u$.");
   params.addParam<MFEMVectorCoefficientName>(
-      "vector_coefficient", "1. 0. 0.", "The name of the velocity vector coefficient $\\vec\\beta$.");
+      "vector_coefficient",
+      "1. 0. 0.",
+      "The name of the velocity vector coefficient $\\vec\\beta$.");
   return params;
 }
 

@@ -12,7 +12,6 @@
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
 #include "MFEMEigenproblem.h"
-#include "MFEMComplexEigenproblem.h"
 #include "EigenproblemEquationSystem.h"
 #include "EquationSystemProblemOperator.h"
 #include "EigenproblemESProblemOperator.h"
@@ -45,12 +44,14 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     std::string name = "__DefaultWeakFormProblemComposer";
     InputParameters params = _factory.getValidParams("MFEMWeakFormProblemComposer");
 
-    if (dynamic_cast<MFEMComplexEigenproblem *>(&_mfem_problem))
-      _mfem_problem.addMFEMProblemComposer(
-          "MFEMComplexEigenWeakFormProblemComposer", name, params);
-    else if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      _mfem_problem.addMFEMProblemComposer("MFEMEigenWeakFormProblemComposer", name, params);
-    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    const bool is_complex = _mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX;
+
+    if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
+      _mfem_problem.addMFEMProblemComposer(is_complex ? "MFEMComplexEigenWeakFormProblemComposer"
+                                                      : "MFEMEigenWeakFormProblemComposer",
+                                           name,
+                                           params);
+    else if (is_complex)
       _mfem_problem.addMFEMProblemComposer("MFEMComplexWeakFormProblemComposer", name, params);
     else
       _mfem_problem.addMFEMProblemComposer("MFEMWeakFormProblemComposer", name, params);

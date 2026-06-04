@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMComplexEigenproblem.h"
+#include "MFEMEigenproblem.h"
 #include "MFEMProblemComposer.h"
 
 /**
