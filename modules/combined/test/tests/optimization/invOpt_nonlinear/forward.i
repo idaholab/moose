@@ -32,7 +32,7 @@
 [Materials]
   [NonlinearConductivity]
     type = ADParsedMaterial
-    f_name = 'conductivity'
+    property_name = 'conductivity'
     expression = '10+500*forwardT'
     coupled_variables = 'forwardT'
   []
