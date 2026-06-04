@@ -143,8 +143,18 @@ AbaqusUELMeshUserElement::setupElementSet()
       mooseError("Element set '", elset_name, "' not found in UEL mesh");
     for (const auto uel_elem_index : elset->second)
     {
-      // TODO: check pid! && _uel_elements[uel_elem_id].pid == processor_id()
-      if (_uel_elements[uel_elem_index]._uel._type_id == _uel_definition._type_id)
+      const auto & uel_elem = _uel_elements[uel_elem_index];
+      if (uel_elem._uel._type_id != _uel_definition._type_id)
+        continue;
+
+      // Process each UEL element on exactly one rank: the one that owns its first node-element.
+      // The AbaqusUELRelationshipManager (geometric/algebraic/coupling) ghosts the remaining
+      // node-elements - and their dofs - of every UEL element that touches a locally owned
+      // node-element, so the owning rank can always read the full element solution. Without this
+      // filter every rank would process every element and read non-ghosted off-processor dofs.
+      const auto * first_node_elem = _uel_mesh.elemPtr(uel_elem._nodes[0]);
+      mooseAssert(first_node_elem, "Node element not found for UEL element");
+      if (first_node_elem->processor_id() == processor_id())
         selected_elements.insert(uel_elem_index);
     }
   }
@@ -396,20 +406,23 @@ AbaqusUELMeshUserElement::execute()
     // sign of 'residuals' has been tested with external loading and matches that of moose-umat
     // setups.
 
-    if (do_residual){
-       addResiduals(_fe_problem.assembly(_tid, _sys.number()), _local_re, all_dof_indices, -1.0);
-	}
+    if (do_residual)
+    {
+      addResiduals(_fe_problem.assembly(_tid, _sys.number()), _local_re, all_dof_indices, -1.0);
+    }
 
     // write to the Jacobian (unfortunately we have to transpose first)
     if (do_jacobian)
     {
-	  // sign of residual and jacobian contribution differ in abaqus uel
+      // sign of residual and jacobian contribution differ in abaqus uel
       _local_ke_T.resize(ndofel, ndofel);
-	  for (const auto i : index_range(_local_re)){
-		for (const auto j : index_range(_local_re)){
-              _local_ke_T(i,j) = -1.0*_local_ke(j,i);
-		}
-	  }
+      for (const auto i : index_range(_local_re))
+      {
+        for (const auto j : index_range(_local_re))
+        {
+          _local_ke_T(i, j) = -1.0 * _local_ke(j, i);
+        }
+      }
       //_local_ke.get_transpose(_local_ke_T);
       addJacobian(_fe_problem.assembly(_tid, _sys.number()),
                   _local_ke_T,
@@ -418,8 +431,6 @@ AbaqusUELMeshUserElement::execute()
                   -1.0);
     }
   }
-
-  _sys.solution().close();
 }
 
 const std::array<Real, 8> *
