@@ -127,7 +127,7 @@ FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
   logAdd("KokkosLinearFVKernel", name, kernel_name, parameters);
   _linear_systems[sys_num - _num_nl_sys]->addKokkosKernel(kernel_name, name, parameters);
 
-  addKokkosMeshInitializationHook([this]() { _mesh.getKokkosMesh()->initLinearFV(); });
+  _mesh.getKokkosMesh()->setNeedsLinearFV();
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
@@ -151,7 +151,7 @@ FEProblemBase::addKokkosLinearFVBC(const std::string & bc_name,
   logAdd("KokkosLinearFVBoundaryCondition", name, bc_name, parameters);
   _linear_systems[sys_num - _num_nl_sys]->addKokkosBoundaryCondition(bc_name, name, parameters);
 
-  addKokkosMeshInitializationHook([this]() { _mesh.getKokkosMesh()->initLinearFV(); });
+  _mesh.getKokkosMesh()->setNeedsLinearFV();
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
