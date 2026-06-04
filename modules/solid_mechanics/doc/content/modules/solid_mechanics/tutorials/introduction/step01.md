@@ -95,3 +95,10 @@ A question that comes up often is "What units does MOOSE use?".
 
 Once you've answered the questions and run the first example it is time to move
 on to a slightly more complex scenario in [Step 2](solid_mechanics/tutorials/introduction/step02.md).
+
+!media solid_mechanics/tutorials/introduction/mech_step01.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=mech_step01_result
+       caption=Displacement magnitude. With no boundary conditions or applied loads the block does not deform.

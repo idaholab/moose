@@ -156,3 +156,10 @@ associated shape functions) cannot accommodate the incompressibility constraint.
 Once you've answered the questions and run this example we will move on to
 [Step 1](contact/tutorials/introduction/step04.md optional=True) of the contact
 tutorial, which builds on this step.
+
+!media solid_mechanics/tutorials/introduction/mech_step04.mp4
+       style=width:17%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=mech_step04_result
+       caption=Displacement magnitude for the pair of cantilevers. The displacement grows from zero at the fixed bottom to a maximum at the free tops as the pressure loads push the blocks together.

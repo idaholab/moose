@@ -74,3 +74,10 @@ conductivity?
 Once you've answered the questions and run this example we will move on to
 [Step 3](heat_transfer/tutorials/introduction/therm_step03.md), where additional terms will be
 added to the heat equation.
+
+!media heat_transfer/tutorials/introduction/therm_step02.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=therm_step02_result
+       caption=Temperature field `T`. The fixed left boundary and the time-dependent right boundary drive a nearly linear steady-state profile across the block.
