@@ -11,6 +11,7 @@
 
 #include "MFEMEigensolverBase.h"
 #include "MFEMProblem.h"
+#include "MFEMComplexEigenproblem.h"
 
 namespace Moose::MFEM
 {
@@ -29,8 +30,10 @@ EigensolverBase::validParams()
   return params;
 }
 
-EigensolverBase::EigensolverBase(const InputParameters & parameters)
-  : LinearSolverBase(parameters), _num_modes(getMFEMProblem().getParam<int>("num_modes"))
+MFEMEigensolverBase::MFEMEigensolverBase(const InputParameters & parameters)
+  : MFEMSolverBase(parameters),
+    _num_modes(getMFEMProblem().getParam<int>("num_modes")),
+    _mode_stride(dynamic_cast<MFEMComplexEigenproblem *>(&getMFEMProblem()) ? 2 : 1)
 {
 }
 }

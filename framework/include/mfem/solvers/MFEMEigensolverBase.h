@@ -38,8 +38,16 @@ public:
   virtual const mfem::HypreParVector & GetEigenvector(int index) const = 0;
 
 protected:
-  /// Number of eigenmodes to compute
+  /// Number of distinct physical eigenmodes to report.
   int _num_modes;
+
+  /// Number of modes the underlying solver computes per distinct physical mode. The monolithic real
+  /// form of a complex (Hermitian) eigenproblem doubles every eigenvalue, so this is 2 for complex
+  /// eigenproblems and 1 otherwise.
+  int _mode_stride;
+
+  /// Total number of modes the underlying solver must compute.
+  int numComputedModes() const { return _num_modes * _mode_stride; }
 };
 }
 
