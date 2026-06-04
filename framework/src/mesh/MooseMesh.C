@@ -63,14 +63,6 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/elem_side_builder.h"
 
-// static const int GRAIN_SIZE =
-//     1; // the grain_size does not have much influence on our execution speed
-
-// The above comment, written to explain that the extra
-// default-overriding code here is merely *pointless* rather than
-// *defective*, is incorrect; I get over 20x slowdown when trying to
-// use 64 threads on tiny meshes.
-
 using namespace libMesh;
 
 // Make newer nanoflann API compatible with older nanoflann versions
