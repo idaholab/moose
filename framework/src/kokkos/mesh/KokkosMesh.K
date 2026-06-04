@@ -30,7 +30,7 @@ Mesh::update()
 
   _initialized = true;
 
-  if (had_linearfv_data)
+  if (had_linearfv_data || _needs_linearfv)
   {
     _linearfv_initialized = false;
     initLinearFV();

@@ -72,6 +72,11 @@ public:
   void update();
 
   /**
+   * Mark that LinearFV geometry data is needed; initLinearFV() will be called on the next update()
+   */
+  void setNeedsLinearFV() { _needs_linearfv = true; }
+
+  /**
    * Get the number of subdomains
    * @returns The number of subdomains
    */
@@ -286,6 +291,7 @@ public:
   }
 
   void initLinearFV();
+
   /**
    * Get the number of sides of an element type
    * @param elem_type The element type ID
@@ -501,6 +507,7 @@ private:
   Array<Array<ContiguousNodeID>> _boundary_nodes;
 
   bool _linearfv_initialized = false;
+  bool _needs_linearfv = false;
   Array<Real> _linearfv_elem_volume;
   Array<Real3> _linearfv_elem_centroid;
   Array2D<Real> _linearfv_face_area;
