@@ -67,6 +67,7 @@ The purpose of these lists is two fold:
 
 - [FalCon](https://github.com/idaholab/falcon) - Fracturing and liquid conservation; geothermal reservoir simulation and analysis code for coupled and fully implicit Thermo-Hydro-Mechanical-Chemical (THMC) geosystems
 - [Redback](https://github.com/pou036/redback) - Rock Mechanics with Dissipative (Thermo-Hydro-Mechanical-Chemical) Feedbacks: joint development between CSIRO and UNSW Australia
+- [TIGER](https://github.com/MGK-Lab/tiger) - Thermo-Hydro-Mechanical-Chemical sImulator for GEoscience Research, developed by Karlsruhe Institute of Technology
 
 
 ### Miscellaneous
