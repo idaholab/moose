@@ -5,21 +5,18 @@ registerMooseObject("MooseTestApp", ADCoupledFieldScalar);
 InputParameters
 ADCoupledFieldScalar::validParams()
 {
-  InputParameters params = ADKernelScalarBase::validParams();
+  InputParameters params = ElementADScalarKernel::validParams();
+  params.addRequiredCoupledVar("u", "The coupled field variable");
   params.addClassDescription(
       "Scalar variable residual: integral of -1 / (1/(1+u) + 1/(1 + |grad(u)|^2)).");
   return params;
 }
 
 ADCoupledFieldScalar::ADCoupledFieldScalar(const InputParameters & parameters)
-  : ADKernelScalarBase(parameters)
+  : ElementADScalarKernel(parameters),
+    _u(adCoupledValue("u")),
+    _grad_u(adCoupledGradient("u"))
 {
-}
-
-ADReal
-ADCoupledFieldScalar::computeQpResidual()
-{
-  return 0.0;
 }
 
 ADReal

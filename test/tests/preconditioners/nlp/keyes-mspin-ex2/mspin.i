@@ -15,7 +15,7 @@
   []
 []
 
-[Kernels]
+[ScalarKernels]
   [v_offdiag]
     extra_matrix_tags = 'NPC_J_1_0'
   []

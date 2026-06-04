@@ -1,19 +1,20 @@
 #pragma once
 
-#include "ADKernelScalarBase.h"
+#include "ElementADScalarKernel.h"
 
 /**
  * Contributes a scalar variable residual equal to the integral over the domain of
- * -1 / (1/(1+u) + 1/(1 + grad(u)*grad(u))), where u is the kernel's field variable.
- * No contribution is made to the field equation.
+ * -1 / (1/(1+u) + 1/(1 + grad(u)*grad(u))), where u is a coupled field variable.
  */
-class ADCoupledFieldScalar : public ADKernelScalarBase
+class ADCoupledFieldScalar : public ElementADScalarKernel
 {
 public:
   static InputParameters validParams();
   ADCoupledFieldScalar(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
-  virtual ADReal computeScalarQpResidual() override;
+  ADReal computeScalarQpResidual() override;
+
+  const ADVariableValue & _u;
+  const ADVariableGradient & _grad_u;
 };
