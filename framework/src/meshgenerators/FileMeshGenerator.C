@@ -41,12 +41,6 @@ FileMeshGenerator::validParams()
                         "Whether to allow the mesh to renumber nodes and elements, if not "
                         "overridden by a global parameter or by a requirement (e.g. an exodus "
                         "restart or a constraint matrix) that disables renumbering.");
-  params.addParam<bool>("allow_remote_element_removal",
-                        true,
-                        "Whether to allow remote element deletion when the mesh is prepared. Note "
-                        "that allowal of remote element removal will be restored to its previous "
-                        "state after this mesh generator runs; e.g. this user parameter setting "
-                        "will only be applied temporarily during *this* generator.");
   params.addParam<bool>("clear_spline_nodes",
                         false,
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
@@ -78,8 +72,7 @@ FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
     _matrix_file_name(getParam<MatrixFileName>("constraint_matrix")),
     _matrix_preconditioning(getParam<Real>("constraint_preconditioning")),
     _skip_partitioning(getParam<bool>("skip_partitioning")),
-    _allow_renumbering(getParam<bool>("allow_renumbering")),
-    _allow_remote_element_removal(getParam<bool>("allow_remote_element_removal"))
+    _allow_renumbering(getParam<bool>("allow_renumbering"))
 {
   if (_matrix_preconditioning && _matrix_file_name.empty())
     paramError("constraint_preconditioning",
@@ -111,9 +104,6 @@ FileMeshGenerator::generate()
                 _file_name.rfind(".ele") == std::string::npos;
   bool has_exodus_integers = isParamValid("exodus_extra_element_integers");
   bool restart_exodus = (getParam<bool>("use_for_exodus_restart") && _app.getExodusFileRestart());
-  const bool old_allow_remote_element_removal = mesh->allow_remote_element_removal();
-  mesh->allow_remote_element_removal(_allow_remote_element_removal);
-
   if (exodus)
   {
     auto exreader = std::make_shared<libMesh::ExodusII_IO>(*mesh);
@@ -167,7 +157,6 @@ FileMeshGenerator::generate()
     // Load the meta data if it is available
     _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)file_name);
   }
-  mesh->allow_remote_element_removal(old_allow_remote_element_removal);
 
   if (!_matrix_file_name.empty())
   {

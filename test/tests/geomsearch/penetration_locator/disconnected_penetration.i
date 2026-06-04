@@ -12,7 +12,6 @@
   [connected_mesh]
     type = FileMeshGenerator
     file = 2dcontact_collide.e
-    allow_remote_element_removal = false
   []
   [exploded_mesh]
     type = BreakMeshByElementGenerator
