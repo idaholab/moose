@@ -21,7 +21,7 @@ class TestHarnessTester(TestHarnessTestCase):
         out = result.output
         self.assertRegex(
             out,
-            r"test_harness\.csvdiff_invalid_override.*?FAILED \(Override inputs not the same length\)",
+            r"test_harness\.csvdiff_invalid_override.*?FAILED \(Invalid override inputs\)",
         )
 
         self.checkStatus(result.harness, failed=1)
