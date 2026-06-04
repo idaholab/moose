@@ -78,7 +78,7 @@
   [steel]
     type = ParsedMaterial
     f_name = 'thermal_conductivity'
-    function = '.01*T'
+    expression = '.01*T'
     coupled_variables = 'T'
   []
 []
