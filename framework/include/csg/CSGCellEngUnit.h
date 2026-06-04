@@ -27,10 +27,11 @@ class CSGBase; // forward declaration
  * equivalent CSGCell representation using basic CSG components.
  *
  * Derived classes must implement:
- *   - expandUnit(CSGBase &) — construct the equivalent CSGCell and any other necessary
- *     CSG components that are required for defining the unit in basic CSG components
- *     and add them to CSGBase. The created CSGCell should set to _expanded_cell once
- *     generated so it can be returned by getExpandedCell().
+ *   - expandUnit() — populate _internal_base with the expanded cell and any supporting objects.
+ *     Create surfaces via _internal_base->addSurface(...), any fill universes via
+ *     _internal_base->createUniverse(...), and the cell via _internal_base->createCell(...) —
+ *     the cell goes to the root automatically. Exactly one cell must be in the root.
+ *     CSGBase::expandEngUnit() joins _internal_base via joinOtherBase() afterward.
  *   - clone() — return a deep copy of the derived class.
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
@@ -97,33 +98,28 @@ protected:
   virtual std::unique_ptr<CSGCellEngUnit> clone() const = 0;
 
   /**
-   * @brief Create the CSGCell and any other necessary components that replace this engineering
-   * unit in CSGBase.
+   * @brief Create the CSGCell and any other necessary components in _internal_base.
    *
    * Called exclusively by CSGBase. The implementation should:
-   *   1. Create any needed CSGSurfaces in base
+   *   1. Create any needed CSGSurfaces via _internal_base->addSurface(...)
    *   2. Create a CSGRegion from those surfaces
-   *   3. Create any other components required to define the fill, if necessary (CSGUniverse, etc.)
-   *   4. Register a the CSGCell via base.createCell(...) and store the returned reference
-   *      for retrieval by getExpandedCell().
+   *   3. Create any fill universe if necessary via _internal_base->createUniverse(...)
+   *   4. Register exactly one CSGCell via _internal_base->createCell(...) — it goes to root.
    *
-   * @param base CSGBase to which the cell and other components will be added to
+   * Do NOT set any pointer — CSGBase::expandEngUnit() retrieves the expanded cell from root.
    */
-  void expandUnit(CSGBase & base) override = 0;
+  void expandUnit() override = 0;
 
   /**
-   * @brief Return the CSGCell created and stored during expandUnit().
+   * @brief Return the single cell in _internal_base's root, which IS the expanded cell.
    *
-   * Checks that expandUnit() has already been called before returning.
-   * Throws if called before expansion.
+   * Enforces that exactly one cell is in the root (errors otherwise). Valid after
+   * expandUnit() has been called. Not valid after CSGBase::expandEngUnit() has consumed
+   * the internal base.
    *
-   * @return const reference to the newly expanded CSGCell
+   * @return const reference to the expanded CSGCell
    */
   const CSGCell & getExpandedCell() const;
-
-  /// Stores a pointer to the plain CSGCell registered during expandUnit(); nullptr until then.
-  /// Derived classes must set this (e.g. _expanded_cell = &base.createCell(...)) in expandUnit().
-  const CSGCell * _expanded_cell = nullptr;
 
   // Only CSGBase should be calling expandUnit() and getExpandedCell()
   friend class CSGBase;

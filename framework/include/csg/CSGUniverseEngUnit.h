@@ -27,10 +27,11 @@ class CSGBase; // forward declaration
  * equivalent CSGUniverse representation, along with all supporting surfaces and cells.
  *
  * Derived classes must implement:
- *   - expandUnit(CSGBase &) — construct the equivalent CSGUniverse and any other necessary
- *     CSG components that are required for defining the unit in basic CSG components
- *     and add them to CSGBase. The created CSGUniverse should set to _expanded_universe once
- *     generated so it can be returned by getExpandedUniverse().
+ *   - expandUnit() — populate _internal_base: create cells via _internal_base->createCell(...)
+ *     (they go to the root automatically), create any non-root fill universes via
+ *     _internal_base->createUniverse(...), and rename the root with
+ *     _internal_base->renameRootUniverse("name"). The root IS the expanded universe.
+ *     CSGBase::expandEngUnit() joins _internal_base via joinOtherBase() afterward.
  *   - clone() — return a deep copy of the derived class.
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
@@ -92,32 +93,26 @@ protected:
   virtual std::unique_ptr<CSGUniverseEngUnit> clone() const = 0;
 
   /**
-   * @brief Create the CSGUniverse and any other necessary components that replace this engineering
-   * unit in CSGBase.
+   * @brief Populate _internal_base with the CSGUniverse and any supporting objects.
    *
-   * Called exclusively by CSGBase. The implementation must:
-   *   1. Create any needed surfaces, cells, and universe(s) in base via the appropriate creation
-   * methods.
-   *   2. Create the a CSGUniverse that represents the "root" of this engineering unit and store the
-   * returned reference for retrieval by getExpandedUniverse().
-   *
-   * @param base CSGBase to which the universe and other components will be added to
+   * Called exclusively by CSGBase. The root universe of _internal_base represents this
+   * engineering unit's expanded universe. The implementation should:
+   *   1. Create any needed surfaces via _internal_base->addSurface(...).
+   *   2. Create cells via _internal_base->createCell(...) — they go to the root automatically.
+   *   3. Create any non-root fill universes via _internal_base->createUniverse(...).
+   *   4. Rename the root with _internal_base->renameRootUniverse("desired_name") if needed.
    */
-  void expandUnit(CSGBase & base) override = 0;
+  void expandUnit() override = 0;
 
   /**
-   * @brief Return the CSGUniverse created and stored during expandUnit().
+   * @brief Return the root universe of _internal_base, which IS the expanded universe.
    *
-   * Checks that expandUnit() has already been called before returning.
-   * Throws if called before expansion.
+   * Valid after expandUnit() has populated _internal_base. Not valid after
+   * CSGBase::expandEngUnit() has run (the internal base is consumed by the join).
    *
-   * @return const reference to the newly expanded CSGUniverse
+   * @return const reference to the root CSGUniverse of _internal_base
    */
   const CSGUniverse & getExpandedUniverse() const;
-
-  /// Stores a pointer to the plain CSGUniverse registered during expandUnit(); nullptr until then.
-  /// Derived classes must set this (e.g. _expanded_universe = &base.createUniverse(...)) in expandUnit().
-  const CSGUniverse * _expanded_universe = nullptr;
 
   // Only CSGBase should be calling expandUnit() and getExpandedUniverse()
   friend class CSGBase;

@@ -1298,8 +1298,12 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   // Get mutable reference from the owning surface list — expandUnit() is non-const
   auto & mutable_unit = static_cast<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
 
-  // Derived class creates the CSGSurface object(s) and adds them to CSGBase
-  mutable_unit.expandUnit(*this);
+  // Derived class creates the CSGSurface object(s) in the unit's base object and sets
+  // _expanded_region
+  mutable_unit.expandUnit();
+
+  // Join the unit's base object into this; transfers surfaces (and any other objects) during merge.
+  joinOtherBase(mutable_unit.releaseBase(), false);
 
   // Derived class provides the expanded region formed by the expanded surfaces
   CSGRegion expanded_region = mutable_unit.getExpandedRegion();
@@ -1329,10 +1333,17 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // Get mutable reference from the owning cell list — expandUnit() is non-const
   auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
 
-  // Derived class creates the CSGCell object and any other necessary objects and adds them to
-  // CSGBase, storing the result internally for retrieval via getExpandedCell()
-  mutable_unit.expandUnit(*this);
+  // Derived class populates an internal base object (owned by the unit) with the expanded cell (in
+  // root) and any supports
+  mutable_unit.expandUnit();
+
+  // Capture a reference to the expanded cell before the join. joinOtherBase transfers ownership
+  // of the cell's unique_ptr but does not relocate the object, so the reference stays valid.
+  // getExpandedCell also validates that root has exactly 1 cell.
   const CSGCell & expanded_cell = mutable_unit.getExpandedCell();
+
+  // Join the unit's base object: 1-param merges root cells into this root
+  joinOtherBase(mutable_unit.releaseBase(), false);
 
   // Propagate any stored transformations from the EngUnit to the expanded cell
   const auto & trans = static_cast<const CSGCell &>(mutable_unit).getTransformations();
@@ -1343,9 +1354,8 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
       mutable_cell.addTransformation(trans_type, values);
   }
 
-  // createCell() inside expandUnit() might add the new cell to root by default. Remove it first so
-  // that replaceCellRefs can manage all universe membership cleanly — it will re-add to root only
-  // if the original unit was there, preventing a duplicate insertion warning.
+  // The join added the expanded cell to this root via root-merge; remove it so
+  // replaceCellRefs() can place it in the correct universe(s)
   if (getRootUniverse().hasCell(expanded_cell.getName()))
     removeCellFromUniverse(getRootUniverse(), expanded_cell);
 
@@ -1364,10 +1374,23 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   auto & mutable_unit =
       static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit.getName()));
 
-  // Derived class creates the CSGUniverse object and any other necessary objects and adds them to
-  // CSGBase, storing the result internally for retrieval via getExpandedUniverse()
-  mutable_unit.expandUnit(*this);
-  const CSGUniverse & expanded_univ = mutable_unit.getExpandedUniverse();
+  // Derived class populates the unit's base object; the root of this base is the expanded universe
+  // that will be used to replace this universe unit
+  mutable_unit.expandUnit();
+
+  // Capture the name of the expanded universe (the unit base's root universe) before the join
+  // getExpandedUniverse will validate that the root contains cells and was properly
+  // implemented/expanded
+  const std::string expanded_name = mutable_unit.getExpandedUniverse().getName();
+
+  // Join the unit's base into this: all objects are transferred and the incoming root is added as
+  // a named non-root universe (expanded_name). If the root universe's name is not unique (i.e. it
+  // was left named ROOT_UNIVERSE), this will throw an error.
+  joinOtherBase(mutable_unit.releaseBase(), false, expanded_name);
+
+  // must get this by name after joining because the join method rebuilds the universe and the
+  // previous reference from getExpandedUniverse is not valid anymore.
+  const CSGUniverse & expanded_univ = getUniverseByName(expanded_name);
 
   // Propagate any stored transformations from the EngUnit to the new expanded universe
   const auto & trans = static_cast<const CSGUniverse &>(mutable_unit).getTransformations();

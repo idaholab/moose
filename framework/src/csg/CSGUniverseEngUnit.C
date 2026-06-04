@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverseEngUnit.h"
+#include "CSGBase.h"
 
 namespace CSG
 {
@@ -22,11 +23,15 @@ CSGUniverseEngUnit::CSGUniverseEngUnit(const std::string & name,
 const CSGUniverse &
 CSGUniverseEngUnit::getExpandedUniverse() const
 {
-  if (!_expanded_universe)
-    mooseError("getExpandedUniverse() cannot be called on CSGUniverseEngUnit '",
+  // if root universe contains no cells, then it has not be expanded (or not implemented correctly)
+  if (_internal_base->getRootUniverse().getAllCells().empty())
+    mooseError("Root universe of ",
                getName(),
-               "' before expandUnit() has been called.");
-  return *_expanded_universe;
+               " contains no cells. ",
+               "Either getExpandedUniverse() has been called before expandUnit() or expandUnit() ",
+               "is not implemented correctly.");
+
+  return _internal_base->getRootUniverse();
 }
 
 } // namespace CSG

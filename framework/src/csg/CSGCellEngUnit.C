@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGCellEngUnit.h"
+#include "CSGBase.h"
 #include "CSGRegion.h"
 
 namespace CSG
@@ -21,11 +22,23 @@ CSGCellEngUnit::CSGCellEngUnit(const std::string & name, const std::string & uni
 const CSGCell &
 CSGCellEngUnit::getExpandedCell() const
 {
-  if (!_expanded_cell)
-    mooseError("getExpandedCell() cannot be called on CSGCellEngUnit '",
+  // must contain exactly one cell to be considered a correct implementation and be expanded
+  // properly
+  const auto & cells = _internal_base->getRootUniverse().getAllCells();
+  if (cells.size() == 0)
+    mooseError("The root universe of CSGCellEngUnit ",
                getName(),
-               "' before expandUnit() has been called.");
-  return *_expanded_cell;
+               " contains no cells. ",
+               "Either getExpandedCell() was called before expandUnit() or expandUnit() is not "
+               "implemented correctly");
+  if (cells.size() > 1)
+    mooseError("CSGCellEngUnit '",
+               getName(),
+               "' expandUnit() must create exactly one cell in _internal_base's root universe "
+               "(found ",
+               cells.size(),
+               ").");
+  return cells[0];
 }
 
 } // namespace CSG

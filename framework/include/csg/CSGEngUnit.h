@@ -32,7 +32,7 @@ class CSGBase; // forward declaration
 class CSGEngUnit
 {
 public:
-  virtual ~CSGEngUnit() = default;
+  virtual ~CSGEngUnit();
 
   /**
    * @brief Get the unique instance name of this engineering unit.
@@ -101,15 +101,35 @@ protected:
   CSGEngUnit(const std::string & behavior, const std::string & unit_type);
 
   /**
-   * @brief Expand this engineering unit into basic CSG objects in the provided CSGBase.
+   * @brief Expand this engineering unit into basic CSG objects stored in _internal_base.
    *
    * Called exclusively by CSGBase via the typed expandEngUnit() overloads. The implementation
-   * must create all necessary basic CSG objects by calling the appropriate CSGBase public
-   * methods (addSurface, createCell, createUniverse, etc.).
-   *
-   * @param base CSGBase that will hold any generated CSG objects
+   * must create all necessary basic CSG objects by calling the appropriate methods on
+   * _internal_base (e.g., _internal_base->addSurface(...), _internal_base->createCell(...)).
+   * CSGBase::expandEngUnit() then joins _internal_base into the parent CSGBase after
+   * this method returns.
    */
-  virtual void expandUnit(CSGBase & base) = 0;
+  virtual void expandUnit() = 0;
+
+  /**
+   * @brief Get the internal CSGBase owned by this engineering unit.
+   *
+   * @return reference to the internal CSGBase
+   */
+  CSGBase & getBase() { return *_internal_base; }
+
+  /**
+   * @brief Transfer ownership of the internal CSGBase out of this unit.
+   *
+   * Called once by CSGBase::expandEngUnit() to join the internal base into the parent.
+   * After this call _internal_base is null.
+   *
+   * @return unique_ptr to the internal CSGBase
+   */
+  std::unique_ptr<CSGBase> releaseBase() { return std::move(_internal_base); }
+
+  /// CSGBase populated by expandUnit(); joined into the parent CSGBase by expandEngUnit()
+  std::unique_ptr<CSGBase> _internal_base;
 
   /// The basic CSG type this unit produces — one of "SURFACE", "CELL", "UNIVERSE"
   MooseEnum _behavior{"SURFACE CELL UNIVERSE"};

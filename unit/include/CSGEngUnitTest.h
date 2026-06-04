@@ -29,13 +29,12 @@
  *    - 1 cell
  *    - at least 1 surface is TestSurfEngUnit
  *    - cell is filled with a universe
- *    - creation of cell doesn't specify which universe it should belong to
  *
  *  - TestUnivEngUnit:
- *    - 2 cells where one is TestCellEngUnit and both are added to the created universe via
- *      different mechanisms, which will make one also be a part of root
- *    - 1 universe
- *    - 1 real surface (for cell region use)
+ *    - 2 cells (one TestCellEngUnit, one real cell) both in root of _internal_base (= expanded
+ * univ)
+ *    - root is renamed to "<name>_real_univ"
+ *    - 1 real surface (for the real cell's region)
  */
 
 namespace CSG
@@ -60,15 +59,15 @@ public:
 protected:
   std::unique_ptr<CSGSurface> clone() const override
   {
-    return std::make_unique<TestSurfEngUnit>(*this);
+    return std::make_unique<TestSurfEngUnit>(getName());
   }
 
-  void expandUnit(CSGBase & base) override
+  void expandUnit() override
   {
     std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
     std::unique_ptr<CSGSurface> s2_ptr = std::make_unique<CSGSphere>(getName() + "_s2", 1.0);
-    auto & s1 = base.addSurface(std::move(s1_ptr));
-    auto & s2 = base.addSurface(std::move(s2_ptr));
+    auto & s1 = _internal_base->addSurface(std::move(s1_ptr));
+    auto & s2 = _internal_base->addSurface(std::move(s2_ptr));
     _expanded_region = -s1 & +s2;
   }
 
@@ -97,15 +96,13 @@ protected:
     return std::make_unique<TestCellEngUnit>(getName());
   }
 
-  void expandUnit(CSGBase & base) override
+  void expandUnit() override
   {
     // use the surface unit in this one for nested units
     std::unique_ptr<TestSurfEngUnit> s1_ptr = std::make_unique<TestSurfEngUnit>(getName() + "_s1");
-    auto & s1 = base.addEngUnit(std::move(s1_ptr));
-    auto & univ = base.createUniverse(getName() + "_fill_univ");
-    // intentionally create a cell that doesn't specifiy a universe that it should be added to so
-    // that management of ownership through CSGBase can be properly tested
-    _expanded_cell = &base.createCell(getName() + "_real_cell", univ, -s1);
+    auto & s1 = _internal_base->addEngUnit(std::move(s1_ptr));
+    auto & univ = _internal_base->createUniverse(getName() + "_fill_univ");
+    _internal_base->createCell(getName() + "_real_cell", univ, -s1);
   }
 
 #ifdef MOOSE_UNIT_TEST
@@ -133,19 +130,15 @@ protected:
     return std::make_unique<TestUnivEngUnit>(getName());
   }
 
-  void expandUnit(CSGBase & base) override
+  void expandUnit() override
   {
-    _expanded_universe = &base.createUniverse(getName() + "_real_univ");
-    // add the cell unit to the created universe to start (should never be a part of root)
+    // all cells go to _internal_base's root, which is the expanded universe
     auto c1_prt = std::make_unique<TestCellEngUnit>(getName() + "_c1_unit");
-    base.addEngUnit(std::move(c1_prt), _expanded_universe);
-    // surface for cell region
+    _internal_base->addEngUnit(std::move(c1_prt)); // goes to root
     std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
-    auto & s1 = base.addSurface(std::move(s1_ptr));
-    // when creating the plain cell, do not add to a universe until after creation
-    // (should be a part of new universe and root)
-    auto & c2 = base.createCell(getName() + "_c2", +s1);
-    base.addCellToUniverse(*_expanded_universe, c2);
+    auto & s1 = _internal_base->addSurface(std::move(s1_ptr));
+    _internal_base->createCell(getName() + "_c2", +s1); // goes to root
+    _internal_base->renameRootUniverse(getName() + "_real_univ");
   }
 
 #ifdef MOOSE_UNIT_TEST
