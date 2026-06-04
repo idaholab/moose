@@ -51,6 +51,7 @@
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "ScalarKernelBase.h"
+#include "ElementADScalarKernel.h"
 #include "Parser.h"
 #include "Split.h"
 #include "FieldSplitPreconditioner.h"
@@ -270,6 +271,7 @@ NonlinearSystemBase::initialSetup()
     }
 
     _scalar_kernels.initialSetup();
+    _element_scalar_kernels.initialSetup();
     _constraints.initialSetup();
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
@@ -382,6 +384,7 @@ NonlinearSystemBase::timestepSetup()
     }
   }
   _scalar_kernels.timestepSetup();
+  _element_scalar_kernels.timestepSetup();
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
@@ -445,6 +448,7 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
     }
   }
   _scalar_kernels.customSetup(exec_type);
+  _element_scalar_kernels.customSetup(exec_type);
   _constraints.customSetup(exec_type);
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
@@ -539,7 +543,11 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
   postAddResidualObject(*kernel);
   // Add to theWarehouse, a centralized storage for all moose objects
   _fe_problem.theWarehouse().add(kernel);
-  _scalar_kernels.addObject(kernel);
+  auto elem_scalar_kernel = std::dynamic_pointer_cast<ElementADScalarKernel>(kernel);
+  if (elem_scalar_kernel)
+    _element_scalar_kernels.addObject(elem_scalar_kernel);
+  else
+    _scalar_kernels.addObject(kernel);
 }
 
 void
@@ -1748,6 +1756,7 @@ NonlinearSystemBase::residualSetup()
     _integrated_bcs.residualSetup(tid);
   }
   _scalar_kernels.residualSetup();
+  _element_scalar_kernels.residualSetup();
   _constraints.residualSetup();
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
@@ -2967,6 +2976,7 @@ NonlinearSystemBase::jacobianSetup()
     _integrated_bcs.jacobianSetup(tid);
   }
   _scalar_kernels.jacobianSetup();
+  _element_scalar_kernels.jacobianSetup();
   _constraints.jacobianSetup();
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
@@ -3409,6 +3419,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _splits.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();
+    _element_scalar_kernels.updateActive();
 
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels.updateActive();

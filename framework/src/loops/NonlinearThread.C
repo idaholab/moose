@@ -20,6 +20,7 @@
 #include "SwapBackSentinel.h"
 #include "FVTimeKernel.h"
 #include "ComputeJacobianThread.h"
+#include "ElementADScalarKernel.h"
 
 #include "libmesh/threads.h"
 
@@ -32,9 +33,10 @@ NonlinearThread::NonlinearThread(FEProblemBase & fe_problem)
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
     _kernels(_nl.getKernelWarehouse()),
     _hdg_kernels(_nl.getHDGKernelWarehouse()),
+    _element_scalar_kernels(_nl.getElementScalarKernelWarehouse()),
     _has_active_objects(_integrated_bcs.hasActiveObjects() || _dg_kernels.hasActiveObjects() ||
                         _interface_kernels.hasActiveObjects() || _kernels.hasActiveObjects() ||
-                        _fe_problem.haveFV()),
+                        _fe_problem.haveFV() || _element_scalar_kernels.hasActiveObjects()),
     _should_execute_dg(false)
 {
 }
@@ -50,6 +52,7 @@ NonlinearThread::NonlinearThread(NonlinearThread & x, Threads::split split)
     _kernels(x._kernels),
     _tag_kernels(x._tag_kernels),
     _hdg_kernels(x._hdg_kernels),
+    _element_scalar_kernels(x._element_scalar_kernels),
     _has_active_objects(x._has_active_objects),
     _should_execute_dg(x._should_execute_dg)
 {
@@ -116,6 +119,18 @@ NonlinearThread::subdomainChanged()
     }
   }
 
+  if (_element_scalar_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const auto & esks = _element_scalar_kernels.getActiveBlockObjects(_subdomain, _tid);
+    for (const auto & esk : esks)
+    {
+      const auto & mv_deps = esk->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+      const auto & mp_deps = esk->getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    }
+  }
+
   // Cache these to avoid computing them on every side
   _subdomain_has_dg = _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
   _subdomain_has_hdg = _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
@@ -154,6 +169,10 @@ NonlinearThread::computeOnElement()
   if (_fe_problem.haveFV())
     for (auto kernel : _fv_kernels)
       compute(*kernel);
+
+  if (_element_scalar_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    for (const auto & esk : _element_scalar_kernels.getActiveBlockObjects(_subdomain, _tid))
+      computeElementScalarKernel(*esk);
 }
 
 void

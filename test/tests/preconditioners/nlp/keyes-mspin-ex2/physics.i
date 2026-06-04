@@ -26,14 +26,14 @@
     variable = u
     lambda = 0
   []
-  [v_offdiag]
-    type = ADCoupledFieldScalar
-    variable = u
-    scalar_variable = v
-  []
 []
 
 [ScalarKernels]
+  [v_offdiag]
+    type = ADCoupledFieldScalar
+    variable = v
+    u = u
+  []
   [v_diag]
     type = ADScalarReaction
     variable = v

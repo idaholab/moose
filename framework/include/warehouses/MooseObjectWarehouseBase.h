@@ -367,10 +367,14 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
         // interface level...
         variable_name = parameters.getVecMooseType("variable")[0];
 
-      blk->checkVariable(problem.getVariable(
-          tid, variable_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY));
+      // Scalar variables are not block-restricted; field lookup would fail
+      if (!problem.hasScalarVariable(variable_name))
+      {
+        blk->checkVariable(problem.getVariable(
+            tid, variable_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY));
 
-      _all_variable_objects[tid][variable_name].push_back(object);
+        _all_variable_objects[tid][variable_name].push_back(object);
+      }
     }
   }
 }
