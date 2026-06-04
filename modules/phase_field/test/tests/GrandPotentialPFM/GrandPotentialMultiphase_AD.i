@@ -208,7 +208,7 @@
   [omegaa]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = omegaa
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
     expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
@@ -216,7 +216,7 @@
   [omegab]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = omegab
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
     expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
@@ -224,7 +224,7 @@
   [rhoa]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = rhoa
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
     expression = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
@@ -232,7 +232,7 @@
   [rhob]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = rhob
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
     expression = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
@@ -244,7 +244,7 @@
   []
   [Mobility]
     type = ADDerivativeParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
     expression = 'D*chi'
     derivative_order = 2

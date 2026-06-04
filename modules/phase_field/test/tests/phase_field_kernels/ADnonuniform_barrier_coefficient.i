@@ -51,21 +51,21 @@
   [../]
   [./h0]
     type = ADDerivativeParsedMaterial
-    f_name = h0
+    property_name = h0
     coupled_variables = 'gr0 gr1'
     expression = 'gr0^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./h1]
     type = ADDerivativeParsedMaterial
-    f_name = h1
+    property_name = h1
     coupled_variables = 'gr0 gr1'
     expression = 'gr1^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./mu]
     type = ADDerivativeParsedMaterial
-    f_name = mu
+    property_name = mu
     coupled_variables = 'gr0 gr1'
     constant_names = 'mag'
     constant_expressions = '16'
@@ -74,7 +74,7 @@
   [../]
   [./kappa]
     type = ADDerivativeParsedMaterial
-    f_name = kappa
+    property_name = kappa
     coupled_variables = 'gr0 gr1'
     material_property_names = 'h0(gr0,gr1) h1(gr0,gr1)'
     constant_names = 'mag0 mag1'

@@ -57,13 +57,13 @@
 [Materials]
   [LinearizedConductivity]
     type = ADParsedMaterial
-    f_name = 'linearized_conductivity'
+    property_name = 'linearized_conductivity'
     expression = '10+500*forwardT'
     coupled_variables = 'forwardT'
   []
   [_dDdT]
     type = ADParsedMaterial
-    f_name = '_dDdT' # "_" represents negation
+    property_name = '_dDdT' # "_" represents negation
     expression = '-500'
     coupled_variables = 'forwardT'
   []

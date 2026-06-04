@@ -189,7 +189,7 @@
   [omegaa]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = omegaa
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
     expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
@@ -197,7 +197,7 @@
   [omegab]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = omegab
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
     expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
@@ -205,7 +205,7 @@
   [omegad]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = omegad
+    property_name = omegad
     material_property_names = 'Vm kd cdeq'
     expression = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
     derivative_order = 2
@@ -213,7 +213,7 @@
   [rhoa]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = rhoa
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
     expression = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
@@ -221,7 +221,7 @@
   [rhob]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = rhob
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
     expression = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
@@ -229,7 +229,7 @@
   [rhod]
     type = ADDerivativeParsedMaterial
     coupled_variables = 'w'
-    f_name = rhod
+    property_name = rhod
     material_property_names = 'Vm kd cdeq'
     expression = 'w/Vm^2/kd + cdeq/Vm'
     derivative_order = 2
@@ -238,7 +238,7 @@
     type = ADParsedMaterial
     material_property_names = 'Vm rhoa rhob rhod ha hb hd'
     expression = 'Vm * (ha * rhoa + hb * rhob + hd * rhod)'
-    f_name = c
+    property_name = c
   []
   [const]
     type = ADGenericConstantMaterial
@@ -247,14 +247,14 @@
   []
   [Mobility]
     type = ADDerivativeParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
     expression = 'D*chi'
     derivative_order = 2
   []
   [chi]
     type = ADDerivativeParsedMaterial
-    f_name = chi
+    property_name = chi
     material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
     expression = '(ha/ka + hb/kb + hd/kd) / Vm^2'
     coupled_variables = 'etaa0 etab0 etad0'
