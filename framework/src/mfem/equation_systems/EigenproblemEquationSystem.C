@@ -11,7 +11,7 @@
 
 #include "EigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
-#include "MFEMEigenproblemBase.h"
+#include "MFEMEigenproblem.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM

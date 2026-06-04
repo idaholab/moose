@@ -12,7 +12,6 @@
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
 #include "MFEMEigenproblem.h"
-#include "MFEMComplexEigenproblem.h"
 #include "EigenproblemEquationSystem.h"
 #include "EquationSystemProblemOperator.h"
 #include "EigenproblemESProblemOperator.h"
@@ -63,7 +62,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     }
     else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
-      if (auto * eigen_problem = dynamic_cast<MFEMComplexEigenproblem *>(&_mfem_problem))
+      if (auto * eigen_problem = dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
         _mfem_problem_data.eqn_system =
             std::make_shared<Moose::MFEM::ComplexEigenproblemEquationSystem>(*eigen_problem);
