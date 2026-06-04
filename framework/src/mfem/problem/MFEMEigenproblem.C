@@ -10,37 +10,25 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMEigenproblem.h"
-#include "MFEMVariable.h"
-#include "MFEMEigensolverBase.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblem);
 
 InputParameters
 MFEMEigenproblem::validParams()
 {
-  InputParameters params = MFEMProblem::validParams();
-  params.addClassDescription("Problem type for building and solving a finite element eigenproblem "
-                             "using the MFEM finite element library.");
-  params.addParam<int>("num_modes", 1, "Set the number of lowest eigenmodes to compute.");
-  params.addParam<std::string>(
-      "mode_separator",
-      "_",
-      "Separator string inserted between a variable name and its eigenmode index when "
-      "registering the gridfunction that stores the corresponding eigenvector.");
-  params.addParam<MFEMScalarCoefficientName>(
-      "rhs_coefficient",
-      "1.",
-      "Name of scalar coefficient to scale the right-hand side of the eigenproblem equation by");
-
+  InputParameters params = MFEMEigenproblemBase::validParams();
+  params.addClassDescription("Problem type for building and solving a real-valued finite element "
+                             "eigenproblem using the MFEM finite element library.");
   return params;
 }
 
-MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params)
+MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMEigenproblemBase(params)
 {
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
 
-  if (_num_type == NumericType::COMPLEX)
-    mooseError("Complex numbers are not currently supported for eigenproblems.");
+  if (getNumericType() == NumericType::COMPLEX)
+    mooseError("MFEMEigenproblem is real-valued; use MFEMComplexEigenproblem for complex "
+               "eigenproblems.");
 }
 
 mfem::Coefficient &
