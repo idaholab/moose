@@ -49,13 +49,14 @@ BlockRestrictable::initializeKokkosBlockRestrictable()
                     kokkos_mesh->getSubdomainContiguousNodeIDs(block).begin(),
                     kokkos_mesh->getSubdomainContiguousNodeIDs(block).end());
 
-    for (const auto elem : _blk_mesh->getMesh().active_local_subdomain_elements_ptr_range(block))
-    {
-      const auto eid = kokkos_mesh->getContiguousElementID(elem);
+    if (_moose_object->isParamValid("_kokkos_flux_kernel"))
+      for (const auto elem : _blk_mesh->getMesh().active_local_subdomain_elements_ptr_range(block))
+      {
+        const auto eid = kokkos_mesh->getContiguousElementID(elem);
 
-      for (const auto side : make_range(elem->n_sides()))
-        element_side_ids.insert({eid, side});
-    }
+        for (const auto side : make_range(elem->n_sides()))
+          element_side_ids.insert({eid, side});
+      }
   }
 
   _kokkos_element_ids = element_ids;

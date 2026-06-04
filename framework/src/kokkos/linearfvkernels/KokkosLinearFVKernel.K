@@ -87,6 +87,7 @@ LinearFVFluxKernel::validParams()
 {
   auto params = LinearFVKernel::validParams();
   params.registerSystemAttributeName("LinearFVFluxKernel");
+  params.addPrivateParam<bool>("_kokkos_flux_kernel", true);
   return params;
 }
 
