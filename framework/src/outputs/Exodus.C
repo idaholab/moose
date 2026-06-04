@@ -215,6 +215,7 @@ Exodus::outputSetup()
     auto & lm_mesh = moose_mesh.getMesh();
     // Exodus is serial output so that we have to gather everything to "zero".
     lm_mesh.gather_to_zero();
+    unsigned char map_rebuilt = false;
     if ((this->processor_id() == 0) && !lm_mesh.is_replicated())
     {
       // In an ideal world we could just call something like moose_mesh.update() below but that
@@ -225,18 +226,20 @@ Exodus::outputSetup()
       // elements will have neighbors that they didn't previously have
       moose_mesh.markFiniteVolumeInfoDirty();
       // And similarly we have both new nodes and new elements for the node to element map
-      const bool map_rebuilt = moose_mesh.possiblyRebuildNodeToElemMap();
+      map_rebuilt = moose_mesh.possiblyRebuildNodeToElemMap();
       // If the map was rebuilt then we need to reinitialize geometric search data to re-add things
       // like "quadrature" nodes to that map. And GeometricSearch::reinit calls
       // MooseMesh::clearQuadratureNodes which clears its _quadrature_nodes but does not clear them
       // from its _bnd_nodes which is what we iterate over when doing nearest node location in the
       // geometric search. So we also need to rebuild _bnd_nodes to erase the old quadrature nodes
       if (map_rebuilt)
-      {
         moose_mesh.buildNodeList();
-        problem.reinitGeomSearch();
-      }
     }
+    _communicator.broadcast(map_rebuilt);
+    if (map_rebuilt)
+      // Geometric search may create point locators which involves communication, so we must call it
+      // from all ranks
+      problem.reinitGeomSearch();
   };
   serialize(*_problem_ptr);
 
