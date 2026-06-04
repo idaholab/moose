@@ -506,16 +506,27 @@ private:
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
 
+  /// Whether initLinearFV() has been called and the geometry cache is populated
   bool _linearfv_initialized = false;
+  /// Whether initLinearFV() should be called on the next update()
   bool _needs_linearfv = false;
+  /// Cached element volumes indexed by contiguous element ID
   Array<Real> _linearfv_elem_volume;
+  /// Cached element centroids indexed by contiguous element ID
   Array<Real3> _linearfv_elem_centroid;
+  /// Cached face areas indexed by (side, contiguous element ID)
   Array2D<Real> _linearfv_face_area;
+  /// Cached face centroids indexed by (side, contiguous element ID)
   Array2D<Real3> _linearfv_face_centroid;
+  /// Cell-center to face-center distance vectors indexed by (side, contiguous element ID)
   Array2D<Real3> _linearfv_face_d_cf;
+  /// Cell-center to face-center distance magnitudes indexed by (side, contiguous element ID)
   Array2D<Real> _linearfv_face_d_cf_mag;
+  /// Cell-center to neighbor-center distance vectors indexed by (side, contiguous element ID)
   Array2D<Real3> _linearfv_face_d_cn;
+  /// Cell-center to neighbor-center distance magnitudes indexed by (side, contiguous element ID)
   Array2D<Real> _linearfv_face_d_cn_mag;
+  /// Boundary IDs for each face indexed by (side, contiguous element ID)
   Array2D<BoundaryID> _linearfv_face_boundary_id;
 };
 
