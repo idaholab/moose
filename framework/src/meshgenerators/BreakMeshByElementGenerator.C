@@ -138,8 +138,8 @@ BreakMeshByElementGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
                                            const Node * node) const
 {
   std::unique_ptr<Node> new_node = Node::build(*node, Node::invalid_id);
-  new_node->processor_id() = elem->processor_id();
   Node * added_node = mesh->add_node(std::move(new_node));
+  added_node->processor_id() = elem->processor_id();
   for (const auto j : elem->node_index_range())
     if (elem->node_id(j) == node->id())
     {
