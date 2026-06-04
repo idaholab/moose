@@ -1,6 +1,4 @@
-# Anisotropic Maxwell eigenvalue problem, curl curl E = lambda epsilon E with
-# E x n = 0, reproducing MFEM example ex32p. The anisotropy is carried by the
-# 3x3 dielectric tensor epsilon on the right-hand-side mass matrix.
+sqrt2_inv = 0.70710678118654752
 
 [Mesh]
   type = MFEMMesh
@@ -33,7 +31,7 @@
   [epsilon]
     type = MFEMGenericFunctorMatrixMaterial
     prop_names = epsilon
-    prop_values = '{2 0.70710678118654752 0; 0.70710678118654752 2 0.70710678118654752; 0 0.70710678118654752 2}'
+    prop_values = '{2 ${sqrt2_inv} 0; ${sqrt2_inv} 2 ${sqrt2_inv}; 0 ${sqrt2_inv} 2}'
   []
 []
 
