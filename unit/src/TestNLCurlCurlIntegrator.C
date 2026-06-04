@@ -56,8 +56,8 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
     el.CalcPhysCurlShape(T, curlshape);
     curlshape.MultTranspose(elfun, curl_u);
 
-    const double curl_u_norm = curl_u.Norml2();
-    if (curl_u_norm > 1e-16)
+    const mfem::real_t curl_u_norm = curl_u.Norml2();
+    if (curl_u_norm > 1e-32)
     {
       curl_u_hat = curl_u;
       curl_u_hat /= curl_u_norm;
@@ -65,16 +65,16 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
     else
       curl_u_hat = 0.0;
 
-    const double weight = ip.weight * T.Weight();
-    const double k = curl_u_norm * curl_u_norm;
-    const double curlu_dk_dcurlu = 2.0 * curl_u_norm * curl_u_norm;
+    const mfem::real_t weight = ip.weight * T.Weight();
+    const mfem::real_t k = curl_u_norm * curl_u_norm;
+    const mfem::real_t curlu_dk_dcurlu = 2.0 * curl_u_norm * curl_u_norm;
 
     for (int i = 0; i < el.GetDof(); ++i)
       for (int j = 0; j < el.GetDof(); ++j)
       {
-        double curl_trial_dot_curl_test = 0.0;
-        double curl_hat_dot_curl_test = 0.0;
-        double curl_hat_dot_curl_trial = 0.0;
+        mfem::real_t curl_trial_dot_curl_test = 0.0;
+        mfem::real_t curl_hat_dot_curl_test = 0.0;
+        mfem::real_t curl_hat_dot_curl_trial = 0.0;
         for (int d = 0; d < el.GetCurlDim(); ++d)
         {
           curl_trial_dot_curl_test += curlshape(j, d) * curlshape(i, d);
