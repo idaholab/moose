@@ -57,7 +57,14 @@ BreakMeshByElementGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   if (!mesh->is_prepared())
+  {
+    const bool old_allow_remote_element_removal = mesh->allow_remote_element_removal();
+    mesh->allow_remote_element_removal(false);
     mesh->prepare_for_use();
+    mesh->allow_remote_element_removal(old_allow_remote_element_removal);
+  }
+
+  mooseAssert(mesh->is_serial(), "This generator only works with an incoming serial mesh");
 
   // check that the subdomain IDs exist in the mesh
   for (const auto & id : _subdomains)
