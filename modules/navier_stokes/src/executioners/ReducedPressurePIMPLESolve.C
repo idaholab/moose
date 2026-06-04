@@ -1962,13 +1962,15 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
       _problem.execute(EXEC_NONLINEAR);
       if (corrector)
       {
+        // OpenFOAM's MULES path bounds alpha through the limited face fluxes instead of
+        // projecting the solved field. Do not apply the inherited scalar lower limiter here.
         residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
                                            *system,
                                            _volume_fraction_equation_relaxation[i],
                                            _volume_fraction_linear_control,
                                            _volume_fraction_l_abs_tol,
                                            1.0,
-                                           _volume_fraction_min_value);
+                                           std::numeric_limits<Real>::min());
         system->computeGradients();
         auto * curvature = sharpInterfaceCurvature();
         if (curvature)
@@ -1992,64 +1994,79 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
       *previous_solution = *(system->system().current_local_solution);
       previous_solution->close();
     }
-
-    if (_dump_pressure_outer_debug_csv && corrector)
-    {
-      const auto audit = corrector->rhoPhiConsistencyAudit();
-      _console << name() << ": rhoPhi audit for '" << corrector->variableName()
-               << "' after alpha solve: L2=" << audit.l2_norm
-               << ", max_abs=" << audit.max_abs_mismatch;
-      if (audit.has_worst_face)
-        _console << ", worst_face=" << audit.worst_face_id << " @ (" << audit.worst_face_centroid(0)
-                 << ", " << audit.worst_face_centroid(1) << ", " << audit.worst_face_centroid(2)
-                 << "), stored=" << audit.stored_rho_phi
-                 << ", reconstructed=" << audit.reconstructed_rho_phi
-                 << ", phi=" << audit.volumetric_phi
-                 << ", alphaPhi=" << audit.limited_alpha_flux
-                 << ", rho_g=" << audit.gas_density << ", rho_l=" << audit.liquid_density;
-      _console << std::endl;
-    }
   }
 
   _problem.dt() = global_dt;
   _problem.time() = global_time;
   _problem.timeOld() = global_time_old;
 
-  clampVolumeFractionSystems();
+  finalizeVolumeFractionTransportState();
 
-  for (const auto & system : _volume_fraction_systems)
-    system->computeGradients();
+  if (_dump_pressure_outer_debug_csv)
+    for (const auto & system_name : _volume_fraction_system_names)
+      if (auto * corrector = sharpInterfaceVOFCorrector(system_name))
+      {
+        const auto audit = corrector->rhoPhiConsistencyAudit();
+        _console << name() << ": rhoPhi audit for '" << corrector->variableName()
+                 << "' after alpha finalization: L2=" << audit.l2_norm
+                 << ", max_abs=" << audit.max_abs_mismatch;
+        if (audit.has_worst_face)
+          _console << ", worst_face=" << audit.worst_face_id << " @ ("
+                   << audit.worst_face_centroid(0) << ", " << audit.worst_face_centroid(1)
+                   << ", " << audit.worst_face_centroid(2)
+                   << "), stored=" << audit.stored_rho_phi
+                   << ", reconstructed=" << audit.reconstructed_rho_phi
+                   << ", phi=" << audit.volumetric_phi
+                   << ", alphaPhi=" << audit.limited_alpha_flux
+                   << ", rho_g=" << audit.gas_density << ", rho_l=" << audit.liquid_density;
+        _console << std::endl;
+      }
 
   return residuals;
 }
 
 void
-ReducedPressurePIMPLESolve::clampVolumeFractionSystems()
+ReducedPressurePIMPLESolve::finalizeVolumeFractionTransportState()
 {
-  for (auto * system : _volume_fraction_systems)
+  for (const auto system_i : index_range(_volume_fraction_systems))
+    if (!sharpInterfaceVOFCorrector(_volume_fraction_system_names[system_i]))
+      clampVolumeFractionSystem(*_volume_fraction_systems[system_i]);
+
+  for (const auto & system : _volume_fraction_systems)
+    system->computeGradients();
+
+  if (auto * curvature = sharpInterfaceCurvature())
+    curvature->updateCurvatureMaps(_print_fields);
+
+  for (const auto & system_name : _volume_fraction_system_names)
+    if (auto * corrector = sharpInterfaceVOFCorrector(system_name))
+      corrector->refreshPublishedRhoPhi();
+}
+
+void
+ReducedPressurePIMPLESolve::clampVolumeFractionSystem(LinearSystem & system)
+{
+  auto & current_local_solution = *(system.system().current_local_solution);
+  for (const auto i :
+       make_range(current_local_solution.first_local_index(), current_local_solution.last_local_index()))
+    current_local_solution.set(
+        i,
+        std::min(_volume_fraction_max_value,
+                 std::max(_volume_fraction_min_value, current_local_solution(i))));
+  current_local_solution.close();
+
+  if (auto * previous_solution = system.solutionPreviousNewton())
   {
-    auto & current_local_solution = *(system->system().current_local_solution);
-    for (const auto i : make_range(current_local_solution.first_local_index(),
-                                   current_local_solution.last_local_index()))
-      current_local_solution.set(
+    for (const auto i :
+         make_range(previous_solution->first_local_index(), previous_solution->last_local_index()))
+      previous_solution->set(
           i,
           std::min(_volume_fraction_max_value,
-                   std::max(_volume_fraction_min_value, current_local_solution(i))));
-    current_local_solution.close();
-
-    if (auto * previous_solution = system->solutionPreviousNewton())
-    {
-      for (const auto i :
-           make_range(previous_solution->first_local_index(), previous_solution->last_local_index()))
-        previous_solution->set(
-            i,
-            std::min(_volume_fraction_max_value,
-                     std::max(_volume_fraction_min_value, (*previous_solution)(i))));
-      previous_solution->close();
-    }
-
-    system->setSolution(current_local_solution);
+                   std::max(_volume_fraction_min_value, (*previous_solution)(i))));
+    previous_solution->close();
   }
+
+  system.setSolution(current_local_solution);
 }
 
 std::pair<unsigned int, Real>

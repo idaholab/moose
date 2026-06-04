@@ -135,6 +135,11 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       true,
       "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to use a classic per-cell summed MULES "
       "limiter instead of sequential face-budget depletion.");
+  params.addParam<bool>(
+      "use_local_mules_bounds",
+      true,
+      "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to optionally constrain correction "
+      "fluxes by local neighbor extrema instead of the global alpha bounds.");
   params.addParam<bool>("debug_dump_subcycle",
                         false,
                         "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector for targeted interface-face "
@@ -179,7 +184,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
 
   params.addParamNamesToGroup(
       "system_names advected_interp_method compression_factor interface_normal_functor "
-      "alpha_correction_scheme",
+      "alpha_correction_scheme use_local_mules_bounds",
       "Numerical scheme");
 
   params.suppressParameter<MooseEnum>("preconditioning");
@@ -349,6 +354,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   params.set<bool>("alpha_apply_prev_corr") = getParam<bool>("alpha_apply_prev_corr");
   params.set<bool>("use_cell_summed_mules_limiter") =
       getParam<bool>("use_cell_summed_mules_limiter");
+  params.set<bool>("use_local_mules_bounds") = getParam<bool>("use_local_mules_bounds");
   params.set<MooseFunctorName>("liquid_density") = _liquid_density_name;
   params.set<MooseFunctorName>("gas_density") = _gas_density_name;
   params.set<MooseFunctorName>("alpha_phi_bd_functor_name") =
@@ -390,12 +396,11 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaTimeKernels()
 void
 WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaAdvectionKernels()
 {
-  auto params = getFactory().getValidParams("LinearFVScalarAdvection");
-  assignBlocks(params, _blocks);
-  params.set<LinearVariableName>("variable") = _alpha_name;
-  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") = getParam<MooseEnum>("advected_interp_method");
-  getProblem().addLinearFVKernel("LinearFVScalarAdvection", prefix() + "alpha_advection", params);
+  addLinearFVScalarAdvectionKernel(_alpha_name,
+                                   prefix() + "alpha_advection",
+                                   _flow_equations_physics->rhieChowUOName(),
+                                   getParam<MooseEnum>("advected_interp_method"),
+                                   _blocks);
 }
 
 void

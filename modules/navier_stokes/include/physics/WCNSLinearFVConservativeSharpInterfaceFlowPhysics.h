@@ -1,70 +1,66 @@
 #pragma once
 
-#include "WCNSFVFlowPhysicsBase.h"
-#include "WCNSFVTurbulencePhysics.h"
+#include "WCNSLinearFVFlowPhysicsBase.h"
+#include "NS.h"
 
 /**
  * Linear-FV segregated sharp-interface flow physics for the reference-parity U path.
  *
- * This class is intentionally structured as a sibling of WCNSLinearFVFlowPhysics,
- * because the stock linear-FV mixture path does not provide the extra face-flux
- * predictors needed for large-density-ratio sharp-interface coupling.
+ * This class reuses the common segregated Linear FV flow setup and overrides the sharp-interface
+ * pieces needed for large-density-ratio conservative coupling.
  */
-class WCNSLinearFVConservativeSharpInterfaceFlowPhysics final : public WCNSFVFlowPhysicsBase
+class WCNSLinearFVConservativeSharpInterfaceFlowPhysics final : public WCNSLinearFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
 
   WCNSLinearFVConservativeSharpInterfaceFlowPhysics(const InputParameters & parameters);
 
-protected:
-  void initializePhysicsAdditional() override;
-
 private:
-  void addSolverVariables() override;
-  void addFVKernels() override;
-  void addUserObjects() override;
   void addFunctorMaterials() override;
   void addRhieChowUserObjects() override;
 
-  void addPressureCorrectionKernels();
+  void addAdditionalUserObjects() override;
   void addCurvatureUserObject();
   void addDynamicContactAngleFunctorMaterial();
-  void addMomentumTimeKernels() override;
-  void addMomentumFluxKernels();
-  void addMomentumConditioningKernels();
-  void addMomentumPressureKernels() override;
-  void addMomentumGravityKernels() override;
-  void addMomentumReducedPressureKernels();
-  void addMomentumFrictionKernels() override;
-  void addMomentumBoussinesqKernels() override;
-
-  void addInletBC() override;
+  void addMomentumConditioningKernels() override;
+  void addMomentumReducedPressureKernels() override;
   void addOutletBC() override;
   void addWallsBC() override;
-  void addSeparatorBC() override {}
-
-  bool hasForchheimerFriction() const override { return false; }
 
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
-  MooseFunctorName momentumTransportMassFluxFunctorName() const;
   MooseFunctorName generatedBoundaryMomentumFunctorName(const BoundaryName & boundary,
                                                         unsigned int component,
                                                         const std::string & family) const;
-  bool useMomentumContinuityErrorSink() const;
+  bool useMomentumContinuityErrorSink() const override;
+  bool shouldAddMomentumPressureKernels() const override;
+  bool shouldAddMomentumReducedPressureKernels() const override;
+  MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
+  MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }
+  std::string momentumTimeKernelType() const override
+  {
+    return "LinearWCNSFVMomentumTimeDerivative";
+  }
+  std::string momentumTimeDensityParameterName() const override { return NS::density; }
+  std::string momentumFluxKernelType() const override
+  {
+    return "LinearWCNSFVConservativeMomentumFlux";
+  }
+  MooseFunctorName momentumFluxMassFluxFunctorName() const override
+  {
+    return "rho_phi_mass_flux_density";
+  }
+  MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
+                                            unsigned int component) const override;
+  MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
+                                           unsigned int component) const override;
   bool shouldCreateGeometryFunctorMaterial() const;
   bool shouldCreateCurvatureProducer() const;
   bool shouldCreateDynamicContactAngleFunctorMaterial() const;
   void addVelocityBoundaryInputFunctorMaterials();
 
-  MooseFunctorName getLinearFrictionCoefName() const override
-  {
-    return "";
-  }
-
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
-  const bool _non_orthogonal_correction;
   const MooseEnum _pressure_formulation;
   const bool _add_transient_projection_flux;
   const bool _add_capillary_hydrostatic_flux;

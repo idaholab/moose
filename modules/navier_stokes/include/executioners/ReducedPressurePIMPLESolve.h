@@ -73,7 +73,8 @@ private:
   void synchronizeSystemState(LinearSystem & system) const;
   std::vector<std::pair<unsigned int, Real>> solveVolumeFractionSystems(
       const SolverParams & solver_params);
-  void clampVolumeFractionSystems();
+  void finalizeVolumeFractionTransportState();
+  void clampVolumeFractionSystem(LinearSystem & system);
   ConservativeSharpInterfaceVOFMULESCorrector * sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
 
   std::pair<unsigned int, Real>

@@ -52,6 +52,28 @@ NavierStokesPhysicsBase::addFVAdvectedInterpolationMethod(const MooseEnum & inte
   getProblem().addFVInterpolationMethod(method_type, method_name, params);
 }
 
+void
+NavierStokesPhysicsBase::addLinearFVScalarAdvectionKernel(
+    const LinearVariableName & variable,
+    const std::string & kernel_name,
+    const UserObjectName & rhie_chow_user_object,
+    const MooseEnum & advected_interp_method,
+    const std::vector<SubdomainName> & blocks,
+    const std::function<void(InputParameters &)> & extra_parameter_setup)
+{
+  const std::string kernel_type = "LinearFVScalarAdvection";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+  assignBlocks(params, blocks);
+  params.set<LinearVariableName>("variable") = variable;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_user_object;
+  params.set<MooseEnum>("advected_interp_method") = advected_interp_method;
+
+  if (extra_parameter_setup)
+    extra_parameter_setup(params);
+
+  getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
+}
+
 InputParameters
 NavierStokesPhysicsBase::getAdditionalRMParams() const
 {

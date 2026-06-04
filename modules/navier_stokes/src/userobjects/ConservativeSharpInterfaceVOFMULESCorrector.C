@@ -95,6 +95,11 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       true,
       "Use a classic cell-summed MULES-style limiter based on per-cell positive/negative "
       "correction totals instead of sequential face-budget depletion.");
+  params.addParam<bool>(
+      "use_local_mules_bounds",
+      true,
+      "When true, limit each correction against local neighbor extrema. When false, limit against "
+      "the admissible global volume-fraction bounds.");
   params.addParam<Real>("min_value", 0.0, "Lower admissible volume-fraction bound.");
   params.addParam<Real>("max_value", 1.0, "Upper admissible volume-fraction bound.");
   params.addParam<bool>("debug_dump_subcycle",
@@ -174,6 +179,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _max_value(getParam<Real>("max_value")),
     _alpha_apply_prev_corr(getParam<bool>("alpha_apply_prev_corr")),
     _use_cell_summed_mules_limiter(getParam<bool>("use_cell_summed_mules_limiter")),
+    _use_local_mules_bounds(getParam<bool>("use_local_mules_bounds")),
     _debug_dump_subcycle(getParam<bool>("debug_dump_subcycle")),
     _debug_only_first_subcycle(getParam<bool>("debug_only_first_subcycle")),
     _debug_dump_max_faces(getParam<unsigned int>("debug_dump_max_faces")),
@@ -310,7 +316,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::solutionAlpha(const NumericVector<N
   if (dof == DofObject::invalid_id)
     return 0.0;
 
-  return std::min(_max_value, std::max(_min_value, static_cast<Real>(solution(dof))));
+  return static_cast<Real>(solution(dof));
 }
 
 Real
@@ -337,7 +343,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::integrateLiquidVolume(const Numeric
 Real
 ConservativeSharpInterfaceVOFMULESCorrector::cellAlpha(const ElemInfo & elem_info) const
 {
-  return boundedAlpha(_alpha_var->getElemValue(elem_info, Moose::currentState()));
+  return _alpha_var->getElemValue(elem_info, Moose::currentState());
 }
 
 Real
@@ -483,6 +489,37 @@ ConservativeSharpInterfaceVOFMULESCorrector::invalidateOuterCorrectionFluxSeed()
   invalidatePreviousCorrectionFluxes();
 }
 
+void
+ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
+{
+  if (!_system || !_alpha_var)
+    return;
+
+  for (const auto * fi : _fe_problem.mesh().faceInfo())
+  {
+    if (!fi)
+      continue;
+
+    const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
+    if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+      continue;
+
+    if (!hasBlocks(fi->elemSubdomainID()) &&
+        !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
+      continue;
+
+    const auto face_id = fi->id();
+    const Real limited_alpha_flux =
+        _alpha_phi_limited.count(face_id) ? libmesh_map_find(_alpha_phi_limited, face_id) : 0.0;
+    const Real integrated_rho_phi = rhoPhi(*fi, limited_alpha_flux);
+    const Real face_measure = faceMeasure(*fi);
+
+    _rho_phi[face_id] = integrated_rho_phi;
+    _rho_phi_mass_flux_density[face_id] =
+        face_measure > 0.0 ? integrated_rho_phi / face_measure : 0.0;
+  }
+}
+
 LinearFVBoundaryCondition *
 ConservativeSharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & fi) const
 {
@@ -507,6 +544,40 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(const FaceInfo & fi,
   const auto * fluid_info = face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? fi.neighborInfo()
                                                                                : fi.elemInfo();
   return fluid_info ? cellAlpha(*fluid_info) : 0.0;
+}
+
+bool
+ConservativeSharpInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
+                                                         const bool fi_elem_side) const
+{
+  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
+  if (fi_elem_side)
+    return face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+           face_type == FaceInfo::VarFaceNeighbors::BOTH;
+  else
+    return face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+           face_type == FaceInfo::VarFaceNeighbors::BOTH;
+}
+
+Moose::FaceArg
+ConservativeSharpInterfaceVOFMULESCorrector::functorFaceArg(
+    const Moose::Functor<Real> & functor, const FaceInfo & fi) const
+{
+  auto face_arg = makeCDFace(fi);
+  const auto on_elem = functor.hasFaceSide(fi, true);
+  const auto on_neighbor = functor.hasFaceSide(fi, false);
+
+  if (on_elem && on_neighbor)
+    face_arg.face_side = nullptr;
+  else if (on_elem)
+    face_arg.face_side = fi.elemPtr();
+  else if (on_neighbor)
+    face_arg.face_side = fi.neighborPtr();
+  else
+    mooseError(
+        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
+
+  return face_arg;
 }
 
 Real
@@ -712,25 +783,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::faceFunctorAverage(const FaceInfo &
                                                     const Moose::Functor<Real> & functor) const
 {
   const auto state = Moose::currentState();
-  if (!fi.neighborPtr())
-  {
-    const Elem * fluid_elem = fi.elemPtr();
-    if (!hasBlocks(fluid_elem->subdomain_id()) && fi.neighborPtr())
-      fluid_elem = fi.neighborPtr();
-    const Moose::FaceArg face_arg{&fi,
-                                  Moose::FV::LimiterType::CentralDifference,
-                                  true,
-                                  false,
-                                  fluid_elem,
-                                  nullptr};
-    return MetaPhysicL::raw_value(functor(face_arg, state));
-  }
-
-  const Real elem_value = MetaPhysicL::raw_value(functor(Moose::ElemArg{fi.elemPtr(), false}, state));
-
-  const Real neighbor_value =
-      MetaPhysicL::raw_value(functor(Moose::ElemArg{fi.neighborPtr(), false}, state));
-  return 0.5 * (elem_value + neighbor_value);
+  return MetaPhysicL::raw_value(functor(functorFaceArg(functor, fi), state));
 }
 
 Real
@@ -924,28 +977,28 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
       }
     }
 
-    if (_use_cell_summed_mules_limiter)
+    std::unordered_map<dof_id_type, Real> local_upper_bound;
+    std::unordered_map<dof_id_type, Real> local_lower_bound;
+
+    const auto initialize_local_bounds = [&](const dof_id_type dof)
     {
-      std::unordered_map<dof_id_type, Real> local_upper_bound;
-      std::unordered_map<dof_id_type, Real> local_lower_bound;
+      if (local_upper_bound.count(dof))
+        return;
 
-      const auto initialize_local_bounds = [&](const dof_id_type dof)
-      {
-        if (local_upper_bound.count(dof))
-          return;
+      local_upper_bound.emplace(dof, _min_value);
+      local_lower_bound.emplace(dof, _max_value);
+    };
 
-        local_upper_bound.emplace(dof, _min_value);
-        local_lower_bound.emplace(dof, _max_value);
-      };
+    const auto widen_local_bounds = [&](const dof_id_type dof, const Real alpha)
+    {
+      initialize_local_bounds(dof);
+      const Real bounded_alpha = boundedAlpha(alpha);
+      local_upper_bound[dof] = std::max(local_upper_bound[dof], bounded_alpha);
+      local_lower_bound[dof] = std::min(local_lower_bound[dof], bounded_alpha);
+    };
 
-      const auto widen_local_bounds = [&](const dof_id_type dof, const Real alpha)
-      {
-        initialize_local_bounds(dof);
-        const Real bounded_alpha = boundedAlpha(alpha);
-        local_upper_bound[dof] = std::max(local_upper_bound[dof], bounded_alpha);
-        local_lower_bound[dof] = std::min(local_lower_bound[dof], bounded_alpha);
-      };
-
+    if (_use_local_mules_bounds)
+    {
       for (const auto & data : face_corrections)
       {
         initialize_local_bounds(data.elem_dof);
@@ -966,7 +1019,21 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
         pair.second = std::min(pair.second, _max_value);
       for (auto & pair : local_lower_bound)
         pair.second = std::max(pair.second, _min_value);
+    }
+    else
+      for (const auto & data : face_corrections)
+      {
+        local_upper_bound[data.elem_dof] = _max_value;
+        local_lower_bound[data.elem_dof] = _min_value;
+        if (data.has_neighbor)
+        {
+          local_upper_bound[data.neighbor_dof] = _max_value;
+          local_lower_bound[data.neighbor_dof] = _min_value;
+        }
+      }
 
+    if (_use_cell_summed_mules_limiter)
+    {
       for (const auto limiter_it : make_range(_num_limiter_iterations))
       {
         (void)limiter_it;
@@ -982,7 +1049,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
           if (q_pos.count(dof))
             return;
 
-          const Real alpha = boundedAlpha(current_local_solution(dof));
+          const Real alpha = current_local_solution(dof);
           q_pos.emplace(dof, std::max(0.0, local_upper_bound[dof] - alpha));
           q_neg.emplace(dof, std::max(0.0, alpha - local_lower_bound[dof]));
           sum_pos.emplace(dof, 0.0);
@@ -1081,9 +1148,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
           if (remaining_increase_budget.count(dof))
             return;
 
-          const Real alpha = boundedAlpha(current_local_solution(dof));
-          remaining_increase_budget.emplace(dof, _max_value - alpha);
-          remaining_decrease_budget.emplace(dof, alpha - _min_value);
+          const Real alpha = current_local_solution(dof);
+          remaining_increase_budget.emplace(dof, std::max(0.0, local_upper_bound[dof] - alpha));
+          remaining_decrease_budget.emplace(dof, std::max(0.0, alpha - local_lower_bound[dof]));
         };
 
         for (const auto & data : face_corrections)

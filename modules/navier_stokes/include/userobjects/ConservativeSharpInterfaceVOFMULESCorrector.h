@@ -6,6 +6,7 @@
 #include "RhieChowMassFlux.h"
 #include "FaceCenteredMapFunctor.h"
 #include "GradientLimiterType.h"
+#include "FaceArgInterface.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -19,7 +20,8 @@ class ConservativeSharpInterfaceCurvatureCalculator;
  */
 class ConservativeSharpInterfaceVOFMULESCorrector : public GeneralUserObject,
                                         public NonADFunctorInterface,
-                                        public BlockRestrictable
+                                        public BlockRestrictable,
+                                        public FaceArgProducerInterface
 {
 public:
   struct LiquidVolumeAudit
@@ -57,6 +59,7 @@ public:
 
   void resetSubcycleFluxes();
   void invalidateOuterCorrectionFluxSeed();
+  void refreshPublishedRhoPhi();
   void applyCorrection(const Real dt,
                        const Real subcycle_fraction = 1.0,
                        ConservativeSharpInterfaceCurvatureCalculator * curvature = nullptr);
@@ -125,6 +128,8 @@ private:
                      const unsigned int subcycle_index) const;
   LinearFVBoundaryCondition * boundaryCondition(const FaceInfo & fi) const;
   Real boundaryValue(const FaceInfo & fi, FaceInfo::VarFaceNeighbors face_type) const;
+  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+  Moose::FaceArg functorFaceArg(const Moose::Functor<Real> & functor, const FaceInfo & fi) const;
   Real cellVolume(const ElemInfo & elem_info) const;
   Real faceMeasure(const FaceInfo & fi) const;
   Real solutionAlpha(const NumericVector<Number> & solution, const ElemInfo & elem_info) const;
@@ -163,6 +168,7 @@ private:
   const Real _max_value;
   const bool _alpha_apply_prev_corr;
   const bool _use_cell_summed_mules_limiter;
+  const bool _use_local_mules_bounds;
   const bool _debug_dump_subcycle;
   const bool _debug_only_first_subcycle;
   const unsigned int _debug_dump_max_faces;
