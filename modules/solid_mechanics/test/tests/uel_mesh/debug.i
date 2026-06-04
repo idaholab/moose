@@ -5,7 +5,7 @@
 
   [Partitioner]
     type = LibmeshPartitioner
-    partitioner = hilbert_sfc
+    partitioner = linear # hilbert_sfc
   []
 []
 
