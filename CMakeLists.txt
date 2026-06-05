@@ -47,3 +47,7 @@ endif()
 # Phase 1: the MOOSE framework library and unit-test executable.
 add_subdirectory(framework)
 add_subdirectory(unit)
+
+# Python extension modules (hit.so, _pycapabilities.so).
+include(MoosePython)
+moose_add_python_extensions()

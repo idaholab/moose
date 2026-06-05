@@ -128,3 +128,12 @@ foreach(_f IN LISTS _moose_src)
 endforeach()
 
 message(STATUS "libmoose target: ${_moose} (${CMAKE_CURRENT_BINARY_DIR})")
+
+# --------------------------------------------------------------------------------------
+# exodiff: the Exodus diffing tool (its own flags; links only libMesh, not libmoose).
+# --------------------------------------------------------------------------------------
+file(GLOB_RECURSE _exodiff_src CONFIGURE_DEPENDS "${_fwk}/contrib/exodiff/*.C")
+add_executable(exodiff ${_exodiff_src})
+target_include_directories(exodiff PRIVATE "${_fwk}/contrib/exodiff")
+target_compile_options(exodiff PRIVATE -std=c++14 -O2 -felide-constructors -w)
+target_link_libraries(exodiff PRIVATE MOOSE::libmesh)
