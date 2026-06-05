@@ -54,13 +54,13 @@ private:
       std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>;
 
   bool startupPressureInitializationEnabled() const;
-  bool useEquilibriumStartupPressureInitialization() const;
   void assembleMomentumPredictorOnly();
   void initializeStartupPressureField(const SolverParams & solver_params);
   void performStartupContinuityCorrections(const SolverParams & solver_params);
   void preparePressureCorrectorState(const bool subtract_updated_pressure);
   void reconstructPressureCoupledStateFromCurrentPressure(const bool subtract_updated_pressure);
   void dumpPressureOuterDebugState(const std::string & stage_label);
+  void printPressureHbyAParitySummary(const std::string & stage_label) const;
   void dumpPressureDebugFaces(const std::string & stage_label);
   void resolvePressureDebugFaceIds();
   void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
@@ -86,10 +86,8 @@ private:
                                const bool publish_pressure_corrected_state,
                                const SolverParams & solver_params);
   void publishPressureCorrectedTransportState(const std::string & stage_label);
-  void applyReferencePressureCorrectorTail(const std::string & stage_label);
   void reportReferenceContinuityErrors(const std::string & stage_label);
   void correctMovingMeshFaceVelocityAndMakeRelative();
-  void updateAbsolutePressureAndReferenceState();
   void relaxPressureFieldForNextPredictor();
   std::pair<unsigned int, Real>
   correctStartupContinuityOnce(const bool subtract_updated_pressure,
@@ -118,6 +116,7 @@ private:
   const Real _momentum_pressure_max_courant;
   const bool _volume_fraction_outer_corrections;
   const bool _dump_pressure_outer_debug_csv;
+  const bool _print_pressure_hbya_parity_summary;
   const unsigned int _dump_pressure_outer_debug_start_timestep;
   const unsigned int _dump_pressure_outer_debug_end_timestep;
   const unsigned int _dump_pressure_outer_debug_max_outer_iterations;
@@ -129,7 +128,6 @@ private:
   const unsigned int _audit_momentum_predictor_rebuild_end_timestep;
   unsigned int _current_piso_iteration = 0;
   std::string _startup_pressure_initialization;
-  const bool _suppress_explicit_hydrostatic_flux_during_seeded_startup;
   const unsigned int _startup_flux_corrections;
   const unsigned int _num_pressure_nonorthogonal_correctors;
   Real _cumulative_continuity_error = 0.0;

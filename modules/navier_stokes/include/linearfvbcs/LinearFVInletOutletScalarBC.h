@@ -25,6 +25,7 @@ public:
   LinearFVInletOutletScalarBC(const InputParameters & parameters);
 
   Real computeBoundaryValue() const override;
+  Real computeBoundaryValue(bool backflow) const;
   Real computeBoundaryNormalGradient() const override;
   Real computeBoundaryValueMatrixContribution() const override;
   Real computeBoundaryValueRHSContribution() const override;
@@ -36,6 +37,7 @@ public:
 
 protected:
   bool isBackflow() const;
+  Real outwardFaceFlux() const;
   const ElemInfo & fluidElemInfo() const;
   Real computeOutflowBoundaryValue() const;
   Real computeOutflowBoundaryValueRHSContribution() const;
@@ -47,5 +49,6 @@ protected:
   const MooseLinearVariableFVReal * const _w_var;
   std::vector<const MooseLinearVariableFVReal *> _vel_vars;
   const Moose::Functor<Real> & _backflow_value;
+  const Moose::Functor<Real> & _face_flux;
   const bool _two_term_expansion;
 };

@@ -14,6 +14,7 @@
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
+#include "LinearFVInletOutletScalarBC.h"
 #include "LinearSystem.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseFunctorArguments.h"
@@ -24,6 +25,9 @@
 #include "ElemInfo.h"
 #include "SegregatedSolverUtils.h"
 #include "MathFVUtils.h"
+#include "Limiter.h"
+
+#include "timpi/parallel_sync.h"
 
 #include <algorithm>
 #include <cmath>
@@ -68,10 +72,14 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       "Higher-order correction flux added on top of the donor/upwind base flux before MULES-style "
       "limiting.");
   params.addRangeCheckedParam<unsigned int>(
-      "n_alpha_corrections", 2, "n_alpha_corrections>0", "Number of explicit correction sweeps.");
+      "n_alpha_corrections",
+      2,
+      "n_alpha_corrections>=0",
+      "Number of explicit correction sweeps. Zero publishes the donor alpha flux without an "
+      "explicit correction sweep.");
   params.addRangeCheckedParam<unsigned int>(
       "n_limiter_iterations",
-      5,
+      3,
       "n_limiter_iterations>0",
       "Number of limiter tightening passes for each correction sweep.");
   params.addRangeCheckedParam<Real>(
@@ -594,6 +602,15 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi) cons
   Real donor_alpha = elem_alpha;
   if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
     donor_alpha = upwind_is_elem ? elem_alpha : cellAlpha(*fi.neighborInfo());
+  else if (auto * inlet_outlet_bc =
+               dynamic_cast<LinearFVInletOutletScalarBC *>(boundaryCondition(fi)))
+  {
+    inlet_outlet_bc->setupFaceData(&fi, face_type);
+    donor_alpha = upwind_is_elem
+                      ? elem_alpha
+                      : boundedAlpha(
+                            inlet_outlet_bc->computeBoundaryValue(/* backflow = */ true));
+  }
   else if (_alpha_var->isDirichletBoundaryFace(fi))
     donor_alpha = upwind_is_elem ? elem_alpha : boundaryValue(fi, face_type);
 
@@ -619,7 +636,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
         high_order_alpha = venkatakrishnanFaceValue(fi, upwind_is_elem);
         break;
       case HighOrderCorrectionScheme::VanLeer:
-        high_order_alpha = vanLeerFaceValue(fi, upwind_is_elem);
+        high_order_alpha = sharedVanLeerFaceValue(fi, upwind_is_elem);
         break;
     }
   else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
@@ -629,6 +646,12 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
     // The Van Leer correction is only defined here for internal faces with a true downwind cell.
     high_order_alpha =
         upwind_is_elem ? venkatakrishnanFaceValue(fi, true) : boundaryValue(fi, face_type);
+  }
+  else if (auto * inlet_outlet_bc = dynamic_cast<LinearFVInletOutletScalarBC *>(bc))
+  {
+    inlet_outlet_bc->setupFaceData(&fi, face_type);
+    high_order_alpha =
+        boundedAlpha(inlet_outlet_bc->computeBoundaryValue(/* backflow = */ !upwind_is_elem));
   }
   else if (upwind_is_elem &&
            dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
@@ -668,8 +691,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::venkatakrishnanFaceValue(const Face
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::vanLeerFaceValue(const FaceInfo & fi,
-                                                  const bool upwind_is_elem) const
+ConservativeSharpInterfaceVOFMULESCorrector::sharedVanLeerFaceValue(const FaceInfo & fi,
+                                                        const bool upwind_is_elem) const
 {
   mooseAssert(fi.neighborPtr(), "Van Leer correction requires an internal face with a neighbor.");
 
@@ -680,16 +703,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::vanLeerFaceValue(const FaceInfo & f
   const Real phi_upwind = cellAlpha(upwind_info);
   const Real phi_downwind = cellAlpha(downwind_info);
   const VectorValue<Real> grad_upwind = _alpha_var->gradSln(upwind_info, state);
-  const Point upwind_to_downwind = upwind_is_elem ? fi.dCN() : Point(-fi.dCN());
-
-  const Real r_f = Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, upwind_to_downwind);
-  const Real beta = (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
-
-  const Real w_f = upwind_is_elem ? fi.gC() : (1.0 - fi.gC());
-  const Real g_unclamped = beta * (1.0 - w_f);
-  const Real g = std::min(std::max(g_unclamped, 0.0), 1.0 - w_f);
-
-  const Real phi_face = (1.0 - g) * phi_upwind + g * phi_downwind;
+  const auto limiter = Moose::FV::Limiter<Real>::build(Moose::FV::LimiterType::VanLeer);
+  const Real phi_face =
+      Moose::FV::interpolate(*limiter, phi_upwind, phi_downwind, &grad_upwind, fi, upwind_is_elem);
   return std::min(_max_value, std::max(_min_value, phi_face));
 }
 
@@ -710,6 +726,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::classifyBoundaryFace(const FaceInfo
 
   if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
     return volumetric_flux >= 0.0 ? BoundaryFaceKind::DirichletOutflow
+                                  : BoundaryFaceKind::DirichletInflow;
+
+  if (dynamic_cast<LinearFVInletOutletScalarBC *>(bc))
+    return volumetric_flux >= 0.0 ? BoundaryFaceKind::OpenOutflow
                                   : BoundaryFaceKind::DirichletInflow;
 
   if (dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
@@ -754,7 +774,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::compressionFlux(const FaceInfo & fi
   const RealVectorValue interface_normal = MetaPhysicL::raw_value(_interface_normal(face_arg, state));
   const Real bounded_elem_alpha = boundedAlpha(elem_alpha);
   const Real bounded_neighbor_alpha = boundedAlpha(neighbor_alpha);
-  const Real alpha_face = 0.5 * (bounded_elem_alpha + bounded_neighbor_alpha);
+  const Real alpha_face =
+      boundedAlpha(fi.gC() * bounded_elem_alpha + (1.0 - fi.gC()) * bounded_neighbor_alpha);
   const Real compressive_speed =
       std::abs(_mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi)) *
       MetaPhysicL::raw_value(_compression_factor(face_arg, state)) *
@@ -823,9 +844,18 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
   {
     data.neighbor_alpha = cellAlpha(*fi.neighborInfo());
     data.interface_normal_alignment = compressionAlignment(fi);
-    data.compressive_flux = compressionFlux(fi, data.elem_alpha, data.neighbor_alpha);
+    const Real raw_compressive_flux = compressionFlux(fi, data.elem_alpha, data.neighbor_alpha);
+    Real compressed_high_order_flux = data.high_order_flux;
+    const Real phi_face_area = data.volumetric_flux * faceMeasure(fi);
+    if (std::abs(phi_face_area) > libMesh::TOLERANCE)
+    {
+      const Real compressed_alpha =
+          boundedAlpha(highOrderFaceValue(fi) + raw_compressive_flux / phi_face_area);
+      compressed_high_order_flux = phi_face_area * compressed_alpha;
+    }
+    data.compressive_flux = compressed_high_order_flux - data.high_order_flux;
     data.advective_correction_flux = data.high_order_flux - data.donor_flux;
-    data.correction_flux = data.advective_correction_flux + data.compressive_flux;
+    data.correction_flux = compressed_high_order_flux - data.donor_flux;
     return data;
   }
 
@@ -876,6 +906,76 @@ ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
   }
 }
 
+bool
+ConservativeSharpInterfaceVOFMULESCorrector::partitionFace(const FaceCorrectionData & data) const
+{
+  return data.has_neighbor &&
+         data.face->elemInfo()->elem()->processor_id() !=
+             data.face->neighborInfo()->elem()->processor_id();
+}
+
+bool
+ConservativeSharpInterfaceVOFMULESCorrector::locallyOwnedCell(const ElemInfo & elem_info) const
+{
+  return elem_info.elem()->processor_id() == processor_id();
+}
+
+bool
+ConservativeSharpInterfaceVOFMULESCorrector::synchronizePartitionFaceLimiters(
+    const std::vector<FaceCorrectionData> & face_corrections,
+    std::vector<Real> & accepted_lambda) const
+{
+  if (n_processors() == 1)
+    return false;
+
+  using Datum = std::pair<dof_id_type, Real>;
+  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
+
+  for (const auto i : index_range(face_corrections))
+    if (partitionFace(face_corrections[i]))
+    {
+      const auto & data = face_corrections[i];
+      const auto elem_pid = data.face->elemInfo()->elem()->processor_id();
+      const auto neighbor_pid = data.face->neighborInfo()->elem()->processor_id();
+      const auto other_pid = elem_pid == processor_id() ? neighbor_pid : elem_pid;
+      push_data[other_pid].push_back(std::make_pair(data.face->id(), accepted_lambda[i]));
+    }
+
+  std::unordered_map<dof_id_type, Real> received_minimum_lambda_by_face;
+  auto receive_limiters =
+      [&received_minimum_lambda_by_face](const processor_id_type,
+                                         const std::vector<Datum> & sent_data)
+  {
+    for (const auto & [face_id, lambda] : sent_data)
+    {
+      auto it = received_minimum_lambda_by_face.find(face_id);
+      if (it == received_minimum_lambda_by_face.end())
+        received_minimum_lambda_by_face.emplace(face_id, lambda);
+      else
+        it->second = std::min(it->second, lambda);
+    }
+  };
+
+  TIMPI::push_parallel_vector_data(_communicator, push_data, receive_limiters);
+
+  bool changed_lambda = false;
+  for (const auto i : index_range(face_corrections))
+    if (partitionFace(face_corrections[i]))
+    {
+      const auto face_id = face_corrections[i].face->id();
+      const auto it = received_minimum_lambda_by_face.find(face_id);
+      if (it == received_minimum_lambda_by_face.end())
+        continue;
+
+      const Real updated_lambda = std::min(accepted_lambda[i], it->second);
+      changed_lambda =
+          changed_lambda || updated_lambda + libMesh::TOLERANCE < accepted_lambda[i];
+      accepted_lambda[i] = updated_lambda;
+    }
+
+  return changed_lambda;
+}
+
 void
 ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     const Real dt,
@@ -906,6 +1006,47 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
   std::unordered_map<dof_id_type, Real> alpha_after_correction;
   const bool use_previous_correction_flux = _alpha_apply_prev_corr && _previous_correction_flux_valid;
   std::unordered_map<dof_id_type, Real> working_alpha_flux;
+
+  if (_num_alpha_corrections == 0)
+  {
+    _system->computeGradients();
+
+    std::vector<FaceCorrectionData> face_corrections;
+    face_corrections.reserve(_fe_problem.mesh().faceInfo().size());
+
+    for (const auto * fi : _fe_problem.mesh().faceInfo())
+    {
+      const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
+      if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+        continue;
+      if (!hasBlocks(fi->elemSubdomainID()) &&
+          !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
+        continue;
+
+      auto data = buildFaceCorrectionData(*fi);
+      if (data.face)
+        face_corrections.push_back(data);
+    }
+
+    if (face_corrections.empty())
+      return;
+
+    std::vector<Real> zero_flux(face_corrections.size(), 0.0);
+    std::vector<Real> donor_flux(face_corrections.size(), 0.0);
+    for (const auto i : index_range(face_corrections))
+    {
+      donor_flux[i] = face_corrections[i].donor_flux;
+      _alpha_phi_working_before_debug[face_corrections[i].face->id()] = donor_flux[i];
+      _alpha_phi_target_debug[face_corrections[i].face->id()] = donor_flux[i];
+      _alpha_phi_limited_delta_debug[face_corrections[i].face->id()] = 0.0;
+      _alpha_phi_lambda_debug[face_corrections[i].face->id()] = 0.0;
+    }
+
+    publishFaceFluxes(face_corrections, zero_flux, donor_flux, zero_flux, subcycle_fraction);
+    invalidatePreviousCorrectionFluxes();
+    _system->computeGradients();
+    return;
+  }
 
   for (const auto correction_it : make_range(_num_alpha_corrections))
   {
@@ -1032,107 +1173,157 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
         }
       }
 
+    std::unordered_map<dof_id_type, Real> cell_volume_by_dof;
+    for (const auto & data : face_corrections)
+    {
+      cell_volume_by_dof.emplace(data.elem_dof, cellVolume(*data.face->elemInfo()));
+      if (data.has_neighbor)
+        cell_volume_by_dof.emplace(data.neighbor_dof, cellVolume(*data.face->neighborInfo()));
+    }
+
     if (_use_cell_summed_mules_limiter)
     {
+      std::unordered_map<dof_id_type, Real> psi_maxn;
+      std::unordered_map<dof_id_type, Real> psi_minn;
+      std::unordered_map<dof_id_type, Real> sum_phip;
+      std::unordered_map<dof_id_type, Real> m_sum_phim;
+
+      const auto initialize_cmules_cell = [&](const dof_id_type dof)
+      {
+        if (psi_maxn.count(dof))
+          return;
+
+        const Real alpha = current_local_solution(dof);
+        const Real cell_volume = libmesh_map_find(cell_volume_by_dof, dof);
+        psi_maxn.emplace(
+            dof, cell_volume * std::max(0.0, local_upper_bound[dof] - alpha) / dt);
+        psi_minn.emplace(
+            dof, cell_volume * std::max(0.0, alpha - local_lower_bound[dof]) / dt);
+        sum_phip.emplace(dof, 0.0);
+        m_sum_phim.emplace(dof, 0.0);
+      };
+
+      for (const auto & data : face_corrections)
+      {
+        initialize_cmules_cell(data.elem_dof);
+        if (data.has_neighbor)
+          initialize_cmules_cell(data.neighbor_dof);
+      }
+
+      for (const auto i : index_range(face_corrections))
+      {
+        const auto & data = face_corrections[i];
+        const Real phi_corr_f = raw_correction_flux[i];
+        if (std::abs(phi_corr_f) < libMesh::TOLERANCE)
+          continue;
+
+        if (phi_corr_f > 0.0)
+        {
+          sum_phip[data.elem_dof] += phi_corr_f;
+          if (data.has_neighbor)
+            m_sum_phim[data.neighbor_dof] += phi_corr_f;
+        }
+        else
+        {
+          m_sum_phim[data.elem_dof] -= phi_corr_f;
+          if (data.has_neighbor)
+            sum_phip[data.neighbor_dof] -= phi_corr_f;
+        }
+      }
+
+      const auto clamp_limiter = [](const Real value)
+      {
+        return std::min(1.0, std::max(0.0, value));
+      };
+
+      const Real root_v_small = std::sqrt(std::numeric_limits<Real>::min());
+
       for (const auto limiter_it : make_range(_num_limiter_iterations))
       {
         (void)limiter_it;
-        std::unordered_map<dof_id_type, Real> q_pos;
-        std::unordered_map<dof_id_type, Real> q_neg;
-        std::unordered_map<dof_id_type, Real> sum_pos;
-        std::unordered_map<dof_id_type, Real> sum_neg;
-        std::unordered_map<dof_id_type, Real> lambda_pos;
-        std::unordered_map<dof_id_type, Real> lambda_neg;
+        std::unordered_map<dof_id_type, Real> sum_l_phip;
+        std::unordered_map<dof_id_type, Real> m_sum_l_phim;
 
-        const auto initialize_cell = [&](const dof_id_type dof)
-        {
-          if (q_pos.count(dof))
-            return;
-
-          const Real alpha = current_local_solution(dof);
-          q_pos.emplace(dof, std::max(0.0, local_upper_bound[dof] - alpha));
-          q_neg.emplace(dof, std::max(0.0, alpha - local_lower_bound[dof]));
-          sum_pos.emplace(dof, 0.0);
-          sum_neg.emplace(dof, 0.0);
-        };
-
-        for (const auto & data : face_corrections)
-        {
-          initialize_cell(data.elem_dof);
-          if (data.has_neighbor)
-            initialize_cell(data.neighbor_dof);
-        }
+        for (const auto & pair : psi_maxn)
+          sum_l_phip.emplace(pair.first, 0.0);
+        for (const auto & pair : psi_minn)
+          m_sum_l_phim.emplace(pair.first, 0.0);
 
         for (const auto i : index_range(face_corrections))
         {
           const auto & data = face_corrections[i];
-          const Real raw_flux = raw_correction_flux[i];
-          if (std::abs(raw_flux) < libMesh::TOLERANCE || accepted_lambda[i] <= 0.0)
+          const Real phi_corr_f = accepted_lambda[i] * raw_correction_flux[i];
+          if (std::abs(phi_corr_f) < libMesh::TOLERANCE)
             continue;
 
-          const Real proposed_flux = accepted_lambda[i] * raw_flux;
-          const Real elem_delta = -dt * proposed_flux / cellVolume(*data.face->elemInfo());
-          if (elem_delta > libMesh::TOLERANCE)
-            sum_pos[data.elem_dof] += elem_delta;
-          else if (elem_delta < -libMesh::TOLERANCE)
-            sum_neg[data.elem_dof] += -elem_delta;
-
-          if (data.has_neighbor)
+          if (phi_corr_f > 0.0)
           {
-            const Real neighbor_delta = dt * proposed_flux / cellVolume(*data.face->neighborInfo());
-            if (neighbor_delta > libMesh::TOLERANCE)
-              sum_pos[data.neighbor_dof] += neighbor_delta;
-            else if (neighbor_delta < -libMesh::TOLERANCE)
-              sum_neg[data.neighbor_dof] += -neighbor_delta;
+            sum_l_phip[data.elem_dof] += phi_corr_f;
+            if (data.has_neighbor)
+              m_sum_l_phim[data.neighbor_dof] += phi_corr_f;
+          }
+          else
+          {
+            m_sum_l_phim[data.elem_dof] -= phi_corr_f;
+            if (data.has_neighbor)
+              sum_l_phip[data.neighbor_dof] -= phi_corr_f;
           }
         }
 
-        for (const auto & pair : q_pos)
+        std::unordered_map<dof_id_type, Real> lambda_minus;
+        std::unordered_map<dof_id_type, Real> lambda_plus;
+        for (const auto & pair : psi_maxn)
         {
           const auto dof = pair.first;
-          const Real pos_demand = sum_pos[dof];
-          const Real neg_demand = sum_neg[dof];
-          lambda_pos[dof] = pos_demand > libMesh::TOLERANCE
-                                ? std::min(1.0, std::max(0.0, q_pos[dof] / pos_demand))
-                                : 1.0;
-          lambda_neg[dof] = neg_demand > libMesh::TOLERANCE
-                                ? std::min(1.0, std::max(0.0, q_neg[dof] / neg_demand))
-                                : 1.0;
+          lambda_minus[dof] =
+              clamp_limiter((sum_l_phip[dof] + psi_maxn[dof]) / (m_sum_phim[dof] + root_v_small));
+          lambda_plus[dof] =
+              clamp_limiter((m_sum_l_phim[dof] + psi_minn[dof]) / (sum_phip[dof] + root_v_small));
         }
 
         bool changed_lambda = false;
         for (const auto i : index_range(face_corrections))
         {
           const auto & data = face_corrections[i];
-          const Real raw_flux = raw_correction_flux[i];
-          if (std::abs(raw_flux) < libMesh::TOLERANCE || accepted_lambda[i] <= 0.0)
+          const Real phi_corr_f = raw_correction_flux[i];
+          if (std::abs(phi_corr_f) < libMesh::TOLERANCE || accepted_lambda[i] <= 0.0)
             continue;
 
-          Real lambda = 1.0;
+          Real lambda = accepted_lambda[i];
 
-          const Real elem_delta = -dt * raw_flux / cellVolume(*data.face->elemInfo());
-          if (elem_delta > libMesh::TOLERANCE)
-            lambda = std::min(lambda, lambda_pos[data.elem_dof]);
-          else if (elem_delta < -libMesh::TOLERANCE)
-            lambda = std::min(lambda, lambda_neg[data.elem_dof]);
-
-          if (data.has_neighbor)
+          if (data.boundary_kind == BoundaryFaceKind::Internal)
           {
-            const Real neighbor_delta = dt * raw_flux / cellVolume(*data.face->neighborInfo());
-            if (neighbor_delta > libMesh::TOLERANCE)
-              lambda = std::min(lambda, lambda_pos[data.neighbor_dof]);
-            else if (neighbor_delta < -libMesh::TOLERANCE)
-              lambda = std::min(lambda, lambda_neg[data.neighbor_dof]);
+            if (phi_corr_f > 0.0)
+              lambda = std::min(
+                  lambda, std::min(lambda_plus[data.elem_dof], lambda_minus[data.neighbor_dof]));
+            else
+              lambda = std::min(
+                  lambda, std::min(lambda_minus[data.elem_dof], lambda_plus[data.neighbor_dof]));
+          }
+          else
+          {
+            const Real corrected_boundary_flux = target_alpha_flux[i] + phi_corr_f;
+            if (corrected_boundary_flux > libMesh::TOLERANCE * libMesh::TOLERANCE)
+            {
+              if (phi_corr_f > 0.0)
+                lambda = std::min(lambda, lambda_plus[data.elem_dof]);
+              else
+                lambda = std::min(lambda, lambda_minus[data.elem_dof]);
+            }
           }
 
-          const Real updated_lambda =
-              std::min(accepted_lambda[i], std::min(1.0, std::max(0.0, lambda)));
+          const Real updated_lambda = std::min(accepted_lambda[i], clamp_limiter(lambda));
           changed_lambda =
               changed_lambda || updated_lambda + libMesh::TOLERANCE < accepted_lambda[i];
           accepted_lambda[i] = updated_lambda;
         }
 
-        if (!changed_lambda)
+        changed_lambda =
+            synchronizePartitionFaceLimiters(face_corrections, accepted_lambda) || changed_lambda;
+
+        unsigned int changed_anywhere = changed_lambda ? 1 : 0;
+        _communicator.max(changed_anywhere);
+        if (!changed_anywhere)
           break;
       }
     }
@@ -1228,7 +1419,12 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
           }
         }
 
-        if (!changed_lambda)
+        changed_lambda =
+            synchronizePartitionFaceLimiters(face_corrections, accepted_lambda) || changed_lambda;
+
+        unsigned int changed_anywhere = changed_lambda ? 1 : 0;
+        _communicator.max(changed_anywhere);
+        if (!changed_anywhere)
           break;
       }
 
@@ -1242,19 +1438,21 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
         const auto & data = face_corrections[i];
         const Real bounded_elem_delta =
             -dt * limited_correction_flux[i] / cellVolume(*data.face->elemInfo());
-        applied_change[data.elem_dof] += bounded_elem_delta;
+        if (locallyOwnedCell(*data.face->elemInfo()))
+          applied_change[data.elem_dof] += bounded_elem_delta;
 
         if (data.has_neighbor)
         {
           const Real bounded_neighbor_delta =
               dt * limited_correction_flux[i] / cellVolume(*data.face->neighborInfo());
-          applied_change[data.neighbor_dof] += bounded_neighbor_delta;
+          if (locallyOwnedCell(*data.face->neighborInfo()))
+            applied_change[data.neighbor_dof] += bounded_neighbor_delta;
         }
       }
 
     auto limited_update = current_local_solution.zero_clone();
     for (const auto & pair : applied_change)
-      limited_update->set(pair.first, pair.second);
+      limited_update->add(pair.first, pair.second);
     limited_update->close();
 
     current_local_solution.add(*limited_update);

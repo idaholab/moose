@@ -127,9 +127,6 @@ u_in = 1.0
   volume_fraction_petsc_options_iname = '-pc_type'
   volume_fraction_petsc_options_value = 'lu'
 
-  pin_pressure = true
-  pressure_pin_point = '1.0 0.0 0.0'
-
   volume_fraction_subcycles = 3
   dt = 0.005
   num_steps = 80

@@ -159,11 +159,7 @@ g = 9.81
   volume_fraction_petsc_options_iname = '-pc_type'
   volume_fraction_petsc_options_value = 'lu'
 
-  pin_pressure = true
-  pressure_pin_point = '0.0 0.0 0.0'
-  pressure_pin_value = 0.0
-
-  startup_pressure_initialization = 'equilibrium-seed'
+  startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
 
   volume_fraction_subcycles = 1

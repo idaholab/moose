@@ -10,22 +10,24 @@
 #pragma once
 
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "NS.h"
+
+#include "libmesh/point.h"
 
 class ElemInfo;
 
 /**
- * OpenFOAM-style pressureInletOutletVelocity boundary condition for the sharp-interface path.
+ * Linear-FV analog of OpenFOAM's prghTotalPressure boundary condition.
  *
- * The historical class name is retained, but the solved variable and returned boundary values are
- * velocity components, not rho*u.
+ * This is a fixed-value p_rgh boundary. It applies the supplied static/total pressure reference,
+ * subtracts the OpenFOAM p_rgh hydrostatic offset, and on backflow subtracts the incoming dynamic
+ * pressure used with pressureInletOutletVelocity.
  */
-class LinearFVPressureInletOutletMomentumBC : public LinearFVAdvectionDiffusionBC
+class LinearFVPrghTotalPressureBC : public LinearFVAdvectionDiffusionBC
 {
 public:
   static InputParameters validParams();
 
-  LinearFVPressureInletOutletMomentumBC(const InputParameters & parameters);
+  LinearFVPrghTotalPressureBC(const InputParameters & parameters);
 
   Real computeBoundaryValue() const override;
   Real computeBoundaryNormalGradient() const override;
@@ -34,29 +36,23 @@ public:
   Real computeBoundaryGradientMatrixContribution() const override;
   Real computeBoundaryGradientRHSContribution() const override;
 
-  bool includesMaterialPropertyMultiplier() const override { return !isBackflow(); }
-  bool useBoundaryGradientExtrapolation() const override { return isBackflow(); }
-
 protected:
+  const ElemInfo & fluidElemInfo() const;
   bool isBackflow() const;
   Real outwardFaceFlux() const;
-  const ElemInfo & fluidElemInfo() const;
-  Real computeOutflowBoundaryValue() const;
-  Real computeOutflowBoundaryValueRHSContribution() const;
-  Real computeBackflowBoundaryValue() const;
-  Real computeBackflowBoundaryValueMatrixContribution() const;
-  Real computeVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
-  RealVectorValue outwardUnitNormal() const;
-  RealGradient computeVelocityGradient(const ElemInfo & elem_info, const Moose::StateArg & state) const;
+  Real dynamicPressureCorrection() const;
+  Real hydrostaticPressureOffset() const;
 
   const unsigned int _dim;
   const MooseLinearVariableFVReal * const _u_var;
   const MooseLinearVariableFVReal * const _v_var;
   const MooseLinearVariableFVReal * const _w_var;
   std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
-  const unsigned int _index;
-  const Moose::Functor<Real> & _backflow_value;
+  const Moose::Functor<Real> & _p_rgh_reference;
+  const Moose::Functor<Real> & _density;
   const Moose::Functor<Real> & _face_flux;
-  const bool _two_term_expansion;
+  const RealVectorValue _gravity;
+  const Point _reference_pressure_point;
+  const bool _use_normal_velocity_only;
 };

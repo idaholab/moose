@@ -509,37 +509,10 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addOutletBC()
 {
   const bool use_reduced_pressure_outlet_flux_bc =
       _solve_for_dynamic_pressure && _pressure_formulation == "reduced";
-  bool has_fixed_pressure_outlet = false;
-  for (const auto & outlet_pair : _momentum_outlet_types)
-  {
-    const auto & momentum_outlet_type = outlet_pair.second;
-    if (momentum_outlet_type == "fixed-pressure" ||
-        momentum_outlet_type == "fixed-pressure-zero-gradient")
-    {
-      has_fixed_pressure_outlet = true;
-      break;
-    }
-  }
-
-  if (use_reduced_pressure_outlet_flux_bc && has_fixed_pressure_outlet)
-  {
-    const auto * executioner = getMooseApp().getExecutioner();
-    const bool executioner_pins_pressure =
-        executioner && executioner->parameters().isParamValid("pin_pressure") &&
-        executioner->getParam<bool>("pin_pressure");
-
-    if (!executioner_pins_pressure)
-      paramError("momentum_outlet_types",
-                 "Sharp reduced-pressure fixed-pressure outlets now use the constrained "
-                 "pressure-flux boundary path and therefore require Executioner/pin_pressure = "
-                 "true to provide the pressure reference.");
-  }
-
   unsigned int num_pressure_value_outlets = 0;
   for (const auto & [bdy, momentum_outlet_type] : _momentum_outlet_types)
-    if (!use_reduced_pressure_outlet_flux_bc &&
-        (momentum_outlet_type == "fixed-pressure" ||
-         momentum_outlet_type == "fixed-pressure-zero-gradient"))
+    if (momentum_outlet_type == "fixed-pressure" ||
+        momentum_outlet_type == "fixed-pressure-zero-gradient")
       num_pressure_value_outlets++;
 
   if (num_pressure_value_outlets && num_pressure_value_outlets != _pressure_functors.size())
@@ -579,8 +552,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addOutletBC()
             params.set<SolverVariableName>("w") = _velocity_names[2];
           params.set<MooseEnum>("momentum_component") =
               MooseEnum("x=0 y=1 z=2", NS::directions[d]);
-
-          params.set<MooseFunctorName>("backflow_value") = "0";
+          params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
         }
 
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + outlet_bdy, params);
@@ -590,31 +562,26 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addOutletBC()
     if (momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
+      const std::string bc_type = use_reduced_pressure_outlet_flux_bc
+                                      ? "LinearFVPrghTotalPressureBC"
+                                      : "LinearFVAdvectionDiffusionFunctorDirichletBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<LinearVariableName>("variable") = _pressure_name;
+      params.set<MooseFunctorName>("functor") = libmesh_map_find(_pressure_functors, outlet_bdy);
+      params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
       if (use_reduced_pressure_outlet_flux_bc)
       {
-        const std::string pressure_bc_type = "LinearFVPressureFluxBC";
-        InputParameters pressure_params = getFactory().getValidParams(pressure_bc_type);
-        pressure_params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
-        pressure_params.set<LinearVariableName>("variable") = _pressure_name;
-        pressure_params.set<MooseFunctorName>("pressure_predictor_flux") =
-            "pressure_predictor_flux";
-        pressure_params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
-            "pressure_boundary_normal_gradient";
-        pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
-        pressure_params.set<MooseFunctorName>("HbyA_flux") = "phiHbyA";
-        pressure_params.set<MooseFunctorName>("Ainv") = "pressure_Ainv";
-        getProblem().addLinearFVBC(
-            pressure_bc_type, _pressure_name + "_outlet_flux_" + outlet_bdy, pressure_params);
+        params.set<MooseFunctorName>(NS::density) = _density_name;
+        params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+        params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
+        params.set<SolverVariableName>("u") = _velocity_names[0];
+        if (dimension() >= 2)
+          params.set<SolverVariableName>("v") = _velocity_names[1];
+        if (dimension() >= 3)
+          params.set<SolverVariableName>("w") = _velocity_names[2];
+        params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
       }
-      else
-      {
-        const std::string bc_type = "LinearFVAdvectionDiffusionFunctorDirichletBC";
-        InputParameters params = getFactory().getValidParams(bc_type);
-        params.set<LinearVariableName>("variable") = _pressure_name;
-        params.set<MooseFunctorName>("functor") = libmesh_map_find(_pressure_functors, outlet_bdy);
-        params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
-        getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + outlet_bdy, params);
-      }
+      getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + outlet_bdy, params);
     }
   }
 }

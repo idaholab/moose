@@ -103,7 +103,9 @@ LinearFVVOFCompression::computeCompressionFlux()
   const Real elem_alpha = clampAlpha(_var.getElemValue(*_current_face_info->elemInfo(), state));
   const Real neighbor_alpha =
       clampAlpha(_var.getElemValue(*_current_face_info->neighborInfo(), state));
-  const Real alpha_face = 0.5 * (elem_alpha + neighbor_alpha);
+  const Real alpha_face =
+      clampAlpha(_current_face_info->gC() * elem_alpha +
+                 (1.0 - _current_face_info->gC()) * neighbor_alpha);
 
   const RealVectorValue face_normal = _current_face_info->normal();
   const Real face_normal_mag = face_normal.norm();

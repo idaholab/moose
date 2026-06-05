@@ -28,6 +28,10 @@ LinearFVInletOutletScalarBC::validParams()
       "backflow_value",
       "0",
       "The boundary value imposed when the local boundary flow reverses and becomes inflow.");
+  params.addParam<MooseFunctorName>(
+      "face_flux",
+      "corrected_face_phi",
+      "The corrected face-flux functor used to switch between outflow and backflow.");
   params.addParam<bool>(
       "use_two_term_expansion",
       false,
@@ -50,6 +54,7 @@ LinearFVInletOutletScalarBC::LinearFVInletOutletScalarBC(const InputParameters &
                      &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
                : nullptr),
     _backflow_value(getFunctor<Real>("backflow_value")),
+    _face_flux(getFunctor<Real>("face_flux")),
     _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
   if (!_u_var)
@@ -83,16 +88,16 @@ LinearFVInletOutletScalarBC::fluidElemInfo() const
 bool
 LinearFVInletOutletScalarBC::isBackflow() const
 {
-  const auto & elem_info = fluidElemInfo();
-  const auto state = determineState();
-  RealVectorValue cell_velocity;
-  for (const auto dim_i : make_range(_dim))
-    cell_velocity(dim_i) = _vel_vars[dim_i]->getElemValue(elem_info, state);
+  return outwardFaceFlux() < 0.0;
+}
 
+Real
+LinearFVInletOutletScalarBC::outwardFaceFlux() const
+{
+  const auto state = determineState();
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  const Real normal_velocity = boundary_normal_multiplier * (cell_velocity * _current_face_info->normal());
-  return normal_velocity < 0.0;
+  return boundary_normal_multiplier * _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
 }
 
 Real
@@ -127,6 +132,12 @@ Real
 LinearFVInletOutletScalarBC::computeBoundaryValue() const
 {
   return isBackflow() ? computeBackflowBoundaryValue() : computeOutflowBoundaryValue();
+}
+
+Real
+LinearFVInletOutletScalarBC::computeBoundaryValue(const bool backflow) const
+{
+  return backflow ? computeBackflowBoundaryValue() : computeOutflowBoundaryValue();
 }
 
 Real

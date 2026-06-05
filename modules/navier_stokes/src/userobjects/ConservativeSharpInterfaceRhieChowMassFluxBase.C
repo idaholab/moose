@@ -1,6 +1,8 @@
 #include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
 
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVPressureInletOutletMomentumBC.h"
+#include "LinearFVPressureInletOutletVelocityBC.h"
 #include "LinearSystem.h"
 #include "MooseFunctorArguments.h"
 #include "MooseMesh.h"
@@ -333,6 +335,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorOperatorPhi(const
   // convention. Convert it back to the reference solver transport convention before
   // removing the transient projection.
   return -storedPressurePredictorBasePhi(fi) - libmesh_map_find(_transient_projection_flux, fi.id());
+}
+
+Real
+ConservativeSharpInterfaceRhieChowMassFluxBase::storedPhiHbyAReferenceStyle(const FaceInfo & fi) const
+{
+  return -libmesh_map_find(_phiHbyA_flux, fi.id());
 }
 
 Real
@@ -1129,138 +1137,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::predictorVelocityComponent(const
 
   const auto dof = elem_info.dofIndices()[_global_momentum_system_numbers[component]][0];
   return -(*_HbyA_raw[component])(dof);
-}
-
-bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::seedHydrostaticPressure(LinearSystem & pressure_system,
-                                                        const dof_id_type pressure_pin_dof,
-                                                        const Real pressure_pin_value) const
-{
-  static constexpr Real gravity_tol = 1e-12;
-  static constexpr Real coordinate_tol = 1e-10;
-
-  unsigned int dominant_component = libMesh::invalid_uint;
-  Real dominant_magnitude = 0.0;
-  for (const auto component : make_range(_dim))
-  {
-    const Real magnitude = std::abs(_gravity(component));
-    if (magnitude > dominant_magnitude)
-    {
-      dominant_component = component;
-      dominant_magnitude = magnitude;
-    }
-  }
-
-  if (dominant_component == libMesh::invalid_uint || dominant_magnitude <= gravity_tol)
-    return false;
-
-  for (const auto component : make_range(_dim))
-    if (component != dominant_component && std::abs(_gravity(component)) > gravity_tol)
-      return false;
-
-  struct LevelData
-  {
-    Real coordinate = 0.0;
-    Real gh = 0.0;
-    Real rho_sum = 0.0;
-    unsigned int count = 0;
-    std::vector<dof_id_type> dofs;
-  };
-
-  std::map<long long, LevelData> levels;
-  long long pin_key = 0;
-  bool found_pin = false;
-
-  const auto time_arg = Moose::currentState();
-
-  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
-  {
-    if (!hasBlocks(elem_info->subdomain_id()))
-      continue;
-
-    const auto * const elem = elem_info->elem();
-    const auto elem_arg = makeElemArg(elem);
-    const Point centroid = elem->vertex_average();
-    const Real coordinate = centroid(dominant_component);
-    const long long key = std::llround(coordinate / coordinate_tol);
-    auto & level = levels[key];
-    if (level.count == 0)
-    {
-      level.coordinate = coordinate;
-      level.gh = _gravity * (centroid - _reference_pressure_point);
-    }
-
-    level.rho_sum += _rho(elem_arg, time_arg);
-    level.count++;
-
-    const auto dof = elem_info->dofIndices()[_global_pressure_system_number][0];
-    level.dofs.push_back(dof);
-
-    if (dof == pressure_pin_dof)
-    {
-      pin_key = key;
-      found_pin = true;
-    }
-  }
-
-  if (!found_pin || levels.empty())
-    return false;
-
-  struct ReducedPressureLevel
-  {
-    Real gh = 0.0;
-    Real rho = 0.0;
-    Real reduced_pressure = 0.0;
-    std::vector<dof_id_type> dofs;
-  };
-
-  std::vector<std::pair<long long, ReducedPressureLevel>> ordered_levels;
-  ordered_levels.reserve(levels.size());
-  for (const auto & [key, level] : levels)
-    ordered_levels.push_back(
-        {key, {level.gh, level.rho_sum / level.count, 0.0, level.dofs}});
-
-  std::sort(ordered_levels.begin(),
-            ordered_levels.end(),
-            [](const auto & lhs, const auto & rhs) { return lhs.second.gh < rhs.second.gh; });
-
-  const auto pin_it = std::find_if(
-      ordered_levels.begin(),
-      ordered_levels.end(),
-      [pin_key](const auto & level) { return level.first == pin_key; });
-  if (pin_it == ordered_levels.end())
-    return false;
-
-  const auto pin_index = std::distance(ordered_levels.begin(), pin_it);
-  pin_it->second.reduced_pressure = pressure_pin_value;
-
-  Real total_pressure = pressure_pin_value + pin_it->second.rho * pin_it->second.gh;
-  for (auto level_index = pin_index + 1; level_index < ordered_levels.size(); ++level_index)
-  {
-    const auto & previous = ordered_levels[level_index - 1].second;
-    auto & current = ordered_levels[level_index].second;
-    total_pressure += 0.5 * (previous.rho + current.rho) * (current.gh - previous.gh);
-    current.reduced_pressure = total_pressure - current.rho * current.gh;
-  }
-
-  total_pressure = pressure_pin_value + pin_it->second.rho * pin_it->second.gh;
-  for (int level_index = static_cast<int>(pin_index) - 1; level_index >= 0; --level_index)
-  {
-    const auto & next = ordered_levels[level_index + 1].second;
-    auto & current = ordered_levels[level_index].second;
-    total_pressure += 0.5 * (next.rho + current.rho) * (current.gh - next.gh);
-    current.reduced_pressure = total_pressure - current.rho * current.gh;
-  }
-
-  auto & current_local_solution = *(pressure_system.system().current_local_solution);
-  for (const auto & level : ordered_levels)
-    for (const auto dof : level.second.dofs)
-      current_local_solution.set(dof, level.second.reduced_pressure);
-
-  current_local_solution.close();
-  pressure_system.setSolution(current_local_solution);
-
-  return true;
 }
 
 Real
@@ -2944,6 +2820,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
 
     for (const auto dim_i : make_range(_dim))
       if (auto * bc_pointer = _vel[dim_i]->getBoundaryCondition(boundary_id))
+      {
+        if (dynamic_cast<LinearFVPressureInletOutletMomentumBC *>(bc_pointer) ||
+            dynamic_cast<LinearFVPressureInletOutletVelocityBC *>(bc_pointer))
+          continue;
+
         if (auto * adv_diff_bc = dynamic_cast<LinearFVAdvectionDiffusionBC *>(bc_pointer))
         {
           adv_diff_bc->setupFaceData(
@@ -2955,6 +2836,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
             break;
           }
         }
+      }
   }
 
   return use_constrained_boundary_state;

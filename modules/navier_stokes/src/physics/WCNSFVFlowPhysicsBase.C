@@ -383,10 +383,6 @@ WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
   if (_solve_for_dynamic_pressure)
   {
     params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
-    if (!isParamSetByUser("reference_pressure_point"))
-      paramWarning("reference_pressure_point",
-                   "Default value of (0,0,0) used. If this point is outside the flow domain, the "
-                   "simulation will error");
     params.set<Real>("reference_pressure") = getParam<Real>("reference_pressure");
   }
   params.set<Point>("gravity") = getParam<RealVectorValue>("gravity");

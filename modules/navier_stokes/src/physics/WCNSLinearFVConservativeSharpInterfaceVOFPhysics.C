@@ -108,10 +108,14 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       "Whether to use an interFoam-style bounded explicit correction stage after the donor alpha "
       "solve. When enabled, the matrix transport should remain on upwind/donor transport.");
   params.addRangeCheckedParam<unsigned int>(
-      "n_alpha_corrections", 2, "n_alpha_corrections>0", "Number of MULES-style correction sweeps.");
+      "n_alpha_corrections",
+      2,
+      "n_alpha_corrections>=0",
+      "Number of MULES-style correction sweeps. Zero publishes the donor alpha flux without an "
+      "explicit correction sweep.");
   params.addRangeCheckedParam<unsigned int>(
       "n_limiter_iterations",
-      5,
+      3,
       "n_limiter_iterations>0",
       "Number of limiter tightening passes inside each correction sweep.");
   params.addRangeCheckedParam<Real>(
@@ -465,6 +469,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaOutletBC()
       if (dimension() >= 3)
         params.set<SolverVariableName>("w") = velocity_names[2];
       params.set<MooseFunctorName>("backflow_value") = _alpha_outlet_backflow_functor;
+      params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
     }
     getProblem().addLinearFVBC(bc_type, prefix() + "alpha_outlet_" + outlet_bdy, params);
   }

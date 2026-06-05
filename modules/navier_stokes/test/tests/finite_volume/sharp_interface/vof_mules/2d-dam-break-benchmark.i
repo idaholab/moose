@@ -53,7 +53,6 @@ c_alpha = 0.01
         dynamic_viscosity = 'mu_mixture'
         gravity = '0 -${g} 0'
         volume_fraction_functor = 'alpha'
-        reference_pressure_point = '0 ${domain_dims_y} 0'
         surface_tension_coefficient = '0'
         create_curvature_producer = true
         curvature_delta_n_mode = 'fixed'
@@ -96,7 +95,7 @@ c_alpha = 0.01
         use_mules_correction = true
         alpha_apply_prev_corr = false
         n_alpha_corrections = 2
-        n_limiter_iterations = 6
+        n_limiter_iterations = 3
         use_cell_summed_mules_limiter = true
         use_local_mules_bounds = true
       []
@@ -188,9 +187,6 @@ c_alpha = 0.01
   pressure_petsc_options_value = 'lu'
   volume_fraction_petsc_options_iname = '-pc_type'
   volume_fraction_petsc_options_value = 'lu'
-
-  pin_pressure = true
-  pressure_pin_point = '0.0 ${domain_dims_y} 0.0'
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2

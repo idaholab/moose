@@ -126,6 +126,10 @@ private:
                      const std::unordered_map<dof_id_type, Real> & alpha_before,
                      const std::unordered_map<dof_id_type, Real> & alpha_after,
                      const unsigned int subcycle_index) const;
+  bool partitionFace(const FaceCorrectionData & data) const;
+  bool locallyOwnedCell(const ElemInfo & elem_info) const;
+  bool synchronizePartitionFaceLimiters(const std::vector<FaceCorrectionData> & face_corrections,
+                                        std::vector<Real> & accepted_lambda) const;
   LinearFVBoundaryCondition * boundaryCondition(const FaceInfo & fi) const;
   Real boundaryValue(const FaceInfo & fi, FaceInfo::VarFaceNeighbors face_type) const;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
@@ -140,7 +144,7 @@ private:
   Real highOrderFaceValue(const FaceInfo & fi) const;
   Real highOrderFlux(const FaceInfo & fi) const;
   Real venkatakrishnanFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
-  Real vanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
+  Real sharedVanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   BoundaryFaceKind classifyBoundaryFace(const FaceInfo & fi,
                                         FaceInfo::VarFaceNeighbors face_type,
                                         Real volumetric_flux) const;

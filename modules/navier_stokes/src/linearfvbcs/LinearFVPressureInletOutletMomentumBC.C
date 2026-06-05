@@ -20,9 +20,9 @@ LinearFVPressureInletOutletMomentumBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription(
-      "Adds an reference-solver-style pressure-inlet-outlet boundary condition for velocity components. "
-      "On outflow it behaves like a zero-gradient / extrapolated outlet; on backflow it switches "
-      "to a prescribed velocity value.");
+      "Adds an OpenFOAM-style pressureInletOutletVelocity boundary condition for velocity "
+      "components. On outflow it behaves like a zero-gradient / extrapolated outlet; on backflow "
+      "it fixes the tangential velocity and extrapolates the normal velocity.");
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
@@ -34,7 +34,13 @@ LinearFVPressureInletOutletMomentumBC::validParams()
   params.addParam<MooseFunctorName>(
       "backflow_value",
       "0",
-      "The backflow velocity imposed when the local boundary flow reverses and becomes inflow.");
+      "The tangential backflow velocity component imposed when the local boundary flow reverses "
+      "and becomes inflow. The OpenFOAM dam-break path uses the default value of zero.");
+  params.addParam<MooseFunctorName>(
+      "face_flux",
+      "corrected_face_phi",
+      "The corrected face-flux functor used to switch between outflow and backflow. This matches "
+      "OpenFOAM pressureInletOutletVelocity, which switches on phi rather than cell velocity.");
   params.addParam<MooseFunctorName>(
       NS::density,
       "1",
@@ -71,6 +77,7 @@ LinearFVPressureInletOutletMomentumBC::LinearFVPressureInletOutletMomentumBC(
                : nullptr),
     _index(getParam<MooseEnum>("momentum_component")),
     _backflow_value(getFunctor<Real>("backflow_value")),
+    _face_flux(getFunctor<Real>("face_flux")),
     _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
   if (!_u_var)
@@ -94,6 +101,15 @@ LinearFVPressureInletOutletMomentumBC::LinearFVPressureInletOutletMomentumBC(
     _var.computeCellGradients();
 }
 
+Real
+LinearFVPressureInletOutletMomentumBC::outwardFaceFlux() const
+{
+  const auto state = determineState();
+  const Real boundary_normal_multiplier =
+      _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
+  return boundary_normal_multiplier * _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
+}
+
 const ElemInfo &
 LinearFVPressureInletOutletMomentumBC::fluidElemInfo() const
 {
@@ -108,6 +124,31 @@ LinearFVPressureInletOutletMomentumBC::computeVelocity(const ElemInfo & elem_inf
   return _var.getElemValue(elem_info, state);
 }
 
+RealVectorValue
+LinearFVPressureInletOutletMomentumBC::cellVelocity(const ElemInfo & elem_info,
+                                                    const Moose::StateArg & state) const
+{
+  RealVectorValue velocity;
+  for (const auto dim_i : make_range(_dim))
+    velocity(dim_i) = _velocity_vars[dim_i]->getElemValue(elem_info, state);
+
+  return velocity;
+}
+
+RealVectorValue
+LinearFVPressureInletOutletMomentumBC::outwardUnitNormal() const
+{
+  auto normal = _current_face_info->normal();
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+    normal *= -1.0;
+
+  const Real normal_magnitude = normal.norm();
+  if (normal_magnitude <= libMesh::TOLERANCE)
+    return RealVectorValue();
+
+  return normal / normal_magnitude;
+}
+
 RealGradient
 LinearFVPressureInletOutletMomentumBC::computeVelocityGradient(const ElemInfo & elem_info,
                                                                const Moose::StateArg & state) const
@@ -118,18 +159,7 @@ LinearFVPressureInletOutletMomentumBC::computeVelocityGradient(const ElemInfo & 
 bool
 LinearFVPressureInletOutletMomentumBC::isBackflow() const
 {
-  const auto & elem_info = fluidElemInfo();
-  const auto state = determineState();
-
-  RealVectorValue cell_velocity;
-  for (const auto dim_i : make_range(_dim))
-    cell_velocity(dim_i) = _velocity_vars[dim_i]->getElemValue(elem_info, state);
-
-  const Real boundary_normal_multiplier =
-      _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  const Real normal_velocity =
-      boundary_normal_multiplier * (cell_velocity * _current_face_info->normal());
-  return normal_velocity < 0.0;
+  return outwardFaceFlux() < 0.0;
 }
 
 Real
@@ -157,13 +187,23 @@ LinearFVPressureInletOutletMomentumBC::computeOutflowBoundaryValueRHSContributio
 Real
 LinearFVPressureInletOutletMomentumBC::computeBackflowBoundaryValue() const
 {
-  return _backflow_value(functorFaceArg(_backflow_value, _current_face_info), determineState());
+  const auto & elem_info = fluidElemInfo();
+  const auto state = determineState();
+  const RealVectorValue normal = outwardUnitNormal();
+  const Real normal_component = normal(_index);
+  const Real normal_velocity = cellVelocity(elem_info, state) * normal;
+  const Real backflow_tangential_value =
+      _backflow_value(functorFaceArg(_backflow_value, _current_face_info), state);
+
+  return normal_component * normal_velocity +
+         (1.0 - normal_component * normal_component) * backflow_tangential_value;
 }
 
 Real
 LinearFVPressureInletOutletMomentumBC::computeBackflowBoundaryValueMatrixContribution() const
 {
-  return 1.0;
+  const Real normal_component = outwardUnitNormal()(_index);
+  return normal_component * normal_component;
 }
 
 Real
@@ -180,35 +220,38 @@ LinearFVPressureInletOutletMomentumBC::computeBoundaryNormalGradient() const
 
   const auto & elem_info = fluidElemInfo();
   const Real distance = computeCellToFaceDistance();
-  return (computeBackflowBoundaryValue() -
-          computeBackflowBoundaryValueMatrixContribution() * _var.getElemValue(elem_info, determineState())) /
-         distance;
+  return (computeBackflowBoundaryValue() - _var.getElemValue(elem_info, determineState())) / distance;
 }
 
 Real
 LinearFVPressureInletOutletMomentumBC::computeBoundaryValueMatrixContribution() const
 {
-  if (isBackflow())
-    return 0.0;
-
-  return 1.0;
+  return isBackflow() ? computeBackflowBoundaryValueMatrixContribution() : 1.0;
 }
 
 Real
 LinearFVPressureInletOutletMomentumBC::computeBoundaryValueRHSContribution() const
 {
-  return isBackflow() ? computeBackflowBoundaryValue() : computeOutflowBoundaryValueRHSContribution();
+  if (!isBackflow())
+    return computeOutflowBoundaryValueRHSContribution();
+
+  const auto & elem_info = fluidElemInfo();
+  return computeBackflowBoundaryValue() -
+         computeBackflowBoundaryValueMatrixContribution() *
+             _var.getElemValue(elem_info, determineState());
 }
 
 Real
 LinearFVPressureInletOutletMomentumBC::computeBoundaryGradientMatrixContribution() const
 {
-  return isBackflow() ? computeBackflowBoundaryValueMatrixContribution() / computeCellToFaceDistance()
-                      : 0.0;
+  if (!isBackflow())
+    return 0.0;
+
+  return (1.0 - computeBackflowBoundaryValueMatrixContribution()) / computeCellToFaceDistance();
 }
 
 Real
 LinearFVPressureInletOutletMomentumBC::computeBoundaryGradientRHSContribution() const
 {
-  return isBackflow() ? computeBackflowBoundaryValue() / computeCellToFaceDistance() : 0.0;
+  return isBackflow() ? computeBoundaryValueRHSContribution() / computeCellToFaceDistance() : 0.0;
 }

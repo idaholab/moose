@@ -46,7 +46,6 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         dynamic_viscosity = 'mu_mixture'
         gravity = '0 -${g} 0'
         volume_fraction_functor = 'alpha'
-        reference_pressure_point = '0 ${domain_dims_y} 0'
         surface_tension_coefficient = '0'
         create_curvature_producer = false
 
@@ -175,9 +174,6 @@ cell_dy = ${fparse domain_dims_y / 50.0}
   pressure_petsc_options_value = 'lu'
   volume_fraction_petsc_options_iname = '-pc_type'
   volume_fraction_petsc_options_value = 'lu'
-
-  pin_pressure = true
-  pressure_pin_point = '0.0 ${domain_dims_y} 0.0'
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2

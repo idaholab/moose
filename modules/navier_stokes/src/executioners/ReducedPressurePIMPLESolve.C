@@ -221,27 +221,14 @@ ReducedPressurePIMPLESolve::validParams()
       "Deprecated compatibility switch. The reduced-pressure sharp-interface PIMPLE path now "
       "always refreshes the volume-fraction system(s) and alpha-owned rhoPhi on every outer "
       "correction to match interFoam's outer-loop architecture.");
-  MooseEnum startup_pressure_initialization("none projection-only equilibrium-seed",
-                                            "projection-only");
+  MooseEnum startup_pressure_initialization("none projection-only", "projection-only");
   params.addParam<MooseEnum>(
       "startup_pressure_initialization",
       startup_pressure_initialization,
       "Startup reduced-pressure initialization policy on the first time step. Use "
       "'projection-only' to mimic interFoam's initCorrectPhi-style startup projection without "
-      "overwriting the user-supplied reduced-pressure field, 'equilibrium-seed' to explicitly "
-      "construct a quiescent reduced-pressure equilibrium before projection, or 'none' to skip "
-      "startup pressure cleanup entirely.");
-  params.addParam<bool>(
-      "perform_startup_hydrostatic_initialization",
-      false,
-      "Deprecated compatibility switch. When explicitly set true it maps to "
-      "startup_pressure_initialization=equilibrium-seed, and when explicitly set false it maps "
-      "to startup_pressure_initialization=none.");
-  params.addParam<bool>(
-      "suppress_explicit_hydrostatic_flux_during_seeded_startup",
-      false,
-      "Whether to suppress the explicit sharp-interface hydrostatic pressure-equation source "
-      "flux during an equilibrium-seed startup reconstruction on the first time step.");
+      "overwriting the user-supplied reduced-pressure field, or 'none' to skip startup pressure "
+      "cleanup entirely.");
   params.addRangeCheckedParam<unsigned int>(
       "startup_flux_corrections",
       1,
@@ -262,6 +249,11 @@ ReducedPressurePIMPLESolve::validParams()
       false,
       "Whether to dump the pre-pressure-solve reduced-pressure cell state and sharp-interface "
       "face-operator state to CSV for the first few outer iterations.");
+  params.addParam<bool>(
+      "print_pressure_hbya_parity_summary",
+      false,
+      "Whether to print one compact sharp-interface rhoPhi/HbyA/pressure-writeback parity summary "
+      "line after each pressure-corrected state publication.");
   params.addRangeCheckedParam<unsigned int>(
       "dump_pressure_outer_debug_start_timestep",
       1,
@@ -309,10 +301,10 @@ ReducedPressurePIMPLESolve::validParams()
       "volume_fraction_max_value volume_fraction_subcycles volume_fraction_max_courant "
       "adjust_momentum_pressure_time_step momentum_pressure_max_courant "
       "volume_fraction_outer_corrections "
-      "startup_pressure_initialization perform_startup_hydrostatic_initialization "
-      "suppress_explicit_hydrostatic_flux_during_seeded_startup startup_flux_corrections "
+      "startup_pressure_initialization startup_flux_corrections "
       "num_pressure_nonorthogonal_correctors n_nonorthogonal_correctors "
-      "dump_pressure_outer_debug_csv dump_pressure_outer_debug_start_timestep "
+      "dump_pressure_outer_debug_csv print_pressure_hbya_parity_summary "
+      "dump_pressure_outer_debug_start_timestep "
       "dump_pressure_outer_debug_end_timestep dump_pressure_outer_debug_max_outer_iterations "
       "pressure_debug_face_ids pressure_debug_face_points "
       "audit_momentum_predictor_rebuild audit_momentum_predictor_rebuild_start_timestep "
@@ -339,6 +331,7 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _momentum_pressure_max_courant(getParam<Real>("momentum_pressure_max_courant")),
     _volume_fraction_outer_corrections(getParam<bool>("volume_fraction_outer_corrections")),
     _dump_pressure_outer_debug_csv(getParam<bool>("dump_pressure_outer_debug_csv")),
+    _print_pressure_hbya_parity_summary(getParam<bool>("print_pressure_hbya_parity_summary")),
     _dump_pressure_outer_debug_start_timestep(
         getParam<unsigned int>("dump_pressure_outer_debug_start_timestep")),
     _dump_pressure_outer_debug_end_timestep(
@@ -359,8 +352,6 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
         getParam<unsigned int>("audit_momentum_predictor_rebuild_start_timestep")),
     _audit_momentum_predictor_rebuild_end_timestep(
         getParam<unsigned int>("audit_momentum_predictor_rebuild_end_timestep")),
-    _suppress_explicit_hydrostatic_flux_during_seeded_startup(
-        getParam<bool>("suppress_explicit_hydrostatic_flux_during_seeded_startup")),
     _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections")),
     _num_pressure_nonorthogonal_correctors([&]()
                                            {
@@ -391,9 +382,11 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
 {
   _startup_pressure_initialization =
       getParam<MooseEnum>("startup_pressure_initialization").operator std::string();
-  if (parameters().isParamSetByUser("perform_startup_hydrostatic_initialization"))
-    _startup_pressure_initialization =
-        getParam<bool>("perform_startup_hydrostatic_initialization") ? "equilibrium-seed" : "none";
+
+  if (_pin_pressure)
+    paramError("pin_pressure",
+               "ReducedPressurePIMPLE supports the OpenFOAM-style pressure boundary-condition "
+               "path only; pressure pinning is not supported.");
 
   if (_volume_fraction_min_value > _volume_fraction_max_value)
     paramError("volume_fraction_max_value",
@@ -443,12 +436,6 @@ bool
 ReducedPressurePIMPLESolve::startupPressureInitializationEnabled() const
 {
   return _startup_pressure_initialization != "none";
-}
-
-bool
-ReducedPressurePIMPLESolve::useEquilibriumStartupPressureInitialization() const
-{
-  return _startup_pressure_initialization == "equilibrium-seed";
 }
 
 ConservativeSharpInterfaceVOFMULESCorrector *
@@ -1284,33 +1271,13 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
   if (!_should_solve_pressure)
     return;
 
-  bool seeded_pressure = false;
-  if (useEquilibriumStartupPressureInitialization())
-  {
-    _console << "Applying startup reduced-pressure equilibrium seed before PIMPLE iterations"
-             << std::endl;
-    if (auto * sharp_rc = sharpInterfaceRC())
-      if (sharp_rc->seedHydrostaticPressure(_pressure_system, _pressure_pin_dof, _pressure_pin_value))
-      {
-        seeded_pressure = true;
-        synchronizeSystemState(_pressure_system);
-        _pressure_system.computeGradients();
-        _problem.execute(EXEC_NONLINEAR);
-      }
-
-    if (!seeded_pressure)
-      _console << "Startup equilibrium seed could not be constructed; falling back to "
-                  "projection-only startup cleanup"
-               << std::endl;
-  }
-  else
-    _console << "Applying startup continuity / CorrectPhi projection before PIMPLE iterations"
-             << std::endl;
+  _console << "Applying startup continuity / CorrectPhi projection before PIMPLE iterations"
+           << std::endl;
 
   // Closest MOOSE equivalent of interFoam's initCorrectPhi: honor the current
-  // reduced-pressure field (user-supplied or equilibrium-seeded), assemble the
-  // momentum predictor coefficients, and run pressure-only startup continuity
-  // corrections before the first outer iteration.
+  // reduced-pressure field, assemble the momentum predictor coefficients, and
+  // run pressure-only startup continuity corrections before the first outer
+  // iteration.
   if (!_momentum_systems.empty() && _rc_uo)
   {
     assembleMomentumPredictorOnly();
@@ -1404,7 +1371,7 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] updating pressure boundary gradients" << std::endl;
-  _rc_uo->updatePressureBoundaryNormalGradients(_pin_pressure);
+  _rc_uo->updatePressureBoundaryNormalGradients(/* apply_reference_adjustment = */ false);
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] preparePressureCorrectorState end" << std::endl;
@@ -1620,6 +1587,173 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] dumpPressureOuterDebugState end"
               << " stage=" << stage_label << std::endl;
+}
+
+void
+ReducedPressurePIMPLESolve::printPressureHbyAParitySummary(const std::string & stage_label) const
+{
+  if (!_print_pressure_hbya_parity_summary ||
+      _problem.timeStep() < _dump_pressure_outer_debug_start_timestep ||
+      _problem.timeStep() > _dump_pressure_outer_debug_end_timestep ||
+      _current_outer_iteration > _dump_pressure_outer_debug_max_outer_iterations)
+    return;
+
+  const auto * const sharp_rc = sharpInterfaceRC();
+  if (!sharp_rc)
+    return;
+
+  std::size_t face_count = 0;
+  Real max_abs_outer_rho_phi_minus_vof = 0.0;
+  Real max_abs_phi_hbya_style_mismatch = 0.0;
+  Real max_abs_final_phi_mismatch = 0.0;
+  Real max_abs_writeback_phi_mismatch = 0.0;
+  Real max_abs_phig = 0.0;
+  const FaceInfo * worst_rho_phi_face = nullptr;
+
+  Point corner_min_max;
+  corner_min_max(0) = std::numeric_limits<Real>::max();
+  corner_min_max(1) = std::numeric_limits<Real>::lowest();
+  corner_min_max(2) = 0.0;
+  const auto dim = _momentum_system_numbers.size();
+
+  for (const auto * fi : sharp_rc->flowFacesForAudit())
+    if (fi)
+    {
+      const Point centroid = fi->faceCentroid();
+      corner_min_max(0) = std::min(corner_min_max(0), centroid(0));
+      corner_min_max(1) = std::max(corner_min_max(1), centroid(1));
+      if (dim > 2)
+        corner_min_max(2) = std::max(corner_min_max(2), centroid(2));
+    }
+
+  const ElemInfo * top_left_elem = nullptr;
+  Real top_left_dist_sq = std::numeric_limits<Real>::max();
+  std::unordered_set<dof_id_type> visited_elem_ids;
+
+  auto consider_elem = [&](const ElemInfo * elem_info)
+  {
+    if (!elem_info || !elem_info->elem())
+      return;
+
+    if (!visited_elem_ids.insert(elem_info->elem()->id()).second)
+      return;
+
+    const Real dist_sq = (elem_info->centroid() - corner_min_max).norm_sq();
+    if (dist_sq < top_left_dist_sq)
+    {
+      top_left_dist_sq = dist_sq;
+      top_left_elem = elem_info;
+    }
+  };
+
+  for (const auto * fi : sharp_rc->flowFacesForAudit())
+  {
+    if (!fi)
+      continue;
+
+    ++face_count;
+
+    const Real vof_rho_phi = sharp_rc->vofRhoPhiIntegrated(*fi);
+    const Real outer_rho_phi = sharp_rc->storedOuterIterationRhoPhiIntegrated(*fi);
+    const Real outer_rho_phi_mismatch = std::abs(outer_rho_phi - vof_rho_phi);
+    if (outer_rho_phi_mismatch > max_abs_outer_rho_phi_minus_vof)
+    {
+      max_abs_outer_rho_phi_minus_vof = outer_rho_phi_mismatch;
+      worst_rho_phi_face = fi;
+    }
+
+    const Real reference_phi_hbya_before_phig =
+        sharp_rc->storedPredictorOperatorPhi(*fi) + sharp_rc->storedTransientProjectionFlux(*fi);
+    const Real reference_phi_hbya =
+        reference_phi_hbya_before_phig + sharp_rc->storedPhigFlux(*fi);
+    const Real current_phi_hbya = sharp_rc->storedPhiHbyAReferenceStyle(*fi);
+    max_abs_phi_hbya_style_mismatch =
+        std::max(max_abs_phi_hbya_style_mismatch,
+                 std::abs(current_phi_hbya - reference_phi_hbya));
+
+    const Real reference_final_phi =
+        reference_phi_hbya + sharp_rc->storedPressureEquationVolumetricFlux(*fi);
+    max_abs_final_phi_mismatch =
+        std::max(max_abs_final_phi_mismatch,
+                 std::abs(sharp_rc->storedCorrectedFacePhi(*fi) - reference_final_phi));
+
+    const Real reference_writeback_phi =
+        sharp_rc->storedPressureEquationVolumetricFlux(*fi) + sharp_rc->storedPhigFlux(*fi);
+    max_abs_writeback_phi_mismatch =
+        std::max(max_abs_writeback_phi_mismatch,
+                 std::abs(sharp_rc->storedPressureCorrectionPhi(*fi) - reference_writeback_phi));
+    max_abs_phig = std::max(max_abs_phig, std::abs(sharp_rc->storedPhigFlux(*fi)));
+
+    consider_elem(fi->elemInfo());
+    consider_elem(fi->neighborInfo());
+  }
+
+  Real top_left_velocity_magnitude = 0.0;
+  dof_id_type top_left_elem_id = DofObject::invalid_id;
+  if (top_left_elem)
+  {
+    top_left_elem_id = top_left_elem->elem()->id();
+    for (const auto dim_i : make_range(dim))
+    {
+      const Real component = sharp_rc->debugCurrentVelocityComponent(*top_left_elem, dim_i);
+      top_left_velocity_magnitude += component * component;
+    }
+    top_left_velocity_magnitude = std::sqrt(top_left_velocity_magnitude);
+  }
+
+  dof_id_type worst_rho_phi_face_id = DofObject::invalid_id;
+  Point worst_rho_phi_centroid;
+  Real worst_outer_phi = 0.0;
+  Real worst_vof_transport_phi = 0.0;
+  Real worst_outer_rho_phi = 0.0;
+  Real worst_vof_rho_phi = 0.0;
+  Real worst_vof_base_gas_rho_phi = 0.0;
+  Real worst_vof_alpha_correction_rho_phi = 0.0;
+  Real worst_alpha_phi = 0.0;
+  Real worst_elem_alpha = 0.0;
+  Real worst_neighbor_alpha = 0.0;
+  if (worst_rho_phi_face)
+  {
+    worst_rho_phi_face_id = worst_rho_phi_face->id();
+    worst_rho_phi_centroid = worst_rho_phi_face->faceCentroid();
+    worst_outer_phi = sharp_rc->storedOuterIterationPhi(*worst_rho_phi_face);
+    worst_vof_transport_phi = sharp_rc->storedVOFTransportPhi(*worst_rho_phi_face);
+    worst_outer_rho_phi = sharp_rc->storedOuterIterationRhoPhiIntegrated(*worst_rho_phi_face);
+    worst_vof_rho_phi = sharp_rc->vofRhoPhiIntegrated(*worst_rho_phi_face);
+    worst_vof_base_gas_rho_phi = sharp_rc->vofBaseGasRhoPhiIntegrated(*worst_rho_phi_face);
+    worst_vof_alpha_correction_rho_phi =
+        sharp_rc->vofAlphaCorrectionRhoPhiIntegrated(*worst_rho_phi_face);
+    worst_alpha_phi = sharp_rc->vofAlphaPhiLimitedIntegrated(*worst_rho_phi_face);
+    worst_elem_alpha = sharp_rc->debugElemAlpha(*worst_rho_phi_face, Moose::currentState());
+    worst_neighbor_alpha =
+        sharp_rc->debugNeighborAlpha(*worst_rho_phi_face, Moose::currentState());
+  }
+
+  _console << std::setprecision(8) << name() << ": hbya_parity"
+           << " stage=" << stage_label
+           << " ts=" << _problem.timeStep()
+           << " outer=" << _current_outer_iteration
+           << " piso=" << _current_piso_iteration
+           << " faces=" << face_count
+           << " max|outerRhoPhi-vofRhoPhi|=" << max_abs_outer_rho_phi_minus_vof
+           << " max|phiHbyA-currentRef|=" << max_abs_phi_hbya_style_mismatch
+           << " max|finalPhi-ref|=" << max_abs_final_phi_mismatch
+           << " max|writebackPhi-ref|=" << max_abs_writeback_phi_mismatch
+           << " max|phig|=" << max_abs_phig
+           << " worstRhoPhiFace=" << worst_rho_phi_face_id
+           << " worstRhoPhiCentroid=" << worst_rho_phi_centroid
+           << " worstOuterPhi=" << worst_outer_phi
+           << " worstVOFTransportPhi=" << worst_vof_transport_phi
+           << " worstOuterRhoPhi=" << worst_outer_rho_phi
+           << " worstVOFRhoPhi=" << worst_vof_rho_phi
+           << " worstVOFBaseGasRhoPhi=" << worst_vof_base_gas_rho_phi
+           << " worstVOFAlphaCorrectionRhoPhi=" << worst_vof_alpha_correction_rho_phi
+           << " worstAlphaPhi=" << worst_alpha_phi
+           << " worstElemAlpha=" << worst_elem_alpha
+           << " worstNeighborAlpha=" << worst_neighbor_alpha
+           << " topLeftElem=" << top_left_elem_id
+           << " topLeft|U|=" << top_left_velocity_magnitude
+           << std::endl;
 }
 
 void
@@ -2134,21 +2268,11 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
       sharp_rc ? sharp_rc->suppressExplicitHydrostaticPressureFlux() : false;
   const bool saved_suppress_startup_pressure_predictor_flux_sources =
       sharp_rc ? sharp_rc->suppressStartupPressurePredictorFluxSources() : false;
-  const bool preserve_seeded_hydrostatic_startup_operator =
-      useEquilibriumStartupPressureInitialization() &&
-      !_suppress_explicit_hydrostatic_flux_during_seeded_startup;
   if (sharp_rc)
   {
-    // Projection-only startup cleanup should still mimic a bare CorrectPhi-like
-    // flux repair. But when we intentionally seed a reduced-pressure
-    // hydrostatic equilibrium, the startup pressure correction must see the
-    // same explicit hydrostatic face operator that the seeded field is meant to
-    // balance against; otherwise the first real pressure stage starts from a
-    // discretely inconsistent state.
-    sharp_rc->setSuppressStartupPressurePredictorFluxSources(
-        !preserve_seeded_hydrostatic_startup_operator);
-    sharp_rc->setSuppressExplicitHydrostaticPressureFlux(
-        !preserve_seeded_hydrostatic_startup_operator);
+    // Projection-only startup cleanup should mimic a bare CorrectPhi-like flux repair.
+    sharp_rc->setSuppressStartupPressurePredictorFluxSources(true);
+    sharp_rc->setSuppressExplicitHydrostaticPressureFlux(true);
   }
 
   preparePressureCorrectorState(subtract_updated_pressure);
@@ -2337,25 +2461,13 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedTransportState(const std::st
     std::cerr << "[ReducedPressurePIMPLESolve] updating velocity boundary state" << std::endl;
   _rc_uo->updateVelocityBoundaryState();
 
-  applyReferencePressureCorrectorTail(stage_label);
+  reportReferenceContinuityErrors(stage_label);
+  correctMovingMeshFaceVelocityAndMakeRelative();
 
   if (_problem.timeStep() == 1)
     std::cerr << "[ReducedPressurePIMPLESolve] dumping post-pressure debug state" << std::endl;
   dumpPressureOuterDebugState(stage_label);
-}
-
-void
-ReducedPressurePIMPLESolve::applyReferencePressureCorrectorTail(const std::string & stage_label)
-{
-  // reference solver tail after the final non-orthogonal pressure correction:
-  //   continuityErrors();
-  //   fvc::correctUf(Uf, U, phi, MRF);
-  //   fvc::makeRelative(phi, U);
-  //   p == p_rgh + rho*gh;
-  //   reference correction for p/p_rgh.
-  reportReferenceContinuityErrors(stage_label);
-  correctMovingMeshFaceVelocityAndMakeRelative();
-  updateAbsolutePressureAndReferenceState();
+  printPressureHbyAParitySummary(stage_label);
 }
 
 void
@@ -2443,55 +2555,6 @@ ReducedPressurePIMPLESolve::correctMovingMeshFaceVelocityAndMakeRelative()
   //   fvc::correctUf(Uf, U, phi, MRF);
   //   fvc::makeRelative(phi, U);
   // are exact no-ops.
-}
-
-void
-ReducedPressurePIMPLESolve::updateAbsolutePressureAndReferenceState()
-{
-  // The reduced-pressure path solves only the configured pressure system. There is no separate
-  // absolute pressure variable equivalent to reference solver's p == p_rgh + rho*gh in this executioner.
-  // The matching reference operation is to restore the solved reduced-pressure reference after
-  // relaxation, equivalent to reference solver's final p/p_rgh reference adjustment for this single-field
-  // representation.
-  if (!_pin_pressure)
-    return;
-
-  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-  auto & pressure_comm = _pressure_system.system().comm();
-
-  dof_id_type pressure_pin_dof = _pressure_pin_dof;
-  pressure_comm.min(pressure_pin_dof);
-  if (pressure_pin_dof == DofObject::invalid_id || pressure_pin_dof == libMesh::invalid_uint)
-    return;
-
-  const auto & pressure_dof_map = _pressure_system.system().get_dof_map();
-  const processor_id_type pressure_pin_owner = pressure_dof_map.dof_owner(pressure_pin_dof);
-
-  Real pressure_pin_value = 0.0;
-  if (pressure_comm.rank() == pressure_pin_owner)
-  {
-    PetscVectorReader pressure_reader(pressure_current_solution);
-    pressure_pin_value = pressure_reader(pressure_pin_dof);
-  }
-  pressure_comm.broadcast(pressure_pin_value, pressure_pin_owner);
-
-  const Real reference_shift = _pressure_pin_value - pressure_pin_value;
-
-  for (const auto i : make_range(pressure_current_solution.first_local_index(),
-                                 pressure_current_solution.last_local_index()))
-    pressure_current_solution.set(i, pressure_current_solution(i) + reference_shift);
-  pressure_current_solution.close();
-
-  if (auto * pressure_old_solution = _pressure_system.solutionPreviousNewton())
-  {
-    for (const auto i :
-         make_range(pressure_old_solution->first_local_index(), pressure_old_solution->last_local_index()))
-      pressure_old_solution->set(i, (*pressure_old_solution)(i) + reference_shift);
-    pressure_old_solution->close();
-  }
-
-  _pressure_system.setSolution(pressure_current_solution);
-  _pressure_system.computeGradients();
 }
 
 void

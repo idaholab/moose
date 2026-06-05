@@ -99,9 +99,6 @@ public:
   void freezeVOFTransportState(const bool use_previous_timestep_flux = false);
   void adoptPublishedVOFTransportState();
   void clearVOFTransportState();
-  bool seedHydrostaticPressure(LinearSystem & pressure_system,
-                               const dof_id_type pressure_pin_dof,
-                               const Real pressure_pin_value) const;
   void updateVelocityBoundaryState() override;
 
   /// Update the additional pressure-equation source-flux functors before the pressure solve.
@@ -137,6 +134,7 @@ public:
   Real storedPressurePredictorBasePhi(const FaceInfo & fi) const;
   Real storedPressureEquationVolumetricFlux(const FaceInfo & fi) const;
   Real storedPredictorOperatorPhi(const FaceInfo & fi) const;
+  Real storedPhiHbyAReferenceStyle(const FaceInfo & fi) const;
   Real storedPressureCorrectionPhi(const FaceInfo & fi) const;
   Real storedVOFTransportPhi(const FaceInfo & fi) const;
   Real storedOuterIterationPhi(const FaceInfo & fi) const;
