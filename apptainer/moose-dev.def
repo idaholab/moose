@@ -16,6 +16,8 @@
 {#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
+{#- PYTORCH_GIT_SHA: The git SHA to use for pytorch                                           -#}
+{#- PYTORCH_GIT_REMOTE: The git remote to use to get pytorch                                  -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
 {#- WITH_FMU: Whether or not to install python fmu utilities (default: 0)                     -#}
@@ -122,10 +124,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYFMI_VERSION=2.21.0
     # PythonFMU python package
     PYTHONFMU_VERSION=0.7.0
-{%- endif %}
-{% if WITHOUT_PYTORCH is not defined %}
-    # pytorch
-    PYTORCH_VERSION=2.12.0
 {%- endif %}
 {% if PROFILING is defined %}
     # pprof and its dependencies
@@ -370,11 +368,12 @@ EOF
     (
         cd ${ROOT_BUILD_DIR}
 
-        # Clone pytorch for build
+        # Clone pytorch
         PYTORCH_SRC_DIR=${ROOT_BUILD_DIR}/pytorch
-        git clone --branch v${PYTORCH_VERSION} \
-            --single-branch --recurse-submodules --shallow-submodules \
-            https://github.com/pytorch/pytorch ${PYTORCH_SRC_DIR}
+        git clone --depth 1 {{ PYTORCH_GIT_REMOTE }} ${PYTORCH_SRC_DIR}
+        cd ${PYTORCH_SRC_DIR}
+        git fetch --depth 1 origin {{ PYTORCH_GIT_SHA }}
+        git submodule update --init --depth 1 --recursive
 
         # Create a temporary python environment for building libtorch
         LIBTORCH_BUILD_VENV=${ROOT_BUILD_DIR}/pytorch_venv

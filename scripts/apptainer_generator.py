@@ -724,6 +724,7 @@ class ApptainerGenerator:
             "libmesh": [{"package": "libmesh", "submodule": "libmesh"}],
             "moose-dev": [
                 {"package": "conduit", "submodule": "framework/contrib/conduit"},
+                {"package": "pytorch", "submodule": "framework/contrib/pytorch"},
                 {"package": "mfem", "submodule": "framework/contrib/mfem"},
                 {"package": "neml2", "submodule": "framework/contrib/neml2"},
                 {"package": "wasp", "submodule": "framework/contrib/wasp"},
