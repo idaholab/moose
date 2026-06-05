@@ -1,7 +1,7 @@
 [Tests]
   design = 'MFEMProblem.md MFEMVariable.md'
+  issues = '#32940'
   [MFEMVariableSetupFromMOOSEVariables]
-    issues = '#29632'
     type = XMLDiff
     input = mfem_variables_from_moose.i
     xmldiff = 'OutputData/VariableSetupTest/Run0/Cycle000000/data.pvtu
@@ -14,7 +14,6 @@
     restep = false
   []
   [MFEMDiffusionAltSyntax]
-    issues = '#32940'
     type = XMLDiff
     input = ../kernels/diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
