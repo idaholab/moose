@@ -30,15 +30,11 @@ MFEMEigenproblem::validParams()
   params.addParam<MFEMScalarCoefficientName>(
       "rhs_coefficient",
       "1.",
-      "Name of the coefficient to scale the right-hand side of the eigenproblem equation by. A "
-      "declared matrix coefficient may be given for an anisotropic problem; otherwise it is "
-      "interpreted as a scalar coefficient.");
-  params.addParam<MFEMMatrixCoefficientName>(
-      "rhs_matrix_coefficient",
-      "1.",
-      "Name of the coefficient to scale the right-hand side of the eigenproblem equation by. A "
-      "declared matrix coefficient may be given for an anisotropic problem; otherwise it is "
-      "interpreted as a scalar coefficient.");
+      "Name of the coefficient to scale the right-hand side of the eigenproblem equation by.");
+  params.addParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient",
+                                             "1.",
+                                             "Name of the matrix coefficient to scale the "
+                                             "right-hand side of the eigenproblem equation by.");
 
   return params;
 }
