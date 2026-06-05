@@ -1266,8 +1266,33 @@ CSGBase::deleteEngUnit(const CSGEngUnit & unit)
 void
 CSGBase::expandAllEngUnits()
 {
-  // Snapshot raw pointers before expanding — expandEngUnit destroys each unit after expansion
-  // so iterating live references would dangle.
+  std::set<std::set<std::string>> all_type_sets;
+  expandAllEngUnitsCycle(all_type_sets);
+}
+
+void
+CSGBase::expandAllEngUnitsCycle(std::set<std::set<std::string>> & all_type_sets)
+{
+  // One call to this function is one pass: collect all current eng units, expand them, then
+  // recurse if expansion created new units. Units created during a pass are not in this pass's
+  // snapshot; they are handled in the next pass.
+  //
+  // Cycle check: if the same combination of unit types appeared at the start of a prior pass,
+  // expansion is stuck repeating the same configuration. Tracking the full type-set (not
+  // individual types) prevents false positives when a type reappears because it was produced
+  // by a different type's expansion rather than its own.
+  std::set<std::string> current_types;
+  for (const auto & u : getAllEngUnits())
+    current_types.insert(u.get().getUnitType());
+
+  if (all_type_sets.count(
+          current_types)) // this expansion set was already captured which means we are cycling
+    mooseError("Circular dependency detected in engineering unit expansion");
+
+  all_type_sets.insert(current_types);
+
+  // Snapshot raw pointers before expanding. Units are destroyed after expansion so iterating live
+  // references would dangle.
   std::vector<const CSGSurfaceEngUnit *> surfs;
   std::vector<const CSGCellEngUnit *> cells;
   std::vector<const CSGUniverseEngUnit *> univs;
@@ -1278,6 +1303,7 @@ CSGBase::expandAllEngUnits()
   for (const auto & u : getAllUniverseEngUnits())
     univs.push_back(&u.get());
 
+  // Expand all units in this pass
   for (const auto * s : surfs)
     expandEngUnit(*s);
   for (const auto * c : cells)
@@ -1285,11 +1311,10 @@ CSGBase::expandAllEngUnits()
   for (const auto * u : univs)
     expandEngUnit(*u);
 
-  // expandUnit() implementations may themselves create additional engineering units
-  // (e.g., a CSGCellEngUnit that internally adds a CSGSurfaceEngUnit). If any remain,
-  // recurse to expand them.
-  if (getAllEngUnits().size())
-    expandAllEngUnits();
+  // if engineering units exist after completion of all expansions above, then start the next "pass"
+  // through this expansion process. This will create a new set of "current_types" to check.
+  if (!getAllEngUnits().empty())
+    expandAllEngUnitsCycle(all_type_sets);
 }
 
 CSGRegion
@@ -1461,6 +1486,9 @@ CSGBase::replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegi
   {
     const CSGCell & cell = cell_ref.get();
     CSGRegion new_region = cell.getRegion();
+    if (new_region.getRegionType() == CSGRegion::RegionType::EMPTY)
+      continue; // cell units do not have a region so skip (can also skip if a regular cell has an
+                // empty region)
     new_region.replaceWithSubRegion(old_surf, sub_region);
     updateCellRegion(cell, new_region);
   }

@@ -896,6 +896,18 @@ private:
    */
   CSGSurface & getSurface(const std::string & name) { return _surface_list.getSurface(name); }
 
+  /**
+   * @brief Recursive implementation of expandAllEngUnits().
+   *
+   * Each call is one pass: all eng units currently in the base are expanded, then if new units
+   * were created the function calls itself to expand them. The set of unit types present at the
+   * start of each pass is recorded. If that exact combination was seen in a prior pass, expansion
+   * is detected to be a circular dependency and an error is raised.
+   *
+   * @param all_type_sets set of the sets of types seen in each pass of expandAllEngUnitsCycle
+   */
+  void expandAllEngUnitsCycle(std::set<std::set<std::string>> & all_type_sets);
+
   /// Check universes linked to root universe match universes defined in _universe_list
   void checkUniverseLinking() const;
 
