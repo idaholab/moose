@@ -293,6 +293,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::predictorOperatorFaceMassFlux(co
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::pressureCoupledWritebackMassFlux(const FaceInfo & fi) const
 {
+  if (_corrected_face_phi_seeded)
+    return volumetricNormalFluxToPressureMassFluxDensity(
+        &fi, libmesh_map_find(_pressure_correction_phi, fi.id()));
+
   return pressureVelocityWritebackFluxDensity(&fi);
 }
 
@@ -651,7 +655,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::dumpPressureCorrectorFaceDebugCS
          "corrected_face_phi_reference_style,corrected_face_phi_current_style,"
          "corrected_face_phi_style_mismatch,"
          "raw_rc_mass_flux,predictor_operator_mass_flux,pressure_writeback_mass_flux,"
-         "reconstructed_pressure_writeback_mass_flux,pressure_writeback_mass_flux_mismatch,"
+         "elem_reconstructed_pressure_writeback_mass_flux,"
+         "neighbor_reconstructed_pressure_writeback_mass_flux,"
+         "reconstructed_pressure_writeback_mass_flux,"
+         "elem_pressure_writeback_mass_flux_mismatch,"
+         "neighbor_pressure_writeback_mass_flux_mismatch,"
+         "pressure_writeback_mass_flux_mismatch,"
          "pressure_coupled_cell_reconstruction_scalar,"
          "elem_delta_u,elem_delta_v,elem_delta_w,"
          "neighbor_delta_u,neighbor_delta_v,neighbor_delta_w,"
@@ -790,7 +799,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::dumpPressureCorrectorFaceDebugCS
     RealVectorValue elem_delta;
     RealVectorValue neighbor_delta;
     RealVectorValue face_delta;
+    Real elem_reconstructed_pressure_writeback_mass_flux = 0.0;
+    Real neighbor_reconstructed_pressure_writeback_mass_flux = 0.0;
     Real reconstructed_pressure_writeback_mass_flux = 0.0;
+    Real elem_pressure_writeback_mass_flux_mismatch = 0.0;
+    Real neighbor_pressure_writeback_mass_flux_mismatch = 0.0;
     Real pressure_writeback_mass_flux_mismatch = 0.0;
     if (_pressure_coupled_velocity_correction_valid && _vel[0]->isInternalFace(*fi))
     {
@@ -803,8 +816,17 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::dumpPressureCorrectorFaceDebugCS
                                neighbor_delta(dim_i),
                                *fi,
                                true);
+      elem_reconstructed_pressure_writeback_mass_flux =
+          predictorFaceDensity(fi, time_arg) * (elem_delta * face_normal);
+      neighbor_reconstructed_pressure_writeback_mass_flux =
+          predictorFaceDensity(fi, time_arg) * (neighbor_delta * face_normal);
       reconstructed_pressure_writeback_mass_flux =
           predictorFaceDensity(fi, time_arg) * (face_delta * face_normal);
+      elem_pressure_writeback_mass_flux_mismatch =
+          pressureCoupledWritebackMassFlux(*fi) - elem_reconstructed_pressure_writeback_mass_flux;
+      neighbor_pressure_writeback_mass_flux_mismatch =
+          pressureCoupledWritebackMassFlux(*fi) -
+          neighbor_reconstructed_pressure_writeback_mass_flux;
       pressure_writeback_mass_flux_mismatch =
           pressureCoupledWritebackMassFlux(*fi) - reconstructed_pressure_writeback_mass_flux;
     }
@@ -869,7 +891,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::dumpPressureCorrectorFaceDebugCS
         << rawRhieChowMassFlux(*fi) << ','
         << predictorOperatorFaceMassFlux(*fi, time_arg) << ','
         << pressureCoupledWritebackMassFlux(*fi) << ','
+        << elem_reconstructed_pressure_writeback_mass_flux << ','
+        << neighbor_reconstructed_pressure_writeback_mass_flux << ','
         << reconstructed_pressure_writeback_mass_flux << ','
+        << elem_pressure_writeback_mass_flux_mismatch << ','
+        << neighbor_pressure_writeback_mass_flux_mismatch << ','
         << pressure_writeback_mass_flux_mismatch << ','
         << libmesh_map_find(_pressure_coupled_cell_reconstruction_scalar, fi->id()) << ','
         << elem_delta(0) << ',' << elem_delta(1) << ',' << elem_delta(2) << ','
@@ -1492,6 +1518,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
         pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
     _pressure_equation_volumetric_flux[fi->id()] = state.pressure_equation_phi;
     _pressure_correction_phi[fi->id()] = state.pressure_writeback_phi;
+    // OpenFOAM parity contract:
+    //   phi = phiHbyA + pEqn.flux()
+    // This face flux is authoritative for continuity/transport. The reconstructed
+    // cell velocity below is only the cell-centered U writeback branch and is not
+    // projected back to overwrite this face flux.
     _corrected_face_phi[fi->id()] = state.corrected_transport_phi;
     _pressure_coupled_cell_reconstruction_scalar[fi->id()] =
         state.writeback_reconstruction_scalar;
@@ -1629,9 +1660,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
 
   const auto time_arg = Moose::currentState();
   for (const auto * fi : _sharp_interface_face_info)
+  {
+    // Keep the pressure-corrected face flux as the source of truth, matching
+    // OpenFOAM's direct phi update. Do not reconstruct cell U and project it
+    // back to faces here; that round trip is not an exact inverse.
     _face_mass_flux[fi->id()] =
         transportMassFluxDensityFromVolumetricPhi(
             fi, libmesh_map_find(_corrected_face_phi, fi->id()), time_arg);
+  }
 }
 
 Moose::FaceArg
