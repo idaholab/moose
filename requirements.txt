@@ -4,6 +4,9 @@
 # This should mirror conda/tools/[conda_build_config.yaml,meta.yaml]
 # as much as reasonably possible
 #
+# Currently, it is only used within the moose-dev apptainer containers
+# (see apptainer/moose-dev.def)
+#
 beautifulsoup4
 black==26.5.1
 clang-format==22.1.5
