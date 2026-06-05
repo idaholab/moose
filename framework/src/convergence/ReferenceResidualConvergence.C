@@ -148,6 +148,7 @@ ReferenceResidualConvergence::initialSetup()
   _group_output_resid.resize(n_groups);
   _group_names.resize(n_groups);
   _converge_on_group.assign(n_groups, true);
+  _scaling_factors.resize(n_soln_vars);
 
   // Check to make sure variables aren't in multiple groups
   if (_use_group_variables)
@@ -269,14 +270,6 @@ ReferenceResidualConvergence::initialSetup()
       _group_names[i] += ")";
     }
   }
-
-  const unsigned int size_soln_vars = _soln_vars.size();
-  _scaling_factors.resize(size_soln_vars);
-  for (unsigned int i = 0; i < size_soln_vars; ++i)
-    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
-      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
-    else
-      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 }
 
 void
@@ -286,6 +279,12 @@ ReferenceResidualConvergence::updateReferenceResidual()
 
   auto & current_nl_sys = _fe_problem.currentNonlinearSystem();
   auto & s = current_nl_sys.system();
+
+  for (unsigned int i = 0; i < _scaling_factors.size(); ++i)
+    if (current_nl_sys.isScalarVariable(_soln_vars[i]))
+      _scaling_factors[i] = current_nl_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
+    else
+      _scaling_factors[i] = current_nl_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 
   std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
   std::fill(_group_output_resid.begin(), _group_output_resid.end(), 0.0);

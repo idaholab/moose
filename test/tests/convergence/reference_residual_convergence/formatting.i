@@ -1,3 +1,5 @@
+scaling = false
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -98,46 +100,46 @@
 
 [BCs]
   [a_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = a
+    boundary = 'left right'
+    value = 1
   []
   [b_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = b
+    boundary = 'left right'
+    value = 1
   []
   [c_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = c
+    boundary = 'left right'
+    value = 1
   []
   [d_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = d
+    boundary = 'left right'
+    value = 1
   []
   [e_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = verylongvariable_e
+    boundary = 'left right'
+    value = 1
   []
   [f_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = variable_f
+    boundary = 'left right'
+    value = 1
   []
   [g_bc]
-    type = RobinBC
-    boundary = 'left right'
-    coef = 1
+    type = DirichletBC
     variable = g
+    boundary = 'left right'
+    value = 1
   []
 []
 
@@ -147,11 +149,15 @@
     reference_vector = 'ref'
     group_variables = 'a b variable_f; c d'
     converge_on = 'a b variable_f c d g'
+    nl_rel_tol = 1e-9
+    unscale_the_residual = ${scaling}
   []
   [conv_two]
     type = ReferenceResidualConvergence
     reference_vector = 'ref'
     converge_on = 'verylongvariable_e g'
+    nl_rel_tol = 1e-9
+    unscale_the_residual = ${scaling}
   []
   [combined]
     type = ParsedConvergence
@@ -166,8 +172,10 @@
   num_steps = 1
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  line_search = none
   nonlinear_convergence = combined
   verbose = true
+  automatic_scaling = ${scaling}
 []
 
 [Outputs]
