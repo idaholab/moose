@@ -370,7 +370,7 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
     {
       if (_converge_on_group[i])
       {
-        out << "   " << std::setw(var_space + (_local_norm ? 5 : 2) + 6) << std::right
+        out << "   " << std::setw(var_space + (_local_norm ? 7 : 2) + 6) << std::right
             << (_local_norm ? "norm " : "") + _group_names[i] + "-> res: ";
 
         if (_group_output_resid[i] == _group_resid[i])

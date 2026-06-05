@@ -158,6 +158,7 @@ scaling = false
     converge_on = 'verylongvariable_e g'
     nl_rel_tol = 1e-9
     unscale_the_residual = ${scaling}
+    normalization_type = LOCAL_L2
   []
   [combined]
     type = ParsedConvergence
