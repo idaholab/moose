@@ -11,11 +11,11 @@
 </PCells>
 <PPointData>
 <PDataArray type="Float64" Name="dscalar_var_dt" NumberOfComponents="1"  format="binary" />
-<PDataArray type="Float64" Name="dvector_var_dt" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="dvector_var_dt" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="binary" />
 <PDataArray type="Float64" Name="scalar_auxvar" NumberOfComponents="1"  format="binary" />
 <PDataArray type="Float64" Name="scalar_var" NumberOfComponents="1"  format="binary" />
-<PDataArray type="Float64" Name="vector_auxvar" NumberOfComponents="1"  format="binary" />
-<PDataArray type="Float64" Name="vector_var" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="vector_auxvar" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="binary" />
+<PDataArray type="Float64" Name="vector_var" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="binary" />
 </PPointData>
 <PCellData>
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="binary"/>

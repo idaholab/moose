@@ -510,32 +510,30 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 {
 
   InputParameters fespace_params = _factory.getValidParams("MFEMGenericFESpace");
-  InputParameters mfem_variable_params = _factory.getValidParams("MFEMVariable");
+  InputParameters variable_params = _factory.getValidParams("MFEMVariable");
 
-  auto moose_fe_type =
-      FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto family = Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family"));
+  auto order = static_cast<int>(parameters.get<MooseEnum>("order"));
+  const auto dim = mesh().dimension();
 
-  std::string mfem_family;
-  int mfem_vdim = 1;
+  std::string space;
+  int vdim = 1;
 
-  switch (moose_fe_type.family)
+  switch (family)
   {
     case FEFamily::LAGRANGE:
-      mfem_family = "H1";
-      mfem_vdim = 1;
+      space = "H1";
       break;
     case FEFamily::LAGRANGE_VEC:
-      mfem_family = "H1";
-      mfem_vdim = 3;
+      space = "H1";
+      vdim = dim;
       break;
     case FEFamily::MONOMIAL:
-      mfem_family = "L2";
-      mfem_vdim = 1;
+      space = "L2";
       break;
     case FEFamily::MONOMIAL_VEC:
-      mfem_family = "L2";
-      mfem_vdim = 3;
+      space = "L2";
+      vdim = dim;
       break;
     default:
       mooseError("Unable to set MFEM FESpace for MOOSE variable");
@@ -543,23 +541,21 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
   }
 
   // Create fespace name. If this already exists, we will reuse this for
-  // the mfem variable ("gridfunction").
-  const std::string fespace_name = mfem_family + "_" +
-                                   std::to_string(mesh().getMFEMParMesh().Dimension()) + "D_P" +
-                                   std::to_string(moose_fe_type.order.get_order());
+  // the mfem variable ("gridfunction"). If using AMR, this implies all
+  // variables sharing the fespace are affected.
+  const auto fec_name = space + "_" + std::to_string(dim) + "D_P" + std::to_string(order);
+  const auto fes_name = fec_name + "_X" + std::to_string(vdim);
 
   // Set all fespace parameters.
-  fespace_params.set<std::string>("fec_name") = fespace_name;
-  fespace_params.set<int>("vdim") = mfem_vdim;
+  fespace_params.set<std::string>("fec_name") = fec_name;
+  fespace_params.set<int>("vdim") = vdim;
 
-  if (!hasMFEMObject("MFEMFESpace", fespace_name)) // Create the fespace (implicit).
-  {
-    addFESpace("MFEMGenericFESpace", fespace_name, fespace_params);
-  }
+  if (!hasMFEMObject("MFEMFESpace", fes_name))
+    addFESpace("MFEMGenericFESpace", fes_name, fespace_params);
 
-  mfem_variable_params.set<MFEMFESpaceName>("fespace") = fespace_name;
+  variable_params.set<MFEMFESpaceName>("fespace") = fes_name;
 
-  return mfem_variable_params;
+  return variable_params;
 }
 
 void
