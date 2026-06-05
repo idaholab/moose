@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <mutex>
+#include <type_traits>
 
 #include "MooseObject.h"
 #include "MooseHashing.h"
@@ -492,10 +493,26 @@ public:
     for (auto & obj : objs)
     {
       mooseAssert(obj, "Null object");
-      auto cast_obj = dynamic_cast<T *>(obj);
-      mooseAssert(cast_obj,
-                  "Queried object " + obj->typeAndName() + " has incompatible c++ type with " +
-                      MooseUtils::prettyCppType<T>());
+      T * cast_obj;
+      // We've been using dynamic_cast plus an assert that it
+      // succeeds, but if we know the correct type T then often we can
+      // use a much-cheaper static_cast.  libMesh::cast_ptr will still
+      // use a dynamic_cast + assertion in devel/dbg modes.
+      if constexpr (std::is_convertible_v<MooseObject *, T *> ||
+                    std::is_convertible_v<T *, MooseObject *>)
+      {
+        cast_obj = cast_ptr<T *>(obj);
+      }
+      // Side-casts or virtual inheritence are always expensive.
+      // Someone should figure out how to get rid of this code path.
+      else
+      {
+        cast_obj = dynamic_cast<T *>(obj);
+        mooseAssert(cast_obj,
+                    "Queried object " + obj->typeAndName() + " has incompatible c++ type with " +
+                        MooseUtils::prettyCppType<T>());
+      }
+
       mooseAssert(std::find(results.begin(), results.end(), cast_obj) == results.end(),
                   "Duplicate object");
       if (show_all || obj->enabled())
