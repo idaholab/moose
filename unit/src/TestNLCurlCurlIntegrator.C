@@ -33,7 +33,8 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 
   const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
 
-  Moose::MFEM::NLCurlCurlIntegrator integ(k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, &ir);
+  Moose::MFEM::NLCurlCurlIntegrator integ(
+      k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir);
 
   const auto & el = *fespace.GetFE(0);
   auto & T = *mesh.GetElementTransformation(0);

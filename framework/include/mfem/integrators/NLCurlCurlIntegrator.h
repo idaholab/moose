@@ -25,7 +25,8 @@ class NLCurlCurlJacMatrixCoefficient : public mfem::MatrixCoefficient
 public:
   NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
                                  mfem::Coefficient & curlu_dk_dcurlu,
-                                 mfem::VectorCoefficient & curlu_vec);
+                                 mfem::VectorCoefficient & curlu_vec,
+                                 mfem::real_t curlu_zero_tol);
 
   void Eval(mfem::DenseMatrix & K,
             mfem::ElementTransformation & T,
@@ -35,6 +36,7 @@ public:
 protected:
   mfem::Coefficient & _k_coef;
   mfem::Coefficient & _curlu_dk_dcurlu_coef;
+  const mfem::real_t _curlu_zero_tol;
   mfem::NormalizedVectorCoefficient _curlu_hat_coef;
 };
 
@@ -49,6 +51,7 @@ public:
   NLCurlCurlIntegrator(mfem::Coefficient & k,
                        mfem::Coefficient & curlu_dk_dcurlu,
                        mfem::VectorCoefficient & curlu_vec,
+                       mfem::real_t curlu_zero_tol = 1e-32,
                        const mfem::IntegrationRule * ir = nullptr);
 
   virtual void AssembleElementVector(const mfem::FiniteElement & el,

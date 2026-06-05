@@ -16,11 +16,13 @@ namespace Moose::MFEM
 {
 NLCurlCurlJacMatrixCoefficient::NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
                                                                mfem::Coefficient & curlu_dk_dcurlu,
-                                                               mfem::VectorCoefficient & curlu_vec)
+                                                               mfem::VectorCoefficient & curlu_vec,
+                                                               mfem::real_t curlu_zero_tol)
   : mfem::MatrixCoefficient(curlu_vec.GetVDim()),
     _k_coef(k),
     _curlu_dk_dcurlu_coef(curlu_dk_dcurlu),
-    _curlu_hat_coef(curlu_vec, 1e-32)
+    _curlu_zero_tol(curlu_zero_tol),
+    _curlu_hat_coef(curlu_vec, _curlu_zero_tol)
 {
 }
 
@@ -54,9 +56,10 @@ NLCurlCurlJacMatrixCoefficient::Eval(mfem::DenseMatrix & K,
 NLCurlCurlIntegrator::NLCurlCurlIntegrator(mfem::Coefficient & k,
                                            mfem::Coefficient & curlu_dk_dcurlu,
                                            mfem::VectorCoefficient & curlu_vec,
+                                           mfem::real_t curlu_zero_tol,
                                            const mfem::IntegrationRule * ir)
   : _curlcurl_res_integ(k, ir),
-    _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec),
+    _curlcurl_jac_matrix_coef(k, curlu_dk_dcurlu, curlu_vec, curlu_zero_tol),
     _curlcurl_jac_integ(_curlcurl_jac_matrix_coef, ir)
 {
 }
