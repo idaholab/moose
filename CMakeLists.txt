@@ -32,8 +32,9 @@ include(MooseWasp)
 moose_create_wasp_target()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-# Contrib library helpers (pcre/hit/gtest), used by framework/ and unit/.
+# Contrib library helpers (pcre/hit/gtest) and the downstream app helper.
 include(MooseContrib)
+include(MooseApp)
 
 # Phase 0 verification: a tiny TU that includes and links libMesh. Off by default; enabled
 # with -DMOOSE_SANITY_CHECK=ON.
@@ -47,6 +48,9 @@ endif()
 # Phase 1: the MOOSE framework library and unit-test executable.
 add_subdirectory(framework)
 add_subdirectory(unit)
+
+# Phase 2: the MOOSE test application, built via moose_add_app().
+add_subdirectory(test)
 
 # Python extension modules (hit.so, _pycapabilities.so).
 include(MoosePython)
