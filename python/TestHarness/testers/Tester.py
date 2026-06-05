@@ -219,7 +219,7 @@ class Tester(MooseObject, OutputInterface):
         params.addParam(
             "deprecated",
             False,
-            "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.",
+            "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition. Also prevents errors from being raised if a deprecation warning is encountered.",
         )
         params.addParam(
             "collections",
