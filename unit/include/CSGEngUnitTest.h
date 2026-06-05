@@ -145,4 +145,60 @@ protected:
   FRIEND_TEST(CSGEngUnitTest, testUnivUnit);
 #endif
 };
+
+/**
+ * A cyclic engineering unit pair for testing that circular dependencies of engineering units are
+ * caught in expandAllEngUnits(). Expanding TestCycleUnivEngUnit creates a TestCycleCellEngUnit, and
+ * expanding TestCycleCellEngUnit creates a TestCycleUnivEngUnit..
+ */
+class TestCycleCellEngUnit;
+
+class TestCycleUnivEngUnit : public CSGUniverseEngUnit
+{
+public:
+  TestCycleUnivEngUnit(const std::string & name)
+    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestCycleUnivEngUnit>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGUniverseEngUnit> clone() const override
+  {
+    return std::make_unique<TestCycleUnivEngUnit>(getName());
+  }
+
+  void expandUnit() override
+  {
+    // Creates a TestCycleCellEngUnit (will trigger cycle)
+    auto cell_ptr = std::make_unique<TestCycleCellEngUnit>(getName() + "_cycle_cell");
+    getBase().addEngUnit(std::move(cell_ptr));
+    getBase().renameRootUniverse(getName() + "_expanded");
+  }
+};
+
+class TestCycleCellEngUnit : public CSGCellEngUnit
+{
+public:
+  TestCycleCellEngUnit(const std::string & name)
+    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCycleCellEngUnit>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGCellEngUnit> clone() const override
+  {
+    return std::make_unique<TestCycleCellEngUnit>(getName());
+  }
+
+  void expandUnit() override
+  {
+    // Creates a TestCycleUnivEngUnit (will trigger cycle)
+    auto univ_ptr = std::make_unique<TestCycleUnivEngUnit>(getName() + "_cycle_univ");
+    const auto & univ_unit = getBase().addEngUnit(std::move(univ_ptr));
+    auto & surf = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_surf", 1.0));
+    getBase().createCell(getName() + "_expanded_cell", univ_unit, -surf);
+  }
+};
 }

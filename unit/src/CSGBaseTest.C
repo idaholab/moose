@@ -1990,6 +1990,32 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   ASSERT_TRUE(c2_surfs[0].get().getName() == name + "_s1");
 }
 
+/// tests that expandAllEngUnits raises an error when a circular dependency exists between unit types
+TEST(CSGBaseTest, testExpandAllCyclicError)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addEngUnit(std::make_unique<TestCycleUnivEngUnit>("cycle_unit"));
+
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->expandAllEngUnits(); },
+                                 "Circular dependency detected in engineering unit expansion");
+}
+
+/// tests that expandAllEngUnits will not raise an error in the case where there are multiple of one
+/// type of unit after an expansion pass but not a cyclic relationship
+TEST(CSGBaseTest, testExpandAllMulti)
+{
+  // make two units where one expands to create the other but in a non-cyclic manner
+  // (TestUnivEngUnit creates TestCellEngUnit)
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addEngUnit(std::make_unique<TestUnivEngUnit>("unit1"));
+  csg_obj->addEngUnit(std::make_unique<TestCellEngUnit>("unit2"));
+
+  // the fact that there are two TestCellEngUnits after TestUnivEngUnit is expanded should not
+  // trigger the repetition error that checks for cyclic behavior because the TestCellEngUnits are
+  // both unique and do not cycle.
+  ASSERT_NO_THROW(csg_obj->expandAllEngUnits());
+}
+
 /// tests getEngUnitByName
 TEST(CSGBaseTest, testGetEngUnit)
 {
