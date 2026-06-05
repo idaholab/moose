@@ -215,31 +215,44 @@ Exodus::outputSetup()
     auto & lm_mesh = moose_mesh.getMesh();
     // Exodus is serial output so that we have to gather everything to "zero".
     lm_mesh.gather_to_zero();
-    unsigned char map_rebuilt = false;
+    unsigned char map_rebuilt_on_0 = false;
     if ((this->processor_id() == 0) && !lm_mesh.is_replicated())
     {
-      // In an ideal world we could just call something like moose_mesh.update() below but that
-      // method does global communication, e.g. we'd have to call it from all ranks in the
-      // communicator
+      // We could just call something like moose_mesh.update() below but that
+      // method does a decent amount of global communication. We'll try to focus on the subset of
+      // things in the mesh that are no longer valid instead
 
       // This makes the face information out-of-date on process 0 for distributed meshes, e.g.
       // elements will have neighbors that they didn't previously have
       moose_mesh.markFiniteVolumeInfoDirty();
       // And similarly we have both new nodes and new elements for the node to element map
-      map_rebuilt = moose_mesh.possiblyRebuildNodeToElemMap();
-      // If the map was rebuilt then we need to reinitialize geometric search data to re-add things
-      // like "quadrature" nodes to that map. And GeometricSearch::reinit calls
-      // MooseMesh::clearQuadratureNodes which clears its _quadrature_nodes but does not clear them
-      // from its _bnd_nodes which is what we iterate over when doing nearest node location in the
-      // geometric search. So we also need to rebuild _bnd_nodes to erase the old quadrature nodes
-      if (map_rebuilt)
-        moose_mesh.buildNodeList();
+      map_rebuilt_on_0 = moose_mesh.possiblyRebuildNodeToElemMap();
     }
-    _communicator.broadcast(map_rebuilt);
-    if (map_rebuilt)
-      // Geometric search may create point locators which involves communication, so we must call it
-      // from all ranks
+
+    // Geometric search may create point locators which involves communication, so we must call it
+    // from all ranks
+    _communicator.broadcast(map_rebuilt_on_0);
+    if (map_rebuilt_on_0)
+    {
+      if (this->processor_id() != 0)
+      {
+        // We have to clear soon-to-be stale quadrature nodes from the node-to-element map by
+        // rebuilding with just the true mesh nodes to start
+        [[maybe_unused]] const bool map_rebuilt_elsewhere =
+            moose_mesh.possiblyRebuildNodeToElemMap();
+        mooseAssert(map_rebuilt_elsewhere,
+                    "We should have uniformly requested the node-to-element map across all ranks "
+                    "in the communicator");
+      }
+
+      // MooseMesh::clearQuadratureNodes clears _quadrature_nodes/_extra_bnd_nodes but does not
+      // clear them from its _bnd_nodes which is what we iterate over when doing nearest node
+      // location in the geometric search. So we also need to rebuild _bnd_nodes to erase the old
+      // quadrature nodes
+      moose_mesh.clearQuadratureNodes();
+      moose_mesh.buildNodeList();
       problem.reinitGeomSearch();
+    }
   };
   serialize(*_problem_ptr);
 
