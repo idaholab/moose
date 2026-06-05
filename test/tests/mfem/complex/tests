@@ -47,7 +47,7 @@
     csvdiff = 'OutputData/ComplexDiffusionEigenproblem_eigenvalues_0001.csv'
     requirement = 'The system shall have the ability to solve a complex-valued eigenproblem with Dirichlet BCs using MFEM.'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     recover = false
   []
   [MFEMComplexMagneticEigenproblem]
@@ -56,7 +56,7 @@
     csvdiff = 'OutputData/ComplexMagneticEigenproblem_eigenvalues_0001.csv'
     requirement = 'The system shall have the ability to solve a complex-valued eigenproblem with a genuinely complex (coupled real and imaginary) Hermitian operator using MFEM.'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     recover = false
   []
 []

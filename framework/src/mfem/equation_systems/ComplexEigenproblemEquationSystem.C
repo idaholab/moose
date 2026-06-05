@@ -17,21 +17,6 @@
 namespace Moose::MFEM
 {
 
-// GetSystemMatrix() assembles the monolithic [[Re,-Im],[Im,Re]] matrix on the host from
-// the complex blocks, so on GPU we sync those blocks to host first, then move the result
-// to device memory for the eigensolve. No-ops on CPU.
-mfem::HypreParMatrix *
-buildSystemMatrix(mfem::ComplexHypreParMatrix & cmat)
-{
-  if (auto * re = dynamic_cast<mfem::HypreParMatrix *>(&cmat.real()))
-    re->HostRead();
-  if (auto * im = dynamic_cast<mfem::HypreParMatrix *>(&cmat.imag()))
-    im->HostRead();
-  auto * sysmat = cmat.GetSystemMatrix();
-  sysmat->HypreReadWrite();
-  return sysmat;
-}
-
 void
 ComplexEigenproblemEquationSystem::ApplyEssentialBCs()
 {
@@ -59,7 +44,7 @@ ComplexEigenproblemEquationSystem::FormEigenproblemMatrix(mfem::OperatorHandle &
   slf->imag().EliminateEssentialBCDiag(_global_ess_markers, 0.0);
   slf->Finalize();
   std::unique_ptr<mfem::ComplexHypreParMatrix> cmat(slf->ParallelAssemble());
-  mfem::HypreParMatrix * sysmat = buildSystemMatrix(*cmat);
+  mfem::HypreParMatrix * sysmat = cmat->GetSystemMatrix();
 
   // LOBPCG/AME require a symmetric operator. The monolithic system is symmetric only if the form is
   // Hermitian.
@@ -105,7 +90,7 @@ ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
   m->real().EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
   m->Finalize();
   std::unique_ptr<mfem::ComplexHypreParMatrix> cmat(m->ParallelAssemble());
-  op.Reset(buildSystemMatrix(*cmat));
+  op.Reset(cmat->GetSystemMatrix());
 }
 
 void
