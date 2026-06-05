@@ -58,3 +58,16 @@
     boundary = 'right'
   []
 []
+
+[Convergence]
+  [u]
+    type = DefaultNonlinearConvergence
+    nl_abs_tol = 1e-10
+    nl_rel_tol = 0
+  []
+  [v]
+    type = DefaultNonlinearConvergence
+    nl_abs_tol = 1e-10
+    nl_rel_tol = 0
+  []
+[]

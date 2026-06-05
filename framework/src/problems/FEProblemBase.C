@@ -2944,7 +2944,7 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  for (const auto & conv_name : getNonlinearConvergenceNames())
+  for (const auto & conv_name : conv_names)
     addConvergence(class_name, conv_name, params);
 }
 
@@ -8599,9 +8599,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation())
-              // PETSc algorithms require diagonal allocations regardless of whether there is
-              // non-zero diagonal dependence. With global AD indexing we only add non-zero
+            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation() &&
+                currentNlISysNum() == currentNlJSysNum())
+              // Preconditioning algorithms often require diagonal allocations regardless of whether
+              // there is non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
               for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
                 matrix.add(index, index, 0);

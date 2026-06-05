@@ -15,6 +15,12 @@
   []
 []
 
+[Kernels]
+  [u_diff]
+    extra_matrix_tags = 'NPC_J_0_1'
+  []
+[]
+
 [ScalarKernels]
   [v_offdiag]
     extra_matrix_tags = 'NPC_J_1_0'
@@ -47,9 +53,17 @@
   [u]
     type = NewtonSNESExecutor
     nonlinear_system_names = 'u'
+    convergence_names = 'u'
+    solve_type = Newton
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+    petsc_options_value = 'lu       mumps'
   []
   [v]
     type = NewtonSNESExecutor
     nonlinear_system_names = 'v'
+    convergence_names = 'v'
+    solve_type = Newton
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+    petsc_options_value = 'lu       mumps'
   []
 []

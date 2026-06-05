@@ -2629,6 +2629,7 @@ Assembly::init(const CouplingMatrix * cm)
   _cached_jacobian_values.resize(num_matrix_tags);
   _cached_jacobian_rows.resize(num_matrix_tags);
   _cached_jacobian_cols.resize(num_matrix_tags);
+  _constrained_jacobian_rows.resize(num_matrix_tags);
 
   // Element matrices
   _sub_Kee.resize(num_matrix_tags);
@@ -4539,14 +4540,28 @@ Assembly::cacheJacobian(numeric_index_type i,
 }
 
 void
+Assembly::constrainJacobianRow(dof_id_type row, LocalDataKey, const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      _constrained_jacobian_rows[tag].push_back(row);
+}
+
+void
 Assembly::setCachedJacobian(GlobalDataKey)
 {
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
+  for (MooseIndex(_constrained_jacobian_rows) tag = 0;
+       tag < _constrained_jacobian_rows.size();
+       tag++)
     if (_sys.hasMatrix(tag))
     {
-      // First zero the rows (including the diagonals) to prepare for
-      // setting the cached values.
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
+      // A node on several boundaries registers its rows once per boundary, so remove duplicates
+      auto & rows = _constrained_jacobian_rows[tag];
+      std::sort(rows.begin(), rows.end());
+      rows.erase(std::unique(rows.begin(), rows.end()), rows.end());
+
+      // Zero the constrained rows to prepare for setting the cached BC values.
+      _sys.getMatrix(tag).zero_rows(rows, 0.0);
 
       // TODO: Use SparseMatrix::set_values() for efficiency
       for (MooseIndex(_cached_jacobian_values) i = 0; i < _cached_jacobian_values[tag].size(); ++i)
@@ -4559,16 +4574,6 @@ Assembly::setCachedJacobian(GlobalDataKey)
 }
 
 void
-Assembly::zeroCachedJacobian(GlobalDataKey)
-{
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
-    if (_sys.hasMatrix(tag))
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
-
-  clearCachedJacobian();
-}
-
-void
 Assembly::clearCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
@@ -4576,6 +4581,7 @@ Assembly::clearCachedJacobian()
     _cached_jacobian_rows[tag].clear();
     _cached_jacobian_cols[tag].clear();
     _cached_jacobian_values[tag].clear();
+    _constrained_jacobian_rows[tag].clear();
   }
 }
 
