@@ -60,6 +60,9 @@ VectorNodalBC::computeJacobian()
 
   const RealVectorValue cached_val = computeQpJacobian();
 
+  for (const auto i : index_range(cached_rows))
+    constrainJacobianRow(_fe_problem.assembly(0, _sys.number()), cached_rows[i]);
+
   // Cache the user's computeQpJacobian() value for later use.
   for (const auto i : index_range(cached_rows))
     addJacobianElement(_fe_problem.assembly(0, _sys.number()),

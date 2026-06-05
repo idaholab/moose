@@ -7874,9 +7874,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation())
-              // PETSc algorithms require diagonal allocations regardless of whether there is
-              // non-zero diagonal dependence. With global AD indexing we only add non-zero
+            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation() &&
+                matrix.m() == matrix.n())
+              // Preconditioning algorithms often require diagonal allocations regardless of whether
+              // there is non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
               for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
                 matrix.add(index, index, 0);

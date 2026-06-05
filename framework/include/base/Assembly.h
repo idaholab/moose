@@ -1104,9 +1104,10 @@ public:
   void setCachedJacobian(GlobalDataKey);
 
   /**
-   * Zero out previously-cached Jacobian rows.
+   * Register a Jacobian row as constrained (e.g. Dirichlet BC). The row will be zeroed and
+   * re-populated with set semantics when setCachedJacobian is called.
    */
-  void zeroCachedJacobian(GlobalDataKey);
+  void constrainJacobianRow(dof_id_type row, LocalDataKey, const std::set<TagID> & tags);
 
   /**
    * Get local residual block for a variable and a tag. Only blessed framework classes may call this
@@ -2812,6 +2813,8 @@ protected:
   std::vector<std::vector<dof_id_type>> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
   std::vector<std::vector<dof_id_type>> _cached_jacobian_cols;
+  /// Rows registered as constrained (e.g. Dirichlet BCs); zeroed in setCachedJacobian
+  std::vector<std::vector<dof_id_type>> _constrained_jacobian_rows;
 
   unsigned int _max_cached_jacobians;
 
@@ -3199,13 +3202,6 @@ Assembly::cacheJacobianWithoutConstraints(const Residuals & residuals,
     const auto & sparse_derivatives = residuals[i].derivatives();
     const auto & column_indices = sparse_derivatives.nude_indices();
     const auto & raw_derivatives = sparse_derivatives.nude_data();
-
-    if (column_indices.size() == 0)
-    {
-      // Lots of algorithms have issues without explicit allocation of the diagonal
-      cacheJacobian(row_index, row_index, 0, {}, matrix_tags);
-      continue;
-    }
 
     for (std::size_t j = 0; j < column_indices.size(); ++j)
       cacheJacobian(

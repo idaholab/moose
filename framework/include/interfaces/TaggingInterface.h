@@ -372,6 +372,12 @@ protected:
                           Real scaling_factor);
 
   /**
+   * Register a Jacobian row as constrained (e.g. Dirichlet BC). The row will be zeroed in
+   * setCachedJacobian before the cached BC value is set.
+   */
+  void constrainJacobianRow(Assembly & assembly, dof_id_type row_index);
+
+  /**
    * Add a local Jacobian matrix
    */
   void addJacobian(Assembly & assembly,
@@ -641,6 +647,12 @@ TaggingInterface::addJacobianElement(Assembly & assembly,
 {
   assembly.cacheJacobian(
       row_index, column_index, value * scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
+}
+
+inline void
+TaggingInterface::constrainJacobianRow(Assembly & assembly, const dof_id_type row_index)
+{
+  assembly.constrainJacobianRow(row_index, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 inline void

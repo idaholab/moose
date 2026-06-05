@@ -61,6 +61,9 @@ ArrayNodalBC::computeJacobian()
     const dof_id_type cached_row = _var.nodalDofIndex();
 
     for (const auto i : make_range(_var.count()))
+      constrainJacobianRow(_fe_problem.assembly(0, _sys.number()), cached_row + i);
+
+    for (const auto i : make_range(_var.count()))
       addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                          cached_val(i),
                          cached_row + i,
