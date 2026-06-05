@@ -136,7 +136,7 @@ ReferenceResidualConvergence::initialSetup()
     num_variables_in_groups += _group_variables[i].size();
     if (_group_variables[i].size() == 1)
       paramError("group_variables",
-                 " variable ",
+                 "variable ",
                  _group_variables[i][0],
                  " is not grouped with other variables.");
   }

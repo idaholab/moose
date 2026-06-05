@@ -46,7 +46,7 @@
     prereq = group_variables
     type = 'RunException'
     input = 'group_variables.i'
-    expect_err = "A variable cannot be included in multiple groups in the 'group_variables' parameter."
+    expect_err = "Problem/group_variables: A variable cannot be included in multiple groups."
     cli_args = 'Problem/group_variables="disp_x disp_y; disp_x scalar_strain_zz1"'
     requirement = 'The reference residual based convergence checking system shall generate an error if a variable is added to multiple groups.'
     design = 'ReferenceResidualProblem.md'
@@ -56,7 +56,7 @@
     prereq = group_variables_duplicate_error_check
     type = 'RunException'
     input = 'group_variables.i'
-    expect_err = "In the 'group_variables' parameter, variable disp_x is not grouped with other variables."
+    expect_err = "Problem/group_variables: variable disp_x is not grouped with other variables."
     cli_args = 'Problem/group_variables="disp_x; scalar_strain_zz1 scalar_strain_zz2"'
     requirement = 'The reference residual based convergence checking system shall generate an error if a group containing a single variable is defined.'
     design = 'ReferenceResidualProblem.md'
@@ -68,7 +68,7 @@
     input = 'group_variables.i'
     cli_args = 'Problem/group_variables="disp_x disp_y scalar_strain_zz1"'
     requirement = "ReferenceResidualProblem shall generate a warning if a mix of scalar and field variables is provided in the 'group_variables' parameter"
-    expect_err = "In the 'group_variables' parameter, standard variables and scalar variables are grouped together in group 0"
+    expect_err = "Problem/group_variables: standard variables and scalar variables are grouped together"
     design = 'ReferenceResidualProblem.md'
     issues = '#13729'
   [../]
