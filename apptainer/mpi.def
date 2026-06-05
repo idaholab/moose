@@ -17,7 +17,7 @@ From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-cuda-gcc:8.10-cuda
 {%- elif ALTERNATE_FROM == "gcc_min" %}
 From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-gccmin:8.10-gcc9.2.1-mpich5.0.1-20260605
 {%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.0.0-mpich5.0.1-20260605
+From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.0.0-mpich4.3.2-20260605
 {%- elif ALTERNATE_FROM == "rocky9" %}
 From: ghcr.io/idaholab/moose-containers/main-moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260605
 {%- else %}
