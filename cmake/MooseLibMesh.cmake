@@ -67,6 +67,8 @@ function(moose_libmesh_create_target)
   _moose_libmesh_query(_ldflags  --ldflags)
   _moose_libmesh_query(_host     --host)
   set(MOOSE_LIBMESH_HOST "${_host}" CACHE INTERNAL "libMesh host triplet")
+  # Raw --include string, needed verbatim for the FParser JIT ADFPARSER_INCLUDES define.
+  set(MOOSE_LIBMESH_INCLUDE "${_include}" CACHE INTERNAL "libMesh raw include flags")
 
   separate_arguments(_cppflags_l NATIVE_COMMAND "${_cppflags}")
   separate_arguments(_cxxflags_l NATIVE_COMMAND "${_cxxflags}")

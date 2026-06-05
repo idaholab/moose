@@ -11,6 +11,7 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # METHOD must be resolved before we query libmesh-config for the compiler.
 include(MooseMethods)
+include(MooseUtils)
 
 # libMesh is the source of truth for the toolchain; the compiler (mpicxx/mpicc/mpif90)
 # must be set before project().
@@ -26,11 +27,23 @@ message(STATUS "libMesh CXX compiler:  ${CMAKE_CXX_COMPILER}")
 moose_libmesh_create_target()
 message(STATUS "libMesh host triplet:  ${MOOSE_LIBMESH_HOST}")
 
+# WASP (conda-provided) and Python (for generated headers / bindings).
+include(MooseWasp)
+moose_create_wasp_target()
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+# Contrib library helpers (pcre/hit/gtest), used by framework/ and unit/.
+include(MooseContrib)
+
 # Phase 0 verification: a tiny TU that includes and links libMesh. Off by default; enabled
-# for the Phase 0 sanity build with -DMOOSE_SANITY_CHECK=ON.
+# with -DMOOSE_SANITY_CHECK=ON.
 option(MOOSE_SANITY_CHECK "Build the Phase 0 libMesh sanity executable" OFF)
 if(MOOSE_SANITY_CHECK)
   moose_method_libname(_sanity_name moose_libmesh_sanity)
   add_executable(${_sanity_name} cmake/checks/libmesh_sanity.C)
   target_link_libraries(${_sanity_name} PRIVATE MOOSE::libmesh)
 endif()
+
+# Phase 1: the MOOSE framework library and unit-test executable.
+add_subdirectory(framework)
+add_subdirectory(unit)
