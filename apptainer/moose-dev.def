@@ -18,11 +18,17 @@
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
+{#- WITH_FMU: Whether or not to install python fmu utilities (default: 0)                     -#}
 {#- WITHOUT_PYTORCH: Set to anything to not build/download pytorch and neml2                  -#}
 
 {#- Set WITH_MFEM default if not set                                                          -#}
 {%- if WITH_MFEM is not defined %}
 {%- set WITH_MFEM = '1' %}
+{%- endif %}
+
+{#- Set WITH_FMU default if not set                                                           -#}
+{%- if WITH_FMU is not defined %}
+{%- set WITH_FMU = '0' %}
 {%- endif %}
 
 {#- The within-container build directory to use                                               -#}
@@ -102,6 +108,32 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
+    # Individual versions for packages to install, in the order
+    # in which they are installed below.
+    # code-server and code-server plugins
+    CODE_SERVER_VERSION=4.122.0
+    MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
+    # python
+    PYTHON_VERSION=3.14.5
+{% if WITH_FMU %}
+    # PyFMI python package and its dependencies
+    FMI_LIBRARY_VERSION=3.0.4
+    ASSIMULO_VERSION=3.8.0
+    PYFMI_VERSION=2.21.0
+    # PythonFMU python package
+    PYTHONFMU_VERSION=0.7.0
+{%- endif %}
+{% if WITHOUT_PYTORCH is not defined %}
+    # pytorch
+    PYTORCH_VERSION=2.12.0
+{%- endif %}
+{% if PROFILING is defined %}
+    # pprof and its dependencies
+    GPERFTOOLS_VERSION=2.18.1
+    GO_VERSION=1.26.1
+    PPROF_SHA=a0b0bb1d4134f37be44de6c328680339b0fc13ad
+{%- endif %}
+
     # Special setup for OpenMPI
     if [ -n "${MOOSE_OPENMPI_DIR:-}" ]; then
         # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
@@ -127,7 +159,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     (
         cd ${ROOT_BUILD_DIR}
 
-        CODE_SERVER_VERSION=4.122.0
         CODE_SERVER_DIR={{ CODE_SERVER_DIR }}
 
         # Install code-server rpm
@@ -142,7 +173,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         mkdir ${CODE_SERVER_DIR}/extensions
 
         # Download extensions for code-server, currently just moose language support
-        MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
         cd ${CODE_SERVER_DIR}/extensions
         curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
 
@@ -182,12 +212,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     )
 
     # Install python environment
+    PYTHON_DIR={{ PYTHON_DIR }}
     (
         cd ${ROOT_BUILD_DIR}
 
-        PYTHON_VERSION=3.14.5
         UV_DIR={{ UV_DIR }}
-        PYTHON_DIR={{ PYTHON_DIR }}
 
         # Install uv
         UV_BIN_DIR=${UV_DIR}/bin
@@ -226,12 +255,120 @@ EOF
         ${PYTHON_DIR}/bin/pip install -r /root/requirements.txt && rm /root/requirements.txt
     )
 
+{% if WITH_FMU %}
+    # Install fmi-library dependency for pyfmi
+    FMI_LIBRARY_DIR=/opt/fmi-library
+    (
+        cd ${ROOT_BUILD_DIR}
+
+        # Clone fmi-library
+        FMI_LIBRARY_SRC_DIR=${ROOT_BUILD_DIR}/fmi-library
+        git clone --branch ${FMI_LIBRARY_VERSION} \
+            --single-branch \
+            https://github.com/modelon-community/fmi-library.git ${FMI_LIBRARY_SRC_DIR}
+        cd ${FMI_LIBRARY_SRC_DIR}
+
+        # Build and install fmi-library
+        mkdir build_tmp && cd build_tmp
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$FMI_LIBRARY_DIR" \
+            -GNinja \
+            -DFMILIB_BUILD_SHARED_LIB=ON \
+            -DFMILIB_BUILD_TESTS=OFF
+        cmake --build . --parallel ${MOOSE_JOBS}
+        cmake --install . --prefix ${FMI_LIBRARY_DIR}
+
+        # Cleanup
+        rm -rf ${FMI_LIBRARY_SRC_DIR}
+    )
+
+    # Install assimumlo dependency for pyfmi
+    (
+        cd ${ROOT_BUILD_DIR}
+
+        # Clone Assimulo
+        ASSIMULO_SRC_DIR=${ROOT_BUILD_DIR}/Assimulo
+        git clone --branch "Assimulo-${ASSIMULO_VERSION}" \
+            --single-branch \
+            https://github.com/modelon-community/Assimulo.git ${ASSIMULO_SRC_DIR}
+        cd ${ASSIMULO_SRC_DIR}
+
+        # Install cython for the assimulo setup.py install. Assimulo doesn't
+        # define cython as a build dependency so we need to manually
+        # install it. It can be removed after if not already available.
+        remove_cython=
+        ${PYTHON_DIR}/bin/pip show cython &>/dev/null || (${PYTHON_DIR}/bin/pip install cython && remove_cython=1)
+
+        # Build Assimulo
+        PATH=${PYTHON_DIR}/bin:${PATH} python setup.py install
+
+        # Remove cython if we installed it
+        test -z "$remove_cython" || ${PYTHON_DIR}/bin/pip uninstall -y cython
+
+        # Cleanup
+        rm -rf ${ASSIMULO_SRC_DIR}
+
+        # Test package
+        ${PYTHON_DIR}/bin/python -c "import assimulo; print('Assimulo:', assimulo.__version__)"
+    )
+
+    # Install PyFMI
+    (
+        cd ${ROOT_BUILD_DIR}
+
+        # Clone pyfmi
+        PYFMI_SRC_DIR=${ROOT_BUILD_DIR}/PyFMI
+        git clone --branch "PyFMI-${PYFMI_VERSION}" \
+            --single-branch \
+            https://github.com/modelon-community/PyFMI.git ${PYFMI_SRC_DIR}
+        cd ${PYFMI_SRC_DIR}
+
+        # Install cython for the pyfmi setup.py install. PyFMI doesn't
+        # define cython as a build dependency so we need to manually
+        # install it. It can be removed after if not already available.
+        remove_cython=
+        ${PYTHON_DIR}/bin/pip show cython &>/dev/null || (${PYTHON_DIR}/bin/pip install cython && remove_cython=1)
+
+        # Setup pyfmi
+        PATH=${PYTHON_DIR}/bin:${PATH} python setup.py install --fmil-home=${FMI_LIBRARY_DIR}
+
+        # Remove cython if we installed it
+        test -z "$remove_cython" || ${PYTHON_DIR}/bin/pip uninstall -y cython
+
+        # Cleanup
+        rm -rf ${PYFMI_SRC_DIR}
+
+        # Test package
+        ${PYTHON_DIR}/bin/python -c "import pyfmi; print('PyFMI:', pyfmi.__version__)"
+    )
+
+    # Install PythonFMU
+    (
+        cd ${ROOT_BUILD_DIR}
+
+        # Clone PythonFMU
+        PYTHONFMU_SRC_DIR=${ROOT_BUILD_DIR}/PythonFMU
+        git clone --branch v${PYTHONFMU_VERSION} --single-branch \
+            https://github.com/NTNU-IHB/PythonFMU.git ${PYTHONFMU_SRC_DIR}
+        cd ${PYTHONFMU_SRC_DIR}
+
+        # Build and install PythonFMU
+        PATH={{ PYTHON_DIR }}/bin:${PATH} bash build_unix.sh
+        PATH={{ PYTHON_DIR }}/bin:${PATH} pip install .
+
+        # Cleanup
+        rm -rf ${PYTHONFMU_SRC_DIR}
+
+        # Test package
+        ${PYTHON_DIR}/bin/python -c "import pythonfmu; print('PythonFMU:', pythonfmu.__version__)"
+    )
+{%- endif %}
+
 {% if WITHOUT_PYTORCH is not defined %}
     # Build libtorch
     (
         cd ${ROOT_BUILD_DIR}
-
-        PYTORCH_VERSION=2.12.0
 
         # Clone pytorch for build
         PYTORCH_SRC_DIR=${ROOT_BUILD_DIR}/pytorch
@@ -241,7 +378,7 @@ EOF
 
         # Create a temporary python environment for building libtorch
         LIBTORCH_BUILD_VENV=${ROOT_BUILD_DIR}/pytorch_venv
-        {{ PYTHON_DIR }}/bin/python -m venv ${LIBTORCH_BUILD_VENV}
+        ${PYTHON_DIR}/bin/python -m venv ${LIBTORCH_BUILD_VENV}
         source ${LIBTORCH_BUILD_VENV}/bin/activate
         pip3 install --no-cache -r ${PYTORCH_SRC_DIR}/requirements.txt
 
@@ -405,8 +542,6 @@ EOF
     (
         cd ${ROOT_BUILD_DIR}
 
-        GPERFTOOLS_VERSION=2.18.1
-
         # Clone gperftools
         GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
         git clone -b gperftools-${GPERFTOOLS_VERSION} --single-branch \
@@ -427,7 +562,6 @@ EOF
     # Install pprof
     (
         # Install go for building pprof; to be removed
-        GO_VERSION=1.26.1
         GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
         curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
         tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
@@ -437,38 +571,14 @@ EOF
         mkdir ${GOPATH}
 
         # Install pprof
-        PPROF_VERSION=a0b0bb1d4134f37be44de6c328680339b0fc13ad
         PPROF_DIR={{ PPROF_DIR }}
-        GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_VERSION}
+        GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_SHA}
 
         # Remove go now that pprof is installed
         go clean -cache -modcache
         rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
     )
 {%- endif %}
-
-    # Build and add pythonfmu only with GCC
-    (
-        cd ${ROOT_BUILD_DIR}
-
-        PYTHONFMU_VERSION=0.7.0
-
-        if [ "$(mpicxx -show | awk '{ print $1 }')" == "g++" ]; then
-            # Clone PythonFMU
-            PYTHONFMU_SRC=${ROOT_BUILD_DIR}/PythonFMU
-            git clone --branch v${PYTHONFMU_VERSION} --single-branch \
-                https://github.com/NTNU-IHB/PythonFMU.git ${PYTHONFMU_SRC}
-            cd ${PYTHONFMU_SRC}
-
-            # Build and install PythonFMU
-            export PATH={{ PYTHON_DIR }}/bin:${PATH}
-            bash build_unix.sh
-            pip install .
-
-            # Cleanup
-            rm -rf ${PYTHONFMU_SRC}
-        fi
-    )
 
     # Clean up
     dnf clean all
