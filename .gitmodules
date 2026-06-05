@@ -57,3 +57,8 @@
     path = framework/contrib/neml2
     url = ../../applied-material-modeling/neml2.git
     update = none
+[submodule "framework/contrib/pytorch"]
+	path = framework/contrib/pytorch
+    url = ../../pytorch/pytorch.git
+    update = none
+    ignore = untracked
