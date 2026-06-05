@@ -1,0 +1,36 @@
+# Phase 0 scaffolding for the MOOSE GNU Make -> CMake transition.
+#
+# This CMake build COEXISTS with the existing framework/*.mk build and does not replace it.
+# It is driven one build tree per METHOD: cmake -S . -B build/<method> -DMOOSE_METHOD=<method>.
+# libMesh / PETSc / WASP are discovered from the environment (LIBMESH_DIR/PETSC_DIR/WASP_DIR),
+# which the moose-dev conda env provides. See the migration roadmap for the full plan.
+
+cmake_minimum_required(VERSION 3.24)
+
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# METHOD must be resolved before we query libmesh-config for the compiler.
+include(MooseMethods)
+
+# libMesh is the source of truth for the toolchain; the compiler (mpicxx/mpicc/mpif90)
+# must be set before project().
+include(MooseLibMesh)
+moose_libmesh_set_compilers()
+
+project(Moose VERSION 1.0 LANGUAGES CXX C Fortran)
+
+message(STATUS "MOOSE build method:    ${MOOSE_METHOD}")
+message(STATUS "libMesh CXX compiler:  ${CMAKE_CXX_COMPILER}")
+
+# Build the MOOSE::libmesh usage-requirements target from libmesh-config.
+moose_libmesh_create_target()
+message(STATUS "libMesh host triplet:  ${MOOSE_LIBMESH_HOST}")
+
+# Phase 0 verification: a tiny TU that includes and links libMesh. Off by default; enabled
+# for the Phase 0 sanity build with -DMOOSE_SANITY_CHECK=ON.
+option(MOOSE_SANITY_CHECK "Build the Phase 0 libMesh sanity executable" OFF)
+if(MOOSE_SANITY_CHECK)
+  moose_method_libname(_sanity_name moose_libmesh_sanity)
+  add_executable(${_sanity_name} cmake/checks/libmesh_sanity.C)
+  target_link_libraries(${_sanity_name} PRIVATE MOOSE::libmesh)
+endif()
