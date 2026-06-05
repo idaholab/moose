@@ -167,11 +167,6 @@ public:
   /// constant matrix coefficient.
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
 
-  /// Return whether a matrix coefficient with the given name has been declared. Unlike scalars and
-  /// vectors, which can always be parsed from a numeric literal, a matrix coefficient only exists if
-  /// it has been declared, so this provides the only way to discriminate it from a scalar by name.
-  bool hasMatrixCoefficient(const std::string & name) const;
-
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
