@@ -87,10 +87,8 @@ protected:
   ///@}
 
   ///@{
-  /// List of grouped solution variable names whose reference residuals will be stored,
-  /// and the residual variable names that will store them.
-  std::vector<NonlinearVariableName> _group_soln_var_names;
-  std::vector<AuxVariableName> _group_ref_resid_var_names;
+  /// List of grouped solution variable names whose reference residuals will be stored
+  std::vector<NonlinearVariableName> _group_names;
   ///@}
 
   ///@{
@@ -108,14 +106,17 @@ protected:
   ///@}
 
   ///@{
-  /// Local storage for *discrete L2 residual norms* of the grouped variables listed in _group_ref_resid_var_names.
+  /// Local storage for *discrete L2 residual norms* of the grouped variables.
   std::vector<Real> _group_ref_resid;
   std::vector<Real> _group_resid;
   std::vector<Real> _group_output_resid;
   ///@}
 
+  /// Vector of bools to signify if variable is in a group.
+  std::vector<bool> _is_var_grouped;
+
   /// Group number index for each variable
-  std::vector<unsigned int> _variable_group_num_index;
+  std::vector<unsigned int> _group_index;
 
   /// Local storage for the scaling factors applied to each of the variables to apply to _ref_resid_vars.
   std::vector<Real> _scaling_factors;
@@ -123,8 +124,9 @@ protected:
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
 
-  /// Flag for each solution variable being in 'converge_on'
+  /// Flag for each solution variable or group being in 'converge_on'
   std::vector<bool> _converge_on_var;
+  std::vector<bool> _converge_on_group;
 
   /// Container for convergence treatment when the reference residual is zero
   const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;

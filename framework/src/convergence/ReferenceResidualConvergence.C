@@ -58,9 +58,14 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _reference_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
   }
   else
-    paramInfo("reference_vector",
-              "No reference vector is specified. The standard absolute and relative tolerance "
-              "checks will be used instead.");
+    mooseDeprecated(
+        "No `reference_vector` is provided, thus the Reference Residual convergence method will "
+        "revert to default tolerance checking. `reference_vector` will become a required parameter "
+        "on June 1st, 2027. If you are using `ReferenceResidualProblem`, either provide a "
+        "reference_vector or use a standard problem type (e.g., remove "
+        "Problem/type=ReferenceResidualProblem from your input file). If you are using "
+        "`ReferenceResidualConvergence`, either provide a reference_vector or utilize "
+        "`DefaultNonlinearConvergence` instead.");
 
   const auto norm_type_enum =
       parameters.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
@@ -95,24 +100,20 @@ void
 ReferenceResidualConvergence::initialSetup()
 {
   DefaultNonlinearConvergence::initialSetup();
+  // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
+  if (!_reference_vector)
+    return;
 
-  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
-  System & s = nonlinear_sys.system();
-  auto & as = _fe_problem.getAuxiliarySystem().sys();
+  auto & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
+  auto & s = nonlinear_sys.system();
 
   // If the user provides reference_vector, that implies that they want the
   // individual variables compared against their reference quantities in the
   // tag vector. The code depends on having _soln_var_names populated,
   // so fill that out if they didn't specify solution_variables.
-  if (_reference_vector)
-    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-      _soln_var_names.push_back(s.variable_name(var_num));
-
-  // If they didn't provide reference_vector, that implies that they
-  // want to skip the individual variable comparison, so leave it alone.
-
-  const auto n_soln_vars = _soln_var_names.size();
-  _variable_group_num_index.resize(n_soln_vars);
+  for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+    _soln_var_names.push_back(s.variable_name(var_num));
+  const auto n_soln_vars = nonlinear_sys.nVariables();
 
   const auto converge_on = getParam<std::vector<NonlinearVariableName>>("converge_on");
   if (!converge_on.empty())
@@ -129,45 +130,35 @@ ReferenceResidualConvergence::initialSetup()
   else
     _converge_on_var.assign(n_soln_vars, true);
 
-  unsigned int group_variable_num = 0;
-  if (_use_group_variables)
+  unsigned int num_variables_in_groups = 0;
+  for (unsigned int i = 0; i < _group_variables.size(); ++i)
   {
-    for (unsigned int i = 0; i < _group_variables.size(); ++i)
-    {
-      group_variable_num += _group_variables[i].size();
-      if (_group_variables[i].size() == 1)
-        mooseError(" In the 'group_variables' parameter, variable ",
-                   _group_variables[i][0],
-                   " is not grouped with other variables.");
-    }
-
-    unsigned int size = n_soln_vars - group_variable_num + _group_variables.size();
-    _group_ref_resid.resize(size);
-    _group_resid.resize(size);
-    _group_output_resid.resize(size);
-    _group_soln_var_names.resize(size);
-    _group_ref_resid_var_names.resize(size);
-  }
-  // If not using groups, use one group for each variable
-  else
-  {
-    _group_ref_resid.resize(n_soln_vars);
-    _group_resid.resize(n_soln_vars);
-    _group_output_resid.resize(n_soln_vars);
-    _group_soln_var_names.resize(n_soln_vars);
-    _group_ref_resid_var_names.resize(n_soln_vars);
+    num_variables_in_groups += _group_variables[i].size();
+    if (_group_variables[i].size() == 1)
+      paramError("group_variables",
+                 " variable ",
+                 _group_variables[i][0],
+                 " is not grouped with other variables.");
   }
 
-  std::set<std::string> check_duplicate;
+  // If no groups, size = n_soln_vars
+  unsigned int n_groups = n_soln_vars - num_variables_in_groups + _group_variables.size();
+  _group_ref_resid.resize(n_groups);
+  _group_resid.resize(n_groups);
+  _group_output_resid.resize(n_groups);
+  _group_names.resize(n_groups);
+  _converge_on_group.assign(n_groups, true);
+
+  // Check to make sure variables aren't in multiple groups
   if (_use_group_variables)
   {
+    std::set<std::string> check_duplicate;
     for (unsigned int i = 0; i < _group_variables.size(); ++i)
       for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
         check_duplicate.insert(_group_variables[i][j]);
 
-    if (check_duplicate.size() != group_variable_num)
-      mooseError(
-          "A variable cannot be included in multiple groups in the 'group_variables' parameter.");
+    if (check_duplicate.size() != num_variables_in_groups)
+      paramError("group_variables", "A variable cannot be included in multiple groups.");
   }
 
   _soln_vars.clear();
@@ -190,32 +181,15 @@ ReferenceResidualConvergence::initialSetup()
                  "'.");
   }
 
-  if (!_reference_vector)
-  {
-    _ref_resid_vars.clear();
-    for (unsigned int i = 0; i < _ref_resid_var_names.size(); ++i)
-    {
-      bool foundMatch = false;
-      for (unsigned int var_num = 0; var_num < as.n_vars(); var_num++)
-        if (_ref_resid_var_names[i] == as.variable_name(var_num))
-        {
-          _ref_resid_vars.push_back(var_num);
-          foundMatch = true;
-          break;
-        }
-
-      if (!foundMatch)
-        mooseError("Could not find variable '", _ref_resid_var_names[i], "' in auxiliary system");
-    }
-  }
-
   unsigned int ungroup_index = 0;
   if (_use_group_variables)
     ungroup_index = _group_variables.size();
 
+  // Determine which group each variable belongs to
+  _group_index.resize(n_soln_vars);
+  _is_var_grouped.assign(n_soln_vars, false);
   for (const auto i : index_range(_soln_vars))
   {
-    bool find_group = false;
     if (_use_group_variables)
     {
       for (unsigned int j = 0; j < _group_variables.size(); ++j)
@@ -230,85 +204,88 @@ ReferenceResidualConvergence::initialSetup()
                        "' to a group but excluded it from the convergence check. This is not "
                        "permitted.");
 
-          _variable_group_num_index[i] = j;
-          find_group = true;
+          _group_index[i] = j;
+          _is_var_grouped[i] = true;
           break;
         }
 
-      if (!find_group)
+      if (!_is_var_grouped[i])
       {
-        _variable_group_num_index[i] = ungroup_index;
+        _group_index[i] = ungroup_index;
         ungroup_index++;
       }
     }
     else
-      _variable_group_num_index[i] = i;
+      _group_index[i] = i;
   }
 
-  if (_use_group_variables)
+  // Check for variable groups containing both field and scalar variables
+  for (unsigned int i = 0; i < _group_variables.size(); ++i)
   {
-    // Check for variable groups containing both field and scalar variables
-    for (unsigned int i = 0; i < _group_variables.size(); ++i)
+    unsigned int num_scalar_vars = 0;
+    unsigned int num_field_vars = 0;
+    if (_group_variables[i].size() > 1)
     {
-      unsigned int num_scalar_vars = 0;
-      unsigned int num_field_vars = 0;
-      if (_group_variables[i].size() > 1)
+      for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
+        for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+          if (_group_variables[i][j] == s.variable_name(var_num))
+          {
+            if (nonlinear_sys.isScalarVariable(_soln_vars[var_num]))
+              ++num_scalar_vars;
+            else
+              ++num_field_vars;
+            break;
+          }
+    }
+    if (num_scalar_vars > 0 && num_field_vars > 0)
+      paramWarning("group_variables",
+                   "standard variables and scalar variables are grouped together in group ",
+                   i);
+  }
+
+  for (unsigned int i = 0; i < _group_names.size(); ++i)
+  {
+    // Accumulate names for a given group
+    std::vector<NonlinearVariableName> names;
+    for (unsigned int j = 0; j < _group_index.size(); ++j)
+      if (_group_index[j] == i)
       {
-        for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
-          for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-            if (_group_variables[i][j] == s.variable_name(var_num))
-            {
-              if (nonlinear_sys.isScalarVariable(_soln_vars[var_num]))
-                ++num_scalar_vars;
-              else
-                ++num_field_vars;
-              break;
-            }
+        names.push_back(_soln_var_names[j]);
+        _converge_on_group[i] = _converge_on_group[i] && _converge_on_var[j];
       }
-      if (num_scalar_vars > 0 && num_field_vars > 0)
-        mooseWarning("In the 'group_variables' parameter, standard variables and scalar variables "
-                     "are grouped together in group ",
-                     i);
-    }
-  }
-
-  // Keep track of the names of the variables in each group (of 1 variable if not using groups)
-  for (unsigned int i = 0; i < n_soln_vars; ++i)
-  {
-    if (_group_soln_var_names[_variable_group_num_index[i]].empty())
+    if (names.size() == 0)
+      mooseError("Internal error, something is wrong with variable grouping");
+    else if (names.size() == 1)
+      _group_names[i] = names[0];
+    else
     {
-      _group_soln_var_names[_variable_group_num_index[i]] = _soln_var_names[i];
-      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
-        _group_soln_var_names[_variable_group_num_index[i]] += " (grouped) ";
-    }
-
-    if (!_reference_vector && _group_ref_resid_var_names[_variable_group_num_index[i]].empty())
-    {
-      _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
-      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
-        _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
+      _group_names[i] = "(";
+      for (unsigned int j = 0; j < names.size(); ++j)
+      {
+        _group_names[i] += names[j];
+        if (j != names.size() - 1)
+          _group_names[i] += ", ";
+      }
+      _group_names[i] += ")";
     }
   }
 
-  if (!_reference_vector)
-  {
-    const unsigned int size_soln_vars = _soln_vars.size();
-    _scaling_factors.resize(size_soln_vars);
-    for (unsigned int i = 0; i < size_soln_vars; ++i)
-      if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
-        _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
-      else
-        _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
-  }
+  const unsigned int size_soln_vars = _soln_vars.size();
+  _scaling_factors.resize(size_soln_vars);
+  for (unsigned int i = 0; i < size_soln_vars; ++i)
+    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
+      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
+    else
+      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 }
 
 void
 ReferenceResidualConvergence::updateReferenceResidual()
 {
-  NonlinearSystemBase & _current_nl_sys = _fe_problem.currentNonlinearSystem();
-  AuxiliarySystem & aux_sys = _fe_problem.getAuxiliarySystem();
-  System & s = _current_nl_sys.system();
-  auto & as = aux_sys.sys();
+  // If no reference_vector is provided, this method is completely skipped
+
+  auto & current_nl_sys = _fe_problem.currentNonlinearSystem();
+  auto & s = current_nl_sys.system();
 
   std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
   std::fill(_group_output_resid.begin(), _group_output_resid.end(), 0.0);
@@ -319,55 +296,44 @@ ReferenceResidualConvergence::updateReferenceResidual()
 
   for (const auto i : index_range(_soln_vars))
   {
-    Real resid = 0.0;
-    const auto group = _variable_group_num_index[i];
-    if (_local_norm)
+    if (_converge_on_var[i])
     {
-      mooseAssert(_current_nl_sys.RHS().size() == (*_reference_vector).size(),
-                  "Sizes of nonlinear RHS and reference vector should be the same.");
-      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
-      // Add a tiny number to the reference to prevent a divide by zero.
-      auto ref = _reference_vector->clone();
-      ref->add(std::numeric_limits<Number>::min());
-      auto div = _current_nl_sys.RHS().clone();
-      *div /= *ref;
-      resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
-      if (_unscale_the_residual)
+      Real resid = 0.0;
+      const auto group = _group_index[i];
+      if (_local_norm)
       {
-        mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
-        resid /= Utility::pow<2>(_scaling_factors[i]);
+        mooseAssert(current_nl_sys.RHS().size() == (*_reference_vector).size(),
+                    "Sizes of nonlinear RHS and reference vector should be the same.");
+        mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+        // Add a tiny number to the reference to prevent a divide by zero.
+        auto ref = _reference_vector->clone();
+        ref->add(std::numeric_limits<Number>::min());
+        auto div = current_nl_sys.RHS().clone();
+        *div /= *ref;
+        resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
+        if (_unscale_the_residual)
+        {
+          mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
+          resid /= Utility::pow<2>(_scaling_factors[i]);
+        }
       }
-    }
-    else
-    {
-      resid = Utility::pow<2>(s.calculate_norm(_current_nl_sys.RHS(), _soln_vars[i], _norm_type));
-      if (_unscale_the_residual)
+      else
       {
-        mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
-        resid /= Utility::pow<2>(_scaling_factors[i]);
-      }
-      if (_reference_vector)
-      {
+        resid = Utility::pow<2>(s.calculate_norm(current_nl_sys.RHS(), _soln_vars[i], _norm_type));
+        if (_unscale_the_residual)
+        {
+          mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
+          resid /= Utility::pow<2>(_scaling_factors[i]);
+        }
+
         auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
         if (_unscale_the_residual)
           ref_resid /= Utility::pow<2>(_scaling_factors[i]);
         _group_ref_resid[group] += Utility::pow<2>(ref_resid);
       }
-    }
 
-    _group_resid[group] += _converge_on_var[i] ? resid : 0;
-    _group_output_resid[group] += resid;
-  }
-
-  if (!_reference_vector)
-  {
-    for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
-    {
-      auto ref_resid =
-          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], _norm_type);
-      if (!_unscale_the_residual)
-        ref_resid *= _scaling_factors[i];
-      _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(ref_resid);
+      _group_resid[group] += _converge_on_var[i] ? resid : 0;
+      _group_output_resid[group] += resid;
     }
   }
 
@@ -382,47 +348,42 @@ ReferenceResidualConvergence::updateReferenceResidual()
 void
 ReferenceResidualConvergence::nonlinearConvergenceSetup()
 {
+  // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
+  if (!_reference_vector)
+    return;
+
   updateReferenceResidual();
 
   std::ostringstream out;
 
-  if (_group_soln_var_names.size() > 0)
+  out << _name << ": Reference Residual check\n";
+
+  if (_group_names.size() > 0)
   {
-    out << std::setprecision(2) << std::scientific
-        << "   Solution, reference convergence variable norms:\n";
-    unsigned int maxwsv = 0;
-    unsigned int maxwrv = 0;
-    for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
+    // Set residual and references so that they always have a spacing of 8
+    out << std::setprecision(2) << std::scientific;
+    unsigned int var_space = 0;
+    for (unsigned int i = 0; i < _group_names.size(); ++i)
+      if (_group_names[i].size() > var_space)
+        var_space = _group_names[i].size();
+
+    for (unsigned int i = 0; i < _group_names.size(); ++i)
     {
-      if (_group_soln_var_names[i].size() > maxwsv)
-        maxwsv = _group_soln_var_names[i].size();
-      if (!_reference_vector && _group_ref_resid_var_names[i].size() > maxwrv)
-        maxwrv = _group_ref_resid_var_names[i].size();
-    }
-    if (_reference_vector)
-      // maxwrv is the width of maxwsv plus the length of "_ref" (e.g. 4)
-      maxwrv = maxwsv + 4;
-
-    for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
-    {
-      out << "   " << std::setw(maxwsv + (_local_norm ? 5 : 2)) << std::left
-          << (_local_norm ? "norm " : "") + _group_soln_var_names[i] + ": ";
-
-      if (_group_output_resid[i] == _group_resid[i])
-        out << std::setw(8) << _group_output_resid[i];
-      else
-        out << std::setw(8) << _group_resid[i] << " (" << _group_output_resid[i] << ')';
-
-      if (!_local_norm)
+      if (_converge_on_group[i])
       {
-        const auto ref_var_name =
-            _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
-        out << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << std::setw(8)
-            << _group_ref_resid[i] << "  (" << std::setw(8)
-            << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i])
-            << ")";
+        out << "   " << std::setw(var_space + (_local_norm ? 5 : 2) + 6) << std::right
+            << (_local_norm ? "norm " : "") + _group_names[i] + "-> res: ";
+
+        if (_group_output_resid[i] == _group_resid[i])
+          out << std::setw(8) << _group_output_resid[i];
+        else
+          out << std::setw(8) << _group_resid[i] << " (" << _group_output_resid[i] << ')';
+
+        if (!_local_norm)
+          out << "  ref: " << std::setw(8) << _group_ref_resid[i] << "  res/ref: " << std::setw(8)
+              << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i]);
+        out << '\n';
       }
-      out << '\n';
     }
     _console << out.str() << std::flush;
   }
@@ -463,24 +424,23 @@ ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
                                                        const Real abstol,
                                                        std::ostringstream & oss)
 {
-  if (!_group_resid.size())
+  // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
+  if (!_reference_vector)
     return DefaultNonlinearConvergence::checkRelativeConvergence(
         it, fnorm, the_residual, rtol, abstol, oss);
 
   if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
-    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
-        << ") or absolute tolerance (" << abstol << ") for all solution variables\n";
+    oss << "Converged normally";
     return true;
   }
   else if (it >= _accept_iters &&
            checkConvergenceIndividVars(
                fnorm, abstol * _accept_mult, rtol * _accept_mult, the_residual))
   {
-    oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
-        << rtol * _accept_mult << ") or acceptable absolute tolerance (" << abstol * _accept_mult
-        << ") for all solution variables\n";
-    _console << "Converged due to ACCEPTABLE tolerances" << std::endl;
+    oss << "  Converged due a larger acceptable tolerance due to `acceptible_multiplier` after "
+           "`acceptible_iterations`.";
+    _console << "  Converged due to ACCEPTABLE tolerances" << std::endl;
     return true;
   }
 
