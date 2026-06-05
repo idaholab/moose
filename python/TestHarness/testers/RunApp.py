@@ -447,6 +447,7 @@ class RunApp(Tester):
         if (
             "--error-deprecated" not in cli_args
             and not specs["no_error_deprecated"]
+            and not specs["deprecated"]
             and (not specs["allow_deprecated"] or options.error_deprecated)
         ):
             cli_args.append("--error-deprecated")
