@@ -10,37 +10,65 @@
   [u]
   []
   [v]
-    family = SCALAR
-    initial_condition = 1
+  []
+[]
+
+[Functions]
+  [u0]
+    type = ParsedFunction
+    expression = 'x*(1-x)'
+  []
+  [v0]
+    type = ParsedFunction
+    expression = '1+0.5*sin(2*pi*x)'
+  []
+[]
+
+[ICs]
+  [u]
+    type = FunctionIC
+    variable = u
+    function = u0
+  []
+  [v]
+    type = FunctionIC
+    variable = v
+    function = v0
   []
 []
 
 [Kernels]
   [u_diff]
-    type = ADCoupledScalarDiffusion
+    type = ADMatDiffusion
     variable = u
-    v = v
+    diffusivity = v_diffusivity
   []
   [u_rxn]
     type = ADLambdaU2
     variable = u
     lambda = 0
   []
-[]
-
-[ScalarKernels]
   [v_offdiag]
-    type = ADCoupledFieldScalar
+    type = ADCoupledFieldKernel
     variable = v
     u = u
   []
   [v_diag]
-    type = ADScalarReaction
+    type = ADReaction
     variable = v
   []
   [v_exp_diag]
-    type = ADExpU
+    type = ADExpUKernel
     variable = v
+  []
+[]
+
+[Materials]
+  [v_diffusivity]
+    type = ADParsedMaterial
+    property_name = v_diffusivity
+    expression = 'v'
+    coupled_variables = 'v'
   []
 []
 

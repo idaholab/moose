@@ -19,9 +19,6 @@
   [u_diff]
     extra_matrix_tags = 'NPC_J_0_1'
   []
-[]
-
-[ScalarKernels]
   [v_offdiag]
     extra_matrix_tags = 'NPC_J_1_0'
   []
