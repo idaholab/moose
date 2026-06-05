@@ -267,7 +267,6 @@ NewtonSNESExecutor::allocateOffDiagMats()
 
       const std::pair<unsigned int, unsigned int> key{i, j};
       auto & [our_mat, tag] = libmesh_map_find(_off_diag_mats, key);
-      sys_i.associateMatrixToTag(*mat, tag);
       our_mat = std::move(mat);
     }
   }
