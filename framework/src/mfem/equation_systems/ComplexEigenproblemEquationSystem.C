@@ -32,7 +32,6 @@ buildSystemMatrix(mfem::ComplexHypreParMatrix & cmat)
   return sysmat;
 }
 
-
 void
 ComplexEigenproblemEquationSystem::ApplyEssentialBCs()
 {
