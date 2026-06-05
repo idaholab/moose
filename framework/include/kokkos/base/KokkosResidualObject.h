@@ -230,7 +230,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
 
-  for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
+  for (unsigned int t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
@@ -251,7 +251,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
 
-  for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
+  for (unsigned int t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
@@ -280,7 +280,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
   auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
 
-  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
@@ -298,7 +298,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getElemLocalDofIndex(datum.elem().id, i, _kokkos_var.var(comp));
 
-  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
@@ -326,7 +326,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
   auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
   auto col = sys.getNodeGlobalDofIndex(node, jvar);
 
-  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
@@ -354,7 +354,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
 
-  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
     auto & matrix = sys.getMatrix(tag);

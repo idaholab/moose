@@ -19,7 +19,7 @@
 namespace Moose::Kokkos
 {
 
-using ThreadID = dof_id_type;
+using ThreadID = MOOSE_KOKKOS_INDEX_TYPE;
 
 /**
  * The Kokkos thread object that aids in converting the one-dimensional thread index into

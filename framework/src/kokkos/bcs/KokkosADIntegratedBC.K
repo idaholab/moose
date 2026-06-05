@@ -61,7 +61,8 @@ ADIntegratedBC::computeResidualAndJacobian()
 void
 ADIntegratedBC::dispatch()
 {
-  _thread.resize(_num_local_threads, numKokkosBoundarySides());
+  _thread.resize(_computing_jacobian ? _num_local_jacobian_threads : _num_local_residual_threads,
+                 numKokkosBoundarySides());
 
   Policy policy(0, _thread.size());
 

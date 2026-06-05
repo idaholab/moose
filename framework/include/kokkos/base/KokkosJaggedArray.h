@@ -159,7 +159,7 @@ JaggedArrayInnerData<T, inner, layout>::operator()(indices... i) const
 template <typename T,
           unsigned int inner,
           unsigned int outer,
-          typename index_type = dof_id_type,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
           LayoutType layout = LayoutType::LEFT>
 class JaggedArray
 {

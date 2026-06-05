@@ -128,7 +128,9 @@ MaterialProperty<T, dimension>::allocate(const Mesh & mesh,
     auto sid = mesh.getContiguousSubdomainID(subdomain);
     auto constant_option = libmesh_map_find(_record->constant_option, subdomain);
 
-    std::vector<dof_id_type> n;
+    using index_type = typename std::remove_reference_t<decltype(_data[sid])>::unsigned_index_type;
+
+    std::vector<index_type> n;
 
     for (unsigned int i = 0; i < dimension; ++i)
       n.push_back(libmesh_map_find(_record->dims, subdomain)[i]);

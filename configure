@@ -614,14 +614,14 @@ LIBPNG_INCLUDES
 LIBPNG_LIBS
 LIBPNG
 PKG_CONFIG
+kokkos_gpu
+kokkos_support
 neml2_library
 neml2_support
 mfem_library
 mfem_support
 libtorch_library
 libtorch_support
-kokkos_support
-kokkos_gpu
 target_alias
 host_alias
 build_alias
@@ -669,6 +669,7 @@ with_libtorch
 with_mfem
 with_neml2
 with_kokkos
+with_kokkos_index_size
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1300,6 +1301,8 @@ Optional Packages:
                           or neml2 directory]
   --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes
                           or cpu to disable GPU capabilities]
+  --with-kokkos-index-size=ARG
+                          Specify Kokkos index size [ARG=4 (default) or 8]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1936,31 +1939,83 @@ fi
 if test ${with_kokkos+y}
 then :
   withval=$with_kokkos; kokkos_support=yes
-else $as_nop
-  kokkos_support=no
+else case e in #(
+  e) kokkos_support=no ;;
+esac
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with Kokkos support: $kokkos_support" >&5
-printf "%s\n" "configuring with Kokkos support: $kokkos_support" >&6; }
+
+
+# Check whether --with-kokkos-index-size was given.
+if test ${with_kokkos_index_size+y}
+then :
+  withval=$with_kokkos_index_size;
+fi
+
+
+if test "x$with_kokkos_index_size" != x && test "$kokkos_support" != yes
+then :
+  as_fn_error $? "--with-kokkos-index-size requires --with-kokkos" "$LINENO" 5
+fi
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with kokkos support: $kokkos_support" >&5
+printf "%s\n" "configuring with kokkos support: $kokkos_support" >&6; }
 
 if test "$kokkos_support" = yes
 then :
-  printf "%s\n" "#define KOKKOS_ENABLED 1" >>confdefs.h
-  kokkos_support=true
+
+
+printf "%s\n" "#define KOKKOS_ENABLED 1" >>confdefs.h
+
+        kokkos_support=true
+
+
+        if test "x$with_kokkos_index_size" = x
+then :
+  with_kokkos_index_size=4
 fi
 
-if test ${with_kokkos+y}
+        case $with_kokkos_index_size in #(
+  4) :
+
+                  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos index size: 4 bytes" >&5
+printf "%s\n" "Kokkos index size: 4 bytes" >&6; }
+
+printf "%s\n" "#define KOKKOS_INDEX_TYPE uint32_t" >>confdefs.h
+
+                 ;; #(
+  8) :
+
+                  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos index size: 8 bytes" >&5
+printf "%s\n" "Kokkos index size: 8 bytes" >&6; }
+
+printf "%s\n" "#define KOKKOS_INDEX_TYPE uint64_t" >>confdefs.h
+
+                 ;; #(
+  *) :
+
+                  as_fn_error $? "invalid value for --with-kokkos-index-size: $with_kokkos_index_size (valid values are 4 or 8)" "$LINENO" 5
+                 ;;
+esac
+
+        if test "$with_kokkos" = cpu
 then :
-  if test "$with_kokkos" = cpu
-  then :
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities disabled" >&5
-    printf "%s\n" "Kokkos GPU capabilities disabled" >&6; }
-    kokkos_gpu=false
-  else
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities enabled" >&5
-    printf "%s\n" "Kokkos GPU capabilities enabled" >&6; }
-    kokkos_gpu=true
-  fi
+
+                  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities disabled" >&5
+printf "%s\n" "Kokkos GPU capabilities disabled" >&6; }
+                  kokkos_gpu=false
+
+
+else case e in #(
+  e)
+                  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities enabled" >&5
+printf "%s\n" "Kokkos GPU capabilities enabled" >&6; }
+                  kokkos_gpu=true
+
+               ;;
+esac
+fi
+
 fi
 
 if test -n "$ac_tool_prefix"; then

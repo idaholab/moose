@@ -5488,7 +5488,12 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       q.queryInto(tguos);
 
       ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+
+      // Force one thread per ThreadedGeneralUserObject via grainsize
+      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(),
+                                                      tguos.end(),
+                                                      /*grainsize=*/1),
+                               ctguot);
       joinAndFinalize(q);
     }
 
