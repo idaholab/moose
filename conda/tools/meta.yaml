@@ -51,7 +51,6 @@ requirements:
     - pybtex
     - pycobertura
     - pyflakes
-    - pyfmi
     - pylatexenc
     - pylint
     - pymongo
@@ -78,7 +77,6 @@ test:
     - ruff --version
   imports:
     - bs4
-    - pyfmi
     - coverage
     - deepdiff
     - git
