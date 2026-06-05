@@ -143,10 +143,25 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # get "lstopo-no-graphics", which can be used to
         # prebuild a topology file to avoid hwloc reading
         # topology for every run
-        if mpiexec --version | grep -q hwloc; then
-            dnf install -y hwloc-gui
-        fi
+        (
+            if [ -n "${CUDA_DIR:-}" ]; then
+                export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
+            fi
+            if mpiexec --version | grep -q hwloc; then
+                dnf install -y hwloc-gui
+            fi
+        )
     fi
+
+    # Reset compiler variables to those from MPI to the underlying
+    # compilers because the first packages we build here don't
+    # and shouldn't be linked to MPI
+    for var in CC CXX FC F90 F77; do
+        before_var="${var}_BEFORE"
+        declare "${before_var}=${!var}"
+        export "$var="$("${!var}" -show | awk '{print $1}')""
+        echo "Changed ${var} from ${!before_var} to ${!var}"
+    done
 
     # Install code-server
     (
@@ -271,7 +286,13 @@ EOF
         rm -rf ${FMI_LIBRARY_SRC_DIR}
     )
 
-    # Install assimumlo dependency for pyfmi
+    # Install cython for the assimulo setup.py installs that follow
+    # (assimulo and pyfmi). After that, we can delete it (if it
+    # isn't already installed).
+    FMU_REMOVE_CYTHON=
+    ${PYTHON_DIR}/bin/pip show cython &>/dev/null || (${PYTHON_DIR}/bin/pip install cython && FMU_REMOVE_CYTHON=1)
+
+    # Install assimulo dependency for pyfmi
     (
         cd ${ROOT_BUILD_DIR}
 
@@ -282,23 +303,16 @@ EOF
             https://github.com/modelon-community/Assimulo.git ${ASSIMULO_SRC_DIR}
         cd ${ASSIMULO_SRC_DIR}
 
-        # Install cython for the assimulo setup.py install. Assimulo doesn't
-        # define cython as a build dependency so we need to manually
-        # install it. It can be removed after if not already available.
-        remove_cython=
-        ${PYTHON_DIR}/bin/pip show cython &>/dev/null || (${PYTHON_DIR}/bin/pip install cython && remove_cython=1)
+        export PATH={{ PYTHON_DIR }}/bin:${PATH}
 
         # Build Assimulo
-        PATH=${PYTHON_DIR}/bin:${PATH} python setup.py install
-
-        # Remove cython if we installed it
-        test -z "$remove_cython" || ${PYTHON_DIR}/bin/pip uninstall -y cython
+        python setup.py install
 
         # Cleanup
         rm -rf ${ASSIMULO_SRC_DIR}
 
         # Test package
-        ${PYTHON_DIR}/bin/python -c "import assimulo; print('Assimulo:', assimulo.__version__)"
+        python -c "import assimulo; print('Assimulo:', assimulo.__version__)"
     )
 
     # Install PyFMI
@@ -312,24 +326,21 @@ EOF
             https://github.com/modelon-community/PyFMI.git ${PYFMI_SRC_DIR}
         cd ${PYFMI_SRC_DIR}
 
-        # Install cython for the pyfmi setup.py install. PyFMI doesn't
-        # define cython as a build dependency so we need to manually
-        # install it. It can be removed after if not already available.
-        remove_cython=
-        ${PYTHON_DIR}/bin/pip show cython &>/dev/null || (${PYTHON_DIR}/bin/pip install cython && remove_cython=1)
+        export PATH={{ PYTHON_DIR }}/bin:${PATH}
 
         # Setup pyfmi
-        PATH=${PYTHON_DIR}/bin:${PATH} python setup.py install --fmil-home=${FMI_LIBRARY_DIR}
-
-        # Remove cython if we installed it
-        test -z "$remove_cython" || ${PYTHON_DIR}/bin/pip uninstall -y cython
+        python setup.py install --fmil-home=${FMI_LIBRARY_DIR}
 
         # Cleanup
         rm -rf ${PYFMI_SRC_DIR}
 
         # Test package
-        ${PYTHON_DIR}/bin/python -c "import pyfmi; print('PyFMI:', pyfmi.__version__)"
+        python -c "import pyfmi; print('PyFMI:', pyfmi.__version__)"
     )
+
+    # Remove cython if we installed it
+    test -z "$FMU_REMOVE_CYTHON" || ${PYTHON_DIR}/bin/pip uninstall -y cython
+    FMU_REMOVE_CYTHON=
 
     # Install PythonFMU
     (
@@ -341,22 +352,25 @@ EOF
             https://github.com/NTNU-IHB/PythonFMU.git ${PYTHONFMU_SRC_DIR}
         cd ${PYTHONFMU_SRC_DIR}
 
-        # Build and install PythonFMU
-        PATH={{ PYTHON_DIR }}/bin:${PATH} bash build_unix.sh
-        PATH={{ PYTHON_DIR }}/bin:${PATH} pip install .
+        export PATH={{ PYTHON_DIR }}/bin:${PATH}
+
+        # Build pythonfmu
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --parallel ${MOOSE_JOBS}
+        cd ..
+
+        # Install pythonfmu
+        pip install .
 
         # Cleanup
         rm -rf ${PYTHONFMU_SRC_DIR}
 
         # Test package
-        ${PYTHON_DIR}/bin/python -c "import pythonfmu; print('PythonFMU:', pythonfmu.__version__)"
+        python -c "import pythonfmu; print('PythonFMU:', pythonfmu.__version__)"
     )
 {%- endif %}
-
-    # Need to expose cuda compat libs when using mpich with cuda to run mpicc
-    if [ -n "${CUDA_DIR:-}" ] && [ -n "${MOOSE_MPICH_DIR:-}" ]; then
-        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
-    fi
 
 {% if WITHOUT_PYTORCH is not defined %}
     # Build libtorch
@@ -411,7 +425,21 @@ EOF
         deactivate
         rm -rf ${LIBTORCH_BUILD_VENV} ${PYTORCH_SRC_DIR} ${LIBTORCH_BUILD_DIR}
     )
+{%- endif %}
 
+    # Use the MPI compiler wrappers again
+    for var in CC CXX FC F90 F77; do
+        BEFORE_VAR="${var}_BEFORE"
+        echo "Resetting ${var} from ${!var} to ${!BEFORE_VAR}"
+        export "${var}=${!BEFORE_VAR}"
+    done
+
+    # Need to expose cuda compat libs when using mpich with cuda to run mpicc
+    if [ -n "${CUDA_DIR:-}" ] && [ -n "${MOOSE_MPICH_DIR:-}" ]; then
+        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
+    fi
+
+{% if WITHOUT_PYTORCH is not defined %}
     # Build neml2
     (
         cd ${ROOT_BUILD_DIR}
