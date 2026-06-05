@@ -209,12 +209,6 @@ CoefficientManager::getMatrixCoefficient(const std::string & name)
 }
 
 bool
-CoefficientManager::hasMatrixCoefficient(const std::string & name) const
-{
-  return this->_matrix_coeffs.hasCoefficient(name);
-}
-
-bool
 CoefficientManager::scalarPropertyIsDefined(const std::string & name,
                                             const std::string & block) const
 {

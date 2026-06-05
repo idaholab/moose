@@ -69,7 +69,11 @@ ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
   std::unique_ptr<mfem::ParSesquilinearForm> m =
       std::make_unique<mfem::ParSesquilinearForm>(fespace);
 
-  const bool use_matrix = _eigen_problem.rhsCoefficientIsMatrix();
+  const bool use_matrix = _eigen_problem.isParamSetByUser("rhs_matrix_coefficient");
+  if (use_matrix && _eigen_problem.isParamSetByUser("rhs_coefficient"))
+    mooseError("Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
+               "non-default value.");
+
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
   {
     if (use_matrix)

@@ -41,10 +41,6 @@ public:
   /// Returns the scalar coefficient used to scale the right-hand side of the eigenproblem equation.
   mfem::Coefficient & getRHSCoefficient();
 
-  /// Returns whether the right-hand-side coefficient names a declared matrix coefficient, in which
-  /// case the eigenproblem is anisotropic and the matrix coefficient should be retrieved instead.
-  bool rhsCoefficientIsMatrix();
-
   /// Returns the matrix coefficient used to scale the right-hand side of the eigenproblem equation.
   mfem::MatrixCoefficient & getRHSMatrixCoefficient();
 };

@@ -9,7 +9,7 @@ sqrt2_inv = 0.70710678118654752
 [Problem]
   type = MFEMEigenproblem
   num_modes = 5
-  rhs_coefficient = epsilon
+  rhs_matrix_coefficient = epsilon
 []
 
 [FESpaces]
