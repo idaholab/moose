@@ -72,6 +72,15 @@ function(moose_add_app)
 
   set(MOOSE_APP_LIB_TARGET "${_lib}" PARENT_SCOPE)
 
+  # --- plugins (app.mk PLUGIN_DIR -> <name>-<method>.plugin) ---
+  # Each source in <dir>/plugins and <dir>/test/plugins becomes a standalone shared object
+  # named <basename>-<method>.plugin, written into the source plugins dir (MOOSE loads it from
+  # there by the path in the input file; .plugin is gitignored). Symbols are resolved against
+  # the host executable at load (-undefined dynamic_lookup), so plugins are NOT linked to
+  # moose/libmesh -- they only borrow the app's include dirs + compile options. Building the
+  # app library also builds its plugins.
+  _moose_add_plugins(${_lib} "${A_NAME}" "${A_APP_DIR}")
+
   # --- test-object library (modules: <dir>/test/src -> lib<name>_test-<method>) ---
   set(_exec_link Moose::${A_NAME})
   if(A_WITH_TEST_LIB)
@@ -96,6 +105,54 @@ function(moose_add_app)
     set_target_properties(${_exec} PROPERTIES OUTPUT_NAME "${_lib}")
     target_link_libraries(${_exec} PRIVATE ${_exec_link})
     set(MOOSE_APP_EXEC_TARGET "${_exec}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# _moose_add_plugins(<applib> <name> <appdir>): build every plugin source under
+# <appdir>/plugins and <appdir>/test/plugins as <basename>-<method>.plugin (a MODULE in the
+# source dir), and make <applib> depend on them so they build with the app.
+function(_moose_add_plugins applib name appdir)
+  set(_plugin_targets "")
+  # test/include dirs (e.g. abaqus utility .f files INCLUDEd by UMAT plugins) -- these are on
+  # the test lib, not the app lib, but plugins live in test/plugins and reference them.
+  moose_collect_subdirs(_test_inc "${appdir}/test/include")
+  foreach(_pdir IN ITEMS "${appdir}/plugins" "${appdir}/test/plugins")
+    if(NOT IS_DIRECTORY "${_pdir}")
+      continue()
+    endif()
+    file(GLOB_RECURSE _psrc CONFIGURE_DEPENDS
+         "${_pdir}/*.C" "${_pdir}/*.c" "${_pdir}/*.f" "${_pdir}/*.f90")
+    foreach(_ps IN LISTS _psrc)
+      get_filename_component(_pn "${_ps}" NAME_WE)
+      get_filename_component(_pd "${_ps}" DIRECTORY)
+      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _ptag "${name}_${_pd}_${_pn}")
+      set(_ptgt "plugin_${_ptag}")
+      add_library(${_ptgt} MODULE "${_ps}")
+      set_target_properties(${_ptgt} PROPERTIES
+        PREFIX ""
+        SUFFIX "-${MOOSE_METHOD}.plugin"
+        OUTPUT_NAME "${_pn}"
+        LIBRARY_OUTPUT_DIRECTORY "${_pd}")
+      # Borrow the app's include dirs + compile options (e.g. -include MooseConfig.h, the
+      # libmesh CXX flags) without linking any libraries; CXX-only flags are genex-guarded so
+      # Fortran/C plugins ignore them.
+      target_include_directories(${_ptgt} PRIVATE
+        "${_pd}" ${_test_inc}
+        $<TARGET_PROPERTY:${applib},INCLUDE_DIRECTORIES>)
+      target_compile_options(${_ptgt} PRIVATE
+        $<TARGET_PROPERTY:${applib},INTERFACE_COMPILE_OPTIONS>
+        # Fortran flags build.mk adds to libmesh_FFLAGS for gfortran. -fdefault-real-8/
+        # -fdefault-double-8 are essential: Abaqus UMAT code uses default-kind REALs expecting
+        # 8 bytes; without these the plugin computes garbage (zero-pivot / NaN at solve time).
+        "$<$<COMPILE_LANGUAGE:Fortran>:-fdefault-real-8;-fdefault-double-8;-ffree-line-length-none>")
+      if(APPLE)
+        target_link_options(${_ptgt} PRIVATE -undefined dynamic_lookup)
+      endif()
+      list(APPEND _plugin_targets ${_ptgt})
+    endforeach()
+  endforeach()
+  if(_plugin_targets)
+    add_dependencies(${applib} ${_plugin_targets})
   endif()
 endfunction()
 
