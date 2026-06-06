@@ -55,9 +55,12 @@ add_subdirectory(test)
 # Phase 3: all physics modules (libraries), built via moose_add_app() with the dep graph.
 add_subdirectory(modules)
 
-# Phase 4: export a build-tree CMake package so external apps can find_package(Moose).
+# Phase 4: export a build-tree CMake package + define a relocatable install, both consumable
+# via find_package(Moose).
 include(MooseExport)
 moose_export()
+include(MooseInstall)
+moose_install()
 
 # Python extension modules (hit.so, _pycapabilities.so).
 include(MoosePython)

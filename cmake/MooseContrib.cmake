@@ -24,7 +24,9 @@ function(moose_add_hit)
   moose_method_libname(_name hit)
   add_library(${_name} SHARED
     "${_srcdir}/parse.cc" "${_srcdir}/lex.cc" "${_srcdir}/braceexpr.cc")
-  target_include_directories(${_name} PUBLIC "${_dir}/include")
+  # BUILD_INTERFACE so the absolute source path does not leak into the install export; the
+  # installed MooseConfig re-adds hit headers from the install tree.
+  target_include_directories(${_name} PUBLIC "$<BUILD_INTERFACE:${_dir}/include>")
   target_link_libraries(${_name} PUBLIC MOOSE::libmesh MOOSE::wasp)
   add_library(Moose::hit ALIAS ${_name})
 endfunction()

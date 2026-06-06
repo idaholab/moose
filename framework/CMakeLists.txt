@@ -15,6 +15,9 @@ file(MAKE_DIRECTORY "${MOOSE_CONFIG_DIR}")
 configure_file("${_fwk}/include/base/MooseDefaultConfig.h"
                "${MOOSE_CONFIG_DIR}/MooseConfig.h" COPYONLY)
 set(MOOSE_CONFIG_HEADER "${MOOSE_CONFIG_DIR}/MooseConfig.h")
+# Expose to the top-level scope (moose_install lives there).
+set(MOOSE_CONFIG_DIR "${MOOSE_CONFIG_DIR}" CACHE INTERNAL "MOOSE generated header dir")
+set(MOOSE_CONFIG_HEADER "${MOOSE_CONFIG_HEADER}" CACHE INTERNAL "Generated MooseConfig.h path")
 
 # MooseRevision.h via the existing python generator. Generated at configure time so it
 # exists before the build; the script only rewrites when the revision actually changes.
@@ -79,9 +82,14 @@ list(APPEND _inc_dirs
   "${_fwk}/contrib/gtest"
   "${_fwk}/contrib/hit/include")
 
-target_include_directories(${_moose} PUBLIC
-  "${MOOSE_CONFIG_DIR}"   # generated MooseConfig.h / MooseRevision.h win over any in-source copy
-  ${_inc_dirs})
+# Build-tree include dirs are absolute source paths -- scope them to BUILD_INTERFACE so they
+# don't leak into the install export. The installed MooseConfig.cmake re-adds the equivalent
+# dirs from $PREFIX/include/moose (globbed, same as the build does).
+set(_binc "$<BUILD_INTERFACE:${MOOSE_CONFIG_DIR}>")  # generated MooseConfig.h / MooseRevision.h
+foreach(_d IN LISTS _inc_dirs)
+  list(APPEND _binc "$<BUILD_INTERFACE:${_d}>")
+endforeach()
+target_include_directories(${_moose} PUBLIC ${_binc})
 
 # --------------------------------------------------------------------------------------
 # Compile usage requirements not carried by libmesh-config.
@@ -89,9 +97,10 @@ target_include_directories(${_moose} PUBLIC
 # -DMETHOD=<method> (build.mk adds this to libmesh_CXXFLAGS, not libmesh-config).
 target_compile_definitions(${_moose} PUBLIC "METHOD=${MOOSE_METHOD}")
 
-# Force-include the generated MooseConfig.h, as the make build does via -include.
+# Force-include the generated MooseConfig.h, as the make build does via -include. Scoped to
+# BUILD_INTERFACE; the installed config adds the installed MooseConfig.h instead.
 target_compile_options(${_moose} PUBLIC
-  "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include ${MOOSE_CONFIG_HEADER}>")
+  "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include ${MOOSE_CONFIG_HEADER}>>")
 
 # FParser JIT include path string (PRIVATE: only libmoose sources reference it).
 set(_adfparser "-I${_fwk}/include/utils -I${_fwk}/include/base ${MOOSE_LIBMESH_INCLUDE}")
