@@ -20,7 +20,7 @@
 # This is the downstream front door for the new build; legacy apps that `include app.mk`
 # keep working unchanged during the migration window.
 function(moose_add_app)
-  cmake_parse_arguments(A "BUILD_EXEC;WITH_TEST_LIB" "NAME;APP_DIR" "DEPEND_MODULES" ${ARGN})
+  cmake_parse_arguments(A "BUILD_EXEC;WITH_TEST_LIB;GEN_REVISION" "NAME;APP_DIR" "DEPEND_MODULES" ${ARGN})
   if(NOT A_NAME OR NOT A_APP_DIR)
     message(FATAL_ERROR "moose_add_app: NAME and APP_DIR are required")
   endif()
@@ -37,6 +37,26 @@ function(moose_add_app)
 
   moose_collect_subdirs(_inc "${A_APP_DIR}/include")
   target_include_directories(${_lib} PUBLIC ${_inc})
+
+  # Per-app revision header <Camel>Revision.h (app.mk's GEN_REVISION=yes), generated at
+  # configure time into a build-only include dir made PUBLIC (so test libs/dependers see it).
+  if(A_GEN_REVISION)
+    _moose_camel(_camel "${A_NAME}")
+    set(_revdir "${CMAKE_CURRENT_BINARY_DIR}/${A_NAME}_generated_include")
+    file(MAKE_DIRECTORY "${_revdir}")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E env
+        REPO_LOCATION=${A_APP_DIR}
+        HEADER_FILE=${_revdir}/${_camel}Revision.h
+        APPLICATION_NAME=${A_NAME}
+        INSTALLABLE_DIRS=
+        ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/framework/scripts/get_repo_revision.py
+      RESULT_VARIABLE _rrc)
+    if(NOT _rrc EQUAL 0)
+      message(FATAL_ERROR "moose_add_app(${A_NAME}): failed to generate ${_camel}Revision.h")
+    endif()
+    target_include_directories(${_lib} PUBLIC "${_revdir}")
+  endif()
 
   # -D<NAME>_ENABLED (uppercased, dashes removed), as app.mk defines per app.
   string(TOUPPER "${A_NAME}" _upper)
@@ -77,6 +97,20 @@ function(moose_add_app)
     target_link_libraries(${_exec} PRIVATE ${_exec_link})
     set(MOOSE_APP_EXEC_TARGET "${_exec}" PARENT_SCOPE)
   endif()
+endfunction()
+
+# _moose_camel(<out> <name>): snake_case -> CamelCase (combined -> Combined,
+# heat_transfer -> HeatTransfer), matching app.mk's perl s/(?:^|_)([a-z])/\u$1/g.
+function(_moose_camel out name)
+  string(REPLACE "_" ";" _parts "${name}")
+  set(_r "")
+  foreach(_p IN LISTS _parts)
+    string(SUBSTRING "${_p}" 0 1 _head)
+    string(TOUPPER "${_head}" _head)
+    string(SUBSTRING "${_p}" 1 -1 _tail)
+    string(APPEND _r "${_head}${_tail}")
+  endforeach()
+  set(${out} "${_r}" PARENT_SCOPE)
 endfunction()
 
 # Apply a native GROUP unity build to <target>: one group per top-level subdir of <srcroot>;

@@ -58,7 +58,8 @@ foreach(_m IN LISTS _rev)
   endif()
 endforeach()
 
-# Create the module library targets in dependency order.
+# Create the module library targets (+ per-module exec and test lib) in dependency order.
+set(_enabled_modules "")
 foreach(_m IN LISTS MOOSE_MODULES_ORDERED)
   string(TOUPPER "${_m}" _M)
   if(MOOSE_MODULE_${_M})
@@ -66,5 +67,25 @@ foreach(_m IN LISTS MOOSE_MODULES_ORDERED)
                   APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_m}"
                   BUILD_EXEC WITH_TEST_LIB
                   DEPEND_MODULES ${_dep_${_m}})
+    list(APPEND _enabled_modules ${_m})
   endif()
 endforeach()
+
+# combined: built only when every module is enabled (mirrors modules.mk's ALL_MODULES guard).
+# CombinedApp registers all modules (each guarded by <NAME>_ENABLED, inherited via the module
+# libs) and CombinedTestApp registers every module's test objects -- so the combined test lib
+# links every module's test library (the make build's USE_TEST_LIBS=yes).
+list(LENGTH MOOSE_MODULES_ORDERED _n_all)
+list(LENGTH _enabled_modules _n_on)
+if(_n_on EQUAL _n_all)
+  moose_add_app(NAME combined
+                APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/combined"
+                BUILD_EXEC WITH_TEST_LIB GEN_REVISION
+                DEPEND_MODULES ${MOOSE_MODULES_ORDERED})
+  moose_method_libname(_combined_test combined_test)
+  if(TARGET ${_combined_test})
+    foreach(_m IN LISTS MOOSE_MODULES_ORDERED)
+      target_link_libraries(${_combined_test} PUBLIC Moose::${_m}_test)
+    endforeach()
+  endif()
+endif()
