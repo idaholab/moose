@@ -145,10 +145,14 @@ advected_interp_method = 'average'
   num_iterations = 500
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
-  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg'
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
-  pressure_petsc_options_value = 'hypre boomeramg'
+  # The momentum systems are diagonally dominant and converge in a few Krylov iterations, so a cheap
+  # SOR preconditioner beats building a full AMG hierarchy (whose setup would dominate the solve).
+  momentum_petsc_options_iname = '-pc_type'
+  momentum_petsc_options_value = 'sor'
+  # The pressure Poisson operator barely changes between SIMPLE iterations, so we reuse the AMG
+  # hierarchy across iterations and skip the (expensive) repeated AMG setup.
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type -ksp_reuse_preconditioner'
+  pressure_petsc_options_value = 'hypre boomeramg true'
   print_fields = false
 
   pin_pressure = true
