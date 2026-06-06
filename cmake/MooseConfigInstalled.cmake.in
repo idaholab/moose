@@ -41,3 +41,22 @@ moose_collect_subdirs(_moose_inc_dirs "${_moose_inc}")
 set_property(TARGET Moose::moose APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_moose_inc_dirs})
 set_property(TARGET Moose::moose APPEND PROPERTY INTERFACE_COMPILE_OPTIONS
   "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include ${_moose_inc}/MooseConfig.h>")
+
+# Physics module components: each Moose::<module> carries its own installed headers; its
+# module dependencies' headers come transitively. find_package(Moose COMPONENTS <m>) works.
+set(_moose_modules @MOOSE_INSTALLED_MODULES@)
+foreach(_m IN LISTS _moose_modules)
+  if(TARGET Moose::${_m})
+    moose_collect_subdirs(_md "${_moose_inc}/modules/${_m}")
+    set_property(TARGET Moose::${_m} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_md})
+    set(Moose_${_m}_FOUND TRUE)
+  endif()
+endforeach()
+
+# Honor requested COMPONENTS (CMake also auto-checks *_FOUND when REQUIRED).
+foreach(_c IN LISTS Moose_FIND_COMPONENTS)
+  if(NOT Moose_${_c}_FOUND)
+    set(Moose_FOUND FALSE)
+    set(Moose_NOT_FOUND_MESSAGE "MOOSE component '${_c}' is not available in this install")
+  endif()
+endforeach()

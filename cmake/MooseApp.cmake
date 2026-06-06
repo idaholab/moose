@@ -35,8 +35,14 @@ function(moose_add_app)
   add_library(${_lib} SHARED ${_src})
   add_library(Moose::${A_NAME} ALIAS ${_lib})
 
+  # BUILD_INTERFACE-scoped so absolute source paths don't leak into the install export; the
+  # installed MooseConfig re-adds module headers from include/moose/modules/<name>.
   moose_collect_subdirs(_inc "${A_APP_DIR}/include")
-  target_include_directories(${_lib} PUBLIC ${_inc})
+  set(_binc "")
+  foreach(_d IN LISTS _inc)
+    list(APPEND _binc "$<BUILD_INTERFACE:${_d}>")
+  endforeach()
+  target_include_directories(${_lib} PUBLIC ${_binc})
 
   # Per-app revision header <Camel>Revision.h (app.mk's GEN_REVISION=yes), generated at
   # configure time into a build-only include dir made PUBLIC (so test libs/dependers see it).
@@ -55,7 +61,7 @@ function(moose_add_app)
     if(NOT _rrc EQUAL 0)
       message(FATAL_ERROR "moose_add_app(${A_NAME}): failed to generate ${_camel}Revision.h")
     endif()
-    target_include_directories(${_lib} PUBLIC "${_revdir}")
+    target_include_directories(${_lib} PUBLIC "$<BUILD_INTERFACE:${_revdir}>")
   endif()
 
   # -D<NAME>_ENABLED (uppercased, dashes removed), as app.mk defines per app.

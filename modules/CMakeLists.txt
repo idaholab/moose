@@ -70,6 +70,8 @@ foreach(_m IN LISTS MOOSE_MODULES_ORDERED)
     list(APPEND _enabled_modules ${_m})
   endif()
 endforeach()
+# Expose to the top-level scope (moose_install installs/exports these).
+set(MOOSE_ENABLED_MODULES "${_enabled_modules}" CACHE INTERNAL "Enabled MOOSE module names")
 
 # combined: built only when every module is enabled (mirrors modules.mk's ALL_MODULES guard).
 # CombinedApp registers all modules (each guarded by <NAME>_ENABLED, inherited via the module

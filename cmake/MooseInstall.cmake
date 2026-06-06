@@ -27,6 +27,23 @@ function(moose_install)
           ARCHIVE DESTINATION lib/moose
           RUNTIME DESTINATION lib/moose)
 
+  # Physics modules: install each library to lib/moose (same export set + rpath) and its
+  # headers under include/moose/modules/<name>, so downstream can
+  # find_package(Moose COMPONENTS <name>). Test libs are not installed (test-only).
+  foreach(_m IN LISTS MOOSE_ENABLED_MODULES)
+    set(_mlib ${_m}-${MOOSE_METHOD})
+    if(TARGET ${_mlib})
+      set_target_properties(${_mlib} PROPERTIES EXPORT_NAME ${_m} INSTALL_RPATH "${_rpath}")
+      install(TARGETS ${_mlib}
+              EXPORT MooseInstallTargets
+              LIBRARY DESTINATION lib/moose
+              ARCHIVE DESTINATION lib/moose
+              RUNTIME DESTINATION lib/moose)
+      install(DIRECTORY "${CMAKE_SOURCE_DIR}/modules/${_m}/include/"
+              DESTINATION "include/moose/modules/${_m}")
+    endif()
+  endforeach()
+
   install(EXPORT MooseInstallTargets
           NAMESPACE Moose::
           FILE MooseTargets-${MOOSE_METHOD}.cmake
@@ -62,6 +79,7 @@ function(moose_install)
           DESTINATION lib/cmake/moose/modules)
 
   set(MOOSE_FRAMEWORK_SCRIPTS "${CMAKE_SOURCE_DIR}/framework/scripts")
+  set(MOOSE_INSTALLED_MODULES "${MOOSE_ENABLED_MODULES}")
   configure_file("${CMAKE_SOURCE_DIR}/cmake/MooseConfigInstalled.cmake.in"
                  "${CMAKE_BINARY_DIR}/install/MooseConfig.cmake" @ONLY)
   install(FILES "${CMAKE_BINARY_DIR}/install/MooseConfig.cmake" DESTINATION lib/cmake/moose)
