@@ -149,10 +149,12 @@ advected_interp_method = 'average'
   # SOR preconditioner beats building a full AMG hierarchy (whose setup would dominate the solve).
   momentum_petsc_options_iname = '-pc_type'
   momentum_petsc_options_value = 'sor'
-  # The pressure Poisson operator barely changes between SIMPLE iterations, so we reuse the AMG
-  # hierarchy across iterations and skip the (expensive) repeated AMG setup.
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type -ksp_reuse_preconditioner'
-  pressure_petsc_options_value = 'hypre boomeramg true'
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
+  pressure_petsc_options_value = 'hypre boomeramg'
+  # The pressure Poisson operator barely changes between SIMPLE iterations, so we only rebuild its
+  # AMG preconditioner every few iterations and reuse it in between, skipping most of the (expensive)
+  # AMG setup. Use a smaller value if the pressure operator changes quickly during the solve.
+  pressure_pc_recompute_frequency = 20
   print_fields = false
 
   pin_pressure = true
