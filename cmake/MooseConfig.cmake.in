@@ -1,0 +1,35 @@
+# MooseConfig.cmake -- find_package(Moose) entry point.
+#
+# Phase 4 of the Make->CMake transition: lets an external app consume MOOSE via
+#   find_package(Moose REQUIRED PATHS <moose-build-dir>)
+#   moose_add_app(NAME my_app APP_DIR ${CMAKE_SOURCE_DIR} BUILD_EXEC)
+#
+# This is a build-tree export: the imported targets reference MOOSE's libraries and headers
+# in place (absolute paths). A relocatable install (copied headers + INSTALL_INTERFACE +
+# rpath rewrite) is a further step. The consuming project must set the libMesh toolchain
+# before its project() call, exactly as MOOSE's own top-level CMakeLists does:
+#   list(PREPEND CMAKE_MODULE_PATH "<moose>/cmake")
+#   include(MooseMethods); include(MooseLibMesh); moose_libmesh_set_compilers()
+
+list(PREPEND CMAKE_MODULE_PATH "@MOOSE_CMAKE_DIR@")
+if(NOT DEFINED MOOSE_METHOD)
+  set(MOOSE_METHOD "@MOOSE_METHOD@")
+endif()
+# Where moose_add_app(... GEN_REVISION) finds get_repo_revision.py downstream.
+set(MOOSE_FRAMEWORK_SCRIPTS "@MOOSE_FRAMEWORK_SCRIPTS@")
+
+include(MooseMethods)
+include(MooseUtils)
+include(MooseLibMesh)
+include(MooseWasp)
+include(MooseApp)
+
+# Re-create the imported interface targets the exported MOOSE libraries link against.
+if(NOT TARGET MOOSE::libmesh)
+  moose_libmesh_create_target()
+endif()
+if(NOT TARGET MOOSE::wasp)
+  moose_create_wasp_target()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/MooseTargets.cmake")
