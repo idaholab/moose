@@ -81,25 +81,19 @@ TestRoot = namedtuple(
 )
 
 
-def findTestRoot(path: Optional[str] = None) -> TestRoot:
+def findTestRoot(start: Optional[str] = None) -> TestRoot:
     """
     Search for the test root in all folders above this one.
 
-    If 'path' is given, use it directly instead of traversing upwards. It
-    may point either at a testroot file or at a directory containing one.
+    If 'start' is given, begin the upward search from there instead of the
+    current directory. It may be a directory or a path to a file (in which
+    case its containing directory is used).
     """
-    if path is not None:
-        testroot_file = (
-            path if os.path.isfile(path) else os.path.join(path, "testroot")
-        )
-        if not (os.path.exists(testroot_file) and os.access(testroot_file, os.R_OK)):
-            raise RuntimeError(
-                f"--test-root: no readable testroot file found at {path}"
-            )
-        root_dir = os.path.dirname(os.path.abspath(testroot_file))
-        return TestRoot(root_dir, *readTestRoot(testroot_file))
-
-    start = os.getcwd()
+    if start is None:
+        start = os.getcwd()
+    elif os.path.isfile(start):
+        start = os.path.dirname(start)
+    start = os.path.abspath(start)
     root_dir = start
     while os.path.dirname(root_dir) != root_dir:
         testroot_file = os.path.join(root_dir, "testroot")
@@ -307,22 +301,26 @@ class TestHarness:
             pythonpath = [moose_python_dir] + pythonpath
             os.environ["PYTHONPATH"] = ":".join(pythonpath)
 
-        # Allow an explicit testroot location via --test-root/-C and an
-        # app_name override via --app-name, parsed here since both must be
-        # resolved before the full CLI args (the testroot can inject args and
-        # changes the working directory, and the app_name picks the executable)
-        explicit_test_root = None
+        # The folder to run tests from (--test-root/-C, or its deprecated
+        # alias --spec-file) and an app_name override (--app-name) are parsed
+        # here since both must be resolved before the full CLI args: the
+        # testroot is searched for starting from that folder, it can inject
+        # args and change the working directory, and the app_name picks the
+        # executable
+        test_root_dir = None
         cli_app_name = None
         if not skip_testroot:
             pre_parser = argparse.ArgumentParser(add_help=False)
-            pre_parser.add_argument("-C", "--test-root", dest="test_root")
+            pre_parser.add_argument(
+                "-C", "--test-root", "--spec-file", dest="test_root_dir"
+            )
             pre_parser.add_argument("--app-name", dest="app_name")
             pre_args = pre_parser.parse_known_args(argv[1:])[0]
-            explicit_test_root = pre_args.test_root
+            test_root_dir = pre_args.test_root_dir
             cli_app_name = pre_args.app_name
 
         # Search for the test root (if any; required when app_name is not specified)
-        test_root = None if skip_testroot else findTestRoot(explicit_test_root)
+        test_root = None if skip_testroot else findTestRoot(test_root_dir)
 
         # Append PYTHONPATH paths specified from testroot
         if test_root:
@@ -1472,9 +1470,10 @@ class TestHarness:
             action="store",
             metavar="path",
             type=str,
-            dest="test_root",
-            help="Use this testroot file (or directory containing one) instead "
-            "of searching upwards from the current directory",
+            dest="spec_file",
+            help="Folder to run tests from: the testroot is searched for "
+            "starting here and test spec files are searched for here. May also "
+            "be a path to a single spec file.",
         )
         inputgroup.add_argument(
             "--app-name",
@@ -1489,7 +1488,8 @@ class TestHarness:
             "--spec-file",
             action="store",
             type=str,
-            help="Supply a path to the tests spec file to run the tests found therein or supply a path to a directory in which the TestHarness will search for tests",
+            dest="spec_file",
+            help="Deprecated alias of --test-root",
         )
 
         parallelgroup = parser.add_argument_group(
@@ -2026,6 +2026,13 @@ class TestHarness:
         def print_info(*args):
             util.printInfo(*args, colored=options.colored)
 
+        if "--spec-file" in argv:
+            util.printPrefixed(
+                "WARNING",
+                "--spec-file is deprecated; use --test-root instead",
+                color="YELLOW" if options.colored else None,
+            )
+
         # Try to guess the --hpc option if --hpc-host is set
         if options.hpc_host and not options.hpc:
             hpc_host = options.hpc_host[0]
@@ -2077,10 +2084,9 @@ class TestHarness:
         if len(has_flags) > 1:
             self.errorExit(" and ".join(has_flags), "cannot be used together")
         if opts.spec_file:
-            # With an explicit --test-root we change into the testroot's
-            # directory, so resolve a relative --spec-file against the
-            # directory the user actually invoked from instead
-            if opts.test_root and not os.path.isabs(opts.spec_file):
+            # We change into the testroot's directory, so resolve a relative
+            # path against the directory the user actually invoked from
+            if not os.path.isabs(opts.spec_file):
                 opts.spec_file = os.path.join(self._orig_cwd, opts.spec_file)
             if not os.path.exists(opts.spec_file):
                 self.errorExit("--spec-file supplied but path does not exist")
