@@ -36,6 +36,17 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 include(MooseContrib)
 include(MooseApp)
 
+# Coverage instrumentation (build.mk's coverage=true). Global, so libmoose + apps + modules
+# are all instrumented. gcc needs -lgcov; clang links the runtime via the profile flags.
+option(MOOSE_COVERAGE "Build with gcov coverage instrumentation" OFF)
+if(MOOSE_COVERAGE)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-DCOVERAGE_ENABLED> -fprofile-arcs -ftest-coverage)
+  add_link_options(-fprofile-arcs -ftest-coverage)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_link_options(-lgcov)
+  endif()
+endif()
+
 # Phase 0 verification: a tiny TU that includes and links libMesh. Off by default; enabled
 # with -DMOOSE_SANITY_CHECK=ON.
 option(MOOSE_SANITY_CHECK "Build the Phase 0 libMesh sanity executable" OFF)
