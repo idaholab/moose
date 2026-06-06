@@ -52,6 +52,9 @@ add_subdirectory(unit)
 # Phase 2: the MOOSE test application, built via moose_add_app().
 add_subdirectory(test)
 
+# Phase 3: all physics modules (libraries), built via moose_add_app() with the dep graph.
+add_subdirectory(modules)
+
 # Python extension modules (hit.so, _pycapabilities.so).
 include(MoosePython)
 moose_add_python_extensions()
