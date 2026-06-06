@@ -64,6 +64,7 @@ foreach(_m IN LISTS MOOSE_MODULES_ORDERED)
   if(MOOSE_MODULE_${_M})
     moose_add_app(NAME ${_m}
                   APP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_m}"
+                  BUILD_EXEC WITH_TEST_LIB
                   DEPEND_MODULES ${_dep_${_m}})
   endif()
 endforeach()
