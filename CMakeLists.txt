@@ -53,7 +53,12 @@ add_subdirectory(unit)
 add_subdirectory(test)
 
 # Phase 3: all physics modules (libraries), built via moose_add_app() with the dep graph.
-add_subdirectory(modules)
+option(MOOSE_ENABLE_MODULES "Build and install the physics modules" ON)
+if(MOOSE_ENABLE_MODULES)
+  add_subdirectory(modules)
+else()
+  set(MOOSE_ENABLED_MODULES "" CACHE INTERNAL "Enabled MOOSE module names" FORCE)
+endif()
 
 # Phase 4: export a build-tree CMake package + define a relocatable install, both consumable
 # via find_package(Moose).
