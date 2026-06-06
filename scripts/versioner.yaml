@@ -134,7 +134,8 @@ packages:
       - scripts/configure_wasp.sh
       - scripts/update_and_rebuild_wasp.sh
       # libtorch
-      - scripts/setup_libtorch.sh
+      - framework/contrib/pytorch
+      - scripts/configure_libtorch.sh
       # neml2
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh
