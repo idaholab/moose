@@ -427,6 +427,49 @@ EOF
     )
 {%- endif %}
 
+{% if PROFILING is defined %}
+    # Install gperftools
+    (
+        cd ${ROOT_BUILD_DIR}
+
+        # Clone gperftools
+        GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
+        git clone -b gperftools-${GPERFTOOLS_VERSION} --single-branch \
+            https://github.com/gperftools/gperftools.git ${GPERFTOOLS_SRC}
+        cd ${GPERFTOOLS_SRC}
+
+        # Build gperftools
+        GPERF_DIR={{ GPERF_DIR }}
+        ./autogen.sh
+        ./configure --prefix=${GPERF_DIR} --enable-frame-pointers
+        make -j ${MOOSE_JOBS}
+        make install
+
+        # Cleanup
+        rm -rf ${GPERFTOOLS_SRC}
+    )
+
+    # Install pprof
+    (
+        # Install go for building pprof; to be removed
+        GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
+        curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
+        tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
+        rm ${GO_TAR}
+        export PATH=${ROOT_BUILD_DIR}/go/bin:${PATH}
+        export GOPATH=${ROOT_BUILD_DIR}/gopath
+        mkdir ${GOPATH}
+
+        # Install pprof
+        PPROF_DIR={{ PPROF_DIR }}
+        GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_SHA}
+
+        # Remove go now that pprof is installed
+        go clean -cache -modcache
+        rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
+    )
+{%- endif %}
+
     # Use the MPI compiler wrappers again
     for var in CC CXX FC F90 F77; do
         BEFORE_VAR="${var}_BEFORE"
@@ -558,49 +601,6 @@ EOF
 
     # Install node.js. Requested by dschwen for bison
     dnf install -y nodejs npm
-
-{% if PROFILING is defined %}
-    # Install gperftools
-    (
-        cd ${ROOT_BUILD_DIR}
-
-        # Clone gperftools
-        GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
-        git clone -b gperftools-${GPERFTOOLS_VERSION} --single-branch \
-            https://github.com/gperftools/gperftools.git ${GPERFTOOLS_SRC}
-        cd ${GPERFTOOLS_SRC}
-
-        # Build gperftools
-        GPERF_DIR={{ GPERF_DIR }}
-        ./autogen.sh
-        ./configure --prefix=${GPERF_DIR} --enable-frame-pointers
-        make -j ${MOOSE_JOBS}
-        make install
-
-        # Cleanup
-        rm -rf ${GPERFTOOLS_SRC}
-    )
-
-    # Install pprof
-    (
-        # Install go for building pprof; to be removed
-        GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
-        curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
-        tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
-        rm ${GO_TAR}
-        export PATH=${ROOT_BUILD_DIR}/go/bin:${PATH}
-        export GOPATH=${ROOT_BUILD_DIR}/gopath
-        mkdir ${GOPATH}
-
-        # Install pprof
-        PPROF_DIR={{ PPROF_DIR }}
-        GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_SHA}
-
-        # Remove go now that pprof is installed
-        go clean -cache -modcache
-        rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
-    )
-{%- endif %}
 
     # Clean up
     dnf clean all
