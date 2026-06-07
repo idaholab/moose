@@ -14,7 +14,7 @@ source:
 
 build:
   number: 0
-  string: {{ mpi }}
+  string: mpich
   pin_depends: strict
   script_env:
     - MOOSE_JOBS
@@ -29,7 +29,7 @@ requirements:
     - {{ compiler('fortran') }}
     - {{ stdlib('c') }}
     # for libmesh libtool
-    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
     # build utilities
     - make
     - packaging
@@ -38,20 +38,18 @@ requirements:
     - python 3.14.*
     - moose-tools __VERSIONER_TOOLS_VERSION__
   host:
-    - {{ mpi }} {{ mpi_version }}
+    - mpich {{ mpich_version }}
     - hdf5 {{ hdf5 }}
-    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
-    {% if mpi == "mpich" %}
-    # see libfabric entry in conda/conda_build_config.yaml
+    - hdf5 {{ hdf5 }} mpi_mpich_*
+    # see libfabric entry in conda/conda_build_config.yaml (only for mpich)
     - libfabric {{ libfabric }} # [linux]
-    {% endif %}
     - libpng
-    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
     - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
     - zlib
   run:
-    - {{ mpi }} {{ mpi_version }}
-    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - mpich {{ mpich_version }}
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
     - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]

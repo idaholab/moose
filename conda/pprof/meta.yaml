@@ -1,4 +1,5 @@
-{% set version = "2026.03.01_a15ffb7" %}
+{% set version = "2026.05.06_92041b7" %}
+{% set build = 0 %}
 
 package:
   name: moose-pprof
@@ -10,8 +11,8 @@ source:
   git_depth: 1
 
 build:
-  number: 0
-  string: build_0
+  number: {{ build }}
+  string: build_{{ build }}
   script: |
     GO111MODULE=on CGO_ENABLED=0 go build -o "$PREFIX"/bin/pprof .
 
