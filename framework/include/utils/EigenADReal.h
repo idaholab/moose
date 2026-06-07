@@ -154,28 +154,28 @@ namespace Eigen::internal
 {
 
 template <>
-inline long double
+EIGEN_DEVICE_FUNC inline long double
 cast<ADReal, long double>(const ADReal & x)
 {
   return MetaPhysicL::raw_value(x);
 }
 
 template <>
-inline double
+EIGEN_DEVICE_FUNC inline double
 cast<ADReal, double>(const ADReal & x)
 {
   return MetaPhysicL::raw_value(x);
 }
 
 template <>
-inline long
+EIGEN_DEVICE_FUNC inline long
 cast<ADReal, long>(const ADReal & x)
 {
   return MetaPhysicL::raw_value(x);
 }
 
 template <>
-inline int
+EIGEN_DEVICE_FUNC inline int
 cast<ADReal, int>(const ADReal & x)
 {
   return MetaPhysicL::raw_value(x);
