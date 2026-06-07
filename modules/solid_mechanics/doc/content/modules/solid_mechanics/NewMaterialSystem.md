@@ -79,6 +79,9 @@ for large deformations and
       \Delta l_{ij} = F_{ij}^{(new)} - F_{ij}^{(old)}
 \end{equation}
 for small deformations, to define the incremental strains.  [kinematics] provides the definition of the other standard kinematic variables.
+The formula above for large deformations is the default `kinematic_approximation = linear`; three other
+approximations are available for large deformations and are described on the
+[kinematic approximations page](/solid_mechanics/KinematicApproximations.md).
 
 !table id=kinematics caption=Standard kinematic quantities provided by `ComputeLagrangianStrain`
 | Quantity name                            | Definition, `large_kinematics=true`                                           | Definition, `large_kinematics=false`                       |

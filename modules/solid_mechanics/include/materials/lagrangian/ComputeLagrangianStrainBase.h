@@ -47,16 +47,59 @@ public:
   ComputeLagrangianStrainBase(const InputParameters & parameters);
   virtual void initialSetup() override;
 
+  /// Approximation used to convert the inverse incremental deformation gradient `f^{-1}`
+  /// into the increment in the spatial velocity gradient (and its symmetric / skew parts).
+  /// See `rashid_project/plan_outline.pdf` section 2.
+  enum class KinematicApproximation
+  {
+    Linear,            ///< dL = I - f^{-1}
+    Quadratic,         ///< dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2
+    RashidApproximate, ///< Rashid's symmetric+skew formulas
+    RashidEigen        ///< "Exact": polar decomposition + matrix logs
+  };
+
+  /// What F gets F-bar volumetric correction applied to. Affects only `stabilize_strain = true`.
+  ///   Total      -> average the full deformation gradient F_ust at each qp, then rescale by
+  ///                gamma = cbrt(det(F_avg) / det(F_ust[qp])). This is the existing behavior.
+  ///   Incremental -> average the *incremental* F (`f_ust = F_ust * F_ust_old^{-1}`) at each qp,
+  ///                 then rescale by gamma = cbrt(det(f_avg) / det(f_ust[qp])). Matches the
+  ///                 OLD `ComputeFiniteStrain` F-bar (averaged Fhat) so cumulative strain is
+  ///                 bit-for-bit compatible with `volumetric_locking_correction = true`.
+  enum class FBarMode
+  {
+    Total,
+    Incremental
+  };
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;
-  /// Calculate the strains based on the spatial velocity gradient
+  /// Calculate the strains based on the spatial velocity gradient. The sym/skew split is
+  /// trivial; kept as a public helper for backward compatibility with the linear-only path.
   virtual void computeQpIncrementalStrains(const RankTwoTensor & dL);
+  /// Update strain / vorticity / mechanical-strain bookkeeping from already-split
+  /// (`dd`, `dw`) tensors. Used by the Rashid options where `dd != sym(dL)` and
+  /// `dw != skew(dL)`.
+  void setQpIncrementalStrains(const RankTwoTensor & dd, const RankTwoTensor & dw);
+  /// Dispatcher: compute (Deltad, Deltaw, d(Deltal)/d(f^{-1}), d(Deltaw)/d(f^{-1})) for the active
+  /// kinematic approximation. The vorticity derivative is returned separately so the
+  /// Jaumann objective rate can chain its own Jacobian without re-projecting from dL.
+  void computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
+                                        RankTwoTensor & dd,
+                                        RankTwoTensor & dw,
+                                        RankFourTensor & d_dL_d_f_inv,
+                                        RankFourTensor & d_dw_d_f_inv);
+  /// Compute and publish the polar decomposition of _F_actual at the current qp.
+  /// Always populates `_rotation` and `_stretch` (R and U). When `need_jacobian` is true,
+  /// additionally populates `_d_rotation_d_F`. Consumed by the Green-Naghdi objective rate.
+  void computeQpPolarDecomposition(bool need_jacobian);
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
-  /// Calculate the unstabilized deformation gradient at the quadrature point
+  /// Calculate the unstabilized (alpha-weighted) deformation gradient at the quadrature point
   virtual void computeQpUnstabilizedDeformationGradient();
+  /// Calculate the actual deformation gradient at n+1 (no alpha weighting, no F-bar)
+  virtual void computeQpActualDeformationGradient();
   /// Calculate the unstabilized and optionally the stabilized deformation gradients
   virtual void computeDeformationGradient();
 
@@ -64,6 +107,10 @@ protected:
   const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
+  /// Old displacement values for the generalized midpoint rule
+  std::vector<const VariableValue *> _disp_old;
+  /// Old displacement gradients for the generalized midpoint rule
+  std::vector<const VariableGradient *> _grad_disp_old;
 
   /// Material system base name
   const std::string _base_name;
@@ -73,6 +120,26 @@ protected:
 
   /// If true stabilize the strains with F_bar
   const bool _stabilize_strain;
+
+  /// Selected F-bar averaging mode (Total vs. Incremental). See `FBarMode`.
+  const FBarMode _F_bar_mode;
+
+  /// If true, publish `_rotation_increment = exp(_vorticity_increment)` (Rodrigues) instead
+  /// of the default identity. Enables OLD-compatible plasticity through `ComputeLagrangianWrappedStress`:
+  /// wrapped materials with `perform_finite_strain_rotations = true` (e.g.
+  /// `ComputeMultiPlasticityStress`) will rotate their internal `_stress` each step, so the
+  /// next step's return mapping reads `_stress_old = sigma_cauchy_old` (matching OLD's
+  /// `ComputeFiniteStrain` pipeline). Pair with `rotate_old_stress = true` on the
+  /// objective rate so the rate skips its outer rotation (the wrapped material already
+  /// applied it) and doesn't double-rotate. Default false preserves the existing pipeline
+  /// where the rate alone applies rotation.
+  const bool _publish_rotation_increment;
+
+  /// Generalized-midpoint weight for the deformation gradient (1.0 = backward Euler, 0.5 = midpoint)
+  const Real _alpha;
+
+  /// Selected approximation for the spatial velocity gradient increment.
+  const KinematicApproximation _kinematic_approximation;
 
   // The eigenstrains
   std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -85,6 +152,15 @@ protected:
   MaterialProperty<RankTwoTensor> & _mechanical_strain;
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
 
+  /// Mechanical strain accumulated with the incremental rotation r_hat = exp(Deltaw), matching
+  /// the convention `ComputeFiniteStrain` uses for its `mechanical_strain` output
+  /// (`eps_n+1 = r_hat * (eps_n + Deltad) * r_hat^T`). Provided as a separate property so the standard
+  /// `_mechanical_strain` (consumed by constitutive materials) stays un-rotated and the
+  /// objective-rate-driven stress chain is unaffected. Use this for aux-variable output
+  /// when matching the old-system convention.
+  MaterialProperty<RankTwoTensor> & _rotated_mechanical_strain;
+  const MaterialProperty<RankTwoTensor> & _rotated_mechanical_strain_old;
+
   /// Strain increment
   MaterialProperty<RankTwoTensor> & _strain_increment;
 
@@ -94,8 +170,18 @@ protected:
   /// Vorticity increment
   MaterialProperty<RankTwoTensor> & _vorticity_increment;
 
-  /// The unstabilized deformation gradient
+  /// The unstabilized (alpha-weighted) deformation gradient
   MaterialProperty<RankTwoTensor> & _F_ust;
+
+  /// Old unstabilized deformation gradient. Needed for `F_bar_mode = incremental` so the
+  /// incremental F (`F_ust * F_ust_old^{-1}`) at this step is built from the unstabilized
+  /// pair (matching OLD `ComputeFiniteStrain`'s `_Fhat`). Only consulted in incremental mode.
+  const MaterialProperty<RankTwoTensor> & _F_ust_old;
+
+  /// The literal deformation gradient at n+1 (I + grad u_{n+1}). Equals _F_ust when alpha = 1.
+  /// Needed by the UL kernel for the spatial-to-reference pull-back, since the spatial frame is
+  /// always at n+1 regardless of alpha.
+  MaterialProperty<RankTwoTensor> & _F_actual;
 
   // The average deformation gradient over the element for F-bar stabilization. Note that the
   // average deformation gradient is undefined if stabilization is not active.
@@ -113,6 +199,37 @@ protected:
   /// Inverse incremental deformation gradient
   MaterialProperty<RankTwoTensor> & _f_inv;
 
+  /// Derivative of the spatial velocity gradient increment with respect to F_{n+1}.
+  /// Stored so downstream consumers do not bake in the linear-approximation assumption.
+  MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+
+  /// Derivative of the vorticity increment Deltaw with respect to F_{n+1}. Consumed by the
+  /// Jaumann objective rate so it can produce a consistent Jacobian regardless of which
+  /// kinematic_approximation the strain calculator is using.
+  MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
+
+  /// Derivative of F_{n+1} with respect to the displacement gradient.
+  /// Identity for backward Euler; will become alpha * Identity for the generalized midpoint rule.
+  MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
+
+  /// Polar decomposition R of the (alpha-weighted, F-bar-stabilized) deformation gradient
+  /// F at this qp. Stateful so the Green-Naghdi rate can read R_n via getMaterialPropertyOld.
+  MaterialProperty<RankTwoTensor> & _rotation;
+  const MaterialProperty<RankTwoTensor> & _rotation_old;
+  /// Stretch U from the same polar decomposition.
+  MaterialProperty<RankTwoTensor> & _stretch;
+  /// Derivative of R with respect to F.
+  MaterialProperty<RankFourTensor> & _d_rotation_d_F;
+
+  /// Partial derivative of the F-bar-stabilized deformation gradient with respect to the
+  /// unstabilized (per-qp local) deformation gradient. Equals IdentityFour when F-bar is off.
+  MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
+
+  /// Partial derivative of the F-bar-stabilized deformation gradient with respect to the
+  /// element-averaged deformation gradient F_avg (the non-local coupling). Equals zero when
+  /// F-bar is off.
+  MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
+
   /// Names of any extra homogenization gradients
   std::vector<MaterialPropertyName> _homogenization_gradient_names;
 
@@ -121,4 +238,40 @@ protected:
 
   /// Rotation increment for "old" materials inheriting from ComputeStressBase
   MaterialProperty<RankTwoTensor> & _rotation_increment;
+
+private:
+  /// Linear approximation: dL = I - f^{-1}.
+  void computeLinearIncrement(const RankTwoTensor & f_inv,
+                              RankTwoTensor & dd,
+                              RankTwoTensor & dw,
+                              RankFourTensor & d_dL_d_f_inv,
+                              RankFourTensor & d_dw_d_f_inv) const;
+  /// Quadratic approximation: dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2.
+  void computeQuadraticIncrement(const RankTwoTensor & f_inv,
+                                 RankTwoTensor & dd,
+                                 RankTwoTensor & dw,
+                                 RankFourTensor & d_dL_d_f_inv,
+                                 RankFourTensor & d_dw_d_f_inv) const;
+  /// Rashid's approximate symmetric+skew formulas.
+  void computeRashidApproximateIncrement(const RankTwoTensor & f_inv,
+                                         RankTwoTensor & dd,
+                                         RankTwoTensor & dw,
+                                         RankFourTensor & d_dL_d_f_inv,
+                                         RankFourTensor & d_dw_d_f_inv) const;
+  /// "Exact" via polar decomposition of f^{-1} + matrix logs.
+  void computeRashidEigenIncrement(const RankTwoTensor & f_inv,
+                                   RankTwoTensor & dd,
+                                   RankTwoTensor & dw,
+                                   RankFourTensor & d_dL_d_f_inv,
+                                   RankFourTensor & d_dw_d_f_inv) const;
+
+  /// Rotation increment matched to the active `_kinematic_approximation`, suitable for
+  /// publishing as `_rotation_increment` so downstream `ComputeStressBase`-style materials
+  /// see the OLD-compatible rotation. For `RashidApproximate` this ports OLD
+  /// `ComputeFiniteStrain`'s C1/C2/C3 polynomial Rodrigues approximation (bit-for-bit OLD
+  /// TaylorExpansion); for `RashidEigen` and `Linear` / `Quadratic` it returns `exp(dw)`
+  /// via the Rodrigues block (exact rotation around the dw axis -- bit-exact for RashidEigen,
+  /// which has no OLD counterpart for the linear/quadratic cases).
+  RankTwoTensor computeQpRotationIncrement(const RankTwoTensor & f_inv,
+                                           const RankTwoTensor & dw) const;
 };

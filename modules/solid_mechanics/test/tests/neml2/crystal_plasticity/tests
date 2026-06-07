@@ -17,4 +17,30 @@
     capabilities = 'neml2'
     valgrind = heavy
   []
+  [approx_kinematics_jacobian]
+    type = PetscJacobianTester
+    requirement = 'The TL Jacobian assembled through ComputeLagrangianCauchyCustomStress is '
+                  'consistent with the finite-differenced Jacobian to within NEML2 AD noise at '
+                  'every nonlinear iteration of every load step, including steps that consume '
+                  'non-zero old state (plastic_defgrad, orientation, slip_hardening).'
+    input = 'approx_kinematics.i'
+    run_sim = true
+    ratio_tol = 5E-5
+    difference_tol = 1E10
+    capabilities = 'neml2'
+    heavy = true
+  []
+  [exact_kinematics_jacobian]
+    type = PetscJacobianTester
+    requirement = 'The TL Jacobian assembled through ComputeLagrangianStressCustomPK2 is '
+                  'consistent with the finite-differenced Jacobian to within NEML2 AD noise at '
+                  'every nonlinear iteration of every load step, including steps that consume '
+                  'non-zero old state (plastic_defgrad, tauc).'
+    input = 'exact_kinematics.i'
+    run_sim = true
+    ratio_tol = 5E-5
+    difference_tol = 1E10
+    capabilities = 'neml2'
+    heavy = true
+  []
 []

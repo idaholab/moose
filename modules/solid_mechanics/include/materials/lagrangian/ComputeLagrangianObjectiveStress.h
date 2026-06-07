@@ -10,7 +10,9 @@
 #pragma once
 
 #include "ComputeLagrangianStressCauchy.h"
-#include "DerivativeMaterialPropertyNameInterface.h"
+#include "LagrangianObjectiveRate.h"
+
+#include <memory>
 
 /// Provide the Cauchy stress via an objective integration of a small stress
 ///
@@ -21,16 +23,24 @@
 /// which must provide the _small_stress and _small_jacobian
 /// properties.
 ///
-/// This class is then responsible for completing the cauchy stress
-/// update with an objective integration, providing _cauchy_stress
-/// and _cauchy_jacobian properties
-///
-class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy,
-                                         public DerivativeMaterialPropertyNameInterface
+/// The objective integration itself is delegated to a `LagrangianObjectiveRate`
+/// strategy object that is selected by the `objective_rate` input parameter
+/// (truesdell / jaumann / green_naghdi / rashid). Each strategy reads kinematic
+/// quantities published by the strain calculator and writes back the Cauchy
+/// stress, the consistent Jacobian, and the eigenstrain off-diagonal Jacobian.
+class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy
 {
 public:
   static InputParameters validParams();
   ComputeLagrangianObjectiveStress(const InputParameters & parameters);
+
+  // Rate-strategy helpers reach into the material's protected property handles
+  // and write the three output properties (cauchy stress, cauchy jacobian,
+  // eigenstrain jacobian). Keep the host's interface unchanged for callers.
+  friend class LagrangianTruesdellRate;
+  friend class LagrangianJaumannRate;
+  friend class LagrangianGreenNaghdiRate;
+  friend class LagrangianRashidRate;
 
 protected:
   /// Initialize the new (small) stress
@@ -52,6 +62,13 @@ protected:
   /// The updated small algorithmic tangent
   MaterialProperty<RankFourTensor> & _small_jacobian;
 
+  /// Derivative of the Cauchy stress with respect to the eigenstrain at this step,
+  /// d_sigma/d_eigenstrain = -Jinv_obj * small_jacobian. The kernel consumes this single
+  /// rank-4 property to assemble the temperature off-diagonal Jacobian; future Cauchy-
+  /// providing materials that don't go through the objective-rate path can publish this
+  /// property with their own derivative.
+  MaterialProperty<RankFourTensor> & _dcauchy_stress_d_eigenstrain;
+
   /// We need the old Cauchy stress to do the objective integration
   const MaterialProperty<RankTwoTensor> & _cauchy_stress_old;
 
@@ -64,58 +81,36 @@ protected:
   /// Provided for material models that use the vorticity increment
   const MaterialProperty<RankTwoTensor> & _vorticity_increment;
 
+  /// The spatial velocity gradient increment (dL)
+  const MaterialProperty<RankTwoTensor> & _spatial_velocity_increment;
+
+  /// d(dL)/dF, stored by the strain calculator
+  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+
+  /// d(dW)/dF from the strain calculator, consumed by Jaumann and Rashid
+  const MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
+
+  /// Polar-decomposition rotation R of F (and its old value and derivative),
+  /// published by the strain calculator. Consumed by the Green-Naghdi rate.
+  const MaterialProperty<RankTwoTensor> & _rotation;
+  const MaterialProperty<RankTwoTensor> & _rotation_old;
+  const MaterialProperty<RankFourTensor> & _d_rotation_d_F;
+
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad;
 
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad_old;
 
-  /// Types of objective integrations
-  enum class ObjectiveRate
-  {
-    Truesdell,
-    Jaumann,
-    GreenNaghdi
-  } _rate;
+  /// Strategy that implements the chosen objective rate.
+  std::unique_ptr<LagrangianObjectiveRate> _rate_strategy;
 
-  /// Whether we need to perform polar decomposition
-  const bool _polar_decomp;
-
-  /// Current rotation, i.e. R in polar decomposition F = RU
-  MaterialProperty<RankTwoTensor> * _rotation;
-
-  /// Rotation at the begining of this step
-  const MaterialProperty<RankTwoTensor> * _rotation_old;
-
-  /// Derivative of rotation w.r.t. the deformation gradient
-  MaterialProperty<RankFourTensor> * _d_rotation_d_def_grad;
-
-  /// Current stretch, i.e. U in polar decomposition F = RU
-  MaterialProperty<RankTwoTensor> * _stretch;
-
-private:
-  /// Objective update using the Truesdell rate
-  RankTwoTensor objectiveUpdateTruesdell(const RankTwoTensor & dS);
-
-  /// Objective update using the Jaumann rate
-  RankTwoTensor objectiveUpdateJaumann(const RankTwoTensor & dS);
-
-  /// Objective update using the Green-Naghdi rate
-  RankTwoTensor objectiveUpdateGreenNaghdi(const RankTwoTensor & dS);
-
-  /// Advect the stress using the provided kinematic tensor
-  std::tuple<RankTwoTensor, RankFourTensor> advectStress(const RankTwoTensor & S0,
-                                                         const RankTwoTensor & dQ) const;
-
-  /// Make the tensor used to advect the stress
-  RankFourTensor updateTensor(const RankTwoTensor & Q) const;
-
-  /// Derivative of the action to advect stress with respect to the kinematic tensor
-  RankFourTensor stressAdvectionDerivative(const RankTwoTensor & S) const;
-
-  /// Compute the consistent tangent
-  RankFourTensor cauchyJacobian(const RankFourTensor & Jinv, const RankFourTensor & U) const;
-
-  /// Perform polar decomposition
-  void polarDecomposition();
+  /// If true, the rate's `update()` runs in passthrough mode -- it skips its own outer
+  /// rotation and sets `_cauchy_stress = _small_stress` directly. Used in tandem with the
+  /// strain calculator's `publish_rotation_increment = true` to delegate the rotation of
+  /// the stress state to the wrapped material's `_perform_finite_strain_rotations = true`
+  /// path (so `ComputeMultiPlasticityStress` etc. see the correctly-rotated `_stress_old`
+  /// for return mapping). `_cauchy_jacobian` is still built by the rate's chain rule, so
+  /// the Jacobian remains consistent.
+  const bool _rotate_old_stress;
 };

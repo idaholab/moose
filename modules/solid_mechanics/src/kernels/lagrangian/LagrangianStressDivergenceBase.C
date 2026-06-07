@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LagrangianStressDivergenceBase.h"
+#include "RankFourTensor.h"
 
 InputParameters
 LagrangianStressDivergenceBase::validParams()
@@ -19,6 +20,14 @@ LagrangianStressDivergenceBase::validParams()
 
   params.addParam<bool>("large_kinematics", false, "Use large displacement kinematics");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
+  MooseEnum F_bar_mode("total incremental", "total");
+  params.addParam<MooseEnum>(
+      "F_bar_mode",
+      F_bar_mode,
+      "Which F gets the F-bar volumetric correction (must match the strain calc's setting). "
+      "'total' (default) reproduces existing behavior; 'incremental' makes the F-bar element-"
+      "average operate on the incremental F so cumulative strain matches OLD's "
+      "`ComputeFiniteStrain` + `volumetric_locking_correction = true`.");
 
   params.addParam<std::string>("base_name", "Material property base name");
 
@@ -43,18 +52,34 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
   : JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>(parameters),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
+    _F_bar_mode(getParam<MooseEnum>("F_bar_mode") == "incremental" ? FBarMode::Incremental
+                                                                   : FBarMode::Total),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _alpha(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_nums(_ndisp),
     _avg_grad_trial(_ndisp),
+    _avg_grad_spatial_phi(_ndisp),
+    _avg_test_phi_cross(3, std::vector<std::vector<std::vector<Real>>>(3)),
     _F_ust(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_ust_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name +
+                                                           "unstabilized_deformation_gradient")),
     _F_avg(getMaterialPropertyByName<RankTwoTensor>(_base_name + "average_deformation_gradient")),
     _f_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name +
                                                     "inverse_incremental_deformation_gradient")),
     _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _F_actual(getMaterialPropertyByName<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
+    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_deformation_gradient_d_grad_displacement")),
+    _d_F_stab_d_F_ust(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
+    _d_F_stab_d_F_avg(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
+    _cauchy_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)
@@ -79,6 +104,23 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
       _deigenstrain_dargs[i].push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
           eigenstrain_name, _coupled_moose_vars[i]->name()));
+
+  // The direct-chain temperature off-diagonal Jacobian needs d_sigma/d_eigenstrain. Only
+  // fetch it when eigenstrains are coupled -- otherwise the temperature Jacobian short-
+  // circuits to zero and this property would be a needless dependency that other Cauchy-
+  // providing materials would have to publish.
+  if (!getParam<std::vector<MaterialPropertyName>>("eigenstrain_names").empty())
+    _dcauchy_stress_d_eigenstrain =
+        &getMaterialPropertyByName<RankFourTensor>(_base_name + "dcauchy_stress_d_eigenstrain");
+}
+
+void
+LagrangianStressDivergenceBase::jacobianSetup()
+{
+  JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>::jacobianSetup();
+  // Force every Jacobian sweep to refresh the F-bar caches. See header comment for the
+  // single-element-per-rank staleness scenario this guards against.
+  _fbar_cache_elem = nullptr;
 }
 
 void
@@ -92,6 +134,7 @@ LagrangianStressDivergenceBase::precalculateJacobian()
   _fe_problem.prepareShapes(_var.number(), _tid);
   _avg_grad_trial[_alpha].resize(_phi.size());
   precalculateJacobianDisplacement(_alpha);
+  prepareFBarCaches();
 }
 
 void
@@ -108,13 +151,64 @@ LagrangianStressDivergenceBase::precalculateOffDiagJacobian(unsigned int jvar)
       _fe_problem.prepareShapes(jvar, _tid);
       _avg_grad_trial[beta].resize(_phi.size());
       precalculateJacobianDisplacement(beta);
+      prepareFBarCaches();
     }
+}
+
+void
+LagrangianStressDivergenceBase::prepareFBarCaches()
+{
+  // Cache is element-keyed; skip the work if we've already refreshed it for this element
+  // during the current Jacobian assembly pass. The element pointer is stable across the
+  // per-column precalculate calls a single element receives.
+  if (_fbar_cache_elem == _current_elem)
+    return;
+
+  const unsigned int n_qp = _qrule->n_points();
+  _D_nl_cache.resize(n_qp);
+  if (_large_kinematics)
+  {
+    _F_ust_det_cache.resize(n_qp);
+    _F_ust_inv_T_cache.resize(n_qp);
+  }
+
+  for (unsigned int qp = 0; qp < n_qp; ++qp)
+  {
+    // Compose `D_nl_ijkl = cauchy_jacobian_ijab * d_dL_dF_abcd * d_F_stab_d_F_avg_cdkl`.
+    // The R4 middle-pair contraction matches the chain-rule semantics we need (the
+    // strain-calc helpers and the kernel already rely on this convention elsewhere).
+    _D_nl_cache[qp] =
+        _cauchy_jacobian[qp] * _d_spatial_velocity_increment_d_F[qp] * _d_F_stab_d_F_avg[qp];
+
+    if (_large_kinematics)
+    {
+      _F_ust_det_cache[qp] = _F_ust[qp].det();
+      _F_ust_inv_T_cache[qp] = _F_ust[qp].inverse().transpose();
+    }
+  }
+
+  _fbar_cache_elem = _current_elem;
 }
 
 Real
 LagrangianStressDivergenceBase::computeQpJacobian()
 {
   return computeQpJacobianDisplacement(_alpha, _alpha);
+}
+
+RankTwoTensor
+LagrangianStressDivergenceBase::deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const
+{
+  if (!_stabilize_strain)
+    return RankTwoTensor();
+  // Composed operator + cached per-qp scalars/tensors live in `_*_cache`, refreshed once
+  // per element by `prepareFBarCaches()`. Caller responsibility: `prepareFBarCaches()` has
+  // run for the current element (precalculate{,OffDiag}Jacobian both invoke it when
+  // `_stabilize_strain == true`).
+  const RankTwoTensor delta_sigma_nl = _D_nl_cache[_qp] * delta_F_avg;
+  if (_large_kinematics)
+    return _F_ust_det_cache[_qp] * delta_sigma_nl * _F_ust_inv_T_cache[_qp];
+  return delta_sigma_nl;
 }
 
 Real

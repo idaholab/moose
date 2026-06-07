@@ -34,8 +34,46 @@ ComputeLagrangianStressCustomPK2::ComputeLagrangianStressCustomPK2(
 void
 ComputeLagrangianStressCustomPK2::computeQpPK1Stress()
 {
-  _pk1_stress[_qp] = _F[_qp] * _pk2[_qp];
+  // PK1 = F_ust * PK2(F_stab) -- F-bar enters only through PK2 via the strain calc's
+  // F-bar'd `_F` (which is what NEML2 sees as `forces/F`). The wrap uses F_ust so the
+  // residual matches the new convention.
+  _pk1_stress[_qp] = _F_ust[_qp] * _pk2[_qp];
 
-  usingTensorIndices(i, j, k, l, m);
-  _pk1_jacobian[_qp] = _F[_qp].times<i, m, m, j, k, l>(_dpk2_dF[_qp]);
+  // The R4 algebra for `_pk1_jacobian` / `_pk1_jacobian_bypass_fbar` is read only on
+  // Jacobian sweeps; skip it on residual-only sweeps.
+  if (!_fe_problem.currentlyComputingJacobian() &&
+      !_fe_problem.currentlyComputingResidualAndJacobian())
+    return;
+
+  // dPK1/d(F_ust) = del_ik PK2_lj  +  F_ust * dPK2/d(F_stab) * d(F_stab)/d(F_ust).
+  usingTensorIndices(i_, j_, k_, l_);
+  const auto I = RankTwoTensor::Identity();
+  const RankFourTensor termA = I.template times<i_, k_, j_, l_>(_pk2[_qp].transpose());
+  // Default path: full F-bar local correction. Equals `_dpk2_dF` when F-bar is off (since
+  // `_d_F_stab_d_F_ust == IdentityFour` then).
+  const RankFourTensor dPK2_dFust = _dpk2_dF[_qp] * _d_F_stab_d_F_ust[_qp];
+  _pk1_jacobian[_qp] = termA + dPK2_dFust.singleProductI(_F_ust[_qp]);
+  // Bypass-F-bar variant for specialty kernels (WPS, homogenization).
+  _pk1_jacobian_bypass_fbar[_qp] = termA + _dpk2_dF[_qp].singleProductI(_F_ust[_qp]);
+}
+
+void
+ComputeLagrangianStressCustomPK2::computeQpCauchyStress()
+{
+  // sigma = (1/J_ust) F_ust * PK2(F_stab) * F_ust^T. Computed directly because the PK1
+  // base's sigma chain assumes `pk1_jacobian = constitutive dPK1/d(F_stab)`, but here PK1
+  // depends on F_ust directly (Term A above) -- already folded into _pk1_jacobian.
+  const Real J_ust = _F_ust[_qp].det();
+  _cauchy_stress[_qp] = _F_ust[_qp] * _pk2[_qp] * _F_ust[_qp].transpose() / J_ust;
+
+  if (!_fe_problem.currentlyComputingJacobian() &&
+      !_fe_problem.currentlyComputingResidualAndJacobian())
+    return;
+
+  // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through PK2(F_stab(dL))
+  // (F_ust is constant w.r.t. dL since dL is computed from F_stab via the kinematic helper).
+  //   dPK2/d(dL) = dPK2/d(F_stab) * d(F_stab)/d(dL) = _dpk2_dF *
+  //   (_d_spatial_velocity_increment_d_F)^{-1}
+  const RankFourTensor dPK2_d_dL = _dpk2_dF[_qp] * _d_spatial_velocity_increment_d_F[_qp].inverse();
+  _cauchy_jacobian[_qp] = dPK2_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
 }

@@ -110,7 +110,46 @@ of the strain does affect the Jacobian calculated in the
 
 !alert warning
 The $\bar{F}$ stabilization triggered by the `stabilize_strain` flag should only used for linear quad and hex elements.
-$\bar{F}$ is unnecessary for higher order elements and ineffective for linear triangle and tetrahedral elements. 
+$\bar{F}$ is unnecessary for higher order elements and ineffective for linear triangle and tetrahedral elements.
+
+### `F_bar_mode`: Total vs Incremental Averaging
+
+The `F_bar_mode` parameter on
+[`ComputeLagrangianStrain`](/ComputeLagrangianStrain.md) selects which deformation
+gradient is averaged over the element when building the volumetric correction.
+Two modes are available; both apply only to large kinematics.
+
+The default, `F_bar_mode = total`, is the formulation described above: the
+*total* deformation gradient $F$ is averaged and the multiplicative correction
+$\gamma_{\text{tot}} = (\det\bar F / \det F)^{1/3}$ is applied to $F$ at each
+quadrature point.
+
+`F_bar_mode = incremental` instead averages the *incremental* deformation gradient
+$f = F\,F^{(n) -1}$ over the element:
+\begin{equation}
+   \bar f = \frac{1}{V} \int_V f \, dV,
+   \quad
+   \gamma_{\text{inc}} = \left( \frac{\det \bar f}{\det f} \right)^{1/3}.
+\end{equation}
+The stabilized total deformation gradient is then reconstructed at each quadrature
+point as $F^{\prime} = \gamma_{\text{inc}}\, F$.
+
+This incremental mode reproduces the volumetric correction used by the legacy
+[`ComputeFiniteStrain`](/ComputeFiniteStrain.md) +
+[`StressDivergenceTensors`](/StressDivergenceTensors.md) pipeline (its `_Fhat`
+F-bar) and is the right choice when porting an old input with
+`volumetric_locking_correction = true` and bit-for-bit agreement with the legacy
+results is required.  Selecting it on the strain calculator also enables a
+matching B-bar contribution in the
+[`TotalLagrangianStressDivergence`](/TotalLagrangianStressDivergence.md) residual
+so the kernel-side weak form matches the legacy `volumetric_locking_correction`
+integrand for spatially non-uniform stress.  The
+[QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
+sets `F_bar_mode = incremental` automatically when wrapping an OLD-style material
+with finite strain and `volumetric_locking_correction = true`.
+
+`F_bar_mode = incremental` requires `large_kinematics = true`; small kinematics
+must use the (default) `total` mode.
 
 ## Cook's Membrane: A Demonstration the Stabilization is Effective
 

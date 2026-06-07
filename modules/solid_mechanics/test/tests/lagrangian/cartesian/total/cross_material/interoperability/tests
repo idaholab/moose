@@ -1,0 +1,106 @@
+[Tests]
+  issues = '#33005'
+  design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
+  [manual_TaylorExpansion_no_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'TaylorExpansion_no_stabilization.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_no_stabilization"
+  []
+  [manual_EigenSolution_no_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'EigenSolution_no_stabilization.csv'
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_no_stabilization"
+  []
+  [manual_TaylorExpansion_with_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'TaylorExpansion_with_stabilization.csv'
+    requirement = "Large deformation kinematics, with stabilization, produce results compatible "
+                  "with the old kernel system when using `F_bar_mode = incremental` (the OLD-compat "
+                  "F-bar averages the incremental F, matching `ComputeFiniteStrain` + "
+                  "`volumetric_locking_correction = true`)."
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
+  [manual_EigenSolution_with_stab]
+    type = CSVDiff
+    input = 'new_system_manual.i'
+    csvdiff = 'EigenSolution_with_stabilization.csv'
+    requirement = "Large deformation kinematics, with stabilization, produce results compatible "
+                  "with the old kernel system when using `F_bar_mode = incremental` (EigenSolution "
+                  "polar-decomposition variant)."
+    capabilities = 'method!=dbg'
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_with_stabilization GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
+  [manual_TaylorExpansion_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_plasticity.i'
+    csvdiff = 'TaylorExpansion_plasticity.csv'
+    requirement = "Large deformation kinematics with plasticity produces results compatible with "
+                  "the old system (rashid_approximate kinematic / OLD TaylorExpansion decomp). The "
+                  "test demonstrates that NEW's Lagrangian pipeline (TL kernel + ComputeLagrangianStrain "
+                  "+ ComputeLagrangianWrappedStress around ComputeMultiPlasticityStress) tracks the OLD "
+                  "system (StressDivergenceTensors on displaced mesh + ComputeFiniteStrain + "
+                  "ComputeMultiPlasticityStress) at the rashid_approximate / TaylorExpansion polynomial "
+                  "rotation level."
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_plasticity GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
+  [manual_EigenSolution_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_plasticity.i'
+    csvdiff = 'EigenSolution_plasticity.csv'
+    requirement = "Large deformation kinematics with plasticity produces results identical to the "
+                  "old system (rashid_eigen kinematic / OLD EigenSolution decomp) when the strain "
+                  "calc publishes a real rotation_increment and the rate runs in rotate_old_stress "
+                  "passthrough mode."
+    cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_plasticity GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+  []
+  [manual_small_plasticity]
+    type = CSVDiff
+    input = 'new_system_manual_small_plasticity.i'
+    csvdiff = 'small_plasticity.csv'
+    requirement = "Small-deformation kinematics + volumetric_locking_correction + plasticity through "
+                  "the manually-wired NEW pipeline (ComputeLagrangianStrain with `large_kinematics = "
+                  "false, stabilize_strain = true` + ComputeLagrangianWrappedStress with "
+                  "`rotate_old_stress = false` + ComputeMultiPlasticityStress) produces stable, "
+                  "repeatable results. Provides the gold for the `action_small_plasticity` test."
+    cli_args = "Outputs/compare/file_base=small_plasticity"
+  []
+  [action_small_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'small_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` configures the small-"
+                  "deformation Lagrangian pipeline (large_kinematics = false, no incremental F-bar, "
+                  "no published rotation increment, wrap with `rotate_old_stress = false`) and "
+                  "reproduces the manually-wired small-strain plasticity test bit-for-bit."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+               "Functions/pullx/expression='t*0.01' Functions/pully/expression='t*0.0025' "
+               "Functions/pullz/expression='t*0.001' "
+               "Outputs/compare/file_base=small_plasticity"
+  []
+  [action_TaylorExpansion_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'TaylorExpansion_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` reproduces the manually-wired "
+                  "NEW-system + TaylorExpansion + ComputeMultiPlasticityStress test bit-for-bit, "
+                  "demonstrating that a one-flag flip on an OLD-style input drives the Lagrangian "
+                  "pipeline with identical results."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/decomposition_method=TaylorExpansion Outputs/compare/file_base=TaylorExpansion_plasticity"
+  []
+  [action_EigenSolution_plasticity]
+    type = CSVDiff
+    input = 'new_system_action.i'
+    csvdiff = 'EigenSolution_plasticity.csv'
+    requirement = "QuasiStatic action with `compatibility_mode = true` reproduces the manually-wired "
+                  "NEW-system + EigenSolution + ComputeMultiPlasticityStress test bit-for-bit."
+    cli_args = "Physics/SolidMechanics/QuasiStatic/all/decomposition_method=EigenSolution Outputs/compare/file_base=EigenSolution_plasticity"
+  []
+[]

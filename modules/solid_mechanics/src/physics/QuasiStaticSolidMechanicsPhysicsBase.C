@@ -233,6 +233,19 @@ QuasiStaticSolidMechanicsPhysicsBase::validParams()
                         "If true use the new "
                         "LagrangianStressDiverence kernels.");
 
+  params.addParam<bool>(
+      "compatibility_mode",
+      false,
+      "If true, configure the Lagrangian kernel system to reproduce the OLD "
+      "(StressDivergenceTensors + ComputeFiniteStrain) results bit-for-bit when wrapping an "
+      "old-style ComputeStressBase material like ComputeMultiPlasticityStress. Implies "
+      "`new_system = true` and `formulation = TOTAL`; auto-adds ComputeLagrangianWrappedStress "
+      "around the user-supplied stress material; sets `kinematic_approximation` from "
+      "`decomposition_method`; sets `F_bar_mode = incremental` when "
+      "`volumetric_locking_correction = true`; redirects `stress` / `mechanical_strain` output "
+      "requests to the equivalent NEW-system properties (`cauchy_stress` / "
+      "`rotated_mechanical_strain`).");
+
   MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
   params.addParam<MooseEnum>("formulation",
                              formulationType,
