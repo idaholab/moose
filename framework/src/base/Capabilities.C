@@ -243,6 +243,17 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
+    const auto doc = "AMD GPU parallel computing platform";
+#ifdef PETSC_HAVE_HIPROCM
+    const std::string version = QUOTE(PETSC_PKG_HIP_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_HIP_VERSION_MINOR) "." QUOTE(PETSC_PKG_HIP_VERSION_SUBMINOR);
+    add_string("hip", version, doc);
+#else
+    missing("hip", doc, "Add the HIP bin directory to your path and rebuild PETSc.");
+#endif
+  }
+
+  {
     const auto doc = "Kokkos performance portability programming ecosystem";
 #ifdef MOOSE_KOKKOS_ENABLED
     const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(

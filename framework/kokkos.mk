@@ -18,6 +18,13 @@ KOKKOS_CUDA_ARCH_90  := Hopper CC 9.0
 KOKKOS_CUDA_ARCH_100 := Blackwell CC 10.0
 KOKKOS_CUDA_ARCH_120 := Blackwell CC 12.0
 
+# HIP architecture strings
+KOKKOS_HIP_ARCH_gfx900 := GCN 5.0
+KOKKOS_HIP_ARCH_gfx906 := GCN 5.1
+KOKKOS_HIP_ARCH_gfx908 := CDNA 1.0
+KOKKOS_HIP_ARCH_gfx90a := CDNA 2.0
+KOKKOS_HIP_ARCH_gfx942 := CDNA 3.0
+
 # SYCL architecture strings
 KOKKOS_SYCL_ARCH_        := SPIR-V
 KOKKOS_SYCL_ARCH_gen9-   := Gen9+
@@ -55,6 +62,7 @@ ifeq ($(PETSC_HAVE_KOKKOS),1)
     ifeq ($(PETSC_HAVE_HIPCUDA),1)
       $(error For NVIDIA GPUs, use CUDA instead of HIP)
     endif
+    HIP_ARCH := $(shell sed -n 's/\#define PETSC_HIP_ROCM_ARCH //p' $(PETSC_CONF))
   endif
   ifeq ($(PETSC_HAVE_SYCL),1)
     SYCL_ARCH := $(shell sed -n 's/\#define PETSC_SYCL_DEVICE //p' $(PETSC_CONF))
@@ -89,14 +97,14 @@ ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_CXXFLAGS   += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
   KOKKOS_CPPFLAGS    = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
   KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler -arch=sm_$(CUDA_ARCH)
-else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
+else ifneq ($(PETSC_HAVE_HIP),)
   KOKKOS_DEVICE     := HIP
-  KOKKOS_ARCH       :=
+  KOKKOS_ARCH       := $(KOKKOS_HIP_ARCH_$(HIP_ARCH))
   KOKKOS_COMPILER   := HIPCC
   KOKKOS_CXX         = $(HIP_COMPILER)
-  KOKKOS_CXXFLAGS    =
-  KOKKOS_CPPFLAGS    =
-  KOKKOS_LDFLAGS     =
+  KOKKOS_CXXFLAGS    = --offload-arch=$(HIP_ARCH) -x hip $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
+  KOKKOS_LDFLAGS     = --offload-arch=$(HIP_ARCH)
 else ifneq ($(PETSC_HAVE_SYCL),)
   KOKKOS_DEVICE     := SYCL
   KOKKOS_ARCH       := $(KOKKOS_SYCL_ARCH_$(SYCL_ARCH))
