@@ -477,7 +477,8 @@ EOF
         export "${var}=${!BEFORE_VAR}"
     done
 
-    # Need to expose cuda compat libs when using mpich with cuda to run mpicc
+    # Expose the compat libraries with mpich and cuda (which build scripts
+    # will use to test if the compiler works)
     if [ -n "${CUDA_DIR:-}" ] && [ -n "${MOOSE_MPICH_DIR:-}" ]; then
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
     fi
@@ -567,20 +568,16 @@ EOF
 
         # Additional mfem options with cuda
         if [ -n "${CUDA_DIR:-}" ]; then
-            # Additional options with cuda
-            MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DCUDA_ARCH=sm_80")
-            # The build environment lacks libnvidia-ml.so.1, which PETSc needs,
-            # so we bypass the test that MFEM uses to check PETSc's installation
-            # during CMake configuration.
-            MFEM_OPTIONS+=("-DPETSC_EXECUTABLE_RUNS=YES")
-            # Expose the compat libraries if we haven't already
-            if [[ "${LD_LIBRARY_PATH:-}" != *"${CUDA_DIR}/compat"* ]]; then
-                export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
-            fi
-            # Expose the cuda headers if we haven't already
-            if [[ "${CPATH:-}" != *"${CUDA_DIR}/include"* ]]; then
-                export CPATH=${CUDA_DIR}/include:${CPATH:-}
-            fi
+            MFEM_OPTIONS+=(
+                "-DMFEM_USE_CUDA=ON"
+                "-DCUDA_ARCH=sm_80"
+                # The build environment lacks libnvidia-ml.so.1, which PETSc needs,
+                # so we bypass the test that MFEM uses to check PETSc's installation
+                # during CMake configuration.
+                "-DPETSC_EXECUTABLE_RUNS=YES"
+            )
+            # Expose the cuda headers
+            export CPATH=${CUDA_DIR}/include:${CPATH:-}
         fi
 
         # Install mfem
