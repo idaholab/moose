@@ -36,20 +36,27 @@ MFEMNLCurlCurlKernel::validParams()
       "Name of the coefficient representing "
       "$|\\vec \\nabla \\times \\vec u| \\partial k(|\\nabla "
       "\\times \\vec u|)/\\partial |\\nabla \\times \\vec u|$");
+  params.addParam<mfem::real_t>(
+      "curlu_zero_tol",
+      1e-32,
+      "Tolerance used for normalizing the curl vector when forming the Jacobian.");
   return params;
 }
 
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _curlu_dk_dcurlu_coeff(getScalarCoefficient("curlu_dk_dcurlu_coefficient"))
+    _curlu_dk_dcurlu_coef(getScalarCoefficient("curlu_dk_dcurlu_coefficient")),
+    _curlu_vec_coef(getVectorCoefficientByName(getTrialVariableName() + "_curl")),
+    _curlu_zero_tol(getParam<mfem::real_t>("curlu_zero_tol"))
 {
 }
 
 mfem::NonlinearFormIntegrator *
 MFEMNLCurlCurlKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _curlu_dk_dcurlu_coeff);
+  return new Moose::MFEM::NLCurlCurlIntegrator(
+      _k_coef, _curlu_dk_dcurlu_coef, _curlu_vec_coef, _curlu_zero_tol);
 }
 
 #endif

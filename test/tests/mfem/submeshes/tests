@@ -129,7 +129,7 @@
     compute_devices = 'cpu' # NLCurlCurlKernel not optimised for use on GPU
     recover = false
     restep = false
-    valgrind = none # times out on heavy
+    valgrind = heavy
     min_slots = 3 # memory heavy
   []
 []

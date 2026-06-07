@@ -15,6 +15,32 @@
 namespace Moose::MFEM
 {
 /**
+ * Matrix coefficient for the Jacobian of NLCurlCurlIntegrator.
+ *
+ * Produces the matrix
+ *   k(|curl u|) I + |curl u| dk/d|curl u| (curl u_hat \otimes curl u_hat)
+ */
+class NLCurlCurlJacMatrixCoefficient : public mfem::MatrixCoefficient
+{
+public:
+  NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
+                                 mfem::Coefficient & curlu_dk_dcurlu,
+                                 mfem::VectorCoefficient & curlu_vec,
+                                 mfem::real_t curlu_zero_tol);
+
+  void Eval(mfem::DenseMatrix & K,
+            mfem::ElementTransformation & T,
+            const mfem::IntegrationPoint & ip) override;
+  void SetTime(mfem::real_t t) override;
+
+protected:
+  mfem::Coefficient & _k_coef;
+  mfem::Coefficient & _curlu_dk_dcurlu_coef;
+  const mfem::real_t _curlu_zero_tol;
+  mfem::NormalizedVectorCoefficient _curlu_hat_coef;
+};
+
+/**
  * \f[
  * (k(|\vec \nabla \times \vec u|) \vec \nabla \times \vec u, \vec \nabla \times \vec v)
  * \f]
@@ -24,6 +50,8 @@ class NLCurlCurlIntegrator : public mfem::NonlinearFormIntegrator
 public:
   NLCurlCurlIntegrator(mfem::Coefficient & k,
                        mfem::Coefficient & curlu_dk_dcurlu,
+                       mfem::VectorCoefficient & curlu_vec,
+                       mfem::real_t curlu_zero_tol = 1e-32,
                        const mfem::IntegrationRule * ir = nullptr);
 
   virtual void AssembleElementVector(const mfem::FiniteElement & el,
@@ -36,10 +64,9 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::SumCoefficient _k_plus_curlu_dk_dcurlu_coef; // (k + |curl u| dk/d|curl u|)
   mfem::CurlCurlIntegrator _curlcurl_res_integ;      // (k(|curl u|) curl u, curl phi_j)
-  mfem::CurlCurlIntegrator
-      _curlcurl_jac_integ; // ([k(|curl u|) + |curl u| dk/d|curl u|] curl phi_i, curl phi_j)
+  NLCurlCurlJacMatrixCoefficient _curlcurl_jac_matrix_coef;
+  mfem::CurlCurlIntegrator _curlcurl_jac_integ;
 };
 }
 
