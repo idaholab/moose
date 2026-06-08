@@ -8,6 +8,23 @@ The `bibtex` extension is enabled by default. The only thing necessary for using
 the citation commands is to provide properly-formatted `.bib` file(s) within the
 included content in your configuration file.
 
+The inline citation style is controlled by the `citation_style` configuration
+option, which applies to every page:
+
+- `author-year` (default): inline citations render as author and year, e.g.
+  "Slaughter et al. (2014)".
+- `number`: inline citations render as bracketed numbers, e.g. "[1]", numbered
+  in the order they are first cited. The reference list is ordered to match, so
+  "[1]" always points to the first entry. This is useful on pages that cite many
+  works by the same authors or year, where author-year labels are hard to tell
+  apart.
+
+```yaml
+Extensions:
+    MooseDocs.extensions.bibtex:
+        citation_style: number
+```
+
 ## Usage
 
 Two commands are provided for citing BibTeX references: `!cite` and `!citep`.

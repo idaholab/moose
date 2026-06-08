@@ -48,6 +48,11 @@ class BibtexExtension(command.CommandExtension):
             "Show a warning when duplicate entries detected.",
         )
         config["duplicates"] = (list(), "A list of duplicates that are allowed.")
+        config["citation_style"] = (
+            "author-year",
+            "The inline citation style: 'author-year' (e.g. 'Smith et al. (2024)') "
+            "or 'number' (e.g. '[1]').",
+        )
         return config
 
     def __init__(self, *args, **kwargs):
@@ -90,6 +95,19 @@ class BibtexExtension(command.CommandExtension):
     def preRead(self, page):
         """Initialize the page citations list."""
         page["citations"] = list()
+        page["citation_numbers"] = None
+
+    def citationNumbers(self, page):
+        """Return a {key: number} map for a page, numbered in order of first
+        citation appearance (deduplicated). Used by the 'number' citation style."""
+        numbers = page.get("citation_numbers")
+        if numbers is None:
+            numbers = dict()
+            for key in page.get("citations", list()):
+                if key not in numbers:
+                    numbers[key] = len(numbers) + 1
+            page["citation_numbers"] = numbers
+        return numbers
 
     def postTokenize(self, page, ast):
         if page["citations"]:
@@ -200,6 +218,9 @@ class RenderBibtexCite(components.RenderComponent):
         if cite == "nocite":
             return parent
 
+        if self.extension.get("citation_style") == "number":
+            return self._createNumberHTML(parent, token, page)
+
         citep = cite == "citep"
         if citep:
             html.String(parent, content="(")
@@ -272,6 +293,28 @@ class RenderBibtexCite(components.RenderComponent):
 
         return parent
 
+    def _createNumberHTML(self, parent, token, page):
+        """Render citations as bracketed numbers, e.g. '[1, 2]', that match the
+        numbering of the reference list."""
+        numbers = self.extension.citationNumbers(page)
+        num_keys = len(token["keys"])
+        html.String(parent, content="[")
+        for i, key in enumerate(token["keys"]):
+            if key not in self.extension.database().entries:
+                LOG.error("Unknown BibTeX key: %s", key)
+                html.Tag(parent, "span", string=key, style="color:red;")
+            else:
+                html.Tag(
+                    parent,
+                    "a",
+                    href="#{}".format(key),
+                    string=str(numbers.get(key)),
+                )
+            if i != num_keys - 1:
+                html.String(parent, content=", ")
+        html.String(parent, content="]")
+        return parent
+
     def createMaterialize(self, parent, token, page):
         self.createHTML(parent, token, page)
 
@@ -306,7 +349,11 @@ class RenderBibtexBibliography(components.RenderComponent):
             ol = html.Tag(div, "ol")
 
             backend = html_backend(encoding="utf-8")
-            for entry in formatted_bibliography:
+            entries = list(formatted_bibliography)
+            if self.extension.get("citation_style") == "number":
+                numbers = self.extension.citationNumbers(page)
+                entries.sort(key=lambda e: numbers.get(e.key, len(numbers) + 1))
+            for entry in entries:
                 text = entry.text.render(backend)
                 html.Tag(ol, "li", id_=entry.key, string=text)
 
