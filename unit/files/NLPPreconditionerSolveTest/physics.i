@@ -107,12 +107,5 @@
 []
 
 [Outputs]
-  [csv]
-    type = CSV
-    execute_on = 'final'
-  []
-  [console]
-    type = Console
-    execute_postprocessors_on = 'final'
-  []
+  console = false
 []

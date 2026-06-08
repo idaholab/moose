@@ -1,6 +1,6 @@
 #include "ADLambdaU2.h"
 
-registerMooseObject("MooseTestApp", ADLambdaU2);
+registerMooseObject("MooseUnitApp", ADLambdaU2);
 
 InputParameters
 ADLambdaU2::validParams()

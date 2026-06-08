@@ -1,6 +1,6 @@
 #include "ADExpUKernel.h"
 
-registerMooseObject("MooseTestApp", ADExpUKernel);
+registerMooseObject("MooseUnitApp", ADExpUKernel);
 
 InputParameters
 ADExpUKernel::validParams()
