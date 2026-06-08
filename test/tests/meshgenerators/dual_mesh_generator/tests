@@ -1,5 +1,7 @@
 [Tests]
-  [./mesh_only]
+  design = 'meshgenerators/DualMeshGenerator.md'
+  issues = '#<some issue number>'
+  [concave]
     type = 'Exodiff'
     input = 'concave_dual.i'
     cli_args = '--mesh-only'
@@ -7,8 +9,6 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The system shall have the capability to generate a dual mesh from an input mesh with both convex and concave edges'
-    design = 'meshgenerators/DualMeshGenerator.md'
-  [../]
-  
+    requirement = 'The system shall have the capability to generate a dual mesh from an input mesh with a concave boundary.'
+  []
 []
