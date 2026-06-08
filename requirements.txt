@@ -1,0 +1,50 @@
+#
+# Base python requirements for MOOSE
+#
+# This should mirror conda/tools/[conda_build_config.yaml,meta.yaml]
+# as much as reasonably possible
+#
+# Currently, it is only used within the moose-dev apptainer containers
+# (see apptainer/moose-dev.def)
+#
+beautifulsoup4
+black==26.5.1
+clang-format==22.1.5
+coverage==7.13.2
+deepdiff
+git-lfs
+gitpython
+graphviz
+h5py
+jinja2
+lcov-cobertura # not in conda moose-tools; needed for app coverage
+livereload
+lxml
+mako
+matplotlib
+mock
+numpy
+packaging
+pandas
+paramiko
+plotly
+psutil
+psycopg2-binary # instead of psycopg2 in conda moose-tools
+pyarrow
+pybtex
+pycobertura
+pyflakes
+pylatexenc
+pylint
+pymongo
+pytest
+pytest-cov
+pyyaml
+requests
+ruff==0.15.15
+scikit-image
+setuptools
+sympy
+tabulate
+uncertainties
+xmltodict<0.14

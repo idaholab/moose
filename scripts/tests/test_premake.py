@@ -125,7 +125,7 @@ gold_apptainer_env = {
 class Test(unittest.TestCase):
     def testCondaList(self):
         # Can only test this if we actually have conda
-        if os.environ.get("CONDA_PREFIX"):
+        if os.environ.get("CONDA_PREFIX") is not None:
             conda_list = PreMake.condaList()
 
             # Run our own conda list to make sure it all looks right
@@ -174,7 +174,8 @@ class Test(unittest.TestCase):
         self.assertEqual(PreMake.getCondaEnv(), None)
 
         # Set this back once we're done
-        os.environ["CONDA_PREFIX"] = CONDA_PREFIX
+        if CONDA_PREFIX is not None:
+            os.environ["CONDA_PREFIX"] = CONDA_PREFIX
 
     @patch.object(PreMake, "condaList")
     def testCheckCondaPackage(self, mock_conda_list):
@@ -220,7 +221,10 @@ class Test(unittest.TestCase):
         self.assertEqual(e.exception.required_build, build_number)
 
         # Set this back once we're done
-        os.environ["CONDA_PREFIX"] = CONDA_PREFIX
+        if CONDA_PREFIX is not None:
+            os.environ["CONDA_PREFIX"] = CONDA_PREFIX
+        else:
+            del os.environ["CONDA_PREFIX"]
 
     def testGetApptainerEnv(self):
         prefix = "MOOSE_APPTAINER_GENERATOR_"

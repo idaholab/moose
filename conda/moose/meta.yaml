@@ -14,7 +14,7 @@ source:
 
 build:
   number: 0
-  string: {{ mpi }}
+  string: mpich
   pin_depends: strict
   script_env:
     - MOOSE_JOBS
@@ -29,36 +29,34 @@ requirements:
     - {{ compiler('fortran') }}
     - {{ stdlib('c') }}
     # for libmesh libtool
-    - moose-libmesh 2026.05.06_aeab0b9 {{ mpi }}_0
+    - moose-libmesh 2026.06.05_ab36c00 mpich_0
     # build utilities
     - make
     - packaging
     - patchelf # [linux]
     # python; for doc build + premake
     - python 3.14.*
-    - moose-tools 2026.04.21
+    - moose-tools 2026.06.07
   host:
-    - {{ mpi }} {{ mpi_version }}
+    - mpich {{ mpich_version }}
     - hdf5 {{ hdf5 }}
-    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
-    {% if mpi == "mpich" %}
-    # see libfabric entry in conda/conda_build_config.yaml
+    - hdf5 {{ hdf5 }} mpi_mpich_*
+    # see libfabric entry in conda/conda_build_config.yaml (only for mpich)
     - libfabric {{ libfabric }} # [linux]
-    {% endif %}
     - libpng
-    - moose-libmesh 2026.05.06_aeab0b9 {{ mpi }}_0
-    - moose-wasp 2025.09.19_02960f1 build_6
+    - moose-libmesh 2026.06.05_ab36c00 mpich_0
+    - moose-wasp 2026.05.24_2cdbeb7 build_0
     - zlib
   run:
-    - {{ mpi }} {{ mpi_version }}
-    - moose-libmesh 2026.05.06_aeab0b9 {{ mpi }}_0
-    - moose-wasp 2025.09.19_02960f1 build_6
+    - mpich {{ mpich_version }}
+    - moose-libmesh 2026.06.05_ab36c00 mpich_0
+    - moose-wasp 2026.05.24_2cdbeb7 build_0
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]
     - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]
     - clangxx_osx-arm64 {{ cxx_compiler_version }}.*          # [osx and arm64]
     # for testharness/python utilities
-    - moose-tools 2026.04.21
+    - moose-tools 2026.06.07
     # for running app --copy-inputs
     - rsync
   run_constrained:

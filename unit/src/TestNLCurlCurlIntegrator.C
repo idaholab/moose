@@ -33,7 +33,8 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 
   const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
 
-  Moose::MFEM::NLCurlCurlIntegrator integ(k_coeff, curlu_dk_dcurlu_coeff, &ir);
+  Moose::MFEM::NLCurlCurlIntegrator integ(
+      k_coeff, curlu_dk_dcurlu_coeff, curl_gf_coeff, 1e-32, &ir);
 
   const auto & el = *fespace.GetFE(0);
   auto & T = *mesh.GetElementTransformation(0);
@@ -46,6 +47,7 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
 
   mfem::DenseMatrix curlshape(el.GetDof(), el.GetCurlDim());
   mfem::Vector curl_u(el.GetCurlDim());
+  mfem::Vector curl_u_hat(el.GetCurlDim());
 
   for (int qp = 0; qp < ir.GetNPoints(); ++qp)
   {
@@ -55,19 +57,35 @@ TEST(CheckData, NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization)
     el.CalcPhysCurlShape(T, curlshape);
     curlshape.MultTranspose(elfun, curl_u);
 
-    const double curl_u_norm = curl_u.Norml2();
-    const double weight = ip.weight * T.Weight();
-    const double k = curl_u_norm * curl_u_norm;
-    const double curlu_dk_dcurlu = 2.0 * curl_u_norm * curl_u_norm;
+    const mfem::real_t curl_u_norm = curl_u.Norml2();
+    if (curl_u_norm > 1e-32)
+    {
+      curl_u_hat = curl_u;
+      curl_u_hat /= curl_u_norm;
+    }
+    else
+      curl_u_hat = 0.0;
+
+    const mfem::real_t weight = ip.weight * T.Weight();
+    const mfem::real_t k = curl_u_norm * curl_u_norm;
+    const mfem::real_t curlu_dk_dcurlu = 2.0 * curl_u_norm * curl_u_norm;
 
     for (int i = 0; i < el.GetDof(); ++i)
       for (int j = 0; j < el.GetDof(); ++j)
       {
-        double curl_trial_dot_curl_test = 0.0;
+        mfem::real_t curl_trial_dot_curl_test = 0.0;
+        mfem::real_t curl_hat_dot_curl_test = 0.0;
+        mfem::real_t curl_hat_dot_curl_trial = 0.0;
         for (int d = 0; d < el.GetCurlDim(); ++d)
+        {
           curl_trial_dot_curl_test += curlshape(j, d) * curlshape(i, d);
+          curl_hat_dot_curl_test += curl_u_hat(d) * curlshape(i, d);
+          curl_hat_dot_curl_trial += curl_u_hat(d) * curlshape(j, d);
+        }
 
-        jacobian_expected(i, j) += weight * (k + curlu_dk_dcurlu) * curl_trial_dot_curl_test;
+        jacobian_expected(i, j) +=
+            weight * (k * curl_trial_dot_curl_test +
+                      curlu_dk_dcurlu * curl_hat_dot_curl_test * curl_hat_dot_curl_trial);
       }
   }
 

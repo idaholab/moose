@@ -1,28 +1,27 @@
 {#- Required jinja arguments                                                                  -#}
 {#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 
-{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- Optional jinja arguments                                                                  -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
 
+# TODO: Update packages to production versions
 Bootstrap: docker
 {%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.1_2026.04.14
-{%- elif ALTERNATE_FROM == "clang_min" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.1_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-clang:8.10-clang21.1.8-gcc15.2.1-mpich5.0.1-20260605
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-cuda12.9.1-gcc13.3.1-mpich5.0.1-openmpi5.0.10_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-cuda-gcc:8.10-cuda13.2.1-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
 {%- elif ALTERNATE_FROM == "gcc_min" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.1_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gccmin:8.10-gcc9.2.1-mpich5.0.1-20260605
 {%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.3-mpich4.3.2_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.0.0-mpich4.3.2-20260605
 {%- elif ALTERNATE_FROM == "rocky9" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260605
 {%- else %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10_2026.04.12
+From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
 {%- endif %}
 
 %environment
@@ -30,16 +29,15 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.
     export LC_ALL=C
 
     # Environment from underyling docker image
-    if [ -f "/moose_env.sh" ]; then
-        source /moose_env.sh
-    fi
+    test -f /moose_env.sh && . /moose_env.sh
 
 %post
-    umask 022
+    # Be careful about unknown variables
+    set -u
 
     # Determine rocky version
     grep -q "Rocky" /etc/os-release && IS_ROCKY=1
-    if [ -n "$IS_ROCKY" ]; then
+    if [ -n "${IS_ROCKY:-}" ]; then
         grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
         grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
     fi
@@ -51,10 +49,10 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.
 
     # Enable additional repos
     dnf install -y dnf-plugins-core
-    if [ -n "$IS_ROCKY_8" ]; then
+    if [ -n "${IS_ROCKY_8:-}" ]; then
         dnf config-manager --set-enabled powertools
         dnf install -y redhat-lsb-core.x86_64
-    elif [ -n "$IS_ROCKY_9" ]; then
+    elif [ -n "${IS_ROCKY_9:-}" ]; then
         dnf config-manager --set-enabled crb
     fi
     dnf install -y epel-release
@@ -63,7 +61,7 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.
     dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
         libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov bash-completion
+        automake cppunit-devel glpk-devel patchelf lcov bash-completion ninja-build
 
     # Clean after install
     dnf clean all
