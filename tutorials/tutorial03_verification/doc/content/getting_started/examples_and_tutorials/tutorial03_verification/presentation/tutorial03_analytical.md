@@ -66,6 +66,14 @@ configuration of a first-order Lagrange finite element variable.
 
 !---
 
+### Initial Conditions
+
+The initial condition for temperature at the beginning of the simulation is set using the Initial Condition System in the `[ICs]` block. At $t=0$, an constant initial value of $T=300$ is applied uniformly across the problem.
+
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=ICs
+
+!---
+
 ### Kernels
 
 The "volumetric" portions equation weak form are defined using the Kernel System in the `[Kernels]`
