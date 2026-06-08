@@ -51,17 +51,29 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
   const auto & nl_sys_names = getParam<std::vector<NonlinearSystemName>>("nonlinear_system_names");
   if (nl_sys_names.empty())
     paramError("nonlinear_system_names", "Empty string passed?");
-
   for (const auto & nl_sys_name : nl_sys_names)
+    _nl_sys_nums.push_back(_fe_problem.nlSysNum(nl_sys_name));
+
+  //
+  // Store PETSc options
+  //
+
+  if (_nl_sys_nums.size() > 1)
+    Moose::PetscSupport::storePetscOptions(_fe_problem, this->name() + "_", *this);
+  else
   {
-    const auto sys_num = _fe_problem.nlSysNum(nl_sys_name);
-    _nl_sys_nums.push_back(sys_num);
+    const auto sys_num = _nl_sys_nums[0];
     const auto & sys = _fe_problem.getNonlinearSystemBase(sys_num);
     Moose::PetscSupport::storePetscOptions(_fe_problem, sys.prefix(), *this);
     auto & solver_params = _fe_problem.solverParams(sys_num);
     solver_params._prefix = sys.prefix();
     solver_params._solver_sys_num = sys_num;
   }
+  Moose::PetscSupport::setESLinearSolverParams(_fe_problem.es(), *this);
+
+  //
+  // Setup matrices
+  //
 
   if (_nl_sys_nums.size() > 1)
   {
@@ -78,6 +90,10 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
       }
   }
 
+  //
+  // Setup convergence objects
+  //
+
   if (isParamValid("convergence_names"))
   {
     const auto & conv_names = getParam<std::vector<ConvergenceName>>("convergence_names");
@@ -89,8 +105,6 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
     for (const auto i : index_range(nl_sys_names))
       _fe_problem.setNonlinearConvergence(nl_sys_names[i], conv_names[i]);
   }
-
-  Moose::PetscSupport::setESLinearSolverParams(_fe_problem.es(), *this);
 }
 
 NewtonSNESExecutor::~NewtonSNESExecutor()
