@@ -1,4 +1,4 @@
-# Multiplicative Schwarz Preconditioned Inexact Newton (with backtracking)
+# Multiplicative Schwarz Preconditioned Inexact Newton.
 
 !include physics.i
 
@@ -38,6 +38,7 @@
     type = NewtonSNESExecutor
     nonlinear_system_names = 'u v'
     nl_preconditioning = 'nmsm'
+    petsc_options = '-snes_monitor'
   []
   [steady]
     type = SteadyExecutor

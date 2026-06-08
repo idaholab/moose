@@ -1,6 +1,6 @@
 #include "ADCoupledFieldKernel.h"
 
-registerMooseObject("MooseTestApp", ADCoupledFieldKernel);
+registerMooseObject("MooseUnitApp", ADCoupledFieldKernel);
 
 InputParameters
 ADCoupledFieldKernel::validParams()

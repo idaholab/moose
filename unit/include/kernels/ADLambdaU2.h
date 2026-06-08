@@ -3,7 +3,7 @@
 #include "ADKernel.h"
 
 /**
- * Kernel computing lambda * u^2 for AD Jacobian testing.
+ * Kernel computing lambda * u^2 for the Keyes MSPIN unit test.
  */
 class ADLambdaU2 : public ADKernel
 {

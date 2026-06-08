@@ -46,7 +46,7 @@
   [u_rxn]
     type = ADLambdaU2
     variable = u
-    lambda = 0
+    lambda = 20000
   []
   [v_offdiag]
     type = ADCoupledFieldKernel
@@ -98,4 +98,23 @@
     nl_abs_tol = 1e-10
     nl_rel_tol = 0
   []
+[]
+
+[Postprocessors]
+  [u]
+    type = ElementAverageValue
+    variable = u
+    execute_on = 'final'
+  []
+  [v]
+    type = ElementAverageValue
+    variable = v
+    execute_on = 'final'
+  []
+[]
+
+[Outputs]
+  console = false
+  print_nonlinear_residuals = false
+  print_linear_residuals = false
 []

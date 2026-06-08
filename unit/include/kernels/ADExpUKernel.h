@@ -3,7 +3,7 @@
 #include "ADKernelValue.h"
 
 /**
- * Field kernel computing exp(u - 1) for AD Jacobian testing.
+ * Field kernel computing exp(u - 1) for the Keyes MSPIN unit test.
  */
 class ADExpUKernel : public ADKernelValue
 {
