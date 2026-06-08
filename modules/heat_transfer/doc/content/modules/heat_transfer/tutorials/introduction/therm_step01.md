@@ -119,3 +119,10 @@ A question that comes up often is "What units does MOOSE use?".
 
 Once you've answered the questions and run the first example it is time to move
 on to a slightly more complex scenario in [Step 2](heat_transfer/tutorials/introduction/therm_step02.md).
+
+!media heat_transfer/tutorials/introduction/therm_step01.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=therm_step01_result
+       caption=Temperature field `T` over the five time steps. With no boundary conditions or heat source the solution stays at its initial value.

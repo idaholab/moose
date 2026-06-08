@@ -71,3 +71,10 @@ each time step.
 Once you've run this example we will move on to
 [Step 3](heat_transfer/tutorials/introduction/therm_step03.md), where additional terms will be
 added to the heat equation.
+
+!media heat_transfer/tutorials/introduction/therm_step02a.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=therm_step02a_result
+       caption=Temperature field `T`. This is the same solution as in Step 2; here the values are additionally sampled along a line and written to CSV.

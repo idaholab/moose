@@ -95,3 +95,10 @@ this model?
 Once you've answered the questions and run this example we will move on to
 [Step 2](combined/tutorials/introduction/step02.md) in which we introduce
 a third block participating in the contact problem.
+
+!media combined/tutorials/introduction/thermomech_step01.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=thermomech_step01_result
+       caption=Temperature field `T` shown on the deforming (displaced) mesh. As the block heats up it expands through the thermal eigenstrain, coupling the thermal and mechanical solutions.
