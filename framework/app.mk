@@ -364,21 +364,9 @@ $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 
 ifeq ($(ENABLE_KOKKOS),true)
 
-ifeq ($(MOOSE_UNITY),true)
-
-app_kokkos_unity_srcsubdirs := $(shell find $(APPLICATION_DIR)/src/kokkos -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*' 2>/dev/null)
-$(foreach srcsubdir,$(app_kokkos_unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),K),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.K"),$(srcsubdir),$(unity_src_dir))))
-
-app_KOKKOS_UNITY_SRC_FILES := $(foreach srcsubdir,$(app_kokkos_unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),K))
-app_KOKKOS_SRC_FILES        := $(app_KOKKOS_UNITY_SRC_FILES)
-
-else
-
 app_KOKKOS_UNITY_SRC_FILES :=
+
 app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
-
-endif
-
 app_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
 app_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(app_KOKKOS_OBJECTS))
 app_KOKKOS_LIB       :=
