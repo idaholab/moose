@@ -85,6 +85,7 @@ class MediaExtension(command.CommandExtension):
         self.addCommand(reader, ScriptCommand())
         self.addCommand(reader, ImageCommand())
         self.addCommand(reader, VideoCommand())
+        self.addCommand(reader, UnsupportedMediaCommand())
 
         renderer.add("Image", RenderImage())
         renderer.add("Video", RenderVideo())
@@ -313,6 +314,31 @@ class VideoCommand(command.CommandComponent):
             vid.attributes.update(**self.attributes(settings))
 
         return parent
+
+
+class UnsupportedMediaCommand(command.CommandComponent):
+    """
+    Catch-all for !media references with an unsupported file type (e.g. PDF), so a clear
+    diagnostic is reported instead of the generic "unknown command combination" message.
+    """
+
+    COMMAND = "media"
+    SUBCOMMAND = "*"
+    # Avoid parsing settings; this command always errors so the settings are irrelevant and
+    # parsing them would risk masking the diagnostic below with an "unknown setting" error.
+    PARSE_SETTINGS = False
+
+    def createToken(self, parent, info, page, settings):
+        _, ext = os.path.splitext(info["subcommand"])
+        media_type = ext.lstrip(".") or info["subcommand"]
+        images = ", ".join(ImageCommand.SUBCOMMAND)
+        videos = ", ".join(sub for sub in VideoCommand.SUBCOMMAND if sub)
+        msg = (
+            "The '!media' command does not support the '{}' media type. Supported image types "
+            "are: {}; supported video types are: {}. For other file types, such as PDF, link to "
+            "the file instead (e.g., '[text](file.ext)')."
+        )
+        raise exceptions.MooseDocsException(msg, media_type, images, videos)
 
 
 class RenderImage(components.RenderComponent):
