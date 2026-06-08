@@ -10,14 +10,6 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "MooseEnum.h"
-
-#include "libmesh/bounding_box.h"
-
-namespace libMesh
-{
-class BoundingBox;
-}
 
 /**
  * MeshGenerator for creating dual mesh

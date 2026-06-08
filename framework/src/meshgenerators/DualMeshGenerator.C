@@ -20,8 +20,6 @@ registerMooseObject("MooseApp", DualMeshGenerator);
 InputParameters
 DualMeshGenerator::validParams()
 {
-  MooseEnum location("INSIDE OUTSIDE", "INSIDE");
-
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
@@ -223,13 +221,6 @@ DualMeshGenerator::generate()
     tri->set_node(1, b);
     tri->set_node(2, c);
     dualMesh->add_elem(std::move(tri));
-  };
-
-  auto triangleArea = [](const Node * a, const Node * b, const Node * c) -> Real
-  {
-    return std::abs(((*b)(0) - (*a)(0)) * ((*c)(1) - (*a)(1)) -
-                    ((*b)(1) - (*a)(1)) * ((*c)(0) - (*a)(0))) *
-           0.5;
   };
 
   auto isCornerNode = [&](const Node * node) -> bool
