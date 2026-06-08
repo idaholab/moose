@@ -973,12 +973,15 @@ CoreMeshGenerator::generateCSG()
 
   // Define lattice cell, with the lattice surrounded by a bounding circle whose radius is
   // determined by the mesh periphery radius. If no mesh periphery is defined, the radius will be (N
-  // + 1) times the assembly pitch of the lattice, where N is the number of rings for a hexagonal
-  // lattice or half the number of assembly widths that span a square lattice. This ensures that the
-  // ring radius completely surrounds the underlying lattice.
+  // + 1) times the assembly pitch of the lattice for hex lattices, where N is the number of rings
+  // for a hexagonal lattice. For Cartesian lattices, the radius will be (N / 2 * sqrt(2)) times the
+  // assembly pitch, where N is the number of assembly widths that span a square lattice. This
+  // ensures that the ring radius completely surrounds the underlying lattice.
   std::string lat_cell_name = name() + "_lattice_cell";
-  const auto ring_radius =
-      _mesh_periphery ? _outer_circle_radius : (universe_pattern.size() + 2) / 2. * assembly_pitch;
+  const auto ring_radius = _mesh_periphery ? _outer_circle_radius
+                           : (_geom_type == "Hex")
+                               ? (universe_pattern.size() + 2) / 2. * assembly_pitch
+                               : universe_pattern.size() / 2. * sqrt(2.) * assembly_pitch;
   const auto ring_surf_name = name() + "_radial_ring";
   std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
       std::make_unique<CSG::CSGZCylinder>(ring_surf_name, 0, 0, ring_radius);
