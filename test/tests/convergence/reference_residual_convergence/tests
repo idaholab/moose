@@ -129,14 +129,14 @@
   [formatting]
     type = RunApp
     input = 'formatting.i'
-    expect_out = 'conv_one: Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: Reference Residual check.*norm verylongvariable_e.*norm g.*conv_two: Converged normally'
+    expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
     requirement = 'The system shall be able to use ReferenceresidualConvergence with two separate convergence options, and print to screen the relevant parameters for each convergence object'
   []
   [unscale]
     type = RunApp
     input = 'formatting.i'
     cli_args = 'scaling=true'
-    expect_out = '\(a, b, variable_f\)-> res: 5\.00e\+06  ref: 2\.04e\+06  res/ref: 2\.45e\+00'
+    expect_out = '\(a, b, variable_f\)-> res: 5\.00e\+06  ref: 6\.12e\+06  res/ref: 8\.16e\-01'
     requirement = 'The system shall be able to use ReferenceresidualConvergence and reverse variable scaling to output the actual residual, while allowing variable scaling'
   []
 

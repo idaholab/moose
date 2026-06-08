@@ -34,14 +34,6 @@ public:
 
   virtual void initialSetup() override;
 
-  enum class NormalizationType
-  {
-    GLOBAL_L2 = 0,
-    LOCAL_L2 = 1,
-    GLOBAL_LINF = 2,
-    LOCAL_LINF = 3
-  };
-
   class ReferenceVectorTagIDKey
   {
     friend class TaggingInterface;
@@ -79,6 +71,8 @@ protected:
                                    const Real rtol,
                                    const Real initial_residual_before_preset_bcs);
 
+  const MooseEnum _norm_type_enum;
+
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
   /// and the residual variable names that will store them.
@@ -109,7 +103,6 @@ protected:
   /// Local storage for *discrete L2 residual norms* of the grouped variables.
   std::vector<Real> _group_ref_resid;
   std::vector<Real> _group_resid;
-  std::vector<Real> _group_output_resid;
   ///@}
 
   /// Vector of bools to signify if variable is in a group.

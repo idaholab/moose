@@ -40,6 +40,7 @@ ReferenceResidualConvergence::validParams()
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
   : DefaultNonlinearConvergence(parameters),
     ReferenceResidualInterface(this),
+    _norm_type_enum(getParam<MooseEnum>("normalization_type")),
     _accept_mult(getParam<Real>("acceptable_multiplier")),
     _accept_iters(getParam<unsigned int>("acceptable_iterations")),
     _reference_vector(nullptr),
@@ -67,24 +68,22 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
         "`ReferenceResidualConvergence`, either provide a reference_vector or utilize "
         "`DefaultNonlinearConvergence` instead.");
 
-  const auto norm_type_enum =
-      parameters.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
-  if (norm_type_enum == NormalizationType::LOCAL_L2)
+  if (_norm_type_enum == "LOCAL_L2")
   {
     _norm_type = libMesh::DISCRETE_L2;
     _local_norm = true;
   }
-  else if (norm_type_enum == NormalizationType::GLOBAL_L2)
+  else if (_norm_type_enum == "GLOBAL_L2")
   {
     _norm_type = libMesh::DISCRETE_L2;
     _local_norm = false;
   }
-  else if (norm_type_enum == NormalizationType::LOCAL_LINF)
+  else if (_norm_type_enum == "LOCAL_LINF")
   {
     _norm_type = libMesh::DISCRETE_L_INF;
     _local_norm = true;
   }
-  else if (norm_type_enum == NormalizationType::GLOBAL_LINF)
+  else if (_norm_type_enum == "GLOBAL_LINF")
   {
     _norm_type = libMesh::DISCRETE_L_INF;
     _local_norm = false;
@@ -145,7 +144,6 @@ ReferenceResidualConvergence::initialSetup()
   unsigned int n_groups = n_soln_vars - num_variables_in_groups + _group_variables.size();
   _group_ref_resid.resize(n_groups);
   _group_resid.resize(n_groups);
-  _group_output_resid.resize(n_groups);
   _group_names.resize(n_groups);
   _converge_on_group.assign(n_groups, true);
   _scaling_factors.resize(n_soln_vars);
@@ -287,59 +285,53 @@ ReferenceResidualConvergence::updateReferenceResidual()
       _scaling_factors[i] = current_nl_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 
   std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
-  std::fill(_group_output_resid.begin(), _group_output_resid.end(), 0.0);
-  if (_local_norm)
-    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 1.0);
-  else
-    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
+  std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
   for (const auto i : index_range(_soln_vars))
   {
     if (_converge_on_var[i])
     {
-      Real resid = 0.0;
       const auto group = _group_index[i];
+
+      // Prepare residual
+      auto resid =
+          Utility::pow<2>(s.calculate_norm(current_nl_sys.RHS(), _soln_vars[i], _norm_type));
+      if (_unscale_the_residual)
+      {
+        mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
+        resid /= Utility::pow<2>(_scaling_factors[i]);
+      }
+      _group_resid[group] += resid;
+
+      // Prepare reference residual. If local norm, this is actually the ratio of the residual
+      // dividied by the reference at all DOF
+      Real ref_resid;
       if (_local_norm)
       {
         mooseAssert(current_nl_sys.RHS().size() == (*_reference_vector).size(),
                     "Sizes of nonlinear RHS and reference vector should be the same.");
         mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
-        // Add a tiny number to the reference to prevent a divide by zero.
         auto ref = _reference_vector->clone();
+        // Add a tiny number to the reference to prevent a divide by zero.
         ref->add(std::numeric_limits<Number>::min());
         auto div = current_nl_sys.RHS().clone();
         *div /= *ref;
-        resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
-        if (_unscale_the_residual)
-        {
-          mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
-          resid /= Utility::pow<2>(_scaling_factors[i]);
-        }
+        ref_resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
       }
       else
       {
-        resid = Utility::pow<2>(s.calculate_norm(current_nl_sys.RHS(), _soln_vars[i], _norm_type));
-        if (_unscale_the_residual)
-        {
-          mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
-          resid /= Utility::pow<2>(_scaling_factors[i]);
-        }
-
-        auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
+        ref_resid =
+            Utility::pow<2>(s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type));
         if (_unscale_the_residual)
           ref_resid /= Utility::pow<2>(_scaling_factors[i]);
-        _group_ref_resid[group] += Utility::pow<2>(ref_resid);
       }
-
-      _group_resid[group] += _converge_on_var[i] ? resid : 0;
-      _group_output_resid[group] += resid;
+      _group_ref_resid[group] += ref_resid;
     }
   }
 
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
   {
     _group_resid[i] = std::sqrt(_group_resid[i]);
-    _group_output_resid[i] = std::sqrt(_group_output_resid[i]);
     _group_ref_resid[i] = std::sqrt(_group_ref_resid[i]);
   }
 }
@@ -354,8 +346,7 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
   updateReferenceResidual();
 
   std::ostringstream out;
-
-  out << _name << ": Reference Residual check\n";
+  out << _name << ": " << _norm_type_enum << " Reference Residual check\n";
 
   if (_group_names.size() > 0)
   {
@@ -370,18 +361,21 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
     {
       if (_converge_on_group[i])
       {
-        out << "   " << std::setw(var_space + (_local_norm ? 7 : 2) + 6) << std::right
-            << (_local_norm ? "norm " : "") + _group_names[i] + "-> res: ";
+        // Print residual
+        out << "   " << std::setw(var_space + 8) << std::right
+            << _group_names[i] + "-> res: " << std::setw(8) << _group_resid[i];
 
-        if (_group_output_resid[i] == _group_resid[i])
-          out << std::setw(8) << _group_output_resid[i];
+        // Print res/ref ratio
+        if (_local_norm)
+          out << "  local res/ref: " << std::setw(8) << _group_ref_resid[i] << "\n";
         else
-          out << std::setw(8) << _group_resid[i] << " (" << _group_output_resid[i] << ')';
-
-        if (!_local_norm)
-          out << "  ref: " << std::setw(8) << _group_ref_resid[i] << "  res/ref: " << std::setw(8)
-              << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i]);
-        out << '\n';
+        {
+          // Print reference first if not local norm
+          out << "  ref: " << std::setw(8) << _group_ref_resid[i];
+          out << "  res/ref: " << std::setw(8)
+              << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i])
+              << "\n";
+        }
       }
     }
     _console << out.str() << std::flush;
@@ -396,7 +390,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
     const Real /*initial_residual_before_preset_bcs*/)
 {
   // Convergence is checked via:
-  // 1) if group residual is less than group reference residual by relative tolerance
+  // 1) Ratio of group residual to reference is less than relative tolerance
   // 2) if group residual is less than absolute tolerance
   // 3) if group reference residual is zero and:
   //   3.1) Convergence type is ZERO_TOLERANCE and group residual is zero (rare, but possible, and
@@ -408,8 +402,9 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   bool convergedRelative = true;
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
     convergedRelative &=
-        (_group_resid[i] < _group_ref_resid[i] * rtol || _group_resid[i] < abstol ||
-         (!_group_ref_resid[i] &&
+        ((!_local_norm && _group_resid[i] < _group_ref_resid[i] * rtol) ||
+         (_local_norm && _group_ref_resid[i] < rtol) || _group_resid[i] < abstol ||
+         (!_group_ref_resid[i] && !_local_norm &&
           ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && !_group_resid[i]) ||
            (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE && _group_resid[i] <= rtol))));
   return convergedRelative;
