@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2025.09.19_02960f1" %}
+{% set version = "2026.05.24_2cdbeb7" %}
 
 package:
   name: moose-wasp
@@ -16,8 +16,8 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: 6
-  string: build_6
+  number: 0
+  string: build_0
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE

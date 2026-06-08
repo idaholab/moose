@@ -42,17 +42,13 @@ ReflectionCoefficient::ReflectionCoefficient(const InputParameters & parameters)
     _k(getParam<Real>("k")),
     _incoming_mag(getParam<Real>("incoming_field_magnitude"))
 {
+  if (_mesh.dimension() > 1)
+    mooseError("This object does not support two and three-dimensional meshes.");
 }
 
 void
 ReflectionCoefficient::initialize()
 {
-  if (_current_elem->dim() > 1)
-  {
-    mooseError("The ReflectionCoefficient object is not currently configured to work with 2D or 3D "
-               "meshes. Please disable this object or setup a 1D mesh!");
-  }
-
   _reflection_coefficient = 0;
 }
 

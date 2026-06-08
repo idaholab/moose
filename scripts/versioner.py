@@ -352,8 +352,8 @@ class Versioner:
         num_packages_changed = 0
         num_packages_failed = 0
         for name, head_package in head.items():
-            # we do not care about app or non-conda packages
-            if head_package.is_app or not head_package.conda:
+            # we do not care about app packages
+            if head_package.is_app:
                 continue
 
             status = "OK"
@@ -391,7 +391,7 @@ class Versioner:
                     build_color = "YELLOW"
 
                 # Full version is different, which means it was bumped
-                if base_conda is not None and base_conda.install != head_conda.install:
+                if base_package.full_version != head_package.full_version:
                     status = "CHANGE"
                     if different_version:
                         base_date = self.match_date(base_package.version)
@@ -436,13 +436,13 @@ class Versioner:
                 base_version = ""
                 base_hash = ""
 
-                if base_package is not None and base_conda is not None:
-                    base_version = base_conda.version
+                if base_package is not None:
+                    base_version = base_package.version
                     base_hash = base_package.hash
                     if base_package.build_number is not None:
                         base_version += f" build {base_package.build_number}"
 
-                head_version = colorize(head_conda.version, version_color)
+                head_version = colorize(head_package.version, version_color)
                 if head_package.build_number is not None:
                     head_version += colorize(
                         f" build {head_package.build_number}", build_color

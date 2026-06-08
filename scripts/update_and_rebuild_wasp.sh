@@ -57,12 +57,16 @@ else
     fi
   fi
 
+  WASP_OPTIONS=("-DCMAKE_INSTALL_PREFIX:STRING=${WASP_PREFIX:-${WASP_SRC_DIR}/install}")
+  if which ninja &> /dev/null; then
+    WASP_OPTIONS+=("-GNinja")
+  fi
+
   rm -rf "${WASP_SRC_DIR}"/build
   mkdir -p "${WASP_SRC_DIR}"/build
   cd "${WASP_SRC_DIR}"/build
-  WASP_OPTIONS="-DCMAKE_INSTALL_PREFIX:STRING=${WASP_PREFIX:-${WASP_SRC_DIR}/install}"
   source $SCRIPT_DIR/configure_wasp.sh
-  configure_wasp "$WASP_OPTIONS" ../ "${EXTRA_ARGS[@]}"
+  configure_wasp "${WASP_OPTIONS[@]}" ../ "${EXTRA_ARGS[@]}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: configure step for WASP failed to complete successfully"
     exit 1
@@ -70,9 +74,6 @@ else
 fi
 
 # Build with MOOSE_JOBS jobs if defined, otherwise build with a single job
-make -j ${MOOSE_JOBS:-1} install
-if [[ $? -ne 0 ]] ; then
-  echo "Error: build step for WASP failed to complete successfully"
-  exit 1
-fi
-exit 0
+set -e
+cmake --build . --parallel "${MOOSE_JOBS:-1}"
+cmake --install .

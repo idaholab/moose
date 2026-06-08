@@ -38,6 +38,11 @@ zip_keys:
   - mpi_version
   - mpi_friendly_name
 
+# Should match the first zipped item in mpi_version above; used by the moose
+# and app conda install that just builds with mpich
+mpich_version:
+  - 5.0.1
+
 # libfabric 2.5.1 on linux has an undefined reference to
 # getrandom@GLIBC_2.25 during builds due to the 2.25 sysroot
 # bump in conda-forge/libfabric-feedstock#42
@@ -80,7 +85,7 @@ fortran_compiler_version:
 bzip2:
   - 1
 fmt:
-  - '12.0'
+  - '12.1'
 hdf5:
   - 1.14.6
 krb5:
@@ -94,7 +99,7 @@ libcurl:
 libffi:
   - '3.5'
 libhwloc:
-  - 2.12.2
+  - 2.13.0
 libiconv:
   - 1
 libssh2:

@@ -1,17 +1,21 @@
+#
+# NOTE: These should mirror ./requirements.txt as much as possible.
+#
+# ./requirements.txt is used to setup the python environment
+# within apptainer distributions.
+#
+
 black:
-  - 26.1.0
+  - 26.5.1
 
 clang_format:
-  - 19
-
-clang_tools:
-  - 19
+  - 22.1.5
 
 coverage:
   - 7.13.2
 
 ruff:
-  - 0.15.1
+  - 0.15.15
 
 xmltodict:
   - <0.14

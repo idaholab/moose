@@ -134,7 +134,6 @@ function configure_petsc()
       --download-kokkos-kernels-commit=4.7.04 \
       --download-libceed=1 \
       --download-umpire \
-      --download-umpire-commit=v2025.12.0 \
       "${EXTRA_CONFIGURE_OPTIONS[@]}" \
       "$@"
 
