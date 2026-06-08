@@ -62,6 +62,10 @@ requirements:
   run_constrained:
     - {{ moose_python_constrained }}
 
+test:
+  source_files:
+    - test/tests/kernels/simple_diffusion/simple_diffusion.i
+
 about:
   home: https://mooseframework.inl.gov/
   license: LGPL 2.1

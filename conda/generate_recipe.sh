@@ -62,7 +62,7 @@ function string_replace()
     local REPLACE ARG
     printf 'Creating recipes at %s/%s\n' "${TMP_DIR}" "${RECIPES}"
     REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE \
-IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH MOOSE_OPTIONS)
+IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH MOOSE_OPTIONS MOOSE_DOCS_FLAGS)
     # shellcheck disable=SC2044  # we will never allow spaces in our filesnames
     for sfile in $(find "${SCRIPT_DIR}/${TEMPLATE}" -type l); do
         cat "${sfile}" > "${TMP_DIR}/${RECIPES}/$(basename "${sfile}")"
@@ -93,7 +93,7 @@ function conda_build()
         string_replace || exit 1
         cd "${TMP_DIR}/${RECIPES}" || exit 1
         mkdir -p "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
-        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
+        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" -m "${REPO}/moose/conda/conda_build_config.yaml" || exit 1
         printf 'Built: %s/packages/%s/%s/%s%s-%s-build_%s.conda\n' \
           "${SCRIPT_DIR}" \
           "${APPLICATION}" \
