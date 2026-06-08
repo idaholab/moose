@@ -394,7 +394,13 @@ class TestUnsupportedMedia(MooseDocsTestCase):
     def testError(self):
         # Unsupported media types should produce a clear diagnostic, not the generic
         # "unknown command combination" message, regardless of the specific extension.
-        for src in ("!media Flag_of_Idaho.pdf", "!media foo.tiff", "!media bar.bmp"):
+        for src in (
+            "!media Flag_of_Idaho.pdf",
+            "!media foo.tiff",
+            "!media bar.bmp",
+            "!media https://host/file.pdf?download=1",
+            "!media https://host/file.pdf#frag",
+        ):
             with self.assertLogs(level="ERROR") as cm:
                 ast = self.tokenize(src)
             self.assertSize(ast, 1)
