@@ -45,6 +45,41 @@
     []
   []
 
+  [nested]
+    requirement = "The system shall be capable of executing nested multi-application structures "
+                  "from a Transient parent executioner, where a sub-application performs a "
+                  "complete simulation at every parent timestep and itself contains sub-applications, "
+                  "with the inner sub-application using a "
+    [fullsolve_fullsolve]
+      type = CSVDiff
+      input = parent_transient.i
+      cli_args = 'MultiApps/sub/input_files=sub_nested_fullsolve.i
+                  Outputs/file_base=nested_fs_fs_out'
+      csvdiff = nested_fs_fs_out.csv
+
+      detail = "complete-simulation executioner contained within an outer complete-simulation "
+               "sub-application, "
+    []
+    [fullsolve_transient]
+      type = CSVDiff
+      input = parent_transient.i
+      cli_args = 'MultiApps/sub/input_files=sub_nested_transient.i
+                  Outputs/file_base=nested_fs_tr_out'
+      csvdiff = nested_fs_tr_out.csv
+
+      detail = "Transient executioner that advances in step with the parent contained within an "
+               "outer complete-simulation sub-application, and a "
+    []
+    [transient_fullsolve]
+      type = CSVDiff
+      input = parent_nested_transient.i
+      csvdiff = parent_nested_transient_out.csv
+
+      detail = "complete-simulation executioner contained within an outer sub-application that "
+               "advances in step with the parent."
+    []
+  []
+
   [nl_eigen]
     requirement = "The system shall be capable of executing a sub-application from a Eigenvalue executioner on "
     [exec_initial]
