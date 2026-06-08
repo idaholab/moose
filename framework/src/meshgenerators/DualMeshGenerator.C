@@ -27,8 +27,6 @@ DualMeshGenerator::validParams()
                              "changes each input mode into an element and each input element "
                              "into a node located at its centroid.");
 
-  params.addParam<std::string>("integer_name",
-                               "Element integer to be assigned (default to subdomain ID)");
   params.addParam<Real>("boundary_node_angular_tol",
                         1,
                         "Tolerance (in degrees) for determining colinearity of boundary sides"
@@ -58,9 +56,6 @@ DualMeshGenerator::generate()
   //////////Adding nodes//////
   for (const auto & in_elem : mesh->element_ptr_range())
   {
-
-    _console << "Found centroid: " << in_elem->true_centroid() << std::endl;
-
     Point centroid = in_elem->true_centroid();
     centroids.push_back(centroid);
     for (unsigned int n = 0; n < in_elem->n_nodes(); n++)
@@ -86,8 +81,6 @@ DualMeshGenerator::generate()
   } //_elem_to_node_map now has element IDs in the first entry and maps to the nodes that make
     // up that element
 
-  _console << "Mesh populated with dual nodes" << std::endl;
-
   // Get what nodes are boundary nodes
   // looping over primal elements....
   std::unordered_map<dof_id_type, std::vector<Point>> node_to_boundary_midpoints;
@@ -104,7 +97,6 @@ DualMeshGenerator::generate()
         std::unique_ptr<Elem> side_elem = primalElem->build_side_ptr(side);
 
         std::vector<Node *> side_nodes;
-        _console << "found bordering side with nodes: " << std::endl;
         for (unsigned int i = 0; i < side_elem->n_nodes(); ++i)
         {
           Node * node = side_elem->node_ptr(i);
@@ -314,7 +306,6 @@ DualMeshGenerator::generate()
   // loop over all primal nodes / dual elements
   for (const auto & [primalNodeID, primalElemIDs] : _node_to_elem_map)
   {
-    _console << "Number of nodes for dual element: " << primalElemIDs.size() << std::endl;
     const bool is_boundary_node =
         node_to_boundary_midpoints.find(primalNodeID) != node_to_boundary_midpoints.end();
     std::vector<std::pair<Node *, Real>> dualNodesAndPhis;
