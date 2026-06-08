@@ -23,6 +23,28 @@
     []
   []
 
+  [transient]
+    requirement = "The system shall be capable of executing a full-solve sub-application from a "
+                  "Transient parent executioner, completing a full solve at every parent timestep, "
+                  "with a sub-application that is "
+    [sub_steady]
+      type = CSVDiff
+      input = parent_transient.i
+      cli_args = 'MultiApps/sub/input_files=sub_steady.i'
+      csvdiff = parent_transient_out.csv
+
+      detail = "steady, and "
+    []
+    [sub_transient]
+      type = CSVDiff
+      input = parent_transient.i
+      csvdiff = parent_transient_out.csv
+      prereq = transient/sub_steady
+
+      detail = "transient."
+    []
+  []
+
   [nl_eigen]
     requirement = "The system shall be capable of executing a sub-application from a Eigenvalue executioner on "
     [exec_initial]

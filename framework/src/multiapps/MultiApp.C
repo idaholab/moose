@@ -36,10 +36,11 @@
 #include "libmesh/numeric_vector.h"
 
 // C++ includes
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iterator>
-#include <algorithm>
+#include <set>
 
 // Call to "uname"
 #ifdef LIBMESH_HAVE_SYS_UTSNAME_H
@@ -1156,9 +1157,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   std::vector<std::string> input_cli_args;
   if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
     input_cli_args = getCommandLineArgs(i);
+  // FullSolveMultiApp (and its derived classes) always performs a complete fresh
+  // solve on every execution, so the parent's recovery-related global CLI params
+  // must not be propagated to those sub-apps.
+  const std::set<std::string> recover_exclude =
+      propagateRecoveryToSubApps()
+          ? std::set<std::string>{}
+          : std::set<std::string>{"recover", "test_checkpoint_half_transient"};
   // This will mark all hit CLI command line parameters that are passed to subapps
   // as used within the parent app (_app)
-  auto app_cli = _app.commandLine()->initSubAppCommandLine(name(), multiapp_name, input_cli_args);
+  auto app_cli = _app.commandLine()->initSubAppCommandLine(
+      name(), multiapp_name, input_cli_args, recover_exclude);
   app_cli->parse();
 
   if (_fe_problem.verboseMultiApps())
@@ -1235,7 +1244,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setGlobalTimeOffset(start_time);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
-  app->setRecover(_app.isRecovering());
+  app->setRecover(propagateRecoveryToSubApps() && _app.isRecovering());
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);

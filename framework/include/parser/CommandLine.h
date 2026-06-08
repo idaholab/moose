@@ -113,11 +113,17 @@ public:
    *
    * This will apply all global parameters from this parent application and all HIT CLI
    * parameters that have the same.
+   *
+   * The optional \p exclude_params is a set of InputParameters names (e.g. "recover",
+   * "test_checkpoint_half_transient") whose corresponding command-line entries will NOT
+   * be propagated to the sub-app, even if they are marked global. Entries are matched
+   * by the parameter name as registered in MooseApp::validParams().
    */
   std::unique_ptr<CommandLine>
   initSubAppCommandLine(const std::string & multiapp_name,
                         const std::string & subapp_name,
-                        const std::vector<std::string> & input_cli_args);
+                        const std::vector<std::string> & input_cli_args,
+                        const std::set<std::string> & exclude_params = {});
 
   /**
    * @return The parsed HIT command line parameters per the command line arguments.
