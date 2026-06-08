@@ -100,7 +100,6 @@ DualMeshGenerator::generate()
         for (unsigned int i = 0; i < side_elem->n_nodes(); ++i)
         {
           Node * node = side_elem->node_ptr(i);
-          node->print_info();
           side_nodes.push_back(node);
         }
 
@@ -311,8 +310,9 @@ DualMeshGenerator::generate()
     std::vector<std::pair<Node *, Real>> dualNodesAndPhis;
     if (!is_boundary_node) // For interior polygons we needn't worry about the boundary
     {
-      // Now loop over the # of nodes on each dual element
-      auto primalNode = mesh->node_ptr(primalNodeID);
+      f
+          // Now loop over the # of nodes on each dual element
+          auto primalNode = mesh->node_ptr(primalNodeID);
 
       for (unsigned int j = 0; j < primalElemIDs.size(); ++j)
       {
