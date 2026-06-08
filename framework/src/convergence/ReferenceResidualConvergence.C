@@ -43,18 +43,29 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _norm_type_enum(getParam<MooseEnum>("normalization_type")),
     _accept_mult(getParam<Real>("acceptable_multiplier")),
     _accept_iters(getParam<unsigned int>("acceptable_iterations")),
+    _residual_vector(nullptr),
     _reference_vector(nullptr),
     _zero_ref_type(
         getParam<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>()),
     _unscale_the_residual(getParam<bool>("unscale_the_residual")),
     _reference_vector_tag_id(Moose::INVALID_TAG_ID)
 {
+  // This restriction is primarily due to reference and residual vector parameters
+  if (_fe_problem.numNonlinearSystems() > 1)
+    paramError("nl_sys_names",
+               "reference residual problem does not currently support multiple nonlinear systems");
+
+  if (parameters.isParamValid("residual_vector"))
+  {
+    const auto residual_vector_tag_id =
+        _fe_problem.getVectorTagID(getParam<TagName>("residual_vector"));
+    _residual_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(residual_vector_tag_id);
+  }
+  else
+    _residual_vector = &_fe_problem.getNonlinearSystemBase(0).RHS();
+
   if (parameters.isParamValid("reference_vector"))
   {
-    if (_fe_problem.numNonlinearSystems() > 1)
-      paramError(
-          "nl_sys_names",
-          "reference residual problem does not currently support multiple nonlinear systems");
     _reference_vector_tag_id = _fe_problem.getVectorTagID(getParam<TagName>("reference_vector"));
     _reference_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
   }
@@ -294,8 +305,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
       const auto group = _group_index[i];
 
       // Prepare residual
-      auto resid =
-          Utility::pow<2>(s.calculate_norm(current_nl_sys.RHS(), _soln_vars[i], _norm_type));
+      auto resid = Utility::pow<2>(s.calculate_norm(*_residual_vector, _soln_vars[i], _norm_type));
       if (_unscale_the_residual)
       {
         mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
@@ -308,13 +318,13 @@ ReferenceResidualConvergence::updateReferenceResidual()
       Real ref_resid;
       if (_local_norm)
       {
-        mooseAssert(current_nl_sys.RHS().size() == (*_reference_vector).size(),
+        mooseAssert((*_residual_vector).size() == (*_reference_vector).size(),
                     "Sizes of nonlinear RHS and reference vector should be the same.");
         mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
         auto ref = _reference_vector->clone();
         // Add a tiny number to the reference to prevent a divide by zero.
         ref->add(std::numeric_limits<Number>::min());
-        auto div = current_nl_sys.RHS().clone();
+        auto div = (*_residual_vector).clone();
         *div /= *ref;
         ref_resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
       }

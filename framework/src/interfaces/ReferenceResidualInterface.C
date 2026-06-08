@@ -16,6 +16,9 @@ ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
+  params.addParam<TagName>("residual_vector",
+                           "The tag name of the residual vector. If not provided, the full "
+                           "residual vector will be used.");
   params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
   params.addParam<Real>("acceptable_multiplier",
                         1.0,

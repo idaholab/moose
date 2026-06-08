@@ -71,6 +71,7 @@ protected:
                                    const Real rtol,
                                    const Real initial_residual_before_preset_bcs);
 
+  /// Enum holding the normalization type
   const MooseEnum _norm_type_enum;
 
   ///@{
@@ -113,6 +114,9 @@ protected:
 
   /// Local storage for the scaling factors applied to each of the variables to apply to _ref_resid_vars.
   std::vector<Real> _scaling_factors;
+
+  /// The optional vector storing the reference residual values
+  const NumericVector<Number> * _residual_vector;
 
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
