@@ -1230,7 +1230,7 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
   if constexpr (ArrayDeepCopy<T>::value)
   {
     for (index_type i = 0; i < _size; ++i)
-      new (_host_data + i) T(array._host_data[i]);
+      emplace(i, array._host_data[i]);
 
     copyToDevice();
   }
