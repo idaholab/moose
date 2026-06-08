@@ -14,7 +14,6 @@
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "LinearFVAnisotropicDiffusion.h"
-#include "LinearFVElementalKernel.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -24,6 +23,7 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
+class ElemInfo;
 class LinearFVGradientReader;
 namespace libMesh
 {
@@ -53,12 +53,12 @@ public:
   /// Mark the registered pressure gradient field update as a base-gradient update.
   void preparePressureGradientUpdate();
 
-  /// Whether reconstructed cell velocities are ready for the gradient method to consume.
-  bool hasReconstructedCellVelocity() const;
+  /// Whether reconstructed pressure gradients are ready for the gradient method to consume.
+  bool hasReconstructedPressureGradient() const;
 
-  /// Get the pressure-layout reconstructed cell velocity component vectors.
+  /// Get the pressure-layout reconstructed pressure-gradient component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  reconstructedCellVelocityComponents() const;
+  reconstructedPressureGradientComponents() const;
 
   /// Get the momentum-layout H/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
@@ -66,10 +66,10 @@ public:
   /// Get the momentum-layout 1/A component vectors.
   const std::vector<std::unique_ptr<NumericVector<Number>>> & AinvComponents() const;
 
-  /// Relaxation factor for reconstructed cell velocities and pressure gradients.
-  Real reconstructedPressureGradientRelaxation() const
+  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve.
+  Real reconstructedPressureGradientFeedbackRelaxation() const
   {
-    return _reconstructed_pressure_gradient_relaxation;
+    return _reconstructed_pressure_gradient_feedback_relaxation;
   }
 
   /// Variable number of the pressure variable reconstructed by this object.
@@ -130,8 +130,37 @@ protected:
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 
-  /// Update face velocities from the current conservative mass fluxes
-  void updateFaceVelocityFromMassFlux();
+  /// Update the cell velocity gradients used by the Aguerre flux reconstruction.
+  void updateReconstructionVelocityGradient();
+
+  /// Interpolate one velocity component gradient from the current cell to the face.
+  RealVectorValue reconstructionVelocityGradient(const ElemInfo & elem_info,
+                                                 const FaceInfo & fi,
+                                                 bool elem_has_info,
+                                                 unsigned int velocity_component) const;
+
+  /// Update gradients for the split flux reconstruction.
+  void updateSplitFluxReconstructionGradients(
+      const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient);
+
+  /// Interpolate one split-reconstruction component gradient from the current cell to the face.
+  RealVectorValue splitFluxReconstructionGradient(
+      const ElemInfo & elem_info,
+      const FaceInfo & fi,
+      bool elem_has_info,
+      unsigned int component,
+      const std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> & gradients,
+      bool pressure_layout) const;
+
+  /// Update the cell velocity from the currently published pressure gradient.
+  void computeCellVelocityFromPressureGradient();
+
+  /// Recover a face-normal value from a conservative face flux.
+  Real
+  faceNormalValueFromFlux(const FaceInfo & fi, const Point & face_normal, Real face_flux) const;
+
+  /// Recover the face-normal velocity from the conservative mass flux.
+  Real faceNormalVelocityFromMassFlux(const FaceInfo & fi, const Point & face_normal) const;
 
   /// Populate the face values of the H/A and 1/A fields
   void
@@ -159,7 +188,7 @@ protected:
   const MooseLinearVariableFVReal * const _p;
 
   /// The thread 0 copy of the x-velocity variable
-  std::vector<const MooseLinearVariableFVReal *> _vel;
+  std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
   LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
@@ -184,10 +213,6 @@ protected:
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
-  /// Face velocity reconstructed from the conservative Rhie-Chow mass flux
-  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
-      _face_velocity;
-
   /**
    * We hold on to the cell-based 1/A vectors so that we can easily reconstruct the
    * cell velocities as well.
@@ -201,11 +226,6 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /// Pointer to the body force terms
-  std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;
-  /// Vector of body force term names
-  std::vector<std::vector<std::string>> _body_force_kernel_names;
-
   /// Optional momentum pressure kernel whose registered pressure gradient field should be reused.
   const std::string _momentum_pressure_kernel_name;
 
@@ -215,16 +235,22 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
 
-  /**
-   * Cell velocity reconstructed from the conservative face fluxes.
-   *
-   * For each cell, the velocity is recovered from the face-normal velocities with the
-   * least-squares flux reconstruction described in Aguerre et al. (2018).
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_cell_velocity;
+  /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
 
-  /// Whether _reconstructed_cell_velocity should be exposed through FVReconstructedPressureGradient.
-  bool _reconstructed_cell_velocity_ready;
+  /// Cell velocity gradients used by the Aguerre face-flux reconstruction.
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _reconstruction_velocity_gradient;
+
+  /// Cell H/A gradients used by the split flux reconstruction.
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> _split_flux_hbya_gradient;
+
+  /// Cell pressure-velocity gradients used by the split flux reconstruction.
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _split_flux_pressure_velocity_gradient;
+
+  /// Whether _reconstructed_pressure_gradient should be exposed through FVReconstructedPressureGradient.
+  bool _reconstructed_pressure_gradient_ready;
 
   /**
    * Functor describing the density of the fluid
@@ -258,13 +284,25 @@ protected:
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;
 
-  /// Relaxation factor for reconstructed cell velocities and pressure gradients
-  const Real _reconstructed_pressure_gradient_relaxation;
+  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve
+  const Real _reconstructed_pressure_gradient_feedback_relaxation;
+
+  /// Formulation used to reconstruct pressure gradients from Rhie-Chow face fluxes
+  const MooseEnum _reconstructed_pressure_gradient_formulation;
+
+  /// How reconstructed-pressure-gradient mode updates the cell velocity after pressure correction
+  const MooseEnum _reconstructed_pressure_gradient_velocity_update;
+
+  /// Which pressure gradient is fed back on boundary-adjacent cells
+  const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
 
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;
+
+  /// Element ids of cells touching a boundary face on the flow blocks.
+  std::unordered_set<dof_id_type> _boundary_cell_ids;
 };
 
 template <typename VarType>

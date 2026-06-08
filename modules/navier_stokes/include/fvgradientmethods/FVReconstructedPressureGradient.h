@@ -11,6 +11,8 @@
 
 #include "FVGradientMethod.h"
 
+#include "libmesh/numeric_vector.h"
+
 class RhieChowMassFlux;
 
 /**
@@ -52,7 +54,7 @@ private:
    */
   const FVGradientMethod & resolveBaseGradientMethod(SystemBase & system) const;
 
-  /// Rhie-Chow user object that supplies HbyA, Ainv, and reconstructed cell velocities.
+  /// Rhie-Chow user object that supplies the reconstructed pressure gradient.
   const UserObjectName _rhie_chow_user_object_name;
 
   /// Gradient method used before reconstructed Rhie-Chow data are available.
@@ -63,4 +65,7 @@ private:
 
   /// Cached Rhie-Chow user object that owns the reconstructed gradients.
   mutable const RhieChowMassFlux * _rhie_chow_user_object = nullptr;
+
+  /// Persistent relaxed reconstructed pressure gradient from the previous feedback update.
+  mutable GradientContainer _reconstructed_gradient_feedback;
 };

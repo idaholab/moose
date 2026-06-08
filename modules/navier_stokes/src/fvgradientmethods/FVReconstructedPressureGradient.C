@@ -109,55 +109,59 @@ FVReconstructedPressureGradient::computeGradientWithoutLimiter(
                  _rhie_chow_user_object_name,
                  "'.");
 
-  // During the first pressure-gradient update, Rhie-Chow has not yet reconstructed cell velocities
-  // from the face fluxes. Use the base method until those reconstructed velocities exist.
-  if (!rc.hasReconstructedCellVelocity())
+  // During the first pressure-gradient update, Rhie-Chow has not yet reconstructed pressure
+  // gradients from the face fluxes. Use the base method until those reconstructed gradients exist.
+  if (!rc.hasReconstructedPressureGradient())
   {
     _base_gradient_method->computeGradient(
         system, output_gradient, scratch_gradient, variable_numbers);
     return;
   }
 
-  // Start from the configured base gradient. It remains the fallback value and is also blended with
-  // the reconstructed gradient when the relaxation factor is below one.
+  // Start from the configured base gradient. It remains the fallback value and seeds the relaxed
+  // feedback state the first time reconstructed gradients become available.
   _base_gradient_method->computeGradient(
       system, output_gradient, scratch_gradient, variable_numbers);
 
   const auto dim = system.feProblem().mesh().dimension();
-  const Real alpha = rc.reconstructedPressureGradientRelaxation();
-  const auto & reconstructed_cell_velocity = rc.reconstructedCellVelocityComponents();
-  const auto & HbyA = rc.HbyAComponents();
-  const auto & Ainv = rc.AinvComponents();
+  const Real alpha = rc.reconstructedPressureGradientFeedbackRelaxation();
+  const auto & reconstructed_pressure_gradient = rc.reconstructedPressureGradientComponents();
 
-  mooseAssert(reconstructed_cell_velocity.size() == dim,
-              "Reconstructed cell velocity container must match the mesh dimension.");
-  mooseAssert(HbyA.size() == dim, "HbyA container must match the mesh dimension.");
-  mooseAssert(Ainv.size() == dim, "Ainv container must match the mesh dimension.");
+  mooseAssert(reconstructed_pressure_gradient.size() == dim,
+              "Reconstructed pressure-gradient container must match the mesh dimension.");
+
+  bool reset_feedback = _reconstructed_gradient_feedback.size() != dim;
+  if (!reset_feedback)
+    for (const auto component : make_range(dim))
+      if (_reconstructed_gradient_feedback[component]->size() != output_gradient[component]->size())
+      {
+        reset_feedback = true;
+        break;
+      }
+
+  if (reset_feedback)
+  {
+    _reconstructed_gradient_feedback.clear();
+    for (const auto component : make_range(dim))
+      _reconstructed_gradient_feedback.push_back(output_gradient[component]->clone());
+  }
 
   for (const auto component : make_range(dim))
   {
-    // RhieChowMassFlux enforces compatible pressure and momentum systems for this reconstruction,
-    // so these component vectors can be combined with pressure-gradient component vectors directly.
-    mooseAssert(
-        reconstructed_cell_velocity[component]->size() == output_gradient[component]->size(),
-        "Reconstructed cell velocity and pressure gradient vectors must have the same size.");
-    mooseAssert(HbyA[component]->size() == output_gradient[component]->size(),
-                "HbyA and pressure gradient vectors must have the same size.");
-    mooseAssert(Ainv[component]->size() == output_gradient[component]->size(),
-                "Ainv and pressure gradient vectors must have the same size.");
+    mooseAssert(reconstructed_pressure_gradient[component]->size() ==
+                    output_gradient[component]->size(),
+                "Reconstructed and published pressure gradient vectors must have the same size.");
 
-    // Rearrange u_C = -(H/A)_C - (1/A)_C grad(p)_C to reconstruct the pressure gradient:
-    // grad(p)_C = (-u_C - (H/A)_C) / (1/A)_C.
-    auto & reconstructed_gradient = *scratch_gradient[component];
-    reconstructed_gradient = *reconstructed_cell_velocity[component];
-    reconstructed_gradient.scale(-1.0);
-    reconstructed_gradient.add(-1.0, *HbyA[component]);
-    reconstructed_gradient.pointwise_divide(reconstructed_gradient, *Ainv[component]);
+    // Relax the persistent feedback state toward the newly reconstructed value:
+    // feedback = (1 - alpha) * feedback + alpha * reconstructed_gradient.
+    auto & feedback = *_reconstructed_gradient_feedback[component];
+    feedback.scale(1.0 - alpha);
+    feedback.add(alpha, *reconstructed_pressure_gradient[component]);
+    feedback.close();
 
-    // Publish a relaxed update in the output vector:
-    // output = (1 - alpha) * base_gradient + alpha * reconstructed_gradient.
+    // Publish the feedback state. Unlike a fresh blend with the base gradient, this accumulates the
+    // reconstructed pressure-gradient update over SIMPLE iterations.
     auto & gradient = *output_gradient[component];
-    gradient.scale(1.0 - alpha);
-    gradient.add(alpha, reconstructed_gradient);
+    gradient = feedback;
   }
 }

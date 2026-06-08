@@ -383,7 +383,7 @@ LinearAssemblySegregatedSolve::updatePressureGradient()
 {
   mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
   _rc_uo->preparePressureGradientUpdate();
-  _pressure_system.updateFVGradient(_rc_uo->pressureGradientField());
+  _pressure_system.computeGradients();
 }
 
 std::pair<unsigned int, Real>
@@ -548,6 +548,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
+
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
 
   return residuals;
 }
