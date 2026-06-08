@@ -35,6 +35,12 @@ To generate the list of references cited on a page, the `!bibtex bibliography`
 command is used. If it is not used, then it will automatically be placed at the
 bottom of the page.
 
+Each entry in the reference list provides an "[Export]" link that opens the
+citation in three formats: BibTeX, [RIS](https://en.wikipedia.org/wiki/RIS_(file_format))
+(for import into Microsoft Word, EndNote, Zotero, or Mendeley), and a plain-text
+reference string. The RIS and plain-text formats are intended for those who do
+not write in LaTeX.
+
 See [citation_examples] for examples.
 
 !devel! example caption=Citation examples. id=citation_examples

@@ -34,6 +34,67 @@ BibtexCite = tokens.newToken("BibtexCite", keys=[])
 BibtexBibliography = tokens.newToken("BibtexBibliography", bib_style="")
 BibtexList = tokens.newToken("BibtexList", BibtexBibliography, bib_files=None)
 
+# Maps BibTeX entry types to RIS reference types; unknown types fall back to GEN.
+RIS_TYPES = {
+    "article": "JOUR",
+    "book": "BOOK",
+    "booklet": "BOOK",
+    "inbook": "CHAP",
+    "incollection": "CHAP",
+    "inproceedings": "CPAPER",
+    "conference": "CPAPER",
+    "manual": "GEN",
+    "mastersthesis": "THES",
+    "phdthesis": "THES",
+    "proceedings": "CONF",
+    "techreport": "RPRT",
+    "unpublished": "UNPB",
+    "misc": "GEN",
+}
+
+
+def bibtex_to_ris(entry):
+    """Convert a pybtex bibliography entry into an RIS-formatted string.
+
+    RIS is the interchange format imported by reference managers used outside of
+    LaTeX, such as Microsoft Word, EndNote, Zotero, and Mendeley. pybtex provides
+    no RIS writer, so the common fields are mapped here by hand.
+    """
+    to_text = LatexNodes2Text().latex_to_text
+    fields = entry.fields
+    lines = [("TY", RIS_TYPES.get(entry.type, "GEN"))]
+
+    persons = entry.persons.get("author") or entry.persons.get("editor") or []
+    for person in persons:
+        last = to_text(" ".join(person.last_names))
+        given = to_text(" ".join(person.first_names + person.middle_names))
+        lines.append(("AU", "{}, {}".format(last, given) if given else last))
+
+    field_map = [
+        ("TI", "title"),
+        ("JO", "journal"),
+        ("T2", "booktitle"),
+        ("PY", "year"),
+        ("VL", "volume"),
+        ("IS", "number"),
+        ("PB", "publisher"),
+        ("CY", "address"),
+        ("DO", "doi"),
+        ("UR", "url"),
+    ]
+    for tag, field in field_map:
+        if field in fields:
+            lines.append((tag, to_text(fields[field])))
+
+    if "pages" in fields:
+        parts = fields["pages"].replace("--", "-").split("-")
+        lines.append(("SP", parts[0].strip()))
+        if len(parts) > 1:
+            lines.append(("EP", parts[-1].strip()))
+
+    lines.append(("ER", ""))
+    return "\n".join("{}  - {}".format(tag, value) for tag, value in lines)
+
 
 class BibtexExtension(command.CommandExtension):
     """
@@ -369,9 +430,15 @@ class RenderBibtexBibliography(components.RenderComponent):
 
         for child in ol.children:
             key = child["id"]
+            entry = self.extension.database().entries[key]
+
             db = BibliographyData()
-            db.add_entry(key, self.extension.database().entries[key])
-            btex = db.to_string("bibtex")
+            db.add_entry(key, entry)
+            formats = [
+                ("BibTeX", db.to_string("bibtex"), "language-latex"),
+                ("RIS", bibtex_to_ris(entry), None),
+                ("Plain Text", self._plainText(key, token["bib_style"]), None),
+            ]
 
             m_id = uuid.uuid4()
             html.Tag(
@@ -380,15 +447,26 @@ class RenderBibtexBibliography(components.RenderComponent):
                 style="padding-left:10px;",
                 class_="modal-trigger moose-bibtex-modal",
                 href="#{}".format(m_id),
-                string="[BibTeX]",
+                string="[Export]",
             )
 
             modal = html.Tag(child, "div", class_="modal", id_=m_id)
             content = html.Tag(modal, "div", class_="modal-content")
-            pre = html.Tag(content, "pre", style="line-height:1.25;")
-            html.Tag(pre, "code", class_="language-latex", string=btex)
+            for name, text, lang in formats:
+                html.Tag(content, "h6", string=name)
+                pre = html.Tag(content, "pre", style="line-height:1.25;")
+                html.Tag(pre, "code", class_=lang, string=text)
 
         return ol
+
+    def _plainText(self, key, bib_style):
+        """Render a single citation as a plain-text reference string."""
+        style = find_plugin("pybtex.style.formatting", bib_style or "plain")
+        formatted = style().format_bibliography(self.extension.database(), [key])
+        backend = find_plugin("pybtex.backends", "plaintext")(encoding="utf-8")
+        for entry in formatted:
+            return entry.text.render(backend)
+        return ""
 
     def createLatex(self, parent, token, page):
         pass

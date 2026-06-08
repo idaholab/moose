@@ -10,9 +10,11 @@
 
 import unittest
 import logging
+import moosetree
+from pybtex.database import parse_file
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, bibtex
-from MooseDocs import common
+from MooseDocs import base, common
 
 logging.basicConfig()
 
@@ -73,6 +75,60 @@ class TestBibtexNumber(MooseDocsTestCase):
         self.assertHTMLTag(ol, "ol")
         self.assertEqual(ol(0)["id"], "slaughter2014framework")
         self.assertEqual(ol(1)["id"], "gaston2015physics")
+
+
+class TestBibtexToRIS(unittest.TestCase):
+    def testRIS(self):
+        db = parse_file("framework/doc/content/bib/moose.bib")
+        ris = bibtex.bibtex_to_ris(db.entries["slaughter2015continuous"]).splitlines()
+        self.assertEqual(ris[0], "TY  - JOUR")
+        self.assertIn("AU  - Slaughter, Andrew E", ris)
+        self.assertIn(
+            "TI  - Continuous integration for concurrent MOOSE framework and "
+            "application development on GitHub",
+            ris,
+        )
+        self.assertIn("JO  - Journal of Open Research Software", ris)
+        self.assertIn("PY  - 2015", ris)
+        self.assertIn("VL  - 3", ris)
+        self.assertEqual(ris[-1], "ER  - ")
+
+    def testRISLatexAuthor(self):
+        # Author names containing LaTeX must be converted to plain text.
+        db = parse_file("framework/doc/content/bib/moose.bib")
+        ris = bibtex.bibtex_to_ris(db.entries["slaughter2014framework"])
+        self.assertIn("AU  - Andrš, D.", ris)
+        self.assertNotIn("\\v", ris)
+
+
+class TestBibtexExport(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, bibtex]
+    TEXT = "[!cite](slaughter2014framework)\n\n!bibtex bibliography"
+
+    def setupContent(self):
+        config = [
+            dict(
+                root_dir="framework/doc/content", content=["bib/moose.bib"]
+            )
+        ]
+        return common.get_content(config, ".bib")
+
+    def testModalFormats(self):
+        _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
+
+        # The references list shows a single [Export] modal trigger.
+        trigger = moosetree.find(
+            res, lambda n: "moose-bibtex-modal" in (n.get("class") or "")
+        )
+        self.assertIsNotNone(trigger)
+        self.assertEqual(trigger(0)["content"], "[Export]")
+
+        # The modal offers BibTeX, RIS, and Plain Text exports.
+        content = moosetree.find(
+            res, lambda n: n.name == "div" and "modal-content" in (n.get("class") or "")
+        )
+        headings = [c(0)["content"] for c in content if c.name == "h6"]
+        self.assertEqual(headings, ["BibTeX", "RIS", "Plain Text"])
 
 
 if __name__ == "__main__":
