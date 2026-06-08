@@ -30,7 +30,6 @@
     mesh_mode = 'REPLICATED'
     recover = false
     deprecated = true
-    no_error_deprecated = true
   [../]
   [./annular_mesh_generator_radial_positions]
     type = 'Exodiff'
