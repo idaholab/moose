@@ -28,6 +28,21 @@ CoarsenMeshAlongSidesetGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to coarsen");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundaries", "The sideset(s) to coarsen the mesh along");
+  params.addRangeCheckedParam<Real>(
+      "max_normal_deviation",
+      "max_normal_deviation >= 0 & max_normal_deviation <= 180",
+      "Maximum angle, in degrees, between the normals of the two elements merged together. "
+      "Merges exceeding it are skipped, which preserves features/corners");
+  params.addRangeCheckedParam<Real>(
+      "max_merged_side_length",
+      "max_merged_side_length > 0",
+      "Maximum length of the side created along the sideset by merging two elements. "
+      "Merges exceeding it are skipped");
+  params.addRangeCheckedParam<Real>(
+      "max_merged_element_area",
+      "max_merged_element_area > 0",
+      "Maximum area of an element created by merging two elements. Merges exceeding it are "
+      "skipped");
   params.addParam<bool>(
       "verbose",
       false,
@@ -40,6 +55,12 @@ CoarsenMeshAlongSidesetGenerator::CoarsenMeshAlongSidesetGenerator(
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _boundaries(getParam<std::vector<BoundaryName>>("boundaries")),
+    _has_max_normal_deviation(isParamValid("max_normal_deviation")),
+    _max_normal_deviation(_has_max_normal_deviation ? getParam<Real>("max_normal_deviation") : 0),
+    _has_max_side_length(isParamValid("max_merged_side_length")),
+    _max_merged_side_length(_has_max_side_length ? getParam<Real>("max_merged_side_length") : 0),
+    _has_max_element_area(isParamValid("max_merged_element_area")),
+    _max_merged_element_area(_has_max_element_area ? getParam<Real>("max_merged_element_area") : 0),
     _verbose(getParam<bool>("verbose"))
 {
 }
@@ -135,11 +156,31 @@ CoarsenMeshAlongSidesetGenerator::generate()
 
       const Point a_point = *mesh->node_ptr(target_id);
 
+      // The collapse merges the two sideset edges (target,node) and (node,other) into the single
+      // edge (target,other), regardless of which way we collapse
+      dof_id_type other_id = DofObject::invalid_id;
+      for (const auto n : neighbors)
+        if (n != target_id)
+          other_id = n;
+
+      // Criterion: maximum length of the side created along the sideset
+      if (_has_max_side_length &&
+          (a_point - *mesh->node_ptr(other_id)).norm() > _max_merged_side_length)
+        continue;
+
       // Validate the collapse and classify each incident element as kept (re-pointed) or
       // degenerate (to be deleted). A degenerate element must be a TRI3; a re-pointed element
       // must not become degenerate or flip its normal.
+      struct ElemInfo
+      {
+        Elem * elem;
+        bool degenerate;
+        std::vector<dof_id_type> ids;
+        std::vector<Point> orig_pts;
+        std::vector<Point> new_pts;
+      };
       bool valid = true;
-      std::vector<Elem *> degenerate;
+      std::vector<ElemInfo> infos;
       for (const auto incident_id : node_to_elems[node_id])
       {
         Elem * elem = mesh->elem_ptr(incident_id);
@@ -152,22 +193,22 @@ CoarsenMeshAlongSidesetGenerator::generate()
         }
 
         // Does the element already contain the target node? If so the collapse degenerates it.
-        bool degenerates = false;
-        std::vector<Point> orig_pts, new_pts;
+        ElemInfo info{elem, false, {}, {}, {}};
         for (const auto & node : elem->node_ref_range())
         {
-          orig_pts.push_back(node);
+          info.ids.push_back(node.id());
+          info.orig_pts.push_back(node);
           if (node.id() == node_id)
-            new_pts.push_back(a_point);
+            info.new_pts.push_back(a_point);
           else
           {
             if (node.id() == target_id)
-              degenerates = true;
-            new_pts.push_back(node);
+              info.degenerate = true;
+            info.new_pts.push_back(node);
           }
         }
 
-        if (degenerates)
+        if (info.degenerate)
         {
           // We only delete triangles. A degenerating quad would require a quad->tri conversion
           // (and boundary bookkeeping of its other sides), so we decline the collapse instead.
@@ -176,22 +217,58 @@ CoarsenMeshAlongSidesetGenerator::generate()
             valid = false;
             break;
           }
-          degenerate.push_back(elem);
         }
         else
         {
           // Re-pointed element: reject the collapse if it would invert or nearly flatten it
-          const Point orig_n = newellNormal(orig_pts);
-          const Point new_n = newellNormal(new_pts);
+          const Point orig_n = newellNormal(info.orig_pts);
+          const Point new_n = newellNormal(info.new_pts);
           if (new_n * orig_n <= 1e-6 * orig_n.norm_sq())
           {
             valid = false;
             break;
           }
+          // Criterion: maximum area of the merged element
+          if (_has_max_element_area && 0.5 * new_n.norm() > _max_merged_element_area)
+          {
+            valid = false;
+            break;
+          }
+        }
+        infos.push_back(info);
+      }
+
+      // Criterion: maximum normal deviation between the two elements being merged. Each deleted
+      // triangle (target,node,apex) merges with the re-pointed element sharing its apex node.
+      if (valid && _has_max_normal_deviation)
+      {
+        const Real cos_threshold = std::cos(_max_normal_deviation * libMesh::pi / 180.0);
+        for (const auto & d : infos)
+        {
+          if (!d.degenerate)
+            continue;
+          dof_id_type apex_id = DofObject::invalid_id;
+          for (const auto id : d.ids)
+            if (id != target_id && id != node_id)
+              apex_id = id;
+          for (const auto & r : infos)
+          {
+            if (r.degenerate || std::find(r.ids.begin(), r.ids.end(), apex_id) == r.ids.end())
+              continue;
+            const Point nd = newellNormal(d.orig_pts);
+            const Point nr = newellNormal(r.orig_pts);
+            const Real denom = nd.norm() * nr.norm();
+            if (denom > 0 && (nd * nr) / denom < cos_threshold)
+              valid = false;
+          }
         }
       }
 
       // A clean collapse removes exactly one triangle per side of the sideset
+      std::vector<Elem *> degenerate;
+      for (const auto & info : infos)
+        if (info.degenerate)
+          degenerate.push_back(info.elem);
       if (!valid || degenerate.empty())
         continue;
 

@@ -32,6 +32,21 @@ protected:
   /// Sideset(s) to coarsen the mesh along
   const std::vector<BoundaryName> & _boundaries;
 
+  /// Whether a maximum normal deviation between merged elements is enforced
+  const bool _has_max_normal_deviation;
+  /// Maximum angle (degrees) between the normals of the two elements merged together
+  const Real _max_normal_deviation;
+
+  /// Whether a maximum merged side length is enforced
+  const bool _has_max_side_length;
+  /// Maximum length of the side created by merging two elements
+  const Real _max_merged_side_length;
+
+  /// Whether a maximum merged element area is enforced
+  const bool _has_max_element_area;
+  /// Maximum area of an element created by merging two elements
+  const Real _max_merged_element_area;
+
   /// Whether the mesh generator should be verbose to the console
   const bool _verbose;
 };
