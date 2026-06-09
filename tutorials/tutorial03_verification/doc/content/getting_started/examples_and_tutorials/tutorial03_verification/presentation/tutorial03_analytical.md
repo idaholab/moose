@@ -118,7 +118,7 @@ Executing the simulation is straightforward, simply execute the heat transfer mo
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 1d_analytical.i
+~/projects/moose/modules/heat_transfer/heat_transfer-opt -i 1d_analytical.i
 ```
 
 !---
