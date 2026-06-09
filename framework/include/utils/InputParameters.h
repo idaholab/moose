@@ -2051,7 +2051,8 @@ InputParameters::addOptionalValuedCommandLineParam(const std::string & name,
                                                    const T & value,
                                                    const std::string & doc_string)
 {
-  mooseAssert(name == "csg_only" || name == "mesh_only" || name == "recover" || name == "run",
+  mooseAssert(name == "citations" || name == "csg_only" || name == "mesh_only" ||
+                  name == "recover" || name == "run",
               "Not supported for new parameters");
   static_assert(!std::is_same_v<T, bool>, "Cannot be used for a bool (does not take a value)");
   addParam<T>(name, value, doc_string);
