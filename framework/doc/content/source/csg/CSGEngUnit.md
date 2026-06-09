@@ -8,29 +8,29 @@ A more detailed description of how to use engineering units in the `generateCSG`
 
 ## Common Methods
 
-All custom engineering units must implement the following two methods (first two methods are described in more detail below):
+All custom engineering units must implement the following methods (first two methods are described in more detail below):
 
-- `expandUnit`: creates the equivalent object using basic [!ac](CSG) components and adds them to the provided `CSGBase` instance
-- `getAttributes`: returns a map of necessary unit attributes to their values
-- `clone`: clones the instance as a unique pointer
+- `expandUnit()`: creates the equivalent object using basic [!ac](CSG) components and adds them to the provided `CSGBase` instance
+- `getAttributes()`: returns a map of necessary unit attributes to their values
+- `clone()`: clones the instance as a unique pointer
 
 All engineering units have additional information retrievable with the following methods:
 
-- `getName`: returns the name of the unit
-- `getBehavior`: returns what type of object this unit behaves like (`"SURFACE"`, `"CELL"`, or `"UNIVERSE"`)
-- `getUnitType`: returns the class name as a string for the specific engineering unit
+- `getName()`: returns the name of the unit
+- `getBehavior()`: returns what type of object this unit behaves like (`"SURFACE"`, `"CELL"`, or `"UNIVERSE"`)
+- `getUnitType()`: returns the class name as a string for the specific engineering unit
 
 ### Unit Expansion
 
-All engineering units, regardless of type, must implement the `expandUnit` method for the engineering unit.
+All engineering units, regardless of type, must implement the `expandUnit()` method for the engineering unit.
 This method recreates the engineering unit as the corresponding rudimentary components (`CSGSurface`, `CSGCell`, `CSGUniverse`, and/or `CSGLattice`) and creates an object of the type of base component that it is being used as.
-The implementation of this method follows the same basic guidelines for implementing the `generateCSG` method described in [source/csg/CSGBase.md].
-Every `CSGEngUnit` is initialized with and owns a scratch `CSGBase` object called `_internal_base` which is the base object that should be used for implementing the expansion method.
-More details on implementing this method for each of the three types of units is below in the respective sections.
+The implementation of this method follows the same basic guidelines for implementing the `generateCSG()` method described in [source/csg/CSGBase.md].
+Every `CSGEngUnit` is initialized with and owns a scratch `CSGBase` object called `_internal_base` which is the base object that should be used for implementing the expansion method in `expandUnit()`.
+More details on implementing this method and the requirements for each of the three types of units is below in the respective sections.
 
 !alert! note title=Naming Conventions and Restrictions
 
-To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the expanded cell cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable. All components are created in a separate `CSGBase` object rather than the parent `CSGBase`, so conflicts with the parent's existing names are checked at after expansion (when the two bases are joined) rather than during the expansion process.
+To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the expanded cell cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable. All components are created in a separate `CSGBase` object (`_internal_base`) rather than the parent `CSGBase` instance, so conflicts with the parent's existing names are not checked at after expansion (when the two bases are joined) rather than during the expansion process.
 
 !alert-end!
 
