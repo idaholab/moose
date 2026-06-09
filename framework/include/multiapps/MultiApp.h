@@ -418,7 +418,7 @@ protected:
    * FullSolveMultiApp sub-app may legitimately be restarted from a user-specified
    * restart file.
    */
-  virtual bool propagateRecoveryToSubApps() const { return true; }
+  virtual bool propagateRecoverToSubApps() const { return true; }
 
   /**
    * Create an MPI communicator suitable for each app.

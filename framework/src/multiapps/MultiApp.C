@@ -1161,7 +1161,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // solve on every execution, so the parent's recovery-related global CLI params
   // must not be propagated to those sub-apps.
   const std::set<std::string> recover_exclude =
-      propagateRecoveryToSubApps()
+      propagateRecoverToSubApps()
           ? std::set<std::string>{}
           : std::set<std::string>{"recover", "test_checkpoint_half_transient"};
   // This will mark all hit CLI command line parameters that are passed to subapps
@@ -1244,7 +1244,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setGlobalTimeOffset(start_time);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
   app->setRestart(_app.isRestarting());
-  app->setRecover(propagateRecoveryToSubApps() && _app.isRecovering());
+  app->setRecover(propagateRecoverToSubApps() && _app.isRecovering());
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
