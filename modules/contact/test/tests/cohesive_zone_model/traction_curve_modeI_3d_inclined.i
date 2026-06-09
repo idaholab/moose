@@ -1,5 +1,6 @@
 # Purpose: Verify mode-I traction-separation with a 45-degree inclined 3D interface.
-# Verifies: Non-trivial Q and R rotation frames produce reproducible scalar traction-separation output.
+# Assertion: Non-trivial Q and R rotation frames produce scalar traction-separation output matching the CSV gold curve.
+# Why this exists: Confirms local-frame outputs remain correct on interfaces not aligned with the global axes.
 
 [Mesh]
   [base]

@@ -1,5 +1,6 @@
-# Purpose: Verify out-of-plane (mode-III) shear traction in a 3D single-element geometry.
-# Verifies: cohesive_traction_tangential_2 is nonzero under z-shear; normal traction remains zero.
+# Purpose: Verify pre-debond out-of-plane mode-III CZM outputs in a 3D single-element geometry.
+# Assertion: z-shear produces local_tangential_jump_2 and cohesive_traction_tangential_2 matching the CSV gold curve while normal and first tangential traction remain negligible.
+# Why this exists: Protects the second local tangential component output before full debond, where post-debond jump output is unstable.
 
 [Mesh]
   [base]
@@ -409,7 +410,9 @@
   nl_abs_tol = 1e-11
   start_time = 0.0
   dt = 0.01
-  end_time = 1.0
+  # End just before complete debond (damage = 1 at t = 0.67): post-failure the block
+  # slides freely and the tangential jump output is no longer meaningful.
+  end_time = 0.66
   dtmin = 0.01
 []
 

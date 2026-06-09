@@ -1,5 +1,6 @@
 # Purpose: Verify viscously regularized mode-I traction-separation output.
-# Verifies: The viscously regularized traction-separation response matches the CSV gold curve.
+# Assertion: The viscously regularized traction-separation response matches the CSV gold curve.
+# Why this exists: Protects the viscous regularization option of the bilinear cohesive law.
 
 [Mesh]
   [base]
