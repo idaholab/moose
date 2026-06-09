@@ -66,9 +66,14 @@ def bibtex_to_ris(entry):
 
     persons = entry.persons.get("author") or entry.persons.get("editor") or []
     for person in persons:
-        last = to_text(" ".join(person.last_names))
+        # RIS author names are "family, given, suffix"; the family name keeps any
+        # particle (e.g. "van") and the suffix holds the lineage (e.g. "Jr.").
+        last = to_text(" ".join(person.prelast_names + person.last_names))
         given = to_text(" ".join(person.first_names + person.middle_names))
-        lines.append(("AU", "{}, {}".format(last, given) if given else last))
+        name = "{}, {}".format(last, given) if given else last
+        if person.lineage_names:
+            name += ", {}".format(to_text(" ".join(person.lineage_names)))
+        lines.append(("AU", name))
 
     field_map = [
         ("TI", "title"),

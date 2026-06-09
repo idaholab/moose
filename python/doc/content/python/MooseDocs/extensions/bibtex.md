@@ -13,9 +13,9 @@ option, which applies to every page:
 
 - `author-year` (default): inline citations render as author and year, e.g.
   "Slaughter et al. (2014)".
-- `number`: inline citations render as bracketed numbers, e.g. "[1]", numbered
+- `number`: inline citations render as bracketed numbers, e.g. `[1]`, numbered
   in the order they are first cited. The reference list is ordered to match, so
-  "[1]" always points to the first entry. This is useful on pages that cite many
+  `[1]` always points to the first entry. This is useful on pages that cite many
   works by the same authors or year, where author-year labels are hard to tell
   apart.
 
@@ -35,11 +35,10 @@ To generate the list of references cited on a page, the `!bibtex bibliography`
 command is used. If it is not used, then it will automatically be placed at the
 bottom of the page.
 
-Each entry in the reference list provides an "[Export]" link that opens the
-citation in three formats: BibTeX, [RIS](https://en.wikipedia.org/wiki/RIS_(file_format))
-(for import into Microsoft Word, EndNote, Zotero, or Mendeley), and a plain-text
-reference string. The RIS and plain-text formats are intended for those who do
-not write in LaTeX.
+Each entry in the reference list provides an `[Export]` link that opens the
+citation in three formats: BibTeX, RIS (for import into Microsoft Word, EndNote,
+Zotero, or Mendeley), and a plain-text reference string. The RIS and plain-text
+formats are intended for those who do not write in LaTeX.
 
 See [citation_examples] for examples.
 

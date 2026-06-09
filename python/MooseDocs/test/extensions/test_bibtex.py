@@ -11,7 +11,7 @@
 import unittest
 import logging
 import moosetree
-from pybtex.database import parse_file
+from pybtex.database import Entry, Person
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, bibtex
 from MooseDocs import base, common
@@ -24,11 +24,7 @@ class TestBibtexCite(MooseDocsTestCase):
     TEXT = "[!cite](slaughter2014framework, gaston2015physics)\n\n!bibtex bibliography"
 
     def setupContent(self):
-        config = [
-            dict(
-                root_dir="framework/doc/content", content=["bib/moose.bib"]
-            )
-        ]
+        config = [dict(root_dir="framework/doc/content", content=["bib/moose.bib"])]
         return common.get_content(config, ".bib")
 
     def testAuthorYearHTML(self):
@@ -50,11 +46,7 @@ class TestBibtexNumber(MooseDocsTestCase):
             return dict(citation_style="number")
 
     def setupContent(self):
-        config = [
-            dict(
-                root_dir="framework/doc/content", content=["bib/moose.bib"]
-            )
-        ]
+        config = [dict(root_dir="framework/doc/content", content=["bib/moose.bib"])]
         return common.get_content(config, ".bib")
 
     def testNumberHTML(self):
@@ -79,10 +71,23 @@ class TestBibtexNumber(MooseDocsTestCase):
 
 class TestBibtexToRIS(unittest.TestCase):
     def testRIS(self):
-        db = parse_file("framework/doc/content/bib/moose.bib")
-        ris = bibtex.bibtex_to_ris(db.entries["slaughter2015continuous"]).splitlines()
+        entry = Entry(
+            "article",
+            persons={
+                "author": [Person("Slaughter, Andrew E."), Person("Peterson, John W.")]
+            },
+            fields={
+                "title": "Continuous integration for concurrent MOOSE framework and "
+                "application development on GitHub",
+                "journal": "Journal of Open Research Software",
+                "year": "2015",
+                "volume": "3",
+                "number": "1",
+            },
+        )
+        ris = bibtex.bibtex_to_ris(entry).splitlines()
         self.assertEqual(ris[0], "TY  - JOUR")
-        self.assertIn("AU  - Slaughter, Andrew E", ris)
+        self.assertIn("AU  - Slaughter, Andrew E.", ris)
         self.assertIn(
             "TI  - Continuous integration for concurrent MOOSE framework and "
             "application development on GitHub",
@@ -95,10 +100,27 @@ class TestBibtexToRIS(unittest.TestCase):
 
     def testRISLatexAuthor(self):
         # Author names containing LaTeX must be converted to plain text.
-        db = parse_file("framework/doc/content/bib/moose.bib")
-        ris = bibtex.bibtex_to_ris(db.entries["slaughter2014framework"])
-        self.assertIn("AU  - Andrš, D.", ris)
+        entry = Entry(
+            "inproceedings",
+            persons={"author": [Person("Andr\\v{s}, D.")]},
+            fields={"title": "X", "year": "2014"},
+        )
+        ris = bibtex.bibtex_to_ris(entry)
+        self.assertIn("AU  - Andr\u0161, D.", ris)
         self.assertNotIn("\\v", ris)
+
+    def testRISNameParticles(self):
+        # Name particles (e.g. "van") and suffixes (e.g. "Jr.") must be retained.
+        entry = Entry(
+            "article",
+            persons={
+                "author": [Person("van Genuchten, M. Th."), Person("Smith, Jr., John")]
+            },
+            fields={"title": "A closed-form equation", "year": "1980"},
+        )
+        ris = bibtex.bibtex_to_ris(entry).splitlines()
+        self.assertIn("AU  - van Genuchten, M. Th.", ris)
+        self.assertIn("AU  - Smith, John, Jr.", ris)
 
 
 class TestBibtexExport(MooseDocsTestCase):
@@ -106,11 +128,7 @@ class TestBibtexExport(MooseDocsTestCase):
     TEXT = "[!cite](slaughter2014framework)\n\n!bibtex bibliography"
 
     def setupContent(self):
-        config = [
-            dict(
-                root_dir="framework/doc/content", content=["bib/moose.bib"]
-            )
-        ]
+        config = [dict(root_dir="framework/doc/content", content=["bib/moose.bib"])]
         return common.get_content(config, ".bib")
 
     def testModalFormats(self):
