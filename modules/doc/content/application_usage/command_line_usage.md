@@ -123,8 +123,8 @@ the left.
 ### `--citations`
 
 `--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. The
-MOOSE framework and PETSc papers are always included, and any module or object that registers a
-citation is added only when it is actually used in the run:
+current MOOSE framework paper is always included, and any module that registers a citation is added
+only when one of its objects is actually used in the run:
 
 ```
 ./yourapp-opt -i input.i --citations
@@ -132,16 +132,19 @@ citation is added only when it is actually used in the run:
 
 This is intended to make crediting the MOOSE ecosystem easier and more accurate: rather than citing
 a single framework paper for everything, users are pointed to the specific works behind the
-capabilities they used. An optional file name writes the entries to a file (e.g. for import into a
-reference manager) instead of the console:
+capabilities they used. The citations are emitted through PETSc, so PETSc and any of its
+sub-packages (e.g. SLEPc) that were used are credited as well. An optional file name writes the
+entries to a file (e.g. for import into a reference manager) instead of the console:
 
 ```
 ./yourapp-opt -i input.i --citations refs.bib
 ```
 
-It can be combined with `--check-input` to report the citations without solving. Module and object
-developers register their papers with `registerMooseObjectCitation` (per object) or
-`Registry::addLabelCitation` (per module/app).
+It can be combined with `--check-input` to report the citations without solving. The file name is
+optional, so when one is given it must immediately follow `--citations` (otherwise the next token on
+the command line is consumed as the file name). Module developers register their papers with
+`Registry::addLabelCitation` (per module/app); `Registry::addAlwaysCitation` registers a paper that
+is always emitted.
 
 Would show you documentation for objects matching `SomeKernel`.
 

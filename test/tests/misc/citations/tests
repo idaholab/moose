@@ -1,13 +1,21 @@
 [Tests]
   issues = '#25412'
   design = 'MooseApp.md'
-  [report]
+  [framework]
     type = RunApp
     input = citations.i
     cli_args = '--check-input --citations'
-    expect_out = '(?s)@article\{permann2020moose.*@inproceedings\{petsc-efficient'
-    requirement = "The system shall report, in BibTeX format, the references that should be cited "
-                  "for the framework and PETSc when the --citations command-line option is provided."
+    expect_out = 'permann2020moose'
+    requirement = "The system shall report, in BibTeX format, the current framework reference that "
+                  "should be cited when the --citations command-line option is provided."
+  []
+  [petsc]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input --citations'
+    expect_out = 'petsc-efficient'
+    requirement = "The system shall report the PETSc references that should be cited when the "
+                  "--citations command-line option is provided."
   []
   [not_requested]
     type = RunApp
@@ -16,5 +24,11 @@
     absent_out = 'permann2020moose'
     requirement = "The system shall not report citations when the --citations command-line option "
                   "is not provided."
+  []
+  [key_sync]
+    type = RunCommand
+    command = 'python3 check_citation_keys.py'
+    requirement = "The system shall ensure that every citation key registered in source code is "
+                  "defined in a documentation BibTeX file."
   []
 []
