@@ -395,8 +395,8 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
 bool
 ReferenceResidualConvergence::checkConvergenceIndividVars(
     const Real /*fnorm*/,
-    const Real abstol,
-    const Real rtol,
+    const Real abs_tol,
+    const Real rel_tol,
     const Real /*initial_residual_before_preset_bcs*/)
 {
   // Convergence is checked via:
@@ -412,35 +412,36 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   bool convergedRelative = true;
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
     convergedRelative &=
-        ((!_local_norm && _group_resid[i] < _group_ref_resid[i] * rtol) ||
-         (_local_norm && _group_ref_resid[i] < rtol) || _group_resid[i] < abstol ||
+        ((!_local_norm && _group_resid[i] < _group_ref_resid[i] * rel_tol) ||
+         (_local_norm && _group_ref_resid[i] < rel_tol) || _group_resid[i] < abs_tol ||
          (!_group_ref_resid[i] && !_local_norm &&
           ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && !_group_resid[i]) ||
-           (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE && _group_resid[i] <= rtol))));
+           (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE &&
+            _group_resid[i] <= rel_tol))));
   return convergedRelative;
 }
 
 bool
 ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
                                                        const Real fnorm,
-                                                       const Real the_residual,
-                                                       const Real rtol,
-                                                       const Real abstol,
+                                                       const Real ref_norm,
+                                                       const Real rel_tol,
+                                                       const Real abs_tol,
                                                        std::ostringstream & oss)
 {
   // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
   if (!_reference_vector)
     return DefaultNonlinearConvergence::checkRelativeConvergence(
-        it, fnorm, the_residual, rtol, abstol, oss);
+        it, fnorm, ref_norm, rel_tol, abs_tol, oss);
 
-  if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
+  if (checkConvergenceIndividVars(fnorm, abs_tol, rel_tol, ref_norm))
   {
     oss << "Converged normally";
     return true;
   }
   else if (it >= _accept_iters &&
            checkConvergenceIndividVars(
-               fnorm, abstol * _accept_mult, rtol * _accept_mult, the_residual))
+               fnorm, abs_tol * _accept_mult, rel_tol * _accept_mult, ref_norm))
   {
     oss << "  Converged due a larger acceptable tolerance due to `acceptible_multiplier` after "
            "`acceptible_iterations`.";
