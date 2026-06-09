@@ -1334,5 +1334,14 @@ createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
   return std::make_unique<PetscMatrix<Number>>(mat, comm);
 }
 
+void
+registerPetscCitation(const std::string & bibtex)
+{
+  // PETSc concatenates registered entries verbatim, so ensure a trailing newline to keep entries
+  // separated. A null "set" flag registers unconditionally; callers deduplicate by citation key.
+  const std::string entry = (!bibtex.empty() && bibtex.back() == '\n') ? bibtex : bibtex + "\n";
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscCitationsRegister(entry.c_str(), nullptr));
+}
+
 } // Namespace PetscSupport
 } // Namespace MOOSE

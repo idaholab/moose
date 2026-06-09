@@ -1924,30 +1924,15 @@ MooseApp::printCitations()
     }
   }
 
-  // Resolve the keys to their BibTeX entries
+  // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
+  // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
+  // used, at PetscFinalize (to the console or, if a file name was given, to that file).
   const auto & citations = Registry::getCitations();
-  std::string bibtex;
   for (const auto & key : keys)
     if (const auto it = citations.find(key); it != citations.end())
-      bibtex += it->second + "\n\n";
+      Moose::PetscSupport::registerPetscCitation(it->second);
 
-  // Only the root process should print or write the citations
-  if (processor_id() != 0)
-    return;
-
-  const auto & filename = getParam<std::string>("citations");
-  if (filename.empty())
-    Moose::out << "\nPlease cite the following references for the MOOSE framework, PETSc, and the "
-                  "modules and objects used in this simulation:\n\n"
-               << bibtex << std::flush;
-  else
-  {
-    std::ofstream fs(filename.c_str());
-    if (!fs.good())
-      mooseError("Unable to open file '", filename, "' for writing citations.");
-    fs << bibtex;
-    Moose::out << "\nCitations written to '" << filename << "'.\n" << std::flush;
-  }
+  Moose::PetscSupport::setSinglePetscOption("-citations", getParam<std::string>("citations"));
 }
 
 bool
