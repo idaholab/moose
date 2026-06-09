@@ -405,7 +405,11 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
   else if (const auto * rt = std::get_if<RegionType>(&_postfix_tokens.back()))
     _region_type = regionTypeName(*rt);
   else
+  {
+    mooseAssert(std::holds_alternative<CSGSurface::Halfspace>(_postfix_tokens.back()),
+                "Expected halfspace as last token");
     _region_type = "HALFSPACE";
+  }
 }
 
 } // namespace CSG
