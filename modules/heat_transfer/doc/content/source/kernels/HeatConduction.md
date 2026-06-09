@@ -23,7 +23,7 @@ The diffusion coefficient is specified with a material property; the
 parameter is used to define the material property name
 which contains the diffusion coefficient.
 The Jacobian will account for partial derivatives of the diffusion coefficient
-with respect to the unknown variable if the [!param](/Kernels/HeatConduction/diffusion_coefficient_dT) property
+with respect to the unknown variable if the [!param](/Kernels/HeatConduction/thermal_conductivity_dT) property
 name is provided. These particular defaults for these parameters
 are the names used by [HeatConductionMaterial](HeatConductionMaterial.md),
 though you can also define these materials using other [Material](Materials/index.md) objects.
