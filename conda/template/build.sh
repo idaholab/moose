@@ -30,8 +30,8 @@ function do_build(){
     # Configure MOOSE
     cd "${SRC_DIR:?}/moose"
     local -a moose_options=()
-    read -ra moose_options <<< "$MOOSE_OPTIONS"
-    ./configure --prefix=${PREFIX:?} "${moose_options[@]}"
+    read -rA moose_options <<< "$MOOSE_OPTIONS" || true
+    ./configure --prefix=${PREFIX:?} "${moose_options[@]+"${moose_options[@]}"}"
 
     # Build and install application
     cd "${SRC_DIR:?}"
