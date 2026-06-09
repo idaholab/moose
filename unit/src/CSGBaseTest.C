@@ -2016,6 +2016,49 @@ TEST(CSGBaseTest, testExpandAllMulti)
   ASSERT_NO_THROW(csg_obj->expandAllEngUnits());
 }
 
+/// tests that expanding a surface engineering unit that incorrectly creates cells or universes
+/// raises an error
+TEST(CSGBaseTest, testSurfBadExpansion)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & unit = csg_obj->addEngUnit(std::make_unique<TestSurfBadExpansion>("bad_surf"));
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "contains either cells or universes");
+}
+
+/// tests that expanding a cell engineering unit whose expandUnit() creates more than one cell in
+/// root raises an error
+TEST(CSGBaseTest, testCellBadExpansionMulti)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestCellBadExpansionMulti>("bad_cell_multi"));
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "exactly one cell");
+}
+
+/// tests that expanding a cell engineering unit whose expandUnit() leaves an orphaned universe
+/// raises an error
+TEST(CSGBaseTest, testCellBadExpansionUnlinked)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestCellBadExpansionUnlinked>("bad_cell_unlinked"));
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "unlinked universes or cells");
+}
+
+/// tests that expanding a universe engineering unit whose expandUnit() leaves an orphaned universe
+/// at the same level as root raises an error
+TEST(CSGBaseTest, testUnivBadExpansion)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestUnivEngUnitBadExpansion>("bad_univ_unit"));
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "unlinked universes or cells");
+}
+
 /// tests getEngUnitByName
 TEST(CSGBaseTest, testGetEngUnit)
 {

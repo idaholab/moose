@@ -201,4 +201,125 @@ protected:
     getBase().createCell(getName() + "_expanded_cell", univ_unit, -surf);
   }
 };
+
+/**
+ * The following set of engineering unit implementations have an incorrect expansion method for the
+ * type.
+ *    TestSurfaceBadExpansion: expandUnit() should create only surfaces, not any cells or universes
+ *      (except root). This test implementation creates cell(s) and universe(s). Should raise an
+ *      error when expandEngUnit() is called from CSGBase.
+ *    TestCellBadExpansionMulti: expandUnit() should create exactly one cell that belongs to the
+ * root universe (but additional cells can be created and nested within the tree). This test
+ *      implementation creates 2 cells that both belong to root. Error should be raised when
+ *      getExpandedCell() is called.
+ *    TestCellBadExpansionUnlinked: any nested universes and cells should be linked back to the
+ *      single expanded cell. expandUnit() creates an extra cell and universe that are not linked in
+ *      any way.
+ *    TestUniverseBadExpansion: expandUnit() should modify the root universe and there should only
+ *      be the root universe at that level and any other universes must be nested within cells.
+ *      Universe linking is checked by CSGBase to ensure this is consistent set of universes. If
+ *      more than one universe exists at the same level as the root universe, then the linking check
+ *      will fail. This test expandUnit() creates an extra unlinked universe to check this.
+ */
+
+class TestSurfBadExpansion : public CSGSurfaceEngUnit
+{
+public:
+  TestSurfBadExpansion(const std::string & name)
+    : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<TestSurfBadExpansion>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+  Real evaluateSurfaceEquationAtPoint(const Point &) const override { return 1.0; }
+
+protected:
+  std::unique_ptr<CSGSurface> clone() const override
+  {
+    return std::make_unique<TestSurfBadExpansion>(getName());
+  }
+
+  void expandUnit() override
+  {
+    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
+    auto & s1 = getBase().addSurface(std::move(s1_ptr));
+    _expanded_region = -s1;
+    // create a cell and universe (considered invalid)
+    getBase().createCell("bad_cell", _expanded_region);
+    getBase().createUniverse("bad_universe");
+  }
+};
+
+class TestCellBadExpansionMulti : public CSGCellEngUnit
+{
+public:
+  TestCellBadExpansionMulti(const std::string & name)
+    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellBadExpansionMulti>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGCellEngUnit> clone() const override
+  {
+    return std::make_unique<TestCellBadExpansionMulti>(getName());
+  }
+
+  void expandUnit() override
+  {
+    // create two cells that belong to root - invalid
+    auto & s1 = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_s1", 3.0));
+    getBase().createCell("bad_cell_1", -s1);
+    getBase().createCell("bad_cell_2", -s1);
+  }
+};
+
+class TestCellBadExpansionUnlinked : public CSGCellEngUnit
+{
+public:
+  TestCellBadExpansionUnlinked(const std::string & name)
+    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellBadExpansionUnlinked>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGCellEngUnit> clone() const override
+  {
+    return std::make_unique<TestCellBadExpansionUnlinked>(getName());
+  }
+
+  void expandUnit() override
+  {
+    auto & s1 = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_s1", 3.0));
+    getBase().createCell("exp_cell", -s1);
+    // create an extra universe that is not linked to the expanded cell - invalid
+    getBase().createUniverse("bad_univ");
+  }
+};
+
+class TestUnivEngUnitBadExpansion : public CSGUniverseEngUnit
+{
+public:
+  TestUnivEngUnitBadExpansion(const std::string & name)
+    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestUnivEngUnitBadExpansion>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGUniverseEngUnit> clone() const override
+  {
+    return std::make_unique<TestUnivEngUnitBadExpansion>(getName());
+  }
+
+  void expandUnit() override
+  {
+    // need at least one cell in root so the "no cells" check passes and we reach areUniversesLinked
+    auto & s1 = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_s1", 3.0));
+    getBase().createCell(getName() + "_cell", +s1);
+    getBase().createUniverse("bad_univ"); // orphaned universe at same level as root — invalid
+    getBase().renameRootUniverse(getName() + "_expanded");
+  }
+};
 }

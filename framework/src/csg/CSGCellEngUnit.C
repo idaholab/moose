@@ -22,8 +22,9 @@ CSGCellEngUnit::CSGCellEngUnit(const std::string & name, const std::string & uni
 const CSGCell &
 CSGCellEngUnit::getExpandedCell() const
 {
-  // must contain exactly one cell to be considered a correct implementation and be expanded
-  // properly
+  // must contain exactly one cell in the root universe to be considered a correct implementation
+  // and be expanded properly. Additional cells can exist in _internal_base through universe/cell
+  // nesting.
   const auto & cells = _internal_base->getRootUniverse().getAllCells();
   if (cells.size() == 0)
     mooseError("The root universe of CSGCellEngUnit ",
@@ -38,6 +39,15 @@ CSGCellEngUnit::getExpandedCell() const
                "(found ",
                cells.size(),
                ").");
+  // Check that all universes and cells in _internal_base are reachable from root.
+  if (!_internal_base->areUniversesLinked())
+    mooseError("CSGCellEngUnit '",
+               getName(),
+               "' of type '",
+               getUnitType(),
+               "' contains unlinked universes or cells. All objects created in expandUnit() must "
+               "be reachable from root. Check implementation of expandUnit().");
+
   return cells[0];
 }
 

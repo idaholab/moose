@@ -704,6 +704,14 @@ public:
   void expandAllEngUnits();
 
   /**
+   * @brief Check whether all universes and cells in this CSGBase are reachable from the root
+   * universe through the cell/fill hierarchy.
+   *
+   * @return true if all are linked, false if any universe or cell is orphaned
+   */
+  bool areUniversesLinked() const;
+
+  /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
    * of the incoming CSGBase will be added to the existing root universe of this
    * CSGBase.

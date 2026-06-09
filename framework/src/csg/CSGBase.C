@@ -1208,6 +1208,23 @@ CSGBase::checkUniverseLinking() const
       mooseWarning("Cell with name ", cell.getName(), " is not linked to root universe.");
 }
 
+bool
+CSGBase::areUniversesLinked() const
+{
+  std::vector<std::string> linked_univs, linked_cells;
+  getLinkedUniverses(getRootUniverse(), linked_univs, linked_cells);
+
+  for (const CSGUniverse & univ : getAllUniverses())
+    if (std::find(linked_univs.begin(), linked_univs.end(), univ.getName()) == linked_univs.end())
+      return false;
+
+  for (const CSGCell & cell : getAllCells())
+    if (std::find(linked_cells.begin(), linked_cells.end(), cell.getName()) == linked_cells.end())
+      return false;
+
+  return true;
+}
+
 void
 CSGBase::getLinkedUniverses(const CSGUniverse & univ,
                             std::vector<std::string> & linked_universe_names,
@@ -1324,6 +1341,17 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   // _expanded_region
   mutable_unit.expandUnit();
 
+  // check that the base object that was generated has only surfaces and no cells or universes
+  // (except root).
+  auto unit_base = mutable_unit.getBase();
+  if ((unit_base.getAllCells().size() > 0) || (unit_base.getAllUniverses().size() > 1))
+    mooseError("CSGSurfaceEngineering unit ",
+               mutable_unit.getName(),
+               " of type ",
+               mutable_unit.getUnitType(),
+               " contains either cells or universes (beyond the root universe) after expansion, "
+               "but should only contain surfaces.");
+
   // Join the unit's base object into this; transfers surfaces (and any other objects) during merge.
   joinOtherBase(mutable_unit.releaseBase(), false);
 
@@ -1402,7 +1430,7 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
 
   // Capture the name of the expanded universe (the unit base's root universe) before the join
   // getExpandedUniverse will validate that the root contains cells and was properly
-  // implemented/expanded
+  // implemented/expanded such that incoming cells and universes are all linked to the root.
   const std::string expanded_name = mutable_unit.getExpandedUniverse().getName();
 
   // Join the unit's base into this: all objects are transferred and the incoming root is added as
