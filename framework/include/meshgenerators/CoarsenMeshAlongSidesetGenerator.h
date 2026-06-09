@@ -30,7 +30,10 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// Sideset(s) to coarsen the mesh along
-  const std::vector<BoundaryName> & _boundaries;
+  const std::vector<BoundaryName> _boundaries;
+
+  /// Sideset(s) to exclude when coarsening along all the sidesets of the mesh
+  const std::vector<BoundaryName> _exclude_boundaries;
 
   /// Whether a maximum normal deviation between merged elements is enforced
   const bool _has_max_normal_deviation;

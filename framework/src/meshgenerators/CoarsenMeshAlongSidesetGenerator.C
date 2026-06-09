@@ -26,8 +26,12 @@ CoarsenMeshAlongSidesetGenerator::validParams()
       "and the sideset itself is preserved. Apply the generator multiple times for additional "
       "coarsening.");
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to coarsen");
-  params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundaries", "The sideset(s) to coarsen the mesh along");
+  params.addParam<std::vector<BoundaryName>>("boundaries",
+                                             "The sideset(s) to coarsen the mesh along");
+  params.addParam<std::vector<BoundaryName>>(
+      "exclude_boundaries",
+      "Coarsen the mesh along all of its sidesets except these. Mutually exclusive with "
+      "'boundaries'");
   params.addRangeCheckedParam<Real>(
       "max_normal_deviation",
       "max_normal_deviation >= 0 & max_normal_deviation <= 180",
@@ -54,7 +58,11 @@ CoarsenMeshAlongSidesetGenerator::CoarsenMeshAlongSidesetGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _boundaries(getParam<std::vector<BoundaryName>>("boundaries")),
+    _boundaries(isParamValid("boundaries") ? getParam<std::vector<BoundaryName>>("boundaries")
+                                           : std::vector<BoundaryName>{}),
+    _exclude_boundaries(isParamValid("exclude_boundaries")
+                            ? getParam<std::vector<BoundaryName>>("exclude_boundaries")
+                            : std::vector<BoundaryName>{}),
     _has_max_normal_deviation(isParamValid("max_normal_deviation")),
     _max_normal_deviation(_has_max_normal_deviation ? getParam<Real>("max_normal_deviation") : 0),
     _has_max_side_length(isParamValid("max_merged_side_length")),
@@ -63,6 +71,9 @@ CoarsenMeshAlongSidesetGenerator::CoarsenMeshAlongSidesetGenerator(
     _max_merged_element_area(_has_max_element_area ? getParam<Real>("max_merged_element_area") : 0),
     _verbose(getParam<bool>("verbose"))
 {
+  if (_boundaries.empty() == _exclude_boundaries.empty())
+    paramError("boundaries",
+               "Exactly one of 'boundaries' and 'exclude_boundaries' must be provided");
 }
 
 namespace
@@ -102,11 +113,23 @@ CoarsenMeshAlongSidesetGenerator::generate()
   if (!mesh->is_prepared())
     mesh->prepare_for_use();
 
-  // Resolve the sideset names to ids
-  const auto boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _boundaries, false);
-  const std::set<boundary_id_type> boundary_id_set(boundary_ids.begin(), boundary_ids.end());
-
   const auto & boundary_info = mesh->get_boundary_info();
+
+  // Resolve the sideset names to the set of ids to coarsen along, either directly or by excluding
+  // the requested sidesets from all the mesh sidesets
+  std::set<boundary_id_type> boundary_id_set;
+  if (!_boundaries.empty())
+  {
+    const auto boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _boundaries, false);
+    boundary_id_set.insert(boundary_ids.begin(), boundary_ids.end());
+  }
+  else
+  {
+    boundary_id_set = boundary_info.get_side_boundary_ids();
+    const auto exclude_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _exclude_boundaries, false);
+    for (const auto id : exclude_ids)
+      boundary_id_set.erase(id);
+  }
 
   // Gather the unique boundary edges (an internal sideset lists each edge twice, once per side)
   // and from them the boundary-node adjacency along the sideset curve(s)
