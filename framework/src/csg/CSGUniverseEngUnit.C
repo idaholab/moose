@@ -31,6 +31,15 @@ CSGUniverseEngUnit::getExpandedUniverse() const
                "Either getExpandedUniverse() has been called before expandUnit() or expandUnit() ",
                "is not implemented correctly.");
 
+  // Check that all universes and cells created in _internal_base are reachable from the root.
+  if (!_internal_base->areUniversesLinked())
+    mooseError("CSGUniverseEngUnit '",
+               getName(),
+               "' of type '",
+               getUnitType(),
+               "' contains unlinked universes or cells. All objects created in expandUnit() must be"
+               " reachable from the expanded root universe. Check implementation of expandUnit().");
+
   return _internal_base->getRootUniverse();
 }
 
