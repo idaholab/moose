@@ -1,0 +1,30 @@
+[Tests]
+  [contact]
+    issues = '33040'
+    design = 'ReferenceResidualConvergence.md'
+    requirement = 'The system shall be able to use the reference residual method to converge based on : '
+    [unscaled]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'contact_out.csv'
+      detail = 'an unscaled residual'
+    []
+    [scaled]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'contact_scaled_out.csv'
+      cli_args = 'temp_scaling=2 Outputs/file_base=contact_scaled_out'
+      detail = 'a scaled residual, and appropriately unscale the residual'
+      rel_err = 1e-3
+    []
+    [custom_residual]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'contact_custom_residual_out.csv'
+      cli_args = 'temp_scaling=2 Outputs/file_base=contact_custom_residual_out Convergence/temp_ref_check/residual_vector=total_res'
+      detail = 'a scaled residual using a custom vector tag, and appropriately unscale the residual.'
+      rel_err = 1e-3
+    []
+  []
+[]
+
