@@ -150,10 +150,14 @@ CoarsenMeshAlongSidesetGenerator::generate()
 
   // Run the coarsening pass once, or repeatedly until no collapse remains, so that more than two
   // elements may be merged together
+  const auto n_elem_before = mesh->n_elem();
   unsigned int collapsed = 0;
   do
     collapsed = coarsenAlongSidesets(mesh, boundary_id_set);
   while (_coarsen_more_than_two_elements && collapsed > 0);
+
+  _console << name() << ": merged " << (n_elem_before - mesh->n_elem())
+           << " element(s) together along the sideset(s)." << std::endl;
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
