@@ -40,7 +40,11 @@ function do_build(){
 
     # Strip unneeded symbols from executables and libraries
     find "${PREFIX:?}/bin" -newer "$FILE_MARKER" -type f -print -exec strip -S {} \;
-    ([[ "$(uname)" == "Darwin" ]] && LIB_SUFFIX="dylib") || LIB_SUFFIX="so"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        LIB_SUFFIX="dylib"
+    else
+        LIB_SUFFIX="so"
+    fi
     find "${PREFIX:?}/lib" -newer "$FILE_MARKER" -type f -name "*.${LIB_SUFFIX}*" -print -exec strip -S {} \;
 }
 
