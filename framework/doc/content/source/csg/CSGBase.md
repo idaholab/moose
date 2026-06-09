@@ -597,11 +597,26 @@ Methods for renaming objects are available as described in the above sections to
 
 ## Example Implementations
 
-Provided here are example implementations of the `generateCSG` method for three simple [source/meshgenerators/MeshGenerator.md] types.
+Provided here are example implementations of the `generateCSG` method for four basic [source/meshgenerators/MeshGenerator.md] types.
+
+!alert! note title=Running the Examples
+
+To run any of these examples, use `--allow-test-objects`. For example:
+
+```shell
+./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_only_chained.i
+```
+
+!alert-end!
+
+### Infinite Prism Example
+
 The first mesh generator creates an infinite rectangular prism given an input parameter for `side_length`.
 The code snippets provided here correspond to the `.C` file.
 
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=InputParameters
+
+### Chained Mesh Generator Example
 
 The next example mesh generator builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adds planes to create a finite rectangular prism.
 This will also optionally rotate the generated cell a specified angle around the z-axis.
@@ -618,6 +633,8 @@ Example Output:
 
 !listing csg_only_chained_out_csg.json
 
+### Lattice Example
+
 A third example implementation shows the construction of a 2D lattice of universes, using the `ExampleCSGInfiniteSquareMeshGenerator` as input.
 
 !listing TestCSGLatticeMeshGenerator.C start=InputParameters
@@ -632,16 +649,28 @@ Example Output:
 
 !listing csg_lattice_cart_out_csg.json
 
-!alert! note title=Running the Examples
+### Engineering Unit Example
 
-To run either of the above examples, use `--allow-test-objects`:
+This fourth example is creating an infinite N-Sided polygon, similar to the [first infinite prism example](#infinite-prism-example), but it instead creates an engineering unit with the option to expand that unit into the corresponding rudimentary components.
 
-```shell
-./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_only_chained.i
-```
+!listing TestPolygonUnitMeshGenerator.C start=InputParameters
 
-```shell
-./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_lattice_cart.i
-```
+This first set of input and output show the use case where the engineering unit is the final output (not expanded).
 
-!alert-end!
+Input:
+
+!listing csg_only_poly_unit.i
+
+Output:
+
+!listing csg_only_poly_unit_out_csg.json
+
+The second use case for this mesh generator is when `expand_unit = true`, thus removing the engineering unit from the output and replacing it with the appropriate surface definitions.
+
+Input:
+
+!listing csg_only_poly_unit_expand.i
+
+Output:
+
+!listing csg_only_poly_unit_expand_out_csg.json
