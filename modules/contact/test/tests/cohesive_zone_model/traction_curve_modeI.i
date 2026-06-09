@@ -1,5 +1,5 @@
 # Purpose: Verify monotonic mode-I traction-separation behavior and exposed normal jump/traction outputs.
-# Assertion: Mode-I cohesive traction and jump response match CSV gold curves across default, dt-refined, and mesh-refined runs.
+# Assertion: Mode-I cohesive traction and jump response match CSV gold curves across default and CLI-varied timestep, mesh, mismatch, and parallel runs.
 # Why this exists: Protects the bilinear normal traction law output under temporal and spatial changes.
 
 [Mesh]
