@@ -51,7 +51,7 @@ The `getAttributes()` method returns a map of `AttributeVariant` data types (`st
 The type of unit must be set for `_unit_type` in the unit constructor.
 It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<EngUnitClassName>()` so that the unit type automatically matches the class that created it.
 
-## `CSGSurfaceEngUnit`
+## CSGSurfaceEngUnit
 
 To define a surface-like engineering unit, define a class the derives from `CSGSurfaceEngUnit`.
 Functionally, these behave like a `CSGSurface` in that you can use them to define half-spaces when defining `CSGRegions` for a `CSGCell`.
@@ -95,7 +95,7 @@ The expectation is that a `CSGUniverseEngUnit` replaces a collection of `CSGCell
 
 ### Expansion Implementation
 
-The implementation of `expandUnit` should populate the root universe of `_internal_base` with any cells necessary for the create the expanded `CSGUniverse` definition. The root universe of `_internal_base` will become the expanded universe used in the parent `CSGBase` object.
+The implementation of `expandUnit` should populate the root universe of `_internal_base` with any cells necessary for the creation of the expanded `CSGUniverse` definition. The root universe of `_internal_base` will become the expanded universe used in the parent `CSGBase` object.
 After populating `_internal_base` with any necessary objects, the root universe, which is named `ROOT_UNIVERSE` by default, should be renamed to represent that it is the expanded universe (e.g. `_internal_base->renameRootUniverse("X_expanded_univ")`).
 
 ## Example Implementation
