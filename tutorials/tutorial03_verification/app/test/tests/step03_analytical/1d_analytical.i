@@ -69,7 +69,7 @@
 
 [Postprocessors]
   [error]
-    type = NodalL2Error
+    type = ElementL2Error
     variable = T
     function = T_exact
   []
