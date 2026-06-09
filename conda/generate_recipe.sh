@@ -138,7 +138,7 @@ else
     ARCH='linux-64'
 fi
 
-if [[ ! -v PREFIX_PACKAGE_WITH ]]; then
+if [ -z "${PREFIX_PACKAGE_WITH+x}" ]; then
     export PREFIX_PACKAGE_WITH="ncrc-"
 fi
 
