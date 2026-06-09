@@ -348,12 +348,18 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "near_interface_upper",
       0.99,
       "Upper threshold for the reference-solver-like near-interface indicator.");
+  params.addParam<bool>(
+      "use_one_sided_interface_predictor_interpolation",
+      false,
+      "Whether predictor-side face interpolation should use one-sided liquid/gas owner values on "
+      "pure sharp-interface faces. When false, internal predictor faces use centered geometric "
+      "linear interpolation to match OpenFOAM's default fvc::interpolate(linear) path.");
 
   params.addParamNamesToGroup(
       "pressure_formulation add_transient_projection_flux "
       "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
       "apply_pressure_face_flux_correction transient_projection_face_acceleration "
-      "use_interfoam_predictor_contract "
+      "use_interfoam_predictor_contract use_one_sided_interface_predictor_interpolation "
       "surface_tension_face_acceleration surface_tension_cell_acceleration "
       "hydrostatic_density_gradient_face_acceleration "
       "hydrostatic_density_gradient_cell_acceleration",
@@ -871,8 +877,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
     params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
   params.set<bool>("add_transient_projection_flux") = _add_transient_projection_flux;
   params.set<bool>("add_capillary_hydrostatic_flux") = _add_capillary_hydrostatic_flux;
-  params.set<bool>("use_face_based_reduced_pressure_predictor_contract") =
-      use_face_based_reduced_pressure_predictor;
   params.set<bool>("apply_pressure_velocity_writeback") =
       getParam<bool>("apply_pressure_velocity_writeback");
   params.set<bool>("apply_pressure_face_flux_correction") =
@@ -883,6 +887,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       getParam<MooseFunctorName>("volume_fraction_functor");
   params.set<Real>("near_interface_lower") = getParam<Real>("near_interface_lower");
   params.set<Real>("near_interface_upper") = getParam<Real>("near_interface_upper");
+  params.set<bool>("use_one_sided_interface_predictor_interpolation") =
+      getParam<bool>("use_one_sided_interface_predictor_interpolation");
   params.set<MooseFunctorName>("vof_alpha_phi_limited_functor") =
       getParam<MooseFunctorName>("vof_alpha_phi_limited_functor");
   params.set<MooseFunctorName>("liquid_density_functor") =

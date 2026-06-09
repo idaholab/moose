@@ -78,10 +78,6 @@ public:
 
   /// Get the volumetric face flux (used in advection terms)
   virtual Real getVolumetricFaceFlux(const FaceInfo & fi) const;
-  /// Get the volumetric face flux to be used by the VOF transport solve. By default this is the
-  /// same as the generic volumetric face flux, but sharp-interface implementations may freeze a
-  /// lagged transport state for the duration of the alpha solve.
-  virtual Real getVOFTransportVolumetricFaceFlux(const FaceInfo & fi) const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,

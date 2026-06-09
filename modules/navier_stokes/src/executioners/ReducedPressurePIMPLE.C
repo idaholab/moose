@@ -71,7 +71,6 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
                    << " face_phi=" << courant_audit.worst_face_volumetric_flux
                    << " face_flux=" << courant_audit.worst_face_integrated_flux;
       }
-      _console << _reduced_pimple_solve.momentumPressureWorstFaceSharpDiagnostics(courant_audit);
       _console << ")" << std::endl;
       dt_to_take = adjusted_dt;
     }

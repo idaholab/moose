@@ -134,12 +134,6 @@ g = 9.81
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
 
-  dump_pressure_outer_debug_csv = true
-  dump_pressure_outer_debug_start_timestep = 1
-  dump_pressure_outer_debug_end_timestep = 2
-  dump_pressure_outer_debug_max_outer_iterations = 1
-  pressure_debug_face_points = '0.225 0.6 0  0.225 0.65 0  0.4 0.325 0  0.4 0.575 0'
-
   volume_fraction_subcycles = 3
   dt = 0.0002
   num_steps = 2

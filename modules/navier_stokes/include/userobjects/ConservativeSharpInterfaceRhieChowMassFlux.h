@@ -30,32 +30,6 @@ public:
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) const override;
 
-  bool debugUsingCachedPredictorOperator() const;
-  Real debugCurrentVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
-  Real debugLastWritebackPreVelocityComponent(const ElemInfo & elem_info,
-                                              const unsigned int component) const;
-  Real debugLastWritebackPostVelocityComponent(const ElemInfo & elem_info,
-                                               const unsigned int component) const;
-  Real debugLastWritebackPressureDeltaVelocityComponent(const ElemInfo & elem_info,
-                                                        const unsigned int component) const;
-  Real debugLivePredictorBaseRawComponent(const ElemInfo & elem_info,
-                                          const unsigned int component) const;
-  Real debugCachedPredictorBaseRawComponent(const ElemInfo & elem_info,
-                                            const unsigned int component) const;
-  Real debugVelocityPredictorBaseRawComponent(const ElemInfo & elem_info,
-                                              const unsigned int component) const;
-  Real debugVelocityPredictorHbyAComponent(const ElemInfo & elem_info,
-                                           const unsigned int component) const;
-
 private:
-  void computePredictorOperatorBaseForSolution(const unsigned int system_i,
-                                               const NumericVector<Number> & solution_override,
-                                               NumericVector<Number> & base_raw,
-                                               NumericVector<Number> & diagonal_raw) const;
-  void buildVelocityPredictorState(const unsigned int system_i,
-                                   const bool with_updated_pressure,
-                                   NumericVector<Number> & hbya_raw,
-                                   NumericVector<Number> & ainv_raw) const;
-
   CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _continuity_error;
 };

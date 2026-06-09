@@ -417,12 +417,6 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
 }
 
 Real
-RhieChowMassFlux::getVOFTransportVolumetricFaceFlux(const FaceInfo & fi) const
-{
-  return getVolumetricFaceFlux(fi);
-}
-
-Real
 RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                         const FaceInfo & fi,
                                         const Moose::StateArg & time,

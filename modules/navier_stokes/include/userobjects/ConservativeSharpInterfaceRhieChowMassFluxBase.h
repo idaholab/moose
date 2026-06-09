@@ -2,7 +2,6 @@
 
 #include "RhieChowMassFlux.h"
 #include "PetscVectorReader.h"
-#include <array>
 
 class ElemInfo;
 class LinearSystem;
@@ -21,30 +20,6 @@ class LinearSystem;
 class ConservativeSharpInterfaceRhieChowMassFluxBase : public RhieChowMassFlux
 {
 public:
-  struct PressureCorrectionReconstructionDebug
-  {
-    std::array<Real, 9> normal_matrix{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-    std::array<Real, 3> rhs{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> solution{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> reference_delta_velocity{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> smooth_delta_velocity{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> delta_velocity{{0.0, 0.0, 0.0}};
-    unsigned int contributing_faces = 0;
-    bool singular = false;
-  };
-
-  struct MomentumPredictorExplicitForceDebug
-  {
-    std::array<Real, 3> pressure_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> body_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> cell_body_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> scalar_reconstructed_pressure_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> scalar_reconstructed_body_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> total_force_density{{0.0, 0.0, 0.0}};
-    std::array<Real, 3> rhs_contribution{{0.0, 0.0, 0.0}};
-    bool face_based_pressure = false;
-  };
-
   struct SharpFaceOperatorState
   {
     Real face_rho = 0.0;
@@ -53,15 +28,6 @@ public:
     Real normal_raw_ainv = 0.0;
     RealVectorValue face_normal;
     RealVectorValue face_raw_ainv;
-  };
-
-  struct DensityNormalGradientDebug
-  {
-    Real orthogonal_part = 0.0;
-    Real base_part = 0.0;
-    Real correction_part = 0.0;
-    Real limited_correction_part = 0.0;
-    Real total = 0.0;
   };
 
   struct PressureVelocityFaceState
@@ -89,7 +55,6 @@ public:
   void computeCellVelocity() override;
   Real getMassFlux(const FaceInfo & fi) const override;
   Real getVolumetricFaceFlux(const FaceInfo & fi) const override;
-  Real getVOFTransportVolumetricFaceFlux(const FaceInfo & fi) const override;
   Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                              const FaceInfo & fi,
                              const Moose::StateArg & time,
@@ -136,7 +101,6 @@ public:
   Real storedPredictorOperatorPhi(const FaceInfo & fi) const;
   Real storedPhiHbyAReferenceStyle(const FaceInfo & fi) const;
   Real storedPressureCorrectionPhi(const FaceInfo & fi) const;
-  Real storedVOFTransportPhi(const FaceInfo & fi) const;
   Real storedOuterIterationPhi(const FaceInfo & fi) const;
   Real storedOuterIterationRhoPhiIntegrated(const FaceInfo & fi) const;
   Real storedPredictorConvectivePhi(const FaceInfo & fi) const;
@@ -144,32 +108,9 @@ public:
   Real storedPhigFlux(const FaceInfo & fi) const;
   Real storedCapillaryHydrostaticFlux(const FaceInfo & fi) const;
   Real storedTransientProjectionFlux(const FaceInfo & fi) const;
-  Real debugHydrostaticFaceMassFluxDensityRaw(const FaceInfo & fi) const;
-  Real debugFaceNormalDensityGradient(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugFaceNormalDensityGradientOrthogonalPart(const FaceInfo & fi,
-                                                    const Moose::StateArg & time_arg) const;
-  Real debugFaceNormalDensityGradientBasePart(const FaceInfo & fi,
-                                              const Moose::StateArg & time_arg) const;
-  Real debugFaceNormalDensityGradientCorrectionPart(const FaceInfo & fi,
-                                                    const Moose::StateArg & time_arg) const;
-  Real debugFaceNormalDensityGradientLimitedCorrectionPart(
-      const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugFaceNormalDensityWeightedAinv(const FaceInfo & fi) const;
-  Real debugFaceNormalRawAinv(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugHydrostaticGh(const FaceInfo & fi) const;
-  Real debugElemAlpha(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugNeighborAlpha(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugElemDensity(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugNeighborDensity(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
   Real maxVolumeFractionCourant(const Real dt) const;
   virtual RealVectorValue pressureCoupledCellVelocityDelta(
       const ElemInfo & elem_info, const Moose::StateArg & time_arg) const;
-  virtual PressureCorrectionReconstructionDebug
-  pressureCorrectionReconstructionDebug(const ElemInfo & elem_info,
-                                        const Moose::StateArg & time_arg) const;
-  MomentumPredictorExplicitForceDebug
-  momentumPredictorExplicitForceDebug(const ElemInfo & elem_info,
-                                      const Moose::StateArg & time_arg);
   RealVectorValue reducedPressureMomentumPredictorForceDensity(
       const ElemInfo & elem_info, const Moose::StateArg & time_arg) const;
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
@@ -178,9 +119,6 @@ public:
   Real vofAlphaPhiLimitedIntegrated(const FaceInfo & fi) const;
   Real vofBaseGasRhoPhiIntegrated(const FaceInfo & fi) const;
   Real vofAlphaCorrectionRhoPhiIntegrated(const FaceInfo & fi) const;
-  Real debugGasDensityFace(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  Real debugLiquidDensityFace(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
-  void dumpPressureCorrectorFaceDebugCSV(const std::string & path);
 
 protected:
   using FaceScalarField =
@@ -209,12 +147,6 @@ protected:
   Real transportIntegratedRhoPhiFromVolumetricPhi(const FaceInfo * fi,
                                                   const Real volumetric_phi,
                                                   const Moose::StateArg & time_arg) const;
-  Real transportVolumetricPhiFromMassFluxDensity(const FaceInfo * fi,
-                                                 const Real mass_flux_density) const;
-  Real transportVolumetricPhiFromIntegratedRhoPhi(const FaceInfo * fi,
-                                                  const Real integrated_rho_phi) const;
-  Real publishedVOFRhoPhiIntegrated(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
-  Real faceAlphaRho(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
                                      const Moose::StateArg * limiter_state = nullptr) const;
@@ -285,8 +217,6 @@ protected:
                                                      const Real volumetric_flux) const;
   Real computeDiscretePressureFaceVolumetricFlux(const FaceInfo * fi) const;
   Real computeDiscretePressureFaceFlux(const FaceInfo * fi) const override;
-  DensityNormalGradientDebug computeFaceNormalDensityGradientDebug(
-      const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real computeFaceNormalDensityGradient(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real computeFaceNormalPressureGradient(const FaceInfo * fi,
                                          const Moose::StateArg & time_arg) const;
@@ -318,10 +248,6 @@ protected:
                                                    const Moose::StateArg & time_arg) const;
   Real pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
-  PressureCorrectionReconstructionDebug reconstructReferenceFaceScalarToCellVectorDebug(
-      const ElemInfo * elem_info,
-      const Moose::StateArg & time_arg,
-      const FaceScalarField & scalar_field) const;
   RealVectorValue reconstructFaceNormalScalarToCellVector(
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
@@ -339,9 +265,6 @@ protected:
   FaceScalarField _corrected_face_phi;
   FaceScalarField _previous_timestep_corrected_face_phi;
   FaceScalarField _vof_transport_phi;
-  FaceScalarField _debug_update_hydrostatic_face_mass_flux_density_raw;
-  FaceScalarField _debug_update_physical_capillary_hydrostatic_flux;
-  FaceScalarField _debug_update_hydrostatic_branch_taken;
   FaceScalarField _pressure_coupled_cell_reconstruction_scalar;
   FaceVectorField _pressure_coupled_cell_reconstruction_vector;
 
@@ -355,6 +278,7 @@ protected:
   const Point _reference_pressure_point;
   const Real _near_interface_lower;
   const Real _near_interface_upper;
+  const bool _use_one_sided_interface_predictor_interpolation;
   const Real _pressure_writeback_face_ainv_relative_tolerance;
   const MooseEnum _density_sn_grad_scheme;
   const Real _density_sn_grad_limiter_coefficient;

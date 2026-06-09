@@ -9,7 +9,6 @@
 
 #include "ConservativeSharpInterfaceVOFMULESCorrector.h"
 #include "ConservativeSharpInterfaceCurvatureCalculator.h"
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
@@ -23,8 +22,8 @@
 #include "MooseMesh.h"
 #include "FaceInfo.h"
 #include "ElemInfo.h"
-#include "SegregatedSolverUtils.h"
 #include "MathFVUtils.h"
+#include "MathUtils.h"
 #include "Limiter.h"
 
 #include "timpi/parallel_sync.h"
@@ -32,7 +31,6 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -51,9 +49,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
                                             "The linear system transporting the volume fraction.");
   params.addRequiredParam<VariableName>("variable",
                                         "The transported volume-fraction variable.");
-  params.addRequiredParam<UserObjectName>(
-      "rhie_chow_user_object",
-      "The Rhie-Chow user object used to obtain physical volumetric face fluxes.");
+  params.addRequiredParam<MooseFunctorName>(
+      "face_flux", "Volumetric face-flux functor used by alpha/rhoPhi correction.");
   params.addRequiredParam<MooseFunctorName>("liquid_density",
                                             "Liquid density functor for rhoPhi accumulation.");
   params.addRequiredParam<MooseFunctorName>("gas_density",
@@ -110,26 +107,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       "the admissible global volume-fraction bounds.");
   params.addParam<Real>("min_value", 0.0, "Lower admissible volume-fraction bound.");
   params.addParam<Real>("max_value", 1.0, "Upper admissible volume-fraction bound.");
-  params.addParam<bool>("debug_dump_subcycle",
-                        false,
-                        "Dump donor/correction/limiter data for interface faces during alpha "
-                        "subcycling.");
-  params.addParam<bool>("debug_only_first_subcycle",
-                        true,
-                        "If true, only dump debug data for the first alpha subcycle.");
-  params.addRangeCheckedParam<unsigned int>(
-      "debug_dump_max_faces", 12, "debug_dump_max_faces>0", "Maximum number of faces to dump.");
-  params.addRangeCheckedParam<Real>(
-      "debug_interface_alpha_tolerance",
-      1e-10,
-      "debug_interface_alpha_tolerance>=0",
-      "Minimum alpha jump across a face before it is treated as an interface face for debug "
-      "output.");
-  params.addParam<std::vector<unsigned int>>(
-      "debug_face_ids",
-      {},
-      "Optional list of face ids to include in the alpha debug dump. If empty, the usual "
-      "interface-face filter is used.");
   params.addParam<MooseFunctorName>("alpha_phi_bd_functor_name",
                                     "alpha_phi_bd",
                                     "Published donor/base alpha face flux.");
@@ -170,7 +147,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     BlockRestrictable(this),
     _system_name(getParam<SolverSystemName>("system_name")),
     _variable_name(getParam<VariableName>("variable")),
-    _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
+    _face_flux(getFunctor<Real>("face_flux")),
     _compression_factor(getFunctor<Real>("compression_factor")),
     _interface_normal(getFunctor<RealVectorValue>("interface_normal")),
     _liquid_density(getFunctor<Real>("liquid_density")),
@@ -188,17 +165,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _alpha_apply_prev_corr(getParam<bool>("alpha_apply_prev_corr")),
     _use_cell_summed_mules_limiter(getParam<bool>("use_cell_summed_mules_limiter")),
     _use_local_mules_bounds(getParam<bool>("use_local_mules_bounds")),
-    _debug_dump_subcycle(getParam<bool>("debug_dump_subcycle")),
-    _debug_only_first_subcycle(getParam<bool>("debug_only_first_subcycle")),
-    _debug_dump_max_faces(getParam<unsigned int>("debug_dump_max_faces")),
-    _debug_interface_alpha_tolerance(getParam<Real>("debug_interface_alpha_tolerance")),
-    _debug_face_ids([&params]()
-                    {
-                      std::unordered_set<dof_id_type> ids;
-                      for (const auto id : params.get<std::vector<unsigned int>>("debug_face_ids"))
-                        ids.insert(static_cast<dof_id_type>(id));
-                      return ids;
-                    }()),
     _alpha_phi_bd(_fe_problem.mesh(), blockIDs(), getParam<MooseFunctorName>("alpha_phi_bd_functor_name")),
     _alpha_phi_ho(_fe_problem.mesh(), blockIDs(), getParam<MooseFunctorName>("alpha_phi_ho_functor_name")),
     _alpha_phi_comp(_fe_problem.mesh(),
@@ -244,15 +210,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::initialSetup()
 {
   cacheSystemData();
   initializeFluxStorage();
-  if (_debug_dump_subcycle)
-  {
-    std::cerr << "[" << name() << "] debug_dump_subcycle=1 debug_only_first_subcycle="
-              << (_debug_only_first_subcycle ? 1 : 0)
-              << " debug_dump_max_faces=" << _debug_dump_max_faces << std::endl;
-    _console << name() << " debug_dump_subcycle=1 debug_only_first_subcycle="
-             << (_debug_only_first_subcycle ? 1 : 0)
-             << " debug_dump_max_faces=" << _debug_dump_max_faces << std::endl;
-  }
 }
 
 void
@@ -317,38 +274,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::faceMeasure(const FaceInfo & fi) co
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::solutionAlpha(const NumericVector<Number> & solution,
-                                               const ElemInfo & elem_info) const
-{
-  const auto dof = elem_info.dofIndices()[_sys_num][_var_num];
-  if (dof == DofObject::invalid_id)
-    return 0.0;
-
-  return static_cast<Real>(solution(dof));
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::integrateLiquidVolume(const NumericVector<Number> & solution) const
-{
-  Real local_liquid_volume = 0.0;
-
-  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
-  {
-    if (!elem_info || !hasBlocks(elem_info->subdomain_id()))
-      continue;
-
-    const auto * const elem = elem_info->elem();
-    if (!elem || elem->processor_id() != processor_id())
-      continue;
-
-    local_liquid_volume += solutionAlpha(solution, *elem_info) * cellVolume(*elem_info);
-  }
-
-  _communicator.sum(local_liquid_volume);
-  return local_liquid_volume;
-}
-
-Real
 ConservativeSharpInterfaceVOFMULESCorrector::cellAlpha(const ElemInfo & elem_info) const
 {
   return _alpha_var->getElemValue(elem_info, Moose::currentState());
@@ -358,108 +283,6 @@ Real
 ConservativeSharpInterfaceVOFMULESCorrector::boundedAlpha(const Real value) const
 {
   return std::min(_max_value, std::max(_min_value, value));
-}
-
-ConservativeSharpInterfaceVOFMULESCorrector::RhoPhiConsistencyAudit
-ConservativeSharpInterfaceVOFMULESCorrector::rhoPhiConsistencyAudit() const
-{
-  RhoPhiConsistencyAudit audit;
-
-  Real local_rho_phi_mismatch_sq_sum = 0.0;
-  Real local_max_abs_mismatch = 0.0;
-
-  for (const auto * fi : _fe_problem.mesh().faceInfo())
-  {
-    if (!fi || fi->processor_id() != processor_id())
-      continue;
-
-    const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
-    if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-      continue;
-
-    if (!hasBlocks(fi->elemSubdomainID()) &&
-        !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
-      continue;
-
-    const auto face_id = fi->id();
-    const bool have_rho_phi = _rho_phi.count(face_id);
-    const bool have_limited_alpha_flux = _alpha_phi_limited.count(face_id);
-    if (!have_rho_phi && !have_limited_alpha_flux)
-      continue;
-
-    const Real stored_rho_phi = have_rho_phi ? libmesh_map_find(_rho_phi, face_id) : 0.0;
-    const Real limited_alpha_flux =
-        have_limited_alpha_flux ? libmesh_map_find(_alpha_phi_limited, face_id) : 0.0;
-    const Real gas_density = faceFunctorAverage(*fi, _gas_density);
-    const Real liquid_density = faceFunctorAverage(*fi, _liquid_density);
-    const Real volumetric_phi = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(*fi);
-    const Real reconstructed_rho_phi =
-        volumetric_phi * faceMeasure(*fi) * gas_density +
-        (liquid_density - gas_density) * limited_alpha_flux;
-    const Real mismatch = stored_rho_phi - reconstructed_rho_phi;
-    const Real abs_mismatch = std::abs(mismatch);
-
-    local_rho_phi_mismatch_sq_sum += mismatch * mismatch;
-
-    if (abs_mismatch > local_max_abs_mismatch)
-    {
-      local_max_abs_mismatch = abs_mismatch;
-      audit.has_worst_face = true;
-      audit.worst_face_id = face_id;
-      audit.worst_face_centroid = fi->faceCentroid();
-      audit.stored_rho_phi = stored_rho_phi;
-      audit.reconstructed_rho_phi = reconstructed_rho_phi;
-      audit.volumetric_phi = volumetric_phi;
-      audit.limited_alpha_flux = limited_alpha_flux;
-      audit.gas_density = gas_density;
-      audit.liquid_density = liquid_density;
-    }
-  }
-
-  _communicator.sum(local_rho_phi_mismatch_sq_sum);
-  audit.l2_norm = std::sqrt(local_rho_phi_mismatch_sq_sum);
-
-  processor_id_type worst_face_pid = processor_id();
-  _communicator.maxloc(local_max_abs_mismatch, worst_face_pid);
-  audit.max_abs_mismatch = local_max_abs_mismatch;
-  if (worst_face_pid != processor_id())
-    audit.has_worst_face = false;
-
-  return audit;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::alphaPhiWorkingBeforeIntegrated(const FaceInfo & fi) const
-{
-  const auto it = _alpha_phi_working_before_debug.find(fi.id());
-  return it != _alpha_phi_working_before_debug.end() ? it->second : 0.0;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::alphaPhiTargetIntegrated(const FaceInfo & fi) const
-{
-  const auto it = _alpha_phi_target_debug.find(fi.id());
-  return it != _alpha_phi_target_debug.end() ? it->second : 0.0;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::alphaPhiRawCorrectionIntegrated(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_alpha_phi_corr_raw, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::alphaPhiLimitedDeltaIntegrated(const FaceInfo & fi) const
-{
-  const auto it = _alpha_phi_limited_delta_debug.find(fi.id());
-  return it != _alpha_phi_limited_delta_debug.end() ? it->second : 0.0;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::alphaPhiAcceptedLambda(const FaceInfo & fi) const
-{
-  const auto it = _alpha_phi_lambda_debug.find(fi.id());
-  return it != _alpha_phi_lambda_debug.end() ? it->second : 0.0;
 }
 
 void
@@ -485,10 +308,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
     pair.second = 0.0;
   for (auto & pair : _rho_phi_mass_flux_density)
     pair.second = 0.0;
-  _alpha_phi_working_before_debug.clear();
-  _alpha_phi_target_debug.clear();
-  _alpha_phi_limited_delta_debug.clear();
-  _alpha_phi_lambda_debug.clear();
 }
 
 void
@@ -595,7 +414,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi) cons
   if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return 0.0;
 
-  const Real volumetric_flux = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi);
+  const Real volumetric_flux = vofTransportVolumetricFaceFlux(fi);
   const bool upwind_is_elem = volumetric_flux >= 0.0;
   const Real elem_alpha = cellAlpha(*fi.elemInfo());
 
@@ -624,7 +443,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
   if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return 0.0;
 
-  const Real volumetric_flux = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi);
+  const Real volumetric_flux = vofTransportVolumetricFaceFlux(fi);
   const bool upwind_is_elem = volumetric_flux >= 0.0;
   auto * bc = boundaryCondition(fi);
 
@@ -662,18 +481,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
                : cellAlpha(*fi.elemInfo());
 
   return high_order_alpha;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::highOrderFlux(const FaceInfo & fi) const
-{
-  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
-  if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-    return 0.0;
-
-  const Real volumetric_flux = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi);
-  const Real high_order_alpha = highOrderFaceValue(fi);
-  return volumetric_flux * high_order_alpha * faceMeasure(fi);
 }
 
 Real
@@ -758,11 +565,35 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundaryFaceKindName(const Boundary
   return "unknown";
 }
 
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::compressionFlux(const FaceInfo & fi,
-                                                 const Real elem_alpha,
-                                                 const Real neighbor_alpha) const
+ConservativeSharpInterfaceVOFMULESCorrector::AlphaFluxData
+ConservativeSharpInterfaceVOFMULESCorrector::buildAlphaFlux(
+    const FaceInfo & fi,
+    const Real elem_alpha,
+    const Real neighbor_alpha,
+    const BoundaryFaceKind boundary_kind) const
 {
+  AlphaFluxData flux;
+
+  const Real face_phi = vofTransportVolumetricFaceFlux(fi);
+  const Real face_measure = faceMeasure(fi);
+  const Real integrated_phi = face_phi * face_measure;
+
+  flux.donor_flux = donorFlux(fi);
+  flux.high_order_flux = integrated_phi * highOrderFaceValue(fi);
+  flux.total_flux = flux.donor_flux;
+
+  if (boundary_kind == BoundaryFaceKind::Closed)
+    return flux;
+
+  if (boundary_kind != BoundaryFaceKind::Internal)
+  {
+    if (boundary_kind == BoundaryFaceKind::DirichletOutflow)
+      flux.total_flux = flux.high_order_flux;
+
+    flux.correction_flux = flux.total_flux - flux.donor_flux;
+    return flux;
+  }
+
   const auto state = Moose::currentState();
   const Moose::FaceArg face_arg{
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
@@ -772,31 +603,32 @@ ConservativeSharpInterfaceVOFMULESCorrector::compressionFlux(const FaceInfo & fi
   const RealVectorValue face_unit_normal =
       face_normal_mag > 0.0 ? face_normal / face_normal_mag : RealVectorValue();
   const RealVectorValue interface_normal = MetaPhysicL::raw_value(_interface_normal(face_arg, state));
-  const Real bounded_elem_alpha = boundedAlpha(elem_alpha);
-  const Real bounded_neighbor_alpha = boundedAlpha(neighbor_alpha);
-  const Real alpha_face =
-      boundedAlpha(fi.gC() * bounded_elem_alpha + (1.0 - fi.gC()) * bounded_neighbor_alpha);
-  const Real compressive_speed =
-      std::abs(_mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi)) *
-      MetaPhysicL::raw_value(_compression_factor(face_arg, state)) *
-      (interface_normal * face_unit_normal);
+  flux.interface_normal_alignment = interface_normal * face_unit_normal;
 
-  return compressive_speed * alpha_face * (1.0 - alpha_face) * faceMeasure(fi);
-}
+  if (std::abs(integrated_phi) > libMesh::TOLERANCE)
+  {
+    const Real bounded_elem_alpha = boundedAlpha(elem_alpha);
+    const Real bounded_neighbor_alpha = boundedAlpha(neighbor_alpha);
+    const Real linear_alpha =
+        boundedAlpha(fi.gC() * bounded_elem_alpha + (1.0 - fi.gC()) * bounded_neighbor_alpha);
+    const Real high_order_alpha = highOrderFaceValue(fi);
+    const Real compression_factor = MetaPhysicL::raw_value(_compression_factor(face_arg, state));
+    const Real compressed_alpha =
+        boundedAlpha(high_order_alpha + compression_factor * MathUtils::sign(integrated_phi) *
+                                            linear_alpha * (1.0 - linear_alpha) *
+                                            flux.interface_normal_alignment);
 
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::compressionAlignment(const FaceInfo & fi) const
-{
-  const auto state = Moose::currentState();
-  const Moose::FaceArg face_arg{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
+    flux.total_flux = integrated_phi * compressed_alpha;
+    flux.compressive_flux = flux.total_flux - flux.high_order_flux;
+  }
+  else
+  {
+    flux.total_flux = flux.high_order_flux;
+    flux.compressive_flux = 0.0;
+  }
 
-  const RealVectorValue face_normal = fi.normal();
-  const Real face_normal_mag = face_normal.norm();
-  const RealVectorValue face_unit_normal =
-      face_normal_mag > 0.0 ? face_normal / face_normal_mag : RealVectorValue();
-  const RealVectorValue interface_normal = MetaPhysicL::raw_value(_interface_normal(face_arg, state));
-  return interface_normal * face_unit_normal;
+  flux.correction_flux = flux.total_flux - flux.donor_flux;
+  return flux;
 }
 
 Real
@@ -808,12 +640,19 @@ ConservativeSharpInterfaceVOFMULESCorrector::faceFunctorAverage(const FaceInfo &
 }
 
 Real
+ConservativeSharpInterfaceVOFMULESCorrector::vofTransportVolumetricFaceFlux(
+    const FaceInfo & fi) const
+{
+  return _face_flux(functorFaceArg(_face_flux, fi), Moose::currentState());
+}
+
+Real
 ConservativeSharpInterfaceVOFMULESCorrector::rhoPhi(const FaceInfo & fi, const Real limited_alpha_flux) const
 {
   const Real gas_density = faceFunctorAverage(fi, _gas_density);
   const Real liquid_density = faceFunctorAverage(fi, _liquid_density);
   const Real volumetric_mass_flux =
-      _mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi) * faceMeasure(fi) * gas_density;
+      vofTransportVolumetricFaceFlux(fi) * faceMeasure(fi) * gas_density;
   return volumetric_mass_flux + (liquid_density - gas_density) * limited_alpha_flux;
 }
 
@@ -832,10 +671,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
   if (data.has_neighbor)
     data.neighbor_dof = fi.neighborInfo()->dofIndices()[_sys_num][_var_num];
 
-  data.volumetric_flux = _mass_flux_provider.getVOFTransportVolumetricFaceFlux(fi);
+  data.volumetric_flux = vofTransportVolumetricFaceFlux(fi);
   data.elem_alpha = cellAlpha(*fi.elemInfo());
-  data.donor_flux = donorFlux(fi);
-  data.high_order_flux = highOrderFlux(fi);
 
   data.boundary_kind = classifyBoundaryFace(fi, face_type, data.volumetric_flux);
   data.boundary_face = data.boundary_kind != BoundaryFaceKind::Internal;
@@ -843,34 +680,24 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
   if (data.boundary_kind == BoundaryFaceKind::Internal)
   {
     data.neighbor_alpha = cellAlpha(*fi.neighborInfo());
-    data.interface_normal_alignment = compressionAlignment(fi);
-    const Real raw_compressive_flux = compressionFlux(fi, data.elem_alpha, data.neighbor_alpha);
-    Real compressed_high_order_flux = data.high_order_flux;
-    const Real phi_face_area = data.volumetric_flux * faceMeasure(fi);
-    if (std::abs(phi_face_area) > libMesh::TOLERANCE)
-    {
-      const Real compressed_alpha =
-          boundedAlpha(highOrderFaceValue(fi) + raw_compressive_flux / phi_face_area);
-      compressed_high_order_flux = phi_face_area * compressed_alpha;
-    }
-    data.compressive_flux = compressed_high_order_flux - data.high_order_flux;
-    data.advective_correction_flux = data.high_order_flux - data.donor_flux;
-    data.correction_flux = compressed_high_order_flux - data.donor_flux;
+    const auto flux = buildAlphaFlux(fi, data.elem_alpha, data.neighbor_alpha, data.boundary_kind);
+    data.interface_normal_alignment = flux.interface_normal_alignment;
+    data.donor_flux = flux.donor_flux;
+    data.high_order_flux = flux.high_order_flux;
+    data.compressive_flux = flux.compressive_flux;
+    data.advective_correction_flux = flux.high_order_flux - flux.donor_flux;
+    data.correction_flux = flux.correction_flux;
     return data;
   }
 
   data.neighbor_alpha = boundaryValue(fi, face_type);
-
-  // Phase-7 boundary policy:
-  // - prescribed inflow alpha remains donor-only in the explicit correction stage
-  // - prescribed outflow alpha may reuse its one-sided advective face value, but no compression
-  // - extrapolated/open outlets remain donor-only in the explicit correction stage
-  // - closed boundaries remain donor-only in the explicit correction stage
-  if (data.boundary_kind == BoundaryFaceKind::DirichletOutflow)
-  {
-    data.advective_correction_flux = data.high_order_flux - data.donor_flux;
-    data.correction_flux = data.advective_correction_flux;
-  }
+  const auto flux = buildAlphaFlux(fi, data.elem_alpha, data.neighbor_alpha, data.boundary_kind);
+  data.interface_normal_alignment = flux.interface_normal_alignment;
+  data.donor_flux = flux.donor_flux;
+  data.high_order_flux = flux.high_order_flux;
+  data.compressive_flux = flux.compressive_flux;
+  data.advective_correction_flux = flux.high_order_flux - flux.donor_flux;
+  data.correction_flux = flux.correction_flux;
 
   return data;
 }
@@ -986,24 +813,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
   if (!_system || !_alpha_var || dt <= 0.0)
     return;
 
-  if (_debug_dump_subcycle && (!_debug_only_first_subcycle || _subcycle_counter == 1))
-  {
-    std::cerr << "[" << name() << "] entering applyCorrection subcycle=" << _subcycle_counter
-              << " dt=" << dt << " subcycle_fraction=" << subcycle_fraction << std::endl;
-    _console << name() << " entering applyCorrection subcycle=" << _subcycle_counter
-             << " dt=" << dt << " subcycle_fraction=" << subcycle_fraction << std::endl;
-  }
-
   std::vector<FaceCorrectionData> published_face_corrections;
   std::vector<Real> published_raw_correction_fluxes;
   std::vector<Real> published_accumulated_alpha_fluxes;
   std::vector<Real> published_accumulated_correction_fluxes;
-  std::vector<Real> published_working_alpha_fluxes_before;
-  std::vector<Real> published_target_alpha_fluxes;
-  std::vector<Real> published_limited_correction_fluxes;
-  std::vector<Real> published_accepted_lambda;
-  std::unordered_map<dof_id_type, Real> alpha_before_correction;
-  std::unordered_map<dof_id_type, Real> alpha_after_correction;
   const bool use_previous_correction_flux = _alpha_apply_prev_corr && _previous_correction_flux_valid;
   std::unordered_map<dof_id_type, Real> working_alpha_flux;
 
@@ -1034,13 +847,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     std::vector<Real> zero_flux(face_corrections.size(), 0.0);
     std::vector<Real> donor_flux(face_corrections.size(), 0.0);
     for (const auto i : index_range(face_corrections))
-    {
       donor_flux[i] = face_corrections[i].donor_flux;
-      _alpha_phi_working_before_debug[face_corrections[i].face->id()] = donor_flux[i];
-      _alpha_phi_target_debug[face_corrections[i].face->id()] = donor_flux[i];
-      _alpha_phi_limited_delta_debug[face_corrections[i].face->id()] = 0.0;
-      _alpha_phi_lambda_debug[face_corrections[i].face->id()] = 0.0;
-    }
 
     publishFaceFluxes(face_corrections, zero_flux, donor_flux, zero_flux, subcycle_fraction);
     invalidatePreviousCorrectionFluxes();
@@ -1100,22 +907,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
       target_alpha_flux[i] = data.donor_flux + data.correction_flux;
       raw_correction_flux[i] = target_alpha_flux[i] - working_alpha_flux_before[i];
       accepted_lambda[i] = std::abs(raw_correction_flux[i]) > libMesh::TOLERANCE ? 1.0 : 0.0;
-    }
-
-    if (_debug_dump_subcycle && correction_it == 0 &&
-        (!_debug_only_first_subcycle || _subcycle_counter == 1))
-      dumpCandidateFaceDebug(
-          face_corrections, raw_correction_flux, accepted_lambda, _subcycle_counter);
-
-    if (_debug_dump_subcycle && correction_it == 0)
-    {
-      alpha_before_correction.clear();
-      for (const auto & data : face_corrections)
-      {
-        alpha_before_correction[data.elem_dof] = current_local_solution(data.elem_dof);
-        if (data.has_neighbor)
-          alpha_before_correction[data.neighbor_dof] = current_local_solution(data.neighbor_dof);
-      }
     }
 
     std::unordered_map<dof_id_type, Real> local_upper_bound;
@@ -1460,7 +1251,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     _system->computeGradients();
 
     if (curvature)
-      curvature->updateCurvatureMaps(_debug_dump_subcycle);
+      curvature->updateCurvatureMaps(false);
 
     for (const auto i : index_range(face_corrections))
     {
@@ -1475,21 +1266,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     published_raw_correction_fluxes = raw_correction_flux;
     published_accumulated_alpha_fluxes = accumulated_alpha_flux;
     published_accumulated_correction_fluxes = accumulated_correction_flux;
-    published_working_alpha_fluxes_before = working_alpha_flux_before;
-    published_target_alpha_fluxes = target_alpha_flux;
-    published_limited_correction_fluxes = limited_correction_flux;
-    published_accepted_lambda = accepted_lambda;
-
-    if (_debug_dump_subcycle && correction_it == 0)
-    {
-      alpha_after_correction.clear();
-      for (const auto & data : face_corrections)
-      {
-        alpha_after_correction[data.elem_dof] = current_local_solution(data.elem_dof);
-        if (data.has_neighbor)
-          alpha_after_correction[data.neighbor_dof] = current_local_solution(data.neighbor_dof);
-      }
-    }
   }
 
   if (!published_face_corrections.empty())
@@ -1507,217 +1283,13 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
       invalidatePreviousCorrectionFluxes();
 
     for (const auto i : index_range(published_face_corrections))
-    {
       if (_alpha_apply_prev_corr)
         _alpha_phi_corr_prev[published_face_corrections[i].face->id()] =
             published_accumulated_correction_fluxes[i];
-      _alpha_phi_working_before_debug[published_face_corrections[i].face->id()] =
-          published_working_alpha_fluxes_before[i];
-      _alpha_phi_target_debug[published_face_corrections[i].face->id()] =
-          published_target_alpha_fluxes[i];
-      _alpha_phi_limited_delta_debug[published_face_corrections[i].face->id()] =
-          published_limited_correction_fluxes[i];
-      _alpha_phi_lambda_debug[published_face_corrections[i].face->id()] =
-          published_accepted_lambda[i];
-    }
     _previous_correction_flux_valid = _alpha_apply_prev_corr;
-
-    if (_debug_dump_subcycle && (!_debug_only_first_subcycle || _subcycle_counter == 1))
-      dumpFaceDebug(published_face_corrections,
-                    published_raw_correction_fluxes,
-                    published_accepted_lambda,
-                    alpha_before_correction,
-                    alpha_after_correction,
-                    _subcycle_counter);
   }
   else
     invalidatePreviousCorrectionFluxes();
 
   _system->computeGradients();
-}
-
-void
-ConservativeSharpInterfaceVOFMULESCorrector::dumpCandidateFaceDebug(
-    const std::vector<FaceCorrectionData> & face_corrections,
-    const std::vector<Real> & raw_correction_fluxes,
-    const std::vector<Real> & accepted_lambda,
-    const unsigned int subcycle_index) const
-{
-  unsigned int dumped = 0;
-  for (const auto i : index_range(face_corrections))
-  {
-    if (dumped >= _debug_dump_max_faces)
-      break;
-
-    const auto & data = face_corrections[i];
-    if (!shouldDebugFace(data))
-      continue;
-    if (std::abs(data.elem_alpha - data.neighbor_alpha) < _debug_interface_alpha_tolerance)
-      continue;
-
-    const auto * const sharp_mass_flux =
-        dynamic_cast<const ConservativeSharpInterfaceRhieChowMassFlux *>(&_mass_flux_provider);
-    const Real rc_corrected_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedCorrectedFacePhi(*data.face) : 0.0;
-    const Real vof_transport_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedVOFTransportPhi(*data.face) : 0.0;
-    const Real rc_outer_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedOuterIterationPhi(*data.face) : 0.0;
-    const Real rc_predictor_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedPredictorConvectivePhi(*data.face) : 0.0;
-
-    std::ostringstream line;
-    line << name() << " stage=prelimit"
-         << " subcycle=" << subcycle_index << " face=" << data.face->id()
-         << " elem_dof=" << data.elem_dof;
-    if (data.has_neighbor)
-      line << " neighbor_dof=" << data.neighbor_dof;
-    else
-      line << " boundary_face=1 boundary_kind=" << boundaryFaceKindName(data.boundary_kind);
-    line << " volumetric_flux=" << data.volumetric_flux
-         << " elem_alpha=" << data.elem_alpha << " neighbor_alpha=" << data.neighbor_alpha
-         << " interface_normal_alignment=" << data.interface_normal_alignment
-         << " rc_corrected_phi=" << rc_corrected_phi
-         << " vof_transport_phi=" << vof_transport_phi
-         << " rc_outer_phi=" << rc_outer_phi
-         << " rc_predictor_phi=" << rc_predictor_phi
-         << " donor_flux=" << data.donor_flux << " high_order_flux=" << data.high_order_flux
-         << " compressive_flux=" << data.compressive_flux
-         << " advective_correction_flux=" << data.advective_correction_flux
-         << " correction_flux=" << data.correction_flux
-         << " raw_correction_flux="
-         << (i < raw_correction_fluxes.size() ? raw_correction_fluxes[i] : 0.0)
-         << " accepted_lambda=" << (i < accepted_lambda.size() ? accepted_lambda[i] : 0.0);
-    std::cerr << "[" << line.str() << "]" << std::endl;
-
-    _console << name() << " stage=prelimit"
-             << " subcycle=" << subcycle_index << " face=" << data.face->id()
-             << " elem_dof=" << data.elem_dof;
-    if (data.has_neighbor)
-      _console << " neighbor_dof=" << data.neighbor_dof;
-    else
-      _console << " boundary_face=1 boundary_kind=" << boundaryFaceKindName(data.boundary_kind);
-    _console << " volumetric_flux=" << data.volumetric_flux
-             << " elem_alpha=" << data.elem_alpha << " neighbor_alpha=" << data.neighbor_alpha
-             << " interface_normal_alignment=" << data.interface_normal_alignment
-             << " rc_corrected_phi=" << rc_corrected_phi
-             << " vof_transport_phi=" << vof_transport_phi
-             << " rc_outer_phi=" << rc_outer_phi
-             << " rc_predictor_phi=" << rc_predictor_phi
-             << " donor_flux=" << data.donor_flux << " high_order_flux=" << data.high_order_flux
-             << " compressive_flux=" << data.compressive_flux
-             << " advective_correction_flux=" << data.advective_correction_flux
-             << " correction_flux=" << data.correction_flux
-             << " raw_correction_flux=" << (i < raw_correction_fluxes.size() ? raw_correction_fluxes[i] : 0.0)
-             << " accepted_lambda=" << (i < accepted_lambda.size() ? accepted_lambda[i] : 0.0)
-             << std::endl;
-    ++dumped;
-  }
-}
-
-void
-ConservativeSharpInterfaceVOFMULESCorrector::dumpFaceDebug(
-    const std::vector<FaceCorrectionData> & face_corrections,
-    const std::vector<Real> & raw_correction_fluxes,
-    const std::vector<Real> & accepted_lambda,
-    const std::unordered_map<dof_id_type, Real> & alpha_before,
-    const std::unordered_map<dof_id_type, Real> & alpha_after,
-    const unsigned int subcycle_index) const
-{
-  unsigned int dumped = 0;
-  for (const auto i : index_range(face_corrections))
-  {
-    if (dumped >= _debug_dump_max_faces)
-      break;
-
-    const auto & data = face_corrections[i];
-    if (!shouldDebugFace(data))
-      continue;
-    const auto * const sharp_mass_flux =
-        dynamic_cast<const ConservativeSharpInterfaceRhieChowMassFlux *>(&_mass_flux_provider);
-    const Real rc_corrected_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedCorrectedFacePhi(*data.face) : 0.0;
-    const Real vof_transport_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedVOFTransportPhi(*data.face) : 0.0;
-    const Real rc_outer_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedOuterIterationPhi(*data.face) : 0.0;
-    const Real rc_predictor_phi =
-        sharp_mass_flux ? sharp_mass_flux->storedPredictorConvectivePhi(*data.face) : 0.0;
-    const auto elem_before_it = alpha_before.find(data.elem_dof);
-    const auto elem_after_it = alpha_after.find(data.elem_dof);
-    if (elem_before_it == alpha_before.end() || elem_after_it == alpha_after.end())
-      continue;
-
-    const Real elem_before = elem_before_it->second;
-    const Real elem_after = elem_after_it->second;
-    Real neighbor_before = boundaryValue(
-        *data.face, data.face->faceType(std::make_pair(_var_num, _sys_num)));
-    Real neighbor_after = neighbor_before;
-
-    if (data.has_neighbor)
-    {
-      const auto neighbor_before_it = alpha_before.find(data.neighbor_dof);
-      const auto neighbor_after_it = alpha_after.find(data.neighbor_dof);
-      if (neighbor_before_it == alpha_before.end() || neighbor_after_it == alpha_after.end())
-        continue;
-      neighbor_before = neighbor_before_it->second;
-      neighbor_after = neighbor_after_it->second;
-    }
-
-    if (std::abs(elem_before - neighbor_before) < _debug_interface_alpha_tolerance)
-      continue;
-
-    std::ostringstream line;
-    line << name() << " subcycle=" << subcycle_index << " face=" << data.face->id()
-         << " elem_dof=" << data.elem_dof;
-    if (data.has_neighbor)
-      line << " neighbor_dof=" << data.neighbor_dof;
-    else
-      line << " boundary_face=1 boundary_kind=" << boundaryFaceKindName(data.boundary_kind);
-    line << " volumetric_flux=" << data.volumetric_flux
-         << " interface_normal_alignment=" << data.interface_normal_alignment
-         << " rc_corrected_phi=" << rc_corrected_phi
-         << " vof_transport_phi=" << vof_transport_phi
-         << " rc_outer_phi=" << rc_outer_phi
-         << " rc_predictor_phi=" << rc_predictor_phi
-         << " donor_flux=" << data.donor_flux << " high_order_flux=" << data.high_order_flux
-         << " compressive_flux=" << data.compressive_flux
-         << " correction_flux=" << data.correction_flux
-         << " raw_correction_flux="
-         << (i < raw_correction_fluxes.size() ? raw_correction_fluxes[i] : 0.0)
-         << " accepted_lambda=" << (i < accepted_lambda.size() ? accepted_lambda[i] : 0.0)
-         << " elem_alpha_before=" << elem_before << " elem_alpha_after=" << elem_after
-         << " neighbor_alpha_before=" << neighbor_before
-         << " neighbor_alpha_after=" << neighbor_after;
-    std::cerr << "[" << line.str() << "]" << std::endl;
-
-    _console << name() << " subcycle=" << subcycle_index << " face=" << data.face->id()
-             << " elem_dof=" << data.elem_dof;
-    if (data.has_neighbor)
-      _console << " neighbor_dof=" << data.neighbor_dof;
-    else
-      _console << " boundary_face=1 boundary_kind=" << boundaryFaceKindName(data.boundary_kind);
-    _console << " volumetric_flux=" << data.volumetric_flux
-             << " interface_normal_alignment=" << data.interface_normal_alignment
-             << " rc_corrected_phi=" << rc_corrected_phi
-             << " vof_transport_phi=" << vof_transport_phi
-             << " rc_outer_phi=" << rc_outer_phi
-             << " rc_predictor_phi=" << rc_predictor_phi
-             << " donor_flux=" << data.donor_flux << " high_order_flux=" << data.high_order_flux
-             << " compressive_flux=" << data.compressive_flux
-             << " correction_flux=" << data.correction_flux
-             << " raw_correction_flux="
-             << (i < raw_correction_fluxes.size() ? raw_correction_fluxes[i] : 0.0)
-             << " accepted_lambda=" << (i < accepted_lambda.size() ? accepted_lambda[i] : 0.0)
-             << " elem_alpha_before=" << elem_before << " elem_alpha_after=" << elem_after
-             << " neighbor_alpha_before=" << neighbor_before
-             << " neighbor_alpha_after=" << neighbor_after << std::endl;
-    ++dumped;
-  }
-}
-
-bool
-ConservativeSharpInterfaceVOFMULESCorrector::shouldDebugFace(const FaceCorrectionData & data) const
-{
-  return _debug_face_ids.empty() || _debug_face_ids.count(data.face->id());
 }

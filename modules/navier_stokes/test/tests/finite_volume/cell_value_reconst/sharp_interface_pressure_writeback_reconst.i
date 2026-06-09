@@ -136,12 +136,6 @@ mu_g = 1.0e-3
 
   startup_pressure_initialization = 'none'
 
-  dump_pressure_outer_debug_csv = true
-  dump_pressure_outer_debug_start_timestep = 1
-  dump_pressure_outer_debug_end_timestep = 1
-  dump_pressure_outer_debug_max_outer_iterations = 1
-  print_pressure_hbya_parity_summary = true
-
   dt = 1e-3
   num_steps = 1
 []

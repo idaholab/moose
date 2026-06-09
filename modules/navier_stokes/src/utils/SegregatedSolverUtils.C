@@ -32,23 +32,15 @@ relaxMatrix(SparseMatrix<Number> & matrix,
   PetscVector<Number> * diff_diag = dynamic_cast<PetscVector<Number> *>(&diff_diagonal);
   mooseAssert(diff_diag, "This should be a PetscVector!");
 
-  // Zero the diagonal difference vector
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix zero diff begin" << std::endl;
   *diff_diag = 0;
   diff_diag->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix zero diff end" << std::endl;
 
-  // Get the diagonal of the matrix
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix get diagonal begin" << std::endl;
   mat->get_diagonal(*diff_diag);
   diff_diag->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix get diagonal end" << std::endl;
 
-  // Create a copy of the diagonal for later use and cast it
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix clone diagonal begin" << std::endl;
+  // Create a copy of the diagonal for later use and cast it.
   auto original_diagonal = diff_diag->clone();
   original_diagonal->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix clone diagonal end" << std::endl;
 
   // We cache the inverse of the relaxation parameter because doing divisions might
   // be more expensive for every row
@@ -93,23 +85,17 @@ relaxMatrix(SparseMatrix<Number> & matrix,
       new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
     }
   }
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix insert diagonal begin" << std::endl;
   diff_diag->insert(new_diagonal, indices);
   diff_diag->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix insert diagonal end" << std::endl;
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix matrix diagonal set begin" << std::endl;
   LibmeshPetscCallA(mat->comm().get(), MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
   mat->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix matrix diagonal set end" << std::endl;
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix diff add begin" << std::endl;
   diff_diag->add(-1.0, *original_diagonal);
   diff_diag->close();
-  std::cerr << "[SegregatedSolverUtils] relaxMatrix diff add end" << std::endl;
 }
 
 void
@@ -120,11 +106,9 @@ relaxRightHandSide(NumericVector<Number> & rhs,
 
   // We need a working vector here to make sure we don't modify the
   // (D*-D) vector
-  std::cerr << "[SegregatedSolverUtils] relaxRightHandSide clone/mult begin" << std::endl;
   auto working_vector = diff_diagonal.clone();
   working_vector->pointwise_mult(solution, *working_vector);
   working_vector->close();
-  std::cerr << "[SegregatedSolverUtils] relaxRightHandSide clone/mult end" << std::endl;
 
   // The correction to the right hand side is just
   // (D*-D)*old_solution
@@ -132,10 +116,8 @@ relaxRightHandSide(NumericVector<Number> & rhs,
   //
   // Juretic, Franjo. Error analysis in finite volume CFD. Diss.
   // Imperial College London (University of London), 2005.
-  std::cerr << "[SegregatedSolverUtils] relaxRightHandSide rhs add begin" << std::endl;
   rhs.add(*working_vector);
   rhs.close();
-  std::cerr << "[SegregatedSolverUtils] relaxRightHandSide rhs add end" << std::endl;
 }
 
 void

@@ -6,7 +6,6 @@
 #include "libmesh/point.h"
 
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 class ConservativeSharpInterfaceRhieChowMassFlux;
@@ -27,8 +26,6 @@ public:
   bool solve() override;
   Real momentumPressureCourant(const Real dt) const;
   RhieChowMassFlux::MaxCourantAudit momentumPressureCourantAudit(const Real dt) const;
-  std::string momentumPressureWorstFaceSharpDiagnostics(
-      const RhieChowMassFlux::MaxCourantAudit & audit) const;
   Real constrainedMomentumPressureDT(const Real dt) const;
   void commitAcceptedTimestepTransportHistory() const;
   bool adjustMomentumPressureTimeStepEnabled() const
@@ -47,7 +44,6 @@ protected:
   void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
                                             NumericVector<Number> & rhs) override;
   std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
-  bool auditMomentumPredictorRebuild() const override;
 
 private:
   using NonlinearSolutionStateSnapshots =
@@ -59,10 +55,6 @@ private:
   void performStartupContinuityCorrections(const SolverParams & solver_params);
   void preparePressureCorrectorState(const bool subtract_updated_pressure);
   void reconstructPressureCoupledStateFromCurrentPressure(const bool subtract_updated_pressure);
-  void dumpPressureOuterDebugState(const std::string & stage_label);
-  void printPressureHbyAParitySummary(const std::string & stage_label) const;
-  void dumpPressureDebugFaces(const std::string & stage_label);
-  void resolvePressureDebugFaceIds();
   void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
   void advanceMomentumOuterIterationHistory() const;
   void advanceVolumeFractionOuterIterationHistory() const;
@@ -115,17 +107,6 @@ private:
   const bool _adjust_momentum_pressure_time_step;
   const Real _momentum_pressure_max_courant;
   const bool _volume_fraction_outer_corrections;
-  const bool _dump_pressure_outer_debug_csv;
-  const bool _print_pressure_hbya_parity_summary;
-  const unsigned int _dump_pressure_outer_debug_start_timestep;
-  const unsigned int _dump_pressure_outer_debug_end_timestep;
-  const unsigned int _dump_pressure_outer_debug_max_outer_iterations;
-  std::unordered_set<dof_id_type> _pressure_debug_face_ids;
-  const std::vector<Point> _pressure_debug_face_points;
-  bool _pressure_debug_face_ids_resolved = false;
-  const bool _audit_momentum_predictor_rebuild;
-  const unsigned int _audit_momentum_predictor_rebuild_start_timestep;
-  const unsigned int _audit_momentum_predictor_rebuild_end_timestep;
   unsigned int _current_piso_iteration = 0;
   std::string _startup_pressure_initialization;
   const unsigned int _startup_flux_corrections;

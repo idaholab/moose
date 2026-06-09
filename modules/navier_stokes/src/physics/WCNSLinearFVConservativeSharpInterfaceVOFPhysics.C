@@ -144,26 +144,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       true,
       "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to optionally constrain correction "
       "fluxes by local neighbor extrema instead of the global alpha bounds.");
-  params.addParam<bool>("debug_dump_subcycle",
-                        false,
-                        "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector for targeted interface-face "
-                        "debug dumps.");
-  params.addParam<bool>("debug_only_first_subcycle",
-                        true,
-                        "Only dump the first alpha subcycle when debug dumping is enabled.");
-  params.addRangeCheckedParam<unsigned int>(
-      "debug_dump_max_faces", 12, "debug_dump_max_faces>0", "Maximum number of interface faces dumped.");
-  params.addParam<std::vector<unsigned int>>(
-      "debug_face_ids",
-      {},
-      "Optional list of face ids to include in ConservativeSharpInterfaceVOFMULESCorrector debug dumps. If "
-      "empty, the usual interface-face filter is used.");
-  params.addRangeCheckedParam<Real>(
-      "debug_interface_alpha_tolerance",
-      1e-10,
-      "debug_interface_alpha_tolerance>=0",
-      "Minimum alpha jump across a face before it is considered an interface face in debug dumps.");
-
   params.addParam<bool>(
       "create_complementary_fraction",
       true,
@@ -345,7 +325,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   assignBlocks(params, _blocks);
   params.set<SolverSystemName>("system_name") = getSolverSystem(_alpha_name);
   params.set<VariableName>("variable") = _alpha_name;
-  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+  params.set<MooseFunctorName>("face_flux") = "vof_transport_phi";
   params.set<MooseFunctorName>("compression_factor") = _compression_factor_name;
   params.set<MooseFunctorName>("interface_normal") = _interface_normal_functor_name;
   params.set<MooseEnum>("high_order_correction_scheme") = _alpha_correction_scheme;
@@ -375,13 +355,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
       getParam<MooseFunctorName>("alpha_phi_limited_functor_name");
   params.set<MooseFunctorName>("rho_phi_functor_name") =
       getParam<MooseFunctorName>("rho_phi_functor_name");
-  params.set<bool>("debug_dump_subcycle") = getParam<bool>("debug_dump_subcycle");
-  params.set<bool>("debug_only_first_subcycle") = getParam<bool>("debug_only_first_subcycle");
-  params.set<unsigned int>("debug_dump_max_faces") = getParam<unsigned int>("debug_dump_max_faces");
-  params.set<std::vector<unsigned int>>("debug_face_ids") =
-      getParam<std::vector<unsigned int>>("debug_face_ids");
-  params.set<Real>("debug_interface_alpha_tolerance") =
-      getParam<Real>("debug_interface_alpha_tolerance");
   getProblem().addUserObject(object_type, object_name, params);
 }
 
@@ -404,7 +377,13 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaAdvectionKernels()
                                    prefix() + "alpha_advection",
                                    _flow_equations_physics->rhieChowUOName(),
                                    getParam<MooseEnum>("advected_interp_method"),
-                                   _blocks);
+                                   _blocks,
+                                   [this](InputParameters & params)
+                                   {
+                                     if (_use_mules_correction)
+                                       params.set<MooseFunctorName>("face_flux") =
+                                           "vof_transport_phi";
+                                   });
 }
 
 void
@@ -469,7 +448,8 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaOutletBC()
       if (dimension() >= 3)
         params.set<SolverVariableName>("w") = velocity_names[2];
       params.set<MooseFunctorName>("backflow_value") = _alpha_outlet_backflow_functor;
-      params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
+      params.set<MooseFunctorName>("face_flux") =
+          _use_mules_correction ? "vof_transport_phi" : "corrected_face_phi";
     }
     getProblem().addLinearFVBC(bc_type, prefix() + "alpha_outlet_" + outlet_bdy, params);
   }
