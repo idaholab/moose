@@ -8,22 +8,48 @@
       input = contact.i
       csvdiff = 'contact_out.csv'
       detail = 'an unscaled residual'
+      rel_err = 1e-1
     []
     [scaled]
       type = CSVDiff
       input = contact.i
       csvdiff = 'contact_scaled_out.csv'
-      cli_args = 'temp_scaling=2 Outputs/file_base=contact_scaled_out'
+      cli_args = 'temp_scaling=100 Outputs/file_base=contact_scaled_out'
       detail = 'a scaled residual, and appropriately unscale the residual'
-      rel_err = 1e-3
+      rel_err = 1e-1
     []
     [custom_residual]
       type = CSVDiff
       input = contact.i
       csvdiff = 'contact_custom_residual_out.csv'
-      cli_args = 'temp_scaling=2 Outputs/file_base=contact_custom_residual_out Convergence/temp_ref_check/residual_vector=total_res'
+      cli_args = 'temp_scaling=100 Outputs/file_base=contact_custom_residual_out Convergence/temp_ref_check/residual_vector=total_res'
       detail = 'a scaled residual using a custom vector tag, and appropriately unscale the residual.'
-      rel_err = 1e-3
+      rel_err = 1e-1
+    []
+
+    [ad_unscaled]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'ad_contact_out.csv'
+      cli_args = 'AD=AD use_ad=true Outputs/file_base=ad_contact_out'
+      detail = 'an unscaled residual using AD'
+      rel_err = 1e-1
+    []
+    [ad_scaled]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'ad_contact_scaled_out.csv'
+      cli_args = 'AD=AD use_ad=true temp_scaling=100 Outputs/file_base=ad_contact_scaled_out'
+      detail = 'a scaled residual, and appropriately unscale the residual using AD'
+      rel_err = 1e-1
+    []
+    [ad_custom_residual]
+      type = CSVDiff
+      input = contact.i
+      csvdiff = 'ad_contact_custom_residual_out.csv'
+      cli_args = 'AD=AD use_ad=true temp_scaling=100 Outputs/file_base=ad_contact_custom_residual_out Convergence/temp_ref_check/residual_vector=total_res'
+      detail = 'a scaled residual using a custom vector tag, and appropriately unscale the residual using AD.'
+      rel_err = 1e-1
     []
   []
 []

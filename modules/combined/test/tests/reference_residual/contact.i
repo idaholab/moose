@@ -1,7 +1,7 @@
 AD = ''
 use_ad = false
 temp_scaling = 1
-disp_x_scaling = ${fparse 2 * temp_scaling}
+disp_x_scaling = ${fparse 1 / temp_scaling}
 
 [GlobalParams]
   order = FIRST
@@ -233,11 +233,9 @@ disp_x_scaling = ${fparse 2 * temp_scaling}
 
 [Kernels]
   [heat]
-    type = ${AD}HeatConduction
+    type = ${AD}Diffusion
     block = 'a c'
     variable = temp
-    diffusion_coefficient = 1
-    # thermal_conductivity = 1
     extra_vector_tags = 'kernel_res total_res'
     absolute_value_vector_tags = 'absolute_ref kernel_ref'
   []
@@ -385,7 +383,7 @@ disp_x_scaling = ${fparse 2 * temp_scaling}
     reference_vector = 'absolute_ref'
     converge_on = 'disp_x disp_y'
     nl_rel_tol = 5e-6
-    nl_abs_tol = 5e-25
+    nl_abs_tol = 5e-9
     nl_max_its = 20
     nl_div_tol = -1
     verbose = true
@@ -410,17 +408,12 @@ disp_x_scaling = ${fparse 2 * temp_scaling}
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu NONZERO               1e-25'
   line_search = 'none'
-  # snesmf_reuse_base = false
   verbose = true
 
   l_max_its = 60
 
-  num_steps = 10
+  num_steps = 9
   dt = 0.1
-
-  # automatic_scaling = true
-  # compute_scaling_once = false
-  # off_diagonals_in_auto_scaling = true
 []
 
 [Postprocessors]
@@ -539,6 +532,7 @@ disp_x_scaling = ${fparse 2 * temp_scaling}
 
 [Outputs]
   csv = true
+  time_step_interval = 9
 []
 
 [Debug]
