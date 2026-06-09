@@ -1,0 +1,35 @@
+[Tests]
+  design = 'meshgenerators/CoarsenMeshAlongSidesetGenerator.md'
+  issues = '#30957'
+
+  [internal]
+    type = 'Exodiff'
+    input = 'coarsen_along_internal_sideset.i'
+    cli_args = '--mesh-only'
+    exodiff = 'coarsen_along_internal_sideset_in.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to coarsen a 2D-element mesh along an internal sideset '
+                  'by merging the elements on both sides of the sideset, preserving the sideset.'
+  []
+  [external]
+    type = 'Exodiff'
+    input = 'coarsen_along_internal_sideset.i'
+    cli_args = 'Mesh/coarsen/boundaries=top --mesh-only coarsen_along_external_sideset_in.e'
+    exodiff = 'coarsen_along_external_sideset_in.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to coarsen a 2D-element mesh along an external '
+                  'sideset by merging the elements along it.'
+  []
+  [criterion_blocks]
+    type = 'Exodiff'
+    input = 'coarsen_along_internal_sideset.i'
+    cli_args = 'Mesh/coarsen/max_merged_side_length=1.5 --mesh-only coarsen_criterion_blocks_in.e'
+    exodiff = 'coarsen_criterion_blocks_in.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall not merge elements along a sideset when doing so would exceed '
+                  'a user-specified limit on the merged geometry.'
+  []
+[]
