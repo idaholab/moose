@@ -1,5 +1,6 @@
 # Purpose: Verify stable behavior when the softening zone is nearly zero (brittle limit).
-# Verifies: Finite traction output and bounded damage when delta_f is only marginally larger than delta_0.
+# Assertion: Traction output stays finite and damage bounded when delta_f is only marginally larger than delta_0, matching the CSV gold baseline.
+# Why this exists: Guards solver and constitutive robustness in the near-brittle limit of the bilinear law.
 
 # Parameters: K=1000, N=50 -> delta_0 = 0.05.
 # GI_c = 1.3 -> delta_f = 2*1.3/50 = 0.052, giving delta_f/delta_0 = 1.04 (near-brittle).
