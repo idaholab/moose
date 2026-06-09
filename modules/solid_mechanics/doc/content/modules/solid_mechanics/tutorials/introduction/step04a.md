@@ -63,3 +63,10 @@ order elements with certain material properties. It can be alleviated through
 
 Users are encouraged to carefully check their results through convergence
 studies.
+
+!media solid_mechanics/tutorials/introduction/mech_step04a.mp4
+       style=width:17%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=mech_step04a_result
+       caption=Displacement magnitude for the default case (first order QUAD4 elements, no volumetric locking correction). Compare the deflection magnitude against the other element/refinement combinations plotted below.

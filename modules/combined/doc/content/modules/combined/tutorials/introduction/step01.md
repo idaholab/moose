@@ -95,3 +95,10 @@ well.
 Once you've answered the questions and run this example we will move on to
 [Step 2](combined/tutorials/introduction/step02.md) in which we introduce
 a third block participating in the contact problem.
+
+!media combined/tutorials/introduction/thermomech_cont_step01.mp4
+       style=width:17%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=thermomech_cont_step01_result
+       caption=Temperature field `T` on the displaced mesh. The heated left cantilever conducts heat across the contact gap into the cooled right cantilever as they deform into contact.
