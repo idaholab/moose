@@ -21,11 +21,13 @@ public:
 
   DualMeshGenerator(const InputParameters & parameters);
 
+  Point circumcenter(const Elem * elem);
+
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  // Vertex tolerance for determining colinearity of adjacent sides
+  /// Vertex tolerance for determining colinearity of adjacent sides
   Real _boundary_node_angular_tol;
 };
