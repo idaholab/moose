@@ -57,7 +57,7 @@ within the home directory. With this assumption, the following commands will com
 the heat transfer module executable.
 
 ```bash
-cd ~/projects/moose/modules/heat_conduction
+cd ~/projects/moose/modules/heat_transfer
 make -j8
 ./run_tests -j8
 ```
@@ -86,6 +86,10 @@ configuration of a first-order Lagrange finite element variable. Note, within th
 the variable is arbitrary; "T" was selected here to match the equation.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Variables
+
+The initial condition for temperature at the beginning of the simulation is set using the Initial Condition System in the `[ICs]` block. At $t=0$, an constant initial value of $T=300$ is applied uniformly across the problem.
+
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=ICs
 
 The "volumetric" portions of the weak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
