@@ -13,6 +13,8 @@
 #include "RhieChowMassFlux.h"
 #include "LinearAssemblySegregatedSolve.h"
 
+#include <memory>
+
 /**
  * PIMPLE-based (PISO + SIMPLE) for transient solution object with
  * linear FV system assembly. A detailed discussion of the algorithm
@@ -41,6 +43,19 @@ protected:
                   const bool recompute_face_mass_flux,
                   const SolverParams & solver_params) override;
 
+  virtual void preparePressureCorrectorState(const bool subtract_updated_pressure);
+  virtual std::pair<unsigned int, Real>
+  applyPressureCorrectionStage(const bool recompute_face_mass_flux,
+                               const bool publish_pressure_corrected_state,
+                               const SolverParams & solver_params);
+  virtual void postPressureCorrectorSolve(const bool final_nonorthogonal_iteration);
+  virtual void publishPressureCorrectedState(const bool recompute_face_mass_flux);
+  void storePressurePreviousOuterIterationState();
+  void relaxPressureFieldForNextPredictor();
+
+  void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
+  void advancePressureOuterIterationHistory() const;
+
   bool hasPISOAbsoluteTerminationCriterion() const;
   bool shouldContinuePISOIterations(const unsigned int piso_iteration_counter,
                                     const Real stage_residual,
@@ -50,4 +65,9 @@ protected:
   const unsigned int _num_piso_iterations;
   const Real _piso_absolute_tolerance;
   const Real _piso_relative_tolerance;
+  const unsigned int _num_pressure_nonorthogonal_correctors;
+  unsigned int _current_piso_iteration = 0;
+
+private:
+  std::unique_ptr<NumericVector<Number>> _pressure_previous_outer_solution;
 };

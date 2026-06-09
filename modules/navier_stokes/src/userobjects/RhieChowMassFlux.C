@@ -389,8 +389,8 @@ RhieChowMassFlux::initFaceMassFlux()
 
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
-        density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
-                                        boundaryVelocityValue(fi, dim_i, time_arg);
+        density_times_velocity(dim_i) =
+            boundary_normal_multiplier * face_rho * boundaryVelocityValue(fi, dim_i, time_arg);
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -601,14 +601,12 @@ RhieChowMassFlux::faceFluxConsistencyAudit() const
     if (is_boundary)
     {
       boundary_squared_sum += mismatch * mismatch;
-      audit.max_abs_boundary_mismatch =
-          std::max(audit.max_abs_boundary_mismatch, abs_mismatch);
+      audit.max_abs_boundary_mismatch = std::max(audit.max_abs_boundary_mismatch, abs_mismatch);
     }
     else
     {
       internal_squared_sum += mismatch * mismatch;
-      audit.max_abs_internal_mismatch =
-          std::max(audit.max_abs_internal_mismatch, abs_mismatch);
+      audit.max_abs_internal_mismatch = std::max(audit.max_abs_internal_mismatch, abs_mismatch);
     }
 
     if (!audit.has_worst_face || abs_mismatch > audit.max_abs_mismatch)
@@ -667,8 +665,7 @@ RhieChowMassFlux::computeDiscretePressureFaceFlux(const FaceInfo * fi) const
     const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
     const auto neighbor_matrix_contribution =
         _p_diffusion_kernel->computeNeighborMatrixContribution();
-    const auto elem_rhs_contribution =
-        _p_diffusion_kernel->computeElemRightHandSideContribution();
+    const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
 
     return (p_neighbor_value * neighbor_matrix_contribution +
             p_elem_value * elem_matrix_contribution) -
@@ -869,6 +866,7 @@ void
 RhieChowMassFlux::clearMomentumPredictorOperatorCache()
 {
   _cached_predictor_operator_base_raw.clear();
+  _cached_predictor_rhs_raw.clear();
   _cached_predictor_diagonal_raw.clear();
   _cached_predictor_explicit_force_raw.clear();
   _cached_predictor_body_force_raw.clear();
@@ -894,6 +892,7 @@ RhieChowMassFlux::canUseCachedMomentumPredictorOperator() const
     return false;
 
   if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size() ||
+      _cached_predictor_rhs_raw.size() != _momentum_systems.size() ||
       _cached_predictor_diagonal_raw.size() != _momentum_systems.size())
     return false;
 
@@ -906,6 +905,9 @@ RhieChowMassFlux::canUseCachedMomentumPredictorOperator() const
 
   return std::all_of(_cached_predictor_operator_base_raw.begin(),
                      _cached_predictor_operator_base_raw.end(),
+                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
+         std::all_of(_cached_predictor_rhs_raw.begin(),
+                     _cached_predictor_rhs_raw.end(),
                      [](const auto & vec) { return static_cast<bool>(vec); }) &&
          std::all_of(_cached_predictor_diagonal_raw.begin(),
                      _cached_predictor_diagonal_raw.end(),
@@ -936,7 +938,6 @@ RhieChowMassFlux::computePredictorOperatorBase(const unsigned int system_i,
               "PetscMatrix.");
 
   const NumericVector<Number> & rhs = rhs_override ? *rhs_override : *(momentum_system->rhs);
-  const NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
   const NumericVector<Number> & solution = *(momentum_system->solution);
 
   auto diagonal_parallel = solution.zero_clone();
@@ -966,8 +967,10 @@ RhieChowMassFlux::computePredictorOperatorBase(const unsigned int system_i,
   base_raw = *base_parallel;
   base_raw.close();
 
-  mooseAssert(base_raw.first_local_index() == current_local_solution.first_local_index() &&
-                  base_raw.last_local_index() == current_local_solution.last_local_index(),
+  mooseAssert(base_raw.first_local_index() ==
+                      momentum_system->current_local_solution->first_local_index() &&
+                  base_raw.last_local_index() ==
+                      momentum_system->current_local_solution->last_local_index(),
               "Predictor operator cache must use the current-local vector layout.");
 }
 
@@ -985,6 +988,8 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
 
   if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size())
     _cached_predictor_operator_base_raw.resize(_momentum_systems.size());
+  if (_cached_predictor_rhs_raw.size() != _momentum_systems.size())
+    _cached_predictor_rhs_raw.resize(_momentum_systems.size());
   if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
     _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
   if (_cached_predictor_explicit_force_raw.size() != _momentum_systems.size())
@@ -996,15 +1001,21 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
   NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
 
   _cached_predictor_operator_base_raw[system_i] = current_local_solution.zero_clone();
+  _cached_predictor_rhs_raw[system_i] = current_local_solution.zero_clone();
   _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
   _cached_predictor_operator_base_raw[system_i]->close();
+  _cached_predictor_rhs_raw[system_i]->close();
   _cached_predictor_diagonal_raw[system_i]->close();
 
-  computePredictorOperatorBase(
-      system_i,
-      *_cached_predictor_operator_base_raw[system_i],
-      *_cached_predictor_diagonal_raw[system_i],
-      rhs_override);
+  const NumericVector<Number> & rhs =
+      rhs_override ? *rhs_override : *(_momentum_implicit_systems[system_i]->rhs);
+  *_cached_predictor_rhs_raw[system_i] = rhs;
+  _cached_predictor_rhs_raw[system_i]->close();
+
+  computePredictorOperatorBase(system_i,
+                               *_cached_predictor_operator_base_raw[system_i],
+                               *_cached_predictor_diagonal_raw[system_i],
+                               _cached_predictor_rhs_raw[system_i].get());
 
   if (_split_momentum_predictor_operator)
   {
@@ -1032,12 +1043,16 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
 
   _cached_predictor_operator_valid =
       _cached_predictor_operator_base_raw.size() == _momentum_systems.size() &&
+      _cached_predictor_rhs_raw.size() == _momentum_systems.size() &&
       _cached_predictor_diagonal_raw.size() == _momentum_systems.size() &&
       (!_split_momentum_predictor_operator ||
        (_cached_predictor_explicit_force_raw.size() == _momentum_systems.size() &&
         _cached_predictor_body_force_raw.size() == _momentum_systems.size())) &&
       std::all_of(_cached_predictor_operator_base_raw.begin(),
                   _cached_predictor_operator_base_raw.end(),
+                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
+      std::all_of(_cached_predictor_rhs_raw.begin(),
+                  _cached_predictor_rhs_raw.end(),
                   [](const auto & vec) { return static_cast<bool>(vec); }) &&
       std::all_of(_cached_predictor_diagonal_raw.begin(),
                   _cached_predictor_diagonal_raw.end(),
@@ -1103,10 +1118,9 @@ RhieChowMassFlux::updateVelocityBoundaryState()
           _vel[component]->getBoundaryCondition(*fi->boundaryIDs().begin()))
       {
         auto * bc_pointer = _vel[component]->getBoundaryCondition(*fi->boundaryIDs().begin());
-        bc_pointer->setupFaceData(
-            fi,
-            fi->faceType(
-                std::make_pair(_vel[component]->number(), _vel[component]->sys().number())));
+        bc_pointer->setupFaceData(fi,
+                                  fi->faceType(std::make_pair(_vel[component]->number(),
+                                                              _vel[component]->sys().number())));
         _boundary_velocity_face_values[component][fi->id()] = bc_pointer->computeBoundaryValue();
       }
       else
@@ -1117,8 +1131,8 @@ RhieChowMassFlux::updateVelocityBoundaryState()
             _vel[component]->getElemValue(elem_info, time_arg);
       }
 
-      density_times_velocity(component) =
-          boundary_normal_multiplier * face_rho * _boundary_velocity_face_values[component][fi->id()];
+      density_times_velocity(component) = boundary_normal_multiplier * face_rho *
+                                          _boundary_velocity_face_values[component][fi->id()];
     }
 
     // Before a pressure correction has been solved, publish the predictor-side
@@ -1157,8 +1171,7 @@ RhieChowMassFlux::boundaryVelocityValue(const FaceInfo * fi,
     {
       bc_pointer->setupFaceData(
           fi,
-          fi->faceType(
-              std::make_pair(_vel[component]->number(), _vel[component]->sys().number())));
+          fi->faceType(std::make_pair(_vel[component]->number(), _vel[component]->sys().number())));
       return bc_pointer->computeBoundaryValue();
     }
   }
@@ -1169,7 +1182,8 @@ RhieChowMassFlux::boundaryVelocityValue(const FaceInfo * fi,
 }
 
 Real
-RhieChowMassFlux::boundaryMassFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const
+RhieChowMassFlux::boundaryMassFluxTarget(const FaceInfo * fi,
+                                         const Moose::StateArg & time_arg) const
 {
   mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
               "boundaryMassFluxTarget should only be called on boundary faces.");
@@ -1229,7 +1243,8 @@ RhieChowMassFlux::isAdjustablePressureBoundaryFace(const FaceInfo * fi) const
   if (!fi || _vel[0]->isInternalFace(*fi) || fi->boundaryIDs().empty())
     return false;
 
-  mooseAssert(fi->boundaryIDs().size() == 1, "Expected a single boundary id on a FV boundary face.");
+  mooseAssert(fi->boundaryIDs().size() == 1,
+              "Expected a single boundary id on a FV boundary face.");
   if (const auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
     return dynamic_cast<const LinearFVPressureFluxBC *>(bc_pointer) ||
            dynamic_cast<const LinearFVPressureSymmetryBC *>(bc_pointer);
@@ -1409,10 +1424,10 @@ RhieChowMassFlux::auditPressureBoundaryGradientState(const std::string & stage_l
         target_top_left_face = fi;
       }
 
-      const Real top_gradient = _pressure_boundary_normal_gradient_valid
-                                    ? std::abs(libmesh_map_find(_pressure_boundary_normal_gradient,
-                                                                fi->id()))
-                                    : 0.0;
+      const Real top_gradient =
+          _pressure_boundary_normal_gradient_valid
+              ? std::abs(libmesh_map_find(_pressure_boundary_normal_gradient, fi->id()))
+              : 0.0;
       if (top_gradient > worst_top_gradient)
       {
         worst_top_gradient = top_gradient;
@@ -1460,7 +1475,8 @@ RhieChowMassFlux::auditPressureBoundaryGradientState(const std::string & stage_l
     }
   }
 
-  auto audit_face = [this, &time_arg, &stage_label](const FaceInfo * face, const std::string & label)
+  auto audit_face =
+      [this, &time_arg, &stage_label](const FaceInfo * face, const std::string & label)
   {
     if (!face || face->boundaryIDs().empty())
       return;
@@ -1489,15 +1505,14 @@ RhieChowMassFlux::auditPressureBoundaryGradientState(const std::string & stage_l
     const Real target_flux = boundaryMassFluxTarget(face, time_arg);
     const Real required_pressure_flux = phi_hbya + target_flux;
     const Real normal_ainv = boundaryNormalAinv(face);
-    const Real cached_sn_grad = _pressure_boundary_normal_gradient_valid
-                                    ? libmesh_map_find(_pressure_boundary_normal_gradient,
-                                                       face->id())
-                                    : 0.0;
+    const Real cached_sn_grad =
+        _pressure_boundary_normal_gradient_valid
+            ? libmesh_map_find(_pressure_boundary_normal_gradient, face->id())
+            : 0.0;
     const Real bc_value = bc_pointer->computeBoundaryValue();
     const Real bc_sn_grad = bc_pointer->computeBoundaryNormalGradient();
-    const Real pressure_flux = _pressure_equation_flux_valid
-                                   ? libmesh_map_find(_pressure_equation_flux, face->id())
-                                   : 0.0;
+    const Real pressure_flux =
+        _pressure_equation_flux_valid ? libmesh_map_find(_pressure_equation_flux, face->id()) : 0.0;
     const Real stored_face_flux = libmesh_map_find(_face_mass_flux, face->id());
 
     RealVectorValue boundary_velocity;
@@ -1513,7 +1528,8 @@ RhieChowMassFlux::auditPressureBoundaryGradientState(const std::string & stage_l
 
       if (!face->boundaryIDs().empty())
       {
-        if (auto * vel_bc_pointer = _vel[component]->getBoundaryCondition(*face->boundaryIDs().begin()))
+        if (auto * vel_bc_pointer =
+                _vel[component]->getBoundaryCondition(*face->boundaryIDs().begin()))
           velocity_bc_types << vel_bc_pointer->type();
         else
           velocity_bc_types << "none";
@@ -1531,18 +1547,14 @@ RhieChowMassFlux::auditPressureBoundaryGradientState(const std::string & stage_l
              << ", normal=" << face->normal() << ", p_elem=" << p_elem
              << ", pressure_bc_type=" << bc_pointer->type()
              << ", predictor_base_flux=" << predictor_base_flux
-             << ", predictor_adjustment=" << predictor_adjustment
-             << ", phiHbyA=" << phi_hbya << ", target_flux=" << target_flux
+             << ", predictor_adjustment=" << predictor_adjustment << ", phiHbyA=" << phi_hbya
+             << ", target_flux=" << target_flux
              << ", required_pressure_flux=" << required_pressure_flux
-             << ", normal_ainv=" << normal_ainv
-             << ", cached_sn_grad_p=" << cached_sn_grad
-             << ", bc_value=" << bc_value
-             << ", bc_sn_grad_p=" << bc_sn_grad
+             << ", normal_ainv=" << normal_ainv << ", cached_sn_grad_p=" << cached_sn_grad
+             << ", bc_value=" << bc_value << ", bc_sn_grad_p=" << bc_sn_grad
              << ", pressure_equation_flux=" << pressure_flux
-             << ", stored_face_flux=" << stored_face_flux
-             << ", face_rho=" << face_rho
-             << ", boundary_velocity=" << boundary_velocity
-             << ", cell_velocity=" << cell_velocity
+             << ", stored_face_flux=" << stored_face_flux << ", face_rho=" << face_rho
+             << ", boundary_velocity=" << boundary_velocity << ", cell_velocity=" << cell_velocity
              << ", boundary_normal_velocity=" << boundary_normal_velocity
              << ", cell_normal_velocity=" << cell_normal_velocity
              << ", velocity_bc_types=" << velocity_bc_types.str()
@@ -1675,9 +1687,7 @@ RhieChowMassFlux::populateCouplingFunctors(
         if (auto * bc_pointer = _vel[dim_i]->getBoundaryCondition(*fi->boundaryIDs().begin()))
         {
           bc_pointer->setupFaceData(
-              fi,
-              fi->faceType(
-                  std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
+              fi, fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
           return bc_pointer->computeBoundaryValue();
         }
 
@@ -1694,8 +1704,7 @@ RhieChowMassFlux::populateCouplingFunctors(
             {
               pressure_inlet_outlet_bc->setupFaceData(
                   fi,
-                  fi->faceType(
-                      std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
+                  fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
               if (pressure_inlet_outlet_bc->computeBoundaryGradientMatrixContribution() > 0.0)
               {
                 use_constrained_boundary_state = true;
@@ -1810,17 +1819,18 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
     if (use_cached_predictor_operator)
     {
-      _Ainv_raw.push_back(_cached_predictor_diagonal_raw[system_i]->clone());
-      _HbyA_raw.push_back(_cached_predictor_operator_base_raw[system_i]->clone());
-    }
-    else
-    {
       _Ainv_raw.push_back(current_local_solution.zero_clone());
       _HbyA_raw.push_back(current_local_solution.zero_clone());
       computePredictorOperatorBase(system_i,
                                    *(_HbyA_raw.back()),
                                    *(_Ainv_raw.back()),
-                                   nullptr);
+                                   _cached_predictor_rhs_raw[system_i].get());
+    }
+    else
+    {
+      _Ainv_raw.push_back(current_local_solution.zero_clone());
+      _HbyA_raw.push_back(current_local_solution.zero_clone());
+      computePredictorOperatorBase(system_i, *(_HbyA_raw.back()), *(_Ainv_raw.back()), nullptr);
     }
 
     NumericVector<Number> & Ainv = *(_Ainv_raw.back());

@@ -92,7 +92,8 @@ public:
   /// Cache the exact pressure-equation face flux from the current solved pressure field.
   virtual void cachePressureEquationFlux();
   /// Evaluate the discrete internal-face pressure-equation flux for a supplied exact pressure.
-  Real exactInternalPressureEquationFlux(const FaceInfo & fi, const Function & exact_pressure) const;
+  Real exactInternalPressureEquationFlux(const FaceInfo & fi,
+                                         const Function & exact_pressure) const;
   /// Access the currently stored pressure-equation face flux.
   Real storedPressureEquationFlux(const FaceInfo & fi) const;
   /// Debug accessors for the discrete internal-face pressure diffusion operator pieces.
@@ -189,8 +190,8 @@ protected:
   virtual Real pressureBoundaryNormalAinv(const FaceInfo * fi) const;
   /// Evaluate or fetch the boundary face value for a velocity component.
   Real boundaryVelocityValue(const FaceInfo * fi,
-                            const unsigned int component,
-                            const Moose::StateArg & time_arg) const;
+                             const unsigned int component,
+                             const Moose::StateArg & time_arg) const;
   /// Compute the target physical boundary mass flux rho U_b.n at a face.
   Real boundaryMassFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   /// Compute the target volumetric boundary flux U_b.n at a face.
@@ -280,8 +281,7 @@ protected:
    * Predictor-side face mass flux used by momentum-advection kernels that need a frozen rhoPhi
    * family instead of the live corrected face mass flux.
    */
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>
-      _pressure_predictor_mass_flux;
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_mass_flux;
 
   /**
    * Explicit face-force contribution entering the pressure corrector, i.e. the local analog of
@@ -364,6 +364,9 @@ protected:
 
   /// Cached base predictor operator M*u - A*u - rhs for each momentum component.
   std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_operator_base_raw;
+
+  /// Cached relaxed predictor RHS used to rebuild HbyA with the latest velocity iterate.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_rhs_raw;
 
   /// Cached relaxed predictor diagonal for each momentum component.
   std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_diagonal_raw;

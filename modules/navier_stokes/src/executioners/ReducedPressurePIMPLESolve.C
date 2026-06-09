@@ -131,15 +131,6 @@ ReducedPressurePIMPLESolve::validParams()
       "startup_flux_corrections>0",
       "Number of pressure-only startup cleanup / projection corrections applied when "
       "startup_pressure_initialization is not 'none'.");
-  params.addParam<unsigned int>(
-      "num_pressure_nonorthogonal_correctors",
-      0,
-      "Number of additional non-final pressure equation solves inside each pressure-corrector "
-      "stage. This follows reference solver's nNonOrthogonalCorrectors convention: 0 means one final "
-      "pressure solve, 1 means one non-final solve followed by one final solve, etc.");
-  params.addParam<unsigned int>(
-      "n_nonorthogonal_correctors",
-      "reference-solver-style alias for num_pressure_nonorthogonal_correctors.");
   params.addParamNamesToGroup(
       "volume_fraction_systems volume_fraction_equation_relaxation volume_fraction_petsc_options "
       "volume_fraction_petsc_options_iname volume_fraction_petsc_options_value "
@@ -156,7 +147,8 @@ ReducedPressurePIMPLESolve::validParams()
 
 ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
   : PIMPLESolve(ex),
-    _volume_fraction_system_names(getParam<std::vector<SolverSystemName>>("volume_fraction_systems")),
+    _volume_fraction_system_names(
+        getParam<std::vector<SolverSystemName>>("volume_fraction_systems")),
     _has_volume_fraction_systems(!_volume_fraction_system_names.empty()),
     _should_solve_volume_fractions(getParam<bool>("should_solve_volume_fractions")),
     _volume_fraction_equation_relaxation(
@@ -171,33 +163,7 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _adjust_momentum_pressure_time_step(getParam<bool>("adjust_momentum_pressure_time_step")),
     _momentum_pressure_max_courant(getParam<Real>("momentum_pressure_max_courant")),
     _volume_fraction_outer_corrections(getParam<bool>("volume_fraction_outer_corrections")),
-    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections")),
-    _num_pressure_nonorthogonal_correctors([&]()
-                                           {
-                                             const bool canonical_set = parameters().isParamSetByUser(
-                                                 "num_pressure_nonorthogonal_correctors");
-                                             const bool alias_set =
-                                                 parameters().isParamSetByUser(
-                                                     "n_nonorthogonal_correctors");
-                                             const auto canonical_value =
-                                                 getParam<unsigned int>(
-                                                     "num_pressure_nonorthogonal_correctors");
-
-                                             if (!alias_set)
-                                               return canonical_value;
-
-                                             const auto alias_value =
-                                                 getParam<unsigned int>(
-                                                     "n_nonorthogonal_correctors");
-                                             if (canonical_set && alias_value != canonical_value)
-                                               paramError(
-                                                   "n_nonorthogonal_correctors",
-                                                   "Set only one of n_nonorthogonal_correctors "
-                                                   "and num_pressure_nonorthogonal_correctors, "
-                                                   "or set them to the same value.");
-
-                                             return alias_value;
-                                           }())
+    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections"))
 {
   _startup_pressure_initialization =
       getParam<MooseEnum>("startup_pressure_initialization").operator std::string();
@@ -273,10 +239,11 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
         corrector && corrector->systemName() == system_name)
     {
       if (corrector_match)
-        mooseError("ReducedPressurePIMPLESolve found multiple ConservativeSharpInterfaceVOFMULESCorrector "
-                   "objects for system '",
-                   system_name,
-                   "'.");
+        mooseError(
+            "ReducedPressurePIMPLESolve found multiple ConservativeSharpInterfaceVOFMULESCorrector "
+            "objects for system '",
+            system_name,
+            "'.");
       corrector_match = corrector;
     }
 
@@ -291,9 +258,10 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
       for (const auto & obj : objs)
       {
         _console << " " << obj->name();
-        if (const auto * corrector = dynamic_cast<ConservativeSharpInterfaceVOFMULESCorrector *>(obj))
-          _console << "(ConservativeSharpInterfaceVOFMULESCorrector system=" << corrector->systemName()
-                   << ")";
+        if (const auto * corrector =
+                dynamic_cast<ConservativeSharpInterfaceVOFMULESCorrector *>(obj))
+          _console << "(ConservativeSharpInterfaceVOFMULESCorrector system="
+                   << corrector->systemName() << ")";
       }
       _console << std::endl;
     }
@@ -404,6 +372,9 @@ ReducedPressurePIMPLESolve::solve()
   {
     simple_iteration_counter++;
     _current_outer_iteration = simple_iteration_counter;
+
+    if (_should_solve_pressure)
+      advancePressureOuterIterationHistory();
 
     if (_should_solve_momentum)
       // Keep the full nonlinear history on the previous outer-corrector state
@@ -556,8 +527,8 @@ ReducedPressurePIMPLESolve::solve()
     bool passive_scalar_converged = false;
     unsigned int ps_iteration_counter = 0;
 
-    _console << "Passive scalar iteration " << ps_iteration_counter << " Residual norms:"
-             << std::endl;
+    _console << "Passive scalar iteration " << ps_iteration_counter
+             << " Residual norms:" << std::endl;
 
     while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {
@@ -604,8 +575,7 @@ void
 ReducedPressurePIMPLESolve::addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                                                 NumericVector<Number> & rhs)
 {
-  if (auto * sharp_rc = sharpInterfaceRC();
-      sharp_rc && sharp_rc->splitMomentumPredictorOperator())
+  if (auto * sharp_rc = sharpInterfaceRC(); sharp_rc && sharp_rc->splitMomentumPredictorOperator())
     sharp_rc->addMomentumPredictorExplicitForcing(system_i, rhs);
 }
 
@@ -613,8 +583,7 @@ void
 ReducedPressurePIMPLESolve::addMomentumPredictorBodyForceForcing(const unsigned int system_i,
                                                                  NumericVector<Number> & rhs)
 {
-  if (auto * sharp_rc = sharpInterfaceRC();
-      sharp_rc && sharp_rc->splitMomentumPredictorOperator())
+  if (auto * sharp_rc = sharpInterfaceRC(); sharp_rc && sharp_rc->splitMomentumPredictorOperator())
     sharp_rc->addMomentumPredictorBodyForceForcing(system_i, rhs);
 }
 
@@ -645,7 +614,8 @@ ReducedPressurePIMPLESolve::sharpInterfaceCurvature() const
     if (auto * curvature = dynamic_cast<ConservativeSharpInterfaceCurvatureCalculator *>(obj))
     {
       if (curvature_match)
-        mooseError("ReducedPressurePIMPLESolve found multiple ConservativeSharpInterfaceCurvatureCalculator "
+        mooseError("ReducedPressurePIMPLESolve found multiple "
+                   "ConservativeSharpInterfaceCurvatureCalculator "
                    "objects in the problem. The current implementation requires a single "
                    "sharp-interface curvature producer.");
       curvature_match = curvature;
@@ -748,6 +718,7 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
     if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
     {
       predictor_rhs_base = rhs.clone();
+      *predictor_rhs_base = rhs;
       predictor_rhs_base->close();
 
       predictor_body_force = rhs.clone();
@@ -759,6 +730,7 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
       addMomentumPredictorExplicitForcing(system_i, rhs);
 
       predictor_explicit_force = rhs.clone();
+      *predictor_explicit_force = rhs;
       predictor_explicit_force->add(-1.0, *predictor_rhs_base);
       predictor_explicit_force->close();
     }
@@ -872,34 +844,6 @@ ReducedPressurePIMPLESolve::reconstructPressureCoupledStateFromCurrentPressure(
 }
 
 void
-ReducedPressurePIMPLESolve::advanceSystemOuterIterationHistory(
-    const std::vector<LinearSystem *> & systems) const
-{
-  for (auto * system : systems)
-  {
-    unsigned int max_state = 0;
-    while (system->hasSolutionState(max_state + 1, Moose::SolutionIterationType::Nonlinear))
-      ++max_state;
-
-    for (unsigned int state = max_state; state > 1; --state)
-    {
-      auto & nonlinear_state = system->solutionState(state, Moose::SolutionIterationType::Nonlinear);
-      nonlinear_state = system->solutionState(state - 1, Moose::SolutionIterationType::Nonlinear);
-      nonlinear_state.close();
-    }
-
-    if (max_state >= 1)
-    {
-      auto & previous_outer_solution =
-          system->solutionState(1, Moose::SolutionIterationType::Nonlinear);
-      previous_outer_solution = *(system->system().current_local_solution);
-      previous_outer_solution.close();
-    }
-  }
-
-}
-
-void
 ReducedPressurePIMPLESolve::advanceMomentumOuterIterationHistory() const
 {
   advanceSystemOuterIterationHistory(_momentum_systems);
@@ -921,8 +865,8 @@ ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
     const Real alpha_courant = sharp_rc->maxVolumeFractionCourant(_problem.dt());
     if (std::isfinite(alpha_courant) && alpha_courant > _volume_fraction_max_courant)
     {
-      const auto required_subcycles = static_cast<unsigned int>(
-          std::ceil(alpha_courant / _volume_fraction_max_courant));
+      const auto required_subcycles =
+          static_cast<unsigned int>(std::ceil(alpha_courant / _volume_fraction_max_courant));
       subcycles = std::max(subcycles, std::max(required_subcycles, 1u));
     }
   }
@@ -953,12 +897,12 @@ ReducedPressurePIMPLESolve::snapshotMomentumNonlinearSolutionStates() const
   NonlinearSolutionStateSnapshots snapshots(_momentum_systems.size());
 
   for (const auto system_i : index_range(_momentum_systems))
-    for (unsigned int state = 1;
-         _momentum_systems[system_i]->hasSolutionState(state, Moose::SolutionIterationType::Nonlinear);
+    for (unsigned int state = 1; _momentum_systems[system_i]->hasSolutionState(
+             state, Moose::SolutionIterationType::Nonlinear);
          ++state)
     {
-      const auto & nonlinear_state =
-          _momentum_systems[system_i]->solutionState(state, Moose::SolutionIterationType::Nonlinear);
+      const auto & nonlinear_state = _momentum_systems[system_i]->solutionState(
+          state, Moose::SolutionIterationType::Nonlinear);
       auto snapshot = nonlinear_state.zero_clone();
       *snapshot = nonlinear_state;
       snapshot->close();
@@ -974,8 +918,8 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
   _console << name() << ": entering solveVolumeFractionSystems"
            << " timeStep=" << _problem.timeStep() << " dt=" << _problem.dt() << std::endl;
 
-  std::vector<std::pair<unsigned int, Real>> residuals(
-      _volume_fraction_system_names.size(), std::make_pair(0, 1.0));
+  std::vector<std::pair<unsigned int, Real>> residuals(_volume_fraction_system_names.size(),
+                                                       std::make_pair(0, 1.0));
 
   const Real global_dt = _problem.dt();
   const Real global_time = _problem.time();
@@ -985,8 +929,8 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
 
   if (num_subcycles > _volume_fraction_subcycles)
     _console << name() << ": increasing alpha subcycles from " << _volume_fraction_subcycles
-             << " to " << num_subcycles << " to keep alpha CFL <= "
-             << _volume_fraction_max_courant << " at dt=" << global_dt << std::endl;
+             << " to " << num_subcycles << " to keep alpha CFL <= " << _volume_fraction_max_courant
+             << " at dt=" << global_dt << std::endl;
 
   for (const auto i : index_range(_volume_fraction_system_names))
   {
@@ -1100,8 +1044,8 @@ void
 ReducedPressurePIMPLESolve::clampVolumeFractionSystem(LinearSystem & system)
 {
   auto & current_local_solution = *(system.system().current_local_solution);
-  for (const auto i :
-       make_range(current_local_solution.first_local_index(), current_local_solution.last_local_index()))
+  for (const auto i : make_range(current_local_solution.first_local_index(),
+                                 current_local_solution.last_local_index()))
     current_local_solution.set(
         i,
         std::min(_volume_fraction_max_value,
@@ -1120,35 +1064,6 @@ ReducedPressurePIMPLESolve::clampVolumeFractionSystem(LinearSystem & system)
   }
 
   system.setSolution(current_local_solution);
-}
-
-std::pair<unsigned int, Real>
-ReducedPressurePIMPLESolve::correctVelocity(const bool /*subtract_updated_pressure*/,
-                                            const bool /*recompute_face_mass_flux*/,
-                                            const SolverParams & solver_params)
-{
-  std::pair<unsigned int, Real> residual;
-  Real first_stage_residual = std::numeric_limits<Real>::quiet_NaN();
-  unsigned int piso_iteration_counter = 0;
-  while (true)
-  {
-    _current_piso_iteration = piso_iteration_counter + 1;
-    const bool subtract_updated_pressure = piso_iteration_counter == 0;
-    preparePressureCorrectorState(subtract_updated_pressure);
-    // reference solver's pressureCorrector publishes phi, relaxes p_rgh, and writes back
-    // U on every pimple.correct() pressure-correction pass.
-    residual = applyPressureCorrectionStage(false, true, solver_params);
-    if (piso_iteration_counter == 0)
-      first_stage_residual = residual.second;
-    if (!shouldContinuePISOIterations(
-            piso_iteration_counter, residual.second, first_stage_residual))
-      break;
-    piso_iteration_counter++;
-  }
-
-  _current_piso_iteration = 0;
-
-  return residual;
 }
 
 std::pair<unsigned int, Real>
@@ -1195,8 +1110,7 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
 
   std::pair<unsigned int, Real> residuals{0, std::numeric_limits<Real>::quiet_NaN()};
   unsigned int total_linear_iterations = 0;
-  for (const auto nonorthogonal_iteration :
-       make_range(_num_pressure_nonorthogonal_correctors + 1))
+  for (const auto nonorthogonal_iteration : make_range(_num_pressure_nonorthogonal_correctors + 1))
   {
     const bool final_nonorthogonal_iteration =
         nonorthogonal_iteration == _num_pressure_nonorthogonal_correctors;
@@ -1253,72 +1167,29 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
                                                 const bool recompute_face_mass_flux,
                                                 const SolverParams & solver_params)
 {
+  storePressurePreviousOuterIterationState();
   preparePressureCorrectorState(subtract_updated_pressure);
 
-  const auto residuals = applyPressureCorrectionStage(recompute_face_mass_flux, true, solver_params);
-
-  return residuals;
-}
-
-std::pair<unsigned int, Real>
-ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_face_mass_flux,
-                                                         const bool publish_pressure_corrected_state,
-                                                         const SolverParams & solver_params)
-{
-  Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
-
-  std::pair<unsigned int, Real> residuals{0, std::numeric_limits<Real>::quiet_NaN()};
-  unsigned int total_linear_iterations = 0;
-
-  // Mirror reference solver's pimple.correctNonOrthogonal() loop. Non-final solves
-  // update the pressure field and pressure-equation flux cache only; the
-  // accepted phi/U state is published exactly once on the final solve.
-  for (const auto nonorthogonal_iteration :
-       make_range(_num_pressure_nonorthogonal_correctors + 1))
-  {
-    const bool final_nonorthogonal_iteration =
-        nonorthogonal_iteration == _num_pressure_nonorthogonal_correctors;
-
-    residuals = solvePressureCorrector();
-    total_linear_iterations += residuals.first;
-
-    auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-    _pressure_system.setSolution(pressure_current_solution);
-
-    _pressure_system.computeGradients();
-    _rc_uo->cachePressureEquationFlux();
-
-    if (!final_nonorthogonal_iteration)
-      continue;
-
-    if (recompute_face_mass_flux && !publish_pressure_corrected_state)
-    {
-      _rc_uo->computeFaceMassFlux();
-
-      if (auto * sharp_rc = sharpInterfaceRC())
-        sharp_rc->applyAdditionalFaceMassFluxCorrection();
-    }
-
-    if (publish_pressure_corrected_state)
-      publishPressureCorrectedTransportState("post_pressure_writeback");
-  }
-
-  residuals.first = total_linear_iterations;
+  const auto residuals =
+      applyPressureCorrectionStage(recompute_face_mass_flux, true, solver_params);
 
   return residuals;
 }
 
 void
-ReducedPressurePIMPLESolve::publishPressureCorrectedTransportState(const std::string & stage_label)
+ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_face_mass_flux)
 {
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
   _pressure_system.setSolution(pressure_current_solution);
   _pressure_system.computeGradients();
   _rc_uo->cachePressureEquationFlux();
 
-  _rc_uo->computeFaceMassFlux();
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->applyAdditionalFaceMassFluxCorrection();
+  if (recompute_face_mass_flux)
+  {
+    _rc_uo->computeFaceMassFlux();
+    if (auto * sharp_rc = sharpInterfaceRC())
+      sharp_rc->applyAdditionalFaceMassFluxCorrection();
+  }
 
   // Match reference solver's final pressure-corrector ordering:
   //   phi = phiHbyA + pEqn.flux();
@@ -1335,9 +1206,8 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedTransportState(const std::st
 
   _rc_uo->updateVelocityBoundaryState();
 
-  reportReferenceContinuityErrors(stage_label);
+  reportReferenceContinuityErrors("post_pressure_writeback");
   correctMovingMeshFaceVelocityAndMakeRelative();
-
 }
 
 void
@@ -1378,8 +1248,7 @@ ReducedPressurePIMPLESolve::reportReferenceContinuityErrors(const std::string & 
       if (has_pressure_dof(neighbor_info))
       {
         cell_integrated_divergence[fi->neighborPtr()->id()] -= integrated_phi;
-        cell_volume[fi->neighborPtr()->id()] =
-            neighbor_info.volume() * neighbor_info.coordFactor();
+        cell_volume[fi->neighborPtr()->id()] = neighbor_info.volume() * neighbor_info.coordFactor();
       }
     }
   }
@@ -1399,19 +1268,16 @@ ReducedPressurePIMPLESolve::reportReferenceContinuityErrors(const std::string & 
   }
 
   const Real dt = _problem.dt();
-  const Real local_continuity_error =
-      volume_sum > std::numeric_limits<Real>::epsilon()
-          ? dt * local_divergence_integral / volume_sum
-          : 0.0;
-  const Real global_continuity_error =
-      volume_sum > std::numeric_limits<Real>::epsilon()
-          ? dt * global_divergence_integral / volume_sum
-          : 0.0;
+  const Real local_continuity_error = volume_sum > std::numeric_limits<Real>::epsilon()
+                                          ? dt * local_divergence_integral / volume_sum
+                                          : 0.0;
+  const Real global_continuity_error = volume_sum > std::numeric_limits<Real>::epsilon()
+                                           ? dt * global_divergence_integral / volume_sum
+                                           : 0.0;
   _cumulative_continuity_error += global_continuity_error;
 
   _console << "time step continuity errors"
-           << ": stage=" << stage_label
-           << ", sum local = " << local_continuity_error
+           << ": stage=" << stage_label << ", sum local = " << local_continuity_error
            << ", global = " << global_continuity_error
            << ", cumulative = " << _cumulative_continuity_error << std::endl;
 }
@@ -1425,18 +1291,4 @@ ReducedPressurePIMPLESolve::correctMovingMeshFaceVelocityAndMakeRelative()
   //   fvc::correctUf(Uf, U, phi, MRF);
   //   fvc::makeRelative(phi, U);
   // are exact no-ops.
-}
-
-void
-ReducedPressurePIMPLESolve::relaxPressureFieldForNextPredictor()
-{
-  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-  auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
-
-  NS::FV::relaxSolutionUpdate(
-      pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
-
-  pressure_old_solution = pressure_current_solution;
-  _pressure_system.setSolution(pressure_current_solution);
-  _pressure_system.computeGradients();
 }
