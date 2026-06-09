@@ -48,6 +48,11 @@ CoarsenMeshAlongSidesetGenerator::validParams()
       "Maximum area of an element created by merging two elements. Merges exceeding it are "
       "skipped");
   params.addParam<bool>(
+      "coarsen_more_than_two_elements",
+      false,
+      "Whether to coarsen iteratively in a single invocation so that more than two elements can "
+      "be merged together. The amount of coarsening is then bounded by the merge criteria");
+  params.addParam<bool>(
       "verbose",
       false,
       "Whether to make the mesh generator output details of its actions on the console");
@@ -69,6 +74,7 @@ CoarsenMeshAlongSidesetGenerator::CoarsenMeshAlongSidesetGenerator(
     _max_merged_side_length(_has_max_side_length ? getParam<Real>("max_merged_side_length") : 0),
     _has_max_element_area(isParamValid("max_merged_element_area")),
     _max_merged_element_area(_has_max_element_area ? getParam<Real>("max_merged_element_area") : 0),
+    _coarsen_more_than_two_elements(getParam<bool>("coarsen_more_than_two_elements")),
     _verbose(getParam<bool>("verbose"))
 {
   if (_boundaries.empty() == _exclude_boundaries.empty())
@@ -131,6 +137,33 @@ CoarsenMeshAlongSidesetGenerator::generate()
       boundary_id_set.erase(id);
   }
 
+  // Verify at least one side exists for the requested sidesets
+  bool found_side = false;
+  for (const auto & t : boundary_info.build_side_list())
+    if (boundary_id_set.count(std::get<2>(t)))
+    {
+      found_side = true;
+      break;
+    }
+  if (!found_side)
+    paramError("boundaries", "No sides were found for the requested sideset(s)");
+
+  // Run the coarsening pass once, or repeatedly until no collapse remains, so that more than two
+  // elements may be merged together
+  unsigned int collapsed = 0;
+  do
+    collapsed = coarsenAlongSidesets(mesh, boundary_id_set);
+  while (_coarsen_more_than_two_elements && collapsed > 0);
+
+  return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+unsigned int
+CoarsenMeshAlongSidesetGenerator::coarsenAlongSidesets(
+    std::unique_ptr<MeshBase> & mesh, const std::set<boundary_id_type> & boundary_id_set)
+{
+  const auto & boundary_info = mesh->get_boundary_info();
+
   // Gather the unique boundary edges (an internal sideset lists each edge twice, once per side)
   // and from them the boundary-node adjacency along the sideset curve(s)
   std::map<dof_id_type, std::set<dof_id_type>> boundary_node_neighbors;
@@ -145,9 +178,6 @@ CoarsenMeshAlongSidesetGenerator::generate()
     boundary_node_neighbors[n0].insert(n1);
     boundary_node_neighbors[n1].insert(n0);
   }
-
-  if (boundary_node_neighbors.empty())
-    paramError("boundaries", "No sides were found for the requested sideset(s)");
 
   // Map every node to the ids of the elements referencing it. We use ids (not pointers) so that
   // entries pointing at elements deleted earlier in the pass can be safely skipped.
@@ -327,5 +357,5 @@ CoarsenMeshAlongSidesetGenerator::generate()
   mesh->contract();
   mesh->prepare_for_use();
 
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return num_collapsed;
 }

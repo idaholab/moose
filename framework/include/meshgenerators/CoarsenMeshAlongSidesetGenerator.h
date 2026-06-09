@@ -26,6 +26,14 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /**
+   * Performs a single coarsening pass: collapse a maximal independent set of sideset nodes,
+   * merging pairs of elements.
+   * @return the number of nodes collapsed during the pass
+   */
+  unsigned int coarsenAlongSidesets(std::unique_ptr<MeshBase> & mesh,
+                                    const std::set<boundary_id_type> & boundary_id_set);
+
   /// Input mesh to coarsen
   std::unique_ptr<MeshBase> & _input;
 
@@ -49,6 +57,9 @@ protected:
   const bool _has_max_element_area;
   /// Maximum area of an element created by merging two elements
   const Real _max_merged_element_area;
+
+  /// Whether to repeat the coarsening pass so that more than two elements can be merged together
+  const bool _coarsen_more_than_two_elements;
 
   /// Whether the mesh generator should be verbose to the console
   const bool _verbose;

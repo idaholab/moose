@@ -25,8 +25,12 @@ of the mesh except those listed in
 provided.
 
 A single invocation removes a maximal set of non-adjacent sideset nodes, coarsening the sideset
-discretization by roughly a factor of two. To coarsen further, apply the generator multiple times in
-sequence.
+discretization by roughly a factor of two. To coarsen further, either apply the generator multiple
+times in sequence, or set
+[!param](/Mesh/CoarsenMeshAlongSidesetGenerator/coarsen_more_than_two_elements), which repeats the
+coarsening pass within a single invocation until no further collapse is possible. In that case more
+than two elements can be merged into one, so it is usually combined with the merge criteria below to
+bound the amount of coarsening.
 
 A collapse is skipped if it would invert or flatten an element. The collapse can be further
 restricted, in order to preserve geometric features, with:

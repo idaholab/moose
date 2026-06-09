@@ -32,4 +32,14 @@
     requirement = 'The system shall not merge elements along a sideset when doing so would exceed '
                   'a user-specified limit on the merged geometry.'
   []
+  [iterative]
+    type = 'Exodiff'
+    input = 'coarsen_along_internal_sideset.i'
+    cli_args = 'Mesh/coarsen/coarsen_more_than_two_elements=true --mesh-only coarsen_iterative_in.e'
+    exodiff = 'coarsen_iterative_in.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to merge more than two elements together along a '
+                  'sideset by coarsening iteratively in a single invocation.'
+  []
 []
