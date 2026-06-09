@@ -63,8 +63,9 @@ protected:
   /// Map from degree of freedom to mode mixity ratio (AD needed?)
   std::unordered_map<const DofObject *, ADReal> _dof_to_mode_mixity_ratio;
 
-  /// Map from degree of freedom to the local-frame cohesive traction
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_local_czm_traction;
+  /// Map from degree of freedom to the local-frame cohesive traction. Stored as raw
+  /// values (no AD derivatives) since it only feeds auxiliary output.
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_local_czm_traction;
 
   /// The normal strength material property
   const MaterialProperty<Real> & _normal_strength;
