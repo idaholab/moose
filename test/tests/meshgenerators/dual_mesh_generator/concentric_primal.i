@@ -8,15 +8,10 @@
         has_outer_square = false
         preserve_volumes = false
     []
-    
-    [myDualGen]
-        type = DualMeshGenerator
-        input = myCCMG
-    []
 
     [SdmPerElemGen]
         type = SubdomainPerElementGenerator
-        input = myDualGen
+        input = myCCMG
     []
 
 

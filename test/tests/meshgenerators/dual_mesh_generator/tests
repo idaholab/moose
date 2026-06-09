@@ -11,4 +11,34 @@
 
     requirement = 'The system shall have the capability to generate a dual mesh from an input mesh with a concave boundary.'
   []
+  [C]
+    type = 'Exodiff'
+    input = 'C.i'
+    cli_args = '--mesh-only'
+    exodiff = 'C_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a dual mesh from an input with square concave boundaries.'
+  []
+  [cartesian]
+    type = 'Exodiff'
+    input = 'cartesian_dual.i'
+    cli_args = '--mesh-only'
+    exodiff = 'cartesian_dual_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a dual mesh from a standard cartesian input.'
+  []
+  [concentric]
+    type = 'Exodiff'
+    input = 'concentric_dual.i'
+    cli_args = '--mesh-only'
+    exodiff = 'concentric_dual_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capaility to generate a dual mesh from convex primal input meshes.'
+  []
 []
