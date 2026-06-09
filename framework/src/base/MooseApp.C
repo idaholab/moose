@@ -223,6 +223,14 @@ MooseApp::validParams()
       "--list-constructed-objects",
       "List all moose object type names constructed by the master app factory");
 
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "citations",
+      "--citations [file]",
+      "",
+      "List the papers (in BibTeX format) that should be cited for the framework, PETSc, and the "
+      "modules and objects used in this simulation; optionally write them to [file] instead of the "
+      "console");
+
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
   // This probably shouldn't be global, but the implications of removing this are currently
@@ -1891,6 +1899,54 @@ MooseApp::run()
     errorCheck();
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
+  }
+
+  if (isParamSetByUser("citations"))
+    printCitations();
+}
+
+void
+MooseApp::printCitations()
+{
+  // Gather the citation keys that apply to this run: the always-cited framework and PETSc papers,
+  // plus any citations tied to the owning module/app labels of the object types that were actually
+  // constructed in this simulation.
+  std::set<std::string> keys = Registry::getAlwaysCitations();
+
+  const auto & label_citations = Registry::getLabelCitations();
+  for (const auto & objname : _factory.getConstructedObjects())
+  {
+    if (Registry::isRegisteredObj(objname))
+    {
+      const auto & label = Registry::objData(objname)._label;
+      if (const auto it = label_citations.find(label); it != label_citations.end())
+        keys.insert(it->second.begin(), it->second.end());
+    }
+  }
+
+  // Resolve the keys to their BibTeX entries
+  const auto & citations = Registry::getCitations();
+  std::string bibtex;
+  for (const auto & key : keys)
+    if (const auto it = citations.find(key); it != citations.end())
+      bibtex += it->second + "\n\n";
+
+  // Only the root process should print or write the citations
+  if (processor_id() != 0)
+    return;
+
+  const auto & filename = getParam<std::string>("citations");
+  if (filename.empty())
+    Moose::out << "\nPlease cite the following references for the MOOSE framework, PETSc, and the "
+                  "modules and objects used in this simulation:\n\n"
+               << bibtex << std::flush;
+  else
+  {
+    std::ofstream fs(filename.c_str());
+    if (!fs.good())
+      mooseError("Unable to open file '", filename, "' for writing citations.");
+    fs << bibtex;
+    Moose::out << "\nCitations written to '" << filename << "'.\n" << std::flush;
   }
 }
 

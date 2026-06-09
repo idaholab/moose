@@ -1601,6 +1601,12 @@ private:
   bool runInputs();
 
   /**
+   * Handles the --citations command-line option: prints (or writes to a file) the BibTeX entries
+   * that should be cited for the framework, PETSc, and the modules/objects used in this simulation.
+   */
+  void printCitations();
+
+  /**
    * Internal method for adding a capability.
    *
    * Used to catch exceptions and report them as a mooseError.

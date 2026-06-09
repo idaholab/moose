@@ -71,6 +71,31 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerActions(s, af, {"MooseApp"});
   registerAppDataFilePath("moose");
   registerRepository("moose", "github.com/idaholab/moose");
+
+  // Citations emitted by the --citations command-line option. The framework and PETSc papers are
+  // always cited; modules and objects register their own citations (via registerMooseObjectCitation
+  // and Registry::addLabelCitation) and are cited only when actually used in a simulation.
+  Registry::addAlwaysCitation("permann2020moose",
+                              R"(@article{permann2020moose,
+  title = {{MOOSE}: Enabling massively parallel multiphysics simulation},
+  journal = {{SoftwareX}},
+  volume = {11},
+  pages = {100430},
+  year = {2020},
+  issn = {2352-7110},
+  doi = {https://doi.org/10.1016/j.softx.2020.100430},
+  author = {Cody J. Permann and Derek R. Gaston and David Andr{\v{s}} and Robert W. Carlsen and Fande Kong and Alexander D. Lindsay and Jason M. Miller and John W. Peterson and Andrew E. Slaughter and Roy H. Stogner and Richard C. Martineau},
+})");
+  Registry::addAlwaysCitation("petsc-efficient",
+                              R"(@inproceedings{petsc-efficient,
+  author = {Satish Balay and William D. Gropp and Lois Curfman McInnes and Barry F. Smith},
+  title = {Efficient Management of Parallelism in Object Oriented Numerical Software Libraries},
+  booktitle = {Modern Software Tools in Scientific Computing},
+  editor = {E. Arge and A. M. Bruaset and H. P. Langtangen},
+  pages = {163--202},
+  year = {1997},
+  publisher = {Birkh{\"a}user Press},
+})");
 }
 
 void

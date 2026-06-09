@@ -233,6 +233,13 @@ public:
   /// register a repository
   static void addRepository(const std::string & repo_name, const std::string & repo_url);
 
+  /// Register a citation tied to a \p label (app/module); emitted by --citations when any object of
+  /// that label is constructed.
+  static void
+  addLabelCitation(const std::string & label, const std::string & key, const std::string & bibtex);
+  /// Register a citation that --citations always emits (e.g. the framework and PETSc papers).
+  static void addAlwaysCitation(const std::string & key, const std::string & bibtex);
+
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allObjects()
   {
@@ -272,6 +279,22 @@ public:
    * Returns a map of all registered repositories
    */
   static const std::map<std::string, std::string> & getRepos() { return getRegistry()._repos; }
+
+  /// Returns a map of all registered citations (BibTeX key -> BibTeX entry text)
+  static const std::map<std::string, std::string> & getCitations()
+  {
+    return getRegistry()._citations;
+  }
+  /// Returns a map of label (app/module) -> citation keys tied to that label
+  static const std::map<std::string, std::set<std::string>> & getLabelCitations()
+  {
+    return getRegistry()._label_citations;
+  }
+  /// Returns the set of citation keys that --citations always emits
+  static const std::set<std::string> & getAlwaysCitations()
+  {
+    return getRegistry()._always_citations;
+  }
 
   /// returns the name() for a registered class
   template <typename T>
@@ -331,6 +354,9 @@ private:
   /// Check a data file path for valid characters
   static void checkDataFilePathName(const std::string & name);
 
+  /// Store a citation key -> BibTeX text mapping, erroring on a conflicting redefinition
+  static void addCitationText(const std::string & key, const std::string & bibtex);
+
   /// Add a data file path capability
   static void addDataFilePathCapability(const std::string & name,
                                         const std::optional<std::string> & path = {},
@@ -345,6 +371,12 @@ private:
   /// Repository name -> repository URL; used for mooseDocumentedError
   std::map<std::string, std::string> _repos;
   std::map<std::string, std::string> _type_to_classname;
+  /// Citation key -> BibTeX entry text
+  std::map<std::string, std::string> _citations;
+  /// Label (app/module) -> set of citation keys tied to that label
+  std::map<std::string, std::set<std::string>> _label_citations;
+  /// Citation keys that --citations always emits
+  std::set<std::string> _always_citations;
 };
 
 template <typename T>
