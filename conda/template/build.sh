@@ -29,7 +29,7 @@ function do_build(){
 
     # Configure MOOSE
     cd "${SRC_DIR:?}/moose"
-    local -a moose_options
+    local -a moose_options=()
     read -ra moose_options <<< "$MOOSE_OPTIONS"
     ./configure --prefix=${PREFIX:?} "${moose_options[@]}"
 
