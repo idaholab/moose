@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#25412'
+  design = 'MooseApp.md'
+  [report]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input --citations'
+    expect_out = '(?s)@article\{permann2020moose.*@inproceedings\{petsc-efficient'
+    requirement = "The system shall report, in BibTeX format, the references that should be cited "
+                  "for the framework and PETSc when the --citations command-line option is provided."
+  []
+  [not_requested]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input'
+    absent_out = 'permann2020moose'
+    requirement = "The system shall not report citations when the --citations command-line option "
+                  "is not provided."
+  []
+[]

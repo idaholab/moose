@@ -15,6 +15,7 @@ To print out the available command-line options use `--help`.  An example from M
 
 Options:
   --app <type>                        Specify the application type to run (case-sensitive)
+  --citations [file]                  List the papers (BibTeX) to cite for the framework, PETSc, and the modules/objects used; optionally write them to [file]
   --copy-inputs <dir>                 Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>
   --disallow-test-objects             Don't register test objects and syntax
   -v --version                        Print application version
@@ -118,6 +119,29 @@ the left.
 ```
 ./yourapp-opt --dump SomeKernel
 ```
+
+### `--citations`
+
+`--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. The
+MOOSE framework and PETSc papers are always included, and any module or object that registers a
+citation is added only when it is actually used in the run:
+
+```
+./yourapp-opt -i input.i --citations
+```
+
+This is intended to make crediting the MOOSE ecosystem easier and more accurate: rather than citing
+a single framework paper for everything, users are pointed to the specific works behind the
+capabilities they used. An optional file name writes the entries to a file (e.g. for import into a
+reference manager) instead of the console:
+
+```
+./yourapp-opt -i input.i --citations refs.bib
+```
+
+It can be combined with `--check-input` to report the citations without solving. Module and object
+developers register their papers with `registerMooseObjectCitation` (per object) or
+`Registry::addLabelCitation` (per module/app).
 
 Would show you documentation for objects matching `SomeKernel`.
 
