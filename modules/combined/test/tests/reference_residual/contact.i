@@ -1,6 +1,7 @@
 AD = ''
 use_ad = false
 temp_scaling = 1
+disp_x_scaling = ${fparse 2 * temp_scaling}
 
 [GlobalParams]
   order = FIRST
@@ -57,6 +58,7 @@ temp_scaling = 1
     scaling = ${temp_scaling}
   []
   [disp_x]
+    scaling = ${disp_x_scaling}
   []
   [disp_y]
   []
@@ -524,6 +526,11 @@ temp_scaling = 1
     type = ParsedPostprocessor
     pp_names = 'total_res_temp'
     expression = 'total_res_temp / ${temp_scaling}'
+  []
+  [scaled_res_disp_x]
+    type = ParsedPostprocessor
+    pp_names = 'total_res_disp_x'
+    expression = 'total_res_disp_x / ${disp_x_scaling}'
   []
   [total_num_nonlinear_its]
     type = NumNonlinearIterations
