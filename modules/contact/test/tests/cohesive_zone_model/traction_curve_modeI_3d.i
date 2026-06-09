@@ -1,5 +1,6 @@
 # Purpose: Verify mode-I traction-separation behavior in a 3D single-element geometry.
-# Verifies: Normal traction is produced while both tangential traction components remain negligible.
+# Assertion: Normal traction follows the CSV gold curve while both tangential traction components remain negligible.
+# Why this exists: Protects the 3D local-frame split of normal versus tangential traction components.
 
 [Mesh]
   [base]

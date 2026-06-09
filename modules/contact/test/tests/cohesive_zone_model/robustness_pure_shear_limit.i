@@ -1,5 +1,6 @@
 # Purpose: Verify numerical stability when normal opening is near zero under dominant shear loading.
-# Verifies: Finite dominant-shear output when the mode-mixity ratio is large.
+# Assertion: Dominant-shear output stays finite when the mode-mixity ratio is large, matching the CSV gold baseline.
+# Why this exists: Guards the mode-mixity computation against the near-zero normal-opening limit.
 
 [Mesh]
   [base]
