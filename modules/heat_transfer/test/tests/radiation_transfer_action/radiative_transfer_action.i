@@ -68,7 +68,7 @@
     type = HeatConduction
     variable = temperature
     block = 0
-    diffusion_coefficient = 5
+    thermal_conductivity = 5
   [../]
 []
 

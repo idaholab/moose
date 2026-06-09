@@ -52,7 +52,7 @@
   [./graphite_diffusion]
     type = HeatConduction
     variable = temperature
-    diffusion_coefficient = 'k_s'
+    thermal_conductivity = 'k_s'
   [../]
 []
 

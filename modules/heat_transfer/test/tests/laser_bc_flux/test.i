@@ -18,7 +18,7 @@
   [conduction]
     type = HeatConduction
     variable = temperature
-    diffusion_coefficient = 1
+    thermal_conductivity = 1
   []
 []
 
