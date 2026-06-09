@@ -145,7 +145,7 @@ then the names in "symbol_names" can be used in the definition of the equation i
 ### $L_2$ Error
 
 The $L_2$-norm of the difference between the computed and exact solution
-can be computed using the `NodalL2Error` object. This is created within the `[Postprocessors]` block
+can be computed using the `ElementL2Error` object. This is created within the `[Postprocessors]` block
 along with the average element size.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors

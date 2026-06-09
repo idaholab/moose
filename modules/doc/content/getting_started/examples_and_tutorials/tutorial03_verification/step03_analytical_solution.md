@@ -150,7 +150,7 @@ The "symbol_names" and "symbol_values" items have a one-to-one relationship, e.g
 then the names in "symbol_names" can be used in the definition of the equation in the "expression" parameter.
 
 The error is a single value for each time step. Since the exact solution is known the $L_2$-norm
-can be computed using the [postprocessors/NodalL2Error.md] object within the `[Postprocessors]` block,
+can be computed using the [postprocessors/ElementL2Error.md] object within the `[Postprocessors]` block,
 which computes the error of the given variable (e.g., "T") and the known solution defined in the
 "T_exact" function.
 
