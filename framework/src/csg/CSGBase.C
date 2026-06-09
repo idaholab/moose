@@ -28,25 +28,23 @@ CSGBase::CSGBase(const CSGBase & other_base)
     _universe_list(CSGUniverseList()),
     _lattice_list(CSGLatticeList())
 {
-  // _surface_list was copy-constructed above, cloning all surfaces (including surface EngUnits)
-  // via CSGSurface::clone(). Any CSGSurfaceEngUnits need to also be added to the engineering units
-  // list for tracking.
-  for (auto & [name, surf_ptr] : _surface_list.getSurfaceListMap())
-    if (auto * eng_unit = dynamic_cast<CSGSurfaceEngUnit *>(surf_ptr.get()))
-      _eng_unit_list.addEngUnit(*eng_unit);
+  // Add all engineering units first so the recursive addCellToList / addUniverseToList calls
+  // below can find them via hasCell() / hasUniverse() and return early without erroring.
+  // Cell engineering units do not have universes and universe engineering units do not contain
+  // cells in the same way that the plain objects do, so we do not need to worry about recursion.
 
-  // Iterate through all cell references from the other CSGBase instance and create new CSGCell
-  // pointers based on these references. This is done recursively to properly handle cells with
-  // universe fills. Engineering units are added first so that they can recurse properly and not
-  // cause errors in an attempt to add them as plain objects.
-  for (const auto & [name, cell] : other_base.getCellList().getCellListMap())
-    if (const auto * eng_unit = cellToEngUnit(*cell))
-    {
-      addEngUnit(eng_unit->clone());
-      // addEngUnit always adds cell eng units to root by default. Always remove from root here so
-      // that root membership is reconstructed uniformly by the loop below for all cell types.
-      removeCellFromUniverse(getRootUniverse(), _cell_list.getCell(name));
-    }
+  // Bypass addCellToList because it that doesn't properly handle engineering units and also
+  // bypass addEngUnit for cells to avoid erroneously adding it to the root universe if it is not
+  // necessary.
+  for (const auto & eng_unit : other_base.getAllCellEngUnits())
+    _cell_list.addCell(eng_unit.get().clone());
+
+  for (const auto & eng_unit : other_base.getAllUniverseEngUnits())
+    addEngUnit(eng_unit.get().clone());
+
+  // Iterate through all non-eng unit cell references from the other CSGBase instance and
+  // create new CSGCell pointers based on these references. This is done
+  // recursively to properly handle cells with universe fills.
   for (const auto & [name, cell] : other_base.getCellList().getCellListMap())
     if (!cellToEngUnit(*cell))
       addCellToList(*cell);
@@ -58,13 +56,9 @@ CSGBase::CSGBase(const CSGBase & other_base)
     addCellToUniverse(getRootUniverse(), list_cell);
   }
 
-  // Iterate through all universe references from the other CSGBase instance and create new
-  // CSGUniverse pointers based on these references. This is done in case any universe exist in the
-  // universe list that are not connected to the cell list. Engineering units are added first so
-  // that they can recurse properly and not cause errors in an attempt to add them as plain objects.
-  for (const auto & [name, univ] : other_base.getUniverseList().getUniverseListMap())
-    if (const auto * eng_unit = universeToEngUnit(*univ))
-      addEngUnit(eng_unit->clone());
+  // Iterate through all non-eng unit universe references from the other CSGBase instance and
+  // create new CSGUniverse pointers based on these references. This is done in case
+  // any universe exist in the universe list that are not connected to the cell list.
   for (const auto & [name, univ] : other_base.getUniverseList().getUniverseListMap())
     if (!universeToEngUnit(*univ))
       addUniverseToList(*univ);
@@ -73,6 +67,9 @@ CSGBase::CSGBase(const CSGBase & other_base)
   // create new CSGLattice pointers based on these references.
   for (const auto & [name, lattice] : other_base.getLatticeList().getLatticeListMap())
     addLatticeToList(*lattice);
+
+  // Rebuild the eng unit index from the now-complete surface, cell, and universe lists.
+  rebuildEngUnitList();
 }
 
 CSGBase::~CSGBase() {}
