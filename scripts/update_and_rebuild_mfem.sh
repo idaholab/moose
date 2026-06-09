@@ -154,6 +154,7 @@ do
       -DHYPRE_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DMUMPS_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMUMPS_REQUIRED_LIBRARIES="-fopenmp;-Wl,-rpath,$PETSC_DIR/$PETSC_ARCH/lib;-L$PETSC_DIR/$PETSC_ARCH/lib;-lptesmumps;-lptscotchparmetisv3;-lptscotch;-lptscotcherr;-lesmumps;-lscotch;-lscotcherr" \
       -DNETCDF_DIR="$LIBMESH_DIR" \
       -DParMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DPETSC_ARCH="$PETSC_ARCH" \
