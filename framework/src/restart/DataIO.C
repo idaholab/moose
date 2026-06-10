@@ -89,6 +89,16 @@ dataStore(std::ostream & stream, FEType & v, void * context)
 
 template <>
 void
+dataStore(std::ostream & stream, std::vector<bool> & v, void * context)
+{
+  std::size_t size = v.size();
+  dataStore(stream, size, nullptr);
+  for (bool b : v)
+    dataStore(stream, b, context);
+}
+
+template <>
+void
 dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
 {
   dataStore(stream, rtt._coords, context);
@@ -450,6 +460,21 @@ dataLoad(std::istream & stream, FEType & v, void * context)
 #endif
 
   dataLoad(stream, v.p_refinement, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
+{
+  std::size_t size = 0;
+  dataLoad(stream, size, nullptr);
+  v.resize(size);
+  for (std::size_t i = 0; i < size; i++)
+  {
+    bool b;
+    dataLoad(stream, b, context);
+    v[i] = b;
+  }
 }
 
 template <>
