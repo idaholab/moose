@@ -19,8 +19,8 @@ InputParameters
 SphereMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Generate a 3-D sphere mesh centered on the origin");
-  params.addRequiredRangeCheckedParam<Real>("radius", "radius > 0.0", "Sphere radius");
+  params.addClassDescription("Generate a sphere (ball) mesh centered on the origin");
+  params.addRequiredRangeCheckedParam<Real>("radius", "radius > 0.0", "Sphere (ball) radius");
   params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr > 0", "Number of radial elements");
 
   params.addParam<MooseEnum>(
