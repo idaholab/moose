@@ -1916,12 +1916,11 @@ MooseApp::requestCitations()
   const auto & app_citation_keys = Registry::getAppCitationBibtexKeys();
   for (const auto & objname : _factory.getConstructedObjects())
   {
-    if (Registry::isRegisteredObj(objname))
-    {
-      const auto & label = Registry::objData(objname)._label;
-      if (const auto it = app_citation_keys.find(label); it != app_citation_keys.end())
-        keys.insert(it->second.begin(), it->second.end());
-    }
+    mooseAssert(Registry::isRegisteredObj(objname),
+                "Constructed object '" + objname + "' is not registered");
+    const auto & label = Registry::objData(objname)._label;
+    if (const auto it = app_citation_keys.find(label); it != app_citation_keys.end())
+      keys.insert(it->second.begin(), it->second.end());
   }
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
@@ -1929,8 +1928,7 @@ MooseApp::requestCitations()
   // used, at PetscFinalize (to the console or, if a file name was given, to that file).
   const auto & citations = Registry::getCitations();
   for (const auto & key : keys)
-    if (const auto it = citations.find(key); it != citations.end())
-      Moose::PetscSupport::registerPetscCitation(it->second);
+    Moose::PetscSupport::registerPetscCitation(libmesh_map_find(citations, key));
 
   Moose::PetscSupport::setSinglePetscOption("-citations", getParam<std::string>("citations"));
 }
