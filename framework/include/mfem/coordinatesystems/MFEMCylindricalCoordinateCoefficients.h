@@ -12,8 +12,8 @@
 #pragma once
 
 #include "MFEMCoordinateCoefficients.h"
-
 #include <memory>
+
 /**
  * Class that constructs and owns the scalar cylindrical built-in MFEM coefficients
  * (r, 1/r, 2*pi*r, and measure weight) for cylindrical and axisymmetric MFEM formulations

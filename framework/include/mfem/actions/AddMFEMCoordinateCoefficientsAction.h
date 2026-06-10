@@ -18,7 +18,6 @@
  * objects, that construct and expose built-in scalar coefficients
  * providers through the '[CoordinateSystem]' block.
  */
-
 class AddMFEMCoordinateCoefficientsAction : public MooseObjectAction
 {
 public:
