@@ -117,8 +117,8 @@ TEST_F(RegistryTest, citations)
 TEST_F(RegistryTest, citationConflict)
 {
   Registry::addAppCitation("MyApp", "dup", "@misc{dup, title={A}}");
-  EXPECT_MOOSEERROR_MSG(Registry::addAppCitation("MyApp", "dup", "@misc{dup, title={B}}"),
-                        "is already registered with different BibTeX text");
+  EXPECT_MOOSEERROR_MSG_CONTAINS(Registry::addAppCitation("MyApp", "dup", "@misc{dup, title={B}}"),
+                                 "is already registered with different BibTeX text");
 }
 
 TEST_F(RegistryTest, appNameFromAppPathFailed)

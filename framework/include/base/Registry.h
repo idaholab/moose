@@ -286,7 +286,9 @@ public:
     return getRegistry()._app_citations;
   }
   /// Returns the citations (BibTeX key -> BibTeX entry text) tied to \p app_name, or an empty map
-  /// if the app has none registered
+  /// if no citations are registered for it. Most apps/modules register none, so the empty result
+  /// is a normal case: callers iterate over all constructed objects' labels and gather whatever
+  /// citations exist.
   static const std::map<std::string, std::string> & getCitations(const std::string & app_name);
 
   /// returns the name() for a registered class
