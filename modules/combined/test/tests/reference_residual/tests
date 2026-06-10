@@ -1,6 +1,6 @@
 [Tests]
   [contact]
-    issues = '33040'
+    issues = '#33040'
     design = 'ReferenceResidualConvergence.md'
     requirement = 'The system shall be able to use the reference residual method to converge based on : '
     [unscaled]
