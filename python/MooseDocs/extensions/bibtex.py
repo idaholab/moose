@@ -300,38 +300,7 @@ class RenderBibtexCite(components.RenderComponent):
                 continue
 
             entry = self.extension.database().entries[key]
-            author_found = True
-            if (
-                not "author" in entry.persons.keys()
-                and not "Author" in entry.persons.keys()
-            ):
-                author_found = False
-                entities = ["institution", "organization"]
-                for entity in entities:
-                    if entity in entry.fields.keys():
-                        author_found = True
-                        name = ""
-                        for word in entry.fields[entity]:
-                            if word[0].isupper():
-                                name += word[0]
-                        entry.persons["author"] = [Person(name)]
-
-            if not author_found:
-                msg = "No author, institution, or organization for {}"
-                raise exceptions.MooseDocsException(msg, key)
-
-            a = entry.persons["author"]
-            n = len(a)
-            if n > 2:
-                author = "{} et al.".format(" ".join(a[0].last_names))
-            elif n == 2:
-                a0 = " ".join(a[0].last_names)
-                a1 = " ".join(a[1].last_names)
-                author = "{} and {}".format(a0, a1)
-            else:
-                author = " ".join(a[0].last_names)
-
-            author = LatexNodes2Text().latex_to_text(author)
+            author = self._authorString(key, entry)
 
             form = "{}, {}" if citep else "{} ({})"
             year = entry.fields.get("year", None)
@@ -359,16 +328,70 @@ class RenderBibtexCite(components.RenderComponent):
 
         return parent
 
+    def _authorString(self, key, entry):
+        """Return the inline author label for an entry, e.g. 'Slaughter et al.'.
+
+        Falls back to initials of the institution or organization when the entry
+        has no author."""
+        author_found = True
+        if (
+            not "author" in entry.persons.keys()
+            and not "Author" in entry.persons.keys()
+        ):
+            author_found = False
+            entities = ["institution", "organization"]
+            for entity in entities:
+                if entity in entry.fields.keys():
+                    author_found = True
+                    name = ""
+                    for word in entry.fields[entity]:
+                        if word[0].isupper():
+                            name += word[0]
+                    entry.persons["author"] = [Person(name)]
+
+        if not author_found:
+            msg = "No author, institution, or organization for {}"
+            raise exceptions.MooseDocsException(msg, key)
+
+        a = entry.persons["author"]
+        n = len(a)
+        if n > 2:
+            author = "{} et al.".format(" ".join(a[0].last_names))
+        elif n == 2:
+            a0 = " ".join(a[0].last_names)
+            a1 = " ".join(a[1].last_names)
+            author = "{} and {}".format(a0, a1)
+        else:
+            author = " ".join(a[0].last_names)
+
+        return LatexNodes2Text().latex_to_text(author)
+
     def _createNumberHTML(self, parent, token, page):
-        """Render citations as bracketed numbers, e.g. '[1, 2]', that match the
-        numbering of the reference list."""
+        """Render citations using bracketed numbers that match the reference list.
+
+        Parenthetical citations (!citep) render as just the number, e.g. '[1, 2]'.
+        Textual citations (!cite, !citet) prepend the author so the citation reads
+        as part of the sentence, e.g. 'Slaughter et al. [1]'."""
         numbers = self.extension.citationNumbers(page)
+        textual = token["cite"] != "citep"
         num_keys = len(token["keys"])
-        html.String(parent, content="[")
+        if not textual:
+            html.String(parent, content="[")
         for i, key in enumerate(token["keys"]):
             if key not in self.extension.database().entries:
                 LOG.error("Unknown BibTeX key: %s", key)
                 html.Tag(parent, "span", string=key, style="color:red;")
+            elif textual:
+                entry = self.extension.database().entries[key]
+                html.String(
+                    parent, content="{} ".format(self._authorString(key, entry))
+                )
+                html.Tag(
+                    parent,
+                    "a",
+                    href="#{}".format(key),
+                    string="[{}]".format(numbers.get(key)),
+                )
             else:
                 html.Tag(
                     parent,
@@ -378,7 +401,8 @@ class RenderBibtexCite(components.RenderComponent):
                 )
             if i != num_keys - 1:
                 html.String(parent, content=", ")
-        html.String(parent, content="]")
+        if not textual:
+            html.String(parent, content="]")
         return parent
 
     def createMaterialize(self, parent, token, page):

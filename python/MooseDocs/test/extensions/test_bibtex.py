@@ -51,7 +51,19 @@ class TestBibtexNumber(MooseDocsTestCase):
 
     def testNumberHTML(self):
         _, res = self.execute(self.TEXT)
-        # Inline citation is rendered as bracketed numbers in citation order.
+        # Textual (!cite) citations prepend the author to the bracketed number.
+        p = res(0)
+        self.assertHTMLTag(p, "p")
+        self.assertHTMLString(p(0), "Slaughter et al. ")
+        self.assertHTMLTag(p(1), "a", string="[1]", href="#slaughter2014framework")
+        self.assertHTMLString(p(2), ", ")
+        self.assertHTMLString(p(3), "Gaston et al. ")
+        self.assertHTMLTag(p(4), "a", string="[2]", href="#gaston2015physics")
+
+    def testNumberParentheticalHTML(self):
+        text = "[!citep](slaughter2014framework, gaston2015physics)\n\n!bibtex bibliography"
+        _, res = self.execute(text)
+        # Parenthetical (!citep) citations render as just bracketed numbers.
         p = res(0)
         self.assertHTMLTag(p, "p")
         self.assertHTMLString(p(0), "[")

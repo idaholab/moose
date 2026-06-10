@@ -13,11 +13,15 @@ option, which applies to every page:
 
 - `author-year` (default): inline citations render as author and year, e.g.
   "Slaughter et al. (2014)".
-- `number`: inline citations render as bracketed numbers, e.g. `[1]`, numbered
-  in the order they are first cited. The reference list is ordered to match, so
-  `[1]` always points to the first entry. This is useful on pages that cite many
-  works by the same authors or year, where author-year labels are hard to tell
-  apart.
+- `number`: inline citations render as bracketed numbers, numbered in the order
+  they are first cited. The reference list is ordered to match, so `[1]` always
+  points to the first entry. This is useful on pages that cite many works by the
+  same authors or year, where author-year labels are hard to tell apart. As with
+  `author-year`, the textual (`!cite`) and parenthetical (`!citep`) commands
+  differ: `!citep` renders just the number, e.g. `[1]`, for use inside or at the
+  end of a sentence, while `!cite` keeps the author so it reads as part of the
+  sentence, e.g. "Slaughter et al. [1]" (a bare number would not read well in
+  running text).
 
 ```yaml
 Extensions:
