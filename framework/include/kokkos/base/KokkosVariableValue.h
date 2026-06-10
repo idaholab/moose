@@ -11,11 +11,26 @@
 
 #include "KokkosDatum.h"
 
+#include "MooseError.h"
 #include "MooseVariableFieldBase.h"
 #include "SystemBase.h"
 
 namespace Moose::Kokkos
 {
+
+inline void
+checkVariable(const Variable & var, bool expect_vector, const std::string & wrapper_name)
+{
+  if (!var.initialized())
+    mooseError("Attempted to construct Kokkos ", wrapper_name, " with an uninitialized variable.");
+
+  if (var.vector() != expect_vector)
+    mooseError("Kokkos",
+               wrapper_name,
+               " cannot be constructed with ",
+               var.vector() ? "vector" : "scalar",
+               " variables.");
+}
 
 /**
  * The Kokkos wrapper classes for MOOSE-like shape function access
@@ -231,7 +246,10 @@ public:
    * @param var The Kokkos variable
    * @param dof Whether to get DOF values
    */
-  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof) {}
+  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -243,6 +261,7 @@ public:
                      bool dof = false)
     : _var(var, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   /**
    * Constructor
@@ -256,12 +275,14 @@ public:
                      bool dof = false)
     : _var(vars, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   VariableValueTempl(const std::vector<MooseVariableFieldBase *> & vars,
                      const TagName & tag = Moose::SOLUTION_TAG,
                      bool dof = false)
     : _var(vars, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   ///@}
 
@@ -451,7 +472,10 @@ public:
    * Constructor
    * @param var The Kokkos variable
    */
-  VariableGradientTempl(Variable var) : _var(var) {}
+  VariableGradientTempl(Variable var) : _var(var)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -461,6 +485,7 @@ public:
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(var, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   /**
    * Constructor
@@ -472,11 +497,13 @@ public:
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(vars, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   VariableGradientTempl(const std::vector<MooseVariableFieldBase *> & vars,
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(vars, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   ///@}
 
@@ -645,7 +672,10 @@ public:
    * @param var The Kokkos variable
    * @param dof Whether to get DOF values
    */
-  VectorVariableValue(Variable var, bool dof = false) : _var(var), _dof(dof) {}
+  VectorVariableValue(Variable var, bool dof = false) : _var(var), _dof(dof)
+  {
+    checkVariable(_var, true, "VectorVariableValue");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -657,6 +687,7 @@ public:
                       bool dof = false)
     : _var(var, tag), _dof(dof)
   {
+    checkVariable(_var, true, "VectorVariableValue");
   }
 
   /**
@@ -671,7 +702,9 @@ public:
    * @param qp The local quadrature point index
    * @returns The vector variable value
    */
-  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int qp) const;
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum,
+                                   unsigned int qp,
+                                   unsigned int comp = 0) const;
 
   /**
    * Get the Kokkos variable
@@ -701,7 +734,10 @@ public:
    * Constructor
    * @param var The Kokkos variable
    */
-  VectorVariableGradient(Variable var) : _var(var) {}
+  VectorVariableGradient(Variable var) : _var(var)
+  {
+    checkVariable(_var, true, "VectorVariableGradient");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -711,6 +747,7 @@ public:
                          const TagName & tag = Moose::SOLUTION_TAG)
     : _var(var, tag)
   {
+    checkVariable(_var, true, "VectorVariableGradient");
   }
 
   /**
@@ -725,7 +762,9 @@ public:
    * @param qp The local quadrature point index
    * @returns The vector variable gradient
    */
-  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int qp) const;
+  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum,
+                                    unsigned int qp,
+                                    unsigned int comp = 0) const;
 
   /**
    * Get the Kokkos variable
@@ -741,7 +780,7 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real3
-VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp) const
+VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
 {
   KOKKOS_ASSERT(_var.initialized());
 
@@ -749,8 +788,8 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp) const
 
   if (_var.coupled())
   {
-    auto & sys = datum.system(_var.sys());
-    auto var = _var.var();
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
     auto tag = _var.tag();
 
     if (_dof)
@@ -777,14 +816,13 @@ VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp) const
     }
   }
   else
-    for (unsigned int comp = 0; comp < _var.components(); ++comp)
-      value(comp) = _var.value(comp);
+    value = _var.vectorValue(comp);
 
   return value;
 }
 
 KOKKOS_FUNCTION inline Real33
-VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp) const
+VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
 {
   KOKKOS_ASSERT(_var.initialized());
 
@@ -796,8 +834,8 @@ VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp) const
 
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto & sys = datum.system(_var.sys());
-    auto var = _var.var();
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
     auto tag = _var.tag();
 
     if (side == libMesh::invalid_uint)
