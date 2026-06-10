@@ -59,5 +59,5 @@ protected:
   /// Distribution objects, one per column, whose quantile functions are sampled
   std::vector<Distribution const *> _distributions;
   /// Per-column pseudo-random permuters that enforce the LHS bin assignment
-  std::vector<std::unique_ptr<MooseRandomPerturbation>> _shufflers;
+  std::vector<std::unique_ptr<MooseRandomPerturbation>> & _shufflers;
 };
