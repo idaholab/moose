@@ -49,7 +49,7 @@ SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParame
     if (p_over_d < 1.0 || p_over_d > 1.42)
       flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the updated "
                           "Cheng-Todreas friction correlation data range.");
-    if (_has_wire_wrap && (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0))
+    if (_has_wire_wrap && (wire_lead_to_diameter < 8.0 || wire_lead_to_diameter > 52.0))
       flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the updated "
                           "Cheng-Todreas friction correlation data range.");
     if (num_pins < 7 || num_pins > 271)
