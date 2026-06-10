@@ -706,10 +706,17 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
 }
 
 void
-EquationSystem::prepareLinearSolver(LinearSolverBase & solver)
+EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
 {
   if (solver.isLOR())
+  {
+    if (Complex())
+      mooseError("LOR solve is not supported for complex equation systems.");
+    if (_test_var_names.size() > 1)
+      mooseError("LOR solve is only supported for single-variable systems");
     solver.setupLOR(*_blfs.Get(_test_var_names.at(0)), _ess_tdof_lists.at(0));
+  }
+
   mooseAssert(_linear_operator.Ptr(),
               "If we are preparing a linear solver, we better have a linear operator");
   solver.setOperator(_linear_operator);

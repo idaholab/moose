@@ -27,17 +27,7 @@ EquationSystemProblemOperator::Solve()
   BuildEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es,
-                    _true_rhs,
-                    _true_x,
-                    es->nonlinear(),
-                    [this, es]()
-                    {
-                      if (_problem_data.jacobian_solver->isLOR() &&
-                          es->GetTestVarNames().size() > 1)
-                        mooseError("LOR solve is only supported for single-variable systems");
-                      es->prepareLinearSolver(*_problem_data.jacobian_solver);
-                    });
+  SolveWithOperator(*es, _true_rhs, _true_x);
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }

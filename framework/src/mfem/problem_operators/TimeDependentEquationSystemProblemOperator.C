@@ -65,17 +65,7 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   BuildEquationSystemOperator(dt);
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es,
-                    _true_rhs,
-                    _true_x,
-                    es->nonlinear(),
-                    [this, es]()
-                    {
-                      if (_problem_data.jacobian_solver->isLOR() &&
-                          es->GetTestVarNames().size() > 1)
-                        mooseError("LOR solve is only supported for single-variable systems");
-                      es->prepareLinearSolver(*_problem_data.jacobian_solver);
-                    });
+  SolveWithOperator(*es, _true_rhs, _true_x);
 
   X_new.MakeRef(_true_x, 0);
 }

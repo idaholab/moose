@@ -76,14 +76,14 @@ public:
   /**
    * @returns Whether nonlinear integrators are present
    */
-  bool nonlinear() const { return _non_linear; }
+  bool Nonlinear() const { return _non_linear; }
 
   /**
    * Propagate the assembled system operator to the given linear solver (and its preconditioner).
    * Calls the bilinear-form overload first (a no-op for non-LOR solvers) then the operator-level
    * overload once the assembled matrix is available.
    */
-  void prepareLinearSolver(LinearSolverBase & solver);
+  void PrepareLinearSolver(LinearSolverBase & solver);
 
 protected:
   /// Add coupled variable to EquationSystem.
@@ -211,6 +211,11 @@ protected:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
+
+  /**
+   * Whether this a complex equation system
+   */
+  virtual bool Complex() const { return false; }
 
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.

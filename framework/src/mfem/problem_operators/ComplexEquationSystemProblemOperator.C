@@ -55,16 +55,7 @@ ComplexEquationSystemProblemOperator::Solve()
   BuildEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es,
-                    _true_rhs,
-                    _true_x,
-                    es->nonlinear(),
-                    [this, es]()
-                    {
-                      if (_problem_data.jacobian_solver->isLOR())
-                        mooseError("LOR solve is not supported for complex equation systems.");
-                      es->prepareLinearSolver(*_problem_data.jacobian_solver);
-                    });
+  SolveWithOperator(*es, _true_rhs, _true_x);
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
