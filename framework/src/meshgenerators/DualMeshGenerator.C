@@ -145,9 +145,9 @@ DualMeshGenerator::circumcenter(const Elem * elem)
     }
   }
 
-  if (!inside && !on_boundary)
+  /*if (!inside && !on_boundary)
     return centroid();
-
+*/
   return cc;
 }
 
@@ -393,6 +393,6 @@ DualMeshGenerator::generate()
   }
 
   dualMesh->unset_is_prepared();
-  // return dynamic_pointer_cast<MeshBase>(dualMesh);
-  return dynamic_pointer_cast<MeshBase>(tri_mesh);
+  return dynamic_pointer_cast<MeshBase>(dualMesh);
+  //  return dynamic_pointer_cast<MeshBase>(tri_mesh);
 }

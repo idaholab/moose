@@ -19,7 +19,6 @@
         input = myDualGen
     []
 
-
     [convert]
         type = ElementsToSimplicesConverter
         input = 'SdmPerElemGen'
