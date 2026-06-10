@@ -31,8 +31,7 @@ public:
   std::map<std::string, std::string> _old_data_file_paths;
   std::map<std::string, std::string> _old_repos;
   Moose::internal::Capabilities::RegistryType _old_capabilities_registry;
-  std::map<std::string, std::string> _old_citations;
-  std::map<std::string, std::set<std::string>> _old_app_citation_bibtex_keys;
+  std::map<std::string, std::map<std::string, std::string>> _old_app_citations;
 };
 
 void
@@ -48,8 +47,7 @@ RegistryTest::SetUp()
 
   // Save and clear the citation state (RegistryTest is a friend of Registry)
   auto & r = Registry::getRegistry();
-  std::swap(r._citations, _old_citations);
-  std::swap(r._app_citation_bibtex_keys, _old_app_citation_bibtex_keys);
+  std::swap(r._app_citations, _old_app_citations);
 }
 
 void
@@ -66,10 +64,8 @@ RegistryTest::TearDown()
 
   // Restore the citation state
   auto & r = Registry::getRegistry();
-  std::swap(r._citations, _old_citations);
-  std::swap(r._app_citation_bibtex_keys, _old_app_citation_bibtex_keys);
-  _old_citations.clear();
-  _old_app_citation_bibtex_keys.clear();
+  std::swap(r._app_citations, _old_app_citations);
+  _old_app_citations.clear();
 }
 
 TEST_F(RegistryTest, getClassName)
@@ -96,18 +92,26 @@ TEST_F(RegistryTest, citations)
   Registry::addAppCitation("MooseApp", "framework_key", "@misc{framework_key, title={F}}");
   Registry::addAppCitation("MyApp", "app_key", "@misc{app_key, title={A}}");
 
-  // The BibTeX text is stored once per key
-  EXPECT_EQ(Registry::getCitations().at("framework_key"), "@misc{framework_key, title={F}}");
-  EXPECT_EQ(Registry::getCitations().at("app_key"), "@misc{app_key, title={A}}");
+  const auto & citations = Registry::getCitations();
 
-  // Keys are tied to the right app
-  EXPECT_EQ(Registry::getAppCitationBibtexKeys().at("MooseApp"),
-            (std::set<std::string>{"framework_key"}));
-  EXPECT_EQ(Registry::getAppCitationBibtexKeys().at("MyApp"), (std::set<std::string>{"app_key"}));
+  // Citations are keyed by app, then by BibTeX key, with the BibTeX text as the value
+  EXPECT_EQ(citations.at("MooseApp").at("framework_key"), "@misc{framework_key, title={F}}");
+  EXPECT_EQ(citations.at("MyApp").at("app_key"), "@misc{app_key, title={A}}");
+
+  // The per-app overload returns just that app's citations, and an empty map for an unknown app
+  EXPECT_EQ(Registry::getCitations("MyApp").at("app_key"), "@misc{app_key, title={A}}");
+  EXPECT_TRUE(Registry::getCitations("NotAnApp").empty());
 
   // Re-registering an identical entry is idempotent
   Registry::addAppCitation("MooseApp", "framework_key", "@misc{framework_key, title={F}}");
-  EXPECT_EQ(Registry::getCitations().size(), 2);
+  EXPECT_EQ(citations.at("MooseApp").size(), 1);
+
+  // A citation key shared across apps is stored per app with consistent text, so resolving the
+  // union of apps yields a single entry for it
+  Registry::addAppCitation("MooseApp", "shared_key", "@misc{shared_key, title={S}}");
+  Registry::addAppCitation("MyApp", "shared_key", "@misc{shared_key, title={S}}");
+  EXPECT_EQ(Registry::getCitations("MooseApp").at("shared_key"),
+            Registry::getCitations("MyApp").at("shared_key"));
 }
 
 TEST_F(RegistryTest, citationConflict)

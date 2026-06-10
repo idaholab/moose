@@ -143,8 +143,8 @@ entries to a file (e.g. for import into a reference manager) instead of the cons
 
 It can be combined with `--check-input` to report the citations without solving. The file name is
 optional, so when one is given it must immediately follow `--citations` (otherwise the next token on
-the command line is consumed as the file name). Module developers register their papers per app with
-`Registry::addAppCitation(app_name, key, bibtex)`.
+the command line is consumed as the file name). Module/app developers register their papers per
+module/app with `Registry::addAppCitation(app_name, key, bibtex)`.
 
 Would show you documentation for objects matching `SomeKernel`.
 
