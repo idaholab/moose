@@ -195,22 +195,24 @@ Registry::getRepositoryURL(const std::string & repo_name)
 }
 
 void
-Registry::addCitationText(const std::string & key, const std::string & bibtex)
+Registry::addAppCitation(const std::string & app_name,
+                         const std::string & key,
+                         const std::string & bibtex)
 {
-  auto & citations = getRegistry()._citations;
-  const auto [it, inserted] = citations.emplace(key, bibtex);
+  auto & app_citations = getRegistry()._app_citations[app_name];
+  const auto [it, inserted] = app_citations.emplace(key, bibtex);
   if (!inserted && it->second != bibtex)
     mooseError(
         "Registry: the citation '", key, "' is already registered with different BibTeX text.");
 }
 
-void
-Registry::addAppCitation(const std::string & app_name,
-                         const std::string & key,
-                         const std::string & bibtex)
+const std::map<std::string, std::string> &
+Registry::getCitations(const std::string & app_name)
 {
-  addCitationText(key, bibtex);
-  getRegistry()._app_citation_bibtex_keys[app_name].insert(key);
+  static const std::map<std::string, std::string> empty;
+  const auto & app_citations = getRegistry()._app_citations;
+  const auto it = app_citations.find(app_name);
+  return it != app_citations.end() ? it->second : empty;
 }
 
 std::string

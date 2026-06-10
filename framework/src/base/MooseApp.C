@@ -1908,27 +1908,24 @@ MooseApp::run()
 void
 MooseApp::requestCitations()
 {
-  // Gather the citation keys that apply to this run: for every object type actually constructed,
-  // the citations registered for its owning app/module. The framework paper is tied to "MooseApp",
-  // so it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it.
-  std::set<std::string> keys;
-
-  const auto & app_citation_keys = Registry::getAppCitationBibtexKeys();
+  // Gather the citations that apply to this run: for every object type actually constructed, the
+  // citations registered for its owning app/module. The framework paper is tied to "MooseApp", so
+  // it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it. The
+  // map is keyed by BibTeX key so a citation shared across apps is resolved only once.
+  std::map<std::string, std::string> citations;
   for (const auto & objname : _factory.getConstructedObjects())
   {
     mooseAssert(Registry::isRegisteredObj(objname),
                 "Constructed object '" + objname + "' is not registered");
-    const auto & label = Registry::objData(objname)._label;
-    if (const auto it = app_citation_keys.find(label); it != app_citation_keys.end())
-      keys.insert(it->second.begin(), it->second.end());
+    const auto & app_citations = Registry::getCitations(Registry::objData(objname)._label);
+    citations.insert(app_citations.begin(), app_citations.end());
   }
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
   // used, at PetscFinalize (to the console or, if a file name was given, to that file).
-  const auto & citations = Registry::getCitations();
-  for (const auto & key : keys)
-    Moose::PetscSupport::registerPetscCitation(libmesh_map_find(citations, key));
+  for (const auto & citation : citations)
+    Moose::PetscSupport::registerPetscCitation(citation.second);
 
   Moose::PetscSupport::setSinglePetscOption("-citations", getParam<std::string>("citations"));
 }

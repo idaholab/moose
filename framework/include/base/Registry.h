@@ -279,16 +279,15 @@ public:
    */
   static const std::map<std::string, std::string> & getRepos() { return getRegistry()._repos; }
 
-  /// Returns a map of all registered citations (BibTeX key -> BibTeX entry text)
-  static const std::map<std::string, std::string> & getCitations()
+  /// Returns the registered citations, keyed by app/module name and then by BibTeX key
+  /// (app/module name -> (BibTeX key -> BibTeX entry text))
+  static const std::map<std::string, std::map<std::string, std::string>> & getCitations()
   {
-    return getRegistry()._citations;
+    return getRegistry()._app_citations;
   }
-  /// Returns a map of app/module name -> the BibTeX citation keys tied to that app
-  static const std::map<std::string, std::set<std::string>> & getAppCitationBibtexKeys()
-  {
-    return getRegistry()._app_citation_bibtex_keys;
-  }
+  /// Returns the citations (BibTeX key -> BibTeX entry text) tied to \p app_name, or an empty map
+  /// if the app has none registered
+  static const std::map<std::string, std::string> & getCitations(const std::string & app_name);
 
   /// returns the name() for a registered class
   template <typename T>
@@ -348,9 +347,6 @@ private:
   /// Check a data file path for valid characters
   static void checkDataFilePathName(const std::string & name);
 
-  /// Store a citation key -> BibTeX text mapping, erroring on a conflicting redefinition
-  static void addCitationText(const std::string & key, const std::string & bibtex);
-
   /// Add a data file path capability
   static void addDataFilePathCapability(const std::string & name,
                                         const std::optional<std::string> & path = {},
@@ -365,10 +361,8 @@ private:
   /// Repository name -> repository URL; used for mooseDocumentedError
   std::map<std::string, std::string> _repos;
   std::map<std::string, std::string> _type_to_classname;
-  /// Citation key -> BibTeX entry text
-  std::map<std::string, std::string> _citations;
-  /// App/module name -> set of citation keys tied to that app
-  std::map<std::string, std::set<std::string>> _app_citation_bibtex_keys;
+  /// App/module name -> (citation key -> BibTeX entry text) for that app
+  std::map<std::string, std::map<std::string, std::string>> _app_citations;
 };
 
 template <typename T>
