@@ -95,6 +95,8 @@ template <>
 void
 dataStore(std::ostream & stream, std::vector<bool> & v, void * context)
 {
+  std::size_t size = v.size();
+  dataStore(stream, size, nullptr);
   for (bool b : v)
     dataStore(stream, b, context);
 }
@@ -462,8 +464,15 @@ template <>
 void
 dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
 {
-  for (bool b : v)
+  std::size_t size = 0;
+  dataLoad(stream, size, nullptr);
+  v.resize(size);
+  for (std::size_t i = 0; i < size; i++)
+  {
+    bool b;
     dataLoad(stream, b, context);
+    v[i] = b;
+  }
 }
 
 template <>
