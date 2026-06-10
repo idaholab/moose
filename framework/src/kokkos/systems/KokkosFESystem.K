@@ -17,6 +17,7 @@
 #include "FEProblemBase.h"
 
 #include "libmesh/system.h"
+#include "libmesh/fe_interface.h"
 
 namespace Moose::Kokkos
 {
@@ -33,6 +34,8 @@ FESystem::FESystem(SystemBase & system)
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions.create(MAX_TAG);
+  _qp_vector_solutions_grad.create(MAX_TAG);
 }
 
 FESystem::FESystem(System & base, SystemBase & system)
@@ -46,6 +49,8 @@ FESystem::FESystem(System & base, SystemBase & system)
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions.create(MAX_TAG);
+  _qp_vector_solutions_grad.create(MAX_TAG);
 }
 
 void
@@ -54,11 +59,18 @@ FESystem::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
+  _var_is_vector.create(_num_vars);
 
   for (unsigned int var = 0; var < _num_vars; ++var)
-    _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
+  {
+    const auto fe_type = sys.variable_type(var);
+
+    _var_fe_types[var] = kokkosAssembly().getFETypeID(fe_type);
+    _var_is_vector[var] = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
+  }
 
   _var_fe_types.copyToDevice();
+  _var_is_vector.copyToDevice();
 }
 
 void
@@ -191,6 +203,12 @@ FESystem::reinit()
     if (!_qp_solutions_grad[tag].isAlloc())
       _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
+    if (!_qp_vector_solutions[tag].isAlloc())
+      _qp_vector_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
+
+    if (!_qp_vector_solutions_grad[tag].isAlloc())
+      _qp_vector_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
+
     for (auto subdomain : _mesh.meshSubdomains())
     {
       auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
@@ -200,20 +218,35 @@ FESystem::reinit()
         if (!_var_subdomain_active(var, sid))
           continue;
 
-        if (!_qp_solutions[tag](sid, var).isAlloc())
-          _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+        if (_var_is_vector[var])
+        {
+          if (!_qp_vector_solutions[tag](sid, var).isAlloc())
+            _qp_vector_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
 
-        if (!_qp_solutions_grad[tag](sid, var).isAlloc())
-          _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+          if (!_qp_vector_solutions_grad[tag](sid, var).isAlloc())
+            _qp_vector_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+        }
+        else
+        {
+          if (!_qp_solutions[tag](sid, var).isAlloc())
+            _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+
+          if (!_qp_solutions_grad[tag](sid, var).isAlloc())
+            _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+        }
       }
     }
 
     _qp_solutions[tag].copyToDevice();
     _qp_solutions_grad[tag].copyToDevice();
+    _qp_vector_solutions[tag].copyToDevice();
+    _qp_vector_solutions_grad[tag].copyToDevice();
   }
 
   _qp_solutions.copyToDevice();
   _qp_solutions_grad.copyToDevice();
+  _qp_vector_solutions.copyToDevice();
+  _qp_vector_solutions_grad.copyToDevice();
 
   dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
@@ -250,23 +283,46 @@ FESystem::operator()(const ThreadID tid) const
   if (qp >= num_qps)
     return;
 
-  auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
-  auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
-  auto jacobian = kokkosAssembly().getJacobian(info, qp);
-
-  Real value = 0;
-  Real3 grad = 0;
-
-  for (unsigned int i = 0; i < num_dofs; ++i)
+  if (_var_is_vector[var])
   {
-    auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+    auto & phi = kokkosAssembly().getVectorPhi(sid, elem_type, fe_type);
+    auto & grad_phi = kokkosAssembly().getVectorGradPhi(sid, elem_type, fe_type);
+    auto jacobian = kokkosAssembly().getJacobian(info, qp).transpose();
 
-    value += vector * phi(i, qp);
-    grad += vector * (jacobian * grad_phi(i, qp));
+    Real3 value = 0;
+    Real33 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * (grad_phi(i, qp) * jacobian);
+    }
+
+    getVectorQpVectorValue(info, qp_offset + qp, var, tag) = value;
+    getVectorQpVectorGrad(info, qp_offset + qp, var, tag) = grad;
   }
+  else
+  {
+    auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
+    auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
+    auto jacobian = kokkosAssembly().getJacobian(info, qp);
 
-  getVectorQpValue(info, qp_offset + qp, var, tag) = value;
-  getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
+    Real value = 0;
+    Real3 grad = 0;
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * (jacobian * grad_phi(i, qp));
+    }
+
+    getVectorQpValue(info, qp_offset + qp, var, tag) = value;
+    getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
+  }
 }
 
 } // namespace Moose::Kokkos
