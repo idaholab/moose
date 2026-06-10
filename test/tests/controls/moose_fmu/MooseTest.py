@@ -91,7 +91,9 @@ class MooseTest(Moose2FMU):
 
         # Synchronize MOOSE simulation time with the FMU (supports MOOSE
         # simulation time stepping mechanism).
-        moose_time, signal = self.sync_moose_fmu_to_target_time(current_time, step_size, self.flag)
+        moose_time, signal = self.sync_moose_fmu_to_target_time(
+            current_time, step_size, self.flag
+        )
 
         if moose_time is None:
             return False
