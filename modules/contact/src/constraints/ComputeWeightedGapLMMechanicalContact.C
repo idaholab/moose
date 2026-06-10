@@ -194,7 +194,10 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   if (_use_derived_c_normal)
   {
     const auto & [c_nn, ignored] = libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof);
-    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
+    // Multiply by the displacement variable scaling so that the off-diagonal Jacobian block
+    // K_{lm,u} = c * normalization matches the scaled diagonal K_{u,u} = s_u * E regardless
+    // of whether the user has applied variable scaling.
+    c = _disp_x_var->scalingFactor() * (_normalize_c ? c_nn / *_normalization_ptr : c_nn);
   }
   else
     c = _normalize_c ? _c / *_normalization_ptr : _c;
