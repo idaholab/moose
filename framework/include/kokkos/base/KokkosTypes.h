@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/tensor_tools.h"
+#include "libmesh/tensor_value.h"
 
 namespace Moose::Kokkos
 {
@@ -42,7 +43,7 @@ struct Vector3
   Vector3(const libMesh::TypeVector<T> & vector);
   KOKKOS_INLINE_FUNCTION Vector3() { *this = T{}; }
   KOKKOS_INLINE_FUNCTION Vector3(const T & scalar) { *this = scalar; }
-  KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) { *this = vector; }
+  KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) = default;
   KOKKOS_INLINE_FUNCTION Vector3(const T & x, const T & y, const T & z);
 
   KOKKOS_INLINE_FUNCTION Vector3<T> operator-() const;
@@ -78,15 +79,19 @@ struct Real33
 #ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_INLINE_FUNCTION Real33() { *this = 0; }
   KOKKOS_INLINE_FUNCTION Real33(const Real scalar) { *this = scalar; }
-  KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) { *this = tensor; }
+  KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) = default;
+  Real33(const libMesh::TypeTensor<Real> & tensor) { *this = tensor; }
 
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i, unsigned int j) { return a[i][j]; }
   KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i, unsigned int j) const { return a[i][j]; }
 
+  Real33 & operator=(const libMesh::TypeTensor<Real> & tensor);
   KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real33 & tensor);
   KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real scalar);
   KOKKOS_INLINE_FUNCTION void operator+=(const Real33 tensor);
+  KOKKOS_INLINE_FUNCTION void operator*=(const Real scalar);
 
+  KOKKOS_INLINE_FUNCTION Real contract(const Real33 tensor) const;
   KOKKOS_INLINE_FUNCTION void identity(const unsigned int dim = 3);
   KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3) const;
   KOKKOS_INLINE_FUNCTION Real33 inverse(const unsigned int dim = 3) const;
@@ -320,6 +325,16 @@ Vector3<Real>::cartesian_product(const Real3 vector) const
   return tensor;
 }
 
+inline Real33 &
+Real33::operator=(const libMesh::TypeTensor<Real> & tensor)
+{
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      a[i][j] = tensor(i, j);
+
+  return *this;
+}
+
 KOKKOS_INLINE_FUNCTION Real33 &
 Real33::operator=(const Real33 & tensor)
 {
@@ -346,6 +361,26 @@ Real33::operator+=(const Real33 tensor)
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       a[i][j] += tensor.a[i][j];
+}
+
+KOKKOS_INLINE_FUNCTION void
+Real33::operator*=(const Real scalar)
+{
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      a[i][j] *= scalar;
+}
+
+KOKKOS_INLINE_FUNCTION Real
+Real33::contract(const Real33 tensor) const
+{
+  Real value = 0;
+
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      value += a[i][j] * tensor.a[i][j];
+
+  return value;
 }
 
 KOKKOS_INLINE_FUNCTION void
@@ -452,6 +487,22 @@ operator*(const Real33 left, const Real33 right)
         mul(i, j) += left(i, k) * right(k, j);
 
   return mul;
+}
+
+KOKKOS_INLINE_FUNCTION Real33
+operator*(const Real left, Real33 right)
+{
+  right *= left;
+
+  return right;
+}
+
+KOKKOS_INLINE_FUNCTION Real33
+operator*(Real33 left, const Real right)
+{
+  left *= right;
+
+  return left;
 }
 
 KOKKOS_INLINE_FUNCTION Real3
