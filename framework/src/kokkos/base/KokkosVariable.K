@@ -29,6 +29,7 @@ Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
   _nodal = variable.isNodal();
   _components = variable.count();
   _tag = tag;
+  _vector = variable.isVector();
 
   _moose_var.createHost(_components);
   _var.create(_components);
@@ -79,11 +80,15 @@ Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const Ta
 void
 Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
 {
+  if (variables.empty())
+    mooseError("Cannot initialize a Kokkos variable with zero components.");
+
   _initialized = true;
   _coupled = true;
   _nodal = true;
   _components = variables.size();
   _tag = tag;
+  _vector = variables[0]->isVector();
 
   _moose_var.createHost(_components);
   _var.create(_components);
@@ -92,6 +97,9 @@ Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, co
   for (unsigned int comp = 0; comp < _components; ++comp)
   {
     _nodal = _nodal && variables[comp]->isNodal();
+
+    if (variables[comp]->isVector() != _vector)
+      mooseError("Cannot initialize a Kokkos variable with mixed scalar and vector components.");
 
     _moose_var[comp] = variables[comp];
     _var[comp] = variables[comp]->number();
@@ -122,6 +130,18 @@ Variable::init(const std::vector<Real> & values, CoupleableKey)
   _components = values.size();
 
   _default_value = values;
+}
+
+void
+Variable::init(const std::vector<Real3> & values, CoupleableKey)
+{
+  _initialized = true;
+  _coupled = false;
+  _nodal = true;
+  _components = values.size();
+  _vector = true;
+
+  _default_vector_value = values;
 }
 
 } // namespace Moose::Kokkos
