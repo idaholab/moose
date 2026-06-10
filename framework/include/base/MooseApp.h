@@ -802,11 +802,17 @@ public:
   std::unique_ptr<Backup> finalizeRestore();
 
   /**
-   * @return Whether or not a restore is currently in progress, i.e. restore() has been called
-   * and finalizeRestore() has not yet been called. While true, the checkpoint reader's
-   * stream/header are still open.
+   * Restores \p value in place from the checkpoint reader if it is present in the checkpoint
+   * and has not yet been loaded. Used to recover data (e.g. reporter values) that is declared
+   * after the bulk restore pass while the reader window is still open. No-op on non-recover
+   * runs and for data declared before the restore window opens.
+   *
+   * @return Whether or not the value was restored
    */
-  bool isRestoreInProgress() const { return _rd_reader.isRestoring(); }
+  bool restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid = 0)
+  {
+    return _rd_reader.restoreDataIfAvailable(value, tid);
+  }
 
   /**
    * Returns a string to be printed at the beginning of a simulation

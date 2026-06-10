@@ -178,10 +178,9 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
 }
 
 void
-ReporterData::checkLateReporterDeclaration(const ReporterName & reporter_name) const
+ReporterData::restoreReporterStateIfAvailable(RestartableDataValue & state) const
 {
-  if (_app.isRecovering() && _app.isRestoreInProgress())
-    mooseError("Reporter value '", reporter_name, "' is declared after the bulk restore and will not be recovered");
+  _app.restoreDataIfAvailable(state);
 }
 
 bool

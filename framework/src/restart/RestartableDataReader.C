@@ -339,6 +339,18 @@ RestartableDataReader::requireRestoring() const
 }
 
 bool
+RestartableDataReader::restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid)
+{
+  if (!isRestoring() || value.loaded())
+    return false;
+  const auto * const header_entry = queryHeader(value.name(), tid);
+  if (!header_entry)
+    return false;
+  deserializeValue(*_streams.data, value, *header_entry);
+  return true;
+}
+
+bool
 RestartableDataReader::isSameType(const RestartableDataReader::HeaderEntry & header_entry,
                                   const std::type_info & type) const
 {

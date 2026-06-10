@@ -55,6 +55,17 @@ public:
   bool isRestoring() const { return _streams.data != nullptr; }
 
   /**
+   * Restores \p value in place from the open reader if it is present in the checkpoint and
+   * has not yet been loaded. Used to recover data (e.g. reporter values) that is declared
+   * after the bulk restore pass while the reader window is still open.
+   *
+   * Requires that restore() has been called.
+   *
+   * @return Whether or not the value was restored
+   */
+  bool restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid = 0);
+
+  /**
    * Clears the contents of the reader (header stream, data stream, header)
    *
    * This returns ownership of the resulting input in the event that
