@@ -51,16 +51,37 @@ class Moose2FMU(Fmi2Slave):
         """Initialize the base Moose2FMU wrapper and default configuration."""
         super().__init__(*args, **kwargs, logging_add_standard_categories=True)
 
+        # Per-instance logging uses a hierarchical "<module>.<class>" name keyed
+        # off the concrete (possibly subclassed) type:
+        #   base_logger -- module-scoped parent. Setting its level or attaching
+        #                  handlers configures every class logger in that module
+        #                  at once.
+        #   self.logger -- the per-class child the instance actually logs
+        #                  through, so each record is tagged with the concrete
+        #                  class name and any Moose2FMU subclass automatically
+        #                  gets its own distinct logger.
         base_logger = logging.getLogger(self.__class__.__module__)
         self.logger = base_logger.getChild(self.__class__.__name__)
         self.logger.info("Moose2FMU initialized successfully.")
 
-        # Configuration parameters
+        # Caller-supplied configuration (constructor kwargs / FMI start values):
+        #   flag          -- extra sync flag, merged with the built-in defaults
+        #   moose_command -- command line that launches the MOOSE executable
+        #   server_name   -- MooseControl server block this FMU attaches to
+        #   max_retries   -- control-server poll attempts before giving up
+        #   dt_tolerance  -- allowed FMU-vs-MOOSE clock mismatch when syncing
         self.flag: str = flag
         self.moose_command: str = moose_command
         self.server_name: str = server_name
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
+
+        # Experiment/runtime state, set later (start/stop/tolerance by the FMI
+        # host via setup_experiment, moose_time during stepping):
+        #   moose_time -- latest MOOSE clock captured during sync; also an output
+        #   start_time -- experiment start time
+        #   stop_time  -- experiment stop time
+        #   tolerance  -- integrator tolerance requested by the host
         self.moose_time: Real = 0.0
         self.start_time: Real = 0.0
         self.stop_time: Real = 0.0
@@ -107,7 +128,7 @@ class Moose2FMU(Fmi2Slave):
             )
         )
 
-        # Register outputs
+        # Register a default set of outputs (just simulation time for now)
         self.register_variable(
             Real(
                 "moose_time",

@@ -74,7 +74,7 @@ waits for a set of synchronization signals by default:
 - `INITIAL` and `MULTIAPP_FIXED_POINT_BEGIN` are consumed before attempting to
   advance the coupled simulation. `MULTIAPP_FIXED_POINT_BEGIN` is the first flag
   raised immediately after the new time step has been computed, so listening
-  for it gives the FMU the earliest opportunity to synchronize clocks.
+  for it gives the FMU the earliest opportunity to synchronize simulation time and FMU time.
 - `MULTIAPP_FIXED_POINT_END` is consumed before any reporter or postprocessor
   values are retrieved. In a typical execution order controls run ahead of
   reporters and postprocessors, and those objects usually execute at
