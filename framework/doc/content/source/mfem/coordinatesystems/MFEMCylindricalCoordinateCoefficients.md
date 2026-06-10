@@ -17,7 +17,7 @@ The `two_pi_r` coefficient is constructed using [`mfem::TransformedCoefficient`]
 
 The `inv_r` coefficient is regularized as
 !equation
-{\text{inv\_r} = \frac{1}{r + \varepsilon}}
+{\text{inv\_r} = \sqrt\frac{1}{r^2 + \varepsilon^2}}
 
 where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
 
