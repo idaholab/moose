@@ -110,7 +110,7 @@ the individual variable residuals to.
 
 ### Grouping Variables
 
-!listing modules/combined/test/tests/reference_residual/group_variables.i block=Problem
+!listing modules/solid_mechanics/test/tests/reference_residual/group_variables.i block=Problem
 
 Multiple groupings of variables can be provided in `group_variables` by separating them by  semicolon.
 Convergence for those variables that are not given in `group_variables` is checked individually. A given variable can only be included in one group.
