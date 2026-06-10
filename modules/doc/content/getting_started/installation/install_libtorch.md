@@ -1,6 +1,6 @@
 # Libtorch (PyTorch C++ API)
 
-MOOSE can be linked against [libtorch](https://pytorch.org/cppdocs/) [!cite](paszke2019pytorch) to enable hardware acceleration. The libtorch source is provided as a git submodule under `framework/contrib/pytorch`, and a setup script is provided to build and install it with the configuration MOOSE expects.
+MOOSE can be linked against [libtorch](https://pytorch.org/cppdocs/) [!cite](paszke2019pytorch) to enable hardware acceleration and some high-level machine-learning capabilities. The libtorch source is provided as a git submodule under `framework/contrib/pytorch`, and a setup script is provided to build and install it with the configuration MOOSE expects.
 
 ## Prerequisites
 
