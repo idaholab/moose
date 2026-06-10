@@ -23,6 +23,10 @@ WCNSLinearFVScalarTransportPhysics::validParams()
                              "equation(s) using the linear finite volume discretization");
   params.set<MooseEnum>("passive_scalar_advection_interpolation") =
       NS::fvAdvectedInterpolationMethods();
+  params.addParam<InterpolationMethodName>(
+      "passive_scalar_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for passive scalar advection. "
+      "When provided, this overrides 'passive_scalar_advection_interpolation'.");
   params.addParam<bool>("use_nonorthogonal_correction",
                         true,
                         "If the nonorthogonal correction should be used when computing the normal "
@@ -30,6 +34,9 @@ WCNSLinearFVScalarTransportPhysics::validParams()
 
   // Not supported
   params.suppressParameter<MooseEnum>("preconditioning");
+
+  params.addParamNamesToGroup("passive_scalar_advection_interpolation_method_name",
+                              "Numerical scheme");
 
   return params;
 }
@@ -90,9 +97,12 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
 void
 WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
-  const auto & interpolation_method = getParam<MooseEnum>("passive_scalar_advection_interpolation");
-  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), interpolation_method);
-  const std::string method_name = interpolation_method;
+  const auto method_name =
+      NS::fvAdvectedInterpolationMethodName(*this,
+                                            getProblem(),
+                                            getFactory(),
+                                            "passive_scalar_advection_interpolation",
+                                            "passive_scalar_advection_interpolation_method_name");
 
   const std::string kernel_type = "LinearFVScalarAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);

@@ -59,6 +59,17 @@ WCNSLinearFVTurbulencePhysics::validParams()
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
   params.addParamNamesToGroup("use_nonorthogonal_correction", "Numerical scheme");
+  params.addParam<InterpolationMethodName>(
+      "tke_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for turbulent kinetic energy "
+      "advection. When provided, this overrides 'tke_advection_interpolation'.");
+  params.addParam<InterpolationMethodName>(
+      "tked_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for turbulent kinetic energy "
+      "dissipation advection. When provided, this overrides 'tked_advection_interpolation'.");
+  params.addParamNamesToGroup(
+      "tke_advection_interpolation_method_name tked_advection_interpolation_method_name",
+      "K-Epsilon model numerical");
   return params;
 }
 
@@ -177,11 +188,18 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
 void
 WCNSLinearFVTurbulencePhysics::addKEpsilonAdvection()
 {
-  const auto & tke_interpolation_method = getParam<MooseEnum>("tke_advection_interpolation");
-  const auto & tked_interpolation_method = getParam<MooseEnum>("tked_advection_interpolation");
-
-  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), tke_interpolation_method);
-  NS::addFVAdvectedInterpolationMethod(getProblem(), getFactory(), tked_interpolation_method);
+  const auto tke_method_name =
+      NS::fvAdvectedInterpolationMethodName(*this,
+                                            getProblem(),
+                                            getFactory(),
+                                            "tke_advection_interpolation",
+                                            "tke_advection_interpolation_method_name");
+  const auto tked_method_name =
+      NS::fvAdvectedInterpolationMethodName(*this,
+                                            getProblem(),
+                                            getFactory(),
+                                            "tked_advection_interpolation",
+                                            "tked_advection_interpolation_method_name");
 
   const std::string kernel_type = "LinearFVTurbulentAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -189,13 +207,11 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonAdvection()
   assignBlocks(params, _blocks);
 
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  const std::string tke_method_name = tke_interpolation_method;
   params.set<InterpolationMethodName>("advected_interp_method_name") = tke_method_name;
   params.set<LinearVariableName>("variable") = _tke_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_advection", params);
   params.set<LinearVariableName>("variable") = _tked_name;
   params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-  const std::string tked_method_name = tked_interpolation_method;
   params.set<InterpolationMethodName>("advected_interp_method_name") = tked_method_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tked_advection", params);
 }

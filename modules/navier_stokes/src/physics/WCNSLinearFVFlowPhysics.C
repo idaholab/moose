@@ -30,6 +30,10 @@ WCNSLinearFVFlowPhysics::validParams()
       "Define the Navier Stokes weakly-compressible equations with the linear "
       "solver implementation of the SIMPLE scheme");
   params.set<MooseEnum>("momentum_advection_interpolation") = NS::fvAdvectedInterpolationMethods();
+  params.addParam<InterpolationMethodName>(
+      "momentum_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for momentum advection. When "
+      "provided, this overrides 'momentum_advection_interpolation'.");
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
@@ -67,6 +71,7 @@ WCNSLinearFVFlowPhysics::validParams()
 
   // Rhie-Chow
   params.transferParam<MooseEnum>(RhieChowMassFlux::validParams(), "pressure_projection_method");
+  params.addParamNamesToGroup("momentum_advection_interpolation_method_name", "Numerical scheme");
 
   return params;
 }
@@ -250,9 +255,12 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
 void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
-  const std::string momentum_advection_method_name = _momentum_advection_interpolation;
-  NS::addFVAdvectedInterpolationMethod(
-      getProblem(), getFactory(), _momentum_advection_interpolation);
+  const auto momentum_advection_method_name =
+      NS::fvAdvectedInterpolationMethodName(*this,
+                                            getProblem(),
+                                            getFactory(),
+                                            "momentum_advection_interpolation",
+                                            "momentum_advection_interpolation_method_name");
 
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";

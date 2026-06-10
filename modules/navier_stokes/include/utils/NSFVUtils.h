@@ -13,6 +13,7 @@
 #include "MooseEnum.h"
 
 class MooseObject;
+class MooseBase;
 class InputParameters;
 class FEProblemBase;
 class Factory;
@@ -66,6 +67,17 @@ std::string fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_me
 void addFVAdvectedInterpolationMethod(FEProblemBase & problem,
                                       Factory & factory,
                                       const MooseEnum & interpolation_method);
+
+/**
+ * Gets the FVInterpolationMethod name to pass to a linear FV kernel.
+ * If the object name parameter is supplied, the object is expected to be created externally.
+ * Otherwise, this creates the method object from the enum parameter if it is absent.
+ */
+std::string fvAdvectedInterpolationMethodName(const MooseBase & obj,
+                                              FEProblemBase & problem,
+                                              Factory & factory,
+                                              const std::string & interpolation_param,
+                                              const std::string & interpolation_name_param);
 
 /**
  * Builds the face interpolation methods supported by FVInterpolationMethod objects.
