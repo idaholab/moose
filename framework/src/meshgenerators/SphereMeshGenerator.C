@@ -21,7 +21,7 @@ SphereMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Generate a sphere (ball) mesh centered on the origin");
   params.addRequiredRangeCheckedParam<Real>("radius", "radius > 0.0", "Sphere (ball) radius");
-  params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr > 0", "Number of radial elements");
+  params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr >= 0", "Number of refinements");
 
   params.addParam<MooseEnum>(
       "elem_type", MooseMesh::elemTypes(), "The type of element to generate");
