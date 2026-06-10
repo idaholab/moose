@@ -400,7 +400,7 @@ class TestMoose2FMU(unittest.TestCase):
         mock_control.return_value.initialize.assert_called_once_with()
 
     def test_sync_moose_fmu_to_target_time_success(self):
-        """sync_moose_fmu_to_target_time should align times and return the trigger flag."""
+        """sync_moose_fmu_to_target_time aligns times and returns the trigger flag."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Runner:
