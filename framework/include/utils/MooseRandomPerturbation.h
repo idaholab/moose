@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "DataIO.h"
 #include "MooseError.h"
 
 #include <cstdint>
@@ -124,4 +125,36 @@ private:
   const uint32_t _half_mask;
   /// Number of Feistel rounds to apply per permute/invert call
   const unsigned int _rounds;
+
+  // for restart capability
+  friend void dataStore<MooseRandomPerturbation>(std::ostream &, MooseRandomPerturbation &, void *);
 };
+
+template <>
+inline void
+dataStore(std::ostream & stream, MooseRandomPerturbation & v, void * context)
+{
+  uint64_t seed = (static_cast<uint64_t>(v._k1) << 32) | v._k0;
+  storeHelper(stream, seed, context);
+  storeHelper(stream, v._n, context);
+  storeHelper(stream, v._rounds, context);
+}
+
+template <>
+inline void
+dataStore(std::ostream & stream, std::unique_ptr<MooseRandomPerturbation> & v, void * context)
+{
+  storeHelper(stream, *v, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, std::unique_ptr<MooseRandomPerturbation> & v, void * context)
+{
+  uint64_t seed;
+  unsigned int n, rounds;
+  loadHelper(stream, seed, context);
+  loadHelper(stream, n, context);
+  loadHelper(stream, rounds, context);
+  v = std::make_unique<MooseRandomPerturbation>(seed, n, rounds);
+}
