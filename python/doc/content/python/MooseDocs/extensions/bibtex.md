@@ -20,7 +20,7 @@ option, which applies to every page:
   `author-year`, the textual (`!cite`) and parenthetical (`!citep`) commands
   differ: `!citep` renders just the number, e.g. `[1]`, for use inside or at the
   end of a sentence, while `!cite` keeps the author so it reads as part of the
-  sentence, e.g. "Slaughter et al. [1]" (a bare number would not read well in
+  sentence, e.g. "Slaughter et al. `[1]`" (a bare number would not read well in
   running text).
 
 ```yaml
