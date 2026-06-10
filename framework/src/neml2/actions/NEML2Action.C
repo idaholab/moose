@@ -73,7 +73,8 @@ NEML2Action::NEML2Action(const InputParameters & params)
     _idx_generator_name(isParamValid("batch_index_generator_name")
                             ? getParam<std::string>("batch_index_generator_name")
                             : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
-    _block(getParam<std::vector<SubdomainName>>("block"))
+    _block(getParam<std::vector<SubdomainName>>("block")),
+    _skip_input_variables(getParam<std::vector<std::string>>("skip_input_variables"))
 {
   NEML2Utils::assertNEML2Enabled();
 
@@ -82,9 +83,6 @@ NEML2Action::NEML2Action(const InputParameters & params)
   auto & sub_block_params = *(all_params.find(uniqueActionName())->second.get());
   const auto & common_action = getCommonAction();
   sub_block_params.applyParameters(common_action.parameters());
-
-  // Variables to skip
-  _skip_input_variables = getParam<std::vector<std::string>>("skip_input_variables");
 
   // Set up optional output variable initialization
   auto init_vars = getParam<std::vector<MaterialPropertyName>>("initialize_outputs");

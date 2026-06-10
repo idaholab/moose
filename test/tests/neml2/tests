@@ -3,7 +3,7 @@
   issues = '#26450 #26920'
   design = 'NEML2/index.md NEML2Action.md'
   [custom_model]
-    requirement = 'The framework shall be capable of running custom NEML2 model implemented in MOOSE (optionally with automatic differentiation).'
+    requirement = 'The framework shall be capable of running custom NEML2 models implemented in MOOSE (optionally with automatic differentiation).'
     type = Exodiff
     input = 'custom_model.i'
     exodiff = 'custom_model_out.e'
