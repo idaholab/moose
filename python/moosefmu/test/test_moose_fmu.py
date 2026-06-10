@@ -399,8 +399,8 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(args[0], mock_runner.return_value)
         mock_control.return_value.initialize.assert_called_once_with()
 
-    def test_sync_with_moose_success(self):
-        """sync_with_moose should align times and return the trigger flag."""
+    def test_sync_moose_fmu_to_target_time_success(self):
+        """sync_moose_fmu_to_target_time should align times and return the trigger flag."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Runner:
@@ -441,7 +441,7 @@ class TestMoose2FMU(unittest.TestCase):
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-        moose_time, signal = slave.sync_with_moose(1.0, 0.1)
+        moose_time, signal = slave.sync_moose_fmu_to_target_time(1.0, 0.1)
 
         self.assertEqual(signal, "INITIAL")
         self.assertAlmostEqual(moose_time, 1.0005, delta=1e-3)

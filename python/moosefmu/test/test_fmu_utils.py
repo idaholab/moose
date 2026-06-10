@@ -222,6 +222,10 @@ class TestFmuAccessorHelpers(unittest.TestCase):
         fmu_utils.set_string(fmu, vr_map, "mode", "active")
         fmu_utils.set_bool(fmu, vr_map, "enabled", False)
 
+        # Inspect the recorded call log to confirm each helper resolved the
+        # variable name to its value reference via vr_map and invoked the
+        # matching typed FMI accessor: getReal([1]) for "temperature",
+        # getString([2]) for "mode", getBoolean([3]) for "enabled".
         self.assertEqual(fmu.calls["getReal"], [(1,)])
         self.assertEqual(fmu.calls["getString"], [(2,)])
         self.assertEqual(fmu.calls["getBoolean"], [(3,)])

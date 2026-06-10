@@ -22,8 +22,10 @@ Why step-by-step?
   to interleave custom logic (e.g., fixed-point coupling, data logging, or
   external synchronization) between steps.
 - The FMU's *internal* integration step is fixed at FMU build time in MOOSE.
-  Step-by-step does not change that internal dt, but it *does* control how
+  Step-by-step does not change that internal dt, but it *does/can* control how
   often the co-simulation master exchanges data (do_step calls).
+  NOTE: the control system can be used to change the internal integration step,
+  with a selection of timestepper (notably FunctionDT or PostprocessorDT)
 """
 
 if __name__ == "__main__":

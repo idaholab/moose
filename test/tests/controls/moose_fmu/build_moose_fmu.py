@@ -68,7 +68,12 @@ def main() -> int:
         sys.stderr.write("MooseTest.fmu not found after pythonfmu build.\n")
         return 1
 
-    _set_needs_execution_tool(fmu_path)
+    try:
+        _set_needs_execution_tool(fmu_path)
+    except (RuntimeError, OSError, zipfile.BadZipFile, ET.ParseError) as exc:
+        sys.stderr.write(f"Failed to patch MooseTest.fmu: {exc}\n")
+        return 1
+
     print("Updated MooseTest.fmu: needsExecutionTool=false")
     return 0
 

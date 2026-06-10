@@ -10,7 +10,7 @@ in `test/tests/controls/moose_fmu` pass these parameters as FMI start values, so
 you can see them in action in `run_fmu.py` and the `simulate_moose_fmu` helper
 inside `moose_fmu_tester.py`:
 
-- `flag`: Optional user-defined synchronization flag that supplements the
+- `flag`: Optional user-defined synchronization flag (see [synchronization]) that supplements the
   default `INITIAL`, `MULTIAPP_FIXED_POINT_BEGIN`, and `MULTIAPP_FIXED_POINT_END`
   signals.
 - `moose_command`: Full command string used to launch the MOOSE executable and
@@ -23,8 +23,15 @@ inside `moose_fmu_tester.py`:
 
 !listing python/moosefmu/moose2fmu.py start=def __init__ end=# Default synchronization and data retrieval flags
 
-The class also exposes a ``default_experiment`` that can be customized if the
-FMU should advertise a different start/stop time or nominal step size.
+Because `Moose2FMU` derives from `pythonfmu`'s `Fmi2Slave`, it also inherits a
+`default_experiment` attribute. Assign it a
+[`DefaultExperiment`](https://github.com/NTNU-IHB/PythonFMU/blob/master/pythonfmu/default_experiment.py)
+instance (`from pythonfmu.default_experiment import DefaultExperiment`) when the
+FMU should advertise a different `start_time`, `stop_time`, `step_size`, or
+`tolerance`. These values are written into the FMU's `modelDescription.xml` as
+the `<DefaultExperiment>` element and serve as hints to the importing
+co-simulation tool. Note that the step size is fixed when the FMU is built, so
+changing it requires rebuilding the FMU.
 
 
 ### Runtime helpers
@@ -36,9 +43,18 @@ interacting with a running MOOSE simulation:
   values to the `WebServerControl` system. Values are cached to avoid
   redundant updates; pass ``force=True`` to resend a value that was already
   applied.
-- `sync_with_moose` advances the FMU time until it matches the simulation time
-  within `dt_tolerance`. Additional synchronization flags can be supplied via
-  the optional `allowed_flags` argument.
+- `sync_moose_fmu_to_target_time` steps the running MOOSE simulation forward until the MOOSE
+  clock reaches the FMU's target time (`current_time`, the communication point
+  requested by the co-simulation master in `do_step`) to within `dt_tolerance`.
+  It is the MOOSE clock that is advanced to catch up with the FMU, not the other
+  way around, because MOOSE is a high-fidelity physics solver that usually
+  integrates with smaller internal time steps than the FMU's communication step;
+  it therefore takes one or more of its own steps to reach each FMU communication
+  point (the base class requires `moose_dt <= step_size`). At each synchronization
+  flag the method reads MOOSE's time and, if the target has not been reached,
+  acknowledges the flag and lets MOOSE continue to its next step. It returns the
+  matched MOOSE time and the flag that was active. Additional synchronization
+  flags can be supplied via the optional `allowed_flags` argument.
 - `ensure_control_listening` verifies the control socket is ready before any
   postprocessors or reporters are queried.
 - `get_postprocessor_value` and `get_reporter_value` wait for a specific
@@ -49,7 +65,7 @@ interacting with a running MOOSE simulation:
 Together these helpers reduce the boilerplate needed inside a custom
 `do_step` implementation and make it easier to write robust coupling logic.
 
-### Synchronization and data retrieval flags
+### Synchronization and data retrieval flags id=synchronization
 
 `Moose2FMU` coordinates with the running MOOSE simulation through named
 `MooseControl` flags. To simplify typical multiapp workflows the base class
@@ -101,7 +117,7 @@ utilities described above:
 
 ```python
     def do_step(self, current_time: float, step_size: float, **_kwargs) -> bool:
-        moose_time, signal = self.sync_with_moose(current_time, step_size)
+        moose_time, signal = self.sync_moose_fmu_to_target_time(current_time, step_size)
         if moose_time is None:
             return False
 

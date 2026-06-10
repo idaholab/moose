@@ -20,12 +20,11 @@ from pyfmi import load_fmu
 def test_controller(user_cmd: str | None = None):
     """Return the command used to launch MOOSE, or exit if it is unavailable."""
     # Get the command we should run
-    # You'll hit this if you don't run a RunApp-derived Tester or
-    # don't run it with the "command_proxy" option
     if user_cmd:
         return user_cmd
     RUNAPP_COMMAND = os.environ.get("RUNAPP_COMMAND")
-
+    # You'll hit this if you don't run a RunApp-derived Tester or
+    # don't run it with the "command_proxy" option
     if RUNAPP_COMMAND is None:
         sys.exit("Missing expected command variable RUNAPP_COMMAND")
 
@@ -141,52 +140,6 @@ def moose_fmu_step_by_step(
                 ("diffused", np.float64),
                 ("rep_value", np.float64),
             ],
-        )
-
-        # Save our step-by-step results
-        df_step = pd.DataFrame(result)
-        df_step.to_csv(step_csv, index=False)
-
-        return result
-    finally:
-        _finalize_moose_fmu(model)
-
-
-def moose_fmu_time(
-    moose_filename: str,
-    t0: float,
-    t1: float,
-    dt: float,
-    flag: str,
-    cmd: str,
-    *,
-    time_tol: float | None = None,
-    step_csv: str = "run_fmu_time.csv",
-):
-    """Manual FMI 2.0 run for testing fmu moose time sync."""
-    if time_tol is None:
-        time_tol = 1e-15
-
-    model = _load_moose_fmu(moose_filename, debug_logging=True)
-
-    try:
-        _initialize_moose_fmu(model, t0, t1, flag, cmd)
-
-        # --- Step loop ---
-        rows = []
-        t = t0
-        while t <= t1:
-            model.do_step(current_t=t, step_size=dt)
-
-            moose_time = get_float(model, "moose_time")
-
-            rows.append((t, moose_time))
-
-            t = min(t + dt, t1 + time_tol)
-
-        result = np.array(
-            rows,
-            dtype=[("time", np.float64), ("moose_time", np.float64)],
         )
 
         # Save our step-by-step results

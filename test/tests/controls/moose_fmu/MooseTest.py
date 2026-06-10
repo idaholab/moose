@@ -91,7 +91,7 @@ class MooseTest(Moose2FMU):
 
         # Synchronize MOOSE simulation time with the FMU (supports MOOSE
         # simulation time stepping mechanism).
-        moose_time, signal = self.sync_with_moose(current_time, step_size, self.flag)
+        moose_time, signal = self.sync_moose_fmu_to_target_time(current_time, step_size, self.flag)
 
         if moose_time is None:
             return False
@@ -110,7 +110,7 @@ class MooseTest(Moose2FMU):
             diffused = self.get_postprocessor_value("diffused", current_time)
 
             # If the value is not found, fail the step to surface the issue to
-            # the master algorithm.
+            # the caller of this routine.
             if diffused is None:
                 return False
 

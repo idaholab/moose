@@ -56,7 +56,7 @@ def _initialize_moose_fmu(model, t0: float, t1: float, flag: str, cmd: str) -> N
     model.exit_initialization_mode()
 
 
-def _initialize_passthrough_fmu(model, t0: float, t1: float) -> None:
+def _initialize_basic_fmu(model, t0: float, t1: float) -> None:
     model.setup_experiment(start_time=t0, stop_time=t1)
     model.enter_initialization_mode()
     model.exit_initialization_mode()
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         _initialize_moose_fmu(
             moose_instance, start_time, stop_time, flag, moose_command
         )
-        _initialize_passthrough_fmu(fmu_instance, start_time, stop_time)
+        _initialize_basic_fmu(fmu_instance, start_time, stop_time)
 
         # Reference run (MOOSE only)
         moose_times_ref, diffused_ref = [], []

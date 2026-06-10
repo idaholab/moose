@@ -154,7 +154,7 @@ class Moose2FMU(Fmi2Slave):
         """FMU stepping logic must be implemented by subclasses."""
         raise NotImplementedError("Subclasses must implement do_step()")
 
-    def sync_with_moose(
+    def sync_moose_fmu_to_target_time(
         self,
         current_time: float,
         step_size: float,
@@ -451,7 +451,7 @@ class Moose2FMU(Fmi2Slave):
         wait_seconds: float = 0.5,
     ) -> Optional[str]:
         """
-        Poll ``get_waiting_flag`` and retry before giving up.
+        Poll ``get_waiting_flag`` and retry 'max_retries' times before giving up.
 
         Parameters
         ----------
@@ -461,7 +461,13 @@ class Moose2FMU(Fmi2Slave):
         max_retries
             Number of times to attempt retrieving the flag.
         wait_seconds
-            Delay between retries in seconds.
+            Polling interval, in seconds, slept between attempts while waiting
+            for MOOSE to reach an expected control point. ``get_waiting_flag``
+            is a non-blocking status check, so the helper only gives up after
+            roughly ``max_retries * wait_seconds`` of wall-clock; size that
+            product to exceed the time a time step takes to solve (including any
+            timestep cutbacks), or the poll loop will abandon a step that is
+            still computing.
 
         """
         normalized_allowed: Optional[Set[str]] = None
@@ -651,34 +657,6 @@ class Moose2FMU(Fmi2Slave):
         normalized_flag = flag_value.strip().upper()
         self.logger.debug("Received flag '%s'", normalized_flag or flag_value)
         return normalized_flag or flag_value
-
-    def _schedule_next_time(self, next_time: float) -> bool:
-        """
-        Request MOOSE to insert an additional time point if needed.
-
-        Parameters
-        ----------
-        next_time
-            The time that MOOSE should be forced to hit before advancing further.
-
-        Returns
-        -------
-        bool
-            ``True`` when a new request was sent to MOOSE, ``False`` if it was
-            skipped because the same value was already applied.
-
-        """
-        path = "Times/external_input/next_time"
-        cached = self._controllable_real_cache.get(path)
-        if cached == next_time:
-            self.logger.debug(
-                "Skipping next-time scheduling; %.6f already requested", next_time
-            )
-            return False
-
-        self.control.set_real(path, next_time)
-        self._controllable_real_cache[path] = next_time
-        return True
 
     def terminate(self) -> bool:
         """Shut down the underlying MooseControl instance."""

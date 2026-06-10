@@ -120,7 +120,17 @@ def configure_fmu_logging(
 
 
 def fmu_info(fmu_model: str, filename: str):
-    """Read and log FMI model variable metadata for the given FMU archive."""
+    """
+    Read and log FMI model variable metadata for the given FMU archive.
+
+    The reported ``start`` and ``valueReference`` fields are read from the FMU's
+    ``modelDescription.xml``; they are not supplied to this function. ``start`` is
+    the optional declared initial value of a variable, and ``valueReference`` is
+    the integer handle the FMI API uses to address a variable by id instead of by
+    name. Both are fixed when the FMU is built -- ``valueReference`` is
+    auto-assigned by ``pythonfmu`` as each variable is registered -- so this
+    function only introspects them.
+    """
     if load_fmu is None:
         raise ModuleNotFoundError(
             "fmu_info() requires optional dependency 'pyfmi'. "
