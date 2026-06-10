@@ -28,6 +28,15 @@
     collections = 'SYSTEM'
     capabilities = '!neml2'
   []
+  [infer_io_type_ambiguous]
+    requirement = 'The framework shall throw an error when the MOOSE data type for a NEML2 scalar input variable cannot be unambiguously inferred because the name matches multiple MOOSE entities.'
+    type = RunException
+    input = 'custom_model.i'
+    cli_args = 'Functions/A/type=ParsedFunction Functions/A/expression=1.0'
+    expect_err = 'Trying to infer MOOSE data type for NEML2 variable A\. The name matches multiple types \(function variable\s*\)'
+    collections = 'SYSTEM'
+    capabilities = 'neml2'
+  []
   [model_parameter]
     requirement = 'The framework shall be capable of using MOOSE data as NEML2 model parameters.'
     type = Exodiff
