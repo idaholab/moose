@@ -32,8 +32,7 @@ public:
   std::map<std::string, std::string> _old_repos;
   Moose::internal::Capabilities::RegistryType _old_capabilities_registry;
   std::map<std::string, std::string> _old_citations;
-  std::map<std::string, std::set<std::string>> _old_label_citations;
-  std::set<std::string> _old_always_citations;
+  std::map<std::string, std::set<std::string>> _old_app_citation_bibtex_keys;
 };
 
 void
@@ -50,8 +49,7 @@ RegistryTest::SetUp()
   // Save and clear the citation state (RegistryTest is a friend of Registry)
   auto & r = Registry::getRegistry();
   std::swap(r._citations, _old_citations);
-  std::swap(r._label_citations, _old_label_citations);
-  std::swap(r._always_citations, _old_always_citations);
+  std::swap(r._app_citation_bibtex_keys, _old_app_citation_bibtex_keys);
 }
 
 void
@@ -69,11 +67,9 @@ RegistryTest::TearDown()
   // Restore the citation state
   auto & r = Registry::getRegistry();
   std::swap(r._citations, _old_citations);
-  std::swap(r._label_citations, _old_label_citations);
-  std::swap(r._always_citations, _old_always_citations);
+  std::swap(r._app_citation_bibtex_keys, _old_app_citation_bibtex_keys);
   _old_citations.clear();
-  _old_label_citations.clear();
-  _old_always_citations.clear();
+  _old_app_citation_bibtex_keys.clear();
 }
 
 TEST_F(RegistryTest, getClassName)
@@ -97,26 +93,27 @@ TEST_F(RegistryTest, appNameFromAppPath)
 
 TEST_F(RegistryTest, citations)
 {
-  Registry::addAlwaysCitation("always_key", "@misc{always_key, title={A}}");
-  Registry::addLabelCitation("MyApp", "label_key", "@misc{label_key, title={L}}");
+  Registry::addAppCitation("MooseApp", "framework_key", "@misc{framework_key, title={F}}");
+  Registry::addAppCitation("MyApp", "app_key", "@misc{app_key, title={A}}");
 
   // The BibTeX text is stored once per key
-  EXPECT_EQ(Registry::getCitations().at("always_key"), "@misc{always_key, title={A}}");
-  EXPECT_EQ(Registry::getCitations().at("label_key"), "@misc{label_key, title={L}}");
+  EXPECT_EQ(Registry::getCitations().at("framework_key"), "@misc{framework_key, title={F}}");
+  EXPECT_EQ(Registry::getCitations().at("app_key"), "@misc{app_key, title={A}}");
 
-  // Keys are tied to the right scope
-  EXPECT_EQ(Registry::getAlwaysCitations(), (std::set<std::string>{"always_key"}));
-  EXPECT_EQ(Registry::getLabelCitations().at("MyApp"), (std::set<std::string>{"label_key"}));
+  // Keys are tied to the right app
+  EXPECT_EQ(Registry::getAppCitationBibtexKeys().at("MooseApp"),
+            (std::set<std::string>{"framework_key"}));
+  EXPECT_EQ(Registry::getAppCitationBibtexKeys().at("MyApp"), (std::set<std::string>{"app_key"}));
 
   // Re-registering an identical entry is idempotent
-  Registry::addAlwaysCitation("always_key", "@misc{always_key, title={A}}");
+  Registry::addAppCitation("MooseApp", "framework_key", "@misc{framework_key, title={F}}");
   EXPECT_EQ(Registry::getCitations().size(), 2);
 }
 
 TEST_F(RegistryTest, citationConflict)
 {
-  Registry::addAlwaysCitation("dup", "@misc{dup, title={A}}");
-  EXPECT_MOOSEERROR_MSG(Registry::addAlwaysCitation("dup", "@misc{dup, title={B}}"),
+  Registry::addAppCitation("MyApp", "dup", "@misc{dup, title={A}}");
+  EXPECT_MOOSEERROR_MSG(Registry::addAppCitation("MyApp", "dup", "@misc{dup, title={B}}"),
                         "is already registered with different BibTeX text");
 }
 

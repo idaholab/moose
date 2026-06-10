@@ -1902,24 +1902,24 @@ MooseApp::run()
   }
 
   if (isParamSetByUser("citations"))
-    printCitations();
+    requestCitations();
 }
 
 void
-MooseApp::printCitations()
+MooseApp::requestCitations()
 {
-  // Gather the citation keys that apply to this run: the always-cited framework and PETSc papers,
-  // plus any citations tied to the owning module/app labels of the object types that were actually
-  // constructed in this simulation.
-  std::set<std::string> keys = Registry::getAlwaysCitations();
+  // Gather the citation keys that apply to this run: for every object type actually constructed,
+  // the citations registered for its owning app/module. The framework paper is tied to "MooseApp",
+  // so it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it.
+  std::set<std::string> keys;
 
-  const auto & label_citations = Registry::getLabelCitations();
+  const auto & app_citation_keys = Registry::getAppCitationBibtexKeys();
   for (const auto & objname : _factory.getConstructedObjects())
   {
     if (Registry::isRegisteredObj(objname))
     {
       const auto & label = Registry::objData(objname)._label;
-      if (const auto it = label_citations.find(label); it != label_citations.end())
+      if (const auto it = app_citation_keys.find(label); it != app_citation_keys.end())
         keys.insert(it->second.begin(), it->second.end());
     }
   }

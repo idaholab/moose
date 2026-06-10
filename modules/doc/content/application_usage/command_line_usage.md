@@ -122,9 +122,10 @@ the left.
 
 ### `--citations`
 
-`--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. The
-current MOOSE framework paper is always included, and any module that registers a citation is added
-only when one of its objects is actually used in the run:
+`--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. Each
+citation is tied to an app: the current MOOSE framework paper is tied to `MooseApp`, and any module
+that registers a citation is added only when one of its objects is actually used in the run (so an
+app composed of MooseApp and other apps inherits their citations as they are used):
 
 ```
 ./yourapp-opt -i input.i --citations
@@ -142,9 +143,8 @@ entries to a file (e.g. for import into a reference manager) instead of the cons
 
 It can be combined with `--check-input` to report the citations without solving. The file name is
 optional, so when one is given it must immediately follow `--citations` (otherwise the next token on
-the command line is consumed as the file name). Module developers register their papers with
-`Registry::addLabelCitation` (per module/app); `Registry::addAlwaysCitation` registers a paper that
-is always emitted.
+the command line is consumed as the file name). Module developers register their papers per app with
+`Registry::addAppCitation(app_name, key, bibtex)`.
 
 Would show you documentation for objects matching `SomeKernel`.
 

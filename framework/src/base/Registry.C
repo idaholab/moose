@@ -205,19 +205,12 @@ Registry::addCitationText(const std::string & key, const std::string & bibtex)
 }
 
 void
-Registry::addLabelCitation(const std::string & label,
-                           const std::string & key,
-                           const std::string & bibtex)
+Registry::addAppCitation(const std::string & app_name,
+                         const std::string & key,
+                         const std::string & bibtex)
 {
   addCitationText(key, bibtex);
-  getRegistry()._label_citations[label].insert(key);
-}
-
-void
-Registry::addAlwaysCitation(const std::string & key, const std::string & bibtex)
-{
-  addCitationText(key, bibtex);
-  getRegistry()._always_citations.insert(key);
+  getRegistry()._app_citation_bibtex_keys[app_name].insert(key);
 }
 
 std::string

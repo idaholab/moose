@@ -233,12 +233,11 @@ public:
   /// register a repository
   static void addRepository(const std::string & repo_name, const std::string & repo_url);
 
-  /// Register a citation tied to a \p label (app/module); emitted by --citations when any object of
-  /// that label is constructed.
+  /// Register a citation (the full BibTeX \p bibtex text, identified by \p key) tied to the app
+  /// \p app_name; emitted by --citations when any object registered to that app is constructed. The
+  /// framework registers its paper under "MooseApp", so apps composed of MooseApp inherit it.
   static void
-  addLabelCitation(const std::string & label, const std::string & key, const std::string & bibtex);
-  /// Register a citation that --citations always emits (e.g. the framework and PETSc papers).
-  static void addAlwaysCitation(const std::string & key, const std::string & bibtex);
+  addAppCitation(const std::string & app_name, const std::string & key, const std::string & bibtex);
 
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allObjects()
@@ -285,15 +284,10 @@ public:
   {
     return getRegistry()._citations;
   }
-  /// Returns a map of label (app/module) -> citation keys tied to that label
-  static const std::map<std::string, std::set<std::string>> & getLabelCitations()
+  /// Returns a map of app/module name -> the BibTeX citation keys tied to that app
+  static const std::map<std::string, std::set<std::string>> & getAppCitationBibtexKeys()
   {
-    return getRegistry()._label_citations;
-  }
-  /// Returns the set of citation keys that --citations always emits
-  static const std::set<std::string> & getAlwaysCitations()
-  {
-    return getRegistry()._always_citations;
+    return getRegistry()._app_citation_bibtex_keys;
   }
 
   /// returns the name() for a registered class
@@ -373,10 +367,8 @@ private:
   std::map<std::string, std::string> _type_to_classname;
   /// Citation key -> BibTeX entry text
   std::map<std::string, std::string> _citations;
-  /// Label (app/module) -> set of citation keys tied to that label
-  std::map<std::string, std::set<std::string>> _label_citations;
-  /// Citation keys that --citations always emits
-  std::set<std::string> _always_citations;
+  /// App/module name -> set of citation keys tied to that app
+  std::map<std::string, std::set<std::string>> _app_citation_bibtex_keys;
 };
 
 template <typename T>

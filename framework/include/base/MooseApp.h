@@ -1585,10 +1585,12 @@ private:
   bool runInputs();
 
   /**
-   * Handles the --citations command-line option: prints (or writes to a file) the BibTeX entries
-   * that should be cited for the framework, PETSc, and the modules/objects used in this simulation.
+   * Handles the --citations command-line option: registers with PETSc the BibTeX entries that
+   * should be cited for the framework and the modules/objects used in this simulation, and enables
+   * PETSc's -citations option. PETSc prints them (together with its own and its sub-packages'
+   * citations) at PetscFinalize, to the console or to a file if one was given.
    */
-  void printCitations();
+  void requestCitations();
 
   /**
    * Internal method for adding a capability.
