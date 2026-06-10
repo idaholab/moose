@@ -177,6 +177,13 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
   return _app.registerRestartableData(std::move(data_ptr), 0, !declare);
 }
 
+void
+ReporterData::checkLateReporterDeclaration(const ReporterName & reporter_name) const
+{
+  if (_app.isRecovering() && _app.isRestoreInProgress())
+    mooseError("Reporter value '", reporter_name, "' is declared after the bulk restore and will not be recovered");
+}
+
 bool
 ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
 {

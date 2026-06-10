@@ -312,6 +312,8 @@ private:
   RestartableDataValue & getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
                                                   bool declare) const;
 
+  void checkLateReporterDeclaration(const ReporterName & reporter_name) const;
+
   /// Map from ReporterName -> Reporter state. We need to keep track of all of the states that are
   /// created so that we can check them after Reporter declaration to make sure all states have
   /// a producer (are delcared). We cannot check _context_ptrs, because a context is only
@@ -404,6 +406,8 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
 {
   // Get/create the ReporterState
   auto & state = getReporterStateHelper<T>(reporter_name, /* declare = */ true, &producer);
+
+  checkLateReporterDeclaration(reporter_name);
 
   // They key in _states (ReporterName) is not unique by special type. This is done on purpose
   // because we want to store reporter names a single name regardless of special type.

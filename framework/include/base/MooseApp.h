@@ -802,6 +802,13 @@ public:
   std::unique_ptr<Backup> finalizeRestore();
 
   /**
+   * @return Whether or not a restore is currently in progress, i.e. restore() has been called
+   * and finalizeRestore() has not yet been called. While true, the checkpoint reader's
+   * stream/header are still open.
+   */
+  bool isRestoreInProgress() const { return _rd_reader.isRestoring(); }
+
+  /**
    * Returns a string to be printed at the beginning of a simulation
    */
   virtual std::string header() const;
