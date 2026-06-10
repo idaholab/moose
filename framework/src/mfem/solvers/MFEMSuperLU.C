@@ -26,18 +26,18 @@ MFEMSuperLU::validParams()
 MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMSuperLU::constructSolver()
+MFEMSuperLU::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
   _solver = std::move(solver);
 }
 
 void
-MFEMSuperLU::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMSuperLU::SetupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("SuperLU solver does not support LOR solve");

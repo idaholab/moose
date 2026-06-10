@@ -737,7 +737,7 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
   if (getProblemData().jacobian_solver)
   {
     solvers.push_back(MooseUtils::prettyCppType(getProblemData().jacobian_solver.get()));
-    if (const auto * prec = getProblemData().jacobian_solver->getPreconditioner())
+    if (const auto * prec = getProblemData().jacobian_solver->GetPreconditioner())
       solvers.push_back(MooseUtils::prettyCppType(prec));
   }
 

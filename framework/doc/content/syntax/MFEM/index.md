@@ -69,7 +69,7 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 ### Solver and Executioner
 
-With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. For problems with high polynomial order, setting [!param](/Solvers/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMSolverBase.md).
+With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. For problems with high polynomial order, setting [!param](/Solvers/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMLinearSolverBase.md).
 
 While in principle any solver may be used as the main solver or preconditioner, the main limitation to keep in mind is that Hypre solvers may only be preconditioned by other Hypre solvers. Furthermore, when a Hypre solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a Hypre solver for preconditioning purposes.
 

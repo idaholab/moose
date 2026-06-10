@@ -32,35 +32,35 @@ MFEMHypreFGMRES::validParams()
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreFGMRES::constructSolver()
+MFEMHypreFGMRES::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreFGMRES>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetKDim(getParam<int>("kdim"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*solver);
+  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMHypreFGMRES::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreFGMRES::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->setupLOR(a, tdofs);
-    setPreconditioner(static_cast<mfem::HypreFGMRES &>(*_solver));
+    _preconditioner->SetupLOR(a, tdofs);
+    SetPreconditioner(static_cast<mfem::HypreFGMRES &>(*_solver));
   }
   else if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(lor_disc, getMFEMProblem().getComm());
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));

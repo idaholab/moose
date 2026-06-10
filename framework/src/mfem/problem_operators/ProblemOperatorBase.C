@@ -91,14 +91,14 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
       mooseError("A nonlinear MFEM solve requires a nonlinear solver, but none was provided.");
 
     auto & nonlinear_solver = *_problem_data.nonlinear_solver;
-    if (nonlinear_solver.usesExternalLinearSolver())
+    if (nonlinear_solver.RequiresExternalLinearSolver())
     {
       if (!_problem_data.jacobian_solver)
         mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
                    "none was provided.");
       auto & linear_solver = *_problem_data.jacobian_solver;
       equation_system.PrepareLinearSolver(linear_solver);
-      nonlinear_solver.SetLinearSolver(linear_solver.getSolver());
+      nonlinear_solver.SetLinearSolver(linear_solver.GetSolver());
     }
 
     nonlinear_solver.SetOperator(equation_system);
@@ -116,7 +116,7 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
 
     auto & linear_solver = *_problem_data.jacobian_solver;
     equation_system.PrepareLinearSolver(linear_solver);
-    linear_solver.getSolver().Mult(rhs, x);
+    linear_solver.GetSolver().Mult(rhs, x);
   }
 }
 

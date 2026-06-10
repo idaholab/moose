@@ -22,10 +22,6 @@
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
 
-#ifdef MOOSE_MFEM_ENABLED
-#include "MFEMSolverBase.h"
-#endif
-
 #include "hit/parse.h"
 
 #include <unistd.h>
@@ -761,7 +757,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
-  syntax.registerSyntaxType("Solvers/*", "UserObjectName");
+  syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

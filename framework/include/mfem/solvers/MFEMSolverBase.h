@@ -26,10 +26,10 @@ public:
   SolverBase(const InputParameters & parameters);
 
   /// Returns the wrapped MFEM solver
-  mfem::Solver & getSolver();
+  mfem::Solver & GetSolver();
 
   /// Override in derived classes to construct and set the solver options.
-  virtual void constructSolver() = 0;
+  virtual void ConstructSolver() = 0;
 
 protected:
   /// Solver to be used for the problem
@@ -37,7 +37,7 @@ protected:
 };
 
 inline mfem::Solver &
-Moose::MFEM::SolverBase::getSolver()
+SolverBase::GetSolver()
 {
   mooseAssert(_solver, "Attempting to retrieve solver before it's been constructed");
   return *_solver;

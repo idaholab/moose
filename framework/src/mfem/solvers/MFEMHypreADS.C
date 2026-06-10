@@ -31,11 +31,11 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreADS::constructSolver()
+MFEMHypreADS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   solver->SetPrintLevel(getParam<int>("print_level"));
@@ -44,11 +44,11 @@ MFEMHypreADS::constructSolver()
 }
 
 void
-MFEMHypreADS::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreADS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");

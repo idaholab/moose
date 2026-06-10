@@ -33,35 +33,35 @@ MFEMGMRESSolver::validParams()
 MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMGMRESSolver::constructSolver()
+MFEMGMRESSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*solver);
+  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMGMRESSolver::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMGMRESSolver::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->setupLOR(a, tdofs);
-    setPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
+    _preconditioner->SetupLOR(a, tdofs);
+    SetPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs);
     lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));

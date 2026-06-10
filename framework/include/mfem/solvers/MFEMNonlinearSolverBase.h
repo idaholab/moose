@@ -31,7 +31,7 @@ public:
 
   NonlinearSolverBase(const InputParameters & parameters);
 
-  void constructSolver() override = 0;
+  void ConstructSolver() override = 0;
 
   /// Configure the nonlinear solver with the residual/Jacobian operator.
   virtual void SetOperator(const mfem::Operator & op) = 0;
@@ -43,10 +43,10 @@ public:
   virtual void Mult(const mfem::Vector & rhs, mfem::Vector & x) = 0;
 
   /// Return whether this nonlinear solver requires Jacobian/gradient information from the operator.
-  virtual bool requiresGradient() const = 0;
+  virtual bool RequiresGradient() const = 0;
 
-  /// Return whether this nonlinear solver uses the externally configured MFEM linear solver.
-  virtual bool usesExternalLinearSolver() const = 0;
+  /// Return whether this nonlinear solver requires an externally configured MFEM linear solver.
+  virtual bool RequiresExternalLinearSolver() const = 0;
 };
 } // namespace Moose::MFEM
 

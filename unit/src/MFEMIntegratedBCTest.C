@@ -301,6 +301,7 @@ TEST_F(MFEMIntegratedBCTest, NLBoundaryConvectiveHeatFluxIntegratorJacobianMatch
   mfem::GridFunction gf(&fespace);
   gf = 0.0;
 
+  ASSERT_TRUE(mesh.GetNBE());
   const int be = 0;
   mfem::Array<int> vdofs;
   fespace.GetBdrElementVDofs(be, vdofs);
@@ -404,7 +405,6 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters nonlinear_params =
       _factory.getValidParams("TestOffDiagonalNonlinearIntegratedBC");
@@ -442,21 +442,19 @@ TEST_F(MFEMIntegratedBCTest, AcceptsLinearOffDiagonalIntegratedBCWhenBuildingEqu
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
-  diag_trial_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearIntegratedBC");
   linear_params.set<VariableName>("variable") = "test_variable_name";
   linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
   linear_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
-  auto diag_test = addSharedObject<MFEMDiffusionKernel>(
-      "MFEMDiffusionKernel", "diag_test_bc_2", diag_test_params);
+  auto diag_test =
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test_bc", diag_test_params);
   auto diag_trial = addSharedObject<MFEMDiffusionKernel>(
-      "MFEMDiffusionKernel", "diag_trial_bc_2", diag_trial_params);
+      "MFEMDiffusionKernel", "diag_trial_bc", diag_trial_params);
   auto linear = addSharedObject<TestOffDiagonalLinearIntegratedBC>(
       "TestOffDiagonalLinearIntegratedBC", "linear_offdiag_bc", linear_params);
 

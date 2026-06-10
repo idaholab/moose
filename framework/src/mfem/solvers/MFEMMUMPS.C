@@ -27,11 +27,11 @@ MFEMMUMPS::validParams()
 
 MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMMUMPS::constructSolver()
+MFEMMUMPS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
   solver->SetPrintLevel(getParam<int>("print_level"));
@@ -39,7 +39,7 @@ MFEMMUMPS::constructSolver()
 }
 
 void
-MFEMMUMPS::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMMUMPS::SetupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("MUMPS solver does not support LOR solve");

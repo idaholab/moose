@@ -388,20 +388,18 @@ TEST_F(MFEMKernelTest, AcceptsLinearOffDiagonalKernelWhenBuildingEquationSystem)
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
-  diag_trial_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearKernel");
   linear_params.set<VariableName>("variable") = "test_variable_name";
   linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
 
   auto diag_test =
-      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test_2", diag_test_params);
-  auto diag_trial = addSharedObject<MFEMDiffusionKernel>(
-      "MFEMDiffusionKernel", "diag_trial_2", diag_trial_params);
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test", diag_test_params);
+  auto diag_trial =
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_trial", diag_trial_params);
   auto linear = addSharedObject<TestOffDiagonalLinearKernel>(
       "TestOffDiagonalLinearKernel", "linear_offdiag", linear_params);
 
@@ -421,7 +419,6 @@ TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired
 {
   InputParameters linear_params = _factory.getValidParams("MFEMDiffusionKernel");
   linear_params.set<VariableName>("variable") = "test_variable_name";
-  linear_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters nonlinear_params = _factory.getValidParams("TestDiagonalNonlinearKernel");
   nonlinear_params.set<VariableName>("variable") = "test_variable_name";
@@ -442,7 +439,7 @@ TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired
 
   // The GetGradient() guard fires before the vector argument is accessed, so a
   // default-constructed (empty) vector is sufficient to reach it. Skipping
-  // AssembleSystem avoids putting _h_blocks and _linear_operator into the
+  // FormSystem avoids putting _h_blocks and _linear_operator into the
   // mixed-level state that caused teardown failures in earlier iterations of
   // this test, allowing eqn_system to be stack-allocated and destroyed normally.
   const mfem::Vector dummy;

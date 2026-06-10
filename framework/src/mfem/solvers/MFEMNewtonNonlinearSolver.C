@@ -25,11 +25,11 @@ MFEMNewtonNonlinearSolver::validParams()
 MFEMNewtonNonlinearSolver::MFEMNewtonNonlinearSolver(const InputParameters & parameters)
   : Moose::MFEM::NonlinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMNewtonNonlinearSolver::constructSolver()
+MFEMNewtonNonlinearSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::NewtonSolver>(getMFEMProblem().getComm());
   solver->iterative_mode = getParam<bool>("use_initial_guess");
@@ -43,18 +43,18 @@ MFEMNewtonNonlinearSolver::constructSolver()
 void
 MFEMNewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
-  static_cast<mfem::NewtonSolver &>(getSolver()).SetOperator(op);
+  GetSolver().SetOperator(op);
 }
 
 void
 MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
-  static_cast<mfem::NewtonSolver &>(getSolver()).SetSolver(solver);
+  static_cast<mfem::NewtonSolver &>(GetSolver()).SetSolver(solver);
 }
 
 void
 MFEMNewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
 {
-  getSolver().Mult(rhs, x);
+  GetSolver().Mult(rhs, x);
 }
 #endif

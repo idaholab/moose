@@ -26,21 +26,21 @@ MFEMOperatorJacobiSmoother::validParams()
 MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMOperatorJacobiSmoother::constructSolver()
+MFEMOperatorJacobiSmoother::ConstructSolver()
 {
   _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
 }
 
 void
-MFEMOperatorJacobiSmoother::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMOperatorJacobiSmoother::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
   }
 }

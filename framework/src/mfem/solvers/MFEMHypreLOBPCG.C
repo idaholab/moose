@@ -28,11 +28,11 @@ MFEMHypreLOBPCG::validParams()
 MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
   : Moose::MFEM::EigensolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreLOBPCG::constructSolver()
+MFEMHypreLOBPCG::ConstructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
 
@@ -42,7 +42,7 @@ MFEMHypreLOBPCG::constructSolver()
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*_eigensolver);
+  SetPreconditioner(*_eigensolver);
 }
 
 #endif

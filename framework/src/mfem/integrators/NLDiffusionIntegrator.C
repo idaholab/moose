@@ -19,7 +19,7 @@ NLDiffusionIntegrator::NLDiffusionIntegrator(mfem::Coefficient & k,
                                              const mfem::IntegrationRule * ir)
   : _diffusion_integ(k, ir),
     _grad_trial(gf),
-    _neg_grad_trial(_neg_one, _grad_trial),
+    _neg_grad_trial(-1, _grad_trial),
     _neg_dk_du_grad_trial(dk_du, _neg_grad_trial),
     _weak_div_integ(_neg_dk_du_grad_trial)
 {

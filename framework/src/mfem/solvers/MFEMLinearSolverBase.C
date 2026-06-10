@@ -32,7 +32,7 @@ LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
 
 template <typename T>
 void
-LinearSolverBase::setPreconditioner(T & solver)
+LinearSolverBase::SetPreconditioner(T & solver)
 {
   if (isParamSetByUser("preconditioner"))
   {
@@ -44,10 +44,10 @@ LinearSolverBase::setPreconditioner(T & solver)
       _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.shared_from_this());
     }
 
-    if (dynamic_cast<const EigensolverBase *>(getPreconditioner()))
+    if (dynamic_cast<const EigensolverBase *>(GetPreconditioner()))
       mooseError("Eigensolvers cannot be used as preconditioners.");
 
-    auto & mfem_pre = _preconditioner->getSolver();
+    auto & mfem_pre = _preconditioner->GetSolver();
     if constexpr (std::is_base_of_v<mfem::HypreSolver, T> || std::is_same_v<mfem::HypreAME, T>)
       if (auto * const hypre_pre = dynamic_cast<mfem::HypreSolver *>(&mfem_pre))
         solver.SetPreconditioner(*hypre_pre);
@@ -58,23 +58,23 @@ LinearSolverBase::setPreconditioner(T & solver)
   }
 }
 
-template void LinearSolverBase::setPreconditioner(mfem::CGSolver &);
-template void LinearSolverBase::setPreconditioner(mfem::GMRESSolver &);
-template void LinearSolverBase::setPreconditioner(mfem::HypreFGMRES &);
-template void LinearSolverBase::setPreconditioner(mfem::HypreGMRES &);
-template void LinearSolverBase::setPreconditioner(mfem::HyprePCG &);
-template void LinearSolverBase::setPreconditioner(mfem::HypreLOBPCG &);
-template void LinearSolverBase::setPreconditioner(mfem::HypreAME &);
+template void LinearSolverBase::SetPreconditioner(mfem::CGSolver &);
+template void LinearSolverBase::SetPreconditioner(mfem::GMRESSolver &);
+template void LinearSolverBase::SetPreconditioner(mfem::HypreFGMRES &);
+template void LinearSolverBase::SetPreconditioner(mfem::HypreGMRES &);
+template void LinearSolverBase::SetPreconditioner(mfem::HyprePCG &);
+template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
+template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
 
 void
-LinearSolverBase::setOperator(mfem::OperatorHandle & op)
+LinearSolverBase::SetOperator(mfem::OperatorHandle & op)
 {
   mooseAssert(_solver, "setOperator called before the solver was constructed");
   _solver->SetOperator(*op);
 }
 
 void
-LinearSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
+LinearSolverBase::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
   if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))
   {

@@ -39,11 +39,11 @@ MFEMPetscNonlinearSolver::validParams()
 MFEMPetscNonlinearSolver::MFEMPetscNonlinearSolver(const InputParameters & parameters)
   : Moose::MFEM::NonlinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMPetscNonlinearSolver::constructSolver()
+MFEMPetscNonlinearSolver::ConstructSolver()
 {
   const auto & prefix = getParam<std::string>("petsc_options_prefix");
   const auto normalized_prefix = !prefix.empty() && prefix.back() != '_' ? prefix + "_" : prefix;
@@ -77,7 +77,7 @@ MFEMPetscNonlinearSolver::constructSolver()
 void
 MFEMPetscNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
-  static_cast<mfem::PetscNonlinearSolver &>(getSolver()).SetOperator(op);
+  GetSolver().SetOperator(op);
 }
 
 void
@@ -90,7 +90,7 @@ MFEMPetscNonlinearSolver::SetLinearSolver(mfem::Solver &)
 void
 MFEMPetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
 {
-  getSolver().Mult(rhs, x);
+  GetSolver().Mult(rhs, x);
 }
 #endif
 

@@ -54,9 +54,9 @@ MFEMProblemSolve::solve()
       // Reset linear solver and its preconditioner now the problem size has changed
       if (auto & solver = _mfem_problem.getProblemData().jacobian_solver)
       {
-        if (auto * prec = solver->getPreconditioner())
-          prec->constructSolver();
-        solver->constructSolver();
+        if (auto * prec = solver->GetPreconditioner())
+          prec->ConstructSolver();
+        solver->ConstructSolver();
       }
 
       // Reset gridfunctions

@@ -42,7 +42,7 @@ MFEMEigenvaluesPostprocessor::execute()
     mooseError("The solver is not an eigensolver, cannot retrieve eigenvalues.");
 
   mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->getEigenvalues(eigenvalues);
+  eigensolver->GetEigenvalues(eigenvalues);
 
   const auto ev_dim = getMFEMProblem().getParam<int>("num_modes");
   _eigenvalues.resize(ev_dim);

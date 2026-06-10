@@ -45,8 +45,8 @@ MFEMNLConvectiveHeatFluxBC::MFEMNLConvectiveHeatFluxBC(const InputParameters & p
   : MFEMIntegratedBC(parameters),
     _heat_transfer_coef(getScalarCoefficient("heat_transfer_coefficient")),
     _d_heat_transfer_dT_coef(getScalarCoefficient("d_heat_transfer_dT_coefficient")),
-    _d_T_inf_dT_coef(getScalarCoefficient("d_T_infinity_dT_coefficient")),
     _T_inf_coef(getScalarCoefficient("T_infinity")),
+    _d_T_inf_dT_coef(getScalarCoefficient("d_T_infinity_dT_coefficient")),
     _T_coef(getScalarCoefficientByName((getTrialVariableName())))
 {
 }

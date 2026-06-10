@@ -26,8 +26,8 @@ EigenproblemESProblemOperator::Solve()
 
   auto eigensolver =
       std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
-  es->prepareEigensolver(*eigensolver);
-  eigensolver->solve();
+  es->PrepareEigensolver(*eigensolver);
+  eigensolver->Solve();
   RecoverEigenproblemSolution(_problem_data.gridfunctions, eigensolver.get());
 }
 
@@ -43,17 +43,17 @@ EigenproblemESProblemOperator::RecoverEigenproblemSolution(
     Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::EigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->getEigenvalues(eigenvalues);
+  eigensolver->GetEigenvalues(eigenvalues);
 
   const auto & trial_var_name = _trial_var_names.at(0);
   const auto & sep = _problem_data.mode_separator;
 
   // Distribute the zeroth mode onto the base variable
-  gridfunctions.Get(trial_var_name)->Distribute(eigensolver->getEigenvector(0));
+  gridfunctions.Get(trial_var_name)->Distribute(eigensolver->GetEigenvector(0));
 
   for (int i = 0; i < eigenvalues.Size(); ++i)
     gridfunctions.Get(trial_var_name + sep + std::to_string(i))
-        ->Distribute(eigensolver->getEigenvector(i));
+        ->Distribute(eigensolver->GetEigenvector(i));
 }
 
 } // namespace Moose::MFEM

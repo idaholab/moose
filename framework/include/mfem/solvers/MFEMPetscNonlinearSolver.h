@@ -25,13 +25,13 @@ public:
 
   MFEMPetscNonlinearSolver(const InputParameters & parameters);
 
-  void constructSolver() override;
+  void ConstructSolver() override;
 
   void SetOperator(const mfem::Operator & op) override;
   void SetLinearSolver(mfem::Solver & solver) override;
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) override;
-  bool requiresGradient() const override { return true; }
-  bool usesExternalLinearSolver() const override { return false; }
+  bool RequiresGradient() const override { return true; }
+  bool RequiresExternalLinearSolver() const override { return false; }
 };
 
 #endif

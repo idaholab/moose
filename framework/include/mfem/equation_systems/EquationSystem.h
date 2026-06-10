@@ -79,9 +79,9 @@ public:
   bool Nonlinear() const { return _non_linear; }
 
   /**
-   * Propagate the assembled system operator to the given linear solver (and its preconditioner).
-   * Calls the bilinear-form overload first (a no-op for non-LOR solvers) then the operator-level
-   * overload once the assembled matrix is available.
+   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
+   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
+   * operator
    */
   void PrepareLinearSolver(LinearSolverBase & solver);
 

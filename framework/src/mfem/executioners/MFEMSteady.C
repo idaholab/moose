@@ -79,7 +79,7 @@ MFEMSteady::init()
 
   if (_mfem_problem_data.nonlinear_solver)
     _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
-        _mfem_problem_data.nonlinear_solver->requiresGradient());
+        _mfem_problem_data.nonlinear_solver->RequiresGradient());
 
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(

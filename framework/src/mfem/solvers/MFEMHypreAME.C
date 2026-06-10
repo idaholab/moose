@@ -26,11 +26,11 @@ MFEMHypreAME::validParams()
 MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
   : Moose::MFEM::EigensolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreAME::constructSolver()
+MFEMHypreAME::ConstructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreAME>(getMFEMProblem().getComm());
 
@@ -38,7 +38,7 @@ MFEMHypreAME::constructSolver()
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*_eigensolver);
+  SetPreconditioner(*_eigensolver);
 }
 
 #endif

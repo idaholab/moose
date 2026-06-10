@@ -52,8 +52,9 @@ play different roles at solve time:
   as `mfem::NewtonSolver` or `mfem::PetscNonlinearSolver`
 
 Some nonlinear solvers also depend on a separate linear solver. For
-example, Newton requires a Jacobian solve. Others, such as the current
-PETSc nonlinear wrapper, manage their own internal linear solver stack.
+example, `mfem::NewtonSolver` requires the user to provide a Jacobian solver.
+Others, such as the current `mfem::PetscNonlinearSolver` implementation, manage
+their own internal linear solver stack.
 
 ## Why This Exists
 
@@ -66,6 +67,5 @@ solver configuration extensible.
 
 ## See Also
 
-- [MFEM solver base class](source/mfem/solvers/MFEMSolverBase.md)
-- [MFEM Newton nonlinear solver](source/mfem/solvers/MFEMNewtonNonlinearSolver.md)
-- [MFEM PETSc nonlinear solver](source/mfem/solvers/MFEMPetscNonlinearSolver.md)
+- [MFEM linear solver base class](source/mfem/solvers/MFEMLinearSolverBase.md)
+- [MFEM nonlinear solver base class](source/mfem/solvers/MFEMNonlinearSolverBase.md)

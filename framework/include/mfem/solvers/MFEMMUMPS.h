@@ -24,10 +24,10 @@ public:
   MFEMMUMPS(const InputParameters & parameters);
 
 protected:
-  void constructSolver() override;
+  void ConstructSolver() override;
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
+  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 };
 
 #endif

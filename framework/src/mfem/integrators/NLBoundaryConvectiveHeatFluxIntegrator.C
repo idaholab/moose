@@ -53,8 +53,8 @@ NLBoundaryConvectiveHeatFluxIntegrator::AssembleElementGrad(const mfem::FiniteEl
                                                             const mfem::Vector & elfun,
                                                             mfem::DenseMatrix & elmat)
 {
-  // (k + dk_du (u-u_inf)) phi, v);
-  _jacobian_action.AssembleElementGrad(el, Tr, elfun, elmat); //
+  // (k (1 - du_inf/du) + dk_du (u-u_inf)) phi, v);
+  _jacobian_action.AssembleElementGrad(el, Tr, elfun, elmat);
 }
 }
 

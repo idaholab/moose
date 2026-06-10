@@ -28,7 +28,7 @@ public:
   void BuildEigenproblemJacobian(mfem::BlockVector & trueX);
 
   /// Prepare the provided eigensolver
-  void prepareEigensolver(EigensolverBase & solver);
+  void PrepareEigensolver(EigensolverBase & solver);
 
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination

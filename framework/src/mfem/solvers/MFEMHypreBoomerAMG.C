@@ -42,13 +42,13 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
                   .getFESpace()
             : nullptr)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
 
 void
-MFEMHypreBoomerAMG::constructSolver()
+MFEMHypreBoomerAMG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 
@@ -65,11 +65,11 @@ MFEMHypreBoomerAMG::constructSolver()
 }
 
 void
-MFEMHypreBoomerAMG::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreBoomerAMG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));

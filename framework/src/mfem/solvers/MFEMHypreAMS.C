@@ -35,11 +35,11 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreAMS::constructSolver()
+MFEMHypreAMS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
@@ -51,11 +51,11 @@ MFEMHypreAMS::constructSolver()
 }
 
 void
-MFEMHypreAMS::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");
