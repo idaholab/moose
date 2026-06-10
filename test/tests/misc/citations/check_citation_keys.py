@@ -9,10 +9,9 @@
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 """
 Sync check for the hybrid citation system: every citation key registered in C++
-(via addAlwaysCitation or addLabelCitation) must also exist as an entry in a
-documentation .bib file, so the inline BibTeX stays tied to a real, documented
-reference. Exits non-zero (listing the offenders) if any registered key is
-missing from the .bib files.
+(via addAppCitation) must also exist as an entry in a documentation .bib file,
+so the inline BibTeX stays tied to a real, documented reference. Exits non-zero
+(listing the offenders) if any registered key is missing from the .bib files.
 """
 
 import os
@@ -37,10 +36,9 @@ BIB_GLOBS = [
 # Each pattern captures the BibTeX key argument of a registration call. \s* spans newlines so the
 # patterns match regardless of how clang-format wraps the arguments.
 KEY_PATTERNS = [
-    re.compile(r'addAlwaysCitation\(\s*"([^"]+)"'),
-    re.compile(r'addLabelCitation\(\s*"[^"]+"\s*,\s*"([^"]+)"'),
+    re.compile(r'addAppCitation\(\s*"[^"]+"\s*,\s*"([^"]+)"'),
 ]
-CALL_NAMES = ["addAlwaysCitation", "addLabelCitation"]
+CALL_NAMES = ["addAppCitation"]
 
 
 def registered_keys():

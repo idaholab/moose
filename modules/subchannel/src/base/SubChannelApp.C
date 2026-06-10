@@ -38,9 +38,9 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"SubChannelApp"});
 
   // Cited by --citations whenever any SubChannel object is used in a simulation
-  Registry::addLabelCitation("SubChannelApp",
-                             "kyriakopoulos2022development",
-                             R"(@article{kyriakopoulos2022development,
+  Registry::addAppCitation("SubChannelApp",
+                           "kyriakopoulos2022development",
+                           R"(@article{kyriakopoulos2022development,
   title={Development of a Single-Phase, Transient, Subchannel Code, within the MOOSE Multi-Physics Computational Framework},
   author={Kyriakopoulos, Vasileios and Tano, Mauricio E and Ragusa, Jean C},
   journal={Energies},
@@ -49,6 +49,17 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   pages={3948},
   year={2022},
   publisher={MDPI}
+})");
+  Registry::addAppCitation("SubChannelApp",
+                           "kyriakopoulos2026numerical",
+                           R"(@article{kyriakopoulos2026numerical,
+  title={Numerical implementation of the MOOSE subchannel module (SCM) algorithm},
+  author={Kyriakopoulos, Vasileios and Tano, Mauricio},
+  journal={Nuclear Engineering and Design},
+  volume={450},
+  pages={114802},
+  year={2026},
+  publisher={Elsevier}
 })");
 
   /* register custom execute flags, action syntax, etc. here */

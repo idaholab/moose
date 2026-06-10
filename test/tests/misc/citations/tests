@@ -5,7 +5,7 @@
     type = RunApp
     input = citations.i
     cli_args = '--check-input --citations'
-    expect_out = 'permann2020moose'
+    expect_out = 'harbour2025moose'
     requirement = "The system shall report, in BibTeX format, the current framework reference that "
                   "should be cited when the --citations command-line option is provided."
   []
@@ -21,7 +21,7 @@
     type = RunApp
     input = citations.i
     cli_args = '--check-input'
-    absent_out = 'permann2020moose'
+    absent_out = 'harbour2025moose'
     requirement = "The system shall not report citations when the --citations command-line option "
                   "is not provided."
   []
