@@ -1016,6 +1016,12 @@ public:
   [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
 
   /**
+   * Mark a variable family for either disabling or enabling p-refinement with valid parameters of a
+   * variable
+   */
+  void markFamilyPRefinement(const InputParameters & params);
+
+  /**
    * Set the current lower dimensional element. This can be null
    */
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);
@@ -1037,12 +1043,6 @@ protected:
    * Verify the integrity of _vector_tags and _typed_vector_tags
    */
   bool verifyVectorTags() const;
-
-  /**
-   * Mark a variable family for either disabling or enabling p-refinement with valid parameters of a
-   * variable
-   */
-  void markFamilyPRefinement(const InputParameters & params);
 
   /// The currently declared tags
   std::map<TagName, TagID> _matrix_tag_name_to_tag_id;

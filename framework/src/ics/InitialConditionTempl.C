@@ -125,9 +125,13 @@ InitialConditionTempl<T>::compute()
   // Interpolate node values first
   _current_dof = 0;
 
+  auto & dof_map = _var.dofMap();
+  const bool add_p_level =
+      dof_map.should_p_refine(dof_map.var_group_from_var_number(_var.number()));
+
   for (_n = 0; _n != n_nodes; ++_n)
   {
-    _nc = FEInterface::n_dofs_at_node(_fe_type, _current_elem, _n);
+    _nc = FEInterface::n_dofs_at_node(_fe_type, _current_elem, _n, add_p_level);
 
     // for nodes that are in more than one subdomain, only compute the initial
     // condition once on the lowest numbered block
@@ -174,10 +178,6 @@ InitialConditionTempl<T>::compute()
 
   // From here on out we won't be sampling at nodes anymore
   _current_node = nullptr;
-
-  auto & dof_map = _var.dofMap();
-  const bool add_p_level =
-      dof_map.should_p_refine(dof_map.var_group_from_var_number(_var.number()));
 
   // In 3D, project any edge values next
   if (_dim > 2 && _cont != DISCONTINUOUS)
