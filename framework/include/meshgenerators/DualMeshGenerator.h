@@ -23,20 +23,8 @@ public:
 
   Point circumcenter(const Elem * elem);
 
-  std::vector<Point> clipPolygonToElem(const std::vector<Point> & poly, const Elem * elem);
-
-  std::vector<Point>
-  clipPolygonToPhysicalBoundary(const std::vector<Point> & poly,
-                                const std::vector<std::pair<Point, Point>> & boundary_segments);
-
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
   std::unique_ptr<MeshBase> & _input;
-
-  /// Vertex tolerance for determining colinearity of adjacent sides
-  Real _boundary_node_angular_tol;
-
-  // Vertex tolerance for determining if vertices are inside/outside of a boundary
-  Real _boundary_edge_outside_tol;
 };
