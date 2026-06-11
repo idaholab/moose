@@ -18,6 +18,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <limits>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
@@ -69,18 +72,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       0.99,
       "Upper threshold used to classify cells as interface-adjacent for predictor-face "
       "localization.");
-  params.addParam<bool>(
-      "use_one_sided_interface_predictor_interpolation",
-      false,
-      "Whether predictor-side face interpolation should use one-sided liquid/gas owner values on "
-      "pure sharp-interface faces. When false, internal faces use the same centered geometric "
-      "linear interpolation as OpenFOAM's default fvc::interpolate(linear) path.");
   params.addRangeCheckedParam<Real>(
       "pressure_writeback_face_ainv_relative_tolerance",
       1e-4,
       "pressure_writeback_face_ainv_relative_tolerance>=0",
       "Relative cutoff used when normalizing the pressure-correction face flux for the "
-      "reference-solver-style velocity writeback. Faces whose pressure-space normal Ainv falls below "
+      "reference-solver-style velocity writeback. Faces whose pressure-space normal Ainv falls "
+      "below "
       "this fraction of the active-face maximum are treated as degenerate and do not "
       "participate in the reconstructed cell-velocity correction.");
   MooseEnum density_sn_grad_scheme("orthogonal corrected limited", "corrected");
@@ -157,6 +155,43 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       "rho_g",
       "Gas-phase density functor used to reconstruct the VOF-consistent volumetric face flux "
       "from rhoPhi and alphaPhi during the outer-iteration handoff.");
+  params.addParam<std::string>(
+      "sharp_flux_diagnostic_file_base",
+      "",
+      "Optional file base for a one-time CSV dump of the sharp-interface face-flux "
+      "decomposition.");
+  params.addParam<Real>(
+      "sharp_flux_diagnostic_time",
+      -1.0,
+      "Simulation time at which to dump the sharp-interface face-flux decomposition. A negative "
+      "value disables the dump.");
+  params.addRangeCheckedParam<Real>(
+      "sharp_flux_diagnostic_front_band_width",
+      0.01,
+      "sharp_flux_diagnostic_front_band_width>=0",
+      "Width behind the current alpha=0.5 front used to select faces for the diagnostic dump.");
+  params.addParam<bool>(
+      "sharp_flux_diagnostic_all_faces",
+      false,
+      "Whether to dump every flow face instead of only faces in the front diagnostic band.");
+  params.addParam<bool>(
+      "require_vof_rho_phi_functor",
+      false,
+      "Require the alpha-owned VOF rhoPhi and alphaPhi functors. Enable this for OpenFOAM "
+      "incompressibleVoF parity runs so momentum advection cannot fall back to rho_f * phi.");
+  params.addParam<bool>(
+      "enforce_vof_rho_phi_contract",
+      false,
+      "Check after each alpha solve that the published VOF rhoPhi satisfies "
+      "rhoPhi = rho_g * vof_transport_phi * area + (rho_l-rho_g) * alphaPhi_limited.");
+  params.addRangeCheckedParam<Real>("vof_rho_phi_contract_abs_tol",
+                                    1e-10,
+                                    "vof_rho_phi_contract_abs_tol>=0",
+                                    "Absolute tolerance for the VOF rhoPhi contract check.");
+  params.addRangeCheckedParam<Real>("vof_rho_phi_contract_rel_tol",
+                                    1e-10,
+                                    "vof_rho_phi_contract_rel_tol>=0",
+                                    "Relative tolerance for the VOF rhoPhi contract check.");
   params.addParam<RealVectorValue>(
       "gravity",
       RealVectorValue(),
@@ -171,11 +206,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
   return params;
 }
 
-ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieChowMassFluxBase(const InputParameters & params)
+ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieChowMassFluxBase(
+    const InputParameters & params)
   : RhieChowMassFlux(params),
     _transient_projection_flux(_moose_mesh, blockIDs(), "transient_projection_flux"),
     _capillary_hydrostatic_flux(_moose_mesh, blockIDs(), "capillary_hydrostatic_flux"),
-    _pressure_equation_volumetric_flux(_moose_mesh, blockIDs(), "pressure_equation_volumetric_flux"),
+    _pressure_equation_volumetric_flux(
+        _moose_mesh, blockIDs(), "pressure_equation_volumetric_flux"),
     _pressure_correction_phi(_moose_mesh, blockIDs(), "pressure_correction_phi"),
     _corrected_face_phi(_moose_mesh, blockIDs(), "corrected_face_phi"),
     _previous_timestep_corrected_face_phi(
@@ -183,8 +220,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _vof_transport_phi(_moose_mesh, blockIDs(), "vof_transport_phi"),
     _pressure_coupled_cell_reconstruction_scalar(
         _moose_mesh, blockIDs(), "pressure_coupled_cell_reconstruction_scalar"),
-    _pressure_coupled_cell_reconstruction_vector(
-        _moose_mesh, blockIDs(), "pressure_coupled_cell_reconstruction_vector"),
     _add_transient_projection_flux(getParam<bool>("add_transient_projection_flux")),
     _add_capillary_hydrostatic_flux(getParam<bool>("add_capillary_hydrostatic_flux")),
     _apply_pressure_velocity_writeback(getParam<bool>("apply_pressure_velocity_writeback")),
@@ -193,13 +228,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _reference_pressure_point(getParam<Point>("reference_pressure_point")),
     _near_interface_lower(getParam<Real>("near_interface_lower")),
     _near_interface_upper(getParam<Real>("near_interface_upper")),
-    _use_one_sided_interface_predictor_interpolation(
-        getParam<bool>("use_one_sided_interface_predictor_interpolation")),
     _pressure_writeback_face_ainv_relative_tolerance(
         getParam<Real>("pressure_writeback_face_ainv_relative_tolerance")),
     _density_sn_grad_scheme(getParam<MooseEnum>("density_sn_grad_scheme")),
-    _density_sn_grad_limiter_coefficient(
-        getParam<Real>("density_sn_grad_limiter_coefficient")),
+    _density_sn_grad_limiter_coefficient(getParam<Real>("density_sn_grad_limiter_coefficient")),
     _hydrostatic_predictor_discretization(
         getParam<MooseEnum>("hydrostatic_predictor_discretization")),
     _volume_fraction_name(getParam<MooseFunctorName>("volume_fraction_functor")),
@@ -217,6 +249,15 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _vof_alpha_phi_limited_name(getParam<MooseFunctorName>("vof_alpha_phi_limited_functor")),
     _liquid_density_name(getParam<MooseFunctorName>("liquid_density_functor")),
     _gas_density_name(getParam<MooseFunctorName>("gas_density_functor")),
+    _sharp_flux_diagnostic_file_base(getParam<std::string>("sharp_flux_diagnostic_file_base")),
+    _sharp_flux_diagnostic_time(getParam<Real>("sharp_flux_diagnostic_time")),
+    _sharp_flux_diagnostic_front_band_width(
+        getParam<Real>("sharp_flux_diagnostic_front_band_width")),
+    _sharp_flux_diagnostic_all_faces(getParam<bool>("sharp_flux_diagnostic_all_faces")),
+    _require_vof_rho_phi_functor(getParam<bool>("require_vof_rho_phi_functor")),
+    _enforce_vof_rho_phi_contract(getParam<bool>("enforce_vof_rho_phi_contract")),
+    _vof_rho_phi_contract_abs_tol(getParam<Real>("vof_rho_phi_contract_abs_tol")),
+    _vof_rho_phi_contract_rel_tol(getParam<Real>("vof_rho_phi_contract_rel_tol")),
     _transient_projection_face_acceleration(
         _transient_projection_face_acceleration_name.empty()
             ? nullptr
@@ -245,7 +286,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
 {
   for (const auto tid : make_range(libMesh::n_threads()))
   {
-    UserObject::_subproblem.addFunctor("transient_projection_flux", _transient_projection_flux, tid);
+    UserObject::_subproblem.addFunctor(
+        "transient_projection_flux", _transient_projection_flux, tid);
     UserObject::_subproblem.addFunctor(
         "capillary_hydrostatic_flux", _capillary_hydrostatic_flux, tid);
     UserObject::_subproblem.addFunctor(
@@ -257,9 +299,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     UserObject::_subproblem.addFunctor("vof_transport_phi", _vof_transport_phi, tid);
     UserObject::_subproblem.addFunctor("pressure_coupled_cell_reconstruction_scalar",
                                        _pressure_coupled_cell_reconstruction_scalar,
-                                       tid);
-    UserObject::_subproblem.addFunctor("pressure_coupled_cell_reconstruction_vector",
-                                       _pressure_coupled_cell_reconstruction_vector,
                                        tid);
   }
 
@@ -275,6 +314,18 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::getMassFlux(const FaceInfo & fi) const
 {
+  if (_vof_rho_phi)
+  {
+    const Real face_measure = fi.faceArea() * fi.faceCoord();
+    return face_measure > 0.0 ? vofRhoPhiIntegrated(fi) / face_measure : 0.0;
+  }
+
+  if (_require_vof_rho_phi_functor)
+    mooseError(name(),
+               " requires alpha-owned VOF rhoPhi, but the functor '",
+               _vof_rho_phi_name,
+               "' is not available.");
+
   return RhieChowMassFlux::getMassFlux(fi);
 }
 
@@ -282,24 +333,6 @@ Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::rawRhieChowMassFlux(const FaceInfo & fi) const
 {
   return RhieChowMassFlux::getMassFlux(fi);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::predictorOperatorFaceMassFlux(const FaceInfo & fi,
-                                                              const Moose::StateArg & time_arg) const
-{
-  (void)time_arg;
-  return libmesh_map_find(_HbyA_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureCoupledWritebackMassFlux(const FaceInfo & fi) const
-{
-  if (_corrected_face_phi_seeded)
-    return volumetricNormalFluxToPressureMassFluxDensity(
-        &fi, libmesh_map_find(_pressure_correction_phi, fi.id()));
-
-  return pressureVelocityWritebackFluxDensity(&fi);
 }
 
 void
@@ -320,37 +353,24 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::storedCorrectedFacePhi(const Fac
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPressurePredictorBasePhi(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorOperatorPhi(
+    const FaceInfo & fi) const
 {
-  // updateAdditionalPressureFluxFunctors() stores this in the internal
-  // pressure-correction convention, i.e. as the negative of the reference-solver-style
-  // accepted predictor transport phi.
-  return libmesh_map_find(_pressure_predictor_base_flux, fi.id());
+  const Real face_measure = fi.faceArea() * fi.faceCoord();
+  if (face_measure <= libMesh::TOLERANCE)
+    return 0.0;
+
+  // _pressure_predictor_base_flux and _transient_projection_flux are cached as
+  // OpenFOAM-style integrated fluxes. Convert back to MOOSE's normal-flux
+  // transport convention for diagnostics/accessors.
+  return (-libmesh_map_find(_pressure_predictor_base_flux, fi.id()) -
+          libmesh_map_find(_transient_projection_flux, fi.id())) /
+         face_measure;
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPressureEquationVolumetricFlux(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_pressure_equation_volumetric_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorOperatorPhi(const FaceInfo & fi) const
-{
-  // storedPressurePredictorBasePhi() is cached in the internal pressure-correction
-  // convention. Convert it back to the reference solver transport convention before
-  // removing the transient projection.
-  return -storedPressurePredictorBasePhi(fi) - libmesh_map_find(_transient_projection_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPhiHbyAReferenceStyle(const FaceInfo & fi) const
-{
-  return -libmesh_map_find(_phiHbyA_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPressureCorrectionPhi(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::storedPressureCorrectionPhi(
+    const FaceInfo & fi) const
 {
   return libmesh_map_find(_pressure_correction_phi, fi.id());
 }
@@ -362,40 +382,18 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::storedOuterIterationPhi(const Fa
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedOuterIterationRhoPhiIntegrated(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::storedOuterIterationRhoPhiIntegrated(
+    const FaceInfo & fi) const
 {
   return transportIntegratedRhoPhiFromVolumetricPhi(
       &fi, libmesh_map_find(_previous_timestep_corrected_face_phi, fi.id()), Moose::currentState());
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorConvectivePhi(const FaceInfo & fi) const
-{
-  return storedPredictorOperatorPhi(fi);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorConvectiveMassFlux(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorConvectiveMassFlux(
+    const FaceInfo & fi) const
 {
   return libmesh_map_find(_HbyA_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPhigFlux(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_phig_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedCapillaryHydrostaticFlux(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_capillary_hydrostatic_flux, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedTransientProjectionFlux(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_transient_projection_flux, fi.id());
 }
 
 Real
@@ -408,7 +406,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::vofRhoPhiIntegrated(const FaceIn
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaPhiLimitedIntegrated(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaPhiLimitedIntegrated(
+    const FaceInfo & fi) const
 {
   if (!_vof_alpha_phi_limited)
     return 0.0;
@@ -417,14 +416,17 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaPhiLimitedIntegrated(con
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::vofBaseGasRhoPhiIntegrated(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::vofBaseGasRhoPhiIntegrated(
+    const FaceInfo & fi) const
 {
   const auto time_arg = Moose::currentState();
   const Real face_measure = fi.faceArea() * fi.faceCoord();
   if (face_measure <= libMesh::TOLERANCE)
     return 0.0;
 
-  const Real transport_phi = storedOuterIterationPhi(fi);
+  const Real transport_phi = _vof_transport_phi_valid
+                                 ? libmesh_map_find(_vof_transport_phi, fi.id())
+                                 : storedOuterIterationPhi(fi);
   const Real gas_density =
       _gas_density ? evaluateCellBasedFaceScalarFunctor(_gas_density, &fi, time_arg) : 0.0;
 
@@ -432,7 +434,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::vofBaseGasRhoPhiIntegrated(const
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaCorrectionRhoPhiIntegrated(const FaceInfo & fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaCorrectionRhoPhiIntegrated(
+    const FaceInfo & fi) const
 {
   const auto time_arg = Moose::currentState();
   const Real gas_density =
@@ -441,6 +444,76 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::vofAlphaCorrectionRhoPhiIntegrat
       _liquid_density ? evaluateCellBasedFaceScalarFunctor(_liquid_density, &fi, time_arg) : 0.0;
 
   return (liquid_density - gas_density) * vofAlphaPhiLimitedIntegrated(fi);
+}
+
+Real
+ConservativeSharpInterfaceRhieChowMassFluxBase::vofRhoPhiReconstructedVolumetricPhi(
+    const FaceInfo & fi) const
+{
+  if (!_vof_rho_phi || !_vof_alpha_phi_limited || !_liquid_density || !_gas_density)
+    return 0.0;
+
+  const auto time_arg = Moose::currentState();
+  const Real face_measure = fi.faceArea() * fi.faceCoord();
+  const Real gas_density = evaluateCellBasedFaceScalarFunctor(_gas_density, &fi, time_arg);
+  const Real liquid_density = evaluateCellBasedFaceScalarFunctor(_liquid_density, &fi, time_arg);
+  const Real rho_phi = vofRhoPhiIntegrated(fi);
+  const Real alpha_phi = vofAlphaPhiLimitedIntegrated(fi);
+  const Real gas_mass_flux = rho_phi - (liquid_density - gas_density) * alpha_phi;
+
+  return std::abs(gas_density * face_measure) > libMesh::TOLERANCE
+             ? gas_mass_flux / (gas_density * face_measure)
+             : 0.0;
+}
+
+void
+ConservativeSharpInterfaceRhieChowMassFluxBase::checkVOFRhoPhiContract() const
+{
+  if (!_enforce_vof_rho_phi_contract)
+    return;
+
+  if (!_vof_transport_phi_valid || !_vof_rho_phi || !_vof_alpha_phi_limited || !_liquid_density ||
+      !_gas_density)
+    return;
+
+  const auto time_arg = Moose::currentState();
+  Real max_error = 0.0;
+  Real max_allowed = 0.0;
+  dof_id_type max_face_id = std::numeric_limits<dof_id_type>::max();
+
+  for (const auto * fi : flowFaceInfo())
+  {
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    const Real gas_density = evaluateCellBasedFaceScalarFunctor(_gas_density, fi, time_arg);
+    const Real liquid_density = evaluateCellBasedFaceScalarFunctor(_liquid_density, fi, time_arg);
+    const Real transport_phi = libmesh_map_find(_vof_transport_phi, fi->id());
+    const Real alpha_phi = vofAlphaPhiLimitedIntegrated(*fi);
+    const Real expected =
+        gas_density * transport_phi * face_measure + (liquid_density - gas_density) * alpha_phi;
+    const Real actual = vofRhoPhiIntegrated(*fi);
+    const Real allowed =
+        _vof_rho_phi_contract_abs_tol +
+        _vof_rho_phi_contract_rel_tol * std::max({1.0, std::abs(expected), std::abs(actual)});
+    const Real error = std::abs(actual - expected);
+
+    if (error > max_error)
+    {
+      max_error = error;
+      max_allowed = allowed;
+      max_face_id = fi->id();
+    }
+  }
+
+  if (max_error > max_allowed)
+    mooseError(name(),
+               " detected an inconsistent VOF rhoPhi handoff. The alpha-owned rhoPhi must satisfy "
+               "rhoPhi = rho_g * vof_transport_phi * area + (rho_l-rho_g) * alphaPhi_limited. "
+               "max_error=",
+               max_error,
+               ", allowed=",
+               max_allowed,
+               ", face_id=",
+               max_face_id);
 }
 
 RealVectorValue
@@ -510,10 +583,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictor
       const Real cell_rho = _rho(elem_arg, time_arg);
 
       if (_surface_tension_face_acceleration)
-        normal_force_density += cell_rho *
-                                (evaluateBoundaryAwareVectorFunctor(
-                                     _surface_tension_face_acceleration, fi_loc, time_arg) *
-                                 fi_loc->normal());
+        normal_force_density +=
+            cell_rho * (evaluateBoundaryAwareVectorFunctor(
+                            _surface_tension_face_acceleration, fi_loc, time_arg) *
+                        fi_loc->normal());
       else if (_surface_tension_cell_acceleration)
         normal_force_density +=
             cell_rho *
@@ -529,18 +602,16 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictor
         else if (_hydrostatic_density_gradient_face_acceleration)
         {
           hydrostatic_force_density +=
-              cell_rho *
-              (evaluateBoundaryAwareVectorFunctor(
-                   _hydrostatic_density_gradient_face_acceleration, fi_loc, time_arg) *
-               fi_loc->normal());
+              cell_rho * (evaluateBoundaryAwareVectorFunctor(
+                              _hydrostatic_density_gradient_face_acceleration, fi_loc, time_arg) *
+                          fi_loc->normal());
         }
         else if (_hydrostatic_density_gradient_cell_acceleration)
         {
           hydrostatic_force_density +=
-              cell_rho *
-              (MetaPhysicL::raw_value(
-                   (*_hydrostatic_density_gradient_cell_acceleration)(elem_arg, time_arg)) *
-               fi_loc->normal());
+              cell_rho * (MetaPhysicL::raw_value((*_hydrostatic_density_gradient_cell_acceleration)(
+                              elem_arg, time_arg)) *
+                          fi_loc->normal());
         }
         else
         {
@@ -569,13 +640,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictor
                         normal_matrix(0, 1) * normal_matrix(1, 0)) <= libMesh::TOLERANCE;
   else if (_dim == 3)
   {
-    const Real det =
-        normal_matrix(0, 0) * (normal_matrix(1, 1) * normal_matrix(2, 2) -
-                               normal_matrix(1, 2) * normal_matrix(2, 1)) -
-        normal_matrix(0, 1) * (normal_matrix(1, 0) * normal_matrix(2, 2) -
-                               normal_matrix(1, 2) * normal_matrix(2, 0)) +
-        normal_matrix(0, 2) * (normal_matrix(1, 0) * normal_matrix(2, 1) -
-                               normal_matrix(1, 1) * normal_matrix(2, 0));
+    const Real det = normal_matrix(0, 0) * (normal_matrix(1, 1) * normal_matrix(2, 2) -
+                                            normal_matrix(1, 2) * normal_matrix(2, 1)) -
+                     normal_matrix(0, 1) * (normal_matrix(1, 0) * normal_matrix(2, 2) -
+                                            normal_matrix(1, 2) * normal_matrix(2, 0)) +
+                     normal_matrix(0, 2) * (normal_matrix(1, 0) * normal_matrix(2, 1) -
+                                            normal_matrix(1, 1) * normal_matrix(2, 0));
     singular = std::abs(det) <= libMesh::TOLERANCE;
   }
 
@@ -592,8 +662,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictor
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::predictorVelocityComponent(const ElemInfo & elem_info,
-                                                           const unsigned int component) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::predictorVelocityComponent(
+    const ElemInfo & elem_info, const unsigned int component) const
 {
   mooseAssert(component < _dim, "Momentum component index out of range.");
 
@@ -608,11 +678,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(const Face
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
-                                                      const FaceInfo & fi,
-                                                      const Moose::StateArg & time,
-                                                      const THREAD_ID /*tid*/,
-                                                      bool libmesh_dbg_var(subtract_mesh_velocity)) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(
+    const Moose::FV::InterpMethod m,
+    const FaceInfo & fi,
+    const Moose::StateArg & time,
+    const THREAD_ID /*tid*/,
+    bool libmesh_dbg_var(subtract_mesh_velocity)) const
 {
   mooseAssert(!subtract_mesh_velocity,
               "ConservativeSharpInterfaceRhieChowMassFluxBase does not support moving meshes yet!");
@@ -646,7 +717,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initializeAdditionalPressureFlux
     _previous_timestep_corrected_face_phi[fi->id()] = 0.0;
     _vof_transport_phi[fi->id()] = 0.0;
     _pressure_coupled_cell_reconstruction_scalar[fi->id()] = 0.0;
-    _pressure_coupled_cell_reconstruction_vector[fi->id()] = RealVectorValue();
     _pressure_predictor_flux[fi->id()] = 0.0;
     _pressure_predictor_mass_flux[fi->id()] = 0.0;
   }
@@ -667,7 +737,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityTo
   {
     auto * momentum_system = _momentum_implicit_systems[system_i];
     mooseAssert(momentum_system && momentum_system->current_local_solution,
-                "The requested momentum component is not linked to ConservativeSharpInterfaceRhieChowMassFluxBase.");
+                "The requested momentum component is not linked to "
+                "ConservativeSharpInterfaceRhieChowMassFluxBase.");
     pressure_corrected_solution.push_back(momentum_system->current_local_solution->zero_clone());
   }
 
@@ -681,13 +752,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityTo
 
     for (const auto system_i : index_range(_momentum_implicit_systems))
     {
-      const auto & dof_indices =
-          elem_info->dofIndices()[_global_momentum_system_numbers[system_i]];
+      const auto & dof_indices = elem_info->dofIndices()[_global_momentum_system_numbers[system_i]];
       if (dof_indices.empty())
         continue;
 
-      pressure_corrected_solution[system_i]->set(
-          dof_indices[0], predictorVelocityComponent(*elem_info, system_i) + pressure_delta(system_i));
+      pressure_corrected_solution[system_i]->set(dof_indices[0],
+                                                 predictorVelocityComponent(*elem_info, system_i) +
+                                                     pressure_delta(system_i));
     }
   }
 
@@ -721,14 +792,18 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::transportIntegratedRhoPhiFromVol
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(const FaceInfo * fi,
-                                                           const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(
+    const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
-  return boundaryPhysicalVolumetricFluxTarget(fi, time_arg);
+  if (!fi)
+    return 0.0;
+
+  return boundaryPhysicalVolumetricFluxTarget(fi, time_arg) * fi->faceArea() * fi->faceCoord();
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(const FaceInfo * fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(
+    const FaceInfo * fi) const
 {
   if (!fi)
     return 0.0;
@@ -742,7 +817,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(const
 
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::cellPhysicalVelocityComponent(
-    const ElemInfo & elem_info, const unsigned int component, const Moose::StateArg & time_arg) const
+    const ElemInfo & elem_info,
+    const unsigned int component,
+    const Moose::StateArg & time_arg) const
 {
   mooseAssert(component < _vel.size(), "Velocity component index out of range.");
   return _vel[component]->getElemValue(elem_info, time_arg);
@@ -788,8 +865,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureFaceNormalAinv(
   // pressure-space face functor rather than projecting the cached raw Ainv map
   // directly, so the writeback stays aligned with the operator contract if the
   // pressure face interpolation changes.
-  const RealVectorValue pressure_face_rau =
-      _pressure_Ainv(makeCenteredFaceArg(fi), time_arg);
+  const RealVectorValue pressure_face_rau = _pressure_Ainv(makeCenteredFaceArg(fi), time_arg);
   return computeFaceNormalRawAinv(pressure_face_rau, fi->normal());
 }
 
@@ -806,14 +882,20 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
   state.predictor_valid = _pressure_predictor_face_state_valid;
   if (state.predictor_valid)
   {
-    // The pressure equation stores the predictor flux in the native
-    // pressure-correction sign convention. The accepted transport flux is the
-    // opposite of that predictor branch plus the accepted pressure-equation
-    // flux.
-    state.predictor_transport_phi = -libmesh_map_find(_phiHbyA_flux, fi->id());
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
+    { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
+
+    // The sharp pressure equation stores OpenFOAM-style area-integrated phi.
+    // Convert back to MOOSE's normal-flux-density transport convention only at
+    // the publication/writeback boundary.
+    state.predictor_transport_phi =
+        integratedToVolumetricPhi(-libmesh_map_find(_phiHbyA_flux, fi->id()));
     state.pressure_equation_phi =
-        _pressure_equation_flux_valid ? libmesh_map_find(_pressure_equation_flux, fi->id()) : 0.0;
-    const Real phig_phi = libmesh_map_find(_phig_flux, fi->id());
+        _pressure_equation_flux_valid
+            ? integratedToVolumetricPhi(libmesh_map_find(_pressure_equation_flux, fi->id()))
+            : 0.0;
+    const Real phig_phi = integratedToVolumetricPhi(libmesh_map_find(_phig_flux, fi->id()));
     state.pressure_writeback_phi =
         _pressure_equation_flux_valid ? state.pressure_equation_phi + phig_phi : 0.0;
     state.corrected_transport_phi =
@@ -826,8 +908,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
                  std::abs(state.normal_pressure_ainv) > degenerate_normal_pressure_ainv_tol
              ? state.pressure_writeback_phi / state.normal_pressure_ainv
              : 0.0);
-    state.writeback_reconstruction_vector =
-        fi->normal() * (state.writeback_reconstruction_scalar * fi->faceCoord());
   }
   else
   {
@@ -863,8 +943,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
   const auto time_arg = Moose::currentState();
   for (const auto * fi : flowFaceInfo())
   {
-    const auto state =
-        pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
+    const auto state = pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
     _pressure_equation_volumetric_flux[fi->id()] = state.pressure_equation_phi;
     _pressure_correction_phi[fi->id()] = state.pressure_writeback_phi;
     // OpenFOAM parity contract:
@@ -873,10 +952,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
     // cell velocity below is only the cell-centered U writeback branch and is not
     // projected back to overwrite this face flux.
     _corrected_face_phi[fi->id()] = state.corrected_transport_phi;
-    _pressure_coupled_cell_reconstruction_scalar[fi->id()] =
-        state.writeback_reconstruction_scalar;
-    _pressure_coupled_cell_reconstruction_vector[fi->id()] =
-        state.writeback_reconstruction_vector;
+    _pressure_coupled_cell_reconstruction_scalar[fi->id()] = state.writeback_reconstruction_scalar;
   }
   _corrected_face_phi_seeded = true;
 }
@@ -890,10 +966,120 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::freezeVOFTransportState(
 
   for (const auto * fi : flowFaceInfo())
     _vof_transport_phi[fi->id()] =
-        use_previous_timestep_flux ? libmesh_map_find(_previous_timestep_corrected_face_phi, fi->id())
-                                   : libmesh_map_find(_corrected_face_phi, fi->id());
+        use_previous_timestep_flux
+            ? libmesh_map_find(_previous_timestep_corrected_face_phi, fi->id())
+            : libmesh_map_find(_corrected_face_phi, fi->id());
 
   _vof_transport_phi_valid = true;
+
+  dumpSharpFluxDiagnostic();
+}
+
+void
+ConservativeSharpInterfaceRhieChowMassFluxBase::dumpSharpFluxDiagnostic()
+{
+  if (_sharp_flux_diagnostic_file_base.empty() || _sharp_flux_diagnostic_time < 0.0 ||
+      _t + libMesh::TOLERANCE < _sharp_flux_diagnostic_time)
+    return;
+
+  const auto current_t_step = static_cast<unsigned int>(_fe_problem.timeStep());
+  if (_last_sharp_flux_diagnostic_t_step == current_t_step)
+    return;
+
+  const auto time_arg = Moose::currentState();
+  auto face_alpha = [this, &time_arg](const FaceInfo * const fi, const bool elem_side)
+  {
+    if (!_volume_fraction || !fi)
+      return 0.0;
+
+    const Elem * const elem = elem_side ? fi->elemPtr() : fi->neighborPtr();
+    if (!elem || !hasBlocks(elem->subdomain_id()))
+      return 0.0;
+
+    return std::max(0.0,
+                    std::min(1.0,
+                             MetaPhysicL::raw_value(
+                                 (*_volume_fraction)(Moose::ElemArg{elem, false}, time_arg))));
+  };
+
+  Real front_x = -std::numeric_limits<Real>::max();
+  if (_volume_fraction)
+    for (const auto * const fi : flowFaceInfo())
+    {
+      const Real elem_alpha = face_alpha(fi, true);
+      const Real neighbor_alpha = face_alpha(fi, false);
+      if ((elem_alpha - 0.5) * (neighbor_alpha - 0.5) <= 0.0 &&
+          std::max(elem_alpha, neighbor_alpha) >= _near_interface_lower &&
+          std::min(elem_alpha, neighbor_alpha) <= _near_interface_upper)
+        front_x = std::max(front_x, fi->faceCentroid()(0));
+    }
+
+  if (front_x == -std::numeric_limits<Real>::max())
+    for (const auto * const fi : flowFaceInfo())
+      front_x = std::max(front_x, fi->faceCentroid()(0));
+
+  const std::string file_name = _sharp_flux_diagnostic_file_base + ".csv";
+  std::ofstream out(file_name);
+  out << std::setprecision(17);
+  out << "time,t_step,front_x,face_id,x,y,nx,ny,area,coord,elem_id,neighbor_id,elem_alpha,"
+         "neighbor_alpha,hbya_phi,transient_phi,phig_phi,predictor_phi,pEqn_phi,recovery_phi,"
+         "corrected_phi,vof_transport_phi,vof_rho_phi,vof_rho_phi_density,vof_alpha_phi,"
+         "vof_reconstructed_phi,vof_rho_phi_contract_error,pressure_predictor_base_phi,"
+         "internal_phiHbyA\n";
+
+  for (const auto * const fi : flowFaceInfo())
+  {
+    if (!_sharp_flux_diagnostic_all_faces && fi->faceCentroid()(0) + libMesh::TOLERANCE <
+                                                 front_x - _sharp_flux_diagnostic_front_band_width)
+      continue;
+
+    const Real elem_alpha = face_alpha(fi, true);
+    const Real neighbor_alpha = face_alpha(fi, false);
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
+    { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
+    const Real hbya_phi = storedPredictorOperatorPhi(*fi);
+    const Real transient_phi =
+        integratedToVolumetricPhi(libmesh_map_find(_transient_projection_flux, fi->id()));
+    const Real phig_phi = integratedToVolumetricPhi(libmesh_map_find(_phig_flux, fi->id()));
+    const Real p_eqn_phi =
+        _pressure_equation_flux_valid
+            ? integratedToVolumetricPhi(libmesh_map_find(_pressure_equation_flux, fi->id()))
+            : 0.0;
+    const Real predictor_phi = hbya_phi + transient_phi + phig_phi;
+    const Real recovery_phi = transient_phi + phig_phi + p_eqn_phi;
+    const Real corrected_phi = libmesh_map_find(_corrected_face_phi, fi->id());
+    const Real vof_transport_phi = libmesh_map_find(_vof_transport_phi, fi->id());
+    const Real vof_rho_phi = vofRhoPhiIntegrated(*fi);
+    const Real vof_rho_phi_density = face_measure > 0.0 ? vof_rho_phi / face_measure : 0.0;
+    const Real vof_alpha_phi = vofAlphaPhiLimitedIntegrated(*fi);
+    const Real vof_reconstructed_phi = vofRhoPhiReconstructedVolumetricPhi(*fi);
+    Real vof_contract_error = 0.0;
+    if (_liquid_density && _gas_density)
+    {
+      const Real gas_density = evaluateCellBasedFaceScalarFunctor(_gas_density, fi, time_arg);
+      const Real liquid_density = evaluateCellBasedFaceScalarFunctor(_liquid_density, fi, time_arg);
+      vof_contract_error = vof_rho_phi - (gas_density * vof_transport_phi * face_measure +
+                                          (liquid_density - gas_density) * vof_alpha_phi);
+    }
+    const Real pressure_predictor_base_phi = hbya_phi + transient_phi;
+    const Real internal_phi_hbya =
+        integratedToVolumetricPhi(libmesh_map_find(_phiHbyA_flux, fi->id()));
+
+    out << _t << ',' << current_t_step << ',' << front_x << ',' << fi->id() << ','
+        << fi->faceCentroid()(0) << ',' << fi->faceCentroid()(1) << ',' << fi->normal()(0) << ','
+        << fi->normal()(1) << ',' << fi->faceArea() << ',' << fi->faceCoord() << ','
+        << fi->elemPtr()->id() << ','
+        << (fi->neighborPtr() ? std::to_string(fi->neighborPtr()->id()) : std::string("")) << ','
+        << elem_alpha << ',' << neighbor_alpha << ',' << hbya_phi << ',' << transient_phi << ','
+        << phig_phi << ',' << predictor_phi << ',' << p_eqn_phi << ',' << recovery_phi << ','
+        << corrected_phi << ',' << vof_transport_phi << ',' << vof_rho_phi << ','
+        << vof_rho_phi_density << ',' << vof_alpha_phi << ',' << vof_reconstructed_phi << ','
+        << vof_contract_error << ',' << pressure_predictor_base_phi << ',' << internal_phi_hbya
+        << '\n';
+  }
+
+  _last_sharp_flux_diagnostic_t_step = current_t_step;
 }
 
 void
@@ -901,6 +1087,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::adoptPublishedVOFTransportState(
 {
   if (!_vof_transport_phi_valid)
     freezeVOFTransportState(false);
+
+  checkVOFRhoPhiContract();
 }
 
 void
@@ -952,6 +1140,24 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
   if (!_gas_density_name.empty() &&
       UserObject::_subproblem.hasFunctorWithType<Real>(_gas_density_name, _tid))
     _gas_density = &getFunctor<Real>(_gas_density_name);
+
+  if (_require_vof_rho_phi_functor || _enforce_vof_rho_phi_contract)
+  {
+    if (!_vof_rho_phi)
+      paramError("vof_rho_phi_functor",
+                 "The conservative sharp-interface OpenFOAM-parity path requires the VOF-owned "
+                 "rhoPhi functor.");
+    if (!_vof_alpha_phi_limited)
+      paramError("vof_alpha_phi_limited_functor",
+                 "The conservative sharp-interface OpenFOAM-parity path requires the VOF-owned "
+                 "limited alphaPhi functor.");
+    if (!_liquid_density)
+      paramError("liquid_density_functor",
+                 "The VOF rhoPhi contract check requires the liquid density functor.");
+    if (!_gas_density)
+      paramError("gas_density_functor",
+                 "The VOF rhoPhi contract check requires the gas density functor.");
+  }
 }
 
 void
@@ -964,7 +1170,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialize()
     cacheCurrentCorrectedVolumetricFlux();
 
   for (const auto * fi : _sharp_interface_face_info)
-    _previous_timestep_corrected_face_phi[fi->id()] = libmesh_map_find(_corrected_face_phi, fi->id());
+    _previous_timestep_corrected_face_phi[fi->id()] =
+        libmesh_map_find(_corrected_face_phi, fi->id());
 }
 
 void
@@ -1009,31 +1216,27 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
     // Keep the pressure-corrected face flux as the source of truth, matching
     // OpenFOAM's direct phi update. Do not reconstruct cell U and project it
     // back to faces here; that round trip is not an exact inverse.
-    _face_mass_flux[fi->id()] =
-        transportMassFluxDensityFromVolumetricPhi(
-            fi, libmesh_map_find(_corrected_face_phi, fi->id()), time_arg);
+    _face_mass_flux[fi->id()] = transportMassFluxDensityFromVolumetricPhi(
+        fi, libmesh_map_find(_corrected_face_phi, fi->id()), time_arg);
   }
 }
 
 Moose::FaceArg
-ConservativeSharpInterfaceRhieChowMassFluxBase::makeCenteredFaceArg(const FaceInfo * fi,
-                                                    const Moose::StateArg * limiter_state) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::makeCenteredFaceArg(
+    const FaceInfo * fi, const Moose::StateArg * limiter_state) const
 {
   return Moose::FaceArg{
       fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, limiter_state};
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(const FaceInfo * fi,
-                                                       const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
+    const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   using namespace Moose::FV;
 
   if (_vel[0]->isInternalFace(*fi))
   {
-    if (const auto * owner_info = sharpInterfaceOneSidedInterpolationOwner(fi, time_arg))
-      return _rho(makeElemArg(owner_info->elem()), time_arg);
-
     const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
     const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
 
@@ -1055,35 +1258,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(const Fac
   return _rho(makeElemArg(elem_info.elem()), time_arg);
 }
 
-const ElemInfo *
-ConservativeSharpInterfaceRhieChowMassFluxBase::sharpInterfaceOneSidedInterpolationOwner(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
-{
-  if (!_use_one_sided_interface_predictor_interpolation)
-    return nullptr;
-
-  if (!fi || !_vel[0]->isInternalFace(*fi) || !_volume_fraction || !fi->elemInfo() || !fi->neighborInfo())
-    return nullptr;
-
-  const Real elem_alpha = (*_volume_fraction)(makeElemArg(fi->elemPtr()), time_arg);
-  const Real neighbor_alpha = (*_volume_fraction)(makeElemArg(fi->neighborPtr()), time_arg);
-  const bool elem_liquid = elem_alpha >= _near_interface_upper;
-  const bool elem_gas = elem_alpha <= _near_interface_lower;
-  const bool neighbor_liquid = neighbor_alpha >= _near_interface_upper;
-  const bool neighbor_gas = neighbor_alpha <= _near_interface_lower;
-
-  if (elem_liquid && neighbor_gas)
-    return fi->elemInfo();
-
-  if (neighbor_liquid && elem_gas)
-    return fi->neighborInfo();
-
-  return nullptr;
-}
-
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::predictorFaceDensity(const FaceInfo * fi,
-                                                     const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::predictorFaceDensity(
+    const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   // In the sharp-interface VOF path, rhoPhi is assembled from the primary volumetric
   // flux plus the limited alpha transport flux. It is therefore not generally equal
@@ -1102,9 +1279,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
 
   if (_vel[component]->isInternalFace(*fi))
   {
-    if (const auto * owner_info = sharpInterfaceOneSidedInterpolationOwner(fi, time_arg))
-      return cellPhysicalVelocityComponent(*owner_info, component, time_arg);
-
     const auto & elem_info = *fi->elemInfo();
     const auto & neighbor_info = *fi->neighborInfo();
     Real face_velocity = 0.0;
@@ -1121,8 +1295,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolatedPhysicalFaceFlux(const FaceInfo * fi,
-                                                             const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::interpolatedPhysicalFaceFlux(
+    const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi)
     return 0.0;
@@ -1152,59 +1326,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(
   RealVectorValue face_ainv;
 
   if (raw_ainv_readers.size() < _dim)
-    return face_ainv;
-
-  if (_vel[0]->isInternalFace(*fi))
-  {
-    if (const auto * owner_info = sharpInterfaceOneSidedInterpolationOwner(fi, Moose::currentState()))
-      for (const auto dim_i : make_range(_dim))
-      {
-        const auto dof = owner_info->dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-        face_ainv(dim_i) = raw_ainv_readers[dim_i](dof);
-      }
-    else
-    {
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-
-      for (const auto dim_i : make_range(_dim))
-      {
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      const auto neighbor_dof =
-          neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      interpolate(InterpMethod::Average,
-                  face_ainv(dim_i),
-                  raw_ainv_readers[dim_i](elem_dof),
-                  raw_ainv_readers[dim_i](neighbor_dof),
-                  *fi,
-                  true);
-      }
-    }
-  }
-  else
-  {
-    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-    const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
-
-    for (const auto dim_i : make_range(_dim))
-    {
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      face_ainv(dim_i) = raw_ainv_readers[dim_i](elem_dof);
-    }
-  }
-
-  return face_ainv;
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolatePressureFaceRau(
-    const FaceInfo * fi, const std::vector<PetscVectorReader> & raw_ainv_readers) const
-{
-  using namespace Moose::FV;
-
-  RealVectorValue face_ainv;
-
-  if (!fi || raw_ainv_readers.size() < _dim)
     return face_ainv;
 
   if (_vel[0]->isInternalFace(*fi))
@@ -1262,11 +1383,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
     return;
   }
 
-  const bool have_cached_predictor_diagonal =
-      _cached_predictor_diagonal_raw.size() >= _dim &&
-      std::all_of(_cached_predictor_diagonal_raw.begin(),
-                  _cached_predictor_diagonal_raw.begin() + _dim,
-                  [](const auto & vec) { return static_cast<bool>(vec); });
+  bool have_cached_predictor_diagonal = true;
+  for (const auto dim_i : make_range(_dim))
+    have_cached_predictor_diagonal = have_cached_predictor_diagonal &&
+                                     static_cast<bool>(cachedMomentumPredictorDiagonalRaw(dim_i));
 
   if (!have_cached_predictor_diagonal)
     return;
@@ -1283,7 +1403,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
     NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
     owned_raw_ainv.push_back(current_local_solution.zero_clone());
     NumericVector<Number> & raw_ainv = *owned_raw_ainv.back();
-    raw_ainv = *_cached_predictor_diagonal_raw[dim_i];
+    raw_ainv = *cachedMomentumPredictorDiagonalRaw(dim_i);
 
     auto working_vector = current_local_solution.zero_clone();
     auto * working_vector_petsc = dynamic_cast<PetscVector<Number> *>(working_vector.get());
@@ -1321,10 +1441,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceOperatorState(
   state.face_rho = interpolateFaceDensity(fi, time_arg);
   state.face_raw_ainv = interpolateFaceRawAinv(fi, raw_ainv_readers);
   state.normal_raw_ainv = computeFaceNormalRawAinv(state.face_raw_ainv, state.face_normal);
-  state.negative_sn_grad_p =
-      -(pressure_gradient_readers
-            ? computeFaceNormalPressureGradient(fi, *pressure_gradient_readers)
-            : computeFaceNormalPressureGradient(fi, time_arg));
+  state.negative_sn_grad_p = -(
+      pressure_gradient_readers ? computeFaceNormalPressureGradient(fi, *pressure_gradient_readers)
+                                : computeFaceNormalPressureGradient(fi, time_arg));
   if (!_suppress_startup_pressure_predictor_flux_sources &&
       !_suppress_explicit_hydrostatic_pressure_flux)
   {
@@ -1359,10 +1478,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateCellVectorFunctorToFa
 
   if (_vel[0]->isInternalFace(*fi))
   {
-    if (const auto * owner_info = sharpInterfaceOneSidedInterpolationOwner(fi, time_arg))
-      return MetaPhysicL::raw_value((*functor)(makeElemArg(owner_info->elem()), time_arg));
-
-    const auto elem_value = MetaPhysicL::raw_value((*functor)(makeElemArg(fi->elemPtr()), time_arg));
+    const auto elem_value =
+        MetaPhysicL::raw_value((*functor)(makeElemArg(fi->elemPtr()), time_arg));
     const auto neighbor_value =
         MetaPhysicL::raw_value((*functor)(makeElemArg(fi->neighborPtr()), time_arg));
     RealVectorValue face_value;
@@ -1377,10 +1494,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateCellVectorFunctorToFa
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(const Moose::Functor<Real> * functor,
-                                                          const FaceInfo * fi,
-                                                          const Moose::StateArg & time_arg,
-                                                          const Moose::StateArg * limiter_state) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
+    const Moose::Functor<Real> * functor,
+    const FaceInfo * fi,
+    const Moose::StateArg & time_arg,
+    const Moose::StateArg * limiter_state) const
 {
   if (!functor)
     return 0.0;
@@ -1399,7 +1517,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateCellBasedFaceScalarFunct
 
   if (_vel[0]->isInternalFace(*fi))
   {
-    const Real elem_value = MetaPhysicL::raw_value((*functor)(makeElemArg(fi->elemPtr()), time_arg));
+    const Real elem_value =
+        MetaPhysicL::raw_value((*functor)(makeElemArg(fi->elemPtr()), time_arg));
     const Real neighbor_value =
         MetaPhysicL::raw_value((*functor)(makeElemArg(fi->neighborPtr()), time_arg));
     Real face_value = 0.0;
@@ -1414,14 +1533,16 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateCellBasedFaceScalarFunct
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::projectPhysicalMassFluxDensity(const Real face_rho,
-                                                               const RealVectorValue & face_ainv_raw,
-                                                               const RealVectorValue & face_acceleration,
-                                                               const RealVectorValue & face_normal) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::projectPhysicalMassFluxDensity(
+    const Real face_rho,
+    const RealVectorValue & face_ainv_raw,
+    const RealVectorValue & face_acceleration,
+    const RealVectorValue & face_normal) const
 {
   Real projected_flux = 0.0;
   for (const auto dim_i : make_range(_dim))
-    projected_flux += face_rho * face_ainv_raw(dim_i) * face_acceleration(dim_i) * face_normal(dim_i);
+    projected_flux +=
+        face_rho * face_ainv_raw(dim_i) * face_acceleration(dim_i) * face_normal(dim_i);
 
   return projected_flux;
 }
@@ -1439,9 +1560,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalRawAinv(
 
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectionVolumetricFlux(
-    const FaceInfo * fi,
-    const Moose::StateArg & time_arg,
-    const SharpFaceOperatorState & state) const
+    const FaceInfo * fi, const Moose::StateArg & time_arg, const SharpFaceOperatorState & state)
 {
   if (!fi || time_arg.state != Moose::currentState().state)
     return 0.0;
@@ -1450,7 +1569,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectio
   if (dt <= libMesh::TOLERANCE)
     return 0.0;
 
-  if (!_vel[0]->isInternalFace(*fi) && useConstrainedBoundaryPredictorState(fi))
+  if (!_vel[0]->isInternalFace(*fi))
     return 0.0;
 
   const Real old_corrected_phi = libmesh_map_find(_previous_timestep_corrected_face_phi, fi->id());
@@ -1460,6 +1579,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectio
   const Real ddt_coupling_coeff =
       std::max(0.0, 1.0 - std::min(std::abs(phi_corr) / phi_scale, 1.0));
 
+  // OpenFOAM's Euler ddtCorr contribution is
+  // fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr) * phiCorr / dt, and
+  // pressureCorrector adds interpolate(rho*rAU()) times that value to phiHbyA.
   return ddt_coupling_coeff * state.face_rho * state.normal_raw_ainv * phi_corr / dt;
 }
 
@@ -1487,27 +1609,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNorma
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::volumetricNormalFluxToPressureMassFluxDensity(
-    const FaceInfo * fi, const Real volumetric_flux) const
-{
-  if (!fi)
-    return 0.0;
-
-  const RealVectorValue face_normal = fi->normal();
-  const RealVectorValue face_raw_ainv = interpolateFaceRawAinv(fi);
-  const RealVectorValue face_density_weighted_ainv = libmesh_map_find(_Ainv, fi->id());
-  const Real normal_raw_ainv = computeFaceNormalRawAinv(face_raw_ainv, face_normal);
-  const Real normal_density_weighted_ainv =
-      computeFaceNormalRawAinv(face_density_weighted_ainv, face_normal);
-
-  if (std::abs(normal_raw_ainv) <= libMesh::TOLERANCE)
-    return transportMassFluxDensityFromVolumetricPhi(fi, volumetric_flux, Moose::currentState());
-
-  return volumetric_flux * normal_density_weighted_ainv / normal_raw_ainv;
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolumetricFlux(const FaceInfo * fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolumetricFlux(
+    const FaceInfo * fi) const
 {
   if (!fi)
     return 0.0;
@@ -1515,7 +1618,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
   PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
 
   _p_diffusion_kernel->setupFaceData(fi);
-  _p_diffusion_kernel->setCurrentFaceArea(1.0);
+  const Real face_measure = fi->faceArea() * fi->faceCoord();
+  _p_diffusion_kernel->setCurrentFaceArea(face_measure);
 
   if (_p->isInternalFace(*fi))
   {
@@ -1528,13 +1632,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
     const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
     const auto neighbor_matrix_contribution =
         _p_diffusion_kernel->computeNeighborMatrixContribution();
-    const auto elem_rhs_contribution =
-        _p_diffusion_kernel->computeElemRightHandSideContribution();
+    const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
 
-    // The pressure equation now uses the raw face Ainv functor (`pressure_Ainv`),
-    // so the diffusion kernel already returns the solved volumetric face flux
-    // primitive directly. Do not reinterpret it as a density-weighted pressure
-    // mass-flux density here.
+    // The sharp pressure projection stores the solved OpenFOAM-style pEqn.flux
+    // including face area. MOOSE transport converts back to a normal flux
+    // density when publishing corrected_face_phi.
     return p_neighbor_value * neighbor_matrix_contribution +
            p_elem_value * elem_matrix_contribution - elem_rhs_contribution;
   }
@@ -1556,8 +1658,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
       const auto rhs_contribution =
           _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
 
-      // Boundary pressure diffusion is in the same volumetric face-flux space
-      // as the interior operator once `pressure_Ainv` is used.
+      // Boundary pressure diffusion follows the same integrated-flux contract
+      // as the interior pressure operator.
       return p_elem_value * matrix_contribution - rhs_contribution;
     }
   }
@@ -1566,7 +1668,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceFlux(const FaceInfo * fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceFlux(
+    const FaceInfo * fi) const
 {
   return computeDiscretePressureFaceVolumetricFlux(fi);
 }
@@ -1591,8 +1694,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
     const Real rho_jump = neighbor_rho - elem_rho;
     const Real orthogonal_part = rho_jump / delta_mag;
 
-    const Real non_orth_delta_coeff =
-        1.0 / std::max(fi->normal() * delta, 0.05 * delta_mag);
+    const Real non_orth_delta_coeff = 1.0 / std::max(fi->normal() * delta, 0.05 * delta_mag);
     const Real base_part = non_orth_delta_coeff * rho_jump;
 
     const Point non_orth_correction_vector = fi->normal() - delta * non_orth_delta_coeff;
@@ -1602,8 +1704,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
         MetaPhysicL::raw_value(_rho.gradient(makeElemArg(fi->neighborPtr()), time_arg));
 
     RealVectorValue face_grad_rho = 0;
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, face_grad_rho, elem_grad_rho, neighbor_grad_rho, *fi, true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           face_grad_rho,
+                           elem_grad_rho,
+                           neighbor_grad_rho,
+                           *fi,
+                           true);
     const Real correction_part = non_orth_correction_vector * face_grad_rho;
 
     if (_density_sn_grad_scheme == "orthogonal")
@@ -1614,11 +1720,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
 
     const Real correction_magnitude = std::abs(correction_part);
     const Real base_magnitude = std::abs(base_part);
-    const Real limiter = std::min(
-        _density_sn_grad_limiter_coefficient * base_magnitude /
-            ((1.0 - _density_sn_grad_limiter_coefficient) * correction_magnitude +
-             libMesh::TOLERANCE),
-        1.0);
+    const Real limiter =
+        std::min(_density_sn_grad_limiter_coefficient * base_magnitude /
+                     ((1.0 - _density_sn_grad_limiter_coefficient) * correction_magnitude +
+                      libMesh::TOLERANCE),
+                 1.0);
     return base_part + limiter * correction_part;
   }
 
@@ -1735,24 +1841,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useDiscreteHydrostaticPredictorF
          _hydrostatic_predictor_discretization == "discrete_density_sn_grad";
 }
 
-bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::useLegacyHydrostaticPredictorFaceAcceleration() const
-{
-  return useExplicitHydrostaticPredictorForce() &&
-         _hydrostatic_predictor_discretization == "legacy_acceleration" &&
-         _hydrostatic_density_gradient_face_acceleration;
-}
-
-bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::hasHydrostaticPredictorFaceForce() const
-{
-  return useDiscreteHydrostaticPredictorFaceForce() ||
-         useLegacyHydrostaticPredictorFaceAcceleration();
-}
-
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscreteHydrostaticPredictorFaceNormalForceDensity(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::
+    computeDiscreteHydrostaticPredictorFaceNormalForceDensity(
+        const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi || !useDiscreteHydrostaticPredictorFaceForce())
     return 0.0;
@@ -1761,213 +1853,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscreteHydrostaticPredic
   return -ghf * computeFaceNormalDensityGradient(fi, time_arg);
 }
 
-bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::populateMomentumPredictorBodyForceFaceField(
-    FaceVectorField & face_field, const Moose::StateArg & time_arg) const
-{
-  const bool have_surface_face_force = _surface_tension_face_acceleration;
-  const bool have_hydrostatic_face_force = hasHydrostaticPredictorFaceForce();
-
-  if (!have_surface_face_force && !have_hydrostatic_face_force)
-    return false;
-
-  std::vector<std::unique_ptr<NumericVector<Number>>> owned_raw_ainv;
-  std::vector<PetscVectorReader> raw_ainv_readers;
-  buildSharpFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
-
-  for (const auto * fi : _sharp_interface_face_info)
-  {
-    const auto state = buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers);
-    Real total_normal_force_density = 0.0;
-    bool have_face_force = false;
-
-    if (have_surface_face_force)
-    {
-      const auto surface_accel =
-          evaluateBoundaryAwareVectorFunctor(_surface_tension_face_acceleration, fi, time_arg);
-      const Real surface_mass_flux_density = projectPhysicalMassFluxDensity(
-          state.face_rho, state.face_raw_ainv, surface_accel, state.face_normal);
-      if (std::abs(state.normal_raw_ainv) > libMesh::TOLERANCE)
-      {
-        total_normal_force_density += surface_mass_flux_density / state.normal_raw_ainv;
-        have_face_force = true;
-      }
-    }
-
-    if (have_hydrostatic_face_force)
-    {
-      if (useDiscreteHydrostaticPredictorFaceForce())
-      {
-        total_normal_force_density +=
-            computeDiscreteHydrostaticPredictorFaceNormalForceDensity(fi, time_arg);
-        have_face_force = true;
-      }
-      else if (useLegacyHydrostaticPredictorFaceAcceleration())
-      {
-        const auto hydrostatic_accel = evaluateBoundaryAwareVectorFunctor(
-            _hydrostatic_density_gradient_face_acceleration, fi, time_arg);
-        const Real hydrostatic_mass_flux_density = projectPhysicalMassFluxDensity(
-            state.face_rho, state.face_raw_ainv, hydrostatic_accel, state.face_normal);
-        if (std::abs(state.normal_raw_ainv) > libMesh::TOLERANCE)
-        {
-          total_normal_force_density += hydrostatic_mass_flux_density / state.normal_raw_ainv;
-          have_face_force = true;
-        }
-      }
-    }
-
-    face_field[fi->id()] =
-        have_face_force ? total_normal_force_density * state.face_normal : RealVectorValue();
-  }
-
-  return true;
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateCellMomentumPredictorPressureForceDensity(
-    const ElemInfo & elem_info) const
-{
-  RealVectorValue pressure_force_density;
-
-  for (const auto dim_i : make_range(_dim))
-    pressure_force_density(dim_i) = -_p->gradSlnComponent(elem_info, dim_i);
-
-  return pressure_force_density;
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateCellHydrostaticMomentumPredictorBodyForceDensity(
-    const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
-{
-  RealVectorValue body_force_density;
-
-  if (!elem_info)
-    return body_force_density;
-
-  if (!useExplicitHydrostaticPredictorForce())
-    return body_force_density;
-
-  const auto * const elem = elem_info->elem();
-  const auto elem_arg = makeElemArg(elem);
-
-  if (_hydrostatic_predictor_discretization == "legacy_acceleration" &&
-      _hydrostatic_density_gradient_cell_acceleration)
-  {
-    const Real rho = _rho(elem_arg, time_arg);
-    body_force_density +=
-        rho *
-        MetaPhysicL::raw_value((*_hydrostatic_density_gradient_cell_acceleration)(elem_arg, time_arg));
-    return body_force_density;
-  }
-
-  const Real gh = _gravity * (elem->vertex_average() - _reference_pressure_point);
-  const RealVectorValue grad_rho = MetaPhysicL::raw_value(_rho.gradient(elem_arg, time_arg));
-  body_force_density += -gh * grad_rho;
-  return body_force_density;
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateLegacyMomentumPredictorBodyForceDensity(
-    const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
-{
-  RealVectorValue body_force_density;
-
-  if (!elem_info)
-    return body_force_density;
-
-  const auto * const elem = elem_info->elem();
-  const auto elem_arg = makeElemArg(elem);
-  const Real rho = _rho(elem_arg, time_arg);
-
-  if (_surface_tension_cell_acceleration)
-    body_force_density +=
-        rho * MetaPhysicL::raw_value((*_surface_tension_cell_acceleration)(elem_arg, time_arg));
-
-  body_force_density += evaluateCellHydrostaticMomentumPredictorBodyForceDensity(elem_info, time_arg);
-
-  return body_force_density;
-}
-
-bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::populateMomentumPredictorPressureForceFaceField(
-    FaceVectorField & face_field, const Moose::StateArg & time_arg) const
-{
-  bool found_nonzero_force = false;
-  std::vector<std::unique_ptr<NumericVector<Number>>> owned_raw_ainv;
-  std::vector<PetscVectorReader> raw_ainv_readers;
-  buildSharpFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
-  for (const auto * fi : _sharp_interface_face_info)
-  {
-    const auto state = buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers);
-    const Real normal_force_density = state.negative_sn_grad_p;
-
-    if (std::abs(normal_force_density) > libMesh::TOLERANCE)
-      found_nonzero_force = true;
-
-    face_field[fi->id()] = normal_force_density * state.face_normal;
-  }
-
-  return found_nonzero_force;
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceVectorFieldToCellSourceDensity(
-    const ElemInfo * elem_info,
-    const Moose::StateArg & time_arg,
-    const FaceVectorField & face_field) const
-{
-  FaceScalarField face_normal_scalar(
-      _moose_mesh, blockIDs(), "momentum_predictor_reconstructed_face_normal_scalar");
-
-  for (const auto * fi : _sharp_interface_face_info)
-    face_normal_scalar[fi->id()] =
-        face_field(makeCenteredFaceArg(fi), time_arg) * fi->normal();
-
-  return reconstructFaceNormalScalarToCellVector(elem_info, time_arg, face_normal_scalar);
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceBasedMomentumPredictorBodyForceDensity(
-    const ElemInfo * elem_info,
-    const Moose::StateArg & time_arg,
-    const FaceVectorField * face_field) const
-{
-  RealVectorValue body_force_density;
-
-  if (!elem_info)
-    return body_force_density;
-
-  const auto * const elem = elem_info->elem();
-  const auto elem_arg = makeElemArg(elem);
-  const Real rho = _rho(elem_arg, time_arg);
-  const bool have_face_hydrostatic = hasHydrostaticPredictorFaceForce();
-
-  if (face_field)
-    body_force_density += (*face_field)(elem_arg, time_arg);
-
-  if (!_surface_tension_face_acceleration && _surface_tension_cell_acceleration)
-    body_force_density +=
-        rho * MetaPhysicL::raw_value((*_surface_tension_cell_acceleration)(elem_arg, time_arg));
-
-  if (!have_face_hydrostatic)
-    body_force_density += evaluateCellHydrostaticMomentumPredictorBodyForceDensity(elem_info, time_arg);
-
-  return body_force_density;
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const
-{
-  if (!fi)
-    return 0.0;
-
-  const auto state = pressureVelocityFaceState(fi, Moose::currentState());
-  return volumetricNormalFluxToPressureMassFluxDensity(fi, state.pressure_writeback_phi);
-}
-
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunctors(const bool with_updated_pressure,
-                                                                     const bool verbose)
+ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunctors(
+    const bool with_updated_pressure, const bool verbose)
 {
   _pressure_coupled_velocity_correction_valid = false;
   _pressure_predictor_face_state_valid = false;
@@ -1993,30 +1881,19 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
     {
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
-      if (const auto * owner_info = sharpInterfaceOneSidedInterpolationOwner(fi, time_arg))
-      {
-        for (const auto dim_i : index_range(_vel))
-        {
-          const auto owner_dof =
-              owner_info->dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          face_hbya(dim_i) = -hbya_readers[dim_i](owner_dof);
-        }
-      }
-      else
-      {
-        for (const auto dim_i : index_range(_vel))
-        {
-          const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          const auto neighbor_dof =
-              neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
 
-          interpolate(Moose::FV::InterpMethod::Average,
-                      face_hbya(dim_i),
-                      -hbya_readers[dim_i](elem_dof),
-                      -hbya_readers[dim_i](neighbor_dof),
-                      *fi,
-                      true);
-        }
+      for (const auto dim_i : index_range(_vel))
+      {
+        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+        const auto neighbor_dof =
+            neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+
+        interpolate(Moose::FV::InterpMethod::Average,
+                    face_hbya(dim_i),
+                    -hbya_readers[dim_i](elem_dof),
+                    -hbya_readers[dim_i](neighbor_dof),
+                    *fi,
+                    true);
       }
     }
     else
@@ -2051,11 +1928,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       }
     }
 
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
     const Real predictor_operator_volumetric_flux = face_hbya * fi->normal();
     const auto state =
         buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers, &pressure_gradient_readers);
-    const RealVectorValue pressure_face_raw_ainv =
-        interpolatePressureFaceRau(fi, raw_ainv_readers);
+    const RealVectorValue pressure_face_raw_ainv = state.face_raw_ainv;
     const Real normal_pressure_ainv =
         computeFaceNormalRawAinv(pressure_face_raw_ainv, state.face_normal);
     Real transient_projection_flux = 0.0;
@@ -2066,8 +1943,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
     {
       if (_transient_projection_face_acceleration)
       {
-        const RealVectorValue transient_acceleration =
-            evaluateBoundaryAwareVectorFunctor(_transient_projection_face_acceleration, fi, time_arg);
+        const RealVectorValue transient_acceleration = evaluateBoundaryAwareVectorFunctor(
+            _transient_projection_face_acceleration, fi, time_arg);
         if (transient_acceleration != RealVectorValue())
         {
           const Real transient_mass_flux_density = projectPhysicalMassFluxDensity(
@@ -2080,8 +1957,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
         transient_projection_flux =
             -computeDefaultTransientProjectionVolumetricFlux(fi, time_arg, state);
     }
-
-    _transient_projection_flux[fi->id()] = transient_projection_flux;
 
     if (_add_capillary_hydrostatic_flux && !_suppress_startup_pressure_predictor_flux_sources)
     {
@@ -2097,8 +1972,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       {
         const Real surface_mass_flux_density = projectPhysicalMassFluxDensity(
             state.face_rho, state.face_raw_ainv, surface_acceleration, state.face_normal);
-        surface_tension_flux =
-            massFluxDensityToVolumetricNormalFlux(fi, surface_mass_flux_density);
+        surface_tension_flux = massFluxDensityToVolumetricNormalFlux(fi, surface_mass_flux_density);
       }
 
       if (!_suppress_explicit_hydrostatic_pressure_flux)
@@ -2109,10 +1983,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       }
     }
 
-    const Real phig_flux = surface_tension_flux + hydrostatic_flux;
+    const Real phig_flux = (surface_tension_flux + hydrostatic_flux) * face_measure;
+    const Real transient_projection_integrated_flux = transient_projection_flux * face_measure;
     const Real pressure_predictor_base_flux =
-        predictor_operator_volumetric_flux + transient_projection_flux;
+        (predictor_operator_volumetric_flux + transient_projection_flux) * face_measure;
 
+    _transient_projection_flux[fi->id()] = transient_projection_integrated_flux;
     _capillary_hydrostatic_flux[fi->id()] = phig_flux;
     _phig_flux[fi->id()] = phig_flux;
     _pressure_Ainv[fi->id()] = pressure_face_raw_ainv;
@@ -2120,22 +1996,22 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
     _phiHbyA_flux[fi->id()] = -(pressure_predictor_base_flux + phig_flux);
     _pressure_predictor_flux[fi->id()] = _phiHbyA_flux[fi->id()];
     _pressure_predictor_mass_flux[fi->id()] =
-        transportMassFluxDensityFromVolumetricPhi(
-            fi, pressure_predictor_base_flux + phig_flux, time_arg);
+        face_measure > libMesh::TOLERANCE
+            ? transportMassFluxDensityFromVolumetricPhi(
+                  fi, (pressure_predictor_base_flux + phig_flux) / face_measure, time_arg)
+            : 0.0;
 
     if (verbose)
     {
       _console << "Sharp-interface velocity predictor on face " << fi->id()
                << ": HbyA_flux=" << predictor_operator_volumetric_flux
                << ", transient_source_flux=" << _transient_projection_flux[fi->id()]
-               << ", capillary_hydrostatic_source_flux="
-               << _capillary_hydrostatic_flux[fi->id()]
+               << ", capillary_hydrostatic_source_flux=" << _capillary_hydrostatic_flux[fi->id()]
                << ", phig_flux=" << _phig_flux[fi->id()]
                << ", pressure_predictor_base_flux=" << pressure_predictor_base_flux
                << ", internal_pressure_predictor_base_flux="
                << _pressure_predictor_base_flux[fi->id()]
-               << ", phiHbyA_flux=" << _phiHbyA_flux[fi->id()]
-               << std::endl;
+               << ", phiHbyA_flux=" << _phiHbyA_flux[fi->id()] << std::endl;
     }
   }
 
@@ -2149,10 +2025,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCor
   if (!_apply_pressure_velocity_writeback)
   {
     for (const auto * fi : flowFaceInfo())
-    {
       _pressure_coupled_cell_reconstruction_scalar[fi->id()] = 0.0;
-      _pressure_coupled_cell_reconstruction_vector[fi->id()] = RealVectorValue();
-    }
 
     _pressure_coupled_velocity_correction_valid = true;
     return;
@@ -2177,7 +2050,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCor
 }
 
 bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorState(const FaceInfo * fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorState(
+    const FaceInfo * fi) const
 {
   if (!fi || _vel[0]->isInternalFace(*fi))
     return false;
@@ -2199,8 +2073,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
         if (auto * adv_diff_bc = dynamic_cast<LinearFVAdvectionDiffusionBC *>(bc_pointer))
         {
           adv_diff_bc->setupFaceData(
-              fi,
-              fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
+              fi, fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
           if (adv_diff_bc->computeBoundaryGradientMatrixContribution() > 0.0)
           {
             use_constrained_boundary_state = true;
@@ -2315,13 +2188,12 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCel
                         normal_matrix(0, 1) * normal_matrix(1, 0)) <= libMesh::TOLERANCE;
   else if (_dim == 3)
   {
-    const Real det =
-        normal_matrix(0, 0) * (normal_matrix(1, 1) * normal_matrix(2, 2) -
-                               normal_matrix(1, 2) * normal_matrix(2, 1)) -
-        normal_matrix(0, 1) * (normal_matrix(1, 0) * normal_matrix(2, 2) -
-                               normal_matrix(1, 2) * normal_matrix(2, 0)) +
-        normal_matrix(0, 2) * (normal_matrix(1, 0) * normal_matrix(2, 1) -
-                               normal_matrix(1, 1) * normal_matrix(2, 0));
+    const Real det = normal_matrix(0, 0) * (normal_matrix(1, 1) * normal_matrix(2, 2) -
+                                            normal_matrix(1, 2) * normal_matrix(2, 1)) -
+                     normal_matrix(0, 1) * (normal_matrix(1, 0) * normal_matrix(2, 2) -
+                                            normal_matrix(1, 2) * normal_matrix(2, 0)) +
+                     normal_matrix(0, 2) * (normal_matrix(1, 0) * normal_matrix(2, 1) -
+                                            normal_matrix(1, 1) * normal_matrix(2, 0));
     singular = std::abs(det) <= libMesh::TOLERANCE;
   }
 
@@ -2338,30 +2210,25 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCel
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructReferenceStylePressureCoupledCellVelocityDelta(
-    const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::
+    reconstructReferenceStylePressureCoupledCellVelocityDelta(
+        const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
   if (!elem_info || !_pressure_coupled_velocity_correction_valid)
     return RealVectorValue();
 
-  // reference-solver-like writeback:
-  //   U = HbyA + Ainv_cell * reconstruct(phi_correction / Ainv_face)
-  // Publish the normalized face primitive as a face-vector functor and let the
-  // built-in MOOSE FaceCenteredMapFunctor perform the face-to-cell
-  // reconstruction on the active element geometry.
-  const RealVectorValue reconstructed_operator =
-      _pressure_coupled_cell_reconstruction_vector(makeElemArg(elem_info->elem()), time_arg);
+  const RealVectorValue reconstructed_operator = reconstructFaceNormalScalarToCellVector(
+      elem_info, time_arg, _pressure_coupled_cell_reconstruction_scalar);
 
   RealVectorValue pressure_delta;
   for (const auto system_i : index_range(_momentum_implicit_systems))
   {
-    const auto & dof_indices =
-        elem_info->dofIndices()[_global_momentum_system_numbers[system_i]];
+    const auto & dof_indices = elem_info->dofIndices()[_global_momentum_system_numbers[system_i]];
     if (dof_indices.empty())
       continue;
 
-    pressure_delta(system_i) = cellAinvRaw(system_i, dof_indices[0]) *
-                               reconstructed_operator(system_i);
+    pressure_delta(system_i) =
+        cellAinvRaw(system_i, dof_indices[0]) * reconstructed_operator(system_i);
   }
 
   return pressure_delta;
@@ -2371,7 +2238,8 @@ RealVectorValue
 ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVelocityDelta(
     const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
-  if (!elem_info || !_pressure_coupled_velocity_correction_valid || !_apply_pressure_velocity_writeback)
+  if (!elem_info || !_pressure_coupled_velocity_correction_valid ||
+      !_apply_pressure_velocity_writeback)
     return RealVectorValue();
 
   return reconstructReferenceStylePressureCoupledCellVelocityDelta(elem_info, time_arg);

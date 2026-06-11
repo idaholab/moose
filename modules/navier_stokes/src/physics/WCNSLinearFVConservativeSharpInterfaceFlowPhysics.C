@@ -14,35 +14,40 @@
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp",
                                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics);
-registerMooseAction(
-    "NavierStokesApp", WCNSLinearFVConservativeSharpInterfaceFlowPhysics, "add_linear_fv_kernel");
-registerMooseAction(
-    "NavierStokesApp", WCNSLinearFVConservativeSharpInterfaceFlowPhysics, "add_linear_fv_bc");
-registerMooseAction(
-    "NavierStokesApp",
-    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
-    "add_functor_material");
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    "add_linear_fv_kernel");
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    "add_linear_fv_bc");
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    "add_functor_material");
 
 namespace
 {
 bool
 containsDynamicContactAngleModel(const std::vector<std::string> & models)
 {
-  return std::any_of(models.begin(), models.end(), [](const std::string & model)
-  {
-    std::string lower = model;
-    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c)
-    {
-      return static_cast<char>(std::tolower(c));
-    });
-    return lower == "dynamic";
-  });
+  return std::any_of(models.begin(),
+                     models.end(),
+                     [](const std::string & model)
+                     {
+                       std::string lower = model;
+                       std::transform(lower.begin(),
+                                      lower.end(),
+                                      lower.begin(),
+                                      [](unsigned char c)
+                                      { return static_cast<char>(std::tolower(c)); });
+                       return lower == "dynamic";
+                     });
 }
 
 bool
 blocksOverlap(const std::set<SubdomainID> & lhs, const std::set<SubdomainID> & rhs)
 {
-  if (lhs.empty() || rhs.empty() || lhs.count(Moose::ANY_BLOCK_ID) || rhs.count(Moose::ANY_BLOCK_ID))
+  if (lhs.empty() || rhs.empty() || lhs.count(Moose::ANY_BLOCK_ID) ||
+      rhs.count(Moose::ANY_BLOCK_ID))
     return true;
 
   auto lhs_it = lhs.begin();
@@ -64,10 +69,10 @@ std::string
 sanitizeFunctorLabel(const std::string & input)
 {
   std::string result = input;
-  std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c)
-  {
-    return std::isalnum(c) ? static_cast<char>(c) : '_';
-  });
+  std::transform(result.begin(),
+                 result.end(),
+                 result.begin(),
+                 [](unsigned char c) { return std::isalnum(c) ? static_cast<char>(c) : '_'; });
   return result;
 }
 }
@@ -77,9 +82,9 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
 {
   InputParameters params = WCNSLinearFVFlowPhysicsBase::validParams();
 
-  params.addClassDescription(
-      "Define a linear-FV segregated sharp-interface flow solve using reference-solver-style velocity "
-      "components as the primary momentum unknowns.");
+  params.addClassDescription("Define a linear-FV segregated sharp-interface flow solve using "
+                             "reference-solver-style velocity "
+                             "components as the primary momentum unknowns.");
   params.set<std::vector<std::string>>("velocity_variable") =
       std::vector<std::string>(NS::velocity_vector, NS::velocity_vector + 3);
 
@@ -88,6 +93,10 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.transferParam<bool>(RhieChowMassFlux::validParams(),
                              "use_cached_momentum_predictor_operator");
   params.set<bool>("use_cached_momentum_predictor_operator") = true;
+  params.transferParam<std::string>(RhieChowMassFlux::validParams(),
+                                    "momentum_predictor_operator_diagnostic_file_base");
+  params.transferParam<Real>(RhieChowMassFlux::validParams(),
+                             "momentum_predictor_operator_diagnostic_time");
 
   MooseEnum pressure_formulation("reduced total", "reduced");
   params.addParam<MooseEnum>(
@@ -133,6 +142,24 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
                                          "liquid_density_functor");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "gas_density_functor");
+  params.transferParam<std::string>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                                    "sharp_flux_diagnostic_file_base");
+  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "sharp_flux_diagnostic_time");
+  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "sharp_flux_diagnostic_front_band_width");
+  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "sharp_flux_diagnostic_all_faces");
+  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "require_vof_rho_phi_functor");
+  params.set<bool>("require_vof_rho_phi_functor") = true;
+  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "enforce_vof_rho_phi_contract");
+  params.set<bool>("enforce_vof_rho_phi_contract") = true;
+  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "vof_rho_phi_contract_abs_tol");
+  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
+                             "vof_rho_phi_contract_rel_tol");
 
   params.addParam<MooseFunctorName>(
       "transient_projection_face_acceleration",
@@ -239,11 +266,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "curvature_delta_n_fixed_value",
       1e-8,
       "Fixed delta_n value used by the curvature producer when curvature_delta_n_mode = fixed.");
-  params.addParam<bool>(
-      "use_reference_simple_curvature",
-      true,
-      "Use the baseline reference solver curvature expression K = -div(nHatf). This should remain true "
-      "for parity with the shipped solver path.");
+  params.addParam<bool>("use_reference_simple_curvature",
+                        true,
+                        "Use the baseline reference solver curvature expression K = -div(nHatf). "
+                        "This should remain true "
+                        "to match the shipped solver path.");
   params.addParam<unsigned int>(
       "n_alpha_smooth_curvature",
       0,
@@ -328,10 +355,9 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       1e-8,
       "Regularization used in the geometry material when constructing interface unit normals if "
       "no precomputed unit-normal functor is supplied.");
-  params.addParam<Real>(
-      "geometry_minimum_density",
-      1e-12,
-      "Positive floor used in the geometry material when dividing by density.");
+  params.addParam<Real>("geometry_minimum_density",
+                        1e-12,
+                        "Positive floor used in the geometry material when dividing by density.");
   params.addParam<bool>(
       "clip_volume_fraction_for_geometry",
       true,
@@ -340,36 +366,26 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "geometry_alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>(
       "geometry_alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
-  params.addParam<Real>(
-      "near_interface_lower",
-      0.01,
-      "Lower threshold for the reference-solver-like near-interface indicator.");
-  params.addParam<Real>(
-      "near_interface_upper",
-      0.99,
-      "Upper threshold for the reference-solver-like near-interface indicator.");
-  params.addParam<bool>(
-      "use_one_sided_interface_predictor_interpolation",
-      false,
-      "Whether predictor-side face interpolation should use one-sided liquid/gas owner values on "
-      "pure sharp-interface faces. When false, internal predictor faces use centered geometric "
-      "linear interpolation to match OpenFOAM's default fvc::interpolate(linear) path.");
-
+  params.addParam<Real>("near_interface_lower",
+                        0.01,
+                        "Lower threshold for the reference-solver-like near-interface indicator.");
+  params.addParam<Real>("near_interface_upper",
+                        0.99,
+                        "Upper threshold for the reference-solver-like near-interface indicator.");
   params.addParamNamesToGroup(
       "pressure_formulation add_transient_projection_flux "
       "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
       "apply_pressure_face_flux_correction transient_projection_face_acceleration "
-      "use_interfoam_predictor_contract use_one_sided_interface_predictor_interpolation "
+      "use_interfoam_predictor_contract "
       "surface_tension_face_acceleration surface_tension_cell_acceleration "
       "hydrostatic_density_gradient_face_acceleration "
       "hydrostatic_density_gradient_cell_acceleration",
       "Sharp Interface Pressure Correction");
 
-  params.addParamNamesToGroup(
-      "surface_tension_momentum_source_x surface_tension_momentum_source_y "
-      "surface_tension_momentum_source_z hydrostatic_momentum_source_x "
-      "hydrostatic_momentum_source_y hydrostatic_momentum_source_z",
-      "Sharp Interface Momentum Predictor");
+  params.addParamNamesToGroup("surface_tension_momentum_source_x surface_tension_momentum_source_y "
+                              "surface_tension_momentum_source_z hydrostatic_momentum_source_x "
+                              "hydrostatic_momentum_source_y hydrostatic_momentum_source_z",
+                              "Sharp Interface Momentum Predictor");
 
   params.addParamNamesToGroup(
       "create_geometry_functors volume_fraction_functor surface_tension_coefficient "
@@ -390,8 +406,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   return params;
 }
 
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::WCNSLinearFVConservativeSharpInterfaceFlowPhysics(
-    const InputParameters & parameters)
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
+    WCNSLinearFVConservativeSharpInterfaceFlowPhysics(const InputParameters & parameters)
   : WCNSLinearFVFlowPhysicsBase(parameters),
     _pressure_formulation(getParam<MooseEnum>("pressure_formulation")),
     _add_transient_projection_flux(getParam<bool>("add_transient_projection_flux")),
@@ -417,7 +433,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::WCNSLinearFVConservativeSharp
   const auto & contact_angle_models = getParam<std::vector<std::string>>("contact_angle_models");
   const bool has_dynamic_model = containsDynamicContactAngleModel(contact_angle_models);
 
-  if (has_dynamic_model && !getParam<MooseFunctorName>("wall_contact_angle_degrees_functor").empty())
+  if (has_dynamic_model &&
+      !getParam<MooseFunctorName>("wall_contact_angle_degrees_functor").empty())
     paramError("wall_contact_angle_degrees_functor",
                "wall_contact_angle_degrees_functor cannot be supplied together with a dynamic "
                "entry in contact_angle_models. Provide either the explicit wall-angle functor or "
@@ -468,8 +485,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumReducedPressureKer
   assignBlocks(params, _blocks);
 
   const std::vector<std::string> comp_axis({"x", "y", "z"});
-  const auto resolve_source_name = [this](const std::string & param_name,
-                                          const std::string & generated_base_name)
+  const auto resolve_source_name =
+      [this](const std::string & param_name, const std::string & generated_base_name)
   {
     const auto explicit_name = getParam<MooseFunctorName>(param_name);
     if (!explicit_name.empty())
@@ -483,31 +500,26 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumReducedPressureKer
   {
     params.set<LinearVariableName>("variable") = _velocity_names[d];
 
-    const auto capillary_source_name = resolve_source_name("surface_tension_momentum_source_" +
-                                                               comp_axis[d],
-                                                           "surface_tension_momentum_source_" +
-                                                               comp_axis[d]);
+    const auto capillary_source_name =
+        resolve_source_name("surface_tension_momentum_source_" + comp_axis[d],
+                            "surface_tension_momentum_source_" + comp_axis[d]);
     if (!capillary_source_name.empty())
     {
       params.set<MooseFunctorName>("source_density") = capillary_source_name;
-      getProblem().addLinearFVKernel(kernel_type,
-                                     prefix() + "ins_momentum_capillary_source_" + comp_axis[d],
-                                     params);
+      getProblem().addLinearFVKernel(
+          kernel_type, prefix() + "ins_momentum_capillary_source_" + comp_axis[d], params);
     }
 
-    const auto hydrostatic_source_name = resolve_source_name("hydrostatic_momentum_source_" +
-                                                                 comp_axis[d],
-                                                             "hydrostatic_momentum_source_" +
-                                                                 comp_axis[d]);
+    const auto hydrostatic_source_name =
+        resolve_source_name("hydrostatic_momentum_source_" + comp_axis[d],
+                            "hydrostatic_momentum_source_" + comp_axis[d]);
     if (!hydrostatic_source_name.empty())
     {
       params.set<MooseFunctorName>("source_density") = hydrostatic_source_name;
-      getProblem().addLinearFVKernel(kernel_type,
-                                     prefix() + "ins_momentum_hydrostatic_source_" + comp_axis[d],
-                                     params);
+      getProblem().addLinearFVKernel(
+          kernel_type, prefix() + "ins_momentum_hydrostatic_source_" + comp_axis[d], params);
     }
   }
-
 }
 
 void
@@ -556,8 +568,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addOutletBC()
             params.set<SolverVariableName>("v") = _velocity_names[1];
           if (dimension() >= 3)
             params.set<SolverVariableName>("w") = _velocity_names[2];
-          params.set<MooseEnum>("momentum_component") =
-              MooseEnum("x=0 y=1 z=2", NS::directions[d]);
+          params.set<MooseEnum>("momentum_component") = MooseEnum("x=0 y=1 z=2", NS::directions[d]);
           params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
         }
 
@@ -620,8 +631,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallsBC()
       InputParameters pressure_params = getFactory().getValidParams(pressure_bc_type);
       pressure_params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
       pressure_params.set<LinearVariableName>("variable") = _pressure_name;
-      pressure_params.set<MooseFunctorName>("pressure_predictor_flux") =
-          "pressure_predictor_flux";
+      pressure_params.set<MooseFunctorName>("pressure_predictor_flux") = "pressure_predictor_flux";
       pressure_params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
           "pressure_boundary_normal_gradient";
       pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
@@ -651,8 +661,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallsBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
         params.set<LinearVariableName>("variable") = _pressure_name;
-        params.set<MooseFunctorName>("pressure_predictor_flux") =
-            "pressure_predictor_flux";
+        params.set<MooseFunctorName>("pressure_predictor_flux") = "pressure_predictor_flux";
         params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
             "pressure_boundary_normal_gradient";
         params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
@@ -742,10 +751,10 @@ bool
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateDynamicContactAngleFunctorMaterial()
     const
 {
-  return _create_dynamic_contact_angle_functor_material &&
-         shouldCreateCurvatureProducer() &&
+  return _create_dynamic_contact_angle_functor_material && shouldCreateCurvatureProducer() &&
          getParam<MooseFunctorName>("wall_contact_angle_degrees_functor").empty() &&
-         containsDynamicContactAngleModel(getParam<std::vector<std::string>>("contact_angle_models"));
+         containsDynamicContactAngleModel(
+             getParam<std::vector<std::string>>("contact_angle_models"));
 }
 
 void
@@ -825,7 +834,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       .queryInto(objs);
 
   bool have_sharp_rc_uo = false;
-  const auto this_block_ids = getSubdomainIDs(std::set<SubdomainName>(_blocks.begin(), _blocks.end()));
+  const auto this_block_ids =
+      getSubdomainIDs(std::set<SubdomainName>(_blocks.begin(), _blocks.end()));
   for (const auto & obj : objs)
     if (dynamic_cast<RhieChowMassFlux *>(obj))
     {
@@ -852,9 +862,9 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
 
   const std::string u_names[3] = {"u", "v", "w"};
   const auto object_type = "ConservativeSharpInterfaceRhieChowMassFlux";
-  const bool use_face_based_reduced_pressure_predictor =
-      _solve_for_dynamic_pressure && _pressure_formulation == "reduced" &&
-      _add_capillary_hydrostatic_flux;
+  const bool use_face_based_reduced_pressure_predictor = _solve_for_dynamic_pressure &&
+                                                         _pressure_formulation == "reduced" &&
+                                                         _add_capillary_hydrostatic_flux;
 
   auto params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
@@ -869,8 +879,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       getParam<MooseEnum>("pressure_projection_method");
   params.set<bool>("use_cached_momentum_predictor_operator") =
       getParam<bool>("use_cached_momentum_predictor_operator");
-  params.set<bool>("split_momentum_predictor_operator") =
-      use_face_based_reduced_pressure_predictor;
+  params.set<bool>("split_momentum_predictor_operator") = use_face_based_reduced_pressure_predictor;
+  params.set<std::string>("momentum_predictor_operator_diagnostic_file_base") =
+      getParam<std::string>("momentum_predictor_operator_diagnostic_file_base");
+  params.set<Real>("momentum_predictor_operator_diagnostic_time") =
+      getParam<Real>("momentum_predictor_operator_diagnostic_time");
   if (parameters().isParamValid("gravity"))
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
   if (_solve_for_dynamic_pressure)
@@ -887,59 +900,29 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       getParam<MooseFunctorName>("volume_fraction_functor");
   params.set<Real>("near_interface_lower") = getParam<Real>("near_interface_lower");
   params.set<Real>("near_interface_upper") = getParam<Real>("near_interface_upper");
-  params.set<bool>("use_one_sided_interface_predictor_interpolation") =
-      getParam<bool>("use_one_sided_interface_predictor_interpolation");
   params.set<MooseFunctorName>("vof_alpha_phi_limited_functor") =
       getParam<MooseFunctorName>("vof_alpha_phi_limited_functor");
   params.set<MooseFunctorName>("liquid_density_functor") =
       getParam<MooseFunctorName>("liquid_density_functor");
   params.set<MooseFunctorName>("gas_density_functor") =
       getParam<MooseFunctorName>("gas_density_functor");
-
-  const bool use_cell_based_reduced_pressure_force_names = false;
-  if (!use_face_based_reduced_pressure_predictor && _solve_for_dynamic_pressure &&
-      _pressure_formulation == "reduced" && _add_capillary_hydrostatic_flux &&
-      use_cell_based_reduced_pressure_force_names)
-  {
-    const std::vector<std::string> comp_axis({"x", "y", "z"});
-    std::vector<std::vector<std::string>> body_force_kernel_names(dimension());
-    const auto resolve_source_name = [this](const std::string & param_name,
-                                            const std::string & generated_base_name)
-    {
-      const auto explicit_name = getParam<MooseFunctorName>(param_name);
-      if (!explicit_name.empty())
-        return explicit_name;
-
-      return shouldCreateGeometryFunctorMaterial()
-                 ? generatedGeometryFunctorName(generated_base_name)
-                 : MooseFunctorName("");
-    };
-
-    for (const auto d : make_range(dimension()))
-    {
-      if (!resolve_source_name("surface_tension_momentum_source_" + comp_axis[d],
-                               "surface_tension_momentum_source_" + comp_axis[d])
-               .empty())
-        body_force_kernel_names[d].push_back(prefix() + "ins_momentum_capillary_source_" +
-                                             comp_axis[d]);
-
-      if (!resolve_source_name("hydrostatic_momentum_source_" + comp_axis[d],
-                               "hydrostatic_momentum_source_" + comp_axis[d])
-               .empty())
-        body_force_kernel_names[d].push_back(prefix() + "ins_momentum_hydrostatic_source_" +
-                                             comp_axis[d]);
-    }
-
-    params.set<std::vector<std::vector<std::string>>>("body_force_kernel_names") =
-        body_force_kernel_names;
-  }
+  params.set<std::string>("sharp_flux_diagnostic_file_base") =
+      getParam<std::string>("sharp_flux_diagnostic_file_base");
+  params.set<Real>("sharp_flux_diagnostic_time") = getParam<Real>("sharp_flux_diagnostic_time");
+  params.set<Real>("sharp_flux_diagnostic_front_band_width") =
+      getParam<Real>("sharp_flux_diagnostic_front_band_width");
+  params.set<bool>("sharp_flux_diagnostic_all_faces") =
+      getParam<bool>("sharp_flux_diagnostic_all_faces");
+  params.set<bool>("require_vof_rho_phi_functor") = getParam<bool>("require_vof_rho_phi_functor");
+  params.set<bool>("enforce_vof_rho_phi_contract") = getParam<bool>("enforce_vof_rho_phi_contract");
+  params.set<Real>("vof_rho_phi_contract_abs_tol") = getParam<Real>("vof_rho_phi_contract_abs_tol");
+  params.set<Real>("vof_rho_phi_contract_rel_tol") = getParam<Real>("vof_rho_phi_contract_rel_tol");
 
   const auto transient_name = getParam<MooseFunctorName>("transient_projection_face_acceleration");
   if (!transient_name.empty())
     params.set<MooseFunctorName>("transient_projection_face_acceleration") = transient_name;
 
-  const auto surface_tension_name =
-      getParam<MooseFunctorName>("surface_tension_face_acceleration");
+  const auto surface_tension_name = getParam<MooseFunctorName>("surface_tension_face_acceleration");
   if (!surface_tension_name.empty())
     params.set<MooseFunctorName>("surface_tension_face_acceleration") = surface_tension_name;
   const auto surface_tension_cell_name =
@@ -949,8 +932,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
   if (shouldCreateGeometryFunctorMaterial())
   {
     const auto sigma_name = getParam<MooseFunctorName>("surface_tension_coefficient");
-    const bool sigma_is_literal_zero =
-        MooseUtils::parsesToReal(sigma_name) && std::abs(std::stod(sigma_name)) <= libMesh::TOLERANCE;
+    const bool sigma_is_literal_zero = MooseUtils::parsesToReal(sigma_name) &&
+                                       std::abs(std::stod(sigma_name)) <= libMesh::TOLERANCE;
     if (!sigma_is_literal_zero)
     {
       if (surface_tension_name.empty())
@@ -1071,8 +1054,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
     params.set<std::string>("expression") =
         "conservative_continuity_error / (" + _density_name + " + " +
         std::to_string(getParam<Real>("geometry_minimum_density")) + ")";
-    params.set<std::vector<std::string>>("functor_names") =
-        {"conservative_continuity_error", _density_name};
+    params.set<std::vector<std::string>>("functor_names") = {"conservative_continuity_error",
+                                                             _density_name};
     params.set<std::string>("property_name") = "conservative_continuity_error_over_density";
     getProblem().addMaterial(
         "ParsedFunctorMaterial", prefix() + "conservative_continuity_error_over_density", params);
@@ -1195,8 +1178,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addVelocityBoundaryInputFunct
       const auto & velocity_functors = libmesh_map_find(_momentum_inlet_functors, boundary);
       for (const auto d : make_range(dimension()))
         add_velocity_functor(velocity_functors[d],
-                            generatedBoundaryMomentumFunctorName(boundary, d, "inlet"),
-                            "inlet_velocity_bc");
+                             generatedBoundaryMomentumFunctorName(boundary, d, "inlet"),
+                             "inlet_velocity_bc");
     }
 
   for (const auto & [boundary, wall_type] : _momentum_wall_types)
@@ -1205,8 +1188,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addVelocityBoundaryInputFunct
       const auto & velocity_functors = _momentum_wall_functors[boundary];
       for (const auto d : make_range(dimension()))
         add_velocity_functor(velocity_functors[d],
-                            generatedBoundaryMomentumFunctorName(boundary, d, "wall"),
-                            "wall_velocity_bc");
+                             generatedBoundaryMomentumFunctorName(boundary, d, "wall"),
+                             "wall_velocity_bc");
     }
 }
 

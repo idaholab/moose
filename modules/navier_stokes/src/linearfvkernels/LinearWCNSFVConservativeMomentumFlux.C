@@ -21,10 +21,11 @@ InputParameters
 LinearWCNSFVConservativeMomentumFlux::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
-  params.addClassDescription("Represents the matrix and right hand side contributions of the "
-                             "stress and advection terms of an reference-solver-style velocity momentum "
-                             "equation. The historical object name is retained for the single "
-                             "sharp-interface parity path.");
+  params.addClassDescription(
+      "Represents the matrix and right hand side contributions of the "
+      "stress and advection terms of an reference-solver-style velocity momentum "
+      "equation. The historical object name is retained for the single "
+      "sharp-interface parity path.");
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
@@ -36,6 +37,11 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
       "Optional face-centered mass-flux functor used for momentum advection. When supplied, "
       "this overrides the Rhie-Chow user object's live face-mass-flux query so one convective "
       "flux family can be frozen for the whole outer iteration.");
+  params.addParam<bool>(
+      "require_mass_flux_functor",
+      true,
+      "Require mass_flux_functor instead of silently falling back to the live Rhie-Chow mass flux. "
+      "The conservative sharp-interface parity path should consume the alpha-owned rhoPhi flux.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The diffusion coefficient.");
   params.addParam<MooseFunctorName>(
       NS::density,
@@ -46,10 +52,9 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
       "density_gradient_functor",
       "0",
       "Deprecated compatibility parameter. The primary unknown is velocity.");
-  params.addParam<Real>(
-      "minimum_density",
-      0.0,
-      "Deprecated compatibility parameter. The primary unknown is velocity.");
+  params.addParam<Real>("minimum_density",
+                        0.0,
+                        "Deprecated compatibility parameter. The primary unknown is velocity.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -81,6 +86,7 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
     _mass_flux_functor(params.isParamValid("mass_flux_functor")
                            ? &getFunctor<Real>("mass_flux_functor")
                            : nullptr),
+    _require_mass_flux_functor(getParam<bool>("require_mass_flux_functor")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
@@ -99,13 +105,19 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
     _coord_type(getBlockCoordSystem()),
     _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord())
 {
+  if (_require_mass_flux_functor && !_mass_flux_functor)
+    paramError("mass_flux_functor",
+               "LinearWCNSFVConservativeMomentumFlux requires an alpha-owned rhoPhi mass-flux "
+               "functor. This avoids falling back to rho_f * phi in the sharp-interface parity "
+               "path.");
+
   // We only need gradients if the nonorthogonal correction is enabled or when we request the
   // computation of the deviatoric parts of the stress tensor.
   if (_use_nonorthogonal_correction || _use_deviatoric_terms)
     _var.computeCellGradients();
 
-  const bool need_more_ghosting = Moose::FV::setInterpolationMethod(
-      *this, _advected_interp_method, "advected_interp_method");
+  const bool need_more_ghosting =
+      Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
   if (_adv_interp_method)
   {
     if (_adv_interp_method->needsGradients())
@@ -274,10 +286,10 @@ LinearWCNSFVConservativeMomentumFlux::computeInternalStressRHSContribution()
               _current_face_info->eCN();
 
       // Cache the matrix contribution
-      _stress_rhs_contribution += _mu(face_arg, state_arg) *
-                                  (interp_coeffs.first * grad_elem +
-                                   interp_coeffs.second * grad_neighbor) *
-                                  correction_vector;
+      _stress_rhs_contribution +=
+          _mu(face_arg, state_arg) *
+          (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
+          correction_vector;
     }
     // scenario (2), we will have to account for the deviatoric parts of the stress tensor.
     if (_use_deviatoric_terms)
@@ -425,8 +437,8 @@ LinearWCNSFVConservativeMomentumFlux::computeStressBoundaryRHSContribution(
     }
 
     // We support internal boundaries too so we have to make sure the normal points always outward
-    grad_contrib += _mu(face_arg, state_arg) * deviatoric_vector_elem *
-                    _boundary_normal_factor * _current_face_info->normal();
+    grad_contrib += _mu(face_arg, state_arg) * deviatoric_vector_elem * _boundary_normal_factor *
+                    _current_face_info->normal();
   }
 
   return grad_contrib;
@@ -462,14 +474,19 @@ LinearWCNSFVConservativeMomentumFlux::setupFaceData(const FaceInfo * face_info)
   if (_mass_flux_functor)
   {
     const auto state = determineState();
-    const Moose::FaceArg face_arg =
-        (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-            ? makeCDFace(*_current_face_info)
-            : singleSidedFaceArg(_current_face_info);
+    const Moose::FaceArg face_arg = (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+                                        ? makeCDFace(*_current_face_info)
+                                        : singleSidedFaceArg(_current_face_info);
     _face_mass_flux = (*_mass_flux_functor)(face_arg, state);
   }
   else
+  {
+    if (_require_mass_flux_functor)
+      mooseError(name(),
+                 " cannot assemble momentum advection without mass_flux_functor. The "
+                 "sharp-interface conservative path must use the VOF-owned rhoPhi flux.");
     _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
+  }
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
@@ -533,19 +550,19 @@ LinearWCNSFVConservativeMomentumFlux::accumulateCurrentFaceResidualContributions
 
     if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
     {
-      advection_residual.add(
-          dof_id_elem,
-          elem_advection * elem_value + neighbor_advection * neighbor_value - advection_rhs);
+      advection_residual.add(dof_id_elem,
+                             elem_advection * elem_value + neighbor_advection * neighbor_value -
+                                 advection_rhs);
       stress_residual.add(dof_id_elem, stress_matrix * (elem_value - neighbor_value) - stress_rhs);
     }
 
     if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
     {
-      advection_residual.add(
-          dof_id_neighbor,
-          -elem_advection * elem_value - neighbor_advection * neighbor_value + advection_rhs);
-      stress_residual.add(
-          dof_id_neighbor, -stress_matrix * (elem_value - neighbor_value) + stress_rhs);
+      advection_residual.add(dof_id_neighbor,
+                             -elem_advection * elem_value - neighbor_advection * neighbor_value +
+                                 advection_rhs);
+      stress_residual.add(dof_id_neighbor,
+                          -stress_matrix * (elem_value - neighbor_value) + stress_rhs);
     }
   }
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
@@ -574,8 +591,7 @@ LinearWCNSFVConservativeMomentumFlux::accumulateCurrentFaceResidualContributions
         computeAdvectionBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
     const Real stress_matrix =
         computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area;
-    const Real stress_rhs =
-        computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
+    const Real stress_rhs = computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
 
     if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
     {
@@ -589,8 +605,7 @@ LinearWCNSFVConservativeMomentumFlux::accumulateCurrentFaceResidualContributions
       const auto dof_id_neighbor =
           _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
       const Real neighbor_value = solution(dof_id_neighbor);
-      advection_residual.add(
-          dof_id_neighbor, advection_matrix * neighbor_value - advection_rhs);
+      advection_residual.add(dof_id_neighbor, advection_matrix * neighbor_value - advection_rhs);
       stress_residual.add(dof_id_neighbor, stress_matrix * neighbor_value - stress_rhs);
     }
   }

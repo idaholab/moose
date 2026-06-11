@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVFluxKernel.h"
+#include "LinearFVAssemblyConsumer.h"
 #include "LinearFVBoundaryCondition.h"
 
 InputParameters
@@ -50,15 +51,26 @@ LinearFVFluxKernel::addMatrixContribution()
     // (diagonal).
     const auto elem_matrix_contribution = computeElemMatrixContribution();
     const auto neighbor_matrix_contribution = computeNeighborMatrixContribution();
+    const bool elem_has_blocks = hasBlocks(_current_face_info->elemInfo()->subdomain_id());
+    const bool neighbor_has_blocks = hasBlocks(_current_face_info->neighborInfo()->subdomain_id());
+
+    if (!_matrices.empty())
+      if (auto * consumer = assemblyConsumer())
+        consumer->addInternalFaceMatrixContribution(_dof_indices(0),
+                                                    _dof_indices(1),
+                                                    elem_matrix_contribution,
+                                                    neighbor_matrix_contribution,
+                                                    elem_has_blocks,
+                                                    neighbor_has_blocks);
 
     // Populate matrix
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+    if (elem_has_blocks)
     {
       _matrix_contribution(0, 0) = elem_matrix_contribution;
       _matrix_contribution(0, 1) = neighbor_matrix_contribution;
     }
 
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+    if (neighbor_has_blocks)
     {
       _matrix_contribution(1, 0) = -elem_matrix_contribution;
       _matrix_contribution(1, 1) = -neighbor_matrix_contribution;
@@ -94,6 +106,11 @@ LinearFVFluxKernel::addMatrixContribution()
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
 
+        if (!_matrices.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryMatrixContribution(
+                _current_face_info->id(), dof_id_elem, matrix_contribution);
+
         // We add the contributions to every tagged matrix
         for (auto & matrix : _matrices)
           (*matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
@@ -102,6 +119,11 @@ LinearFVFluxKernel::addMatrixContribution()
       {
         const auto dof_id_neighbor =
             _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+
+        if (!_matrices.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryMatrixContribution(
+                _current_face_info->id(), dof_id_neighbor, matrix_contribution);
 
         // We add the contributions to every tagged matrix
         for (auto & matrix : _matrices)
@@ -125,11 +147,22 @@ LinearFVFluxKernel::addRightHandSideContribution()
     // Compute the entries which will go to the neighbor and element positions.
     const auto elem_rhs_contribution = computeElemRightHandSideContribution();
     const auto neighbor_rhs_contribution = computeNeighborRightHandSideContribution();
+    const bool elem_has_blocks = hasBlocks(_current_face_info->elemInfo()->subdomain_id());
+    const bool neighbor_has_blocks = hasBlocks(_current_face_info->neighborInfo()->subdomain_id());
+
+    if (!_vectors.empty())
+      if (auto * consumer = assemblyConsumer())
+        consumer->addInternalFaceRightHandSideContribution(_dof_indices(0),
+                                                           _dof_indices(1),
+                                                           elem_rhs_contribution,
+                                                           neighbor_rhs_contribution,
+                                                           elem_has_blocks,
+                                                           neighbor_has_blocks);
 
     // Populate right hand side
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
+    if (elem_has_blocks)
       _rhs_contribution(0) = elem_rhs_contribution;
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
+    if (neighbor_has_blocks)
       _rhs_contribution(1) = neighbor_rhs_contribution;
 
     // We add the contributions to every tagged vector
@@ -161,6 +194,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
+        if (!_vectors.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryRightHandSideContribution(dof_id_elem, rhs_contribution);
         // We add the contributions to every tagged vector
         for (auto & vector : _vectors)
           (*vector).add(dof_id_elem, rhs_contribution);
@@ -169,6 +205,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
       {
         const auto dof_id_neighbor =
             _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
+        if (!_vectors.empty())
+          if (auto * consumer = assemblyConsumer())
+            consumer->addBoundaryRightHandSideContribution(dof_id_neighbor, rhs_contribution);
         // We add the contributions to every tagged matrix
         for (auto & vector : _vectors)
           (*vector).add(dof_id_neighbor, rhs_contribution);

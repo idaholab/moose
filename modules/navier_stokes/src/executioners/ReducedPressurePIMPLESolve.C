@@ -368,7 +368,7 @@ ReducedPressurePIMPLESolve::solve()
         sharp_rc->commitAcceptedTimestepTransportHistory();
   }
 
-  while (simple_iteration_counter < _num_iterations)
+  while (simple_iteration_counter < _num_iterations && !converged)
   {
     simple_iteration_counter++;
     _current_outer_iteration = simple_iteration_counter;
@@ -699,11 +699,29 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
     if (auto * previous_newton = _momentum_systems[system_i]->solutionPreviousNewton())
       previous_newton->close();
     rhs.close();
-    _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
-    rhs.close();
-    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
 
     if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->beginFVSplitMomentumPredictorOperatorAssembly(system_i);
+
+    try
+    {
+      _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+    }
+    catch (...)
+    {
+      if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+        _rc_uo->clearMomentumPredictorOperatorCache();
+      throw;
+    }
+    rhs.close();
+
+    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
+          system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
+
+    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
+
+    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
     {
       predictor_diagonal_raw = solution.zero_clone();
       predictor_diagonal_raw->close();
@@ -733,11 +751,14 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
       *predictor_explicit_force = rhs;
       predictor_explicit_force->add(-1.0, *predictor_rhs_base);
       predictor_explicit_force->close();
+
+      _rc_uo->setMomentumPredictorForcing(
+          system_i, predictor_explicit_force.get(), predictor_body_force.get());
     }
 
     momentum_system.update();
 
-    if (_rc_uo)
+    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
       _rc_uo->cacheMomentumPredictorOperator(system_i,
                                              predictor_rhs_base.get(),
                                              predictor_explicit_force.get(),
@@ -1205,8 +1226,10 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_f
   _rc_uo->computeCellVelocity();
 
   _rc_uo->updateVelocityBoundaryState();
+  const std::string stage_label =
+      "piso_" + std::to_string(_current_piso_iteration) + "_post_pressure_writeback";
 
-  reportReferenceContinuityErrors("post_pressure_writeback");
+  reportReferenceContinuityErrors(stage_label);
   correctMovingMeshFaceVelocityAndMakeRelative();
 }
 

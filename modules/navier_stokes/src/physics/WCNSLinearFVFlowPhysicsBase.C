@@ -192,6 +192,7 @@ WCNSLinearFVFlowPhysicsBase::addPressureCorrectionKernels()
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _pressure_name;
     params.set<MooseFunctorName>("face_flux") = pressureDivergenceFluxName();
+    params.set<bool>("face_flux_is_integrated") = pressureDivergenceFluxIsIntegrated();
     params.set<bool>("force_boundary_execution") = true;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
@@ -222,7 +223,8 @@ WCNSLinearFVFlowPhysicsBase::addMomentumFluxKernels()
   const std::string u_names[3] = {"u", "v", "w"};
   const std::string kernel_type = momentumFluxKernelType();
   const std::string kernel_name = prefix() + "ins_momentum_flux_";
-  const bool use_venkat_deferred_correction = _momentum_advection_interpolation == "venkatakrishnan";
+  const bool use_venkat_deferred_correction =
+      _momentum_advection_interpolation == "venkatakrishnan";
   const InterpolationMethodName advected_interp_method_name =
       prefix() + "momentum_advection_deferred_correction";
 

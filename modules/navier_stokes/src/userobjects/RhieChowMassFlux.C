@@ -17,15 +17,21 @@
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
+#include "LinearFVElementalKernel.h"
+#include "LinearFVKernel.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
+#include "LinearFVFluxKernel.h"
 #include "LinearFVPressureFluxBC.h"
 #include "LinearFVPressureInletOutletVelocityBC.h"
 #include "LinearFVPressureSymmetryBC.h"
 #include "Function.h"
+#include "MooseUtils.h"
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 
@@ -93,6 +99,16 @@ RhieChowMassFlux::validParams()
       "Whether the assembled momentum predictor operator already excludes explicit pressure-"
       "gradient and body-force terms, so HbyA should use that operator directly instead of "
       "subtracting those terms back out.");
+  params.addParam<std::string>(
+      "momentum_predictor_operator_diagnostic_file_base",
+      "",
+      "Optional file base for CSV dumps of the cached UEqn-like momentum predictor operator "
+      "decomposition used to build HbyA.");
+  params.addParam<Real>(
+      "momentum_predictor_operator_diagnostic_time",
+      -1.0,
+      "Simulation time at which to start dumping cached momentum predictor operator diagnostics. A "
+      "negative value disables the dump.");
   return params;
 }
 
@@ -122,6 +138,10 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _use_cached_momentum_predictor_operator(
         getParam<bool>("use_cached_momentum_predictor_operator")),
     _split_momentum_predictor_operator(getParam<bool>("split_momentum_predictor_operator")),
+    _momentum_predictor_operator_diagnostic_file_base(
+        getParam<std::string>("momentum_predictor_operator_diagnostic_file_base")),
+    _momentum_predictor_operator_diagnostic_time(
+        getParam<Real>("momentum_predictor_operator_diagnostic_time")),
     _body_force_kernel_names(
         getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
@@ -862,15 +882,261 @@ RhieChowMassFlux::debugCellAinvRaw(const unsigned int system_i, const dof_id_typ
   return (*_Ainv_raw[system_i])(dof);
 }
 
+bool
+RhieChowMassFlux::MomentumPredictorOperator::complete() const
+{
+  return constant_source_raw && rhs_raw && diagonal_raw && openfoam_diagonal_raw &&
+         (!split ||
+          (assembly_closed && finalized && pre_relaxation_diagonal_raw && relaxation_source_raw &&
+           boundary_source_raw && explicit_force_raw && body_force_raw));
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::computeHSource(
+    NumericVector<Number> & solution, NumericVector<Number> & h_source_raw) const
+{
+  mooseAssert(constant_source_raw,
+              "The momentum predictor operator must have a constant source before H(U) is built.");
+
+  PetscVectorReader solution_reader(solution);
+  PetscVectorReader constant_source_reader(*constant_source_raw);
+  const bool compute_relaxation_source =
+      split && diagonal_raw && pre_relaxation_diagonal_raw && relaxation_source_raw;
+  const std::unique_ptr<PetscVectorReader> diagonal_reader =
+      compute_relaxation_source ? std::make_unique<PetscVectorReader>(*diagonal_raw) : nullptr;
+  const std::unique_ptr<PetscVectorReader> pre_relaxation_diagonal_reader =
+      compute_relaxation_source ? std::make_unique<PetscVectorReader>(*pre_relaxation_diagonal_raw)
+                                : nullptr;
+  const std::unique_ptr<PetscVectorReader> boundary_h_diagonal_reader =
+      boundary_h_diagonal_raw ? std::make_unique<PetscVectorReader>(*boundary_h_diagonal_raw)
+                              : nullptr;
+
+  h_source_raw.zero();
+  h_source_raw.close();
+  if (compute_relaxation_source)
+  {
+    relaxation_source_raw->zero();
+    relaxation_source_raw->close();
+  }
+
+  const auto first_local = constant_source_raw->first_local_index();
+  const auto last_local = constant_source_raw->last_local_index();
+  std::vector<dof_id_type> indices;
+  std::vector<Real> values;
+  std::vector<Real> relaxation_values;
+  indices.reserve(last_local - first_local);
+  values.reserve(last_local - first_local);
+  if (compute_relaxation_source)
+    relaxation_values.reserve(last_local - first_local);
+
+  for (const auto row_dof : make_range(first_local, last_local))
+  {
+    Real offdiag_action = 0.0;
+    if (const auto row_entries = offdiag_coefficients.find(row_dof);
+        row_entries != offdiag_coefficients.end())
+      for (const auto & [column_dof, coefficient] : row_entries->second)
+        offdiag_action += coefficient * solution_reader(column_dof);
+
+    const Real boundary_h_action =
+        boundary_h_diagonal_reader ? (*boundary_h_diagonal_reader)(row_dof)*solution_reader(row_dof)
+                                   : 0.0;
+    const Real relaxation_source =
+        compute_relaxation_source
+            ? ((*diagonal_reader)(row_dof) - (*pre_relaxation_diagonal_reader)(row_dof)) *
+                  solution_reader(row_dof)
+            : 0.0;
+
+    indices.push_back(row_dof);
+    values.push_back(constant_source_reader(row_dof) + offdiag_action + boundary_h_action -
+                     relaxation_source);
+    if (compute_relaxation_source)
+      relaxation_values.push_back(relaxation_source);
+  }
+
+  h_source_raw.insert(values, indices);
+  h_source_raw.close();
+  if (compute_relaxation_source)
+  {
+    relaxation_source_raw->insert(relaxation_values, indices);
+    relaxation_source_raw->close();
+  }
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addElementalMatrixContribution(const dof_id_type dof,
+                                                                            const Real contribution)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+  interior_diagonal_raw->add(dof, contribution);
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addElementalRightHandSideContribution(
+    const dof_id_type dof, const Real contribution)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+  rhs_raw->add(dof, contribution);
+  constant_source_raw->add(dof, -contribution);
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addInternalFaceMatrixContribution(
+    const dof_id_type elem_dof,
+    const dof_id_type neighbor_dof,
+    const Real elem_matrix_contribution,
+    const Real neighbor_matrix_contribution,
+    const bool elem_has_blocks,
+    const bool neighbor_has_blocks)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+
+  if (elem_has_blocks)
+  {
+    interior_diagonal_raw->add(elem_dof, elem_matrix_contribution);
+    offdiag_abs_sum_raw->add(elem_dof, std::abs(neighbor_matrix_contribution));
+    offdiag_coefficients[elem_dof].push_back({neighbor_dof, neighbor_matrix_contribution});
+  }
+
+  if (neighbor_has_blocks)
+  {
+    interior_diagonal_raw->add(neighbor_dof, -neighbor_matrix_contribution);
+    offdiag_abs_sum_raw->add(neighbor_dof, std::abs(elem_matrix_contribution));
+    offdiag_coefficients[neighbor_dof].push_back({elem_dof, -elem_matrix_contribution});
+  }
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addInternalFaceRightHandSideContribution(
+    const dof_id_type elem_dof,
+    const dof_id_type neighbor_dof,
+    const Real elem_rhs_contribution,
+    const Real neighbor_rhs_contribution,
+    const bool elem_has_blocks,
+    const bool neighbor_has_blocks)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+
+  if (elem_has_blocks)
+  {
+    rhs_raw->add(elem_dof, elem_rhs_contribution);
+    constant_source_raw->add(elem_dof, -elem_rhs_contribution);
+  }
+
+  if (neighbor_has_blocks)
+  {
+    rhs_raw->add(neighbor_dof, neighbor_rhs_contribution);
+    constant_source_raw->add(neighbor_dof, -neighbor_rhs_contribution);
+  }
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addBoundaryMatrixContribution(
+    const dof_id_type face_id, const dof_id_type dof, const Real contribution)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+  boundary_matrix_contributions.push_back({face_id, dof, contribution});
+}
+
+void
+RhieChowMassFlux::MomentumPredictorOperator::addBoundaryRightHandSideContribution(
+    const dof_id_type dof, const Real contribution)
+{
+  libMesh::Threads::spin_mutex::scoped_lock lock(assembly_mutex);
+  rhs_raw->add(dof, contribution);
+  constant_source_raw->add(dof, -contribution);
+  boundary_source_raw->add(dof, -contribution);
+}
+
+const RhieChowMassFlux::MomentumPredictorOperator *
+RhieChowMassFlux::cachedMomentumPredictorOperator(const unsigned int system_i) const
+{
+  if (system_i >= _momentum_predictor_operators.size())
+    return nullptr;
+
+  return _momentum_predictor_operators[system_i].get();
+}
+
+void
+RhieChowMassFlux::dumpMomentumPredictorOperatorDiagnostic(
+    const unsigned int system_i,
+    const unsigned int call_id,
+    NumericVector<Number> & solution,
+    const MomentumPredictorOperator & predictor,
+    NumericVector<Number> & h_source_raw,
+    NumericVector<Number> & hby_a_raw,
+    NumericVector<Number> & ainv_raw) const
+{
+  if (_momentum_predictor_operator_diagnostic_file_base.empty() ||
+      _momentum_predictor_operator_diagnostic_time < 0.0 ||
+      _t + libMesh::TOLERANCE < _momentum_predictor_operator_diagnostic_time)
+    return;
+
+  std::ostringstream file_name;
+  file_name << _momentum_predictor_operator_diagnostic_file_base << "_step"
+            << _fe_problem.timeStep() << "_call" << call_id << ".csv";
+
+  std::ofstream out(file_name.str(), system_i == 0 ? std::ios::out : std::ios::app);
+  out << std::setprecision(17);
+  if (system_i == 0)
+    out << "time,t_step,call_id,system_i,elem_id,dof,x,y,z,volume,velocity,"
+           "D0,D_relaxed,D_openfoam,rAU,relaxation_source,boundary_source,constant_source,"
+           "offdiag_H,H_source,final_HbyA\n";
+
+  PetscVectorReader solution_reader(solution);
+  PetscVectorReader d0_reader(*predictor.pre_relaxation_diagonal_raw);
+  PetscVectorReader d_relaxed_reader(*predictor.diagonal_raw);
+  PetscVectorReader d_openfoam_reader(*predictor.openfoam_diagonal_raw);
+  PetscVectorReader relaxation_source_reader(*predictor.relaxation_source_raw);
+  PetscVectorReader boundary_source_reader(*predictor.boundary_source_raw);
+  PetscVectorReader constant_source_reader(*predictor.constant_source_raw);
+  PetscVectorReader h_source_reader(h_source_raw);
+  PetscVectorReader hby_a_reader(hby_a_raw);
+  PetscVectorReader ainv_reader(ainv_raw);
+  PetscVectorReader volume_reader(*_cell_volumes);
+
+  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
+  {
+    if (!hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const auto & dof_indices = elem_info->dofIndices()[_global_momentum_system_numbers[system_i]];
+    if (dof_indices.empty())
+      continue;
+
+    const auto dof = dof_indices[0];
+    Real offdiag_action = 0.0;
+    if (const auto row_entries = predictor.offdiag_coefficients.find(dof);
+        row_entries != predictor.offdiag_coefficients.end())
+      for (const auto & [column_dof, coefficient] : row_entries->second)
+        offdiag_action += coefficient * solution_reader(column_dof);
+
+    const Point centroid = elem_info->elem()->vertex_average();
+    out << _t << ',' << _fe_problem.timeStep() << ',' << call_id << ',' << system_i << ','
+        << elem_info->elem()->id() << ',' << dof << ',' << centroid(0) << ',' << centroid(1) << ','
+        << centroid(2) << ',' << volume_reader(dof) << ',' << solution_reader(dof) << ','
+        << d0_reader(dof) << ',' << d_relaxed_reader(dof) << ',' << d_openfoam_reader(dof) << ','
+        << ainv_reader(dof) << ',' << relaxation_source_reader(dof) << ','
+        << boundary_source_reader(dof) << ',' << constant_source_reader(dof) << ','
+        << offdiag_action << ',' << h_source_reader(dof) << ',' << hby_a_reader(dof) << '\n';
+  }
+}
+
+const NumericVector<Number> *
+RhieChowMassFlux::cachedMomentumPredictorDiagonalRaw(const unsigned int system_i) const
+{
+  const auto * const predictor = cachedMomentumPredictorOperator(system_i);
+  return predictor ? (predictor->openfoam_diagonal_raw ? predictor->openfoam_diagonal_raw.get()
+                                                       : predictor->diagonal_raw.get())
+                   : nullptr;
+}
+
 void
 RhieChowMassFlux::clearMomentumPredictorOperatorCache()
 {
-  _cached_predictor_operator_base_raw.clear();
-  _cached_predictor_rhs_raw.clear();
-  _cached_predictor_diagonal_raw.clear();
-  _cached_predictor_explicit_force_raw.clear();
-  _cached_predictor_body_force_raw.clear();
+  LinearFVKernel::setAssemblyConsumer(nullptr);
+  _momentum_predictor_operators.clear();
   _cached_predictor_operator_valid = false;
+  _cached_predictor_operator_finalized = false;
 }
 
 void
@@ -886,40 +1152,178 @@ RhieChowMassFlux::addMomentumPredictorBodyForceForcing(const unsigned int /*syst
 }
 
 bool
-RhieChowMassFlux::canUseCachedMomentumPredictorOperator() const
+RhieChowMassFlux::canUseCachedMomentumPredictorOperator()
 {
-  if (!_use_cached_momentum_predictor_operator || !_cached_predictor_operator_valid)
+  if (!_use_cached_momentum_predictor_operator)
     return false;
 
-  if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size() ||
-      _cached_predictor_rhs_raw.size() != _momentum_systems.size() ||
-      _cached_predictor_diagonal_raw.size() != _momentum_systems.size())
+  if (_split_momentum_predictor_operator && !_cached_predictor_operator_finalized)
+    finalizeCachedMomentumPredictorOperators();
+
+  if (!_cached_predictor_operator_valid)
     return false;
 
-  if (_split_momentum_predictor_operator &&
-      _cached_predictor_explicit_force_raw.size() != _momentum_systems.size())
-    return false;
-  if (_split_momentum_predictor_operator &&
-      _cached_predictor_body_force_raw.size() != _momentum_systems.size())
+  if (_momentum_predictor_operators.size() != _momentum_systems.size())
     return false;
 
-  return std::all_of(_cached_predictor_operator_base_raw.begin(),
-                     _cached_predictor_operator_base_raw.end(),
-                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
-         std::all_of(_cached_predictor_rhs_raw.begin(),
-                     _cached_predictor_rhs_raw.end(),
-                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
-         std::all_of(_cached_predictor_diagonal_raw.begin(),
-                     _cached_predictor_diagonal_raw.end(),
-                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
-         (!_split_momentum_predictor_operator ||
-          std::all_of(_cached_predictor_explicit_force_raw.begin(),
-                      _cached_predictor_explicit_force_raw.end(),
-                      [](const auto & vec) { return static_cast<bool>(vec); })) &&
-         (!_split_momentum_predictor_operator ||
-          std::all_of(_cached_predictor_body_force_raw.begin(),
-                      _cached_predictor_body_force_raw.end(),
-                      [](const auto & vec) { return static_cast<bool>(vec); }));
+  return std::all_of(_momentum_predictor_operators.begin(),
+                     _momentum_predictor_operators.end(),
+                     [](const auto & op) { return op && op->complete(); });
+}
+
+void
+RhieChowMassFlux::updateCachedMomentumPredictorOperatorValidity()
+{
+  _cached_predictor_operator_valid =
+      _momentum_predictor_operators.size() == _momentum_systems.size() &&
+      std::all_of(_momentum_predictor_operators.begin(),
+                  _momentum_predictor_operators.end(),
+                  [](const auto & op) { return op && op->complete(); });
+}
+
+void
+RhieChowMassFlux::finalizeCachedMomentumPredictorOperators()
+{
+  if (!_use_cached_momentum_predictor_operator || !_split_momentum_predictor_operator ||
+      _cached_predictor_operator_finalized)
+    return;
+
+  if (_momentum_predictor_operators.size() != _momentum_systems.size() ||
+      std::any_of(_momentum_predictor_operators.begin(),
+                  _momentum_predictor_operators.end(),
+                  [](const auto & op) { return !op || !op->assembly_closed; }))
+    return;
+
+  struct BoundaryFaceCoefficients
+  {
+    std::vector<Real> coefficient;
+    std::vector<dof_id_type> dof;
+    std::vector<bool> has_component;
+  };
+
+  const auto n_components = _momentum_predictor_operators.size();
+  std::unordered_map<dof_id_type, BoundaryFaceCoefficients> boundary_faces;
+  for (const auto system_i : index_range(_momentum_predictor_operators))
+  {
+    auto & predictor = *_momentum_predictor_operators[system_i];
+    predictor.boundary_relax_diagonal_raw->zero();
+    predictor.boundary_relax_diagonal_raw->close();
+    predictor.boundary_a_diagonal_raw->zero();
+    predictor.boundary_a_diagonal_raw->close();
+    predictor.boundary_dominance_diagonal_raw->zero();
+    predictor.boundary_dominance_diagonal_raw->close();
+    predictor.boundary_h_diagonal_raw->zero();
+    predictor.boundary_h_diagonal_raw->close();
+
+    for (const auto & contribution : predictor.boundary_matrix_contributions)
+    {
+      auto & face = boundary_faces[contribution.face_id];
+      if (face.coefficient.empty())
+      {
+        face.coefficient.assign(n_components, 0.0);
+        face.dof.assign(n_components, DofObject::invalid_id);
+        face.has_component.assign(n_components, false);
+      }
+
+      face.coefficient[system_i] += contribution.contribution;
+      face.dof[system_i] = contribution.dof;
+      face.has_component[system_i] = true;
+    }
+  }
+
+  for (const auto & [face_id, face] : boundary_faces)
+  {
+    (void)face_id;
+    Real component_sum = 0.0;
+    Real max_component_magnitude = 0.0;
+    Real min_component = std::numeric_limits<Real>::max();
+    unsigned int n_present_components = 0;
+
+    for (const auto component_i : index_range(face.coefficient))
+      if (face.has_component[component_i])
+      {
+        const Real coefficient = face.coefficient[component_i];
+        component_sum += coefficient;
+        max_component_magnitude = std::max(max_component_magnitude, std::abs(coefficient));
+        min_component = std::min(min_component, coefficient);
+        ++n_present_components;
+      }
+
+    if (!n_present_components)
+      continue;
+
+    const Real component_average = component_sum / n_present_components;
+    for (const auto component_i : index_range(face.coefficient))
+      if (face.has_component[component_i])
+      {
+        const auto dof = face.dof[component_i];
+        auto & predictor = *_momentum_predictor_operators[component_i];
+        predictor.boundary_dominance_diagonal_raw->add(dof, max_component_magnitude);
+        predictor.boundary_relax_diagonal_raw->add(dof, min_component);
+        predictor.boundary_a_diagonal_raw->add(dof, component_average);
+        predictor.boundary_h_diagonal_raw->add(dof,
+                                               -face.coefficient[component_i] + component_average);
+      }
+  }
+
+  for (const auto system_i : index_range(_momentum_predictor_operators))
+  {
+    auto & predictor = *_momentum_predictor_operators[system_i];
+
+    predictor.boundary_relax_diagonal_raw->close();
+    predictor.boundary_a_diagonal_raw->close();
+    predictor.boundary_dominance_diagonal_raw->close();
+    predictor.boundary_h_diagonal_raw->close();
+
+    *predictor.pre_relaxation_diagonal_raw = *predictor.interior_diagonal_raw;
+    predictor.pre_relaxation_diagonal_raw->close();
+
+    const auto first_local = predictor.interior_diagonal_raw->first_local_index();
+    const auto last_local = predictor.interior_diagonal_raw->last_local_index();
+    std::vector<dof_id_type> indices;
+    std::vector<Real> relaxed_diagonal;
+    indices.reserve(last_local - first_local);
+    relaxed_diagonal.reserve(last_local - first_local);
+
+    {
+      PetscVectorReader interior_diagonal_reader(*predictor.interior_diagonal_raw);
+      PetscVectorReader boundary_relax_diagonal_reader(*predictor.boundary_relax_diagonal_raw);
+      PetscVectorReader boundary_dominance_diagonal_reader(
+          *predictor.boundary_dominance_diagonal_raw);
+      PetscVectorReader offdiag_abs_sum_reader(*predictor.offdiag_abs_sum_raw);
+
+      for (const auto dof : make_range(first_local, last_local))
+      {
+        const Real diagonal_for_dominance =
+            interior_diagonal_reader(dof) + boundary_dominance_diagonal_reader(dof);
+        Real new_diagonal = diagonal_for_dominance;
+        if (predictor.enforce_diagonal_dominance)
+          new_diagonal = std::max(std::abs(diagonal_for_dominance), offdiag_abs_sum_reader(dof));
+
+        new_diagonal /= predictor.relaxation_parameter;
+        new_diagonal -= boundary_relax_diagonal_reader(dof);
+        indices.push_back(dof);
+        relaxed_diagonal.push_back(new_diagonal);
+      }
+    }
+
+    predictor.diagonal_raw->zero();
+    predictor.diagonal_raw->close();
+    predictor.diagonal_raw->insert(relaxed_diagonal, indices);
+    predictor.diagonal_raw->close();
+
+    *predictor.openfoam_diagonal_raw = *predictor.diagonal_raw;
+    predictor.openfoam_diagonal_raw->add(1.0, *predictor.boundary_a_diagonal_raw);
+    predictor.openfoam_diagonal_raw->close();
+
+    predictor.relaxation_source_raw->zero();
+    predictor.relaxation_source_raw->close();
+
+    predictor.finalized = true;
+  }
+
+  _cached_predictor_operator_finalized = true;
+  updateCachedMomentumPredictorOperatorValidity();
 }
 
 void
@@ -975,6 +1379,124 @@ RhieChowMassFlux::computePredictorOperatorBase(const unsigned int system_i,
 }
 
 void
+RhieChowMassFlux::beginFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i)
+{
+  if (!_use_cached_momentum_predictor_operator)
+    return;
+
+  mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
+              "The requested momentum component is not linked to RhieChowMassFlux.");
+
+  if (_momentum_predictor_operators.size() != _momentum_systems.size())
+    _momentum_predictor_operators.resize(_momentum_systems.size());
+
+  auto * momentum_system = _momentum_implicit_systems[system_i];
+  NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+  auto predictor = std::make_unique<MomentumPredictorOperator>();
+  predictor->split = true;
+
+  auto initialize_zero_vector =
+      [&current_local_solution](std::unique_ptr<NumericVector<Number>> & v)
+  {
+    v = current_local_solution.zero_clone();
+    v->zero();
+    v->close();
+  };
+
+  initialize_zero_vector(predictor->constant_source_raw);
+  initialize_zero_vector(predictor->rhs_raw);
+  initialize_zero_vector(predictor->diagonal_raw);
+  initialize_zero_vector(predictor->openfoam_diagonal_raw);
+  initialize_zero_vector(predictor->pre_relaxation_diagonal_raw);
+  initialize_zero_vector(predictor->relaxation_source_raw);
+  initialize_zero_vector(predictor->boundary_source_raw);
+  initialize_zero_vector(predictor->interior_diagonal_raw);
+  initialize_zero_vector(predictor->boundary_relax_diagonal_raw);
+  initialize_zero_vector(predictor->boundary_a_diagonal_raw);
+  initialize_zero_vector(predictor->boundary_dominance_diagonal_raw);
+  initialize_zero_vector(predictor->boundary_h_diagonal_raw);
+  initialize_zero_vector(predictor->offdiag_abs_sum_raw);
+  initialize_zero_vector(predictor->explicit_force_raw);
+  initialize_zero_vector(predictor->body_force_raw);
+
+  LinearFVKernel::setAssemblyConsumer(predictor.get());
+  _momentum_predictor_operators[system_i] = std::move(predictor);
+  _cached_predictor_operator_valid = false;
+}
+
+void
+RhieChowMassFlux::completeFVSplitMomentumPredictorOperatorAssembly(
+    const unsigned int system_i,
+    const Real relaxation_parameter,
+    const bool enforce_diagonal_dominance)
+{
+  LinearFVKernel::setAssemblyConsumer(nullptr);
+
+  if (!_use_cached_momentum_predictor_operator)
+    return;
+
+  mooseAssert(system_i < _momentum_predictor_operators.size() &&
+                  _momentum_predictor_operators[system_i],
+              "A split momentum predictor operator assembly was not started.");
+  mooseAssert(relaxation_parameter > 0.0,
+              "The momentum equation relaxation parameter must be positive.");
+
+  auto & predictor = *_momentum_predictor_operators[system_i];
+
+  predictor.constant_source_raw->close();
+  predictor.rhs_raw->close();
+  predictor.boundary_source_raw->close();
+  predictor.interior_diagonal_raw->close();
+  predictor.boundary_relax_diagonal_raw->close();
+  predictor.boundary_a_diagonal_raw->close();
+  predictor.boundary_dominance_diagonal_raw->close();
+  predictor.boundary_h_diagonal_raw->close();
+  predictor.offdiag_abs_sum_raw->close();
+  predictor.diagonal_raw->close();
+  predictor.openfoam_diagonal_raw->close();
+  predictor.relaxation_parameter = relaxation_parameter;
+  predictor.enforce_diagonal_dominance = enforce_diagonal_dominance;
+  predictor.assembly_closed = true;
+  predictor.finalized = false;
+  _cached_predictor_operator_finalized = false;
+
+  updateCachedMomentumPredictorOperatorValidity();
+}
+
+void
+RhieChowMassFlux::setMomentumPredictorForcing(const unsigned int system_i,
+                                              const NumericVector<Number> * explicit_force,
+                                              const NumericVector<Number> * body_force)
+{
+  if (!_use_cached_momentum_predictor_operator || !_split_momentum_predictor_operator)
+    return;
+
+  mooseAssert(system_i < _momentum_predictor_operators.size() &&
+                  _momentum_predictor_operators[system_i],
+              "A split momentum predictor operator must be cached before forcing is published.");
+
+  auto * momentum_system = _momentum_implicit_systems[system_i];
+  NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+  auto & predictor = *_momentum_predictor_operators[system_i];
+
+  predictor.explicit_force_raw = current_local_solution.zero_clone();
+  if (explicit_force)
+    *predictor.explicit_force_raw = *explicit_force;
+  else
+    predictor.explicit_force_raw->zero();
+  predictor.explicit_force_raw->close();
+
+  predictor.body_force_raw = current_local_solution.zero_clone();
+  if (body_force)
+    *predictor.body_force_raw = *body_force;
+  else
+    predictor.body_force_raw->zero();
+  predictor.body_force_raw->close();
+
+  updateCachedMomentumPredictorOperatorValidity();
+}
+
+void
 RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
                                                  const NumericVector<Number> * rhs_override,
                                                  const NumericVector<Number> * explicit_force,
@@ -986,85 +1508,57 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
   mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
               "The requested momentum component is not linked to RhieChowMassFlux.");
 
-  if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size())
-    _cached_predictor_operator_base_raw.resize(_momentum_systems.size());
-  if (_cached_predictor_rhs_raw.size() != _momentum_systems.size())
-    _cached_predictor_rhs_raw.resize(_momentum_systems.size());
-  if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
-    _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
-  if (_cached_predictor_explicit_force_raw.size() != _momentum_systems.size())
-    _cached_predictor_explicit_force_raw.resize(_momentum_systems.size());
-  if (_cached_predictor_body_force_raw.size() != _momentum_systems.size())
-    _cached_predictor_body_force_raw.resize(_momentum_systems.size());
+  if (_momentum_predictor_operators.size() != _momentum_systems.size())
+    _momentum_predictor_operators.resize(_momentum_systems.size());
 
   auto * momentum_system = _momentum_implicit_systems[system_i];
   NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+  auto predictor = std::make_unique<MomentumPredictorOperator>();
+  predictor->split = _split_momentum_predictor_operator;
 
-  _cached_predictor_operator_base_raw[system_i] = current_local_solution.zero_clone();
-  _cached_predictor_rhs_raw[system_i] = current_local_solution.zero_clone();
-  _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
-  _cached_predictor_operator_base_raw[system_i]->close();
-  _cached_predictor_rhs_raw[system_i]->close();
-  _cached_predictor_diagonal_raw[system_i]->close();
+  predictor->constant_source_raw = current_local_solution.zero_clone();
+  predictor->rhs_raw = current_local_solution.zero_clone();
+  predictor->diagonal_raw = current_local_solution.zero_clone();
+  predictor->openfoam_diagonal_raw = current_local_solution.zero_clone();
+  predictor->constant_source_raw->close();
+  predictor->rhs_raw->close();
+  predictor->diagonal_raw->close();
+  predictor->openfoam_diagonal_raw->close();
 
   const NumericVector<Number> & rhs =
       rhs_override ? *rhs_override : *(_momentum_implicit_systems[system_i]->rhs);
-  *_cached_predictor_rhs_raw[system_i] = rhs;
-  _cached_predictor_rhs_raw[system_i]->close();
+  *predictor->rhs_raw = rhs;
+  predictor->rhs_raw->close();
 
   computePredictorOperatorBase(system_i,
-                               *_cached_predictor_operator_base_raw[system_i],
-                               *_cached_predictor_diagonal_raw[system_i],
-                               _cached_predictor_rhs_raw[system_i].get());
+                               *predictor->constant_source_raw,
+                               *predictor->diagonal_raw,
+                               predictor->rhs_raw.get());
+  *predictor->openfoam_diagonal_raw = *predictor->diagonal_raw;
+  predictor->openfoam_diagonal_raw->close();
 
   if (_split_momentum_predictor_operator)
   {
-    _cached_predictor_explicit_force_raw[system_i] = current_local_solution.zero_clone();
-    _cached_predictor_explicit_force_raw[system_i]->close();
+    predictor->explicit_force_raw = current_local_solution.zero_clone();
+    predictor->explicit_force_raw->close();
     if (explicit_force)
-      *_cached_predictor_explicit_force_raw[system_i] = *explicit_force;
+      *predictor->explicit_force_raw = *explicit_force;
     else
-      _cached_predictor_explicit_force_raw[system_i]->zero();
-    _cached_predictor_explicit_force_raw[system_i]->close();
+      predictor->explicit_force_raw->zero();
+    predictor->explicit_force_raw->close();
 
-    _cached_predictor_body_force_raw[system_i] = current_local_solution.zero_clone();
-    _cached_predictor_body_force_raw[system_i]->close();
+    predictor->body_force_raw = current_local_solution.zero_clone();
+    predictor->body_force_raw->close();
     if (body_force)
-      *_cached_predictor_body_force_raw[system_i] = *body_force;
+      *predictor->body_force_raw = *body_force;
     else
-      _cached_predictor_body_force_raw[system_i]->zero();
-    _cached_predictor_body_force_raw[system_i]->close();
-  }
-  else
-  {
-    _cached_predictor_explicit_force_raw[system_i].reset();
-    _cached_predictor_body_force_raw[system_i].reset();
+      predictor->body_force_raw->zero();
+    predictor->body_force_raw->close();
   }
 
-  _cached_predictor_operator_valid =
-      _cached_predictor_operator_base_raw.size() == _momentum_systems.size() &&
-      _cached_predictor_rhs_raw.size() == _momentum_systems.size() &&
-      _cached_predictor_diagonal_raw.size() == _momentum_systems.size() &&
-      (!_split_momentum_predictor_operator ||
-       (_cached_predictor_explicit_force_raw.size() == _momentum_systems.size() &&
-        _cached_predictor_body_force_raw.size() == _momentum_systems.size())) &&
-      std::all_of(_cached_predictor_operator_base_raw.begin(),
-                  _cached_predictor_operator_base_raw.end(),
-                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
-      std::all_of(_cached_predictor_rhs_raw.begin(),
-                  _cached_predictor_rhs_raw.end(),
-                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
-      std::all_of(_cached_predictor_diagonal_raw.begin(),
-                  _cached_predictor_diagonal_raw.end(),
-                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
-      (!_split_momentum_predictor_operator ||
-       std::all_of(_cached_predictor_explicit_force_raw.begin(),
-                   _cached_predictor_explicit_force_raw.end(),
-                   [](const auto & vec) { return static_cast<bool>(vec); })) &&
-      (!_split_momentum_predictor_operator ||
-       std::all_of(_cached_predictor_body_force_raw.begin(),
-                   _cached_predictor_body_force_raw.end(),
-                   [](const auto & vec) { return static_cast<bool>(vec); }));
+  _momentum_predictor_operators[system_i] = std::move(predictor);
+
+  updateCachedMomentumPredictorOperatorValidity();
 }
 
 void
@@ -1074,15 +1568,21 @@ RhieChowMassFlux::cacheStartupPredictorDiagonal(const unsigned int system_i,
   mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
               "The requested momentum component is not linked to RhieChowMassFlux.");
 
-  if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
-    _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
+  if (_momentum_predictor_operators.size() != _momentum_systems.size())
+    _momentum_predictor_operators.resize(_momentum_systems.size());
 
   auto * momentum_system = _momentum_implicit_systems[system_i];
   NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+  if (!_momentum_predictor_operators[system_i])
+    _momentum_predictor_operators[system_i] = std::make_unique<MomentumPredictorOperator>();
 
-  _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
-  *_cached_predictor_diagonal_raw[system_i] = diagonal_raw;
-  _cached_predictor_diagonal_raw[system_i]->close();
+  auto & predictor = *_momentum_predictor_operators[system_i];
+  predictor.diagonal_raw = current_local_solution.zero_clone();
+  *predictor.diagonal_raw = diagonal_raw;
+  predictor.diagonal_raw->close();
+  predictor.openfoam_diagonal_raw = current_local_solution.zero_clone();
+  *predictor.openfoam_diagonal_raw = diagonal_raw;
+  predictor.openfoam_diagonal_raw->close();
 }
 
 void
@@ -1321,20 +1821,27 @@ RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_referen
       if (isAdjustablePressureBoundaryFace(fi))
       {
         const Real face_measure = fi->faceArea() * fi->faceCoord();
-        integrated_source_imbalance +=
-            (_pressure_predictor_flux[fi->id()] + pressureBoundaryTargetFlux(fi, time_arg)) *
-            face_measure;
+        const Real required_pressure_flux =
+            _pressure_predictor_flux[fi->id()] + pressureBoundaryTargetFlux(fi, time_arg);
+        integrated_source_imbalance += pressureCorrectionFluxIsIntegrated()
+                                           ? required_pressure_flux
+                                           : required_pressure_flux * face_measure;
         adjustable_measure += face_measure;
       }
 
     if (adjustable_measure > libMesh::TOLERANCE)
     {
-      const Real uniform_source_adjustment = -integrated_source_imbalance / adjustable_measure;
+      const Real uniform_source_adjustment_density =
+          -integrated_source_imbalance / adjustable_measure;
       for (const auto * fi : _flow_face_info)
         if (isAdjustablePressureBoundaryFace(fi))
         {
-          _pressure_predictor_flux_adjustment[fi->id()] = uniform_source_adjustment;
-          _pressure_predictor_flux[fi->id()] += uniform_source_adjustment;
+          const Real face_measure = fi->faceArea() * fi->faceCoord();
+          const Real source_adjustment = pressureCorrectionFluxIsIntegrated()
+                                             ? uniform_source_adjustment_density * face_measure
+                                             : uniform_source_adjustment_density;
+          _pressure_predictor_flux_adjustment[fi->id()] = source_adjustment;
+          _pressure_predictor_flux[fi->id()] += source_adjustment;
         }
     }
   }
@@ -1353,7 +1860,17 @@ RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_referen
 
     const Real required_pressure_flux =
         _pressure_predictor_flux[fi->id()] + pressureBoundaryTargetFlux(fi, time_arg);
-    _pressure_boundary_normal_gradient[fi->id()] = -required_pressure_flux / normal_ainv;
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    if (pressureCorrectionFluxIsIntegrated() && face_measure <= libMesh::TOLERANCE)
+    {
+      _pressure_boundary_normal_gradient[fi->id()] = 0.0;
+      continue;
+    }
+
+    const Real required_pressure_flux_density = pressureCorrectionFluxIsIntegrated()
+                                                    ? required_pressure_flux / face_measure
+                                                    : required_pressure_flux;
+    _pressure_boundary_normal_gradient[fi->id()] = -required_pressure_flux_density / normal_ainv;
   }
 
   _pressure_boundary_normal_gradient_valid = true;
@@ -1786,9 +2303,15 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
   auto & pressure_gradient = selectPressureGradient(with_updated_pressure);
   const bool use_cached_predictor_operator = canUseCachedMomentumPredictorOperator();
   const bool split_predictor_operator = _split_momentum_predictor_operator;
+  const bool dump_momentum_predictor_operator =
+      !_momentum_predictor_operator_diagnostic_file_base.empty() &&
+      _momentum_predictor_operator_diagnostic_time >= 0.0 &&
+      _t + libMesh::TOLERANCE >= _momentum_predictor_operator_diagnostic_time;
+  const unsigned int momentum_predictor_operator_diagnostic_call_id =
+      dump_momentum_predictor_operator ? ++_momentum_predictor_operator_diagnostic_call_count : 0;
 
   if (verbose && use_cached_predictor_operator)
-    _console << "Using cached assembled momentum predictor operator for HbyA/Ainv." << std::endl;
+    _console << "Using cached momentum predictor operator for HbyA/Ainv." << std::endl;
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
@@ -1800,6 +2323,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     NumericVector<Number> & rhs = *(momentum_system->rhs);
     NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
     NumericVector<Number> & solution = *(momentum_system->solution);
+    const MomentumPredictorOperator * predictor_for_diagnostic = nullptr;
     PetscMatrix<Number> * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
     mooseAssert(mmat,
                 "The matrices used in the segregated INSFVRhieChow objects need to be convertable "
@@ -1821,10 +2345,13 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     {
       _Ainv_raw.push_back(current_local_solution.zero_clone());
       _HbyA_raw.push_back(current_local_solution.zero_clone());
-      computePredictorOperatorBase(system_i,
-                                   *(_HbyA_raw.back()),
-                                   *(_Ainv_raw.back()),
-                                   _cached_predictor_rhs_raw[system_i].get());
+      const auto * const predictor = cachedMomentumPredictorOperator(system_i);
+      mooseAssert(predictor && predictor->complete(),
+                  "A complete momentum predictor operator is required before computing HbyA.");
+      predictor->computeHSource(current_local_solution, *(_HbyA_raw.back()));
+      *(_Ainv_raw.back()) = *predictor->openfoam_diagonal_raw;
+      _Ainv_raw.back()->close();
+      predictor_for_diagnostic = predictor;
     }
     else
     {
@@ -1891,12 +2418,29 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
       HbyA.print();
     }
 
+    std::unique_ptr<NumericVector<Number>> h_source_for_diagnostic;
+    if (dump_momentum_predictor_operator && predictor_for_diagnostic)
+    {
+      h_source_for_diagnostic = HbyA.clone();
+      *h_source_for_diagnostic = HbyA;
+      h_source_for_diagnostic->close();
+    }
+
     // It is time to create element-wise 1/A-s based on the the diagonal of the momentum matrix
     *working_vector_petsc = 1.0;
     Ainv.pointwise_divide(*working_vector_petsc, Ainv);
 
     // Create 1/A*(H(u)-RHS)
     HbyA.pointwise_mult(HbyA, Ainv);
+
+    if (dump_momentum_predictor_operator && predictor_for_diagnostic && h_source_for_diagnostic)
+      dumpMomentumPredictorOperatorDiagnostic(system_i,
+                                              momentum_predictor_operator_diagnostic_call_id,
+                                              current_local_solution,
+                                              *predictor_for_diagnostic,
+                                              *h_source_for_diagnostic,
+                                              HbyA,
+                                              Ainv);
 
     if (verbose)
     {

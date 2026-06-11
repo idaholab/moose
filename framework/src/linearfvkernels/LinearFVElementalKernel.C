@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVElementalKernel.h"
+#include "LinearFVAssemblyConsumer.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 
@@ -30,6 +31,10 @@ LinearFVElementalKernel::addMatrixContribution()
   // These only contribute to the diagonal of the matrix, so we just get
   // the contribution and insert it immediately. We add it to every tagged matrix.
   const auto mx_contrib = computeMatrixContribution();
+  if (!_matrices.empty())
+    if (auto * consumer = assemblyConsumer())
+      consumer->addElementalMatrixContribution(_dof_id, mx_contrib);
+
   for (auto & matrix : _matrices)
     (*matrix).add(_dof_id, _dof_id, mx_contrib);
 }
@@ -41,6 +46,10 @@ LinearFVElementalKernel::addRightHandSideContribution()
   // the contribution and insert it immediately. We add it to every tagged
   // vector.
   const auto rhs_contrib = computeRightHandSideContribution();
+  if (!_vectors.empty())
+    if (auto * consumer = assemblyConsumer())
+      consumer->addElementalRightHandSideContribution(_dof_id, rhs_contrib);
+
   for (auto & vector : _vectors)
     (*vector).add(_dof_id, rhs_contrib);
 }

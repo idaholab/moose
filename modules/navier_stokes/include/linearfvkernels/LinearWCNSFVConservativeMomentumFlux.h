@@ -58,8 +58,8 @@ public:
 
   /// Accumulate the current-face residual contributions split into advection and stress pieces.
   void accumulateCurrentFaceResidualContributions(const NumericVector<Number> & solution,
-                                                 NumericVector<Number> & advection_residual,
-                                                 NumericVector<Number> & stress_residual);
+                                                  NumericVector<Number> & advection_residual,
+                                                  NumericVector<Number> & stress_residual);
 
   /// Audit accessors for the currently prepared face state.
   Real currentFaceMassFlux() const { return _face_mass_flux; }
@@ -115,6 +115,9 @@ protected:
   /// Optional face-centered mass-flux functor used to freeze one convective state per outer
   /// iteration on the sharp-interface parity path.
   const Moose::Functor<Real> * const _mass_flux_functor;
+
+  /// Whether this OpenFOAM-parity kernel may fall back to the live Rhie-Chow mass flux.
+  const bool _require_mass_flux_functor;
 
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;

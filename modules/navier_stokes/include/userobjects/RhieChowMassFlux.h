@@ -14,18 +14,22 @@
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "LinearFVElementalKernel.h"
+#include "LinearFVAnisotropicDiffusion.h"
+#include "LinearFVAssemblyConsumer.h"
 #include <string>
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
 
 #include "libmesh/petsc_vector.h"
+#include "libmesh/threads.h"
 
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVPressureCorrectionDiffusion;
 class Function;
+class LinearFVElementalKernel;
 namespace libMesh
 {
 class Elem;
@@ -68,6 +72,69 @@ public:
     RealVectorValue worst_face_normal;
     Real worst_face_volumetric_flux = 0.0;
     Real worst_face_integrated_flux = 0.0;
+  };
+
+  /**
+   * OpenFOAM-like momentum predictor owner.
+   *
+   * This object is the single source of truth for the cached predictor equation used by Rhie-Chow.
+   * diagonal_raw is the relaxed solve diag() while openfoam_diagonal_raw is the D() used by
+   * fvMatrix::A(); H(U) is rebuilt from source, boundary-source, and off-diagonal pieces. PETSc
+   * remains the solve backend; this object owns the FV equation pieces that PETSc assembly would
+   * otherwise flatten.
+   */
+  struct MomentumPredictorOperator : public LinearFVAssemblyConsumer
+  {
+    bool split = false;
+    bool assembly_closed = false;
+    bool finalized = false;
+    Real relaxation_parameter = 1.0;
+    bool enforce_diagonal_dominance = false;
+    std::unique_ptr<NumericVector<Number>> constant_source_raw;
+    std::unique_ptr<NumericVector<Number>> rhs_raw;
+    std::unique_ptr<NumericVector<Number>> diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> openfoam_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> pre_relaxation_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> relaxation_source_raw;
+    std::unique_ptr<NumericVector<Number>> boundary_source_raw;
+    std::unique_ptr<NumericVector<Number>> interior_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> boundary_relax_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> boundary_a_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> boundary_dominance_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> boundary_h_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> offdiag_abs_sum_raw;
+    std::unique_ptr<NumericVector<Number>> explicit_force_raw;
+    std::unique_ptr<NumericVector<Number>> body_force_raw;
+    struct BoundaryMatrixContribution
+    {
+      dof_id_type face_id;
+      dof_id_type dof;
+      Real contribution;
+    };
+    std::vector<BoundaryMatrixContribution> boundary_matrix_contributions;
+    std::unordered_map<dof_id_type, std::vector<std::pair<dof_id_type, Real>>> offdiag_coefficients;
+    mutable libMesh::Threads::spin_mutex assembly_mutex;
+
+    bool complete() const;
+    void computeHSource(NumericVector<Number> & solution,
+                        NumericVector<Number> & h_source_raw) const;
+    void addElementalMatrixContribution(dof_id_type dof, Real contribution) override;
+    void addElementalRightHandSideContribution(dof_id_type dof, Real contribution) override;
+    void addInternalFaceMatrixContribution(dof_id_type elem_dof,
+                                           dof_id_type neighbor_dof,
+                                           Real elem_matrix_contribution,
+                                           Real neighbor_matrix_contribution,
+                                           bool elem_has_blocks,
+                                           bool neighbor_has_blocks) override;
+    void addInternalFaceRightHandSideContribution(dof_id_type elem_dof,
+                                                  dof_id_type neighbor_dof,
+                                                  Real elem_rhs_contribution,
+                                                  Real neighbor_rhs_contribution,
+                                                  bool elem_has_blocks,
+                                                  bool neighbor_has_blocks) override;
+    void
+    addBoundaryMatrixContribution(dof_id_type face_id, dof_id_type dof, Real contribution) override;
+    void addBoundaryRightHandSideContribution(dof_id_type dof, Real contribution) override;
   };
 
   static InputParameters validParams();
@@ -132,6 +199,16 @@ public:
                                       const NumericVector<Number> * rhs_override = nullptr,
                                       const NumericVector<Number> * explicit_force = nullptr,
                                       const NumericVector<Number> * body_force = nullptr);
+  /// Begin streaming native linear FV assembly contributions into the cached split predictor.
+  void beginFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i);
+  /// Finalize the streamed split predictor and apply OpenFOAM-like equation relaxation to it.
+  void completeFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i,
+                                                        const Real relaxation_parameter,
+                                                        const bool enforce_diagonal_dominance);
+  /// Publish explicit/body-force RHS pieces associated with the split predictor.
+  void setMomentumPredictorForcing(const unsigned int system_i,
+                                   const NumericVector<Number> * explicit_force,
+                                   const NumericVector<Number> * body_force);
   /// Cache only the relaxed predictor diagonal for startup/operator consumers that need it before
   /// the full predictor cache is published.
   void cacheStartupPredictorDiagonal(const unsigned int system_i,
@@ -188,6 +265,8 @@ protected:
                                           const Moose::StateArg & time_arg) const;
   /// Normal diffusion coefficient for the active pressure-correction space.
   virtual Real pressureBoundaryNormalAinv(const FaceInfo * fi) const;
+  /// Whether pressure-correction face fluxes include face area.
+  virtual bool pressureCorrectionFluxIsIntegrated() const { return false; }
   /// Evaluate or fetch the boundary face value for a velocity component.
   Real boundaryVelocityValue(const FaceInfo * fi,
                              const unsigned int component,
@@ -225,8 +304,31 @@ protected:
                                     NumericVector<Number> & diagonal_raw,
                                     const NumericVector<Number> * rhs_override = nullptr) const;
 
+  /// Refresh the aggregate validity flag for the cached predictor operator.
+  void updateCachedMomentumPredictorOperatorValidity();
+
   /// Whether the cached predictor-operator state is complete and can be consumed.
-  bool canUseCachedMomentumPredictorOperator() const;
+  bool canUseCachedMomentumPredictorOperator();
+
+  /// Finalize all streamed component operators as one vector UEqn-like object.
+  void finalizeCachedMomentumPredictorOperators();
+
+  /// Access the UEqn-like cached predictor operator for a component.
+  const MomentumPredictorOperator *
+  cachedMomentumPredictorOperator(const unsigned int system_i) const;
+
+  /// Dump the cached UEqn-like predictor decomposition for relaxation parity checks.
+  void dumpMomentumPredictorOperatorDiagnostic(const unsigned int system_i,
+                                               const unsigned int call_id,
+                                               NumericVector<Number> & solution,
+                                               const MomentumPredictorOperator & predictor,
+                                               NumericVector<Number> & h_source_raw,
+                                               NumericVector<Number> & hby_a_raw,
+                                               NumericVector<Number> & ainv_raw) const;
+
+  /// Access the cached fvMatrix::D() diagonal used by pressure projection for a component.
+  const NumericVector<Number> *
+  cachedMomentumPredictorDiagonalRaw(const unsigned int system_i) const;
 
   /**
    * Check the block consistency between the passed in \p var and us
@@ -271,9 +373,9 @@ protected:
 
   /**
    * Predictor-side face flux in the same native pressure-correction space consumed by the
-   * pressure equation and pressure boundary-condition updates. For stock RC this matches
-   * _phiHbyA_flux directly; sharp/conservative paths may publish a volumetric face flux here, but
-   * it is still a pressure-correction-space predictor quantity, not the accepted transport phi.
+   * pressure equation and pressure boundary-condition updates. For stock RC this is a normal
+   * flux density; sharp/conservative paths publish an OpenFOAM-style area-integrated phi. It is
+   * still a pressure-correction-space predictor quantity, not the accepted transport phi.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_flux;
 
@@ -362,23 +464,23 @@ protected:
   /// Whether the momentum predictor operator already excludes explicit pressure/body-force terms.
   const bool _split_momentum_predictor_operator;
 
-  /// Cached base predictor operator M*u - A*u - rhs for each momentum component.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_operator_base_raw;
+  /// Optional CSV file base for cached momentum predictor decomposition diagnostics.
+  const std::string _momentum_predictor_operator_diagnostic_file_base;
 
-  /// Cached relaxed predictor RHS used to rebuild HbyA with the latest velocity iterate.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_rhs_raw;
+  /// Simulation time at which to start dumping momentum predictor operator diagnostics.
+  const Real _momentum_predictor_operator_diagnostic_time;
 
-  /// Cached relaxed predictor diagonal for each momentum component.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_diagonal_raw;
-
-  /// Cached explicit predictor forcing applied after the pressure-free operator assembly.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_explicit_force_raw;
-
-  /// Cached predictor body-force forcing, excluding the explicit pressure-gradient term.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _cached_predictor_body_force_raw;
+  /// UEqn-like predictor operators for each momentum component.
+  std::vector<std::unique_ptr<MomentumPredictorOperator>> _momentum_predictor_operators;
 
   /// Indicates whether the cached predictor operator has been populated for every component.
   bool _cached_predictor_operator_valid = false;
+
+  /// Indicates whether all streamed component operators have been vector-finalized.
+  bool _cached_predictor_operator_finalized = false;
+
+  /// Monotonic ID used to distinguish repeated HbyA diagnostic dumps at the same time step.
+  unsigned int _momentum_predictor_operator_diagnostic_call_count = 0;
 
   /// Pointer to the body force terms
   std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;

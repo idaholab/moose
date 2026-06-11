@@ -52,10 +52,7 @@ protected:
 
   void addRhieChowUserObjects() override;
 
-  MooseFunctorName getLinearFrictionCoefName() const override
-  {
-    mooseError("Not implemented");
-  }
+  MooseFunctorName getLinearFrictionCoefName() const override { mooseError("Not implemented"); }
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
@@ -65,6 +62,7 @@ protected:
   virtual bool shouldAddMomentumReducedPressureKernels() const { return false; }
   virtual MooseFunctorName pressureDiffusionTensorName() const { return "Ainv"; }
   virtual MooseFunctorName pressureDivergenceFluxName() const { return "HbyA"; }
+  virtual bool pressureDivergenceFluxIsIntegrated() const { return false; }
   virtual std::string momentumTimeKernelType() const { return "LinearFVTimeDerivative"; }
   virtual std::string momentumTimeDensityParameterName() const { return "factor"; }
   virtual std::string momentumFluxKernelType() const { return "LinearWCNSFVMomentumFlux"; }

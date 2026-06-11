@@ -317,8 +317,24 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 
     auto diff_diagonal = solution.zero_clone();
 
+    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->beginFVSplitMomentumPredictorOperatorAssembly(system_i);
+
     // We assemble the matrix and the right hand side
-    _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+    try
+    {
+      _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+    }
+    catch (...)
+    {
+      if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+        _rc_uo->clearMomentumPredictorOperatorCache();
+      throw;
+    }
+
+    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
+          system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
 
     applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
 
@@ -342,6 +358,9 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
       *predictor_explicit_force = rhs;
       predictor_explicit_force->add(-1.0, *predictor_rhs_base);
       predictor_explicit_force->close();
+
+      _rc_uo->setMomentumPredictorForcing(
+          system_i, predictor_explicit_force.get(), predictor_body_force.get());
     }
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
@@ -364,12 +383,11 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
 
-    if (_rc_uo)
-      _rc_uo->cacheMomentumPredictorOperator(
-          system_i,
-          predictor_rhs_base.get(),
-          predictor_explicit_force.get(),
-          predictor_body_force.get());
+    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->cacheMomentumPredictorOperator(system_i,
+                                             predictor_rhs_base.get(),
+                                             predictor_explicit_force.get(),
+                                             predictor_body_force.get());
 
     // We will reuse the preconditioner for every momentum system
     if (system_i == 0)
@@ -439,12 +457,9 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
   }
 
   _console << "Momentum predictor rebuild audit: outer_iter=" << _current_outer_iteration
-           << ", component=" << system_i
-           << ", |U|_2=" << solution.l2_norm()
-           << ", |rhs|_2=" << rhs.l2_norm()
-           << ", |A*U-rhs|_2=" << residual->l2_norm()
-           << ", |A*U-rhs|_inf=" << residual->linfty_norm()
-           << ", normalized_pre_solve_residual="
+           << ", component=" << system_i << ", |U|_2=" << solution.l2_norm()
+           << ", |rhs|_2=" << rhs.l2_norm() << ", |A*U-rhs|_2=" << residual->l2_norm()
+           << ", |A*U-rhs|_inf=" << residual->linfty_norm() << ", normalized_pre_solve_residual="
            << residual->l2_norm() / std::max(norm_factor, std::numeric_limits<Real>::min());
 
   if (rhs_base)
@@ -458,7 +473,8 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
   auto other_elemental_residual = solution.zero_clone();
   auto advection_residual = solution.zero_clone();
   auto stress_residual = solution.zero_clone();
-  std::vector<std::pair<std::string, std::unique_ptr<NumericVector<Number>>>> elemental_kernel_residuals;
+  std::vector<std::pair<std::string, std::unique_ptr<NumericVector<Number>>>>
+      elemental_kernel_residuals;
   time_residual->zero();
   other_elemental_residual->zero();
   advection_residual->zero();
@@ -502,9 +518,8 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
 
       kernel->setCurrentElemInfo(elem_info);
       kernel->setCurrentElemVolume(elem_volume);
-      const Real residual_contribution =
-          kernel->computeMatrixContribution() * solution(dof) -
-          kernel->computeRightHandSideContribution();
+      const Real residual_contribution = kernel->computeMatrixContribution() * solution(dof) -
+                                         kernel->computeRightHandSideContribution();
 
       elemental_kernel_residuals[kernel_i].second->add(dof, residual_contribution);
 
@@ -540,7 +555,8 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
       continue;
 
     const auto elem_subdomain = fi->elem().subdomain_id();
-    const auto neighbor_subdomain = fi->neighborPtr() ? fi->neighbor().subdomain_id() : elem_subdomain;
+    const auto neighbor_subdomain =
+        fi->neighborPtr() ? fi->neighbor().subdomain_id() : elem_subdomain;
     const Real face_area = fi->faceArea() * fi->faceCoord();
 
     for (auto * kernel : momentum_flux_kernels)
@@ -677,8 +693,8 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
     const auto target_dof = target_elem_info->dofIndices()[momentum_sys_num][0];
     auto * sharp_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo);
 
-    _console << "  " << label << ": cell_id=" << target_elem->id()
-             << " dof=" << target_dof << " centroid=" << Moose::stringify(target_elem_info->centroid())
+    _console << "  " << label << ": cell_id=" << target_elem->id() << " dof=" << target_dof
+             << " centroid=" << Moose::stringify(target_elem_info->centroid())
              << " time_residual=" << (*time_residual)(target_dof)
              << " other_elemental_residual=" << (*other_elemental_residual)(target_dof)
              << " face_advection_residual=" << (*advection_residual)(target_dof)
@@ -741,10 +757,9 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
         const auto coeffs = kernel->currentAdvectedInterpCoeffs();
         const Real mass_flux = kernel->currentFaceMassFlux();
         const Real rhs_face_value = kernel->currentAdvectedRHSFaceValue();
-        const Real elem_contribution =
-            (coeffs.first * elem_value + coeffs.second * neighbor_value -
-             rhs_face_value * mass_flux) *
-            face_area;
+        const Real elem_contribution = (coeffs.first * elem_value + coeffs.second * neighbor_value -
+                                        rhs_face_value * mass_flux) *
+                                       face_area;
         const Real target_contribution = target_is_elem ? elem_contribution : -elem_contribution;
 
         _console << "      kernel=" << kernel->name() << " elem_id=" << fi->elem().id()
@@ -819,7 +834,6 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
       }
     }
   }
-
 }
 
 void
@@ -1283,8 +1297,8 @@ LinearAssemblySegregatedSolve::solve()
     bool passive_scalar_converged = false;
     unsigned int ps_iteration_counter = 0;
 
-    _console << "Passive scalar iteration " << ps_iteration_counter << " Residual norms:"
-             << std::endl;
+    _console << "Passive scalar iteration " << ps_iteration_counter
+             << " Residual norms:" << std::endl;
 
     while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {

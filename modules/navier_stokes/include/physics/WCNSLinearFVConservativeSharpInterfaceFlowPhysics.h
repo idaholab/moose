@@ -37,6 +37,7 @@ private:
   bool shouldAddMomentumReducedPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
   MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }
+  bool pressureDivergenceFluxIsIntegrated() const override { return true; }
   std::string momentumTimeKernelType() const override
   {
     return "LinearWCNSFVMomentumTimeDerivative";
