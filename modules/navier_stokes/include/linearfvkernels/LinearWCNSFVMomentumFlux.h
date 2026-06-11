@@ -10,8 +10,6 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "FVInterpolationMethodInterface.h"
-#include "FVAdvectedInterpolationMethod.h"
 
 #include <array>
 
@@ -23,7 +21,7 @@ class LinearFVAdvectionDiffusionBC;
  * Kernel that implements the stress tensor and advection terms for the momentum
  * equation.
  */
-class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel, public FVInterpolationMethodInterface
+class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -63,10 +61,6 @@ protected:
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalAdvectionNeighborMatrixContribution();
 
-  /// Computes the right hand side contribution of the advective flux on the current face
-  /// when the face is an internal face (doesn't have associated boundary conditions).
-  Real computeInternalAdvectionRHSContribution();
-
   /// Computes the matrix contribution of the stress term on the current face
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalStressMatrixContribution();
@@ -100,10 +94,6 @@ protected:
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
 
-  /// Optional face-centered mass-flux functor used to freeze one convective state per outer
-  /// iteration on the sharp-interface pressure-coupled path.
-  const Moose::Functor<Real> * const _mass_flux_functor;
-
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 
@@ -114,11 +104,8 @@ protected:
   const bool _use_deviatoric_terms;
 
   /// Container for the current advected interpolation coefficients on the face to make sure
-  /// we do not compute it multiple times for different terms.
+  /// we don't compute it multiple times for different terms.
   std::pair<Real, Real> _advected_interp_coeffs;
-
-  /// Explicit deferred-correction face-value contribution for internal advection.
-  Real _advected_rhs_face_value;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -137,10 +124,6 @@ protected:
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 
-  /// Optional deferred-correction interpolation method for internal advection faces.
-  const FVAdvectedInterpolationMethod * _adv_interp_method;
-
-
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
   const unsigned int _index;
@@ -156,8 +139,4 @@ protected:
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
-
-  /// Reusable gradient storage used when advected interpolation requires gradients.
-  VectorValue<Real> _elem_grad_storage;
-  VectorValue<Real> _neighbor_grad_storage;
 };

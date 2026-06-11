@@ -36,23 +36,6 @@ registerMooseAction("NavierStokesApp",
 namespace
 {
 bool
-containsDynamicContactAngleModel(const std::vector<std::string> & models)
-{
-  return std::any_of(models.begin(),
-                     models.end(),
-                     [](const std::string & model)
-                     {
-                       std::string lower = model;
-                       std::transform(lower.begin(),
-                                      lower.end(),
-                                      lower.begin(),
-                                      [](unsigned char c)
-                                      { return static_cast<char>(std::tolower(c)); });
-                       return lower == "dynamic";
-                     });
-}
-
-bool
 blocksOverlap(const std::set<SubdomainID> & lhs, const std::set<SubdomainID> & rhs)
 {
   if (lhs.empty() || rhs.empty() || lhs.count(Moose::ANY_BLOCK_ID) ||
@@ -120,11 +103,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "predictor terms.");
   params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                              "apply_pressure_velocity_writeback");
-  params.addParam<bool>(
-      "add_momentum_continuity_error_sink",
-      false,
-      "Whether to add the conservative momentum continuity-error sink conditioning term. This is "
-      "not part of the standard sharp-interface momentum equation.");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "vof_rho_phi_functor");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
@@ -139,63 +117,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
                                          "liquid_density_functor");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "gas_density_functor");
-  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "require_vof_rho_phi_functor");
-  params.set<bool>("require_vof_rho_phi_functor") = true;
-  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "enforce_vof_rho_phi_contract");
-  params.set<bool>("enforce_vof_rho_phi_contract") = true;
-  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "vof_rho_phi_contract_abs_tol");
-  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "vof_rho_phi_contract_rel_tol");
-
-  params.addParam<MooseFunctorName>(
-      "transient_projection_face_acceleration",
-      "",
-      "Optional face-based transient projection correction functor in acceleration-like units.");
-  params.addParam<MooseFunctorName>(
-      "surface_tension_face_acceleration",
-      "",
-      "Optional face-based surface-tension contribution functor in acceleration-like units. If "
-      "left empty and the sharp-interface geometry functors are enabled, this physics object will "
-      "auto-generate the functor name and pass it to the Rhie-Chow object.");
-  params.addParam<MooseFunctorName>(
-      "surface_tension_cell_acceleration",
-      "",
-      "Optional cell-based surface-tension contribution functor in acceleration-like units. If "
-      "left empty and the sharp-interface geometry functors are enabled, this physics object will "
-      "auto-generate the functor name and pass it to the Rhie-Chow object.");
-  params.addParam<MooseFunctorName>(
-      "hydrostatic_density_gradient_face_acceleration",
-      "",
-      "Optional face-based hydrostatic density-gradient contribution functor in acceleration-like "
-      "units. If left empty and the sharp-interface geometry functors are enabled, this physics "
-      "object will auto-generate the functor name and pass it to the Rhie-Chow object.");
-  params.addParam<MooseFunctorName>(
-      "hydrostatic_density_gradient_cell_acceleration",
-      "",
-      "Optional cell-based hydrostatic density-gradient contribution functor in acceleration-like "
-      "units. If left empty and the sharp-interface geometry functors are enabled, this physics "
-      "object will auto-generate the functor name and pass it to the Rhie-Chow object.");
-  params.addParam<MooseFunctorName>(
-      "surface_tension_momentum_source_x",
-      "",
-      "Optional x-component capillary momentum-source density functor for the reduced-pressure "
-      "momentum predictor. If left empty and the sharp-interface geometry functors are enabled, "
-      "this physics object will auto-generate the functor name.");
-  params.addParam<MooseFunctorName>(
-      "surface_tension_momentum_source_y",
-      "",
-      "Optional y-component capillary momentum-source density functor for the reduced-pressure "
-      "momentum predictor. If left empty and the sharp-interface geometry functors are enabled, "
-      "this physics object will auto-generate the functor name.");
-  params.addParam<MooseFunctorName>(
-      "surface_tension_momentum_source_z",
-      "",
-      "Optional z-component capillary momentum-source density functor for the reduced-pressure "
-      "momentum predictor. If left empty and the sharp-interface geometry functors are enabled, "
-      "this physics object will auto-generate the functor name.");
   params.addParam<MooseFunctorName>(
       "hydrostatic_momentum_source_x",
       "",
@@ -223,127 +144,18 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.addParam<MooseFunctorName>(
       "volume_fraction_functor",
       "",
-      "Volume-fraction / phase-fraction functor used by the geometry material and curvature "
-      "producer. Leave empty to skip automatic creation of sharp-interface geometry objects.");
+      "Volume-fraction / phase-fraction functor used by the geometry material. Leave empty to "
+      "skip automatic creation of sharp-interface geometry objects.");
   params.addParam<MooseFunctorName>(
       "surface_tension_coefficient",
       "0",
-      "Surface-tension coefficient functor or numeric constant string used by the geometry "
-      "material.");
-  params.addParam<MooseFunctorName>(
-      "curvature_functor",
-      "",
-      "Optional curvature functor consumed by the geometry material. If left empty and the "
-      "curvature producer is enabled, this physics object will auto-generate the curvature "
-      "functor from the curvature calculator user object.");
-  params.addParam<bool>(
-      "create_curvature_producer",
-      true,
-      "Whether to automatically add the curvature producer user object when a volume_fraction_"
-      "functor is supplied.");
-  params.addParam<MooseEnum>(
-      "curvature_delta_n_mode",
-      MooseEnum("mesh_scaled_reference fixed", "mesh_scaled_reference"),
-      "How the curvature producer chooses the normal regularization delta_n.");
-  params.addParam<Real>(
-      "curvature_delta_n_scale",
-      1e-8,
-      "Scale factor used by the curvature producer when curvature_delta_n_mode = "
-      "mesh_scaled_reference. The effective delta_n becomes scale / cbrt(average cell volume).");
-  params.addParam<Real>(
-      "curvature_delta_n_fixed_value",
-      1e-8,
-      "Fixed delta_n value used by the curvature producer when curvature_delta_n_mode = fixed.");
-  params.addParam<bool>("use_reference_simple_curvature",
-                        true,
-                        "Use the baseline simple curvature expression K = -div(nHatf). This "
-                        "should remain true to match the shipped solver path.");
-  params.addParam<unsigned int>(
-      "n_alpha_smooth_curvature",
-      0,
-      "Optional number of curvature-input smoothing sweeps performed by the curvature producer "
-      "before building grad(alpha). A value of 0 leaves the curvature producer on the baseline "
-      "path, while positive values provide additional alpha smoothing for difficult capillary "
-      "cases.");
-
-  params.addParam<std::vector<BoundaryName>>(
-      "contact_angle_boundaries",
-      {},
-      "Boundary names or IDs on which wall contact-angle correction should be applied inside the "
-      "curvature producer.");
-  params.addParam<std::vector<std::string>>(
-      "contact_angle_models",
-      {},
-      "Optional per-boundary contact-angle model names. Entries equal to 'dynamic' activate the "
-      "dynamic wall-contact-angle material on the corresponding boundary. Boundaries without a "
-      "dynamic entry may still use static_contact_angles_degrees.");
-  params.addParam<std::vector<Real>>(
-      "static_contact_angles_degrees",
-      {},
-      "Static wall contact angles in degrees, one per selected boundary. A single value is "
-      "broadcast to all selected boundaries.");
-  params.addParam<MooseFunctorName>(
-      "wall_contact_angle_degrees_functor",
-      "",
-      "Optional face-aware functor returning wall contact angle in degrees. When supplied, it "
-      "overrides static_contact_angles_degrees and disables automatic creation of the dynamic "
-      "wall-contact-angle functor material.");
-  params.addParam<Real>("contact_angle_small_det",
-                        1e-12,
-                        "Positive floor used when the wall-contact-angle determinant 1 - "
-                        "(nHat.nWall)^2 becomes very small.");
-
-  params.addParam<bool>(
-      "create_dynamic_contact_angle_functor_material",
-      true,
-      "Whether to automatically add a dynamic wall-contact-angle functor material when at least "
-      "one contact_angle_models entry is 'dynamic' and no explicit wall_contact_angle_degrees_"
-      "functor is provided.");
-  params.addParam<std::vector<Real>>(
-      "equilibrium_contact_angles_deg",
-      {},
-      "Per-boundary equilibrium contact angles theta0 in degrees for dynamic contact-angle "
-      "boundaries.");
-  params.addParam<std::vector<Real>>(
-      "advancing_contact_angles_deg",
-      {},
-      "Per-boundary advancing contact angles thetaA in degrees for dynamic contact-angle "
-      "boundaries.");
-  params.addParam<std::vector<Real>>(
-      "receding_contact_angles_deg",
-      {},
-      "Per-boundary receding contact angles thetaR in degrees for dynamic contact-angle "
-      "boundaries.");
-  params.addParam<std::vector<Real>>(
-      "contact_angle_velocity_scales",
-      {},
-      "Per-boundary velocity scales uTheta for the dynamic wall-contact-angle law.");
-  params.addParam<MooseFunctorName>(
-      "dynamic_contact_angle_wall_velocity_functor",
-      "",
-      "Optional wall-velocity vector functor used by the dynamic wall-contact-angle law.");
-  params.addParam<RealVectorValue>(
-      "dynamic_contact_angle_default_wall_velocity",
-      RealVectorValue(),
-      "Constant fallback wall velocity used by the dynamic wall-contact-angle law.");
-  params.addParam<Real>(
-      "dynamic_contact_angle_parallel_direction_small",
-      1e-12,
-      "Positive regularization added when normalizing the wall-parallel interface direction in "
-      "the dynamic wall-contact-angle law.");
-  params.addParam<Real>(
-      "dynamic_contact_angle_u_theta_small",
-      1e-12,
-      "Positive floor below which the dynamic wall-contact-angle law falls back to theta0.");
+      "Compatibility parameter for zero-surface-tension inputs. Nonzero capillary "
+      "coupling is not part of this sharp-interface path.");
 
   params.addParam<Real>(
       "geometry_delta_n",
       1e-8,
-      "Regularization used in the geometry material when constructing interface unit normals if "
-      "no precomputed unit-normal functor is supplied.");
-  params.addParam<Real>("geometry_minimum_density",
-                        1e-12,
-                        "Positive floor used in the geometry material when dividing by density.");
+      "Regularization used in the geometry material when constructing interface unit normals.");
   params.addParam<bool>(
       "clip_volume_fraction_for_geometry",
       true,
@@ -357,30 +169,16 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.addParam<Real>(
       "near_interface_upper", 0.99, "Upper threshold for the near-interface indicator.");
   params.addParamNamesToGroup("pressure_formulation add_transient_projection_flux "
-                              "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
-                              "transient_projection_face_acceleration "
-                              "surface_tension_face_acceleration surface_tension_cell_acceleration "
-                              "hydrostatic_density_gradient_face_acceleration "
-                              "hydrostatic_density_gradient_cell_acceleration",
+                              "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback",
                               "Sharp Interface Pressure Correction");
 
-  params.addParamNamesToGroup("surface_tension_momentum_source_x surface_tension_momentum_source_y "
-                              "surface_tension_momentum_source_z hydrostatic_momentum_source_x "
-                              "hydrostatic_momentum_source_y hydrostatic_momentum_source_z",
+  params.addParamNamesToGroup("hydrostatic_momentum_source_x hydrostatic_momentum_source_y "
+                              "hydrostatic_momentum_source_z",
                               "Sharp Interface Momentum Predictor");
 
   params.addParamNamesToGroup(
       "create_geometry_functors volume_fraction_functor surface_tension_coefficient "
-      "curvature_functor create_curvature_producer curvature_delta_n_mode "
-      "curvature_delta_n_scale curvature_delta_n_fixed_value use_reference_simple_curvature "
-      "n_alpha_smooth_curvature contact_angle_boundaries contact_angle_models "
-      "static_contact_angles_degrees wall_contact_angle_degrees_functor contact_angle_small_det "
-      "create_dynamic_contact_angle_functor_material equilibrium_contact_angles_deg "
-      "advancing_contact_angles_deg receding_contact_angles_deg "
-      "contact_angle_velocity_scales dynamic_contact_angle_wall_velocity_functor "
-      "dynamic_contact_angle_default_wall_velocity "
-      "dynamic_contact_angle_parallel_direction_small dynamic_contact_angle_u_theta_small "
-      "geometry_delta_n geometry_minimum_density clip_volume_fraction_for_geometry "
+      "geometry_delta_n clip_volume_fraction_for_geometry "
       "geometry_alpha_lower_bound geometry_alpha_upper_bound near_interface_lower "
       "near_interface_upper",
       "Sharp Interface Geometry");
@@ -394,10 +192,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
     _pressure_formulation(getParam<MooseEnum>("pressure_formulation")),
     _add_transient_projection_flux(getParam<bool>("add_transient_projection_flux")),
     _add_capillary_hydrostatic_flux(getParam<bool>("add_capillary_hydrostatic_flux")),
-    _create_geometry_functors(getParam<bool>("create_geometry_functors")),
-    _create_curvature_producer(getParam<bool>("create_curvature_producer")),
-    _create_dynamic_contact_angle_functor_material(
-        getParam<bool>("create_dynamic_contact_angle_functor_material"))
+    _create_geometry_functors(getParam<bool>("create_geometry_functors"))
 {
   if (_pressure_formulation == "reduced" && !_solve_for_dynamic_pressure)
     paramError("solve_for_dynamic_pressure",
@@ -406,48 +201,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
   if (_pressure_formulation == "total" && _solve_for_dynamic_pressure)
     paramError("solve_for_dynamic_pressure",
                "pressure_formulation = 'total' requires solve_for_dynamic_pressure = false.");
-
-  const auto & contact_angle_models = getParam<std::vector<std::string>>("contact_angle_models");
-  const bool has_dynamic_model = containsDynamicContactAngleModel(contact_angle_models);
-
-  if (has_dynamic_model &&
-      !getParam<MooseFunctorName>("wall_contact_angle_degrees_functor").empty())
-    paramError("wall_contact_angle_degrees_functor",
-               "wall_contact_angle_degrees_functor cannot be supplied together with a dynamic "
-               "entry in contact_angle_models. Provide either the explicit wall-angle functor or "
-               "the automatic dynamic-contact-angle setup, but not both.");
-
-  if (has_dynamic_model && getParam<std::vector<BoundaryName>>("contact_angle_boundaries").empty())
-    paramError("contact_angle_boundaries",
-               "contact_angle_boundaries must be supplied when contact_angle_models contains a "
-               "dynamic entry.");
-
-  if (has_dynamic_model && !_create_curvature_producer)
-    paramError("create_curvature_producer",
-               "Automatic dynamic wall-contact-angle creation requires create_curvature_producer = "
-               "true so the provisional face unit normal is available.");
-
-  if (has_dynamic_model && getParam<MooseFunctorName>("volume_fraction_functor").empty())
-    paramError("volume_fraction_functor",
-               "Automatic dynamic wall-contact-angle creation requires volume_fraction_functor so "
-               "the curvature producer can be built.");
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumConditioningKernels()
-{
-  const std::string kernel_type = "LinearFVContinuityErrorSink";
-  const std::string kernel_name = prefix() + "ins_momentum_continuity_error_sink_";
-
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>("coeff") = "conservative_continuity_error_over_density";
-
-  for (const auto d : make_range(dimension()))
-  {
-    params.set<LinearVariableName>("variable") = _velocity_names[d];
-    getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
-  }
 }
 
 void
@@ -476,16 +229,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addMomentumReducedPressureKer
   for (const auto d : make_range(dimension()))
   {
     params.set<LinearVariableName>("variable") = _velocity_names[d];
-
-    const auto capillary_source_name =
-        resolve_source_name("surface_tension_momentum_source_" + comp_axis[d],
-                            "surface_tension_momentum_source_" + comp_axis[d]);
-    if (!capillary_source_name.empty())
-    {
-      params.set<MooseFunctorName>("source_density") = capillary_source_name;
-      getProblem().addLinearFVKernel(
-          kernel_type, prefix() + "ins_momentum_capillary_source_" + comp_axis[d], params);
-    }
 
     const auto hydrostatic_source_name =
         resolve_source_name("hydrostatic_momentum_source_" + comp_axis[d],
@@ -638,12 +381,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallsBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
         params.set<LinearVariableName>("variable") = _pressure_name;
-        params.set<MooseFunctorName>("pressure_predictor_flux") = "pressure_predictor_flux";
-        params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
-            "pressure_boundary_normal_gradient";
-        params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
         params.set<MooseFunctorName>("HbyA_flux") = "phiHbyA";
-        params.set<MooseFunctorName>("Ainv") = "pressure_Ainv";
         getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
       }
     }
@@ -691,13 +429,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::wallVelocityFunctorName(
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::useMomentumContinuityErrorSink() const
-{
-  return isParamSetByUser("add_momentum_continuity_error_sink") &&
-         getParam<bool>("add_momentum_continuity_error_sink");
-}
-
-bool
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddMomentumPressureKernels() const
 {
   return !(_solve_for_dynamic_pressure && _pressure_formulation == "reduced" &&
@@ -715,86 +446,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateGeometryFunctorMa
 {
   return _create_geometry_functors &&
          !getParam<MooseFunctorName>("volume_fraction_functor").empty();
-}
-
-bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateCurvatureProducer() const
-{
-  return _create_curvature_producer &&
-         !getParam<MooseFunctorName>("volume_fraction_functor").empty();
-}
-
-bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateDynamicContactAngleFunctorMaterial()
-    const
-{
-  return _create_dynamic_contact_angle_functor_material && shouldCreateCurvatureProducer() &&
-         getParam<MooseFunctorName>("wall_contact_angle_degrees_functor").empty() &&
-         containsDynamicContactAngleModel(
-             getParam<std::vector<std::string>>("contact_angle_models"));
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addAdditionalUserObjects()
-{
-  addCurvatureUserObject();
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addCurvatureUserObject()
-{
-  if (!shouldCreateCurvatureProducer())
-    return;
-
-  std::vector<UserObject *> objs;
-  getProblem()
-      .theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
-      .queryInto(objs);
-
-  for (const auto & obj : objs)
-    if (const auto * curvature = dynamic_cast<GeneralUserObject *>(obj))
-      if (curvature->name() == prefix() + "sharp_interface_curvature")
-        return;
-
-  const std::string object_type = "ConservativeSharpInterfaceCurvatureCalculator";
-  auto params = getFactory().getValidParams(object_type);
-  assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>("volume_fraction_functor") =
-      getParam<MooseFunctorName>("volume_fraction_functor");
-  params.set<MooseEnum>("delta_n_mode") = getParam<MooseEnum>("curvature_delta_n_mode");
-  params.set<Real>("delta_n_scale") = getParam<Real>("curvature_delta_n_scale");
-  params.set<Real>("delta_n_fixed_value") = getParam<Real>("curvature_delta_n_fixed_value");
-  params.set<bool>("use_reference_simple_curvature") =
-      getParam<bool>("use_reference_simple_curvature");
-  params.set<unsigned int>("n_alpha_smooth_curvature") =
-      getParam<unsigned int>("n_alpha_smooth_curvature");
-  params.set<std::vector<BoundaryName>>("contact_angle_boundaries") =
-      getParam<std::vector<BoundaryName>>("contact_angle_boundaries");
-  params.set<std::vector<Real>>("static_contact_angles_degrees") =
-      getParam<std::vector<Real>>("static_contact_angles_degrees");
-  params.set<Real>("contact_angle_small_det") = getParam<Real>("contact_angle_small_det");
-
-  const auto explicit_wall_angle_functor =
-      getParam<MooseFunctorName>("wall_contact_angle_degrees_functor");
-  if (!explicit_wall_angle_functor.empty())
-    params.set<MooseFunctorName>("wall_contact_angle_degrees_functor") =
-        explicit_wall_angle_functor;
-  else if (shouldCreateDynamicContactAngleFunctorMaterial())
-    params.set<MooseFunctorName>("wall_contact_angle_degrees_functor") =
-        generatedGeometryFunctorName("dynamic_wall_contact_angle_degrees");
-
-  params.set<MooseFunctorName>("face_smoothed_alpha_gradient_name") =
-      generatedGeometryFunctorName("curvature_face_smoothed_alpha_gradient");
-  params.set<MooseFunctorName>("provisional_face_unit_normal_name") =
-      generatedGeometryFunctorName("curvature_provisional_interface_unit_normal_face");
-  params.set<MooseFunctorName>("face_unit_normal_name") =
-      generatedGeometryFunctorName("curvature_interface_unit_normal_face");
-  params.set<MooseFunctorName>("curvature_name") = generatedGeometryFunctorName("curvature");
-
-  getProblem().addUserObject(object_type, prefix() + "sharp_interface_curvature", params);
 }
 
 void
@@ -877,109 +528,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       getParam<MooseFunctorName>("liquid_density_functor");
   params.set<MooseFunctorName>("gas_density_functor") =
       getParam<MooseFunctorName>("gas_density_functor");
-  params.set<bool>("require_vof_rho_phi_functor") = getParam<bool>("require_vof_rho_phi_functor");
-  params.set<bool>("enforce_vof_rho_phi_contract") = getParam<bool>("enforce_vof_rho_phi_contract");
-  params.set<Real>("vof_rho_phi_contract_abs_tol") = getParam<Real>("vof_rho_phi_contract_abs_tol");
-  params.set<Real>("vof_rho_phi_contract_rel_tol") = getParam<Real>("vof_rho_phi_contract_rel_tol");
-
-  const auto transient_name = getParam<MooseFunctorName>("transient_projection_face_acceleration");
-  if (!transient_name.empty())
-    params.set<MooseFunctorName>("transient_projection_face_acceleration") = transient_name;
-
-  const auto surface_tension_name = getParam<MooseFunctorName>("surface_tension_face_acceleration");
-  if (!surface_tension_name.empty())
-    params.set<MooseFunctorName>("surface_tension_face_acceleration") = surface_tension_name;
-  const auto surface_tension_cell_name =
-      getParam<MooseFunctorName>("surface_tension_cell_acceleration");
-  if (!surface_tension_cell_name.empty())
-    params.set<MooseFunctorName>("surface_tension_cell_acceleration") = surface_tension_cell_name;
-  if (shouldCreateGeometryFunctorMaterial())
-  {
-    const auto sigma_name = getParam<MooseFunctorName>("surface_tension_coefficient");
-    const bool sigma_is_literal_zero = MooseUtils::parsesToReal(sigma_name) &&
-                                       std::abs(std::stod(sigma_name)) <= libMesh::TOLERANCE;
-    if (!sigma_is_literal_zero)
-    {
-      if (surface_tension_name.empty())
-        params.set<MooseFunctorName>("surface_tension_face_acceleration") =
-            generatedGeometryFunctorName("surface_tension_face_acceleration");
-      if (surface_tension_cell_name.empty())
-        params.set<MooseFunctorName>("surface_tension_cell_acceleration") =
-            generatedGeometryFunctorName("surface_tension_cell_acceleration");
-    }
-  }
-
-  if (!use_face_based_reduced_pressure_predictor)
-  {
-    const auto hydrostatic_name =
-        getParam<MooseFunctorName>("hydrostatic_density_gradient_face_acceleration");
-    if (!hydrostatic_name.empty())
-      params.set<MooseFunctorName>("hydrostatic_density_gradient_face_acceleration") =
-          hydrostatic_name;
-    const auto hydrostatic_cell_name =
-        getParam<MooseFunctorName>("hydrostatic_density_gradient_cell_acceleration");
-    if (!hydrostatic_cell_name.empty())
-      params.set<MooseFunctorName>("hydrostatic_density_gradient_cell_acceleration") =
-          hydrostatic_cell_name;
-    if (shouldCreateGeometryFunctorMaterial())
-    {
-      if (hydrostatic_name.empty())
-        params.set<MooseFunctorName>("hydrostatic_density_gradient_face_acceleration") =
-            generatedGeometryFunctorName("hydrostatic_density_gradient_face_acceleration");
-      if (hydrostatic_cell_name.empty())
-        params.set<MooseFunctorName>("hydrostatic_density_gradient_cell_acceleration") =
-            generatedGeometryFunctorName("hydrostatic_density_gradient_cell_acceleration");
-    }
-  }
-
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addDynamicContactAngleFunctorMaterial()
-{
-  if (!shouldCreateDynamicContactAngleFunctorMaterial())
-    return;
-
-  const std::string class_name = "DynamicWallContactAngleFunctorMaterial";
-  auto params = getFactory().getValidParams(class_name);
-  assignBlocks(params, _blocks);
-
-  params.set<MooseFunctorName>("provisional_interface_unit_normal_functor") =
-      generatedGeometryFunctorName("curvature_provisional_interface_unit_normal_face");
-  params.set<std::vector<BoundaryName>>("contact_angle_boundaries") =
-      getParam<std::vector<BoundaryName>>("contact_angle_boundaries");
-  params.set<std::vector<std::string>>("contact_angle_models") =
-      getParam<std::vector<std::string>>("contact_angle_models");
-  params.set<std::vector<Real>>("equilibrium_contact_angles_deg") =
-      getParam<std::vector<Real>>("equilibrium_contact_angles_deg");
-  params.set<std::vector<Real>>("advancing_contact_angles_deg") =
-      getParam<std::vector<Real>>("advancing_contact_angles_deg");
-  params.set<std::vector<Real>>("receding_contact_angles_deg") =
-      getParam<std::vector<Real>>("receding_contact_angles_deg");
-  params.set<std::vector<Real>>("contact_angle_velocity_scales") =
-      getParam<std::vector<Real>>("contact_angle_velocity_scales");
-
-  std::vector<MooseFunctorName> velocity_component_functors;
-  for (const auto d : make_range(dimension()))
-    velocity_component_functors.push_back(_velocity_names[d]);
-  params.set<std::vector<MooseFunctorName>>("velocity_component_functors") =
-      velocity_component_functors;
-
-  const auto wall_velocity_functor =
-      getParam<MooseFunctorName>("dynamic_contact_angle_wall_velocity_functor");
-  if (!wall_velocity_functor.empty())
-    params.set<MooseFunctorName>("wall_velocity_functor") = wall_velocity_functor;
-
-  params.set<RealVectorValue>("default_wall_velocity") =
-      getParam<RealVectorValue>("dynamic_contact_angle_default_wall_velocity");
-  params.set<Real>("parallel_direction_small") =
-      getParam<Real>("dynamic_contact_angle_parallel_direction_small");
-  params.set<Real>("u_theta_small") = getParam<Real>("dynamic_contact_angle_u_theta_small");
-  params.set<MooseFunctorName>("wall_contact_angle_degrees_name") =
-      generatedGeometryFunctorName("dynamic_wall_contact_angle_degrees");
-
-  getProblem().addFunctorMaterial(class_name, prefix() + "dynamic_wall_contact_angle", params);
 }
 
 void
@@ -1008,22 +557,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
   }
 
   addVelocityBoundaryInputFunctorMaterials();
-  addDynamicContactAngleFunctorMaterial();
-
-  if (isTransient() && useMomentumContinuityErrorSink())
-  {
-    auto params = getFactory().getValidParams("ParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<bool>("enable_jit") = false;
-    params.set<std::string>("expression") =
-        "conservative_continuity_error / (" + _density_name + " + " +
-        std::to_string(getParam<Real>("geometry_minimum_density")) + ")";
-    params.set<std::vector<std::string>>("functor_names") = {"conservative_continuity_error",
-                                                             _density_name};
-    params.set<std::string>("property_name") = "conservative_continuity_error_over_density";
-    getProblem().addMaterial(
-        "ParsedFunctorMaterial", prefix() + "conservative_continuity_error_over_density", params);
-  }
 
   if (!shouldCreateGeometryFunctorMaterial())
   {
@@ -1041,26 +574,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
   params.set<MooseFunctorName>("volume_fraction_functor") =
       getParam<MooseFunctorName>("volume_fraction_functor");
   params.set<MooseFunctorName>("density_functor") = _density_name;
-  params.set<MooseFunctorName>("liquid_density_functor") =
-      getParam<MooseFunctorName>("liquid_density_functor");
-  params.set<MooseFunctorName>("gas_density_functor") =
-      getParam<MooseFunctorName>("gas_density_functor");
-  params.set<MooseFunctorName>("surface_tension_coefficient") =
-      getParam<MooseFunctorName>("surface_tension_coefficient");
-
-  const auto curvature_name = getParam<MooseFunctorName>("curvature_functor");
-  if (!curvature_name.empty())
-    params.set<MooseFunctorName>("curvature_functor") = curvature_name;
-  else if (shouldCreateCurvatureProducer())
-    params.set<MooseFunctorName>("curvature_functor") = generatedGeometryFunctorName("curvature");
-
-  if (shouldCreateCurvatureProducer())
-  {
-    params.set<MooseFunctorName>("face_smoothed_alpha_gradient_functor") =
-        generatedGeometryFunctorName("curvature_face_smoothed_alpha_gradient");
-    params.set<MooseFunctorName>("interface_unit_normal_functor") =
-        generatedGeometryFunctorName("curvature_interface_unit_normal_face");
-  }
 
   if (parameters().isParamValid("gravity"))
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
@@ -1074,7 +587,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
   params.set<Real>("alpha_upper_bound") = getParam<Real>("geometry_alpha_upper_bound");
   params.set<Real>("near_interface_lower") = getParam<Real>("near_interface_lower");
   params.set<Real>("near_interface_upper") = getParam<Real>("near_interface_upper");
-  params.set<Real>("minimum_density") = getParam<Real>("geometry_minimum_density");
   params.set<Real>("delta_n") = getParam<Real>("geometry_delta_n");
 
   params.set<MooseFunctorName>("delta_n_name") = generatedGeometryFunctorName("delta_n");
@@ -1082,29 +594,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
       generatedGeometryFunctorName("near_interface");
   params.set<MooseFunctorName>("alpha_gradient_name") =
       generatedGeometryFunctorName("alpha_gradient");
-  params.set<MooseFunctorName>("face_smoothed_alpha_gradient_name") =
-      generatedGeometryFunctorName("face_smoothed_alpha_gradient");
-  params.set<MooseFunctorName>("density_gradient_name") =
-      generatedGeometryFunctorName("density_gradient");
   params.set<MooseFunctorName>("interface_unit_normal_name") =
       generatedGeometryFunctorName("interface_unit_normal_face");
-  params.set<MooseFunctorName>("sigma_k_name") = generatedGeometryFunctorName("sigma_k");
-  params.set<MooseFunctorName>("reduced_pressure_head_name") =
-      generatedGeometryFunctorName("reduced_pressure_head");
-  params.set<MooseFunctorName>("surface_tension_face_acceleration_name") =
-      generatedGeometryFunctorName("surface_tension_face_acceleration");
-  params.set<MooseFunctorName>("surface_tension_cell_acceleration_name") =
-      generatedGeometryFunctorName("surface_tension_cell_acceleration");
-  params.set<MooseFunctorName>("surface_tension_momentum_source_x_name") =
-      generatedGeometryFunctorName("surface_tension_momentum_source_x");
-  params.set<MooseFunctorName>("surface_tension_momentum_source_y_name") =
-      generatedGeometryFunctorName("surface_tension_momentum_source_y");
-  params.set<MooseFunctorName>("surface_tension_momentum_source_z_name") =
-      generatedGeometryFunctorName("surface_tension_momentum_source_z");
-  params.set<MooseFunctorName>("hydrostatic_density_gradient_face_acceleration_name") =
-      generatedGeometryFunctorName("hydrostatic_density_gradient_face_acceleration");
-  params.set<MooseFunctorName>("hydrostatic_density_gradient_cell_acceleration_name") =
-      generatedGeometryFunctorName("hydrostatic_density_gradient_cell_acceleration");
   params.set<MooseFunctorName>("hydrostatic_momentum_source_x_name") =
       generatedGeometryFunctorName("hydrostatic_momentum_source_x");
   params.set<MooseFunctorName>("hydrostatic_momentum_source_y_name") =

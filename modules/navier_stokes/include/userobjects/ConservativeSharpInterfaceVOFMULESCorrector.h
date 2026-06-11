@@ -13,14 +13,13 @@
 #include "NonADFunctorInterface.h"
 #include "BlockRestrictable.h"
 #include "FaceCenteredMapFunctor.h"
-#include "GradientLimiterType.h"
 #include "FaceArgInterface.h"
 
 #include <unordered_map>
 
 class LinearSystem;
 class LinearFVBoundaryCondition;
-class ConservativeSharpInterfaceCurvatureCalculator;
+
 /**
  * Applies an explicit bounded correction to a donor/upwind alpha solve, following the same
  * bounded-flux-plus-limited-correction structure used by the sharp-interface VOF path.
@@ -44,20 +43,12 @@ public:
   void resetSubcycleFluxes();
   void invalidateOuterCorrectionFluxSeed();
   void refreshPublishedRhoPhi();
-  void applyCorrection(const Real dt,
-                       const Real subcycle_fraction = 1.0,
-                       ConservativeSharpInterfaceCurvatureCalculator * curvature = nullptr);
+  void applyCorrection(const Real dt, const Real subcycle_fraction = 1.0);
 
   const SolverSystemName & systemName() const { return _system_name; }
   const VariableName & variableName() const { return _variable_name; }
 
 private:
-  enum class HighOrderCorrectionScheme : unsigned char
-  {
-    Venkatakrishnan,
-    VanLeer
-  };
-
   enum class BoundaryFaceKind : unsigned char
   {
     Internal,
@@ -118,7 +109,6 @@ private:
   Real boundedAlpha(Real value) const;
   Real donorFlux(const FaceInfo & fi) const;
   Real highOrderFaceValue(const FaceInfo & fi) const;
-  Real venkatakrishnanFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   Real sharedVanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   BoundaryFaceKind classifyBoundaryFace(const FaceInfo & fi,
                                         FaceInfo::VarFaceNeighbors face_type,
@@ -140,7 +130,6 @@ private:
   const Moose::Functor<RealVectorValue> & _interface_normal;
   const Moose::Functor<Real> & _liquid_density;
   const Moose::Functor<Real> & _gas_density;
-  const HighOrderCorrectionScheme _high_order_correction_scheme;
   const unsigned int _num_alpha_corrections;
   const unsigned int _num_limiter_iterations;
   const Real _correction_relaxation;

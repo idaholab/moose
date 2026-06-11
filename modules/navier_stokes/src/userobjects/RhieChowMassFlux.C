@@ -23,7 +23,6 @@
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVFluxKernel.h"
 #include "LinearFVPressureFluxBC.h"
-#include "LinearFVPressureInletOutletVelocityBC.h"
 #include "LinearFVPressureSymmetryBC.h"
 #include "Function.h"
 #include "MooseUtils.h"
@@ -1784,23 +1783,6 @@ RhieChowMassFlux::populateCouplingFunctors(
       };
 
       bool use_constrained_boundary_state = _vel[0]->isDirichletBoundaryFace(*fi);
-      if (!use_constrained_boundary_state && !fi->boundaryIDs().empty())
-        for (const auto dim_i : make_range(_dim))
-          if (auto * bc_pointer = _vel[dim_i]->getBoundaryCondition(*fi->boundaryIDs().begin()))
-          {
-            if (auto * pressure_inlet_outlet_bc =
-                    dynamic_cast<LinearFVPressureInletOutletVelocityBC *>(bc_pointer))
-            {
-              pressure_inlet_outlet_bc->setupFaceData(
-                  fi,
-                  fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
-              if (pressure_inlet_outlet_bc->computeBoundaryGradientMatrixContribution() > 0.0)
-              {
-                use_constrained_boundary_state = true;
-                break;
-              }
-            }
-          }
 
       // Local constrainHbyA analogue: only use the live boundary value when the
       // velocity patch is actually fixed on this iteration (Dirichlet or inletOutlet

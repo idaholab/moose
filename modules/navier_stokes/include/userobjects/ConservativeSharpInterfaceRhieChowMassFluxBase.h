@@ -114,10 +114,6 @@ public:
                                                const Moose::StateArg & time_arg) const;
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
   Real vofRhoPhiIntegrated(const FaceInfo & fi) const;
-  Real vofAlphaPhiLimitedIntegrated(const FaceInfo & fi) const;
-  Real vofBaseGasRhoPhiIntegrated(const FaceInfo & fi) const;
-  Real vofAlphaCorrectionRhoPhiIntegrated(const FaceInfo & fi) const;
-  Real vofRhoPhiReconstructedVolumetricPhi(const FaceInfo & fi) const;
 
 protected:
   using FaceScalarField = FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>;
@@ -129,7 +125,6 @@ protected:
   Real pressureFaceNormalAinv(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
-  void checkVOFRhoPhiContract() const;
   void writePressureCorrectedVelocityToMomentumSolution(const Moose::StateArg & time_arg);
   void rebuildSharpInterfaceFaceInfo();
   void cacheCurrentCorrectedVolumetricFlux(const Real degenerate_normal_pressure_ainv_tol = 0.0);
@@ -179,14 +174,6 @@ protected:
       const std::vector<PetscVectorReader> & raw_ainv_readers,
       const std::vector<PetscVectorReader> * pressure_gradient_readers = nullptr) const;
 
-  RealVectorValue
-  evaluateBoundaryAwareVectorFunctor(const Moose::Functor<RealVectorValue> * functor,
-                                     const FaceInfo * fi,
-                                     const Moose::StateArg & time_arg) const;
-  RealVectorValue
-  interpolateCellVectorFunctorToFace(const Moose::Functor<RealVectorValue> * functor,
-                                     const FaceInfo * fi,
-                                     const Moose::StateArg & time_arg) const;
   Real evaluateFaceScalarFunctor(const Moose::Functor<Real> * functor,
                                  const FaceInfo * fi,
                                  const Moose::StateArg & time_arg,
@@ -215,7 +202,6 @@ protected:
   Real computeFaceNormalPressureGradient(
       const FaceInfo * fi, const std::vector<PetscVectorReader> & pressure_gradient_readers) const;
   bool useExplicitHydrostaticPredictorForce() const;
-  bool useDiscreteHydrostaticPredictorFaceForce() const;
   Real
   computeDiscreteHydrostaticPredictorFaceNormalForceDensity(const FaceInfo * fi,
                                                             const Moose::StateArg & time_arg) const;
@@ -252,28 +238,13 @@ protected:
   const Real _pressure_writeback_face_ainv_relative_tolerance;
   const MooseEnum _density_sn_grad_scheme;
   const Real _density_sn_grad_limiter_coefficient;
-  const MooseEnum _hydrostatic_predictor_discretization;
 
   const MooseFunctorName _volume_fraction_name;
-  const MooseFunctorName _transient_projection_face_acceleration_name;
-  const MooseFunctorName _surface_tension_face_acceleration_name;
-  const MooseFunctorName _surface_tension_cell_acceleration_name;
-  const MooseFunctorName _hydrostatic_density_gradient_face_acceleration_name;
-  const MooseFunctorName _hydrostatic_density_gradient_cell_acceleration_name;
   const MooseFunctorName _vof_rho_phi_name;
   const MooseFunctorName _vof_alpha_phi_limited_name;
   const MooseFunctorName _liquid_density_name;
   const MooseFunctorName _gas_density_name;
-  const bool _require_vof_rho_phi_functor;
-  const bool _enforce_vof_rho_phi_contract;
-  const Real _vof_rho_phi_contract_abs_tol;
-  const Real _vof_rho_phi_contract_rel_tol;
 
-  const Moose::Functor<RealVectorValue> * const _transient_projection_face_acceleration;
-  const Moose::Functor<RealVectorValue> * const _surface_tension_face_acceleration;
-  const Moose::Functor<RealVectorValue> * const _surface_tension_cell_acceleration;
-  const Moose::Functor<RealVectorValue> * const _hydrostatic_density_gradient_face_acceleration;
-  const Moose::Functor<RealVectorValue> * const _hydrostatic_density_gradient_cell_acceleration;
   const Moose::Functor<Real> * _volume_fraction;
   const Moose::Functor<Real> * _vof_rho_phi;
   const Moose::Functor<Real> * _vof_alpha_phi_limited;

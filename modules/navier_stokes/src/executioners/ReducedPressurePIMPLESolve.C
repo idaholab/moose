@@ -14,7 +14,6 @@
 #include "MooseApp.h"
 #include "SegregatedSolverUtils.h"
 #include "ConservativeSharpInterfaceRhieChowMassFlux.h"
-#include "ConservativeSharpInterfaceCurvatureCalculator.h"
 #include "ConservativeSharpInterfaceVOFMULESCorrector.h"
 #include "TheWarehouse.h"
 #include "libmesh/petsc_linear_solver.h"
@@ -570,30 +569,6 @@ ReducedPressurePIMPLESolve::commitAcceptedTimestepTransportHistory() const
     sharp_rc->commitAcceptedTimestepTransportHistory();
 }
 
-ConservativeSharpInterfaceCurvatureCalculator *
-ReducedPressurePIMPLESolve::sharpInterfaceCurvature() const
-{
-  std::vector<UserObject *> objs;
-  _problem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
-      .queryInto(objs);
-  ConservativeSharpInterfaceCurvatureCalculator * curvature_match = nullptr;
-  for (const auto & obj : objs)
-    if (auto * curvature = dynamic_cast<ConservativeSharpInterfaceCurvatureCalculator *>(obj))
-    {
-      if (curvature_match)
-        mooseError("ReducedPressurePIMPLESolve found multiple "
-                   "ConservativeSharpInterfaceCurvatureCalculator "
-                   "objects in the problem. The current implementation requires a single "
-                   "sharp-interface curvature producer.");
-      curvature_match = curvature;
-    }
-
-  return curvature_match;
-}
-
 void
 ReducedPressurePIMPLESolve::synchronizeSystemState(LinearSystem & system) const
 {
@@ -797,11 +772,6 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
 void
 ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_updated_pressure)
 {
-  // Refresh the curvature producer before the pressure predictor stage so every
-  // downstream face functor sees the latest smoothed normals / curvature.
-  if (auto * curvature = sharpInterfaceCurvature())
-    curvature->updateCurvatureMaps(_print_fields);
-
   _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
 
   if (auto * sharp_rc = sharpInterfaceRC())
@@ -971,10 +941,7 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
                                            1.0,
                                            std::numeric_limits<Real>::min());
         system->computeGradients();
-        auto * curvature = sharpInterfaceCurvature();
-        if (curvature)
-          curvature->updateCurvatureMaps(_print_fields);
-        corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt, curvature);
+        corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt);
       }
       else
         residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
@@ -1013,9 +980,6 @@ ReducedPressurePIMPLESolve::finalizeVolumeFractionTransportState()
 
   for (const auto & system : _volume_fraction_systems)
     system->computeGradients();
-
-  if (auto * curvature = sharpInterfaceCurvature())
-    curvature->updateCurvatureMaps(_print_fields);
 
   for (const auto & system_name : _volume_fraction_system_names)
     if (auto * corrector = sharpInterfaceVOFCorrector(system_name))

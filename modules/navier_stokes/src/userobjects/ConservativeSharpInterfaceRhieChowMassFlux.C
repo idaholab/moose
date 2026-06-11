@@ -17,7 +17,6 @@ InputParameters
 ConservativeSharpInterfaceRhieChowMassFlux::validParams()
 {
   InputParameters params = ConservativeSharpInterfaceRhieChowMassFluxBase::validParams();
-  params.set<MooseEnum>("hydrostatic_predictor_discretization") = "discrete_density_sn_grad";
   params.addClassDescription(
       "Sharp-interface Rhie-Chow face-flux provider for velocity-component momentum. The primary "
       "unknowns are U components; density weighting enters through the "

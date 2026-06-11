@@ -111,14 +111,20 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
 void
 WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
+  const std::string kernel_type = "LinearFVScalarAdvection";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+
+  assignBlocks(params, _blocks);
+  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+  params.set<MooseEnum>("advected_interp_method") =
+      getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  setSlipVelocityParams(params);
+
   for (const auto & vname : _passive_scalar_names)
-    addLinearFVScalarAdvectionKernel(
-        vname,
-        prefix() + "ins_" + vname + "_advection",
-        _flow_equations_physics->rhieChowUOName(),
-        getParam<MooseEnum>("passive_scalar_advection_interpolation"),
-        _blocks,
-        [this](InputParameters & params) { setSlipVelocityParams(params); });
+  {
+    params.set<LinearVariableName>("variable") = vname;
+    getProblem().addLinearFVKernel(kernel_type, prefix() + "ins_" + vname + "_advection", params);
+  }
 }
 
 void

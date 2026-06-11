@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConservativeSharpInterfaceVOFMULESCorrector.h"
-#include "ConservativeSharpInterfaceCurvatureCalculator.h"
 
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
@@ -60,12 +59,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "interface_normal",
       "Face-oriented interface unit normal used in the explicit compression correction.");
-  MooseEnum high_order_correction_scheme("venkatakrishnan vanLeer", "vanLeer");
-  params.addParam<MooseEnum>(
-      "high_order_correction_scheme",
-      high_order_correction_scheme,
-      "Higher-order correction flux added on top of the donor/upwind base flux before bounded "
-      "limiting.");
   params.addRangeCheckedParam<unsigned int>(
       "n_alpha_corrections",
       2,
@@ -147,9 +140,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _interface_normal(getFunctor<RealVectorValue>("interface_normal")),
     _liquid_density(getFunctor<Real>("liquid_density")),
     _gas_density(getFunctor<Real>("gas_density")),
-    _high_order_correction_scheme(getParam<MooseEnum>("high_order_correction_scheme") == "vanLeer"
-                                      ? HighOrderCorrectionScheme::VanLeer
-                                      : HighOrderCorrectionScheme::Venkatakrishnan),
     _num_alpha_corrections(getParam<unsigned int>("n_alpha_corrections")),
     _num_limiter_iterations(getParam<unsigned int>("n_limiter_iterations")),
     _correction_relaxation(getParam<Real>("correction_relaxation")),
@@ -231,7 +221,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
 
   _sys_num = _alpha_var->sys().number();
   _var_num = _alpha_var->number();
-  _alpha_var->computeCellLimitedGradients(Moose::FV::GradientLimiterType::Venkatakrishnan);
 }
 
 void
@@ -446,22 +435,11 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
 
   Real high_order_alpha = 0.0;
   if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    switch (_high_order_correction_scheme)
-    {
-      case HighOrderCorrectionScheme::Venkatakrishnan:
-        high_order_alpha = venkatakrishnanFaceValue(fi, upwind_is_elem);
-        break;
-      case HighOrderCorrectionScheme::VanLeer:
-        high_order_alpha = sharedVanLeerFaceValue(fi, upwind_is_elem);
-        break;
-    }
+    high_order_alpha = sharedVanLeerFaceValue(fi, upwind_is_elem);
   else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
   {
     (void)dirichlet_bc;
-    // Keep the one-sided boundary reconstruction on open outflow even when Van Leer is selected.
-    // The Van Leer correction is only defined here for internal faces with a true downwind cell.
-    high_order_alpha =
-        upwind_is_elem ? venkatakrishnanFaceValue(fi, true) : boundaryValue(fi, face_type);
+    high_order_alpha = boundaryValue(fi, face_type);
   }
   else if (auto * inlet_outlet_bc = dynamic_cast<LinearFVInletOutletScalarBC *>(bc))
   {
@@ -477,20 +455,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
                : cellAlpha(*fi.elemInfo());
 
   return high_order_alpha;
-}
-
-Real
-ConservativeSharpInterfaceVOFMULESCorrector::venkatakrishnanFaceValue(
-    const FaceInfo & fi, const bool upwind_is_elem) const
-{
-  const auto state = Moose::currentState();
-  const auto & upwind_info = upwind_is_elem ? *fi.elemInfo() : *fi.neighborInfo();
-  const auto alpha_upwind = cellAlpha(upwind_info);
-  const auto grad_upwind = _alpha_var->limitedGradSln(
-      upwind_info, state, Moose::FV::GradientLimiterType::Venkatakrishnan);
-  const Point & upwind_centroid = upwind_is_elem ? fi.elemCentroid() : fi.neighborCentroid();
-  const Real reconstructed = alpha_upwind + grad_upwind * (fi.faceCentroid() - upwind_centroid);
-  return std::min(_max_value, std::max(_min_value, reconstructed));
 }
 
 Real
@@ -799,10 +763,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::synchronizePartitionFaceLimiters(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
-    const Real dt,
-    const Real subcycle_fraction,
-    ConservativeSharpInterfaceCurvatureCalculator * const curvature)
+ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
+                                                             const Real subcycle_fraction)
 {
   ++_subcycle_counter;
   if (!_system || !_alpha_var || dt <= 0.0)
@@ -1238,9 +1200,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(
     current_local_solution.add(*limited_update);
     current_local_solution.close();
     _system->computeGradients();
-
-    if (curvature)
-      curvature->updateCurvatureMaps(false);
 
     for (const auto i : index_range(face_corrections))
     {

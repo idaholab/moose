@@ -1,9 +1,0 @@
-#!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial clean functions
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
-
-cleanVoFCase
-
-#------------------------------------------------------------------------------

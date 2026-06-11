@@ -12,8 +12,9 @@
 #include "NavierStokesPhysicsBase.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
-class WCNSLinearFVConservativeSharpInterfaceVOFPhysics final : public NavierStokesPhysicsBase,
-                                                   public WCNSFVCoupledAdvectionPhysicsHelper
+class WCNSLinearFVConservativeSharpInterfaceVOFPhysics final
+  : public NavierStokesPhysicsBase,
+    public WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
@@ -45,7 +46,6 @@ private:
   const bool _alpha_two_term_bc_expansion;
   const MooseFunctorName _compression_factor_name;
   const MooseFunctorName _interface_normal_functor_name;
-  const MooseEnum _alpha_correction_scheme;
   const bool _use_mules_correction;
 
   const bool _create_complementary_fraction;

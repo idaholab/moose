@@ -18,7 +18,6 @@
 #include <vector>
 
 class ConservativeSharpInterfaceRhieChowMassFlux;
-class ConservativeSharpInterfaceCurvatureCalculator;
 class ConservativeSharpInterfaceVOFMULESCorrector;
 
 /**
@@ -80,7 +79,6 @@ private:
                                                              const SolverParams & solver_params);
 
   ConservativeSharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
-  ConservativeSharpInterfaceCurvatureCalculator * sharpInterfaceCurvature() const;
 
   const std::vector<SolverSystemName> _volume_fraction_system_names;
   const bool _has_volume_fraction_systems;

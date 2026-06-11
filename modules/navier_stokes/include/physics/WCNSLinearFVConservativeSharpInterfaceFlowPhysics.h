@@ -29,10 +29,6 @@ private:
   void addFunctorMaterials() override;
   void addRhieChowUserObjects() override;
 
-  void addAdditionalUserObjects() override;
-  void addCurvatureUserObject();
-  void addDynamicContactAngleFunctorMaterial();
-  void addMomentumConditioningKernels() override;
   void addMomentumReducedPressureKernels() override;
   void addOutletBC() override;
   void addWallsBC() override;
@@ -41,7 +37,6 @@ private:
   MooseFunctorName generatedBoundaryMomentumFunctorName(const BoundaryName & boundary,
                                                         unsigned int component,
                                                         const std::string & family) const;
-  bool useMomentumContinuityErrorSink() const override;
   bool shouldAddMomentumPressureKernels() const override;
   bool shouldAddMomentumReducedPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
@@ -65,8 +60,6 @@ private:
   MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
                                            unsigned int component) const override;
   bool shouldCreateGeometryFunctorMaterial() const;
-  bool shouldCreateCurvatureProducer() const;
-  bool shouldCreateDynamicContactAngleFunctorMaterial() const;
   void addVelocityBoundaryInputFunctorMaterials();
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
@@ -75,6 +68,4 @@ private:
   const bool _add_transient_projection_flux;
   const bool _add_capillary_hydrostatic_flux;
   const bool _create_geometry_functors;
-  const bool _create_curvature_producer;
-  const bool _create_dynamic_contact_angle_functor_material;
 };
