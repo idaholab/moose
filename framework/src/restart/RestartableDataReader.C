@@ -339,7 +339,9 @@ RestartableDataReader::requireRestoring() const
 }
 
 bool
-RestartableDataReader::restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid)
+RestartableDataReader::restoreDataIfAvailable(RestartableDataValue & value,
+                                              const THREAD_ID tid,
+                                              Moose::PassKey<MooseApp>)
 {
   if (!isRestoring() || value.loaded())
     return false;

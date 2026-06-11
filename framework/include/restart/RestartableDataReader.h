@@ -13,6 +13,7 @@
 
 #include "RestartableData.h"
 #include "InputStream.h"
+#include "MoosePassKey.h"
 
 #include <sstream>
 #include <utility>
@@ -63,7 +64,9 @@ public:
    *
    * @return Whether or not the value was restored
    */
-  bool restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid = 0);
+  bool restoreDataIfAvailable(RestartableDataValue & value,
+                              const THREAD_ID tid,
+                              Moose::PassKey<MooseApp>);
 
   /**
    * Clears the contents of the reader (header stream, data stream, header)

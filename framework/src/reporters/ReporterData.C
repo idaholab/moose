@@ -180,7 +180,7 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
 void
 ReporterData::restoreReporterStateIfAvailable(RestartableDataValue & state) const
 {
-  _app.restoreDataIfAvailable(state);
+  _app.restoreDataIfAvailable(state, 0, {});
 }
 
 bool

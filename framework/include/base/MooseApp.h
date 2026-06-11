@@ -63,6 +63,7 @@ class FEProblemBase;
 class InputParameterWarehouse;
 class CommandLine;
 class RelationshipManager;
+class ReporterData;
 class SolutionInvalidity;
 class MultiApp;
 #ifdef MOOSE_MFEM_ENABLED
@@ -809,9 +810,11 @@ public:
    *
    * @return Whether or not the value was restored
    */
-  bool restoreDataIfAvailable(RestartableDataValue & value, const THREAD_ID tid = 0)
+  bool restoreDataIfAvailable(RestartableDataValue & value,
+                              const THREAD_ID tid,
+                              Moose::PassKey<ReporterData>)
   {
-    return _rd_reader.restoreDataIfAvailable(value, tid);
+    return _rd_reader.restoreDataIfAvailable(value, tid, {});
   }
 
   /**
