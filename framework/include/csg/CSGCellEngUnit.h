@@ -28,10 +28,10 @@ class CSGBase; // forward declaration
  *
  * Derived classes must implement:
  *   - expandUnit(): populate _internal_base with the expanded cell and any supporting objects.
- *     Create surfaces via _internal_base->addSurface(...), any fill universes via
- *     _internal_base->createUniverse(...), and the cell via _internal_base->createCell(...) which
- * puts the cell into the root automatically. Exactly one cell must be in the root.
- *     CSGBase::expandEngUnit() joins _internal_base via joinOtherBase() afterward.
+ *      Create surfaces via _internal_base->addSurface(...), any fill universes via
+ *      _internal_base->createUniverse(...), and the cell via _internal_base->createCell(...) which
+ *      puts the cell into the root automatically. Exactly one cell must be in the root.
+ *      CSGBase::expandEngUnit() joins _internal_base via joinOtherBase() afterward.
  *   - clone(): return a deep copy of the derived class.
  *   - getAttributes(): return a map of domain-specific attribute name to value.
  */
@@ -42,15 +42,8 @@ public:
   const std::string & getName() const override { return CSGCell::getName(); }
 
   /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
-  bool operator==(const CSGCellEngUnit & other) const
-  {
-    return CSGEngUnit::operator==(other);
-  }
-  bool operator!=(const CSGCellEngUnit & other) const
-  {
-    return CSGEngUnit::operator!=(other);
-  }
-
+  bool operator==(const CSGCellEngUnit & other) const { return CSGEngUnit::operator==(other); }
+  bool operator!=(const CSGCellEngUnit & other) const { return CSGEngUnit::operator!=(other); }
   /// Delegate to CSGCell (CSGTransformationHelper)
   const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
   getTransformations() const override

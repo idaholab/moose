@@ -25,7 +25,6 @@ CSGUniverse::CSGUniverse(const std::string & name, std::vector<CSGCell *> & cell
     addCell(*cell);
 }
 
-
 void
 CSGUniverse::addCell(const CSGCell & cell)
 {
