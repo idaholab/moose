@@ -10,7 +10,7 @@ in `test/tests/controls/moose_fmu` pass these parameters as FMI start values, so
 you can see them in action in `run_fmu.py` and the `simulate_moose_fmu` helper
 inside `moose_fmu_tester.py`:
 
-- `flag`: Optional user-defined synchronization flag (see [synchronization]) that supplements the
+- `flag`: Optional user-defined synchronization flag (see [#synchronization]) that supplements the
   default `INITIAL`, `MULTIAPP_FIXED_POINT_BEGIN`, and `MULTIAPP_FIXED_POINT_END`
   signals.
 - `moose_command`: Full command string used to launch the MOOSE executable and
