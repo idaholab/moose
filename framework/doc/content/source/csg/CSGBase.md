@@ -350,7 +350,7 @@ For example, a standard `CSGCell` can have a region that is defined using a `CSG
 Because each engineering unit is technically derived from a basic CSG component (`CSGSurface`, `CSGCell`, and `CSGUniverse`), each engineering unit is stored and managed in `CSGBase` as if were an object of that type.
 For all rudimentary component types, any getter-type method for that component is also usable on the derived `CSGEngUnit` objects too.
 This means that calling methods like `getAllSurfaces()` or `getSurfaceByName` will include any `CSGSurfaceEngUnit` types in the query.
-Similarly, methods like `hasCell(name)` will return `true` if a `CSGCellEngUnit` has is called `name`.
+Similarly, methods like `hasCell(name)` will return `true` if a `CSGCellEngUnit` exists that is called `name`.
 Not all methods that alter an object are available though.
 Below is a table that shows which of the `CSGBase` non-getter-type methods are usable for each type of `CSGEngUnit`.
 
@@ -387,6 +387,7 @@ However, because each engineering unit is also considered an object of the type 
 All `CSGEngUnit` objects must have unique names (regardless of derived type units).
 No basic object or engineering unit of that derived type may have the same name.
 In other words, a `CSGSurface` and `CSGSurfaceEngUnit` cannot use the same name, but a `CSGSurface` and `CSGCellEngUnit` can be named the same.
+And furthermore, a `CSGSurfaceEngUnit` and `CSGCellEngUnit` cannot have the same name either.
 
 #### Expansion
 
