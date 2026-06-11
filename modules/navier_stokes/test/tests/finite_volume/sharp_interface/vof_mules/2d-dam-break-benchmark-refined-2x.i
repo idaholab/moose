@@ -1,8 +1,0 @@
-!include 2d-dam-break-benchmark.i
-
-[Mesh]
-  [mesh]
-    ix := '400'
-    iy := '100'
-  []
-[]

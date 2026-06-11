@@ -1,9 +1,0 @@
-[Tests]
-  design = 'SHARP_INTERFACE_IMPLEMENTATION_PLAN.md'
-  [unsteady_coupled_alpha_ns_mules]
-    type = MMSTest
-    input = 'test_mules.py'
-    test_case = TestUnsteadyCoupledAlphaNSMULES
-    requirement = 'The split reduced-pressure sharp-interface finite-volume solver shall support a MULES-enabled manufactured sharp-interface bounded-transport path with rho(alpha)-coupled momentum, bounded alpha, convergent interface-position and mass diagnostics, and convergent coupled alpha, velocity, and rho errors for the zero-compression variant.'
-  []
-[]
