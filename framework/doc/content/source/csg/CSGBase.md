@@ -421,9 +421,11 @@ For `CSGSurfaceEngUnit` types, this means that each new `CSGSurface` that is a p
 
 The `CSGBase` class provides support for creating an N-sided regular polygon, but any custom unit type can also be defined by following the information in [source/csg/CSGEngUnit.md].
 To create a `CSGNPolygonUnit`, simply provide the constructor with the number of sides and length of the apothem (center-to-flat distance).
-This polygon is an infinite region along the z-axis assumed to be centered at the origin with the right-most edge parallel to the y-axis (shown below), but can be modified with the application of [transformations](#transformations).
+This polygon is an infinite region along the z-axis assumed to be centered at the origin with the right-most edge parallel to the y-axis (shown in [!ref](fig:n-polygon-orientation)), but can be modified with the application of [transformations](#transformations).
 
-INSERT EXAMPLE POLYGON IMAGES TO DEMONSTRATE ALIGNMENT/ORIENTATION
+!media large_media/csg/n-sided-poly-orientation.png
+       id=fig:n-polygon-orientation
+       caption=Depiction of the assumed orientation of N-sided polygon engineering units.
 
 A `CSGNPolygonUnit` can then be used as a `CSGSurface` for any cell region definition and the "negative" half-space is considered to be the interior of the polygon.
 If expanded, the unit will be replaced with the interior region of a polygon defined by $N$ planes corresponding to the edges of the polygon.
