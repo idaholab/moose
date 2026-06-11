@@ -42,7 +42,7 @@ class MeshBase;
 class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
-  struct FaceFluxConsistencyAudit
+  struct FaceFluxConsistencySummary
   {
     Real l2_norm = 0.0;
     Real internal_l2_norm = 0.0;
@@ -55,22 +55,6 @@ public:
     dof_id_type worst_face_id = 0;
     Point worst_face_centroid;
     RealVectorValue worst_face_normal;
-  };
-
-  struct MaxCourantAudit
-  {
-    Real max_courant = 0.0;
-    bool has_worst_cell = false;
-    dof_id_type worst_cell_id = DofObject::invalid_id;
-    Point worst_cell_centroid;
-    Real worst_cell_volume = 0.0;
-    Real worst_cell_flux_sum = 0.0;
-    bool has_worst_face = false;
-    dof_id_type worst_face_id = DofObject::invalid_id;
-    Point worst_face_centroid;
-    RealVectorValue worst_face_normal;
-    Real worst_face_volumetric_flux = 0.0;
-    Real worst_face_integrated_flux = 0.0;
   };
 
   /**
@@ -164,13 +148,11 @@ public:
   Real storedPressureEquationFlux(const FaceInfo & fi) const;
   /// Maximum face-flux Courant number over active flow cells for the supplied timestep.
   virtual Real maxCourant(const Real dt) const;
-  /// Detailed audit of the cell/face responsible for the maximum face-flux Courant number.
-  virtual MaxCourantAudit maxCourantAudit(const Real dt) const;
-  /// Access the active flow faces used by this Rhie-Chow object for audit postprocessors.
-  const std::vector<const FaceInfo *> & flowFacesForAudit() const { return _flow_face_info; }
+  /// Access the active flow faces used by this Rhie-Chow object.
+  const std::vector<const FaceInfo *> & flowFaces() const { return _flow_face_info; }
   /// Compare the stored volumetric face fluxes against the flux implied by the current
   /// cell/boundary velocity field.
-  FaceFluxConsistencyAudit faceFluxConsistencyAudit() const;
+  FaceFluxConsistencySummary faceFluxConsistencySummary() const;
   /// Update the values of the face velocities in the containers
   virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
@@ -207,7 +189,7 @@ public:
   /// Whether the predictor operator excludes explicit pressure/body-force terms.
   bool splitMomentumPredictorOperator() const { return _split_momentum_predictor_operator; }
   /// Update boundary pressure gradients from the current predictor and boundary velocity state.
-  void updatePressureBoundaryNormalGradients(const bool apply_reference_adjustment);
+  void updatePressureBoundaryNormalGradients(const bool apply_pressure_flux_adjustment);
   /// Refresh boundary-face velocity values from the active FV velocity BC objects.
   virtual void updateVelocityBoundaryState();
 
@@ -291,10 +273,10 @@ protected:
   /// Whether the cached predictor-operator state is complete and can be consumed.
   bool canUseCachedMomentumPredictorOperator();
 
-  /// Finalize all streamed component operators as one vector UEqn-like object.
+  /// Finalize all streamed component operators as one vector momentum-predictor object.
   void finalizeCachedMomentumPredictorOperators();
 
-  /// Access the UEqn-like cached predictor operator for a component.
+  /// Access the cached momentum-predictor operator for a component.
   const MomentumPredictorOperator *
   cachedMomentumPredictorOperator(const unsigned int system_i) const;
 
@@ -358,8 +340,7 @@ protected:
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_mass_flux;
 
   /**
-   * Explicit face-force contribution entering the pressure corrector, i.e. the local analog of
-   * reference solver's phig term.
+   * Explicit face-force contribution entering the pressure corrector.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _phig_flux;
 
@@ -402,8 +383,8 @@ protected:
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_equation_flux;
 
   /**
-   * Cached boundary-normal pressure gradient used to emulate reference solver's constrainPressure /
-   * fixedFluxPressure patch update against the current predictor flux.
+   * Cached boundary-normal pressure gradient used by fixed-flux pressure boundary updates against
+   * the current predictor flux.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>
       _pressure_boundary_normal_gradient;
@@ -436,7 +417,7 @@ protected:
   /// Whether the momentum predictor operator already excludes explicit pressure/body-force terms.
   const bool _split_momentum_predictor_operator;
 
-  /// UEqn-like predictor operators for each momentum component.
+  /// Predictor operators for each momentum component.
   std::vector<std::unique_ptr<MomentumPredictorOperator>> _momentum_predictor_operators;
 
   /// Indicates whether the cached predictor operator has been populated for every component.

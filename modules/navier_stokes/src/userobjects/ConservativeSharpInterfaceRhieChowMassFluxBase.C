@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
 
 #include "LinearFVAdvectionDiffusionBC.h"
@@ -66,9 +75,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       "pressure_writeback_face_ainv_relative_tolerance",
       1e-4,
       "pressure_writeback_face_ainv_relative_tolerance>=0",
-      "Relative cutoff used when normalizing the pressure-correction face flux for the "
-      "reference-solver-style velocity writeback. Faces whose pressure-space normal Ainv falls "
-      "below "
+      "Relative cutoff used when normalizing the pressure-correction face flux for velocity "
+      "writeback. Faces whose pressure-space normal Ainv falls below "
       "this fraction of the active-face maximum are treated as degenerate and do not "
       "participate in the reconstructed cell-velocity correction.");
   MooseEnum density_sn_grad_scheme("orthogonal corrected limited", "corrected");
@@ -902,11 +910,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
     const auto state = pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
     _pressure_equation_volumetric_flux[fi->id()] = state.pressure_equation_phi;
     _pressure_correction_phi[fi->id()] = state.pressure_writeback_phi;
-    // Sharp-interface pressure-correction contract:
-    //   phi = phiHbyA + pEqn.flux()
-    // This face flux is authoritative for continuity/transport. The reconstructed
-    // cell velocity below is only the cell-centered U writeback branch and is not
-    // projected back to overwrite this face flux.
+    // Sharp-interface pressure-correction contract: the corrected transport flux is the
+    // predictor flux plus the pressure-equation flux. This face flux is authoritative for
+    // continuity/transport. The reconstructed cell velocity below is only the cell-centered
+    // velocity writeback branch and is not projected back to overwrite this face flux.
     _corrected_face_phi[fi->id()] = state.corrected_transport_phi;
     _pressure_coupled_cell_reconstruction_scalar[fi->id()] = state.writeback_reconstruction_scalar;
   }
@@ -1479,8 +1486,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
         _p_diffusion_kernel->computeNeighborMatrixContribution();
     const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
 
-    // The sharp pressure projection stores the solved pEqn.flux including face area. Transport
-    // converts back to a normal flux density when publishing corrected_face_phi.
+    // The sharp pressure projection stores the solved pressure-equation flux including face area.
+    // Transport converts back to a normal flux density when publishing corrected_face_phi.
     return p_neighbor_value * neighbor_matrix_contribution +
            p_elem_value * elem_matrix_contribution - elem_rhs_contribution;
   }
@@ -1577,8 +1584,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
   const Moose::FaceArg boundary_face{
       fi, Moose::FV::LimiterType::CentralDifference, true, false, fluid_elem, nullptr};
 
-  // On uncoupled boundary patches reference solver's explicit non-orthogonal correction
-  // is zero and the operative snGrad comes from the boundary patch field.
+  // On uncoupled boundary patches the explicit non-orthogonal correction is zero and the
+  // operative snGrad comes from the boundary patch field.
   return MetaPhysicL::raw_value(_rho.gradient(boundary_face, time_arg)) * fi->normal();
 }
 
@@ -1699,7 +1706,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::
 
 void
 ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunctors(
-    const bool with_updated_pressure, const bool verbose)
+    const bool with_updated_pressure, const bool /*verbose*/)
 {
   _pressure_coupled_velocity_correction_valid = false;
   _pressure_predictor_face_state_valid = false;
@@ -1844,19 +1851,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
             ? transportMassFluxDensityFromVolumetricPhi(
                   fi, (pressure_predictor_base_flux + phig_flux) / face_measure, time_arg)
             : 0.0;
-
-    if (verbose)
-    {
-      _console << "Sharp-interface velocity predictor on face " << fi->id()
-               << ": HbyA_flux=" << predictor_operator_volumetric_flux
-               << ", transient_source_flux=" << _transient_projection_flux[fi->id()]
-               << ", capillary_hydrostatic_source_flux=" << _capillary_hydrostatic_flux[fi->id()]
-               << ", phig_flux=" << _phig_flux[fi->id()]
-               << ", pressure_predictor_base_flux=" << pressure_predictor_base_flux
-               << ", internal_pressure_predictor_base_flux="
-               << _pressure_predictor_base_flux[fi->id()]
-               << ", phiHbyA_flux=" << _phiHbyA_flux[fi->id()] << std::endl;
-    }
   }
 
   _pressure_predictor_face_state_valid = true;
@@ -2006,12 +2000,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCel
     if (face_measure <= 0.0)
       continue;
 
-    // reference solver fvc::reconstruct uses
-    //   inv(surfaceSum(SfHat*Sf)) & surfaceSum(SfHat*ssf)
-    // with SfHat = Sf/|Sf|. In the local cell frame, this becomes a sum over
-    // face measures of n_out \otimes n_out and n_out * ssf_cell, where the
-    // scalar face field is sign-adjusted onto the current cell's outward
-    // normal convention on internal faces.
+    // Reconstruct a vector from face-normal scalars with a least-squares form built from the
+    // local cell face normals. The scalar face field is sign-adjusted onto the current cell's
+    // outward normal convention on internal faces.
     const Real orientation = fi_loc->elemPtr() == elem ? 1.0 : -1.0;
     const RealVectorValue outward_normal = orientation * fi_loc->normal();
     const Real psi_f = orientation * scalar_field(makeCenteredFaceArg(fi_loc), time_arg);
@@ -2054,9 +2045,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCel
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::
-    reconstructReferenceStylePressureCoupledCellVelocityDelta(
-        const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructBasePressureCoupledCellVelocityDelta(
+    const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
   if (!elem_info || !_pressure_coupled_velocity_correction_valid)
     return RealVectorValue();
@@ -2086,7 +2076,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVe
       !_apply_pressure_velocity_writeback)
     return RealVectorValue();
 
-  return reconstructReferenceStylePressureCoupledCellVelocityDelta(elem_info, time_arg);
+  return reconstructBasePressureCoupledCellVelocityDelta(elem_info, time_arg);
 }
 
 void

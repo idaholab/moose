@@ -14,7 +14,7 @@
 class ElemInfo;
 
 /**
- * Linear-FV analog of reference solver's pressureInletOutletVelocity boundary condition.
+ * Linear-FV pressure inlet/outlet velocity boundary condition.
  *
  * On outflow this behaves like a zero-gradient / extrapolated velocity outlet.
  * On backflow it switches to a prescribed boundary value instead of blindly

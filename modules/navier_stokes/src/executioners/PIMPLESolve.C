@@ -40,11 +40,10 @@ PIMPLESolve::validParams()
       "num_pressure_nonorthogonal_correctors",
       0,
       "Number of additional non-final pressure equation solves inside each pressure-corrector "
-      "stage. This follows reference-solver nNonOrthogonalCorrectors convention: 0 means one final "
-      "pressure solve, 1 means one non-final solve followed by one final solve, etc.");
-  params.addParam<unsigned int>(
-      "n_nonorthogonal_correctors",
-      "Reference-solver-style alias for num_pressure_nonorthogonal_correctors.");
+      "stage. A value of 0 means one final pressure solve, 1 means one non-final solve followed "
+      "by one final solve, etc.");
+  params.addParam<unsigned int>("n_nonorthogonal_correctors",
+                                "Alias for num_pressure_nonorthogonal_correctors.");
 
   return params;
 }

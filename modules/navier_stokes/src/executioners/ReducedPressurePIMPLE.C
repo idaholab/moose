@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ReducedPressurePIMPLE.h"
 
 #include "FEProblem.h"
@@ -46,7 +55,6 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
   if (_reduced_pimple_solve.adjustMomentumPressureTimeStepEnabled() && dt_to_take > 0.0)
   {
     const Real courant = _reduced_pimple_solve.momentumPressureCourant(dt_to_take);
-    const auto courant_audit = _reduced_pimple_solve.momentumPressureCourantAudit(dt_to_take);
     const Real required_dt = _reduced_pimple_solve.constrainedMomentumPressureDT(dt_to_take);
     const Real adjusted_dt = std::max(required_dt, _dtmin);
 
@@ -54,23 +62,9 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
     {
       _console << name() << ": reducing dt from " << dt_to_take << " to " << adjusted_dt
                << " to keep momentum/pressure CFL <= "
-               << _reduced_pimple_solve.momentumPressureMaxCourant() << " (current CFL="
-               << courant;
+               << _reduced_pimple_solve.momentumPressureMaxCourant() << " (current CFL=" << courant;
       if (required_dt < _dtmin)
         _console << ", requested dt " << required_dt << " is below dtmin=" << _dtmin;
-      if (courant_audit.has_worst_cell)
-      {
-        _console << ", worst cell id=" << courant_audit.worst_cell_id
-                 << " centroid=" << courant_audit.worst_cell_centroid
-                 << " volume=" << courant_audit.worst_cell_volume
-                 << " flux_sum=" << courant_audit.worst_cell_flux_sum;
-        if (courant_audit.has_worst_face)
-          _console << ", worst face id=" << courant_audit.worst_face_id
-                   << " face_centroid=" << courant_audit.worst_face_centroid
-                   << " face_normal=" << courant_audit.worst_face_normal
-                   << " face_phi=" << courant_audit.worst_face_volumetric_flux
-                   << " face_flux=" << courant_audit.worst_face_integrated_flux;
-      }
       _console << ")" << std::endl;
       dt_to_take = adjusted_dt;
     }

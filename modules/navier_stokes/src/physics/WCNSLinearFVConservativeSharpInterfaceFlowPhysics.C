@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "WCNSLinearFVConservativeSharpInterfaceFlowPhysics.h"
 
 #include "GeneralUserObject.h"
@@ -83,8 +92,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   InputParameters params = WCNSLinearFVFlowPhysicsBase::validParams();
 
   params.addClassDescription("Define a linear-FV segregated sharp-interface flow solve using "
-                             "reference-solver-style velocity "
-                             "components as the primary momentum unknowns.");
+                             "velocity components as the primary momentum unknowns.");
   params.set<std::vector<std::string>>("velocity_variable") =
       std::vector<std::string>(NS::velocity_vector, NS::velocity_vector + 3);
 
@@ -241,17 +249,15 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "curvature_delta_n_scale",
       1e-8,
       "Scale factor used by the curvature producer when curvature_delta_n_mode = "
-      "mesh_scaled_reference. The effective delta_n becomes scale / cbrt(average cell volume), "
-      "matching reference solver's default interfaceProperties setup.");
+      "mesh_scaled_reference. The effective delta_n becomes scale / cbrt(average cell volume).");
   params.addParam<Real>(
       "curvature_delta_n_fixed_value",
       1e-8,
       "Fixed delta_n value used by the curvature producer when curvature_delta_n_mode = fixed.");
   params.addParam<bool>("use_reference_simple_curvature",
                         true,
-                        "Use the baseline reference solver curvature expression K = -div(nHatf). "
-                        "This should remain true "
-                        "to match the shipped solver path.");
+                        "Use the baseline simple curvature expression K = -div(nHatf). This "
+                        "should remain true to match the shipped solver path.");
   params.addParam<unsigned int>(
       "n_alpha_smooth_curvature",
       0,
@@ -282,11 +288,10 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "Optional face-aware functor returning wall contact angle in degrees. When supplied, it "
       "overrides static_contact_angles_degrees and disables automatic creation of the dynamic "
       "wall-contact-angle functor material.");
-  params.addParam<Real>(
-      "contact_angle_small_det",
-      1e-12,
-      "Positive floor used when the reference-solver-style wall-contact-angle determinant 1 - "
-      "(nHat.nWall)^2 becomes very small.");
+  params.addParam<Real>("contact_angle_small_det",
+                        1e-12,
+                        "Positive floor used when the wall-contact-angle determinant 1 - "
+                        "(nHat.nWall)^2 becomes very small.");
 
   params.addParam<bool>(
       "create_dynamic_contact_angle_functor_material",
@@ -347,12 +352,10 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "geometry_alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>(
       "geometry_alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
-  params.addParam<Real>("near_interface_lower",
-                        0.01,
-                        "Lower threshold for the reference-solver-like near-interface indicator.");
-  params.addParam<Real>("near_interface_upper",
-                        0.99,
-                        "Upper threshold for the reference-solver-like near-interface indicator.");
+  params.addParam<Real>(
+      "near_interface_lower", 0.01, "Lower threshold for the near-interface indicator.");
+  params.addParam<Real>(
+      "near_interface_upper", 0.99, "Upper threshold for the near-interface indicator.");
   params.addParamNamesToGroup("pressure_formulation add_transient_projection_flux "
                               "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
                               "transient_projection_face_acceleration "

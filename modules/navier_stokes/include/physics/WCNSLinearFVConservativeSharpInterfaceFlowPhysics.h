@@ -1,10 +1,19 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "WCNSLinearFVFlowPhysicsBase.h"
 #include "NS.h"
 
 /**
- * Linear-FV segregated sharp-interface flow physics for the reference-parity U path.
+ * Linear-FV segregated sharp-interface flow physics for velocity-component momentum unknowns.
  *
  * This class reuses the common segregated Linear FV flow setup and overrides the sharp-interface
  * pieces needed for large-density-ratio conservative coupling.

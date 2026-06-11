@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "FunctorMaterial.h"
@@ -10,8 +19,8 @@
 /**
  * Face-aware dynamic wall-contact-angle producer for sharp-interface FV work.
  *
- * This material is designed to mirror reference solver's dynamicAlphaContactAngle /
- * alphaContactAngle theta(U, nHat) path as closely as practical inside MOOSE.
+ * This material evaluates a dynamic contact-angle theta(U, nHat) law for sharp-interface
+ * transport.
  * It consumes the provisional face unit normal produced by the curvature
  * calculator *before* wall contact-angle correction, so the dynamic model sees
  * the same face-smoothed alpha-gradient / deltaN regularization path used by

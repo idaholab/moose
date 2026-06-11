@@ -19,7 +19,7 @@ LinearFVContinuityErrorSink::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription(
-      "Linear FV kernel that mimics the reference-solver-style -Sp(a, phi) operator by treating the "
+      "Linear FV kernel that adds a diagonalized -Sp(a, phi) operator by treating the "
       "sink contribution implicitly and the opposite-sign source contribution explicitly.");
   params.addRequiredParam<MooseFunctorName>(
       "coeff",

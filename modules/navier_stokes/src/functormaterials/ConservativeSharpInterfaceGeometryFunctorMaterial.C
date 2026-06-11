@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ConservativeSharpInterfaceGeometryFunctorMaterial.h"
 
 #include "MooseFunctorArguments.h"
@@ -32,21 +41,21 @@ geometrySafeMagnitude(const RealVectorValue & v)
 
 template <typename R, typename T>
 RealVectorValue
-geometryEffectiveFaceAlphaGradient(const Moose::Functor<Real> & volume_fraction,
-                                   const Moose::Functor<RealVectorValue> * face_smoothed_alpha_gradient,
-                                   const Moose::Functor<RealVectorValue> * precomputed_interface_unit_normal,
-                                   const R & r,
-                                   const T & t)
+geometryEffectiveFaceAlphaGradient(
+    const Moose::Functor<Real> & volume_fraction,
+    const Moose::Functor<RealVectorValue> * face_smoothed_alpha_gradient,
+    const Moose::Functor<RealVectorValue> * precomputed_interface_unit_normal,
+    const R & r,
+    const T & t)
 {
-  const auto raw_grad_alpha =
-      [&]() -> RealVectorValue
-      {
-        if constexpr (std::is_same_v<std::decay_t<R>, Moose::FaceArg>)
-          if (face_smoothed_alpha_gradient)
-            return (*face_smoothed_alpha_gradient)(r, t);
+  const auto raw_grad_alpha = [&]() -> RealVectorValue
+  {
+    if constexpr (std::is_same_v<std::decay_t<R>, Moose::FaceArg>)
+      if (face_smoothed_alpha_gradient)
+        return (*face_smoothed_alpha_gradient)(r, t);
 
-        return volume_fraction.gradient(r, t);
-      }();
+    return volume_fraction.gradient(r, t);
+  }();
   const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(raw_grad_alpha));
   RealVectorValue effective_grad_alpha = MetaPhysicL::raw_value(raw_grad_alpha);
   if constexpr (std::is_same_v<std::decay_t<R>, Moose::FaceArg>)
@@ -99,7 +108,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
       "face_smoothed_alpha_gradient_functor",
       "",
       "Optional face-smoothed alpha-gradient functor produced by the curvature calculator. "
-      "When supplied, it is used in the capillary force path so the same reference-solver-like "
+      "When supplied, it is used in the capillary force path so the same face-smoothed "
       "smoothing is used in both curvature and surface-tension evaluation.");
   params.addParam<MooseFunctorName>(
       "interface_unit_normal_functor",
@@ -124,47 +133,37 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   params.addParam<Real>("alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>("alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
   params.addParam<Real>(
-      "near_interface_lower",
-      0.01,
-      "Lower threshold used for the reference-solver-like near-interface indicator.");
+      "near_interface_lower", 0.01, "Lower threshold used for the near-interface indicator.");
   params.addParam<Real>(
-      "near_interface_upper",
-      0.99,
-      "Upper threshold used for the reference-solver-like near-interface indicator.");
-  params.addParam<Real>(
-      "minimum_density",
-      1e-12,
-      "Floor used when dividing by density in acceleration-like face functors.");
+      "near_interface_upper", 0.99, "Upper threshold used for the near-interface indicator.");
+  params.addParam<Real>("minimum_density",
+                        1e-12,
+                        "Floor used when dividing by density in acceleration-like face functors.");
 
   params.addParam<Real>(
-      "delta_n",
-      1e-8,
-      "Regularization added to |grad(alpha)| when constructing unit normals. This is the "
-      "direct analog of reference solver's deltaN regularization term.");
+      "delta_n", 1e-8, "Regularization added to |grad(alpha)| when constructing unit normals.");
 
-  params.addParam<MooseFunctorName>("delta_n_name", "delta_n", "Output name for the delta_n functor.");
+  params.addParam<MooseFunctorName>(
+      "delta_n_name", "delta_n", "Output name for the delta_n functor.");
   params.addParam<MooseFunctorName>(
       "near_interface_name", "near_interface", "Output name for the near-interface indicator.");
   params.addParam<MooseFunctorName>(
-      "alpha_gradient_name", "alpha_gradient", "Output name for the cell gradient of the volume-fraction functor.");
-  params.addParam<MooseFunctorName>(
-      "face_smoothed_alpha_gradient_name",
-      "face_smoothed_alpha_gradient",
-      "Output name for the reference-solver-like face-smoothed alpha-gradient functor.");
+      "alpha_gradient_name",
+      "alpha_gradient",
+      "Output name for the cell gradient of the volume-fraction functor.");
+  params.addParam<MooseFunctorName>("face_smoothed_alpha_gradient_name",
+                                    "face_smoothed_alpha_gradient",
+                                    "Output name for the face-smoothed alpha-gradient functor.");
   params.addParam<MooseFunctorName>(
       "density_gradient_name", "density_gradient", "Output name for the density gradient functor.");
+  params.addParam<MooseFunctorName>("interface_unit_normal_name",
+                                    "interface_unit_normal_face",
+                                    "Output name for the face-oriented unit normal functor.");
   params.addParam<MooseFunctorName>(
-      "interface_unit_normal_name",
-      "interface_unit_normal_face",
-      "Output name for the face-oriented unit normal functor.");
-  params.addParam<MooseFunctorName>(
-      "sigma_k_name",
-      "sigma_k",
-      "Output name for the sigma*kappa functor.");
-  params.addParam<MooseFunctorName>(
-      "reduced_pressure_head_name",
-      "reduced_pressure_head",
-      "Output name for the reduced-pressure head gh functor.");
+      "sigma_k_name", "sigma_k", "Output name for the sigma*kappa functor.");
+  params.addParam<MooseFunctorName>("reduced_pressure_head_name",
+                                    "reduced_pressure_head",
+                                    "Output name for the reduced-pressure head gh functor.");
   params.addParam<MooseFunctorName>(
       "surface_tension_face_acceleration_name",
       "surface_tension_face_acceleration",
@@ -209,8 +208,8 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   return params;
 }
 
-ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeometryFunctorMaterial(
-    const InputParameters & parameters)
+ConservativeSharpInterfaceGeometryFunctorMaterial::
+    ConservativeSharpInterfaceGeometryFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _volume_fraction(getFunctor<Real>("volume_fraction_functor")),
     _density(getFunctor<Real>("density_functor")),
@@ -305,7 +304,8 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
 
   addFunctorProperty<RealVectorValue>(
       _alpha_gradient_name,
-      [this](const auto & r, const auto & t) -> RealVectorValue { return _volume_fraction.gradient(r, t); },
+      [this](const auto & r, const auto & t) -> RealVectorValue
+      { return _volume_fraction.gradient(r, t); },
       clearance_schedule);
 
   addFunctorProperty<RealVectorValue>(
@@ -332,18 +332,17 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
           if (_precomputed_interface_unit_normal)
             return (*_precomputed_interface_unit_normal)(r, t);
 
-        const auto grad_alpha =
-            [&]() -> RealVectorValue
-            {
-              if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
-                if (_face_smoothed_alpha_gradient)
-                  return (*_face_smoothed_alpha_gradient)(r, t);
+        const auto grad_alpha = [&]() -> RealVectorValue
+        {
+          if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
+            if (_face_smoothed_alpha_gradient)
+              return (*_face_smoothed_alpha_gradient)(r, t);
 
-              return _volume_fraction.gradient(r, t);
-            }();
+          return _volume_fraction.gradient(r, t);
+        }();
         const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(grad_alpha));
 
-        // This mirrors the reference solver regularization nHat = grad(alpha) / (|grad(alpha)| + deltaN).
+        // Regularize nHat = grad(alpha) / (|grad(alpha)| + deltaN).
         // When the curvature producer is active, boundary contact-angle correction has already
         // been applied to the supplied face-unit-normal functor before this fallback path is used.
         return grad_alpha / (mag_grad_alpha + _delta_n);
@@ -378,8 +377,12 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
 
         const Real rho = geometrySafeDensity(_density(r, t), _minimum_density);
         const Real sigma_k = _surface_tension(r, t) * (*_curvature)(r, t);
-        const RealVectorValue effective_grad_alpha = geometryEffectiveFaceAlphaGradient(
-            _volume_fraction, _face_smoothed_alpha_gradient, _precomputed_interface_unit_normal, r, t);
+        const RealVectorValue effective_grad_alpha =
+            geometryEffectiveFaceAlphaGradient(_volume_fraction,
+                                               _face_smoothed_alpha_gradient,
+                                               _precomputed_interface_unit_normal,
+                                               r,
+                                               t);
 
         // Force-per-mass form so the Rhie-Chow object can multiply by rho_f and raw A^{-1}
         // exactly once when constructing the pressure-predictor face flux.
@@ -415,7 +418,8 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
             return 0.0;
 
           const Real sigma_k = _surface_tension(r, t) * (*_curvature)(r, t);
-          const RealVectorValue grad_alpha = MetaPhysicL::raw_value(_volume_fraction.gradient(r, t));
+          const RealVectorValue grad_alpha =
+              MetaPhysicL::raw_value(_volume_fraction.gradient(r, t));
 
           // Force-per-volume form so the reduced-pressure momentum predictor carries the same
           // capillary term that the face-based pressure-correction path uses in phig.
@@ -436,12 +440,12 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
         {
           if constexpr (std::is_same_v<std::decay_t<decltype(r)>, Moose::FaceArg>)
           {
-            const RealVectorValue effective_grad_alpha = geometryEffectiveFaceAlphaGradient(
-                _volume_fraction,
-                _face_smoothed_alpha_gradient,
-                _precomputed_interface_unit_normal,
-                r,
-                t);
+            const RealVectorValue effective_grad_alpha =
+                geometryEffectiveFaceAlphaGradient(_volume_fraction,
+                                                   _face_smoothed_alpha_gradient,
+                                                   _precomputed_interface_unit_normal,
+                                                   r,
+                                                   t);
             const Real rho_l_elem = (*_liquid_density)(r.makeElem(), t);
             const Real rho_g_elem = (*_gas_density)(r.makeElem(), t);
             Real rho_l = rho_l_elem;
@@ -460,9 +464,8 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::ConservativeSharpInterfaceGeo
         if (!used_interface_aware_face_gradient)
           grad_rho = MetaPhysicL::raw_value(_density.gradient(r, t));
 
-        // This maps directly to the reference-solver-style reduced-pressure face predictor term
-        // - gh_f * snGrad(rho) after the Rhie-Chow object projects onto the face normal and
-        // multiplies by rho_f * A^{-1}_{raw,f}.
+        // Build the reduced-pressure face predictor term -gh_f * snGrad(rho) before the
+        // Rhie-Chow object projects onto the face normal and multiplies by rho_f * A^{-1}_{raw,f}.
         return -(gh / rho) * grad_rho;
       },
       clearance_schedule);

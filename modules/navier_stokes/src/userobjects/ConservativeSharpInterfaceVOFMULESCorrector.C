@@ -64,7 +64,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
   params.addParam<MooseEnum>(
       "high_order_correction_scheme",
       high_order_correction_scheme,
-      "Higher-order correction flux added on top of the donor/upwind base flux before MULES-style "
+      "Higher-order correction flux added on top of the donor/upwind base flux before bounded "
       "limiting.");
   params.addRangeCheckedParam<unsigned int>(
       "n_alpha_corrections",
@@ -92,11 +92,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       true,
       "Whether to reuse the previous limited correction flux as the initial correction guess on "
       "the next alpha solve.");
-  params.addParam<bool>(
-      "use_cell_summed_mules_limiter",
-      true,
-      "Use a classic cell-summed MULES-style limiter based on per-cell positive/negative "
-      "correction totals instead of sequential face-budget depletion.");
+  params.addParam<bool>("use_cell_summed_mules_limiter",
+                        true,
+                        "Use a cell-summed limiter based on per-cell positive/negative "
+                        "correction totals instead of sequential face-budget depletion.");
   params.addParam<bool>(
       "use_local_mules_bounds",
       true,
@@ -289,8 +288,7 @@ void
 ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
 {
   _subcycle_counter = 0;
-  // Mirror reference solver's createAlphaFluxes.H lifecycle: clear the working
-  // current-solve alpha/rhoPhi accumulators, but keep the previous limited
+  // Clear the working current-solve alpha/rhoPhi accumulators, but keep the previous limited
   // correction flux stored for the next alpha solve.
   for (auto & pair : _alpha_phi_bd)
     pair.second = 0.0;

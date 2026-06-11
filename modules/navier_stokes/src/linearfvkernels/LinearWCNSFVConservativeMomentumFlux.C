@@ -22,10 +22,9 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
 {
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription(
-      "Represents the matrix and right hand side contributions of the "
-      "stress and advection terms of an reference-solver-style velocity momentum "
-      "equation. The historical object name is retained for the single "
-      "sharp-interface parity path.");
+      "Represents the matrix and right hand side contributions of the stress and advection terms "
+      "of a velocity-component momentum equation. The historical object name is retained for the "
+      "single sharp-interface pressure-coupled path.");
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
@@ -41,7 +40,7 @@ LinearWCNSFVConservativeMomentumFlux::validParams()
       "require_mass_flux_functor",
       true,
       "Require mass_flux_functor instead of silently falling back to the live Rhie-Chow mass flux. "
-      "The conservative sharp-interface parity path should consume the alpha-owned rhoPhi flux.");
+      "The conservative sharp-interface path should consume the alpha-owned rhoPhi flux.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The diffusion coefficient.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -96,7 +95,7 @@ LinearWCNSFVConservativeMomentumFlux::LinearWCNSFVConservativeMomentumFlux(
   if (_require_mass_flux_functor && !_mass_flux_functor)
     paramError("mass_flux_functor",
                "LinearWCNSFVConservativeMomentumFlux requires an alpha-owned rhoPhi mass-flux "
-               "functor. This avoids falling back to rho_f * phi in the sharp-interface parity "
+               "functor. This avoids falling back to rho_f * phi in the sharp-interface "
                "path.");
 
   // We only need gradients if the nonorthogonal correction is enabled or when we request the

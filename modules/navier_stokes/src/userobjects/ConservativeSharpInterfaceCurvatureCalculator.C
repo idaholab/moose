@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ConservativeSharpInterfaceCurvatureCalculator.h"
 
 #include "FVUtils.h"
@@ -68,23 +77,22 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params += NonADFunctorInterface::validParams();
   params += BlockRestrictable::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_LINEAR};
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC |
-                                    Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters & obj_params, InputParameters & rm_params)
-                                {
-                                  rm_params.set<unsigned short>("layers") = 2;
-                                  rm_params.set<bool>("use_point_neighbors") = false;
-                                  rm_params.set<bool>("attach_geometric_early") = true;
-                                  rm_params.set<bool>("use_displaced_mesh") =
-                                      obj_params.get<bool>("use_displaced_mesh");
-                                });
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<unsigned short>("layers") = 2;
+        rm_params.set<bool>("use_point_neighbors") = false;
+        rm_params.set<bool>("attach_geometric_early") = true;
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+      });
 
   params.addClassDescription(
-      "Produce reference-solver-like face-smoothed interface normals and cell curvature from a volume "
-      "fraction functor for sharp-interface linear-FV coupling. The implementation mirrors the "
-      "shipped interfaceProperties path K = -div(nHatf), with optional curvature-input alpha "
+      "Produce face-smoothed interface normals and cell curvature from a volume fraction functor "
+      "for sharp-interface linear-FV coupling. The implementation uses the shipped "
+      "K = -div(nHatf) path, with optional curvature-input alpha "
       "smoothing and wall-contact-angle correction.");
 
   params.addRequiredParam<MooseFunctorName>(
@@ -95,21 +103,19 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params.addParam<MooseEnum>(
       "delta_n_mode",
       delta_n_mode,
-      "How the unit-normal regularization delta_n is chosen. 'mesh_scaled_reference' mirrors "
-      "reference solver's deltaN = 1e-8 / cbrt(average(cellVolume)).");
+      "How the unit-normal regularization delta_n is chosen. 'mesh_scaled_reference' uses "
+      "delta_n = 1e-8 / cbrt(average(cellVolume)).");
   params.addParam<Real>(
       "delta_n_scale",
       1e-8,
       "Scale factor used when delta_n_mode = mesh_scaled_reference. The effective value becomes "
-      "delta_n_scale / cbrt(average cell volume), matching reference solver's default "
-      "interfaceProperties behavior.");
-  params.addParam<Real>(
-      "delta_n_fixed_value", 1e-8, "Fixed value used when delta_n_mode = fixed.");
+      "delta_n_scale / cbrt(average cell volume).");
+  params.addParam<Real>("delta_n_fixed_value", 1e-8, "Fixed value used when delta_n_mode = fixed.");
 
   params.addParam<bool>(
       "use_reference_simple_curvature",
       true,
-      "Use the baseline reference solver simple curvature expression K = -div(nHatf). The optional "
+      "Use the baseline simple curvature expression K = -div(nHatf). The optional "
       "higher-order correction path remains intentionally unsupported in this step.");
 
   params.addParam<unsigned int>(
@@ -122,7 +128,7 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "contact_angle_boundaries",
       {},
-      "Boundary names or IDs on which the reference-solver-like wall contact-angle correction should be "
+      "Boundary names or IDs on which the wall contact-angle correction should be "
       "applied.");
   params.addParam<std::vector<Real>>(
       "static_contact_angles_degrees",
@@ -134,44 +140,39 @@ ConservativeSharpInterfaceCurvatureCalculator::validParams()
       "",
       "Optional face-aware functor returning wall contact angle in degrees. When supplied, it "
       "overrides static_contact_angles_degrees on the selected boundaries.");
-  params.addParam<Real>(
-      "contact_angle_small_det",
-      1e-12,
-      "Positive floor used when the reference-solver-style wall-contact-angle determinant 1 - "
-      "(nHat.nWall)^2 becomes very small.");
+  params.addParam<Real>("contact_angle_small_det",
+                        1e-12,
+                        "Positive floor used when the wall-contact-angle determinant 1 - "
+                        "(nHat.nWall)^2 becomes very small.");
 
-  params.addParam<MooseFunctorName>(
-      "face_smoothed_alpha_gradient_name",
-      "curvature_face_smoothed_alpha_gradient",
-      "Output name for the reference-solver-like face-smoothed alpha gradient functor.");
+  params.addParam<MooseFunctorName>("face_smoothed_alpha_gradient_name",
+                                    "curvature_face_smoothed_alpha_gradient",
+                                    "Output name for the face-smoothed alpha gradient functor.");
   params.addParam<MooseFunctorName>(
       "provisional_face_unit_normal_name",
       "curvature_provisional_interface_unit_normal_face",
       "Output name for the provisional face unit normal functor used before wall-contact-angle "
       "correction is applied.");
-  params.addParam<MooseFunctorName>(
-      "face_unit_normal_name",
-      "curvature_interface_unit_normal_face",
-      "Output name for the corrected face unit normal functor.");
+  params.addParam<MooseFunctorName>("face_unit_normal_name",
+                                    "curvature_interface_unit_normal_face",
+                                    "Output name for the corrected face unit normal functor.");
   params.addParam<MooseFunctorName>(
       "curvature_name", "curvature", "Output name for the cell-centered curvature functor.");
 
   return params;
 }
 
-ConservativeSharpInterfaceCurvatureCalculator::ConservativeSharpInterfaceCurvatureCalculator(const InputParameters & params)
+ConservativeSharpInterfaceCurvatureCalculator::ConservativeSharpInterfaceCurvatureCalculator(
+    const InputParameters & params)
   : GeneralUserObject(params),
     NonADFunctorInterface(this),
     BlockRestrictable(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
-    _face_smoothed_alpha_gradient(_moose_mesh,
-                                  blockIDs(),
-                                  getParam<MooseFunctorName>("face_smoothed_alpha_gradient_name")),
+    _face_smoothed_alpha_gradient(
+        _moose_mesh, blockIDs(), getParam<MooseFunctorName>("face_smoothed_alpha_gradient_name")),
     _provisional_face_unit_normal(
         _moose_mesh, blockIDs(), getParam<MooseFunctorName>("provisional_face_unit_normal_name")),
-    _face_unit_normal(_moose_mesh,
-                      blockIDs(),
-                      getParam<MooseFunctorName>("face_unit_normal_name")),
+    _face_unit_normal(_moose_mesh, blockIDs(), getParam<MooseFunctorName>("face_unit_normal_name")),
     _curvature(_moose_mesh, blockIDs(), getParam<MooseFunctorName>("curvature_name"), false),
     _volume_fraction(this->template getFunctor<Real>("volume_fraction_functor")),
     _wall_contact_angle_degrees_functor_name(
@@ -229,9 +230,8 @@ ConservativeSharpInterfaceCurvatureCalculator::parseStaticContactAngles()
 
   if (!static_angles_deg.empty())
     for (const auto i : make_range(boundaries.size()))
-      _static_contact_angle_radians[boundary_ids[i]] =
-          radiansFromDegrees(expandedEntry(
-              static_angles_deg, i, "static_contact_angles_degrees", boundaries.size()));
+      _static_contact_angle_radians[boundary_ids[i]] = radiansFromDegrees(
+          expandedEntry(static_angles_deg, i, "static_contact_angles_degrees", boundaries.size()));
 }
 
 void
@@ -257,7 +257,8 @@ ConservativeSharpInterfaceCurvatureCalculator::rebuildSharpInterfaceFaceInfo()
 bool
 ConservativeSharpInterfaceCurvatureCalculator::elemInBlocks(const Elem * elem) const
 {
-  return elem && elem != libMesh::remote_elem && (blockIDs().empty() || hasBlocks(elem->subdomain_id()));
+  return elem && elem != libMesh::remote_elem &&
+         (blockIDs().empty() || hasBlocks(elem->subdomain_id()));
 }
 
 bool
@@ -267,7 +268,8 @@ ConservativeSharpInterfaceCurvatureCalculator::faceTouchesBlocks(const FaceInfo 
 }
 
 bool
-ConservativeSharpInterfaceCurvatureCalculator::isFaceGeometricallyRelevant(const FaceInfo & fi) const
+ConservativeSharpInterfaceCurvatureCalculator::isFaceGeometricallyRelevant(
+    const FaceInfo & fi) const
 {
   if (&fi.elem() == libMesh::remote_elem)
     return false;
@@ -305,10 +307,12 @@ ConservativeSharpInterfaceCurvatureCalculator::faceMeasure(const FaceInfo * fi) 
 }
 
 Real
-ConservativeSharpInterfaceCurvatureCalculator::elemMeasure(const FaceInfo * fi, const bool neighbor) const
+ConservativeSharpInterfaceCurvatureCalculator::elemMeasure(const FaceInfo * fi,
+                                                           const bool neighbor) const
 {
   const auto * elem_info = neighbor ? fi->neighborInfo() : fi->elemInfo();
-  mooseAssert(elem_info, "Missing ElemInfo in ConservativeSharpInterfaceCurvatureCalculator::elemMeasure");
+  mooseAssert(elem_info,
+              "Missing ElemInfo in ConservativeSharpInterfaceCurvatureCalculator::elemMeasure");
   return (neighbor ? fi->neighborVolume() : fi->elemVolume()) * elem_info->coordFactor();
 }
 
@@ -342,15 +346,16 @@ ConservativeSharpInterfaceCurvatureCalculator::updateEffectiveDeltaN()
   _communicator.sum(local_cell_count);
 
   if (!local_cell_count)
-    mooseError("No cells were found for ConservativeSharpInterfaceCurvatureCalculator when computing delta_n.");
+    mooseError("No cells were found for ConservativeSharpInterfaceCurvatureCalculator when "
+               "computing delta_n.");
 
   const Real average_volume = local_volume_sum / static_cast<Real>(local_cell_count);
   _effective_delta_n = _delta_n_scale / std::cbrt(average_volume);
 }
 
 Moose::FaceArg
-ConservativeSharpInterfaceCurvatureCalculator::makeCenteredFaceArg(const FaceInfo * fi,
-                                                       const Moose::StateArg * limiter_state) const
+ConservativeSharpInterfaceCurvatureCalculator::makeCenteredFaceArg(
+    const FaceInfo * fi, const Moose::StateArg * limiter_state) const
 {
   return Moose::FaceArg{
       fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, limiter_state};
@@ -358,17 +363,16 @@ ConservativeSharpInterfaceCurvatureCalculator::makeCenteredFaceArg(const FaceInf
 
 void
 ConservativeSharpInterfaceCurvatureCalculator::buildCellAlphaField(
-    const Moose::StateArg & time_arg,
-    std::unordered_map<dof_id_type, Real> & cell_alpha) const
+    const Moose::StateArg & time_arg, std::unordered_map<dof_id_type, Real> & cell_alpha) const
 {
   cell_alpha.clear();
 
   for (const auto * fi : _sharp_interface_face_info)
   {
     if (elemInBlocks(fi->elemPtr()))
-      cell_alpha.emplace(fi->elemPtr()->id(),
-                         MetaPhysicL::raw_value(
-                             _volume_fraction(Moose::ElemArg{fi->elemPtr(), false}, time_arg)));
+      cell_alpha.emplace(
+          fi->elemPtr()->id(),
+          MetaPhysicL::raw_value(_volume_fraction(Moose::ElemArg{fi->elemPtr(), false}, time_arg)));
     if (elemInBlocks(fi->neighborPtr()))
       cell_alpha.emplace(fi->neighborPtr()->id(),
                          MetaPhysicL::raw_value(
@@ -378,8 +382,7 @@ ConservativeSharpInterfaceCurvatureCalculator::buildCellAlphaField(
 
 Real
 ConservativeSharpInterfaceCurvatureCalculator::interpolateCellScalarToFace(
-    const FaceInfo * fi,
-    const std::unordered_map<dof_id_type, Real> & cell_field) const
+    const FaceInfo * fi, const std::unordered_map<dof_id_type, Real> & cell_field) const
 {
   const bool elem_ok = elemInBlocks(fi->elemPtr()) && cell_field.count(fi->elemPtr()->id());
   const bool neighbor_ok = fi->neighborPtr() && elemInBlocks(fi->neighborPtr()) &&
@@ -540,13 +543,12 @@ ConservativeSharpInterfaceCurvatureCalculator::finalize()
 }
 
 void
-ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool verbose)
+ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool /*verbose*/)
 {
   if (!_use_reference_simple_curvature)
-    mooseError(
-        name(),
-        ": only the baseline reference solver simple curvature path is implemented in this step. "
-        "The optional higher-order correction term remains intentionally unsupported here.");
+    mooseError(name(),
+               ": only the baseline simple curvature path is implemented in this step. "
+               "The optional higher-order correction term remains intentionally unsupported here.");
 
   rebuildSharpInterfaceFaceInfo();
   updateEffectiveDeltaN();
@@ -571,10 +573,6 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
 
     for (const auto & pr : cell_alpha)
       smoothed_alpha[pr.first] = pr.second;
-
-    if (verbose)
-      _console << name() << ": applied " << _n_alpha_smooth_curvature
-               << " curvature-input smoothing sweep(s)." << std::endl;
   }
 
   std::unordered_map<dof_id_type, Real> curvature_flux_sum;
@@ -594,12 +592,8 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
     _provisional_face_unit_normal[fi->id()] = provisional_n_hat_face;
 
     RealVectorValue corrected_face_grad = face_grad;
-    const RealVectorValue n_hat_face = correctBoundaryContactAngle(fi,
-                                                                   provisional_n_hat_face,
-                                                                   face_grad,
-                                                                   time_arg,
-                                                                   &limiter_time,
-                                                                   &corrected_face_grad);
+    const RealVectorValue n_hat_face = correctBoundaryContactAngle(
+        fi, provisional_n_hat_face, face_grad, time_arg, &limiter_time, &corrected_face_grad);
 
     _face_smoothed_alpha_gradient[fi->id()] = corrected_face_grad;
     _face_unit_normal[fi->id()] = n_hat_face;
@@ -619,11 +613,6 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
       curvature_flux_sum[neighbor_id] -= face_flux;
       element_volumes.emplace(neighbor_id, elemMeasure(fi, true));
     }
-
-    if (verbose)
-      _console << "Curvature face " << fi->id() << ": |grad_alpha_f|=" << mag_face_grad
-               << ", delta_n=" << effectiveDeltaN() << ", face_flux=" << face_flux
-               << std::endl;
   }
 
   for (const auto & pr : element_volumes)
@@ -648,7 +637,8 @@ ConservativeSharpInterfaceCurvatureCalculator::updateCurvatureMaps(const bool ve
     provisional_face_unit_normal.assign(_provisional_face_unit_normal);
 
     auto & face_unit_normal = const_cast<Moose::Functor<RealVectorValue> &>(
-        UserObject::_subproblem.getFunctor<RealVectorValue>(_face_unit_normal_name, tid, name(), true));
+        UserObject::_subproblem.getFunctor<RealVectorValue>(
+            _face_unit_normal_name, tid, name(), true));
     face_unit_normal.assign(_face_unit_normal);
 
     auto & curvature = const_cast<Moose::Functor<Real> &>(

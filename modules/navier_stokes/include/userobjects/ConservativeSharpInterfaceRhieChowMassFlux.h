@@ -13,7 +13,7 @@
 #include "CellCenteredMapFunctor.h"
 
 /**
- * Sharp-interface Rhie-Chow implementation for the reference-parity momentum path.
+ * Sharp-interface Rhie-Chow implementation for the velocity-component momentum path.
  *
  * The momentum unknowns are velocity components U_i. Conservative behavior is supplied by the
  * density-weighted matrix coefficients and face fluxes for the reduced-pressure

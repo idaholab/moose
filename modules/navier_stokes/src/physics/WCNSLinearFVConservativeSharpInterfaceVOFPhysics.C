@@ -86,7 +86,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   params.addParam<MooseEnum>(
       "alpha_correction_scheme",
       alpha_correction_scheme,
-      "High-order correction used in the bounded MULES-style alpha update. The donor/base flux "
+      "High-order correction used in the bounded explicit alpha update. The donor/base flux "
       "remains upwind; this selects the higher-order correction flux added on top of it.");
   params.addParam<MooseFunctorName>(
       "alpha_phi_bd_functor_name", "alpha_phi_bd", "Published donor/base alpha face flux.");
@@ -113,12 +113,12 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       true,
       "Whether to use a bounded explicit correction stage after the donor alpha solve. When "
       "enabled, the matrix transport should remain on upwind/donor transport.");
-  params.addRangeCheckedParam<unsigned int>(
-      "n_alpha_corrections",
-      2,
-      "n_alpha_corrections>=0",
-      "Number of MULES-style correction sweeps. Zero publishes the donor alpha flux without an "
-      "explicit correction sweep.");
+  params.addRangeCheckedParam<unsigned int>("n_alpha_corrections",
+                                            2,
+                                            "n_alpha_corrections>=0",
+                                            "Number of bounded explicit correction sweeps. Zero "
+                                            "publishes the donor alpha flux without an "
+                                            "explicit correction sweep.");
   params.addRangeCheckedParam<unsigned int>(
       "n_limiter_iterations",
       3,
@@ -142,7 +142,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   params.addParam<bool>("use_cell_summed_mules_limiter",
                         true,
                         "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to use a classic "
-                        "per-cell summed MULES "
+                        "per-cell summed bounded "
                         "limiter instead of sequential face-budget depletion.");
   params.addParam<bool>(
       "use_local_mules_bounds",

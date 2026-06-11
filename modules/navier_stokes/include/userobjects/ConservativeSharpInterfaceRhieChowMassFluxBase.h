@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "RhieChowMassFlux.h"
@@ -216,8 +225,8 @@ protected:
                                           const Moose::StateArg & time_arg,
                                           const FaceScalarField & scalar_field) const;
   RealVectorValue
-  reconstructReferenceStylePressureCoupledCellVelocityDelta(const ElemInfo * elem_info,
-                                                            const Moose::StateArg & time_arg) const;
+  reconstructBasePressureCoupledCellVelocityDelta(const ElemInfo * elem_info,
+                                                  const Moose::StateArg & time_arg) const;
   virtual RealVectorValue
   reconstructPressureCoupledCellVelocityDelta(const ElemInfo * elem_info,
                                               const Moose::StateArg & time_arg) const;

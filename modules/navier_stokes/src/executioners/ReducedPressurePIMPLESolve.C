@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ReducedPressurePIMPLESolve.h"
 
 #include "FEProblem.h"
@@ -14,7 +23,6 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include <unordered_map>
 using namespace libMesh;
 
 InputParameters
@@ -239,26 +247,6 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
       corrector_match = corrector;
     }
 
-  if (!corrector_match)
-  {
-    static bool reported_missing_corrector = false;
-    if (!reported_missing_corrector)
-    {
-      reported_missing_corrector = true;
-      _console << name() << ": no ConservativeSharpInterfaceVOFMULESCorrector found for system '"
-               << system_name << "'. Available thread-0 user objects:";
-      for (const auto & obj : objs)
-      {
-        _console << " " << obj->name();
-        if (const auto * corrector =
-                dynamic_cast<ConservativeSharpInterfaceVOFMULESCorrector *>(obj))
-          _console << "(ConservativeSharpInterfaceVOFMULESCorrector system="
-                   << corrector->systemName() << ")";
-      }
-      _console << std::endl;
-    }
-  }
-
   return corrector_match;
 }
 
@@ -269,15 +257,6 @@ ReducedPressurePIMPLESolve::momentumPressureCourant(const Real dt) const
     return 0.0;
 
   return _rc_uo->maxCourant(dt);
-}
-
-RhieChowMassFlux::MaxCourantAudit
-ReducedPressurePIMPLESolve::momentumPressureCourantAudit(const Real dt) const
-{
-  if (!_rc_uo || dt <= 0.0)
-    return RhieChowMassFlux::MaxCourantAudit();
-
-  return _rc_uo->maxCourantAudit(dt);
 }
 
 Real
@@ -371,7 +350,7 @@ ReducedPressurePIMPLESolve::solve()
     if (_should_solve_momentum)
       // Keep the full nonlinear history on the previous outer-corrector state
       // for the whole current outer loop. The stock momentum solve shifts this
-      // stack every predictor solve; for parity work we only want to advance it
+      // stack every predictor solve; here we only want to advance it
       // once per outer SIMPLE iteration.
       advanceMomentumOuterIterationHistory();
 
@@ -768,8 +747,7 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
   if (!_should_solve_pressure)
     return;
 
-  _console << "Applying startup continuity / CorrectPhi projection before PIMPLE iterations"
-           << std::endl;
+  _console << "Applying startup continuity projection before PIMPLE iterations" << std::endl;
 
   // Honor the current reduced-pressure field, assemble the momentum predictor coefficients, and run
   // pressure-only startup continuity corrections before the first outer iteration.
@@ -804,7 +782,7 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
   if (!_should_solve_pressure || _momentum_systems.empty() || !_rc_uo)
     return;
 
-  _console << "Applying startup continuity / CorrectPhi corrections" << std::endl;
+  _console << "Applying startup continuity corrections" << std::endl;
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
   for (const auto startup_it : make_range(_startup_flux_corrections))
@@ -829,12 +807,11 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
 
-  // Mirror reference solver's correctUphiBCs -> constrainPressure ordering more closely:
-  // refresh the patch velocity / target-flux state from the latest momentum
+  // Refresh the patch velocity / target-flux state from the latest momentum
   // predictor before assembling the constrained pressure boundary gradient.
   _rc_uo->updateVelocityBoundaryState();
 
-  _rc_uo->updatePressureBoundaryNormalGradients(/* apply_reference_adjustment = */ false);
+  _rc_uo->updatePressureBoundaryNormalGradients(/* apply_pressure_flux_adjustment = */ false);
 }
 
 void
@@ -925,9 +902,6 @@ ReducedPressurePIMPLESolve::snapshotMomentumNonlinearSolutionStates() const
 std::vector<std::pair<unsigned int, Real>>
 ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*solver_params*/)
 {
-  _console << name() << ": entering solveVolumeFractionSystems"
-           << " timeStep=" << _problem.timeStep() << " dt=" << _problem.dt() << std::endl;
-
   std::vector<std::pair<unsigned int, Real>> residuals(_volume_fraction_system_names.size(),
                                                        std::make_pair(0, 1.0));
 
@@ -960,8 +934,6 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
     }
 
     auto * corrector = sharpInterfaceVOFCorrector(_volume_fraction_system_names[i]);
-    _console << name() << ": volume-fraction system '" << _volume_fraction_system_names[i]
-             << "' corrector_found=" << (corrector ? 1 : 0) << std::endl;
     if (corrector)
     {
       if (_current_outer_iteration > 1)
@@ -1109,7 +1081,7 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
       sharp_rc ? sharp_rc->suppressStartupPressurePredictorFluxSources() : false;
   if (sharp_rc)
   {
-    // Projection-only startup cleanup should mimic a bare CorrectPhi-like flux repair.
+    // Projection-only startup cleanup should solve only the continuity flux repair.
     sharp_rc->setSuppressStartupPressurePredictorFluxSources(true);
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(true);
   }
@@ -1145,8 +1117,8 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
   residuals.first = total_linear_iterations;
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
-  // continuity cleanup should repair phi like CorrectPhi/pcorr, not overwrite
-  // the physical p_rgh field before the first real pressure equation.
+  // continuity cleanup should repair phi, not overwrite the physical p_rgh field
+  // before the first real pressure equation.
   pressure_current_solution = *saved_pressure_current_solution;
   pressure_current_solution.close();
   pressure_linear_solution = *saved_pressure_linear_solution;
@@ -1201,106 +1173,23 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_f
       sharp_rc->applyAdditionalFaceMassFluxCorrection();
   }
 
-  // Match reference solver's final pressure-corrector ordering:
-  //   phi = phiHbyA + pEqn.flux();
-  //   p_rgh.relax();
-  //   U = HbyA + rAU*reconstruct((phig + pEqn.flux())/rAUf);
-  //
-  // The face flux and velocity writeback must keep using the cached pEqn.flux
-  // from the unrelaxed pressure solve. relaxPressureFieldForNextPredictor()
-  // refreshes pressure gradients for the next predictor, but does not invalidate
-  // the cached final pressure-equation flux.
+  // The face flux and velocity writeback must keep using the cached pressure-equation flux
+  // from the unrelaxed pressure solve. relaxPressureFieldForNextPredictor() refreshes
+  // pressure gradients for the next predictor, but does not invalidate the cached final
+  // pressure-equation flux.
   relaxPressureFieldForNextPredictor();
 
   _rc_uo->computeCellVelocity();
 
   _rc_uo->updateVelocityBoundaryState();
-  const std::string stage_label =
-      "piso_" + std::to_string(_current_piso_iteration) + "_post_pressure_writeback";
 
-  reportReferenceContinuityErrors(stage_label);
   correctMovingMeshFaceVelocityAndMakeRelative();
-}
-
-void
-ReducedPressurePIMPLESolve::reportReferenceContinuityErrors(const std::string & stage_label)
-{
-  if (!_rc_uo)
-    return;
-
-  std::unordered_map<dof_id_type, Real> cell_integrated_divergence;
-  std::unordered_map<dof_id_type, Real> cell_volume;
-  auto has_pressure_dof = [this](const ElemInfo & elem_info)
-  {
-    return elem_info.dofIndices().size() > static_cast<std::size_t>(_pressure_sys_number) &&
-           !elem_info.dofIndices()[_pressure_sys_number].empty();
-  };
-
-  for (const auto * fi : _rc_uo->flowFacesForAudit())
-  {
-    if (!fi)
-      continue;
-
-    const Real integrated_phi =
-        _rc_uo->getVolumetricFaceFlux(*fi) * fi->faceArea() * fi->faceCoord();
-
-    if (fi->elemPtr())
-    {
-      const auto & elem_info = *fi->elemInfo();
-      if (has_pressure_dof(elem_info))
-      {
-        cell_integrated_divergence[fi->elemPtr()->id()] += integrated_phi;
-        cell_volume[fi->elemPtr()->id()] = elem_info.volume() * elem_info.coordFactor();
-      }
-    }
-
-    if (fi->neighborPtr())
-    {
-      const auto & neighbor_info = *fi->neighborInfo();
-      if (has_pressure_dof(neighbor_info))
-      {
-        cell_integrated_divergence[fi->neighborPtr()->id()] -= integrated_phi;
-        cell_volume[fi->neighborPtr()->id()] = neighbor_info.volume() * neighbor_info.coordFactor();
-      }
-    }
-  }
-
-  Real volume_sum = 0.0;
-  Real local_divergence_integral = 0.0;
-  Real global_divergence_integral = 0.0;
-  for (const auto & [elem_id, integrated_divergence] : cell_integrated_divergence)
-  {
-    const auto volume_it = cell_volume.find(elem_id);
-    if (volume_it == cell_volume.end() || volume_it->second <= libMesh::TOLERANCE)
-      continue;
-
-    volume_sum += volume_it->second;
-    local_divergence_integral += std::abs(integrated_divergence);
-    global_divergence_integral += integrated_divergence;
-  }
-
-  const Real dt = _problem.dt();
-  const Real local_continuity_error = volume_sum > std::numeric_limits<Real>::epsilon()
-                                          ? dt * local_divergence_integral / volume_sum
-                                          : 0.0;
-  const Real global_continuity_error = volume_sum > std::numeric_limits<Real>::epsilon()
-                                           ? dt * global_divergence_integral / volume_sum
-                                           : 0.0;
-  _cumulative_continuity_error += global_continuity_error;
-
-  _console << "time step continuity errors"
-           << ": stage=" << stage_label << ", sum local = " << local_continuity_error
-           << ", global = " << global_continuity_error
-           << ", cumulative = " << _cumulative_continuity_error << std::endl;
 }
 
 void
 ReducedPressurePIMPLESolve::correctMovingMeshFaceVelocityAndMakeRelative()
 {
-  // This parity path currently has no Uf/MRF/moving-mesh flux state. RhieChowMassFlux explicitly
-  // reports no mesh-velocity support, so for the stationary-mesh cases this path supports,
-  // reference solver's
-  //   fvc::correctUf(Uf, U, phi, MRF);
-  //   fvc::makeRelative(phi, U);
-  // are exact no-ops.
+  // This pressure-coupled path currently has no face-velocity or moving-mesh flux state.
+  // RhieChowMassFlux explicitly reports no mesh-velocity support, so this is a no-op for the
+  // stationary-mesh cases currently supported.
 }

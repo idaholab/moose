@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "CellCenteredMapFunctor.h"
@@ -11,7 +20,7 @@
 #include <vector>
 
 /**
- * reference-solver-like curvature producer for a sharp-interface linear-FV path.
+ * Curvature producer for a sharp-interface linear-FV path.
  *
  * Implemented path:
  *
@@ -29,8 +38,8 @@
 class MooseMesh;
 
 class ConservativeSharpInterfaceCurvatureCalculator : public GeneralUserObject,
-                                          public NonADFunctorInterface,
-                                          public BlockRestrictable
+                                                      public NonADFunctorInterface,
+                                                      public BlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -69,13 +78,12 @@ protected:
   Real contactAngleRadiansForFace(const FaceInfo * fi,
                                   const Moose::StateArg & time_arg,
                                   const Moose::StateArg * limiter_state) const;
-  RealVectorValue correctBoundaryContactAngle(
-      const FaceInfo * fi,
-      const RealVectorValue & provisional_n_hat_face,
-      const RealVectorValue & face_gradient,
-      const Moose::StateArg & time_arg,
-      const Moose::StateArg * limiter_state,
-      RealVectorValue * corrected_face_gradient) const;
+  RealVectorValue correctBoundaryContactAngle(const FaceInfo * fi,
+                                              const RealVectorValue & provisional_n_hat_face,
+                                              const RealVectorValue & face_gradient,
+                                              const Moose::StateArg & time_arg,
+                                              const Moose::StateArg * limiter_state,
+                                              RealVectorValue * corrected_face_gradient) const;
 
   Real effectiveDeltaN() const { return _effective_delta_n; }
 

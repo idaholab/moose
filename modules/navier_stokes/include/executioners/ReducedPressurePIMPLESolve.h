@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "PIMPLESolve.h"
@@ -25,7 +34,6 @@ public:
 
   bool solve() override;
   Real momentumPressureCourant(const Real dt) const;
-  RhieChowMassFlux::MaxCourantAudit momentumPressureCourantAudit(const Real dt) const;
   Real constrainedMomentumPressureDT(const Real dt) const;
   void commitAcceptedTimestepTransportHistory() const;
   bool adjustMomentumPressureTimeStepEnabled() const { return _adjust_momentum_pressure_time_step; }
@@ -66,7 +74,6 @@ private:
   std::pair<unsigned int, Real> correctVelocityOnce(const bool subtract_updated_pressure,
                                                     const bool recompute_face_mass_flux,
                                                     const SolverParams & solver_params);
-  void reportReferenceContinuityErrors(const std::string & stage_label);
   void correctMovingMeshFaceVelocityAndMakeRelative();
   std::pair<unsigned int, Real> correctStartupContinuityOnce(const bool subtract_updated_pressure,
                                                              const bool recompute_face_mass_flux,
@@ -94,5 +101,4 @@ private:
   const Real _momentum_pressure_max_courant;
   std::string _startup_pressure_initialization;
   const unsigned int _startup_flux_corrections;
-  Real _cumulative_continuity_error = 0.0;
 };

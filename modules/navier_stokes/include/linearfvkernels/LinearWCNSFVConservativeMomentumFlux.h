@@ -102,7 +102,7 @@ protected:
   const RhieChowMassFlux & _mass_flux_provider;
 
   /// Optional face-centered mass-flux functor used to freeze one convective state per outer
-  /// iteration on the sharp-interface parity path.
+  /// iteration on the sharp-interface pressure-coupled path.
   const Moose::Functor<Real> * const _mass_flux_functor;
 
   /// Whether this sharp-interface kernel may fall back to the live Rhie-Chow mass flux.

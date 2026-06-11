@@ -439,20 +439,11 @@ RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
 Real
 RhieChowMassFlux::maxCourant(const Real dt) const
 {
-  return maxCourantAudit(dt).max_courant;
-}
-
-RhieChowMassFlux::MaxCourantAudit
-RhieChowMassFlux::maxCourantAudit(const Real dt) const
-{
-  MaxCourantAudit audit;
   if (dt <= 0.0)
-    return audit;
+    return 0.0;
 
   std::unordered_map<dof_id_type, Real> cell_flux_sum;
   cell_flux_sum.reserve(_flow_face_info.size());
-  std::unordered_map<dof_id_type, std::pair<const FaceInfo *, Real>> cell_worst_face;
-  cell_worst_face.reserve(_flow_face_info.size());
 
   for (const auto * fi : _flow_face_info)
   {
@@ -464,22 +455,13 @@ RhieChowMassFlux::maxCourantAudit(const Real dt) const
     const Real volumetric_flux = face_volumetric_flux * face_measure;
 
     if (fi->elemPtr() && hasBlocks(fi->elemPtr()->subdomain_id()))
-    {
       cell_flux_sum[fi->elemPtr()->id()] += volumetric_flux;
-      auto & worst_face = cell_worst_face[fi->elemPtr()->id()];
-      if (!worst_face.first || volumetric_flux > worst_face.second)
-        worst_face = std::make_pair(fi, volumetric_flux);
-    }
 
     if (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id()))
-    {
       cell_flux_sum[fi->neighborPtr()->id()] += volumetric_flux;
-      auto & worst_face = cell_worst_face[fi->neighborPtr()->id()];
-      if (!worst_face.first || volumetric_flux > worst_face.second)
-        worst_face = std::make_pair(fi, volumetric_flux);
-    }
   }
 
+  Real max_courant = 0.0;
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
   {
     if (!hasBlocks(elem_info->subdomain_id()))
@@ -494,38 +476,18 @@ RhieChowMassFlux::maxCourantAudit(const Real dt) const
       continue;
 
     const Real courant = 0.5 * dt * it->second / volume;
-    if (courant <= audit.max_courant)
-      continue;
-
-    audit.max_courant = courant;
-    audit.has_worst_cell = true;
-    audit.worst_cell_id = elem_info->elem()->id();
-    audit.worst_cell_centroid = elem_info->elem()->vertex_average();
-    audit.worst_cell_volume = volume;
-    audit.worst_cell_flux_sum = it->second;
-
-    const auto worst_face_it = cell_worst_face.find(elem_info->elem()->id());
-    if (worst_face_it != cell_worst_face.end() && worst_face_it->second.first)
-    {
-      const auto * worst_face = worst_face_it->second.first;
-      audit.has_worst_face = true;
-      audit.worst_face_id = worst_face->id();
-      audit.worst_face_centroid = worst_face->faceCentroid();
-      audit.worst_face_normal = worst_face->normal();
-      audit.worst_face_integrated_flux = worst_face_it->second.second;
-      audit.worst_face_volumetric_flux = std::abs(getVolumetricFaceFlux(*worst_face));
-    }
+    max_courant = std::max(max_courant, courant);
   }
 
-  return audit;
+  return max_courant;
 }
 
-RhieChowMassFlux::FaceFluxConsistencyAudit
-RhieChowMassFlux::faceFluxConsistencyAudit() const
+RhieChowMassFlux::FaceFluxConsistencySummary
+RhieChowMassFlux::faceFluxConsistencySummary() const
 {
   using namespace Moose::FV;
 
-  FaceFluxConsistencyAudit audit;
+  FaceFluxConsistencySummary summary;
   const auto time_arg = Moose::currentState();
 
   Real squared_sum = 0.0;
@@ -565,29 +527,29 @@ RhieChowMassFlux::faceFluxConsistencyAudit() const
     if (is_boundary)
     {
       boundary_squared_sum += mismatch * mismatch;
-      audit.max_abs_boundary_mismatch = std::max(audit.max_abs_boundary_mismatch, abs_mismatch);
+      summary.max_abs_boundary_mismatch = std::max(summary.max_abs_boundary_mismatch, abs_mismatch);
     }
     else
     {
       internal_squared_sum += mismatch * mismatch;
-      audit.max_abs_internal_mismatch = std::max(audit.max_abs_internal_mismatch, abs_mismatch);
+      summary.max_abs_internal_mismatch = std::max(summary.max_abs_internal_mismatch, abs_mismatch);
     }
 
-    if (!audit.has_worst_face || abs_mismatch > audit.max_abs_mismatch)
+    if (!summary.has_worst_face || abs_mismatch > summary.max_abs_mismatch)
     {
-      audit.has_worst_face = true;
-      audit.max_abs_mismatch = abs_mismatch;
-      audit.worst_face_id = fi->id();
-      audit.worst_face_is_boundary = is_boundary;
-      audit.worst_face_centroid = fi->faceCentroid();
-      audit.worst_face_normal = fi->normal();
+      summary.has_worst_face = true;
+      summary.max_abs_mismatch = abs_mismatch;
+      summary.worst_face_id = fi->id();
+      summary.worst_face_is_boundary = is_boundary;
+      summary.worst_face_centroid = fi->faceCentroid();
+      summary.worst_face_normal = fi->normal();
     }
   }
 
-  audit.l2_norm = std::sqrt(squared_sum);
-  audit.internal_l2_norm = std::sqrt(internal_squared_sum);
-  audit.boundary_l2_norm = std::sqrt(boundary_squared_sum);
-  return audit;
+  summary.l2_norm = std::sqrt(squared_sum);
+  summary.internal_l2_norm = std::sqrt(internal_squared_sum);
+  summary.boundary_l2_norm = std::sqrt(boundary_squared_sum);
+  return summary;
 }
 
 void
@@ -596,7 +558,7 @@ RhieChowMassFlux::cachePressureEquationFlux()
   // The anisotropic diffusion kernel's nonorthogonal RHS contribution uses
   // cell pressure gradients. When we recache the solved pressure face flux
   // after a pressure solve / relaxation step, refresh those gradients first so
-  // the reconstructed pEqn.flux stays aligned with the current pressure field.
+  // the reconstructed pressure-equation flux stays aligned with the current pressure field.
   const_cast<MooseLinearVariableFVReal *>(_p)->computeCellGradients();
 
   for (auto & fi : _flow_face_info)
@@ -1606,7 +1568,7 @@ RhieChowMassFlux::pressureBoundaryNormalAinv(const FaceInfo * fi) const
 }
 
 void
-RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_reference_adjustment)
+RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_pressure_flux_adjustment)
 {
   if (!_pressure_predictor_face_state_valid)
     updatePressurePredictorFaceState();
@@ -1621,7 +1583,7 @@ RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_referen
     // space so constrained pressure BCs see the same total phiHbyA contract
     // that the interior pressure equation sees. The sharp-interface path stores
     // _pressure_predictor_base_flux with the internal sign, while _phig_flux is
-    // the reference solver physical contribution, so internal phiHbyA is base - phig.
+    // the explicit body-force contribution, so internal phiHbyA is base - phig.
     _pressure_predictor_flux[fi->id()] =
         _pressure_predictor_base_flux[fi->id()] - _phig_flux[fi->id()];
     if (!_vel[0]->isInternalFace(*fi))
@@ -1639,10 +1601,9 @@ RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_referen
       std::max(std::numeric_limits<Real>::min(),
                std::numeric_limits<Real>::epsilon() * std::max(1.0, max_boundary_normal_ainv));
 
-  // Local adjustPhi analogue for the pressure-reference branch: shift the predictor source
-  // on adjustable fixed-flux patches so the integrated predictor boundary flux matches the
-  // boundary mass-flux target before the pressure solve.
-  if (apply_reference_adjustment)
+  // Shift the predictor source on adjustable fixed-flux patches so the integrated predictor
+  // boundary flux matches the boundary mass-flux target before the pressure solve.
+  if (apply_pressure_flux_adjustment)
   {
     Real integrated_source_imbalance = 0.0;
     Real adjustable_measure = 0.0;

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "DynamicWallContactAngleFunctorMaterial.h"
 
 #include "MooseFunctorArguments.h"
@@ -29,9 +38,10 @@ std::string
 dynamicLowerCase(const std::string & input)
 {
   std::string out = input;
-  std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) {
-    return static_cast<char>(std::tolower(c));
-  });
+  std::transform(out.begin(),
+                 out.end(),
+                 out.begin(),
+                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return out;
 }
 
@@ -63,8 +73,8 @@ DynamicWallContactAngleFunctorMaterial::validParams()
 
   params.addClassDescription(
       "Create a face-aware dynamic wall-contact-angle functor using the same provisional face "
-      "unit normal seen by the reference-solver-style curvature reconstruction. The implemented law "
-      "matches reference solver's dynamicAlphaContactAngle theta(U, nHat) form.");
+      "unit normal seen by the curvature reconstruction. The implemented law evaluates "
+      "theta(U, nHat).");
 
   params.addRequiredParam<MooseFunctorName>(
       "provisional_interface_unit_normal_functor",
@@ -80,7 +90,7 @@ DynamicWallContactAngleFunctorMaterial::validParams()
       "contact_angle_models",
       {},
       "Per-boundary contact-angle model names. Entries equal to 'dynamic' activate the "
-      "reference-solver-style dynamic law on the corresponding boundary. Empty means no dynamic "
+      "dynamic law on the corresponding boundary. Empty means no dynamic "
       "contact-angle boundaries are created here.");
   params.addParam<std::vector<Real>>(
       "equilibrium_contact_angles_deg",
@@ -97,13 +107,12 @@ DynamicWallContactAngleFunctorMaterial::validParams()
   params.addParam<std::vector<Real>>(
       "contact_angle_velocity_scales",
       {},
-      "Per-boundary velocity scales uTheta used by the reference solver dynamic contact-angle law.");
+      "Per-boundary velocity scales uTheta used by the dynamic contact-angle law.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "velocity_component_functors",
       {},
-      "Internal velocity component functors [u, v, w] used to approximate reference solver's "
-      "patchInternalField() for the dynamic contact-angle law.");
+      "Internal velocity component functors [u, v, w] used for the dynamic contact-angle law.");
   params.addParam<MooseFunctorName>(
       "wall_velocity_functor",
       "",
@@ -119,10 +128,7 @@ DynamicWallContactAngleFunctorMaterial::validParams()
       1e-12,
       "Positive regularization added when normalizing the wall-parallel interface direction.");
   params.addParam<Real>(
-      "u_theta_small",
-      1e-12,
-      "Positive floor below which the dynamic law falls back to theta0, matching reference solver's "
-      "uTheta < SMALL behavior.");
+      "u_theta_small", 1e-12, "Positive floor below which the dynamic law falls back to theta0.");
 
   params.addParam<MooseFunctorName>(
       "wall_contact_angle_degrees_name",
@@ -144,15 +150,15 @@ DynamicWallContactAngleFunctorMaterial::DynamicWallContactAngleFunctorMaterial(
     _default_wall_velocity(getParam<RealVectorValue>("default_wall_velocity")),
     _parallel_direction_small(getParam<Real>("parallel_direction_small")),
     _u_theta_small(getParam<Real>("u_theta_small")),
-    _wall_contact_angle_degrees_name(
-        getParam<MooseFunctorName>("wall_contact_angle_degrees_name"))
+    _wall_contact_angle_degrees_name(getParam<MooseFunctorName>("wall_contact_angle_degrees_name"))
 {
   if (_parallel_direction_small <= 0.0)
     paramError("parallel_direction_small", "parallel_direction_small must be positive.");
   if (_u_theta_small <= 0.0)
     paramError("u_theta_small", "u_theta_small must be positive.");
 
-  const auto velocity_names = getParam<std::vector<MooseFunctorName>>("velocity_component_functors");
+  const auto velocity_names =
+      getParam<std::vector<MooseFunctorName>>("velocity_component_functors");
   if (velocity_names.size() > _velocity_component_functors.size())
     paramError("velocity_component_functors",
                "At most ",
@@ -168,7 +174,8 @@ DynamicWallContactAngleFunctorMaterial::DynamicWallContactAngleFunctorMaterial(
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   addFunctorProperty<Real>(
       _wall_contact_angle_degrees_name,
-      [this](const auto & r, const auto & t) -> Real { return evaluateWallContactAngleDegrees(r, t); },
+      [this](const auto & r, const auto & t) -> Real
+      { return evaluateWallContactAngleDegrees(r, t); },
       clearance_schedule);
 }
 
@@ -190,8 +197,8 @@ DynamicWallContactAngleFunctorMaterial::evaluateWallContactAngleDegrees(
 
   const RealVectorValue nf = dynamicSafeUnitVector(fi->normal());
 
-  RealVectorValue Uwall =
-      evaluateBoundaryInternalVelocity(face_arg, time_arg) - evaluateBoundaryWallVelocity(face_arg, time_arg);
+  RealVectorValue Uwall = evaluateBoundaryInternalVelocity(face_arg, time_arg) -
+                          evaluateBoundaryWallVelocity(face_arg, time_arg);
   Uwall -= (nf * Uwall) * nf;
 
   const RealVectorValue provisional_n_hat =
@@ -225,8 +232,8 @@ DynamicWallContactAngleFunctorMaterial::initializeDynamicBoundarySpecs()
 
   for (const auto i : make_range(boundaries.size()))
   {
-    const auto model =
-        dynamicLowerCase(dynamicExpandedEntry(models, i, "contact_angle_models", boundaries.size()));
+    const auto model = dynamicLowerCase(
+        dynamicExpandedEntry(models, i, "contact_angle_models", boundaries.size()));
     if (model != "dynamic")
       continue;
 
@@ -248,14 +255,14 @@ DynamicWallContactAngleFunctorMaterial::initializeDynamicBoundarySpecs()
                  "boundary.");
 
     DynamicBoundarySpec spec;
-    spec.theta0_deg = dynamicExpandedEntry(
-        equilibrium, i, "equilibrium_contact_angles_deg", boundaries.size());
-    spec.theta_adv_deg = dynamicExpandedEntry(
-        advancing, i, "advancing_contact_angles_deg", boundaries.size());
-    spec.theta_rec_deg = dynamicExpandedEntry(
-        receding, i, "receding_contact_angles_deg", boundaries.size());
-    spec.u_theta = dynamicExpandedEntry(
-        u_thetas, i, "contact_angle_velocity_scales", boundaries.size());
+    spec.theta0_deg =
+        dynamicExpandedEntry(equilibrium, i, "equilibrium_contact_angles_deg", boundaries.size());
+    spec.theta_adv_deg =
+        dynamicExpandedEntry(advancing, i, "advancing_contact_angles_deg", boundaries.size());
+    spec.theta_rec_deg =
+        dynamicExpandedEntry(receding, i, "receding_contact_angles_deg", boundaries.size());
+    spec.u_theta =
+        dynamicExpandedEntry(u_thetas, i, "contact_angle_velocity_scales", boundaries.size());
 
     if (spec.u_theta <= 0.0)
       paramError("contact_angle_velocity_scales",
@@ -267,9 +274,7 @@ DynamicWallContactAngleFunctorMaterial::initializeDynamicBoundarySpecs()
 
 bool
 DynamicWallContactAngleFunctorMaterial::getDynamicBoundarySpec(
-    const FaceInfo * fi,
-    BoundaryID & boundary_id,
-    const DynamicBoundarySpec *& spec) const
+    const FaceInfo * fi, BoundaryID & boundary_id, const DynamicBoundarySpec *& spec) const
 {
   spec = nullptr;
   boundary_id = BoundaryID();
@@ -292,8 +297,7 @@ DynamicWallContactAngleFunctorMaterial::getDynamicBoundarySpec(
 
 RealVectorValue
 DynamicWallContactAngleFunctorMaterial::evaluateBoundaryInternalVelocity(
-    const Moose::FaceArg & face_arg,
-    const Moose::StateArg & time_arg) const
+    const Moose::FaceArg & face_arg, const Moose::StateArg & time_arg) const
 {
   RealVectorValue internal_velocity;
   const auto elem_arg = face_arg.makeElem();
@@ -307,8 +311,7 @@ DynamicWallContactAngleFunctorMaterial::evaluateBoundaryInternalVelocity(
 
 RealVectorValue
 DynamicWallContactAngleFunctorMaterial::evaluateBoundaryWallVelocity(
-    const Moose::FaceArg & face_arg,
-    const Moose::StateArg & time_arg) const
+    const Moose::FaceArg & face_arg, const Moose::StateArg & time_arg) const
 {
   if (_wall_velocity_functor)
     return MetaPhysicL::raw_value((*_wall_velocity_functor)(face_arg, time_arg));

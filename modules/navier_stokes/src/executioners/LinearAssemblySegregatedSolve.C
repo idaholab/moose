@@ -148,10 +148,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
                "Solid energy solve cannot be enabled when the fluid energy solve is disabled.");
 
   // Even when the explicit momentum predictor solve is disabled, the pressure
-  // corrector still needs the assembled momentum operator to build the local
-  // UEqn analog (HbyA/rAU/transient projection). So we always fetch the
-  // momentum systems when the pressure solve is active, but only add them to
-  // the solve list if we actually execute the predictor solve.
+  // corrector still needs the assembled momentum operator to build HbyA, rAU, and the transient
+  // projection. So we always fetch the momentum systems when the pressure solve is active, but
+  // only add them to the solve list if we actually execute the predictor solve.
   if (_should_solve_momentum || _should_solve_pressure)
     for (auto system_i : index_range(_momentum_system_names))
     {
