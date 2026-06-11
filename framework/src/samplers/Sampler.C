@@ -75,8 +75,11 @@ Sampler::Sampler(const InputParameters & parameters)
     _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
     _generators(
         declareRecoverableData<std::vector<std::unique_ptr<MooseRandomStateless>>>("generators")),
-    _n_rows(0),
-    _n_cols(0),
+    _n_local_rows(declareRecoverableData<dof_id_type>("n_local_rows")),
+    _local_row_begin(declareRecoverableData<dof_id_type>("local_row_begin")),
+    _local_row_end(declareRecoverableData<dof_id_type>("local_row_end")),
+    _n_rows(declareRecoverableData<dof_id_type>("n_rows")),
+    _n_cols(declareRecoverableData<dof_id_type>("n_cols")),
     _n_seeds(1),
     _initialized(false),
     _needs_reinit(true),
@@ -84,6 +87,7 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_row(getParam<dof_id_type>("limit_get_row")),
+    _rank_config(declareRecoverableData<std::pair<LocalRankConfig, LocalRankConfig>>("rank_config")),
     _auto_advance_generators(true)
 {
 }
