@@ -93,9 +93,9 @@ protected:
   /**
    * @brief Constructor for intermediate EngUnit abstract classes.
    *
-   * @param behavior the basic CSG type this unit produces — must be "SURFACE", "CELL",
+   * @param behavior the basic CSG type this unit produces. Must be "SURFACE", "CELL",
    *   or "UNIVERSE"; set by the intermediate class, not the concrete derived class
-   * @param unit_type the class name of the concrete derived type — set by passing
+   * @param unit_type the class name of the concrete derived type. Set by passing
    *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    */
   CSGEngUnit(const std::string & behavior, const std::string & unit_type);
@@ -131,7 +131,7 @@ protected:
   /// CSGBase populated by expandUnit(); joined into the parent CSGBase by expandEngUnit()
   std::unique_ptr<CSGBase> _internal_base;
 
-  /// The basic CSG type this unit produces — one of "SURFACE", "CELL", "UNIVERSE"
+  /// The basic CSG type this unit produces: "SURFACE", "CELL", or "UNIVERSE"
   MooseEnum _behavior{"SURFACE CELL UNIVERSE"};
 
   /// The class name of the concrete derived type, set via MooseUtils::prettyCppType<T>()

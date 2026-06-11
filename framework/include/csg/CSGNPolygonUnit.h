@@ -29,13 +29,13 @@ class CSGBase;
  * intersection of the N negative half-spaces of those planes.
  *
  * Implements:
- *   - expandUnit() — creates N CSGPlane surfaces in _internal_base, one per side
- *   - getExpandedRegion() — returns the intersection of the N half-spaces formed by the planes that
+ *   - expandUnit(): creates N CSGPlane surfaces in _internal_base, one per side
+ *   - getExpandedRegion(): returns the intersection of the N half-spaces formed by the planes that
  *     containing the origin
- *   - evaluateSurfaceEquationAtPoint() — returns the maximum plane evaluation over
+ *   - evaluateSurfaceEquationAtPoint(): returns the maximum plane evaluation over
  *     all N sides; negative means the point is inside, positive means outside
- *   - clone() — returns a deep copy
- *   - getAttributes() — returns n_sides, apothem
+ *   - clone(): returns a deep copy
+ *   - getAttributes(): returns n_sides, apothem
  */
 class CSGNPolygonUnit : public CSGSurfaceEngUnit
 {

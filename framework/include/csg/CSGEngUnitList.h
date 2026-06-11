@@ -22,7 +22,7 @@ namespace CSG
  * lookup by name and typed queries without holding ownership of the objects.
  *
  * A vector of raw pointers is used rather than a name-keyed map so that renames require
- * no index update — the object's name is updated in-place by the owning type list, and
+ * no index update. The object's name is updated in-place by the owning type list, and
  * the pointer in this vector automatically reflects the new name.
  */
 class CSGEngUnitList
@@ -102,7 +102,7 @@ protected:
   /**
    * @brief Remove an engineering unit from this index by address.
    *
-   * Called by CSGBase when a unit is deleted or expanded. Does not affect ownership —
+   * Called by CSGBase when a unit is deleted or expanded. Does not affect ownership because
    * the object is destroyed by the owning type list.
    *
    * @param unit reference to the engineering unit to remove

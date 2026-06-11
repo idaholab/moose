@@ -17,28 +17,28 @@
 
 #include "MooseObjectUnitTest.h"
 
+namespace CSG
+{
+
 /**
- * @brief fake engineering unit classes for the different kinds of units that are implemented for
- * testing purposes only.
+ * @brief fake, but valid, engineering unit classes for the different kinds of units that are
+ *  implemented for testing purposes only.
  *
  * Characteristics of expanded units for testing purposes:
- *  - TestSurfEngUnit:
+ *  TestSurfEngUnit:
  *    - 2 surfaces (so that cell region replacement using multiple surfaces can be tested)
  *
- *  - TestCellEngUnit:
+ *  TestCellEngUnit:
  *    - 1 cell
  *    - at least 1 surface is TestSurfEngUnit
  *    - cell is filled with a universe
  *
- *  - TestUnivEngUnit:
+ *  TestUnivEngUnit:
  *    - 2 cells (one TestCellEngUnit, one real cell) both in root of _internal_base (= expanded
  * univ)
  *    - root is renamed to "<name>_real_univ"
  *    - 1 real surface (for the real cell's region)
  */
-
-namespace CSG
-{
 
 class TestSurfEngUnit : public CSGSurfaceEngUnit
 {
@@ -318,7 +318,7 @@ protected:
     // need at least one cell in root so the "no cells" check passes and we reach areUniversesLinked
     auto & s1 = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_s1", 3.0));
     getBase().createCell(getName() + "_cell", +s1);
-    getBase().createUniverse("bad_univ"); // orphaned universe at same level as root — invalid
+    getBase().createUniverse("bad_univ"); // orphaned universe at same level as root (invalid)
     getBase().renameRootUniverse(getName() + "_expanded");
   }
 };
