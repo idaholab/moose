@@ -47,12 +47,29 @@ CSGUniverseList::addUniverse(const std::string & name)
 }
 
 CSGUniverse &
-CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe)
+CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe,
+                             const bool ignore_identical_universe)
 {
-  auto name = universe->getName();
-  auto [it, inserted] = _universes.emplace(name, std::move(universe));
+  auto univ_name = universe->getName();
+  if (ignore_identical_universe)
+    // Check that universe already defined in _universes and if so, confirm it matches with input
+    // univ
+    if (auto it = _universes.find(univ_name); it != _universes.end())
+    {
+      if (*universe == *it->second)
+        return *it->second;
+      else
+        mooseError("Universe with name ",
+                   univ_name,
+                   " has the same name as an existing universe in CSGBase instance but cannot be "
+                   "discarded as it is not an identical universe.");
+    }
+
+  // Otherwise, add the universe to the universe list. At this point, we don't expect the universe
+  // to already be defined in the universe list
+  auto [it, inserted] = _universes.emplace(univ_name, std::move(universe));
   if (!inserted)
-    mooseError("Universe with name " + name + " already exists in geometry.");
+    mooseError("Universe with name " + univ_name + " already exists in geometry.");
   return *it->second;
 }
 

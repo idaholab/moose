@@ -13,6 +13,7 @@
 #include "MooseMeshUtils.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
+#include "CSGZCylinder.h"
 
 registerMooseObject("ReactorApp", CoreMeshGenerator);
 
@@ -97,6 +98,9 @@ CoreMeshGenerator::validParams()
       "enforced by declaration in the ReactorMeshParams.");
   // depletion id generation params are added
   addDepletionIDParams(params);
+
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
 
   return params;
 }
@@ -538,6 +542,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   else
     auto input_meshes = getMeshes("inputs");
 
+  // If we are in CSG only mode, store the CSGBase objects associated with input MG's
+  if (_app.getMeshGeneratorSystem().getCSGOnly())
+    _input_csg_bases = getCSGBases("inputs");
+
   generateMetadata();
 }
 
@@ -880,4 +888,114 @@ CoreMeshGenerator::generate()
   (*_build_mesh)->unset_is_prepared();
 
   return std::move(*_build_mesh);
+}
+
+std::unique_ptr<CSG::CSGBase>
+CoreMeshGenerator::generateCSG()
+{
+  // Must be called to free the ReactorMeshParams CSGBase object
+  freeReactorParamsCSG();
+
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  const auto dummy_univ_name = _empty_key + "_univ";
+  if (_empty_pos || !_mesh_periphery)
+  {
+    // Create universe with a single void cell with an empty region. This universe is used for
+    // defining dummy assemblies in the core lattice and the lattce outer universe for lattices
+    // that do not have a mesh periphery
+    const auto dummy_cell_name = _empty_key + "_cell";
+    const auto & dummy_univ = csg_obj->createUniverse(dummy_univ_name);
+    CSG::CSGRegion empty_region;
+    csg_obj->createCell(dummy_cell_name, empty_region, &dummy_univ);
+  }
+
+  // Combine all bases from AssemblyMG inputs into this base. We expect each AssemblyMG
+  // input to contain a root universe with a single cell that constrains the assembly based
+  // on the FEM boundary. Root universes from inputs are renamed to a new universe name.
+  // These universes and their cells will be discarded, so that only the infinite assembly
+  // universes are retained.
+  std::unordered_map<unsigned int, std::string> univ_id_names;
+  std::vector<std::string> univs_to_discard;
+  for (const auto i : index_range(_inputs))
+  {
+    if (_inputs[i] == _empty_key)
+      univ_id_names[i] = dummy_univ_name;
+    else
+    {
+      const auto input_univ_name_discard = _inputs[i] + "_root_univ";
+      const auto input_univ_name = _inputs[i] + "_univ";
+      csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
+      univs_to_discard.push_back(input_univ_name_discard);
+      univ_id_names[i] = input_univ_name;
+    }
+  }
+
+  // Discard root universes of the input assemblies and their cells
+  for (const auto & univ_name : univs_to_discard)
+  {
+    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
+    const auto cells_to_delete = universe_to_delete.getAllCells();
+    csg_obj->deleteUniverse(universe_to_delete);
+    for (const auto & cell : cells_to_delete)
+      csg_obj->deleteCell(cell.get());
+  }
+
+  // Build the universe pattern for the assembly lattice from the input pattern
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> universe_pattern;
+  for (const auto & row : _pattern)
+  {
+    std::vector<std::reference_wrapper<const CSG::CSGUniverse>> universe_row;
+    for (const auto & univ_id : row)
+    {
+      const auto & lattice_univ = csg_obj->getUniverseByName(univ_id_names[univ_id]);
+      universe_row.push_back(lattice_univ);
+    }
+    universe_pattern.push_back(universe_row);
+  }
+
+  const auto assembly_pitch = getReactorParam<Real>(RGMB::assembly_pitch);
+  auto & core_lattice = createRGMBLattice(assembly_pitch, universe_pattern, *csg_obj);
+
+  // Define universe that fills region outside of lattice. For an explicity
+  // defined outer ring, this is a material outer corresponding to the region ID
+  // of the ring region. Otherwise, the outer is defined as a universe containing a void cell
+  if (_mesh_periphery)
+  {
+    std::string region_name = "rgmb_region_" + std::to_string(_periphery_region_id);
+    csg_obj->setLatticeOuter(core_lattice, region_name);
+  }
+  else
+  {
+    const auto & outer_univ = csg_obj->getUniverseByName(dummy_univ_name);
+    csg_obj->setLatticeOuter(core_lattice, outer_univ);
+  }
+
+  // Define lattice cell, with the lattice surrounded by a bounding circle whose radius is
+  // determined by the mesh periphery radius. If no mesh periphery is defined, the radius will be (N
+  // + 1) times the assembly pitch of the lattice for hex lattices, where N is the number of rings
+  // for a hexagonal lattice. For Cartesian lattices, the radius will be (N / 2 * sqrt(2)) times the
+  // assembly pitch, where N is the number of assembly widths that span a square lattice. This
+  // ensures that the ring radius completely surrounds the underlying lattice.
+  std::string lat_cell_name = name() + "_lattice_cell";
+  const auto ring_radius = _mesh_periphery ? _outer_circle_radius
+                           : (_geom_type == "Hex")
+                               ? (universe_pattern.size() + 2) / 2. * assembly_pitch
+                               : universe_pattern.size() / 2. * sqrt(2.) * assembly_pitch;
+  const auto ring_surf_name = name() + "_radial_ring";
+  std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
+      std::make_unique<CSG::CSGZCylinder>(ring_surf_name, 0, 0, ring_radius);
+  const auto & ring_surf = csg_obj->addSurface(std::move(ring_surf_ptr));
+  auto lat_cell_region = -ring_surf;
+
+  if (_mesh_dimensions == 3)
+  {
+    const auto surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
+    const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
+    lat_cell_region = lat_cell_region & +lowest_axial_surf & -highest_axial_surf;
+  }
+  csg_obj->createCell(lat_cell_name, core_lattice, lat_cell_region);
+
+  return csg_obj;
 }

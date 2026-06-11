@@ -102,6 +102,16 @@ This is the resulting mesh block layout:
        style=width:40%;
        alt=Reactor core mesh with hexagonal assemblies and a circular periphery.
 
+## Constructive Solid Geometry (CSG)
+
+`CoreMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains CoreMeshGenerator to represent the assembly structure as a CSG object.
+
+All incoming assembly structures are added to the core CSG structure as their own universes with name `[ASSEMBLY_MG_NAME]_univ`, where `[ASSEMBLY_MG_NAME]` denotes the name of the input assembly mesh generator. Each of these assembly universes are assembled into a [CSGLattice.md] structure. Additionally, dummy assembly positions are filled with an empty universe named "empty_univ", represented by a single universe filled with a void cell that has an empty region.
+
+When a core peripheral ring is present, the core lattice outer region is filled by a material named `"rgmb_region_[REGION_ID]"`, where `[REGION_ID]` refers to the region ID of the peripheral ring region. The lattice is then used as a fill for a cell whose region is bounded by the peripheral ring radius and if extruded, the top and bottom axial planes of the core.
+
+When a core peripheral ring is not present, the core lattice outer region is an empty universe that is the same universe used to represent dummy assembly positions. This lattice is then used as a fill for a cell whose region is constrained by a cylinder that contains the entire core lattice. For hexagonal lattices, the radius of this ring is equivalent to `([LATTICE_SIZE] + 2) / 2 * [ASSEMBLY_PITCH]`, where `[ASSEMBLY_PITCH]` is the pitch of the assembly and `[LATTICE_SIZE]` is the number of assembly widths that spans the lattice. For example, a 1 ring hexagonal assembly lattice has 3 assembly widths, a 2 ring hexagonal assembly lattice has 5 assembly widths, a 3 ring  hexagonal assembly lattice has 7 assembly widths, and so on. For Cartesian lattices, the ring radius will be set to `([LATTICE_SIZE] / 2 * SQRT(2) * [ASSEMBLY_PITCH]`, where `LATTICE_SIZE` is the number of assembly widths of the lattice. For example, a 4x4 square lattice has 4 assembly widths. This additional cell defined by a cylindrical region is created to represent the outer boundary of the CSG domain in a simpler manner, instead of as a jagged or non-uniform boundary that would result for a hexagonal lattice or a lattice with dummy assembly positions.
+
 !syntax parameters /Mesh/CoreMeshGenerator
 
 !syntax inputs /Mesh/CoreMeshGenerator
