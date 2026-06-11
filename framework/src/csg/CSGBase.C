@@ -547,9 +547,9 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
                " that is different " +
                "from the universe of the same name in the CSGBase instance.");
   auto & univ = _universe_list.getUniverse(universe.getName());
-  univ.removeCell(
-      cell.getName()); // this will produce error that cell is not found in the case that the
-                       // universe is actually an engineering unit, so we don't need to check that.
+  // removeCell will produce error that cell is not found in the case that the universe is actually
+  // an engineering unit, so we don't need to check that.
+  univ.removeCell(cell.getName());
 }
 
 void

@@ -14,7 +14,7 @@ All custom engineering units must implement the following methods (first two met
 - `getAttributes()`: returns a map of necessary unit attributes to their values
 - `clone()`: clones the instance as a unique pointer
 
-All engineering units have additional information retrievable with the following methods:
+All engineering units have additional information retrievable with the following methods defined in the abstract `CSGEngUnit` class:
 
 - `getName()`: returns the name of the unit
 - `getBehavior()`: returns what type of object this unit behaves like (`"SURFACE"`, `"CELL"`, or `"UNIVERSE"`)
@@ -30,7 +30,7 @@ More details on implementing this method and the requirements for each of the th
 
 !alert! note title=Naming Conventions and Restrictions
 
-To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the expanded cell cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable. All components are created in a separate `CSGBase` object (`_internal_base`) rather than the parent `CSGBase` instance, so conflicts with the parent's existing names are not checked at after expansion (when the two bases are joined) rather than during the expansion process.
+To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. For example, if a `CSGCellEngUnit` is named `my_cell`, the expanded cell cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable.
 
 !alert-end!
 
