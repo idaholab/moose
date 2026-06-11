@@ -25,7 +25,7 @@ public:
                             const mfem::IntegrationPoint & ip) override
   {
     const mfem::real_t r = _base.Eval(T, ip);
-    return 1.0 / std::sqrt(r*r + _eps*_eps);
+    return 1.0 / std::sqrt(r * r + _eps * _eps);
   }
 
 private:
