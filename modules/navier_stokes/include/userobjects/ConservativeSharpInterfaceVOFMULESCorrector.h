@@ -14,12 +14,12 @@ class LinearFVBoundaryCondition;
 class ConservativeSharpInterfaceCurvatureCalculator;
 /**
  * Applies an explicit bounded correction to a donor/upwind alpha solve, following the same
- * bounded-flux-plus-limited-correction structure used by interFoam's MULES path.
+ * bounded-flux-plus-limited-correction structure used by the sharp-interface VOF path.
  */
 class ConservativeSharpInterfaceVOFMULESCorrector : public GeneralUserObject,
-                                        public NonADFunctorInterface,
-                                        public BlockRestrictable,
-                                        public FaceArgProducerInterface
+                                                    public NonADFunctorInterface,
+                                                    public BlockRestrictable,
+                                                    public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();

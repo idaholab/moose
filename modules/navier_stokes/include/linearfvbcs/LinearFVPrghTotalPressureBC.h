@@ -16,11 +16,10 @@
 class ElemInfo;
 
 /**
- * Linear-FV analog of OpenFOAM's prghTotalPressure boundary condition.
+ * Linear-FV total-pressure boundary condition for a reduced-pressure solve.
  *
  * This is a fixed-value p_rgh boundary. It applies the supplied static/total pressure reference,
- * subtracts the OpenFOAM p_rgh hydrostatic offset, and on backflow subtracts the incoming dynamic
- * pressure used with pressureInletOutletVelocity.
+ * subtracts the p_rgh hydrostatic offset, and on backflow subtracts the incoming dynamic pressure.
  */
 class LinearFVPrghTotalPressureBC : public LinearFVAdvectionDiffusionBC
 {

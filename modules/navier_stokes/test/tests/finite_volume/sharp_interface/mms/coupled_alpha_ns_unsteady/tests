@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INTERFOAM_PARITY_IMPLEMENTATION_PLAN.md'
+  design = 'SHARP_INTERFACE_IMPLEMENTATION_PLAN.md'
   [unsteady_coupled_alpha_ns_mules]
     type = MMSTest
     input = 'test_mules.py'

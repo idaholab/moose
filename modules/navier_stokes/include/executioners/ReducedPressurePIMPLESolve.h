@@ -92,7 +92,6 @@ private:
   const Real _volume_fraction_max_courant;
   const bool _adjust_momentum_pressure_time_step;
   const Real _momentum_pressure_max_courant;
-  const bool _volume_fraction_outer_corrections;
   std::string _startup_pressure_initialization;
   const unsigned int _startup_flux_corrections;
   Real _cumulative_continuity_error = 0.0;

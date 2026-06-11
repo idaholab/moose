@@ -15,7 +15,7 @@
 
 /**
  * Adds the reduced-pressure momentum predictor forcing reconstructed from face
- * snGrad/face-force data, matching the interFoam-style predictor contract.
+ * snGrad/face-force data.
  */
 class LinearFVFaceBasedMomentumPressure : public LinearFVElementalKernel
 {

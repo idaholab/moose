@@ -93,10 +93,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.transferParam<bool>(RhieChowMassFlux::validParams(),
                              "use_cached_momentum_predictor_operator");
   params.set<bool>("use_cached_momentum_predictor_operator") = true;
-  params.transferParam<std::string>(RhieChowMassFlux::validParams(),
-                                    "momentum_predictor_operator_diagnostic_file_base");
-  params.transferParam<Real>(RhieChowMassFlux::validParams(),
-                             "momentum_predictor_operator_diagnostic_time");
 
   MooseEnum pressure_formulation("reduced total", "reduced");
   params.addParam<MooseEnum>(
@@ -116,18 +112,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "predictor terms.");
   params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                              "apply_pressure_velocity_writeback");
-  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "apply_pressure_face_flux_correction");
-  params.addParam<bool>(
-      "use_interfoam_predictor_contract",
-      true,
-      "Sharp-interface reduced-pressure flow uses the live unsplit momentum predictor and does "
-      "not enable any sharp-only split/direct predictor forcing variants.");
   params.addParam<bool>(
       "add_momentum_continuity_error_sink",
       false,
       "Whether to add the conservative momentum continuity-error sink conditioning term. This is "
-      "not part of standard interFoam's momentum equation.");
+      "not part of the standard sharp-interface momentum equation.");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "vof_rho_phi_functor");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
@@ -142,14 +131,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
                                          "liquid_density_functor");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "gas_density_functor");
-  params.transferParam<std::string>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                                    "sharp_flux_diagnostic_file_base");
-  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "sharp_flux_diagnostic_time");
-  params.transferParam<Real>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "sharp_flux_diagnostic_front_band_width");
-  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "sharp_flux_diagnostic_all_faces");
   params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                              "require_vof_rho_phi_functor");
   params.set<bool>("require_vof_rho_phi_functor") = true;
@@ -372,15 +353,13 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.addParam<Real>("near_interface_upper",
                         0.99,
                         "Upper threshold for the reference-solver-like near-interface indicator.");
-  params.addParamNamesToGroup(
-      "pressure_formulation add_transient_projection_flux "
-      "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
-      "apply_pressure_face_flux_correction transient_projection_face_acceleration "
-      "use_interfoam_predictor_contract "
-      "surface_tension_face_acceleration surface_tension_cell_acceleration "
-      "hydrostatic_density_gradient_face_acceleration "
-      "hydrostatic_density_gradient_cell_acceleration",
-      "Sharp Interface Pressure Correction");
+  params.addParamNamesToGroup("pressure_formulation add_transient_projection_flux "
+                              "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback "
+                              "transient_projection_face_acceleration "
+                              "surface_tension_face_acceleration surface_tension_cell_acceleration "
+                              "hydrostatic_density_gradient_face_acceleration "
+                              "hydrostatic_density_gradient_cell_acceleration",
+                              "Sharp Interface Pressure Correction");
 
   params.addParamNamesToGroup("surface_tension_momentum_source_x surface_tension_momentum_source_y "
                               "surface_tension_momentum_source_z hydrostatic_momentum_source_x "
@@ -424,11 +403,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
   if (_pressure_formulation == "total" && _solve_for_dynamic_pressure)
     paramError("solve_for_dynamic_pressure",
                "pressure_formulation = 'total' requires solve_for_dynamic_pressure = false.");
-
-  if (!getParam<bool>("use_interfoam_predictor_contract"))
-    paramError("use_interfoam_predictor_contract",
-               "The sharp-interface reduced-pressure path now follows the interFoam-style live "
-               "unsplit predictor contract only.");
 
   const auto & contact_angle_models = getParam<std::vector<std::string>>("contact_angle_models");
   const bool has_dynamic_model = containsDynamicContactAngleModel(contact_angle_models);
@@ -880,10 +854,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
   params.set<bool>("use_cached_momentum_predictor_operator") =
       getParam<bool>("use_cached_momentum_predictor_operator");
   params.set<bool>("split_momentum_predictor_operator") = use_face_based_reduced_pressure_predictor;
-  params.set<std::string>("momentum_predictor_operator_diagnostic_file_base") =
-      getParam<std::string>("momentum_predictor_operator_diagnostic_file_base");
-  params.set<Real>("momentum_predictor_operator_diagnostic_time") =
-      getParam<Real>("momentum_predictor_operator_diagnostic_time");
   if (parameters().isParamValid("gravity"))
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
   if (_solve_for_dynamic_pressure)
@@ -892,8 +862,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
   params.set<bool>("add_capillary_hydrostatic_flux") = _add_capillary_hydrostatic_flux;
   params.set<bool>("apply_pressure_velocity_writeback") =
       getParam<bool>("apply_pressure_velocity_writeback");
-  params.set<bool>("apply_pressure_face_flux_correction") =
-      getParam<bool>("apply_pressure_face_flux_correction");
   params.set<MooseFunctorName>("vof_rho_phi_functor") =
       getParam<MooseFunctorName>("vof_rho_phi_functor");
   params.set<MooseFunctorName>("volume_fraction_functor") =
@@ -906,13 +874,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
       getParam<MooseFunctorName>("liquid_density_functor");
   params.set<MooseFunctorName>("gas_density_functor") =
       getParam<MooseFunctorName>("gas_density_functor");
-  params.set<std::string>("sharp_flux_diagnostic_file_base") =
-      getParam<std::string>("sharp_flux_diagnostic_file_base");
-  params.set<Real>("sharp_flux_diagnostic_time") = getParam<Real>("sharp_flux_diagnostic_time");
-  params.set<Real>("sharp_flux_diagnostic_front_band_width") =
-      getParam<Real>("sharp_flux_diagnostic_front_band_width");
-  params.set<bool>("sharp_flux_diagnostic_all_faces") =
-      getParam<bool>("sharp_flux_diagnostic_all_faces");
   params.set<bool>("require_vof_rho_phi_functor") = getParam<bool>("require_vof_rho_phi_functor");
   params.set<bool>("enforce_vof_rho_phi_contract") = getParam<bool>("enforce_vof_rho_phi_contract");
   params.set<Real>("vof_rho_phi_contract_abs_tol") = getParam<Real>("vof_rho_phi_contract_abs_tol");

@@ -19,7 +19,6 @@
 #include <string>
 #include <unordered_map>
 #include <set>
-#include <unordered_set>
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/threads.h"
@@ -75,13 +74,13 @@ public:
   };
 
   /**
-   * OpenFOAM-like momentum predictor owner.
+   * Cached momentum predictor owner.
    *
    * This object is the single source of truth for the cached predictor equation used by Rhie-Chow.
-   * diagonal_raw is the relaxed solve diag() while openfoam_diagonal_raw is the D() used by
-   * fvMatrix::A(); H(U) is rebuilt from source, boundary-source, and off-diagonal pieces. PETSc
-   * remains the solve backend; this object owns the FV equation pieces that PETSc assembly would
-   * otherwise flatten.
+   * diagonal_raw is the relaxed solve diagonal while pressure_coupling_diagonal_raw is the
+   * coefficient used by pressure-coupling consumers. H(U) is rebuilt from source,
+   * boundary-source, and off-diagonal pieces. PETSc remains the solve backend; this object owns the
+   * FV equation pieces that PETSc assembly would otherwise flatten.
    */
   struct MomentumPredictorOperator : public LinearFVAssemblyConsumer
   {
@@ -93,7 +92,7 @@ public:
     std::unique_ptr<NumericVector<Number>> constant_source_raw;
     std::unique_ptr<NumericVector<Number>> rhs_raw;
     std::unique_ptr<NumericVector<Number>> diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> openfoam_diagonal_raw;
+    std::unique_ptr<NumericVector<Number>> pressure_coupling_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> pre_relaxation_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> relaxation_source_raw;
     std::unique_ptr<NumericVector<Number>> boundary_source_raw;
@@ -163,16 +162,6 @@ public:
                                          const Function & exact_pressure) const;
   /// Access the currently stored pressure-equation face flux.
   Real storedPressureEquationFlux(const FaceInfo & fi) const;
-  /// Debug accessors for the discrete internal-face pressure diffusion operator pieces.
-  Real debugPressureElemMatrixContribution(const FaceInfo & fi) const;
-  Real debugPressureNeighborMatrixContribution(const FaceInfo & fi) const;
-  Real debugPressureElemRHSContribution(const FaceInfo & fi) const;
-  /// Signed sum of boundary mass fluxes for audit purposes.
-  Real boundaryMassFluxImbalance() const;
-  /// Maximum absolute boundary mass flux for audit purposes.
-  Real maxBoundaryMassFluxMagnitude() const;
-  /// L2 norm of all current face mass fluxes for audit purposes.
-  Real faceMassFluxL2Norm() const;
   /// Maximum face-flux Courant number over active flow cells for the supplied timestep.
   virtual Real maxCourant(const Real dt) const;
   /// Detailed audit of the cell/face responsible for the maximum face-flux Courant number.
@@ -186,14 +175,8 @@ public:
   virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
   virtual void computeCellVelocity();
-  /// Debug accessor for the current cell HbyA state.
-  Real cellHbyARaw(const unsigned int system_i, const dof_id_type dof) const;
-  /// Debug accessor for the current cell Ainv state.
+  /// Accessor for the current cell Ainv state.
   Real cellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
-  /// Null-safe debug accessor for the current cell HbyA state.
-  Real debugCellHbyARaw(const unsigned int system_i, const dof_id_type dof) const;
-  /// Null-safe debug accessor for the current cell Ainv state.
-  Real debugCellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
   /// Cache the assembled/relaxed momentum predictor operator for one component.
   void cacheMomentumPredictorOperator(const unsigned int system_i,
                                       const NumericVector<Number> * rhs_override = nullptr,
@@ -201,7 +184,7 @@ public:
                                       const NumericVector<Number> * body_force = nullptr);
   /// Begin streaming native linear FV assembly contributions into the cached split predictor.
   void beginFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i);
-  /// Finalize the streamed split predictor and apply OpenFOAM-like equation relaxation to it.
+  /// Finalize the streamed split predictor and apply equation relaxation to it.
   void completeFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i,
                                                         const Real relaxation_parameter,
                                                         const bool enforce_diagonal_dominance);
@@ -225,8 +208,6 @@ public:
   bool splitMomentumPredictorOperator() const { return _split_momentum_predictor_operator; }
   /// Update boundary pressure gradients from the current predictor and boundary velocity state.
   void updatePressureBoundaryNormalGradients(const bool apply_reference_adjustment);
-  /// Audit representative top/left pressure-boundary constraint state.
-  void auditPressureBoundaryGradientState(const std::string & stage_label) const;
   /// Refresh boundary-face velocity values from the active FV velocity BC objects.
   virtual void updateVelocityBoundaryState();
 
@@ -317,15 +298,6 @@ protected:
   const MomentumPredictorOperator *
   cachedMomentumPredictorOperator(const unsigned int system_i) const;
 
-  /// Dump the cached UEqn-like predictor decomposition for relaxation parity checks.
-  void dumpMomentumPredictorOperatorDiagnostic(const unsigned int system_i,
-                                               const unsigned int call_id,
-                                               NumericVector<Number> & solution,
-                                               const MomentumPredictorOperator & predictor,
-                                               NumericVector<Number> & h_source_raw,
-                                               NumericVector<Number> & hby_a_raw,
-                                               NumericVector<Number> & ainv_raw) const;
-
   /// Access the cached fvMatrix::D() diagonal used by pressure projection for a component.
   const NumericVector<Number> *
   cachedMomentumPredictorDiagonalRaw(const unsigned int system_i) const;
@@ -374,7 +346,7 @@ protected:
   /**
    * Predictor-side face flux in the same native pressure-correction space consumed by the
    * pressure equation and pressure boundary-condition updates. For stock RC this is a normal
-   * flux density; sharp/conservative paths publish an OpenFOAM-style area-integrated phi. It is
+   * flux density; sharp/conservative paths publish an area-integrated phi. It is
    * still a pressure-correction-space predictor quantity, not the accepted transport phi.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_flux;
@@ -464,12 +436,6 @@ protected:
   /// Whether the momentum predictor operator already excludes explicit pressure/body-force terms.
   const bool _split_momentum_predictor_operator;
 
-  /// Optional CSV file base for cached momentum predictor decomposition diagnostics.
-  const std::string _momentum_predictor_operator_diagnostic_file_base;
-
-  /// Simulation time at which to start dumping momentum predictor operator diagnostics.
-  const Real _momentum_predictor_operator_diagnostic_time;
-
   /// UEqn-like predictor operators for each momentum component.
   std::vector<std::unique_ptr<MomentumPredictorOperator>> _momentum_predictor_operators;
 
@@ -478,9 +444,6 @@ protected:
 
   /// Indicates whether all streamed component operators have been vector-finalized.
   bool _cached_predictor_operator_finalized = false;
-
-  /// Monotonic ID used to distinguish repeated HbyA diagnostic dumps at the same time step.
-  unsigned int _momentum_predictor_operator_diagnostic_call_count = 0;
 
   /// Pointer to the body force terms
   std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;

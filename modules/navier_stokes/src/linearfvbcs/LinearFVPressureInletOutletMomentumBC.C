@@ -11,7 +11,6 @@
 
 #include "ElemInfo.h"
 #include "FEProblemBase.h"
-#include "NS.h"
 
 registerMooseObject("NavierStokesApp", LinearFVPressureInletOutletMomentumBC);
 
@@ -20,9 +19,9 @@ LinearFVPressureInletOutletMomentumBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription(
-      "Adds an OpenFOAM-style pressureInletOutletVelocity boundary condition for velocity "
-      "components. On outflow it behaves like a zero-gradient / extrapolated outlet; on backflow "
-      "it fixes the tangential velocity and extrapolates the normal velocity.");
+      "Adds a pressure-controlled inlet/outlet boundary condition for velocity components. On "
+      "outflow it behaves like a zero-gradient / extrapolated outlet; on backflow it fixes the "
+      "tangential velocity and extrapolates the normal velocity.");
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
@@ -35,24 +34,12 @@ LinearFVPressureInletOutletMomentumBC::validParams()
       "backflow_value",
       "0",
       "The tangential backflow velocity component imposed when the local boundary flow reverses "
-      "and becomes inflow. The OpenFOAM dam-break path uses the default value of zero.");
+      "and becomes inflow. The dam-break path uses the default value of zero.");
   params.addParam<MooseFunctorName>(
       "face_flux",
       "corrected_face_phi",
-      "The corrected face-flux functor used to switch between outflow and backflow. This matches "
-      "OpenFOAM pressureInletOutletVelocity, which switches on phi rather than cell velocity.");
-  params.addParam<MooseFunctorName>(
-      NS::density,
-      "1",
-      "Deprecated compatibility parameter. The boundary condition now acts directly on velocity.");
-  params.addParam<MooseFunctorName>(
-      "density_gradient_functor",
-      "0",
-      "Deprecated compatibility parameter. The boundary condition now acts directly on velocity.");
-  params.addParam<Real>(
-      "minimum_density",
-      0.0,
-      "Deprecated compatibility parameter. The boundary condition now acts directly on velocity.");
+      "The corrected face-flux functor used to switch between outflow and backflow. This switches "
+      "on phi rather than cell velocity.");
   params.addParam<bool>(
       "use_two_term_expansion",
       false,
@@ -107,14 +94,16 @@ LinearFVPressureInletOutletMomentumBC::outwardFaceFlux() const
   const auto state = determineState();
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  return boundary_normal_multiplier * _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
+  return boundary_normal_multiplier *
+         _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
 }
 
 const ElemInfo &
 LinearFVPressureInletOutletMomentumBC::fluidElemInfo() const
 {
-  return _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? *_current_face_info->neighborInfo()
-                                                                    : *_current_face_info->elemInfo();
+  return _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
+             ? *_current_face_info->neighborInfo()
+             : *_current_face_info->elemInfo();
 }
 
 Real
@@ -220,7 +209,8 @@ LinearFVPressureInletOutletMomentumBC::computeBoundaryNormalGradient() const
 
   const auto & elem_info = fluidElemInfo();
   const Real distance = computeCellToFaceDistance();
-  return (computeBackflowBoundaryValue() - _var.getElemValue(elem_info, determineState())) / distance;
+  return (computeBackflowBoundaryValue() - _var.getElemValue(elem_info, determineState())) /
+         distance;
 }
 
 Real
@@ -236,9 +226,8 @@ LinearFVPressureInletOutletMomentumBC::computeBoundaryValueRHSContribution() con
     return computeOutflowBoundaryValueRHSContribution();
 
   const auto & elem_info = fluidElemInfo();
-  return computeBackflowBoundaryValue() -
-         computeBackflowBoundaryValueMatrixContribution() *
-             _var.getElemValue(elem_info, determineState());
+  return computeBackflowBoundaryValue() - computeBackflowBoundaryValueMatrixContribution() *
+                                              _var.getElemValue(elem_info, determineState());
 }
 
 Real

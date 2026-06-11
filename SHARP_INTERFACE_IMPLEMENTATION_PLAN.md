@@ -1,12 +1,12 @@
-# InterFoam Parity Implementation Plan
+# Sharp-Interface Implementation Plan
 
 ## Goal
 
-Achieve algorithmic parity, at the alpha-transport and mixture-coupling level, with the `interFoam`
-free-surface solver workflow for the air-water dam-break target in `modules/navier_stokes`.
+Achieve algorithmic consistency, at the alpha-transport and mixture-coupling level, for the
+air-water dam-break target in `modules/navier_stokes`.
 
-This does not mean matching OpenFOAM line-by-line. It means reproducing the same algorithmic
-structure and the same key robustness mechanisms:
+This does not mean matching a reference solver line-by-line. It means reproducing the same
+algorithmic structure and the same key robustness mechanisms:
 
 - bounded donor/base transport
 - explicit high-order and compressive correction fluxes
@@ -37,7 +37,7 @@ The branch now has:
 - a sharper discontinuous-step regression that exercises the correction loop on a non-smooth alpha
   field
 
-The branch does **not** yet have full `interFoam` parity because:
+The branch does **not** yet have the full target sharp-interface workflow because:
 
 - the custom MULES donor backbone is still under active debugging and is not yet trustworthy on a
   discontinuous sharp-step alpha field
@@ -48,14 +48,14 @@ The branch does **not** yet have full `interFoam` parity because:
 ## Implementation Update: 2026-04-23
 
 The current implementation state is more advanced than the original draft, but it also exposed one
-specific blocker that must be resolved before claiming `interFoam`-style parity.
+specific blocker that must be resolved before claiming the target sharp-interface workflow.
 
 ### What Is Implemented
 
 - `ConservativeSharpInterfaceVOFMULESCorrector` now owns published face-flux state for donor, high-order,
   correction, limited alpha flux, and accumulated `rho_phi`.
 - `ReducedPressurePIMPLESolve` now supports dedicated volume-fraction systems and alpha subcycling.
-- A first `interFoam`-style split exists:
+- A first sharp-interface split exists:
   - donor/base alpha transport
   - explicit correction flux
   - limiter iterations
@@ -104,8 +104,8 @@ algorithmic focus has now shifted to the limiter itself:
 - bounded alpha updates are applied once per correction sweep from
   `alphaPhiBD + relaxation * lambda * alphaPhiCorr`
 
-This is closer to `interFoam` than the earlier incremental “remaining-flux acceptance” approach,
-but it is still not full parity with OpenFOAM's exact `MULES::limiter(...)` implementation.
+This is closer to the target bounded-correction algorithm than the earlier incremental
+“remaining-flux acceptance” approach, but it is still not the final limiter implementation.
 
 ### Implication For The Plan
 
@@ -124,8 +124,8 @@ The current hydrostatic-column scaffold now keeps the interface present (`alpha_
 global step instead of remaining quiescent. This is the gating issue before the 2D dam-break
 benchmark can be used as a meaningful parity target.
 
-The current task is to make the reduced-pressure sharp-interface flow path follow `interFoam`
-more literally at startup:
+The current task is to make the reduced-pressure sharp-interface flow path follow the intended
+startup sequence:
 
 1. Treat the solved pressure variable as true `p_rgh`.
    - Seed a hydrostatically consistent reduced-pressure field before any startup cleanup or first
@@ -151,7 +151,7 @@ more literally at startup:
 
 5. Tighten pressure-boundary parity for gravity-driven closed-box startup.
    - Wall and zero-flux pressure treatment must remain consistent with gravity and reduced
-     pressure, analogous to `fixedFluxPressure` behavior in `interFoam`.
+     pressure.
    - Do not let the startup reconstruction impose a boundary pressure/flux relation that is
      inconsistent with the interior hydrostatic operator.
 
@@ -359,7 +359,7 @@ This is the minimum algorithmic bar for parity.
 
 ### 1. Keep alpha transport as a dedicated subsystem
 
-Do not try to force full `interFoam` parity entirely through the generic linear FV scalar
+Do not try to force the full sharp-interface workflow entirely through the generic linear FV scalar
 advection kernel. The alpha path now has enough special behavior that it should be treated as a
 dedicated transport subsystem.
 
@@ -428,7 +428,7 @@ path.
 
 ### Objective
 
-Match the repeated correction-loop structure used by `interFoam`.
+Match the intended repeated correction-loop structure.
 
 ### Tasks
 
@@ -448,13 +448,13 @@ Match the repeated correction-loop structure used by `interFoam`.
 - Multiple correction sweeps materially change the transported alpha result.
 - Limiter iterations operate on the current correction flux state.
 
-## Phase 2B: Match OpenFOAM-Style Limiter Budgets And Correction Flux Construction
+## Phase 2B: Match Limiter Budgets And Correction Flux Construction
 
 ### Objective
 
-Improve the current face-`lambda` correction loop so it more literally follows OpenFOAM's MULES
-budget accounting and correction-flux construction, which is necessary for stable high-density-
-ratio free-surface scenarios.
+Improve the current face-`lambda` correction loop so it more literally follows the target limiter
+budget accounting and correction-flux construction, which is necessary for stable
+high-density-ratio free-surface scenarios.
 
 ### Tasks
 
@@ -468,8 +468,7 @@ ratio free-surface scenarios.
   - compressive face flux contribution
   - raw correction `alphaPhiCorr = alphaPhiHO + alphaPhiComp - alphaPhiBD`
 - Keep the compressive contribution algorithmically distinct from the advective high-order
-  contribution until the raw correction is assembled, mirroring the OpenFOAM choreography more
-  closely.
+  contribution until the raw correction is assembled.
 - Rebuild face alpha values and raw correction fluxes on each `nAlphaCorr` sweep from the current
   alpha state.
 - Audit and tighten correction-side boundary handling for:
@@ -527,7 +526,7 @@ Move from correction-only subcycling to full alpha subcycling.
 
 ### Objective
 
-Match `interFoam`’s use of alpha-subcycled fluxes to rebuild density transport consistently.
+Use alpha-subcycled fluxes to rebuild density transport consistently.
 
 ### Tasks
 
@@ -667,7 +666,7 @@ Validate the algorithm in the correct order before relying on the full dam-break
 
 ## Definition Of Done
 
-The implementation should be considered algorithmically at parity with `interFoam` when:
+The implementation should be considered algorithmically complete when:
 
 - alpha transport uses bounded donor plus limited correction fluxes
 - repeated correction sweeps are implemented
@@ -682,17 +681,17 @@ The implementation should be considered algorithmically at parity with `interFoa
 The remaining hydrostatic-column instability is now concentrated in the handoff from one outer
 SIMPLE iteration to the next. The first and second outer corrections can stay close to the
 expected hydrostatic branch, but the next outer momentum predictor still rebuilds an operator that
-is not equivalent to `interFoam`'s `UEqn` / `pEqn` choreography.
+is not equivalent to the intended `UEqn` / `pEqn` choreography.
 
-### Why The Current Local Path Still Differs From `interFoam`
+### Why The Current Local Path Still Differs From The Intended Operator Flow
 
 - the current MOOSE path assembles a full momentum system, including pressure-gradient and
   reduced-pressure sharp-interface source kernels, and solves it first
 - `RhieChowMassFlux::computeHbyA()` then tries to reconstruct `HbyA` by subtracting pressure and
   explicit source terms back out of the already-assembled momentum matrix/RHS
-- `interFoam`, by contrast, builds a relaxed non-pressure `UEqn`, uses that same operator for the
-  optional momentum predictor solve, and then derives `rAU`, `HbyA`, `phiHbyA`, and `phig` from
-  that same operator before the pressure correction loop
+- the intended flow builds a relaxed non-pressure `UEqn`, uses that same operator for the optional
+  momentum predictor solve, and then derives `rAU`, `HbyA`, `phiHbyA`, and `phig` from that same
+  operator before the pressure correction loop
 
 The current parity effort therefore needs a real predictor-operator split, not more tuning of the
 post-hoc `HbyA` reconstruction.
@@ -736,7 +735,7 @@ Acceptance target for Patch 1:
 
 Goal:
 
-- make the cached predictor operator match OpenFOAM's pressure-free `UEqn` more literally
+- make the cached predictor operator match the pressure-free `UEqn` more literally
 
 Scope:
 
@@ -760,14 +759,14 @@ Acceptance target for Patch 2:
    - `num_iterations = 3`, `num_piso_iterations = 0`, `num_steps = 1`
 4. Only then rerun the full first-step `num_iterations = 20` case.
 
-### Direct `interFoam` Port Checklist
+### Direct Operator-Flow Port Checklist
 
-The next stage should be executed as a direct file-by-file port of the `UEqn.H` / `pEqn.H`
-handoff rather than more local tuning. The goal is to make the state produced at the end of
-`pEqn` the exact state expected by the next outer-loop momentum predictor.
+The next stage should be executed as a direct operator-flow port of the `UEqn` / `pEqn` handoff
+rather than more local tuning. The goal is to make the state produced at the end of `pEqn` the
+exact state expected by the next outer-loop momentum predictor.
 
 1. `modules/navier_stokes/src/executioners/ReducedPressurePIMPLESolve.C`
-   - make the outer loop follow `interFoam` literally:
+   - make the outer loop follow the intended sequence:
      `alphaEqnSubCycle -> mixture/rho refresh -> UEqn -> while(correct) pEqn`
    - keep `correctPhi` logic startup-only
    - snapshot previous-iteration fields once at outer-loop entry, not inside the pressure
@@ -832,8 +831,8 @@ handoff rather than more local tuning. The goal is to make the state produced at
 
 Highest-value target:
 
-- get the post-`pEqn` `U` writeback to be the exact `interFoam` handoff state the next momentum
-  predictor expects
+- get the post-`pEqn` `U` writeback to be the exact handoff state the next momentum predictor
+  expects
 
 ### Current Thorough Port Steps
 

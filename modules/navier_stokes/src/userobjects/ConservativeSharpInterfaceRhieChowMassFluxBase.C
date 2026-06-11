@@ -18,12 +18,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include <limits>
 #include <map>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 InputParameters
@@ -50,13 +47,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       true,
       "Whether the solved pressure correction should be reconstructed back to the cell velocity "
       "state after each reduced-pressure correction stage.");
-  params.addParam<bool>(
-      "apply_pressure_face_flux_correction",
-      true,
-      "Whether the solved pressure-equation face flux should be applied to the transport "
-      "predictor flux (-phiHbyA) when forming the live corrected face mass flux. Disable this "
-      "to run a predictor-only face-flux diagnostic while still assembling the pressure "
-      "equation.");
   params.addParam<MooseFunctorName>(
       "volume_fraction_functor",
       "",
@@ -155,30 +145,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       "rho_g",
       "Gas-phase density functor used to reconstruct the VOF-consistent volumetric face flux "
       "from rhoPhi and alphaPhi during the outer-iteration handoff.");
-  params.addParam<std::string>(
-      "sharp_flux_diagnostic_file_base",
-      "",
-      "Optional file base for a one-time CSV dump of the sharp-interface face-flux "
-      "decomposition.");
-  params.addParam<Real>(
-      "sharp_flux_diagnostic_time",
-      -1.0,
-      "Simulation time at which to dump the sharp-interface face-flux decomposition. A negative "
-      "value disables the dump.");
-  params.addRangeCheckedParam<Real>(
-      "sharp_flux_diagnostic_front_band_width",
-      0.01,
-      "sharp_flux_diagnostic_front_band_width>=0",
-      "Width behind the current alpha=0.5 front used to select faces for the diagnostic dump.");
-  params.addParam<bool>(
-      "sharp_flux_diagnostic_all_faces",
-      false,
-      "Whether to dump every flow face instead of only faces in the front diagnostic band.");
   params.addParam<bool>(
       "require_vof_rho_phi_functor",
       false,
-      "Require the alpha-owned VOF rhoPhi and alphaPhi functors. Enable this for OpenFOAM "
-      "incompressibleVoF parity runs so momentum advection cannot fall back to rho_f * phi.");
+      "Require the alpha-owned VOF rhoPhi and alphaPhi functors so momentum advection cannot fall "
+      "back to rho_f * phi.");
   params.addParam<bool>(
       "enforce_vof_rho_phi_contract",
       false,
@@ -223,7 +194,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _add_transient_projection_flux(getParam<bool>("add_transient_projection_flux")),
     _add_capillary_hydrostatic_flux(getParam<bool>("add_capillary_hydrostatic_flux")),
     _apply_pressure_velocity_writeback(getParam<bool>("apply_pressure_velocity_writeback")),
-    _apply_pressure_face_flux_correction(getParam<bool>("apply_pressure_face_flux_correction")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _reference_pressure_point(getParam<Point>("reference_pressure_point")),
     _near_interface_lower(getParam<Real>("near_interface_lower")),
@@ -249,11 +219,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _vof_alpha_phi_limited_name(getParam<MooseFunctorName>("vof_alpha_phi_limited_functor")),
     _liquid_density_name(getParam<MooseFunctorName>("liquid_density_functor")),
     _gas_density_name(getParam<MooseFunctorName>("gas_density_functor")),
-    _sharp_flux_diagnostic_file_base(getParam<std::string>("sharp_flux_diagnostic_file_base")),
-    _sharp_flux_diagnostic_time(getParam<Real>("sharp_flux_diagnostic_time")),
-    _sharp_flux_diagnostic_front_band_width(
-        getParam<Real>("sharp_flux_diagnostic_front_band_width")),
-    _sharp_flux_diagnostic_all_faces(getParam<bool>("sharp_flux_diagnostic_all_faces")),
     _require_vof_rho_phi_functor(getParam<bool>("require_vof_rho_phi_functor")),
     _enforce_vof_rho_phi_contract(getParam<bool>("enforce_vof_rho_phi_contract")),
     _vof_rho_phi_contract_abs_tol(getParam<Real>("vof_rho_phi_contract_abs_tol")),
@@ -329,12 +294,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::getMassFlux(const FaceInfo & fi)
   return RhieChowMassFlux::getMassFlux(fi);
 }
 
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::rawRhieChowMassFlux(const FaceInfo & fi) const
-{
-  return RhieChowMassFlux::getMassFlux(fi);
-}
-
 void
 ConservativeSharpInterfaceRhieChowMassFluxBase::commitAcceptedTimestepTransportHistory()
 {
@@ -360,9 +319,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorOperatorPhi(
   if (face_measure <= libMesh::TOLERANCE)
     return 0.0;
 
-  // _pressure_predictor_base_flux and _transient_projection_flux are cached as
-  // OpenFOAM-style integrated fluxes. Convert back to MOOSE's normal-flux
-  // transport convention for diagnostics/accessors.
+  // _pressure_predictor_base_flux and _transient_projection_flux are cached as area-integrated
+  // fluxes. Convert back to the normal-flux transport convention used by consistency checks and
+  // postprocessors.
   return (-libmesh_map_find(_pressure_predictor_base_flux, fi.id()) -
           libmesh_map_find(_transient_projection_flux, fi.id())) /
          face_measure;
@@ -886,9 +845,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
     auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
     { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
 
-    // The sharp pressure equation stores OpenFOAM-style area-integrated phi.
-    // Convert back to MOOSE's normal-flux-density transport convention only at
-    // the publication/writeback boundary.
+    // The sharp pressure equation stores area-integrated phi. Convert back to the
+    // normal-flux-density transport convention only at the publication/writeback boundary.
     state.predictor_transport_phi =
         integratedToVolumetricPhi(-libmesh_map_find(_phiHbyA_flux, fi->id()));
     state.pressure_equation_phi =
@@ -898,9 +856,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
     const Real phig_phi = integratedToVolumetricPhi(libmesh_map_find(_phig_flux, fi->id()));
     state.pressure_writeback_phi =
         _pressure_equation_flux_valid ? state.pressure_equation_phi + phig_phi : 0.0;
-    state.corrected_transport_phi =
-        state.predictor_transport_phi +
-        (_apply_pressure_face_flux_correction ? state.pressure_equation_phi : 0.0);
+    state.corrected_transport_phi = state.predictor_transport_phi + state.pressure_equation_phi;
 
     state.normal_pressure_ainv = pressureFaceNormalAinv(fi, time_arg);
     state.writeback_reconstruction_scalar =
@@ -946,7 +902,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
     const auto state = pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
     _pressure_equation_volumetric_flux[fi->id()] = state.pressure_equation_phi;
     _pressure_correction_phi[fi->id()] = state.pressure_writeback_phi;
-    // OpenFOAM parity contract:
+    // Sharp-interface pressure-correction contract:
     //   phi = phiHbyA + pEqn.flux()
     // This face flux is authoritative for continuity/transport. The reconstructed
     // cell velocity below is only the cell-centered U writeback branch and is not
@@ -971,115 +927,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::freezeVOFTransportState(
             : libmesh_map_find(_corrected_face_phi, fi->id());
 
   _vof_transport_phi_valid = true;
-
-  dumpSharpFluxDiagnostic();
-}
-
-void
-ConservativeSharpInterfaceRhieChowMassFluxBase::dumpSharpFluxDiagnostic()
-{
-  if (_sharp_flux_diagnostic_file_base.empty() || _sharp_flux_diagnostic_time < 0.0 ||
-      _t + libMesh::TOLERANCE < _sharp_flux_diagnostic_time)
-    return;
-
-  const auto current_t_step = static_cast<unsigned int>(_fe_problem.timeStep());
-  if (_last_sharp_flux_diagnostic_t_step == current_t_step)
-    return;
-
-  const auto time_arg = Moose::currentState();
-  auto face_alpha = [this, &time_arg](const FaceInfo * const fi, const bool elem_side)
-  {
-    if (!_volume_fraction || !fi)
-      return 0.0;
-
-    const Elem * const elem = elem_side ? fi->elemPtr() : fi->neighborPtr();
-    if (!elem || !hasBlocks(elem->subdomain_id()))
-      return 0.0;
-
-    return std::max(0.0,
-                    std::min(1.0,
-                             MetaPhysicL::raw_value(
-                                 (*_volume_fraction)(Moose::ElemArg{elem, false}, time_arg))));
-  };
-
-  Real front_x = -std::numeric_limits<Real>::max();
-  if (_volume_fraction)
-    for (const auto * const fi : flowFaceInfo())
-    {
-      const Real elem_alpha = face_alpha(fi, true);
-      const Real neighbor_alpha = face_alpha(fi, false);
-      if ((elem_alpha - 0.5) * (neighbor_alpha - 0.5) <= 0.0 &&
-          std::max(elem_alpha, neighbor_alpha) >= _near_interface_lower &&
-          std::min(elem_alpha, neighbor_alpha) <= _near_interface_upper)
-        front_x = std::max(front_x, fi->faceCentroid()(0));
-    }
-
-  if (front_x == -std::numeric_limits<Real>::max())
-    for (const auto * const fi : flowFaceInfo())
-      front_x = std::max(front_x, fi->faceCentroid()(0));
-
-  const std::string file_name = _sharp_flux_diagnostic_file_base + ".csv";
-  std::ofstream out(file_name);
-  out << std::setprecision(17);
-  out << "time,t_step,front_x,face_id,x,y,nx,ny,area,coord,elem_id,neighbor_id,elem_alpha,"
-         "neighbor_alpha,hbya_phi,transient_phi,phig_phi,predictor_phi,pEqn_phi,recovery_phi,"
-         "corrected_phi,vof_transport_phi,vof_rho_phi,vof_rho_phi_density,vof_alpha_phi,"
-         "vof_reconstructed_phi,vof_rho_phi_contract_error,pressure_predictor_base_phi,"
-         "internal_phiHbyA\n";
-
-  for (const auto * const fi : flowFaceInfo())
-  {
-    if (!_sharp_flux_diagnostic_all_faces && fi->faceCentroid()(0) + libMesh::TOLERANCE <
-                                                 front_x - _sharp_flux_diagnostic_front_band_width)
-      continue;
-
-    const Real elem_alpha = face_alpha(fi, true);
-    const Real neighbor_alpha = face_alpha(fi, false);
-    const Real face_measure = fi->faceArea() * fi->faceCoord();
-    auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
-    { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
-    const Real hbya_phi = storedPredictorOperatorPhi(*fi);
-    const Real transient_phi =
-        integratedToVolumetricPhi(libmesh_map_find(_transient_projection_flux, fi->id()));
-    const Real phig_phi = integratedToVolumetricPhi(libmesh_map_find(_phig_flux, fi->id()));
-    const Real p_eqn_phi =
-        _pressure_equation_flux_valid
-            ? integratedToVolumetricPhi(libmesh_map_find(_pressure_equation_flux, fi->id()))
-            : 0.0;
-    const Real predictor_phi = hbya_phi + transient_phi + phig_phi;
-    const Real recovery_phi = transient_phi + phig_phi + p_eqn_phi;
-    const Real corrected_phi = libmesh_map_find(_corrected_face_phi, fi->id());
-    const Real vof_transport_phi = libmesh_map_find(_vof_transport_phi, fi->id());
-    const Real vof_rho_phi = vofRhoPhiIntegrated(*fi);
-    const Real vof_rho_phi_density = face_measure > 0.0 ? vof_rho_phi / face_measure : 0.0;
-    const Real vof_alpha_phi = vofAlphaPhiLimitedIntegrated(*fi);
-    const Real vof_reconstructed_phi = vofRhoPhiReconstructedVolumetricPhi(*fi);
-    Real vof_contract_error = 0.0;
-    if (_liquid_density && _gas_density)
-    {
-      const Real gas_density = evaluateCellBasedFaceScalarFunctor(_gas_density, fi, time_arg);
-      const Real liquid_density = evaluateCellBasedFaceScalarFunctor(_liquid_density, fi, time_arg);
-      vof_contract_error = vof_rho_phi - (gas_density * vof_transport_phi * face_measure +
-                                          (liquid_density - gas_density) * vof_alpha_phi);
-    }
-    const Real pressure_predictor_base_phi = hbya_phi + transient_phi;
-    const Real internal_phi_hbya =
-        integratedToVolumetricPhi(libmesh_map_find(_phiHbyA_flux, fi->id()));
-
-    out << _t << ',' << current_t_step << ',' << front_x << ',' << fi->id() << ','
-        << fi->faceCentroid()(0) << ',' << fi->faceCentroid()(1) << ',' << fi->normal()(0) << ','
-        << fi->normal()(1) << ',' << fi->faceArea() << ',' << fi->faceCoord() << ','
-        << fi->elemPtr()->id() << ','
-        << (fi->neighborPtr() ? std::to_string(fi->neighborPtr()->id()) : std::string("")) << ','
-        << elem_alpha << ',' << neighbor_alpha << ',' << hbya_phi << ',' << transient_phi << ','
-        << phig_phi << ',' << predictor_phi << ',' << p_eqn_phi << ',' << recovery_phi << ','
-        << corrected_phi << ',' << vof_transport_phi << ',' << vof_rho_phi << ','
-        << vof_rho_phi_density << ',' << vof_alpha_phi << ',' << vof_reconstructed_phi << ','
-        << vof_contract_error << ',' << pressure_predictor_base_phi << ',' << internal_phi_hbya
-        << '\n';
-  }
-
-  _last_sharp_flux_diagnostic_t_step = current_t_step;
 }
 
 void
@@ -1145,11 +992,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
   {
     if (!_vof_rho_phi)
       paramError("vof_rho_phi_functor",
-                 "The conservative sharp-interface OpenFOAM-parity path requires the VOF-owned "
+                 "The conservative sharp-interface path requires the VOF-owned "
                  "rhoPhi functor.");
     if (!_vof_alpha_phi_limited)
       paramError("vof_alpha_phi_limited_functor",
-                 "The conservative sharp-interface OpenFOAM-parity path requires the VOF-owned "
+                 "The conservative sharp-interface path requires the VOF-owned "
                  "limited alphaPhi functor.");
     if (!_liquid_density)
       paramError("liquid_density_functor",
@@ -1213,9 +1060,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
   const auto time_arg = Moose::currentState();
   for (const auto * fi : _sharp_interface_face_info)
   {
-    // Keep the pressure-corrected face flux as the source of truth, matching
-    // OpenFOAM's direct phi update. Do not reconstruct cell U and project it
-    // back to faces here; that round trip is not an exact inverse.
+    // Keep the pressure-corrected face flux as the source of truth. Do not reconstruct cell U and
+    // project it back to faces here; that round trip is not an exact inverse.
     _face_mass_flux[fi->id()] = transportMassFluxDensityFromVolumetricPhi(
         fi, libmesh_map_find(_corrected_face_phi, fi->id()), time_arg);
   }
@@ -1579,9 +1425,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectio
   const Real ddt_coupling_coeff =
       std::max(0.0, 1.0 - std::min(std::abs(phi_corr) / phi_scale, 1.0));
 
-  // OpenFOAM's Euler ddtCorr contribution is
-  // fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr) * phiCorr / dt, and
-  // pressureCorrector adds interpolate(rho*rAU()) times that value to phiHbyA.
+  // Euler ddtCorr contribution: fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr) * phiCorr / dt.
+  // The pressure corrector adds interpolate(rho*rAU()) times that value to phiHbyA.
   return ddt_coupling_coeff * state.face_rho * state.normal_raw_ainv * phi_corr / dt;
 }
 
@@ -1634,9 +1479,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolum
         _p_diffusion_kernel->computeNeighborMatrixContribution();
     const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
 
-    // The sharp pressure projection stores the solved OpenFOAM-style pEqn.flux
-    // including face area. MOOSE transport converts back to a normal flux
-    // density when publishing corrected_face_phi.
+    // The sharp pressure projection stores the solved pEqn.flux including face area. Transport
+    // converts back to a normal flux density when publishing corrected_face_phi.
     return p_neighbor_value * neighbor_matrix_contribution +
            p_elem_value * elem_matrix_contribution - elem_rhs_contribution;
   }

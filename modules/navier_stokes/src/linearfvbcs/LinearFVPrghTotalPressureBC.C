@@ -20,29 +20,27 @@ LinearFVPrghTotalPressureBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription(
-      "Adds an OpenFOAM-style prghTotalPressure fixed-value boundary condition for a linear FV "
-      "p_rgh solve. This imposes the supplied static/total pressure reference with the OpenFOAM "
-      "p_rgh hydrostatic offset; on backflow it also subtracts the incoming dynamic pressure.");
+      "Adds a total-pressure fixed-value boundary condition for a linear FV p_rgh solve. This "
+      "imposes the supplied static/total pressure reference with the p_rgh hydrostatic offset; on "
+      "backflow it also subtracts the incoming dynamic pressure.");
   params.addRequiredParam<MooseFunctorName>(
       "functor", "The static/total pressure reference value imposed when there is no backflow.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density functor.");
   params.addParam<MooseFunctorName>(
       "face_flux",
       "corrected_face_phi",
-      "The corrected face-flux functor used for the OpenFOAM neg(phi) dynamic-pressure switch.");
+      "The corrected face-flux functor used for the backflow dynamic-pressure switch.");
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
   params.addRequiredParam<RealVectorValue>("gravity", "The gravitational acceleration vector.");
-  params.addParam<Point>(
-      "reference_pressure_point",
-      Point(0.0, 0.0, 0.0),
-      "The point used to form gh for the OpenFOAM-style p_rgh hydrostatic offset.");
+  params.addParam<Point>("reference_pressure_point",
+                         Point(0.0, 0.0, 0.0),
+                         "The point used to form gh for the p_rgh hydrostatic offset.");
   params.addParam<bool>(
       "use_normal_velocity_only",
       true,
-      "Use only the extrapolated normal velocity in the dynamic-pressure correction. This matches "
-      "OpenFOAM pressureInletOutletVelocity when no tangentialVelocity is supplied.");
+      "Use only the extrapolated normal velocity in the dynamic-pressure correction.");
   return params;
 }
 
@@ -115,7 +113,8 @@ LinearFVPrghTotalPressureBC::outwardFaceFlux() const
   const auto state = determineState();
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  return boundary_normal_multiplier * _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
+  return boundary_normal_multiplier *
+         _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
 }
 
 Real

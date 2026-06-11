@@ -1,5 +1,5 @@
 [Tests]
-  design = 'INTERFOAM_PARITY_IMPLEMENTATION_PLAN.md'
+  design = 'SHARP_INTERFACE_IMPLEMENTATION_PLAN.md'
   issues = '#single_phase_mixture_model'
   [sharp_interface_vof_subcycles]
     type = Exodiff

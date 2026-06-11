@@ -47,14 +47,6 @@ protected:
                                                    NumericVector<Number> & rhs);
   virtual void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
                                                     NumericVector<Number> & rhs);
-  virtual bool auditMomentumPredictorRebuild() const { return false; }
-  void printMomentumPredictorPreSolveAudit(const unsigned int system_i,
-                                           const NumericVector<Number> & solution,
-                                           SparseMatrix<Number> & mmat,
-                                           const NumericVector<Number> & rhs,
-                                           const NumericVector<Number> * rhs_base,
-                                           const Real norm_factor) const;
-
   /// Computes new velocity field based on computed pressure gradients
   /// @param subtract_updated_pressure If we need to subtract the updated
   /// pressure gradient from the right hand side of the system

@@ -5,7 +5,7 @@ sharp-interface MOOSE implementation before any more solver edits.
 
 It is written to answer one question only:
 
-`Where do we still differ discretely from the interFoam-style reduced-pressure path?`
+`Where do we still differ discretely from the intended reduced-pressure sharp-interface path?`
 
 ## Intended Operator Contract
 

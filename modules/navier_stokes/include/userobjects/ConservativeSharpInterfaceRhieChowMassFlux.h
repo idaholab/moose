@@ -16,10 +16,11 @@
  * Sharp-interface Rhie-Chow implementation for the reference-parity momentum path.
  *
  * The momentum unknowns are velocity components U_i. Conservative behavior is supplied by the
- * density-weighted matrix coefficients and face fluxes, matching the interFoam style
+ * density-weighted matrix coefficients and face fluxes for the reduced-pressure
  * ddt(rho, U) + div(rhoPhi, U) form without storing rho*U as a primary unknown.
  */
-class ConservativeSharpInterfaceRhieChowMassFlux : public ConservativeSharpInterfaceRhieChowMassFluxBase
+class ConservativeSharpInterfaceRhieChowMassFlux
+  : public ConservativeSharpInterfaceRhieChowMassFluxBase
 {
 public:
   static InputParameters validParams();

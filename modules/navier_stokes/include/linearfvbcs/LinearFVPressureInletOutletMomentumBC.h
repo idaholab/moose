@@ -15,7 +15,7 @@
 class ElemInfo;
 
 /**
- * OpenFOAM-style pressureInletOutletVelocity boundary condition for the sharp-interface path.
+ * Pressure-controlled inlet/outlet velocity boundary condition for the sharp-interface path.
  *
  * The historical class name is retained, but the solved variable and returned boundary values are
  * velocity components, not rho*u.
@@ -48,7 +48,8 @@ protected:
   Real computeVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue outwardUnitNormal() const;
-  RealGradient computeVelocityGradient(const ElemInfo & elem_info, const Moose::StateArg & state) const;
+  RealGradient computeVelocityGradient(const ElemInfo & elem_info,
+                                       const Moose::StateArg & state) const;
 
   const unsigned int _dim;
   const MooseLinearVariableFVReal * const _u_var;

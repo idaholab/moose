@@ -87,8 +87,8 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   if (_use_nonorthogonal_correction || _use_deviatoric_terms)
     _var.computeCellGradients();
 
-  const bool need_more_ghosting = Moose::FV::setInterpolationMethod(
-      *this, _advected_interp_method, "advected_interp_method");
+  const bool need_more_ghosting =
+      Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
   if (_adv_interp_method)
   {
     if (_adv_interp_method->needsGradients())
@@ -444,10 +444,9 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
   if (_mass_flux_functor)
   {
     const auto state = determineState();
-    const Moose::FaceArg face_arg =
-        (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-            ? makeCDFace(*_current_face_info)
-            : singleSidedFaceArg(_current_face_info);
+    const Moose::FaceArg face_arg = (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+                                        ? makeCDFace(*_current_face_info)
+                                        : singleSidedFaceArg(_current_face_info);
     _face_mass_flux = (*_mass_flux_functor)(face_arg, state);
   }
   else
@@ -490,93 +489,6 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
   _stress_rhs_contribution = 0;
-}
-
-void
-LinearWCNSFVMomentumFlux::accumulateCurrentFaceResidualContributions(
-    const NumericVector<Number> & solution,
-    NumericVector<Number> & advection_residual,
-    NumericVector<Number> & stress_residual)
-{
-  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
-    const auto dof_id_neighbor =
-        _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
-    const Real elem_value = solution(dof_id_elem);
-    const Real neighbor_value = solution(dof_id_neighbor);
-
-    const Real elem_advection =
-        computeInternalAdvectionElemMatrixContribution() * _current_face_area;
-    const Real neighbor_advection =
-        computeInternalAdvectionNeighborMatrixContribution() * _current_face_area;
-    const Real advection_rhs = computeInternalAdvectionRHSContribution() * _current_face_area;
-    const Real stress_matrix = computeInternalStressMatrixContribution() * _current_face_area;
-    const Real stress_rhs = computeInternalStressRHSContribution() * _current_face_area;
-
-    if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
-    {
-      advection_residual.add(
-          dof_id_elem,
-          elem_advection * elem_value + neighbor_advection * neighbor_value - advection_rhs);
-      stress_residual.add(dof_id_elem, stress_matrix * (elem_value - neighbor_value) - stress_rhs);
-    }
-
-    if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
-    {
-      advection_residual.add(
-          dof_id_neighbor,
-          -elem_advection * elem_value - neighbor_advection * neighbor_value + advection_rhs);
-      stress_residual.add(
-          dof_id_neighbor, -stress_matrix * (elem_value - neighbor_value) + stress_rhs);
-    }
-  }
-  else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-           _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-  {
-    if (_current_face_info->boundaryIDs().empty())
-      return;
-
-    if (_current_face_info->boundaryIDs().size() > 1)
-      mooseError("We currently don't support multiple boundary conditions for the same variable on "
-                 "the same face. Current face center : " +
-                 Moose::stringify(_current_face_info->faceCentroid()) +
-                 " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
-
-    auto * bc_pointer = _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-    if (!bc_pointer)
-      return;
-
-    bc_pointer->setupFaceData(_current_face_info, _current_face_type);
-    const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(bc_pointer);
-    mooseAssert(adv_diff_bc, "This should be a valid BC!");
-
-    const Real advection_matrix =
-        computeAdvectionBoundaryMatrixContribution(adv_diff_bc) * _current_face_area;
-    const Real advection_rhs =
-        computeAdvectionBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
-    const Real stress_matrix =
-        computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area;
-    const Real stress_rhs =
-        computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area;
-
-    if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-    {
-      const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
-      const Real elem_value = solution(dof_id_elem);
-      advection_residual.add(dof_id_elem, advection_matrix * elem_value - advection_rhs);
-      stress_residual.add(dof_id_elem, stress_matrix * elem_value - stress_rhs);
-    }
-    else
-    {
-      const auto dof_id_neighbor =
-          _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
-      const Real neighbor_value = solution(dof_id_neighbor);
-      advection_residual.add(
-          dof_id_neighbor, advection_matrix * neighbor_value - advection_rhs);
-      stress_residual.add(dof_id_neighbor, stress_matrix * neighbor_value - stress_rhs);
-    }
-  }
 }
 
 const MooseLinearVariableFVReal &

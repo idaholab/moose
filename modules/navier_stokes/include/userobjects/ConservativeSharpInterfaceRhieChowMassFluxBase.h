@@ -3,8 +3,6 @@
 #include "RhieChowMassFlux.h"
 #include "PetscVectorReader.h"
 
-#include <limits>
-
 class ElemInfo;
 class LinearSystem;
 
@@ -93,7 +91,6 @@ public:
   {
     return _suppress_startup_pressure_predictor_flux_sources;
   }
-  Real rawRhieChowMassFlux(const FaceInfo & fi) const;
   Real storedCorrectedFacePhi(const FaceInfo & fi) const;
   Real storedPredictorOperatorPhi(const FaceInfo & fi) const;
   Real storedPressureCorrectionPhi(const FaceInfo & fi) const;
@@ -123,7 +120,6 @@ protected:
   Real pressureFaceNormalAinv(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
-  void dumpSharpFluxDiagnostic();
   void checkVOFRhoPhiContract() const;
   void writePressureCorrectedVelocityToMomentumSolution(const Moose::StateArg & time_arg);
   void rebuildSharpInterfaceFaceInfo();
@@ -240,7 +236,6 @@ protected:
   const bool _add_transient_projection_flux;
   const bool _add_capillary_hydrostatic_flux;
   const bool _apply_pressure_velocity_writeback;
-  const bool _apply_pressure_face_flux_correction;
   const RealVectorValue _gravity;
   const Point _reference_pressure_point;
   const Real _near_interface_lower;
@@ -260,10 +255,6 @@ protected:
   const MooseFunctorName _vof_alpha_phi_limited_name;
   const MooseFunctorName _liquid_density_name;
   const MooseFunctorName _gas_density_name;
-  const std::string _sharp_flux_diagnostic_file_base;
-  const Real _sharp_flux_diagnostic_time;
-  const Real _sharp_flux_diagnostic_front_band_width;
-  const bool _sharp_flux_diagnostic_all_faces;
   const bool _require_vof_rho_phi_functor;
   const bool _enforce_vof_rho_phi_contract;
   const Real _vof_rho_phi_contract_abs_tol;
@@ -284,5 +275,4 @@ protected:
   bool _suppress_explicit_hydrostatic_pressure_flux = false;
   bool _suppress_startup_pressure_predictor_flux_sources = false;
   bool _pressure_coupled_velocity_correction_valid = false;
-  unsigned int _last_sharp_flux_diagnostic_t_step = std::numeric_limits<unsigned int>::max();
 };

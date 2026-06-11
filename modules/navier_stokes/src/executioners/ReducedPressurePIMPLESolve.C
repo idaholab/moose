@@ -111,19 +111,13 @@ ReducedPressurePIMPLESolve::validParams()
       "momentum_pressure_max_courant>0",
       "Maximum allowed momentum/pressure face-flux Courant number when "
       "adjust_momentum_pressure_time_step=true.");
-  params.addParam<bool>(
-      "volume_fraction_outer_corrections",
-      false,
-      "Deprecated compatibility switch. The reduced-pressure sharp-interface PIMPLE path now "
-      "always refreshes the volume-fraction system(s) and alpha-owned rhoPhi on every outer "
-      "correction to match interFoam's outer-loop architecture.");
   MooseEnum startup_pressure_initialization("none projection-only", "projection-only");
   params.addParam<MooseEnum>(
       "startup_pressure_initialization",
       startup_pressure_initialization,
       "Startup reduced-pressure initialization policy on the first time step. Use "
-      "'projection-only' to mimic interFoam's initCorrectPhi-style startup projection without "
-      "overwriting the user-supplied reduced-pressure field, or 'none' to skip startup pressure "
+      "'projection-only' to apply startup continuity projection without overwriting the "
+      "user-supplied reduced-pressure field, or 'none' to skip startup pressure "
       "cleanup entirely.");
   params.addRangeCheckedParam<unsigned int>(
       "startup_flux_corrections",
@@ -138,7 +132,6 @@ ReducedPressurePIMPLESolve::validParams()
       "volume_fraction_l_max_its should_solve_volume_fractions volume_fraction_min_value "
       "volume_fraction_max_value volume_fraction_subcycles volume_fraction_max_courant "
       "adjust_momentum_pressure_time_step momentum_pressure_max_courant "
-      "volume_fraction_outer_corrections "
       "startup_pressure_initialization startup_flux_corrections "
       "num_pressure_nonorthogonal_correctors n_nonorthogonal_correctors",
       "Volume Fraction Equations");
@@ -162,7 +155,6 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _volume_fraction_max_courant(getParam<Real>("volume_fraction_max_courant")),
     _adjust_momentum_pressure_time_step(getParam<bool>("adjust_momentum_pressure_time_step")),
     _momentum_pressure_max_courant(getParam<Real>("momentum_pressure_max_courant")),
-    _volume_fraction_outer_corrections(getParam<bool>("volume_fraction_outer_corrections")),
     _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections"))
 {
   _startup_pressure_initialization =
@@ -170,8 +162,8 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
 
   if (_pin_pressure)
     paramError("pin_pressure",
-               "ReducedPressurePIMPLE supports the OpenFOAM-style pressure boundary-condition "
-               "path only; pressure pinning is not supported.");
+               "ReducedPressurePIMPLE supports pressure boundary-condition constraints only; "
+               "pressure pinning is not supported.");
 
   if (_volume_fraction_min_value > _volume_fraction_max_value)
     paramError("volume_fraction_max_value",
@@ -383,16 +375,15 @@ ReducedPressurePIMPLESolve::solve()
       // once per outer SIMPLE iteration.
       advanceMomentumOuterIterationHistory();
 
-    // Mirror interFoam's outer-loop choreography by doing the alpha subcycling
-    // and mixture/rhoPhi refresh inside every outer correction, just before
-    // the momentum-pressure coupling work. This keeps rhoPhi consistent with
-    // the outer-corrector state instead of freezing one alpha update for a
-    // later sequence of momentum-pressure repredictions.
+    // Do the alpha subcycling and mixture/rhoPhi refresh inside every outer correction, just before
+    // the momentum-pressure coupling work. This keeps rhoPhi consistent with the outer-corrector
+    // state instead of freezing one alpha update for a later sequence of momentum-pressure
+    // repredictions.
     if (_has_volume_fraction_systems && _should_solve_volume_fractions)
     {
       // Keep the true timestep-old alpha in solutionOld(), but advance the
       // nonlinear-state stack once per outer iteration so we have a separate
-      // previous-outer iterate available, analogous to interFoam's prevIter().
+      // previous-outer iterate available.
       advanceVolumeFractionOuterIterationHistory();
 
       const bool use_previous_timestep_transport_flux =
@@ -780,10 +771,8 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
   _console << "Applying startup continuity / CorrectPhi projection before PIMPLE iterations"
            << std::endl;
 
-  // Closest MOOSE equivalent of interFoam's initCorrectPhi: honor the current
-  // reduced-pressure field, assemble the momentum predictor coefficients, and
-  // run pressure-only startup continuity corrections before the first outer
-  // iteration.
+  // Honor the current reduced-pressure field, assemble the momentum predictor coefficients, and run
+  // pressure-only startup continuity corrections before the first outer iteration.
   if (!_momentum_systems.empty() && _rc_uo)
   {
     assembleMomentumPredictorOnly();
@@ -1000,8 +989,8 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
       _problem.execute(EXEC_NONLINEAR);
       if (corrector)
       {
-        // OpenFOAM's MULES path bounds alpha through the limited face fluxes instead of
-        // projecting the solved field. Do not apply the inherited scalar lower limiter here.
+        // This path bounds alpha through the limited face fluxes instead of projecting the solved
+        // field. Do not apply the inherited scalar lower limiter here.
         residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
                                            *system,
                                            _volume_fraction_equation_relaxation[i],

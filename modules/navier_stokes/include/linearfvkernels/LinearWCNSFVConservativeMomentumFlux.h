@@ -12,7 +12,6 @@
 #include "LinearFVFluxKernel.h"
 #include "FVInterpolationMethodInterface.h"
 #include "FVAdvectedInterpolationMethod.h"
-#include "libmesh/numeric_vector.h"
 
 #include <array>
 
@@ -55,16 +54,6 @@ public:
    * @param face_info The face info which will be used as current face info
    */
   virtual void setupFaceData(const FaceInfo * face_info) override;
-
-  /// Accumulate the current-face residual contributions split into advection and stress pieces.
-  void accumulateCurrentFaceResidualContributions(const NumericVector<Number> & solution,
-                                                  NumericVector<Number> & advection_residual,
-                                                  NumericVector<Number> & stress_residual);
-
-  /// Audit accessors for the currently prepared face state.
-  Real currentFaceMassFlux() const { return _face_mass_flux; }
-  std::pair<Real, Real> currentAdvectedInterpCoeffs() const { return _advected_interp_coeffs; }
-  Real currentAdvectedRHSFaceValue() const { return _advected_rhs_face_value; }
 
 protected:
   /// Computes the matrix contribution of the advective flux on the element side of current face
@@ -116,7 +105,7 @@ protected:
   /// iteration on the sharp-interface parity path.
   const Moose::Functor<Real> * const _mass_flux_functor;
 
-  /// Whether this OpenFOAM-parity kernel may fall back to the live Rhie-Chow mass flux.
+  /// Whether this sharp-interface kernel may fall back to the live Rhie-Chow mass flux.
   const bool _require_mass_flux_functor;
 
   /// The functor for the dynamic viscosity
