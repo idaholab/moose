@@ -95,8 +95,8 @@ CSGRegion::regionTypeName(const RegionType region_type)
               "Unexpected region type");
 
   constexpr std::array<const char *, 5> names = {
-      nullptr,        // RegionType::EMPTY       — not used as a postfix operator
-      nullptr,        // RegionType::HALFSPACE   — not used as a postfix operator
+      nullptr,        // RegionType::EMPTY (not used as a postfix operator)
+      nullptr,        // RegionType::HALFSPACE (not used as a postfix operator)
       "COMPLEMENT",   // RegionType::COMPLEMENT
       "INTERSECTION", // RegionType::INTERSECTION
       "UNION"         // RegionType::UNION

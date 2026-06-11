@@ -29,15 +29,15 @@ class CSGBase; // forward declaration
  * the basic CSGSurface components.
  *
  * Derived classes must implement:
- *   - expandUnit() — construct the equivalent CSGSurface(s) and CSGRegion using
+ *   - expandUnit(): construct the equivalent CSGSurface(s) and CSGRegion using
  *     _internal_base (e.g., _internal_base->addSurface(...)). The created CSGRegion should
  *     be a non-empty region assigned to _expanded_region so it can be returned by
  *     getExpandedRegion(). CSGBase::expandEngUnit() joins _internal_base afterward.
- *   - evaluateSurfaceEquationAtPoint() - must implement a method to be able to pass a
+ *   - evaluateSurfaceEquationAtPoint(): must implement a method to be able to pass a
  *     value to CSGSurface::getHalfspaceFromPoint() which will inform wether a point is
  *     in the positive or negative "half-space" of this "surface."
- *   - clone() — return a deep copy of the derived class.
- *   - getAttributes() — return a map of domain-specific attribute name to value.
+ *   - clone(): return a deep copy of the derived class.
+ *   - getAttributes(): return a map of domain-specific attribute name to value.
  */
 class CSGSurfaceEngUnit : public CSGSurface, public CSGEngUnit
 {
@@ -46,13 +46,13 @@ public:
    * @brief Construct a new CSGSurfaceEngUnit
    *
    * @param name unique name of surface (will be preserved on the registered surface)
-   * @param unit_type class name of the concrete derived type — pass
+   * @param unit_type class name of the concrete derived type -- pass
    *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    */
   CSGSurfaceEngUnit(const std::string & name, const std::string & unit_type);
 
   /**
-   * @brief Not supported before expansion — throws an error.
+   * @brief Not supported before expansion -- throws an error.
    *
    * Call CSGBase::addEngUnit() and then CSGBase::expandEngUnit() to expand this unit into
    * a concrete surface first. Derived classes may override this if pre-expansion querying
@@ -75,7 +75,7 @@ public:
    */
   Real evaluateSurfaceEquationAtPoint(const Point & p) const override = 0;
 
-  /// Satisfy CSGEngUnit::getName() — resolved via CSGSurface::getName()
+  /// Satisfy CSGEngUnit::getName() -- resolved via CSGSurface::getName()
   const std::string & getName() const override { return CSGSurface::getName(); }
 
   /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
@@ -123,7 +123,7 @@ protected:
    */
   CSGRegion getExpandedRegion() const;
 
-  /// clone() is pure virtual — derived classes must implement
+  /// clone() is pure virtual -- derived classes must implement
   std::unique_ptr<CSGSurface> clone() const override = 0;
 
   /// Stores the result of expandUnit(); EMPTY until then

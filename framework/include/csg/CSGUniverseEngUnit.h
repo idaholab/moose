@@ -27,18 +27,18 @@ class CSGBase; // forward declaration
  * equivalent CSGUniverse representation, along with all supporting surfaces and cells.
  *
  * Derived classes must implement:
- *   - expandUnit() — populate _internal_base: create cells via _internal_base->createCell(...)
+ *   - expandUnit(): populate _internal_base: create cells via _internal_base->createCell(...)
  *     (they go to the root automatically), create any non-root fill universes via
  *     _internal_base->createUniverse(...), and rename the root with
  *     _internal_base->renameRootUniverse("name"). The root IS the expanded universe.
  *     CSGBase::expandEngUnit() joins _internal_base via joinOtherBase() afterward.
- *   - clone() — return a deep copy of the derived class.
- *   - getAttributes() — return a map of domain-specific attribute name to value.
+ *   - clone(): return a deep copy of the derived class.
+ *   - getAttributes(): return a map of domain-specific attribute name to value.
  */
 class CSGUniverseEngUnit : public CSGUniverse, public CSGEngUnit
 {
 public:
-  /// Satisfy CSGEngUnit::getName() — resolved via CSGUniverse::getName()
+  /// Satisfy CSGEngUnit::getName() (resolved via CSGUniverse::getName())
   const std::string & getName() const override { return CSGUniverse::getName(); }
 
   /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
@@ -70,13 +70,13 @@ protected:
    * @brief Constructor for derived classes.
    *
    * @param name unique name of the universe (will be preserved on the plain CSGUniverse)
-   * @param unit_type class name of the concrete derived type — pass
+   * @param unit_type class name of the concrete derived type. Pass
    *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    * @param is_root true if this is the root universe (default false)
    */
   CSGUniverseEngUnit(const std::string & name, const std::string & unit_type, bool is_root = false);
 
-  /// addCell updates are not permitted on engineering units — the geometry
+  /// addCell updates are not permitted on engineering units. The geometry
   /// is defined by the derived class and produced only via expandUnit().
   ///@{
   void addCell(const CSGCell &) = delete;
@@ -98,7 +98,7 @@ protected:
    * Called exclusively by CSGBase. The root universe of _internal_base represents this
    * engineering unit's expanded universe. The implementation should:
    *   1. Create any needed surfaces via _internal_base->addSurface(...).
-   *   2. Create cells via _internal_base->createCell(...) — they go to the root automatically.
+   *   2. Create cells via _internal_base->createCell(...) (they go to the root automatically).
    *   3. Create any non-root fill universes via _internal_base->createUniverse(...).
    *   4. Rename the root with _internal_base->renameRootUniverse("desired_name") if needed.
    */

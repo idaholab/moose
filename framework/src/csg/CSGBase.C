@@ -1265,7 +1265,7 @@ CSGBase::deleteEngUnit(const CSGEngUnit & unit)
                " cannot be deleted as it is different from the engineering unit of the same name "
                "in the CSGBase instance.");
 
-  // Delegate to the typed delete method — it handles EngUnit index cleanup and type list erasure
+  // Delegate to the typed delete method which handles EngUnit index cleanup and type list erasure
   if (const auto * surf_unit = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
     deleteSurface(static_cast<const CSGSurface &>(*surf_unit));
   else if (const auto * cell_unit = dynamic_cast<const CSGCellEngUnit *>(&unit))
@@ -1334,7 +1334,7 @@ CSGBase::expandAllEngUnitsCycle(std::set<std::set<std::string>> & all_type_sets)
 CSGRegion
 CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
 {
-  // Get mutable reference from the owning surface list — expandUnit() is non-const
+  // Get mutable reference from the owning surface list (expandUnit() is non-const)
   auto & mutable_unit = static_cast<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
 
   // Derived class creates the CSGSurface object(s) in the unit's base object and sets
@@ -1371,7 +1371,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   // Replace every CSGSurfaceEngUnit reference in regions of CSGCells with the expanded sub-region
   replaceSurfaceRefsWithRegion(static_cast<const CSGSurface &>(mutable_unit), expanded_region);
 
-  // Remove the EngUnit (destroyed here — no more references to it after
+  // Remove the EngUnit (destroyed here, no more references to it after
   // replaceSurfaceRefsWithRegion)
   deleteEngUnit(unit);
   return expanded_region;
@@ -1380,7 +1380,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
 const CSGCell &
 CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 {
-  // Get mutable reference from the owning cell list — expandUnit() is non-const
+  // Get mutable reference from the owning cell list (expandUnit() is non-const)
   auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
 
   // Derived class populates an internal base object (owned by the unit) with the expanded cell (in
@@ -1412,7 +1412,7 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
   replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), expanded_cell);
 
-  // Remove the EngUnit (destroyed here — no more references to it after replaceCellRefs)
+  // Remove the EngUnit (destroyed here, no more references to it after replaceCellRefs)
   deleteEngUnit(unit);
   return expanded_cell;
 }
@@ -1420,7 +1420,7 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 const CSGUniverse &
 CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
 {
-  // Get mutable reference from the owning universe list — expandUnit() is non-const
+  // Get mutable reference from the owning universe list (expandUnit() is non-const)
   auto & mutable_unit =
       static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit.getName()));
 
@@ -1454,7 +1454,7 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   // Replace references in cell fills, lattice maps and outers, and the root universe
   replaceUniverseRefs(static_cast<const CSGUniverse &>(mutable_unit), expanded_univ);
 
-  // Remove the EngUnit (destroyed here — no more references to it after replaceUniverseRefs)
+  // Remove the EngUnit (destroyed here, no more references to it after replaceUniverseRefs)
   deleteEngUnit(unit);
   return expanded_univ;
 }
