@@ -276,19 +276,19 @@ private:
   std::vector<std::unique_ptr<MooseRandomStateless>> & _generators;
 
   /// Number of rows for this processor
-  dof_id_type _n_local_rows;
+  dof_id_type & _n_local_rows;
 
   /// Global row index for start of data for this processor
-  dof_id_type _local_row_begin;
+  dof_id_type & _local_row_begin;
 
   /// Global row index for end of data for this processor
-  dof_id_type _local_row_end;
+  dof_id_type & _local_row_end;
 
   /// Total number of rows in the sample matrix
-  dof_id_type _n_rows;
+  dof_id_type & _n_rows;
 
   /// Total number of columns in the sample matrix
-  dof_id_type _n_cols;
+  dof_id_type & _n_cols;
 
   /// Number of seeds
   std::size_t _n_seeds;
@@ -312,8 +312,8 @@ private:
   const dof_id_type _limit_get_row;
 
   /// The partitioning of the sampler matrix, built in reinit()
-  /// first is for normal mode and send is for batch mode
-  std::pair<LocalRankConfig, LocalRankConfig> _rank_config;
+  /// first is for normal mode and second is for batch mode
+  std::pair<LocalRankConfig, LocalRankConfig> & _rank_config;
 
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;

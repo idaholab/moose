@@ -18,6 +18,7 @@
       allow_test_objects = true
       cli_args = 'MultiApps/runner/mode=batch-restore'
       jsondiff = main_out.json
+      prereq = dynamic/normal
 
       detail = "batch execution with memory-based restoring, and"
     []
@@ -27,6 +28,7 @@
       allow_test_objects = true
       cli_args = 'MultiApps/runner/mode=batch-reset'
       jsondiff = main_out.json
+      prereq = dynamic/batch-restore
 
       detail = "batch execution with reset-based restoring."
     []
