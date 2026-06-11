@@ -257,7 +257,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
         mooseAssert(obtuse_angle_nodes.empty(), "Should not be empty");
 
         // Find the normal to the element plane
-        const auto elem_centroid = elem->true_centroid();
+        const auto elem_centroid = elem->vertex_average();
         const auto n_nodes = elem->n_nodes();
         Point plane_normal;
         // Two nodes could be aligned with the centroid in a non-convex polygon
@@ -411,7 +411,10 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
       // Keep all the cut elements, to be added at the end to avoid invalidating iterators
       if (fixed_it)
         for (auto & elem_uptr : elements_to_add_to_mesh_temp)
+        {
+          elem_uptr->inherit_data_from(*elem);
           elements_to_add_to_mesh.push_back(std::move(elem_uptr));
+        }
 
       // Heuristic did not work, just use a triangulation
       // NOTE: This is not the triangulation of the polygon. It is simple though
@@ -438,6 +441,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
             mooseError("Manual triangulation failed as two consecutive nodes are aligned with the "
                        "centroid");
 
+          new_elem->inherit_data_from(*elem);
           elements_to_add_to_mesh.push_back(std::move(new_elem));
         }
       }
