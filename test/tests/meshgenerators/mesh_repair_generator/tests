@@ -71,4 +71,12 @@
     requirement = "The system shall be able to repair a quadrilateral sliver element by absorbing it into a neighbor, promoting the neighbor to a polygon while keeping the mesh conformal."
     mesh_mode = 'replicated'
   []
+  [repair_sliver_combinations]
+    type = RunApp
+    input = repair_sliver_combinations.i
+    expect_out = 'Number of sliver elements repaired: 4'
+    issues = '#33151'
+    requirement = "The system shall be able to repair quadrilateral and polygon sliver elements against triangle, quadrilateral, and polygon neighbors, promoting each neighbor to a quadrilateral or polygon while keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
 []
