@@ -239,9 +239,8 @@ NEML2Action::act()
   if (_current_task == "add_material")
   {
     // Look up the NEML2 derivative tensor type for (y, x) variables, or error
-    auto derivTensorType = [this](neml2::TensorType y_type,
-                                  neml2::TensorType x_type,
-                                  const std::string & deriv_name)
+    auto derivTensorType =
+        [this](neml2::TensorType y_type, neml2::TensorType x_type, const std::string & deriv_name)
     {
       auto it = deriv_type_map.find({y_type, x_type});
       if (it == deriv_type_map.end())
