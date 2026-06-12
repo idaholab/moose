@@ -105,4 +105,28 @@
     requirement = "The system shall leave a sliver tetrahedron in place, rather than distorting the boundary, when it has no interior node that can be collapsed."
     mesh_mode = 'replicated'
   []
+  [repair_tet_sliver_needle]
+    type = RunApp
+    input = repair_tet_sliver_needle.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33151'
+    requirement = "The system shall repair high-valence needle sliver tetrahedra (two nearly-adjacent nodes / a short shared edge) by edge collapse, keeping a valid conformal all-tetrahedral mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_sliver_apex_outside]
+    type = RunApp
+    input = repair_tet_sliver_apex_outside.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver tetrahedron whose apex projects outside its opposite face (caught by the volume test, not the flap test), keeping a valid conformal all-tetrahedral mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_sliver_cluster]
+    type = RunApp
+    input = repair_tet_sliver_cluster.i
+    expect_out = 'repaired by edge collapse: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a cluster of adjacent sliver tetrahedra sharing nodes via node-disjoint passes, keeping a valid conformal all-tetrahedral mesh."
+    mesh_mode = 'replicated'
+  []
 []
