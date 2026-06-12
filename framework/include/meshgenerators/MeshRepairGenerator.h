@@ -71,9 +71,10 @@ private:
   void splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const;
 
   /// @brief Repair sliver (near-degenerate) first-order 2D elements (TRI3, QUAD4, polygons). Each
-  ///        sliver is removed and its far-side vertices are inserted into the longest-edge
-  ///        neighbor's shared edge, so the surface stays conformal (no holes or hanging nodes). The
-  ///        neighbor is promoted by vertex count: a triangle becomes a quad, else a polygon.
+  ///        sliver is removed and absorbed into its longest-edge neighbor, keeping the surface
+  ///        conformal (no holes or hanging nodes). A triangle sliver against a triangle neighbor
+  ///        splits that neighbor into two triangles; otherwise the neighbor absorbs the sliver's
+  ///        vertices and is promoted to a quad or polygon.
   /// @param mesh the mesh to modify
   void repairSlivers(std::unique_ptr<MeshBase> & mesh) const;
 };
