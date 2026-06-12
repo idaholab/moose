@@ -52,6 +52,11 @@ private:
   /// a 2D element is a sliver if every non-longest-edge vertex is within this fraction of the
   /// longest-edge length from that edge (0 disables)
   const Real _sliver_flap_tol;
+  /// a TET4 is a sliver if its volume is below this fraction of the mesh bounding-box volume
+  /// (0 disables)
+  const Real _sliver_volume_tol;
+  /// relative floor below which a collapse-reshaped tet is rejected as inverting / re-slivering
+  const Real _tet_collapse_volume_floor;
 
   /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify
@@ -77,4 +82,13 @@ private:
   ///        vertices and is promoted to a quad or polygon.
   /// @param mesh the mesh to modify
   void repairSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair sliver (near-degenerate) TET4 elements by edge collapse. Each sliver is removed
+  ///        by collapsing one of its edges (merging a node onto another existing node), keeping a
+  ///        valid all-tetrahedral, conformal, manifold mesh. A candidate collapse is committed only
+  ///        if it does not invert/degenerate any neighbor, does not create a non-manifold
+  ///        configuration, and does not distort the mesh boundary; otherwise the sliver is left in
+  ///        place. Repairs run in node-disjoint passes.
+  /// @param mesh the mesh to modify
+  void repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const;
 };

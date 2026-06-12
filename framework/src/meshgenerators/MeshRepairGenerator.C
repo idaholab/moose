@@ -10,6 +10,7 @@
 #include "MeshRepairGenerator.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
+#include "GeometryUtils.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_modification.h"
@@ -17,6 +18,9 @@
 #include "libmesh/face_c0polygon.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
+
+#include <array>
+#include <limits>
 
 registerMooseObject("MooseApp", MeshRepairGenerator);
 
@@ -66,7 +70,21 @@ MeshRepairGenerator::validParams()
       "A 2D element is treated as a sliver if every vertex other than the two ends of its longest "
       "edge lies within this fraction of the longest-edge length from that edge, projecting onto "
       "its interior (set to 0 to disable this test). Only used when 'fix_sliver_elements' is "
-      "set.");
+      "set. In 3D this is the apex-to-largest-face distance as a fraction of sqrt(largest-face "
+      "area).");
+  params.addRangeCheckedParam<Real>(
+      "sliver_element_volume_fraction",
+      1e-10,
+      "sliver_element_volume_fraction>=0",
+      "A TET4 whose volume is below this fraction of the mesh bounding-box volume is treated as a "
+      "sliver (set to 0 to disable this test). Only used when 'fix_sliver_elements' is set.");
+  params.addRangeCheckedParam<Real>(
+      "tet_collapse_volume_floor",
+      1e-9,
+      "tet_collapse_volume_floor>=0",
+      "When repairing a TET4 sliver by edge collapse, a reshaped neighbor tet is rejected (the "
+      "collapse is not performed) if its volume would drop below this fraction of the mesh "
+      "bounding-box volume, to avoid inverting elements or creating new slivers.");
 
   params.addParam<bool>(
       "renumber_contiguously",
@@ -90,7 +108,9 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
     _fix_sliver_elements(getParam<bool>("fix_sliver_elements")),
     _sliver_area_tol(getParam<Real>("sliver_element_area_fraction")),
-    _sliver_flap_tol(getParam<Real>("sliver_element_flap_tol"))
+    _sliver_flap_tol(getParam<Real>("sliver_element_flap_tol")),
+    _sliver_volume_tol(getParam<Real>("sliver_element_volume_fraction")),
+    _tet_collapse_volume_floor(getParam<Real>("tet_collapse_volume_floor"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
       !_boundary_id_merge && !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
@@ -120,6 +140,10 @@ MeshRepairGenerator::generate()
   // Repair sliver elements by absorbing them into their longest-edge neighbor
   if (_fix_sliver_elements)
     repairSlivers(mesh);
+
+  // Repair sliver TET4 elements by edge collapse
+  if (_fix_sliver_elements)
+    repairTetSlivers(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -765,5 +789,351 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
   {
     mesh->prepare_for_use();
     _console << "Number of sliver elements repaired: " << num_repaired << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
+{
+  // Bounding-box volume scale (3D analog of the 2D surface_scale) and derived thresholds
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  // A reshaped tet must keep |volume| above this floor (10x to avoid creating a new sliver)
+  const Real invert_floor = 10.0 * vol_scale * _tet_collapse_volume_floor;
+
+  // Signed volume of a tet from its four corner points
+  auto tetVol = [](const Point & a, const Point & b, const Point & c, const Point & d)
+  { return (b - a) * (c - a).cross(d - a) / 6.0; };
+
+  // Signed volume of TET4 e with node g replaced by node k (no mutation of the mesh)
+  auto tetVolSub = [&](const Elem & e, const Node * g, const Node * k)
+  {
+    std::array<const Point *, 4> p;
+    for (const auto i : make_range(4u))
+      p[i] = (e.node_ptr(i) == g) ? static_cast<const Point *>(k)
+                                  : static_cast<const Point *>(e.node_ptr(i));
+    return tetVol(*p[0], *p[1], *p[2], *p[3]);
+  };
+
+  // Largest face of a TET4: returns (area, side index) and sets apex_local to the off-face vertex
+  auto largestFace = [](const Elem & e, unsigned int & apex_local)
+  {
+    Real best = -1;
+    unsigned int best_side = 0;
+    for (const auto s : make_range(e.n_sides()))
+    {
+      const auto ns = e.nodes_on_side(s);
+      const Real a =
+          0.5 * (e.point(ns[1]) - e.point(ns[0])).cross(e.point(ns[2]) - e.point(ns[0])).norm();
+      if (a > best)
+      {
+        best = a;
+        best_side = s;
+      }
+    }
+    const auto ns = e.nodes_on_side(best_side);
+    apex_local = 0;
+    for (const auto i : make_range(4u))
+      if (i != ns[0] && i != ns[1] && i != ns[2])
+        apex_local = i;
+    return std::make_pair(best, best_side);
+  };
+
+  // A TET4 is a sliver if its volume is negligible or its apex is flat against its largest face
+  auto isTetSliver = [&](const Elem & e)
+  {
+    if (e.type() != TET4)
+      return false;
+    if (_sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh)
+      return true;
+    if (_sliver_flap_tol > 0)
+    {
+      unsigned int apex_local;
+      const auto [area, side] = largestFace(e, apex_local);
+      if (area > 0)
+      {
+        const auto ns = e.nodes_on_side(side);
+        const Real d = std::sqrt(geom_utils::pointTriangleDistanceSq(
+            e.point(apex_local), e.point(ns[0]), e.point(ns[1]), e.point(ns[2])));
+        if (d < _sliver_flap_tol * std::sqrt(area))
+          return true;
+      }
+    }
+    return false;
+  };
+
+  // Sorted node-id key of a tet face (for boundary-id transfer and the manifold check)
+  auto faceKey = [](dof_id_type a, dof_id_type b, dof_id_type c)
+  {
+    std::array<dof_id_type, 3> f{a, b, c};
+    std::sort(f.begin(), f.end());
+    return f;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    // node id -> ids of ALL incident elements (used for the collapse star and the non-TET4 guard);
+    // a tet-face -> use count (to find boundary faces independently of possibly-stale neighbor
+    // links); and the current TET4 slivers
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::map<std::array<dof_id_type, 3>, unsigned int> face_count;
+    std::vector<dof_id_type> sliver_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (elem->type() == TET4)
+      {
+        for (const auto s : make_range(elem->n_sides()))
+        {
+          const auto ns = elem->nodes_on_side(s);
+          ++face_count[faceKey(elem->node_id(ns[0]), elem->node_id(ns[1]), elem->node_id(ns[2]))];
+        }
+        if (isTetSliver(*elem))
+          sliver_ids.push_back(elem->id());
+      }
+    }
+    // A node on a face used by a single tet is on the mesh boundary
+    std::unordered_set<dof_id_type> boundary_nodes;
+    for (const auto & [f, count] : face_count)
+      if (count == 1)
+        boundary_nodes.insert(f.begin(), f.end());
+
+    BoundaryInfo & boundary_info = mesh->get_boundary_info();
+    std::unordered_set<dof_id_type> touched_nodes;
+    auto touches_repaired = [&touched_nodes](const Elem & e)
+    {
+      for (const auto i : make_range(e.n_nodes()))
+        if (touched_nodes.count(e.node_id(i)))
+          return true;
+      return false;
+    };
+
+    for (const auto sid : sliver_ids)
+    {
+      Elem * s = mesh->elem_ptr(sid);
+      if (!s || s->type() != TET4 || touches_repaired(*s) || !isTetSliver(*s))
+        continue;
+
+      // Evaluate a candidate "collapse gone-node G onto kept-node K": returns whether it is a
+      // valid, boundary-safe, non-inverting, manifold collapse, and (if so) its deleted/reshaped
+      // tets and a quality score (the minimum reshaped-tet relative volume).
+      Node * best_K = nullptr;
+      Node * best_G = nullptr;
+      std::vector<dof_id_type> best_deleted, best_reshaped;
+      Real best_score = -1;
+      Real best_edge_len = std::numeric_limits<Real>::max();
+
+      auto consider = [&](Node * K, Node * G, Real edge_len)
+      {
+        // Boundary rules: never move/remove a boundary node onto an interior position, and (to keep
+        // the boundary undistorted) never collapse an edge whose both endpoints are on the boundary
+        const bool K_bnd = boundary_nodes.count(K->id());
+        const bool G_bnd = boundary_nodes.count(G->id());
+        if (G_bnd && !K_bnd)
+          return; // would delete a boundary node
+        if (G_bnd && K_bnd)
+          return; // conservative: do not modify the boundary surface
+
+        // The collapse star: all elements incident to G or K
+        std::set<dof_id_type> star;
+        for (const auto eid : libmesh_map_find(node_to_elems, G->id()))
+          star.insert(eid);
+        for (const auto eid : libmesh_map_find(node_to_elems, K->id()))
+          star.insert(eid);
+
+        // Non-TET4 guard: a hybrid star cannot be reshaped by tet collapse
+        for (const auto eid : star)
+        {
+          const Elem * e = mesh->elem_ptr(eid);
+          if (!e || e->type() != TET4)
+            return;
+        }
+
+        // Classify the tets incident to G: deleted (also contain K) vs reshaped (do not)
+        std::vector<dof_id_type> deleted, reshaped;
+        for (const auto eid : libmesh_map_find(node_to_elems, G->id()))
+        {
+          const Elem * e = mesh->elem_ptr(eid);
+          bool has_K = false;
+          for (const auto i : make_range(4u))
+            if (e->node_id(i) == K->id())
+              has_K = true;
+          (has_K ? deleted : reshaped).push_back(eid);
+        }
+
+        // Invertibility: every reshaped tet must keep its orientation and stay non-degenerate
+        Real score = std::numeric_limits<Real>::max();
+        for (const auto eid : reshaped)
+        {
+          const Elem * e = mesh->elem_ptr(eid);
+          const Real vb = e->volume();
+          const Real va = tetVolSub(*e, G, K);
+          if (std::abs(va) < invert_floor)
+            return; // would invert or create a new sliver
+          if (std::abs(vb) >= invert_floor)
+          {
+            if ((vb > 0) != (va > 0))
+              return; // orientation flipped
+          }
+          else if (va <= 0)
+            return; // reshaping a near-degenerate tet: require a positive result
+          score = std::min(score, std::abs(va) / vol_scale);
+        }
+
+        // Manifold check: after the collapse, no face through K may be shared by > 2 surviving
+        // tets, and no two surviving tets may coincide (a topological fold)
+        std::map<std::array<dof_id_type, 3>, unsigned int> kface_count;
+        std::set<std::array<dof_id_type, 4>> survivor_keys;
+        std::set<dof_id_type> deleted_set(deleted.begin(), deleted.end());
+        for (const auto eid : star)
+        {
+          if (deleted_set.count(eid))
+            continue;
+          const Elem * e = mesh->elem_ptr(eid);
+          std::array<dof_id_type, 4> nk;
+          for (const auto i : make_range(4u))
+            nk[i] = (e->node_id(i) == G->id()) ? K->id() : e->node_id(i);
+          auto sorted_nk = nk;
+          std::sort(sorted_nk.begin(), sorted_nk.end());
+          if (sorted_nk[0] == sorted_nk[1] || sorted_nk[1] == sorted_nk[2] ||
+              sorted_nk[2] == sorted_nk[3])
+            return; // degenerate (repeated node) survivor
+          if (!survivor_keys.insert(sorted_nk).second)
+            return; // duplicate tet -> fold
+          for (const auto i : make_range(4u))
+            for (const auto j : make_range(i + 1, 4u))
+              for (const auto l : make_range(j + 1, 4u))
+                if (nk[i] == K->id() || nk[j] == K->id() || nk[l] == K->id())
+                  ++kface_count[faceKey(nk[i], nk[j], nk[l])];
+        }
+        for (const auto & [f, count] : kface_count)
+          if (count > 2)
+            return; // non-manifold face
+
+        // Feasible: keep the best by quality, then shortest collapsed edge, then deterministic id
+        if (score > best_score || (score == best_score && edge_len < best_edge_len) ||
+            (score == best_score && edge_len == best_edge_len &&
+             K->id() < (best_K ? best_K->id() : 0)))
+        {
+          best_score = score;
+          best_edge_len = edge_len;
+          best_K = K;
+          best_G = G;
+          best_deleted = deleted;
+          best_reshaped = reshaped;
+        }
+      };
+
+      // Try all 6 edges of the sliver, both directions
+      static const unsigned int tet_edges[6][2] = {{0, 1}, {1, 2}, {0, 2}, {0, 3}, {1, 3}, {2, 3}};
+      for (const auto & ed : tet_edges)
+      {
+        Node * a = s->node_ptr(ed[0]);
+        Node * b = s->node_ptr(ed[1]);
+        const Real len = (*a - *b).norm();
+        consider(a, b, len);
+        consider(b, a, len);
+      }
+
+      if (!best_K)
+        continue; // no valid collapse this pass; remaining slivers are counted at the end
+
+      // Whole-star node-disjointness: defer if any node of the collapse star was already repaired
+      // this pass (keeps the per-pass node_to_elems / boundary_nodes maps valid for this collapse)
+      std::set<dof_id_type> star_nodes;
+      for (const auto & list : {best_deleted, best_reshaped})
+        for (const auto eid : list)
+        {
+          const Elem * e = mesh->elem_ptr(eid);
+          for (const auto i : make_range(4u))
+            star_nodes.insert(e->node_id(i));
+        }
+      bool overlaps = false;
+      for (const auto n : star_nodes)
+        if (touched_nodes.count(n))
+          overlaps = true;
+      if (overlaps)
+        continue; // retried next pass
+
+      // Capture boundary face ids from all modified tets, keyed by their post-collapse face triple
+      std::map<std::array<dof_id_type, 3>, std::set<boundary_id_type>> face_bcs;
+      std::vector<boundary_id_type> ids;
+      for (const auto & list : {best_deleted, best_reshaped})
+        for (const auto eid : list)
+        {
+          Elem * e = mesh->elem_ptr(eid);
+          for (const auto sd : make_range(e->n_sides()))
+          {
+            boundary_info.boundary_ids(e, cast_int<unsigned short>(sd), ids);
+            if (ids.empty())
+              continue;
+            const auto ns = e->nodes_on_side(sd);
+            auto sub = [&](unsigned int li)
+            { return e->node_id(ns[li]) == best_G->id() ? best_K->id() : e->node_id(ns[li]); };
+            auto & dst = face_bcs[faceKey(sub(0), sub(1), sub(2))];
+            dst.insert(ids.begin(), ids.end());
+          }
+          boundary_info.remove(e);
+        }
+      // Transfer the gone node's nodeset ids to the kept node
+      boundary_info.boundary_ids(best_G, ids);
+      for (const auto bid : ids)
+        boundary_info.add_node(best_K, bid);
+
+      // Commit: reshape (G -> K), delete the collapsing tets (incl. the sliver)
+      for (const auto eid : best_reshaped)
+      {
+        Elem * e = mesh->elem_ptr(eid);
+        for (const auto i : make_range(4u))
+          if (e->node_id(i) == best_G->id())
+            e->set_node(i, best_K);
+      }
+      for (const auto eid : best_deleted)
+        mesh->delete_elem(mesh->elem_ptr(eid));
+
+      // Restore captured boundary ids onto the surviving (reshaped) faces
+      for (const auto eid : best_reshaped)
+      {
+        Elem * e = mesh->elem_ptr(eid);
+        for (const auto sd : make_range(e->n_sides()))
+        {
+          const auto ns = e->nodes_on_side(sd);
+          auto it = face_bcs.find(faceKey(e->node_id(ns[0]), e->node_id(ns[1]), e->node_id(ns[2])));
+          if (it != face_bcs.end())
+            for (const auto bid : it->second)
+              boundary_info.add_side(e, cast_int<unsigned short>(sd), bid);
+        }
+      }
+
+      for (const auto n : star_nodes)
+        touched_nodes.insert(n);
+      ++num_repaired;
+      repaired_in_pass = true;
+    }
+  }
+
+  // Count any slivers that remain (no valid collapse was found for them)
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (elem->type() == TET4 && isTetSliver(*elem))
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of tet sliver elements repaired by edge collapse: " << num_repaired
+             << std::endl;
+    if (num_skipped)
+      _console << "Number of tet slivers that could not be collapsed (left in place): "
+               << num_skipped << std::endl;
   }
 }
