@@ -40,5 +40,7 @@
     expect_out = "Number of non convex polygons: 0"
     requirement = "The system shall be able to split nonconvex polygons to turn them into convex ones."
     issues = '#32159'
+    # parallel packing not implemented for polys
+    mesh_mode = 'replicated'
   []
 []

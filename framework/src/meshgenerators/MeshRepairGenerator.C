@@ -13,6 +13,7 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/face_c0polygon.h"
 
 registerMooseObject("MooseApp", MeshRepairGenerator);
 
@@ -241,6 +242,11 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
   unsigned int num_triangulated = 0;
   std::vector<Elem *> elems_to_delete;
   std::vector<std::unique_ptr<libMesh::C0Polygon>> elements_to_add_to_mesh;
+
+  // Missing parallel packing for polys
+  if (!mesh->is_serial())
+    mooseError("MeshRepairGenerator requires a serial mesh for this operation. "
+               "The mesh should not be distributed.");
 
   for (auto elem : mesh->element_ptr_range())
   {
