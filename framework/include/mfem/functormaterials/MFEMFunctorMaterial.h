@@ -27,7 +27,65 @@ public:
   virtual ~MFEMFunctorMaterial();
 
 protected:
+  /// Group numerical literal values, which should each be enclosed in curly braces, into
+  /// single entries of the output vector. Within a literal, entries are separated by
+  /// whitespace; matrix literals may additionally separate rows with ';'. The kind
+  /// ("vector" or "matrix") and the object type are used in error messages.
+  template <typename T>
+  static std::vector<T> processLiterals(const std::vector<T> & input,
+                                        const std::string & kind,
+                                        const std::string & object_type);
+
   Moose::MFEM::CoefficientManager & _properties;
 };
+
+template <typename T>
+std::vector<T>
+MFEMFunctorMaterial::processLiterals(const std::vector<T> & input,
+                                     const std::string & kind,
+                                     const std::string & object_type)
+{
+  std::vector<T> result;
+  bool in_literal = false;
+  T literal;
+  for (const auto & item : input)
+  {
+    if (in_literal)
+    {
+      if (item.front() == '{')
+        ::mooseError(
+            "Nested numeric ", kind, " values are not permitted in ", object_type, " prop_values.");
+      else if (item.back() == '}')
+      {
+        in_literal = false;
+        literal += " " + item.substr(0, item.size() - 1);
+        result.push_back(literal);
+      }
+      else
+        literal += " " + item;
+    }
+    else if (item.front() == '{')
+    {
+      if (item.back() == '}')
+        result.push_back(item.substr(1, item.size() - 2));
+      else
+      {
+        in_literal = true;
+        literal = item.substr(1);
+      }
+    }
+    else
+      result.push_back(item);
+  }
+  if (in_literal)
+    ::mooseError("No closing curly brace for ",
+               kind,
+               " value in ",
+               object_type,
+               " prop_values: '{",
+               literal,
+               "'");
+  return result;
+}
 
 #endif
