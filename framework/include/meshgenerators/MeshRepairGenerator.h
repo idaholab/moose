@@ -66,15 +66,14 @@ private:
   /// @param mesh the mesh to modify
   void separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const;
 
-<<<<<<< HEAD
   /// @brief Splits non-convex polygonal elements to keep only convex elements
   /// @param mesh the mesh to modify
   void splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const;
-=======
-  /// @brief Repair sliver (near-degenerate) TRI3 elements. Each sliver is removed and the neighbor
-  ///        triangle sharing its longest edge is split at the sliver's opposite vertex, so the
-  ///        surface stays conformal (no holes or hanging nodes).
+
+  /// @brief Repair sliver (near-degenerate) first-order 2D elements (TRI3, QUAD4, polygons). Each
+  ///        sliver is removed and its far-side vertices are inserted into the longest-edge
+  ///        neighbor's shared edge, so the surface stays conformal (no holes or hanging nodes). The
+  ///        neighbor is promoted by vertex count: a triangle becomes a quad, else a polygon.
   /// @param mesh the mesh to modify
-  void repairSliverTriangles(std::unique_ptr<MeshBase> & mesh) const;
->>>>>>> 8a0fb854be1 (Add sliver-triangle repair to MeshRepairGenerator)
+  void repairSlivers(std::unique_ptr<MeshBase> & mesh) const;
 };
