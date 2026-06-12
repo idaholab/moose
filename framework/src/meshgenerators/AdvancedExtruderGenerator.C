@@ -46,6 +46,31 @@
 #include <numeric>
 #include <cmath>
 
+namespace
+{
+/// Compute the vertex-averaged unit normal of a 2D element: the average of the per-vertex
+/// cross-product normals. This reduces to the face normal for triangles and planar quads, and is
+/// robust for warped quads. Returns the zero point for degenerate (e.g. colinear) elements.
+Point
+elemVertexAveragedNormal(const Elem & elem)
+{
+  const auto n_vertices = elem.n_vertices();
+  Point normal;
+  for (const auto i : make_range(n_vertices))
+  {
+    const Point & p = elem.point(i);
+    const Point edge_to_next = elem.point((i + 1) % n_vertices) - p;
+    const Point edge_to_prev = elem.point((i + n_vertices - 1) % n_vertices) - p;
+    const Point vertex_normal = edge_to_next.cross(edge_to_prev);
+    const auto vertex_normal_norm_sq = vertex_normal.norm_sq();
+    if (vertex_normal_norm_sq > 0)
+      normal += vertex_normal / std::sqrt(vertex_normal_norm_sq);
+  }
+  const auto norm_sq = normal.norm_sq();
+  return norm_sq > 0 ? normal / std::sqrt(norm_sq) : Point();
+}
+}
+
 registerMooseObject("MooseApp", AdvancedExtruderGenerator);
 registerMooseObjectRenamed("MooseApp",
                            FancyExtruderGenerator,
@@ -63,7 +88,9 @@ AdvancedExtruderGenerator::validParams()
       "axial element sizes within each elevation and remap subdomain_ids, boundary_ids and element "
       "extra integers within each elevation as well as interface boundaries between neighboring "
       "elevation layers, as well as following a 1D curve and modifying the radial (normal to "
-      "the extrusion axis) extent of the geometry.");
+      "the extrusion axis) extent of the geometry. It can also extrude each node along the "
+      "averaged normal of the elements it is connected to, which is useful to create boundary "
+      "layers.");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
@@ -117,6 +144,12 @@ AdvancedExtruderGenerator::validParams()
       "A vector that points in the ending direction for extruding along a curve. This vector "
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
+  params.addParam<bool>(
+      "extrude_along_node_normals",
+      false,
+      "If true, each node is extruded along the averaged normal of the elements it is connected "
+      "to, instead of along a fixed 'direction'. Only supported when extruding a 2D surface mesh "
+      "into 3D. This is useful to create boundary layers.");
 
   // Boundaries and interfaces
   params.addParam<BoundaryName>(
@@ -193,6 +226,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                                  ? getParam<RealVectorValue>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
+    _extrude_along_node_normals(getParam<bool>("extrude_along_node_normals")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
@@ -234,6 +268,22 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
     if (isParamValid("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
+    if (_extrude_along_node_normals)
+      paramError("extrude_along_node_normals",
+                 "extrude_along_node_normals cannot be set if extruding along curve!");
+  }
+  else if (_extrude_along_node_normals)
+  {
+    if (isParamValid("direction"))
+      paramError("direction",
+                 "direction cannot be set if 'extrude_along_node_normals' is set, as the extrusion "
+                 "direction is computed from the element normals!");
+    if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+      paramError("twist_pitch",
+                 "twist_pitch cannot be set if 'extrude_along_node_normals' is set!");
+    if (_end_radial_extent)
+      paramError("end_radial_extent",
+                 "end_radial_extent cannot be set if 'extrude_along_node_normals' is set!");
   }
   else
   {
@@ -514,6 +564,17 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
 
+  if (_extrude_along_node_normals)
+  {
+    if (input->mesh_dimension() != 2)
+      paramError("extrude_along_node_normals",
+                 "Extruding along node normals is only supported for 2D surface meshes (extruded "
+                 "into 3D).");
+    if (!input->is_replicated())
+      paramError("extrude_along_node_normals",
+                 "Extruding along node normals is not implemented for distributed meshes yet.");
+  }
+
   // We must serialize the curve to know how to extrude across all ranks
   std::unique_ptr<libMesh::MeshSerializer> serializer;
   if (_extrude_along_curve)
@@ -647,6 +708,12 @@ AdvancedExtruderGenerator::generate()
       total_extrusion_distance_at_axis += h;
   mooseAssert(total_extrusion_distance_at_axis > 0, "Should not be 0");
 
+  // When extruding along node normals, precompute each node's extrusion direction from the
+  // normals of the elements connected to it
+  std::unordered_map<dof_id_type, Point> node_normals;
+  if (_extrude_along_node_normals)
+    node_normals = computeNodeNormals(*input);
+
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
@@ -657,6 +724,20 @@ AdvancedExtruderGenerator::generate()
     Real sum_step_sizes_at_axis = 0.;
     // Initial distance from the node to the extrusion axis
     Real start_node_radius = (*node - reference_point).norm();
+
+    // Direction to extrude this node along: a fixed direction, or the averaged normal of the
+    // elements connected to it
+    Point node_extrude_direction = _direction;
+    if (_extrude_along_node_normals)
+    {
+      auto it = node_normals.find(node->id());
+      if (it == node_normals.end())
+        mooseError("Node ",
+                   node->id(),
+                   " is not connected to any element with a well-defined normal; its extrusion "
+                   "direction cannot be determined.");
+      node_extrude_direction = it->second;
+    }
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
@@ -801,9 +882,8 @@ AdvancedExtruderGenerator::generate()
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
             step_size_at_axis = step_size;
-            orig_node_to_current =
-                orig_node_to_previous +
-                _direction * step_size; // update distance from starting node to new node
+            // update distance from starting node to new node
+            orig_node_to_current = orig_node_to_previous + node_extrude_direction * step_size;
           }
 
           // Keep track of the cumulative step size as an extrusion axis coordinate
@@ -1725,4 +1805,68 @@ AdvancedExtruderGenerator::radialExpansionRatio(const Real t) const
                  MathUtils::pow(t, 2) +
              _start_radial_growth_rate * t;
   }
+}
+
+std::unordered_map<dof_id_type, Point>
+AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
+{
+  // Gather the normal of every element connected to each node
+  std::unordered_map<dof_id_type, std::vector<Point>> node_to_elem_normals;
+  for (const auto & elem : input.element_ptr_range())
+  {
+    const Point elem_normal = elemVertexAveragedNormal(*elem);
+    // Skip degenerate elements that do not define a normal
+    if (elem_normal.norm_sq() == 0)
+      continue;
+    for (const auto n : make_range(elem->n_nodes()))
+      node_to_elem_normals[elem->node_id(n)].push_back(elem_normal);
+  }
+
+  // Average the connected element normals at each node. When the connected elements disagree on the
+  // outward/inward orientation, the minority normals (those pointing the other way) are flipped to
+  // match the majority before averaging.
+  std::unordered_map<dof_id_type, Point> node_normals;
+  node_normals.reserve(node_to_elem_normals.size());
+  dof_id_type num_flipped_nodes = 0;
+  for (const auto & [node_id, normals] : node_to_elem_normals)
+  {
+    // Use the orientation shared by the majority of elements as the reference direction
+    Point reference = normals[0];
+    int orientation_balance = 0;
+    for (const auto & elem_normal : normals)
+      orientation_balance += (elem_normal * reference >= 0 ? 1 : -1);
+    if (orientation_balance < 0)
+      reference = -reference;
+
+    // Flip the minority normals to match the reference, then average all of them
+    Point averaged_normal;
+    bool flipped = false;
+    for (const auto & elem_normal : normals)
+      if (elem_normal * reference >= 0)
+        averaged_normal += elem_normal;
+      else
+      {
+        averaged_normal -= elem_normal;
+        flipped = true;
+      }
+    if (flipped)
+      num_flipped_nodes++;
+
+    if (averaged_normal.norm_sq() == 0)
+      mooseError("The averaged normal at node ",
+                 node_id,
+                 " is zero; the connected elements' orientations cancel out and an extrusion "
+                 "direction cannot be determined.");
+    node_normals[node_id] = averaged_normal.unit();
+  }
+
+  if (num_flipped_nodes)
+    mooseInfo("AdvancedExtruderGenerator '",
+              name(),
+              "': the connected elements disagreed on the surface orientation at ",
+              num_flipped_nodes,
+              " node(s); the minority element normals were flipped to match the majority before "
+              "averaging.");
+
+  return node_normals;
 }
