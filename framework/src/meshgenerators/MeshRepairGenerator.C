@@ -646,7 +646,7 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
 
     for (const auto sid : sliver_ids)
     {
-      Elem * s = mesh->elem_ptr(sid);
+      Elem * s = mesh->query_elem_ptr(sid);
       if (!s || touches_repaired(*s))
         continue;
       const auto nv = s->n_vertices();
@@ -668,7 +668,7 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
       {
         if (nid == sid)
           continue;
-        Elem * cand = mesh->elem_ptr(nid);
+        Elem * cand = mesh->query_elem_ptr(nid);
         if (cand && isLinear2D(*cand))
         {
           neighbor = cand;
@@ -919,7 +919,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
 
     for (const auto sid : sliver_ids)
     {
-      Elem * s = mesh->elem_ptr(sid);
+      Elem * s = mesh->query_elem_ptr(sid);
       if (!s || s->type() != TET4 || touches_repaired(*s) || !isTetSliver(*s))
         continue;
 
@@ -953,7 +953,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
         // Non-TET4 guard: a hybrid star cannot be reshaped by tet collapse
         for (const auto eid : star)
         {
-          const Elem * e = mesh->elem_ptr(eid);
+          const Elem * e = mesh->query_elem_ptr(eid);
           if (!e || e->type() != TET4)
             return;
         }
@@ -962,7 +962,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
         std::vector<dof_id_type> deleted, reshaped;
         for (const auto eid : libmesh_map_find(node_to_elems, G->id()))
         {
-          const Elem * e = mesh->elem_ptr(eid);
+          const Elem * e = mesh->query_elem_ptr(eid);
           bool has_K = false;
           for (const auto i : make_range(4u))
             if (e->node_id(i) == K->id())
@@ -974,7 +974,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
         Real score = std::numeric_limits<Real>::max();
         for (const auto eid : reshaped)
         {
-          const Elem * e = mesh->elem_ptr(eid);
+          const Elem * e = mesh->query_elem_ptr(eid);
           const Real vb = e->volume();
           const Real va = tetVolSub(*e, G, K);
           if (std::abs(va) < invert_floor)
@@ -989,16 +989,20 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
           score = std::min(score, std::abs(va) / vol_scale);
         }
 
-        // Manifold check: after the collapse, no face through K may be shared by > 2 surviving
-        // tets, and no two surviving tets may coincide (a topological fold)
-        std::map<std::array<dof_id_type, 3>, unsigned int> kface_count;
-        std::set<std::array<dof_id_type, 4>> survivor_keys;
+        // Validity: build the surviving tets (deleted removed, G -> K applied) and check that the
+        // result stays a valid manifold mesh with an unchanged boundary:
+        //  (a) no survivor is degenerate (repeated node) and no two survivors coincide (a fold);
+        //  (b) no triangular face is shared by more than two survivors (non-manifold);
+        //  (c) every external face of a deleted tet is still carried by a survivor (no boundary
+        //  hole).
         std::set<dof_id_type> deleted_set(deleted.begin(), deleted.end());
+        std::map<std::array<dof_id_type, 3>, unsigned int> survivor_face_count;
+        std::set<std::array<dof_id_type, 4>> survivor_keys;
         for (const auto eid : star)
         {
           if (deleted_set.count(eid))
             continue;
-          const Elem * e = mesh->elem_ptr(eid);
+          const Elem * e = mesh->query_elem_ptr(eid);
           std::array<dof_id_type, 4> nk;
           for (const auto i : make_range(4u))
             nk[i] = (e->node_id(i) == G->id()) ? K->id() : e->node_id(i);
@@ -1012,12 +1016,31 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
           for (const auto i : make_range(4u))
             for (const auto j : make_range(i + 1, 4u))
               for (const auto l : make_range(j + 1, 4u))
-                if (nk[i] == K->id() || nk[j] == K->id() || nk[l] == K->id())
-                  ++kface_count[faceKey(nk[i], nk[j], nk[l])];
+                ++survivor_face_count[faceKey(nk[i], nk[j], nk[l])];
         }
-        for (const auto & [f, count] : kface_count)
+        for (const auto & [f, count] : survivor_face_count)
           if (count > 2)
             return; // non-manifold face
+
+        auto sub = [&](dof_id_type n) { return n == G->id() ? K->id() : n; };
+        for (const auto eid : deleted)
+        {
+          const Elem * e = mesh->query_elem_ptr(eid);
+          for (const auto sd : make_range(e->n_sides()))
+          {
+            const auto ns = e->nodes_on_side(sd);
+            auto fc =
+                face_count.find(faceKey(e->node_id(ns[0]), e->node_id(ns[1]), e->node_id(ns[2])));
+            if (fc == face_count.end() || fc->second != 1)
+              continue; // interior face: fine to dissolve
+            const auto fa = sub(e->node_id(ns[0])), fb = sub(e->node_id(ns[1])),
+                       fcc = sub(e->node_id(ns[2]));
+            if (fa == fb || fb == fcc || fa == fcc)
+              continue; // face sat on the collapsed edge: it vanishes by design
+            if (!survivor_face_count.count(faceKey(fa, fb, fcc)))
+              return; // an external face would disappear -> a boundary hole
+          }
+        }
 
         // Feasible: keep the best by quality, then shortest collapsed edge, then deterministic id
         if (score > best_score || (score == best_score && edge_len < best_edge_len) ||
@@ -1053,7 +1076,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
       for (const auto & list : {best_deleted, best_reshaped})
         for (const auto eid : list)
         {
-          const Elem * e = mesh->elem_ptr(eid);
+          const Elem * e = mesh->query_elem_ptr(eid);
           for (const auto i : make_range(4u))
             star_nodes.insert(e->node_id(i));
         }
@@ -1070,7 +1093,7 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
       for (const auto & list : {best_deleted, best_reshaped})
         for (const auto eid : list)
         {
-          Elem * e = mesh->elem_ptr(eid);
+          Elem * e = mesh->query_elem_ptr(eid);
           for (const auto sd : make_range(e->n_sides()))
           {
             boundary_info.boundary_ids(e, cast_int<unsigned short>(sd), ids);
@@ -1092,18 +1115,18 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
       // Commit: reshape (G -> K), delete the collapsing tets (incl. the sliver)
       for (const auto eid : best_reshaped)
       {
-        Elem * e = mesh->elem_ptr(eid);
+        Elem * e = mesh->query_elem_ptr(eid);
         for (const auto i : make_range(4u))
           if (e->node_id(i) == best_G->id())
             e->set_node(i, best_K);
       }
       for (const auto eid : best_deleted)
-        mesh->delete_elem(mesh->elem_ptr(eid));
+        mesh->delete_elem(mesh->query_elem_ptr(eid));
 
       // Restore captured boundary ids onto the surviving (reshaped) faces
       for (const auto eid : best_reshaped)
       {
-        Elem * e = mesh->elem_ptr(eid);
+        Elem * e = mesh->query_elem_ptr(eid);
         for (const auto sd : make_range(e->n_sides()))
         {
           const auto ns = e->nodes_on_side(sd);
