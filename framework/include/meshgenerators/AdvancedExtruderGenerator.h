@@ -113,8 +113,8 @@ protected:
   Real radialExpansionRatio(const Real t) const;
 
   /// Compute, for each node, the extrusion direction as the average of the normals of all the
-  /// elements connected to it. When connected elements disagree on the surface orientation, the
-  /// minority normals are flipped to match the majority before averaging.
+  /// elements connected to it. The input surface mesh is expected to have consistently oriented
+  /// elements.
   /// @param input the 2D mesh being extruded
   /// @return a map from node id to its (unit) extrusion direction
   std::unordered_map<dof_id_type, Point> computeNodeNormals(const MeshBase & input) const;

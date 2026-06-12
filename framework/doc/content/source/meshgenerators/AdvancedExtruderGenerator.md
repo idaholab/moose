@@ -50,10 +50,8 @@ used as usual to control the layer thicknesses and grading; only the extrusion d
 
 The direction at each node is computed as the average of the normals of all the elements connected to that node. Each
 element normal is itself the average of its per-vertex normals, so the result reduces to the face normal for triangles and
-planar quadrilaterals. When the connected elements disagree on the outward/inward orientation (for example on an
-inconsistently oriented surface mesh), the minority normals are flipped to match the majority before averaging, and the
-number of nodes where this happened is reported. To flip the overall growth direction (inward versus outward), negate the
-[!param](/Mesh/AdvancedExtruderGenerator/heights).
+planar quadrilaterals. The input surface mesh is expected to have consistently oriented elements. To flip the overall
+growth direction (inward versus outward), negate the [!param](/Mesh/AdvancedExtruderGenerator/heights).
 
 This option is only supported when extruding a 2D surface mesh into 3D, and is not currently implemented for distributed
 meshes.
