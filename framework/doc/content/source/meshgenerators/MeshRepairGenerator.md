@@ -19,9 +19,9 @@ The operations currently implemented are:
 - merging boundaries with the same name but different boundary IDs.
 
 - repairing sliver (near-degenerate) first-order 2D elements (`TRI3`, `QUAD4`, polygons). An element is flagged as a
-  sliver if its area is below [!param](/Mesh/MeshRepairGenerator/sliver_triangle_area_fraction) times the mesh
+  sliver if its area is below [!param](/Mesh/MeshRepairGenerator/sliver_element_area_fraction) times the mesh
   surface-area scale, or if every vertex other than the two ends of its longest edge lies within
-  [!param](/Mesh/MeshRepairGenerator/sliver_triangle_flap_tol) times the longest-edge length from that edge. Either test
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) times the longest-edge length from that edge. Either test
   can be disabled by setting its tolerance to 0. Each sliver is removed and absorbed into the element sharing its
   longest edge, keeping the surface conformal (no holes or hanging nodes). A triangle sliver sharing a triangle neighbor
   splits that neighbor into two triangles, so an all-triangle mesh stays all-triangle. Otherwise the neighbor absorbs

@@ -46,7 +46,7 @@ MeshRepairGenerator::validParams()
                         "Merge boundaries if they have the same name but different boundary IDs");
 
   params.addParam<bool>(
-      "fix_sliver_triangles",
+      "fix_sliver_elements",
       false,
       "Whether to repair sliver (near-degenerate) first-order 2D elements (TRI3, QUAD4, polygons). "
       "Each sliver is removed and absorbed into its longest-edge neighbor, keeping the surface "
@@ -54,18 +54,18 @@ MeshRepairGenerator::validParams()
       "triangles (the mesh stays all-triangle); otherwise the neighbor absorbs the sliver's "
       "vertices and is promoted to a quadrilateral or polygon.");
   params.addRangeCheckedParam<Real>(
-      "sliver_triangle_area_fraction",
+      "sliver_element_area_fraction",
       1e-10,
-      "sliver_triangle_area_fraction>=0",
+      "sliver_element_area_fraction>=0",
       "A 2D element whose area is below this fraction of the mesh surface-area scale is treated as "
-      "a sliver (set to 0 to disable this test). Only used when 'fix_sliver_triangles' is set.");
+      "a sliver (set to 0 to disable this test). Only used when 'fix_sliver_elements' is set.");
   params.addRangeCheckedParam<Real>(
-      "sliver_triangle_flap_tol",
+      "sliver_element_flap_tol",
       0.02,
-      "sliver_triangle_flap_tol>=0",
+      "sliver_element_flap_tol>=0",
       "A 2D element is treated as a sliver if every vertex other than the two ends of its longest "
       "edge lies within this fraction of the longest-edge length from that edge, projecting onto "
-      "its interior (set to 0 to disable this test). Only used when 'fix_sliver_triangles' is "
+      "its interior (set to 0 to disable this test). Only used when 'fix_sliver_elements' is "
       "set.");
 
   params.addParam<bool>(
@@ -88,15 +88,15 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name")),
     _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
-    _fix_sliver_triangles(getParam<bool>("fix_sliver_triangles")),
-    _sliver_area_tol(getParam<Real>("sliver_triangle_area_fraction")),
-    _sliver_flap_tol(getParam<Real>("sliver_triangle_flap_tol"))
+    _fix_sliver_elements(getParam<bool>("fix_sliver_elements")),
+    _sliver_area_tol(getParam<Real>("sliver_element_area_fraction")),
+    _sliver_flap_tol(getParam<Real>("sliver_element_flap_tol"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
       !_boundary_id_merge && !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
 
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge && !_fix_sliver_triangles && !getParam<bool>("renumber_contiguously"))
+      !_boundary_id_merge && !_fix_sliver_elements && !getParam<bool>("renumber_contiguously"))
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
@@ -118,7 +118,7 @@ MeshRepairGenerator::generate()
     fixOverlappingNodes(mesh);
 
   // Repair sliver elements by absorbing them into their longest-edge neighbor
-  if (_fix_sliver_triangles)
+  if (_fix_sliver_elements)
     repairSlivers(mesh);
 
   // Flip orientation of elements to keep positive volumes
