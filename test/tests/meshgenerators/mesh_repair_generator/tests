@@ -56,7 +56,7 @@
   [repair_slivers_by_area]
     type = Exodiff
     input = repair_slivers.i
-    cli_args = 'Mesh/repair/sliver_triangle_flap_tol=0 Mesh/repair/sliver_triangle_area_fraction=0.01 --mesh-only repair_slivers_area_in.e'
+    cli_args = 'Mesh/repair/sliver_element_flap_tol=0 Mesh/repair/sliver_element_area_fraction=0.01 --mesh-only repair_slivers_area_in.e'
     exodiff = 'repair_slivers_area_in.e'
     recover = false
     issues = '#33151'
