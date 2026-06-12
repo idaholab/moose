@@ -33,8 +33,8 @@ MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
     const InputParameters & parameters)
   : MFEMFunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(processLiterals(
-        getParam<std::vector<MFEMVectorCoefficientName>>("prop_values"), "vector", type()))
+    _prop_values(
+        processLiterals(getParam<std::vector<MFEMVectorCoefficientName>>("prop_values"), type()))
 {
   if (_prop_names.size() != _prop_values.size())
     paramError("prop_names", "Must match the size of prop_values");

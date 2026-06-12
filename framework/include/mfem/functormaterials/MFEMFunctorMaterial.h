@@ -29,11 +29,9 @@ public:
 protected:
   /// Group numerical literal values, which should each be enclosed in curly braces, into
   /// single entries of the output vector. Within a literal, entries are separated by
-  /// whitespace; matrix literals may additionally separate rows with ';'. The kind
-  /// ("vector" or "matrix") and the object type are used in error messages.
+  /// whitespace; matrix literals may additionally separate rows with ';'.
   template <typename T>
   static std::vector<T> processLiterals(const std::vector<T> & input,
-                                        const std::string & kind,
                                         const std::string & object_type);
 
   Moose::MFEM::CoefficientManager & _properties;
@@ -41,9 +39,7 @@ protected:
 
 template <typename T>
 std::vector<T>
-MFEMFunctorMaterial::processLiterals(const std::vector<T> & input,
-                                     const std::string & kind,
-                                     const std::string & object_type)
+MFEMFunctorMaterial::processLiterals(const std::vector<T> & input, const std::string & object_type)
 {
   std::vector<T> result;
   bool in_literal = false;
@@ -53,8 +49,7 @@ MFEMFunctorMaterial::processLiterals(const std::vector<T> & input,
     if (in_literal)
     {
       if (item.front() == '{')
-        ::mooseError(
-            "Nested numeric ", kind, " values are not permitted in ", object_type, " prop_values.");
+        ::mooseError("Nested numeric values are not permitted in ", object_type, " prop_values.");
       else if (item.back() == '}')
       {
         in_literal = false;
@@ -78,13 +73,8 @@ MFEMFunctorMaterial::processLiterals(const std::vector<T> & input,
       result.push_back(item);
   }
   if (in_literal)
-    ::mooseError("No closing curly brace for ",
-               kind,
-               " value in ",
-               object_type,
-               " prop_values: '{",
-               literal,
-               "'");
+    ::mooseError(
+        "No closing curly brace for value in ", object_type, " prop_values: '{", literal, "'");
   return result;
 }
 
