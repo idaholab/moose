@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 

@@ -9,6 +9,7 @@
 
 #include "CSGNPolygonUnit.h"
 #include "CSGPlane.h"
+#include "CSGBase.h"
 
 namespace CSG
 {

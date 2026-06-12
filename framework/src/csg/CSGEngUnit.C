@@ -43,4 +43,16 @@ CSGEngUnit::operator!=(const CSGEngUnit & other) const
   return !(*this == other);
 }
 
+CSGBase &
+CSGEngUnit::getBase()
+{
+  return *_internal_base;
+}
+
+std::unique_ptr<CSGBase>
+CSGEngUnit::releaseBase()
+{
+  return std::move(_internal_base);
+}
+
 } // namespace CSG
