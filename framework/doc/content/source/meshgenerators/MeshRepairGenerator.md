@@ -18,13 +18,15 @@ The operations currently implemented are:
 
 - merging boundaries with the same name but different boundary IDs.
 
-- repairing sliver (near-degenerate) `TRI3` elements. A triangle is flagged as a sliver if its area is below
-  [!param](/Mesh/MeshRepairGenerator/sliver_triangle_area_fraction) times the mesh surface-area scale, or if the
-  vertex opposite its longest edge lies within [!param](/Mesh/MeshRepairGenerator/sliver_triangle_flap_tol) times the
-  longest-edge length from that edge (projecting onto its interior). Either test can be disabled by setting its
-  tolerance to 0. Each sliver is repaired by removing it and splitting the neighbor triangle that shares its longest
-  edge at the sliver's opposite vertex, so the surface stays conformal (no holes or hanging nodes). If the longest edge
-  is on a surface boundary (no neighbor to split), the sliver is left in place.
+- repairing sliver (near-degenerate) first-order 2D elements (`TRI3`, `QUAD4`, polygons). An element is flagged as a
+  sliver if its area is below [!param](/Mesh/MeshRepairGenerator/sliver_triangle_area_fraction) times the mesh
+  surface-area scale, or if every vertex other than the two ends of its longest edge lies within
+  [!param](/Mesh/MeshRepairGenerator/sliver_triangle_flap_tol) times the longest-edge length from that edge. Either test
+  can be disabled by setting its tolerance to 0. Each sliver is repaired by removing it and inserting its remaining
+  vertices into the longest-edge neighbor's shared edge, dissolving the shared edge so the surface stays conformal (no
+  holes or hanging nodes). The neighbor is promoted by its new vertex count: a triangle becomes a quadrilateral, and
+  anything else becomes a polygon. If the longest edge is on a surface boundary (no neighbor to absorb the sliver), the
+  sliver is left in place.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 
