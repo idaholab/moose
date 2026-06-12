@@ -49,9 +49,10 @@ MeshRepairGenerator::validParams()
       "fix_sliver_triangles",
       false,
       "Whether to repair sliver (near-degenerate) first-order 2D elements (TRI3, QUAD4, polygons). "
-      "Each sliver is removed and its far-side vertices are inserted into the longest-edge "
-      "neighbor, so the surface stays conformal. The neighbor is promoted accordingly: a triangle "
-      "becomes a quadrilateral, and anything else becomes a polygon.");
+      "Each sliver is removed and absorbed into its longest-edge neighbor, keeping the surface "
+      "conformal. A triangle sliver against a triangle neighbor splits that neighbor into two "
+      "triangles (the mesh stays all-triangle); otherwise the neighbor absorbs the sliver's "
+      "vertices and is promoted to a quadrilateral or polygon.");
   params.addRangeCheckedParam<Real>(
       "sliver_triangle_area_fraction",
       1e-10,
@@ -269,7 +270,6 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
 }
 
 void
-<<<<<<< HEAD
 MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const
 {
   // Counters to keep track of what happened in the splitting
@@ -508,10 +508,7 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
 }
 
 void
-MeshRepairGenerator::repairSliverTriangles(std::unique_ptr<MeshBase> & mesh) const
-=======
 MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
->>>>>>> 9e1158556d9 (Generalize MeshRepairGenerator sliver repair to all 2D element types)
 {
   // Surface-area scale of the whole mesh, used by the area-based sliver test
   const auto bbox = MeshTools::create_bounding_box(*mesh);
@@ -581,145 +578,187 @@ MeshRepairGenerator::repairSlivers(std::unique_ptr<MeshBase> & mesh) const
   // First-order linear 2D element (TRI3, QUAD4, C0POLYGON): every node is a vertex
   auto isLinear2D = [](const Elem & e) { return e.dim() == 2 && e.n_nodes() == e.n_vertices(); };
 
-  // Undirected edge (sorted node-id pair) -> ids of the 2D elements using it, plus the list of
-  // sliver elements present in the original mesh
+  // Undirected edge (sorted node-id pair) key
   auto edge_key = [](dof_id_type a, dof_id_type b)
   { return std::make_pair(std::min(a, b), std::max(a, b)); };
-  std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>> edge_to_elems;
-  std::vector<dof_id_type> sliver_ids;
-  for (const auto & elem : mesh->active_element_ptr_range())
-  {
-    if (!isLinear2D(*elem))
-      continue;
-    const auto nv = elem->n_vertices();
-    for (const auto i : make_range(nv))
-      edge_to_elems[edge_key(elem->node_id(i), elem->node_id((i + 1) % nv))].push_back(elem->id());
-    if (isSliver(*elem, longestEdge(*elem)))
-      sliver_ids.push_back(elem->id());
-  }
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  std::unordered_set<dof_id_type> touched;
   std::size_t num_repaired = 0;
 
-  // Repair each sliver present in the original mesh once. Elements created by a repair are never
-  // re-examined, so this terminates and the surface stays conformal: removing the sliver and
-  // inserting its far-side vertex chain into the neighbor moves the shared edges onto the neighbor.
-  for (const auto sid : sliver_ids)
+  // Repair in passes. Within a pass we only perform repairs whose sliver+neighbor node sets are
+  // disjoint from the other repairs in that pass; node-disjoint implies edge-disjoint, so the edge
+  // map built at the start of the pass stays valid for every repair we make. Slivers adjacent to a
+  // repair are deferred to a later pass (rebuilt from the updated mesh). Repairs never create new
+  // slivers, so this terminates.
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
   {
-    if (touched.count(sid))
-      continue;
-    Elem * s = mesh->elem_ptr(sid);
-    if (!s)
-      continue;
-    const auto nv = s->n_vertices();
-    const unsigned int lng = longestEdge(*s);
-    if (!isSliver(*s, lng))
-      continue;
+    repaired_in_pass = false;
 
-    Node * A = s->node_ptr(lng);
-    Node * B = s->node_ptr((lng + 1) % nv);
-    // The sliver's other vertices, in order from just after B around to just before A. They get
-    // inserted into the neighbor's shared edge (going B -> chain -> A).
-    std::vector<Node *> chain;
-    for (const auto off : make_range(2u, nv))
-      chain.push_back(s->node_ptr((lng + off) % nv));
-
-    // Find a 2D neighbor sharing the longest edge A-B
-    Elem * neighbor = nullptr;
-    for (const auto nid : libmesh_map_find(edge_to_elems, edge_key(A->id(), B->id())))
+    // Edge -> ids of the 2D elements using it, and the slivers, from the current mesh
+    std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>> edge_to_elems;
+    std::vector<dof_id_type> sliver_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
     {
-      if (nid == sid || touched.count(nid))
+      if (!isLinear2D(*elem))
         continue;
-      Elem * cand = mesh->elem_ptr(nid);
-      if (cand && isLinear2D(*cand))
-      {
-        neighbor = cand;
-        break;
-      }
+      const auto nv = elem->n_vertices();
+      for (const auto i : make_range(nv))
+        edge_to_elems[edge_key(elem->node_id(i), elem->node_id((i + 1) % nv))].push_back(
+            elem->id());
+      if (isSliver(*elem, longestEdge(*elem)))
+        sliver_ids.push_back(elem->id());
     }
-    // The longest edge is on a surface boundary (or its neighbor was already repaired): we cannot
-    // absorb the sliver into a neighbor, so leave it in place
-    if (!neighbor)
-      continue;
 
-    // Local side of the neighbor that is the shared edge A-B
-    const auto mv = neighbor->n_vertices();
-    unsigned int eidx = libMesh::invalid_uint;
-    for (const auto e : make_range(mv))
+    // Nodes already used by a repair this pass; a sliver or neighbor touching one is deferred
+    std::unordered_set<dof_id_type> touched_nodes;
+    auto touches_repaired = [&touched_nodes](const Elem & e)
     {
-      const auto a = neighbor->node_id(e), b = neighbor->node_id((e + 1) % mv);
-      if ((a == A->id() && b == B->id()) || (a == B->id() && b == A->id()))
-      {
-        eidx = e;
-        break;
-      }
-    }
-    if (eidx == libMesh::invalid_uint)
-      continue; // should not happen
-    const subdomain_id_type sub = neighbor->subdomain_id();
-    const dof_id_type neighbor_id = neighbor->id();
+      for (const auto i : make_range(e.n_vertices()))
+        if (touched_nodes.count(e.node_id(i)))
+          return true;
+      return false;
+    };
 
-    // Build the neighbor's new vertex list, inserting the chain into its shared edge. If the
-    // neighbor traverses the edge B->A, insert the chain as-is; if A->B, insert it reversed.
-    const bool edge_is_BA = (neighbor->node_id(eidx) == B->id());
-    std::vector<Node *> new_nodes;
-    new_nodes.reserve(mv + chain.size());
-    for (const auto e : make_range(mv))
+    for (const auto sid : sliver_ids)
     {
-      new_nodes.push_back(neighbor->node_ptr(e));
-      if (e == eidx)
-      {
-        if (edge_is_BA)
-          new_nodes.insert(new_nodes.end(), chain.begin(), chain.end());
-        else
-          new_nodes.insert(new_nodes.end(), chain.rbegin(), chain.rend());
-      }
-    }
+      Elem * s = mesh->elem_ptr(sid);
+      if (!s || touches_repaired(*s))
+        continue;
+      const auto nv = s->n_vertices();
+      const unsigned int lng = longestEdge(*s);
+      if (!isSliver(*s, lng))
+        continue;
 
-    // Capture the boundary ids on the sides of the sliver and the neighbor, keyed by node-id pair,
-    // so we can put them back on the surviving edges
-    std::map<std::pair<dof_id_type, dof_id_type>, std::vector<boundary_id_type>> edge_bcs;
-    std::vector<boundary_id_type> side_ids;
-    for (const Elem * t : {const_cast<const Elem *>(s), const_cast<const Elem *>(neighbor)})
-      for (const auto e : make_range(t->n_vertices()))
+      Node * A = s->node_ptr(lng);
+      Node * B = s->node_ptr((lng + 1) % nv);
+      // The sliver's other vertices, in order from just after B around to just before A. They get
+      // inserted into the neighbor's shared edge (going B -> chain -> A).
+      std::vector<Node *> chain;
+      for (const auto off : make_range(2u, nv))
+        chain.push_back(s->node_ptr((lng + off) % nv));
+
+      // Find a 2D neighbor sharing the longest edge A-B
+      Elem * neighbor = nullptr;
+      for (const auto nid : libmesh_map_find(edge_to_elems, edge_key(A->id(), B->id())))
       {
-        boundary_info.boundary_ids(t, cast_int<unsigned short>(e), side_ids);
-        if (!side_ids.empty())
+        if (nid == sid)
+          continue;
+        Elem * cand = mesh->elem_ptr(nid);
+        if (cand && isLinear2D(*cand))
         {
-          auto & dst = edge_bcs[edge_key(t->node_id(e), t->node_id((e + 1) % t->n_vertices()))];
-          dst.insert(dst.end(), side_ids.begin(), side_ids.end());
+          neighbor = cand;
+          break;
         }
       }
-    boundary_info.remove(s);
-    boundary_info.remove(neighbor);
+      // No neighbor to absorb the sliver (boundary edge), or the neighbor is already part of a
+      // repair this pass: leave the sliver for now
+      if (!neighbor || touches_repaired(*neighbor))
+        continue;
 
-    // Create the promoted neighbor: a quad if it now has 4 vertices, otherwise a polygon
-    std::unique_ptr<Elem> promoted;
-    if (new_nodes.size() == 4)
-      promoted = std::make_unique<Quad4>();
-    else
-      promoted = std::make_unique<libMesh::C0Polygon>(new_nodes.size());
-    for (const auto i : index_range(new_nodes))
-      promoted->set_node(i, new_nodes[i]);
-    promoted->subdomain_id() = sub;
-    Elem * added = mesh->add_elem(std::move(promoted));
+      // Local side of the neighbor that is the shared edge A-B
+      const auto mv = neighbor->n_vertices();
+      unsigned int eidx = libMesh::invalid_uint;
+      for (const auto e : make_range(mv))
+      {
+        const auto a = neighbor->node_id(e), b = neighbor->node_id((e + 1) % mv);
+        if ((a == A->id() && b == B->id()) || (a == B->id() && b == A->id()))
+        {
+          eidx = e;
+          break;
+        }
+      }
+      if (eidx == libMesh::invalid_uint)
+        continue; // should not happen
+      const subdomain_id_type sub = neighbor->subdomain_id();
 
-    // Restore the captured boundary ids onto the matching edges of the new element
-    for (const auto e : make_range(added->n_vertices()))
-    {
-      auto it =
-          edge_bcs.find(edge_key(added->node_id(e), added->node_id((e + 1) % added->n_vertices())));
-      if (it != edge_bcs.end())
-        for (const auto bid : it->second)
-          boundary_info.add_side(added, cast_int<unsigned short>(e), bid);
+      // Record the sliver and neighbor nodes so adjacent slivers are deferred to a later pass
+      for (const auto i : make_range(nv))
+        touched_nodes.insert(s->node_id(i));
+      for (const auto e : make_range(mv))
+        touched_nodes.insert(neighbor->node_id(e));
+
+      // Capture the boundary ids on the sides of the sliver and the neighbor, keyed by node-id
+      // pair, so we can put them back on the surviving edges
+      std::map<std::pair<dof_id_type, dof_id_type>, std::vector<boundary_id_type>> edge_bcs;
+      std::vector<boundary_id_type> side_ids;
+      for (const Elem * t : {const_cast<const Elem *>(s), const_cast<const Elem *>(neighbor)})
+        for (const auto e : make_range(t->n_vertices()))
+        {
+          boundary_info.boundary_ids(t, cast_int<unsigned short>(e), side_ids);
+          if (!side_ids.empty())
+          {
+            auto & dst = edge_bcs[edge_key(t->node_id(e), t->node_id((e + 1) % t->n_vertices()))];
+            dst.insert(dst.end(), side_ids.begin(), side_ids.end());
+          }
+        }
+      boundary_info.remove(s);
+      boundary_info.remove(neighbor);
+
+      // The element(s) resulting from the repair, onto which we restore the boundary ids
+      std::vector<Elem *> result_elems;
+      if (nv == 3 && mv == 3)
+      {
+        // Triangle sliver against a triangle neighbor: split the neighbor into two triangles at the
+        // sliver's apex, keeping the mesh all-triangle (no promotion to a quad)
+        Node * apex = chain.front();
+        Node * e1 = neighbor->node_ptr((eidx + 1) % 3);
+        Node * w = neighbor->node_ptr((eidx + 2) % 3);
+        neighbor->set_node((eidx + 1) % 3, apex); // reshape the neighbor into (e0, apex, w)
+        auto half = std::make_unique<Tri3>();
+        half->set_node(0, apex);
+        half->set_node(1, e1);
+        half->set_node(2, w);
+        half->subdomain_id() = sub;
+        result_elems.push_back(neighbor);
+        result_elems.push_back(mesh->add_elem(std::move(half)));
+        mesh->delete_elem(s);
+      }
+      else
+      {
+        // Otherwise promote the neighbor: insert the sliver's chain into its shared edge. If the
+        // neighbor traverses the edge B->A, insert the chain as-is; if A->B, insert it reversed.
+        const bool edge_is_BA = (neighbor->node_id(eidx) == B->id());
+        std::vector<Node *> new_nodes;
+        new_nodes.reserve(mv + chain.size());
+        for (const auto e : make_range(mv))
+        {
+          new_nodes.push_back(neighbor->node_ptr(e));
+          if (e == eidx)
+          {
+            if (edge_is_BA)
+              new_nodes.insert(new_nodes.end(), chain.begin(), chain.end());
+            else
+              new_nodes.insert(new_nodes.end(), chain.rbegin(), chain.rend());
+          }
+        }
+        // A quad if it now has 4 vertices, otherwise a polygon
+        std::unique_ptr<Elem> promoted;
+        if (new_nodes.size() == 4)
+          promoted = std::make_unique<Quad4>();
+        else
+          promoted = std::make_unique<libMesh::C0Polygon>(new_nodes.size());
+        for (const auto i : index_range(new_nodes))
+          promoted->set_node(i, new_nodes[i]);
+        promoted->subdomain_id() = sub;
+        result_elems.push_back(mesh->add_elem(std::move(promoted)));
+        mesh->delete_elem(s);
+        mesh->delete_elem(neighbor);
+      }
+
+      // Restore the captured boundary ids onto the matching edges of the resulting element(s)
+      for (Elem * t : result_elems)
+        for (const auto e : make_range(t->n_vertices()))
+        {
+          auto it = edge_bcs.find(edge_key(t->node_id(e), t->node_id((e + 1) % t->n_vertices())));
+          if (it != edge_bcs.end())
+            for (const auto bid : it->second)
+              boundary_info.add_side(t, cast_int<unsigned short>(e), bid);
+        }
+
+      ++num_repaired;
+      repaired_in_pass = true;
     }
-
-    mesh->delete_elem(s);
-    mesh->delete_elem(neighbor);
-    touched.insert(sid);
-    touched.insert(neighbor_id);
-    ++num_repaired;
   }
 
   if (num_repaired)
