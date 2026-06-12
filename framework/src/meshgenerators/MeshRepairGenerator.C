@@ -13,6 +13,8 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/face_tri3.h"
 #include "libmesh/face_c0polygon.h"
 
 registerMooseObject("MooseApp", MeshRepairGenerator);
@@ -43,6 +45,26 @@ MeshRepairGenerator::validParams()
                         "Merge boundaries if they have the same name but different boundary IDs");
 
   params.addParam<bool>(
+      "fix_sliver_triangles",
+      false,
+      "Whether to repair sliver (near-degenerate) TRI3 elements. Each sliver is removed and the "
+      "neighbor triangle sharing its longest edge is split at the sliver's opposite vertex, so the "
+      "surface stays conformal.");
+  params.addRangeCheckedParam<Real>(
+      "sliver_triangle_area_fraction",
+      1e-10,
+      "sliver_triangle_area_fraction>=0",
+      "A TRI3 whose area is below this fraction of the mesh surface-area scale is treated as a "
+      "sliver (set to 0 to disable this test). Only used when 'fix_sliver_triangles' is set.");
+  params.addRangeCheckedParam<Real>(
+      "sliver_triangle_flap_tol",
+      0.02,
+      "sliver_triangle_flap_tol>=0",
+      "A TRI3 is treated as a sliver if the vertex opposite its longest edge lies within this "
+      "fraction of the longest-edge length from that edge, projecting onto its interior (set to 0 "
+      "to disable this test). Only used when 'fix_sliver_triangles' is set.");
+
+  params.addParam<bool>(
       "renumber_contiguously",
       false,
       "Whether to renumber the elements of the mesh so the numbering is contiguous");
@@ -61,10 +83,16 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _fix_element_orientation(getParam<bool>("fix_elements_orientation")),
     _elem_type_separation(getParam<bool>("separate_blocks_by_element_types")),
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name")),
-    _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons"))
+    _split_nonconvex_polygons(getParam<bool>("split_nonconvex_polygons")),
+    _fix_sliver_triangles(getParam<bool>("fix_sliver_triangles")),
+    _sliver_area_tol(getParam<Real>("sliver_triangle_area_fraction")),
+    _sliver_flap_tol(getParam<Real>("sliver_triangle_flap_tol"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
       !_boundary_id_merge && !getParam<bool>("renumber_contiguously") && !_split_nonconvex_polygons)
+
+  if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
+      !_boundary_id_merge && !_fix_sliver_triangles && !getParam<bool>("renumber_contiguously"))
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
@@ -84,6 +112,10 @@ MeshRepairGenerator::generate()
 
   if (_fix_overlapping_nodes)
     fixOverlappingNodes(mesh);
+
+  // Repair sliver triangles by splitting their longest-edge neighbor
+  if (_fix_sliver_triangles)
+    repairSliverTriangles(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -469,4 +501,183 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
              << ", using heuristic: " << num_nonconvex - num_triangulated << std::endl;
   if (!num_polygons)
     mooseWarning("No C0 polygons in mesh: the polyon convexity fix did nothing");
+}
+
+void
+MeshRepairGenerator::repairSliverTriangles(std::unique_ptr<MeshBase> & mesh) const
+{
+  // Surface-area scale of the whole mesh, used by the area-based sliver test
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real surface_scale =
+      std::abs(ext(0) * ext(1)) + std::abs(ext(0) * ext(2)) + std::abs(ext(1) * ext(2));
+  const Real area_thresh = std::max(surface_scale, Real(1e-30)) * _sliver_area_tol;
+
+  // Determine the longest edge (between local nodes lng and lng+1) of a TRI3 and whether it is a
+  // sliver per either of the two tests
+  auto analyze = [&](const Elem & tri, unsigned int & lng, bool & is_sliver)
+  {
+    const Real le[3] = {(tri.point(1) - tri.point(0)).norm(),
+                        (tri.point(2) - tri.point(1)).norm(),
+                        (tri.point(0) - tri.point(2)).norm()};
+    lng = 0;
+    if (le[1] > le[lng])
+      lng = 1;
+    if (le[2] > le[lng])
+      lng = 2;
+    const Real elen = le[lng];
+    is_sliver = false;
+    if (elen <= 0)
+      return;
+    // A is the start of the longest edge, B its end, C the opposite (apex) vertex
+    const Point & A = tri.point(lng);
+    const Point & B = tri.point((lng + 1) % 3);
+    const Point & C = tri.point((lng + 2) % 3);
+    // Area-based test
+    if (_sliver_area_tol > 0 && 0.5 * (B - A).cross(C - A).norm() < area_thresh)
+    {
+      is_sliver = true;
+      return;
+    }
+    // Geometric-flap test: apex near, and projecting onto the interior of, the longest edge
+    if (_sliver_flap_tol > 0)
+    {
+      const Point AB = B - A;
+      const Real t = ((C - A) * AB) / (elen * elen);
+      const Point proj = A + std::max(Real(0), std::min(Real(1), t)) * AB;
+      if (t > 0.001 && t < 0.999 && (C - proj).norm() < _sliver_flap_tol * elen)
+        is_sliver = true;
+    }
+  };
+
+  // Undirected edge (sorted node-id pair) -> ids of the TRI3 elements using it, plus the list of
+  // sliver elements present in the original mesh
+  auto edge_key = [](dof_id_type a, dof_id_type b)
+  { return std::make_pair(std::min(a, b), std::max(a, b)); };
+  std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>> edge_to_elems;
+  std::vector<dof_id_type> sliver_ids;
+  for (const auto & elem : mesh->active_element_ptr_range())
+  {
+    if (elem->type() != TRI3)
+      continue;
+    for (const auto s : make_range(3u))
+      edge_to_elems[edge_key(elem->node_id(s), elem->node_id((s + 1) % 3))].push_back(elem->id());
+    unsigned int lng;
+    bool is_sliver;
+    analyze(*elem, lng, is_sliver);
+    if (is_sliver)
+      sliver_ids.push_back(elem->id());
+  }
+
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  std::unordered_set<dof_id_type> touched;
+  std::size_t num_repaired = 0;
+
+  // Repair each sliver present in the original mesh once. Triangles created by a split are never
+  // re-examined, so this terminates and the surface stays watertight (each repair removes one
+  // triangle and reshapes its neighbor into two).
+  for (const auto sid : sliver_ids)
+  {
+    if (touched.count(sid))
+      continue;
+    Elem * s = mesh->elem_ptr(sid);
+    if (!s)
+      continue;
+    unsigned int lng;
+    bool is_sliver;
+    analyze(*s, lng, is_sliver);
+    if (!is_sliver)
+      continue;
+
+    Node * A = s->node_ptr(lng);
+    Node * B = s->node_ptr((lng + 1) % 3);
+    Node * C = s->node_ptr((lng + 2) % 3);
+
+    // Find the TRI3 neighbor sharing the longest edge A-B
+    Elem * neighbor = nullptr;
+    for (const auto nid : libmesh_map_find(edge_to_elems, edge_key(A->id(), B->id())))
+    {
+      if (nid == sid || touched.count(nid))
+        continue;
+      Elem * cand = mesh->elem_ptr(nid);
+      if (cand && cand->type() == TRI3)
+      {
+        neighbor = cand;
+        break;
+      }
+    }
+    // The longest edge is on a surface boundary (or its neighbor was already repaired): we cannot
+    // heal the sliver by splitting, so leave it in place
+    if (!neighbor)
+      continue;
+
+    // Local side of the neighbor that is the shared edge A-B, and its third (apex) node
+    unsigned int eidx = libMesh::invalid_uint;
+    for (const auto e : make_range(3u))
+    {
+      const auto a = neighbor->node_id(e), b = neighbor->node_id((e + 1) % 3);
+      if ((a == A->id() && b == B->id()) || (a == B->id() && b == A->id()))
+      {
+        eidx = e;
+        break;
+      }
+    }
+    if (eidx == libMesh::invalid_uint)
+      continue; // should not happen
+    Node * e1 = neighbor->node_ptr((eidx + 1) % 3);
+    Node * w = neighbor->node_ptr((eidx + 2) % 3);
+    const subdomain_id_type sub = neighbor->subdomain_id();
+
+    // Capture the boundary ids on the sides of both triangles, keyed by node-id pair, so we can put
+    // them back on the surviving edges of the split
+    std::map<std::pair<dof_id_type, dof_id_type>, std::vector<boundary_id_type>> edge_bcs;
+    std::vector<boundary_id_type> side_ids;
+    for (const Elem * t : {static_cast<const Elem *>(s), static_cast<const Elem *>(neighbor)})
+      for (const auto e : make_range(3u))
+      {
+        boundary_info.boundary_ids(t, cast_int<unsigned short>(e), side_ids);
+        if (!side_ids.empty())
+        {
+          auto & dst = edge_bcs[edge_key(t->node_id(e), t->node_id((e + 1) % 3))];
+          dst.insert(dst.end(), side_ids.begin(), side_ids.end());
+        }
+      }
+    boundary_info.remove(s);
+    boundary_info.remove(neighbor);
+
+    // Reshape the neighbor in place into (e0, C, w) and add the second half (C, e1, w); both keep
+    // the neighbor's original winding
+    neighbor->set_node((eidx + 1) % 3, C);
+    auto half = std::make_unique<Tri3>();
+    half->set_node(0, C);
+    half->set_node(1, e1);
+    half->set_node(2, w);
+    half->subdomain_id() = sub;
+    Elem * new_tri = mesh->add_elem(std::move(half));
+
+    // Restore the captured boundary ids onto the matching edges of the two resulting triangles
+    auto reassign = [&](Elem * t)
+    {
+      for (const auto e : make_range(3u))
+      {
+        auto it = edge_bcs.find(edge_key(t->node_id(e), t->node_id((e + 1) % 3)));
+        if (it != edge_bcs.end())
+          for (const auto bid : it->second)
+            boundary_info.add_side(t, cast_int<unsigned short>(e), bid);
+      }
+    };
+    reassign(neighbor);
+    reassign(new_tri);
+
+    mesh->delete_elem(s);
+    touched.insert(sid);
+    touched.insert(neighbor->id());
+    ++num_repaired;
+  }
+
+  if (num_repaired)
+  {
+    mesh->prepare_for_use();
+    _console << "Number of sliver triangles repaired: " << num_repaired << std::endl;
+  }
 }
