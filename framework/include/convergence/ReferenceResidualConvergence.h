@@ -54,13 +54,10 @@ protected:
                                         const Real abs_tol,
                                         std::ostringstream & oss) override;
 
-  virtual bool checkAbsoluteConvergence(const unsigned int /*it*/,
-                                        const Real /*fnorm*/,
-                                        const Real /*abs_tol*/,
-                                        std::ostringstream & /*oss*/) override
-  {
-    return false;
-  }
+  virtual bool checkAbsoluteConvergence(const unsigned int it,
+                                        const Real fnorm,
+                                        const Real abs_tol,
+                                        std::ostringstream & oss) override;
 
   /**
    * Check the convergence by comparing the norm of each variable's residual separately against

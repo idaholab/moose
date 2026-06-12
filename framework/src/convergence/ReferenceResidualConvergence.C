@@ -451,3 +451,14 @@ ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
 
   return false;
 }
+
+bool
+ReferenceResidualConvergence::checkAbsoluteConvergence(const unsigned int it,
+                                                       const Real fnorm,
+                                                       const Real abs_tol,
+                                                       std::ostringstream & oss)
+{
+  if (!_reference_vector)
+    return DefaultNonlinearConvergence::checkAbsoluteConvergence(it, fnorm, abs_tol, oss);
+  return false;
+}
