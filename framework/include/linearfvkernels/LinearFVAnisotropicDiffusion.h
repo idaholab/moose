@@ -42,6 +42,9 @@ public:
 
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) override;
 
+  /// Whether internal-face nonorthogonal correction is enabled for this diffusion kernel.
+  bool useNonorthogonalCorrection() const { return _use_nonorthogonal_correction; }
+
 protected:
   /**
    * Computes the matrix contribution from the diffusive face flux.

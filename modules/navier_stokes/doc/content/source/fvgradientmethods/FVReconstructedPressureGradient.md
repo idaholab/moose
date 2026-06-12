@@ -4,14 +4,18 @@
 
 This gradient method is intended for linear finite-volume SIMPLE solves using
 [RhieChowMassFlux.md]. It uses the configured base gradient method until Rhie-Chow has reconstructed
-cell velocities from conservative face fluxes. It then combines those cell velocities with the latest
-cell-centered H/A and 1/A data to infer the pressure gradient used by [LinearFVMomentumPressure.md]
-and the H/A construction.
+pressure gradients from conservative face fluxes. The reconstructed gradient is relaxed as feedback
+between SIMPLE iterations before it is used by [LinearFVMomentumPressure.md] and the H/A
+construction.
 
-The reconstruction follows the flux-reconstruction idea of [!cite](aguerre2018oscillation):
-the Rhie-Chow face fluxes define face-normal velocities, a least-squares projection
-recovers a cell velocity, and the cell pressure gradient is inferred from
-$\vec{u}_C = -(H/A)_C - (1/A)_C \nabla p_C$.
+Use pressure-field gradient methods directly for pressure-gradient feedback. Conservative
+Rhie-Chow face fluxes are suitable for velocity and flux reconstruction, but should not be treated
+as pointwise pressure-gradient data on nonorthogonal meshes.
+
+Rhie-Chow removes the previous velocity-gradient contribution from the face flux, reconstructs a
+cell velocity, and recovers the pressure gradient from the momentum balance. When the pressure
+diffusion kernel uses nonorthogonal correction,
+[!param](/UserObjects/RhieChowMassFlux/pressure_projection_method) must be set to `consistent`.
 
 !syntax parameters /FVGradientMethods/FVReconstructedPressureGradient
 

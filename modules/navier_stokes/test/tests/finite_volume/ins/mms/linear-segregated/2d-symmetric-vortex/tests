@@ -23,7 +23,7 @@
     input = test.py
     test_case = TestSymmetricVortexOrthogonalReconstructed
     min_parallel = 2
-    requirement = 'The system shall be able to solve the Navier Stokes equations with pressure flux boundary conditions using the SIMPLE algorithm with reconstructed pressure gradients in the momentum predictor without reducing the velocity convergence order on an orthogonal grid.'
+    requirement = 'The system shall be able to generate MMS convergence data with pressure flux boundary conditions for the reconstructed pressure-gradient formulation on an orthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
     issues = '#32995'
   []

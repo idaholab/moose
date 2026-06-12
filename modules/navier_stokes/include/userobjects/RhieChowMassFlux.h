@@ -44,6 +44,12 @@ public:
   /// Get the face velocity times density (used in advection terms)
   Real getMassFlux(const FaceInfo & fi) const;
 
+  /// Get the H/A face flux.
+  Real getHbyAFlux(const FaceInfo & fi) const;
+
+  /// Get the face-centered A inverse.
+  RealVectorValue getFaceAinv(const FaceInfo & fi) const;
+
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
@@ -139,19 +145,6 @@ protected:
                                                  bool elem_has_info,
                                                  unsigned int velocity_component) const;
 
-  /// Update gradients for the split flux reconstruction.
-  void updateSplitFluxReconstructionGradients(
-      const std::vector<std::unique_ptr<NumericVector<Number>>> & pressure_gradient);
-
-  /// Interpolate one split-reconstruction component gradient from the current cell to the face.
-  RealVectorValue splitFluxReconstructionGradient(
-      const ElemInfo & elem_info,
-      const FaceInfo & fi,
-      bool elem_has_info,
-      unsigned int component,
-      const std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> & gradients,
-      bool pressure_layout) const;
-
   /// Update the cell velocity from the currently published pressure gradient.
   void computeCellVelocityFromPressureGradient();
 
@@ -242,13 +235,6 @@ protected:
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
       _reconstruction_velocity_gradient;
 
-  /// Cell H/A gradients used by the split flux reconstruction.
-  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> _split_flux_hbya_gradient;
-
-  /// Cell pressure-velocity gradients used by the split flux reconstruction.
-  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _split_flux_pressure_velocity_gradient;
-
   /// Whether _reconstructed_pressure_gradient should be exposed through FVReconstructedPressureGradient.
   bool _reconstructed_pressure_gradient_ready;
 
@@ -286,9 +272,6 @@ protected:
 
   /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve
   const Real _reconstructed_pressure_gradient_feedback_relaxation;
-
-  /// Formulation used to reconstruct pressure gradients from Rhie-Chow face fluxes
-  const MooseEnum _reconstructed_pressure_gradient_formulation;
 
   /// How reconstructed-pressure-gradient mode updates the cell velocity after pressure correction
   const MooseEnum _reconstructed_pressure_gradient_velocity_update;

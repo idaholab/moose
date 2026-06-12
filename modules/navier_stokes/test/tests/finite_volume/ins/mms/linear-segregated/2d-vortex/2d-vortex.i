@@ -131,11 +131,21 @@ pressure_gradient_method = 'green-gauss'
     variable = vel_y
     functor = '0'
   []
+  # [pressure-extrapolation]
+  #   type = LinearFVExtrapolatedPressureBC
+  #   boundary = 'left right top bottom'
+  #   variable = pressure
+  #   use_two_term_expansion = false
+  # []
   [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
+    type = LinearFVPressureFluxBC
     boundary = 'left right top bottom'
     variable = pressure
-    use_two_term_expansion = true
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
 []
 
@@ -177,9 +187,9 @@ pressure_gradient_method = 'green-gauss'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.8
+  momentum_equation_relaxation = 0.5
   pressure_variable_relaxation = 0.3
-  num_iterations = 2000
+  num_iterations = 10000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
