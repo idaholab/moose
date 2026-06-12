@@ -96,9 +96,12 @@ protected:
    * list object that calls this function
    *
    * @param universe pointer to universe to add
+   * @param ignore_identical_universe skip adding universe if an identical universe exists in
+   *                                  universe list
    * @return reference to universe that is passed in
    */
-  CSGUniverse & addUniverse(std::unique_ptr<CSGUniverse> universe);
+  CSGUniverse & addUniverse(std::unique_ptr<CSGUniverse> universe,
+                            const bool ignore_identical_universe = false);
 
   /**
    * @brief rename the specified universe

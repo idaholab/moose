@@ -28,17 +28,6 @@ public:
 
 protected:
   /**
-   * Create CSG lattice for pins in an assembly
-   * @param pitch pin pitch
-   * @param pattern pattern of pin universes in the lattice
-   * @param csg_obj reference to CSGBase object
-   */
-  const CSG::CSGLattice & createAssemblyLattice(
-      const Real pitch,
-      const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
-      CSG::CSGBase & csg_obj);
-
-  /**
    * Create CSG cell with lattice fill for region within first duct boundary
    * @param assembly_lattice reference to assembly lattice object
    * @param surfaces_by_axial_region list of surfaces corresponding to each axial plane in assembly

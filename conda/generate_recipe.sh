@@ -59,10 +59,13 @@ CTRL-C to Cancel. "
 
 function string_replace()
 {
-    local REPLACE ARG
+    local REPLACE
     printf 'Creating recipes at %s/%s\n' "${TMP_DIR}" "${RECIPES}"
-    REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE \
-IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH MOOSE_OPTIONS)
+    REPLACE=(
+        "APPLICATION" "FORMATTED_APPLICATION" "EXECUTABLE" "REPO"
+        "VERSION" "MOOSE_JOBS" "SKIP_DOCS" "PREFIX_PACKAGE_WITH"
+        "MOOSE_OPTIONS" "MOOSE_DOCS_FLAGS"
+    )
     # shellcheck disable=SC2044  # we will never allow spaces in our filesnames
     for sfile in $(find "${SCRIPT_DIR}/${TEMPLATE}" -type l); do
         cat "${sfile}" > "${TMP_DIR}/${RECIPES}/$(basename "${sfile}")"
@@ -93,15 +96,14 @@ function conda_build()
         string_replace || exit 1
         cd "${TMP_DIR}/${RECIPES}" || exit 1
         mkdir -p "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
-        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" || exit 1
-        printf 'Built: %s/packages/%s/%s/%s%s-%s-build_%s.conda\n' \
+        conda-build . --output-folder "${SCRIPT_DIR}/packages/${APPLICATION}" -m "${REPO}/moose/conda/conda_build_config.yaml" || exit 1
+        printf 'Built: %s/packages/%s/%s/%s%s-%s-build_0.conda\n' \
           "${SCRIPT_DIR}" \
           "${APPLICATION}" \
           "${ARCH}" \
           "${PREFIX_PACKAGE_WITH}" \
           "${FORMATTED_APPLICATION}" \
-          "${VERSION}" \
-          "${BUILD}"
+          "${VERSION}"
     else
         TMP_DIR="$BUILD_ROOT"
         clean_repo
@@ -135,18 +137,11 @@ if [ "$(uname)" == 'Darwin' ]; then
 else
     ARCH='linux-64'
 fi
-# We are building moose
-if [ "$(basename "${REPO}" .git)" == 'moose' ]; then
-    export IS_MOOSE='/modules'
-    export MOOSE=''
-    export EXECUTABLE='combined'
-    export PREFIX_PACKAGE_WITH=''
-    export MOOSE_SKIP_DOCS='true'
-else
-    export IS_MOOSE=''
-    export MOOSE='/moose'
-    export PREFIX_PACKAGE_WITH="${PREFIX_PACKAGE_WITH:-ncrc-}"
+
+if [ -z "${PREFIX_PACKAGE_WITH+x}" ]; then
+    export PREFIX_PACKAGE_WITH="ncrc-"
 fi
+
 SKIP_DOCS='False'
 if [ -n "${MOOSE_SKIP_DOCS}" ]; then
     printf "Influential environment variable: MOOSE_SKIP_DOCS detected.\n"

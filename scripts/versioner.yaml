@@ -171,6 +171,7 @@ packages:
   app:
     templates:
       conda/moose/meta.yaml.template: conda/moose/meta.yaml
+      conda/template/meta.yaml.template: conda/template/meta.yaml
     dependencies:
       - moose-dev
     apptainer:

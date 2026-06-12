@@ -35,9 +35,12 @@ protected:
    * CSGLatticeList object that calls this function
    *
    * @param lattice pointer to lattice to add
+   * @param ignore_identical_lattice skip adding lattice if an identical lattice exists in lattice
+   *                                 list
    * @return reference to CSGLattice that is passed in
    */
-  CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
+  CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice,
+                          const bool ignore_identical_lattice = false);
 
   /**
    * @brief return whether lattice with given name exists in lattice list

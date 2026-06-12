@@ -87,7 +87,7 @@ protected:
    * to surface list object that calls this function
    *
    * @param surf CSGSurface to add
-   * @param ignore_identical_surface skip adding surface if a identical surface exists in surface
+   * @param ignore_identical_surface skip adding surface if an identical surface exists in surface
    *                                 list
    *
    * @return reference to CSGSurface

@@ -177,6 +177,12 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
   return _app.registerRestartableData(std::move(data_ptr), 0, !declare);
 }
 
+void
+ReporterData::restoreReporterStateIfAvailable(RestartableDataValue & state) const
+{
+  _app.restoreDataIfAvailable(state, 0, {});
+}
+
 bool
 ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
 {
