@@ -57,8 +57,6 @@ protected:
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the fuel pins
   std::vector<Point> _pin_position;
-  /// Pin nodes
-  std::vector<std::vector<Node *>> _pin_nodes;
   /// x,y coordinates of the subchannels
   std::vector<std::vector<Real>> _subchannel_position;
   /// Subchannel subdomain ID

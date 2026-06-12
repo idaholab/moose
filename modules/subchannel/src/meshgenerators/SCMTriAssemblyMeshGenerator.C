@@ -102,8 +102,7 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
     _duct_to_pin_gap(0.5 *
                      (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _pin_diameter)),
     _npins(0),
-    _n_gaps(0),
-    _elem_id(0)
+    _n_gaps(0)
 {
   const Real total_length = _unheated_length_entry + _heated_length + _unheated_length_exit;
 

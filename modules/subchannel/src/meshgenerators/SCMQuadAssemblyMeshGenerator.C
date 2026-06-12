@@ -567,6 +567,7 @@ SCMQuadAssemblyMeshGenerator::generate()
 
   auto & sch_mesh = static_cast<QuadSubChannelMesh &>(*_mesh);
   transferMetadata(sch_mesh);
+  sch_mesh.computeAssemblyHydraulicParameters();
 
   return mesh_base;
 }

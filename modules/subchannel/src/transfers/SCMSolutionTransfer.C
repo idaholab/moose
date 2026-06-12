@@ -16,7 +16,7 @@
 registerMooseObject("SubChannelApp", SCMSolutionTransfer);
 registerMooseObjectRenamed("SubChannelApp",
                            SolutionTransfer,
-                           "06/30/2025 24:00",
+                           "06/30/2027 24:00",
                            SCMSolutionTransfer);
 registerMooseObjectRenamed("SubChannelApp",
                            SCMPinSolutionTransfer,

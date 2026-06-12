@@ -339,13 +339,10 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
   // triangular prism sectors.
   std::vector<std::vector<Node *>> nodes;
   nodes.resize(_n_cells + 1);
-  std::vector<Node *> center_nodes;
-  center_nodes.reserve(_n_cells + 1);
   for (unsigned int k = 0; k < _n_cells + 1; k++)
   {
     const Real elev = _z_grid[k];
-    center_nodes.push_back(mesh_base->add_point(Point(center(0), center(1), elev)));
-    nodes[k].push_back(center_nodes.back());
+    nodes[k].push_back(mesh_base->add_point(Point(center(0), center(1), elev)));
     Real alpha = 0.;
     for (unsigned int i = 0; i < _num_radial_parts; i++, alpha += dalpha)
     {
@@ -372,8 +369,6 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
       elem->set_node(4, nodes[k + 1][idx1]);
       elem->set_node(5, nodes[k + 1][idx2]);
     }
-
-  _pin_nodes.push_back(center_nodes);
 }
 
 std::unique_ptr<MeshBase>
@@ -454,7 +449,6 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
   }
   mesh_base->reserve_nodes(n_points + pin_points);
   mesh_base->reserve_elem(n_elems + pin_elems);
-  _pin_nodes.clear();
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
   // We build for both the square discretization in the edges and the triangular discretization
   // within the mesh

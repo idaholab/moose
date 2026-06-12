@@ -113,8 +113,6 @@ protected:
   std::vector<std::pair<unsigned int, unsigned int>> _gap_pairs_sf;
   /// sweeping flow model channel pairs to specify directional edge flow
   std::vector<std::pair<unsigned int, unsigned int>> _chan_pairs_sf;
-  /// counter for element numbering
-  dof_id_type _elem_id;
 
 public:
   static InputParameters validParams();
