@@ -7,7 +7,7 @@
     type = Exodiff
     input = 'custom_model.i'
     exodiff = 'custom_model_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [neml2_error]
@@ -17,7 +17,7 @@
     cli_args = 'NEML2/all/model=error'
     expect_err = 'NEML2 model execution failed on at least one processor'
     collections = 'SYSTEM'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = none
   []
   [no_neml2]
@@ -35,14 +35,14 @@
     cli_args = 'Functions/A/type=ParsedFunction Functions/A/expression=1.0'
     expect_err = 'Trying to infer MOOSE data type for NEML2 variable A\. The name matches multiple types \(function variable\s*\)'
     collections = 'SYSTEM'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
   []
   [model_parameter]
     requirement = 'The framework shall be capable of using MOOSE data as NEML2 model parameters.'
     type = Exodiff
     input = 'parameter.i'
     exodiff = 'parameter_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [block_restriction]
@@ -54,7 +54,7 @@
       type = Exodiff
       input = 'blocks_same_model.i'
       exodiff = 'blocks_same_model_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [different_model]
@@ -62,7 +62,7 @@
       type = Exodiff
       input = 'blocks_different_model.i'
       exodiff = 'blocks_different_model_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
   []
@@ -72,7 +72,7 @@
     type = Exodiff
     input = 'blocks_empty_neml2.i'
     exodiff = 'blocks_empty_neml2_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
     min_parallel = 2
     max_parallel = 2
@@ -82,7 +82,7 @@
     type = Exodiff
     input = 'multiple_input_files.i'
     exodiff = 'multiple_input_files_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [mesh_change]
@@ -90,7 +90,7 @@
     type = Exodiff
     input = 'mesh_change.i'
     exodiff = 'mesh_change_out.e mesh_change_out.e-s002 mesh_change_out.e-s003 mesh_change_out.e-s004 mesh_change_out.e-s005'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [scheduler]
@@ -102,7 +102,7 @@
       input = 'custom_model.i'
       cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=false NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
       exodiff = 'simple_scheduler_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       recover = false
       valgrind = heavy
     []
@@ -113,7 +113,7 @@
       input = 'custom_model.i'
       cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=true NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
       exodiff = 'simple_scheduler_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       recover = false
       valgrind = heavy
     []

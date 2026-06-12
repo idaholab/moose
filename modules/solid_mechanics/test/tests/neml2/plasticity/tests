@@ -8,7 +8,7 @@
       type = Exodiff
       input = 'perfect.i'
       exodiff = 'perfect_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [isoharden]
@@ -16,7 +16,7 @@
       type = Exodiff
       input = 'isoharden.i'
       exodiff = 'isoharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [kinharden]
@@ -24,7 +24,7 @@
       type = Exodiff
       input = 'kinharden.i'
       exodiff = 'kinharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [isokinharden]
@@ -32,7 +32,7 @@
       type = Exodiff
       input = 'isokinharden.i'
       exodiff = 'isokinharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
   []
@@ -43,7 +43,7 @@
     cli_args = "NEML2/all/manage_state_advance=true"
     exodiff = 'perfect_out.e'
     issues = '#27493'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
 []

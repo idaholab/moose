@@ -8,7 +8,7 @@
       type = Exodiff
       input = 'perfect.i'
       exodiff = 'perfect_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [isoharden]
@@ -16,7 +16,7 @@
       type = Exodiff
       input = 'isoharden.i'
       exodiff = 'isoharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [kinharden]
@@ -24,7 +24,7 @@
       type = Exodiff
       input = 'kinharden.i'
       exodiff = 'kinharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [isokinharden]
@@ -32,7 +32,7 @@
       type = Exodiff
       input = 'isokinharden.i'
       exodiff = 'isokinharden_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [chaboche]
@@ -40,7 +40,7 @@
       type = Exodiff
       input = 'chaboche.i'
       exodiff = 'chaboche_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [radial_return]
@@ -48,7 +48,7 @@
       type = Exodiff
       input = 'radial_return.i'
       exodiff = 'radial_return_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
   []
