@@ -111,7 +111,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     CODE_SERVER_VERSION=4.122.0
     MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
     # python
-    PYTHON_VERSION=3.14.5
+    PYTHON_VERSION=3.14.6
 {% if WITH_FMU %}
     # PyFMI python package and its dependencies
     FMI_LIBRARY_VERSION=3.0.4
@@ -228,9 +228,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         curl -LsSf https://astral.sh/uv/install.sh | XDG_DATA_HOME=${XDG_DATA_HOME} XDG_BIN_HOME=${UV_BIN_DIR} sh
 
         # Use uv to create a python venv and verify the version
-        XDG_DATA_HOME=${XDG_DATA_HOME} ${UV_BIN_DIR}/uv venv ${PYTHON_DIR} --no-project --no-config --relocatable --no-cache --python "${PYTHON_VERSION%.*}"
-        ${PYTHON_DIR}/bin/python
-        ${PYTHON_DIR}/bin/python --version | grep -q "Python ${PYTHON_VERSION}"
+        XDG_DATA_HOME=${XDG_DATA_HOME} ${UV_BIN_DIR}/uv venv ${PYTHON_DIR} --no-project --no-config --relocatable --no-cache --python "$PYTHON_VERSION"
 
         # Setup python development environment from uv environment
         UV_PYTHON_DIR="$(realpath "$(dirname "$(realpath "${PYTHON_DIR}/bin/python${PYTHON_VERSION%.*}")")/..")"
