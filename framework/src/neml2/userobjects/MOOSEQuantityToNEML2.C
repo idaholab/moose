@@ -52,7 +52,7 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
     ElementUserObject(params)
 #ifdef NEML2_ENABLED
     ,
-    _type(getParam<MooseEnum>("quantity_type").getEnum<NEML2Utils::MOOSEIOType>()),
+    _type(getParam<MooseEnum>("quantity_type").template getEnum<NEML2Utils::MOOSEIOType>()),
     _var_scalar(
         _type == NEML2Utils::MOOSEIOType::SCALAR && state == 0
             ? &this->_fe_problem.getScalarVariable(_tid, getParam<std::string>("from_moose")).sln()
