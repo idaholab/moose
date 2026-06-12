@@ -87,4 +87,22 @@
     requirement = "The system shall keep the mesh conformal when repairing an interior sliver whose non-absorbed edge is shared with another element."
     mesh_mode = 'replicated'
   []
+  [repair_tet_sliver]
+    type = Exodiff
+    input = repair_tet_sliver.i
+    cli_args = '--mesh-only'
+    exodiff = 'repair_tet_sliver_in.e'
+    recover = false
+    issues = '#33151'
+    requirement = "The system shall be able to repair an interior sliver tetrahedron by edge collapse, producing a valid all-tetrahedral conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_tet_sliver_skip]
+    type = RunApp
+    input = repair_tet_sliver_skip.i
+    expect_out = 'could not be collapsed \(left in place\): 1'
+    issues = '#33151'
+    requirement = "The system shall leave a sliver tetrahedron in place, rather than distorting the boundary, when it has no interior node that can be collapsed."
+    mesh_mode = 'replicated'
+  []
 []
