@@ -19,7 +19,7 @@
   [./heat_conduction]
     type = HeatConduction
     variable = temp
-    diffusion_coefficient = 1
+    thermal_conductivity = 1
   [../]
   [./heat]
     type = BodyForce

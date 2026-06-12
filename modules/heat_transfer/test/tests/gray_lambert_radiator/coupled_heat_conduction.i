@@ -56,7 +56,7 @@
   [./heat_conduction]
     type = HeatConduction
     variable = temperature
-    diffusion_coefficient = 1
+    thermal_conductivity = 1
     block = '1 3'
   [../]
 []
