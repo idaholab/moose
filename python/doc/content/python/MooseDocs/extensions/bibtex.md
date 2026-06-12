@@ -16,12 +16,7 @@ option, which applies to every page:
 - `number`: inline citations render as bracketed numbers, numbered in the order
   they are first cited. The reference list is ordered to match, so `[1]` always
   points to the first entry. This is useful on pages that cite many works by the
-  same authors or year, where author-year labels are hard to tell apart. As with
-  `author-year`, the textual (`!cite`) and parenthetical (`!citep`) commands
-  differ: `!citep` renders just the number, e.g. `[1]`, for use inside or at the
-  end of a sentence, while `!cite` keeps the author so it reads as part of the
-  sentence, e.g. "Slaughter et al. `[1]`" (a bare number would not read well in
-  running text).
+  same authors or year, where author-year labels are hard to tell apart.
 
 ```yaml
 Extensions:
@@ -32,8 +27,17 @@ Extensions:
 ## Usage
 
 Two commands are provided for citing BibTeX references: `!cite` and `!citep`.
-The latter includes parentheses, while the former does not. To cite multiple
-references, they are separated with a comma.
+`!cite` is textual, so the citation reads as part of the sentence, while `!citep`
+is parenthetical, for use inside or at the end of a sentence. How each renders
+depends on the `citation_style` configured above:
+
+- With `author-year`, `!cite` reads as "Slaughter et al. (2014)" and `!citep`
+  wraps the author and year in parentheses, e.g. "(Slaughter et al., 2014)".
+- With `number`, `!citep` renders just the bracketed number, e.g. `[1]`, while
+  `!cite` keeps the author so it still reads in running text, e.g.
+  "Slaughter et al. `[1]`" (a bare number would not read well there).
+
+To cite multiple references, they are separated with a comma.
 
 To generate the list of references cited on a page, the `!bibtex bibliography`
 command is used. If it is not used, then it will automatically be placed at the
@@ -44,9 +48,10 @@ citation in three formats: BibTeX, RIS (for import into Microsoft Word, EndNote,
 Zotero, or Mendeley), and a plain-text reference string. The RIS and plain-text
 formats are intended for those who do not write in LaTeX.
 
-See [citation_examples] for examples.
+The examples in [citation_examples] use the default `author-year` style, which is
+the style used throughout the MOOSE documentation website.
 
-!devel! example caption=Citation examples. id=citation_examples
+!devel! example caption=Citation examples using the default author-year style. id=citation_examples
 [!cite](slaughter2014framework)
 
 [!cite](slaughter2014framework, slaughter2015continuous)

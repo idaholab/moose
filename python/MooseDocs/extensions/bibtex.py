@@ -463,10 +463,18 @@ class RenderBibtexBibliography(components.RenderComponent):
 
             db = BibliographyData()
             db.add_entry(key, entry)
+            # The 'language-*' class lets Prism wrap each block in its toolbar
+            # (adding the Copy button and overflow scrolling). RIS and plain text
+            # have no Prism grammar, so 'language-none' gives them the same toolbar
+            # without syntax coloring.
             formats = [
                 ("BibTeX", db.to_string("bibtex"), "language-latex"),
-                ("RIS", bibtex_to_ris(entry), None),
-                ("Plain Text", self._plainText(key, token["bib_style"]), None),
+                ("RIS", bibtex_to_ris(entry), "language-none"),
+                (
+                    "Plain Text",
+                    self._plainText(key, token["bib_style"]),
+                    "language-none",
+                ),
             ]
 
             m_id = uuid.uuid4()
