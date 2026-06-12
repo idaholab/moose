@@ -108,7 +108,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Individual versions for packages to install, in the order
     # in which they are installed below.
     # code-server and code-server plugins
-    CODE_SERVER_VERSION=4.122.0
+    CODE_SERVER_VERSION=4.123.0
     MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
     # python
     PYTHON_VERSION=3.14.6
