@@ -566,10 +566,24 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
+# The $(NO_AS_NEEDED_FLAG) below must come before $(applibs) (which carries the
+# Kokkos shared libraries). Toolchains that default to --as-needed (e.g. GCC 15)
+# only keep a library that, at the point it is seen on the link line, satisfies
+# an undefined reference from something already processed. libtool further
+# rearranges the line: bare .so inputs (the GPU-mode Kokkos libs, which cannot be
+# libtool .la archives because libtool cannot drive nvcc) and -Wl flags are
+# emitted into the command in the order parsed, while .la libraries (libmoose,
+# etc.) are siphoned into deplibs and emitted *after* them. So libmoose.so ends
+# up after the Kokkos .so even though it precedes it in $(applibs). The Kokkos
+# symbols are referenced only by libmoose.so (another shared lib, seen later),
+# never by $(main_object), so under --as-needed the Kokkos libs would be dropped
+# and their symbols left undefined. Placing --no-as-needed right after
+# $(main_object) forces them to be retained regardless of this ordering; the flag
+# is parse-order-stable in libtool so a bare .so cannot be hoisted ahead of it.
 $(app_EXEC): $(app_LIBS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS) $(app_KOKKOS_TEST_LIB) $(KOKKOS_DEVICE_LINK_OBJECT) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_EXEC_OBJECTS)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(KOKKOS_DEVICE_LINK_OBJECT) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(if $(filter yes,$(HAVE_NO_AS_NEEDED)),$(NO_AS_NEEDED_FLAG)) $(depend_test_libs_flags) $(applibs) $(KOKKOS_DEVICE_LINK_OBJECT) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
