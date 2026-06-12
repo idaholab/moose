@@ -50,7 +50,7 @@
     exodiff = 'repair_slivers_in.e'
     recover = false
     issues = '#33151'
-    requirement = "The system shall be able to repair sliver elements, flagged by the longest-edge flap test, by removing each sliver and absorbing it into its longest-edge neighbor, promoting a triangle neighbor to a quadrilateral."
+    requirement = "The system shall be able to repair sliver elements, flagged by the longest-edge flap test, by removing each sliver and absorbing it into its longest-edge neighbor, splitting a triangle neighbor into two triangles."
     mesh_mode = 'replicated'
   []
   [repair_slivers_by_area]
