@@ -94,6 +94,4 @@ protected:
 
 public:
   static InputParameters validParams();
-
-  friend class SCMQuadPinMeshGenerator;
 };
