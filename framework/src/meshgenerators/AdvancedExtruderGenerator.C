@@ -1822,51 +1822,23 @@ AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
       node_to_elem_normals[elem->node_id(n)].push_back(elem_normal);
   }
 
-  // Average the connected element normals at each node. When the connected elements disagree on the
-  // outward/inward orientation, the minority normals (those pointing the other way) are flipped to
-  // match the majority before averaging.
+  // Average the normals of all the elements connected to each node. The input surface mesh is
+  // expected to have consistently oriented elements.
   std::unordered_map<dof_id_type, Point> node_normals;
   node_normals.reserve(node_to_elem_normals.size());
-  dof_id_type num_flipped_nodes = 0;
   for (const auto & [node_id, normals] : node_to_elem_normals)
   {
-    // Use the orientation shared by the majority of elements as the reference direction
-    Point reference = normals[0];
-    int orientation_balance = 0;
-    for (const auto & elem_normal : normals)
-      orientation_balance += (elem_normal * reference >= 0 ? 1 : -1);
-    if (orientation_balance < 0)
-      reference = -reference;
-
-    // Flip the minority normals to match the reference, then average all of them
     Point averaged_normal;
-    bool flipped = false;
     for (const auto & elem_normal : normals)
-      if (elem_normal * reference >= 0)
-        averaged_normal += elem_normal;
-      else
-      {
-        averaged_normal -= elem_normal;
-        flipped = true;
-      }
-    if (flipped)
-      num_flipped_nodes++;
+      averaged_normal += elem_normal;
 
     if (averaged_normal.norm_sq() == 0)
       mooseError("The averaged normal at node ",
                  node_id,
-                 " is zero; the connected elements' orientations cancel out and an extrusion "
-                 "direction cannot be determined.");
+                 " is zero; an extrusion direction cannot be determined. This can happen if the "
+                 "connected elements do not have consistent orientations.");
     node_normals[node_id] = averaged_normal.unit();
   }
-
-  if (num_flipped_nodes)
-    mooseInfo("AdvancedExtruderGenerator '",
-              name(),
-              "': the connected elements disagreed on the surface orientation at ",
-              num_flipped_nodes,
-              " node(s); the minority element normals were flipped to match the majority before "
-              "averaging.");
 
   return node_normals;
 }
