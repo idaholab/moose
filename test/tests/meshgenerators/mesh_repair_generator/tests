@@ -43,4 +43,24 @@
     # parallel packing not implemented for polys
     mesh_mode = 'replicated'
   []
+  [repair_slivers]
+    type = Exodiff
+    input = repair_slivers.i
+    cli_args = '--mesh-only'
+    exodiff = 'repair_slivers_in.e'
+    recover = false
+    issues = '#33151'
+    requirement = "The system shall be able to repair sliver triangles, flagged by the apex-to-longest-edge flap test, by removing each sliver and splitting its longest-edge neighbor at the opposite vertex."
+    mesh_mode = 'replicated'
+  []
+  [repair_slivers_by_area]
+    type = Exodiff
+    input = repair_slivers.i
+    cli_args = 'Mesh/repair/sliver_triangle_flap_tol=0 Mesh/repair/sliver_triangle_area_fraction=0.01 --mesh-only repair_slivers_area_in.e'
+    exodiff = 'repair_slivers_area_in.e'
+    recover = false
+    issues = '#33151'
+    requirement = "The system shall be able to repair sliver triangles flagged by the relative-area test."
+    mesh_mode = 'replicated'
+  []
 []
