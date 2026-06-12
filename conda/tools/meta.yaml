@@ -33,7 +33,7 @@ requirements:
     - beautifulsoup4
     - black {{ black }}
     - clang-format {{ clang_format }}
-    - clang-tools
+    - clang-tools {{ clang_tools }}
     - coverage {{ coverage }}
     - deepdiff
     - git-lfs
