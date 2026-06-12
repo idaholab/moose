@@ -1,6 +1,4 @@
-{% set build = "<BUILD>" %}
 {% set version = "<VERSION>" %}
-{% set strbuild = "build_" + build|string %}
 
 package:
   name: <PREFIX_PACKAGE_WITH><FORMATTED_APPLICATION>
@@ -10,8 +8,8 @@ source:
   path: .
 
 build:
-  number: {{ build }}  # [linux,osx]
-  string: {{ strbuild }}
+  number: 0  # [linux,osx]
+  string: build_0
   skip: true # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
