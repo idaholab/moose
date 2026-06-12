@@ -45,12 +45,12 @@ private:
   /// Whether to split non-convex polygons
   const bool _split_nonconvex_polygons;
 
-  /// whether to repair sliver (near-degenerate) TRI3 elements
-  const bool _fix_sliver_triangles;
-  /// a TRI3 is a sliver if its area is below this fraction of the mesh area scale (0 disables)
+  /// whether to repair sliver (near-degenerate) first-order 2D elements
+  const bool _fix_sliver_elements;
+  /// a 2D element is a sliver if its area is below this fraction of the mesh area (0 disables)
   const Real _sliver_area_tol;
-  /// a TRI3 is a sliver if the vertex opposite its longest edge is within this fraction of the
-  /// longest-edge length from that edge, projecting onto its interior (0 disables)
+  /// a 2D element is a sliver if every non-longest-edge vertex is within this fraction of the
+  /// longest-edge length from that edge (0 disables)
   const Real _sliver_flap_tol;
 
   /// @brief Removes the elements with an volume value below the user threshold

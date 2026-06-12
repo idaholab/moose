@@ -67,7 +67,7 @@
     type = MeshRepairGenerator
     input = poly_neighbor
     fix_node_overlap = true
-    fix_sliver_triangles = true
+    fix_sliver_elements = true
   []
   [diagnostics]
     type = MeshDiagnosticsGenerator
