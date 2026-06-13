@@ -60,8 +60,12 @@ MeshRepairGenerator::validParams()
       "the neighbor absorbs the sliver's vertices and is promoted to a quadrilateral or polygon. A "
       "TET4 sliver is removed by edge collapse, keeping a valid all-tetrahedral conformal mesh. A "
       "flat PYRAMID5 sliver is absorbed into the element across its quad base, which becomes a "
-      "polyhedron. Each repair keeps the mesh conformal, or leaves the sliver in place if no valid "
-      "repair exists.");
+      "polyhedron. A flat PRISM6 (wedge) sliver is collapsed onto its opposite triangular face so "
+      "its neighbors meet, while a thin-cross-section wedge is absorbed into the element across "
+      "its "
+      "longest quad side. Each repair keeps the mesh conformal, or leaves the sliver in place if "
+      "no "
+      "valid repair exists.");
   params.addRangeCheckedParam<Real>(
       "sliver_element_area_fraction",
       1e-10,
@@ -76,22 +80,25 @@ MeshRepairGenerator::validParams()
       "edge lies within this fraction of the longest-edge length from that edge, projecting onto "
       "its interior (set to 0 to disable this test). Only used when 'fix_sliver_elements' is "
       "set. In 3D this is the distance from the apex to its opposite face (the largest face for a "
-      "TET4, the quad base for a PYRAMID5) as a fraction of sqrt(that face's area).");
+      "TET4, the quad base for a PYRAMID5) as a fraction of sqrt(that face's area). For a PRISM6 "
+      "it "
+      "flags both a flat wedge (top triangle within this fraction of sqrt(area) of the bottom) and "
+      "a thin-cross-section wedge (a triangle vertex within this fraction of the longest edge).");
   params.addRangeCheckedParam<Real>(
       "sliver_element_volume_fraction",
       1e-10,
       "sliver_element_volume_fraction>=0",
-      "A TET4 or PYRAMID5 whose volume is below this fraction of the mesh bounding-box volume is "
-      "treated as a sliver (set to 0 to disable this test). Only used when 'fix_sliver_elements' "
-      "is "
-      "enabled.");
+      "A TET4, PYRAMID5, or PRISM6 whose volume is below this fraction of the mesh bounding-box "
+      "volume is treated as a sliver (set to 0 to disable this test). Only used when "
+      "'fix_sliver_elements' is enabled.");
   params.addRangeCheckedParam<Real>(
       "tet_collapse_volume_floor",
       1e-9,
       "tet_collapse_volume_floor>=0",
-      "When repairing a TET4 sliver by edge collapse, a reshaped neighbor tet is rejected (the "
-      "collapse is not performed) if its volume would drop below this fraction of the mesh "
-      "bounding-box volume, to avoid inverting elements or creating new slivers.");
+      "When repairing a TET4 or flat PRISM6 (wedge) sliver by collapse, a reshaped neighbor is "
+      "rejected (the collapse is not performed) if its volume would drop below this fraction of "
+      "the "
+      "mesh bounding-box volume, to avoid inverting elements or creating new slivers.");
 
   params.addParam<bool>(
       "renumber_contiguously",
@@ -155,6 +162,10 @@ MeshRepairGenerator::generate()
   // Repair sliver PYRAMID5 elements by absorbing them into their quad-base neighbor
   if (_fix_sliver_elements)
     repairPyramidSlivers(mesh);
+
+  // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
+  if (_fix_sliver_elements)
+    repairWedgeSlivers(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -1172,6 +1183,166 @@ MeshRepairGenerator::repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const
   }
 }
 
+bool
+MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
+                                            Elem * sliver,
+                                            Elem * neighbor,
+                                            const std::vector<dof_id_type> & shared_key,
+                                            std::unordered_set<dof_id_type> & touched_nodes) const
+{
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
+  // Sorted node-id key of a side, used to find and skip the dissolved shared face
+  auto sideKey = [](Elem * e, unsigned int s)
+  {
+    const auto ns = e->nodes_on_side(s);
+    std::vector<dof_id_type> k;
+    for (const auto i : index_range(ns))
+      k.push_back(e->node_id(ns[i]));
+    std::sort(k.begin(), k.end());
+    return k;
+  };
+
+  // Build the union polyhedron's faces: every face of both elements except the shared one. Capture
+  // side boundary ids per face (keyed by sorted node ids) so they can be restored afterwards.
+  std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> face_bcs;
+  std::vector<boundary_id_type> ids;
+  std::vector<std::shared_ptr<libMesh::Polygon>> faces;
+  auto add_face = [&](Elem * e, unsigned int s)
+  {
+    const auto ns = e->nodes_on_side(s);
+    auto poly = std::make_shared<libMesh::C0Polygon>(ns.size());
+    std::vector<dof_id_type> key;
+    for (const auto i : index_range(ns))
+    {
+      poly->set_node(i, e->node_ptr(ns[i]));
+      key.push_back(e->node_id(ns[i]));
+    }
+    faces.push_back(poly);
+    boundary_info.boundary_ids(e, cast_int<unsigned short>(s), ids);
+    if (!ids.empty())
+    {
+      std::sort(key.begin(), key.end());
+      face_bcs[key].insert(ids.begin(), ids.end());
+    }
+  };
+  for (Elem * e : {neighbor, sliver})
+    for (const auto s : make_range(e->n_sides()))
+      if (sideKey(e, s) != shared_key)
+        add_face(e, s);
+
+  // Capture edge boundary ids (edgesets) on both elements, keyed by sorted endpoint-node pair, so
+  // they can be re-applied to the matching edges of the polyhedron (side ids alone would drop
+  // them).
+  std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
+  std::vector<boundary_id_type> eids;
+  auto capture_edges = [&](Elem * e)
+  {
+    for (const auto ed : make_range(e->n_edges()))
+    {
+      boundary_info.edge_boundary_ids(e, cast_int<unsigned short>(ed), eids);
+      if (eids.empty())
+        continue;
+      const auto en = e->nodes_on_edge(ed);
+      auto a = e->node_id(en[0]);
+      auto b = e->node_id(en[1]);
+      if (a > b)
+        std::swap(a, b);
+      edge_bcs[{a, b}].insert(eids.begin(), eids.end());
+    }
+  };
+  capture_edges(neighbor);
+  capture_edges(sliver);
+
+  // Construct the union polyhedron and accept it only if it is a sound, convex cell. The
+  // C0Polyhedron constructor tetrahedralizes the faces and throws if the union is non-convex or has
+  // a flat sub-tet, so the construction is wrapped: any failure leaves the mesh unchanged. Both old
+  // elements still exist here, so declining restores the original state exactly.
+  const subdomain_id_type sub = neighbor->subdomain_id();
+  std::unique_ptr<libMesh::Node> mid_node;
+  std::unique_ptr<libMesh::C0Polyhedron> poly_elem;
+  try
+  {
+    poly_elem = std::make_unique<libMesh::C0Polyhedron>(faces, mid_node);
+  }
+  catch (const std::exception &)
+  {
+    // Non-convex / non-tetrahedralizable union: decline. NOTE: in optimized libMesh builds this
+    // reject path can leak the constructor's interior node (the C0Polyhedron constructor is not
+    // exception-safe on its fallback tetrahedralization); valid (convex) unions are unaffected.
+    // This should be fixed upstream in libMesh.
+    return false;
+  }
+  poly_elem->subdomain_id() = sub;
+  libMesh::Node * mid_ptr = mid_node.get();
+  if (mid_node)
+    mesh->add_node(std::move(mid_node));
+  Elem * added = mesh->add_elem(std::move(poly_elem));
+  // The mid-element node now has a valid id, so volume() is well defined. Reject a degenerate
+  // (non-positive volume) union and, in optimized builds where the constructor does not assert on
+  // non-convexity, a non-convex result (which would self-overlap). convex() is the real geometric
+  // check; volume()>0 alone always holds for a successfully built polyhedron.
+  bool valid = added->volume() > 0;
+  if (valid)
+  {
+    auto * poly = dynamic_cast<libMesh::Polyhedron *>(added);
+    try
+    {
+      valid = poly && poly->convex();
+    }
+    catch (const std::exception &)
+    {
+      valid = false;
+    }
+  }
+  if (!valid)
+  {
+    mesh->delete_elem(added);
+    if (mid_ptr)
+      mesh->delete_node(mid_ptr);
+    return false; // invalid/non-convex union: leave the mesh unchanged
+  }
+
+  // Move side boundary ids from the old elements onto the matching faces of the polyhedron
+  boundary_info.remove(sliver);
+  boundary_info.remove(neighbor);
+  for (const auto s : make_range(added->n_sides()))
+  {
+    const auto ns = added->nodes_on_side(s);
+    std::vector<dof_id_type> key;
+    for (const auto i : index_range(ns))
+      key.push_back(added->node_id(ns[i]));
+    std::sort(key.begin(), key.end());
+    auto it = face_bcs.find(key);
+    if (it != face_bcs.end())
+      for (const auto bid : it->second)
+        boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
+  }
+
+  // Move edge boundary ids onto the matching edges of the polyhedron
+  if (!edge_bcs.empty())
+    for (const auto ed : make_range(added->n_edges()))
+    {
+      const auto en = added->nodes_on_edge(ed);
+      auto a = added->node_id(en[0]);
+      auto b = added->node_id(en[1]);
+      if (a > b)
+        std::swap(a, b);
+      auto it = edge_bcs.find({a, b});
+      if (it != edge_bcs.end())
+        for (const auto bid : it->second)
+          boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
+    }
+
+  for (const auto i : make_range(sliver->n_nodes()))
+    touched_nodes.insert(sliver->node_id(i));
+  for (const auto i : make_range(neighbor->n_nodes()))
+    touched_nodes.insert(neighbor->node_id(i));
+  mesh->delete_elem(sliver);
+  mesh->delete_elem(neighbor);
+  return true;
+}
+
 void
 MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const
 {
@@ -1247,7 +1418,6 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
         sliver_ids.push_back(elem->id());
     }
 
-    BoundaryInfo & boundary_info = mesh->get_boundary_info();
     std::unordered_set<dof_id_type> touched_nodes;
     auto touches_repaired = [&touched_nodes](const Elem & e)
     {
@@ -1315,159 +1485,16 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
           continue;
       }
 
-      // Build the union polyhedron: the neighbor's faces (except the shared quad base) plus the
-      // sliver pyramid's four triangular side faces. Capture boundary ids per face along the way.
-      std::map<std::vector<dof_id_type>, std::set<boundary_id_type>> face_bcs;
-      std::vector<boundary_id_type> ids;
-      std::vector<std::shared_ptr<libMesh::Polygon>> faces;
-      auto add_face = [&](Elem * e, unsigned int s)
-      {
-        const auto ns = e->nodes_on_side(s);
-        auto poly = std::make_shared<libMesh::C0Polygon>(ns.size());
-        std::vector<dof_id_type> key;
-        for (const auto i : index_range(ns))
-        {
-          poly->set_node(i, e->node_ptr(ns[i]));
-          key.push_back(e->node_id(ns[i]));
-        }
-        faces.push_back(poly);
-        boundary_info.boundary_ids(e, cast_int<unsigned short>(s), ids);
-        if (!ids.empty())
-        {
-          std::sort(key.begin(), key.end());
-          face_bcs[key].insert(ids.begin(), ids.end());
-        }
-      };
-      for (const auto s : make_range(nbr->n_sides()))
-      {
-        const auto ns = nbr->nodes_on_side(s);
-        if (ns.size() == 4 && quadKey(nbr->node_id(ns[0]),
-                                      nbr->node_id(ns[1]),
-                                      nbr->node_id(ns[2]),
-                                      nbr->node_id(ns[3])) == base_key)
-          continue; // the dissolved shared quad
-        add_face(nbr, s);
-      }
-      for (const auto s : make_range(4u))
-        add_face(p, s);
-
-      // Capture edge boundary ids (edgesets) on both elements, keyed by sorted endpoint-node pair,
-      // so they can be re-applied to the matching edges of the polyhedron (side ids alone, captured
-      // above, would drop any edgeset living on the pyramid or the neighbor).
-      std::map<std::pair<dof_id_type, dof_id_type>, std::set<boundary_id_type>> edge_bcs;
-      std::vector<boundary_id_type> eids;
-      auto capture_edges = [&](Elem * e)
-      {
-        for (const auto ed : make_range(e->n_edges()))
-        {
-          boundary_info.edge_boundary_ids(e, cast_int<unsigned short>(ed), eids);
-          if (eids.empty())
-            continue;
-          const auto en = e->nodes_on_edge(ed);
-          auto a = e->node_id(en[0]);
-          auto b = e->node_id(en[1]);
-          if (a > b)
-            std::swap(a, b);
-          edge_bcs[{a, b}].insert(eids.begin(), eids.end());
-        }
-      };
-      capture_edges(nbr);
-      capture_edges(p);
-
-      // Construct the union polyhedron and accept it only if it is a sound, convex cell. The
-      // C0Polyhedron constructor tetrahedralizes the faces and throws if the union is non-convex or
-      // has a flat sub-tet (a case the local apex guard above cannot rule out, e.g. a sloping
-      // neighbor face), so the construction is wrapped: any failure leaves the sliver in place. The
-      // old elements still exist here, so declining restores the original state exactly.
-      const subdomain_id_type sub = nbr->subdomain_id();
-      std::unique_ptr<libMesh::Node> mid_node;
-      std::unique_ptr<libMesh::C0Polyhedron> poly_elem;
-      try
-      {
-        poly_elem = std::make_unique<libMesh::C0Polyhedron>(faces, mid_node);
-      }
-      catch (const std::exception &)
-      {
-        // Non-convex / non-tetrahedralizable union: leave the sliver in place. NOTE: in optimized
-        // libMesh builds this reject path can leak the constructor's interior node (the
-        // C0Polyhedron constructor is not exception-safe on its fallback tetrahedralization); valid
-        // (convex) unions are unaffected. This should be fixed upstream in libMesh.
-        continue;
-      }
-      poly_elem->subdomain_id() = sub;
-      libMesh::Node * mid_ptr = mid_node.get();
-      if (mid_node)
-        mesh->add_node(std::move(mid_node));
-      Elem * added = mesh->add_elem(std::move(poly_elem));
-      // The mid-element node now has a valid id, so volume() is well defined. Reject a degenerate
-      // (non-positive volume) union and, in optimized builds where the constructor does not assert
-      // on non-convexity, a non-convex result (which would self-overlap). convex() is the real
-      // geometric check; volume()>0 alone always holds for a successfully built polyhedron.
-      bool valid = added->volume() > 0;
-      if (valid)
-      {
-        auto * poly = dynamic_cast<libMesh::Polyhedron *>(added);
-        try
-        {
-          valid = poly && poly->convex();
-        }
-        catch (const std::exception &)
-        {
-          valid = false;
-        }
-      }
-      if (!valid)
-      {
-        mesh->delete_elem(added);
-        if (mid_ptr)
-          mesh->delete_node(mid_ptr);
-        continue; // invalid/non-convex union: leave the sliver in place
-      }
-
-      // Move the boundary ids from the old elements onto the matching faces of the polyhedron
-      boundary_info.remove(p);
-      boundary_info.remove(nbr);
-
-      // Restore boundary ids onto the matching faces of the new polyhedron
-      for (const auto s : make_range(added->n_sides()))
-      {
-        const auto ns = added->nodes_on_side(s);
-        std::vector<dof_id_type> key;
-        for (const auto i : index_range(ns))
-          key.push_back(added->node_id(ns[i]));
-        std::sort(key.begin(), key.end());
-        auto it = face_bcs.find(key);
-        if (it != face_bcs.end())
-          for (const auto bid : it->second)
-            boundary_info.add_side(added, cast_int<unsigned short>(s), bid);
-      }
-
-      // Restore edge boundary ids onto the matching edges of the new polyhedron
-      if (!edge_bcs.empty())
-        for (const auto ed : make_range(added->n_edges()))
-        {
-          const auto en = added->nodes_on_edge(ed);
-          auto a = added->node_id(en[0]);
-          auto b = added->node_id(en[1]);
-          if (a > b)
-            std::swap(a, b);
-          auto it = edge_bcs.find({a, b});
-          if (it != edge_bcs.end())
-            for (const auto bid : it->second)
-              boundary_info.add_edge(added, cast_int<unsigned short>(ed), bid);
-        }
-
-      for (const auto i : make_range(p->n_nodes()))
-        touched_nodes.insert(p->node_id(i));
-      for (const auto i : make_range(nbr->n_nodes()))
-        touched_nodes.insert(nbr->node_id(i));
-      // If the neighbor we absorbed was itself a sliver pyramid (two slivers glued base to base),
-      // it is removed too and would otherwise vanish from both counts, so account for it here.
+      // Absorb the pyramid into the neighbor across the shared quad base: the four triangular cap
+      // faces become the rest of the polyhedron. Count a neighbor that was itself a sliver pyramid
+      // (two slivers glued base to base) so it is not lost from the totals.
       const bool nbr_was_sliver = nbr->type() == PYRAMID5 && isPyramidSliver(*nbr);
-      mesh->delete_elem(p);
-      mesh->delete_elem(nbr);
-      num_repaired += nbr_was_sliver ? 2 : 1;
-      repaired_in_pass = true;
+      const std::vector<dof_id_type> shared_key(base_key.begin(), base_key.end());
+      if (absorbAcrossSharedFace(mesh, p, nbr, shared_key, touched_nodes))
+      {
+        num_repaired += nbr_was_sliver ? 2 : 1;
+        repaired_in_pass = true;
+      }
     }
   }
 
@@ -1484,6 +1511,276 @@ MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) cons
              << std::endl;
     if (num_skipped)
       _console << "Number of pyramid slivers that could not be absorbed (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
+{
+  // Bounding-box volume scale, used by the volume-based sliver test
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+
+  auto quadKey = [](dof_id_type a, dof_id_type b, dof_id_type c, dof_id_type d)
+  {
+    std::array<dof_id_type, 4> f{a, b, c, d};
+    std::sort(f.begin(), f.end());
+    return f;
+  };
+
+  // Floor below which a collapse-reshaped neighbor is rejected as inverting / re-slivering
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  // Classify a PRISM6: 0 = not a sliver, 1 = flat (top triangle squashed onto the bottom), 2 = thin
+  // (the triangular cross-section is a sliver, i.e. a blade). PRISM6 nodes: 0,1,2 bottom triangle,
+  // 3,4,5 top triangle (node 3 above 0, 4 above 1, 5 above 2).
+  auto wedgeMode = [&](const Elem & e) -> int
+  {
+    if (e.type() != PRISM6)
+      return 0;
+    const Point b0 = e.point(0);
+    const Point cross = (e.point(1) - b0).cross(e.point(2) - b0);
+    const Real twoA = cross.norm(); // twice the bottom-triangle area
+    const Real e01 = (e.point(1) - b0).norm();
+    const Real e12 = (e.point(2) - e.point(1)).norm();
+    const Real e20 = (b0 - e.point(2)).norm();
+    const Real lmax = std::max({e01, e12, e20});
+
+    const bool small_vol = _sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
+    bool flat = false;
+    if (_sliver_flap_tol > 0 && twoA > 0)
+    {
+      const Point un = cross / twoA; // unit normal of the bottom triangle
+      const Real h = std::max({std::abs((e.point(3) - b0) * un),
+                               std::abs((e.point(4) - b0) * un),
+                               std::abs((e.point(5) - b0) * un)});
+      flat = h < _sliver_flap_tol * std::sqrt(0.5 * twoA);
+    }
+    // thin: the vertex opposite the longest edge is within flap_tol * (longest edge) of that edge,
+    // i.e. (2*area)/lmax < flap_tol*lmax  <=>  twoA < flap_tol*lmax^2
+    const bool thin = _sliver_flap_tol > 0 && lmax > 0 && twoA < _sliver_flap_tol * lmax * lmax;
+
+    if (!small_vol && !flat && !thin)
+      return 0;
+    if (flat)
+      return 1;
+    if (thin)
+      return 2;
+    return 1; // near-zero volume but neither clearly flat nor thin: treat as flat
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    // quad-face key -> ids of the 3D elements using that quad face (blade-absorb neighbor, and to
+    // tell whether a flat wedge's quad side is shared); node -> incident elements (collapse star)
+    std::map<std::array<dof_id_type, 4>, std::vector<dof_id_type>> quad_to_elems;
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> sliver_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (elem->dim() == 3)
+        for (const auto s : make_range(elem->n_sides()))
+        {
+          const auto ns = elem->nodes_on_side(s);
+          if (ns.size() == 4)
+            quad_to_elems[quadKey(elem->node_id(ns[0]),
+                                  elem->node_id(ns[1]),
+                                  elem->node_id(ns[2]),
+                                  elem->node_id(ns[3]))]
+                .push_back(elem->id());
+        }
+      if (wedgeMode(*elem))
+        sliver_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    auto touches_repaired = [&touched_nodes](const Elem & e)
+    {
+      for (const auto i : make_range(e.n_nodes()))
+        if (touched_nodes.count(e.node_id(i)))
+          return true;
+      return false;
+    };
+
+    for (const auto sid : sliver_ids)
+    {
+      Elem * w = mesh->query_elem_ptr(sid);
+      if (!w || w->type() != PRISM6 || touches_repaired(*w))
+        continue;
+      const int mode = wedgeMode(*w);
+      if (mode == 0)
+        continue;
+
+      if (mode == 2)
+      {
+        // Blade: absorb the wedge into the neighbor across its longest quad side (the analog of
+        // absorbing a 2D sliver triangle into its longest-edge neighbor). Longest bottom-triangle
+        // edge -> quad side: (0,1)->side 1, (1,2)->side 2, (2,0)->side 3.
+        const Real e01 = (w->point(1) - w->point(0)).norm();
+        const Real e12 = (w->point(2) - w->point(1)).norm();
+        const Real e20 = (w->point(0) - w->point(2)).norm();
+        unsigned int side = 1;
+        if (e12 >= e01 && e12 >= e20)
+          side = 2;
+        else if (e20 >= e01 && e20 >= e12)
+          side = 3;
+        const auto qn = w->nodes_on_side(side);
+        const auto key =
+            quadKey(w->node_id(qn[0]), w->node_id(qn[1]), w->node_id(qn[2]), w->node_id(qn[3]));
+        Elem * nbr = nullptr;
+        for (const auto nid : libmesh_map_find(quad_to_elems, key))
+        {
+          if (nid == sid)
+            continue;
+          Elem * cand = mesh->query_elem_ptr(nid);
+          if (cand && cand->dim() == 3)
+          {
+            nbr = cand;
+            break;
+          }
+        }
+        if (!nbr || touches_repaired(*nbr))
+          continue;
+        const std::vector<dof_id_type> shared_key(key.begin(), key.end());
+        if (absorbAcrossSharedFace(mesh, w, nbr, shared_key, touched_nodes))
+        {
+          ++num_repaired;
+          repaired_in_pass = true;
+        }
+      }
+      else // mode == 1: flat wedge
+      {
+        // Collapse the top triangle onto the bottom (or vice versa) so the elements above and below
+        // the wedge meet. This is only safe when the three quad sides are unshared (a quad-side
+        // neighbor would be collapsed to a degenerate face) and the merge inverts/degenerates no
+        // other element and distorts no boundary; otherwise the wedge is left in place.
+
+        // The three quad sides (1, 2, 3) must each be a boundary face (used only by this wedge)
+        bool quad_shared = false;
+        for (const unsigned int s : {1u, 2u, 3u})
+        {
+          const auto qn = w->nodes_on_side(s);
+          if (libmesh_map_find(
+                  quad_to_elems,
+                  quadKey(
+                      w->node_id(qn[0]), w->node_id(qn[1]), w->node_id(qn[2]), w->node_id(qn[3])))
+                  .size() > 1)
+            quad_shared = true;
+        }
+        if (quad_shared)
+          continue;
+
+        // Collapse the top triangle (3,4,5) onto the bottom (0,1,2). Because the wedge is flat, the
+        // top nodes are within flap_tol of the bottom plane, so this is a sub-tolerance move and
+        // cannot distort the boundary by more than the sliver's own (negligible) thickness; the
+        // bottom triangle and any element below it are left untouched.
+        const std::array<unsigned int, 3> gone{3, 4, 5}, kept{0, 1, 2};
+
+        // Capture the gone nodes now: the wedge is in its own star, so the substitution below
+        // overwrites its gone-node slots and these pointers could no longer be recovered from it.
+        std::array<Node *, 3> gone_nodes{
+            w->node_ptr(gone[0]), w->node_ptr(gone[1]), w->node_ptr(gone[2])};
+
+        // Substitution gone-node-id -> kept Node*, and the collapse star (elements at a gone node)
+        std::map<dof_id_type, Node *> sub;
+        std::set<dof_id_type> star;
+        bool busy = false;
+        for (const auto i : make_range(3u))
+        {
+          sub[w->node_id(gone[i])] = w->node_ptr(kept[i]);
+          for (const auto eid : libmesh_map_find(node_to_elems, w->node_id(gone[i])))
+          {
+            const Elem * e = mesh->query_elem_ptr(eid);
+            if (e && touches_repaired(*e))
+              busy = true;
+            star.insert(eid);
+          }
+        }
+        if (busy)
+          continue;
+
+        // Apply the substitution to the star, saving originals so we can roll back if it is invalid
+        std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
+        for (const auto eid : star)
+        {
+          Elem * e = mesh->query_elem_ptr(eid);
+          if (!e)
+            continue;
+          for (const auto n : make_range(e->n_nodes()))
+          {
+            auto it = sub.find(e->node_id(n));
+            if (it != sub.end())
+            {
+              saved.emplace_back(e, n, e->node_ptr(n));
+              e->set_node(n, it->second);
+            }
+          }
+        }
+
+        // Validate: every star element other than the wedge itself must stay non-degenerate (no
+        // repeated node) and keep a positive volume above the floor (no inversion / new sliver).
+        bool ok = true;
+        for (const auto eid : star)
+        {
+          Elem * e = mesh->query_elem_ptr(eid);
+          if (!e || e == w)
+            continue;
+          std::set<dof_id_type> distinct;
+          for (const auto n : make_range(e->n_nodes()))
+            distinct.insert(e->node_id(n));
+          if (distinct.size() != e->n_nodes() || e->volume() <= invert_floor)
+          {
+            ok = false;
+            break;
+          }
+        }
+        if (!ok)
+        {
+          for (auto & [e, n, orig] : saved)
+            e->set_node(n, orig);
+          continue; // collapse would invert/degenerate a neighbor: leave the wedge in place
+        }
+
+        // Commit: the wedge is now degenerate (its top and bottom nodes coincide); delete it, and
+        // delete the now-orphaned gone nodes. Record the kept nodes as touched so this pass does
+        // not also modify an element adjacent to the freshly collapsed region.
+        for (const auto i : make_range(3u))
+        {
+          touched_nodes.insert(gone_nodes[i]->id());
+          touched_nodes.insert(w->node_id(kept[i]));
+        }
+        mesh->delete_elem(w);
+        for (auto * g : gone_nodes)
+          mesh->delete_node(g);
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  // Count any wedge slivers that remain (no valid repair found)
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (elem->type() == PRISM6 && wedgeMode(*elem))
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of wedge sliver elements repaired: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of wedge slivers that could not be repaired (left in place): "
                << num_skipped << std::endl;
   }
 }
