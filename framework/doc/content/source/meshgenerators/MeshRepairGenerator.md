@@ -55,6 +55,18 @@ The operations currently implemented are:
   sound cell (positive volume, invertible mapping); a pyramid with no element across its quad base, or for which the
   union would be invalid, is left in place and reported.
 
+- repairing sliver `PRISM6` (wedge) elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A wedge is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or by the
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) test, and is then classified and repaired one of two ways.
+  A **flat** wedge (its top triangle squashed onto the bottom) is repaired by **collapsing** the top triangle onto the
+  bottom so the elements above and below it meet; the collapse is a sub-tolerance move (it cannot distort the boundary by
+  more than the sliver's own thickness) and is committed only if the three quad sides are unshared and it inverts or
+  degenerates no neighbor, otherwise the wedge is left in place. A **thin-cross-section** wedge (a "blade", whose
+  triangular cross-section is itself a sliver) is repaired by **absorbing it into the element across its longest quad
+  side** (the 3D analog of absorbing a 2D sliver triangle into its longest-edge neighbor), which becomes a
+  `C0Polyhedron`. A wedge with no admissible repair is left in place and reported.
+
 - renumbering the nodes and elements to have a contiguous ordering.
 
 - splitting non-convex polygons into convex polygons

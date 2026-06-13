@@ -12,6 +12,9 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
+#include <unordered_set>
+#include <vector>
+
 /**
  * Mesh generator to perform various improvement / fixing operations on an input mesh
  */
@@ -100,4 +103,26 @@ private:
   ///        element across its quad base or the resulting polyhedron would be invalid.
   /// @param mesh the mesh to modify
   void repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair sliver (near-degenerate) PRISM6 (wedge) elements. A flat (axially squashed)
+  ///        wedge is repaired by collapsing its top triangle onto its bottom triangle so the
+  ///        elements above and below it meet; a thin-cross-section (blade) wedge is absorbed into
+  ///        the element across its longest quad side, which becomes a C0Polyhedron. A wedge is left
+  ///        in place if no valid repair exists (the collapse would invert/degenerate a neighbor or
+  ///        distort the boundary, or the absorbed union would be an invalid cell).
+  /// @param mesh the mesh to modify
+  void repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Absorb a sliver element into the neighbor sharing the face with sorted node-id key
+  ///        @p shared_key, by replacing both with a single C0Polyhedron whose faces are both
+  ///        elements' faces except the shared one. Side and edge boundary ids and the neighbor's
+  ///        subdomain are carried onto the polyhedron. On success the polyhedron is added, both
+  ///        elements are deleted, their nodes are recorded in @p touched_nodes, and true is
+  ///        returned; if the union is not a valid convex cell the mesh is left unchanged and false
+  ///        is returned.
+  bool absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
+                              Elem * sliver,
+                              Elem * neighbor,
+                              const std::vector<dof_id_type> & shared_key,
+                              std::unordered_set<dof_id_type> & touched_nodes) const;
 };
