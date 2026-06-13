@@ -217,4 +217,44 @@
     requirement = "The system shall leave a sliver pyramid in place, rather than corrupting the mesh, when no element shares its quad base and there is nothing to absorb it into."
     mesh_mode = 'replicated'
   []
+  [repair_wedge_sliver]
+    type = RunApp
+    input = repair_wedge_sliver.i
+    expect_out = 'wedge sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat (axially squashed) sliver wedge by collapsing its top triangle onto its bottom, so the elements above and below it meet, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_prisms]
+    type = RunApp
+    input = repair_wedge_sliver_prisms.i
+    expect_out = 'wedge sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver wedge sandwiched between two prisms, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_blade]
+    type = RunApp
+    input = repair_wedge_sliver_blade.i
+    expect_out = 'wedge sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a thin-cross-section (blade) sliver wedge by absorbing it into the hexahedron across its longest quad side, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_blade_prism]
+    type = RunApp
+    input = repair_wedge_sliver_blade_prism.i
+    expect_out = 'wedge sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a blade sliver wedge whose longest quad side is shared with a prism, absorbing it into that prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_wedge_sliver_skip]
+    type = RunApp
+    input = repair_wedge_sliver_skip.i
+    expect_out = 'could not be repaired \(left in place\): 1'
+    issues = '#33151'
+    requirement = "The system shall leave a sliver wedge in place, rather than corrupting the mesh, when no valid repair exists (no element across its longest quad side)."
+    mesh_mode = 'replicated'
+  []
 []
