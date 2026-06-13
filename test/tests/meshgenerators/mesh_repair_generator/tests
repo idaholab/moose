@@ -153,4 +153,68 @@
     requirement = "The system shall leave a sliver tetrahedron in place when its collapse star includes a non-tetrahedral element, rather than corrupting the mesh."
     mesh_mode = 'replicated'
   []
+  [repair_pyramid_sliver]
+    type = RunApp
+    input = repair_pyramid_sliver.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver pyramid by absorbing it into the hexahedron across its quad base, producing a valid conformal polyhedron and keeping its triangular cap faces conformal with their neighbors."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_polyhedron]
+    type = RunApp
+    input = repair_pyramid_sliver_polyhedron.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver pyramid whose quad base is shared with a polyhedron, absorbing it into that polyhedron neighbor while keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_prism]
+    type = RunApp
+    input = repair_pyramid_sliver_prism.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver pyramid while keeping a triangular cap face conformal with a prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_basenode]
+    type = RunApp
+    input = repair_pyramid_sliver_basenode.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair an asymmetric flat sliver pyramid, whose apex projects inside the quad base but offset toward a corner, by absorbing it into the element across its base."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_basenode_polyhedron]
+    type = RunApp
+    input = repair_pyramid_sliver_basenode_polyhedron.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair an asymmetric flat sliver pyramid sharing its quad base with a polyhedron neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_basenode_prism]
+    type = RunApp
+    input = repair_pyramid_sliver_basenode_prism.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair an asymmetric flat sliver pyramid while keeping a triangular cap face conformal with a prism neighbor."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_thin_base]
+    type = RunApp
+    input = repair_pyramid_sliver_thin_base.i
+    expect_out = 'absorbed into a neighbor: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat sliver pyramid resting on a thin, near-aligned quad base by absorbing it into the thin hexahedron across that base."
+    mesh_mode = 'replicated'
+  []
+  [repair_pyramid_sliver_skip]
+    type = RunApp
+    input = repair_pyramid_sliver_skip.i
+    expect_out = 'could not be absorbed \(left in place\): 1'
+    issues = '#33151'
+    requirement = "The system shall leave a sliver pyramid in place, rather than corrupting the mesh, when no element shares its quad base and there is nothing to absorb it into."
+    mesh_mode = 'replicated'
+  []
 []
