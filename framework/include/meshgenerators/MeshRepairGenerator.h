@@ -91,4 +91,13 @@ private:
   ///        place. Repairs run in node-disjoint passes.
   /// @param mesh the mesh to modify
   void repairTetSlivers(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Repair sliver (near-degenerate, flat) PYRAMID5 elements by absorbing each into the
+  ///        element sharing its quad base. The shared quad face is dissolved and the neighbor (a
+  ///        hex, prism, polyhedron, or another pyramid) is replaced by a C0Polyhedron made of its
+  ///        remaining faces plus the sliver pyramid's four triangular side faces. No node is moved,
+  ///        so the surrounding elements stay conformal. A pyramid is left in place if it has no
+  ///        element across its quad base or the resulting polyhedron would be invalid.
+  /// @param mesh the mesh to modify
+  void repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const;
 };

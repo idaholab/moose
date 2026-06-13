@@ -40,8 +40,20 @@ The operations currently implemented are:
   the [!param](/Mesh/MeshRepairGenerator/tet_collapse_volume_floor) parameter sets the relative volume below which a
   reshaped neighbor is rejected. Slivers with no admissible collapse (for example a flat sliver all of whose nodes are
   on the boundary, or a true flat sliver whose every collapse would invert a neighbor) are left in place and reported.
-  Polyhedron-based absorption (the 3D analog of the 2D promotion) is not used because libMesh polyhedra must be convex,
-  which a flat-sliver union is not. Only first-order `TET4` slivers are handled.
+  Edge collapse (rather than polyhedron-based absorption) is used for tetrahedra because the union of a flat tet with a
+  neighbor is non-convex, and libMesh polyhedra must be convex. Only first-order `TET4` slivers are handled this way.
+
+- repairing flat sliver `PYRAMID5` elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A pyramid is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or if its apex
+  lies within [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) times sqrt(base area) of its quad base. Each
+  sliver is repaired by **absorbing it into the element across its quad base** (a hexahedron, prism, polyhedron, or
+  another pyramid): the shared quad face is dissolved and the neighbor is replaced by a `C0Polyhedron` made of its
+  remaining faces plus the pyramid's four triangular cap faces. No node is moved, so the surrounding elements stay
+  conformal. Here the union *is* convex (a neighbor capped by a shallow pyramid lid), so polyhedron absorption is valid.
+  The absorption is committed only if the apex projects inside the quad-base footprint and the resulting polyhedron is a
+  sound cell (positive volume, invertible mapping); a pyramid with no element across its quad base, or for which the
+  union would be invalid, is left in place and reported.
 
 - renumbering the nodes and elements to have a contiguous ordering.
 
