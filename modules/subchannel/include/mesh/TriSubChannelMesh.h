@@ -115,6 +115,14 @@ public:
     return _gij_map[axial_index][gap_index];
   }
 
+  /**
+   * Set the gap width for a given axial cell and gap index
+   */
+  void setGapWidth(unsigned int axial_index, unsigned int gap_index, Real gap_width)
+  {
+    _gij_map[axial_index][gap_index] = gap_width;
+  }
+
   const std::pair<unsigned int, unsigned int> & getSweepFlowGaps(unsigned int i_chan) const
   {
     return _gap_pairs_sf[i_chan];
@@ -216,7 +224,6 @@ public:
   friend class SCMTriDuctMeshGenerator;
   friend class SCMTriPinMeshGenerator;
   friend class SCMDetailedTriPinMeshGenerator;
-  friend class TriSubChannel1PhaseProblem;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;

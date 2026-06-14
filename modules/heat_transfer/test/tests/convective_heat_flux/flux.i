@@ -30,7 +30,7 @@
   [./heat_conduction]
     type = HeatConduction
     variable = temp
-    diffusion_coefficient = 10
+    thermal_conductivity = 10
   [../]
 []
 

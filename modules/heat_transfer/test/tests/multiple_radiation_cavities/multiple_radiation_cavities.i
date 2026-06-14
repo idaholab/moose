@@ -110,7 +110,7 @@
   [conduction]
     type = HeatConduction
     variable = temperature
-    diffusion_coefficient = 10
+    thermal_conductivity = 10
     block =  '1  2  3  4  5 6   8  10 11 12 13 14 15'
   []
 []
