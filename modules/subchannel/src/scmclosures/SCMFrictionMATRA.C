@@ -45,6 +45,7 @@ matraQuadLatticeFrictionFactor(const Real Re)
   else if (Re >= 30000 and Re < 1000000)
     return 0.184 * std::pow(Re, -0.20);
   else
+    // currently unreachable
     return 0.0;
 }
 }
