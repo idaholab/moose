@@ -30,7 +30,7 @@ MooseVariableDependencyInterface::MooseVariableDependencyInterface(
 
 template <typename DofObjectType>
 std::set<MooseVariableFieldBase *>
-MooseVariableDependencyInterface::checkVariables(
+MooseVariableDependencyInterface::checkVariablesHelper(
     const DofObjectType & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check)
 {
   std::set<MooseVariableFieldBase *> vars_without_indices;
@@ -44,7 +44,7 @@ MooseVariableDependencyInterface::checkVariables(
   return vars_without_indices;
 }
 
-template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariables(
+template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariablesHelper(
     const Elem & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check);
-template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariables(
+template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariablesHelper(
     const Node & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check);

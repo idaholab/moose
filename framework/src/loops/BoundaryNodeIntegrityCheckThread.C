@@ -57,9 +57,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   if (node->processor_id() != _fe_problem.processor_id())
     return;
 
-  auto & mesh = _fe_problem.mesh();
-
-  const auto & bnd_name = mesh.getBoundaryName(boundary_id);
+  const auto & bnd_name = _fe_problem.mesh().getBoundaryName(boundary_id);
 
   // uo check
   std::vector<NodalUserObject *> objs;

@@ -352,6 +352,18 @@ AuxKernelTempl<ComputeValueType>::determineWhetherCoincidentLowerDCalc()
   }
 }
 
+template <typename ComputeValueType>
+std::set<MooseVariableFieldBase *>
+AuxKernelTempl<ComputeValueType>::checkVariables(
+    const libMesh::Node & node, const std::set<MooseVariableFieldBase *> & vars_to_check)
+{
+  if (node.n_dofs(_var.sys().number(), _var.number()))
+    return MooseVariableDependencyInterface::checkVariables(node, vars_to_check);
+  else
+    // the aux kernel early returns if _var has no dofs
+    return {};
+}
+
 // Explicitly instantiates the three versions of the AuxKernelTempl class
 template class AuxKernelTempl<Real>;
 template class AuxKernelTempl<RealVectorValue>;

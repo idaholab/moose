@@ -118,3 +118,17 @@ NodalValueSampler::threadJoin(const UserObject & y)
 
   SamplerBase::threadJoin(vpp);
 }
+
+std::set<MooseVariableFieldBase *>
+NodalValueSampler::checkVariables(
+    const libMesh::Node &,
+    const std::set<MooseVariableFieldBase *> & libmesh_dbg_var(vars_to_check))
+{
+  mooseAssert(vars_to_check ==
+                  std::set<MooseVariableFieldBase *>(_coupled_standard_moose_vars.begin(),
+                                                     _coupled_standard_moose_vars.end()),
+              "The constructor should have caught any non-standard MOOSE variables");
+  // This class implements its own handling of its variables which don't have dof indices on a given
+  // node
+  return {};
+}
