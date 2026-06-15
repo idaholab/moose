@@ -380,6 +380,7 @@ EOF
         git clone --depth 1 {{ PYTORCH_GIT_REMOTE }} ${PYTORCH_SRC_DIR}
         cd ${PYTORCH_SRC_DIR}
         git fetch --depth 1 origin {{ PYTORCH_GIT_SHA }}
+        git checkout {{ PYTORCH_GIT_SHA }}
         git submodule update --init --depth 1 --recursive
 
         # Create a temporary python environment for building libtorch
