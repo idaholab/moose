@@ -47,7 +47,7 @@ FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
 {
   // You could end up with some dirty hidden behavior if you do this. We could remove this check,
   // but I don't think that it's sane to do so.
-  if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
+  if (_no_restore && _app.isRestarting())
     paramError("no_restore",
                "The parent app is restarting or recovering, restoration cannot be disabled");
   // Force the user to make a decision on updating or not the old state of variables
