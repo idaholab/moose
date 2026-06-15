@@ -54,6 +54,9 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
+#ifdef MOOSE_MFEM_ENABLED
+#include "MFEMProblem.h"
+#endif
 #include "Parser.h"
 #include "CSGBase.h"
 #include "Capabilities.h"
@@ -1920,6 +1923,17 @@ MooseApp::requestCitations()
     const auto & app_citations = Registry::getCitations(Registry::objData(objname)._label);
     citations.insert(app_citations.begin(), app_citations.end());
   }
+
+  // Credit the finite element backend actually used in the run. The run uses MFEM when its problem
+  // is an MFEMProblem; otherwise it uses libMesh, the default backend. These are mutually
+  // exclusive, so only the backend in use is cited.
+  std::string backend = "libMesh";
+#ifdef MOOSE_MFEM_ENABLED
+  if ((_executor || _executioner) && dynamic_cast<const MFEMProblem *>(&feProblem()))
+    backend = "MFEM";
+#endif
+  const auto & backend_citations = Registry::getCitations(backend);
+  citations.insert(backend_citations.begin(), backend_citations.end());
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
