@@ -20,21 +20,13 @@ namespace Moose::Kokkos
 void
 Mesh::update()
 {
-  // Snapshot whether the LFV geometry cache was populated before this mesh change.
-  // After rebuilding the base mesh data below, we re-run initLinearFV() if it was,
-  // because the cached face areas, centroids, and distances are now stale.
-  const bool had_linearfv_data = _linearfv_initialized;
-
   initMap();
   initElement();
 
   _initialized = true;
 
-  if (had_linearfv_data || _needs_linearfv)
-  {
-    _linearfv_initialized = false;
+  if (_needs_linearfv)
     initLinearFV();
-  }
 }
 
 void
@@ -50,19 +42,21 @@ Mesh::initMap()
     _node_id_integer = _mesh.getMesh().add_node_integer("kokkos_contiguous_node_id");
 
   _num_local_elems = 0;
+  _num_ghost_elems = 0;
   _num_local_nodes = 0;
 
   _maps->subdomain_id_mapping.clear();
   _maps->boundary_id_mapping.clear();
   _maps->elem_type_id_mapping.clear();
   _maps->local_nodes.clear();
-  _maps->semi_local_node_id_mapping.clear();
+  _maps->ghost_node_id_mapping.clear();
+  _maps->ghost_elem_id_mapping.clear();
   _maps->subdomain_elem_id_ranges.clear();
   _maps->subdomain_node_ids.clear();
   _maps->boundary_node_ids.clear();
 
   std::unordered_set<ElemType> elem_types;
-  std::unordered_set<Node *> semi_local_nodes;
+  std::unordered_set<Node *> ghost_nodes;
 
   for (const auto subdomain : _mesh.meshSubdomains())
   {
@@ -84,7 +78,7 @@ Mesh::initMap()
 
       for (auto & node : elem->node_ref_range())
         if (node.processor_id() != _mesh.processor_id())
-          semi_local_nodes.insert(&node);
+          ghost_nodes.insert(&node);
     }
 
     _maps->subdomain_elem_id_ranges[subdomain] = eid != libMesh::DofObject::invalid_id
@@ -98,6 +92,21 @@ Mesh::initMap()
     _maps->boundary_node_ids[boundary];
   }
 
+  // Enumerate one off-process neighbor layer needed for FV flux kernels
+  if (_needs_linearfv)
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      {
+        const auto neighbor = elem->neighbor_ptr(side);
+        if (neighbor && neighbor != libMesh::remote_elem &&
+            neighbor->processor_id() != _mesh.processor_id() &&
+            !_maps->ghost_elem_id_mapping.count(neighbor))
+        {
+          _maps->ghost_elem_id_mapping[neighbor] = _num_local_elems + _num_ghost_elems++;
+          elem_types.insert(neighbor->type());
+        }
+      }
+
   // Setup node maps
 
   for (const auto type : elem_types)
@@ -105,8 +114,7 @@ Mesh::initMap()
 
   _maps->local_nodes.insert(
       _maps->local_nodes.end(), _mesh.localNodesBegin(), _mesh.localNodesEnd());
-  _maps->local_nodes.insert(
-      _maps->local_nodes.end(), semi_local_nodes.begin(), semi_local_nodes.end());
+  _maps->local_nodes.insert(_maps->local_nodes.end(), ghost_nodes.begin(), ghost_nodes.end());
 
   for (auto node : _maps->local_nodes)
   {
@@ -118,7 +126,7 @@ Mesh::initMap()
         _maps->subdomain_node_ids[subdomain].push_back(_num_local_nodes);
     }
     else
-      _maps->semi_local_node_id_mapping[node] = _num_local_nodes;
+      _maps->ghost_node_id_mapping[node] = _num_local_nodes;
 
     ++_num_local_nodes;
   }
@@ -169,12 +177,13 @@ Mesh::initElement()
 
   // Cache element data
 
+  const auto num_total_elems = getNumTotalElements();
   const auto num_elems = getNumLocalElements();
   const auto num_subdomains = getNumSubdomains();
 
-  _elem_info.create(num_elems);
+  _elem_info.create(num_total_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
-  _extra_elem_ids.create(num_elems, _mesh.getMesh().n_elem_integers());
+  _extra_elem_ids.create(num_total_elems, _mesh.getMesh().n_elem_integers());
   _starting_elem_id.create(num_subdomains);
 
   _elem_neighbor = libMesh::DofObject::invalid_id;
@@ -193,14 +202,6 @@ Mesh::initElement()
       _elem_info[eid].id = eid;
       _elem_info[eid].subdomain = sid;
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
-      {
-        const auto neighbor = elem->neighbor_ptr(side);
-        if (neighbor && neighbor != libMesh::remote_elem &&
-            neighbor->processor_id() == _mesh.processor_id())
-          _elem_neighbor(side, eid) = getContiguousElementID(neighbor);
-      }
-
       for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
         _extra_elem_ids(eid, i) = elem->get_extra_integer(i);
     }
@@ -208,8 +209,20 @@ Mesh::initElement()
     _starting_elem_id[sid] = *getSubdomainContiguousElementIDRange(subdomain).begin();
   }
 
+  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+  {
+    const auto elem_type = getElementTypeID(ghost_elem);
+    const auto sid = getContiguousSubdomainID(ghost_elem->subdomain_id());
+
+    _elem_info[ghost_eid].type = elem_type;
+    _elem_info[ghost_eid].id = ghost_eid;
+    _elem_info[ghost_eid].subdomain = sid;
+
+    for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
+      _extra_elem_ids(ghost_eid, i) = ghost_elem->get_extra_integer(i);
+  }
+
   _elem_info.moveToDevice();
-  _elem_neighbor.moveToDevice();
   _extra_elem_ids.moveToDevice();
   _starting_elem_id.moveToDevice();
 
@@ -218,7 +231,7 @@ Mesh::initElement()
   const auto num_nodes = getNumLocalNodes();
 
   _points.create(num_nodes);
-  _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
+  _nodes.create(_mesh.getMaxNodesPerElem(), num_total_elems);
   _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
   for (const auto node : getLocalNodes())
@@ -266,7 +279,10 @@ Mesh::getContiguousElementID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
-  return elem->get_extra_integer(_elem_id_integer);
+  if (elem->processor_id() == _mesh.processor_id())
+    return elem->get_extra_integer(_elem_id_integer);
+
+  return libmesh_map_find(_maps->ghost_elem_id_mapping, elem);
 }
 
 ContiguousNodeID
@@ -277,22 +293,18 @@ Mesh::getContiguousNodeID(const Node * node) const
   if (node->processor_id() == _mesh.processor_id())
     return node->get_extra_integer(_node_id_integer);
   else
-    return libmesh_map_find(_maps->semi_local_node_id_mapping, node);
+    return libmesh_map_find(_maps->ghost_node_id_mapping, node);
 }
 
 void
 Mesh::initLinearFV()
 {
-  if (_linearfv_initialized)
-    return;
-
-  _linearfv_initialized = true;
-
   const auto num_elems = getNumLocalElements();
+  const auto num_total_elems = getNumTotalElements();
   const auto max_sides = _mesh.getMaxSidesPerElem();
 
-  _linearfv_elem_volume.create(num_elems);
-  _linearfv_elem_centroid.create(num_elems);
+  _linearfv_elem_volume.create(num_total_elems);
+  _linearfv_elem_centroid.create(num_total_elems);
   _linearfv_face_area.create(max_sides, num_elems);
   _linearfv_face_centroid.create(max_sides, num_elems);
   _linearfv_face_d_cf.create(max_sides, num_elems);
@@ -326,10 +338,16 @@ Mesh::initLinearFV()
       auto & face = side_builder(*elem, side);
       const auto face_centroid = face.vertex_average();
       const auto neighbor = elem->neighbor_ptr(side);
-      const auto neighbor_eid = _elem_neighbor(side, eid);
+
+      ContiguousElementID neighbor_eid = libMesh::DofObject::invalid_id;
+      if (neighbor && neighbor != libMesh::remote_elem)
+      {
+        neighbor_eid = getContiguousElementID(neighbor);
+        _elem_neighbor(side, eid) = neighbor_eid;
+      }
+
       const auto d_cf = face_centroid - elem_centroid;
-      const bool has_neighbor = (neighbor && neighbor != libMesh::remote_elem &&
-                                 neighbor_eid != libMesh::DofObject::invalid_id);
+      const bool has_neighbor = neighbor_eid != libMesh::DofObject::invalid_id;
       const auto d_cn = has_neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
 
       _linearfv_face_area(side, eid) = face.volume();
@@ -354,6 +372,13 @@ Mesh::initLinearFV()
     }
   }
 
+  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+  {
+    _linearfv_elem_volume[ghost_eid] = ghost_elem->volume();
+    _linearfv_elem_centroid[ghost_eid] = ghost_elem->vertex_average();
+  }
+
+  _elem_neighbor.moveToDevice();
   _linearfv_elem_volume.moveToDevice();
   _linearfv_elem_centroid.moveToDevice();
   _linearfv_face_area.moveToDevice();
@@ -363,6 +388,8 @@ Mesh::initLinearFV()
   _linearfv_face_d_cn.moveToDevice();
   _linearfv_face_d_cn_mag.moveToDevice();
   _linearfv_face_boundary_id.moveToDevice();
+
+  _linearfv_initialized = true;
 }
 
 } // namespace Moose::Kokkos

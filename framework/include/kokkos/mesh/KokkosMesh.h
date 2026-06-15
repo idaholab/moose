@@ -97,6 +97,17 @@ public:
    */
   auto getNumLocalElements() const { return _num_local_elems; }
   /**
+   * Get the number of ghost (off-process neighbor) elements.
+   * Only nonzero when LinearFV is active.
+   * @returns The number of ghost elements
+   */
+  auto getNumGhostElements() const { return _num_ghost_elems; }
+  /**
+   * Get the total number of elements including semi-local elements
+   * @returns The total number of elements
+   */
+  auto getNumTotalElements() const { return _num_local_elems + _num_ghost_elems; }
+  /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The local number of elements in the subdomain
@@ -140,6 +151,11 @@ public:
    * @returns The contiguous element ID
    */
   ContiguousElementID getContiguousElementID(const Elem * elem) const;
+  /**
+   * Get the ghost element ID map (host-side only)
+   * @returns Map from ghost Elem* to contiguous element ID
+   */
+  const auto & getGhostElemIdMapping() const { return _maps->ghost_elem_id_mapping; }
   /**
    * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -421,9 +437,14 @@ private:
      */
     std::vector<Node *> local_nodes;
     /**
-     * Map from the libMesh semi-local node to the contiguous node ID
+     * Map from off-process ghost node to the contiguous node ID
      */
-    std::unordered_map<const Node *, ContiguousNodeID> semi_local_node_id_mapping;
+    std::unordered_map<const Node *, ContiguousNodeID> ghost_node_id_mapping;
+    /**
+     * Map from off-process semi-local Elem* to its contiguous element ID on this process.
+     * Only populated when LinearFV is active.
+     */
+    std::unordered_map<const Elem *, ContiguousElementID> ghost_elem_id_mapping;
     /**
      * Range of the contiguous element IDs in each subdomain
      */
@@ -457,6 +478,10 @@ private:
    * Number of local elements
    */
   dof_id_type _num_local_elems = 0;
+  /**
+   * Number of ghost (off-process neighbor) elements. Only nonzero when LinearFV is active.
+   */
+  dof_id_type _num_ghost_elems = 0;
   /**
    * Number of local nodes including semi-local nodes
    */

@@ -84,7 +84,7 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  auto num_elems = kokkosMesh().getNumLocalElements();
+  const auto num_total_elems = kokkosMesh().getNumTotalElements();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -119,7 +119,7 @@ System::setupDofs()
           std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
     }
 
-    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_elems);
+    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
     _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
 
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
@@ -132,6 +132,19 @@ System::setupDofs()
       {
         _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
         _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
+      }
+    }
+
+    for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+    {
+      if (!_dof_map.is_evaluable(*ghost_elem, var))
+        continue;
+      _dof_map.dof_indices(ghost_elem, dof_indices, var);
+      for (const auto dof : index_range(dof_indices))
+      {
+        const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+        _local_to_global_dof_index[local_idx] = dof_indices[dof];
       }
     }
   }
