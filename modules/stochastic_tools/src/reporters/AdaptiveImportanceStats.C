@@ -48,7 +48,9 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
     _ais(getSampler<AdaptiveImportanceSampler>("sampler")),
     _gp_flag(isParamValid("flag_sample") ? &getReporterValue<std::vector<bool>>("flag_sample")
                                          : nullptr),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(declareRestartableData<int>("check_step", std::numeric_limits<int>::max())),
+    _pf_sum(declareRestartableData<Real>("pf_sum", 0.0)),
+    _var_sum(declareRestartableData<Real>("var_sum", 0.0))
 {
   // Initialize variables
   const auto rows = _ais.getNumberOfRows();
@@ -56,8 +58,6 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
   _std_imp.resize(rows);
   _pf.resize(1);
   _cov_pf.resize(1);
-  _pf_sum = 0.0;
-  _var_sum = 0.0;
   _distributions_store = _ais.getDistributionNames();
   _factor = _ais.getStdFactor();
 }
