@@ -47,10 +47,6 @@ private:
     return "LinearWCNSFVMomentumTimeDerivative";
   }
   std::string momentumTimeDensityParameterName() const override { return NS::density; }
-  std::string momentumFluxKernelType() const override
-  {
-    return "LinearWCNSFVConservativeMomentumFlux";
-  }
   MooseFunctorName momentumFluxMassFluxFunctorName() const override
   {
     return "rho_phi_mass_flux_density";

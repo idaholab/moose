@@ -28,6 +28,10 @@ LinearWCNSFVMomentumFlux::validParams()
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
+  params.addParam<MooseFunctorName>(
+      "mass_flux_functor",
+      "Optional face-centered mass-flux functor used for momentum advection. When supplied, "
+      "this overrides the Rhie-Chow user object's live face-mass-flux query.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The diffusion coefficient.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -49,6 +53,9 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   : LinearFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
+    _mass_flux_functor(params.isParamValid("mass_flux_functor")
+                           ? &getFunctor<Real>("mass_flux_functor")
+                           : nullptr),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
@@ -401,7 +408,16 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 
   // Caching the mass flux on the face which will be reused in the advection term's matrix and
   // right hand side contributions
-  _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
+  if (_mass_flux_functor)
+  {
+    const auto state = determineState();
+    const Moose::FaceArg face_arg = (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+                                        ? makeCDFace(*_current_face_info)
+                                        : singleSidedFaceArg(_current_face_info);
+    _face_mass_flux = (*_mass_flux_functor)(face_arg, state);
+  }
+  else
+    _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms

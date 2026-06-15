@@ -82,31 +82,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       "interface_normal_functor",
       "interface_unit_normal_face",
       "Face-oriented interface unit normal used by the explicit compression flux.");
-  params.addParam<MooseFunctorName>(
-      "alpha_phi_bd_functor_name", "alpha_phi_bd", "Published donor/base alpha face flux.");
-  params.addParam<MooseFunctorName>("alpha_phi_ho_functor_name",
-                                    "alpha_phi_ho",
-                                    "Published high-order advective alpha face flux.");
-  params.addParam<MooseFunctorName>("alpha_phi_comp_functor_name",
-                                    "alpha_phi_comp",
-                                    "Published explicit compressive alpha face flux.");
-  params.addParam<MooseFunctorName>("alpha_phi_corr_raw_functor_name",
-                                    "alpha_phi_corr_raw",
-                                    "Published raw correction alpha face flux prior to limiting.");
-  params.addParam<MooseFunctorName>("alpha_phi_corr_functor_name",
-                                    "alpha_phi_corr",
-                                    "Published limited correction alpha face flux.");
-  params.addParam<MooseFunctorName>(
-      "alpha_phi_limited_functor_name", "alpha_phi_limited", "Published limited alpha face flux.");
-  params.addParam<MooseFunctorName>("rho_phi_functor_name",
-                                    "rho_phi",
-                                    "Published density-weighted face flux accumulated over alpha "
-                                    "subcycles.");
-  params.addParam<bool>(
-      "use_mules_correction",
-      true,
-      "Whether to use a bounded explicit correction stage after the donor alpha solve. When "
-      "enabled, the matrix transport should remain on upwind/donor transport.");
   params.addRangeCheckedParam<unsigned int>("n_alpha_corrections",
                                             2,
                                             "n_alpha_corrections>=0",
@@ -129,21 +104,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       "later_alpha_correction_relaxation>0 & later_alpha_correction_relaxation<=1",
       "Additional damping applied to alpha correctors after the first one.");
   params.addParam<bool>(
-      "alpha_apply_prev_corr",
-      true,
-      "Whether to reuse the previous limited correction flux as the initial bounded-correction "
-      "guess on the next alpha solve.");
-  params.addParam<bool>("use_cell_summed_mules_limiter",
-                        true,
-                        "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to use a classic "
-                        "per-cell summed bounded "
-                        "limiter instead of sequential face-budget depletion.");
-  params.addParam<bool>(
-      "use_local_mules_bounds",
-      true,
-      "Forwarded to ConservativeSharpInterfaceVOFMULESCorrector to optionally constrain correction "
-      "fluxes by local neighbor extrema instead of the global alpha bounds.");
-  params.addParam<bool>(
       "create_complementary_fraction",
       true,
       "Whether to automatically define a complementary phase fraction functor 1 - alpha.");
@@ -164,10 +124,9 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   params.addRequiredParam<MooseFunctorName>("gas_dynamic_viscosity_name",
                                             "Gas-phase dynamic viscosity functor.");
 
-  params.addParamNamesToGroup(
-      "system_names advected_interp_method compression_factor interface_normal_functor "
-      "use_local_mules_bounds",
-      "Numerical scheme");
+  params.addParamNamesToGroup("system_names advected_interp_method compression_factor "
+                              "interface_normal_functor",
+                              "Numerical scheme");
 
   params.suppressParameter<MooseEnum>("preconditioning");
   return params;
@@ -187,7 +146,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::WCNSLinearFVConservativeSharpI
     _alpha_two_term_bc_expansion(getParam<bool>("volume_fraction_two_term_bc_expansion")),
     _compression_factor_name(getParam<MooseFunctorName>("compression_factor")),
     _interface_normal_functor_name(getParam<MooseFunctorName>("interface_normal_functor")),
-    _use_mules_correction(getParam<bool>("use_mules_correction")),
     _create_complementary_fraction(getParam<bool>("create_complementary_fraction")),
     _create_mixture_materials(getParam<bool>("create_mixture_materials")),
     _mixture_density_name(getParam<MooseFunctorName>("mixture_density_name")),
@@ -202,10 +160,10 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::WCNSLinearFVConservativeSharpI
                "The complementary volume-fraction name must differ from the transported "
                "volume-fraction variable name.");
 
-  if (_use_mules_correction && getParam<MooseEnum>("advected_interp_method") != "upwind")
+  if (getParam<MooseEnum>("advected_interp_method") != "upwind")
     paramError("advected_interp_method",
-               "When use_mules_correction=true the matrix transport must remain on donor/upwind "
-               "transport, matching the bounded-base-plus-limited-correction structure.");
+               "The sharp-interface VOF physics uses a bounded-base-plus-limited-correction "
+               "structure, so the matrix transport must remain on donor/upwind transport.");
 }
 
 void
@@ -237,8 +195,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addFVKernels()
     addAlphaTimeKernels();
 
   addAlphaAdvectionKernels();
-  if (!_use_mules_correction)
-    addAlphaCompressionKernels();
 }
 
 void
@@ -315,9 +271,6 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMaterials()
 void
 WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
 {
-  if (!_use_mules_correction)
-    return;
-
   const std::string object_type = "ConservativeSharpInterfaceVOFMULESCorrector";
   const std::string object_name = prefix() + "vof_mules";
   auto params = getFactory().getValidParams(object_type);
@@ -332,26 +285,8 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   params.set<Real>("correction_relaxation") = getParam<Real>("mules_correction_relaxation");
   params.set<Real>("later_correction_relaxation") =
       getParam<Real>("later_alpha_correction_relaxation");
-  params.set<bool>("alpha_apply_prev_corr") = getParam<bool>("alpha_apply_prev_corr");
-  params.set<bool>("use_cell_summed_mules_limiter") =
-      getParam<bool>("use_cell_summed_mules_limiter");
-  params.set<bool>("use_local_mules_bounds") = getParam<bool>("use_local_mules_bounds");
   params.set<MooseFunctorName>("liquid_density") = _liquid_density_name;
   params.set<MooseFunctorName>("gas_density") = _gas_density_name;
-  params.set<MooseFunctorName>("alpha_phi_bd_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_bd_functor_name");
-  params.set<MooseFunctorName>("alpha_phi_ho_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_ho_functor_name");
-  params.set<MooseFunctorName>("alpha_phi_comp_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_comp_functor_name");
-  params.set<MooseFunctorName>("alpha_phi_corr_raw_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_corr_raw_functor_name");
-  params.set<MooseFunctorName>("alpha_phi_corr_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_corr_functor_name");
-  params.set<MooseFunctorName>("alpha_phi_limited_functor_name") =
-      getParam<MooseFunctorName>("alpha_phi_limited_functor_name");
-  params.set<MooseFunctorName>("rho_phi_functor_name") =
-      getParam<MooseFunctorName>("rho_phi_functor_name");
   getProblem().addUserObject(object_type, object_name, params);
 }
 
@@ -375,24 +310,11 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaAdvectionKernels()
                                    _flow_equations_physics->rhieChowUOName(),
                                    getParam<MooseEnum>("advected_interp_method"),
                                    _blocks,
-                                   [this](InputParameters & params)
+                                   [](InputParameters & params)
                                    {
-                                     if (_use_mules_correction)
-                                       params.set<MooseFunctorName>("face_flux") =
-                                           "vof_transport_phi";
+                                     params.set<MooseFunctorName>("face_flux") =
+                                         "vof_transport_phi";
                                    });
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaCompressionKernels()
-{
-  auto params = getFactory().getValidParams("LinearFVVOFCompression");
-  assignBlocks(params, _blocks);
-  params.set<LinearVariableName>("variable") = _alpha_name;
-  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  params.set<MooseFunctorName>("compression_factor") = _compression_factor_name;
-  params.set<MooseFunctorName>("interface_normal") = _interface_normal_functor_name;
-  getProblem().addLinearFVKernel("LinearFVVOFCompression", prefix() + "alpha_compression", params);
 }
 
 void
@@ -445,8 +367,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaOutletBC()
       if (dimension() >= 3)
         params.set<SolverVariableName>("w") = velocity_names[2];
       params.set<MooseFunctorName>("backflow_value") = _alpha_outlet_backflow_functor;
-      params.set<MooseFunctorName>("face_flux") =
-          _use_mules_correction ? "vof_transport_phi" : "corrected_face_phi";
+      params.set<MooseFunctorName>("face_flux") = "vof_transport_phi";
     }
     getProblem().addLinearFVBC(bc_type, prefix() + "alpha_outlet_" + outlet_bdy, params);
   }

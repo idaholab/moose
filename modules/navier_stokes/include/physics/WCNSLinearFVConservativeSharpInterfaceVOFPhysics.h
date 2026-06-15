@@ -34,7 +34,6 @@ protected:
 private:
   void addAlphaTimeKernels();
   void addAlphaAdvectionKernels();
-  void addAlphaCompressionKernels();
   void addAlphaInletBC();
   void addAlphaOutletBC();
 
@@ -46,7 +45,6 @@ private:
   const bool _alpha_two_term_bc_expansion;
   const MooseFunctorName _compression_factor_name;
   const MooseFunctorName _interface_normal_functor_name;
-  const bool _use_mules_correction;
 
   const bool _create_complementary_fraction;
   const bool _create_mixture_materials;

@@ -905,11 +905,7 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
 
     auto * corrector = sharpInterfaceVOFCorrector(_volume_fraction_system_names[i]);
     if (corrector)
-    {
-      if (_current_outer_iteration > 1)
-        corrector->invalidateOuterCorrectionFluxSeed();
       corrector->resetSubcycleFluxes();
-    }
 
     for (const auto subcycle : make_range(num_subcycles))
     {

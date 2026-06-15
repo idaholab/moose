@@ -94,6 +94,9 @@ protected:
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
 
+  /// Optional face-centered mass-flux functor used instead of the live Rhie-Chow mass flux
+  const Moose::Functor<Real> * const _mass_flux_functor;
+
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 
