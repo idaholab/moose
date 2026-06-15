@@ -111,17 +111,17 @@ protected:
   dof_id_type _num_confg_params;
 
   /// Storage for previous inputs
-  DenseMatrix<Real> _data_prev;
+  DenseMatrix<Real> & _data_prev;
 
   /// Storage for previous variances
-  std::vector<Real> _var_prev;
+  std::vector<Real> & _var_prev;
 
   /// Storage for previous outputs
-  std::vector<Real> _outputs_prev;
+  std::vector<Real> & _outputs_prev;
 
   /// Current output values
   const std::vector<Real> * _output_value;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
+  int & _check_step;
 };
