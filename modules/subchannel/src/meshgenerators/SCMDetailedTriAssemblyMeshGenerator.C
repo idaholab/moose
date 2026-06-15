@@ -439,8 +439,7 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
   const unsigned int n_points = points_per_level * (_n_cells + 1);
   const unsigned int n_elems = elems_per_level * _n_cells;
   const unsigned int n_pins = _pin_position.size();
-  const unsigned int pin_points =
-      n_pins > 0 ? (_n_cells + 1) * (_num_sectors + 1) * n_pins : 0;
+  const unsigned int pin_points = n_pins > 0 ? (_n_cells + 1) * (_num_sectors + 1) * n_pins : 0;
   const unsigned int pin_elems = n_pins > 0 ? _n_cells * _num_sectors * n_pins : 0;
   if (_verbose)
   {
