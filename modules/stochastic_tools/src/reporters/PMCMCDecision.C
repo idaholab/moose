@@ -52,10 +52,13 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
         isParamValid("output_value")
             ? &declareValue<std::vector<Real>>("outputs_required", REPORTER_MODE_DISTRIBUTED)
             : nullptr),
+    _data_prev(declareRestartableData<DenseMatrix<Real>>("data_prev")),
+    _var_prev(declareRestartableData<std::vector<Real>>("var_prev")),
+    _outputs_prev(declareRestartableData<std::vector<Real>>("outputs_prev")),
     _output_value(isParamValid("output_value") ? &getReporterValue<std::vector<Real>>(
                                                      "output_value", REPORTER_MODE_DISTRIBUTED)
                                                : nullptr),
-    _check_step(std::numeric_limits<int>::max())
+    _check_step(declareRestartableData<int>("check_step", std::numeric_limits<int>::max()))
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))

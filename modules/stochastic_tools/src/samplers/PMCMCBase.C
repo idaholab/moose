@@ -56,9 +56,12 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
                                              : nullptr),
     _variance_bound(getParam<Real>("variance_bound")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
+    _new_var_samples(declareRecoverableData<std::vector<Real>>("new_var_samples")),
+    _rnd_vec(declareRecoverableData<std::vector<Real>>("rnd_vec")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _seed_index(0),
-    _rand_index(0)
+    _rand_index(0),
+    _new_samples_confg(declareRecoverableData<std::vector<std::vector<Real>>>("new_samples_confg"))
 {
   // Filling the `priors` vector with the user-provided distributions.
   for (const DistributionName & name :
