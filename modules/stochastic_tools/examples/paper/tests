@@ -12,5 +12,6 @@
     executable_pattern = 'stochastic_tools*'
     valgrind = none
     capabilities = 'method!=dbg'
+    recover = false
   []
 []
