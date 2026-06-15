@@ -36,6 +36,7 @@
   getter = distribution
   distribution = dist
   sampler = sample
+  fv_interpolation_method = interp
 []
 
 [Distributions]
@@ -47,6 +48,12 @@
 [Samplers]
   [sample]
     type = TestSampler
+  []
+[]
+
+[FVInterpolationMethods]
+  [interp]
+    type = FVGeometricAverage
   []
 []
 

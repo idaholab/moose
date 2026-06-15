@@ -55,4 +55,13 @@
     requirement = 'The system shall report an error when a sampler object is requested before sampler objects are available.'
     issues = '#28131'
   []
+  [get_fv_interpolation_method_too_early]
+    type = RunException
+    input = get_distribution_sampler_too_early.i
+    cli_args = 'Problem/getter=fv_interpolation_method'
+    capabilities = 'method=dbg'
+    expect_err = 'An FVInterpolationMethod getter was called before FVInterpolationMethods have been constructed'
+    requirement = 'The system shall report an error when a finite-volume interpolation method object is requested before finite-volume interpolation method objects are available.'
+    issues = '#28131'
+  []
 []

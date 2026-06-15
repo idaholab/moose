@@ -4781,7 +4781,15 @@ FEProblemBase::getFVInterpolationMethod(const InterpolationMethodName & name,
       .queryInto(methods);
 
   if (methods.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_interpolation_method"),
+                "An FVInterpolationMethod getter was called before FVInterpolationMethods have "
+                "been constructed. If you are attempting to access this object in the constructor "
+                "of another object then make sure that the FVInterpolationMethod is constructed "
+                "before the object using it.");
+
     mooseError("Unable to find FVInterpolationMethod with name '", name, "'");
+  }
 
   mooseAssert(methods.size() == 1, "Expected a single FVInterpolationMethod per thread");
   return *(methods[0]);
