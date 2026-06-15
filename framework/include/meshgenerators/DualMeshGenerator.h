@@ -27,4 +27,8 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
+
+  Real _boundary_node_angular_tol;
+
+  bool _clip_boundary;
 };
