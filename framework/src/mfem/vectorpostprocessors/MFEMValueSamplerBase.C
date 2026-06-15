@@ -37,6 +37,27 @@ MFEMVectorToPostprocessorPoints(
     }
   }
 }
+
+mfem::FindPointsGSLIB::AvgType
+get_avg_type(const MooseEnum & avg_type)
+{
+  if (avg_type == "NONE")
+  {
+    return mfem::FindPointsGSLIB::AvgType::NONE;
+  }
+  else if (avg_type == "ARITHMETIC")
+  {
+    return mfem::FindPointsGSLIB::AvgType::ARITHMETIC;
+  }
+  else if (avg_type == "HARMONIC")
+  {
+    return mfem::FindPointsGSLIB::AvgType::HARMONIC;
+  }
+  else
+  {
+    mooseError("Unknown average type: ", avg_type);
+  }
+}
 }
 
 InputParameters
@@ -49,6 +70,13 @@ MFEMValueSamplerBase::validParams()
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>(
       "point_ordering", ordering, "Ordering style to use for point vector DoFs.");
+  MooseEnum avg_type("NONE ARITHMETIC HARMONIC", "ARITHMETIC", false);
+  params.addParam<MooseEnum>(
+      "average_type", avg_type, "Average type used when sampling L2 functions at boundaries.");
+  params.addParam<double>("mesh_boundary_tolerance",
+                          1e-8,
+                          "Distance from point to mesh boundary below which the point is "
+                          "considered to be on the boundary rather than outside the mesh.");
 
   return params;
 }
@@ -68,6 +96,10 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
 {
   if (getMFEMProblem().mesh().shouldDisplace())
     mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+
+  const mfem::FindPointsGSLIB::AvgType avg_type = get_avg_type(getParam<MooseEnum>("average_type"));
+  _finder.SetL2AvgType(avg_type);
+  _finder.SetDistanceToleranceForPointsFoundOnBoundary(getParam<double>("mesh_boundary_tolerance"));
 
   // set up points vector
   _mesh.EnsureNodes();
