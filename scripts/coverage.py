@@ -90,6 +90,12 @@ class MooseCoverage:
         finalize_parser.add_argument(
             "out_info", type=str, help="The output path for the finalized .info file."
         )
+        finalize_parser.add_argument(
+            "include_dirs",
+            nargs="*",
+            type=str,
+            help="The source directories to include in the final output.",
+        )
 
         return parser.parse_args()
 
@@ -292,6 +298,11 @@ class MooseCoverage:
 
     def action_finalize(self):
         """Run the finalize action, which finalizes coverage."""
+        include_dirs = self.args.include_dirs
+        if not include_dirs:
+            self.error("Include directories not provided.")
+        include_dirs = [os.path.abspath(v) for v in include_dirs]
+
         in_json_path = self.args.in_json
         self.print(
             f"Reading initial state from {self.pretty_path(in_json_path)}", bold=True
@@ -340,7 +351,7 @@ class MooseCoverage:
                         gcno_dir.dir,
                         "--include",
                     ]
-                    + self.get_includes(gcno_directories)
+                    + include_dirs
                 )
                 self.run(cmd)
 
@@ -372,6 +383,8 @@ class MooseCoverage:
                 + ["--add-tracefile"]
                 + [combined_output_path, initial_info_path]
                 + ["--lcov", "--output", self.args.out_info]
+                + ["--include"]
+                + include_dirs
             )
             self.run(cmd)
 
