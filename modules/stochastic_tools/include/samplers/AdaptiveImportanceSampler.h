@@ -84,26 +84,26 @@ protected:
   const unsigned int & _num_random_seeds;
 
   /// True if the sampling is completed
-  bool _is_sampling_completed;
+  bool & _is_sampling_completed;
 
 private:
   /// Storage for the inputs vector obtained from the reporter
   const std::vector<std::vector<Real>> & _inputs;
 
   /// For proposing the next sample in the MCMC algorithm
-  std::vector<Real> _prev_value;
+  std::vector<Real> & _prev_value;
 
   /// Storage for means of input values for proposing the next sample
-  std::vector<Real> _mean_sto;
+  std::vector<Real> & _mean_sto;
 
   /// Storage for standard deviations of input values for proposing the next sample
-  std::vector<Real> _std_sto;
+  std::vector<Real> & _std_sto;
 
   /// Storage for previously accepted samples by the decision reporter system
-  std::vector<std::vector<Real>> _inputs_sto;
+  std::vector<std::vector<Real>> & _inputs_sto;
 
   /// Number of retraining performed
-  int _retraining_steps;
+  int & _retraining_steps;
 
   /// Indicate whether GP prediction is good or bad to influence next proposed sample
   const std::vector<bool> * const _gp_flag;

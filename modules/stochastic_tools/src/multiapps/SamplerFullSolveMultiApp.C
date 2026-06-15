@@ -108,7 +108,7 @@ SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
     _number_of_sampler_rows = num_rows;
     initial_setup_required = _mode != StochasticTools::MultiAppMode::BATCH_RESET;
   }
-  else if (_solved_once)
+  else if (_solved_once || _app.isRecovering())
     initial_setup_required = _mode == StochasticTools::MultiAppMode::NORMAL;
 
   // Call initial setup based on the logic above

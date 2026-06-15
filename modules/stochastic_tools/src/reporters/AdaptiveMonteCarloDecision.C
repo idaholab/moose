@@ -46,7 +46,14 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _sampler(getSampler("sampler")),
     _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
     _pss(dynamic_cast<const ParallelSubsetSimulation *>(&_sampler)),
-    _check_step(std::numeric_limits<int>::max()),
+    _check_step(declareRestartableData<int>("check_step", std::numeric_limits<int>::max())),
+    _prev_val(declareRestartableData<std::vector<std::vector<Real>>>("prev_val")),
+    _prev_val_out(declareRestartableData<std::vector<Real>>("prev_val_out")),
+    _inputs_sto(declareRestartableData<std::vector<std::vector<Real>>>("inputs_sto")),
+    _inputs_sorted(declareRestartableData<std::vector<std::vector<Real>>>("inputs_sorted")),
+    _outputs_sto(declareRestartableData<std::vector<Real>>("outputs_sto")),
+    _output_sorted(declareRestartableData<std::vector<Real>>("output_sorted")),
+    _output_limit(declareRestartableData<Real>("output_limit", 0.0)),
     _gp_used(isParamValid("gp_decision")),
 #ifdef MOOSE_LIBTORCH_ENABLED
     _gp_training_samples(

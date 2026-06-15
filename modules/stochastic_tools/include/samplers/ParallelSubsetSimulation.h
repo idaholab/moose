@@ -68,24 +68,24 @@ protected:
   const unsigned int _count_max;
 
   /// Track the current subset index
-  unsigned int _subset;
+  unsigned int & _subset;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
   /// True if the sampling is completed
-  bool _is_sampling_completed;
+  bool & _is_sampling_completed;
 
 private:
   /// Storage for the previously accepted sample inputs across all the subsets
-  std::vector<std::vector<Real>> _inputs_sto;
+  std::vector<std::vector<Real>> & _inputs_sto;
 
   /// Storage for previously accepted sample outputs across all the subsets
-  std::vector<Real> _outputs_sto;
+  std::vector<Real> & _outputs_sto;
 
   /// Store the sorted input samples according to their corresponding outputs
-  std::vector<std::vector<Real>> _inputs_sorted;
+  std::vector<std::vector<Real>> & _inputs_sorted;
 
   /// Mean input vector for the next proposed sample inputs across several processors
-  std::vector<std::vector<Real>> _markov_seed;
+  std::vector<std::vector<Real>> & _markov_seed;
 };
