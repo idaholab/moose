@@ -55,9 +55,9 @@ SCMDetailedTriAssemblyMeshGenerator::validParams()
                                             "num_sectors>=4",
                                             "Number of azimuthal sectors used to discretize each "
                                             "circular pin cross section.");
-  params.addParam<unsigned int>("subchannel_block_id", 0, "Subchannel block id.");
+  params.addParam<unsigned int>("block_id", 0, "Subchannel block id.");
+  params.deprecateParam("block_id", "subchannel_block_id", "07/01/2027");
   params.addParam<unsigned int>("pin_block_id", 1, "Fuel pin block id.");
-  params.addParam<unsigned int>("block_id", 0, "Deprecated subchannel block id.");
   params.addParam<bool>("verbose_flag", false, "Flag to print out the mesh coordinates.");
   return params;
 }
@@ -73,9 +73,7 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _num_sectors(getParam<unsigned int>("num_sectors")),
-    _subchannel_block_id(parameters.isParamSetByUser("subchannel_block_id")
-                             ? getParam<unsigned int>("subchannel_block_id")
-                             : getParam<unsigned int>("block_id")),
+    _subchannel_block_id(getParam<unsigned int>("subchannel_block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id")),
     _n_cells(getParam<unsigned int>("n_cells")),
     _nrods(0),
