@@ -274,7 +274,7 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
   {
     // Compute the height of this element.
     auto dz = z2 - z1;
-    double factor;
+    Real factor;
     auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
     switch (subch_type)
     {

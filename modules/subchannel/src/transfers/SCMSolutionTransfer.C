@@ -62,8 +62,7 @@ SCMSolutionTransfer::initialSetup()
 
     MooseVariableFieldBase & from_var = _subproblem.getVariable(
         0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
-    System & from_sys = from_var.sys().system();
-    const auto & fe_type = from_sys.variable_type(from_var.number());
+    const auto & fe_type = from_var.feType();
 
     if (fe_type.family != LAGRANGE || fe_type.order != FIRST)
       paramError("variable",
@@ -71,9 +70,7 @@ SCMSolutionTransfer::initialSetup()
 
     MooseVariableFieldBase & to_var = _to_problems[0]->getVariable(
         0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
-
-    System & to_sys = to_var.sys().system();
-    const auto & fe_type_target = to_sys.variable_type(to_var.number());
+    const auto & fe_type_target = to_var.feType();
 
     if (fe_type_target.family != LAGRANGE || fe_type_target.order != FIRST)
       paramError("variable",
@@ -91,6 +88,7 @@ SCMSolutionTransfer::execute()
   switch (_current_direction)
   {
     case TO_MULTIAPP:
+    case BETWEEN_MULTIAPP:
       transferToMultiApps();
       break;
 
@@ -154,6 +152,7 @@ SCMSolutionTransfer::transferNodalVars(unsigned int app_idx)
         unsigned int from_sys_num = from_sys->number();
         unsigned int from_var_num = from_sys->variable_number(var_name);
 
+        // Return to parent app MPI communicator to get solution dof
         swapper.forceSwap();
         NumericVector<Real> * from_solution = from_sys->solution.get();
         dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);

@@ -52,9 +52,9 @@ SCMTriAssemblyMeshGenerator::validParams()
   params.addRequiredParam<Real>("dwire", "Wire diameter [m]");
   params.addRequiredParam<Real>("hwire", "Wire lead length [m]");
   params.addParam<std::vector<Real>>(
-      "spacer_z", {}, "Axial location of spacers/vanes/mixing_vanes [m]");
+      "spacer_z", {}, "Axial location of spacers/vanes/mixing vanes [m]");
   params.addParam<std::vector<Real>>(
-      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing vanes [-]");
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
@@ -69,9 +69,9 @@ SCMTriAssemblyMeshGenerator::validParams()
   params.addParam<std::vector<Real>>("k_blockage",
                                      std::vector<Real>({0.0}),
                                      "Form loss coefficient of subchannels affected by blockage");
-  params.addParam<unsigned int>("subchannel_block_id", 0, "Subchannel block id");
+  params.addParam<unsigned int>("block_id", 0, "Subchannel block id");
+  params.deprecateParam("block_id", "subchannel_block_id", "07/01/2027");
   params.addParam<unsigned int>("pin_block_id", 1, "Fuel Pin block id");
-  params.addParam<unsigned int>("block_id", 0, "Deprecated subchannel block id");
   return params;
 }
 
@@ -80,9 +80,7 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
-    _subchannel_block_id(params.isParamSetByUser("subchannel_block_id")
-                             ? getParam<unsigned int>("subchannel_block_id")
-                             : getParam<unsigned int>("block_id")),
+    _subchannel_block_id(getParam<unsigned int>("subchannel_block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
@@ -107,37 +105,37 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
   const Real total_length = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
   if (_n_rings < 2)
-    mooseError(name(),
-               ": 'nrings' must be at least 2. In this mesh generator, the center pin counts as "
+    paramError("nrings",
+               "'nrings' must be at least 2. In this mesh generator, the center pin counts as "
                "the first ring, so a 7-pin bundle uses nrings = 2.");
 
   if (_n_cells == 0)
-    mooseError(name(), ": The number of axial cells must be greater than zero");
+    paramError("n_cells", "The number of axial cells must be greater than zero");
 
   if (total_length <= 0.0)
-    mooseError(name(), ": Total bundle length must be greater than zero");
+    mooseError("Total bundle length must be greater than zero");
 
   if (_spacer_z.size() != _spacer_k.size())
-    mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
+    mooseError("Size of vector spacer_z should be equal to size of vector spacer_k");
 
   for (const auto spacer_z : _spacer_z)
     if (spacer_z < 0.0 || spacer_z > total_length)
-      mooseError(name(), ": Location of spacers should be between zero and total bundle length");
+      paramError("spacer_z", "Location of spacers should be between zero and total bundle length");
 
   if (_z_blockage.size() != 2)
-    mooseError(name(), ": Size of vector z_blockage must be 2");
+    paramError("z_blockage", "Size of vector z_blockage must be 2");
 
   if (_z_blockage.front() > _z_blockage.back())
-    mooseError(name(), ": z_blockage inlet location must not exceed outlet location");
+    paramError("z_blockage", "z_blockage inlet location must not exceed outlet location");
 
   if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
-    mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
+    paramError("reduction_blockage",
+               "The area reduction of the blocked subchannels cannot be more than 1");
 
   if ((_index_blockage.size() != _reduction_blockage.size()) ||
       (_index_blockage.size() != _k_blockage.size()) ||
       (_reduction_blockage.size() != _k_blockage.size()))
-    mooseError(name(),
-               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
+    mooseError("Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
                "to eachother");
 
   SubChannelMesh::generateZGrid(
@@ -211,14 +209,13 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
   _n_channels = chancount + _npins - 1 + (_n_rings - 1) * 6 + 6;
 
   if (*max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
-    mooseError(name(),
-               ": The index of the blocked subchannel cannot be more than the max index of the "
+    paramError("index_blockage",
+               "The index of the blocked subchannel cannot be more than the max index of the "
                "subchannels");
 
   if ((_index_blockage.size() > _n_channels) || (_reduction_blockage.size() > _n_channels) ||
       (_k_blockage.size() > _n_channels))
-    mooseError(name(),
-               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "
+    mooseError("Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "
                "than the total number of subchannels");
 
   // Defining the 2D array for axial resistances

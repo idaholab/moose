@@ -55,7 +55,7 @@ protected:
    */
   const Real _side_gap;
   /// Number of azimuthal sectors used to discretize each circular pin cross section
-  const unsigned int _num_radial_parts;
+  const unsigned int _num_sectors;
   /// Subchannel subdomain ID
   const unsigned int _subchannel_block_id;
   /// Pin subdomain ID

@@ -52,7 +52,7 @@ protected:
   /// Half of gap between adjacent assemblies
   const Real _flat_to_flat;
   /// Number of azimuthal sectors used to discretize each circular pin cross section
-  const unsigned int _num_radial_parts;
+  const unsigned int _num_sectors;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the fuel pins

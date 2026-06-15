@@ -310,17 +310,17 @@ P_out = 101325 # Pa
   []
 []
 
-# ###### Transfers to the detailedMesh at the end of the coupled simulations
-# [Transfers]
-#   [subchannel_transfer]
-#     type = SCMSolutionTransfer
-#     to_multi_app = viz
-#     variable = 'mdot SumWij P DP h T rho mu S'
-#   []
-#   [pin_transfer]
-#     type = SCMSolutionTransfer
-#     transfer_type = pin
-#     to_multi_app = viz
-#     variable = 'Tpin q_prime'
-#   []
-# []
+# Transfers to the detailedMesh at the end of the coupled simulations
+[Transfers]
+  [subchannel_transfer]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [pin_transfer]
+    type = SCMSolutionTransfer
+    transfer_type = pin
+    to_multi_app = viz
+    variable = 'Tpin q_prime'
+  []
+[]

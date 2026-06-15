@@ -50,9 +50,9 @@ SCMQuadAssemblyMeshGenerator::validParams()
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
 
   params.addParam<std::vector<Real>>(
-      "spacer_z", {}, "Axial location of spacers/vanes/mixing_vanes [m]");
+      "spacer_z", {}, "Axial location of spacers/vanes/mixing vanes [m]");
   params.addParam<std::vector<Real>>(
-      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing vanes [-]");
 
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
@@ -110,17 +110,16 @@ SCMQuadAssemblyMeshGenerator::SCMQuadAssemblyMeshGenerator(const InputParameters
   const Real total_length = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
   if (_n_cells == 0)
-    mooseError(name(), ": The number of axial cells must be greater than zero");
+    paramError("n_cells", "The number of axial cells must be greater than zero");
 
   if (total_length <= 0.0)
-    mooseError(name(), ": Total bundle length must be greater than zero");
+    mooseError("Total bundle length must be greater than zero");
 
   if (_nx == 0 || _ny == 0)
-    mooseError(name(), ": The number of subchannels must be greater than zero in each direction");
+    mooseError("The number of subchannels must be greater than zero in each direction");
 
   if (_nx < 2 && _ny < 2)
-    mooseError(name(),
-               ": The number of subchannels cannot be less than 2 in both directions. "
+    mooseError("The number of subchannels cannot be less than 2 in both directions. "
                "Smallest assembly allowed is either 2X1 or 1X2.");
 
   _n_channels = _nx * _ny;
@@ -128,35 +127,34 @@ SCMQuadAssemblyMeshGenerator::SCMQuadAssemblyMeshGenerator(const InputParameters
   _n_pins = (_nx - 1) * (_ny - 1);
 
   if (_spacer_z.size() != _spacer_k.size())
-    mooseError(name(), ": Size of vector spacer_z should equal size of spacer_k");
+    mooseError("Size of vector spacer_z should equal size of spacer_k");
 
   for (const auto spacer_z : _spacer_z)
     if (spacer_z < 0.0 || spacer_z > total_length)
-      mooseError(name(), ": Spacer locations must be between zero and total bundle length");
+      paramError("spacer_z", "Spacer locations must be between zero and total bundle length");
 
   if (_z_blockage.size() != 2)
-    mooseError(name(), ": Size of vector z_blockage must be 2");
+    paramError("z_blockage", "Size of vector z_blockage must be 2");
 
   if (_z_blockage.front() > _z_blockage.back())
-    mooseError(name(), ": z_blockage inlet location must not exceed outlet location");
+    paramError("z_blockage", "z_blockage inlet location must not exceed outlet location");
 
   if (!_index_blockage.empty() &&
       *std::max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
-    mooseError(name(), ": Blocked subchannel index exceeds valid subchannel range");
+    paramError("index_blockage", "Blocked subchannel index exceeds valid subchannel range");
 
   if (!_reduction_blockage.empty() &&
       *std::max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1.0)
-    mooseError(name(), ": Area reduction of blocked subchannels cannot exceed 1");
+    paramError("reduction_blockage", "Area reduction of blocked subchannels cannot exceed 1");
 
   if ((_index_blockage.size() > _n_channels) || (_reduction_blockage.size() > _n_channels) ||
       (_k_blockage.size() > _n_channels))
-    mooseError(name(),
-               ": Sizes of blockage-related vectors cannot exceed total number of subchannels");
+    mooseError("Sizes of blockage-related vectors cannot exceed total number of subchannels");
 
   if ((_index_blockage.size() != _reduction_blockage.size()) ||
       (_index_blockage.size() != _k_blockage.size()) ||
       (_reduction_blockage.size() != _k_blockage.size()))
-    mooseError(name(), ": index_blockage, reduction_blockage, and k_blockage must have equal size");
+    mooseError("index_blockage, reduction_blockage, and k_blockage must have equal size");
 
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
@@ -235,6 +233,8 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
                              (ix == 0 && iy == _ny - 1) || (ix == _nx - 1 && iy == _ny - 1);
       const bool is_edge = (ix == 0 || iy == 0 || ix == _nx - 1 || iy == _ny - 1);
 
+      // Two channels side by side (a 1x2/2x1 grid) only occurs in verification cases; treat both
+      // as CENTER. The smallest physical assembly is 2x2 subchannels around a single pin.
       if (_n_channels == 2)
         _subch_type[i_ch] = EChannelType::CENTER;
       else if (_n_channels == 4)

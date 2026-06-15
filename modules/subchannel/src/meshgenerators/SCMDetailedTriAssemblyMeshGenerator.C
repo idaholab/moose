@@ -50,9 +50,9 @@ SCMDetailedTriAssemblyMeshGenerator::validParams()
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
-  params.addRangeCheckedParam<unsigned int>("num_radial_parts",
+  params.addRangeCheckedParam<unsigned int>("num_sectors",
                                             16,
-                                            "num_radial_parts>=4",
+                                            "num_sectors>=4",
                                             "Number of azimuthal sectors used to discretize each "
                                             "circular pin cross section.");
   params.addParam<unsigned int>("subchannel_block_id", 0, "Subchannel block id.");
@@ -72,7 +72,7 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _pin_diameter(getParam<Real>("pin_diameter")),
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
-    _num_radial_parts(getParam<unsigned int>("num_radial_parts")),
+    _num_sectors(getParam<unsigned int>("num_sectors")),
     _subchannel_block_id(parameters.isParamSetByUser("subchannel_block_id")
                              ? getParam<unsigned int>("subchannel_block_id")
                              : getParam<unsigned int>("block_id")),
@@ -86,15 +86,15 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
   const Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
   if (_n_rings < 2)
-    mooseError(name(),
-               ": 'nrings' must be at least 2. In this mesh generator, the center pin counts as "
+    paramError("nrings",
+               "'nrings' must be at least 2. In this mesh generator, the center pin counts as "
                "the first ring, so a 7-pin bundle uses nrings = 2.");
 
   if (_n_cells == 0)
-    mooseError(name(), ": The number of axial cells must be greater than zero");
+    paramError("n_cells", "The number of axial cells must be greater than zero");
 
   if (L <= 0.0)
-    mooseError(name(), ": Total bundle length must be greater than zero");
+    mooseError("Total bundle length must be greater than zero");
 
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
@@ -332,7 +332,7 @@ void
 SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mesh_base,
                                                  const Point & center)
 {
-  const Real dalpha = 360. / _num_radial_parts;
+  const Real dalpha = 360. / _num_sectors;
   const Real radius = _pin_diameter / 2.;
 
   // Add a center node and radial boundary nodes on each axial level so each pin is discretized into
@@ -344,7 +344,7 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
     const Real elev = _z_grid[k];
     nodes[k].push_back(mesh_base->add_point(Point(center(0), center(1), elev)));
     Real alpha = 0.;
-    for (unsigned int i = 0; i < _num_radial_parts; i++, alpha += dalpha)
+    for (unsigned int i = 0; i < _num_sectors; i++, alpha += dalpha)
     {
       const Real dx = radius * std::cos(alpha * M_PI / 180.);
       const Real dy = radius * std::sin(alpha * M_PI / 180.);
@@ -354,14 +354,14 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
 
   // Add the pin volume elements, linking matching radial sectors between adjacent axial levels.
   for (unsigned int k = 0; k < _n_cells; k++)
-    for (unsigned int i = 0; i < _num_radial_parts; i++)
+    for (unsigned int i = 0; i < _num_sectors; i++)
     {
       Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
       elem->subdomain_id() = _pin_block_id;
       elem->set_id(_elem_id++);
       const unsigned int ctr_idx = 0;
-      const unsigned int idx1 = (i % _num_radial_parts) + 1;
-      const unsigned int idx2 = ((i + 1) % _num_radial_parts) + 1;
+      const unsigned int idx1 = (i % _num_sectors) + 1;
+      const unsigned int idx2 = ((i + 1) % _num_sectors) + 1;
       elem->set_node(0, nodes[k][ctr_idx]);
       elem->set_node(1, nodes[k][idx1]);
       elem->set_node(2, nodes[k][idx2]);
@@ -440,8 +440,8 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
   const unsigned int n_elems = elems_per_level * _n_cells;
   const unsigned int n_pins = _pin_position.size();
   const unsigned int pin_points =
-      n_pins > 0 ? (_n_cells + 1) * (_num_radial_parts + 1) * n_pins : 0;
-  const unsigned int pin_elems = n_pins > 0 ? _n_cells * _num_radial_parts * n_pins : 0;
+      n_pins > 0 ? (_n_cells + 1) * (_num_sectors + 1) * n_pins : 0;
+  const unsigned int pin_elems = n_pins > 0 ? _n_cells * _num_sectors * n_pins : 0;
   if (_verbose)
   {
     _console << "Number of points: " << n_points << std::endl;
