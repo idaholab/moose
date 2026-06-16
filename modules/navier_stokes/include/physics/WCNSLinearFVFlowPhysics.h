@@ -8,16 +8,71 @@
 
 #pragma once
 
-#include "WCNSLinearFVFlowPhysicsBase.h"
+#include "WCNSFVFlowPhysicsBase.h"
+#include "WCNSFVTurbulencePhysics.h"
 
 /**
  * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
  * using the linear finite volume discretization.
+ *
+ * Derived classes may override the protected hooks to customize selected pressure, momentum, and
+ * boundary-condition objects while reusing the stock linear-FV flow setup.
  */
-class WCNSLinearFVFlowPhysics final : public WCNSLinearFVFlowPhysicsBase
+class WCNSLinearFVFlowPhysics : public WCNSFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
 
   WCNSLinearFVFlowPhysics(const InputParameters & parameters);
+
+protected:
+  void initializePhysicsAdditional() override;
+  void addSolverVariables() override;
+  void addFVKernels() override;
+  void addUserObjects() override;
+  void addFunctorMaterials() override;
+
+  void addPressureCorrectionKernels();
+
+  void addMomentumTimeKernels() override;
+  virtual void addMomentumFluxKernels();
+  void addMomentumPressureKernels() override;
+  void addMomentumGravityKernels() override;
+  void addMomentumFrictionKernels() override;
+  void addMomentumBoussinesqKernels() override;
+  virtual void addMomentumConditioningKernels() {}
+  virtual void addMomentumReducedPressureKernels() {}
+
+  void addInletBC() override;
+  void addOutletBC() override;
+  void addWallsBC() override;
+  void addSeparatorBC() override {}
+
+  bool hasForchheimerFriction() const override { return false; }
+
+  void addRhieChowUserObjects() override;
+
+  MooseFunctorName getLinearFrictionCoefName() const override { mooseError("Not implemented"); }
+
+  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+
+  virtual void addAdditionalUserObjects() {}
+  virtual bool useMomentumContinuityErrorSink() const { return false; }
+  virtual bool shouldAddMomentumPressureKernels() const { return true; }
+  virtual bool shouldAddMomentumReducedPressureKernels() const { return false; }
+  virtual MooseFunctorName pressureDiffusionTensorName() const { return "Ainv"; }
+  virtual MooseFunctorName pressureDivergenceFluxName() const { return "HbyA"; }
+  virtual bool pressureDivergenceFluxIsIntegrated() const { return false; }
+  virtual std::string momentumTimeKernelType() const { return "LinearFVTimeDerivative"; }
+  virtual std::string momentumTimeDensityParameterName() const { return "factor"; }
+  virtual std::string momentumFluxKernelType() const { return "LinearWCNSFVMomentumFlux"; }
+  virtual MooseFunctorName momentumFluxMassFluxFunctorName() const { return ""; }
+  virtual bool momentumFluxMassFluxFunctorIsIntegrated() const { return false; }
+  virtual MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
+                                                    unsigned int component) const;
+  virtual MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
+                                                   unsigned int component) const;
+
+  /// Whether to use the correction term for non-orthogonality
+  const bool _non_orthogonal_correction;
 };

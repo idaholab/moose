@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionOutflowBC.h"
 
 /**
  * Linear-FV scalar inlet/outlet boundary condition.
@@ -17,7 +17,7 @@
  * On outflow this behaves like a zero-gradient / extrapolated outlet.
  * On backflow it switches to a prescribed boundary value.
  */
-class LinearFVInletOutletScalarBC : public LinearFVAdvectionDiffusionBC
+class LinearFVInletOutletScalarBC : public LinearFVAdvectionDiffusionOutflowBC
 {
 public:
   static InputParameters validParams();
@@ -39,16 +39,8 @@ protected:
   bool isBackflow() const;
   Real outwardFaceFlux() const;
   const ElemInfo & fluidElemInfo() const;
-  Real computeOutflowBoundaryValue() const;
-  Real computeOutflowBoundaryValueRHSContribution() const;
   Real computeBackflowBoundaryValue() const;
 
-  const unsigned int _dim;
-  const MooseLinearVariableFVReal * const _u_var;
-  const MooseLinearVariableFVReal * const _v_var;
-  const MooseLinearVariableFVReal * const _w_var;
-  std::vector<const MooseLinearVariableFVReal *> _vel_vars;
   const Moose::Functor<Real> & _backflow_value;
   const Moose::Functor<Real> & _face_flux;
-  const bool _two_term_expansion;
 };

@@ -300,63 +300,11 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 
   for (const auto system_i : index_range(_momentum_systems))
   {
-    _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
-
-    // We will need the right hand side and the solution of the next component
-    LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
-
-    NumericVector<Number> & solution = *(momentum_system.solution);
-    NumericVector<Number> & rhs = *(momentum_system.rhs);
-    SparseMatrix<Number> & mmat = *(momentum_system.matrix);
-
-    auto diff_diagonal = solution.zero_clone();
-
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->beginFVSplitMomentumPredictorOperatorAssembly(system_i);
-
-    // We assemble the matrix and the right hand side
-    try
-    {
-      _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
-    }
-    catch (...)
-    {
-      if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-        _rc_uo->clearMomentumPredictorOperatorCache();
-      throw;
-    }
-
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
-          system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
-
-    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
-
-    std::unique_ptr<NumericVector<Number>> predictor_rhs_base;
-    std::unique_ptr<NumericVector<Number>> predictor_explicit_force;
-    std::unique_ptr<NumericVector<Number>> predictor_body_force;
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-    {
-      predictor_rhs_base = rhs.clone();
-      *predictor_rhs_base = rhs;
-      predictor_rhs_base->close();
-
-      predictor_body_force = rhs.clone();
-      predictor_body_force->zero();
-      addMomentumPredictorBodyForceForcing(system_i, *predictor_body_force);
-      predictor_body_force->close();
-
-      addMomentumPredictorExplicitForcing(system_i, rhs);
-
-      predictor_explicit_force = rhs.clone();
-      *predictor_explicit_force = rhs;
-      predictor_explicit_force->add(-1.0, *predictor_rhs_base);
-      predictor_explicit_force->close();
-
-      _rc_uo->setMomentumPredictorForcing(
-          system_i, predictor_explicit_force.get(), predictor_body_force.get());
-    }
+    const auto assembly = assembleMomentumPredictorOperator(system_i);
+    auto & momentum_system = *assembly.system;
+    auto & solution = *assembly.solution;
+    auto & rhs = *assembly.rhs;
+    auto & mmat = *assembly.matrix;
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
@@ -373,12 +321,6 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     // We solve the equation
     auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
-
-    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->cacheMomentumPredictorOperator(system_i,
-                                             predictor_rhs_base.get(),
-                                             predictor_explicit_force.get(),
-                                             predictor_body_force.get());
 
     // We will reuse the preconditioner for every momentum system
     if (system_i == 0)
@@ -424,15 +366,63 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   return its_normalized_residuals;
 }
 
-void
-LinearAssemblySegregatedSolve::addMomentumPredictorExplicitForcing(const unsigned int /*system_i*/,
-                                                                   NumericVector<Number> & /*rhs*/)
+LinearAssemblySegregatedSolve::MomentumPredictorAssembly
+LinearAssemblySegregatedSolve::assembleMomentumPredictorOperator(const unsigned int system_i,
+                                                                 const bool prepare_without_solve)
 {
+  _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
+
+  auto & momentum_system =
+      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+  auto & solution = *(momentum_system.solution);
+  auto & rhs = *(momentum_system.rhs);
+  auto & mmat = *(momentum_system.matrix);
+
+  auto diff_diagonal = solution.zero_clone();
+
+  if (prepare_without_solve)
+  {
+    momentum_system.update();
+    momentum_system.current_local_solution->close();
+    solution.close();
+    _momentum_systems[system_i]->solutionOld().close();
+    if (auto * previous_newton = _momentum_systems[system_i]->solutionPreviousNewton())
+      previous_newton->close();
+    rhs.close();
+  }
+
+  if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+    _rc_uo->beginFVSplitMomentumPredictorOperatorAssembly(system_i);
+
+  try
+  {
+    _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+  }
+  catch (...)
+  {
+    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+      _rc_uo->clearMomentumPredictorOperatorCache();
+    throw;
+  }
+
+  if (prepare_without_solve)
+    rhs.close();
+
+  if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+    _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
+        system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
+
+  applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
+
+  if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+    addMomentumPredictorExplicitForcing(system_i, rhs);
+
+  return {&momentum_system, &solution, &rhs, &mmat};
 }
 
 void
-LinearAssemblySegregatedSolve::addMomentumPredictorBodyForceForcing(const unsigned int /*system_i*/,
-                                                                    NumericVector<Number> & /*rhs*/)
+LinearAssemblySegregatedSolve::addMomentumPredictorExplicitForcing(const unsigned int /*system_i*/,
+                                                                   NumericVector<Number> & /*rhs*/)
 {
 }
 
@@ -699,6 +689,44 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   return residuals;
 }
 
+void
+LinearAssemblySegregatedSolve::preSolveSetup(const SolverParams & /* solver_params */)
+{
+}
+
+void
+LinearAssemblySegregatedSolve::addIterationResiduals(ResidualStorage & residual_storage)
+{
+  residual_storage.converged = residual_storage.ns_residuals.empty();
+}
+
+void
+LinearAssemblySegregatedSolve::initializeSolveLoop(const SolverParams & /* solver_params */)
+{
+}
+
+void
+LinearAssemblySegregatedSolve::preMomentumPressureIteration(
+    ResidualStorage & /* residual_storage */, const SolverParams & /* solver_params */)
+{
+}
+
+bool
+LinearAssemblySegregatedSolve::shouldAssembleMomentumPredictorWithoutSolve() const
+{
+  return false;
+}
+
+void
+LinearAssemblySegregatedSolve::assembleMomentumPredictorWithoutSolve()
+{
+}
+
+void
+LinearAssemblySegregatedSolve::finalizeSolve(const bool /* converged */)
+{
+}
+
 bool
 LinearAssemblySegregatedSolve::solve()
 {
@@ -711,11 +739,14 @@ LinearAssemblySegregatedSolve::solve()
   solver_params._type = Moose::SolveType::ST_LINEAR;
   solver_params._line_search = Moose::LineSearchType::LS_NONE;
 
+  preSolveSetup(solver_params);
+
   // Initialize the SIMPLE iteration counter
   unsigned int simple_iteration_counter = 0;
 
   // We set up the residual storage and the corresponding tolerances.
   ResidualStorage residual_storage = setupResidualStorage();
+  addIterationResiduals(residual_storage);
   auto & ns_residuals = residual_storage.ns_residuals;
   auto & ns_abs_tols = residual_storage.ns_abs_tols;
   const auto & momentum_indices = residual_storage.momentum_indices;
@@ -732,9 +763,14 @@ LinearAssemblySegregatedSolve::solve()
   if (_cht.enabled() && _should_solve_energy)
     _cht.initializeCHTCouplingFields();
 
+  initializeSolveLoop(solver_params);
+
   while (simple_iteration_counter < _num_iterations && !converged)
   {
     simple_iteration_counter++;
+    _current_outer_iteration = simple_iteration_counter;
+
+    preMomentumPressureIteration(residual_storage, solver_params);
 
     // We set the preconditioner/controllable parameters through petsc options. Linear
     // tolerances will be overridden within the solver. In case of a segregated momentum
@@ -756,6 +792,8 @@ LinearAssemblySegregatedSolve::solve()
       for (const auto system_i : index_range(momentum_residual))
         ns_residuals[momentum_indices[system_i]] = momentum_residual[system_i];
     }
+    else if (shouldAssembleMomentumPredictorWithoutSolve())
+      assembleMomentumPredictorWithoutSolve();
 
     // Now we correct the velocity, this function depends on the method, it differs for
     // SIMPLE/PIMPLE, this returns the pressure errors
@@ -915,6 +953,8 @@ LinearAssemblySegregatedSolve::solve()
   }
 
   converged = _continue_on_max_its ? true : converged;
+
+  finalizeSolve(converged);
 
   return converged;
 }

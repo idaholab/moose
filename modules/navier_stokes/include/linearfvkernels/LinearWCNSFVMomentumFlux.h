@@ -97,6 +97,9 @@ protected:
   /// Optional face-centered mass-flux functor used instead of the live Rhie-Chow mass flux
   const Moose::Functor<Real> * const _mass_flux_functor;
 
+  /// Whether the optional face mass-flux functor is already multiplied by face area
+  const bool _mass_flux_is_integrated;
+
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 

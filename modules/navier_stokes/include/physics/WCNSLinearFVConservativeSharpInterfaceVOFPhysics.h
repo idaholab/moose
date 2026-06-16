@@ -36,22 +36,11 @@ private:
   void addAlphaAdvectionKernels();
   void addAlphaInletBC();
   void addAlphaOutletBC();
+  void addMixtureFunctorMaterial(const std::string & object_suffix,
+                                 const MooseFunctorName & property_name,
+                                 const MooseFunctorName & phase_1_name,
+                                 const MooseFunctorName & phase_2_name,
+                                 bool limit_phase_fraction);
 
   const VariableName _alpha_name;
-  const MooseFunctorName _gas_fraction_name;
-  const std::vector<MooseFunctorName> _alpha_inlet_functors;
-  const MooseEnum _alpha_outlet_type;
-  const MooseFunctorName _alpha_outlet_backflow_functor;
-  const bool _alpha_two_term_bc_expansion;
-  const MooseFunctorName _compression_factor_name;
-  const MooseFunctorName _interface_normal_functor_name;
-
-  const bool _create_complementary_fraction;
-  const bool _create_mixture_materials;
-  const MooseFunctorName _mixture_density_name;
-  const MooseFunctorName _mixture_dynamic_viscosity_name;
-  const MooseFunctorName _liquid_density_name;
-  const MooseFunctorName _gas_density_name;
-  const MooseFunctorName _liquid_dynamic_viscosity_name;
-  const MooseFunctorName _gas_dynamic_viscosity_name;
 };

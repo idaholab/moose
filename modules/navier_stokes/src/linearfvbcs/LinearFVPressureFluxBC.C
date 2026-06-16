@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVPressureFluxBC.h"
-#include "FaceCenteredMapFunctor.h"
 
 registerMooseObject("NavierStokesApp", LinearFVPressureFluxBC);
 
@@ -24,24 +23,13 @@ LinearFVPressureFluxBC::validParams()
   params.addParam<MooseFunctorName>(
       "pressure_predictor_flux",
       "",
-      "Optional total pressure-predictor source flux. When provided this supersedes the split "
-      "HbyA_flux + additional_face_fluxes input path.");
+      "Optional total pressure-predictor source flux. When provided this supersedes HbyA_flux.");
   params.addParam<MooseFunctorName>(
       "constrained_pressure_normal_gradient",
       "",
       "Optional cached pressure normal gradient populated from the current Rhie-Chow predictor "
       "state. When provided this supersedes the algebraic wall-flux reconstruction.");
-  params.addParam<bool>(
-      "use_constrained_pressure_normal_gradient_only",
-      false,
-      "When true, require and use constrained_pressure_normal_gradient as the authoritative "
-      "patch constraint instead of reconstructing the pressure boundary gradient algebraically.");
   params.addRequiredParam<MooseFunctorName>("HbyA_flux", "The total HbyA face flux value.");
-  params.addParam<std::vector<MooseFunctorName>>(
-      "additional_face_fluxes",
-      {},
-      "Additional pressure-equation source-flux functors that must be enforced together with "
-      "the HbyA wall flux.");
   params.addRequiredParam<MooseFunctorName>(
       "Ainv", "The 1/A where A is the momentum system diagonal vector.");
   return params;
@@ -49,8 +37,6 @@ LinearFVPressureFluxBC::validParams()
 
 LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
-    _use_constrained_pressure_normal_gradient_only(
-        getParam<bool>("use_constrained_pressure_normal_gradient_only")),
     _pressure_predictor_flux(
         getParam<MooseFunctorName>("pressure_predictor_flux").empty()
             ? nullptr
@@ -58,16 +44,11 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
     _constrained_pressure_normal_gradient(
         getParam<MooseFunctorName>("constrained_pressure_normal_gradient").empty()
             ? nullptr
-            : &getFunctor<Real>(getParam<MooseFunctorName>("constrained_pressure_normal_gradient"))),
+            : &getFunctor<Real>(
+                  getParam<MooseFunctorName>("constrained_pressure_normal_gradient"))),
     _HbyA_flux(getFunctor<Real>("HbyA_flux")),
     _Ainv(getFunctor<RealVectorValue>("Ainv"))
 {
-  if (_use_constrained_pressure_normal_gradient_only && !_constrained_pressure_normal_gradient)
-    paramError("use_constrained_pressure_normal_gradient_only",
-               "requires constrained_pressure_normal_gradient to be provided.");
-
-  for (const auto & flux_name : getParam<std::vector<MooseFunctorName>>("additional_face_fluxes"))
-    _additional_face_fluxes.push_back(&getFunctor<Real>(flux_name));
 }
 
 Real
@@ -81,13 +62,6 @@ LinearFVPressureFluxBC::computeBoundaryNormalAinv() const
     normal_ainv += _Ainv(face_arg, determineState())(i) * normal(i) * normal(i);
 
   return normal_ainv;
-}
-
-Real
-LinearFVPressureFluxBC::computeBoundaryPressureSourceFlux() const
-{
-  refreshBoundaryConstraintCache();
-  return _cached_boundary_pressure_source_flux;
 }
 
 void
@@ -105,29 +79,21 @@ LinearFVPressureFluxBC::refreshBoundaryConstraintCache() const
   _cached_state = state.state;
   _cached_iteration_type = state.iteration_type;
   _cached_boundary_normal_ainv = computeBoundaryNormalAinv();
-  _cached_constrained_pressure_normal_gradient =
-      _constrained_pressure_normal_gradient
-          ? (*_constrained_pressure_normal_gradient)(face_arg, state)
-          : 0.0;
-
-  if (_pressure_predictor_flux)
+  if (_constrained_pressure_normal_gradient)
+  {
+    _cached_constrained_pressure_normal_gradient =
+        (*_constrained_pressure_normal_gradient)(face_arg, state);
+    _cached_boundary_pressure_source_flux = 0.0;
+  }
+  else if (_pressure_predictor_flux)
+  {
+    _cached_constrained_pressure_normal_gradient = 0.0;
     _cached_boundary_pressure_source_flux = (*_pressure_predictor_flux)(face_arg, state);
+  }
   else
   {
-    Real total_flux = _HbyA_flux(face_arg, state);
-    for (const auto * flux : _additional_face_fluxes)
-    {
-      if (const auto * face_map_flux =
-              dynamic_cast<
-                  const FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> *>(
-                  flux);
-          face_map_flux && !face_map_flux->count(_current_face_info->id()))
-        continue;
-
-      total_flux += (*flux)(face_arg, state);
-    }
-
-    _cached_boundary_pressure_source_flux = total_flux;
+    _cached_constrained_pressure_normal_gradient = 0.0;
+    _cached_boundary_pressure_source_flux = _HbyA_flux(face_arg, state);
   }
 
   _boundary_constraint_cache_valid = true;

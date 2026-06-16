@@ -111,15 +111,12 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _correction_relaxation(getParam<Real>("correction_relaxation")),
     _later_correction_relaxation(getParam<Real>("later_correction_relaxation")),
     _alpha_phi_limited(_fe_problem.mesh(), blockIDs(), "alpha_phi_limited"),
-    _rho_phi(_fe_problem.mesh(), blockIDs(), "rho_phi"),
-    _rho_phi_mass_flux_density(_fe_problem.mesh(), blockIDs(), "rho_phi_mass_flux_density")
+    _rho_phi(_fe_problem.mesh(), blockIDs(), "rho_phi")
 {
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     UserObject::_subproblem.addFunctor("alpha_phi_limited", _alpha_phi_limited, tid);
     UserObject::_subproblem.addFunctor("rho_phi", _rho_phi, tid);
-    UserObject::_subproblem.addFunctor(
-        "rho_phi_mass_flux_density", _rho_phi_mass_flux_density, tid);
   }
 }
 
@@ -158,7 +155,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::initializeFluxStorage()
   {
     _alpha_phi_limited[fi->id()] = 0.0;
     _rho_phi[fi->id()] = 0.0;
-    _rho_phi_mass_flux_density[fi->id()] = 0.0;
   }
 }
 
@@ -193,8 +189,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
     pair.second = 0.0;
   for (auto & pair : _rho_phi)
     pair.second = 0.0;
-  for (auto & pair : _rho_phi_mass_flux_density)
-    pair.second = 0.0;
 }
 
 void
@@ -219,12 +213,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
     const auto face_id = fi->id();
     const Real limited_alpha_flux =
         _alpha_phi_limited.count(face_id) ? libmesh_map_find(_alpha_phi_limited, face_id) : 0.0;
-    const Real integrated_rho_phi = rhoPhi(*fi, limited_alpha_flux);
-    const Real face_measure = faceMeasure(*fi);
-
-    _rho_phi[face_id] = integrated_rho_phi;
-    _rho_phi_mass_flux_density[face_id] =
-        face_measure > 0.0 ? integrated_rho_phi / face_measure : 0.0;
+    _rho_phi[face_id] = rhoPhi(*fi, limited_alpha_flux);
   }
 }
 
@@ -552,14 +541,11 @@ ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
     const auto face_id = data.face->id();
     const Real limited_alpha_flux = accumulated_alpha_fluxes[i];
     const Real rho_phi = rhoPhi(*data.face, limited_alpha_flux);
-    const Real face_measure = faceMeasure(*data.face);
 
     // Accumulate the published face fluxes with the same subcycle weighting so downstream
     // consumers see a timestep-consistent alphaPhi/rhoPhi pair after subcycling.
     _alpha_phi_limited[face_id] += subcycle_fraction * limited_alpha_flux;
     _rho_phi[face_id] += subcycle_fraction * rho_phi;
-    _rho_phi_mass_flux_density[face_id] +=
-        subcycle_fraction * (face_measure > 0.0 ? rho_phi / face_measure : 0.0);
   }
 }
 

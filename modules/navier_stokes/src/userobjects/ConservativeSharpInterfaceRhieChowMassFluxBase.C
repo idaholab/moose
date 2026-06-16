@@ -211,70 +211,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::commitAcceptedTimestepTransportH
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedCorrectedFacePhi(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_corrected_face_phi, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorOperatorPhi(
-    const FaceInfo & fi) const
-{
-  const Real face_measure = fi.faceArea() * fi.faceCoord();
-  if (face_measure <= libMesh::TOLERANCE)
-    return 0.0;
-
-  // _pressure_predictor_base_flux and _transient_projection_flux are cached as area-integrated
-  // fluxes. Convert back to the normal-flux transport convention used by consistency checks and
-  // postprocessors.
-  return (-libmesh_map_find(_pressure_predictor_base_flux, fi.id()) -
-          libmesh_map_find(_transient_projection_flux, fi.id())) /
-         face_measure;
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPressureCorrectionPhi(
-    const FaceInfo & fi) const
-{
-  return libmesh_map_find(_pressure_correction_phi, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedOuterIterationPhi(const FaceInfo & fi) const
-{
-  return libmesh_map_find(_previous_timestep_corrected_face_phi, fi.id());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedOuterIterationRhoPhiIntegrated(
-    const FaceInfo & fi) const
-{
-  return transportIntegratedRhoPhiFromVolumetricPhi(
-      &fi, libmesh_map_find(_previous_timestep_corrected_face_phi, fi.id()), Moose::currentState());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::storedPredictorConvectiveMassFlux(
-    const FaceInfo & fi) const
-{
-  return libmesh_map_find(_HbyA_flux, fi.id());
-}
-
-Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::vofRhoPhiIntegrated(const FaceInfo & fi) const
 {
   return evaluateFaceScalarFunctor(_vof_rho_phi, &fi, Moose::currentState(), nullptr);
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureCoupledCellVelocityDelta(
-    const ElemInfo & elem_info, const Moose::StateArg & time_arg) const
-{
-  if (!_pressure_coupled_velocity_correction_valid)
-    const_cast<ConservativeSharpInterfaceRhieChowMassFluxBase *>(this)
-        ->updatePressureCoupledVelocityCorrectionFaceField(time_arg);
-
-  return reconstructPressureCoupledCellVelocityDelta(&elem_info, time_arg);
 }
 
 RealVectorValue
@@ -405,12 +344,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(
     mooseError("Older interpolation times are not supported!");
 
   return getVolumetricFaceFlux(fi);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::maxVolumeFractionCourant(const Real dt) const
-{
-  return RhieChowMassFlux::maxCourant(dt);
 }
 
 void

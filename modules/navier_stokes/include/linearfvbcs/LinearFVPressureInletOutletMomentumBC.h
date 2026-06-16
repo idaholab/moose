@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionOutflowBC.h"
 #include "NS.h"
 
 class ElemInfo;
@@ -20,7 +20,7 @@ class ElemInfo;
  * The historical class name is retained, but the solved variable and returned boundary values are
  * velocity components, not rho*u.
  */
-class LinearFVPressureInletOutletMomentumBC : public LinearFVAdvectionDiffusionBC
+class LinearFVPressureInletOutletMomentumBC : public LinearFVAdvectionDiffusionOutflowBC
 {
 public:
   static InputParameters validParams();
@@ -41,15 +41,10 @@ protected:
   bool isBackflow() const;
   Real outwardFaceFlux() const;
   const ElemInfo & fluidElemInfo() const;
-  Real computeOutflowBoundaryValue() const;
-  Real computeOutflowBoundaryValueRHSContribution() const;
   Real computeBackflowBoundaryValue() const;
   Real computeBackflowBoundaryValueMatrixContribution() const;
-  Real computeVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue outwardUnitNormal() const;
-  RealGradient computeVelocityGradient(const ElemInfo & elem_info,
-                                       const Moose::StateArg & state) const;
 
   const unsigned int _dim;
   const MooseLinearVariableFVReal * const _u_var;
@@ -59,5 +54,4 @@ protected:
   const unsigned int _index;
   const Moose::Functor<Real> & _backflow_value;
   const Moose::Functor<Real> & _face_flux;
-  const bool _two_term_expansion;
 };

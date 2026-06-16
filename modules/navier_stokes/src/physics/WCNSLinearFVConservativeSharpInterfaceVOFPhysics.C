@@ -136,26 +136,9 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::WCNSLinearFVConservativeSharpI
     const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
     WCNSFVCoupledAdvectionPhysicsHelper(this),
-    _alpha_name(getParam<VariableName>("volume_fraction_variable")),
-    _gas_fraction_name(getParam<MooseFunctorName>("complementary_volume_fraction_name")),
-    _alpha_inlet_functors(
-        getParam<std::vector<MooseFunctorName>>("volume_fraction_inlet_functors")),
-    _alpha_outlet_type(getParam<MooseEnum>("volume_fraction_outlet_type")),
-    _alpha_outlet_backflow_functor(
-        getParam<MooseFunctorName>("volume_fraction_outlet_backflow_functor")),
-    _alpha_two_term_bc_expansion(getParam<bool>("volume_fraction_two_term_bc_expansion")),
-    _compression_factor_name(getParam<MooseFunctorName>("compression_factor")),
-    _interface_normal_functor_name(getParam<MooseFunctorName>("interface_normal_functor")),
-    _create_complementary_fraction(getParam<bool>("create_complementary_fraction")),
-    _create_mixture_materials(getParam<bool>("create_mixture_materials")),
-    _mixture_density_name(getParam<MooseFunctorName>("mixture_density_name")),
-    _mixture_dynamic_viscosity_name(getParam<MooseFunctorName>("mixture_dynamic_viscosity_name")),
-    _liquid_density_name(getParam<MooseFunctorName>("liquid_density_name")),
-    _gas_density_name(getParam<MooseFunctorName>("gas_density_name")),
-    _liquid_dynamic_viscosity_name(getParam<MooseFunctorName>("liquid_dynamic_viscosity_name")),
-    _gas_dynamic_viscosity_name(getParam<MooseFunctorName>("gas_dynamic_viscosity_name"))
+    _alpha_name(getParam<VariableName>("volume_fraction_variable"))
 {
-  if (_alpha_name == _gas_fraction_name)
+  if (_alpha_name == getParam<MooseFunctorName>("complementary_volume_fraction_name"))
     paramError("complementary_volume_fraction_name",
                "The complementary volume-fraction name must differ from the transported "
                "volume-fraction variable name.");
@@ -232,40 +215,51 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addFVBCs()
 void
 WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMaterials()
 {
-  if (_create_complementary_fraction && !getProblem().hasFunctor(_gas_fraction_name, /*tid=*/0))
+  const auto gas_fraction_name = getParam<MooseFunctorName>("complementary_volume_fraction_name");
+  if (getParam<bool>("create_complementary_fraction") &&
+      !getProblem().hasFunctor(gas_fraction_name, /*tid=*/0))
   {
     auto params = getFactory().getValidParams("ParsedFunctorMaterial");
     assignBlocks(params, _blocks);
     params.set<std::string>("expression") = "1 - " + _alpha_name;
     params.set<std::vector<std::string>>("functor_names") = {_alpha_name};
-    params.set<std::string>("property_name") = _gas_fraction_name;
-    params.set<std::vector<std::string>>("output_properties") = {_gas_fraction_name};
+    params.set<std::string>("property_name") = gas_fraction_name;
+    params.set<std::vector<std::string>>("output_properties") = {gas_fraction_name};
     params.set<std::vector<OutputName>>("outputs") = {"all"};
     getProblem().addMaterial("ParsedFunctorMaterial", prefix() + "complementary_fraction", params);
   }
 
-  if (_create_mixture_materials)
+  if (getParam<bool>("create_mixture_materials"))
   {
-    auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::vector<MooseFunctorName>>("prop_names") = {_mixture_density_name};
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_liquid_density_name};
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_gas_density_name};
-    params.set<MooseFunctorName>("phase_1_fraction") = _alpha_name;
-    params.set<bool>("limit_phase_fraction") = false;
-    getProblem().addMaterial(
-        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_density", params);
-
-    params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<std::vector<MooseFunctorName>>("prop_names") = {_mixture_dynamic_viscosity_name};
-    params.set<std::vector<MooseFunctorName>>("phase_1_names") = {_liquid_dynamic_viscosity_name};
-    params.set<std::vector<MooseFunctorName>>("phase_2_names") = {_gas_dynamic_viscosity_name};
-    params.set<MooseFunctorName>("phase_1_fraction") = _alpha_name;
-    params.set<bool>("limit_phase_fraction") = true;
-    getProblem().addMaterial(
-        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_dynamic_viscosity", params);
+    addMixtureFunctorMaterial("mixture_density",
+                              getParam<MooseFunctorName>("mixture_density_name"),
+                              getParam<MooseFunctorName>("liquid_density_name"),
+                              getParam<MooseFunctorName>("gas_density_name"),
+                              false);
+    addMixtureFunctorMaterial("mixture_dynamic_viscosity",
+                              getParam<MooseFunctorName>("mixture_dynamic_viscosity_name"),
+                              getParam<MooseFunctorName>("liquid_dynamic_viscosity_name"),
+                              getParam<MooseFunctorName>("gas_dynamic_viscosity_name"),
+                              true);
   }
+}
+
+void
+WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMixtureFunctorMaterial(
+    const std::string & object_suffix,
+    const MooseFunctorName & property_name,
+    const MooseFunctorName & phase_1_name,
+    const MooseFunctorName & phase_2_name,
+    const bool limit_phase_fraction)
+{
+  auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
+  assignBlocks(params, _blocks);
+  params.set<std::vector<MooseFunctorName>>("prop_names") = {property_name};
+  params.set<std::vector<MooseFunctorName>>("phase_1_names") = {phase_1_name};
+  params.set<std::vector<MooseFunctorName>>("phase_2_names") = {phase_2_name};
+  params.set<MooseFunctorName>("phase_1_fraction") = _alpha_name;
+  params.set<bool>("limit_phase_fraction") = limit_phase_fraction;
+  getProblem().addMaterial("WCNSLinearFVMixtureFunctorMaterial", prefix() + object_suffix, params);
 }
 
 void
@@ -278,15 +272,18 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   params.set<SolverSystemName>("system_name") = getSolverSystem(_alpha_name);
   params.set<VariableName>("variable") = _alpha_name;
   params.set<MooseFunctorName>("face_flux") = "vof_transport_phi";
-  params.set<MooseFunctorName>("compression_factor") = _compression_factor_name;
-  params.set<MooseFunctorName>("interface_normal") = _interface_normal_functor_name;
+  params.set<MooseFunctorName>("compression_factor") =
+      getParam<MooseFunctorName>("compression_factor");
+  params.set<MooseFunctorName>("interface_normal") =
+      getParam<MooseFunctorName>("interface_normal_functor");
   params.set<unsigned int>("n_alpha_corrections") = getParam<unsigned int>("n_alpha_corrections");
   params.set<unsigned int>("n_limiter_iterations") = getParam<unsigned int>("n_limiter_iterations");
   params.set<Real>("correction_relaxation") = getParam<Real>("mules_correction_relaxation");
   params.set<Real>("later_correction_relaxation") =
       getParam<Real>("later_alpha_correction_relaxation");
-  params.set<MooseFunctorName>("liquid_density") = _liquid_density_name;
-  params.set<MooseFunctorName>("gas_density") = _gas_density_name;
+  params.set<MooseFunctorName>("liquid_density") =
+      getParam<MooseFunctorName>("liquid_density_name");
+  params.set<MooseFunctorName>("gas_density") = getParam<MooseFunctorName>("gas_density_name");
   getProblem().addUserObject(object_type, object_name, params);
 }
 
@@ -305,28 +302,28 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaTimeKernels()
 void
 WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaAdvectionKernels()
 {
-  addLinearFVScalarAdvectionKernel(_alpha_name,
-                                   prefix() + "alpha_advection",
-                                   _flow_equations_physics->rhieChowUOName(),
-                                   getParam<MooseEnum>("advected_interp_method"),
-                                   _blocks,
-                                   [](InputParameters & params)
-                                   {
-                                     params.set<MooseFunctorName>("face_flux") =
-                                         "vof_transport_phi";
-                                   });
+  addLinearFVScalarAdvectionKernel(
+      _alpha_name,
+      prefix() + "alpha_advection",
+      _flow_equations_physics->rhieChowUOName(),
+      getParam<MooseEnum>("advected_interp_method"),
+      _blocks,
+      [](InputParameters & params)
+      { params.set<MooseFunctorName>("face_flux") = "vof_transport_phi"; });
 }
 
 void
 WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaInletBC()
 {
   const auto & inlet_boundaries = _flow_equations_physics->getInletBoundaries();
-  if (inlet_boundaries.empty() || _alpha_inlet_functors.empty())
+  const auto alpha_inlet_functors =
+      getParam<std::vector<MooseFunctorName>>("volume_fraction_inlet_functors");
+  if (inlet_boundaries.empty() || alpha_inlet_functors.empty())
     return;
 
-  if (_alpha_inlet_functors.size() != inlet_boundaries.size())
+  if (alpha_inlet_functors.size() != inlet_boundaries.size())
     paramError("volume_fraction_inlet_functors",
-               "The number of inlet functors (" + std::to_string(_alpha_inlet_functors.size()) +
+               "The number of inlet functors (" + std::to_string(alpha_inlet_functors.size()) +
                    ") must match the number of inlet boundaries (" +
                    std::to_string(inlet_boundaries.size()) + ").");
 
@@ -334,7 +331,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaInletBC()
   {
     auto params = getFactory().getValidParams("LinearFVAdvectionDiffusionFunctorDirichletBC");
     params.set<LinearVariableName>("variable") = _alpha_name;
-    params.set<MooseFunctorName>("functor") = _alpha_inlet_functors[i];
+    params.set<MooseFunctorName>("functor") = alpha_inlet_functors[i];
     params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[i]};
     getProblem().addLinearFVBC("LinearFVAdvectionDiffusionFunctorDirichletBC",
                                prefix() + "alpha_inlet_" + inlet_boundaries[i],
@@ -349,24 +346,21 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addAlphaOutletBC()
   if (outlet_boundaries.empty())
     return;
 
+  const auto alpha_outlet_type = getParam<MooseEnum>("volume_fraction_outlet_type");
   for (const auto & outlet_bdy : outlet_boundaries)
   {
-    const std::string bc_type = _alpha_outlet_type == "inlet-outlet"
+    const std::string bc_type = alpha_outlet_type == "inlet-outlet"
                                     ? "LinearFVInletOutletScalarBC"
                                     : "LinearFVAdvectionDiffusionOutflowBC";
     auto params = getFactory().getValidParams(bc_type);
     params.set<LinearVariableName>("variable") = _alpha_name;
     params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
-    params.set<bool>("use_two_term_expansion") = _alpha_two_term_bc_expansion;
-    if (_alpha_outlet_type == "inlet-outlet")
+    params.set<bool>("use_two_term_expansion") =
+        getParam<bool>("volume_fraction_two_term_bc_expansion");
+    if (alpha_outlet_type == "inlet-outlet")
     {
-      const auto & velocity_names = _flow_equations_physics->getVelocityNames();
-      params.set<SolverVariableName>("u") = velocity_names[0];
-      if (dimension() >= 2)
-        params.set<SolverVariableName>("v") = velocity_names[1];
-      if (dimension() >= 3)
-        params.set<SolverVariableName>("w") = velocity_names[2];
-      params.set<MooseFunctorName>("backflow_value") = _alpha_outlet_backflow_functor;
+      params.set<MooseFunctorName>("backflow_value") =
+          getParam<MooseFunctorName>("volume_fraction_outlet_backflow_functor");
       params.set<MooseFunctorName>("face_flux") = "vof_transport_phi";
     }
     getProblem().addLinearFVBC(bc_type, prefix() + "alpha_outlet_" + outlet_bdy, params);

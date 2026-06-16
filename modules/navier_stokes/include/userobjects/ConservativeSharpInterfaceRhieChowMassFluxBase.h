@@ -100,15 +100,6 @@ public:
   {
     return _suppress_startup_pressure_predictor_flux_sources;
   }
-  Real storedCorrectedFacePhi(const FaceInfo & fi) const;
-  Real storedPredictorOperatorPhi(const FaceInfo & fi) const;
-  Real storedPressureCorrectionPhi(const FaceInfo & fi) const;
-  Real storedOuterIterationPhi(const FaceInfo & fi) const;
-  Real storedOuterIterationRhoPhiIntegrated(const FaceInfo & fi) const;
-  Real storedPredictorConvectiveMassFlux(const FaceInfo & fi) const;
-  Real maxVolumeFractionCourant(const Real dt) const;
-  virtual RealVectorValue pressureCoupledCellVelocityDelta(const ElemInfo & elem_info,
-                                                           const Moose::StateArg & time_arg) const;
   RealVectorValue
   reducedPressureMomentumPredictorForceDensity(const ElemInfo & elem_info,
                                                const Moose::StateArg & time_arg) const;

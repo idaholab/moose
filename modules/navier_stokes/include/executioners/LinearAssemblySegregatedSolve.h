@@ -45,8 +45,19 @@ protected:
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
   virtual void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                                    NumericVector<Number> & rhs);
-  virtual void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
-                                                    NumericVector<Number> & rhs);
+
+  struct MomentumPredictorAssembly
+  {
+    LinearImplicitSystem * system = nullptr;
+    NumericVector<Number> * solution = nullptr;
+    NumericVector<Number> * rhs = nullptr;
+    SparseMatrix<Number> * matrix = nullptr;
+  };
+
+  MomentumPredictorAssembly
+  assembleMomentumPredictorOperator(const unsigned int system_i,
+                                    const bool prepare_without_solve = false);
+
   /// Computes new velocity field based on computed pressure gradients
   /// @param subtract_updated_pressure If we need to subtract the updated
   /// pressure gradient from the right hand side of the system
@@ -100,6 +111,15 @@ protected:
     /// If we dont have anything we just set this to true.
     bool converged = false;
   };
+
+  virtual void preSolveSetup(const SolverParams & solver_params);
+  virtual void addIterationResiduals(ResidualStorage & residual_storage);
+  virtual void initializeSolveLoop(const SolverParams & solver_params);
+  virtual void preMomentumPressureIteration(ResidualStorage & residual_storage,
+                                            const SolverParams & solver_params);
+  virtual bool shouldAssembleMomentumPredictorWithoutSolve() const;
+  virtual void assembleMomentumPredictorWithoutSolve();
+  virtual void finalizeSolve(const bool converged);
 
   /**
    * Build residual/tolerance vectors and associated indices for all enabled systems.

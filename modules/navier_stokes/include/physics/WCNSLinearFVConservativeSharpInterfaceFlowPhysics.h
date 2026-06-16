@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "WCNSLinearFVFlowPhysicsBase.h"
+#include "WCNSLinearFVFlowPhysics.h"
 #include "NS.h"
 
 /**
@@ -18,7 +18,7 @@
  * This class reuses the common segregated Linear FV flow setup and overrides the sharp-interface
  * pieces needed for large-density-ratio conservative coupling.
  */
-class WCNSLinearFVConservativeSharpInterfaceFlowPhysics final : public WCNSLinearFVFlowPhysicsBase
+class WCNSLinearFVConservativeSharpInterfaceFlowPhysics final : public WCNSLinearFVFlowPhysics
 {
 public:
   static InputParameters validParams();
@@ -47,10 +47,8 @@ private:
     return "LinearWCNSFVMomentumTimeDerivative";
   }
   std::string momentumTimeDensityParameterName() const override { return NS::density; }
-  MooseFunctorName momentumFluxMassFluxFunctorName() const override
-  {
-    return "rho_phi_mass_flux_density";
-  }
+  MooseFunctorName momentumFluxMassFluxFunctorName() const override { return "rho_phi"; }
+  bool momentumFluxMassFluxFunctorIsIntegrated() const override { return true; }
   MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
                                             unsigned int component) const override;
   MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,

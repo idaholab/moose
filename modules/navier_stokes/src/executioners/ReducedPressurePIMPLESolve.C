@@ -275,46 +275,33 @@ ReducedPressurePIMPLESolve::constrainedMomentumPressureDT(const Real dt) const
   return adjusted_dt;
 }
 
-bool
-ReducedPressurePIMPLESolve::solve()
+void
+ReducedPressurePIMPLESolve::preSolveSetup(const SolverParams & /* solver_params */)
 {
-  if (!_problem.shouldSolve())
-    return true;
-
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
+}
 
-  SolverParams solver_params;
-  solver_params._type = Moose::SolveType::ST_LINEAR;
-  solver_params._line_search = Moose::LineSearchType::LS_NONE;
+void
+ReducedPressurePIMPLESolve::addIterationResiduals(ResidualStorage & residual_storage)
+{
+  LinearAssemblySegregatedSolve::addIterationResiduals(residual_storage);
 
-  unsigned int simple_iteration_counter = 0;
-
-  ResidualStorage residual_storage = setupResidualStorage();
-  auto & ns_residuals = residual_storage.ns_residuals;
-  auto & ns_abs_tols = residual_storage.ns_abs_tols;
-  const auto & momentum_indices = residual_storage.momentum_indices;
-  const auto pressure_index = residual_storage.pressure_index;
-  const auto energy_index = residual_storage.energy_index;
-  const auto solid_energy_index = residual_storage.solid_energy_index;
-  const auto & active_scalar_indices = residual_storage.active_scalar_indices;
-  const auto & turbulence_indices = residual_storage.turbulence_indices;
-  const auto & pm_radiation_indices = residual_storage.pm_radiation_indices;
-
-  std::vector<std::size_t> volume_fraction_indices;
+  _volume_fraction_indices.clear();
   if (_has_volume_fraction_systems && _should_solve_volume_fractions)
     for (const auto i : index_range(_volume_fraction_system_names))
     {
-      volume_fraction_indices.push_back(ns_residuals.size());
-      ns_residuals.push_back(std::make_pair(0, 1.0));
-      ns_abs_tols.push_back(_volume_fraction_absolute_tolerance[i]);
+      _volume_fraction_indices.push_back(residual_storage.ns_residuals.size());
+      residual_storage.ns_residuals.push_back(std::make_pair(0, 1.0));
+      residual_storage.ns_abs_tols.push_back(_volume_fraction_absolute_tolerance[i]);
     }
 
-  bool converged = residual_storage.converged && volume_fraction_indices.empty();
+  residual_storage.converged = residual_storage.ns_residuals.empty();
+}
 
-  if (_cht.enabled() && _should_solve_energy)
-    _cht.initializeCHTCouplingFields();
-
+void
+ReducedPressurePIMPLESolve::initializeSolveLoop(const SolverParams & solver_params)
+{
   if (_has_volume_fraction_systems && _should_solve_volume_fractions)
     if (auto * sharp_rc = sharpInterfaceRC())
       sharp_rc->clearVOFTransportState();
@@ -337,197 +324,71 @@ ReducedPressurePIMPLESolve::solve()
       if (auto * sharp_rc = sharpInterfaceRC())
         sharp_rc->commitAcceptedTimestepTransportHistory();
   }
+}
 
-  while (simple_iteration_counter < _num_iterations && !converged)
+void
+ReducedPressurePIMPLESolve::preMomentumPressureIteration(ResidualStorage & residual_storage,
+                                                         const SolverParams & solver_params)
+{
+  if (_should_solve_pressure)
+    advancePressureOuterIterationHistory();
+
+  if (_should_solve_momentum)
+    // Keep the full nonlinear history on the previous outer-corrector state
+    // for the whole current outer loop. The stock momentum solve shifts this
+    // stack every predictor solve; here we only want to advance it
+    // once per outer SIMPLE iteration.
+    advanceSystemOuterIterationHistory(_momentum_systems);
+
+  // Do the alpha subcycling and mixture/rhoPhi refresh inside every outer correction, just before
+  // the momentum-pressure coupling work. This keeps rhoPhi consistent with the outer-corrector
+  // state instead of freezing one alpha update for a later sequence of momentum-pressure
+  // repredictions.
+  if (_has_volume_fraction_systems && _should_solve_volume_fractions)
   {
-    simple_iteration_counter++;
-    _current_outer_iteration = simple_iteration_counter;
+    // Keep the true timestep-old alpha in solutionOld(), but advance the
+    // nonlinear-state stack once per outer iteration so we have a separate
+    // previous-outer iterate available.
+    advanceSystemOuterIterationHistory(_volume_fraction_systems);
 
-    if (_should_solve_pressure)
-      advancePressureOuterIterationHistory();
-
-    if (_should_solve_momentum)
-      // Keep the full nonlinear history on the previous outer-corrector state
-      // for the whole current outer loop. The stock momentum solve shifts this
-      // stack every predictor solve; here we only want to advance it
-      // once per outer SIMPLE iteration.
-      advanceMomentumOuterIterationHistory();
-
-    // Do the alpha subcycling and mixture/rhoPhi refresh inside every outer correction, just before
-    // the momentum-pressure coupling work. This keeps rhoPhi consistent with the outer-corrector
-    // state instead of freezing one alpha update for a later sequence of momentum-pressure
-    // repredictions.
-    if (_has_volume_fraction_systems && _should_solve_volume_fractions)
+    const bool use_previous_timestep_transport_flux =
+        _problem.timeStep() == 1 && _current_outer_iteration == 1;
+    if (auto * sharp_rc = sharpInterfaceRC())
     {
-      // Keep the true timestep-old alpha in solutionOld(), but advance the
-      // nonlinear-state stack once per outer iteration so we have a separate
-      // previous-outer iterate available.
-      advanceVolumeFractionOuterIterationHistory();
-
-      const bool use_previous_timestep_transport_flux =
-          _problem.timeStep() == 1 && _current_outer_iteration == 1;
-      if (auto * sharp_rc = sharpInterfaceRC())
-      {
-        sharp_rc->clearVOFTransportState();
-        sharp_rc->freezeVOFTransportState(use_previous_timestep_transport_flux);
-      }
-
-      _problem.execute(EXEC_NONLINEAR);
-      Moose::PetscSupport::petscSetOptions(_volume_fraction_petsc_options, solver_params);
-      const auto vf_residuals = solveVolumeFractionSystems(solver_params);
-
-      if (auto * sharp_rc = sharpInterfaceRC())
-        sharp_rc->adoptPublishedVOFTransportState();
-
-      _problem.execute(EXEC_NONLINEAR);
-      for (const auto i : index_range(vf_residuals))
-        ns_residuals[volume_fraction_indices[i]] = vf_residuals[i];
-    }
-
-    if (_should_solve_momentum)
-      Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
-
-    if (_should_solve_pressure && simple_iteration_counter == 1)
-      _pressure_system.computeGradients();
-
-    _console << "Iteration " << simple_iteration_counter << " Residual norms:" << std::endl;
-
-    if (_should_solve_momentum)
-    {
-      auto momentum_residual = solveMomentumPredictor();
-      for (const auto system_i : index_range(momentum_residual))
-        ns_residuals[momentum_indices[system_i]] = momentum_residual[system_i];
-    }
-    else if (_should_solve_pressure && !_momentum_systems.empty() && _rc_uo)
-      assembleMomentumPredictorOnly();
-
-    if (_should_solve_pressure)
-      ns_residuals[pressure_index] = correctVelocity(true, true, solver_params);
-
-    if (_has_energy_system && _should_solve_energy)
-    {
-      _cht.resetCHTConvergence();
-      while (!_cht.converged())
-      {
-        if (_cht.enabled())
-          _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::FLUID);
-
-        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-        ns_residuals[energy_index] = solveAdvectedSystem(_energy_sys_number,
-                                                         *_energy_system,
-                                                         _energy_equation_relaxation,
-                                                         _energy_linear_control,
-                                                         _energy_l_abs_tol);
-
-        if (_has_pm_radiation_systems && _should_solve_pm_radiation)
-        {
-          Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
-          for (const auto i : index_range(_pm_radiation_system_names))
-            ns_residuals[pm_radiation_indices[i]] =
-                solveAdvectedSystem(_pm_radiation_system_numbers[i],
-                                    *_pm_radiation_systems[i],
-                                    _pm_radiation_equation_relaxation[i],
-                                    _pm_radiation_linear_control,
-                                    _pm_radiation_l_abs_tol);
-        }
-
-        if (_has_solid_energy_system && _should_solve_solid_energy)
-        {
-          if (_cht.enabled())
-          {
-            _energy_system->computeGradients();
-            _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
-          }
-
-          Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
-          ns_residuals[solid_energy_index] = solveSolidEnergy();
-
-          if (_cht.enabled())
-            _solid_energy_system->computeGradients();
-        }
-
-        if (_cht.enabled())
-        {
-          _cht.sumIntegratedFluxes();
-          _cht.printIntegratedFluxes();
-        }
-
-        _cht.incrementCHTIterators();
-      }
-      if (_cht.enabled())
-        _cht.resetIntegratedFluxes();
-    }
-
-    if (_has_active_scalar_systems && _should_solve_active_scalars)
-    {
-      _problem.execute(EXEC_NONLINEAR);
-      Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
-      for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[active_scalar_indices[i]] =
-            solveAdvectedSystem(_active_scalar_system_numbers[i],
-                                *_active_scalar_systems[i],
-                                _active_scalar_equation_relaxation[i],
-                                _active_scalar_linear_control,
-                                _active_scalar_l_abs_tol);
-    }
-
-    if (_has_turbulence_systems && _should_solve_turbulence)
-    {
-      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
-      for (const auto i : index_range(_turbulence_system_names))
-        ns_residuals[turbulence_indices[i]] =
-            solveAdvectedSystem(_turbulence_system_numbers[i],
-                                *_turbulence_systems[i],
-                                _turbulence_equation_relaxation[i],
-                                _turbulence_linear_control,
-                                _turbulence_l_abs_tol,
-                                _turbulence_field_relaxation[i],
-                                _turbulence_field_min_limit[i]);
+      sharp_rc->clearVOFTransportState();
+      sharp_rc->freezeVOFTransportState(use_previous_timestep_transport_flux);
     }
 
     _problem.execute(EXEC_NONLINEAR);
+    Moose::PetscSupport::petscSetOptions(_volume_fraction_petsc_options, solver_params);
+    const auto vf_residuals = solveVolumeFractionSystems(solver_params);
 
-    converged = NS::FV::converged(ns_residuals, ns_abs_tols);
+    if (auto * sharp_rc = sharpInterfaceRC())
+      sharp_rc->adoptPublishedVOFTransportState();
+
+    _problem.execute(EXEC_NONLINEAR);
+    for (const auto i : index_range(vf_residuals))
+      residual_storage.ns_residuals[_volume_fraction_indices[i]] = vf_residuals[i];
   }
+}
 
-  if (_has_passive_scalar_systems && _should_solve_passive_scalars &&
-      (converged || _continue_on_max_its))
-  {
-    bool passive_scalar_converged = false;
-    unsigned int ps_iteration_counter = 0;
+bool
+ReducedPressurePIMPLESolve::shouldAssembleMomentumPredictorWithoutSolve() const
+{
+  return _should_solve_pressure && !_momentum_systems.empty() && _rc_uo;
+}
 
-    _console << "Passive scalar iteration " << ps_iteration_counter
-             << " Residual norms:" << std::endl;
+void
+ReducedPressurePIMPLESolve::assembleMomentumPredictorWithoutSolve()
+{
+  assembleMomentumPredictorOnly();
+}
 
-    while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
-    {
-      ps_iteration_counter++;
-      std::vector<std::pair<unsigned int, Real>> scalar_residuals(
-          _passive_scalar_system_names.size(), std::make_pair(0, 1.0));
-      std::vector<Real> scalar_abs_tols;
-      for (const auto scalar_tol : _passive_scalar_absolute_tolerance)
-        scalar_abs_tols.push_back(scalar_tol);
-
-      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
-      for (const auto i : index_range(_passive_scalar_system_names))
-        scalar_residuals[i] = solveAdvectedSystem(_passive_scalar_system_numbers[i],
-                                                  *_passive_scalar_systems[i],
-                                                  _passive_scalar_equation_relaxation[i],
-                                                  _passive_scalar_linear_control,
-                                                  _passive_scalar_l_abs_tol);
-
-      passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
-    }
-
-    converged = passive_scalar_converged && converged;
-  }
-
-  converged = _continue_on_max_its ? true : converged;
-
+void
+ReducedPressurePIMPLESolve::finalizeSolve(const bool /* converged */)
+{
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
-
-  return converged;
 }
 
 std::vector<std::pair<unsigned int, Real>>
@@ -546,14 +407,6 @@ ReducedPressurePIMPLESolve::addMomentumPredictorExplicitForcing(const unsigned i
 {
   if (auto * sharp_rc = sharpInterfaceRC(); sharp_rc && sharp_rc->splitMomentumPredictorOperator())
     sharp_rc->addMomentumPredictorExplicitForcing(system_i, rhs);
-}
-
-void
-ReducedPressurePIMPLESolve::addMomentumPredictorBodyForceForcing(const unsigned int system_i,
-                                                                 NumericVector<Number> & rhs)
-{
-  if (auto * sharp_rc = sharpInterfaceRC(); sharp_rc && sharp_rc->splitMomentumPredictorOperator())
-    sharp_rc->addMomentumPredictorBodyForceForcing(system_i, rhs);
 }
 
 ConservativeSharpInterfaceRhieChowMassFlux *
@@ -613,103 +466,17 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
   if (_rc_uo)
     _rc_uo->clearMomentumPredictorOperatorCache();
 
-  LinearImplicitSystem & momentum_system_0 =
-      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
-  PetscLinearSolver<Real> & momentum_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
-
   for (const auto system_i : index_range(_momentum_systems))
   {
-    _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
-
-    LinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
-    momentum_system.update();
-    NumericVector<Number> & solution = *(momentum_system.solution);
-    NumericVector<Number> & rhs = *(momentum_system.rhs);
-    SparseMatrix<Number> & mmat = *(momentum_system.matrix);
-
-    auto diff_diagonal = solution.zero_clone();
-    std::unique_ptr<NumericVector<Number>> predictor_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> predictor_rhs_base;
-    std::unique_ptr<NumericVector<Number>> predictor_explicit_force;
-    std::unique_ptr<NumericVector<Number>> predictor_body_force;
-
-    // Assemble and relax the momentum predictor exactly as in the main SIMPLE loop,
-    // but stop before the linear solve so startup pressure correction can reuse the
-    // same diagonal / HbyA operator without advancing momentum.
-    momentum_system.current_local_solution->close();
-    solution.close();
-    _momentum_systems[system_i]->solutionOld().close();
-    if (auto * previous_newton = _momentum_systems[system_i]->solutionPreviousNewton())
-      previous_newton->close();
-    rhs.close();
-
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->beginFVSplitMomentumPredictorOperatorAssembly(system_i);
-
-    try
-    {
-      _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
-    }
-    catch (...)
-    {
-      if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-        _rc_uo->clearMomentumPredictorOperatorCache();
-      throw;
-    }
-    rhs.close();
-
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
-          system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
-
-    applyMomentumEquationRelaxation(mmat, rhs, solution, *diff_diagonal);
-
-    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
-    {
-      predictor_diagonal_raw = solution.zero_clone();
-      predictor_diagonal_raw->close();
-      auto * petsc_mat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
-      mooseAssert(petsc_mat,
-                  "ReducedPressurePIMPLESolve startup predictor caching requires PETSc matrices.");
-      petsc_mat->get_diagonal(*predictor_diagonal_raw);
-      predictor_diagonal_raw->close();
-      _rc_uo->cacheStartupPredictorDiagonal(system_i, *predictor_diagonal_raw);
-    }
-
-    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
-    {
-      predictor_rhs_base = rhs.clone();
-      *predictor_rhs_base = rhs;
-      predictor_rhs_base->close();
-
-      predictor_body_force = rhs.clone();
-      predictor_body_force->zero();
-      predictor_body_force->close();
-      addMomentumPredictorBodyForceForcing(system_i, *predictor_body_force);
-      predictor_body_force->close();
-
-      addMomentumPredictorExplicitForcing(system_i, rhs);
-
-      predictor_explicit_force = rhs.clone();
-      *predictor_explicit_force = rhs;
-      predictor_explicit_force->add(-1.0, *predictor_rhs_base);
-      predictor_explicit_force->close();
-
-      _rc_uo->setMomentumPredictorForcing(
-          system_i, predictor_explicit_force.get(), predictor_body_force.get());
-    }
-
-    momentum_system.update();
-
-    if (_rc_uo && !_rc_uo->splitMomentumPredictorOperator())
-      _rc_uo->cacheMomentumPredictorOperator(system_i,
-                                             predictor_rhs_base.get(),
-                                             predictor_explicit_force.get(),
-                                             predictor_body_force.get());
+    const auto assembly =
+        assembleMomentumPredictorOperator(system_i, /* prepare_without_solve = */ true);
+    assembly.system->update();
   }
 
+  auto & momentum_system_0 =
+      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
+  auto & momentum_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
   momentum_solver.reuse_preconditioner(false);
 }
 
@@ -784,34 +551,6 @@ ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_up
   _rc_uo->updatePressureBoundaryNormalGradients(/* apply_pressure_flux_adjustment = */ false);
 }
 
-void
-ReducedPressurePIMPLESolve::reconstructPressureCoupledStateFromCurrentPressure(
-    const bool subtract_updated_pressure)
-{
-  preparePressureCorrectorState(subtract_updated_pressure);
-
-  _rc_uo->computeFaceMassFlux();
-
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->applyAdditionalFaceMassFluxCorrection();
-
-  _rc_uo->computeCellVelocity();
-
-  _rc_uo->updateVelocityBoundaryState();
-}
-
-void
-ReducedPressurePIMPLESolve::advanceMomentumOuterIterationHistory() const
-{
-  advanceSystemOuterIterationHistory(_momentum_systems);
-}
-
-void
-ReducedPressurePIMPLESolve::advanceVolumeFractionOuterIterationHistory() const
-{
-  advanceSystemOuterIterationHistory(_volume_fraction_systems);
-}
-
 unsigned int
 ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
 {
@@ -819,7 +558,7 @@ ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
 
   if (const auto * sharp_rc = sharpInterfaceRC())
   {
-    const Real alpha_courant = sharp_rc->maxVolumeFractionCourant(_problem.dt());
+    const Real alpha_courant = sharp_rc->maxCourant(_problem.dt());
     if (std::isfinite(alpha_courant) && alpha_courant > _volume_fraction_max_courant)
     {
       const auto required_subcycles =
@@ -1048,33 +787,10 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
 
   preparePressureCorrectorState(subtract_updated_pressure);
 
-  Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
-
-  std::pair<unsigned int, Real> residuals{0, std::numeric_limits<Real>::quiet_NaN()};
-  unsigned int total_linear_iterations = 0;
-  for (const auto nonorthogonal_iteration : make_range(_num_pressure_nonorthogonal_correctors + 1))
-  {
-    const bool final_nonorthogonal_iteration =
-        nonorthogonal_iteration == _num_pressure_nonorthogonal_correctors;
-
-    residuals = solvePressureCorrector();
-    total_linear_iterations += residuals.first;
-
-    auto & solved_pressure_current_solution =
-        *(_pressure_system.system().current_local_solution.get());
-    _pressure_system.setSolution(solved_pressure_current_solution);
-    _pressure_system.computeGradients();
-    _rc_uo->cachePressureEquationFlux();
-
-    if (final_nonorthogonal_iteration && recompute_face_mass_flux)
-    {
-      _rc_uo->computeFaceMassFlux();
-
-      if (sharp_rc)
-        sharp_rc->applyAdditionalFaceMassFluxCorrection();
-    }
-  }
-  residuals.first = total_linear_iterations;
+  const auto residuals =
+      applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
+  if (recompute_face_mass_flux && sharp_rc)
+    sharp_rc->applyAdditionalFaceMassFluxCorrection();
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
   // continuity cleanup should repair phi, not overwrite the physical p_rgh field
@@ -1142,14 +858,4 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_f
   _rc_uo->computeCellVelocity();
 
   _rc_uo->updateVelocityBoundaryState();
-
-  correctMovingMeshFaceVelocityAndMakeRelative();
-}
-
-void
-ReducedPressurePIMPLESolve::correctMovingMeshFaceVelocityAndMakeRelative()
-{
-  // This pressure-coupled path currently has no face-velocity or moving-mesh flux state.
-  // RhieChowMassFlux explicitly reports no mesh-velocity support, so this is a no-op for the
-  // stationary-mesh cases currently supported.
 }

@@ -27,7 +27,6 @@ class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVPressureCorrectionDiffusion;
-class Function;
 class LinearFVElementalKernel;
 namespace libMesh
 {
@@ -42,21 +41,6 @@ class MeshBase;
 class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
-  struct FaceFluxConsistencySummary
-  {
-    Real l2_norm = 0.0;
-    Real internal_l2_norm = 0.0;
-    Real boundary_l2_norm = 0.0;
-    Real max_abs_mismatch = 0.0;
-    Real max_abs_internal_mismatch = 0.0;
-    Real max_abs_boundary_mismatch = 0.0;
-    bool has_worst_face = false;
-    bool worst_face_is_boundary = false;
-    dof_id_type worst_face_id = 0;
-    Point worst_face_centroid;
-    RealVectorValue worst_face_normal;
-  };
-
   /**
    * Cached momentum predictor owner.
    *
@@ -68,26 +52,20 @@ public:
    */
   struct MomentumPredictorOperator : public LinearFVAssemblyConsumer
   {
-    bool split = false;
     bool assembly_closed = false;
     bool finalized = false;
     Real relaxation_parameter = 1.0;
     bool enforce_diagonal_dominance = false;
     std::unique_ptr<NumericVector<Number>> constant_source_raw;
-    std::unique_ptr<NumericVector<Number>> rhs_raw;
     std::unique_ptr<NumericVector<Number>> diagonal_raw;
     std::unique_ptr<NumericVector<Number>> pressure_coupling_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> pre_relaxation_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> relaxation_source_raw;
-    std::unique_ptr<NumericVector<Number>> boundary_source_raw;
     std::unique_ptr<NumericVector<Number>> interior_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> boundary_relax_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> boundary_a_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> boundary_dominance_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> boundary_h_diagonal_raw;
     std::unique_ptr<NumericVector<Number>> offdiag_abs_sum_raw;
-    std::unique_ptr<NumericVector<Number>> explicit_force_raw;
-    std::unique_ptr<NumericVector<Number>> body_force_raw;
     struct BoundaryMatrixContribution
     {
       dof_id_type face_id;
@@ -139,53 +117,27 @@ public:
   virtual void initFaceMassFlux();
   /// Initialize the coupling fields (HbyA and Ainv)
   void initCouplingField();
-  /// Cache the exact pressure-equation face flux from the current solved pressure field.
+  /// Cache the pressure-equation face flux from the current solved pressure field.
   virtual void cachePressureEquationFlux();
-  /// Evaluate the discrete internal-face pressure-equation flux for a supplied exact pressure.
-  Real exactInternalPressureEquationFlux(const FaceInfo & fi,
-                                         const Function & exact_pressure) const;
-  /// Access the currently stored pressure-equation face flux.
-  Real storedPressureEquationFlux(const FaceInfo & fi) const;
   /// Maximum face-flux Courant number over active flow cells for the supplied timestep.
   virtual Real maxCourant(const Real dt) const;
-  /// Access the active flow faces used by this Rhie-Chow object.
-  const std::vector<const FaceInfo *> & flowFaces() const { return _flow_face_info; }
-  /// Compare the stored volumetric face fluxes against the flux implied by the current
-  /// cell/boundary velocity field.
-  FaceFluxConsistencySummary faceFluxConsistencySummary() const;
   /// Update the values of the face velocities in the containers
   virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
   virtual void computeCellVelocity();
   /// Accessor for the current cell Ainv state.
   Real cellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
-  /// Cache the assembled/relaxed momentum predictor operator for one component.
-  void cacheMomentumPredictorOperator(const unsigned int system_i,
-                                      const NumericVector<Number> * rhs_override = nullptr,
-                                      const NumericVector<Number> * explicit_force = nullptr,
-                                      const NumericVector<Number> * body_force = nullptr);
   /// Begin streaming native linear FV assembly contributions into the cached split predictor.
   void beginFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i);
   /// Finalize the streamed split predictor and apply equation relaxation to it.
   void completeFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i,
                                                         const Real relaxation_parameter,
                                                         const bool enforce_diagonal_dominance);
-  /// Publish explicit/body-force RHS pieces associated with the split predictor.
-  void setMomentumPredictorForcing(const unsigned int system_i,
-                                   const NumericVector<Number> * explicit_force,
-                                   const NumericVector<Number> * body_force);
-  /// Cache only the relaxed predictor diagonal for startup/operator consumers that need it before
-  /// the full predictor cache is published.
-  void cacheStartupPredictorDiagonal(const unsigned int system_i,
-                                     const NumericVector<Number> & diagonal_raw);
   /// Invalidate the cached assembled/relaxed momentum predictor operator.
   void clearMomentumPredictorOperatorCache();
   /// Add explicit forcing to the momentum predictor RHS after the base operator assembly.
   virtual void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                                    NumericVector<Number> & rhs) const;
-  /// Add only the non-pressure/body-force portion of the explicit predictor forcing.
-  virtual void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
-                                                    NumericVector<Number> & rhs) const;
   /// Whether the predictor operator excludes explicit pressure/body-force terms.
   bool splitMomentumPredictorOperator() const { return _split_momentum_predictor_operator; }
   /// Update boundary pressure gradients from the current predictor and boundary velocity state.

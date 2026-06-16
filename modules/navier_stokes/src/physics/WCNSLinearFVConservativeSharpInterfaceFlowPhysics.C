@@ -35,28 +35,6 @@ registerMooseAction("NavierStokesApp",
 
 namespace
 {
-bool
-blocksOverlap(const std::set<SubdomainID> & lhs, const std::set<SubdomainID> & rhs)
-{
-  if (lhs.empty() || rhs.empty() || lhs.count(Moose::ANY_BLOCK_ID) ||
-      rhs.count(Moose::ANY_BLOCK_ID))
-    return true;
-
-  auto lhs_it = lhs.begin();
-  auto rhs_it = rhs.begin();
-  while (lhs_it != lhs.end() && rhs_it != rhs.end())
-  {
-    if (*lhs_it < *rhs_it)
-      ++lhs_it;
-    else if (*rhs_it < *lhs_it)
-      ++rhs_it;
-    else
-      return true;
-  }
-
-  return false;
-}
-
 std::string
 sanitizeFunctorLabel(const std::string & input)
 {
@@ -72,7 +50,7 @@ sanitizeFunctorLabel(const std::string & input)
 InputParameters
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
 {
-  InputParameters params = WCNSLinearFVFlowPhysicsBase::validParams();
+  InputParameters params = WCNSLinearFVFlowPhysics::validParams();
 
   params.addClassDescription("Define a linear-FV segregated sharp-interface flow solve using "
                              "velocity components as the primary momentum unknowns.");
@@ -142,11 +120,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "Whether to automatically add the sharp-interface geometry functor material that produces "
       "face normals and capillary / hydrostatic face accelerations.");
   params.addParam<MooseFunctorName>(
-      "volume_fraction_functor",
-      "",
-      "Volume-fraction / phase-fraction functor used by the geometry material. Leave empty to "
-      "skip automatic creation of sharp-interface geometry objects.");
-  params.addParam<MooseFunctorName>(
       "surface_tension_coefficient",
       "0",
       "Compatibility parameter for zero-surface-tension inputs. Nonzero capillary "
@@ -164,10 +137,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "geometry_alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>(
       "geometry_alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
-  params.addParam<Real>(
-      "near_interface_lower", 0.01, "Lower threshold for the near-interface indicator.");
-  params.addParam<Real>(
-      "near_interface_upper", 0.99, "Upper threshold for the near-interface indicator.");
   params.addParamNamesToGroup("pressure_formulation add_transient_projection_flux "
                               "add_capillary_hydrostatic_flux apply_pressure_velocity_writeback",
                               "Sharp Interface Pressure Correction");
@@ -188,7 +157,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
 
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
     WCNSLinearFVConservativeSharpInterfaceFlowPhysics(const InputParameters & parameters)
-  : WCNSLinearFVFlowPhysicsBase(parameters),
+  : WCNSLinearFVFlowPhysics(parameters),
     _pressure_formulation(getParam<MooseEnum>("pressure_formulation")),
     _add_transient_projection_flux(getParam<bool>("add_transient_projection_flux")),
     _add_capillary_hydrostatic_flux(getParam<bool>("add_capillary_hydrostatic_flux")),
@@ -351,10 +320,8 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallsBC()
       InputParameters pressure_params = getFactory().getValidParams(pressure_bc_type);
       pressure_params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
       pressure_params.set<LinearVariableName>("variable") = _pressure_name;
-      pressure_params.set<MooseFunctorName>("pressure_predictor_flux") = "pressure_predictor_flux";
       pressure_params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
           "pressure_boundary_normal_gradient";
-      pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
       pressure_params.set<MooseFunctorName>("HbyA_flux") = "phiHbyA";
       pressure_params.set<MooseFunctorName>("Ainv") = "pressure_Ainv";
       getProblem().addLinearFVBC(
@@ -468,7 +435,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
     if (dynamic_cast<RhieChowMassFlux *>(obj))
     {
       const auto rc_obj = dynamic_cast<RhieChowMassFlux *>(obj);
-      const bool overlaps = blocksOverlap(rc_obj->blockIDs(), this_block_ids);
+      const auto & rc_block_ids = rc_obj->blockIDs();
+      const bool overlaps = rc_block_ids.empty() || this_block_ids.empty() ||
+                            rc_block_ids.count(Moose::ANY_BLOCK_ID) ||
+                            this_block_ids.count(Moose::ANY_BLOCK_ID) ||
+                            MooseUtils::setsIntersect(rc_block_ids, this_block_ids);
       if (!overlaps)
         continue;
 
@@ -534,28 +505,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
 void
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
 {
-  if (parameters().isParamValid("gravity"))
-  {
-    const auto gravity_vector = getParam<RealVectorValue>("gravity");
-    const std::vector<std::string> comp_axis({"x", "y", "z"});
-
-    for (const auto d : make_range(dimension()))
-      if (gravity_vector(d) != 0)
-      {
-        auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
-        assignBlocks(params, _blocks);
-        params.set<bool>("enable_jit") = false;
-        params.set<std::string>("expression") =
-            _density_gravity_name + " * " + std::to_string(gravity_vector(d));
-        if (!MooseUtils::parsesToReal(_density_gravity_name))
-          params.set<std::vector<std::string>>("functor_names") = {_density_gravity_name};
-        params.set<std::string>("property_name") = "rho_g_" + comp_axis[d];
-
-        getProblem().addMaterial(
-            "ADParsedFunctorMaterial", prefix() + "gravity_helper_" + comp_axis[d], params);
-      }
-  }
-
+  WCNSLinearFVFlowPhysics::addFunctorMaterials();
   addVelocityBoundaryInputFunctorMaterials();
 
   if (!shouldCreateGeometryFunctorMaterial())

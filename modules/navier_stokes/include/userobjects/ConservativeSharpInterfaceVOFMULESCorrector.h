@@ -123,7 +123,6 @@ private:
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _alpha_phi_limited;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _rho_phi;
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _rho_phi_mass_flux_density;
 
   MooseLinearVariableFVReal * _alpha_var = nullptr;
   LinearSystem * _system = nullptr;

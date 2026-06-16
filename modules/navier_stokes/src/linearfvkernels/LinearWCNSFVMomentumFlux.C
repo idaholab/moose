@@ -32,6 +32,11 @@ LinearWCNSFVMomentumFlux::validParams()
       "mass_flux_functor",
       "Optional face-centered mass-flux functor used for momentum advection. When supplied, "
       "this overrides the Rhie-Chow user object's live face-mass-flux query.");
+  params.addParam<bool>(
+      "mass_flux_is_integrated",
+      false,
+      "Whether the supplied mass_flux_functor already includes the face area. When true, the "
+      "kernel divides by face area before applying its standard finite-volume face-area factor.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The diffusion coefficient.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -56,6 +61,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _mass_flux_functor(params.isParamValid("mass_flux_functor")
                            ? &getFunctor<Real>("mass_flux_functor")
                            : nullptr),
+    _mass_flux_is_integrated(getParam<bool>("mass_flux_is_integrated")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
@@ -415,6 +421,8 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
                                         ? makeCDFace(*_current_face_info)
                                         : singleSidedFaceArg(_current_face_info);
     _face_mass_flux = (*_mass_flux_functor)(face_arg, state);
+    if (_mass_flux_is_integrated)
+      _face_mass_flux = _current_face_area > 0.0 ? _face_mass_flux / _current_face_area : 0.0;
   }
   else
     _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);

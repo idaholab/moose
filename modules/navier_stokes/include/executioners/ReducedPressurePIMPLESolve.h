@@ -31,7 +31,6 @@ public:
 
   ReducedPressurePIMPLESolve(Executioner & ex);
 
-  bool solve() override;
   Real momentumPressureCourant(const Real dt) const;
   Real constrainedMomentumPressureDT(const Real dt) const;
   void commitAcceptedTimestepTransportHistory() const;
@@ -39,10 +38,16 @@ public:
   Real momentumPressureMaxCourant() const { return _momentum_pressure_max_courant; }
 
 protected:
+  void preSolveSetup(const SolverParams & solver_params) override;
+  void addIterationResiduals(ResidualStorage & residual_storage) override;
+  void initializeSolveLoop(const SolverParams & solver_params) override;
+  void preMomentumPressureIteration(ResidualStorage & residual_storage,
+                                    const SolverParams & solver_params) override;
+  bool shouldAssembleMomentumPredictorWithoutSolve() const override;
+  void assembleMomentumPredictorWithoutSolve() override;
+  void finalizeSolve(const bool converged) override;
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) override;
-  void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
-                                            NumericVector<Number> & rhs) override;
   std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   void preparePressureCorrectorState(const bool subtract_updated_pressure) override;
   void publishPressureCorrectedState(const bool recompute_face_mass_flux) override;
@@ -55,9 +60,6 @@ private:
   void assembleMomentumPredictorOnly();
   void initializeStartupPressureField(const SolverParams & solver_params);
   void performStartupContinuityCorrections(const SolverParams & solver_params);
-  void reconstructPressureCoupledStateFromCurrentPressure(const bool subtract_updated_pressure);
-  void advanceMomentumOuterIterationHistory() const;
-  void advanceVolumeFractionOuterIterationHistory() const;
   unsigned int computeVolumeFractionSubcycles() const;
   NonlinearSolutionStateSnapshots snapshotMomentumNonlinearSolutionStates() const;
   void
@@ -73,7 +75,6 @@ private:
   std::pair<unsigned int, Real> correctVelocityOnce(const bool subtract_updated_pressure,
                                                     const bool recompute_face_mass_flux,
                                                     const SolverParams & solver_params);
-  void correctMovingMeshFaceVelocityAndMakeRelative();
   std::pair<unsigned int, Real> correctStartupContinuityOnce(const bool subtract_updated_pressure,
                                                              const bool recompute_face_mass_flux,
                                                              const SolverParams & solver_params);
@@ -83,6 +84,7 @@ private:
   const std::vector<SolverSystemName> _volume_fraction_system_names;
   const bool _has_volume_fraction_systems;
   const bool _should_solve_volume_fractions;
+  std::vector<std::size_t> _volume_fraction_indices;
   std::vector<unsigned int> _volume_fraction_system_numbers;
   std::vector<LinearSystem *> _volume_fraction_systems;
 
