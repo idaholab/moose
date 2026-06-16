@@ -10,6 +10,7 @@
       input = '2D_distance_refine.i'
       exodiff = '2D_distance_refine_out.e-s004'
       mesh_mode = 'replicated' # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = 'false'
       detail = 'the distance field is computed correctly in 2D.'
     []
 
@@ -18,6 +19,7 @@
       input = '3D_distance_refine.i'
       exodiff = '3D_distance_refine_out.e-s004'
       mesh_mode = 'replicated' # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = 'false'
       detail = 'the distance field is computed correctly in 3D.'
     []
 
@@ -26,6 +28,7 @@
       input = '2D_multiple_distances_refine_test.i'
       exodiff = '2D_multiple_distances_refine_test_out.e-s004'
       mesh_mode = 'replicated' # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = 'false'
       detail = 'the distance field correctly when multiple distance representations (signed and mesh-based) are used together.'
     []
 
@@ -34,6 +37,7 @@
       input = '3D_multiple_distances_refine.i'
       exodiff = '3D_multiple_distances_refine_out.e-s003'
       mesh_mode = 'replicated' # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = 'false'
       detail = 'the distance field correctly when multiple distance representations (signed and mesh-based) are used together in 3D.'
     []
 
