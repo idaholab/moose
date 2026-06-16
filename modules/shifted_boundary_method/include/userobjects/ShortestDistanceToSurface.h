@@ -24,6 +24,11 @@ public:
   void initialize() override {}
   void threadJoin(const UserObject &) override {}
 
+  // This UO stores per-thread Function pointers. Parsed functions mutate
+  // internal state during evaluation, so sharing the TID=0 copy across threads
+  // can race and produce incorrect distances. Request the thread-local UO copy.
+  bool needThreadedCopy() const override final { return true; }
+
   /// @brief Get the SBMSurfaceMeshBuilder user objects
   const std::vector<const Function *> & getDistanceFuncs() const { return _distance_functions; }
 
