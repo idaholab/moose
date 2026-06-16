@@ -175,15 +175,15 @@ class Parser:
         # test contained within it.
         child_defaults = dict(default_values) if default_values is not None else {}
         for key, value in node.params():
-            if key == 'type':
+            if key == "type":
                 continue
-            if key == 'cli_args' and key in child_defaults:
-                child_defaults[key] = child_defaults[key] + ' ' + value
+            if key == "cli_args" and key in child_defaults:
+                child_defaults[key] = child_defaults[key] + " " + value
             else:
                 child_defaults[key] = value
 
-        if 'type' in node:
-            moose_type = node['type']
+        if "type" in node:
+            moose_type = node["type"]
 
             # Get the valid Params for this type
             params = self.factory.validParams(moose_type)
@@ -194,12 +194,12 @@ class Parser:
             # Apply any new defaults
             for key, value in default_values.items():
                 if key in params.keys():
-                    if key == 'cli_args':
+                    if key == "cli_args":
                         params[key].append(value)
                     elif params.type(key) == list:
                         if isinstance(value, str):
-                            value = value.replace('\n', ' ')
-                            params[key] = re.split(r'\s+', value)
+                            value = value.replace("\n", " ")
+                            params[key] = re.split(r"\s+", value)
                         elif isinstance(value, (list, tuple)):
                             params[key] = list(value)
                         else:
