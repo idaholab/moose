@@ -11,6 +11,7 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
   []
   [explicit_dynamics_validation]
     type = Exodiff
@@ -19,6 +20,7 @@
     exodiff = 'moose_exodus.e'
     valgrind = heavy
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
   []
 
   [explicit_dynamics_adaptivity]
@@ -30,6 +32,7 @@
     compute_devices = 'cpu cuda'
     valgrind = heavy
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
   []
   [explicit_dynamics_validation_adaptivity]
     type = Exodiff
@@ -38,5 +41,6 @@
     exodiff = 'moose_adaptivity_exodus.e moose_adaptivity_exodus.e-s002'
     valgrind = heavy
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
   []
 []

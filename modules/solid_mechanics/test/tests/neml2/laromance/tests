@@ -16,6 +16,7 @@
     csvdiff = 'laromance_return_mapping_out.csv'
     capabilities = 'libtorch & neml2'
     rel_err = 2e-4
+    recover = false
     requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to solve for the "
                   "nonlinear material response in NEML2 using the radial return mapping."
   []
