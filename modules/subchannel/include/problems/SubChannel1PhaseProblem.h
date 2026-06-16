@@ -222,6 +222,8 @@ protected:
   const bool _duct_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
+  /// Whether the time integrator has been checked for consistency with the implementation
+  bool _time_integrator_checked = false;
   /// Time step
   Real _dt;
   /// Turbulent modeling parameter used in axial momentum equation

@@ -20,6 +20,8 @@
 #include "SCMFrictionClosureBase.h"
 #include "SCMHTCClosureBase.h"
 #include "SCMMixingClosureBase.h"
+#include "TransientBase.h"
+#include "ImplicitEuler.h"
 
 struct Ctx
 {
@@ -2503,6 +2505,22 @@ SubChannel1PhaseProblem::externalSolve()
   _console << "Executing subchannel solver\n";
   _dt = (isTransient() ? dt() : _one);
   _TR = isTransient();
+
+  // The subchannel solver hardcodes a first-order backward (implicit) Euler time discretization, so
+  // any other time integrator a user selects is silently ignored. Warn once if one is requested.
+  if (!_time_integrator_checked)
+  {
+    _time_integrator_checked = true;
+    if (isTransient())
+      if (auto * transient = dynamic_cast<TransientBase *>(_app.getExecutioner()))
+        for (const auto * ti : transient->getTimeIntegrators())
+          if (!dynamic_cast<const ImplicitEuler *>(ti))
+            mooseWarning("The subchannel solver always uses implicit (backward) Euler time "
+                         "integration; the requested '",
+                         ti->type(),
+                         "' time integrator is ignored.");
+  }
+
   initializeSolution();
   // Small helper functions to reduce repetition
   // Verbose print helper (no-op unless _verbose_subchannel is true)
