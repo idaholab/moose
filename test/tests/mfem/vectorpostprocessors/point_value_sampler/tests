@@ -36,4 +36,18 @@
     requirement = "The system shall issue a warning if an attempt is made to sample a variable near a boundary when the variable is discontinuous across boundaries."
     capabilities = 'mfem'
   []
+  [MFEMValueSamplerBoundaryTolNotOnBoundary]
+    type = RunApp
+    input = point_value_sampler_boundary_tol.i
+    requirement = "No error will be produced for a point near a boundary when the tolerance is loose"
+    capabilities = 'mfem'
+  []
+  [MFEMValueSamplerBoundaryTolOnBoundary]
+    type = RunException
+    input = point_value_sampler_boundary_tol.i
+    expect_err = 'MFEMValueSamplerBase could not find point at'
+    cli_args = 'VectorPostprocessors/point_sample/mesh_boundary_tolerance=1e-10'
+    requirement = "An error will be produced for a point near a boundary when the tolerance is tight"
+    capabilities = 'mfem'
+  []
 []
