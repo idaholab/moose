@@ -9,18 +9,17 @@
 []
 
 [FESpaces]
-  [L2FESpace]
+  [H1FESpace]
     type = MFEMScalarFESpace
-    fec_type = L2
-    fec_order = CONSTANT
-    basis = GaussLegendre
+    fec_type = H1
+    fec_order = FIRST
   []
 []
 
 [Variables]
-  [l2_scalar]
+  [h1_scalar]
     type = MFEMVariable
-    fespace = L2FESpace
+    fespace = H1FESpace
   []
 []
 
@@ -32,7 +31,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMPointValueSampler
-    variable = 'l2_scalar'
+    variable = 'h1_scalar'
     points = '0 0 1000'
   []
 []
