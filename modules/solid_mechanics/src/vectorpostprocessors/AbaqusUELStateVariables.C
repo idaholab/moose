@@ -11,6 +11,9 @@
 #include "AbaqusUELMeshUserElement.h"
 #include "Conversion.h"
 
+#include <algorithm>
+#include <numeric>
+
 registerMooseObject("SolidMechanicsApp", AbaqusUELStateVariables);
 
 InputParameters
@@ -94,6 +97,48 @@ AbaqusUELStateVariables::execute()
 void
 AbaqusUELStateVariables::finalize()
 {
+  // The active UEL elements are distributed across ranks, so each rank only fills the rows for the
+  // elements it processes. This VPP uses the default (REPLICATED) parallel type, where the CSV
+  // output is read from the root processor. Gather every rank's rows onto the root so the output
+  // contains all elements. All vectors are gathered in the same (rank) order, so the columns stay
+  // row-aligned.
+  _communicator.gather(0, _id_vector);
+  if (_split_vector)
+    _communicator.gather(0, *_split_vector);
+  for (auto & vec : _value_vectors)
+    _communicator.gather(0, *vec);
+
+  // The gather concatenates rows in processor order, which depends on the partitioning. Reorder the
+  // rows into a deterministic order (by element id, then integration point) so the output is
+  // independent of the partitioning and matches a serial run.
+  const auto n = _id_vector.size();
+  std::vector<std::size_t> perm(n);
+  std::iota(perm.begin(), perm.end(), 0);
+  std::stable_sort(perm.begin(),
+                   perm.end(),
+                   [&](std::size_t a, std::size_t b)
+                   {
+                     if (_id_vector[a] != _id_vector[b])
+                       return _id_vector[a] < _id_vector[b];
+                     if (_split_vector)
+                       return (*_split_vector)[a] < (*_split_vector)[b];
+                     return false;
+                   });
+
+  auto reorder = [&perm, n](VectorPostprocessorValue & v)
+  {
+    if (v.size() != n)
+      return;
+    VectorPostprocessorValue tmp(n);
+    for (std::size_t k = 0; k < n; ++k)
+      tmp[k] = v[perm[k]];
+    v.swap(tmp);
+  };
+  reorder(_id_vector);
+  if (_split_vector)
+    reorder(*_split_vector);
+  for (auto & vec : _value_vectors)
+    reorder(*vec);
 }
 
 void

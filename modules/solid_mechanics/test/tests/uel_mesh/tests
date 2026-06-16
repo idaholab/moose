@@ -2,10 +2,10 @@
   issues = '#29382'
   design = 'AbaqusUELMeshUserElement.md AbaqusEssentialBC.md AbaqusForceBC.md'
 
-  # Ideally we should use a space-filling curve partitioner in all tests, so libsfcurves must be available for parallel runs
-  # capabilities = 'installation_type=in_tree & (mpi_procs=1 | sfcurves)'
-
-  # Unfortunately the sfc library is not LGPL and is not distributed with libmesh by default, so we use a crude linear partitioner
+  # AbaqusUELMesh installs its own AbaqusUELPartitioner, which builds the dual graph from the UEL
+  # connectivity and partitions it with ParMETIS (via PETSc). This replaces the previous linear
+  # partitioner workaround that was needed because the disconnected NodeElem mesh produced an empty
+  # connectivity graph for the standard partitioners.
   capabilities = 'installation_type=in_tree'
 
   [build_uel_plugin_opt]

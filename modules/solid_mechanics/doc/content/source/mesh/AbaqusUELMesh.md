@@ -4,6 +4,12 @@
 
 The `AbaqusUELMesh` builds a mesh from an Abaqus input file with custom UEL (user elements). UELs do not have a corresponding representation in Libmesh and represented using Node-Elements and a custom connectivity map.
 
+Because the mesh is made of disconnected Node-Elements, the standard partitioners see an empty
+connectivity graph. The `AbaqusUELMesh` therefore installs a dedicated
+[AbaqusUELPartitioner](AbaqusUELPartitioner.md) by default, which builds the connectivity graph from
+the UEL elements and partitions it with ParMETIS. A user-supplied `[Partitioner]` block overrides
+this default.
+
 # Abaqus Input File Parser Design Documentation
 
 ## High-Level Overview
