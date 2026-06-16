@@ -65,9 +65,28 @@ protected:
   virtual bool pressureDivergenceFluxIsIntegrated() const { return false; }
   virtual std::string momentumTimeKernelType() const { return "LinearFVTimeDerivative"; }
   virtual std::string momentumTimeDensityParameterName() const { return "factor"; }
+  virtual void setMomentumTimeKernelParams(InputParameters & params) const;
   virtual std::string momentumFluxKernelType() const { return "LinearWCNSFVMomentumFlux"; }
   virtual MooseFunctorName momentumFluxMassFluxFunctorName() const { return ""; }
   virtual bool momentumFluxMassFluxFunctorIsIntegrated() const { return false; }
+  virtual std::string momentumOutletBCType(const BoundaryName & boundary,
+                                           const MooseEnum & momentum_outlet_type) const;
+  virtual void setMomentumOutletBCParams(InputParameters & params,
+                                         const BoundaryName & boundary,
+                                         const MooseEnum & momentum_outlet_type,
+                                         unsigned int component) const;
+  virtual std::string pressureOutletBCType(const BoundaryName & boundary,
+                                           const MooseEnum & momentum_outlet_type) const;
+  virtual void setPressureOutletBCParams(InputParameters & params,
+                                         const BoundaryName & boundary,
+                                         const MooseEnum & momentum_outlet_type) const;
+  virtual MooseFunctorName wallPressureSymmetryFluxName() const { return "HbyA"; }
+  virtual void addWallPressureBC(const BoundaryName & boundary,
+                                 const MooseEnum & momentum_wall_type);
+  virtual bool shouldAddWallPressureTwoTermExpansion() const
+  {
+    return getParam<bool>("pressure_two_term_bc_expansion");
+  }
   virtual MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
                                                     unsigned int component) const;
   virtual MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,

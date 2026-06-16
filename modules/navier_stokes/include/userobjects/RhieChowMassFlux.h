@@ -15,13 +15,11 @@
 #include "VectorComponentFunctor.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVAnisotropicDiffusion.h"
-#include "LinearFVAssemblyConsumer.h"
 #include <string>
 #include <unordered_map>
 #include <set>
 
 #include "libmesh/petsc_vector.h"
-#include "libmesh/threads.h"
 
 class MooseMesh;
 class INSFVVelocityVariable;
@@ -41,65 +39,9 @@ class MeshBase;
 class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
-  /**
-   * Cached momentum predictor owner.
-   *
-   * This object is the single source of truth for the cached predictor equation used by Rhie-Chow.
-   * diagonal_raw is the relaxed solve diagonal while pressure_coupling_diagonal_raw is the
-   * coefficient used by pressure-coupling consumers. H(U) is rebuilt from source,
-   * boundary-source, and off-diagonal pieces. PETSc remains the solve backend; this object owns the
-   * FV equation pieces that PETSc assembly would otherwise flatten.
-   */
-  struct MomentumPredictorOperator : public LinearFVAssemblyConsumer
-  {
-    bool assembly_closed = false;
-    bool finalized = false;
-    Real relaxation_parameter = 1.0;
-    bool enforce_diagonal_dominance = false;
-    std::unique_ptr<NumericVector<Number>> constant_source_raw;
-    std::unique_ptr<NumericVector<Number>> diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> pressure_coupling_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> pre_relaxation_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> interior_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> boundary_relax_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> boundary_a_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> boundary_dominance_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> boundary_h_diagonal_raw;
-    std::unique_ptr<NumericVector<Number>> offdiag_abs_sum_raw;
-    struct BoundaryMatrixContribution
-    {
-      dof_id_type face_id;
-      dof_id_type dof;
-      Real contribution;
-    };
-    std::vector<BoundaryMatrixContribution> boundary_matrix_contributions;
-    std::unordered_map<dof_id_type, std::vector<std::pair<dof_id_type, Real>>> offdiag_coefficients;
-    mutable libMesh::Threads::spin_mutex assembly_mutex;
-
-    bool complete() const;
-    void computeHSource(NumericVector<Number> & solution,
-                        NumericVector<Number> & h_source_raw) const;
-    void addElementalMatrixContribution(dof_id_type dof, Real contribution) override;
-    void addElementalRightHandSideContribution(dof_id_type dof, Real contribution) override;
-    void addInternalFaceMatrixContribution(dof_id_type elem_dof,
-                                           dof_id_type neighbor_dof,
-                                           Real elem_matrix_contribution,
-                                           Real neighbor_matrix_contribution,
-                                           bool elem_has_blocks,
-                                           bool neighbor_has_blocks) override;
-    void addInternalFaceRightHandSideContribution(dof_id_type elem_dof,
-                                                  dof_id_type neighbor_dof,
-                                                  Real elem_rhs_contribution,
-                                                  Real neighbor_rhs_contribution,
-                                                  bool elem_has_blocks,
-                                                  bool neighbor_has_blocks) override;
-    void
-    addBoundaryMatrixContribution(dof_id_type face_id, dof_id_type dof, Real contribution) override;
-    void addBoundaryRightHandSideContribution(dof_id_type dof, Real contribution) override;
-  };
-
   static InputParameters validParams();
   RhieChowMassFlux(const InputParameters & params);
+  ~RhieChowMassFlux() override;
 
   /// Get the face velocity times density (used in advection terms)
   virtual Real getMassFlux(const FaceInfo & fi) const;
@@ -169,6 +111,8 @@ public:
   void computeHbyA(const bool with_updated_pressure, const bool verbose);
 
 protected:
+  struct MomentumPredictorOperator;
+
   /// Predictor-side face flux entering the pressure equation. Defaults to the HbyA contribution.
   virtual Real pressurePredictorFlux(const FaceInfo * fi) const;
   /// Populate the explicit face state used by the pressure corrector.
@@ -284,12 +228,6 @@ protected:
    * still a pressure-correction-space predictor quantity, not the accepted transport phi.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_flux;
-
-  /**
-   * Predictor-side face mass flux used by momentum-advection kernels that need a frozen rhoPhi
-   * family instead of the live corrected face mass flux.
-   */
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_mass_flux;
 
   /**
    * Explicit face-force contribution entering the pressure corrector.

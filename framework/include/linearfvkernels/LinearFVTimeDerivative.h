@@ -41,6 +41,9 @@ protected:
   /// on how many states are required in the history.
   const TimeIntegrator & _time_integrator;
 
+  /// Whether RHS factor history starts at the old time state instead of the current state
+  const bool _use_old_state_factor_for_rhs;
+
 private:
   /// Current and older values of the material property multiplier.
   std::vector<Real> _factor_history;

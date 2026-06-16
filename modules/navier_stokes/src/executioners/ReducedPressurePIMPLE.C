@@ -52,24 +52,6 @@ ReducedPressurePIMPLE::takeStep(Real input_dt)
   if (dt_to_take == -1.0)
     dt_to_take = computeConstrainedDT();
 
-  if (_reduced_pimple_solve.adjustMomentumPressureTimeStepEnabled() && dt_to_take > 0.0)
-  {
-    const Real courant = _reduced_pimple_solve.momentumPressureCourant(dt_to_take);
-    const Real required_dt = _reduced_pimple_solve.constrainedMomentumPressureDT(dt_to_take);
-    const Real adjusted_dt = std::max(required_dt, _dtmin);
-
-    if (std::isfinite(courant) && adjusted_dt > 0.0 && adjusted_dt < dt_to_take)
-    {
-      _console << name() << ": reducing dt from " << dt_to_take << " to " << adjusted_dt
-               << " to keep momentum/pressure CFL <= "
-               << _reduced_pimple_solve.momentumPressureMaxCourant() << " (current CFL=" << courant;
-      if (required_dt < _dtmin)
-        _console << ", requested dt " << required_dt << " is below dtmin=" << _dtmin;
-      _console << ")" << std::endl;
-      dt_to_take = adjusted_dt;
-    }
-  }
-
   TransientBase::takeStep(dt_to_take);
   _reduced_pimple_solve.commitAcceptedTimestepTransportHistory();
 }

@@ -217,6 +217,7 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(momentumTimeDensityParameterName()) = _density_name;
+  setMomentumTimeKernelParams(params);
 
   for (const auto d : make_range(dimension()))
   {
@@ -224,6 +225,11 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
     if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, /*error if already defined*/ false))
       getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
   }
+}
+
+void
+WCNSLinearFVFlowPhysics::setMomentumTimeKernelParams(InputParameters & /* params */) const
+{
 }
 
 void
@@ -396,6 +402,42 @@ WCNSLinearFVFlowPhysics::wallVelocityFunctorName(const BoundaryName & boundary,
   return _momentum_wall_functors.at(boundary)[component];
 }
 
+std::string
+WCNSLinearFVFlowPhysics::momentumOutletBCType(const BoundaryName & /* boundary */,
+                                              const MooseEnum & /* momentum_outlet_type */) const
+{
+  return "LinearFVAdvectionDiffusionOutflowBC";
+}
+
+void
+WCNSLinearFVFlowPhysics::setMomentumOutletBCParams(InputParameters & /* params */,
+                                                   const BoundaryName & /* boundary */,
+                                                   const MooseEnum & /* momentum_outlet_type */,
+                                                   const unsigned int /* component */) const
+{
+}
+
+std::string
+WCNSLinearFVFlowPhysics::pressureOutletBCType(const BoundaryName & /* boundary */,
+                                              const MooseEnum & /* momentum_outlet_type */) const
+{
+  return "LinearFVAdvectionDiffusionFunctorDirichletBC";
+}
+
+void
+WCNSLinearFVFlowPhysics::setPressureOutletBCParams(
+    InputParameters & /* params */,
+    const BoundaryName & /* boundary */,
+    const MooseEnum & /* momentum_outlet_type */) const
+{
+}
+
+void
+WCNSLinearFVFlowPhysics::addWallPressureBC(const BoundaryName & /* boundary */,
+                                           const MooseEnum & /* momentum_wall_type */)
+{
+}
+
 void
 WCNSLinearFVFlowPhysics::addInletBC()
 {
@@ -495,7 +537,7 @@ WCNSLinearFVFlowPhysics::addOutletBC()
     if (momentum_outlet_type == "zero-gradient" || momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
-      const std::string bc_type = "LinearFVAdvectionDiffusionOutflowBC";
+      const std::string bc_type = momentumOutletBCType(outlet_bdy, momentum_outlet_type);
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
       params.set<bool>("use_two_term_expansion") = getParam<bool>("momentum_two_term_bc_expansion");
@@ -503,6 +545,7 @@ WCNSLinearFVFlowPhysics::addOutletBC()
       for (const auto d : make_range(dimension()))
       {
         params.set<LinearVariableName>("variable") = _velocity_names[d];
+        setMomentumOutletBCParams(params, outlet_bdy, momentum_outlet_type, d);
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + outlet_bdy, params);
       }
     }
@@ -510,11 +553,12 @@ WCNSLinearFVFlowPhysics::addOutletBC()
     if (momentum_outlet_type == "fixed-pressure" ||
         momentum_outlet_type == "fixed-pressure-zero-gradient")
     {
-      const std::string bc_type = "LinearFVAdvectionDiffusionFunctorDirichletBC";
+      const std::string bc_type = pressureOutletBCType(outlet_bdy, momentum_outlet_type);
       InputParameters params = getFactory().getValidParams(bc_type);
       params.set<LinearVariableName>("variable") = _pressure_name;
       params.set<MooseFunctorName>("functor") = libmesh_map_find(_pressure_functors, outlet_bdy);
       params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
+      setPressureOutletBCParams(params, outlet_bdy, momentum_outlet_type);
       getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + outlet_bdy, params);
     }
   }
@@ -540,6 +584,8 @@ WCNSLinearFVFlowPhysics::addWallsBC()
         params.set<MooseFunctorName>("functor") = wallVelocityFunctorName(boundary_name, d);
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
+
+      addWallPressureBC(boundary_name, momentum_wall_type);
     }
     else if (momentum_wall_type == "symmetry")
     {
@@ -563,7 +609,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
         params.set<LinearVariableName>("variable") = _pressure_name;
-        params.set<MooseFunctorName>("HbyA_flux") = "HbyA";
+        params.set<MooseFunctorName>("HbyA_flux") = wallPressureSymmetryFluxName();
         getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
       }
     }
@@ -571,7 +617,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
       mooseError("Unsupported wall boundary condition type: " + std::string(momentum_wall_type));
   }
 
-  if (getParam<bool>("pressure_two_term_bc_expansion"))
+  if (shouldAddWallPressureTwoTermExpansion())
   {
     if (!has_symmetry_bc)
     {

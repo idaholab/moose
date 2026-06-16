@@ -12,7 +12,6 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 #include "Executioner.h"
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 
 #include <iostream>
 #include <limits>
@@ -282,9 +281,6 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   // Temporary storage for the (flux-normalized) residuals from
   // different momentum components
   std::vector<std::pair<unsigned int, Real>> its_normalized_residuals;
-
-  if (auto * sharp_rc = dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo))
-    sharp_rc->updateContinuityErrorField();
 
   LinearImplicitSystem & momentum_system_0 =
       libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());

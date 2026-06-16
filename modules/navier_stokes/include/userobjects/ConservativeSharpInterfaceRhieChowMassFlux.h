@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
-#include "CellCenteredMapFunctor.h"
 
 /**
  * Sharp-interface Rhie-Chow implementation for the velocity-component momentum path.
@@ -27,10 +26,6 @@ public:
 
   ConservativeSharpInterfaceRhieChowMassFlux(const InputParameters & params);
 
-  void updateContinuityErrorField();
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) const override;
-
-private:
-  CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _continuity_error;
 };

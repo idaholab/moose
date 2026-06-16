@@ -11,8 +11,6 @@
 
 #include "FunctorMaterial.h"
 
-#include <array>
-
 /**
  * Functor material that prepares face-aware sharp-interface geometry quantities
  * for reduced-pressure linear-FV coupling.
@@ -22,7 +20,6 @@
  *
  * - clipped / near-interface alpha indicators
  * - face unit normals from grad(alpha)
- * - hydrostatic momentum-source density components
  */
 class ConservativeSharpInterfaceGeometryFunctorMaterial final : public FunctorMaterial
 {
@@ -33,10 +30,7 @@ public:
 
 private:
   const Moose::Functor<Real> & _volume_fraction;
-  const Moose::Functor<Real> & _density;
 
-  const Point _reference_pressure_point;
-  const RealVectorValue _gravity;
   const bool _clip_volume_fraction;
   const Real _alpha_lower_bound;
   const Real _alpha_upper_bound;
@@ -48,5 +42,4 @@ private:
   const MooseFunctorName _near_interface_name;
   const MooseFunctorName _alpha_gradient_name;
   const MooseFunctorName _interface_unit_normal_name;
-  const std::array<MooseFunctorName, 3> _hydrostatic_momentum_source_names;
 };

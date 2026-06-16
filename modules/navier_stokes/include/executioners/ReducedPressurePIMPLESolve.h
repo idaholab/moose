@@ -31,11 +31,7 @@ public:
 
   ReducedPressurePIMPLESolve(Executioner & ex);
 
-  Real momentumPressureCourant(const Real dt) const;
-  Real constrainedMomentumPressureDT(const Real dt) const;
   void commitAcceptedTimestepTransportHistory() const;
-  bool adjustMomentumPressureTimeStepEnabled() const { return _adjust_momentum_pressure_time_step; }
-  Real momentumPressureMaxCourant() const { return _momentum_pressure_max_courant; }
 
 protected:
   void preSolveSetup(const SolverParams & solver_params) override;
@@ -68,13 +64,9 @@ private:
   std::vector<std::pair<unsigned int, Real>>
   solveVolumeFractionSystems(const SolverParams & solver_params);
   void finalizeVolumeFractionTransportState();
-  void clampVolumeFractionSystem(LinearSystem & system);
   ConservativeSharpInterfaceVOFMULESCorrector *
   sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
 
-  std::pair<unsigned int, Real> correctVelocityOnce(const bool subtract_updated_pressure,
-                                                    const bool recompute_face_mass_flux,
-                                                    const SolverParams & solver_params);
   std::pair<unsigned int, Real> correctStartupContinuityOnce(const bool subtract_updated_pressure,
                                                              const bool recompute_face_mass_flux,
                                                              const SolverParams & solver_params);
@@ -93,12 +85,8 @@ private:
   SIMPLESolverConfiguration _volume_fraction_linear_control;
   const Real _volume_fraction_l_abs_tol;
   const std::vector<Real> _volume_fraction_absolute_tolerance;
-  const Real _volume_fraction_min_value;
-  const Real _volume_fraction_max_value;
   const unsigned int _volume_fraction_subcycles;
   const Real _volume_fraction_max_courant;
-  const bool _adjust_momentum_pressure_time_step;
-  const Real _momentum_pressure_max_courant;
   std::string _startup_pressure_initialization;
   const unsigned int _startup_flux_corrections;
 };

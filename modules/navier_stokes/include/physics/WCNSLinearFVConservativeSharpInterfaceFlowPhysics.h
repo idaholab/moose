@@ -29,26 +29,32 @@ private:
   void addFunctorMaterials() override;
   void addRhieChowUserObjects() override;
 
-  void addMomentumReducedPressureKernels() override;
-  void addOutletBC() override;
-  void addWallsBC() override;
-
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
   MooseFunctorName generatedBoundaryMomentumFunctorName(const BoundaryName & boundary,
                                                         unsigned int component,
                                                         const std::string & family) const;
   bool shouldAddMomentumPressureKernels() const override;
-  bool shouldAddMomentumReducedPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
   MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }
   bool pressureDivergenceFluxIsIntegrated() const override { return true; }
-  std::string momentumTimeKernelType() const override
-  {
-    return "LinearWCNSFVMomentumTimeDerivative";
-  }
-  std::string momentumTimeDensityParameterName() const override { return NS::density; }
+  void setMomentumTimeKernelParams(InputParameters & params) const override;
   MooseFunctorName momentumFluxMassFluxFunctorName() const override { return "rho_phi"; }
   bool momentumFluxMassFluxFunctorIsIntegrated() const override { return true; }
+  std::string momentumOutletBCType(const BoundaryName & boundary,
+                                   const MooseEnum & momentum_outlet_type) const override;
+  void setMomentumOutletBCParams(InputParameters & params,
+                                 const BoundaryName & boundary,
+                                 const MooseEnum & momentum_outlet_type,
+                                 unsigned int component) const override;
+  std::string pressureOutletBCType(const BoundaryName & boundary,
+                                   const MooseEnum & momentum_outlet_type) const override;
+  void setPressureOutletBCParams(InputParameters & params,
+                                 const BoundaryName & boundary,
+                                 const MooseEnum & momentum_outlet_type) const override;
+  MooseFunctorName wallPressureSymmetryFluxName() const override { return "phiHbyA"; }
+  void addWallPressureBC(const BoundaryName & boundary,
+                         const MooseEnum & momentum_wall_type) override;
+  bool shouldAddWallPressureTwoTermExpansion() const override;
   MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
                                             unsigned int component) const override;
   MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
@@ -58,8 +64,5 @@ private:
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
-  const MooseEnum _pressure_formulation;
-  const bool _add_transient_projection_flux;
-  const bool _add_capillary_hydrostatic_flux;
   const bool _create_geometry_functors;
 };

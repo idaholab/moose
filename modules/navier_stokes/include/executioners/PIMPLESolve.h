@@ -56,15 +56,8 @@ protected:
   void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
   void advancePressureOuterIterationHistory() const;
 
-  bool hasPISOAbsoluteTerminationCriterion() const;
-  bool shouldContinuePISOIterations(const unsigned int piso_iteration_counter,
-                                    const Real stage_residual,
-                                    const Real first_stage_residual) const;
-
   /// Number of H(u) and u iterations with fixed face flux.
   const unsigned int _num_piso_iterations;
-  const Real _piso_absolute_tolerance;
-  const Real _piso_relative_tolerance;
   const unsigned int _num_pressure_nonorthogonal_correctors;
   unsigned int _current_piso_iteration = 0;
 

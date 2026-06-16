@@ -86,14 +86,6 @@ ReducedPressurePIMPLESolve::validParams()
   params.addParam<bool>("should_solve_volume_fractions",
                         true,
                         "Whether we should solve the volume-fraction equation(s).");
-  params.addParam<Real>("volume_fraction_min_value",
-                        0.0,
-                        "Lower clamp applied to transported volume-fraction fields after each "
-                        "solve.");
-  params.addParam<Real>("volume_fraction_max_value",
-                        1.0,
-                        "Upper clamp applied to transported volume-fraction fields after each "
-                        "solve.");
   params.addRangeCheckedParam<unsigned int>(
       "volume_fraction_subcycles",
       1,
@@ -106,18 +98,6 @@ ReducedPressurePIMPLESolve::validParams()
       "Maximum allowed alpha Courant number during subcycling. The executioner increases the "
       "alpha subcycle count as needed so the current transported volumetric flux satisfies this "
       "limit.");
-  params.addParam<bool>(
-      "adjust_momentum_pressure_time_step",
-      false,
-      "Whether the ReducedPressurePIMPLE executioner should shrink the current timestep so the "
-      "Rhie-Chow face-flux Courant number stays below momentum_pressure_max_courant before the "
-      "outer PIMPLE loop.");
-  params.addRangeCheckedParam<Real>(
-      "momentum_pressure_max_courant",
-      1.0,
-      "momentum_pressure_max_courant>0",
-      "Maximum allowed momentum/pressure face-flux Courant number when "
-      "adjust_momentum_pressure_time_step=true.");
   MooseEnum startup_pressure_initialization("none projection-only", "projection-only");
   params.addParam<MooseEnum>(
       "startup_pressure_initialization",
@@ -136,11 +116,10 @@ ReducedPressurePIMPLESolve::validParams()
       "volume_fraction_systems volume_fraction_equation_relaxation volume_fraction_petsc_options "
       "volume_fraction_petsc_options_iname volume_fraction_petsc_options_value "
       "volume_fraction_absolute_tolerance volume_fraction_l_tol volume_fraction_l_abs_tol "
-      "volume_fraction_l_max_its should_solve_volume_fractions volume_fraction_min_value "
-      "volume_fraction_max_value volume_fraction_subcycles volume_fraction_max_courant "
-      "adjust_momentum_pressure_time_step momentum_pressure_max_courant "
+      "volume_fraction_l_max_its should_solve_volume_fractions volume_fraction_subcycles "
+      "volume_fraction_max_courant "
       "startup_pressure_initialization startup_flux_corrections "
-      "num_pressure_nonorthogonal_correctors n_nonorthogonal_correctors",
+      "num_pressure_nonorthogonal_correctors",
       "Volume Fraction Equations");
   return params;
 }
@@ -156,12 +135,8 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _volume_fraction_l_abs_tol(getParam<Real>("volume_fraction_l_abs_tol")),
     _volume_fraction_absolute_tolerance(
         getParam<std::vector<Real>>("volume_fraction_absolute_tolerance")),
-    _volume_fraction_min_value(getParam<Real>("volume_fraction_min_value")),
-    _volume_fraction_max_value(getParam<Real>("volume_fraction_max_value")),
     _volume_fraction_subcycles(getParam<unsigned int>("volume_fraction_subcycles")),
     _volume_fraction_max_courant(getParam<Real>("volume_fraction_max_courant")),
-    _adjust_momentum_pressure_time_step(getParam<bool>("adjust_momentum_pressure_time_step")),
-    _momentum_pressure_max_courant(getParam<Real>("momentum_pressure_max_courant")),
     _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections"))
 {
   _startup_pressure_initialization =
@@ -171,10 +146,6 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     paramError("pin_pressure",
                "ReducedPressurePIMPLE supports pressure boundary-condition constraints only; "
                "pressure pinning is not supported.");
-
-  if (_volume_fraction_min_value > _volume_fraction_max_value)
-    paramError("volume_fraction_max_value",
-               "volume_fraction_max_value must be >= volume_fraction_min_value.");
 
   if (_has_volume_fraction_systems)
   {
@@ -247,32 +218,6 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
     }
 
   return corrector_match;
-}
-
-Real
-ReducedPressurePIMPLESolve::momentumPressureCourant(const Real dt) const
-{
-  if (!_rc_uo || dt <= 0.0)
-    return 0.0;
-
-  return _rc_uo->maxCourant(dt);
-}
-
-Real
-ReducedPressurePIMPLESolve::constrainedMomentumPressureDT(const Real dt) const
-{
-  if (!_adjust_momentum_pressure_time_step || dt <= 0.0)
-    return dt;
-
-  const Real courant = momentumPressureCourant(dt);
-  if (!std::isfinite(courant) || courant <= _momentum_pressure_max_courant)
-    return dt;
-
-  const Real adjusted_dt = dt * _momentum_pressure_max_courant / courant;
-  if (!(adjusted_dt > 0.0) || adjusted_dt >= dt)
-    return dt;
-
-  return adjusted_dt;
 }
 
 void
@@ -460,9 +405,6 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
   if (_momentum_systems.empty())
     return;
 
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->updateContinuityErrorField();
-
   if (_rc_uo)
     _rc_uo->clearMomentumPredictorOperatorCache();
 
@@ -493,25 +435,14 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
 
   // Honor the current reduced-pressure field, assemble the momentum predictor coefficients, and run
   // pressure-only startup continuity corrections before the first outer iteration.
-  if (!_momentum_systems.empty() && _rc_uo)
-  {
-    assembleMomentumPredictorOnly();
-    _rc_uo->initFaceMassFlux();
-    performStartupContinuityCorrections(solver_params);
-    synchronizeSystemState(_pressure_system);
-  }
-  else
-  {
-    _console << "Falling back to startup pressure-velocity correction because predictor-only "
-                "startup projection is unavailable"
-             << std::endl;
-    Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
-    for (const auto startup_it : make_range(_startup_flux_corrections))
-    {
-      (void)startup_it;
-      correctVelocityOnce(true, true, solver_params);
-    }
-  }
+  if (_momentum_systems.empty() || !_rc_uo)
+    mooseError("ReducedPressurePIMPLESolve startup projection requires momentum systems and a "
+               "Rhie-Chow user object.");
+
+  assembleMomentumPredictorOnly();
+  _rc_uo->initFaceMassFlux();
+  performStartupContinuityCorrections(solver_params);
+  synchronizeSystemState(_pressure_system);
   _problem.execute(EXEC_NONLINEAR);
 }
 
@@ -664,28 +595,24 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
       }
 
       _problem.execute(EXEC_NONLINEAR);
-      if (corrector)
-      {
-        // This path bounds alpha through the limited face fluxes instead of projecting the solved
-        // field. Do not apply the inherited scalar lower limiter here.
-        residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
-                                           *system,
-                                           _volume_fraction_equation_relaxation[i],
-                                           _volume_fraction_linear_control,
-                                           _volume_fraction_l_abs_tol,
-                                           1.0,
-                                           std::numeric_limits<Real>::min());
-        system->computeGradients();
-        corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt);
-      }
-      else
-        residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
-                                           *system,
-                                           _volume_fraction_equation_relaxation[i],
-                                           _volume_fraction_linear_control,
-                                           _volume_fraction_l_abs_tol,
-                                           1.0,
-                                           _volume_fraction_min_value);
+      if (!corrector)
+        mooseError(
+            "ReducedPressurePIMPLESolve requires a ConservativeSharpInterfaceVOFMULESCorrector "
+            "for volume-fraction system '",
+            _volume_fraction_system_names[i],
+            "'.");
+
+      // This path bounds alpha through the limited face fluxes instead of projecting the solved
+      // field. Do not apply the inherited scalar lower limiter here.
+      residuals[i] = solveAdvectedSystem(_volume_fraction_system_numbers[i],
+                                         *system,
+                                         _volume_fraction_equation_relaxation[i],
+                                         _volume_fraction_linear_control,
+                                         _volume_fraction_l_abs_tol,
+                                         1.0,
+                                         std::numeric_limits<Real>::min());
+      system->computeGradients();
+      corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt);
     }
 
     system->solutionOld() = *saved_old_solution;
@@ -709,42 +636,12 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
 void
 ReducedPressurePIMPLESolve::finalizeVolumeFractionTransportState()
 {
-  for (const auto system_i : index_range(_volume_fraction_systems))
-    if (!sharpInterfaceVOFCorrector(_volume_fraction_system_names[system_i]))
-      clampVolumeFractionSystem(*_volume_fraction_systems[system_i]);
-
   for (const auto & system : _volume_fraction_systems)
     system->computeGradients();
 
   for (const auto & system_name : _volume_fraction_system_names)
     if (auto * corrector = sharpInterfaceVOFCorrector(system_name))
       corrector->refreshPublishedRhoPhi();
-}
-
-void
-ReducedPressurePIMPLESolve::clampVolumeFractionSystem(LinearSystem & system)
-{
-  auto & current_local_solution = *(system.system().current_local_solution);
-  for (const auto i : make_range(current_local_solution.first_local_index(),
-                                 current_local_solution.last_local_index()))
-    current_local_solution.set(
-        i,
-        std::min(_volume_fraction_max_value,
-                 std::max(_volume_fraction_min_value, current_local_solution(i))));
-  current_local_solution.close();
-
-  if (auto * previous_solution = system.solutionPreviousNewton())
-  {
-    for (const auto i :
-         make_range(previous_solution->first_local_index(), previous_solution->last_local_index()))
-      previous_solution->set(
-          i,
-          std::min(_volume_fraction_max_value,
-                   std::max(_volume_fraction_min_value, (*previous_solution)(i))));
-    previous_solution->close();
-  }
-
-  system.setSolution(current_local_solution);
 }
 
 std::pair<unsigned int, Real>
@@ -816,20 +713,6 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(
         saved_suppress_explicit_hydrostatic_pressure_flux);
   }
-
-  return residuals;
-}
-
-std::pair<unsigned int, Real>
-ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pressure,
-                                                const bool recompute_face_mass_flux,
-                                                const SolverParams & solver_params)
-{
-  storePressurePreviousOuterIterationState();
-  preparePressureCorrectorState(subtract_updated_pressure);
-
-  const auto residuals =
-      applyPressureCorrectionStage(recompute_face_mass_flux, true, solver_params);
 
   return residuals;
 }

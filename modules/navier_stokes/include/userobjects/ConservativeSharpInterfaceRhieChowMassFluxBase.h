@@ -127,9 +127,6 @@ protected:
   Real transportMassFluxDensityFromVolumetricPhi(const FaceInfo * fi,
                                                  const Real volumetric_phi,
                                                  const Moose::StateArg & time_arg) const;
-  Real transportIntegratedRhoPhiFromVolumetricPhi(const FaceInfo * fi,
-                                                  const Real volumetric_phi,
-                                                  const Moose::StateArg & time_arg) const;
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
                                      const Moose::StateArg * limiter_state = nullptr) const;
@@ -169,14 +166,7 @@ protected:
                                  const FaceInfo * fi,
                                  const Moose::StateArg & time_arg,
                                  const Moose::StateArg * limiter_state) const;
-  Real evaluateCellBasedFaceScalarFunctor(const Moose::Functor<Real> * functor,
-                                          const FaceInfo * fi,
-                                          const Moose::StateArg & time_arg) const;
 
-  Real projectPhysicalMassFluxDensity(const Real face_rho,
-                                      const RealVectorValue & face_ainv_raw,
-                                      const RealVectorValue & face_acceleration,
-                                      const RealVectorValue & face_normal) const;
   Real computeFaceNormalRawAinv(const RealVectorValue & face_ainv_raw,
                                 const RealVectorValue & face_normal) const;
   Real computeDefaultTransientProjectionVolumetricFlux(const FaceInfo * fi,
@@ -208,10 +198,6 @@ protected:
   reconstructPressureCoupledCellVelocityDelta(const ElemInfo * elem_info,
                                               const Moose::StateArg & time_arg) const;
   bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const;
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _transient_projection_flux;
-  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _capillary_hydrostatic_flux;
-  FaceScalarField _pressure_equation_volumetric_flux;
-  FaceScalarField _pressure_correction_phi;
   FaceScalarField _corrected_face_phi;
   FaceScalarField _previous_timestep_corrected_face_phi;
   FaceScalarField _vof_transport_phi;
@@ -219,28 +205,14 @@ protected:
 
   std::vector<const FaceInfo *> _sharp_interface_face_info;
 
-  const bool _add_transient_projection_flux;
-  const bool _add_capillary_hydrostatic_flux;
   const bool _apply_pressure_velocity_writeback;
   const RealVectorValue _gravity;
   const Point _reference_pressure_point;
-  const Real _near_interface_lower;
-  const Real _near_interface_upper;
   const Real _pressure_writeback_face_ainv_relative_tolerance;
-  const MooseEnum _density_sn_grad_scheme;
-  const Real _density_sn_grad_limiter_coefficient;
 
-  const MooseFunctorName _volume_fraction_name;
   const MooseFunctorName _vof_rho_phi_name;
-  const MooseFunctorName _vof_alpha_phi_limited_name;
-  const MooseFunctorName _liquid_density_name;
-  const MooseFunctorName _gas_density_name;
 
-  const Moose::Functor<Real> * _volume_fraction;
   const Moose::Functor<Real> * _vof_rho_phi;
-  const Moose::Functor<Real> * _vof_alpha_phi_limited;
-  const Moose::Functor<Real> * _liquid_density;
-  const Moose::Functor<Real> * _gas_density;
   bool _vof_transport_phi_valid = false;
   bool _corrected_face_phi_seeded = false;
   bool _suppress_explicit_hydrostatic_pressure_flux = false;

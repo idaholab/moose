@@ -48,19 +48,6 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "volume_fraction_functor",
       "The phase / volume-fraction functor used to construct interface gradients and normals.");
-  params.addRequiredParam<MooseFunctorName>(
-      "density_functor",
-      "Mixture density functor used for hydrostatic momentum-source density components.");
-
-  params.addParam<RealVectorValue>(
-      "gravity",
-      RealVectorValue(),
-      "Gravity vector used for reduced-pressure hydrostatic-density-gradient correction.");
-  params.addParam<Point>(
-      "reference_pressure_point",
-      Point(0, 0, 0),
-      "Reference point used to compute the reduced-pressure head gh = g.(x-x_ref).");
-
   params.addParam<bool>(
       "clip_volume_fraction_for_geometry",
       true,
@@ -85,19 +72,6 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   params.addParam<MooseFunctorName>("interface_unit_normal_name",
                                     "interface_unit_normal_face",
                                     "Output name for the face-oriented unit normal functor.");
-  params.addParam<MooseFunctorName>(
-      "hydrostatic_momentum_source_x_name",
-      "hydrostatic_momentum_source_x",
-      "Output name for the x-component reduced-pressure hydrostatic momentum source density.");
-  params.addParam<MooseFunctorName>(
-      "hydrostatic_momentum_source_y_name",
-      "hydrostatic_momentum_source_y",
-      "Output name for the y-component reduced-pressure hydrostatic momentum source density.");
-  params.addParam<MooseFunctorName>(
-      "hydrostatic_momentum_source_z_name",
-      "hydrostatic_momentum_source_z",
-      "Output name for the z-component reduced-pressure hydrostatic momentum source density.");
-
   return params;
 }
 
@@ -105,9 +79,6 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::
     ConservativeSharpInterfaceGeometryFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _volume_fraction(getFunctor<Real>("volume_fraction_functor")),
-    _density(getFunctor<Real>("density_functor")),
-    _reference_pressure_point(getParam<Point>("reference_pressure_point")),
-    _gravity(getParam<RealVectorValue>("gravity")),
     _clip_volume_fraction(getParam<bool>("clip_volume_fraction_for_geometry")),
     _alpha_lower_bound(getParam<Real>("alpha_lower_bound")),
     _alpha_upper_bound(getParam<Real>("alpha_upper_bound")),
@@ -117,11 +88,7 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::
     _delta_n_name(getParam<MooseFunctorName>("delta_n_name")),
     _near_interface_name(getParam<MooseFunctorName>("near_interface_name")),
     _alpha_gradient_name(getParam<MooseFunctorName>("alpha_gradient_name")),
-    _interface_unit_normal_name(getParam<MooseFunctorName>("interface_unit_normal_name")),
-    _hydrostatic_momentum_source_names{
-        getParam<MooseFunctorName>("hydrostatic_momentum_source_x_name"),
-        getParam<MooseFunctorName>("hydrostatic_momentum_source_y_name"),
-        getParam<MooseFunctorName>("hydrostatic_momentum_source_z_name")}
+    _interface_unit_normal_name(getParam<MooseFunctorName>("interface_unit_normal_name"))
 {
   if (_alpha_lower_bound > _alpha_upper_bound)
     paramError("alpha_upper_bound", "alpha_upper_bound must be >= alpha_lower_bound.");
@@ -166,17 +133,4 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::
         return grad_alpha / (mag_grad_alpha + _delta_n);
       },
       clearance_schedule);
-
-  for (const auto component : make_range(_hydrostatic_momentum_source_names.size()))
-    addFunctorProperty<Real>(
-        _hydrostatic_momentum_source_names[component],
-        [this, component](const auto & r, const auto & t) -> Real
-        {
-          const Point x = r.getPoint();
-          const Real gh = _gravity * (x - _reference_pressure_point);
-          const RealVectorValue grad_rho = MetaPhysicL::raw_value(_density.gradient(r, t));
-
-          return -gh * grad_rho(component);
-        },
-        clearance_schedule);
 }
