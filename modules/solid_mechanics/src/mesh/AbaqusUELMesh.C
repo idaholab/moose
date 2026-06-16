@@ -9,6 +9,7 @@
 
 #include "AbaqusInputObjects.h"
 #include "AbaqusUELMesh.h"
+#include "AbaqusUELPartitioner.h"
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
@@ -34,6 +35,13 @@ AbaqusUELMesh::validParams()
 AbaqusUELMesh::AbaqusUELMesh(const InputParameters & parameters)
   : MooseMesh(parameters), _debug(getParam<bool>("debug"))
 {
+  // The libMesh mesh consists of disconnected NodeElems, so the default Metis/ParMETIS
+  // partitioners see an empty connectivity graph. Install a partitioner that builds the graph
+  // from the UEL connectivity instead. A user-supplied [Partitioner] block still overrides this.
+  // The base-class method clones the argument and stores the clone, so this stack object can
+  // safely go out of scope (same idiom as PartitionerAction).
+  AbaqusUELPartitioner partitioner(*this);
+  setCustomPartitioner(&partitioner);
 }
 
 AbaqusUELMesh::AbaqusUELMesh(const AbaqusUELMesh & other_mesh)
