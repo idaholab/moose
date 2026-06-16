@@ -35,7 +35,7 @@ depends on the `citation_style` configured above:
   wraps the author and year in parentheses, e.g. "(Slaughter et al., 2014)".
 - With `number`, `!citep` renders just the bracketed number, e.g. `[1]`, while
   `!cite` keeps the author so it still reads in running text, e.g.
-  "Slaughter et al. `[1]`" (a bare number would not read well there).
+  "Slaughter et al. `[1]`".
 
 To cite multiple references, they are separated with a comma.
 
