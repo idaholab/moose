@@ -11,6 +11,7 @@ on:
 jobs:
   merge-scheduled-to-weekly:
     name: Merge scheduled to weekly
+    if: github.repository_owner == 'idaholab'
     runs-on: ubuntu-slim
     environment: ${{ github.event_name == 'workflow_dispatch' && 'scheduled-merges' || '' }}
     env:
