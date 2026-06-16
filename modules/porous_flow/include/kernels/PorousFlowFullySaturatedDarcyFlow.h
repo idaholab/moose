@@ -12,35 +12,39 @@
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
 /**
- * Darcy advective flux for a fully-saturated,
- * single-phase, multi-component fluid.
- * No upwinding or relative-permeability is used.
+ * Darcy advective flux for a fully-saturated, single-phase, multi-component fluid.
+ * Extends DarcyBase by multiplying the mobility by the component mass fraction.
+ * No upwinding or relative-permeability effects are included.
  */
-class PorousFlowFullySaturatedDarcyFlow : public PorousFlowFullySaturatedDarcyBase
+template <bool is_ad>
+class PorousFlowFullySaturatedDarcyFlowTempl : public PorousFlowFullySaturatedDarcyBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFullySaturatedDarcyFlow(const InputParameters & parameters);
+  PorousFlowFullySaturatedDarcyFlowTempl(const InputParameters & parameters);
 
 protected:
-  /**
-   * The mobility of the fluid = mass_fraction * density / viscosity
-   */
-  virtual Real mobility() const override;
+  virtual GenericReal<is_ad> mobility() const override;
+  virtual Real dmobility(unsigned int pvar) const override;
 
-  /**
-   * The derivative of the mobility with respect to the PorousFlow variable pvar
-   * @param pvar Take the derivative with respect to this PorousFlow variable
-   */
-  virtual Real dmobility(unsigned pvar) const override;
+  /// Mass fraction of each component in each phase
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mfrac;
 
-  /// mass fraction of the components in the phase
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mfrac;
+  /// d(mass fraction)/d(PorousFlow variable) — null for AD path
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmfrac_dvar;
 
-  /// Derivative of mass fraction wrt wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmfrac_dvar;
-
-  /// The fluid component for this Kernel
+  /// Fluid component index for this kernel
   const unsigned int _fluid_component;
+
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_dictator;
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_multiply_by_density;
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_density;
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_viscosity;
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_ddensity_dvar;
+  using PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::_dviscosity_dvar;
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowFullySaturatedDarcyFlowTempl<false> PorousFlowFullySaturatedDarcyFlow;
+typedef PorousFlowFullySaturatedDarcyFlowTempl<true> ADPorousFlowFullySaturatedDarcyFlow;
