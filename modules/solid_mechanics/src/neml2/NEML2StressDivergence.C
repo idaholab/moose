@@ -39,8 +39,7 @@ NEML2StressDivergence::NEML2StressDivergence(const InputParameters & parameters)
   : NEML2PostKernel(parameters),
     _residual(dynamic_cast<PetscVector<Real> *>(&_sys.system().add_vector(
         getParam<std::string>("residual"), false, libMesh::ParallelType::GHOSTED))),
-    _stress(
-        _constitutive.getOutput(NEML2Utils::parseVariableName(getParam<std::string>("stress")))),
+    _stress(_constitutive.getOutput(getParam<std::string>("stress"))),
     _disp_vars(getParam<std::vector<NonlinearVariableName>>("displacements")),
     _ndisp(_disp_vars.size())
 {

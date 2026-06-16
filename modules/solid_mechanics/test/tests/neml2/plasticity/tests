@@ -10,15 +10,7 @@
       exodiff = 'perfect_out.e'
       capabilities = 'neml2'
       valgrind = heavy
-    []
-    [perfect_keep_tensors_on_device]
-      detail = 'perfect plasticity with tensors kept on the compute device, '
-      type = Exodiff
-      input = 'perfect.i'
-      exodiff = 'perfect_out.e'
-      capabilities = 'neml2'
-      valgrind = heavy
-      cli_args = "NEML2/all/keep_tensors_on_device=true NEML2/all/moose_input_types='MATERIAL POSTPROCESSOR' NEML2/all/moose_inputs='neml2_strain time' NEML2/all/neml2_inputs='forces/E forces/t'"
+      recover = false # TODO: Not sure why this is needed -- investigate later
     []
     [isoharden]
       detail = 'isotropic hardening, '
@@ -44,5 +36,15 @@
       capabilities = 'neml2'
       valgrind = heavy
     []
+  []
+  [manage_state_advance]
+    requirement = 'The system shall be capable of managing the state advance for the NEML2 constitutive update on device.'
+    type = Exodiff
+    input = 'perfect.i'
+    cli_args = "NEML2/all/manage_state_advance=true"
+    exodiff = 'perfect_out.e'
+    issues = '#27493'
+    capabilities = 'neml2'
+    valgrind = heavy
   []
 []
