@@ -30,6 +30,8 @@ namespace libMesh
 {
 class Elem;
 class MeshBase;
+template <typename T>
+class SparseMatrix;
 }
 
 /**
@@ -71,10 +73,14 @@ public:
   Real cellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
   /// Begin streaming native linear FV assembly contributions into the cached split predictor.
   void beginFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i);
-  /// Finalize the streamed split predictor and apply equation relaxation to it.
+  /// Finalize the split predictor assembled from the momentum operator.
   void completeFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i,
                                                         const Real relaxation_parameter,
                                                         const bool enforce_diagonal_dominance);
+  /// Populate cached split-predictor internals from the assembled momentum operator.
+  void cacheFVSplitMomentumPredictorOperatorAssembly(const unsigned int system_i,
+                                                     libMesh::SparseMatrix<Number> & matrix,
+                                                     const NumericVector<Number> & rhs);
   /// Invalidate the cached assembled/relaxed momentum predictor operator.
   void clearMomentumPredictorOperatorCache();
   /// Add explicit forcing to the momentum predictor RHS after the base operator assembly.
@@ -169,7 +175,7 @@ protected:
   /// Whether the cached predictor-operator state is complete and can be consumed.
   bool canUseCachedMomentumPredictorOperator();
 
-  /// Finalize all streamed component operators as one vector momentum-predictor object.
+  /// Finalize all component operators as one vector momentum-predictor object.
   void finalizeCachedMomentumPredictorOperators();
 
   /// Access the cached momentum-predictor operator for a component.

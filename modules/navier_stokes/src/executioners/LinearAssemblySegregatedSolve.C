@@ -405,6 +405,9 @@ LinearAssemblySegregatedSolve::assembleMomentumPredictorOperator(const unsigned 
     rhs.close();
 
   if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+    _rc_uo->cacheFVSplitMomentumPredictorOperatorAssembly(system_i, mmat, rhs);
+
+  if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
     _rc_uo->completeFVSplitMomentumPredictorOperatorAssembly(
         system_i, _momentum_equation_relaxation, _force_momentum_diagonal_dominance);
 
