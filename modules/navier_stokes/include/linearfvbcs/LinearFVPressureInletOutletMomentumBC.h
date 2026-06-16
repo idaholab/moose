@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionOutflowBC.h"
+#include "LinearFVInletOutletScalarBC.h"
 #include "NS.h"
 
 class ElemInfo;
@@ -20,29 +20,16 @@ class ElemInfo;
  * The historical class name is retained, but the solved variable and returned boundary values are
  * velocity components, not rho*u.
  */
-class LinearFVPressureInletOutletMomentumBC : public LinearFVAdvectionDiffusionOutflowBC
+class LinearFVPressureInletOutletMomentumBC : public LinearFVInletOutletScalarBC
 {
 public:
   static InputParameters validParams();
 
   LinearFVPressureInletOutletMomentumBC(const InputParameters & parameters);
 
-  Real computeBoundaryValue() const override;
-  Real computeBoundaryNormalGradient() const override;
-  Real computeBoundaryValueMatrixContribution() const override;
-  Real computeBoundaryValueRHSContribution() const override;
-  Real computeBoundaryGradientMatrixContribution() const override;
-  Real computeBoundaryGradientRHSContribution() const override;
-
-  bool includesMaterialPropertyMultiplier() const override { return !isBackflow(); }
-  bool useBoundaryGradientExtrapolation() const override { return isBackflow(); }
-
 protected:
-  bool isBackflow() const;
-  Real outwardFaceFlux() const;
-  const ElemInfo & fluidElemInfo() const;
-  Real computeBackflowBoundaryValue() const;
-  Real computeBackflowBoundaryValueMatrixContribution() const;
+  Real computeBackflowBoundaryValue() const override;
+  Real computeBackflowBoundaryValueMatrixContribution() const override;
   RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue outwardUnitNormal() const;
 
@@ -52,6 +39,4 @@ protected:
   const MooseLinearVariableFVReal * const _w_var;
   std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
   const unsigned int _index;
-  const Moose::Functor<Real> & _backflow_value;
-  const Moose::Functor<Real> & _face_flux;
 };

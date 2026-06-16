@@ -17,7 +17,7 @@ registerMooseObject("NavierStokesApp", LinearFVPressureInletOutletMomentumBC);
 InputParameters
 LinearFVPressureInletOutletMomentumBC::validParams()
 {
-  InputParameters params = LinearFVAdvectionDiffusionOutflowBC::validParams();
+  InputParameters params = LinearFVInletOutletScalarBC::validParams();
   params.addClassDescription(
       "Adds a pressure-controlled inlet/outlet boundary condition for velocity components. On "
       "outflow it behaves like a zero-gradient / extrapolated outlet; on backflow it fixes the "
@@ -30,22 +30,12 @@ LinearFVPressureInletOutletMomentumBC::validParams()
       "momentum_component",
       momentum_component,
       "The velocity component that this boundary condition applies to.");
-  params.addParam<MooseFunctorName>(
-      "backflow_value",
-      "0",
-      "The tangential backflow velocity component imposed when the local boundary flow reverses "
-      "and becomes inflow. The dam-break path uses the default value of zero.");
-  params.addParam<MooseFunctorName>(
-      "face_flux",
-      "corrected_face_phi",
-      "The corrected face-flux functor used to switch between outflow and backflow. This switches "
-      "on phi rather than cell velocity.");
   return params;
 }
 
 LinearFVPressureInletOutletMomentumBC::LinearFVPressureInletOutletMomentumBC(
     const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionOutflowBC(parameters),
+  : LinearFVInletOutletScalarBC(parameters),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
         &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
@@ -57,9 +47,7 @@ LinearFVPressureInletOutletMomentumBC::LinearFVPressureInletOutletMomentumBC(
                ? dynamic_cast<const MooseLinearVariableFVReal *>(
                      &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
                : nullptr),
-    _index(getParam<MooseEnum>("momentum_component")),
-    _backflow_value(getFunctor<Real>("backflow_value")),
-    _face_flux(getFunctor<Real>("face_flux"))
+    _index(getParam<MooseEnum>("momentum_component"))
 {
   if (!_u_var)
     paramError("u", "the u velocity variable must be a MooseLinearVariableFVReal.");
@@ -77,24 +65,6 @@ LinearFVPressureInletOutletMomentumBC::LinearFVPressureInletOutletMomentumBC(
                "In three dimensions, the w velocity variable must be supplied and it must be a "
                "MooseLinearVariableFVReal.");
   _velocity_vars.push_back(_w_var);
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::outwardFaceFlux() const
-{
-  const auto state = determineState();
-  const Real boundary_normal_multiplier =
-      _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  return boundary_normal_multiplier *
-         _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
-}
-
-const ElemInfo &
-LinearFVPressureInletOutletMomentumBC::fluidElemInfo() const
-{
-  return _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
-             ? *_current_face_info->neighborInfo()
-             : *_current_face_info->elemInfo();
 }
 
 RealVectorValue
@@ -122,12 +92,6 @@ LinearFVPressureInletOutletMomentumBC::outwardUnitNormal() const
   return normal / normal_magnitude;
 }
 
-bool
-LinearFVPressureInletOutletMomentumBC::isBackflow() const
-{
-  return outwardFaceFlux() < 0.0;
-}
-
 Real
 LinearFVPressureInletOutletMomentumBC::computeBackflowBoundaryValue() const
 {
@@ -148,59 +112,4 @@ LinearFVPressureInletOutletMomentumBC::computeBackflowBoundaryValueMatrixContrib
 {
   const Real normal_component = outwardUnitNormal()(_index);
   return normal_component * normal_component;
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryValue() const
-{
-  return isBackflow() ? computeBackflowBoundaryValue()
-                      : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValue();
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryNormalGradient() const
-{
-  if (!isBackflow())
-    return LinearFVAdvectionDiffusionOutflowBC::computeBoundaryNormalGradient();
-
-  const auto & elem_info = fluidElemInfo();
-  const Real distance = computeCellToFaceDistance();
-  return (computeBackflowBoundaryValue() - _var.getElemValue(elem_info, determineState())) /
-         distance;
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryValueMatrixContribution() const
-{
-  return isBackflow()
-             ? computeBackflowBoundaryValueMatrixContribution()
-             : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueMatrixContribution();
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryValueRHSContribution() const
-{
-  if (!isBackflow())
-    return LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueRHSContribution();
-
-  const auto & elem_info = fluidElemInfo();
-  return computeBackflowBoundaryValue() - computeBackflowBoundaryValueMatrixContribution() *
-                                              _var.getElemValue(elem_info, determineState());
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryGradientMatrixContribution() const
-{
-  if (!isBackflow())
-    return LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientMatrixContribution();
-
-  return (1.0 - computeBackflowBoundaryValueMatrixContribution()) / computeCellToFaceDistance();
-}
-
-Real
-LinearFVPressureInletOutletMomentumBC::computeBoundaryGradientRHSContribution() const
-{
-  return isBackflow()
-             ? computeBoundaryValueRHSContribution() / computeCellToFaceDistance()
-             : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientRHSContribution();
 }

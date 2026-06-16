@@ -15,7 +15,6 @@
 #include "MooseFunctorArguments.h"
 #include "MooseMesh.h"
 #include "PIMPLE.h"
-#include "ReducedPressurePIMPLE.h"
 #include "SIMPLE.h"
 #include "SubProblem.h"
 #include "FVUtils.h"
@@ -183,7 +182,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
                " should only be used with a linear segregated thermal-hydraulics solver!");
 
   rebuildSharpInterfaceFaceInfo();
-  initializeAdditionalPressureFluxStorage();
 }
 
 Real
@@ -584,12 +582,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialize()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::initFaceMassFlux()
-{
-  RhieChowMassFlux::initFaceMassFlux();
-}
-
-void
 ConservativeSharpInterfaceRhieChowMassFluxBase::cachePressureEquationFlux()
 {
   const_cast<MooseLinearVariableFVReal *>(_p)->computeCellGradients();
@@ -631,37 +623,24 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
 
 Moose::FaceArg
 ConservativeSharpInterfaceRhieChowMassFluxBase::makeCenteredFaceArg(
-    const FaceInfo * fi, const Moose::StateArg * limiter_state) const
+    const FaceInfo * fi, const Elem * const face_side, const Moose::StateArg * limiter_state) const
 {
   return Moose::FaceArg{
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, limiter_state};
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, face_side, limiter_state};
 }
 
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
-  using namespace Moose::FV;
-
   if (_vel[0]->isInternalFace(*fi))
-  {
-    const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-    const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-
-    Real face_rho = 0.0;
-    interpolate(InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
-    return face_rho;
-  }
+    return evaluateFaceScalarFunctor(&_rho, fi, time_arg, nullptr);
 
   const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
   const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
 
   if (useConstrainedBoundaryPredictorState(fi))
-  {
-    const Moose::FaceArg boundary_face{
-        fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
-    return _rho(boundary_face, time_arg);
-  }
+    return _rho(makeCenteredFaceArg(fi, elem_info.elem()), time_arg);
 
   return _rho(makeElemArg(elem_info.elem()), time_arg);
 }
@@ -689,14 +668,11 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
   {
     const auto & elem_info = *fi->elemInfo();
     const auto & neighbor_info = *fi->neighborInfo();
-    Real face_velocity = 0.0;
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           face_velocity,
-                           cellPhysicalVelocityComponent(elem_info, component, time_arg),
-                           cellPhysicalVelocityComponent(neighbor_info, component, time_arg),
-                           *fi,
-                           true);
-    return face_velocity;
+    return Moose::FV::linearInterpolation(
+        cellPhysicalVelocityComponent(elem_info, component, time_arg),
+        cellPhysicalVelocityComponent(neighbor_info, component, time_arg),
+        *fi,
+        true);
   }
 
   return boundaryPhysicalVelocityComponent(fi, component, time_arg);
@@ -746,12 +722,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
       const auto neighbor_dof =
           neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      interpolate(InterpMethod::Average,
-                  face_ainv(dim_i),
-                  raw_ainv_readers[dim_i](elem_dof),
-                  raw_ainv_readers[dim_i](neighbor_dof),
-                  *fi,
-                  true);
+      face_ainv(dim_i) = linearInterpolation(
+          raw_ainv_readers[dim_i](elem_dof), raw_ainv_readers[dim_i](neighbor_dof), *fi, true);
     }
   }
   else
@@ -873,7 +845,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
   if (!functor)
     return 0.0;
 
-  return MetaPhysicL::raw_value((*functor)(makeCenteredFaceArg(fi, limiter_state), time_arg));
+  return MetaPhysicL::raw_value(
+      (*functor)(makeCenteredFaceArg(fi, nullptr, limiter_state), time_arg));
 }
 
 Real
@@ -1040,12 +1013,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
 
   const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
   const Elem * const fluid_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
-  const Moose::FaceArg boundary_face{
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, fluid_elem, nullptr};
-
   // On uncoupled boundary patches the explicit non-orthogonal correction is zero and the
   // operative snGrad comes from the boundary patch field.
-  return MetaPhysicL::raw_value(_rho.gradient(boundary_face, time_arg)) * fi->normal();
+  return MetaPhysicL::raw_value(_rho.gradient(makeCenteredFaceArg(fi, fluid_elem), time_arg)) *
+         fi->normal();
 }
 
 Real
@@ -1204,9 +1175,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
       const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
       const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
-
       const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
 
       if (use_constrained_boundary_state)
@@ -1214,10 +1182,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
         for (const auto dim_i : make_range(_dim))
         {
           const Real boundary_value = boundaryPhysicalVelocityComponent(fi, dim_i, time_arg);
-          face_hbya(dim_i) =
-              std::isfinite(boundary_value)
-                  ? -boundary_value
-                  : -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+          face_hbya(dim_i) = std::isfinite(boundary_value)
+                                 ? -boundary_value
+                                 : -MetaPhysicL::raw_value((*_vel[dim_i])(
+                                       makeCenteredFaceArg(fi, elem_info.elem()), time_arg));
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
       }
@@ -1345,9 +1313,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateVelocityBoundaryState()
     const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
     const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
     const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-    const Moose::FaceArg boundary_face{
-        fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
-    const Real face_rho = _rho(boundary_face, time_arg);
+    const Real face_rho = _rho(makeCenteredFaceArg(fi, boundary_elem), time_arg);
 
     for (const auto component : index_range(_vel))
     {
@@ -1413,15 +1379,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVe
     return RealVectorValue();
 
   return reconstructBasePressureCoupledCellVelocityDelta(elem_info, time_arg);
-}
-
-void
-ConservativeSharpInterfaceRhieChowMassFluxBase::applyAdditionalFaceMassFluxCorrection()
-{
-  // computeFaceMassFlux() now uses the explicit phiHbyA face state, which in the
-  // sharp-interface path already includes the transient and capillary/hydrostatic
-  // predictor-source fluxes.
-  // There is therefore no additional post-solve face-flux correction to apply here.
 }
 
 void

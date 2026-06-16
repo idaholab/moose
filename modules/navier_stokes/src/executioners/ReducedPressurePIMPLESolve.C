@@ -591,8 +591,6 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
 
   const auto residuals =
       applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
-  if (recompute_face_mass_flux && sharp_rc)
-    sharp_rc->applyAdditionalFaceMassFluxCorrection();
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
   // continuity cleanup should repair phi, not overwrite the physical p_rgh field
@@ -631,11 +629,7 @@ ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_f
   _rc_uo->cachePressureEquationFlux();
 
   if (recompute_face_mass_flux)
-  {
     _rc_uo->computeFaceMassFlux();
-    if (auto * sharp_rc = sharpInterfaceRC())
-      sharp_rc->applyAdditionalFaceMassFluxCorrection();
-  }
 
   // The face flux and velocity writeback must keep using the cached pressure-equation flux
   // from the unrelaxed pressure solve. relaxPressureFieldForNextPredictor() refreshes

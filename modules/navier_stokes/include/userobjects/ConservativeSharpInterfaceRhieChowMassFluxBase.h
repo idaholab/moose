@@ -57,7 +57,6 @@ public:
   void meshChanged() override;
   void initialSetup() override;
   void initialize() override;
-  void initFaceMassFlux() override;
   void cachePressureEquationFlux() override;
   void computeFaceMassFlux() override;
   void computeCellVelocity() override;
@@ -77,8 +76,6 @@ public:
   /// Update the additional pressure-equation source-flux functors before the pressure solve.
   void updateAdditionalPressureFluxFunctors(const bool with_updated_pressure, const bool verbose);
 
-  /// Apply the physical counterpart of the additional source fluxes to the final face mass flux.
-  void applyAdditionalFaceMassFluxCorrection();
   void computePressureCorrectedCellVelocity();
 
   void
@@ -129,6 +126,7 @@ protected:
                                                  const Moose::StateArg & time_arg) const;
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
+                                     const Elem * face_side = nullptr,
                                      const Moose::StateArg * limiter_state = nullptr) const;
 
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;

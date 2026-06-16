@@ -39,7 +39,8 @@ protected:
   bool isBackflow() const;
   Real outwardFaceFlux() const;
   const ElemInfo & fluidElemInfo() const;
-  Real computeBackflowBoundaryValue() const;
+  virtual Real computeBackflowBoundaryValue() const;
+  virtual Real computeBackflowBoundaryValueMatrixContribution() const { return 0.0; }
 
   const Moose::Functor<Real> & _backflow_value;
   const Moose::Functor<Real> & _face_flux;

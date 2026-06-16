@@ -88,7 +88,6 @@ private:
   LinearFVBoundaryCondition * boundaryCondition(const FaceInfo & fi) const;
   Real boundaryValue(const FaceInfo & fi, FaceInfo::VarFaceNeighbors face_type) const;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
-  Moose::FaceArg functorFaceArg(const Moose::Functor<Real> & functor, const FaceInfo & fi) const;
   Real cellVolume(const ElemInfo & elem_info) const;
   Real faceMeasure(const FaceInfo & fi) const;
   Real cellAlpha(const ElemInfo & elem_info) const;

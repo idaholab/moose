@@ -97,22 +97,27 @@ Real
 LinearFVInletOutletScalarBC::computeBoundaryValueMatrixContribution() const
 {
   return isBackflow()
-             ? 0.0
+             ? computeBackflowBoundaryValueMatrixContribution()
              : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueMatrixContribution();
 }
 
 Real
 LinearFVInletOutletScalarBC::computeBoundaryValueRHSContribution() const
 {
-  return isBackflow() ? computeBackflowBoundaryValue()
-                      : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueRHSContribution();
+  if (!isBackflow())
+    return LinearFVAdvectionDiffusionOutflowBC::computeBoundaryValueRHSContribution();
+
+  const auto & elem_info = fluidElemInfo();
+  return computeBackflowBoundaryValue() - computeBackflowBoundaryValueMatrixContribution() *
+                                              _var.getElemValue(elem_info, determineState());
 }
 
 Real
 LinearFVInletOutletScalarBC::computeBoundaryGradientMatrixContribution() const
 {
   return isBackflow()
-             ? 1.0 / computeCellToFaceDistance()
+             ? (1.0 - computeBackflowBoundaryValueMatrixContribution()) /
+                   computeCellToFaceDistance()
              : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientMatrixContribution();
 }
 
@@ -120,6 +125,6 @@ Real
 LinearFVInletOutletScalarBC::computeBoundaryGradientRHSContribution() const
 {
   return isBackflow()
-             ? computeBackflowBoundaryValue() / computeCellToFaceDistance()
+             ? computeBoundaryValueRHSContribution() / computeCellToFaceDistance()
              : LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientRHSContribution();
 }

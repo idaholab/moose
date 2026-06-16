@@ -42,6 +42,27 @@ constexpr Real alpha_max = 1.0;
 constexpr Real correction_relaxation = 1.0;
 constexpr Real first_correction_relaxation = 1.0;
 constexpr Real later_correction_relaxation = 0.5;
+
+Moose::FaceArg
+functorFaceArg(const Moose::Functor<Real> & functor, const FaceInfo & fi)
+{
+  Moose::FaceArg face_arg{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
+  const auto on_elem = functor.hasFaceSide(fi, true);
+  const auto on_neighbor = functor.hasFaceSide(fi, false);
+
+  if (on_elem && on_neighbor)
+    face_arg.face_side = nullptr;
+  else if (on_elem)
+    face_arg.face_side = fi.elemPtr();
+  else if (on_neighbor)
+    face_arg.face_side = fi.neighborPtr();
+  else
+    mooseError(
+        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
+
+  return face_arg;
+}
 }
 
 InputParameters
@@ -211,9 +232,8 @@ LinearFVBoundaryCondition *
 ConservativeSharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & fi) const
 {
   for (const auto bnd_id : fi.boundaryIDs())
-    if (const auto & bc_map = _alpha_var->getBoundaryConditionMap();
-        bc_map.find(bnd_id) != bc_map.end())
-      return bc_map.at(bnd_id);
+    if (auto * bc = _alpha_var->getBoundaryCondition(bnd_id))
+      return bc;
 
   return nullptr;
 }
@@ -244,27 +264,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
   else
     return face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
            face_type == FaceInfo::VarFaceNeighbors::BOTH;
-}
-
-Moose::FaceArg
-ConservativeSharpInterfaceVOFMULESCorrector::functorFaceArg(const Moose::Functor<Real> & functor,
-                                                            const FaceInfo & fi) const
-{
-  auto face_arg = makeCDFace(fi);
-  const auto on_elem = functor.hasFaceSide(fi, true);
-  const auto on_neighbor = functor.hasFaceSide(fi, false);
-
-  if (on_elem && on_neighbor)
-    face_arg.face_side = nullptr;
-  else if (on_elem)
-    face_arg.face_side = fi.elemPtr();
-  else if (on_neighbor)
-    face_arg.face_side = fi.neighborPtr();
-  else
-    mooseError(
-        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
-
-  return face_arg;
 }
 
 Real
