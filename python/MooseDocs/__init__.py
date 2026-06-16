@@ -48,7 +48,11 @@ if MOOSE_DIR is None:
 # reference its content may opt out by setting MOOSEDOCS_LARGE_MEDIA to a false value (e.g. "false",
 # "0", "no"). This check happens here, at import time, because the submodule must be available before
 # any command parses its configuration files.
-USE_LARGE_MEDIA = os.getenv("MOOSEDOCS_LARGE_MEDIA", "true").lower() in ("true", "1", "yes")
+USE_LARGE_MEDIA = os.getenv("MOOSEDOCS_LARGE_MEDIA", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 # Initialize submodule(s) with progress output
 if USE_LARGE_MEDIA:
