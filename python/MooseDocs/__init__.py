@@ -44,11 +44,19 @@ if MOOSE_DIR is None:
     )
     sys.exit(1)
 
+# The large_media submodule is initialized and indexed by default, but applications that do not
+# reference its content may opt out by setting MOOSEDOCS_LARGE_MEDIA to a false value (e.g. "false",
+# "0", "no"). This check happens here, at import time, because the submodule must be available before
+# any command parses its configuration files.
+USE_LARGE_MEDIA = os.getenv("MOOSEDOCS_LARGE_MEDIA", "true").lower() in ("true", "1", "yes")
+
 # Initialize submodule(s) with progress output
-mooseutils.git_init_submodule("large_media", MOOSE_DIR, True)
+if USE_LARGE_MEDIA:
+    mooseutils.git_init_submodule("large_media", MOOSE_DIR, True)
 
 # List all files, this is done here to avoid running this command many times
 ls_files = mooseutils.git_ls_files if is_git_repo else mooseutils.list_files
 PROJECT_FILES = ls_files(ROOT_DIR)
 PROJECT_FILES.update(ls_files(MOOSE_DIR))
-PROJECT_FILES.update(ls_files(os.path.join(MOOSE_DIR, "large_media")))
+if USE_LARGE_MEDIA:
+    PROJECT_FILES.update(ls_files(os.path.join(MOOSE_DIR, "large_media")))
