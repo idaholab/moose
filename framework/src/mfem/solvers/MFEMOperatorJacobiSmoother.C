@@ -33,6 +33,7 @@ void
 MFEMOperatorJacobiSmoother::ConstructSolver()
 {
   _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
+  _solver->iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 void

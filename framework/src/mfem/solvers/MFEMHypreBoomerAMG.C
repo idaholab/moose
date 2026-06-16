@@ -52,6 +52,7 @@ MFEMHypreBoomerAMG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));

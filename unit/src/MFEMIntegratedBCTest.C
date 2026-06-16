@@ -298,10 +298,11 @@ TEST_F(MFEMIntegratedBCTest, NLBoundaryConvectiveHeatFluxIntegratorJacobianMatch
   mfem::H1_FECollection fec(1, mesh.Dimension());
   mfem::FiniteElementSpace fespace(&mesh, &fec);
 
+  ASSERT_EQ(fespace.GetNBE(), 4);
+
   mfem::GridFunction gf(&fespace);
   gf = 0.0;
 
-  ASSERT_TRUE(mesh.GetNBE());
   const int be = 0;
   mfem::Array<int> vdofs;
   fespace.GetBdrElementVDofs(be, vdofs);

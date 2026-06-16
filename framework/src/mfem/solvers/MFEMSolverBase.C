@@ -22,7 +22,7 @@ SolverBase::validParams()
   params.registerBase("Moose::MFEM::SolverBase");
   params.registerSystemAttributeName("Moose::MFEM::SolverBase");
   params.addParam<bool>("use_initial_guess",
-                        true,
+                        false,
                         "Whether to preserve the current MFEM solution vector as the initial "
                         "guess for an iterative solver.");
   return params;

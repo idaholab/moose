@@ -23,6 +23,7 @@ MFEMPetscNonlinearSolver::validParams()
 {
   InputParameters params = Moose::MFEM::NonlinearSolverBase::validParams();
   params.addClassDescription("MFEM PETSc-backed nonlinear solver using SNES.");
+  params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
   params.addParam<MultiMooseEnum>(
       "petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "Singleton PETSc options");
   params.addParam<MultiMooseEnum>("petsc_options_iname",

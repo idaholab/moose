@@ -12,6 +12,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       restep = false
+      rel_err = 1e-4
     []
     [MFEM_sub_cycling]
       type = CSVDiff
@@ -22,6 +23,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       restep = false
+      abs_zero = 1e-9
     []
   []
   [MFEMFullSolveMultiApps]

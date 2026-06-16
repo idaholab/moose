@@ -40,6 +40,7 @@ void
 MFEMGMRESSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));

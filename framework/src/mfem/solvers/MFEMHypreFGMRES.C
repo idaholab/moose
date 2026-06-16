@@ -39,6 +39,7 @@ void
 MFEMHypreFGMRES::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreFGMRES>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetKDim(getParam<int>("kdim"));

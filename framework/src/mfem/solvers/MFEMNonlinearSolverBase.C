@@ -18,6 +18,7 @@ NonlinearSolverBase::validParams()
 {
   InputParameters params = SolverBase::validParams();
   params.addClassDescription("Base class for defining nonlinear MFEM solver strategies for Moose.");
+  params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
   params.addParam<unsigned int>("max_its", 1, "Maximum nonlinear iterations.");
   params.addParam<Real>("abs_tol", 1.0e-50, "Absolute nonlinear tolerance.");
   params.addParam<Real>("rel_tol", 1.0e-8, "Relative nonlinear tolerance.");

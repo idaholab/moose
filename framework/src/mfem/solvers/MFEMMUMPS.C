@@ -34,6 +34,7 @@ void
 MFEMMUMPS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetPrintLevel(getParam<int>("print_level"));
   _solver = std::move(solver);
 }

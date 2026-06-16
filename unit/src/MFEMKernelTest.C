@@ -352,7 +352,6 @@ TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSyst
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters nonlinear_params = _factory.getValidParams("TestOffDiagonalNonlinearKernel");
   nonlinear_params.set<VariableName>("variable") = "test_variable_name";
