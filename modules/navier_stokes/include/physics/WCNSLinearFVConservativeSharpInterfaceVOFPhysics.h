@@ -9,12 +9,10 @@
 
 #pragma once
 
-#include "NavierStokesPhysicsBase.h"
-#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
+#include "WCNSLinearFVScalarTransportPhysics.h"
 
 class WCNSLinearFVConservativeSharpInterfaceVOFPhysics final
-  : public NavierStokesPhysicsBase,
-    public WCNSFVCoupledAdvectionPhysicsHelper
+  : public WCNSLinearFVScalarTransportPhysics
 {
 public:
   static InputParameters validParams();
@@ -22,25 +20,23 @@ public:
   WCNSLinearFVConservativeSharpInterfaceVOFPhysics(const InputParameters & parameters);
 
 protected:
-  void addSolverVariables() override;
   void addInitialConditions() override;
-  void addFVKernels() override;
-  void addFVBCs() override;
   void addMaterials() override;
   void addUserObjects() override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override { return 2; }
 
 private:
-  void addAlphaTimeKernels();
-  void addAlphaAdvectionKernels();
-  void addAlphaInletBC();
-  void addAlphaOutletBC();
+  void addScalarAdvectionKernels() override;
+  void addScalarDiffusionKernels() override {}
+  void addScalarSourceKernels() override {}
+  void addScalarInletBC() override {}
+  void addScalarWallBC() override {}
+  void addScalarOutletBC() override;
+
   void addMixtureFunctorMaterial(const std::string & object_suffix,
                                  const MooseFunctorName & property_name,
                                  const MooseFunctorName & phase_1_name,
                                  const MooseFunctorName & phase_2_name,
                                  bool limit_phase_fraction);
-
-  const VariableName _alpha_name;
 };

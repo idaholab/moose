@@ -11,15 +11,11 @@
 
 #include "GeneralUserObject.h"
 #include "Executioner.h"
-#include "MapConversionUtils.h"
 #include "MooseUtils.h"
 #include "NS.h"
 #include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 #include "RhieChowMassFlux.h"
 #include "TheWarehouse.h"
-
-#include <algorithm>
-#include <cctype>
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp",
                                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics);
@@ -32,20 +28,6 @@ registerMooseAction("NavierStokesApp",
 registerMooseAction("NavierStokesApp",
                     WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
                     "add_functor_material");
-
-namespace
-{
-std::string
-sanitizeFunctorLabel(const std::string & input)
-{
-  std::string result = input;
-  std::transform(result.begin(),
-                 result.end(),
-                 result.begin(),
-                 [](unsigned char c) { return std::isalnum(c) ? static_cast<char>(c) : '_'; });
-  return result;
-}
-}
 
 InputParameters
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
@@ -63,8 +45,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
                              "use_cached_momentum_predictor_operator");
   params.set<bool>("use_cached_momentum_predictor_operator") = true;
 
-  params.transferParam<bool>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                             "apply_pressure_velocity_writeback");
   params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
                                          "vof_rho_phi_functor");
   params.addParam<MooseFunctorName>(
@@ -92,9 +72,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "geometry_alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>(
       "geometry_alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
-  params.addParamNamesToGroup("apply_pressure_velocity_writeback",
-                              "Sharp Interface Pressure Correction");
-
   params.addParamNamesToGroup(
       "create_geometry_functors volume_fraction_functor geometry_delta_n "
       "clip_volume_fraction_for_geometry "
@@ -221,31 +198,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::generatedGeometryFunctorName(
   return prefix() + base_name;
 }
 
-MooseFunctorName
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::generatedBoundaryMomentumFunctorName(
-    const BoundaryName & boundary, unsigned int component, const std::string & family) const
-{
-  return prefix() + family + "_momentum_" + sanitizeFunctorLabel(boundary) + "_" +
-         NS::directions[component];
-}
-
-MooseFunctorName
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::inletVelocityFunctorName(
-    const BoundaryName & boundary, const unsigned int component) const
-{
-  return generatedBoundaryMomentumFunctorName(boundary, component, "inlet");
-}
-
-MooseFunctorName
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::wallVelocityFunctorName(
-    const BoundaryName & boundary, const unsigned int component) const
-{
-  if (_momentum_wall_functors.count(boundary) == 0)
-    return "0";
-
-  return generatedBoundaryMomentumFunctorName(boundary, component, "wall");
-}
-
 bool
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddMomentumPressureKernels() const
 {
@@ -323,8 +275,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
   if (_solve_for_dynamic_pressure)
     params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
-  params.set<bool>("apply_pressure_velocity_writeback") =
-      getParam<bool>("apply_pressure_velocity_writeback");
   params.set<MooseFunctorName>("vof_rho_phi_functor") =
       getParam<MooseFunctorName>("vof_rho_phi_functor");
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
@@ -334,7 +284,6 @@ void
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
 {
   WCNSLinearFVFlowPhysics::addFunctorMaterials();
-  addVelocityBoundaryInputFunctorMaterials();
 
   if (!shouldCreateGeometryFunctorMaterial())
   {
@@ -368,48 +317,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
   params.set<MooseFunctorName>("interface_unit_normal_name") =
       generatedGeometryFunctorName("interface_unit_normal_face");
   getProblem().addFunctorMaterial(class_name, prefix() + "sharp_interface_geometry", params);
-}
-
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addVelocityBoundaryInputFunctorMaterials()
-{
-  auto add_velocity_functor = [this](const MooseFunctorName & source_functor,
-                                     const MooseFunctorName & target_functor,
-                                     const std::string & object_suffix)
-  {
-    auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
-    assignBlocks(params, _blocks);
-    params.set<bool>("enable_jit") = false;
-    params.set<std::string>("expression") = source_functor;
-    std::vector<std::string> functor_names;
-    if (!MooseUtils::parsesToReal(source_functor))
-      functor_names.push_back(source_functor);
-    if (!functor_names.empty())
-      params.set<std::vector<std::string>>("functor_names") = functor_names;
-    params.set<std::string>("property_name") = target_functor;
-    getProblem().addMaterial(
-        "ADParsedFunctorMaterial", prefix() + object_suffix + "_" + target_functor, params);
-  };
-
-  for (const auto & [boundary, inlet_type] : _momentum_inlet_types)
-    if (inlet_type == "fixed-velocity")
-    {
-      const auto & velocity_functors = libmesh_map_find(_momentum_inlet_functors, boundary);
-      for (const auto d : make_range(dimension()))
-        add_velocity_functor(velocity_functors[d],
-                             generatedBoundaryMomentumFunctorName(boundary, d, "inlet"),
-                             "inlet_velocity_bc");
-    }
-
-  for (const auto & [boundary, wall_type] : _momentum_wall_types)
-    if (wall_type == "noslip" && _momentum_wall_functors.count(boundary))
-    {
-      const auto & velocity_functors = _momentum_wall_functors[boundary];
-      for (const auto d : make_range(dimension()))
-        add_velocity_functor(velocity_functors[d],
-                             generatedBoundaryMomentumFunctorName(boundary, d, "wall"),
-                             "wall_velocity_bc");
-    }
 }
 
 unsigned short

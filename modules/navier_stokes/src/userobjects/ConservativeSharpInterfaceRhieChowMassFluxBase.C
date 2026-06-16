@@ -33,6 +33,8 @@
 
 namespace
 {
+constexpr Real pressure_writeback_face_ainv_relative_tolerance = 1e-4;
+
 template <typename FaceNormalScalar>
 RealVectorValue
 reconstructCellVectorFromFaceNormalScalars(const MooseMesh & moose_mesh,
@@ -130,19 +132,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       "Rhie-Chow face-flux provider with additional reduced-pressure predictor functors for "
       "large-density-ratio sharp-interface coupling.");
 
-  params.addParam<bool>(
-      "apply_pressure_velocity_writeback",
-      true,
-      "Whether the solved pressure correction should be reconstructed back to the cell velocity "
-      "state after each reduced-pressure correction stage.");
-  params.addRangeCheckedParam<Real>(
-      "pressure_writeback_face_ainv_relative_tolerance",
-      1e-4,
-      "pressure_writeback_face_ainv_relative_tolerance>=0",
-      "Relative cutoff used when normalizing the pressure-correction face flux for velocity "
-      "writeback. Faces whose pressure-space normal Ainv falls below "
-      "this fraction of the active-face maximum are treated as degenerate and do not "
-      "participate in the reconstructed cell-velocity correction.");
   params.addParam<MooseFunctorName>(
       "vof_rho_phi_functor",
       "rho_phi",
@@ -172,11 +161,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     _vof_transport_phi(_moose_mesh, blockIDs(), "vof_transport_phi"),
     _pressure_coupled_cell_reconstruction_scalar(
         _moose_mesh, blockIDs(), "pressure_coupled_cell_reconstruction_scalar"),
-    _apply_pressure_velocity_writeback(getParam<bool>("apply_pressure_velocity_writeback")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _reference_pressure_point(getParam<Point>("reference_pressure_point")),
-    _pressure_writeback_face_ainv_relative_tolerance(
-        getParam<Real>("pressure_writeback_face_ainv_relative_tolerance")),
     _vof_rho_phi_name(getParam<MooseFunctorName>("vof_rho_phi_functor")),
     _vof_rho_phi(nullptr)
 {
@@ -617,7 +603,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cachePressureEquationFlux()
   const Real max_abs_normal_pressure_ainv = maxPressureFaceNormalAinv(time_arg);
   const Real degenerate_normal_pressure_ainv_tol =
       std::max(std::numeric_limits<Real>::min(),
-               _pressure_writeback_face_ainv_relative_tolerance * max_abs_normal_pressure_ainv);
+               pressure_writeback_face_ainv_relative_tolerance * max_abs_normal_pressure_ainv);
   cacheCurrentCorrectedVolumetricFlux(degenerate_normal_pressure_ainv_tol);
   _pressure_coupled_velocity_correction_valid = false;
 }
@@ -1287,15 +1273,6 @@ void
 ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCorrectionFaceField(
     const Moose::StateArg & time_arg)
 {
-  if (!_apply_pressure_velocity_writeback)
-  {
-    for (const auto * fi : flowFaceInfo())
-      _pressure_coupled_cell_reconstruction_scalar[fi->id()] = 0.0;
-
-    _pressure_coupled_velocity_correction_valid = true;
-    return;
-  }
-
   if (!_pressure_equation_flux_valid)
     cachePressureEquationFlux();
 
@@ -1307,7 +1284,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCor
   const Real max_abs_normal_pressure_ainv = maxPressureFaceNormalAinv(time_arg);
   const Real degenerate_normal_pressure_ainv_tol =
       std::max(std::numeric_limits<Real>::min(),
-               _pressure_writeback_face_ainv_relative_tolerance * max_abs_normal_pressure_ainv);
+               pressure_writeback_face_ainv_relative_tolerance * max_abs_normal_pressure_ainv);
 
   cacheCurrentCorrectedVolumetricFlux(degenerate_normal_pressure_ainv_tol);
 
@@ -1432,8 +1409,7 @@ RealVectorValue
 ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVelocityDelta(
     const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
-  if (!elem_info || !_pressure_coupled_velocity_correction_valid ||
-      !_apply_pressure_velocity_writeback)
+  if (!elem_info || !_pressure_coupled_velocity_correction_valid)
     return RealVectorValue();
 
   return reconstructBasePressureCoupledCellVelocityDelta(elem_info, time_arg);

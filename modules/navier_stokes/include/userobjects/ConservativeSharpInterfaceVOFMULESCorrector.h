@@ -118,8 +118,6 @@ private:
   const Moose::Functor<Real> & _gas_density;
   const unsigned int _num_alpha_corrections;
   const unsigned int _num_limiter_iterations;
-  const Real _correction_relaxation;
-  const Real _later_correction_relaxation;
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _alpha_phi_limited;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _rho_phi;

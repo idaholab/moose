@@ -35,12 +35,12 @@ public:
 
 protected:
   void preSolveSetup(const SolverParams & solver_params) override;
-  void addIterationResiduals(ResidualStorage & residual_storage) override;
   void initializeSolveLoop(const SolverParams & solver_params) override;
   void preMomentumPressureIteration(ResidualStorage & residual_storage,
                                     const SolverParams & solver_params) override;
   bool shouldAssembleMomentumPredictorWithoutSolve() const override;
   void assembleMomentumPredictorWithoutSolve() override;
+  bool shouldSolveActiveScalarsAfterFlowLoop() const override;
   void finalizeSolve(const bool converged) override;
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) override;
@@ -73,18 +73,6 @@ private:
 
   ConservativeSharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
 
-  const std::vector<SolverSystemName> _volume_fraction_system_names;
-  const bool _has_volume_fraction_systems;
-  const bool _should_solve_volume_fractions;
-  std::vector<std::size_t> _volume_fraction_indices;
-  std::vector<unsigned int> _volume_fraction_system_numbers;
-  std::vector<LinearSystem *> _volume_fraction_systems;
-
-  const std::vector<Real> _volume_fraction_equation_relaxation;
-  Moose::PetscSupport::PetscOptions _volume_fraction_petsc_options;
-  SIMPLESolverConfiguration _volume_fraction_linear_control;
-  const Real _volume_fraction_l_abs_tol;
-  const std::vector<Real> _volume_fraction_absolute_tolerance;
   const unsigned int _volume_fraction_subcycles;
   const Real _volume_fraction_max_courant;
   std::string _startup_pressure_initialization;

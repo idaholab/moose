@@ -30,9 +30,6 @@ private:
   void addRhieChowUserObjects() override;
 
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
-  MooseFunctorName generatedBoundaryMomentumFunctorName(const BoundaryName & boundary,
-                                                        unsigned int component,
-                                                        const std::string & family) const;
   bool shouldAddMomentumPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
   MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }
@@ -55,12 +52,7 @@ private:
   void addWallPressureBC(const BoundaryName & boundary,
                          const MooseEnum & momentum_wall_type) override;
   bool shouldAddWallPressureTwoTermExpansion() const override;
-  MooseFunctorName inletVelocityFunctorName(const BoundaryName & boundary,
-                                            unsigned int component) const override;
-  MooseFunctorName wallVelocityFunctorName(const BoundaryName & boundary,
-                                           unsigned int component) const override;
   bool shouldCreateGeometryFunctorMaterial() const;
-  void addVelocityBoundaryInputFunctorMaterials();
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 

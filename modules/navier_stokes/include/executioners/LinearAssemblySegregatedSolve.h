@@ -119,6 +119,7 @@ protected:
                                             const SolverParams & solver_params);
   virtual bool shouldAssembleMomentumPredictorWithoutSolve() const;
   virtual void assembleMomentumPredictorWithoutSolve();
+  virtual bool shouldSolveActiveScalarsAfterFlowLoop() const;
   virtual void finalizeSolve(const bool converged);
 
   /**

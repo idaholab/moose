@@ -39,6 +39,9 @@ namespace
 {
 constexpr Real alpha_min = 0.0;
 constexpr Real alpha_max = 1.0;
+constexpr Real correction_relaxation = 1.0;
+constexpr Real first_correction_relaxation = 1.0;
+constexpr Real later_correction_relaxation = 0.5;
 }
 
 InputParameters
@@ -76,17 +79,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       3,
       "n_limiter_iterations>0",
       "Number of limiter tightening passes for each correction sweep.");
-  params.addRangeCheckedParam<Real>(
-      "correction_relaxation",
-      1.0,
-      "correction_relaxation>0 & correction_relaxation<=1",
-      "Under-relaxation applied to each bounded explicit correction update.");
-  params.addRangeCheckedParam<Real>(
-      "later_correction_relaxation",
-      0.5,
-      "later_correction_relaxation>0 & later_correction_relaxation<=1",
-      "Additional damping applied to correction sweeps after the first one.");
-
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_NONE);
   exec_enum = {EXEC_NONE};
@@ -108,8 +100,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _gas_density(getFunctor<Real>("gas_density")),
     _num_alpha_corrections(getParam<unsigned int>("n_alpha_corrections")),
     _num_limiter_iterations(getParam<unsigned int>("n_limiter_iterations")),
-    _correction_relaxation(getParam<Real>("correction_relaxation")),
-    _later_correction_relaxation(getParam<Real>("later_correction_relaxation")),
     _alpha_phi_limited(_fe_problem.mesh(), blockIDs(), "alpha_phi_limited"),
     _rho_phi(_fe_problem.mesh(), blockIDs(), "rho_phi")
 {
@@ -863,9 +853,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
     for (const auto i : index_range(face_corrections))
       if (std::abs(raw_correction_flux[i]) > libMesh::TOLERANCE)
       {
-        const Real correction_weight = correction_it == 0 ? 1.0 : _later_correction_relaxation;
-        limited_correction_flux[i] = correction_weight * _correction_relaxation *
-                                     accepted_lambda[i] * raw_correction_flux[i];
+        const Real correction_weight =
+            correction_it == 0 ? first_correction_relaxation : later_correction_relaxation;
+        limited_correction_flux[i] =
+            correction_weight * correction_relaxation * accepted_lambda[i] * raw_correction_flux[i];
         const auto & data = face_corrections[i];
         const Real bounded_elem_delta =
             -dt * limited_correction_flux[i] / cellVolume(*data.face->elemInfo());

@@ -718,6 +718,12 @@ LinearAssemblySegregatedSolve::assembleMomentumPredictorWithoutSolve()
 {
 }
 
+bool
+LinearAssemblySegregatedSolve::shouldSolveActiveScalarsAfterFlowLoop() const
+{
+  return true;
+}
+
 void
 LinearAssemblySegregatedSolve::finalizeSolve(const bool /* converged */)
 {
@@ -867,7 +873,8 @@ LinearAssemblySegregatedSolve::solve()
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
     // pressure and velocity
-    if (_has_active_scalar_systems && _should_solve_active_scalars)
+    if (_has_active_scalar_systems && _should_solve_active_scalars &&
+        shouldSolveActiveScalarsAfterFlowLoop())
     {
       _problem.execute(EXEC_NONLINEAR);
 

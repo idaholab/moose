@@ -205,10 +205,8 @@ protected:
 
   std::vector<const FaceInfo *> _sharp_interface_face_info;
 
-  const bool _apply_pressure_velocity_writeback;
   const RealVectorValue _gravity;
   const Point _reference_pressure_point;
-  const Real _pressure_writeback_face_ainv_relative_tolerance;
 
   const MooseFunctorName _vof_rho_phi_name;
 
