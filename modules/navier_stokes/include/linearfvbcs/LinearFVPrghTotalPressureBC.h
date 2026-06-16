@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 #include "libmesh/point.h"
 
@@ -21,7 +21,7 @@ class ElemInfo;
  * This is a fixed-value p_rgh boundary. It applies the supplied static/total pressure reference,
  * subtracts the p_rgh hydrostatic offset, and on backflow subtracts the incoming dynamic pressure.
  */
-class LinearFVPrghTotalPressureBC : public LinearFVAdvectionDiffusionBC
+class LinearFVPrghTotalPressureBC : public LinearFVAdvectionDiffusionFunctorDirichletBC
 {
 public:
   static InputParameters validParams();
@@ -29,11 +29,7 @@ public:
   LinearFVPrghTotalPressureBC(const InputParameters & parameters);
 
   Real computeBoundaryValue() const override;
-  Real computeBoundaryNormalGradient() const override;
-  Real computeBoundaryValueMatrixContribution() const override;
-  Real computeBoundaryValueRHSContribution() const override;
-  Real computeBoundaryGradientMatrixContribution() const override;
-  Real computeBoundaryGradientRHSContribution() const override;
+  bool useBoundaryGradientExtrapolation() const override { return false; }
 
 protected:
   const ElemInfo & fluidElemInfo() const;
@@ -48,7 +44,6 @@ protected:
   const MooseLinearVariableFVReal * const _v_var;
   const MooseLinearVariableFVReal * const _w_var;
   std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
-  const Moose::Functor<Real> & _p_rgh_reference;
   const Moose::Functor<Real> & _density;
   const Moose::Functor<Real> & _face_flux;
   const RealVectorValue _gravity;

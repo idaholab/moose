@@ -18,13 +18,11 @@ registerMooseObject("NavierStokesApp", LinearFVPrghTotalPressureBC);
 InputParameters
 LinearFVPrghTotalPressureBC::validParams()
 {
-  InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
+  InputParameters params = LinearFVAdvectionDiffusionFunctorDirichletBC::validParams();
   params.addClassDescription(
       "Adds a total-pressure fixed-value boundary condition for a linear FV p_rgh solve. This "
       "imposes the supplied static/total pressure reference with the p_rgh hydrostatic offset; on "
       "backflow it also subtracts the incoming dynamic pressure.");
-  params.addRequiredParam<MooseFunctorName>(
-      "functor", "The static/total pressure reference value imposed when there is no backflow.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density functor.");
   params.addParam<MooseFunctorName>(
       "face_flux",
@@ -45,7 +43,7 @@ LinearFVPrghTotalPressureBC::validParams()
 }
 
 LinearFVPrghTotalPressureBC::LinearFVPrghTotalPressureBC(const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters),
+  : LinearFVAdvectionDiffusionFunctorDirichletBC(parameters),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
         &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
@@ -57,7 +55,6 @@ LinearFVPrghTotalPressureBC::LinearFVPrghTotalPressureBC(const InputParameters &
                ? dynamic_cast<const MooseLinearVariableFVReal *>(
                      &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
                : nullptr),
-    _p_rgh_reference(getFunctor<Real>("functor")),
     _density(getFunctor<Real>(NS::density)),
     _face_flux(getFunctor<Real>("face_flux")),
     _gravity(getParam<RealVectorValue>("gravity")),
@@ -158,41 +155,6 @@ Real
 LinearFVPrghTotalPressureBC::computeBoundaryValue() const
 {
   const auto state = determineState();
-  const Real reference_value =
-      _p_rgh_reference(functorFaceArg(_p_rgh_reference, _current_face_info), state);
+  const Real reference_value = _functor(functorFaceArg(_functor, _current_face_info), state);
   return reference_value - dynamicPressureCorrection() - hydrostaticPressureOffset();
-}
-
-Real
-LinearFVPrghTotalPressureBC::computeBoundaryNormalGradient() const
-{
-  const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                                        ? _current_face_info->elemPtr()
-                                        : _current_face_info->neighborPtr());
-  const Real distance = computeCellToFaceDistance();
-  return (computeBoundaryValue() - raw_value(_var(elem_arg, determineState()))) / distance;
-}
-
-Real
-LinearFVPrghTotalPressureBC::computeBoundaryValueMatrixContribution() const
-{
-  return 0.0;
-}
-
-Real
-LinearFVPrghTotalPressureBC::computeBoundaryValueRHSContribution() const
-{
-  return computeBoundaryValue();
-}
-
-Real
-LinearFVPrghTotalPressureBC::computeBoundaryGradientMatrixContribution() const
-{
-  return 1.0 / computeCellToFaceDistance();
-}
-
-Real
-LinearFVPrghTotalPressureBC::computeBoundaryGradientRHSContribution() const
-{
-  return computeBoundaryValue() / computeCellToFaceDistance();
 }
