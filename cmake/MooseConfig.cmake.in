@@ -1,6 +1,6 @@
 # MooseConfig.cmake -- find_package(Moose) entry point.
 #
-# Phase 4 of the Make->CMake transition: lets an external app consume MOOSE via
+# This lets an external app consume MOOSE via:
 #   find_package(Moose REQUIRED PATHS <moose-build-dir>)
 #   moose_add_app(NAME my_app APP_DIR ${CMAKE_SOURCE_DIR} BUILD_EXEC)
 #

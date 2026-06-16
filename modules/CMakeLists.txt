@@ -1,13 +1,13 @@
-# All MOOSE physics modules, built as libmodule-<method> via moose_add_app(). Phase 3 of the
-# Make->CMake transition. Mirrors modules/modules.mk: the module list, the inter-module
+# All MOOSE physics modules, built as libmodule-<method> via moose_add_app().
+# Mirrors modules/modules.mk: the module list, the inter-module
 # dependency graph, and the auto-enable behaviour (enabling a module enables its deps).
 #
 # Each module is an option (default ON == ALL_MODULES). Targets are created in dependency
 # order so each module's Moose::<dep> alias exists before a depender links it.
 #
-# NOTE: this phase builds the module LIBRARIES. The `combined` executable (which links all
+# NOTE: this file builds the module LIBRARIES. The `combined` executable (which links all
 # modules + CombinedTestApp and registers everything) needs test-object-library support and
-# is handled in a follow-up.
+# is handled differently.
 
 # Dependency graph (module -> direct module deps). Modules not listed have no module deps.
 set(_dep_fluid_properties   misc)

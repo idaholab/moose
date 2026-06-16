@@ -25,6 +25,7 @@ function(moose_add_app)
     message(FATAL_ERROR "moose_add_app: NAME and APP_DIR are required")
   endif()
 
+  # find source files (treat main.C separately) in the app
   set(_srcdir "${A_APP_DIR}/src")
   file(GLOB_RECURSE _src CONFIGURE_DEPENDS "${_srcdir}/*.C")
   set(_main "${_srcdir}/main.C")
@@ -69,10 +70,12 @@ function(moose_add_app)
   string(REPLACE "-" "" _upper "${_upper}")
   target_compile_definitions(${_lib} PUBLIC ${_upper}_ENABLED)
 
+  # set list of dependencies in '_deps' variable
   set(_deps Moose::moose)
   foreach(_m IN LISTS A_DEPEND_MODULES)
     list(APPEND _deps Moose::${_m})
   endforeach()
+  # specify the list of dependencies for ${_lib}
   target_link_libraries(${_lib} PUBLIC ${_deps})
   _moose_unity_by_subdir(${_lib} "${_srcdir}" "${_src}")
 

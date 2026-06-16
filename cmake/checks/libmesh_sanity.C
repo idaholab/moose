@@ -1,6 +1,6 @@
-// Phase 0 sanity check for the MOOSE CMake build: confirms that the MOOSE::libmesh target
+// Sanity check for the MOOSE CMake build: confirms that the MOOSE::libmesh target
 // (discovered from libmesh-config) provides enough to compile, link, and run against a
-// conda-built libMesh + PETSc + MPI stack. Not part of the eventual product.
+// conda-built libMesh + PETSc + MPI stack.
 
 #include "libmesh/libmesh.h"
 

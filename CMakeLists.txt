@@ -1,9 +1,8 @@
-# Phase 0 scaffolding for the MOOSE GNU Make -> CMake transition.
-#
-# This CMake build COEXISTS with the existing framework/*.mk build and does not replace it.
-# It is driven one build tree per METHOD: cmake -S . -B build/<method> -DMOOSE_METHOD=<method>.
+# Main CMake script
+# You can build one build tree per METHOD: cmake -S . -B build/<method> -DMOOSE_METHOD=<method>.
 # libMesh / PETSc / WASP are discovered from the environment (LIBMESH_DIR/PETSC_DIR/WASP_DIR),
 # which the moose-dev conda env provides. See the migration roadmap for the full plan.
+# This CMake build COEXISTS with the existing framework/*.mk build and does not replace it.
 
 cmake_minimum_required(VERSION 3.24)
 
@@ -47,7 +46,7 @@ if(MOOSE_COVERAGE)
   endif()
 endif()
 
-# Phase 0 verification: a tiny TU that includes and links libMesh. Off by default; enabled
+# Verification: a tiny TU that includes and links libMesh. Off by default; enabled
 # with -DMOOSE_SANITY_CHECK=ON.
 option(MOOSE_SANITY_CHECK "Build the Phase 0 libMesh sanity executable" OFF)
 if(MOOSE_SANITY_CHECK)
@@ -56,14 +55,14 @@ if(MOOSE_SANITY_CHECK)
   target_link_libraries(${_sanity_name} PRIVATE MOOSE::libmesh)
 endif()
 
-# Phase 1: the MOOSE framework library and unit-test executable.
+# MOOSE framework library and unit-test executable.
 add_subdirectory(framework)
 add_subdirectory(unit)
 
-# Phase 2: the MOOSE test application, built via moose_add_app().
+# MOOSE test application, built via moose_add_app().
 add_subdirectory(test)
 
-# Phase 3: all physics modules (libraries), built via moose_add_app() with the dep graph.
+# All physics modules (libraries), built via moose_add_app() with the dep graph.
 option(MOOSE_ENABLE_MODULES "Build and install the physics modules" ON)
 if(MOOSE_ENABLE_MODULES)
   add_subdirectory(modules)
@@ -71,7 +70,7 @@ else()
   set(MOOSE_ENABLED_MODULES "" CACHE INTERNAL "Enabled MOOSE module names" FORCE)
 endif()
 
-# Phase 4: export a build-tree CMake package + define a relocatable install, both consumable
+# Export a build-tree CMake package + define a relocatable install, both consumable
 # via find_package(Moose).
 include(MooseExport)
 moose_export()

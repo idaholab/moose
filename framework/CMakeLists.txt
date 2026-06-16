@@ -1,6 +1,5 @@
 # Builds libmoose-<method> from framework/src (+ the in-tree contrib source dirs), with a
 # native GROUP unity build mirroring the make build's per-top-level-subdir grouping.
-# Phase 1 of the Make->CMake transition; see the migration roadmap.
 
 set(_fwk "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -42,7 +41,7 @@ moose_add_gtest()
 
 # --------------------------------------------------------------------------------------
 # libmoose sources: framework/src minus only src/kokkos (Kokkos .K/.C needs the dedicated
-# Kokkos toolchain; deferred to a later phase), plus the in-tree contrib source dirs that
+# Kokkos toolchain; not done at this time), plus the in-tree contrib source dirs that
 # compile into libmoose. NOTE: src/libtorch, src/mfem, src/neml2 ARE included even when those
 # features are disabled -- their internals are #ifdef-guarded but they carry unconditional
 # registrations (e.g. NEML2ActionCommon), exactly as the make build compiles them.
@@ -146,3 +145,8 @@ add_executable(exodiff ${_exodiff_src})
 target_include_directories(exodiff PRIVATE "${_fwk}/contrib/exodiff")
 target_compile_options(exodiff PRIVATE -std=c++14 -O2 -felide-constructors -w)
 target_link_libraries(exodiff PRIVATE MOOSE::libmesh)
+# Emit exodiff where the TestHarness looks for an in-tree build
+# (python/TestHarness/testers/Exodiff.py -> framework/contrib/exodiff/exodiff). Method-
+# independent and gitignored. Building any METHOD's tree refreshes this single binary.
+set_target_properties(exodiff PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${_fwk}/contrib/exodiff")
