@@ -32,9 +32,9 @@ neml2_torch_LDIRS    := $(shell pkg-config --libs-only-L $(NEML2_TORCH_PC))
 neml2_torch_LIBS     := $(shell pkg-config --libs $(NEML2_TORCH_PC))
 endif
 
-neml2_INCLUDES += $(filter-out $(neml2_torch_INCLUDES),$(shell pkg-config --cflags $(NEML2_PC)))
-neml2_LDFLAGS  += $(foreach libdir,$(filter-out $(neml2_torch_LDIRS),$(shell pkg-config --libs-only-L $(NEML2_PC))),$(patsubst -L%,-Wl$(comma)-rpath$(comma)%,$(libdir)))
-neml2_LIBS     += $(filter-out $(neml2_torch_LIBS),$(shell pkg-config --libs $(NEML2_PC)))
+neml2_INCLUDES += $(filter-out $(neml2_torch_INCLUDES),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --cflags $(NEML2_PC)))
+neml2_LDFLAGS  += $(foreach libdir,$(filter-out $(neml2_torch_LDIRS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs-only-L $(NEML2_PC))),$(patsubst -L%,-Wl$(comma)-rpath$(comma)%,$(libdir)))
+neml2_LIBS     += $(filter-out $(neml2_torch_LIBS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs $(NEML2_PC)))
 
 # Append to libmesh flags
 libmesh_CXXFLAGS += $(neml2_CPPFLAGS) # I think MOOSE Makefiles tend to abuse libmesh_CXXFLAGS for preprocessor flags
