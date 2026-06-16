@@ -121,6 +121,17 @@ SubChannel1PhaseProblem::validParams()
       true,
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
       "Use closure system instead.");
+
+  params.addParamNamesToGroup("P_tol T_tol T_maxit rtol atol dtol maxit",
+                              "Solver tolerances and iterations");
+  params.addParamNamesToGroup("implicit segregated staggered_pressure interpolation_scheme",
+                              "Solution method");
+  params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
+                              "Closures");
+  params.addParamNamesToGroup("compute_density compute_viscosity compute_power gravity",
+                              "Physics models");
+  params.addParamNamesToGroup("verbose_subchannel full_output", "Output");
+
   return params;
 }
 
