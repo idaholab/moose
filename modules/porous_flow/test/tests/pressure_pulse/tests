@@ -165,6 +165,16 @@
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative.'
   []
+  [pressure_pulse_1d_fully_saturated_2_AD]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_fully_saturated_2_AD.i'
+    csvdiff = 'pressure_pulse_1d_fully_saturated_2.csv'
+    prereq = pressure_pulse_1d_fully_saturated_2
+    rel_err = 1.0E-5
+    issues = '#6845'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
+    requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the AD-templated fully-saturated Darcy and mass time derivative kernels, producing an identical solution to the non-AD formulation.'
+  []
   [pressure_pulse_1d_adapt]
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_adaptivity.i'
