@@ -51,7 +51,7 @@ AS_IF([test "$libtorch_support" = yes],
               [
                     AS_IF([test "${LIBTORCH_DIR+set}" = set],
                           [libtorch_library="${LIBTORCH_DIR}"],
-                          [libtorch_library="$ac_pwd/framework/contrib/libtorch"])
+                          [libtorch_library="$ac_pwd/framework/contrib/libtorch/installed"])
               ])
         AC_DEFINE_UNQUOTED(LIBTORCH_DIR, [$libtorch_library], [The directory where libtorch is installed])
         AC_SUBST([libtorch_library])
