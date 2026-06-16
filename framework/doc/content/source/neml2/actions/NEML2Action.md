@@ -22,9 +22,7 @@ Currently supported objects are summarized below.
 
 | Type            | MOOSE object(s)                                                 |
 | :-------------- | :-------------------------------------------------------------- |
-| Gatherer        | [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) |
-|                 | [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md)                 |
-|                 | [MOOSPostprocessorToNEML2](MOOSEPostprocessorToNEML2.md)        |
+| Gatherer        | [MOOSEQuantityToNEML2](MOOSEQuantityToNEML2.md)                 |
 | Retriever       | [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) |
 | Index generator | [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md)         |
 | Executor        | [NEML2ModelExecutor](NEML2ModelExecutor.md)                     |
@@ -57,7 +55,7 @@ These maps are used later to create objects for transferring data between MOOSE 
 
 This step involves the creation of `MOOSEToNEML2` gatherers for NEML2 input variables and model parameters. The first two maps mentioned in the previous section are used. The maps are looped through to create objects one-by-one.
 
-Note that the correct type of object is selected/created relying on NEML2 model introspection. For example, if a NEML2 input variable is of type `SR2`, we can infer that the corresponding MOOSE data structure should be `SymmetricRankTwoTensor`. According to the user-specified [!param](/NEML2/moose_input_types), we can deduce where the MOOSE data comes from. (Though in this case `MATERIAL` is the only viable option, as a `SymmetricRankTwoTensor` cannot come from a MOOSE variable nor a MOOSE postprocessor).
+Note that the correct type of object is selected/created relying on NEML2 model introspection. For example, if a NEML2 input variable is of type `SR2`, we can infer that the corresponding MOOSE data structure should be `SymmetricRankTwoTensor`.
 
 ## Creating the NEML2 index generator and model executor
 
