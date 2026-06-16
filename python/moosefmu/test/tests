@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#30912'
+  design = 'source/controls/MOOSEFMU.md'
+  [fmu_utils]
+    requirement = 'The MooseFMU utils functions should run successfully.'
+    type = PythonUnitTest
+    input = 'test_fmu_utils.py'
+    required_python_packages = 'pythonfmu'
+    capabilities = 'platform=linux'
+  []
+
+  [fmu_moose]
+    requirement = 'The MooseFMU interface functions should run successfully.'
+    type = PythonUnitTest
+    input = 'test_moose_fmu.py'
+    required_python_packages = 'pythonfmu'
+    capabilities = 'platform=linux'
+  []
+[]

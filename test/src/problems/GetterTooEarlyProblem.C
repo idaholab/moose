@@ -13,13 +13,15 @@ GetterTooEarlyProblem::validParams()
   InputParameters params = FEProblem::validParams();
   params.addRequiredParam<MooseEnum>(
       "getter",
-      MooseEnum("function user_object multi_app distribution sampler"),
+      MooseEnum("function user_object multi_app distribution sampler fv_interpolation_method"),
       "The getter to call too early");
   params.addParam<FunctionName>("function", "Function to request too early");
   params.addParam<UserObjectName>("user_object", "UserObject to request too early");
   params.addParam<MultiAppName>("multi_app", "MultiApp to request too early");
   params.addParam<DistributionName>("distribution", "Distribution to request too early");
   params.addParam<SamplerName>("sampler", "Sampler to request too early");
+  params.addParam<InterpolationMethodName>("fv_interpolation_method",
+                                           "FVInterpolationMethod to request too early");
   return params;
 }
 
@@ -38,4 +40,7 @@ GetterTooEarlyProblem::GetterTooEarlyProblem(const InputParameters & params)
     static_cast<void>(getDistribution(getParam<DistributionName>("distribution")));
   else if (getter == "sampler")
     static_cast<void>(getSampler(getParam<SamplerName>("sampler")));
+  else if (getter == "fv_interpolation_method")
+    static_cast<void>(
+        getFVInterpolationMethod(getParam<InterpolationMethodName>("fv_interpolation_method")));
 }
