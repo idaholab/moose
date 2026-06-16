@@ -1,0 +1,118 @@
+    SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,                  &
+    &           RPL,DDSDDT,DRPLDE,DRPLDT,STRAN,DSTRAN,TIME,            &
+    &           DTIME,TEMP,DTEMP,PREDEF,DPRED,CMNAME,NDI,NSHR,         &
+    &           NTENS,NSTATV,PROPS,NPROPS,COORDS,DROT,PNEWDT,          &
+    &           CELENT,DFGRD0,DFGRD1,NOEL,NPT,LAYER,KSPT,KSTEP,KINC)
+!C
+    USE CONSTANTS
+!C     
+    IMPLICIT NONE
+!C     
+    REAL(R64), INTENT(INOUT) :: STRESS(NTENS), STATEV(NSTATV)
+    REAL(R64), INTENT(INOUT) :: SSE, SPD, SCD
+    REAL(R64), INTENT(INOUT) :: DRPLDE(NTENS)
+    REAL(R64), INTENT(INOUT) :: RPL, DRPLDT, PNEWDT
+!C
+    REAL(R64), INTENT(OUT) :: DDSDDE(NTENS,NTENS)
+    REAL(R64), INTENT(OUT) :: DDSDDT(NTENS)
+!C
+    REAL(R64), INTENT(IN) :: STRAN(NTENS), DSTRAN(NTENS)
+    REAL(R64), INTENT(IN) :: TIME(2), DTIME, TEMP, DTEMP
+    REAL(R64), INTENT(IN) :: PREDEF(2), DPRED(2), PROPS(NPROPS)
+    REAL(R64), INTENT(IN) :: COORDS(3), DROT(3,3)
+    REAL(R64), INTENT(IN) :: CELENT, DFGRD0(3,3), DFGRD1(3,3)
+!C
+    INTEGER, INTENT(IN) :: NDI, NSHR, NTENS, NSTATV
+    INTEGER, INTENT(IN) :: NPROPS, NOEL, NPT, LAYER, KSPT, KSTEP, KINC
+!C
+    CHARACTER, INTENT(IN) :: CMNAME(80)
+!C
+    INTEGER :: I, J
+!C
+    REAL(R64) :: STIFF(NTENS,NTENS), DSTRAN_MECH(NTENS), PPM_SCALAR
+    REAL(R64) :: DSTRESS(NTENS), DHYDRO(NTENS), STRESS_OLD(NTENS)
+    REAL(R64) :: MU, LAM, IDENITY(NTENS,NTENS), NU, E, DTHERM(NTENS)
+    REAL(R64) :: TEMP_END, DCTOT, COMP_OLD(NTENS,NTENS)
+    REAL(R64) :: EE_OLD(NTENS), EE(NTENS), ALPHA_OLD, ALPHA_NEW
+!C
+    IDENITY = ZERO
+    DO I = 1, NTENS
+        IDENITY(I,I) = ONE
+    END DO
+!C
+    PPM_SCALAR = PROPS(7)
+!C
+    TEMP_END = TEMP + DTEMP
+!C
+    DCTOT = DPRED(1)
+    ALPHA_OLD = PROPS(5) + TEMP*PROPS(6)
+    ALPHA_NEW = PROPS(5) + TEMP_END*PROPS(6)
+!C
+    E = PROPS(1) + TEMP*PROPS(2)
+    NU = PROPS(3) + TEMP*PROPS(4)
+!C
+!C  Begining of Increment Compliance
+    COMP_OLD = ZERO
+    DO I = 1, NDI
+        DO J = 1, NDI
+            IF (I.EQ.J) THEN
+                COMP_OLD(I,J) = + ONE/E
+            ELSE
+                COMP_OLD(I,J) = - NU/E
+            ENDIF
+        END DO
+    END DO
+    DO I = NDI+1, NDI+NSHR
+        COMP_OLD(I,I) = TWO*(ONE+NU)/E
+    END DO
+!C
+    E = PROPS(1) + TEMP_END*PROPS(2)
+    NU = PROPS(3) + TEMP_END*PROPS(4)
+    MU = (HALF*E)/(ONE+NU)
+    LAM = (NU*E)/((ONE+NU)*(ONE-TWO*NU))
+!C
+!C  End of Increment Siffness
+    STIFF = ZERO
+    DO I = 1, NDI
+        DO J = 1, NDI
+            IF (I.EQ.J) THEN
+                STIFF(I,J) = TWO*MU + LAM
+            ELSE
+                STIFF(I,J) = LAM
+            ENDIF
+        END DO
+    END DO
+    DO I = NDI+1, NDI+NSHR
+        STIFF(I,I) = MU
+    END DO
+!C
+!C  Hydrogen Eigenstrain
+    DHYDRO = ZERO
+    DO I = 1, NDI
+        DHYDRO(I) = THIRD*DCTOT*PPM_SCALAR
+    END DO
+!C
+!C  Thermal Eigenstrain
+    DTHERM = ZERO
+    DO I = 1, NDI
+        DTHERM(I) = ALPHA_NEW - ALPHA_OLD
+    END DO
+!C
+!C  Mechanical Strain Increment
+    DSTRAN_MECH = DSTRAN - DHYDRO - DTHERM
+    STRESS_OLD = STRESS
+!C
+!C  Old Elastic Strain
+    EE_OLD = matmul(COMP_OLD,STRESS_OLD)
+!C  New Elastic Strain
+    EE = DSTRAN_MECH + EE_OLD
+!C
+!C  End Increment Stress
+    STRESS = matmul(STIFF, EE)
+!C
+    DDSDDE = STIFF
+    DDSDDT = ZERO
+!C
+    SSE = SSE + HALF*dot_product(STRESS, EE)
+!C
+END SUBROUTINE UMAT
