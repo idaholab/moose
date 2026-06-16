@@ -20,6 +20,7 @@ The operations currently implemented are:
 
 - renumbering the nodes and elements to have a contiguous ordering.
 
+- splitting non-convex polygons into convex polygons
 
 !syntax parameters /Mesh/MeshRepairGenerator
 
