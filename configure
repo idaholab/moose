@@ -1827,7 +1827,7 @@ then :
 then :
   libtorch_library="${LIBTORCH_DIR}"
 else case e in #(
-  e) libtorch_library="$ac_pwd/framework/contrib/libtorch/installed" ;;
+  e) libtorch_library="$ac_pwd/framework/contrib/pytorch/installed" ;;
 esac
 fi
 
