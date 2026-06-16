@@ -18,7 +18,7 @@
     update = none
 [submodule "framework/contrib/wasp"]
     path = framework/contrib/wasp
-    url = ../../idaholab/mirror-ornl-neams-workbench-wasp.git
+    url = ../../ornl-neams-workbench/wasp.git
 [submodule "modules/fluid_properties/contrib/sodium"]
     path = modules/fluid_properties/contrib/sodium
     url = ../../idaholab/sodium.git
