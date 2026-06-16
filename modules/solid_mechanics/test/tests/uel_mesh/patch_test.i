@@ -1,11 +1,8 @@
 [Mesh]
   type = AbaqusUELMesh
-  file = CUBE_UEL_BCS.inp
+  file = PATCH_UEL.inp
+  # file = CUBE_UEL.inp
   debug = true
-[]
-
-[Problem]
-  extra_tag_vectors = "AbaqusUELTag"
 []
 
 [Variables]
@@ -36,20 +33,40 @@
 # those will be added by the action
 [BCs]
   [disp_x]
-    type = FunctionDirichletBC
-    boundary = abaqus_bc_union_boundary
+    type = AbaqusEssentialBC
+    abaqus_var_id = 1
     variable = disp_x
-    function = 0.1*y
+    abaqus_step = Step-1
   []
   [disp_y]
-    type = FunctionDirichletBC
-    boundary = abaqus_bc_union_boundary
+    type = AbaqusEssentialBC
+    abaqus_var_id = 2
     variable = disp_y
-    function = 0.1*x
+    abaqus_step = Step-1
+  []
+  [rot_x]
+    type = AbaqusEssentialBC
+    abaqus_var_id = 4
+    variable = rot_x
+    abaqus_step = Step-1
+  []
+[]
+
+[AuxVariables]
+  [pid]
+  []
+[]
+
+[AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
   []
 []
 
 [Problem]
+  extra_tag_vectors = "AbaqusUELTag"
   kernel_coverage_check = false
 []
 
@@ -61,8 +78,12 @@
     element_sets = CUBE
     external_fields = "field1 field2"
   []
-  [step_uo]
-    type = AbaqusUELStepUserObject
+[]
+
+[Preconditioning]
+  [fdp]
+    type = FDP
+    full = true
   []
 []
 
@@ -75,21 +96,13 @@
   []
 []
 
-[Preconditioning]
-  # [fdp]
-  #   type = FDP
-  #   full = true
-  # []
-[]
-
 [Executioner]
   type = Transient
   solve_type = NEWTON
   line_search = NONE
   dt = 0.1
-  end_time = 2.999999
-  nl_abs_tol = 1e-9
-  automatic_scaling = true
+  end_time = 1.0
+  nl_abs_tol = 1e-10
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu mumps'
 []

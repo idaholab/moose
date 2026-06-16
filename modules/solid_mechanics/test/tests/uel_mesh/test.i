@@ -2,11 +2,6 @@
   type = AbaqusUELMesh
   file = BIG_CUBE_UEL.inp
   debug = true
-
-  [Partitioner]
-    type = LibmeshPartitioner
-    partitioner = linear # hilbert_sfc
-  []
 []
 
 [Variables]
@@ -65,6 +60,8 @@
   dt = 0.1
   end_time = 1.0
   nl_abs_tol = 1e-10
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu mumps'
 []
 
 [Outputs]
