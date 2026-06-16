@@ -295,11 +295,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   const auto new_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*mesh_2d_dummy);
 
   if (has_external_side)
-    MooseMeshUtils::createSubdomainFromSidesets(*mesh_2d_dummy,
-                                                {std::to_string(mesh_2d_ext_bdry)},
-                                                new_block_id_1d,
-                                                SubdomainName(),
-                                                type());
+    MooseMeshUtils::createSubdomainFromSidesets(
+        *mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName());
 
   // Create a 1D mesh from the 1D block
   auto mesh_1d = buildMeshBaseObject();

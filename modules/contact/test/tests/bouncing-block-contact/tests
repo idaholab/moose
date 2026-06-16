@@ -2,7 +2,7 @@
 
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080 #14454'
+  issues = '#13080 #14454 #33128'
   [reduced_active_set]
     requirement = 'The system shall be able to solve frictionless mechanical contact using a reduced '
                   'active nonlinear function set scheme (RANFS) in conjunction with a node-face '
@@ -234,5 +234,12 @@
                   'inactive nodes.'
     valgrind = 'heavy'
     capabilities = 'ad_size>=100 & method!=dbg'
+  []
+  [automated_pairing]
+    type = 'Exodiff'
+    input = 'automated-pairing.i'
+    exodiff = 'automated-pairing_out.e'
+    requirement = 'The system shall be able to automatically pair boundaries and build associated mortar data structures via a contact action syntax.'
+    custom_cmp = automated-pairing.cmp
   []
 []

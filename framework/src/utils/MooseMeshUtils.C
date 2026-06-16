@@ -1018,8 +1018,7 @@ void
 createSubdomainFromSidesets(MeshBase & mesh,
                             std::vector<BoundaryName> boundary_names,
                             const SubdomainID new_subdomain_id,
-                            const SubdomainName new_subdomain_name,
-                            const std::string type_name)
+                            const SubdomainName new_subdomain_name)
 {
   // Generate a new block id if one isn't supplied.
   SubdomainID new_block_id = new_subdomain_id;
@@ -1031,7 +1030,7 @@ createSubdomainFromSidesets(MeshBase & mesh,
     // We want all of our boundary elements available, so avoid removing them if they haven't
     // already been so
     mesh.allow_remote_element_removal(false);
-    mesh.prepare_for_use();
+    mesh.complete_preparation();
     mesh.allow_remote_element_removal(allow_remote_element_removal);
   }
 
@@ -1099,65 +1098,14 @@ createSubdomainFromSidesets(MeshBase & mesh,
     side_list = mesh.get_boundary_info().build_side_list();
   }
 
-  std::vector<std::pair<dof_id_type, ElemSidePair>> element_sides_on_boundary;
-  dof_id_type counter = 0;
-  for (const auto & [eid, side, bid] : side_list)
-    if (sidesets.count(bid))
-    {
-      if (auto elem = mesh.query_elem_ptr(eid))
-      {
-        if (!elem->active())
-          mooseError(
-              "Only active, level 0 elements can be made interior parents of new level 0 lower-d "
-              "elements. Make sure that ",
-              type_name,
-              "s are run before any refinement generators");
-        element_sides_on_boundary.push_back(std::make_pair(counter, ElemSidePair(elem, side)));
-      }
-      ++counter;
-    }
-
-  dof_id_type max_elem_id = mesh.max_elem_id();
-  unique_id_type max_unique_id = mesh.parallel_max_unique_id();
-
-  // Making an important assumption that at least our boundary elements are the same on all
-  // processes even in distributed mesh mode (this is reliant on the correct ghosting functors
-  // existing on the mesh)
-  for (auto & [i, elem_side] : element_sides_on_boundary)
-  {
-    Elem * elem = elem_side.elem;
-
-    const auto side = elem_side.side;
-
-    // Build a non-proxy element from this side.
-    std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side));
-
-    // The side will be added with the same processor id as the parent.
-    side_elem->processor_id() = elem->processor_id();
-
-    // Add subdomain ID
-    side_elem->subdomain_id() = new_block_id;
-
-    // Also assign the side's interior parent, so it is always
-    // easy to figure out the Elem we came from.
-    side_elem->set_interior_parent(elem);
-
-    // Add id
-    side_elem->set_id(max_elem_id + i);
-    side_elem->set_unique_id(max_unique_id + i);
-
-    // Finally, add the lower-dimensional element to the mesh.
-    mesh.add_elem(side_elem.release());
-  };
+  // Use libmesh's BoundaryInfo::add_elements to create lower-d elements with interior_parent
+  // pointers and subdomain IDs set in one pass.
+  auto & unstr_mesh = dynamic_cast<UnstructuredMesh &>(mesh);
+  unstr_mesh.get_boundary_info().add_elements(sidesets, unstr_mesh, false, {new_block_id});
 
   // Assign block name, if provided
   if (new_subdomain_name.size())
     mesh.subdomain_name(new_block_id) = new_subdomain_name;
-
-  const bool skip_partitioning_old = mesh.skip_partitioning();
-  mesh.skip_partitioning(true);
-  mesh.prepare_for_use();
-  mesh.skip_partitioning(skip_partitioning_old);
 }
 
 void

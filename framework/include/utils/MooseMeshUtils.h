@@ -500,8 +500,7 @@ std::set<dof_id_type> getBoundaryNodes(const MeshBase & mesh, const BoundaryID b
 void createSubdomainFromSidesets(MeshBase & mesh,
                                  std::vector<BoundaryName> boundary_names,
                                  const SubdomainID new_subdomain_id,
-                                 const SubdomainName new_subdomain_name,
-                                 const std::string type_name);
+                                 const SubdomainName new_subdomain_name);
 
 /**
  * Convert a list of blocks in a given mesh to a standalone new mesh.
