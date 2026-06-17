@@ -74,8 +74,25 @@ protected:
 
     _fe_problem->addUserObject("TemperaturePressureFunctionFluidProperties", "fp_cp", uo_params2);
     _fp_cp = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>("fp_cp");
+
+    InputParameters uo_params3 =
+        _factory.getValidParams("TemperaturePressureFunctionFluidProperties");
+    // Set the three functions and the specific heat capacity
+    uo_params3.set<FunctionName>("k") = "k_function";
+    uo_params3.set<FunctionName>("rho") = "2000";
+    uo_params3.set<FunctionName>("mu") = "mu_function";
+    uo_params3.set<FunctionName>("cp") = "cp_function";
+    uo_params3.set<Real>("T_initial_guess") = 250;
+    uo_params3.set<Real>("p_initial_guess") = 1e7;
+    uo_params3.set<Real>("dT_integration_intervals") = 0.001;
+
+    _fe_problem->addUserObject(
+        "TemperaturePressureFunctionFluidProperties", "fp_incompressible", uo_params3);
+    _fp_incompressible = &_fe_problem->getUserObject<TemperaturePressureFunctionFluidProperties>(
+        "fp_incompressible");
   }
 
   TemperaturePressureFunctionFluidProperties * _fp;
   TemperaturePressureFunctionFluidProperties * _fp_cp;
+  TemperaturePressureFunctionFluidProperties * _fp_incompressible;
 };
