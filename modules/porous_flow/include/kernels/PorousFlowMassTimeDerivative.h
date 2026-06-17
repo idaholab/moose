@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "PorousFlowLumpedKernelBase.h"
 #include "PorousFlowDictator.h"
 
 /**
@@ -19,18 +19,25 @@
  * It is lumped to the nodes.
  * If multiply_by_density = false, then density_phase is not included in this above sum, so the
  * Kernel is calculating the time-derivative of fluid volume
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowMassTimeDerivative : public TimeKernel
+template <bool is_ad>
+class PorousFlowMassTimeDerivativeTempl : public PorousFlowLumpedKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowMassTimeDerivative(const InputParameters & parameters);
+  PorousFlowMassTimeDerivativeTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// Derivative of residual wrt PorousFlow variable pvar (non-AD path only)
+  Real computeQpJac(unsigned int pvar);
 
   /// The fluid component index
   const unsigned int _fluid_component;
@@ -59,52 +66,51 @@ protected:
   /// Old value of total strain calculated by a Tensor Mechanics strain calculator, if it exists, otherwise nullptr
   const MaterialProperty<RankTwoTensor> * const _total_strain_old;
 
-  /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the nodes (AD or non-AD depending on is_ad)
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
-  /// Old value of porosity
+  /// Old value of porosity (always non-AD)
   const MaterialProperty<Real> & _porosity_old;
 
-  /// d(porosity)/d(PorousFlow variable) - these derivatives will be wrt variables at the nodes
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  /// d(porosity)/d(PorousFlow variable) at nodes — null for AD path
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable) - remember these derivatives will be wrt grad(vars) at qps
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable) at qps — null for AD path
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
-  /// The nearest qp to the node
+  /// The nearest qp to the node (unsigned int, always non-AD)
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
-  /// Nodal fluid density
-  const MaterialProperty<std::vector<Real>> * const _fluid_density;
+  /// Nodal fluid density (AD or non-AD); null if !multiply_by_density
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_density;
 
-  /// Old value of nodal fluid density
+  /// Old value of nodal fluid density (always non-AD); null if !multiply_by_density
   const MaterialProperty<std::vector<Real>> * const _fluid_density_old;
 
-  /// d(nodal fluid density)/d(PorousFlow variable)
+  /// d(nodal fluid density)/d(PorousFlow variable) — null for AD path or if !multiply_by_density
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
-  /// Nodal fluid saturation
-  const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal;
+  /// Nodal fluid saturation (AD or non-AD)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_saturation_nodal;
 
-  /// Old value of fluid saturation
+  /// Old value of fluid saturation (always non-AD)
   const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal_old;
 
-  /// d(nodal fluid saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_saturation_nodal_dvar;
+  /// d(nodal fluid saturation)/d(PorousFlow variable) — null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_nodal_dvar;
 
-  /// Nodal mass fraction
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
+  /// Nodal mass fraction (AD or non-AD)
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
 
-  /// Old value of nodal mass fraction
+  /// Old value of nodal mass fraction (always non-AD)
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac_old;
 
-  /// d(nodal mass fraction)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
+  /// d(nodal mass fraction)/d(PorousFlow variable) — null for AD path
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_frac_dvar;
 
-  /**
-   * Derivative of residual with respect to PorousFlow variable number pvar
-   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param pvar take the derivative of the residual wrt this PorousFlow variable
-   */
-  Real computeQpJac(unsigned int pvar);
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowMassTimeDerivativeTempl<false> PorousFlowMassTimeDerivative;
+typedef PorousFlowMassTimeDerivativeTempl<true> ADPorousFlowMassTimeDerivative;

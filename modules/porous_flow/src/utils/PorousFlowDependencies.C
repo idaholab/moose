@@ -188,6 +188,8 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowMassTimeDerivative", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowMassTimeDerivative", "mass_fraction_nodal");
 
+  _deps.insertDependency("ADPorousFlowMassTimeDerivative", "PorousFlowMassTimeDerivative");
+
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "porosity_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "nearest_qp_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "density_nodal");

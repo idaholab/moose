@@ -39,6 +39,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [mass03_AD]
+    type = 'PetscJacobianTester'
+    input = 'mass03_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = mass03
+    requirement = 'The porous flow module shall compute all Jacobian entries via AD for the mass time derivative of 1phase, constant-bulk density, constant porosity, multi-component, unsaturated.'
+    issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [mass04]
     type = 'PetscJacobianTester'
     input = 'mass04.i'
