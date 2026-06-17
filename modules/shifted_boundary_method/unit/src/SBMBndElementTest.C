@@ -144,6 +144,28 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
   EXPECT_GT(dot, 0.0); // Same direction
 }
 
+TEST(SBMBndElementTest, Edge2DistanceNodeFallback)
+{
+  // Edge from (0,0,0) to (1,0,0); query point lies far off the line axis so
+  // its projection onto the edge falls outside the segment, forcing the side
+  // loop in distanceFrom() to take the NODEELEM switch case.
+  std::unique_ptr<Edge2> edge(new Edge2());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
+  edge->set_node(0) = n0.get();
+  edge->set_node(1) = n1.get();
+
+  SBMBndEdge2ForTest bnd_edge(edge.get());
+
+  // Projection of (2, 1, 0) onto the line is (2, 0, 0) which is outside [0,1].
+  // Nearest entity is node (1, 0, 0).
+  Point pt(2.0, 1.0, 0.0);
+  Point dist = bnd_edge.distanceFrom(pt);
+  EXPECT_NEAR(dist(0), -1.0, 1e-12);
+  EXPECT_NEAR(dist(1), -1.0, 1e-12);
+  EXPECT_NEAR(dist(2), 0.0, 1e-12);
+}
+
 TEST(SBMBndElementTest, Tri3NormalTilted)
 {
   std::unique_ptr<Tri3> tri(new Tri3());

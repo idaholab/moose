@@ -42,4 +42,51 @@
     []
 
   []
+
+  [error_test]
+    requirement = 'The system shall throw an error '
+
+    [nodal_variable]
+      type = 'RunException'
+      input = '2D_distance_refine.i'
+      cli_args = 'AuxVariables/distance/order=FIRST AuxVariables/distance/family=LAGRANGE'
+      expect_err = 'This AuxKernel only supports Elemental fields'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'if ElementCentroidToSurfaceDistanceAux is applied to a nodal variable.'
+    []
+
+    [unsupported_surface_function]
+      type = 'RunException'
+      input = '2D_distance_refine.i'
+      cli_args = 'Functions/const_fun/type=ConstantFunction Functions/const_fun/value=1.0 '
+                 'UserObjects/distance_to_surface/surfaces=const_fun'
+      expect_err = 'SBM distance helpers only support ParsedFunction or UnsignedDistanceToSurfaceMesh'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'if ShortestDistanceToSurface receives a function whose type is not ParsedFunction '
+               'or UnsignedDistanceToSurfaceMesh.'
+    []
+
+    [dim_mismatch]
+      type = 'RunException'
+      input = '3D_distance_refine.i'
+      cli_args = 'Mesh/boundary_mesh/file=bunny_2D.msh'
+      expect_err = 'does not match the expected mesh dimension'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'if the embedding mesh dimension does not match the SBM surface mesh dimension plus one.'
+    []
+
+    [unsupported_element_type]
+      type = 'RunException'
+      input = '3D_distance_refine.i'
+      cli_args = 'Mesh/boundary_mesh/file=quad_surface.msh'
+      expect_err = 'Unsupported element type in SBMSurfaceMeshBuilder'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'if the SBM surface mesh contains element types other than EDGE2 or TRI3.'
+    []
+
+  []
 []

@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#31937'
+  design = 'SBMSurfaceMeshBuilder.md ShortestDistanceToSurface.md UnsignedDistanceToSurfaceMesh.md'
+
+  [coverage]
+    requirement = 'The system shall '
+
+    [omnibus]
+      type = 'Exodiff'
+      input = 'coverage_omnibus.i'
+      exodiff = 'coverage_omnibus_out.e'
+      allow_test_objects = true
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'evaluate the closest distance and surface normal at element centroids using both '
+               'function-based and mesh-based distance strategies in ShortestDistanceToSurface.'
+    []
+
+    [build_kd_tree_false]
+      type = 'RunApp'
+      input = 'build_kd_tree_false.i'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'construct boundary element representations from an SBM surface mesh without '
+               'building a KDTree when KDTree construction is disabled.'
+    []
+
+    [non_watertight]
+      type = 'RunApp'
+      input = 'non_watertight.i'
+      expect_out = 'not watertight'
+      mesh_mode = 'replicated'
+      recover = 'false'
+      detail = 'report when an SBM surface mesh is not watertight.'
+    []
+
+  []
+[]
