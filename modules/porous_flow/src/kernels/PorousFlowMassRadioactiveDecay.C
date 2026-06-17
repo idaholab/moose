@@ -126,6 +126,8 @@ PorousFlowMassRadioactiveDecayTempl<is_ad>::computeQpOffDiagJacobian(unsigned in
       return 0.0;
     return computeQpJac(_dictator.porousFlowVariableNum(jvar));
   }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 
@@ -162,6 +164,8 @@ PorousFlowMassRadioactiveDecayTempl<is_ad>::computeQpJac(unsigned int pvar)
     }
     return _test[_i][_qp] * _decay_rate * dmass;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 

@@ -139,6 +139,8 @@ PorousFlowFullySaturatedMassTimeDerivativeTempl<is_ad>::computeQpOffDiagJacobian
       return 0.0;
     return computeQpJac(_dictator.porousFlowVariableNum(jvar));
   }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 
@@ -166,6 +168,8 @@ PorousFlowFullySaturatedMassTimeDerivativeTempl<is_ad>::computeQpJac(unsigned in
                                (*_dfluid_density_dvar)[_qp][phase][pvar] * _phi[_j][_qp] * volume);
     return _test[_i][_qp] * dvolume;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 

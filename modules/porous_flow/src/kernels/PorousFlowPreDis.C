@@ -126,6 +126,8 @@ PorousFlowPreDisTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
       return 0.0;
     return computeQpJac(_dictator.porousFlowVariableNum(jvar));
   }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 
@@ -150,6 +152,8 @@ PorousFlowPreDisTempl<is_ad>::computeQpJac(unsigned int pvar)
            (dres * _saturation[_i][_aq_ph] + res * (*_dsaturation_dvar)[_i][_aq_ph][pvar]) *
            _porosity_old[_i];
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 

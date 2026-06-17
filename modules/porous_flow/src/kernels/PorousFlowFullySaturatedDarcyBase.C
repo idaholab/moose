@@ -132,6 +132,8 @@ PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::computeQpOffDiagJacobian(unsigned
 
     return _grad_test[_i][_qp] * (dmob * flow + mob * dflow);
   }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 
@@ -158,6 +160,8 @@ PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::dmobility(unsigned int pvar) cons
       dmob = _density[_qp][ph] * dmob + (*_ddensity_dvar)[_qp][ph][pvar] / _viscosity[_qp][ph];
     return dmob;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 

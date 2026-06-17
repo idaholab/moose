@@ -79,12 +79,16 @@ PorousFlowLumpedKernelBaseTempl<is_ad>::computeOffDiagJacobian(unsigned int jvar
 {
   if constexpr (!is_ad)
     GenericKernel<is_ad>::computeOffDiagJacobian(jvar);
-  else if (_my_elem_lma != this->_current_elem)
+  else
   {
-    this->computeResidualsForJacobian();
-    this->addJacobianWithoutConstraints(
-        this->_assembly, this->_residuals, this->dofIndices(), this->_var.scalingFactor());
-    _my_elem_lma = this->_current_elem;
+    libmesh_ignore(jvar);
+    if (_my_elem_lma != this->_current_elem)
+    {
+      this->computeResidualsForJacobian();
+      this->addJacobianWithoutConstraints(
+          this->_assembly, this->_residuals, this->dofIndices(), this->_var.scalingFactor());
+      _my_elem_lma = this->_current_elem;
+    }
   }
 }
 

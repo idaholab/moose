@@ -53,6 +53,8 @@ PorousFlowFullySaturatedHeatAdvectionTempl<is_ad>::dmobility(unsigned pvar) cons
     const Real ddarcy_mob = PorousFlowFullySaturatedDarcyBaseTempl<is_ad>::dmobility(pvar);
     return (*_denthalpy_dvar)[_qp][ph][pvar] * darcy_mob + _enthalpy[_qp][ph] * ddarcy_mob;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 

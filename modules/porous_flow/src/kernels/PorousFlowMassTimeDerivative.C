@@ -169,6 +169,8 @@ PorousFlowMassTimeDerivativeTempl<is_ad>::computeQpOffDiagJacobian(unsigned int 
       return 0.0;
     return computeQpJac(_dictator.porousFlowVariableNum(jvar));
   }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 
@@ -208,6 +210,8 @@ PorousFlowMassTimeDerivativeTempl<is_ad>::computeQpJac(unsigned int pvar)
     }
     return _test[_i][_qp] * (1.0 + strain) * dmass / _dt;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 
