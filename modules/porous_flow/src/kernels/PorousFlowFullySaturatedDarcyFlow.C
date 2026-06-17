@@ -69,6 +69,8 @@ PorousFlowFullySaturatedDarcyFlowTempl<is_ad>::dmobility(unsigned int pvar) cons
     return (*_dmfrac_dvar)[_qp][ph][_fluid_component][pvar] * darcy_mob +
            _mfrac[_qp][ph][_fluid_component] * ddarcy_mob;
   }
+  else
+    libmesh_ignore(pvar);
   return 0.0;
 }
 
