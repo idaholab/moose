@@ -36,7 +36,7 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::PorousFlowMatrixInternalEnergyTempl(
     _density(getParam<Real>("density")),
     _heat_cap(_cp * _density),
     _temperature(getGenericMaterialProperty<Real, is_ad>(
-        _nodal_material ? "PorousFlow_temperature_nodal" : "PorousFlow_temperature_qp")),
+        _dictator.isFV() ? "PorousFlow_temperature_qp" : "PorousFlow_temperature_nodal")),
     _dtemperature_dvar(
         is_ad ? nullptr
               : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
@@ -45,7 +45,7 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::PorousFlowMatrixInternalEnergyTempl(
                         : &declareProperty<std::vector<Real>>(
                               "dPorousFlow_matrix_internal_energy_nodal_dvar"))
 {
-  if (!is_ad && _nodal_material != true)
+  if (!_dictator.isFV() && !_nodal_material)
     mooseError("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");
 }
 
