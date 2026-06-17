@@ -115,35 +115,51 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
 
   // Evaluate interpolated values at incoming points.
   auto gather_functor =
-      [this, &local_meshfuns](processor_id_type /*pid*/,
-                              const std::vector<Point> & incoming_points,
-                              std::vector<mfem::real_t> & vals_for_incoming_points)
+      [&](processor_id_type /*pid*/,
+          const std::vector<Point> & incoming_points,
+          std::vector<std::pair<mfem::real_t, unsigned>> & vals_for_incoming_points)
   {
-    vals_for_incoming_points.resize(incoming_points.size(), getMFEMOutOfMeshValue());
+    vals_for_incoming_points.assign(incoming_points.size(), {0., 0});
     // Compute interpolation values of the libMesh variable at all requested points
     for (const auto i_pt : index_range(incoming_points))
-      vals_for_incoming_points[i_pt] = local_meshfuns(incoming_points[i_pt]);
+    {
+      const auto map = local_meshfuns.discontinuous_value(incoming_points[i_pt]);
+      for (const auto & [elem, val] : map)
+        if (elem && elem->processor_id() == this->processor_id())
+        {
+          vals_for_incoming_points[i_pt].first += val;
+          vals_for_incoming_points[i_pt].second++;
+        }
+    }
   };
+
+  // Counters for the no. of elements sharing/neighboring a given point to perform arithmetic avg
+  std::vector<unsigned> neighbor_elems(interp_vals.Size(), 0);
   // Copy data out to interp_vals
   auto action_functor =
-      [&interp_vals, this](processor_id_type /*pid*/,
-                           const std::vector<Point> & /*my_outgoing_points*/,
-                           const std::vector<mfem::real_t> & vals_for_outgoing_points)
+      [&](processor_id_type /*pid*/,
+          const std::vector<Point> & /*my_outgoing_points*/,
+          const std::vector<std::pair<mfem::real_t, unsigned>> & vals_for_outgoing_points)
   {
     for (const auto i : make_range(interp_vals.Size()))
     {
-      const auto val = vals_for_outgoing_points[i];
-      if (val == getMFEMOutOfMeshValue())
+      const auto val = vals_for_outgoing_points[i].first;
+      const auto elems = vals_for_outgoing_points[i].second;
+      if (!elems)
         continue;
-      interp_vals(i) = val;
+      else if (interp_vals(i) == getMFEMOutOfMeshValue())
+        interp_vals(i) = val / (neighbor_elems[i] += elems);
+      else
+        interp_vals(i) = (interp_vals(i) * neighbor_elems[i] + val) / (neighbor_elems[i] += elems);
     }
   };
 
   // Set interpolated field values at points on local processor
   interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
   // We assume incoming_vals is ordered in the same way as outgoing_points
+  std::pair<mfem::real_t, unsigned> * dummy = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
-      comm(), outgoing_points, gather_functor, action_functor, (mfem::real_t *)(nullptr));
+      comm(), outgoing_points, gather_functor, action_functor, dummy);
 }
 
 #endif
