@@ -103,8 +103,6 @@
                  'Contact/mortar/debug_mesh=true Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-centroid-retess'
-      mesh_mode = 'REPLICATED' # see issue 24255
-      map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons when triangulate_triangles is enabled,'
       max_threads = 1
@@ -120,8 +118,6 @@
                  'Contact/mortar/debug_mesh=true Executioner/end_time=0 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-centroid-no-retess'
-      mesh_mode = 'REPLICATED' # see issue 24255
-      map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       max_threads = 1
@@ -138,8 +134,6 @@
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-ear-clipping'
-      mesh_mode = 'REPLICATED' # see issue 24255
-      map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'an ear-clipping algorithm, and'
       max_threads = 1
       valgrind = 'none'
@@ -154,8 +148,6 @@
                  'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
                  'Outputs/exodus=false Outputs/csv=false '
                  'Outputs/file_base=frictionless-mortar-3d-action-delaunay'
-      mesh_mode = 'REPLICATED' # see issue 24255
-      map = false # the mortar segment debug mesh can contain coincident elements
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       max_threads = 1
       valgrind = 'none'
@@ -198,8 +190,6 @@
                  'Constraints/normal_y/triangulate_triangles=true '
                  'Constraints/normal_z/triangulate_triangles=true '
                  'UserObjects/weighted_gap_uo/triangulate_triangles=true'
-      map = false # the mortar segment debug mesh can contain coincident elements
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
                'clipped polygons,'
       max_threads = 1
@@ -225,8 +215,6 @@
                  'Constraints/normal_y/triangulate_triangles=false '
                  'Constraints/normal_z/triangulate_triangles=false '
                  'UserObjects/weighted_gap_uo/triangulate_triangles=false'
-      map = false # the mortar segment debug mesh can contain coincident elements
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
       max_threads = 1
@@ -248,8 +236,6 @@
                  'Constraints/normal_y/triangulation=ear_clipping '
                  'Constraints/normal_z/triangulation=ear_clipping '
                  'UserObjects/weighted_gap_uo/triangulation=ear_clipping'
-      map = false # the mortar segment debug mesh can contain coincident elements
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'an ear-clipping algorithm, and'
       max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
@@ -269,8 +255,6 @@
                  'Constraints/normal_y/triangulation=delaunay '
                  'Constraints/normal_z/triangulation=delaunay '
                  'UserObjects/weighted_gap_uo/triangulation=delaunay'
-      map = false # the mortar segment debug mesh can contain coincident elements
-      mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
       max_threads = 1
       prereq = 'frictionless-mortar-3d-debug-mesh'
