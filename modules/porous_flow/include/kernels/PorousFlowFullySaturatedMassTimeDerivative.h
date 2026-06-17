@@ -69,7 +69,7 @@ protected:
   /// Quadpoint fluid density (AD or non-AD depending on is_ad)
   const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_density;
 
-  /// d(fluid density)/d(PorousFlow variable) — null for AD path
+  /// d(fluid density)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Quadpoint pore pressure
@@ -78,7 +78,7 @@ protected:
   /// Old quadpoint pore pressure (always non-AD)
   const MaterialProperty<std::vector<Real>> & _pp_old;
 
-  /// d(pore pressure)/d(PorousFlow variable) — null for AD path
+  /// d(pore pressure)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dpp_dvar;
 
   /// Quadpoint temperature (only when _includes_thermal)
@@ -87,13 +87,13 @@ protected:
   /// Old quadpoint temperature (always non-AD)
   const MaterialProperty<Real> * const _temperature_old;
 
-  /// d(temperature)/d(PorousFlow variable) — null for AD path
+  /// d(temperature)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Volumetric strain rate (only when _includes_mechanical; always non-AD)
   const MaterialProperty<Real> * const _strain_rate;
 
-  /// d(strain rate)/d(PorousFlow variable) — null for AD path
+  /// d(strain rate)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_dvar;
 
   usingGenericKernelMembers;

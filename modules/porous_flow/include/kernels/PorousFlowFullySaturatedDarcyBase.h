@@ -35,7 +35,7 @@ protected:
   /// Fluid mobility = (density *) 1/viscosity.  Virtual so DarcyFlow can multiply by mass frac.
   virtual GenericReal<is_ad> mobility() const;
 
-  /// d(mobility)/d(PorousFlow variable pvar) — only used on the non-AD path
+  /// d(mobility)/d(PorousFlow variable pvar) -- only used on the non-AD path
   virtual Real dmobility(unsigned int pvar) const;
 
   /// If true the mobility includes fluid density (mass flux); otherwise volume flux
@@ -44,22 +44,22 @@ protected:
   /// Permeability tensor
   const GenericMaterialProperty<RealTensorValue, is_ad> & _permeability;
 
-  /// d(permeability)/d(PorousFlow variable) — null for AD path
+  /// d(permeability)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<RealTensorValue>> * const _dpermeability_dvar;
 
-  /// d(permeability)/d(grad PorousFlow variable) — null for AD path
+  /// d(permeability)/d(grad PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<RealTensorValue>>> * const _dpermeability_dgradvar;
 
   /// Fluid density for each phase
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _density;
 
-  /// d(density)/d(PorousFlow variable) — null for AD path
+  /// d(density)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _ddensity_dvar;
 
   /// Fluid viscosity for each phase
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _viscosity;
 
-  /// d(viscosity)/d(PorousFlow variable) — null for AD path
+  /// d(viscosity)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dviscosity_dvar;
 
   /// Quadpoint pore pressure for each phase
@@ -68,10 +68,10 @@ protected:
   /// Gradient of pore pressure for each phase
   const GenericMaterialProperty<std::vector<RealGradient>, is_ad> & _grad_p;
 
-  /// d(grad p)/d(grad PorousFlow variable) — null for AD path
+  /// d(grad p)/d(grad PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dgrad_p_dgrad_var;
 
-  /// d(grad p)/d(PorousFlow variable) — null for AD path
+  /// d(grad p)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrad_p_dvar;
 
   /// PorousFlowDictator UserObject
