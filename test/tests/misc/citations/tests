@@ -40,7 +40,7 @@
     input = multiapp.i
     cli_args = "MultiApps/sub/input_files=../../mfem/kernels/diffusion.i sub0:Outputs/active='' "
                "--citations"
-    expect_out = 'anderson2021mfem'
+    expect_out = 'mfem-2024'
     capabilities = 'mfem'
     recover = false
     requirement = "The system shall report the finite element backend citation for a backend used "

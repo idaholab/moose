@@ -1947,6 +1947,23 @@ MooseApp::requestCitations()
   std::map<std::string, std::string> citations;
   collectCitations(citations);
 
+  // MultiApp subapps are distributed across the MPI ranks, so each rank has collected citations
+  // only for the subapps it owns. PETSc prints the citation list from rank 0 alone, so gather every
+  // rank's citations onto all ranks; otherwise a module used only by a subapp that lives off rank 0
+  // would be omitted. The map is keyed by BibTeX key (unique per citation), so the union
+  // de-duplicates naturally. The key/text pairs are flattened into one buffer for a single
+  // allgather, which is a no-op on a single process.
+  std::vector<std::string> flattened;
+  flattened.reserve(citations.size() * 2);
+  for (const auto & [key, bibtex] : citations)
+  {
+    flattened.push_back(key);
+    flattened.push_back(bibtex);
+  }
+  _comm->allgather(flattened);
+  for (std::size_t i = 0; i + 1 < flattened.size(); i += 2)
+    citations.emplace(flattened[i], flattened[i + 1]);
+
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
   // used, at PetscFinalize (to the console or, if a file name was given, to that file).
