@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2026.06.07" %}
+{% set version = "2026.06.16" %}
 
 package:
   name: moose-tools
@@ -33,6 +33,7 @@ requirements:
     - beautifulsoup4
     - black {{ black }}
     - clang-format {{ clang_format }}
+    - clang-tools {{ clang_tools }}
     - coverage {{ coverage }}
     - deepdiff
     - git-lfs

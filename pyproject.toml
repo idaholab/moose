@@ -31,7 +31,8 @@ include = [
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
-  "python/TestHarness/tests/resultssummary/**/*.py"
+  "python/TestHarness/tests/resultssummary/**/*.py",
+  "scripts/coverage.py"
 ]
 exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
 

@@ -6,7 +6,7 @@
     type = Exodiff
     input = 'heat_conduction.i'
     exodiff = 'heat_conduction_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     compute_devices = 'cpu cuda'
   []
 []

@@ -14,6 +14,26 @@ namespace NEML2Utils
 {
 #ifdef NEML2_ENABLED
 
+std::string
+stringify(MOOSEIOType type)
+{
+  switch (type)
+  {
+    case NEML2Utils::MOOSEIOType::TIME:
+      return "TIME";
+    case NEML2Utils::MOOSEIOType::SCALAR:
+      return "SCALAR";
+    case NEML2Utils::MOOSEIOType::FUNCTION:
+      return "FUNCTION";
+    case NEML2Utils::MOOSEIOType::VARIABLE:
+      return "VARIABLE";
+    case NEML2Utils::MOOSEIOType::MATERIAL:
+      return "MATERIAL";
+    default:
+      mooseError("Unknown MOOSE IO type.");
+  }
+}
+
 std::shared_ptr<neml2::Model>
 getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype)
 {
@@ -23,32 +43,6 @@ getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype)
   model->to(dtype);
   neml2::set_default_dtype(prev_dtype);
   return model;
-}
-
-void
-assertVariable(const neml2::VariableName & v)
-{
-  if (v.empty())
-    mooseError("Empty NEML2 variable");
-
-  if (!v.is_force() && !v.is_state())
-    mooseError("The NEML2 variable '", v, "' is on the wrong subaxis.");
-}
-
-void
-assertOldVariable(const neml2::VariableName & v)
-{
-  if (v.empty())
-    mooseError("Empty NEML2 variable");
-
-  if (!v.is_old_force() && !v.is_old_state())
-    mooseError("The NEML2 variable '", v, "' is on the wrong subaxis.");
-}
-
-neml2::VariableName
-parseVariableName(const std::string & s)
-{
-  return neml2::utils::parse<neml2::VariableName>(s);
 }
 #endif // NEML2_ENABLED
 

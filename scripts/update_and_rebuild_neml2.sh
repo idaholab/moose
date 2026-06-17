@@ -25,16 +25,12 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  4. Build NEML2"
   echo "  5. Install NEML2"
   echo
-  echo "NEML2 requires WASP and libtorch as dependencies. They can be "
-  echo "obtained using the following scripts:"
-  echo "  - WASP:     scripts/update_and_rebuild_wasp.sh"
-  echo "  - libtorch: scripts/setup_libtorch.sh"
+  echo "NEML2 depends on libtorch as a dependency. It can be obtained using the following script:"
+  echo "  scripts/update_and_rebuild_libtorch.sh"
   echo
   echo "Influential environment variables:"
   echo "  MOOSE_DIR       The path to the MOOSE directory. Default to the parent directory of this script."
-  echo "  WASP_SRC_DIR    The path to the WASP source directory. Default to <MOOSE_DIR>/framework/contrib/wasp."
-  echo "  WASP_DIR        The path to the WASP directory. Default to <WASP_SRC_DIR>/install."
-  echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/libtorch."
+  echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/pytorch/installed."
   echo "  NEML2_DIR       The path where to install NEML2. Default to <NEML2_SRC_DIR>/installed/moose."
   echo "  NEML2_SRC_DIR   The path to the NEML2 source directory if a custom NEML2 should be used. If set, "
   echo "                  --skip-submodule-update will be assumed."
@@ -67,17 +63,7 @@ for ARG in "$@" ; do
 done
 
 # Dependency: libtorch
-export LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/libtorch}
-
-# Dependency: wasp
-WASP_SRC_DIR=${WASP_SRC_DIR:-${MOOSE_DIR}/framework/contrib/wasp}
-export WASP_DIR=${WASP_DIR:-${WASP_SRC_DIR}/install}
-
-# Dependency: hit in place if it exists
-if [ -z "$HIT_SRC_DIR" ] && [ -d "${MOOSE_DIR}/framework/contrib/hit" ]; then
-  HIT_SRC_DIR=${MOOSE_DIR}/framework/contrib/hit
-fi
-export HIT_SRC_DIR
+export LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/pytorch/installed}
 
 # Handle environment variables
 if [[ -n "$NEML2_SRC_DIR" ]]; then
@@ -93,13 +79,6 @@ if [[ -z "$NEML2_JOBS" ]]; then
   else
     NEML2_JOBS=1
   fi
-fi
-
-# Dynamic library suffix
-if [[ $(uname) == "Darwin" ]]; then
-  DYLIB_SUFFIX=dylib
-else
-  DYLIB_SUFFIX=so
 fi
 
 # Build methods
@@ -121,8 +100,6 @@ fi
 SCRIPT_NAME=$(basename "$0")
 echo "****************************************************************************************************"
 echo "${SCRIPT_NAME} summary:"
-echo "  HIT_SRC_DIR:               ${HIT_SRC_DIR}"
-echo "  WASP_DIR:                  ${WASP_DIR}"
 echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
 echo "  NEML2_DIR:                 ${NEML2_DIR}"
 echo "  NEML2_SRC_DIR:             ${NEML2_SRC_DIR}"
@@ -150,22 +127,14 @@ if [[ ! -d "${LIBTORCH_DIR}" ]]; then
   fi
   exit 1
 fi
-if [[ ! -d "${WASP_DIR}" ]]; then
-  echo "Error: The WASP directory (${WASP_DIR}) does not exist. Please see --help for more information."
-  exit 1
-fi
-if [[ ! -f "${WASP_DIR}"/lib/libwaspcore.${DYLIB_SUFFIX} ]] || [[ ! -f "${WASP_DIR}"/lib/libwasphit.${DYLIB_SUFFIX} ]]; then
-  echo "Error: The WASP directory (${WASP_DIR}) does not contain required libraries (core and hit). Please build WASP first."
-  exit 1
-fi
 
 # Step 1: Update the NEML2 submodule
 if [[ "$SKIP_SUBMODULE_UPDATE" != true ]] && [[ "$FAST" != true ]]; then
   cd "$MOOSE_DIR" || exit
-  git submodule update --init --checkout "${NEML2_SRC_DIR}"
+  git submodule update --init --checkout --recursive "${NEML2_SRC_DIR}"
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to update the NEML2 submodule with command"
-    echo "  git submodule update --init --checkout ${NEML2_SRC_DIR}"
+    echo "  git submodule update --init --checkout --recursive ${NEML2_SRC_DIR}"
     exit 1
   fi
 fi
@@ -256,7 +225,10 @@ if [[ $? -eq 0 ]]; then
   echo "NEML2 has been successfully installed. "
   echo
   echo "To configure MOOSE with NEML2, run the following commands:"
+  echo
   echo "  cd ${MOOSE_DIR}"
   echo "  ./configure --with-neml2=${NEML2_DIR} --with-libtorch=${LIBTORCH_DIR}"
+  echo
+  echo "Append other configure options as needed. See configure --help for more information."
   echo "****************************************************************************************************"
 fi

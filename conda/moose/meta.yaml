@@ -36,7 +36,7 @@ requirements:
     - patchelf # [linux]
     # python; for doc build + premake
     - python 3.14.*
-    - moose-tools 2026.06.07
+    - moose-tools 2026.06.16
   host:
     - mpich {{ mpich_version }}
     - hdf5 {{ hdf5 }}
@@ -45,18 +45,18 @@ requirements:
     - libfabric {{ libfabric }} # [linux]
     - libpng
     - moose-libmesh 2026.06.05_ab36c00 mpich_0
-    - moose-wasp 2026.05.24_2cdbeb7 build_0
+    - moose-wasp 2026.06.15_d8777a8 build_0
     - zlib
   run:
     - mpich {{ mpich_version }}
     - moose-libmesh 2026.06.05_ab36c00 mpich_0
-    - moose-wasp 2026.05.24_2cdbeb7 build_0
+    - moose-wasp 2026.06.15_d8777a8 build_0
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]
     - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]
     - clangxx_osx-arm64 {{ cxx_compiler_version }}.*          # [osx and arm64]
     # for testharness/python utilities
-    - moose-tools 2026.06.07
+    - moose-tools 2026.06.16
     # for running app --copy-inputs
     - rsync
   run_constrained:

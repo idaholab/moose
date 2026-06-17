@@ -42,17 +42,9 @@
     model = 'model_A'
     block = 'A'
 
-    moose_input_types = 'VARIABLE MATERIAL'
-    moose_inputs = '     a        b'
-    neml2_inputs = '     forces/A forces/B'
-
-    moose_output_types = 'MATERIAL           MATERIAL'
-    moose_outputs = '     neml2_sum          neml2_product'
-    neml2_outputs = '     state/internal/sum state/internal/product'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_dproduct_da'
-    neml2_derivatives = 'state/internal/product forces/A'
+    # request derivatives (must be pairs of two)
+    # derivative name follow moose convention, e.g., 'doutput/dinput'
+    derivatives = 'product A'
   []
 []
 
@@ -73,22 +65,22 @@
   [source_1]
     type = MatBodyForce
     variable = u
-    material_property = neml2_sum
+    material_property = sum
   []
   [source_2]
     type = MatBodyForce
     variable = u
-    material_property = neml2_product
+    material_property = product
   []
   [source_3]
     type = MatBodyForce
     variable = u
-    material_property = neml2_dproduct_da
+    material_property = dproduct/dA
   []
 []
 
 [AuxVariables]
-  [a]
+  [A]
   []
   [pid]
     order = CONSTANT
@@ -101,22 +93,22 @@
 []
 
 [ICs]
-  [a]
+  [A]
     type = FunctionIC
-    variable = a
+    variable = A
     function = 'x'
   []
 []
 
 [Materials]
-  [b]
+  [B]
     type = GenericFunctionMaterial
-    prop_names = 'b'
+    prop_names = 'B'
     prop_values = 'y+t'
   []
   [dummy]
     type = GenericConstantMaterial
-    prop_names = 'neml2_sum neml2_product neml2_dproduct_da'
+    prop_names = 'sum product dproduct/dA'
     prop_values = '0 0 0'
     block = 'B'
   []

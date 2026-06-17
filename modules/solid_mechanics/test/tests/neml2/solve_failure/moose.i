@@ -28,12 +28,6 @@ N = 2
   []
 []
 
-[AuxVariables]
-  [temp]
-    initial_condition = 1200
-  []
-[]
-
 [BCs]
   [xfix]
     type = DirichletBC
@@ -70,15 +64,7 @@ N = 2
     model = 'model'
     verbose = true
     device = 'cpu'
-    moose_input_types = 'MATERIAL     MATERIAL POSTPROCESSOR POSTPROCESSOR MATERIAL              MATERIAL                  MATERIAL'
-    moose_inputs = '     neml2_strain neml2_strain time          time          neml2_stress        equivalent_plastic_strain back_stress'
-    neml2_inputs = '     forces/E     old_forces/E forces/t      old_forces/t  old_state/S old_state/internal/ep     old_state/internal/X'
-    moose_output_types = 'MATERIAL     MATERIAL                  MATERIAL'
-    moose_outputs = '     neml2_stress    equivalent_plastic_strain back_stress'
-    neml2_outputs = '     state/S      state/internal/ep         state/internal/X'
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_jacobian'
-    neml2_derivatives = 'state/S forces/E'
+    derivatives = 'neml2_stress neml2_strain'
   []
 []
 
@@ -91,7 +77,7 @@ N = 2
   [stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
     custom_small_stress = 'neml2_stress'
-    custom_small_jacobian = 'neml2_jacobian'
+    custom_small_jacobian = 'dneml2_stress/dneml2_strain'
   []
 []
 
@@ -100,14 +86,6 @@ N = 2
     type = PiecewiseLinear
     x = '0 0.005 0.01 0.015 0.02'
     y = '0 0.005 0 -0.005 0'
-  []
-[]
-
-[Postprocessors]
-  [time]
-    type = TimePostprocessor
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    outputs = 'none'
   []
 []
 

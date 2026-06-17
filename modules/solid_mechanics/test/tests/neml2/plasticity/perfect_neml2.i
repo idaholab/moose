@@ -1,23 +1,26 @@
 [Models]
   [elastic_strain]
     type = SR2LinearCombination
-    from_var = 'forces/E state/internal/Ep'
-    to_var = 'state/internal/Ee'
-    coefficients = '1 -1'
+    from = 'neml2_strain plastic_strain'
+    to = 'elastic_strain'
+    weights = '1 -1'
   []
   [elasticity]
     type = LinearIsotropicElasticity
     coefficients = '1e5 0.3'
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
+    strain = 'elastic_strain'
+    stress = 'neml2_stress'
   []
   [mandel_stress]
     type = IsotropicMandelStress
+    cauchy_stress = 'neml2_stress'
   []
   [vonmises]
     type = SR2Invariant
     invariant_type = 'VONMISES'
-    tensor = 'state/internal/M'
-    invariant = 'state/internal/s'
+    tensor = 'mandel_stress'
+    invariant = 'effective_stress'
   []
   [yield]
     type = YieldFunction
@@ -30,19 +33,22 @@
   [normality]
     type = Normality
     model = 'flow'
-    function = 'state/internal/fp'
-    from = 'state/internal/M'
-    to = 'state/internal/NM'
+    function = 'yield_function'
+    from = 'mandel_stress'
+    to = 'flow_direction'
   []
   [Eprate]
     type = AssociativePlasticFlow
   []
   [integrate_Ep]
     type = SR2BackwardEulerTimeIntegration
-    variable = 'state/internal/Ep'
+    variable = 'plastic_strain'
   []
   [consistency]
-    type = RateIndependentPlasticFlowConstraint
+    type = FBComplementarity
+    a = 'yield_function'
+    a_inequality = 'LE'
+    b = 'flow_rate'
   []
   [surface]
     type = ComposedModel
@@ -57,6 +63,8 @@
   [eq_sys]
     type = NonlinearSystem
     model = 'surface'
+    unknowns = 'plastic_strain flow_rate'
+    residuals = 'plastic_strain_residual complementarity'
   []
 []
 
@@ -71,14 +79,20 @@
 []
 
 [Models]
+  [predictor]
+    type = ConstantExtrapolationPredictor
+    unknowns_SR2 = 'plastic_strain'
+    unknowns_Scalar = 'flow_rate'
+  []
   [return_map]
     type = ImplicitUpdate
     equation_system = 'eq_sys'
     solver = 'newton'
+    predictor = 'predictor'
   []
   [model]
     type = ComposedModel
     models = 'return_map elastic_strain elasticity'
-    additional_outputs = 'state/internal/Ep'
+    additional_outputs = 'plastic_strain'
   []
 []

@@ -33,23 +33,27 @@ LAROMANCE6DInterpolation::expected_options()
   options.doc() =
       "Multilinear interpolation over six dimensions (von_mises_stress, temperature, "
       "equivalent_plastic_strain, cell_dislocation_density, wall_dislocation_density, env_factor)";
+
   // Model inputs
-  options.set<VariableName>("equivalent_plastic_strain");
-  options.set<VariableName>("von_mises_stress");
+  options.add_input("equivalent_plastic_strain", "The equivalent plastic strain");
+  options.add_input("von_mises_stress", "The von Mises stress");
+  options.add_input("cell_dislocation_density", "The cell dislocation density");
+  options.add_input("wall_dislocation_density", "The wall dislocation density");
+  options.add_input("temperature", "The temperature");
+  options.add_input("env_factor", "The environment factor");
 
-  options.set<VariableName>("cell_dislocation_density");
-  options.set<VariableName>("wall_dislocation_density");
-
-  options.set<VariableName>("temperature");
-  options.set<VariableName>("env_factor");
   // Model Outputs
-  options.set_output("output_rate");
+  options.add_output("output_rate", "The output rate");
+
   // JSON
-  options.set<std::string>("model_file_name");
-  options.set<std::string>("model_file_variable_name");
+  options.add<std::string>("model_file_name", "The name of the model file");
+  options.add<std::string>("model_file_variable_name",
+                           "The name of the variable in the model file");
+
   // jit does not currently work with this
-  options.set<bool>("jit") = false;
-  options.set("jit").suppressed() = true;
+  options.set<bool>("jit", false);
+  options.suppress("jit");
+
   return options;
 }
 
