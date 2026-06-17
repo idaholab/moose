@@ -16,11 +16,13 @@ InputParameters
 ShiftedBoundaryMethodTestApp::validParams()
 {
   InputParameters params = ShiftedBoundaryMethodApp::validParams();
-  params.set<bool>("use_legacy_material_output") = false;
   return params;
 }
 
-ShiftedBoundaryMethodTestApp::ShiftedBoundaryMethodTestApp(const InputParameters & parameters) : MooseApp(parameters)
+registerKnownLabel("ShiftedBoundaryMethodTestApp");
+
+ShiftedBoundaryMethodTestApp::ShiftedBoundaryMethodTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ShiftedBoundaryMethodTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -29,7 +31,10 @@ ShiftedBoundaryMethodTestApp::ShiftedBoundaryMethodTestApp(const InputParameters
 ShiftedBoundaryMethodTestApp::~ShiftedBoundaryMethodTestApp() {}
 
 void
-ShiftedBoundaryMethodTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+ShiftedBoundaryMethodTestApp::registerAll(Factory & f,
+                                          ActionFactory & af,
+                                          Syntax & s,
+                                          bool use_test_objs)
 {
   ShiftedBoundaryMethodApp::registerAll(f, af, s);
   if (use_test_objs)
@@ -42,7 +47,7 @@ ShiftedBoundaryMethodTestApp::registerAll(Factory & f, ActionFactory & af, Synta
 void
 ShiftedBoundaryMethodTestApp::registerApps()
 {
-  registerApp(ShiftedBoundaryMethodApp);
+  ShiftedBoundaryMethodApp::registerApps();
   registerApp(ShiftedBoundaryMethodTestApp);
 }
 

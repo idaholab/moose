@@ -34,6 +34,12 @@ ShortestDistanceToSurfaceTestAux::validParams()
 
   params.addParam<FunctionName>("function", "Function used for the *ByFunc variants.");
 
+  params.addParam<Point>(
+      "at_point",
+      "Optional fixed query point. If supplied, the accessor is evaluated at this "
+      "point instead of the current element's centroid (useful for hitting "
+      "zero-distance branches at a surface-mesh node).");
+
   params.addClassDescription("Test-only AuxKernel that exposes ShortestDistanceToSurface accessors "
                              "(trueNormal, *ByIndex, *ByFunc) for coverage testing.");
 
@@ -44,16 +50,17 @@ ShortestDistanceToSurfaceTestAux::ShortestDistanceToSurfaceTestAux(
     const InputParameters & parameters)
   : AuxKernel(parameters),
     _distance_to_surface(getUserObject<ShortestDistanceToSurface>("distance_to_surface")),
-    _method(static_cast<Method>(int(getParam<MooseEnum>("method")))),
-    _component(static_cast<Component>(int(getParam<MooseEnum>("component")))),
+    _method(getParam<MooseEnum>("method")),
+    _component(getParam<MooseEnum>("component")),
     _index(getParam<unsigned int>("index")),
-    _function(isParamValid("function") ? &getFunction("function") : nullptr)
+    _function(isParamValid("function") ? &getFunction("function") : nullptr),
+    _use_at_point(isParamValid("at_point")),
+    _at_point(_use_at_point ? getParam<Point>("at_point") : Point())
 {
   if (isNodal())
     paramError("variable", "This AuxKernel only supports Elemental fields");
 
-  const bool needs_function =
-      _method == Method::DISTANCE_BY_FUNC || _method == Method::TRUE_NORMAL_BY_FUNC;
+  const bool needs_function = _method == "distance_by_func" || _method == "true_normal_by_func";
   if (needs_function && !_function)
     paramError("function", "A 'function' parameter is required for the *_by_func methods.");
 }
@@ -61,38 +68,25 @@ ShortestDistanceToSurfaceTestAux::ShortestDistanceToSurfaceTestAux(
 Real
 ShortestDistanceToSurfaceTestAux::computeValue()
 {
-  const Point & pt = _current_elem->vertex_average();
+  const Point pt = _use_at_point ? _at_point : _current_elem->vertex_average();
 
   RealVectorValue v;
-  switch (_method)
-  {
-    case Method::TRUE_NORMAL:
-      v = _distance_to_surface.trueNormal(pt);
-      break;
-    case Method::DISTANCE_BY_INDEX:
-      v = _distance_to_surface.distanceVectorByIndex(_index, pt);
-      break;
-    case Method::TRUE_NORMAL_BY_INDEX:
-      v = _distance_to_surface.trueNormalByIndex(_index, pt);
-      break;
-    case Method::DISTANCE_BY_FUNC:
-      v = _distance_to_surface.distanceVectorByFunc(pt, _t, _function);
-      break;
-    case Method::TRUE_NORMAL_BY_FUNC:
-      v = _distance_to_surface.trueNormalByFunc(pt, _t, _function);
-      break;
-  }
+  if (_method == "true_normal")
+    v = _distance_to_surface.trueNormal(pt);
+  else if (_method == "distance_by_index")
+    v = _distance_to_surface.distanceVectorByIndex(_index, pt);
+  else if (_method == "true_normal_by_index")
+    v = _distance_to_surface.trueNormalByIndex(_index, pt);
+  else if (_method == "distance_by_func")
+    v = _distance_to_surface.distanceVectorByFunc(pt, _t, _function);
+  else
+    v = _distance_to_surface.trueNormalByFunc(pt, _t, _function);
 
-  switch (_component)
-  {
-    case Component::X:
-      return v(0);
-    case Component::Y:
-      return v(1);
-    case Component::Z:
-      return v(2);
-    case Component::NORM:
-    default:
-      return v.norm();
-  }
+  if (_component == "x")
+    return v(0);
+  if (_component == "y")
+    return v(1);
+  if (_component == "z")
+    return v(2);
+  return v.norm();
 }

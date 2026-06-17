@@ -15,6 +15,7 @@
 #include "libmesh/edge_edge2.h"
 #include "SBMUtils.h"
 #include "LineSegment.h"
+#include "Ball.h"
 
 using namespace libMesh;
 
@@ -211,4 +212,74 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
   EXPECT_NEAR(dist2(0), 0.0, 1e-12);
   EXPECT_NEAR(dist2(1), 0.0, 1e-12);
   EXPECT_NEAR(dist2(2), 0.0, 1e-12);
+}
+
+TEST(SBMBndElementTest, ProjectedBoundingBoxDiagonal)
+{
+  // Tri3 spanning [0,1] x [0,1] in the z=0 plane. Bounding-box diagonal is
+  // (1,1,0); projected onto a plane orthogonal to z (i.e. removing the
+  // z-component, which is already zero) the tangential diagonal has norm
+  // sqrt(2). Projecting onto a plane orthogonal to the diagonal direction
+  // itself zeroes out the projection.
+  std::unique_ptr<Tri3> tri(new Tri3());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
+  std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0), 2));
+  tri->set_node(0) = n0.get();
+  tri->set_node(1) = n1.get();
+  tri->set_node(2) = n2.get();
+
+  SBMBndTri3 bnd_tri(tri.get());
+
+  EXPECT_NEAR(bnd_tri.getProjectedBoundingBoxDiagonal(Point(0.0, 0.0, 1.0) /*normal_dir*/),
+              std::sqrt(2.0),
+              1e-12);
+
+  const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
+  EXPECT_NEAR(
+      bnd_tri.getProjectedBoundingBoxDiagonal(Point(inv_sqrt2, inv_sqrt2, 0.0) /*normal_dir*/),
+      0.0,
+      1e-12);
+}
+
+TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
+{
+  // Exercise SBMBndElementBase::intersect / computeBoundingBall through a
+  // base-class reference; the `using` declarations in the derived classes
+  // otherwise route direct calls to LineSegment/Triangle and bypass these
+  // dispatchers.
+  std::unique_ptr<Edge2> edge(new Edge2());
+  std::unique_ptr<Node> e0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> e1(new Node(Point(1.0, 0.0, 0.0), 1));
+  edge->set_node(0) = e0.get();
+  edge->set_node(1) = e1.get();
+  SBMBndEdge2 bnd_edge(edge.get());
+  const SBMBndElementBase & edge_base = bnd_edge;
+
+  LineSegment crossing(Point(0.5, -1.0, 0.0), Point(0.5, 1.0, 0.0));
+  LineSegment parallel(Point(0.0, 1.0, 0.0), Point(1.0, 1.0, 0.0));
+  EXPECT_TRUE(edge_base.intersect(crossing));
+  EXPECT_FALSE(edge_base.intersect(parallel));
+
+  const Ball edge_ball = edge_base.computeBoundingBall();
+  EXPECT_NEAR(edge_ball.center()(0), 0.5, 1e-12);
+  EXPECT_NEAR(edge_ball.radius(), 0.5, 1e-12);
+
+  std::unique_ptr<Tri3> tri(new Tri3());
+  std::unique_ptr<Node> t0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> t1(new Node(Point(1.0, 0.0, 0.0), 1));
+  std::unique_ptr<Node> t2(new Node(Point(0.0, 1.0, 0.0), 2));
+  tri->set_node(0) = t0.get();
+  tri->set_node(1) = t1.get();
+  tri->set_node(2) = t2.get();
+  SBMBndTri3 bnd_tri(tri.get());
+  const SBMBndElementBase & tri_base = bnd_tri;
+
+  LineSegment piercing(Point(0.3, 0.3, -1.0), Point(0.3, 0.3, 1.0));
+  LineSegment missing(Point(2.0, 2.0, -1.0), Point(2.0, 2.0, 1.0));
+  EXPECT_TRUE(tri_base.intersect(piercing));
+  EXPECT_FALSE(tri_base.intersect(missing));
+
+  const Ball tri_ball = tri_base.computeBoundingBall();
+  EXPECT_GT(tri_ball.radius(), 0.0);
 }

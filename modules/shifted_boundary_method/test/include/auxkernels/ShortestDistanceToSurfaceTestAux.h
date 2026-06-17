@@ -30,26 +30,14 @@ protected:
   virtual Real computeValue() override;
 
 private:
-  enum class Method
-  {
-    TRUE_NORMAL,
-    DISTANCE_BY_INDEX,
-    TRUE_NORMAL_BY_INDEX,
-    DISTANCE_BY_FUNC,
-    TRUE_NORMAL_BY_FUNC,
-  };
-
-  enum class Component
-  {
-    X,
-    Y,
-    Z,
-    NORM,
-  };
-
   const ShortestDistanceToSurface & _distance_to_surface;
-  const Method _method;
-  const Component _component;
+  const MooseEnum _method;
+  const MooseEnum _component;
   const unsigned int _index;
   const Function * const _function;
+  /// If set, queries are evaluated at this fixed point instead of the
+  /// current element centroid. Used to drive accessors at specific locations
+  /// (e.g. on a surface-mesh node to exercise zero-distance branches).
+  const bool _use_at_point;
+  const Point _at_point;
 };
