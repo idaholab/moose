@@ -51,13 +51,13 @@ protected:
   /// Saturation (AD or non-AD)
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation;
 
-  /// d(saturation)/d(PorousFlow var) — null for AD path
+  /// d(saturation)/d(PorousFlow var) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 
   /// Reaction rate of the yielding the secondary species (AD or non-AD)
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _reaction_rate;
 
-  /// d(reaction rate)/d(PorousFlow variable) — null for AD path
+  /// d(reaction rate)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dreaction_rate_dvar;
 
   /// Stoichiometric coefficients

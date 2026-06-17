@@ -31,7 +31,7 @@ protected:
   /// Mass fraction of each component in each phase
   const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mfrac;
 
-  /// d(mass fraction)/d(PorousFlow variable) — null for AD path
+  /// d(mass fraction)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmfrac_dvar;
 
   /// Fluid component index for this kernel

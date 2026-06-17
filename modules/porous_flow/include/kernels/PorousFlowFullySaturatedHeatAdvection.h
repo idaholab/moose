@@ -34,7 +34,7 @@ protected:
   /// Enthalpy of each phase
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _enthalpy;
 
-  /// Derivative of enthalpy wrt PorousFlow variables — null for AD path
+  /// Derivative of enthalpy wrt PorousFlow variables -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _denthalpy_dvar;
 
   usingGenericKernelMembers;

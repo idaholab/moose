@@ -58,10 +58,10 @@ protected:
   /// Porosity at the nodes (AD or non-AD depending on is_ad)
   const GenericMaterialProperty<Real, is_ad> & _porosity;
 
-  /// d(porosity)/d(PorousFlow variable) at nodes — null for AD path
+  /// d(porosity)/d(PorousFlow variable) at nodes -- null for AD path
   const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable) at qps — null for AD path
+  /// d(porosity)/d(grad PorousFlow variable) at qps -- null for AD path
   const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
   /// The nearest qp to the node (always non-AD)
@@ -70,19 +70,19 @@ protected:
   /// Nodal fluid density (AD or non-AD)
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density;
 
-  /// d(nodal fluid density)/d(PorousFlow variable) — null for AD path
+  /// d(nodal fluid density)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Nodal fluid saturation (AD or non-AD)
   const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_saturation_nodal;
 
-  /// d(nodal fluid saturation)/d(PorousFlow variable) — null for AD path
+  /// d(nodal fluid saturation)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_nodal_dvar;
 
   /// Nodal mass fraction (AD or non-AD)
   const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
 
-  /// d(nodal mass fraction)/d(PorousFlow variable) — null for AD path
+  /// d(nodal mass fraction)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_frac_dvar;
 
   usingGenericKernelMembers;

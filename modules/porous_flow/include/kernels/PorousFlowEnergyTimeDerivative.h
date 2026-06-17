@@ -68,10 +68,10 @@ protected:
   /// Old value of porosity (always non-AD)
   const MaterialProperty<Real> & _porosity_old;
 
-  /// d(porosity)/d(PorousFlow variable) at nodes — null for AD path
+  /// d(porosity)/d(PorousFlow variable) at nodes -- null for AD path
   const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable) at qps — null for AD path
+  /// d(porosity)/d(grad PorousFlow variable) at qps -- null for AD path
   const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
   /// The nearest qp to the node (always non-AD)
@@ -83,7 +83,7 @@ protected:
   /// Old value of nodal rock energy density (always non-AD)
   const MaterialProperty<Real> & _rock_energy_nodal_old;
 
-  /// d(nodal rock energy density)/d(PorousFlow variable) — null for AD path
+  /// d(nodal rock energy density)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<Real>> * const _drock_energy_nodal_dvar;
 
   /// Nodal fluid density (AD or non-AD); null if !_fluid_present
@@ -92,7 +92,7 @@ protected:
   /// Old value of nodal fluid density (always non-AD); null if !_fluid_present
   const MaterialProperty<std::vector<Real>> * const _fluid_density_old;
 
-  /// d(nodal fluid density)/d(PorousFlow variable) — null for AD path or if !_fluid_present
+  /// d(nodal fluid density)/d(PorousFlow variable) -- null for AD path or if !_fluid_present
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Nodal fluid saturation (AD or non-AD); null if !_fluid_present
@@ -101,7 +101,7 @@ protected:
   /// Old value of fluid saturation (always non-AD); null if !_fluid_present
   const MaterialProperty<std::vector<Real>> * const _fluid_saturation_nodal_old;
 
-  /// d(nodal fluid saturation)/d(PorousFlow variable) — null for AD path or if !_fluid_present
+  /// d(nodal fluid saturation)/d(PorousFlow variable) -- null for AD path or if !_fluid_present
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_nodal_dvar;
 
   /// Internal energy of the phases, evaluated at the nodes (AD or non-AD); null if !_fluid_present
@@ -110,7 +110,7 @@ protected:
   /// Old value of internal energy of the phases, evaluated at the nodes (always non-AD); null if !_fluid_present
   const MaterialProperty<std::vector<Real>> * const _energy_nodal_old;
 
-  /// d(internal energy)/d(PorousFlow variable) — null for AD path or if !_fluid_present
+  /// d(internal energy)/d(PorousFlow variable) -- null for AD path or if !_fluid_present
   const MaterialProperty<std::vector<std::vector<Real>>> * const _denergy_nodal_dvar;
 
   usingGenericKernelMembers;
