@@ -28,11 +28,26 @@ CSGBase::CSGBase(const CSGBase & other_base)
     _universe_list(CSGUniverseList()),
     _lattice_list(CSGLatticeList())
 {
-  // Iterate through all cell references from the other CSGBase instance and
+  // Add all engineering units first so the recursive addCellToList / addUniverseToList calls
+  // below can find them via hasCell() / hasUniverse() and return early without erroring.
+  // Cell engineering units do not have universes and universe engineering units do not contain
+  // cells in the same way that the plain objects do, so we do not need to worry about recursion.
+
+  // Bypass addCellToList because it that doesn't properly handle engineering units and also
+  // bypass addEngUnit for cells to avoid erroneously adding it to the root universe if it is not
+  // necessary.
+  for (const auto & eng_unit : other_base.getAllCellEngUnits())
+    _cell_list.addCell(eng_unit.get().clone());
+
+  for (const auto & eng_unit : other_base.getAllUniverseEngUnits())
+    addEngUnit(eng_unit.get().clone());
+
+  // Iterate through all non-eng unit cell references from the other CSGBase instance and
   // create new CSGCell pointers based on these references. This is done
-  // recursively to properly handle cells with universe fills
+  // recursively to properly handle cells with universe fills.
   for (const auto & [name, cell] : other_base.getCellList().getCellListMap())
-    addCellToList(*cell);
+    if (!cellToEngUnit(*cell))
+      addCellToList(*cell);
 
   // Link all cells in other_base root universe to current root universe
   for (auto & root_cell : other_base.getRootUniverse().getAllCells())
@@ -41,19 +56,48 @@ CSGBase::CSGBase(const CSGBase & other_base)
     addCellToUniverse(getRootUniverse(), list_cell);
   }
 
-  // Iterate through all universe references from the other CSGBase instance and
+  // Iterate through all non-eng unit universe references from the other CSGBase instance and
   // create new CSGUniverse pointers based on these references. This is done in case
   // any universe exist in the universe list that are not connected to the cell list.
   for (const auto & [name, univ] : other_base.getUniverseList().getUniverseListMap())
-    addUniverseToList(*univ);
+    if (!universeToEngUnit(*univ))
+      addUniverseToList(*univ);
 
   // Iterate through all lattice references from the other CSGBase instance and
   // create new CSGLattice pointers based on these references.
   for (const auto & [name, lattice] : other_base.getLatticeList().getLatticeListMap())
     addLatticeToList(*lattice);
+
+  // Rebuild the eng unit index from the now-complete surface, cell, and universe lists.
+  rebuildEngUnitList();
 }
 
 CSGBase::~CSGBase() {}
+
+const CSGSurface &
+CSGBase::addSurface(std::unique_ptr<CSGSurface> surf)
+{
+  if (surfaceToEngUnit(*surf))
+    mooseError("Surface '",
+               surf->getName(),
+               "' is a CSGSurfaceEngUnit and must be added via addEngUnit(), not addSurface().");
+  return _surface_list.addSurface(std::move(surf));
+}
+
+void
+CSGBase::prepareSurfaceDeletion(const CSGSurface & surface) const
+{
+  for (const auto & cell_ref : _cell_list.getAllCells())
+  {
+    const auto & cell = cell_ref.get();
+    for (const auto & region_surf : cell.getRegion().getSurfaces())
+      if (region_surf.get() == surface)
+        mooseError("Cannot delete surface with name ",
+                   surface.getName(),
+                   " as it is used in region definition of cell with name ",
+                   cell.getName());
+  }
+}
 
 void
 CSGBase::deleteSurface(const CSGSurface & surface)
@@ -64,20 +108,9 @@ CSGBase::deleteSurface(const CSGSurface & surface)
                " cannot be deleted as it is different from the surface of the same name in the "
                "CSGBase instance.");
 
-  // Check if surface is used in region definition of existing cells
-  for (const auto & cell_ref : _cell_list.getAllCells())
-  {
-    const auto & cell = cell_ref.get();
-    const auto & cell_region = cell.getRegion();
-    const auto & region_surfaces = cell_region.getSurfaces();
-    for (const auto & region_surf : region_surfaces)
-      if (region_surf.get() == surface)
-        mooseError("Cannot delete surface with name ",
-                   surface.getName(),
-                   " as it is used in region definition of cell with name ",
-                   cell.getName());
-  }
-
+  prepareSurfaceDeletion(surface);
+  if (const auto * eng_unit = surfaceToEngUnit(surface))
+    _eng_unit_list.removeEngUnit(*eng_unit);
   _surface_list.getSurfaceListMap().erase(surface.getName());
 }
 
@@ -88,6 +121,12 @@ CSGBase::addCellToList(const CSGCell & cell)
   const auto name = cell.getName();
   if (_cell_list.hasCell(name))
     return _cell_list.getCell(name);
+
+  // Engineering unit cells must be registered via addEngUnit(), not addCellToList()
+  if (cellToEngUnit(cell))
+    mooseError("Cell '",
+               name,
+               "' is a CSGCellEngUnit and must be added via addEngUnit(), not addCellToList().");
 
   // Otherwise if the cell has material or void cell, we can create it directly
   const auto fill_type = cell.getFillType();
@@ -123,6 +162,13 @@ CSGBase::addUniverseToList(const CSGUniverse & univ)
   const auto name = univ.getName();
   if (_universe_list.hasUniverse(name))
     return _universe_list.getUniverse(name);
+
+  // Engineering unit universes must be registered via addEngUnit(), not addUniverseToList()
+  if (universeToEngUnit(univ))
+    mooseError("Universe '",
+               name,
+               "' is a CSGUniverseEngUnit and must be added via addEngUnit(), not "
+               "addUniverseToList().");
 
   // Otherwise we create a new universe based on its associated cells.
   // addCellToList is called recursively in case associated cells have not
@@ -272,6 +318,28 @@ CSGBase::createCell(const std::string & name,
 }
 
 void
+CSGBase::prepareCellDeletion(const CSGCell & cell)
+{
+  for (const auto & univ_ref : _universe_list.getAllUniverses())
+  {
+    const auto & univ = univ_ref.get();
+    for (const auto & univ_cell : univ.getAllCells())
+      if (cell == univ_cell.get())
+      {
+        // must remove from root intentionally too, but don't warn in this case (too noisy for
+        // expected behavior)
+        if (univ != getRootUniverse())
+          mooseWarning("Removing cell ",
+                       cell.getName(),
+                       " from universe with name ",
+                       univ.getName(),
+                       " before cell deletion.");
+        _universe_list.getUniverse(univ.getName()).removeCell(cell.getName());
+      }
+  }
+}
+
+void
 CSGBase::deleteCell(const CSGCell & cell)
 {
   if (!checkCellInBase(cell))
@@ -280,30 +348,20 @@ CSGBase::deleteCell(const CSGCell & cell)
                " cannot be deleted as it is different from the cell of the same name in the "
                "CSGBase instance.");
 
-  // Check if cell exists in any existing universes. Cell will be removed from these universes
-  for (const auto & univ_ref : _universe_list.getAllUniverses())
-  {
-    const auto & univ = univ_ref.get();
-    const auto & univ_cells = univ.getAllCells();
-    for (const auto & univ_cell : univ_cells)
-      if (cell == univ_cell.get() && univ != getRootUniverse())
-      {
-        mooseWarning("Removing cell ",
-                     cell.getName(),
-                     " from universe with name ",
-                     univ.getName(),
-                     " before cell deletion.");
-        auto & univ_to_modify = _universe_list.getUniverse(univ.getName());
-        univ_to_modify.removeCell(cell.getName());
-      }
-  }
-
+  prepareCellDeletion(cell);
+  if (const auto * eng_unit = cellToEngUnit(cell))
+    _eng_unit_list.removeEngUnit(*eng_unit);
   _cell_list.getCellListMap().erase(cell.getName());
 }
 
 void
 CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (cellToEngUnit(cell))
+    mooseError("Region cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   checkRegionSurfaces(region);
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
@@ -316,6 +374,11 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 void
 CSGBase::resetCellFill(const CSGCell & cell)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (cellToEngUnit(cell))
+    mooseError("Fill cannot be reset for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkCellInBase(cell))
     mooseError("The fill of cell with name " + cell.getName() +
                " that is being updated is different " +
@@ -327,6 +390,11 @@ CSGBase::resetCellFill(const CSGCell & cell)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const std::string & mat_name)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (cellToEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
                " that is being updated is different " +
@@ -338,6 +406,11 @@ CSGBase::updateCellFill(const CSGCell & cell, const std::string & mat_name)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const CSGUniverse * univ)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (cellToEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkUniverseInBase(*univ))
     mooseError("Universe with name ",
                univ->getName(),
@@ -354,6 +427,11 @@ CSGBase::updateCellFill(const CSGCell & cell, const CSGUniverse * univ)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const CSGLattice * lattice)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (cellToEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkLatticeInBase(*lattice))
     mooseError("Lattice with name ",
                lattice->getName(),
@@ -377,23 +455,15 @@ CSGBase::createUniverse(const std::string & name,
 }
 
 void
-CSGBase::deleteUniverse(const CSGUniverse & univ)
+CSGBase::prepareUniverseDeletion(const CSGUniverse & univ) const
 {
-  if (!checkUniverseInBase(univ))
-    mooseError("Universe with name ",
-               univ.getName(),
-               " cannot be deleted as it is different from the universe of the same name in the "
-               "CSGBase instance.");
-
-  // Check if universe is the root universe
   if (univ == getRootUniverse())
     mooseError("Cannot delete root universe from CSGBase instance");
 
   // Check if universe is used in any existing lattices
   for (const auto & lat : _lattice_list.getAllLattices())
   {
-    const auto & lattice_univs = lat.get().getUniqueUniverses();
-    for (const auto & lat_univ : lattice_univs)
+    for (const auto & lat_univ : lat.get().getUniqueUniverses())
       if (univ == lat_univ.get())
         mooseError("Cannot delete universe with name ",
                    univ.getName(),
@@ -416,13 +486,31 @@ CSGBase::deleteUniverse(const CSGUniverse & univ)
                  " as it is used as the fill of cell with name ",
                  cell.getName());
   }
+}
 
+void
+CSGBase::deleteUniverse(const CSGUniverse & univ)
+{
+  if (!checkUniverseInBase(univ))
+    mooseError("Universe with name ",
+               univ.getName(),
+               " cannot be deleted as it is different from the universe of the same name in the "
+               "CSGBase instance.");
+
+  prepareUniverseDeletion(univ);
+  if (const auto * eng_unit = universeToEngUnit(univ))
+    _eng_unit_list.removeEngUnit(*eng_unit);
   _universe_list.getUniverseListMap().erase(univ.getName());
 }
 
 void
 CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
 {
+  // if universe is actually engineering unit, cannot add cells
+  if (universeToEngUnit(universe))
+    mooseError("Universe '" + universe.getName() +
+               "' cannot add cells because it is a CSGUniverseEngUnit.");
+
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
     mooseError("A cell named " + cell.getName() + " is being added to universe " +
@@ -459,6 +547,8 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
                " that is different " +
                "from the universe of the same name in the CSGBase instance.");
   auto & univ = _universe_list.getUniverse(universe.getName());
+  // removeCell will produce error that cell is not found in the case that the universe is actually
+  // an engineering unit, so we don't need to check that.
   univ.removeCell(cell.getName());
 }
 
@@ -623,6 +713,26 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
             addTransformation(surface, type, values);
           }
         }
+        else if constexpr (std::is_same_v<T, CSGEngUnit>)
+        {
+          const CSGEngUnit & eng_unit = obj.get();
+          if (!checkEngUnitInBase(eng_unit))
+            mooseError("Cannot apply transformation to engineering unit ",
+                       eng_unit.getName(),
+                       " that is not in this CSGBase instance.");
+
+          CSGEngUnit & mutable_eng = _eng_unit_list.getEngUnit(eng_unit.getName());
+          if (auto * s = dynamic_cast<CSGSurfaceEngUnit *>(&mutable_eng))
+            s->addTransformation(type, values);
+          else if (auto * c = dynamic_cast<CSGCellEngUnit *>(&mutable_eng))
+            c->addTransformation(type, values);
+          else if (auto * u = dynamic_cast<CSGUniverseEngUnit *>(&mutable_eng))
+            u->addTransformation(type, values);
+          else
+            mooseError("Engineering unit '",
+                       eng_unit.getName(),
+                       "' has an unrecognized type for transformation.");
+        }
         else
           mooseError("Transformation not implemented for this object type: ", typeid(T).name());
       },
@@ -670,6 +780,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identica
   joinCellList(base->getCellList(), ignore_identical_components);
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(base->getUniverseList(), ignore_identical_components);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -685,6 +797,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
   joinCellList(base->getCellList(), ignore_identical_components);
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(base->getUniverseList(), ignore_identical_components, new_root_name_join);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -702,6 +816,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(
       base->getUniverseList(), ignore_identical_components, new_root_name_base, new_root_name_join);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -860,6 +976,24 @@ CSGBase::joinLatticeList(CSGLatticeList & lattice_list, const bool ignore_identi
 }
 
 void
+CSGBase::rebuildEngUnitList()
+{
+  _eng_unit_list = CSGEngUnitList(); // reset to empty
+
+  // iterate through all existing lists to find all CSGEngUnit types and store the pointers to the
+  // rebuilt engineering unit list
+  for (auto & [name, surf] : _surface_list.getSurfaceListMap())
+    if (auto * eu = dynamic_cast<CSGSurfaceEngUnit *>(surf.get()))
+      _eng_unit_list.addEngUnit(*eu);
+  for (auto & [name, cell] : _cell_list.getCellListMap())
+    if (auto * eu = dynamic_cast<CSGCellEngUnit *>(cell.get()))
+      _eng_unit_list.addEngUnit(*eu);
+  for (auto & [name, univ] : _universe_list.getUniverseListMap())
+    if (auto * eu = dynamic_cast<CSGUniverseEngUnit *>(univ.get()))
+      _eng_unit_list.addEngUnit(*eu);
+}
+
+void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list, const bool ignore_identical_universes)
 {
   // case 1: incoming root is joined into existing root; no new universes are created
@@ -948,7 +1082,7 @@ CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
   auto name = surface.getName();
   // if no surface by this name exists, an error will be produced by getSurface
   auto & list_surf = _surface_list.getSurface(name);
-  // return whether that the surface in the list is the same as the surface provided (in memory)
+  // return whether the surface in the list is the same object as the one provided
   return &surface == &list_surf;
 }
 
@@ -958,7 +1092,7 @@ CSGBase::checkCellInBase(const CSGCell & cell) const
   auto name = cell.getName();
   // if no cell by this name exists, an error will be produced by getCell
   auto & list_cell = _cell_list.getCell(name);
-  // return whether that the cell in the list is the same as the cell provided (in memory)
+  // return whether the cell in the list is the same object as the one provided
   return &cell == &list_cell;
 }
 
@@ -968,7 +1102,7 @@ CSGBase::checkUniverseInBase(const CSGUniverse & universe) const
   auto name = universe.getName();
   // if no universe by this name exists, an error will be produced by getUniverse
   auto & list_univ = _universe_list.getUniverse(name);
-  // return whether that the universe in the list is the same as the universe provided (in memory)
+  // return whether the universe in the list is the same object as the one provided
   return &universe == &list_univ;
 }
 
@@ -982,6 +1116,74 @@ CSGBase::checkLatticeInBase(const CSGLattice & lattice) const
   return &lattice == &list_lattice;
 }
 
+bool
+CSGBase::checkEngUnitInBase(const CSGEngUnit & unit) const
+{
+  const auto & name = unit.getName();
+  // if no engineering unit by this name exists, an error will be produced by getEngUnit
+  const auto & list_unit = _eng_unit_list.getEngUnit(name);
+  // compare CSGEngUnit subobject addresses
+  return &unit == &list_unit;
+}
+
+void
+CSGBase::renameEngUnit(const CSGEngUnit & unit, const std::string & name)
+{
+  // Rename in the owning type list (updates the object's name and the type list map key).
+  // The EngUnit index stores raw pointers; because the object's name is updated in-place,
+  // no index update is needed.
+  if (const auto * surf = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
+    renameSurface(*surf, name);
+  else if (const auto * cell = dynamic_cast<const CSGCellEngUnit *>(&unit))
+    renameCell(*cell, name);
+  else if (const auto * univ = dynamic_cast<const CSGUniverseEngUnit *>(&unit))
+    renameUniverse(*univ, name);
+  else
+    mooseError(
+        "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be renamed.");
+}
+
+void
+CSGBase::renameSurface(const CSGSurface & surface, const std::string & name)
+{
+  // if surface is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (surfaceToEngUnit(surface))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename surface " + surface.getName() + " to " + name + ". " +
+                 surface.getName() + " is an engineering unit and a unit with name " + name +
+                 " already exists.");
+
+  _surface_list.renameSurface(surface, name);
+}
+
+void
+CSGBase::renameCell(const CSGCell & cell, const std::string & name)
+{
+  // if cell is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (cellToEngUnit(cell))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename cell " + cell.getName() + " to " + name + ". " + cell.getName() +
+                 " is an engineering unit and a unit with name " + name + " already exists.");
+
+  _cell_list.renameCell(cell, name);
+}
+
+void
+CSGBase::renameUniverse(const CSGUniverse & universe, const std::string & name)
+{
+  // if universe is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (universeToEngUnit(universe))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename universe " + universe.getName() + " to " + name + ". " +
+                 universe.getName() + " is an engineering unit and a unit with name " + name +
+                 " already exists.");
+
+  _universe_list.renameUniverse(universe, name);
+}
+
 void
 CSGBase::checkUniverseLinking() const
 {
@@ -992,7 +1194,7 @@ CSGBase::checkUniverseLinking() const
   getLinkedUniverses(getRootUniverse(), linked_universe_names, linked_cell_names);
 
   // Iterate through all universes in universe list and check that they exist in universes linked
-  // to root universe
+  // to root universe list. Universe list includes CSGUniverseEngUnits.
   for (const CSGUniverse & univ : getAllUniverses())
     if (std::find(linked_universe_names.begin(), linked_universe_names.end(), univ.getName()) ==
         linked_universe_names.end())
@@ -1004,6 +1206,23 @@ CSGBase::checkUniverseLinking() const
     if (std::find(linked_cell_names.begin(), linked_cell_names.end(), cell.getName()) ==
         linked_cell_names.end())
       mooseWarning("Cell with name ", cell.getName(), " is not linked to root universe.");
+}
+
+bool
+CSGBase::areUniversesLinked() const
+{
+  std::vector<std::string> linked_univs, linked_cells;
+  getLinkedUniverses(getRootUniverse(), linked_univs, linked_cells);
+
+  for (const CSGUniverse & univ : getAllUniverses())
+    if (std::find(linked_univs.begin(), linked_univs.end(), univ.getName()) == linked_univs.end())
+      return false;
+
+  for (const CSGCell & cell : getAllCells())
+    if (std::find(linked_cells.begin(), linked_cells.end(), cell.getName()) == linked_cells.end())
+      return false;
+
+  return true;
 }
 
 void
@@ -1037,6 +1256,269 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
   }
 }
 
+void
+CSGBase::deleteEngUnit(const CSGEngUnit & unit)
+{
+  if (!checkEngUnitInBase(unit))
+    mooseError("Engineering unit with name ",
+               unit.getName(),
+               " cannot be deleted as it is different from the engineering unit of the same name "
+               "in the CSGBase instance.");
+
+  // Delegate to the typed delete method which handles EngUnit index cleanup and type list erasure
+  if (const auto * surf_unit = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
+    deleteSurface(static_cast<const CSGSurface &>(*surf_unit));
+  else if (const auto * cell_unit = dynamic_cast<const CSGCellEngUnit *>(&unit))
+    deleteCell(static_cast<const CSGCell &>(*cell_unit));
+  else if (const auto * univ_unit = dynamic_cast<const CSGUniverseEngUnit *>(&unit))
+    deleteUniverse(static_cast<const CSGUniverse &>(*univ_unit));
+  else
+    mooseError(
+        "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be deleted.");
+}
+
+void
+CSGBase::expandAllEngUnits()
+{
+  std::set<std::set<std::string>> all_type_sets;
+  expandAllEngUnitsCycle(all_type_sets);
+}
+
+void
+CSGBase::expandAllEngUnitsCycle(std::set<std::set<std::string>> & all_type_sets)
+{
+  // One call to this function is one pass: collect all current eng units, expand them, then
+  // recurse if expansion created new units. Units created during a pass are not in this pass's
+  // snapshot; they are handled in the next pass.
+  //
+  // Cycle check: if the same combination of unit types appeared at the start of a prior pass,
+  // expansion is stuck repeating the same configuration. Tracking the full type-set (not
+  // individual types) prevents false positives when a type reappears because it was produced
+  // by a different type's expansion rather than its own.
+  std::set<std::string> current_types;
+  for (const auto & u : getAllEngUnits())
+    current_types.insert(u.get().getUnitType());
+
+  if (all_type_sets.count(
+          current_types)) // this expansion set was already captured which means we are cycling
+    mooseError("Circular dependency detected in engineering unit expansion");
+
+  all_type_sets.insert(current_types);
+
+  // Snapshot raw pointers before expanding. Units are destroyed after expansion so iterating live
+  // references would dangle.
+  std::vector<const CSGSurfaceEngUnit *> surfs;
+  std::vector<const CSGCellEngUnit *> cells;
+  std::vector<const CSGUniverseEngUnit *> univs;
+  for (const auto & u : getAllSurfaceEngUnits())
+    surfs.push_back(&u.get());
+  for (const auto & u : getAllCellEngUnits())
+    cells.push_back(&u.get());
+  for (const auto & u : getAllUniverseEngUnits())
+    univs.push_back(&u.get());
+
+  // Expand all units in this pass
+  for (const auto * s : surfs)
+    expandEngUnit(*s);
+  for (const auto * c : cells)
+    expandEngUnit(*c);
+  for (const auto * u : univs)
+    expandEngUnit(*u);
+
+  // if engineering units exist after completion of all expansions above, then start the next "pass"
+  // through this expansion process. This will create a new set of "current_types" to check.
+  if (!getAllEngUnits().empty())
+    expandAllEngUnitsCycle(all_type_sets);
+}
+
+CSGRegion
+CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
+{
+  // Get mutable reference from the owning surface list (expandUnit() is non-const)
+  auto & mutable_unit = static_cast<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
+
+  // Derived class creates the CSGSurface object(s) in the unit's base object and sets
+  // _expanded_region
+  mutable_unit.expandUnit();
+
+  // check that the base object that was generated has only surfaces and no cells or universes
+  // (except root).
+  auto unit_base = mutable_unit.getBase();
+  if ((unit_base.getAllCells().size() > 0) || (unit_base.getAllUniverses().size() > 1))
+    mooseError("CSGSurfaceEngineering unit ",
+               mutable_unit.getName(),
+               " of type ",
+               mutable_unit.getUnitType(),
+               " contains either cells or universes (beyond the root universe) after expansion, "
+               "but should only contain surfaces.");
+
+  // Join the unit's base object into this; transfers surfaces (and any other objects) during merge.
+  joinOtherBase(mutable_unit.releaseBase(), false);
+
+  // Derived class provides the expanded region formed by the expanded surfaces
+  CSGRegion expanded_region = mutable_unit.getExpandedRegion();
+
+  // Propagate any stored transformations from the EngUnit to all new expanded surfaces
+  const auto & trans = static_cast<const CSGSurface &>(mutable_unit).getTransformations();
+  if (!trans.empty())
+    for (const auto & surf_ref : expanded_region.getSurfaces())
+    {
+      CSGSurface & mutable_surf = _surface_list.getSurface(surf_ref.get().getName());
+      for (const auto & [trans_type, values] : trans)
+        mutable_surf.addTransformation(trans_type, values);
+    }
+
+  // Replace every CSGSurfaceEngUnit reference in regions of CSGCells with the expanded sub-region
+  replaceSurfaceRefsWithRegion(static_cast<const CSGSurface &>(mutable_unit), expanded_region);
+
+  // Remove the EngUnit (destroyed here, no more references to it after
+  // replaceSurfaceRefsWithRegion)
+  deleteEngUnit(unit);
+  return expanded_region;
+}
+
+const CSGCell &
+CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
+{
+  // Get mutable reference from the owning cell list (expandUnit() is non-const)
+  auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
+
+  // Derived class populates an internal base object (owned by the unit) with the expanded cell (in
+  // root) and any supports
+  mutable_unit.expandUnit();
+
+  // Capture a reference to the expanded cell before the join. joinOtherBase transfers ownership
+  // of the cell's unique_ptr but does not relocate the object, so the reference stays valid.
+  // getExpandedCell also validates that root has exactly 1 cell.
+  const CSGCell & expanded_cell = mutable_unit.getExpandedCell();
+
+  // Join the unit's base object: 1-param merges root cells into this root
+  joinOtherBase(mutable_unit.releaseBase(), false);
+
+  // Propagate any stored transformations from the EngUnit to the expanded cell
+  const auto & trans = static_cast<const CSGCell &>(mutable_unit).getTransformations();
+  if (!trans.empty())
+  {
+    CSGCell & mutable_cell = _cell_list.getCell(expanded_cell.getName());
+    for (const auto & [trans_type, values] : trans)
+      mutable_cell.addTransformation(trans_type, values);
+  }
+
+  // The join added the expanded cell to this root via root-merge; remove it so
+  // replaceCellRefs() can place it in the correct universe(s)
+  if (getRootUniverse().hasCell(expanded_cell.getName()))
+    removeCellFromUniverse(getRootUniverse(), expanded_cell);
+
+  // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
+  replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), expanded_cell);
+
+  // Remove the EngUnit (destroyed here, no more references to it after replaceCellRefs)
+  deleteEngUnit(unit);
+  return expanded_cell;
+}
+
+const CSGUniverse &
+CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
+{
+  // Get mutable reference from the owning universe list (expandUnit() is non-const)
+  auto & mutable_unit =
+      static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit.getName()));
+
+  // Derived class populates the unit's base object; the root of this base is the expanded universe
+  // that will be used to replace this universe unit
+  mutable_unit.expandUnit();
+
+  // Capture the name of the expanded universe (the unit base's root universe) before the join
+  // getExpandedUniverse will validate that the root contains cells and was properly
+  // implemented/expanded such that incoming cells and universes are all linked to the root.
+  const std::string expanded_name = mutable_unit.getExpandedUniverse().getName();
+
+  // Join the unit's base into this: all objects are transferred and the incoming root is added as
+  // a named non-root universe (expanded_name). If the root universe's name is not unique (i.e. it
+  // was left named ROOT_UNIVERSE), this will throw an error.
+  joinOtherBase(mutable_unit.releaseBase(), false, expanded_name);
+
+  // must get this by name after joining because the join method rebuilds the universe and the
+  // previous reference from getExpandedUniverse is not valid anymore.
+  const CSGUniverse & expanded_univ = getUniverseByName(expanded_name);
+
+  // Propagate any stored transformations from the EngUnit to the new expanded universe
+  const auto & trans = static_cast<const CSGUniverse &>(mutable_unit).getTransformations();
+  if (!trans.empty())
+  {
+    CSGUniverse & mutable_univ = _universe_list.getUniverse(expanded_univ.getName());
+    for (const auto & [trans_type, values] : trans)
+      mutable_univ.addTransformation(trans_type, values);
+  }
+
+  // Replace references in cell fills, lattice maps and outers, and the root universe
+  replaceUniverseRefs(static_cast<const CSGUniverse &>(mutable_unit), expanded_univ);
+
+  // Remove the EngUnit (destroyed here, no more references to it after replaceUniverseRefs)
+  deleteEngUnit(unit);
+  return expanded_univ;
+}
+
+void
+CSGBase::replaceUniverseRefs(const CSGUniverse & old_univ, const CSGUniverse & new_univ)
+{
+  // 1. Cell fills
+  for (const auto & cell_ref : getAllCells())
+  {
+    const CSGCell & cell = cell_ref.get();
+    if (cell.getFillType() == "UNIVERSE" && cell.getFillUniverse() == old_univ)
+      updateCellFill(cell, &new_univ);
+  }
+
+  // 2. Lattice universe maps and outer fills
+  for (const auto & lat_ref : getAllLattices())
+  {
+    const CSGLattice & lat = lat_ref.get();
+    if (lat.getOuterType() == "UNIVERSE" && lat.getOuterUniverse() == old_univ)
+      setLatticeOuter(lat, new_univ);
+
+    auto lat_map = lat.getUniverses();
+    for (std::size_t row = 0; row < lat_map.size(); ++row)
+      for (std::size_t col = 0; col < lat_map[row].size(); ++col)
+        if (lat_map[row][col].get() == old_univ)
+          setUniverseAtLatticeIndex(lat, new_univ, {static_cast<int>(row), static_cast<int>(col)});
+  }
+
+  // 3. Root universe pointer in universe list
+  if (getRootUniverse() == old_univ)
+    _universe_list._root_universe = &new_univ;
+}
+
+void
+CSGBase::replaceCellRefs(const CSGCell & old_cell, const CSGCell & new_cell)
+{
+  for (const auto & univ_ref : getAllUniverses())
+  {
+    const CSGUniverse & univ = univ_ref.get();
+    for (const auto & cell_ref : univ.getAllCells())
+      if (&cell_ref.get() == &old_cell)
+      {
+        removeCellFromUniverse(univ, old_cell);
+        addCellToUniverse(univ, new_cell);
+      }
+  }
+}
+
+void
+CSGBase::replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegion & sub_region)
+{
+  for (const auto & cell_ref : getAllCells())
+  {
+    const CSGCell & cell = cell_ref.get();
+    CSGRegion new_region = cell.getRegion();
+    if (new_region.getRegionType() == CSGRegion::RegionType::EMPTY)
+      continue; // cell units do not have a region so skip (can also skip if a regular cell has an
+                // empty region)
+    new_region.replaceWithSubRegion(old_surf, sub_region);
+    updateCellRegion(cell, new_region);
+  }
+}
+
 nlohmann::json
 CSGBase::generateOutput() const
 {
@@ -1053,6 +1535,8 @@ CSGBase::generateOutput() const
   auto all_surfs = getAllSurfaces();
   for (const CSGSurface & s : all_surfs)
   {
+    if (surfaceToEngUnit(s))
+      continue; // engineering units are written in a separate section
     const auto & surf_name = s.getName();
     const auto & coeffs = s.getCoeffs();
     csg_json["surfaces"][surf_name] = {{"type", s.getSurfaceType()}, {"coefficients", {}}};
@@ -1067,6 +1551,8 @@ CSGBase::generateOutput() const
   auto all_cells = getAllCells();
   for (const CSGCell & c : all_cells)
   {
+    if (cellToEngUnit(c))
+      continue; // engineering units are written in a separate section
     const auto & cell_name = c.getName();
     const auto & cell_region_infix = c.getRegion().toInfixJSON();
     const auto & cell_region_postfix = c.getRegion().toPostfixStringList();
@@ -1085,6 +1571,8 @@ CSGBase::generateOutput() const
   auto all_univs = getAllUniverses();
   for (const CSGUniverse & u : all_univs)
   {
+    if (universeToEngUnit(u))
+      continue; // engineering units are written in a separate section
     const auto & univ_name = u.getName();
     const auto & univ_cells = u.getAllCells();
     csg_json["universes"][univ_name]["cells"] = {};
@@ -1126,6 +1614,28 @@ CSGBase::generateOutput() const
     }
   }
 
+  // include engineering units if they exist
+  auto all_units = getAllEngUnits();
+  if (all_units.size())
+  {
+    csg_json["units"] = {};
+    for (const CSGEngUnit & unit : all_units)
+    {
+      const auto & unit_name = unit.getName();
+      csg_json["units"][unit_name] = {};
+      // behavior and type
+      csg_json["units"][unit_name]["unit_type"] = unit.getUnitType();
+      csg_json["units"][unit_name]["behavior"] = unit.getBehavior();
+      // any unit-specific attributes
+      csg_json["units"][unit_name]["attributes"] = {};
+      const auto & unit_attrs = unit.getAttributes();
+      for (const auto & attr : unit_attrs)
+        csg_json["units"][unit_name]["attributes"][attr.first] = attr.second;
+      if (unit.getTransformations().size())
+        csg_json["units"][unit_name]["transformations"] = unit.getTransformationsAsStrings();
+    }
+  }
+
   return csg_json;
 }
 
@@ -1140,8 +1650,11 @@ CSGBase::operator==(const CSGBase & other) const
   const auto & other_univ_list = other.getUniverseList();
   const auto & lat_list = this->getLatticeList();
   const auto & other_lat_list = other.getLatticeList();
+  const auto & eng_unit_list = this->getEngUnitList();
+  const auto & other_eng_unit_list = other.getEngUnitList();
   return (surf_list == other_surf_list) && (cell_list == other_cell_list) &&
-         (univ_list == other_univ_list) && (lat_list == other_lat_list);
+         (univ_list == other_univ_list) && (lat_list == other_lat_list) &&
+         (eng_unit_list == other_eng_unit_list);
 }
 
 bool

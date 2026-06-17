@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
@@ -99,6 +103,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithNullTransform);
+  FRIEND_TEST(CSGEngUnitTest, testEngUnitEqual);
   ///@}
 #endif
 };

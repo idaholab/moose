@@ -124,6 +124,21 @@ public:
    */
   void resetCellFill();
 
+  /// Operator overload for checking if two CSGCell objects are equal
+  bool operator==(const CSGCell & other) const;
+
+  /// Operator overload for checking if two CSGCell objects are not equal
+  bool operator!=(const CSGCell & other) const;
+
+protected:
+  // set the name of the cell - intentionally not public because
+  // name needs to be managed at the CSGCellList level
+  void setName(const std::string & name) { _name = name; }
+
+  // update the region of the cell to a new region - not public because
+  // it needs to be called from CSGBase so that the surfaces can be checked first.
+  void updateRegion(const CSGRegion & region) { _region = region; }
+
   /**
    * @brief Set the cell fill to a material name
    *
@@ -145,13 +160,6 @@ public:
    */
   void updateCellFill(const CSGLattice * lattice);
 
-  /// Operator overload for checking if two CSGCell objects are equal
-  bool operator==(const CSGCell & other) const;
-
-  /// Operator overload for checking if two CSGCell objects are not equal
-  bool operator!=(const CSGCell & other) const;
-
-protected:
   /**
    * @brief Update surface references of cell region based on map of input surface references
    *
@@ -160,14 +168,6 @@ protected:
    */
   void updateCellRegionSurfaces(
       std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs);
-
-  // set the name of the cell - intentionally not public because
-  // name needs to be managed at the CSGCellList level
-  void setName(const std::string & name) { _name = name; }
-
-  // update the region of the cell to a new region - not public because
-  // it needs to be called from CSGBase so that the surfaces can be checked first.
-  void updateRegion(const CSGRegion & region) { _region = region; }
 
   /// Name of surface
   std::string _name;
@@ -196,6 +196,7 @@ protected:
   FRIEND_TEST(CSGCellTest, testSetName);
   FRIEND_TEST(CSGCellTest, testUpdateRegion);
   FRIEND_TEST(CSGCellTest, testCellEquality);
+  FRIEND_TEST(CSGCellTest, testUpdateFill);
   ///@}
 #endif
 };

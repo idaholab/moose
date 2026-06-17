@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverse.h"
+#include "CSGEngUnit.h"
 #include "CSGUtils.h"
 #include "MooseError.h"
 
@@ -72,6 +73,15 @@ CSGUniverse::removeCell(const std::string & name)
 bool
 CSGUniverse::operator==(const CSGUniverse & other) const
 {
+  // If both objects are engineering units, delegate to CSGEngUnit::operator==
+  if (const auto * this_eng = dynamic_cast<const CSGEngUnit *>(this))
+  {
+    const auto * other_eng = dynamic_cast<const CSGEngUnit *>(&other);
+    if (other_eng)
+      return *this_eng == *other_eng;
+    return false; // an engineering unit cannot equal a plain universe
+  }
+
   if ((this->getName() != other.getName()) ||
       (this->getTransformations() != other.getTransformations()))
     return false;
