@@ -1588,9 +1588,18 @@ private:
    * Handles the --citations command-line option: registers with PETSc the BibTeX entries that
    * should be cited for the framework and the modules/objects used in this simulation, and enables
    * PETSc's -citations option. PETSc prints them (together with its own and its sub-packages'
-   * citations) at PetscFinalize, to the console or to a file if one was given.
+   * citations) at PetscFinalize, to the console or to a file if one was given. The collected set
+   * spans this app and, recursively, every MultiApp subapp, so attribution is complete for
+   * multi-app runs.
    */
   void requestCitations();
+
+  /**
+   * Collects the BibTeX citations for the modules/objects constructed in this app and the finite
+   * element backend it uses, then recurses into every MultiApp subapp to do the same. The map is
+   * keyed by BibTeX key so a citation shared across apps is folded in only once.
+   */
+  void collectCitations(std::map<std::string, std::string> & citations) const;
 
   /**
    * Internal method for adding a capability.

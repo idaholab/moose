@@ -125,7 +125,9 @@ the left.
 `--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. Each
 citation is tied to an app: the current MOOSE framework paper is tied to `MooseApp`, and any module
 that registers a citation is added only when one of its objects is actually used in the run (so an
-app composed of MooseApp and other apps inherits their citations as they are used):
+app composed of MooseApp and other apps inherits their citations as they are used). Objects used
+only inside MultiApp subapps are included as well: the report spans the entire app tree, recursing
+through nested MultiApps, with citations shared across apps de-duplicated into a single combined set:
 
 ```
 ./yourapp-opt -i input.i --citations

@@ -1909,13 +1909,12 @@ MooseApp::run()
 }
 
 void
-MooseApp::requestCitations()
+MooseApp::collectCitations(std::map<std::string, std::string> & citations) const
 {
-  // Gather the citations that apply to this run: for every object type actually constructed, the
+  // Gather the citations that apply to this app: for every object type actually constructed, the
   // citations registered for its owning app/module. The framework paper is tied to "MooseApp", so
   // it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it. The
-  // map is keyed by BibTeX key so a citation shared across apps is resolved only once.
-  std::map<std::string, std::string> citations;
+  // map is keyed by BibTeX key so a citation shared across apps is folded in only once.
   for (const auto & objname : _factory.getConstructedObjects())
   {
     mooseAssert(Registry::isRegisteredObj(objname),
@@ -1924,7 +1923,7 @@ MooseApp::requestCitations()
     citations.insert(app_citations.begin(), app_citations.end());
   }
 
-  // Credit the finite element backend actually used in the run. The run uses MFEM when its problem
+  // Credit the finite element backend actually used by this app. The app uses MFEM when its problem
   // is an MFEMProblem; otherwise it uses libMesh, the default backend. These are mutually
   // exclusive, so only the backend in use is cited.
   std::string backend = "libMesh";
@@ -1934,6 +1933,23 @@ MooseApp::requestCitations()
 #endif
   const auto & backend_citations = Registry::getCitations(backend);
   citations.insert(backend_citations.begin(), backend_citations.end());
+
+  // Recurse into the MultiApp subapps so that objects/modules used only inside subapps are still
+  // attributed. Each subapp is a separate MooseApp whose run() (and thus requestCitations()) is
+  // never called, so the master gathers their citations here. feProblem() asserts when there is no
+  // executioner, so only descend once one exists; nested MultiApps are handled by the recursion.
+  if (_executor || _executioner)
+    for (const auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      for (unsigned int i = 0; i < multi_app->numLocalApps(); ++i)
+        multi_app->localApp(i)->collectCitations(citations);
+}
+
+void
+MooseApp::requestCitations()
+{
+  // Collect the de-duplicated citations across this app and, recursively, every MultiApp subapp.
+  std::map<std::string, std::string> citations;
+  collectCitations(citations);
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
