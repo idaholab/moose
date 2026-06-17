@@ -720,17 +720,19 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
 {
   mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
 
-  std::string solvers = "None";
+  std::vector<std::string> solvers;
+
+  if (getProblemData().nonlinear_solver)
+    solvers.push_back(MooseUtils::prettyCppType(getProblemData().nonlinear_solver.get()));
 
   if (getProblemData().jacobian_solver)
   {
-    solvers = MooseUtils::prettyCppType(getProblemData().nonlinear_solver.get()) + " " +
-              MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
+    solvers.push_back(MooseUtils::prettyCppType(getProblemData().jacobian_solver.get()));
     if (const auto * prec = getProblemData().jacobian_solver->getPreconditioner())
-      solvers += " " + MooseUtils::prettyCppType(prec);
+      solvers.push_back(MooseUtils::prettyCppType(prec));
   }
 
-  return solvers;
+  return solvers.empty() ? "None" : MooseUtils::stringJoin(solvers);
 }
 
 bool
