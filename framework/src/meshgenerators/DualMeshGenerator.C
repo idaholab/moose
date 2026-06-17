@@ -38,7 +38,7 @@ DualMeshGenerator::validParams()
       "with its two adjacent boundary edges. Nodes whose boundary angle differs from pi by more "
       "than this tolerance are treated as primal boundary vertices.");
   params.addClassDescription("Takes a 2D mesh as input and returns a Voronoi dual mesh, i.e.,"
-                             "changes each input mode into an element and each input element "
+                             "changes each input node into an element and each input element "
                              "into a node located at its circumcenter.");
   return params;
 }
@@ -89,9 +89,7 @@ DualMeshGenerator::circumcenter(const Elem * elem)
   const Real cx = (A22 * b1 - A12 * b2) / det;
   const Real cy = (A11 * b2 - A12 * b1) / det;
 
-  Point cc(cx, cy, 0.0);
-
-  return cc;
+  return Point(cx, cy, 0.0);
 }
 
 // True only when two triangles share a full edge.
@@ -201,6 +199,20 @@ pointInPolygon2D(const Point & point, const std::vector<Point> & polygon, const 
   return inside;
 }
 
+static Real
+polygonSignedArea2D(const std::vector<Point> & polygon)
+{
+  if (polygon.size() < 3)
+    return 0.0;
+
+  Real area = 0.0;
+
+  for (std::size_t i = 0, j = polygon.size() - 1; i < polygon.size(); j = i++)
+    area += polygon[j](0) * polygon[i](1) - polygon[i](0) * polygon[j](1);
+
+  return 0.5 * area;
+}
+
 struct BoundarySegment
 {
   dof_id_type node0;
@@ -209,8 +221,6 @@ struct BoundarySegment
   Point p1;
 };
 
-/// @brief
-/// @return
 std::unique_ptr<MeshBase>
 DualMeshGenerator::generate()
 {
@@ -375,12 +385,6 @@ DualMeshGenerator::generate()
   big_square->set_node(2) = p2;
   big_square->set_node(3) = p3;
 
-  if (big_square->is_flipped())
-  {
-    big_square->set_node(1) = p3;
-    big_square->set_node(3) = p1;
-  }
-
   tri_mesh->add_elem(std::move(big_square));
 
   Poly2TriTriangulator triangulator(dynamic_cast<UnstructuredMesh &>(*tri_mesh));
@@ -497,6 +501,75 @@ DualMeshGenerator::generate()
     return unique_clipped_points;
   };
 
+  const auto isBoundaryVertexPoint = [&](const Point & point)
+  {
+    for (const auto boundary_vertex_node : boundary_vertex_nodes)
+    {
+      const auto point_it = boundary_node_points.find(boundary_vertex_node);
+
+      if (point_it != boundary_node_points.end() && samePoint2D(point, point_it->second))
+        return true;
+    }
+
+    return false;
+  };
+
+  const auto isBoundarySegmentPoint = [&](const Point & point)
+  {
+    for (const auto & boundary_segment : boundary_clip_segments)
+      if (pointOnSegment2D(point, boundary_segment.first, boundary_segment.second))
+        return true;
+
+    return false;
+  };
+
+  const auto concaveBoundaryVertexIndex = [&](const std::vector<Point> & points) -> std::size_t
+  {
+    if (points.size() < 4)
+      return points.size();
+
+    const Real signed_area = polygonSignedArea2D(points);
+
+    if (std::abs(signed_area) < 1e-14)
+      return points.size();
+
+    const Real orientation = signed_area > 0.0 ? 1.0 : -1.0;
+
+    for (std::size_t i = 0; i < points.size(); ++i)
+    {
+      const Point & previous = points[(i + points.size() - 1) % points.size()];
+      const Point & current = points[i];
+      const Point & next = points[(i + 1) % points.size()];
+
+      if (isBoundaryVertexPoint(current) && orientation * cross2D(previous, current, next) < -1e-12)
+        return i;
+    }
+
+    return points.size();
+  };
+
+  const auto addDualElement = [&](const std::vector<Point> & points)
+  {
+    auto dual_elem = std::make_unique<libMesh::C0Polygon>(points.size());
+
+    for (unsigned int i = 0; i < points.size(); ++i)
+      dual_elem->set_node(i, dualMesh->add_point(points[i]));
+
+    // Fixing flipped elems
+    if (dual_elem->is_flipped())
+    {
+      auto reversed_elem = std::make_unique<libMesh::C0Polygon>(points.size());
+
+      for (unsigned int i = 0; i < points.size(); ++i)
+        reversed_elem->set_node(i, dualMesh->add_point(points[points.size() - 1 - i]));
+
+      dual_elem = std::move(reversed_elem);
+    }
+
+    if (!dual_elem->is_flipped())
+      dualMesh->add_elem(std::move(dual_elem));
+  };
+
   // Build one dual element around each triangulation node.
   for (const auto & node_triangles : triangulation_node_to_triangles)
   {
@@ -567,32 +640,80 @@ DualMeshGenerator::generate()
 
     if (_clip_boundary && dual_points.size() >= 3)
       dual_points = clipDualPolygonToBoundary(dual_points);
-    else if (dual_points.size() < 3)
-      dual_points.clear();
 
     if (dual_points.size() < 3)
       continue;
 
-    auto dual_elem = std::make_unique<libMesh::C0Polygon>(dual_points.size());
+    const std::size_t concave_vertex_index =
+        _clip_boundary ? concaveBoundaryVertexIndex(dual_points) : dual_points.size();
 
-    for (unsigned int i = 0; i < dual_points.size(); ++i)
-      dual_elem->set_node(i, dualMesh->add_point(dual_points[i]));
-
-    // Fixing flipped elems
-    if (dual_elem->is_flipped())
+    if (concave_vertex_index < dual_points.size())
     {
-      auto reversed_elem = std::make_unique<libMesh::C0Polygon>(dual_points.size());
+      const Point corner_point = dual_points[concave_vertex_index];
+      std::vector<std::pair<Point, Real>> sorted_points;
 
-      for (unsigned int i = 0; i < dual_points.size(); ++i)
-        reversed_elem->set_node(i, dualMesh->add_point(dual_points[dual_points.size() - 1 - i]));
+      // We use phi sorting only for concave dual elements, since the id's are always too jumbled to
+      // sort by adjacency
+      for (std::size_t i = 0; i < dual_points.size(); ++i)
+      {
+        if (i == concave_vertex_index)
+          continue;
 
-      dual_elem = std::move(reversed_elem);
+        const Real phi =
+            std::atan2(dual_points[i](1) - corner_point(1), dual_points[i](0) - corner_point(0));
+        sorted_points.push_back({dual_points[i], phi});
+      }
+
+      std::sort(sorted_points.begin(),
+                sorted_points.end(),
+                [](const auto & a, const auto & b) { return a.second < b.second; });
+
+      std::vector<Point> fan_points = {corner_point};
+
+      for (std::size_t i = 0; i < sorted_points.size(); ++i)
+      {
+        if (!isBoundarySegmentPoint(sorted_points[i].first))
+          continue;
+
+        const std::size_t next_i = (i + 1) % sorted_points.size();
+        const std::size_t prev_i = (i + sorted_points.size() - 1) % sorted_points.size();
+
+        // We pick the direction of fan-triangulating concave polygons such that we never create a
+        // triangle that bridges across a boundary
+        if (!isBoundarySegmentPoint(sorted_points[next_i].first))
+        {
+          for (std::size_t k = 0; k < sorted_points.size(); ++k)
+            fan_points.push_back(sorted_points[(i + k) % sorted_points.size()].first);
+
+          break;
+        }
+
+        if (!isBoundarySegmentPoint(sorted_points[prev_i].first))
+        {
+          for (std::size_t k = 0; k < sorted_points.size(); ++k)
+            fan_points.push_back(
+                sorted_points[(i + sorted_points.size() - k) % sorted_points.size()].first);
+
+          break;
+        }
+      }
+
+      if (fan_points.size() == 1)
+        mooseError("Could not find a boundary point to start concave fan triangulation.");
+
+      for (std::size_t i = 1; i + 1 < fan_points.size(); ++i)
+      {
+        const std::vector<Point> triangle_points = {
+            fan_points[0], fan_points[i], fan_points[i + 1]};
+
+        if (std::abs(cross2D(triangle_points[0], triangle_points[1], triangle_points[2])) > 1e-12)
+          addDualElement(triangle_points);
+      }
+
+      continue;
     }
-    // Printing (for debugging) and adding
-    dual_elem->print_info();
 
-    if (!dual_elem->is_flipped())
-      dualMesh->add_elem(std::move(dual_elem));
+    addDualElement(dual_points);
   }
 
   dualMesh->unset_is_prepared();
