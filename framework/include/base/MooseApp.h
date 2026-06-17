@@ -1589,8 +1589,8 @@ private:
    * should be cited for the framework and the modules/objects used in this simulation, and enables
    * PETSc's -citations option. PETSc prints them (together with its own and its sub-packages'
    * citations) at PetscFinalize, to the console or to a file if one was given. The collected set
-   * spans this app and, recursively, every MultiApp subapp, so attribution is complete for
-   * multi-app runs.
+   * spans this app and, recursively, every MultiApp subapp, and is gathered across all MPI ranks
+   * (PETSc prints from rank 0 alone), so attribution is complete for multi-app runs.
    */
   void requestCitations();
 
