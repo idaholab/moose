@@ -57,7 +57,7 @@ within the home directory. With this assumption, the following commands will com
 the heat transfer module executable.
 
 ```bash
-cd ~/projects/moose/modules/heat_conduction
+cd ~/projects/moose/modules/heat_transfer
 make -j8
 ./run_tests -j8
 ```
@@ -86,6 +86,10 @@ configuration of a first-order Lagrange finite element variable. Note, within th
 the variable is arbitrary; "T" was selected here to match the equation.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Variables
+
+The initial condition for temperature at the beginning of the simulation is set using the Initial Condition System in the `[ICs]` block. At $t=0$, an constant initial value of $T=300$ is applied uniformly across the problem.
+
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=ICs
 
 The "volumetric" portions of the weak form are defined using the
 [Kernel System](syntax/Kernels/index.md) in the `[Kernels]` block, for this example this
@@ -146,7 +150,7 @@ The "symbol_names" and "symbol_values" items have a one-to-one relationship, e.g
 then the names in "symbol_names" can be used in the definition of the equation in the "expression" parameter.
 
 The error is a single value for each time step. Since the exact solution is known the $L_2$-norm
-can be computed using the [postprocessors/NodalL2Error.md] object within the `[Postprocessors]` block,
+can be computed using the [postprocessors/ElementL2Error.md] object within the `[Postprocessors]` block,
 which computes the error of the given variable (e.g., "T") and the known solution defined in the
 "T_exact" function.
 
