@@ -2,13 +2,22 @@
   # The original issue is idaholab/blackbear#333
   issues = '#26450 #26920'
   design = 'NEML2/index.md NEML2Action.md'
+  [custom_model]
+    requirement = 'The framework shall be capable of running custom NEML2 models implemented in MOOSE (optionally with automatic differentiation).'
+    type = Exodiff
+    input = 'custom_model.i'
+    exodiff = 'custom_model_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = heavy
+  []
   [neml2_error]
     requirement = 'The framework shall be capable of capturing errors that occur during the evaluation of a NEML2 model.'
     type = RunException
-    input = 'error.i'
+    input = 'custom_model.i'
+    cli_args = 'NEML2/all/model=error'
     expect_err = 'NEML2 model execution failed on at least one processor'
     collections = 'SYSTEM'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = none
   []
   [no_neml2]
@@ -19,20 +28,21 @@
     collections = 'SYSTEM'
     capabilities = '!neml2'
   []
+  [infer_io_type_ambiguous]
+    requirement = 'The framework shall throw an error when the MOOSE data type for a NEML2 scalar input variable cannot be unambiguously inferred because the name matches multiple MOOSE entities.'
+    type = RunException
+    input = 'custom_model.i'
+    cli_args = 'Functions/A/type=ParsedFunction Functions/A/expression=1.0'
+    expect_err = 'Trying to infer MOOSE data type for NEML2 variable A\. The name matches multiple types \(function variable\s*\)'
+    collections = 'SYSTEM'
+    capabilities = 'libtorch & neml2'
+  []
   [model_parameter]
     requirement = 'The framework shall be capable of using MOOSE data as NEML2 model parameters.'
     type = Exodiff
     input = 'parameter.i'
     exodiff = 'parameter_out.e'
-    capabilities = 'neml2'
-    valgrind = heavy
-  []
-  [custom_model]
-    requirement = 'The framework shall be capable of running custom NEML2 model implemented in MOOSE (optionally with automatic differentiation).'
-    type = Exodiff
-    input = 'custom_model.i'
-    exodiff = 'custom_model_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [block_restriction]
@@ -44,7 +54,7 @@
       type = Exodiff
       input = 'blocks_same_model.i'
       exodiff = 'blocks_same_model_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
     [different_model]
@@ -52,7 +62,7 @@
       type = Exodiff
       input = 'blocks_different_model.i'
       exodiff = 'blocks_different_model_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       valgrind = heavy
     []
   []
@@ -62,7 +72,7 @@
     type = Exodiff
     input = 'blocks_empty_neml2.i'
     exodiff = 'blocks_empty_neml2_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
     min_parallel = 2
     max_parallel = 2
@@ -72,7 +82,7 @@
     type = Exodiff
     input = 'multiple_input_files.i'
     exodiff = 'multiple_input_files_out.e'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [mesh_change]
@@ -80,7 +90,7 @@
     type = Exodiff
     input = 'mesh_change.i'
     exodiff = 'mesh_change_out.e mesh_change_out.e-s002 mesh_change_out.e-s003 mesh_change_out.e-s004 mesh_change_out.e-s005'
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
   [scheduler]
@@ -89,9 +99,10 @@
     [simple_scheduler]
       detail = 'with NEML2 SimpleScheduler which dispatches to a single device'
       type = Exodiff
-      input = 'simple_scheduler.i'
+      input = 'custom_model.i'
+      cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=false NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
       exodiff = 'simple_scheduler_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       recover = false
       valgrind = heavy
     []
@@ -99,10 +110,10 @@
       detail = 'with NEML2 SimpleScheduler which asynchronously dispatches to a single device'
       prereq = 'scheduler/simple_scheduler'
       type = Exodiff
-      input = 'simple_scheduler_async.i'
-      cli_args = 'Outputs/file_base=simple_scheduler_out'
+      input = 'custom_model.i'
+      cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=true NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
       exodiff = 'simple_scheduler_out.e'
-      capabilities = 'neml2'
+      capabilities = 'libtorch & neml2'
       recover = false
       valgrind = heavy
     []

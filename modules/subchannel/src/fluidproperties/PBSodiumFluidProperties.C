@@ -56,8 +56,10 @@ PBSodiumFluidProperties::PBSodiumFluidProperties(const InputParameters & paramet
   : SinglePhaseFluidProperties(parameters), _p_0(getParam<Real>("p_0"))
 {
   _H0 = cp_from_p_T(_p_0, _T0) * _T0;
-  _Cp_Tmax = cp_from_p_T(_p_0, _Tmax);
-  _Cp_Tmin = cp_from_p_T(_p_0, _Tmin);
+  // Evaluate cp at the heat-capacity correlation bounds (cp_from_p_T clamps to this range), so the
+  // precomputed boundary values do not raise spurious invalid-solution flags during construction.
+  _Cp_Tmax = cp_from_p_T(_p_0, _Tmax_cp_k);
+  _Cp_Tmin = cp_from_p_T(_p_0, _Tmin_cp_k);
   _H_Tmax = h_from_p_T(_p_0, _Tmax);
   _H_Tmin = h_from_p_T(_p_0, _Tmin);
 }
@@ -86,9 +88,17 @@ Real
 PBSodiumFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   if (temperature > _Tmax + 1.e-3)
+  {
+    flagInvalidSolution(
+        "Temperature above the valid range for the sodium enthalpy computation; extrapolating");
     return _H_Tmax + _Cp_Tmax * (temperature - _Tmax);
+  }
   else if (temperature < _Tmin - 1.e-3)
+  {
+    flagInvalidSolution(
+        "Temperature below the valid range for the sodium enthalpy computation; extrapolating");
     return _H_Tmin + _Cp_Tmin * (temperature - _Tmin);
+  }
   else
     return _H0 + F_enthalpy(temperature) - F_enthalpy(_T0);
 }
@@ -118,15 +128,19 @@ PBSodiumFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 Real
 PBSodiumFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  if (temperature < 388.15)
+  if (temperature < _Tmin_cp_k)
   {
-    temperature = 388.15;
-    _console << "Warning - minimum temperature in cp caluclation bounded to 388.15 K \n";
+    temperature = _Tmin_cp_k;
+    flagInvalidSolution(
+        "Temperature below the valid range [388.15, 1148.15] K for the sodium heat capacity "
+        "computation");
   }
-  if (temperature > 1148.15)
+  if (temperature > _Tmax_cp_k)
   {
-    temperature = 1148.15;
-    _console << "Warning - maximum temperature bounded in cp calculation to 1148.15 \n";
+    temperature = _Tmax_cp_k;
+    flagInvalidSolution(
+        "Temperature above the valid range [388.15, 1148.15] K for the sodium heat capacity "
+        "computation");
   }
   temperature = temperature_correction(temperature);
   Real A28 = 7.3898e5;
@@ -180,17 +194,19 @@ PBSodiumFluidProperties::mu_from_rho_T(Real /*rho*/, Real temperature) const
 Real
 PBSodiumFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  if (temperature < 388.15)
+  if (temperature < _Tmin_cp_k)
   {
-    temperature = 388.15;
-    _console << "Warning - minimum temperature in thermal conductivity caluclation bounded to "
-                "388.15 K \n";
+    temperature = _Tmin_cp_k;
+    flagInvalidSolution(
+        "Temperature below the valid range [388.15, 1148.15] K for the sodium thermal "
+        "conductivity computation");
   }
-  if (temperature > 1148.15)
+  if (temperature > _Tmax_cp_k)
   {
-    temperature = 1148.15;
-    _console << "Warning - maximum temperature bounded in thermal conductivity calculation to "
-                "1148.15 \n";
+    temperature = _Tmax_cp_k;
+    flagInvalidSolution(
+        "Temperature above the valid range [388.15, 1148.15] K for the sodium thermal "
+        "conductivity computation");
   }
   Real A48 = 1.1045e2;
   Real A49 = -6.5112e-2;
@@ -234,10 +250,14 @@ PBSodiumFluidProperties::T_from_p_h(Real /*pressure*/, Real enthalpy) const
   Real temperature = 0;
   if (enthalpy > _H_Tmax)
   {
+    flagInvalidSolution(
+        "Enthalpy above the valid range for the sodium temperature computation; extrapolating");
     temperature = (enthalpy - _H_Tmax) / _Cp_Tmax + _Tmax;
   }
   else if (enthalpy < _H_Tmin)
   {
+    flagInvalidSolution(
+        "Enthalpy below the valid range for the sodium temperature computation; extrapolating");
     temperature = (enthalpy - _H_Tmin) / _Cp_Tmin + _Tmin;
   }
   else

@@ -14,8 +14,7 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
                 1 0 0
                 0 -1 0
                 0 1 0
-            '
-              '    0 0 -1
+                0 0 -1
                 0 0 1'
     fixed_normal = true
     new_boundary = 'left right bottom top back front'
@@ -111,8 +110,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   []
 []
 
-
-
 [Functions]
   [strain11]
     type = ParsedFunction
@@ -139,7 +136,7 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
 [Materials]
   [stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
-    custom_small_jacobian = neml2_jacobian
+    custom_small_jacobian = dneml2_stress/dneml2_strain
     custom_small_stress = neml2_stress
     large_kinematics = true
     outputs = none
@@ -159,32 +156,33 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
 []
 
 [Materials]
-  [material_neml2_to_moose_stress]
+  [neml2_stress_to_moose]
     type = NEML2ToMOOSESymmetricRankTwoTensorMaterialProperty
     block = ''
-    from_neml2 = state/S
+    from_neml2 = neml2_stress
     neml2_executor = neml2_model_all
     outputs = none
     to_moose = neml2_stress
   []
-  [material_neml2_to_moose_jacobian]
+  [neml2_jacobian_to_moose]
     type = NEML2ToMOOSESymmetricRankFourTensorMaterialProperty
     block = ''
-    from_neml2 = state/S
+    from_neml2 = neml2_stress
     neml2_executor = neml2_model_all
-    neml2_input_derivative = forces/E
+    neml2_input_derivative = neml2_strain
     outputs = none
-    to_moose = neml2_jacobian
+    to_moose = dneml2_stress/dneml2_strain
   []
 []
 
 [UserObjects]
-  [UO_strain_moose_to_neml2]
-    type = MOOSESymmetricRankTwoTensorMaterialPropertyToNEML2
+  [moose_strain_to_neml2]
+    type = MOOSESymmetricRankTwoTensorToNEML2
     block = ''
     execute_on = 'INITIAL LINEAR NONLINEAR'
     from_moose = neml2_strain
-    to_neml2 = forces/E
+    quantity_type = MATERIAL
+    to_neml2 = neml2_strain
   []
   [neml2_index_model_all]
     type = NEML2BatchIndexGenerator
@@ -195,12 +193,11 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
     type = NEML2ModelExecutor
     batch_index_generator = neml2_index_model_all
     device = cpu
-    execute_on = 'INITIAL LINEAR NONLINEAR'
-    gatherers = UO_strain_moose_to_neml2
+    execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_END'
+    gatherers = 'moose_strain_to_neml2'
     input = neml2_elastic.i
     model = model
     param_gatherers = ''
-    execution_order_group = 1
   []
 []
 
@@ -695,39 +692,39 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [mCS_xx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_xx
   []
   [mCS_yy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_yy
   []
   [mCS_zz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_zz
   []
   [mCS_xy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_xy
   []
   [mCS_xz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_xz
   []
   [mCS_yx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_yx
   []
   [mCS_yz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_yz
   []
   [mCS_zy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_zy
   []
   [mCS_zx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = pk1_stress_zx
   []
 []

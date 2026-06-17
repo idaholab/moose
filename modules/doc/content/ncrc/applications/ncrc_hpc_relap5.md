@@ -1,8 +1,12 @@
 # RELAP5-3D on the INL-HPC
 
+!alert! note
+RELAP5-3D Level 1 Executable is only available on Bitterroot or Teton.
+!alert-end!
+
 !style! halign=left
 To access the HPC, familiarize yourself with [inl/hpc_ondemand.md]. There are three options for
-gaining access to the HPC machines Sawtooth, Bitterroot, and WindRiver. The first two are accessed via the
+gaining access to the HPC. The first two are accessed via the
 [HPC OnDemand Dashboard](https://hpcondemand.inl.gov/pun/sys/dashboard).
 !style-end!
 
@@ -19,10 +23,9 @@ Desktop. This takes you to another webpage where you will input the following in
   performing your work. Contact the HPC staff for help determining which project your work pertains
   to.
 
-1. Under the Cluster label, select your choice of machine.
-  Presently, only Sawtooth supports the Login job type.
-
 1. Under the Job Type label, select Login.
+
+1. Under the Cluster label, select your choice of machine.
 
 1. Click Launch
 
@@ -39,13 +42,11 @@ Option 3, use Secure Shell rather than OnDemand. To do so use the following step
 
 1. Once you have accessed hpclogin, from there you must SSH login to your machine of choice.
 
-RELAP5-3D binaries are only available on Bitterroot and Teton.
-
 
 ## Load Environment
 
 !style! halign=left
-Once logged into either Sawtooth, Bitterroot, or WindRiver using any of the methods above, load the RELAP5
+Once logged into either Bitterroot, or Teton using any of the methods above, load the RELAP5-3D
 environment:
 !style-end!
 
@@ -53,7 +54,7 @@ environment:
 module load use.exp_ctl relap53D
 ```
 
-This will put your terminal inside the RELAP53D container where you will be able to run relap53D.
+This will give your terminal access to the RELAP5-3D executable and AptPlot.
 For this example, RELAP5-3D's `--help` can be displayed by running the following command:
 
 ```bash
@@ -112,7 +113,7 @@ the internet for how to use these tools, if unfamiliar.
 
 Alternatively, you can create the file on your local machine using your favorite editor and copy it
 to the remote by running scp or rsync commands. However, doing so will cause your file to have
-carriage-return and line-feeds. These must be removed prior to running relap53D. To do so use the
+carriage-return and line-feeds. These must be removed prior to running relap5-3D. To do so use the
 `dos2unix` linux command.
 
 !alert! tip title=Copying files from your local machine
@@ -138,10 +139,11 @@ rsync /path/to/the/local/input.i <your hpc user id>@hpclogin.inl.gov:~/testing/i
 In the previous section a test input file was created in your INL-HPC home directory within the
 `testing` folder. RELAP5-3D is designed to read arguments for the file location and where to put
 the output and plot files using flags `-i`, `-o`, `-p` respectively. RELAP5-3D also requires fluid
-property files.
+property files. The relap53D module gives you access to all the fluid property files included in
+with level 1 access. On the HPC, these files are automatically available to the executable.
 
 Examples of these files can be found in the relap53D container in the
-`/opt/relap53D_fluids/` directory. Best practice is to execute relap53D from the location of the
+`/opt/relap53D_fluids/` directory. Best practice is to execute relap5-3D from the location of the
 input file, so start by navigating to this location:
 !style-end!
 
@@ -152,19 +154,18 @@ cd ~/testing
 Next, execute the application with the `-i` argument followed by the input filename:
 
 ```bash
-relap53D -i rk.i
+relap5.x -i rk.i
 ```
 
 !alert! note
-The above command only works if the case uses water, and the tpfh20 fluid property file is in the
-`testing/` directory. Also, the output, restart and plot files are named with the defaults.
+The above command uses the default names for the output, restart and plot files (outdta,restrt,plotfl)
 !alert-end!
 
-The recommended command for running relap53D specifies the directory that holds the fluid property
-file and the names of the output, restart, and plot files. See the command below:
+The recommended command for running relap5-3D specifies the names of the output, restart, and plot 
+files. See the command below:
 
 ```bash
-relap53D -i rk.i -o rk.p -r rk.r -tpfdir /opt/relap53D_fluids
+relap5.x -i rk.i -o rk.p -r rk.r
 ```
 
 Check your output using the Linux command `ls`. You should see the following files in your testing
@@ -172,7 +173,7 @@ directory: `rk.i`, `rk.p`, `rk.plt`, and `rk.r`. The file with extension `.plt`,
 and is used for the visualization described below.
 
 !alert! note title=Permission Denied?
-The available applications such as RELAP5 will depend on being granted access to the specific
+The available applications such as RELAP5-3D will depend on being granted access to the specific
 application. Please refer to [inl/index.md] for information about requesting access and the
 different levels available.
 !alert-end!
@@ -191,7 +192,7 @@ aptplot.sh
 AptPlot should open. From the AptPlot window, under the File menu, select "Read" and then select the
 "Relap5 data" option and navigate to the testing folder you created earlier. Double click on the
 `rk.plt` file. This will open a second window where you can select which variables to plot. Note: if
-you didn’t specify the output file name during execution, your plot file will be named `plotfil`.
+you didn’t specify the output file name during execution, your plot file will be named `plotfl`.
 You will need to rename this file with the `.plt` extension to be able to open it in AptPlot.
 
 However, in many cases it is more desirable to view the results on your local machine. This is done

@@ -225,19 +225,20 @@ TriSubChannel1PhaseProblem::initializeSolution()
             }
           }
           displacement = displacement / counter;
-          _tri_sch_mesh._gij_map[iz][i_gap] =
-              0.5 * (flat_to_flat - (n_rings - 1) * pitch * std::sqrt(3.0) -
-                     (*_Dpin_soln)(pin_node_1)) +
-              displacement;
+          _tri_sch_mesh.setGapWidth(iz,
+                                    i_gap,
+                                    0.5 * (flat_to_flat - (n_rings - 1) * pitch * std::sqrt(3.0) -
+                                           (*_Dpin_soln)(pin_node_1)) +
+                                        displacement);
         }
         else // center gap
         {
-          _tri_sch_mesh._gij_map[iz][i_gap] =
-              pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
+          _tri_sch_mesh.setGapWidth(
+              iz, i_gap, pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0);
         }
         // if pins come in contact, the gap is zero
-        if (_tri_sch_mesh._gij_map[iz][i_gap] <= 0.0)
-          _tri_sch_mesh._gij_map[iz][i_gap] = 0.0;
+        if (_tri_sch_mesh.getGapWidth(iz, i_gap) <= 0.0)
+          _tri_sch_mesh.setGapWidth(iz, i_gap, 0.0);
       }
     }
   }

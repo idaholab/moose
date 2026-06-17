@@ -223,6 +223,8 @@ std::unique_ptr<CSG::CSGBase> &
 MeshGenerator::getCSGBase(const std::string & param_name)
 {
   const MeshGeneratorName * name = getMeshGeneratorNameFromParam(param_name, false);
+  if (!name)
+    return _null_csg_base;
   return getCSGBaseByName(*name);
 }
 
@@ -230,6 +232,8 @@ std::unique_ptr<CSG::CSGBase> &
 MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
 {
   checkGetMesh(mesh_generator_name, "");
+  if (isNullMeshName(mesh_generator_name))
+    return _null_csg_base;
 
   auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
   _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);

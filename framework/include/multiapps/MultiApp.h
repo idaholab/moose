@@ -408,6 +408,19 @@ protected:
   void createApp(unsigned int i, Real start_time);
 
   /**
+   * Whether or not to propagate the parent's recover state (the --recover and
+   * --test-checkpoint-half-transient flags) to sub-applications.
+   *
+   * Returns true for all MultiApps except FullSolveMultiApp and its derived
+   * classes. FullSolveMultiApp always performs a complete fresh solve on every
+   * execution and must never recover its sub-apps from a checkpoint. Note that
+   * restart propagation (setRestart) is deliberately not gated here because a
+   * FullSolveMultiApp sub-app may legitimately be restarted from a user-specified
+   * restart file.
+   */
+  virtual bool propagateRecoverToSubApps() const { return true; }
+
+  /**
    * Create an MPI communicator suitable for each app.
    *
    * Also find out which communicator we are using and what our first local app is.

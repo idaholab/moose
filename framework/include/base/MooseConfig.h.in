@@ -27,6 +27,9 @@
 /* Whether to use Kokkos-related code or not */
 #undef KOKKOS_ENABLED
 
+/* Define to specify Kokkos default array and thread index type */
+#undef KOKKOS_INDEX_TYPE
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

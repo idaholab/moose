@@ -163,17 +163,17 @@ QuadSubChannel1PhaseProblem::initializeSolution()
             }
           }
           displacement = displacement / counter;
-          _subchannel_mesh._gij_map[iz][i_gap] =
-              (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + side_gap + displacement;
+          _subchannel_mesh.setGapWidth(
+              iz, i_gap, (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + side_gap + displacement);
         }
         else // center gap
         {
-          _subchannel_mesh._gij_map[iz][i_gap] =
-              pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0;
+          _subchannel_mesh.setGapWidth(
+              iz, i_gap, pitch - (*_Dpin_soln)(pin_node_1) / 2.0 - (*_Dpin_soln)(pin_node_2) / 2.0);
         }
         // if pins come in contact, the gap is zero
-        if (_subchannel_mesh._gij_map[iz][i_gap] <= 0.0)
-          _subchannel_mesh._gij_map[iz][i_gap] = 0.0;
+        if (_subchannel_mesh.getGapWidth(iz, i_gap) <= 0.0)
+          _subchannel_mesh.setGapWidth(iz, i_gap, 0.0);
       }
     }
   }

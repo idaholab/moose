@@ -11,6 +11,7 @@ on:
 jobs:
   merge-scheduled-to-release:
     name: Merge scheduled to release
+    if: github.repository_owner == 'idaholab'
     runs-on: ubuntu-slim
     environment: ${{ github.event_name == 'workflow_dispatch' && 'scheduled-merges' || '' }}
     env:

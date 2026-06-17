@@ -5,23 +5,24 @@
   []
   [mandel_stress]
     type = IsotropicMandelStress
+    cauchy_stress = 'neml2_stress'
   []
   [overstress]
     type = SR2LinearCombination
-    to_var = 'state/internal/O'
-    from_var = 'state/internal/M state/internal/X'
-    coefficients = '1 -1'
+    to = 'over_stress'
+    from = 'mandel_stress back_stress'
+    weights = '1 -1'
   []
   [vonmises]
     type = SR2Invariant
     invariant_type = 'VONMISES'
-    tensor = 'state/internal/O'
-    invariant = 'state/internal/s'
+    tensor = 'over_stress'
+    invariant = 'effective_stress'
   []
   [yield]
     type = YieldFunction
     yield_stress = 5
-    isotropic_hardening = 'state/internal/k'
+    isotropic_hardening = 'isotropic_hardening'
   []
   [flow]
     type = ComposedModel
@@ -30,12 +31,9 @@
   [normality]
     type = Normality
     model = 'flow'
-    function = 'state/internal/fp'
-    from = 'state/internal/M state/internal/k'
-    to = 'state/internal/NM state/internal/Nk'
-  []
-  [consistency]
-    type = RateIndependentPlasticFlowConstraint
+    function = 'yield_function'
+    from = 'mandel_stress isotropic_hardening'
+    to = 'flow_direction isotropic_hardening_direction'
   []
   [eprate]
     type = AssociativeIsotropicPlasticHardening
@@ -48,40 +46,47 @@
   [Eprate]
     type = AssociativePlasticFlow
   []
-  [Erate]
+  [strain_rate]
     type = SR2VariableRate
-    variable = 'forces/E'
-    rate = 'forces/E_rate'
+    variable = 'neml2_strain'
   []
-  [Eerate]
+  [elastic_strain_rate]
     type = SR2LinearCombination
-    from_var = 'forces/E_rate state/internal/Ep_rate'
-    to_var = 'state/internal/Ee_rate'
-    coefficients = '1 -1'
+    from = 'neml2_strain_rate plastic_strain_rate'
+    to = 'elastic_strain_rate'
+    weights = '1 -1'
   []
   [elasticity]
     type = LinearIsotropicElasticity
     coefficients = '1e5 0.3'
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
+    strain = 'elastic_strain'
+    stress = 'neml2_stress'
     rate_form = true
   []
   [integrate_ep]
     type = ScalarBackwardEulerTimeIntegration
-    variable = 'state/internal/ep'
+    variable = 'equivalent_plastic_strain'
   []
   [integrate_X]
     type = SR2BackwardEulerTimeIntegration
-    variable = 'state/internal/X'
+    variable = 'back_stress'
   []
   [integrate_S]
     type = SR2BackwardEulerTimeIntegration
-    variable = 'state/S'
+    variable = 'neml2_stress'
+  []
+  [consistency]
+    type = FBComplementarity
+    a = 'yield_function'
+    a_inequality = 'LE'
+    b = 'flow_rate'
   []
   [surface]
     type = ComposedModel
     models = 'isoharden mandel_stress overstress vonmises
               yield normality eprate Xrate Eprate
-              Erate Eerate elasticity
+              strain_rate elastic_strain_rate elasticity
               consistency integrate_ep integrate_X integrate_S'
   []
 []
@@ -90,6 +95,8 @@
   [eq_sys]
     type = NonlinearSystem
     model = 'surface'
+    unknowns = 'equivalent_plastic_strain back_stress neml2_stress flow_rate'
+    residuals = 'equivalent_plastic_strain_residual back_stress_residual neml2_stress_residual complementarity'
   []
 []
 
@@ -104,9 +111,15 @@
 []
 
 [Models]
+  [predictor]
+    type = ConstantExtrapolationPredictor
+    unknowns_Scalar = 'equivalent_plastic_strain flow_rate'
+    unknowns_SR2 = 'back_stress neml2_stress'
+  []
   [model]
     type = ImplicitUpdate
     equation_system = 'eq_sys'
     solver = 'newton'
+    predictor = 'predictor'
   []
 []

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-# * This file is part of the MOOSE framework
-# * https://mooseframework.inl.gov
-# *
-# * All rights reserved, see COPYRIGHT for full restrictions
-# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
-# *
-# * Licensed under LGPL 2.1, please see LICENSE for details
-# * https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import re
@@ -375,19 +375,14 @@ class CSVDiffer(CSVTools):
                 if abs(val2) < abs_zero:
                     val2 = 0
 
-                # disallow nan in the gold file
-                if math.isnan(val1):
-                    self.addError(
-                        self.files[0],
-                        'The values in column "' + key.strip() + '" contain NaN',
-                    )
+                # disallow nan and inf in both files
+                ne = self.getNumErrors()
+                for f, v in [(self.files[0], val1), (self.files[1], val2)]:
+                    if not math.isfinite(v):
+                        self.addError(f, f'Column "{key.strip()}" has NaN/Inf value(s)')
 
-                # disallow inf in the gold file
-                if math.isinf(val1):
-                    self.addError(
-                        self.files[0],
-                        'The values in column "' + key.strip() + '" contain Inf',
-                    )
+                if self.getNumErrors() != ne:
+                    break
 
                 # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
                 if val1 == 0 and val2 == 0:

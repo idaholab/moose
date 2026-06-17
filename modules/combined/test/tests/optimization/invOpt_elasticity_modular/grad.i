@@ -70,41 +70,15 @@
   device = 'cpu'
   [forward]
     model = 'forward_elasticity_model'
-
-    moose_input_types = 'MATERIAL'
-    moose_inputs = 'forward_strain'
-    neml2_inputs = 'forces/E'
-
-    moose_parameter_types = 'MATERIAL'
-    moose_parameters = 'E_material'
-    neml2_parameters = 'E'
-
-    moose_output_types = 'MATERIAL'
-    moose_outputs = 'forward_stress'
-    neml2_outputs = 'state/S'
-
-    moose_parameter_derivative_types = 'MATERIAL'
-    moose_parameter_derivatives = 'forward_dstress_dE'
-    neml2_parameter_derivatives = 'state/S E'
+    parameter_types = 'MATERIAL'
+    parameters = 'E'
+    parameter_derivatives = 'forward_stress E'
   []
   [adjoint]
     model = 'adjoint_elasticity_model'
-
-    moose_input_types = 'MATERIAL'
-    moose_inputs = 'adjoint_strain'
-    neml2_inputs = 'forces/E'
-
-    moose_parameter_types = 'MATERIAL'
-    moose_parameters = 'E_material'
-    neml2_parameters = 'E'
-
-    moose_output_types = 'MATERIAL'
-    moose_outputs = 'adjoint_stress'
-    neml2_outputs = 'state/S'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'adjoint_jacobian'
-    neml2_derivatives = 'state/S forces/E'
+    parameter_types = 'MATERIAL'
+    parameters = 'E'
+    derivatives = 'adjoint_stress adjoint_strain'
   []
 []
 
@@ -124,12 +98,6 @@
 []
 
 [Materials]
-  [E_material]
-    type = GenericFunctionMaterial
-    prop_names = 'E_material'
-    prop_values = 'E'
-  []
-
   # forward
   [forward_strain]
     type = ComputeLagrangianStrain
@@ -151,7 +119,7 @@
   [adjoint_stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
     custom_small_stress = 'adjoint_stress'
-    custom_small_jacobian = 'adjoint_jacobian'
+    custom_small_jacobian = 'dadjoint_stress/dadjoint_strain'
     base_name = 'adjoint'
   []
 []
@@ -183,7 +151,7 @@
 [VectorPostprocessors]
   [grad_youngs_modulus]
     type = AdjointStrainSymmetricStressGradInnerProduct
-    stress_derivative_name = 'forward_dstress_dE'
+    stress_derivative_name = 'dforward_stress/dE'
     adjoint_strain_name = 'adjoint_mechanical_strain'
     variable = dummy
     function = E

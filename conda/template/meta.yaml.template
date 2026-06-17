@@ -1,0 +1,83 @@
+# Do not alter <...>. These are template tokens altered
+# on the fly by the generate_recipe.py script. The only modifiable
+# item in template/ is the conda_build_config.yaml file (moose_dev)
+{% set version = "<VERSION>" %}
+
+package:
+  name: <PREFIX_PACKAGE_WITH><FORMATTED_APPLICATION>
+  version: {{ version }}
+
+source:
+  - path: <REPO>
+  - path: retry_build.sh
+
+build:
+  number: 0
+  string: build_0
+  pin_depends: strict
+  skip: true # [win]
+  script_env:
+    - MOOSE_JOBS
+    - MOOSE_OPTIONS
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+
+# These requirements should match those of conda/moose/meta.yaml
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    # for libmesh libtool
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
+    # build utilities
+    - make
+    - packaging
+    - patchelf # [linux]
+    # python; for doc build + premake
+    - python 3.14.*
+    - moose-tools __VERSIONER_TOOLS_VERSION__
+  host:
+    # should eventually become 'mpich {{ mpich_version }}'
+    - mpich 5.0.1
+    - hdf5 {{ hdf5 }}
+    - hdf5 {{ hdf5 }} mpi_mpich_*
+    # see libfabric entry in conda/conda_build_config.yaml
+    - libfabric {{ libfabric }} # [linux]
+    - libpng
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    - zlib
+  run:
+    # should eventually become 'mpich {{ mpich_version }}'
+    - mpich 5.0.1
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ mpich___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    # c++ compiler for jit
+    - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]
+    - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]
+    - clangxx_osx-arm64 {{ cxx_compiler_version }}.*          # [osx and arm64]
+    # for testharness/python utilities
+    - moose-tools __VERSIONER_TOOLS_VERSION__
+    # for running app --copy-inputs
+    - rsync
+  run_constrained:
+    - {{ moose_python_constrained }}
+
+test:
+  source_files:
+    - moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
+
+about:
+  home: https://mooseframework.inl.gov/
+  license: LGPL 2.1
+  summary: >
+    The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,
+    multiphysics framework primarily developed by Idaho National Laboratory. This superficial
+    module is a future placeholder for binary releases of a MOOSE-based application.'
+
+extra:
+  recipe-maintainers:
+    - cticenhour
+    - loganharbour

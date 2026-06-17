@@ -34,37 +34,17 @@ N = 2
     model = 'model'
     verbose = true
     device = 'cpu'
-
-    moose_input_types = 'MATERIAL                           POSTPROCESSOR POSTPROCESSOR MATERIAL                  MATERIAL                  MATERIAL'
-    moose_inputs = '     spatial_velocity_increment         time          time          elastic_strain            orientation               slip_hardening'
-    neml2_inputs = '     forces/spatial_velocity_increment  forces/t      old_forces/t  old_state/elastic_strain  old_state/orientation     old_state/internal/slip_hardening'
-
-    moose_output_types = 'MATERIAL                            MATERIAL                  MATERIAL                  MATERIAL'
-    moose_outputs = '     neml2_cauchy_stress                 elastic_strain            orientation               slip_hardening'
-    neml2_outputs = '     state/internal/full_cauchy_stress   state/elastic_strain      state/orientation         state/internal/slip_hardening'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = '     neml2_cauchy_jacobian'
-    neml2_derivatives = '     state/internal/full_cauchy_stress forces/spatial_velocity_increment'
-
-    initialize_outputs = '      orientation'
+    derivatives = 'neml2_stress spatial_deformation_gradient_increment'
+    initialize_outputs = 'orientation'
     initialize_output_values = 'initial_orientation'
-  []
-[]
-
-[Postprocessors]
-  [time]
-    type = TimePostprocessor
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    outputs = 'none'
   []
 []
 
 [Materials]
   [copy]
     type = ComputeLagrangianCauchyCustomStress
-    custom_cauchy_stress = 'neml2_cauchy_stress'
-    custom_cauchy_jacobian = 'neml2_cauchy_jacobian'
+    custom_cauchy_stress = 'neml2_stress'
+    custom_cauchy_jacobian = 'dneml2_stress/dspatial_deformation_gradient_increment'
     large_kinematics = true
   []
   [initial_orientation]

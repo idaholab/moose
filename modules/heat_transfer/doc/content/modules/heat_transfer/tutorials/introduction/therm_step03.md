@@ -99,3 +99,10 @@ available in your Python installation. It is executed by typing:
 
 from the directory where the problems are run. It will generate an image called
 `therm_soln_compare.png` with line plots for these three cases.
+
+!media heat_transfer/tutorials/introduction/therm_step03.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=therm_step03_result
+       caption=Temperature field `T` with the time-derivative term included. The solution evolves from the uniform 300 K initial condition toward the steady-state profile.

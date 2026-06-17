@@ -11,6 +11,8 @@
 #include "DepletionIDGenerator.h"
 #include "MooseMeshUtils.h"
 #include "CSGPlane.h"
+#include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
 
 InputParameters
 ReactorGeometryMeshBuilderBase::validParams()
@@ -303,4 +305,23 @@ ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
   }
 
   return surfaces_by_axial_region;
+}
+
+const CSG::CSGLattice &
+ReactorGeometryMeshBuilderBase::createRGMBLattice(
+    const Real pitch,
+    const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
+    CSG::CSGBase & csg_obj)
+{
+  // Create lattice based on whether it is hexagonal or Cartesian
+  std::string lat_name = name() + "_lattice";
+  std::unique_ptr<CSG::CSGLattice> lat_ptr;
+  const auto mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
+  if (mesh_geometry == "Square")
+    lat_ptr = std::make_unique<CSG::CSGCartesianLattice>(lat_name, pitch, pattern);
+  else // _geom_type == "Hex"
+    lat_ptr = std::make_unique<CSG::CSGHexagonalLattice>(lat_name, pitch, pattern);
+
+  auto & assembly_lattice = csg_obj.addLattice(std::move(lat_ptr));
+  return assembly_lattice;
 }

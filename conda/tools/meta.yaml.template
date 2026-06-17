@@ -23,6 +23,12 @@ requirements:
   build:
     - python {{ python }}
     - setuptools
+  #
+  # NOTE: These should mirror ./requirements.txt as much as possible.
+  #
+  # ./requirements.txt is used to setup the python environment
+  # within apptainer distributions.
+  #
   run:
     - beautifulsoup4
     - black {{ black }}

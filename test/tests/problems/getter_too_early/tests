@@ -1,12 +1,11 @@
 [Tests]
-  design = 'source/problems/FEProblemBase.md'
-
+  design = 'problems/FEProblemBase.md'
   [get_function_too_early]
     type = RunException
     input = get_function_too_early.i
     capabilities = 'method=dbg'
     expect_err = 'getFunction\(\) was called before Functions have been constructed'
-    requirement = 'The system shall assert that getFunction() was called too early when a Function is requested before Functions have been constructed.'
+    requirement = 'The system shall report an error when a function object is requested before function objects are available.'
     issues = '#28131'
   []
 
@@ -14,8 +13,8 @@
     type = RunException
     input = get_user_object_too_early.i
     capabilities = 'method=dbg'
-    expect_err = "A UserObject getter was called before UserObjects have been constructed"
-    requirement = 'The system shall assert that a UserObject getter was called too early when a UserObject is requested before UserObjects have been constructed.'
+    expect_err = 'A UserObject getter was called before UserObjects have been constructed'
+    requirement = 'The system shall report an error when a user object is requested before user objects are available.'
     issues = '#28131'
   []
 
@@ -23,8 +22,46 @@
     type = RunException
     input = get_vector_postprocessor_too_early.i
     capabilities = 'method=dbg'
-    expect_err = "A VectorPostprocessor getter was called before VectorPostprocessors have been constructed"
-    requirement = 'The system shall assert that a VectorPostprocessor getter was called too early when a VectorPostprocessor is requested before VectorPostprocessors have been constructed.'
+    expect_err = 'A VectorPostprocessor getter was called before VectorPostprocessors have been constructed'
+    requirement = 'The system shall report an error when a vector postprocessor is requested before vector postprocessors are available.'
+    issues = '#28131'
+  []
+
+  [get_multiapp_too_early]
+    type = RunException
+    input = get_multiapp_too_early.i
+    capabilities = 'method=dbg'
+    expect_err = 'A MultiApp getter was called before MultiApps have been constructed'
+    requirement = 'The system shall report an error when a multi-application object is requested before multi-application objects are available.'
+    issues = '#28131'
+  []
+
+  [get_distribution_too_early]
+    type = RunException
+    input = get_distribution_sampler_too_early.i
+    cli_args = 'Problem/getter=distribution'
+    capabilities = 'method=dbg'
+    expect_err = 'A Distribution getter was called before Distributions have been constructed'
+    requirement = 'The system shall report an error when a distribution object is requested before distribution objects are available.'
+    issues = '#28131'
+  []
+
+  [get_sampler_too_early]
+    type = RunException
+    input = get_distribution_sampler_too_early.i
+    cli_args = 'Problem/getter=sampler'
+    capabilities = 'method=dbg'
+    expect_err = 'A Sampler getter was called before Samplers have been constructed'
+    requirement = 'The system shall report an error when a sampler object is requested before sampler objects are available.'
+    issues = '#28131'
+  []
+  [get_fv_interpolation_method_too_early]
+    type = RunException
+    input = get_distribution_sampler_too_early.i
+    cli_args = 'Problem/getter=fv_interpolation_method'
+    capabilities = 'method=dbg'
+    expect_err = 'An FVInterpolationMethod getter was called before FVInterpolationMethods have been constructed'
+    requirement = 'The system shall report an error when a finite-volume interpolation method object is requested before finite-volume interpolation method objects are available.'
     issues = '#28131'
   []
 []

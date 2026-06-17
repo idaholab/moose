@@ -142,3 +142,10 @@ bimetallic strip.
 Once you've answered the questions and run this example we will move on to
 [Step 4](solid_mechanics/tutorials/introduction/step04.md)  and setup a
 cantilever problem that prepares us for contact.
+
+!media solid_mechanics/tutorials/introduction/mech_step03a.mp4
+       style=width:20%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=mech_step03a_result
+       caption=Displacement magnitude. The prescribed temperature field produces a thermal expansion eigenstrain that bends the narrow cantilever.

@@ -70,7 +70,7 @@ of time on systems that have several active variables.
 - Shape Functions are the functions that get multiplied by coefficients and summed to form the solution.
 - Individual shape functions are restrictions of the global basis functions to individual elements.
 - They are analogous to the $x^n$ functions from polynomial fitting (in fact, you can use those as shape functions).
-- Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Toucher
+- Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Tocher
     - MOOSE has support for all of these.
 - Lagrange shape functions are the most common.
     -  They are interpolary at the nodes, i.e., the coefficients correspond to the values of the functions at the nodes.

@@ -72,7 +72,7 @@ Individual shape functions are restrictions of the global basis functions to ind
 They are analogous to the $x^n$ functions from polynomial fitting (in fact, you can use those as
 shape functions).
 
-Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Toucher
+Typical shape function families: Lagrange, Hermite, Hierarchic, Monomial, Clough-Tocher
 
 Lagrange shape functions are the most common, which are interpolatory at the nodes, i.e., the
 coefficients correspond to the values of the functions at the nodes.

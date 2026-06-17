@@ -34,6 +34,6 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  const MaterialProperty<Real> & _diffusion_coefficient;
-  const MaterialProperty<Real> * const _diffusion_coefficient_dT;
+  const MaterialProperty<Real> & _thermal_conductivity;
+  const MaterialProperty<Real> * const _thermal_conductivity_dT;
 };

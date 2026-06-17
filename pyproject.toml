@@ -6,6 +6,7 @@ extend-exclude = '''
   | framework/contrib/conduit
   | framework/contrib/mfem
   | framework/contrib/neml2
+  | framework/contrib/pytorch
   | framework/contrib/wasp
   | large_media
   | libmesh
@@ -26,10 +27,12 @@ extend-exclude = '''
 include = [
   "python/moosecontrol/**/*.py",
   "python/moosepy/**/*.py",
+  "python/moosefmu/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
-  "python/TestHarness/tests/resultssummary/**/*.py"
+  "python/TestHarness/tests/resultssummary/**/*.py",
+  "scripts/coverage.py"
 ]
 exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
 

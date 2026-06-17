@@ -3,6 +3,7 @@
     type = LinearIsotropicElasticity
     coefficients = '1 0.3'
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
-    strain = 'forces/E'
+    strain = 'neml2_strain'
+    stress = 'neml2_stress'
   []
 []

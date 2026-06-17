@@ -704,13 +704,8 @@ class ApptainerGenerator:
             jinja_data["APPLICATION_NAME"] = os.path.basename(app_info.git_root)
             jinja_data["BINARY_NAME"] = app_info.name
 
-        # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
-        if self.args.library == "moose-dev":
-            for name in ["tools"]:
-                package = self.packages[name]
-                variable_name = f"MOOSE_{package.name.upper()}_VERSION"
-                jinja_data[variable_name] = package.conda.install
-        elif self.args.library == "libmesh":
+        # Set variables for libmesh build
+        if self.args.library == "libmesh":
             package = self.packages["libmesh-vtk"]
 
             # Jinja returns a list of dictionaries when variants are involved
@@ -729,6 +724,7 @@ class ApptainerGenerator:
             "libmesh": [{"package": "libmesh", "submodule": "libmesh"}],
             "moose-dev": [
                 {"package": "conduit", "submodule": "framework/contrib/conduit"},
+                {"package": "pytorch", "submodule": "framework/contrib/pytorch"},
                 {"package": "mfem", "submodule": "framework/contrib/mfem"},
                 {"package": "neml2", "submodule": "framework/contrib/neml2"},
                 {"package": "wasp", "submodule": "framework/contrib/wasp"},

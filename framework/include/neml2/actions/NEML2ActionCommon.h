@@ -20,17 +20,17 @@
  *   a = 1
  *   b = 2
  *   c = 3
- *   [block1]
+ *   [model1]
  *     d = 4
  *     e = 5
  *     block = 1
  *   []
- *   [block2]
+ *   [model2]
  *     d = 6
  *     e = 7
  *     block = 2
  *   []
- *   [block3]
+ *   [model3]
  *     d = 8
  *     e = 9
  *     block = 3
@@ -39,7 +39,7 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * This object defines input parameters a, b, and c, which will be applied to each of the
- * block-restricted NEML2Action: block1, block2, and block3.
+ * block-restricted NEML2Action: model1, model2, and model3.
  */
 class NEML2ActionCommon : public Action
 {

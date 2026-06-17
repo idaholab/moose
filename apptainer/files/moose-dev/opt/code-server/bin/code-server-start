@@ -74,6 +74,11 @@ if [ "$(whoami)" == root ] && which ompi_info &> /dev/null; then
     export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 fi
 
+# Source the MOOSE profile if it exists
+if [ -f /.singularity.d/moose_bashrc ]; then
+  source /.singularity.d/moose_bashrc
+fi
+
 # Run the server
 code-server --auth=password \
             --bind-addr=0.0.0.0:"${PORT}" \

@@ -1,7 +1,7 @@
 # NavierStokesFV System
 
 !alert warning
-This syntax is deprecated. Please refer to the [section on how to transition to the new Physics syntax](transition) for guidance on how to use the current syntax.
+This syntax is deprecated. Please refer to the [section on how to transition to the new Physics syntax](#transition) for guidance on how to use the current syntax.
 
 ## Overview
 

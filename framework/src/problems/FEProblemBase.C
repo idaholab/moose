@@ -2846,7 +2846,13 @@ FEProblemBase::getDistribution(const std::string & name)
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_distribution"),
+                "A Distribution getter was called before Distributions have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the Distribution is constructed before the object using it.");
     mooseError("Unable to find Distribution with name '" + name + "'");
+  }
   return *(objs[0]);
 }
 
@@ -2871,10 +2877,17 @@ FEProblemBase::getSampler(const std::string & name, const THREAD_ID tid)
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_sampler"),
+                "A Sampler getter was called before Samplers have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the Sampler is constructed before the object using it.");
+
     mooseError(
         "Unable to find Sampler with name '" + name +
         "', if you are attempting to access this object in the constructor of another object then "
-        "the object being retrieved must occur prior to the caller within the input file.");
+        "make sure that the Sampler is constructed before the object using it.");
+  }
   return *(objs[0]);
 }
 
@@ -3022,6 +3035,8 @@ FEProblemBase::addVariable(const std::string & var_type,
   _solver_var_to_sys_num[var_name] = solver_system_number;
 
   markFamilyPRefinement(params);
+  if (_displaced_problem)
+    _displaced_problem->markFamilyPRefinement(params);
 }
 
 std::pair<bool, unsigned int>
@@ -3322,6 +3337,8 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
     _displaced_problem->addAuxVariable(var_type, var_name, params);
 
   markFamilyPRefinement(params);
+  if (_displaced_problem)
+    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -3370,6 +3387,8 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
 
   markFamilyPRefinement(params);
+  if (_displaced_problem)
+    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -3402,6 +3421,8 @@ FEProblemBase::addAuxArrayVariable(const std::string & var_name,
     _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
 
   markFamilyPRefinement(params);
+  if (_displaced_problem)
+    _displaced_problem->markFamilyPRefinement(params);
 }
 
 void
@@ -4760,7 +4781,15 @@ FEProblemBase::getFVInterpolationMethod(const InterpolationMethodName & name,
       .queryInto(methods);
 
   if (methods.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_interpolation_method"),
+                "An FVInterpolationMethod getter was called before FVInterpolationMethods have "
+                "been constructed. If you are attempting to access this object in the constructor "
+                "of another object then make sure that the FVInterpolationMethod is constructed "
+                "before the object using it.");
+
     mooseError("Unable to find FVInterpolationMethod with name '", name, "'");
+  }
 
   mooseAssert(methods.size() == 1, "Expected a single FVInterpolationMethod per thread");
   return *(methods[0]);
@@ -5487,7 +5516,12 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       q.queryInto(tguos);
 
       ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+
+      // Force one thread per ThreadedGeneralUserObject via grainsize
+      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(),
+                                                      tguos.end(),
+                                                      /*grainsize=*/1),
+                               ctguot);
       joinAndFinalize(q);
     }
 
@@ -5806,6 +5840,12 @@ FEProblemBase::hasMultiApp(const std::string & multi_app_name) const
 std::shared_ptr<MultiApp>
 FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 {
+  if (!hasMultiApp(multi_app_name))
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_multi_app"),
+                "A MultiApp getter was called before MultiApps have been constructed. "
+                "If you are attempting to access this object in the constructor of another object "
+                "then make sure that the MultiApp is constructed before the object using it.");
+
   return _multi_apps.getObject(multi_app_name);
 }
 

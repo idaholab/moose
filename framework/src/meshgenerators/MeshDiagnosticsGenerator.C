@@ -87,6 +87,8 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("check_local_jacobian",
                              chk_option,
                              "whether to check the local Jacobian for bad (non-positive) values");
+  params.addParam<MooseEnum>(
+      "check_polygons", chk_option, "Whether to check that all C0 polygons are convex");
   params.addParam<unsigned int>(
       "log_length_limit",
       10,
@@ -114,6 +116,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
+    _check_polygons(getParam<MooseEnum>("check_polygons")),
     _num_outputs(getParam<unsigned int>("log_length_limit"))
 {
   // Check that no secondary parameters have been passed with the main check disabled
@@ -130,7 +133,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
-      _check_non_matching_edges == "NO_CHECK")
+      _check_non_matching_edges == "NO_CHECK" && _check_polygons == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -188,6 +191,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_non_matching_edges != "NO_CHECK")
     checkNonMatchingEdges(mesh);
+
+  if (_check_polygons != "NO_CHECK")
+    checkPolygons(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -1583,6 +1589,81 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
                      Moose::stringify(num_intersecting_edges),
                  _check_non_matching_edges,
                  num_intersecting_edges);
+}
+
+void
+MeshDiagnosticsGenerator::checkPolygons(const std::unique_ptr<MeshBase> & mesh) const
+{
+  unsigned int num_polygons = 0;
+  unsigned int num_nonconvex = 0;
+  unsigned int num_nonplanar = 0;
+  unsigned int num_flat_consecutive_sides = 0;
+
+  for (const auto & elem : mesh->element_ptr_range())
+    if (elem->type() == libMesh::C0POLYGON)
+    {
+      num_polygons++;
+      const auto n_nodes = elem->n_nodes();
+      Point base_top_dir(0, 0, 0);
+      bool nonconvex = false;
+      bool nonplanar = false;
+      for (const auto & i : make_range(n_nodes))
+      {
+        const auto n1 = elem->point(i);
+        const auto n2 = elem->point((i + 1) % n_nodes);
+        const auto n3 = elem->point((i + 2) % n_nodes);
+        // can't be const with unit
+        Point top_dir = (n2 - n1).cross(n3 - n2);
+
+        if (top_dir.norm_sq() > 0 && base_top_dir.norm() == 0)
+        {
+          base_top_dir = top_dir.unit();
+          continue;
+        }
+        if (base_top_dir * top_dir < 0)
+          nonconvex = true;
+        if (top_dir.norm_sq() > 0)
+          top_dir = top_dir.unit();
+        else
+          num_flat_consecutive_sides++;
+        if (!MooseUtils::absoluteFuzzyEqual((top_dir - base_top_dir).norm_sq(), 0, TOLERANCE) &&
+            !MooseUtils::absoluteFuzzyEqual((top_dir + base_top_dir).norm_sq(), 0, TOLERANCE))
+          nonplanar = true;
+      }
+
+      if (nonconvex)
+      {
+        num_nonconvex++;
+        if (num_nonconvex < _num_outputs)
+          _console << "Non convex C0 polygon detected:" << elem->get_info() << std::endl;
+        else if (num_nonconvex == _num_outputs)
+          _console << "Ouptut limit reached for non-convex polygons" << std::endl;
+      }
+      if (nonplanar)
+      {
+        num_nonplanar++;
+        if (num_nonconvex < _num_outputs)
+          _console << "Non planar C0 polygon detected:" << elem->get_info() << std::endl;
+        else if (num_nonconvex == _num_outputs)
+          _console << "Ouptut limit reached for non-planar polygons" << std::endl;
+      }
+    }
+
+  if (!num_polygons)
+    mooseWarning("No C0 polygons in geometry: polyon check did nothing");
+  else
+  {
+    diagnosticsLog("Number of non convex polygons: " + Moose::stringify(num_nonconvex),
+                   _check_polygons,
+                   num_nonconvex);
+    diagnosticsLog("Number of non planar polygons: " + Moose::stringify(num_nonplanar),
+                   _check_polygons,
+                   num_nonplanar);
+    diagnosticsLog("Number of colinear consecutive sides of polygons: " +
+                       Moose::stringify(num_flat_consecutive_sides),
+                   _check_polygons,
+                   num_flat_consecutive_sides);
+  }
 }
 
 void

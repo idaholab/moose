@@ -13,12 +13,6 @@ This object uses the specified NEML2 material model to perform mesh-wise (or sub
 
 Each NEML2 model +input variable+ is gathered from MOOSE by a `MOOSEToNEML2` user object (gatherer) given in [!param](/UserObjects/NEML2ModelExecutor/gatherers). Optionally, NEML2 model +parameters+ can also be gathered from MOOSE by gatherers given in [!param](/UserObjects/NEML2ModelExecutor/param_gatherers).
 
-Currently, three types of gatherers are available:
-
-- [MOOSEMaterialPropertyToNEML2](MOOSEMaterialPropertyToNEML2.md) gathers material property stored at each quadrature point.
-- [MOOSEVariableToNEML2](MOOSEVariableToNEML2.md) gathers (auxiliary) variables interpolated at quadrature points.
-- [MOOSEPostprocessorToNEML2](MOOSEPostprocessorToNEML2.md) gathers postprocessor value broadcast to all quadrature points.
-
 Each model +output+ and its +derivatives+ with respect to input variables and model parameters can be retireved by a [NEML2ToMOOSEMaterialProperty](NEML2ToMOOSEMaterialProperty.md) material object.
 
 ## NEML2 model execution

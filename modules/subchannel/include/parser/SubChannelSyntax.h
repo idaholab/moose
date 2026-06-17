@@ -12,7 +12,7 @@
 class Syntax;
 class ActionFactory;
 
-namespace SubChannel
+namespace SCM
 {
 
 void associateSyntax(Syntax & syntax, ActionFactory & action_factory);

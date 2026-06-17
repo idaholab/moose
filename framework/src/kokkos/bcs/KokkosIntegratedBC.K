@@ -34,7 +34,7 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
 void
 IntegratedBC::computeResidual()
 {
-  _thread.resize(_num_local_threads, numKokkosBoundarySides());
+  _thread.resize(_num_local_residual_threads, numKokkosBoundarySides());
 
   Policy policy(0, _thread.size());
 
@@ -49,7 +49,7 @@ IntegratedBC::computeJacobian()
 {
   if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
   {
-    _thread.resize(_num_local_threads, numKokkosBoundarySides());
+    _thread.resize(_num_local_jacobian_threads, numKokkosBoundarySides());
 
     Policy policy(0, _thread.size());
 
@@ -63,8 +63,9 @@ IntegratedBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(
-        _num_local_threads, sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides());
+    _thread.resize(_num_local_jacobian_threads,
+                   sys.getCoupling(_kokkos_var.var()).size(),
+                   numKokkosBoundarySides());
 
     Policy policy(0, _thread.size());
 

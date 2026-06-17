@@ -25,31 +25,29 @@
 [Models]
   [spatial_velocity_gradient]
     type = R2IncrementToRate
-    variable = 'forces/spatial_velocity_increment'
-    time = 'forces/t'
-    rate = 'forces/spatial_velocity_gradient'
+    increment = 'spatial_deformation_gradient_increment'
+    rate = 'spatial_velocity_gradient'
   []
   [split_to_deformation_rate]
-    type = R2toSR2
-    input = 'forces/spatial_velocity_gradient'
-    output = 'forces/deformation_rate'
+    type = R2ToSR2
+    input = 'spatial_velocity_gradient'
+    output = 'deformation_rate'
   []
   [split_to_vorticity]
-    type = R2toWR2
-    input = 'forces/spatial_velocity_gradient'
-    output = 'forces/vorticity'
+    type = R2ToWR2
+    input = 'spatial_velocity_gradient'
+    output = 'vorticity'
   []
   [euler_rodrigues]
     type = RotationMatrix
-    from = 'state/orientation'
-    to = 'state/orientation_matrix'
+    from = 'orientation'
+    to = 'orientation_matrix'
   []
   [elasticity]
     type = LinearIsotropicElasticity
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
     coefficients = '1e5 0.25'
-    strain = 'state/elastic_strain'
-    stress = 'state/internal/cauchy_stress'
+    strain = 'elastic_strain'
   []
   [resolved_shear]
     type = ResolvedShear
@@ -85,15 +83,15 @@
   []
   [integrate_slip_hardening]
     type = ScalarBackwardEulerTimeIntegration
-    variable = 'state/internal/slip_hardening'
+    variable = 'slip_hardening'
   []
   [integrate_elastic_strain]
     type = SR2BackwardEulerTimeIntegration
-    variable = 'state/elastic_strain'
+    variable = 'elastic_strain'
   []
   [integrate_orientation]
     type = WR2ImplicitExponentialTimeIntegration
-    variable = 'state/orientation'
+    variable = 'orientation'
   []
   [implicit_rate]
     type = ComposedModel
@@ -108,6 +106,7 @@
   [eq_sys]
     type = NonlinearSystem
     model = 'implicit_rate'
+    unknowns = 'elastic_strain slip_hardening orientation'
   []
 []
 
@@ -123,19 +122,26 @@
 []
 
 [Models]
+  [predictor]
+    type = ConstantExtrapolationPredictor
+    unknowns_SR2 = 'elastic_strain'
+    unknowns_Rot = 'orientation'
+    unknowns_Scalar = 'slip_hardening'
+  []
   [model_without_stress]
     type = ImplicitUpdate
     equation_system = 'eq_sys'
     solver = 'newton'
+    predictor = 'predictor'
   []
   [full_stress]
-    type = SR2toR2
-    input = 'state/internal/cauchy_stress'
-    output = 'state/internal/full_cauchy_stress'
+    type = SR2ToR2
+    input = 'stress'
+    output = 'neml2_stress'
   []
   [model]
     type = ComposedModel
     models = 'model_without_stress elasticity full_stress'
-    additional_outputs = 'state/elastic_strain'
+    additional_outputs = 'elastic_strain'
   []
 []

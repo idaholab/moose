@@ -300,6 +300,18 @@ protected:
   std::vector<std::reference_wrapper<const CSG::CSGSurface>>
   getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
 
+  /**
+   * Create CSG lattice for assembly and core lattices. This method does not set the outer universe
+   * of the lattice
+   * @param pitch lattice pitch
+   * @param pattern pattern of universes in the lattice
+   * @param csg_obj reference to CSGBase object
+   */
+  const CSG::CSGLattice & createRGMBLattice(
+      const Real pitch,
+      const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
+      CSG::CSGBase & csg_obj);
+
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)
   std::unique_ptr<MeshBase> * _reactor_params_mesh;

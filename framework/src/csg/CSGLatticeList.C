@@ -34,12 +34,27 @@ CSGLatticeList::getAllLattices() const
 }
 
 CSGLattice &
-CSGLatticeList::addLattice(std::unique_ptr<CSGLattice> lattice)
+CSGLatticeList::addLattice(std::unique_ptr<CSGLattice> lattice, const bool ignore_identical_lattice)
 {
-  auto name = lattice->getName();
-  auto [it, inserted] = _lattices.emplace(name, std::move(lattice));
+  auto lattice_name = lattice->getName();
+  if (ignore_identical_lattice)
+    // Check that lattice already defined in _lattice and if so, confirm it matches with input lat
+    if (auto it = _lattices.find(lattice_name); it != _lattices.end())
+    {
+      if (*lattice == *it->second)
+        return *it->second;
+      else
+        mooseError("Lattice with name ",
+                   lattice_name,
+                   " has the same name as an existing lattice in CSGBase instance but cannot be "
+                   "discarded as it is not an identical lattice.");
+    }
+
+  // Otherwise, add the lattice to the lattice list. At this point, we don't expect the lattice
+  // to already be defined in the lattice list
+  auto [it, inserted] = _lattices.emplace(lattice_name, std::move(lattice));
   if (!inserted)
-    mooseError("Lattice with name " + name + " already exists in geometry.");
+    mooseError("Lattice with name " + lattice_name + " already exists in geometry.");
   return *it->second;
 }
 

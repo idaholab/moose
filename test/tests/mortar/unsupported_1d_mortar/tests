@@ -1,0 +1,10 @@
+[Tests]
+  [unsupported_1d_mortar]
+    type = RunException
+    input = unsupported_1d_mortar.i
+    expect_err = 'Mortar constraints are not currently supported for 1D meshes'
+    design = 'syntax/Constraints/index.md source/constraints/EqualValueConstraint.md'
+    requirement = 'The system shall report a clear error when mortar constraints are used with a 1D mesh.'
+    issues = '#30179'
+  []
+[]

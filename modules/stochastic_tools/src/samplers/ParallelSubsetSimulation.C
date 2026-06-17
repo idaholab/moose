@@ -139,6 +139,8 @@ ParallelSubsetSimulation::executeSetUp()
   std::vector<Real> tmp =
       _use_absolute_value ? AdaptiveMonteCarloUtils::computeVectorABS(_outputs) : _outputs;
   _communicator.allgather(tmp);
+  if (tmp.empty())
+    tmp.resize(getNumberOfRows(), 0.0);
   for (dof_id_type ss = 0; ss < getNumberOfRows(); ++ss)
     _outputs_sto[ss + offset] = tmp[ss];
 

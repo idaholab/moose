@@ -7,7 +7,7 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.04.21
+    version: 2026.06.16
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
@@ -16,7 +16,7 @@ packages:
       - conda/tools
   # dependers: moose-dev
   build:
-    version: 2026.04.21
+    version: 2026.06.16
     conda: conda/build
     templates:
       conda/build/meta.yaml.template: conda/build/meta.yaml
@@ -25,14 +25,14 @@ packages:
       - conda/build
   # dependers: moose-dev
   mpi:
-    version: 2026.04.21
+    version: 2026.06.07
     influential:
       - apptainer/mpi.def
       - apptainer/files/mpi
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.6.1
+    version: 9.6.2
     build_number: 0
     conda: conda/libmesh-vtk
     templates:
@@ -43,7 +43,7 @@ packages:
       - conda/libmesh-vtk
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.25.1
+    version: 3.25.2
     build_number: 0
     conda: conda/petsc
     templates:
@@ -62,7 +62,7 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2026.05.06_aeab0b9
+    version: 2026.06.05_ab36c00
     build_number: 0
     conda: conda/libmesh
     templates:
@@ -82,12 +82,13 @@ packages:
       - scripts/update_and_rebuild_libmesh.sh
   # dependers: pyhit, moose-dev
   wasp:
-    version: 2025.09.19_02960f1
-    build_number: 6
+    version: 2026.06.15_d8777a8
+    build_number: 0
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
     influential:
+      - conda/conda_build_config.yaml
       - conda/functions/retry_build.sh
       - conda/wasp
       - framework/contrib/wasp
@@ -95,7 +96,7 @@ packages:
       - scripts/update_and_rebuild_wasp.sh
   # dependers: none
   pyhit:
-    version: 2026.04.21
+    version: 2026.06.16
     conda: conda/pyhit
     dependencies:
       - wasp
@@ -111,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.05.08
+    version: 2026.06.16
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
@@ -126,14 +127,16 @@ packages:
       - conda/conda_build_config.yaml
       # container build definitions
       - apptainer/moose-dev.def
-      - apptainer/remove_channels.def
       # files that are included within moose-dev.def
       - apptainer/files/moose-dev
+      - requirements.txt
       # wasp
       - scripts/configure_wasp.sh
       - scripts/update_and_rebuild_wasp.sh
       # libtorch
-      - scripts/setup_libtorch.sh
+      - framework/contrib/pytorch
+      - scripts/configure_libtorch.sh
+      - scripts/update_and_rebuild_libtorch.sh
       # neml2
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh
@@ -146,7 +149,8 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2026.03.01_a15ffb7
+    version: 2026.05.06_92041b7
+    build_number: 0
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
@@ -156,7 +160,7 @@ packages:
   # dependers: none
   seacas:
     version: 2025.10.14
-    build_number: 3
+    build_number: 4
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
@@ -168,6 +172,7 @@ packages:
   app:
     templates:
       conda/moose/meta.yaml.template: conda/moose/meta.yaml
+      conda/template/meta.yaml.template: conda/template/meta.yaml
     dependencies:
       - moose-dev
     apptainer:

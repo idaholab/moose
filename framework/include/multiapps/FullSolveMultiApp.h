@@ -40,6 +40,12 @@ public:
 
 protected:
   /**
+   * FullSolveMultiApp always performs a complete fresh solve on every execution,
+   * so the parent's recovery state must never be propagated to its sub-apps.
+   */
+  bool propagateRecoverToSubApps() const override { return false; }
+
+  /**
    * This function is called after each sub-application solve and is meant to display
    * information about the solve. It can be overridden. In this class, it simply
    * displays whether or not the sub-application solve was successful.

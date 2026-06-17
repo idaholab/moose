@@ -312,6 +312,12 @@ private:
   RestartableDataValue & getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
                                                   bool declare) const;
 
+  /**
+   * Helper for restoring \p state from the checkpoint reader if available.
+   * Defined in the .C to avoid requiring a complete MooseApp type in the template header.
+   */
+  void restoreReporterStateIfAvailable(RestartableDataValue & state) const;
+
   /// Map from ReporterName -> Reporter state. We need to keep track of all of the states that are
   /// created so that we can check them after Reporter declaration to make sure all states have
   /// a producer (are delcared). We cannot check _context_ptrs, because a context is only
@@ -436,6 +442,13 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   auto context_ptr = std::make_unique<S>(_app, producer, state, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
   _context_ptrs.emplace(reporter_name, std::move(context_ptr));
+
+  // On recover, values declared after the bulk restore pass are skipped by it.
+  // Restore this value in place from the still-open checkpoint reader (no-op on
+  // normal runs and for values declared before the bulk restore runs, which are
+  // handled by the bulk pass). This is done after context construction so that
+  // context-driven resizes do not clobber the restore.
+  restoreReporterStateIfAvailable(state);
 
   return state.value();
 }

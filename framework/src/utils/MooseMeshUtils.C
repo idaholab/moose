@@ -23,6 +23,9 @@
 #include "libmesh/parallel_node.h"
 #include "libmesh/compare_elems_by_level.h"
 #include "libmesh/mesh_communication.h"
+#include "libmesh/edge_edge3.h"
+#include "libmesh/enum_to_string.h"
+#include "libmesh/unstructured_mesh.h"
 
 #include "timpi/parallel_sync.h"
 
@@ -1399,6 +1402,7 @@ copyIntoMesh(MeshGenerator & mg,
 void
 buildPolyLineMesh(MeshBase & mesh,
                   const std::vector<Point> & points,
+                  const std::vector<Point> & mid_points,
                   const bool loop,
                   const BoundaryName & start_boundary,
                   const BoundaryName & end_boundary,
@@ -1408,6 +1412,17 @@ buildPolyLineMesh(MeshBase & mesh,
                   nums_edges_between_points.size() == points.size() - 1 + loop,
               "nums_edges_between_points must be either a single value or have the same number of "
               "entries as segments defined by the points.");
+  mooseAssert(
+      mid_points.size() == 0 || mid_points.size() == points.size() - (loop ? 0 : 1),
+      "mid_points must be either empty or have the consistent number of entries as points.");
+  mooseAssert(
+      mid_points.size() == 0 ||
+          (nums_edges_between_points.size() == 1 && nums_edges_between_points.front() == 1) ||
+          (nums_edges_between_points.size() == points.size() - 1 + loop &&
+           std::all_of(nums_edges_between_points.begin(),
+                       nums_edges_between_points.end(),
+                       [](unsigned int n) { return n == 1; })),
+      "mid_points can only be provided if each segment has exactly one edge.");
 
   const auto n_points = points.size();
   for (auto i : make_range(n_points))
@@ -1444,6 +1459,10 @@ buildPolyLineMesh(MeshBase & mesh,
       }
     }
   }
+  // Add mid points if applicable. When mid points are provided, each segment has exactly one edge,
+  // so the midpoint node ids follow the vertex node ids.
+  for (const auto & i : make_range(mid_points.size()))
+    mesh.add_point(mid_points[i], n_points + i);
 
   const auto n_segments = loop ? n_points : (n_points - 1);
   const auto n_elem =
@@ -1458,8 +1477,15 @@ buildPolyLineMesh(MeshBase & mesh,
       (loop ? 0 : 1);
   for (auto i : make_range(n_elem))
   {
+    std::unique_ptr<Elem> elem;
+    if (mid_points.size())
+    {
+      elem = std::make_unique<Edge3>();
+      elem->set_node(2, mesh.node_ptr(n_points + i));
+    }
+    else
+      elem = Elem::build(EDGE2);
     const auto ip1 = (i + 1) % max_nodes;
-    auto elem = Elem::build(EDGE2);
     elem->set_node(0, mesh.node_ptr(i));
     elem->set_node(1, mesh.node_ptr(ip1));
     elem->set_id() = i;
@@ -1487,6 +1513,18 @@ buildPolyLineMesh(MeshBase & mesh,
                   const bool loop,
                   const BoundaryName & start_boundary,
                   const BoundaryName & end_boundary,
+                  const std::vector<unsigned int> & nums_edges_between_points)
+{
+  buildPolyLineMesh(
+      mesh, points, {}, loop, start_boundary, end_boundary, nums_edges_between_points);
+}
+
+void
+buildPolyLineMesh(MeshBase & mesh,
+                  const std::vector<Point> & points,
+                  const bool loop,
+                  const BoundaryName & start_boundary,
+                  const BoundaryName & end_boundary,
                   const Real max_elem_size)
 {
   std::vector<unsigned int> nums_edges_between_points;
@@ -1503,7 +1541,8 @@ buildPolyLineMesh(MeshBase & mesh,
     nums_edges_between_points.push_back(n_elems);
   }
 
-  buildPolyLineMesh(mesh, points, loop, start_boundary, end_boundary, nums_edges_between_points);
+  buildPolyLineMesh(
+      mesh, points, {}, loop, start_boundary, end_boundary, nums_edges_between_points);
 }
 
 void

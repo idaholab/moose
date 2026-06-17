@@ -19,7 +19,7 @@ function get_variable()
 # Configure NEML2 with the default MOOSE configuration options
 #
 # Separated so that it can be used across all NEML2 build scripts:
-# - scripts/update_and_rebuild_wasp.sh
+# - scripts/update_and_rebuild_neml2.sh
 #
 # Arguments:
 #   1. Path to the NEML2 source directory
@@ -43,7 +43,7 @@ function configure_neml2()
     -DNEML2_JSON=OFF \
     -DNEML2_CONTRIB_PREFIX="$2/contrib" \
     -Dtorch_ROOT="$(get_variable LIBTORCH_DIR)" \
-    -Dwasp_ROOT="$(get_variable WASP_DIR)" \
+    -Dtorch_SEARCH_SITE_PACKAGES=OFF \
     -G "Unix Makefiles" \
     -B "$2" \
     -S "$1" \

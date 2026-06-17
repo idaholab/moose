@@ -510,6 +510,9 @@ private:
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 
+  /// A nullptr to use for when inputs aren't specified
+  std::unique_ptr<CSG::CSGBase> _null_csg_base = nullptr;
+
   /// The MeshGenerators that are parents to this MeshGenerator
   std::set<const MeshGenerator *, Comparator> _parent_mesh_generators;
   /// The MeshGenerators that are children to this MeshGenerator

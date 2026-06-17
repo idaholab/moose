@@ -41,3 +41,9 @@ the behavior you would expect.
 Try changing the magnitude of the volumetric heating and see how that affects
 the solution.
 
+!media heat_transfer/tutorials/introduction/therm_step03a.mp4
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       autoplay=True
+       loop=True
+       id=therm_step03a_result
+       caption=Temperature field `T` with volumetric heating. The interior heats above the boundary values due to the distributed heat source.
