@@ -6,12 +6,6 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
-[]
-
 [Variables]
   [./u]
   [../]
@@ -38,7 +32,6 @@
     type = CoefDiffusion
     variable = u
     coef = 1
-    extra_vector_tags = 'ref'
   [../]
 []
 
@@ -96,6 +89,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   num_grids = 2
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]
