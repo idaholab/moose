@@ -10,7 +10,13 @@
 import os
 import unittest
 import tempfile
-from mooseutils.yaml_load import yaml_load, yaml_write, IncludeYamlFile
+from mooseutils.yaml_load import (
+    yaml_load,
+    yaml_write,
+    IncludeYamlFile,
+    is_missing_include,
+    prune_missing_includes,
+)
 
 
 class TestYamlLoad(unittest.TestCase):
@@ -52,6 +58,33 @@ class TestYamlLoad(unittest.TestCase):
         self.assertEqual(data["e"], ["Edward", "Bonnie"])
         self.assertEqual(data["f"], [1906])
 
+    def testIncludeOptional(self):
+        data = yaml_load("foo_optional.yml")
+
+        # A present optional include resolves like a normal '!include'
+        self.assertEqual(data["b"][0], 3.6)
+        self.assertEqual(data["b"][1], [1, 2, 3])
+
+        # A missing optional include resolves to the sentinel instead of raising
+        self.assertTrue(is_missing_include(data["c"]))
+        self.assertTrue(is_missing_include(data["d"][0]))
+
+        # Surrounding data is untouched
+        self.assertEqual(data["a"], 1)
+        self.assertEqual(data["d"][1], "keep")
+
+    def testPruneMissingIncludes(self):
+        data = yaml_load("foo_optional.yml")
+        self.assertEqual(prune_missing_includes(data), data)  # returns the pruned node
+
+        # The missing optional includes are removed (mapping key and list item)
+        self.assertNotIn("c", data)
+        self.assertEqual(data["d"], ["keep"])
+
+        # The present include and surrounding data remain
+        self.assertEqual(data["a"], 1)
+        self.assertEqual(data["b"][0], 3.6)
+
 
 class TestYamlWrite(unittest.TestCase):
     def setUp(self):
@@ -91,6 +124,30 @@ class TestYamlWrite(unittest.TestCase):
         with open(self._tmp, "r") as fid:
             out_data = fid.read()
         self.assertEqual(in_data, out_data)
+
+    def testWriteOptional(self):
+
+        # Load without processing includes; a missing optional include becomes the sentinel while a
+        # present one is retained as an IncludeYamlFile flagged optional.
+        data = yaml_load("foo_optional.yml", include=False)
+        self.assertIsInstance(data["b"], IncludeYamlFile)
+        self.assertTrue(data["b"].optional)
+        self.assertTrue(is_missing_include(data["c"]))
+
+        # Prune the missing optional includes, then the remainder round-trips
+        prune_missing_includes(data)
+        yaml_write(self._tmp, data)
+
+        # The present optional include is written back using the '!include?' tag (unquoted)
+        with open(self._tmp, "r") as fid:
+            out_data = fid.read()
+        self.assertIn("!include? bar.yml", out_data)
+
+        # Reloading resolves the present include and the missing ones stay gone
+        data = yaml_load(self._tmp)
+        self.assertEqual(data["b"][0], 3.6)
+        self.assertNotIn("c", data)
+        self.assertEqual(data["d"], ["keep"])
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ import importlib
 import logging
 import collections
 from mooseutils import recursive_update
-from mooseutils.yaml_load import yaml_load
+from mooseutils.yaml_load import yaml_load, prune_missing_includes
 
 import MooseDocs
 from ..tree import pages
@@ -73,6 +73,10 @@ def load_config(filename, **kwargs):
     Read the config.yml file and create the Translator object.
     """
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
+
+    # Drop any configuration that referenced an optional include ('!include?') whose file was
+    # missing (e.g. an optional dependency submodule that is not checked out).
+    prune_missing_includes(config)
 
     # Replace 'default' and 'disable' key in Extensions to allow for recursive_update to accept command line
     for key in config.get("Extensions", dict()).keys():
