@@ -70,9 +70,9 @@ public:
 
   PorousFlowDictator(const InputParameters & parameters);
 
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
+  virtual void initialize() override {};
+  virtual void execute() override {};
+  virtual void finalize() override {};
 
   /**
    * The number of PorousFlow variables.  Materials
@@ -145,6 +145,9 @@ public:
    */
   libMesh::FEType feType() const;
 
+  /// Whether the PorousFlow variables are finite-volume variables
+  bool isFV() const;
+
   /**
    * Check if the simulation includes derivatives of permeability
    * Note: when the permeability is constant, expensive tensor calculations
@@ -185,6 +188,9 @@ private:
 
   /// FE type used by the PorousFlow variables
   libMesh::FEType _fe_type;
+
+  /// Whether the PorousFlow variables are finite-volume variables
+  bool _is_fv;
 
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i
   std::vector<unsigned int> _moose_var_num;
