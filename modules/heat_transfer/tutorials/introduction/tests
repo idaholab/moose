@@ -36,11 +36,15 @@
       csvdiff = therm_step03a_out_t_sampler_0006.csv
       detail = 'adding a volumetric heating term, '
     []
+    # This used to be an ImageDiff test, but doing an ImageDiff on a plot
+    # from matplotlib is not a good idea. Python changes in small ways
+    # and we can't reliably diff that long term. We already test the
+    # solutions from the things we're comparing, so the tests above
+    # failing is good enough to determine if this plot changes.
     [therm_soln_compare]
       prereq = heat_conduction_tutorial/therm_step03a
-      type = ImageDiff
-      command = 'therm_soln_compare.py'
-      imagediff = 'therm_soln_compare.png'
+      type = RunCommand
+      command = 'python therm_soln_compare.py'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
       detail = 'and plotting a comparison of the results.'

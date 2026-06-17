@@ -16,13 +16,15 @@
 #endif
 
 #include "Action.h"
+#include "NEML2Utils.h"
+#include "DerivativeMaterialPropertyNameInterface.h"
 
 class NEML2ActionCommon;
 
 /**
  * Action to set up NEML2 objects.
  */
-class NEML2Action : public Action
+class NEML2Action : public Action, public DerivativeMaterialPropertyNameInterface
 {
 public:
   static InputParameters validParams();
@@ -38,77 +40,46 @@ protected:
 
   const FileName & fname() const { return _fname; }
 
-  enum class MOOSEIOType
-  {
-    MATERIAL,
-    VARIABLE,
-    POSTPROCESSOR
-  };
-
-  struct MOOSEIO
-  {
-    const std::string name;
-    const MOOSEIOType type;
-  };
-
-  struct NEML2IO
-  {
-    const neml2::VariableName name;
-    const neml2::TensorType type;
-  };
-
-  struct NEML2Param
-  {
-    const std::string name;
-    const neml2::TensorType type;
-  };
-
   struct VariableMapping
   {
-    const MOOSEIO moose;
-    const NEML2IO neml2;
+    std::string name;
+    NEML2Utils::MOOSEIOType moose_type;
+    neml2::TensorType neml2_type;
+    std::size_t history_order;
   };
 
   struct ParameterMapping
   {
-    const MOOSEIO moose;
-    const NEML2Param neml2;
+    std::string name;
+    NEML2Utils::MOOSEIOType moose_type;
+    neml2::TensorType neml2_type;
   };
 
   struct DerivativeMapping
   {
-    const MOOSEIO moose;
-    const struct NEML2Derivative
-    {
-      const NEML2IO y;
-      const NEML2IO x;
-    } neml2;
-  };
-
-  struct ParameterDerivativeMapping
-  {
-    const MOOSEIO moose;
-    const struct NEML2Derivative
-    {
-      const NEML2IO y;
-      const NEML2Param x;
-    } neml2;
+    std::string name;
+    std::string y;
+    std::string x;
   };
 
   /// Set up MOOSE-NEML2 input variable mappings
   void setupInputMappings(const neml2::Model &);
 
-  /// Set up MOOSE-NEML2 model parameter mappings
-  void setupParameterMappings(const neml2::Model &);
-
   /// Set up MOOSE-NEML2 output variable mappings
   void setupOutputMappings(const neml2::Model &);
+
+  /// Set up MOOSE-NEML2 model parameter mappings
+  void setupParameterMappings(const neml2::Model &);
 
   /// Set up MOOSE-NEML2 derivative mappings
   void setupDerivativeMappings(const neml2::Model &);
 
   /// Set up MOOSE-NEML2 parameter derivative mappings
   void setupParameterDerivativeMappings(const neml2::Model &);
+
+  /// Infer the MOOSE IO type from the variable name and type
+  NEML2Utils::MOOSEIOType inferMOOSEIOType(const neml2::VariableName & name,
+                                           const neml2::TensorType & type) const;
 
   /// Name of the NEML2 input file
   FileName _fname;
@@ -132,7 +103,7 @@ protected:
   std::vector<DerivativeMapping> _derivs;
 
   /// MOOSE-NEML2 parameter derivative mappings
-  std::vector<ParameterDerivativeMapping> _param_derivs;
+  std::vector<DerivativeMapping> _param_derivs;
 
 #endif
   /// Name of the NEML2Executor user object
@@ -144,6 +115,9 @@ protected:
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
+  /// Input variables to skip (i.e., not to set up mappings for)
+  std::vector<std::string> _skip_input_variables;
+
   /// Material property initial conditions
   std::map<MaterialPropertyName, MaterialPropertyName> _initialize_output_values;
 
@@ -153,22 +127,17 @@ protected:
 private:
 #ifdef NEML2_ENABLED
   /// Get parameter lists for mapping between MOOSE and NEML2 quantities
-  template <typename EnumType, typename T1, typename T2>
-  std::tuple<std::vector<EnumType>, std::vector<T1>, std::vector<T2>>
-  getInputParameterMapping(const std::string & moose_type_opt,
-                           const std::string & moose_name_opt,
-                           const std::string & neml2_name_opt) const
+  template <typename EnumType, typename T>
+  std::tuple<std::vector<EnumType>, std::vector<T>>
+  getInputParameterMapping(const std::string & source_opt, const std::string & name_opt) const
   {
-    const auto moose_types = getParam<MultiMooseEnum>(moose_type_opt).getSetValueIDs<EnumType>();
-    const auto moose_names = getParam<std::vector<T1>>(moose_name_opt);
-    const auto neml2_names = getParam<std::vector<T2>>(neml2_name_opt);
+    const auto moose_types = getParam<MultiMooseEnum>(source_opt).getSetValueIDs<EnumType>();
+    const auto neml2_names = getParam<std::vector<T>>(name_opt);
 
-    if (moose_types.size() != moose_names.size())
-      paramError(moose_name_opt, moose_name_opt, " must have the same length as ", moose_type_opt);
-    if (moose_names.size() != neml2_names.size())
-      paramError(moose_name_opt, moose_name_opt, " must have the same length as ", neml2_name_opt);
+    if (moose_types.size() != neml2_names.size())
+      paramError(source_opt, source_opt, " must have the same length as ", name_opt);
 
-    return {moose_types, moose_names, neml2_names};
+    return {moose_types, neml2_names};
   }
 
   /// Print a summary of the NEML2 model

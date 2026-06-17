@@ -2,10 +2,10 @@
   [model]
     type = NEML2TestModel
     # these are the default values for the parameters
-    A = forces/A
-    B = forces/B
-    sum = state/internal/sum
-    product = state/internal/product
+    A = 'A'
+    B = 'B'
+    sum = 'sum'
+    product = 'product'
   []
   [model_A]
     type = NEML2TestModel
@@ -32,6 +32,11 @@
     p1 = 4
     p2 = 5
     ad = false
+  []
+  [error]
+    type = NEML2TestModel
+    error = true
+    jit = false
   []
 []
 

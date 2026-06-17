@@ -9,7 +9,10 @@ black:
   - 26.5.1
 
 clang_format:
-  - 22.1.5
+  - 19.1.7
+
+clang_tools:
+  - 19.1.7
 
 coverage:
   - 7.13.2

@@ -7,7 +7,7 @@
     input = 'moose.i'
     exodiff = 'moose_out.e'
     allow_warnings = true
-    capabilities = 'neml2'
+    capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
 []

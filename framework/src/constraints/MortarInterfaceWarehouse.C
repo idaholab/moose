@@ -166,6 +166,13 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
   // Clear exiting data
   amg.clear();
 
+  const auto dim = amg.dim();
+
+  if (dim == 1)
+    mooseError("Mortar constraints are not currently supported for 1D meshes");
+  else if (dim != 2 && dim != 3)
+    mooseError("Invalid mesh dimension for mortar constraint");
+
   // Construct maps from nodes -> lower dimensional elements on the primary and secondary
   // boundaries.
   amg.buildNodeToElemMaps();
@@ -173,7 +180,6 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
   // Compute nodal geometry (normals and tangents).
   amg.computeNodalGeometry();
 
-  const auto dim = amg.dim();
   if (dim == 2)
   {
     // Project secondary nodes (find xi^(2) values).
@@ -185,10 +191,8 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
     // Build the mortar segment mesh on the secondary boundary.
     amg.buildMortarSegmentMesh();
   }
-  else if (dim == 3)
+  else // dim == 3
     amg.buildMortarSegmentMesh3d();
-  else
-    mooseError("Invalid mesh dimension for mortar constraint");
 
   amg.computeInactiveLMNodes();
   amg.computeInactiveLMElems();

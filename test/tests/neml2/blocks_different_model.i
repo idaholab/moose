@@ -27,43 +27,22 @@
   input = 'models/custom_model.i'
   verbose = true
   device = 'cpu'
+
+  # request derivatives (must be pairs of two)
+  # derivative name follow moose convention, e.g., 'doutput/dinput'
+  derivatives = 'product A'
+
+  # output to exodus
+  export_outputs = 'sum product dproduct/dA'
+  export_output_targets = 'exodus; exodus; exodus'
+
   [A]
     model = 'model_A'
     block = 'A'
-
-    moose_input_types = 'VARIABLE MATERIAL'
-    moose_inputs = '     a        b'
-    neml2_inputs = '     forces/A forces/B'
-
-    moose_output_types = 'MATERIAL           MATERIAL'
-    moose_outputs = '     neml2_sum          neml2_product'
-    neml2_outputs = '     state/internal/sum state/internal/product'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_dproduct_da'
-    neml2_derivatives = 'state/internal/product forces/A'
-
-    export_outputs = 'neml2_sum neml2_product neml2_dproduct_da'
-    export_output_targets = 'exodus; exodus; exodus'
   []
   [B]
     model = 'model_B'
     block = 'B'
-
-    moose_input_types = 'VARIABLE MATERIAL'
-    moose_inputs = '     a        b'
-    neml2_inputs = '     forces/A forces/B'
-
-    moose_output_types = 'MATERIAL           MATERIAL'
-    moose_outputs = '     neml2_sum          neml2_product'
-    neml2_outputs = '     state/internal/sum state/internal/product'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_dproduct_da'
-    neml2_derivatives = 'state/internal/product forces/A'
-
-    export_outputs = 'neml2_sum neml2_product neml2_dproduct_da'
-    export_output_targets = 'exodus; exodus; exodus'
   []
 []
 
@@ -80,37 +59,37 @@
   [reaction_1]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_sum
+    reaction_rate = sum
   []
   [reaction_2]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_product
+    reaction_rate = product
   []
   [reaction_3]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_dproduct_da
+    reaction_rate = dproduct/dA
   []
 []
 
 [AuxVariables]
-  [a]
+  [A]
   []
 []
 
 [ICs]
-  [a]
+  [A]
     type = FunctionIC
-    variable = a
+    variable = A
     function = 'x'
   []
 []
 
 [Materials]
-  [b]
+  [B]
     type = GenericFunctionMaterial
-    prop_names = 'b'
+    prop_names = 'B'
     prop_values = 'y+t'
     outputs = 'exodus'
   []

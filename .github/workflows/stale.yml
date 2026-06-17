@@ -15,6 +15,7 @@ permissions:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'idaholab'
     steps:
       - uses: actions/stale@v8
         with:

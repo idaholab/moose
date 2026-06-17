@@ -59,6 +59,9 @@ protected:
   static constexpr Real _Tmax = 1154.55;
   /// min temperature
   static constexpr Real _Tmin = 373.15;
+  /// valid temperature range [K] of the heat capacity and thermal conductivity correlations
+  static constexpr Real _Tmin_cp_k = 388.15;
+  static constexpr Real _Tmax_cp_k = 1148.15;
   /// reference enthalpy
   Real _H0;
   /// max enthalpy

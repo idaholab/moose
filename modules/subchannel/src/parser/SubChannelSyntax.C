@@ -11,7 +11,7 @@
 #include "ActionFactory.h"
 #include "Syntax.h"
 
-namespace SubChannel
+namespace SCM
 {
 
 void

@@ -370,7 +370,7 @@ WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
   }
   else
     // not implemented yet
-    paramWarning(
+    paramInfo(
         NS::fluid,
         "Specifying the fluid properties user object does not define the GeneralFunctorFluidProps "
         "when using the porous medium treatment. You have to define this object in the input");

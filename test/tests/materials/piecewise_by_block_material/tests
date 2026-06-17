@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16758 #26324'
+  issues = '#16758 #26250 #26324'
   [continuous]
     type = Exodiff
     input = continuous.i

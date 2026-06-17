@@ -28,6 +28,8 @@ NEML2PreKernel::validParams()
 NEML2PreKernel::NEML2PreKernel(const InputParameters & parameters)
   : NEML2Kernel(parameters), MOOSEToNEML2(parameters)
 {
+  if (name() != NEML2Name())
+    paramError("to_neml2", "NEML2PreKernel name must match to_neml2.");
 }
 
 #endif

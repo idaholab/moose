@@ -1828,6 +1828,9 @@ AutomaticMortarGeneration::computeNodalGeometry()
   // The dimension according to Mesh::mesh_dimension().
   const auto dim = _mesh.mesh_dimension();
 
+  mooseAssert(dim == 2 || dim == 3,
+              "AutomaticMortarGeneration::computeNodalGeometry() is only valid for "
+              "mortar constraints on 2D or 3D meshes.");
   // A nodal lower-dimensional nodal quadrature rule to be used on faces.
   QNodal qface(dim - 1);
 

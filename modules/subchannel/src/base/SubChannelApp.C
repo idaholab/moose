@@ -38,7 +38,7 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"SubChannelApp"});
 
   /* register custom execute flags, action syntax, etc. here */
-  SubChannel::associateSyntax(s, af);
+  SCM::associateSyntax(s, af);
 
   // Register new syntax for SCMClosures
   auto & syntax = s;

@@ -11,17 +11,9 @@
   [thermal_conductivity_model]
     model = 'kappa'
 
-    moose_input_types = 'VARIABLE'
-    moose_inputs = 'T'
-    neml2_inputs = 'forces/T'
-
-    moose_output_types = 'MATERIAL'
-    neml2_outputs = 'state/k_T'
-    moose_outputs = 'k_T'
-
-    moose_derivative_types = 'MATERIAL'
-    neml2_derivatives = 'state/k_T forces/T'
-    moose_derivatives = 'dk_T/dT'
+    # request derivatives (must be pairs of two)
+    # derivative name follow moose convention, e.g., 'doutput/dinput'
+    derivatives = 'k_T T'
 
     export_outputs = 'k_T dK_T/dT'
     export_output_targets = 'exodus; exodus'

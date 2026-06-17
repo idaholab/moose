@@ -20,14 +20,14 @@ OptionSet
 NEML2TestModel::expected_options()
 {
   auto options = Model::expected_options();
-  options.set_input("A") = VariableName("forces", "A");
-  options.set_input("B") = VariableName("forces", "B");
-  options.set_output("sum") = VariableName("state", "internal", "sum");
-  options.set_output("product") = VariableName("state", "internal", "product");
-  options.set_parameter<TensorName<Scalar>>("p1") = "1";
-  options.set_parameter<TensorName<Scalar>>("p2") = "1";
-  options.set<bool>("error") = false;
-  options.set<bool>("ad") = true;
+  options.add_input("A", "Input variable A");
+  options.add_input("B", "Input variable B");
+  options.add_output("sum", "Output variable sum");
+  options.add_output("product", "Output variable product");
+  options.add_parameter<Scalar>("p1", TensorName<Scalar>("1"), "Parameter p1");
+  options.add_parameter<Scalar>("p2", TensorName<Scalar>("1"), "Parameter p2");
+  options.add<bool>("error", false, "Error flag");
+  options.add<bool>("ad", true, "Automatic differentiation flag");
   return options;
 }
 
@@ -65,8 +65,6 @@ void
 NEML2TestModel::set_value(bool out, bool dout_din, bool /*d2out_din2*/)
 {
   neml_assert(!_error, "Error flag set!");
-  neml_assert(_input_a.tensor().numel() > 0, "Input A is empty!");
-  neml_assert(_input_b.tensor().numel() > 0, "Input B is empty!");
 
   if (out)
   {
