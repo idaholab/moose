@@ -31,7 +31,7 @@ public:
 protected:
   /**
    * Check the relative convergence of the nonlinear solution
-   * @param it         Iteration number
+   * @param iter       Iteration number
    * @param fnorm      Norm of the residual vector
    * @param ref_norm   Norm to use for reference value
    * @param rel_tol    Relative tolerance
@@ -39,7 +39,7 @@ protected:
    * @param oss        Output streamstring
    * @return           Bool signifying convergence
    */
-  virtual bool checkRelativeConvergence(const unsigned int it,
+  virtual bool checkRelativeConvergence(const unsigned int iter,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
@@ -48,13 +48,13 @@ protected:
 
   /**
    * Check the relative convergence of the nonlinear solution
-   * @param it         Iteration number
+   * @param iter       Iteration number
    * @param fnorm      Norm of the residual vector
    * @param abs_tol    Absolute tolerance
    * @param oss        Output streamstring
    * @return           Bool signifying convergence
    */
-  virtual bool checkAbsoluteConvergence(const unsigned int it,
+  virtual bool checkAbsoluteConvergence(const unsigned int iter,
                                         const Real fnorm,
                                         const Real abs_tol,
                                         std::ostringstream & oss);

@@ -74,14 +74,14 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 }
 
 bool
-DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int /*it*/,
+DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int iter,
                                                       const Real fnorm,
                                                       const Real ref_norm,
                                                       const Real rel_tol,
                                                       const Real /*abs_tol*/,
                                                       std::ostringstream & oss)
 {
-  if (fnorm <= ref_norm * rel_tol)
+  if (iter && fnorm <= ref_norm * rel_tol)
   {
     oss << "Converged due to relative/normalized residual norm " << fnorm / ref_norm
         << " < relative tolerance (" << rel_tol << ")\n";
@@ -92,12 +92,12 @@ DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int /*it*/,
 }
 
 bool
-DefaultNonlinearConvergence::checkAbsoluteConvergence(const unsigned int it,
+DefaultNonlinearConvergence::checkAbsoluteConvergence(const unsigned int iter,
                                                       const Real fnorm,
                                                       const Real abs_tol,
                                                       std::ostringstream & oss)
 {
-  if (it >= _nl_forced_its && fnorm < abs_tol)
+  if (iter >= _nl_forced_its && fnorm < abs_tol)
   {
     oss << "Converged due to absolute residual " << fnorm << " < absolute tolerance (" << abs_tol
         << ")\n";
@@ -214,7 +214,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
     oss << "Nonlinear solve was blowing up!\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  if ((iter >= _nl_forced_its) && iter && status == MooseConvergenceStatus::ITERATING)
+  if (iter >= _nl_forced_its && status == MooseConvergenceStatus::ITERATING)
   {
     const auto ref_residual = system.referenceResidual();
     if (checkRelativeConvergence(iter, fnorm, ref_residual, rel_tol, abs_tol, oss))
