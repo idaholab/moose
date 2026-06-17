@@ -1,0 +1,8 @@
+[Tests]
+  [material_property_variable_dependency]
+    type = PetscJacobianTester
+    input = material_property_dependency.i
+    requirement = 'The system shall include off-diagonal Jacobian contributions caused by variables coupled through consumed material properties.'
+    issues = '#25800'
+  []
+[]

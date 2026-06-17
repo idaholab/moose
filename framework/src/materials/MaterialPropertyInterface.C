@@ -12,6 +12,8 @@
 #include "MooseApp.h"
 #include "MaterialBase.h"
 #include "FEProblemBase.h"
+#include "MooseVariableDependencyInterface.h"
+#include "MooseVariableFieldBase.h"
 
 const std::string MaterialPropertyInterface::_interpolated_old = "_interpolated_old";
 const std::string MaterialPropertyInterface::_interpolated_older = "_interpolated_older";
@@ -254,6 +256,28 @@ MaterialPropertyInterface::buildRequiredMaterials(bool allow_stateful)
         required_mats[id].begin(), block_required.begin(), block_required.end());
   }
   return required_mats;
+}
+
+std::set<MooseVariableFieldBase *>
+MaterialPropertyInterface::addRequiredMaterialMooseVariableDependencies(
+    MooseVariableDependencyInterface & consumer)
+{
+  std::set<MooseVariableFieldBase *> required_mat_vars;
+
+  if (!getMaterialPropertyCalled())
+    return required_mat_vars;
+
+  const auto required_mats = buildRequiredMaterials();
+
+  for (const auto & block_mats : required_mats)
+    for (const auto * const mat : block_mats.second)
+      for (auto * const var : mat->getMooseVariableDependencies())
+      {
+        consumer.addMooseVariableDependency(var);
+        required_mat_vars.insert(var);
+      }
+
+  return required_mat_vars;
 }
 
 void

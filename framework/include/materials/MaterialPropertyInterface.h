@@ -20,6 +20,7 @@
 #include "MathUtils.h"
 #include "MooseObjectName.h"
 #include "InputParameters.h"
+#include <set>
 
 #include <unordered_map>
 
@@ -31,6 +32,8 @@
 class MooseObject;
 class FEProblemBase;
 class SubProblem;
+class MooseVariableDependencyInterface;
+class MooseVariableFieldBase;
 
 /**
  * Helper class for deferred getting of material properties after the construction
@@ -379,6 +382,17 @@ public:
   /// get a map of MaterialBase pointers for all material objects that this object depends on for each block
   std::unordered_map<SubdomainID, std::vector<MaterialBase *>>
   buildRequiredMaterials(bool allow_stateful = true);
+
+  /**
+   * Add the variable dependencies from materials required by this material-property consumer.
+   *
+   * This is used when an object consumes a material property whose providing material depends on
+   * coupled variables that the consumer does not explicitly couple. The returned set contains only
+   * the variable dependencies introduced through the required materials, so callers can distinguish
+   * those dependencies from the consumer's direct variable dependencies.
+   */
+  std::set<MooseVariableFieldBase *>
+  addRequiredMaterialMooseVariableDependencies(MooseVariableDependencyInterface & consumer);
 
   ///@{
   /**

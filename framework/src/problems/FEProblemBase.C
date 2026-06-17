@@ -125,6 +125,8 @@
 #include "Checkpoint.h"
 #include "MortarInterfaceWarehouse.h"
 #include "AutomaticMortarGeneration.h"
+#include "MaterialPropertyInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -6753,8 +6755,31 @@ FEProblemBase::init()
           break;
 
         case Moose::COUPLING_CUSTOM:
-          // do nothing, _cm was already set through couplingMatrix() call
+        {
+          // The custom coupling matrix was already supplied by the preconditioner. This adds variable
+          // dependencies introduced by materials required by kernels consuming material properties;
+          // these dependencies are not available when preconditioners such as SMP construct the
+          // initial custom coupling matrix.
+          const auto & kernels = nl->getKernelWarehouse().getObjects();
+
+          for (const auto & kernel : kernels)
+          {
+            if (auto mpi = dynamic_cast<MaterialPropertyInterface *>(kernel.get()))
+              if (auto mvdi = dynamic_cast<MooseVariableDependencyInterface *>(kernel.get()))
+              {
+                const auto required_mat_vars =
+                    mpi->addRequiredMaterialMooseVariableDependencies(*mvdi);
+
+                const auto row = kernel->variable().number();
+
+                for (const auto * const coupled_var : required_mat_vars)
+                  if (nl->hasVariable(coupled_var->name()))
+                    (*cm)(row, coupled_var->number()) = 1;
+              }
+          }
+
           break;
+        }
       }
     }
 
