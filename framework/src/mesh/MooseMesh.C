@@ -1464,7 +1464,7 @@ MooseMesh::cacheInfo()
   _lower_d_interior_blocks.clear();
   _lower_d_boundary_blocks.clear();
 
-  auto & mesh = getMesh();
+  const auto & mesh = getMesh();
 
   // Cache higher and lowerD element information
   for (const auto & elem : mesh.element_ptr_range())
@@ -1500,7 +1500,7 @@ MooseMesh::cacheInfo()
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
-      Node & node = *elem->node_ptr(nd);
+      const Node & node = *elem->node_ptr(nd);
       _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
@@ -1518,7 +1518,7 @@ MooseMesh::cacheInfo()
       const auto & boundary_ids = elem_boundary_ids[side];
       sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
 
-      Elem * neig = elem->neighbor_ptr(side);
+      const Elem * neig = elem->neighbor_ptr(side);
       if (neig)
       {
         _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
