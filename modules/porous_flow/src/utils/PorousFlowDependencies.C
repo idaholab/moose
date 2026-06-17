@@ -152,6 +152,8 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection",
                          "PorousFlowFullySaturatedDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection", "enthalpy_qp");
+  _deps.insertDependency("ADPorousFlowFullySaturatedHeatAdvection",
+                         "PorousFlowFullySaturatedHeatAdvection");
 
   _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "enthalpy_nodal");
