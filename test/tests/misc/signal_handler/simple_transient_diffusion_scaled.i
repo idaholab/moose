@@ -38,6 +38,15 @@
   []
 []
 
+[UserObjects]
+  [wait_for_signal]
+    type = WaitForSignal
+    # Only the SignalTester runs (which actually deliver a signal) enable this
+    # via cli_args; plain and recover runs of this input leave it disabled.
+    enable = false
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 50
