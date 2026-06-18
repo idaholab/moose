@@ -15,6 +15,7 @@
 #include "VectorComponentFunctor.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVAnisotropicDiffusion.h"
+#include "PetscVectorReader.h"
 #include <string>
 #include <unordered_map>
 #include <set>
@@ -119,6 +120,14 @@ public:
 
 protected:
   struct MomentumPredictorOperator;
+  struct FaceMomentumPredictorState
+  {
+    Real face_rho = 0.0;
+    RealVectorValue face_hbya;
+    RealVectorValue density_weighted_face_hbya;
+    RealVectorValue face_density_weighted_ainv;
+    RealVectorValue face_pressure_ainv;
+  };
 
   /// Predictor-side face flux entering the pressure equation. Defaults to the HbyA contribution.
   virtual Real pressurePredictorFlux(const FaceInfo * fi) const;
@@ -189,6 +198,19 @@ protected:
   void
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
+
+  /// Build the face predictor state shared by stock and sharp-interface pressure coupling.
+  FaceMomentumPredictorState
+  buildMomentumPredictorFaceState(const FaceInfo * fi,
+                                  const std::vector<PetscVectorReader> & hbya_reader,
+                                  const std::vector<PetscVectorReader> * ainv_reader,
+                                  const Moose::StateArg & time_arg,
+                                  bool include_boundary_body_force_correction,
+                                  bool use_boundary_velocity_values) const;
+  /// Interpolate per-component momentum-system cell readers to a face vector.
+  RealVectorValue
+  interpolateMomentumVectorReadersToFace(const FaceInfo * fi,
+                                         const std::vector<PetscVectorReader> & readers) const;
 
   /// Build the base predictor operator vectors M*u - A*u - rhs and the relaxed diagonal.
   void computePredictorOperatorBase(const unsigned int system_i,

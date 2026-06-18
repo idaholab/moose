@@ -181,7 +181,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
     mooseError(this->name(),
                " should only be used with a linear segregated thermal-hydraulics solver!");
 
-  rebuildSharpInterfaceFaceInfo();
+  initializeAdditionalPressureFluxStorage();
 }
 
 Real
@@ -499,21 +499,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::clearVOFTransportState()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::rebuildSharpInterfaceFaceInfo()
-{
-  _sharp_interface_face_info.clear();
-  for (auto & fi : _fe_problem.mesh().faceInfo())
-    if (isFlowFace(*fi))
-      _sharp_interface_face_info.push_back(fi);
-
-  initializeAdditionalPressureFluxStorage();
-}
-
-void
 ConservativeSharpInterfaceRhieChowMassFluxBase::meshChanged()
 {
   RhieChowMassFlux::meshChanged();
-  rebuildSharpInterfaceFaceInfo();
+  initializeAdditionalPressureFluxStorage();
 }
 
 void
@@ -521,7 +510,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
 {
   const_cast<MooseLinearVariableFVReal *>(_p)->computeCellGradients();
   RhieChowMassFlux::initialSetup();
-  rebuildSharpInterfaceFaceInfo();
+  initializeAdditionalPressureFluxStorage();
   if (!_vof_rho_phi_name.empty() &&
       UserObject::_subproblem.hasFunctorWithType<Real>(_vof_rho_phi_name, _tid))
     _vof_rho_phi = &getFunctor<Real>(_vof_rho_phi_name);
@@ -540,7 +529,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialize()
   if (!_corrected_face_phi_seeded)
     cacheCurrentCorrectedVolumetricFlux();
 
-  for (const auto * fi : _sharp_interface_face_info)
+  for (const auto * fi : flowFaceInfo())
     _previous_timestep_corrected_face_phi[fi->id()] =
         libmesh_map_find(_corrected_face_phi, fi->id());
 }
@@ -576,7 +565,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
   cacheCurrentCorrectedVolumetricFlux();
 
   const auto time_arg = Moose::currentState();
-  for (const auto * fi : _sharp_interface_face_info)
+  for (const auto * fi : flowFaceInfo())
   {
     // Keep the pressure-corrected face flux as the source of truth. Do not reconstruct cell U and
     // project it back to faces here; that round trip is not an exact inverse.
@@ -652,46 +641,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(const Fac
   std::vector<std::unique_ptr<NumericVector<Number>>> owned_raw_ainv;
   std::vector<PetscVectorReader> raw_ainv_readers;
   buildSharpFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
-  return interpolateFaceRawAinv(fi, raw_ainv_readers);
-}
-
-RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(
-    const FaceInfo * fi, const std::vector<PetscVectorReader> & raw_ainv_readers) const
-{
-  using namespace Moose::FV;
-
-  RealVectorValue face_ainv;
-
-  if (raw_ainv_readers.size() < _dim)
-    return face_ainv;
-
-  if (_vel[0]->isInternalFace(*fi))
-  {
-    const auto & elem_info = *fi->elemInfo();
-    const auto & neighbor_info = *fi->neighborInfo();
-
-    for (const auto dim_i : make_range(_dim))
-    {
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      const auto neighbor_dof =
-          neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      face_ainv(dim_i) = linearInterpolation(
-          raw_ainv_readers[dim_i](elem_dof), raw_ainv_readers[dim_i](neighbor_dof), *fi, true);
-    }
-  }
-  else
-  {
-    const ElemInfo & elem_info = boundaryElemInfo(fi);
-
-    for (const auto dim_i : make_range(_dim))
-    {
-      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-      face_ainv(dim_i) = raw_ainv_readers[dim_i](elem_dof);
-    }
-  }
-
-  return face_ainv;
+  return interpolateMomentumVectorReadersToFace(fi, raw_ainv_readers);
 }
 
 void
@@ -772,7 +722,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceOperatorState(
   SharpFaceOperatorState state;
   state.face_normal = fi->normal();
   state.face_rho = interpolateFaceDensity(fi, time_arg);
-  state.face_raw_ainv = interpolateFaceRawAinv(fi, raw_ainv_readers);
+  state.face_raw_ainv = interpolateMomentumVectorReadersToFace(fi, raw_ainv_readers);
   state.normal_raw_ainv = computeFaceNormalAinv(state.face_raw_ainv, state.face_normal);
   state.negative_sn_grad_p = -(
       pressure_gradient_readers ? computeFaceNormalPressureGradient(fi, *pressure_gradient_readers)
@@ -1017,59 +967,18 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
   for (const auto & hbya_raw : _HbyA_raw)
     hbya_readers.emplace_back(*hbya_raw);
 
-  for (const auto * fi : _sharp_interface_face_info)
+  for (const auto * fi : flowFaceInfo())
   {
-    RealVectorValue face_hbya;
-
-    if (_vel[0]->isInternalFace(*fi))
-    {
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-
-      for (const auto dim_i : index_range(_vel))
-      {
-        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-        const auto neighbor_dof =
-            neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-
-        interpolate(Moose::FV::InterpMethod::Average,
-                    face_hbya(dim_i),
-                    -hbya_readers[dim_i](elem_dof),
-                    -hbya_readers[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-      }
-    }
-    else
-    {
-      const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
-      const ElemInfo & elem_info = boundaryElemInfo(fi);
-      const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
-
-      if (use_constrained_boundary_state)
-      {
-        for (const auto dim_i : make_range(_dim))
-        {
-          const Real boundary_value = boundaryVelocityValue(fi, dim_i, time_arg);
-          face_hbya(dim_i) = std::isfinite(boundary_value)
-                                 ? -boundary_value
-                                 : -MetaPhysicL::raw_value((*_vel[dim_i])(
-                                       makeCenteredFaceArg(fi, elem_info.elem()), time_arg));
-          face_hbya(dim_i) *= boundary_normal_multiplier;
-        }
-      }
-      else
-      {
-        for (const auto dim_i : index_range(_vel))
-        {
-          const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          face_hbya(dim_i) = -boundary_normal_multiplier * hbya_readers[dim_i](elem_dof);
-        }
-      }
-    }
+    const auto predictor_state =
+        buildMomentumPredictorFaceState(fi,
+                                        hbya_readers,
+                                        nullptr,
+                                        time_arg,
+                                        /* include_boundary_body_force_correction = */ false,
+                                        /* use_boundary_velocity_values = */ true);
 
     const Real face_measure = faceMeasure(*fi);
-    const Real predictor_operator_volumetric_flux = face_hbya * fi->normal();
+    const Real predictor_operator_volumetric_flux = predictor_state.face_hbya * fi->normal();
     const auto state =
         buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers, &pressure_gradient_readers);
     const RealVectorValue pressure_face_raw_ainv = state.face_raw_ainv;

@@ -1382,6 +1382,168 @@ RhieChowMassFlux::initCouplingField()
   }
 }
 
+RealVectorValue
+RhieChowMassFlux::interpolateMomentumVectorReadersToFace(
+    const FaceInfo * fi, const std::vector<PetscVectorReader> & readers) const
+{
+  using namespace Moose::FV;
+
+  RealVectorValue face_value;
+
+  if (!fi || readers.size() < _dim)
+    return face_value;
+
+  if (_vel[0]->isInternalFace(*fi))
+  {
+    const auto & elem_info = *fi->elemInfo();
+    const auto & neighbor_info = *fi->neighborInfo();
+
+    for (const auto dim_i : make_range(_dim))
+    {
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      const auto neighbor_dof =
+          neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      face_value(dim_i) =
+          linearInterpolation(readers[dim_i](elem_dof), readers[dim_i](neighbor_dof), *fi, true);
+    }
+
+    return face_value;
+  }
+
+  const ElemInfo & elem_info = boundaryElemInfo(fi);
+  for (const auto dim_i : make_range(_dim))
+  {
+    const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+    face_value(dim_i) = readers[dim_i](elem_dof);
+  }
+
+  return face_value;
+}
+
+RhieChowMassFlux::FaceMomentumPredictorState
+RhieChowMassFlux::buildMomentumPredictorFaceState(
+    const FaceInfo * fi,
+    const std::vector<PetscVectorReader> & hbya_reader,
+    const std::vector<PetscVectorReader> * ainv_reader,
+    const Moose::StateArg & time_arg,
+    const bool include_boundary_body_force_correction,
+    const bool use_boundary_velocity_values) const
+{
+  using namespace Moose::FV;
+
+  FaceMomentumPredictorState state;
+  if (!fi)
+    return state;
+
+  mooseAssert(hbya_reader.size() >= _dim, "HbyA readers must cover every momentum component.");
+  mooseAssert(!ainv_reader || ainv_reader->size() >= _dim,
+              "Ainv readers must cover every momentum component.");
+
+  if (_vel[0]->isInternalFace(*fi))
+  {
+    const auto & elem_info = *fi->elemInfo();
+    const auto & neighbor_info = *fi->neighborInfo();
+    const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+    const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+    interpolate(
+        Moose::FV::InterpMethod::Average, state.face_rho, elem_rho, neighbor_rho, *fi, true);
+    if (ainv_reader)
+      state.face_pressure_ainv = interpolateMomentumVectorReadersToFace(fi, *ainv_reader);
+
+    for (const auto dim_i : make_range(_dim))
+    {
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      const auto neighbor_dof =
+          neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      interpolate(Moose::FV::InterpMethod::Average,
+                  state.face_hbya(dim_i),
+                  -hbya_reader[dim_i](elem_dof),
+                  -hbya_reader[dim_i](neighbor_dof),
+                  *fi,
+                  true);
+      interpolate(Moose::FV::InterpMethod::Average,
+                  state.density_weighted_face_hbya(dim_i),
+                  -elem_rho * hbya_reader[dim_i](elem_dof),
+                  -neighbor_rho * hbya_reader[dim_i](neighbor_dof),
+                  *fi,
+                  true);
+
+      if (ainv_reader)
+      {
+        interpolate(Moose::FV::InterpMethod::Average,
+                    state.face_density_weighted_ainv(dim_i),
+                    elem_rho * (*ainv_reader)[dim_i](elem_dof),
+                    neighbor_rho * (*ainv_reader)[dim_i](neighbor_dof),
+                    *fi,
+                    true);
+      }
+    }
+
+    return state;
+  }
+
+  const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+  const ElemInfo & elem_info = boundaryElemInfo(fi);
+  const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, elem_info.elem());
+  const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
+
+  if (use_constrained_boundary_state)
+  {
+    state.face_rho = _rho(boundary_face, Moose::currentState());
+    for (const auto dim_i : make_range(_dim))
+    {
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      Real boundary_value = std::numeric_limits<Real>::quiet_NaN();
+      if (use_boundary_velocity_values)
+        boundary_value = boundaryVelocityValue(fi, dim_i, time_arg);
+      else if (auto * bc_pointer = velocityBoundaryCondition(fi, dim_i))
+        boundary_value = bc_pointer->computeBoundaryValue();
+
+      state.face_hbya(dim_i) =
+          std::isfinite(boundary_value)
+              ? -boundary_value
+              : -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+
+      if (include_boundary_body_force_correction && !_split_momentum_predictor_operator &&
+          !_body_force_kernel_names.empty())
+        for (const auto & force_kernel : _body_force_kernels[dim_i])
+        {
+          force_kernel->setCurrentElemInfo(&elem_info);
+          state.face_hbya(dim_i) -=
+              force_kernel->computeRightHandSideContribution() * (*ainv_reader)[dim_i](elem_dof) /
+              (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
+        }
+
+      state.face_hbya(dim_i) *= boundary_normal_multiplier;
+      state.density_weighted_face_hbya(dim_i) = state.face_rho * state.face_hbya(dim_i);
+    }
+  }
+  else
+  {
+    state.face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+    for (const auto dim_i : make_range(_dim))
+    {
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      state.face_hbya(dim_i) = -boundary_normal_multiplier * hbya_reader[dim_i](elem_dof);
+      state.density_weighted_face_hbya(dim_i) = state.face_rho * state.face_hbya(dim_i);
+    }
+  }
+
+  if (ainv_reader)
+  {
+    state.face_pressure_ainv = interpolateMomentumVectorReadersToFace(fi, *ainv_reader);
+    const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+    for (const auto dim_i : make_range(_dim))
+    {
+      const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
+      state.face_density_weighted_ainv(dim_i) = elem_rho * (*ainv_reader)[dim_i](elem_dof);
+    }
+  }
+
+  return state;
+}
+
 void
 RhieChowMassFlux::populateCouplingFunctors(
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
@@ -1404,124 +1566,18 @@ RhieChowMassFlux::populateCouplingFunctors(
   // We loop through the faces and populate the coupling fields (face H/A and 1/A)
   for (auto & fi : _flow_face_info)
   {
-    Real face_rho = 0;
-    RealVectorValue face_hbya;
-    RealVectorValue density_times_face_hbya;
-
-    // We do the lookup in advance
-    auto & Ainv = _Ainv[fi->id()];
-
-    // If it is internal, we just interpolate (using geometric weights) to the face
-    if (_vel[0]->isInternalFace(*fi))
-    {
-      // Get the dof indices for the element and the neighbor
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-      // Get the density values for the element and neighbor. We need this multiplication to make
-      // the coupling fields mass fluxes.
-      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-
-      // Now we do the interpolation to the face
-      interpolate(Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
-      for (const auto dim_i : index_range(raw_hbya))
-      {
-        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-        const auto neighbor_dof =
-            neighbor_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-        interpolate(Moose::FV::InterpMethod::Average,
-                    face_hbya(dim_i),
-                    -hbya_reader[dim_i](elem_dof),
-                    -hbya_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-        interpolate(_pressure_diffusion_interp_method,
-                    Ainv(dim_i),
-                    elem_rho * ainv_reader[dim_i](elem_dof),
-                    neighbor_rho * ainv_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-        interpolate(Moose::FV::InterpMethod::Average,
-                    _pressure_Ainv[fi->id()](dim_i),
-                    ainv_reader[dim_i](elem_dof),
-                    ainv_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-        interpolate(Moose::FV::InterpMethod::Average,
-                    density_times_face_hbya(dim_i),
-                    -elem_rho * hbya_reader[dim_i](elem_dof),
-                    -neighbor_rho * hbya_reader[dim_i](neighbor_dof),
-                    *fi,
-                    true);
-      }
-    }
-    else
-    {
-      const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
-      const ElemInfo & elem_info = boundaryElemInfo(fi);
-      const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, elem_info.elem());
-
-      const auto boundary_value_from_bc = [this, fi](const unsigned int dim_i)
-      {
-        if (auto * bc_pointer = velocityBoundaryCondition(fi, dim_i))
-          return bc_pointer->computeBoundaryValue();
-
-        return std::numeric_limits<Real>::quiet_NaN();
-      };
-
-      const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
-
-      // Local constrainHbyA analogue: only use the live boundary value when the
-      // velocity patch is actually fixed on this iteration (Dirichlet or inletOutlet
-      // backflow). Pure outflow faces still use the predictor cell state so the
-      // pressure solve can supply the required outlet correction.
-      if (use_constrained_boundary_state)
-      {
-        face_rho = _rho(boundary_face, Moose::currentState());
-        for (const auto dim_i : make_range(_dim))
-        {
-          const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          const Real boundary_value = boundary_value_from_bc(dim_i);
-          face_hbya(dim_i) =
-              std::isfinite(boundary_value)
-                  ? -boundary_value
-                  : -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-
-          if (!_split_momentum_predictor_operator && !_body_force_kernel_names.empty())
-            for (const auto & force_kernel : _body_force_kernels[dim_i])
-            {
-              force_kernel->setCurrentElemInfo(&elem_info);
-              face_hbya(dim_i) -=
-                  force_kernel->computeRightHandSideContribution() * ainv_reader[dim_i](elem_dof) /
-                  (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
-            }
-          face_hbya(dim_i) *= boundary_normal_multiplier;
-          density_times_face_hbya(dim_i) = face_rho * face_hbya(dim_i);
-        }
-      }
-      // Otherwise we just do a one-term expansion (so we just use the element value)
-      else
-      {
-        face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-        for (const auto dim_i : make_range(_dim))
-        {
-          const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-          face_hbya(dim_i) = -boundary_normal_multiplier * hbya_reader[dim_i](elem_dof);
-          density_times_face_hbya(dim_i) = face_rho * face_hbya(dim_i);
-        }
-      }
-
-      // We just do a one-term expansion for 1/A no matter what
-      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-      for (const auto dim_i : index_range(raw_Ainv))
-      {
-        const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[dim_i]][0];
-        Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
-        _pressure_Ainv[fi->id()](dim_i) = ainv_reader[dim_i](elem_dof);
-      }
-    }
+    const auto state =
+        buildMomentumPredictorFaceState(fi,
+                                        hbya_reader,
+                                        &ainv_reader,
+                                        time_arg,
+                                        /* include_boundary_body_force_correction = */
+                                        true,
+                                        /* use_boundary_velocity_values = */ false);
+    _Ainv[fi->id()] = state.face_density_weighted_ainv;
+    _pressure_Ainv[fi->id()] = state.face_pressure_ainv;
     // Lastly, we populate the face flux resulted by H/A
-    _HbyA_flux[fi->id()] = density_times_face_hbya * fi->normal();
+    _HbyA_flux[fi->id()] = state.density_weighted_face_hbya * fi->normal();
   }
 }
 

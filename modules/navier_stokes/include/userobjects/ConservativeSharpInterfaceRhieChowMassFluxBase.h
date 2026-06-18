@@ -115,7 +115,6 @@ protected:
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
   void writePressureCorrectedVelocityToMomentumSolution(const Moose::StateArg & time_arg);
-  void rebuildSharpInterfaceFaceInfo();
   void cacheCurrentCorrectedVolumetricFlux(const Real degenerate_normal_pressure_ainv_tol = 0.0);
   PressureVelocityFaceState
   pressureVelocityFaceState(const FaceInfo * fi,
@@ -134,9 +133,6 @@ protected:
   Real interpolatedPhysicalFaceFlux(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
-  RealVectorValue
-  interpolateFaceRawAinv(const FaceInfo * fi,
-                         const std::vector<PetscVectorReader> & raw_ainv_readers) const;
   void
   buildSharpFaceRawAinvReaders(std::vector<std::unique_ptr<NumericVector<Number>>> & owned_raw_ainv,
                                std::vector<PetscVectorReader> & raw_ainv_readers) const;
@@ -185,8 +181,6 @@ protected:
   FaceScalarField _previous_timestep_corrected_face_phi;
   FaceScalarField _vof_transport_phi;
   FaceScalarField _pressure_coupled_cell_reconstruction_scalar;
-
-  std::vector<const FaceInfo *> _sharp_interface_face_info;
 
   const RealVectorValue _gravity;
   const Point _reference_pressure_point;
