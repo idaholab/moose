@@ -623,14 +623,12 @@ PorousFlowDarcyBaseTempl<is_ad>::harmonicMean(JacRes res_or_jac, unsigned int ph
 
   std::vector<GenericReal<is_ad>> mob(num_nodes);
   unsigned num_zero = 0;
-  unsigned zero_mobility_node = std::numeric_limits<unsigned>::max();
   GenericReal<is_ad> harmonic_mob = 0;
   for (unsigned n = 0; n < num_nodes; ++n)
   {
     mob[n] = mobility(n, ph);
     if (MetaPhysicL::raw_value(mob[n]) == 0.0)
     {
-      zero_mobility_node = n;
       num_zero++;
     }
     else
@@ -652,8 +650,12 @@ PorousFlowDarcyBaseTempl<is_ad>::harmonicMean(JacRes res_or_jac, unsigned int ph
           dharmonic_mob[n] =
               dmobility(n, ph, pvar) * harm2 / std::pow(MetaPhysicL::raw_value(mob[n]), 2);
       else if (num_zero == 1)
-        dharmonic_mob[zero_mobility_node] =
-            num_nodes * dmobility(zero_mobility_node, ph, pvar); // other derivs are zero
+        for (unsigned n = 0; n < num_nodes; ++n)
+          if (MetaPhysicL::raw_value(mob[n]) == 0.0)
+          {
+            dharmonic_mob[n] = num_nodes * dmobility(n, ph, pvar); // other derivs are zero
+            break;
+          }
       // if num_zero > 1 then all dharmonic_mob = 0.0
     }
 
