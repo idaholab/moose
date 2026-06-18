@@ -21,8 +21,6 @@ public:
 
   DualMeshGenerator(const InputParameters & parameters);
 
-  Point circumcenter(const Elem * elem);
-
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
