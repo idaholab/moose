@@ -774,9 +774,6 @@ DualMeshGenerator::generate()
         }
       }
 
-      if (fan_points.size() == 1)
-        mooseError("Could not find a boundary point to start concave fan triangulation.");
-
       for (std::size_t i = 1; i + 1 < fan_points.size(); ++i)
       {
         const std::vector<Point> triangle_points = {

@@ -25,7 +25,6 @@
     [myDualGen]
         type = DualMeshGenerator
         input = cut_center
-        dual_mesh_type = voronoi
     []
 
     [myDiagnosticGenerator]
