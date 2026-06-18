@@ -6,8 +6,8 @@ This object provides Dirichlet boundary values for Kokkos linear finite volume a
 kernels. The boundary value is supplied through a Kokkos-compatible `functor`. It is the Kokkos
 analog of [LinearFVAdvectionDiffusionFunctorDirichletBC.md].
 
-At present, this boundary condition is the only supported Dirichlet boundary treatment for
-[KokkosLinearFVDiffusion.md].
+Currently, the only accepted functor type is [KokkosParsedFunction.md], as we are waiting on
+[relocatable device code (RDC)](KokkosFunctions/index.md#kokkos_rdc) support.
 
 ## Example Syntax
 
