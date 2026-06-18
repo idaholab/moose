@@ -417,7 +417,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
-  bool called_prepare_for_use = false;
+  bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
 
@@ -434,13 +434,13 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   }
   else if (!_mesh->is_prepared())
   {
-    _mesh->prepare_for_use();
+    _mesh->complete_preparation();
     _moose_mesh_prepared = false;
-    called_prepare_for_use = true;
+    libmesh_mesh_prepared = true;
   }
 
   if (_moose_mesh_prepared)
-    return called_prepare_for_use;
+    return libmesh_mesh_prepared;
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
@@ -619,7 +619,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 
   _moose_mesh_prepared = true;
 
-  return called_prepare_for_use;
+  return libmesh_mesh_prepared;
 }
 
 void

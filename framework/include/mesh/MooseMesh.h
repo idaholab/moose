@@ -554,11 +554,12 @@ public:
    * @param mesh_to_clone If nonnull, we will clone this mesh instead of preparing our current one
    * @return Whether the libMesh mesh was prepared. This should really only be relevant in MOOSE
    * framework contexts where we need to make a decision about what to do with the displaced mesh.
-   * If the reference mesh base object has \p prepare_for_use called (e.g. this method returns \p
-   * true when called for the reference mesh), then we must pass the reference mesh base object into
-   * this method when we call this for the displaced mesh. This is because the displaced mesh \emph
-   * must be an exact clone of the reference mesh. We have seen that \p prepare_for_use called on
-   * two previously identical meshes can result in two different meshes even with Metis partitioning
+   * If the reference mesh base object has \p complete_preparation() called (e.g. this method
+   * returns \p true when called for the reference mesh), then we must pass the reference mesh base
+   * object into this method when we call this for the displaced mesh. This is because the displaced
+   * mesh \emph must be an exact clone of the reference mesh. We have seen that \p
+   * complete_preparation() called on two previously identical meshes can result in two different
+   * meshes even with Metis partitioning
    */
   bool prepare(const MeshBase * mesh_to_clone);
 
