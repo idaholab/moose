@@ -11,4 +11,11 @@
     recover = false
     requirement = 'The system shall be able to solve an inverse boundary value problem using TAO.'
   []
+  [grad_check]
+    type = TaoGradientTester
+    input = main.i
+    max_rel_tol = 6e-3
+    issues = '#32496'
+    requirement = 'The system shall be able to accurately compute the gradient for an inverse boundary value.'
+  []
 []

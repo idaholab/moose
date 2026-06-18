@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
   [adjoint_grad]
     type = CSVDiff
     max_threads = 1 # Optimize executioner does not support multiple threads
@@ -12,6 +14,12 @@
     design = 'ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
     requirement = 'The system shall be able to perform gradient based material parameter inversion '
                   'for a single material property.'
+  []
+  [grad_check]
+    type = TaoGradientTester
+    input = main.i
+    requirement = 'The system shall be able to perform gradient based material parameter inversion '
+                  'for a single material property and perform a grad check.'
 
   []
 []

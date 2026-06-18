@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#21885'
+  issues = '#21885 #32496'
   [quadraticObj]
     design = 'Optimize.md'
     requirement = "The system shall minimize a quadratic objective function from a test object "
@@ -48,8 +48,8 @@
   []
 
   [debug]
-    design = 'Optimize.md'
     requirement = 'The system shall be able to debug a optimization solve by '
+    design = 'Optimize.md TaoGradientTester.md'
     [fd]
       type = RunApp
       input = debug_fd.i
@@ -59,14 +59,12 @@
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'using finite-difference to compute the gradient;'
     []
-    [grad_check]
-      type = RunApp
+    [gradient_test]
+      type = TaoGradientTester
       input = debug_gradient.i
-      cli_args = '-tao_ls_type unit'
       allow_test_objects = True
-      expect_out = 'Testing Gradient'
-      max_threads = 1 # Optimize executioner does not support multiple threads
-      detail = 'testing hand-coded gradient;'
+      max_rel_tol = 1e-6
+      detail = 'verifying the adjoint gradient against finite differences.'
     []
   []
 []
