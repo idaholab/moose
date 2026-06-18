@@ -30,6 +30,9 @@ protected:
   // vertices
   Real _boundary_node_angular_tol;
 
+  // Relative tolerance for geometric comparisons, scaled by the input mesh size
+  Real _geometry_relative_tol;
+
   // Dual type; either voronoi (dual nodes at primal element circumcenters) or barycentric (dual
   // nodes at primal element centroids)
   MooseEnum _dual_mesh_type;
