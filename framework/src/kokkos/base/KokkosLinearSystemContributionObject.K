@@ -34,18 +34,16 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
-    MeshHolder(
-        *parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
-    SystemHolder(
-        parameters.getCheckedPointerParam<SystemBase *>("_sys")->feProblem().getKokkosSystems()),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
+    MeshHolder(*getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
+    SystemHolder(getCheckedPointerParam<SystemBase *>("_sys")->feProblem().getKokkosSystems()),
+    _fe_problem(*getParam<FEProblemBase *>("_fe_problem_base")),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  const auto * const subproblem = parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
+  const auto * const subproblem = getCheckedPointerParam<SubProblem *>("_subproblem");
   _kokkos_var.init(subproblem->getVariable(0,
                                            getParam<LinearVariableName>("variable"),
                                            Moose::VarKindType::VAR_SOLVER,

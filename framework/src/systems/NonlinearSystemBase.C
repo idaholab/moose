@@ -199,7 +199,7 @@ NonlinearSystemBase::preInit()
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     _sys.get_dof_map().full_sparsity_pattern_needed();
 #endif
 }

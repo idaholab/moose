@@ -17,7 +17,7 @@ KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::validParams()
 {
   InputParameters params = Moose::Kokkos::LinearFVBoundaryCondition::validParams();
   params.addRequiredParam<FunctionName>("functor",
-                                        "The outward normal flux function on the boundary.");
+                                        "The outward normal flux functor on the boundary.");
   params.addClassDescription(
       "Kokkos LinearFV Neumann boundary condition for advection-diffusion kernels. "
       "Applies a prescribed outward normal flux (positive = outflow).");
