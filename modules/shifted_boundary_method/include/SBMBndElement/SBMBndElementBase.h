@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseMesh.h"
-#include "gtest/gtest.h"
 
 enum class IntersectionType
 {
@@ -96,10 +95,4 @@ private:
 
   /// Ensure the normal vector is initialized before use
   void ensureNormalInitialized() const;
-
-  /// flip the normal direction of the boundary element
-  void flipNormal() { _normal *= -1; };
-
-  friend class SBMSurfaceMeshBuilder;
-  FRIEND_TEST(SBMBndElementTest, Edge2FlipNormal);
 };

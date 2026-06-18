@@ -342,22 +342,3 @@ TEST(SBMBndElementTest, UnsupportedGeometryDispatchersThrow)
       std::exception);
 }
 
-TEST(SBMBndElementTest, Edge2FlipNormal)
-{
-  // The undisturbed Edge2 sits on the x-axis and yields a normal along +/-y.
-  // flipNormal() must invert each component of the cached normal.
-  std::unique_ptr<Edge2> edge(new Edge2());
-  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
-  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
-  edge->set_node(0) = n0.get();
-  edge->set_node(1) = n1.get();
-
-  SBMBndEdge2ForTest bnd(edge.get());
-  const Point n_orig = bnd.normal();
-  bnd.flipNormal();
-  const Point n_flipped = bnd.normal();
-
-  EXPECT_NEAR(n_flipped(0), -n_orig(0), 1e-12);
-  EXPECT_NEAR(n_flipped(1), -n_orig(1), 1e-12);
-  EXPECT_NEAR(n_flipped(2), -n_orig(2), 1e-12);
-}
