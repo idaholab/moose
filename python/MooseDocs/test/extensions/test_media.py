@@ -383,6 +383,32 @@ class TestYouTube(MooseDocsTestCase):
         self.assertHTMLTag(res(0, 0), "iframe", src="https://www.youtube.com/not_real")
 
 
+class TestUnsupportedMedia(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, media]
+
+    def setupContent(self):
+        """Virtual method for populating Content section in configuration."""
+        config = [dict(root_dir="large_media", content=["testing/Flag_of_Idaho.*"])]
+        return common.get_content(config, ".md")
+
+    def testError(self):
+        # Unsupported media types should produce a clear diagnostic, not the generic
+        # "unknown command combination" message, regardless of the specific extension.
+        for src in (
+            "!media Flag_of_Idaho.pdf",
+            "!media foo.tiff",
+            "!media bar.bmp",
+            "!media https://host/file.pdf?download=1",
+            "!media https://host/file.pdf#frag",
+        ):
+            with self.assertLogs(level="ERROR") as cm:
+                ast = self.tokenize(src)
+            self.assertSize(ast, 1)
+            self.assertToken(ast(0), "ErrorToken")
+            self.assertEqual(len(cm.output), 1)
+            self.assertIn("does not support", cm.output[0])
+
+
 class TestFloatReference(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats]
 
