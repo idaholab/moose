@@ -104,8 +104,10 @@ LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
 void
 LinearFVFluxKernel::initialSetup()
 {
-  const auto n_elems = static_cast<dof_id_type>(kokkosMesh().getNumLocalElements());
-  const auto max_sides = static_cast<dof_id_type>(_subproblem.mesh().getMaxSidesPerElem());
+  const auto n_elems =
+      libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(kokkosMesh().getNumLocalElements());
+  const auto max_sides =
+      libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(_subproblem.mesh().getMaxSidesPerElem());
   _bc_data.matrix_coeff.create(max_sides, n_elems);
   _bc_data.rhs_coeff.create(max_sides, n_elems);
   _bc_data.matrix_coeff = 0;

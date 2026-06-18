@@ -43,7 +43,6 @@ protected:
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     _mesh->buildMesh();
     _mesh->prepare(nullptr);
-    _mesh->update();
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
@@ -90,9 +89,9 @@ protected:
   // it requires a live executioner; calling system().init() directly is sufficient.
   void initSystems()
   {
-    for (unsigned int s = 0; s < _fe_problem->numNonlinearSystems(); ++s)
+    for (const auto s : make_range(_fe_problem->numNonlinearSystems()))
       _fe_problem->getNonlinearSystemBase(s).system().init();
-    for (unsigned int s = 0; s < _fe_problem->numLinearSystems(); ++s)
+    for (const auto s : make_range(_fe_problem->numLinearSystems()))
       _fe_problem->getLinearSystem(s).system().init();
     _fe_problem->getAuxiliarySystem().system().init();
   }
