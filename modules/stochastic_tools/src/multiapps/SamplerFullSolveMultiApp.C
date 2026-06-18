@@ -220,7 +220,10 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
         initialSetup();
     }
 
-    const auto row_data = _sampler.getSampleRow(i);
+    // With multiple processors per app, there are no local rows for non-root processors
+    std::vector<Real> row_data;
+    if (isRootProcessor())
+      row_data = _sampler.getSampleRow(i);
     execBatchTransfers(to_transfers,
                        i,
                        row_data,
