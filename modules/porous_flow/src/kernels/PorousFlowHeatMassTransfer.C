@@ -12,11 +12,13 @@
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatMassTransfer);
+registerMooseObject("PorousFlowApp", ADPorousFlowHeatMassTransfer);
 
+template <bool is_ad>
 InputParameters
-PorousFlowHeatMassTransfer::validParams()
+PorousFlowHeatMassTransferTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
 
   params.addClassDescription(
       "Calculate heat or mass transfer from a coupled variable v to the variable u. "
@@ -30,38 +32,49 @@ PorousFlowHeatMassTransfer::validParams()
   return params;
 }
 
-PorousFlowHeatMassTransfer::PorousFlowHeatMassTransfer(const InputParameters & parameters)
-  : Kernel(parameters),
+template <bool is_ad>
+PorousFlowHeatMassTransferTempl<is_ad>::PorousFlowHeatMassTransferTempl(
+    const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
     _v_var(coupled("v")),
-    _v(coupledValue("v")),
-    _coef_var(coupledValue("transfer_coefficient"))
+    _v(this->template coupledGenericValue<is_ad>("v")),
+    _coef_var(this->coupledValue("transfer_coefficient"))
 {
 }
 
-Real
-PorousFlowHeatMassTransfer::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowHeatMassTransferTempl<is_ad>::computeQpResidual()
 {
   return _coef_var[_qp] * (_u[_qp] - _v[_qp]) * _test[_i][_qp];
 }
 
+template <bool is_ad>
 Real
-PorousFlowHeatMassTransfer::computeQpJacobian()
+PorousFlowHeatMassTransferTempl<is_ad>::computeQpJacobian()
 {
   return jac(_var.number());
 }
 
+template <bool is_ad>
 Real
-PorousFlowHeatMassTransfer::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowHeatMassTransferTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   return jac(jvar);
 }
 
+template <bool is_ad>
 Real
-PorousFlowHeatMassTransfer::jac(unsigned int jvar) const
+PorousFlowHeatMassTransferTempl<is_ad>::jac(unsigned int jvar) const
 {
+  // Never called for the AD instantiation, which assembles the Jacobian from the AD residual.
+  mooseAssert(!is_ad, "jac should not be called for the AD instantiation");
   if (jvar == _var.number())
     return _coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   else if (jvar == _v_var)
     return -_coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }
+
+template class PorousFlowHeatMassTransferTempl<false>;
+template class PorousFlowHeatMassTransferTempl<true>;
