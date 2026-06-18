@@ -9,13 +9,9 @@
 
 #include "WCNSLinearFVConservativeSharpInterfaceFlowPhysics.h"
 
-#include "GeneralUserObject.h"
-#include "Executioner.h"
 #include "MooseUtils.h"
 #include "NS.h"
 #include "ConservativeSharpInterfaceRhieChowMassFlux.h"
-#include "RhieChowMassFlux.h"
-#include "TheWarehouse.h"
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp",
                                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics);
@@ -100,16 +96,6 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumTimeKernelParams(
   params.set<bool>("use_old_state_factor_for_rhs") = true;
 }
 
-void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setVelocityParams(InputParameters & params) const
-{
-  params.set<SolverVariableName>("u") = _velocity_names[0];
-  if (dimension() >= 2)
-    params.set<SolverVariableName>("v") = _velocity_names[1];
-  if (dimension() >= 3)
-    params.set<SolverVariableName>("w") = _velocity_names[2];
-}
-
 std::string
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::momentumOutletBCType(
     const BoundaryName & boundary, const MooseEnum & momentum_outlet_type) const
@@ -137,7 +123,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumOutletBCParams(
   if (!use_pressure_inlet_outlet_velocity)
     return;
 
-  setVelocityParams(params);
+  setVelocitySolverVariableParams(params);
   params.set<MooseEnum>("momentum_component") = MooseEnum("x=0 y=1 z=2", NS::directions[component]);
   params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
 }
@@ -158,7 +144,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setPressureOutletBCParams(
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
   params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
-  setVelocityParams(params);
+  setVelocitySolverVariableParams(params);
   params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
 }
 
@@ -207,69 +193,44 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddMomentumPressureKern
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateGeometryFunctorMaterial() const
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::rhieChowUserObjectAppliesToBlocks(
+    const RhieChowMassFlux & rc_obj) const
 {
-  return _create_geometry_functors &&
-         !getParam<MooseFunctorName>("volume_fraction_functor").empty();
+  const auto this_block_ids =
+      getSubdomainIDs(std::set<SubdomainName>(_blocks.begin(), _blocks.end()));
+  const auto & rc_block_ids = rc_obj.blockIDs();
+
+  return rc_block_ids.empty() || this_block_ids.empty() ||
+         rc_block_ids.count(Moose::ANY_BLOCK_ID) || this_block_ids.count(Moose::ANY_BLOCK_ID) ||
+         MooseUtils::setsIntersect(rc_block_ids, this_block_ids);
+}
+
+bool
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::isCompatibleRhieChowUserObject(
+    const UserObject & obj) const
+{
+  return dynamic_cast<const ConservativeSharpInterfaceRhieChowMassFlux *>(&obj);
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::checkIncompatibleRhieChowUserObject(
+    const RhieChowMassFlux & rc_obj) const
 {
-  mooseAssert(dimension(), "0-dimension not supported");
+  mooseError("Sharp-interface flow physics '",
+             name(),
+             "' requires a ConservativeSharpInterfaceRhieChowMassFlux on blocks ",
+             Moose::stringify(_blocks),
+             ", but found existing RhieChowMassFlux '",
+             rc_obj.name(),
+             "' on overlapping blocks. Remove the stock Rhie-Chow object or use the "
+             "sharp-interface flow physics as the owner of the segregated flow coupling.");
+}
 
-  std::vector<UserObject *> objs;
-  getProblem()
-      .theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
-      .queryInto(objs);
-
-  bool have_sharp_rc_uo = false;
-  const auto this_block_ids =
-      getSubdomainIDs(std::set<SubdomainName>(_blocks.begin(), _blocks.end()));
-  for (const auto & obj : objs)
-    if (dynamic_cast<RhieChowMassFlux *>(obj))
-    {
-      const auto rc_obj = dynamic_cast<RhieChowMassFlux *>(obj);
-      const auto & rc_block_ids = rc_obj->blockIDs();
-      const bool overlaps = rc_block_ids.empty() || this_block_ids.empty() ||
-                            rc_block_ids.count(Moose::ANY_BLOCK_ID) ||
-                            this_block_ids.count(Moose::ANY_BLOCK_ID) ||
-                            MooseUtils::setsIntersect(rc_block_ids, this_block_ids);
-      if (!overlaps)
-        continue;
-
-      if (dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(obj))
-        have_sharp_rc_uo = true;
-      else
-        mooseError("Sharp-interface flow physics '",
-                   name(),
-                   "' requires a ConservativeSharpInterfaceRhieChowMassFlux on blocks ",
-                   Moose::stringify(_blocks),
-                   ", but found existing RhieChowMassFlux '",
-                   rc_obj->name(),
-                   "' on overlapping blocks. Remove the stock Rhie-Chow object or use the "
-                   "sharp-interface flow physics as the owner of the segregated flow coupling.");
-    }
-
-  if (have_sharp_rc_uo)
-    return;
-
-  const std::string u_names[3] = {"u", "v", "w"};
-  const auto object_type = "ConservativeSharpInterfaceRhieChowMassFlux";
-  auto params = getFactory().getValidParams(object_type);
-  assignBlocks(params, _blocks);
-
-  for (unsigned int d = 0; d < dimension(); ++d)
-    params.set<VariableName>(u_names[d]) = _velocity_names[d];
-
-  params.set<VariableName>("pressure") = _pressure_name;
-  params.set<std::string>("p_diffusion_kernel") = prefix() + "p_diffusion";
-  params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("pressure_projection_method") =
-      getParam<MooseEnum>("pressure_projection_method");
+void
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setRhieChowUserObjectParams(
+    InputParameters & params) const
+{
+  WCNSLinearFVFlowPhysics::setRhieChowUserObjectParams(params);
   params.set<bool>("use_cached_momentum_predictor_operator") =
       getParam<bool>("use_cached_momentum_predictor_operator");
   params.set<bool>("split_momentum_predictor_operator") = true;
@@ -279,7 +240,13 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addRhieChowUserObjects()
     params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
   params.set<MooseFunctorName>("vof_rho_phi_functor") =
       getParam<MooseFunctorName>("vof_rho_phi_functor");
-  getProblem().addUserObject(object_type, rhieChowUOName(), params);
+}
+
+bool
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateGeometryFunctorMaterial() const
+{
+  return _create_geometry_functors &&
+         !getParam<MooseFunctorName>("volume_fraction_functor").empty();
 }
 
 void

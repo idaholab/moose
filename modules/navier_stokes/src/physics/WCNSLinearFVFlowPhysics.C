@@ -19,6 +19,11 @@ registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_k
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_functor_material");
 
+namespace
+{
+const std::string velocity_param_names[3] = {"u", "v", "w"};
+}
+
 InputParameters
 WCNSLinearFVFlowPhysics::validParams()
 {
@@ -233,9 +238,45 @@ WCNSLinearFVFlowPhysics::setMomentumTimeKernelParams(InputParameters & /* params
 }
 
 void
+WCNSLinearFVFlowPhysics::setVelocitySolverVariableParams(InputParameters & params) const
+{
+  for (unsigned int d = 0; d < dimension(); ++d)
+    params.set<SolverVariableName>(velocity_param_names[d]) = _velocity_names[d];
+}
+
+void
+WCNSLinearFVFlowPhysics::setVelocityVariableParams(InputParameters & params) const
+{
+  for (unsigned int d = 0; d < dimension(); ++d)
+    params.set<VariableName>(velocity_param_names[d]) = _velocity_names[d];
+}
+
+bool
+WCNSLinearFVFlowPhysics::rhieChowUserObjectAppliesToBlocks(const RhieChowMassFlux & rc_obj) const
+{
+  return rc_obj.blocks() == _blocks || rc_obj.blocks().empty() || _blocks.empty();
+}
+
+bool
+WCNSLinearFVFlowPhysics::isCompatibleRhieChowUserObject(const UserObject & obj) const
+{
+  return dynamic_cast<const RhieChowMassFlux *>(&obj);
+}
+
+void
+WCNSLinearFVFlowPhysics::checkIncompatibleRhieChowUserObject(
+    const RhieChowMassFlux & /* rc_obj */) const
+{
+}
+
+void
+WCNSLinearFVFlowPhysics::setRhieChowUserObjectParams(InputParameters & /* params */) const
+{
+}
+
+void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
-  const std::string u_names[3] = {"u", "v", "w"};
   const std::string kernel_type = momentumFluxKernelType();
   const std::string kernel_name = prefix() + "ins_momentum_flux_";
 
@@ -257,8 +298,7 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
   params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
 
-  for (unsigned int i = 0; i < dimension(); ++i)
-    params.set<SolverVariableName>(u_names[i]) = _velocity_names[i];
+  setVelocitySolverVariableParams(params);
 
   for (const auto d : make_range(dimension()))
   {
@@ -567,7 +607,6 @@ WCNSLinearFVFlowPhysics::addOutletBC()
 void
 WCNSLinearFVFlowPhysics::addWallsBC()
 {
-  const std::string u_names[3] = {"u", "v", "w"};
   bool has_symmetry_bc = false;
 
   for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
@@ -594,8 +633,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
         const std::string bc_type = "LinearFVVelocitySymmetryBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
-        for (unsigned int d = 0; d < dimension(); ++d)
-          params.set<SolverVariableName>(u_names[d]) = _velocity_names[d];
+        setVelocitySolverVariableParams(params);
 
         for (const auto d : make_range(dimension()))
         {
@@ -663,33 +701,35 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
       .condition<AttribSystem>("UserObject")
       .condition<AttribThread>(0)
       .queryInto(objs);
-  unsigned int num_rc_uo = 0;
+  bool have_compatible_rc_uo = false;
   for (const auto & obj : objs)
     if (dynamic_cast<RhieChowMassFlux *>(obj))
     {
       const auto rc_obj = dynamic_cast<RhieChowMassFlux *>(obj);
-      if (rc_obj->blocks() == _blocks)
-        num_rc_uo++;
-      else if (rc_obj->blocks().size() == 0 || _blocks.size() == 0)
-        num_rc_uo++;
+      if (!rhieChowUserObjectAppliesToBlocks(*rc_obj))
+        continue;
+
+      if (isCompatibleRhieChowUserObject(*obj))
+        have_compatible_rc_uo = true;
+      else
+        checkIncompatibleRhieChowUserObject(*rc_obj);
     }
 
-  if (num_rc_uo)
+  if (have_compatible_rc_uo)
     return;
 
-  const std::string u_names[3] = {"u", "v", "w"};
-  const auto object_type = "RhieChowMassFlux";
+  const auto object_type = rhieChowUserObjectType();
 
   auto params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
-  for (unsigned int d = 0; d < dimension(); ++d)
-    params.set<VariableName>(u_names[d]) = _velocity_names[d];
+  setVelocityVariableParams(params);
 
   params.set<VariableName>("pressure") = _pressure_name;
   params.set<std::string>("p_diffusion_kernel") = prefix() + "p_diffusion";
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("pressure_projection_method") =
       getParam<MooseEnum>("pressure_projection_method");
+  setRhieChowUserObjectParams(params);
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }

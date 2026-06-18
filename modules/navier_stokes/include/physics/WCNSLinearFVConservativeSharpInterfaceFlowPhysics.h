@@ -27,10 +27,8 @@ public:
 
 private:
   void addFunctorMaterials() override;
-  void addRhieChowUserObjects() override;
 
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
-  void setVelocityParams(InputParameters & params) const;
   bool shouldAddMomentumPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
   MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }
@@ -53,6 +51,14 @@ private:
   void addWallPressureBC(const BoundaryName & boundary,
                          const MooseEnum & momentum_wall_type) override;
   bool shouldAddWallPressureTwoTermExpansion() const override;
+  std::string rhieChowUserObjectType() const override
+  {
+    return "ConservativeSharpInterfaceRhieChowMassFlux";
+  }
+  bool rhieChowUserObjectAppliesToBlocks(const RhieChowMassFlux & rc_obj) const override;
+  bool isCompatibleRhieChowUserObject(const UserObject & obj) const override;
+  void checkIncompatibleRhieChowUserObject(const RhieChowMassFlux & rc_obj) const override;
+  void setRhieChowUserObjectParams(InputParameters & params) const override;
   bool shouldCreateGeometryFunctorMaterial() const;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;

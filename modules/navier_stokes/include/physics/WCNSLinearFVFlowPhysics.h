@@ -11,6 +11,9 @@
 #include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVTurbulencePhysics.h"
 
+class RhieChowMassFlux;
+class UserObject;
+
 /**
  * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
  * using the linear finite volume discretization.
@@ -66,6 +69,13 @@ protected:
   virtual std::string momentumTimeKernelType() const { return "LinearFVTimeDerivative"; }
   virtual std::string momentumTimeDensityParameterName() const { return "factor"; }
   virtual void setMomentumTimeKernelParams(InputParameters & params) const;
+  void setVelocitySolverVariableParams(InputParameters & params) const;
+  void setVelocityVariableParams(InputParameters & params) const;
+  virtual std::string rhieChowUserObjectType() const { return "RhieChowMassFlux"; }
+  virtual bool rhieChowUserObjectAppliesToBlocks(const RhieChowMassFlux & rc_obj) const;
+  virtual bool isCompatibleRhieChowUserObject(const UserObject & obj) const;
+  virtual void checkIncompatibleRhieChowUserObject(const RhieChowMassFlux & rc_obj) const;
+  virtual void setRhieChowUserObjectParams(InputParameters & params) const;
   virtual std::string momentumFluxKernelType() const { return "LinearWCNSFVMomentumFlux"; }
   virtual MooseFunctorName momentumFluxMassFluxFunctorName() const { return ""; }
   virtual bool momentumFluxMassFluxFunctorIsIntegrated() const { return false; }
