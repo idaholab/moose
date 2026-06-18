@@ -171,6 +171,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [fflux01_AD]
+    type = 'PetscJacobianTester'
+    input = 'fflux01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = fflux01
+    requirement = 'The system shall compute all Jacobian entries via AD for the fluid flux, with 1-phase, 1-component, unsaturated, constant viscosity, constant permeability, constant fluid-bulk modulus, Corey-relative permeability.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [fflux02]
     type = 'PetscJacobianTester'
     input = 'fflux02.i'
@@ -340,6 +351,17 @@
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md PorousFlowFullySaturatedAdvectiveFlux.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [fflux02_fully_saturated_AD]
+    type = 'PetscJacobianTester'
+    input = 'fflux02_fully_saturated_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = fflux02_fully_saturated
+    requirement = 'The system shall compute all Jacobian entries via AD for the fluid flux, with 1-phase, 3-components, constant viscosity, constant permeability, constant fluid-bulk modulus, fully-saturated formulation with strong advection.'
+    issues = '#16841 #33122'
+    design = 'PorousFlowFullySaturated.md PorousFlowFullySaturatedAdvectiveFlux.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [eff_stress01]
     type = 'PetscJacobianTester'
     input = 'eff_stress01.i'
@@ -348,6 +370,17 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the effective stress, with 2-phase, 2-component, PP formulation.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [eff_stress01_AD]
+    type = 'PetscJacobianTester'
+    input = 'eff_stress01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = eff_stress01
+    requirement = 'The system shall compute all Jacobian entries via AD for the effective stress, with 2-phase, 2-component, PP formulation.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
   [eff_stress02]
@@ -492,6 +525,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [hcond01_AD]
+    type = 'PetscJacobianTester'
+    input = 'hcond01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = hcond01
+    requirement = 'The system shall compute all Jacobian entries via AD for the heat conduction, with 0 phases.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [hcond02]
     type = 'PetscJacobianTester'
     input = 'hcond02.i'
@@ -586,6 +630,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [heat_advection01_AD]
+    type = 'PetscJacobianTester'
+    input = 'heat_advection01_AD.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = heat_advection01
+    requirement = 'The system shall compute all Jacobian entries via AD for the heat advection, with 1 phase, unsaturated.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [heat_advection02]
     type = 'PetscJacobianTester'
     input = 'heat_advection02.i'
@@ -627,6 +682,17 @@
     issues = '#16841'
     design = 'PorousFlowFullySaturatedUpwindHeatAdvection.md porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [heat_advection01_fullsat_upwind_AD]
+    type = 'PetscJacobianTester'
+    input = 'heat_advection01_fullsat_upwind_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = heat_advection01_fullsat_upwind
+    requirement = 'The system shall compute all Jacobian entries via AD for the heat advection, with 1 phase, fully-saturated, fully-upwinded formulation.'
+    issues = '#16841 #33122'
+    design = 'PorousFlowFullySaturatedUpwindHeatAdvection.md porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
 
   [diff01]
     type = 'PetscJacobianTester'
@@ -666,6 +732,17 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the transverse dispersion.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [disp01_AD]
+    type = 'PetscJacobianTester'
+    input = 'disp01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = disp01
+    requirement = 'The system shall compute all Jacobian entries via AD for the dispersive flux, with 1 phase, 2 components, fully saturated.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
   [disp02]
@@ -792,6 +869,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [desorped_mass01_AD]
+    type = 'PetscJacobianTester'
+    input = 'desorped_mass01_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = desorped_mass01
+    requirement = 'The system shall compute all Jacobian entries via AD for the desorbed mass time derivative, with 1 phase, constant porosity.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [desorped_mass_vol_exp01]
     type = 'PetscJacobianTester'
     input = 'desorped_mass_vol_exp01.i'
@@ -905,6 +993,27 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the exponential decay.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [exponential_decay_AD]
+    type = 'PetscJacobianTester'
+    input = 'exponential_decay_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = exponential_decay
+    requirement = 'The system shall compute all Jacobian entries via AD for the exponential decay.'
+    issues = '#6845 #33122'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [heat_mass_transfer_AD]
+    type = 'PetscJacobianTester'
+    input = 'heat_mass_transfer_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    requirement = 'The system shall compute all Jacobian entries via AD for the heat or mass transfer between two coupled variables.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
   [radioactive_decay01_AD]
@@ -1127,6 +1236,17 @@
     cli_args = 'Executioner/num_steps=1'
     requirement = 'The system shall compute all Jacobian entries of physics kernels for the basic advection with a Darcy velocity vector in the 2-phase PP case.'
     issues = '#6845'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
+  [basic_advection_AD]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection_AD.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
+    prereq = basic_advection2
+    requirement = 'The system shall compute all Jacobian entries via AD for the basic advection with a Darcy velocity vector in the fully-saturated, constant permeability, constant viscosity case.'
+    issues = '#6845 #33122'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
   [esbc01]
