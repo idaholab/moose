@@ -40,9 +40,13 @@ ActiveLearningMonteCarloSampler::validParams()
 ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _flag_sample(getReporterValue<std::vector<bool>>("flag_sample")),
+    _is_sampling_completed(declareRecoverableData<bool>("is_sampling_completed", false)),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _num_batch(getParam<dof_id_type>("num_batch")),
-    _num_samples(getParam<int>("num_samples"))
+    _num_samples(getParam<int>("num_samples")),
+    _retraining_steps(declareRecoverableData<int>("retraining_steps", 0)),
+    _inputs_sto(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_sto")),
+    _inputs_gp_fails(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_gp_fails"))
 {
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
     _distributions.push_back(&getDistributionByName(name));
