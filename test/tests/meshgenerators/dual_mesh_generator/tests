@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'dual_mesh_generator.i'
     cli_args = '--mesh-only'
-    exodiff = 'cartesian_dual_in.e'
+    exodiff = 'dual_mesh_generator_in.e'
     mesh_mode = 'REPLICATED'
     recover = false
 

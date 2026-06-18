@@ -10,6 +10,7 @@
 #include "DualMeshGenerator.h"
 #include "Conversion.h"
 #include "CastUniquePointer.h"
+#include "MathUtils.h"
 #include "MooseMeshUtils.h"
 #include "libmesh/node_elem.h"
 #include "libmesh/poly2tri_triangulator.h"
@@ -50,47 +51,6 @@ DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
     _boundary_node_angular_tol(getParam<Real>("boundary_node_angular_tol")),
     _dual_mesh_type(getParam<MooseEnum>("dual_mesh_type"))
 {
-}
-
-// Circumcenter method
-Point
-DualMeshGenerator::circumcenter(const Elem * elem)
-{
-  const unsigned int n = elem->n_vertices();
-  libmesh_assert_greater(n, 2);
-
-  const Point & p0 = elem->point(0);
-
-  Real A11 = 0.;
-  Real A12 = 0.;
-  Real A22 = 0.;
-
-  Real b1 = 0.;
-  Real b2 = 0.;
-
-  for (unsigned int i = 1; i < n; ++i)
-  {
-    const Point & pi = elem->point(i);
-
-    const Real dx = pi(0) - p0(0);
-    const Real dy = pi(1) - p0(1);
-
-    const Real rhs = 0.5 * (pi(0) * pi(0) + pi(1) * pi(1) - p0(0) * p0(0) - p0(1) * p0(1));
-
-    A11 += dx * dx;
-    A12 += dx * dy;
-    A22 += dy * dy;
-
-    b1 += dx * rhs;
-    b2 += dy * rhs;
-  }
-
-  const Real det = A11 * A22 - A12 * A12;
-
-  const Real cx = (A22 * b1 - A12 * b2) / det;
-  const Real cy = (A11 * b2 - A12 * b1) / det;
-
-  return Point(cx, cy, 0.0);
 }
 
 // True only when two elements share a full edge.
@@ -419,7 +379,8 @@ DualMeshGenerator::generate()
 
       const dof_id_type center_id = dual_centers.size();
 
-      dual_centers.push_back(circumcenter(tri_elem));
+      dual_centers.push_back(
+          MathUtils::circumcenter2D(tri_elem->point(0), tri_elem->point(1), tri_elem->point(2)));
       source_elem_to_center_id[tri_elem->id()] = center_id;
 
       for (const auto n : make_range(tri_elem->n_nodes()))
