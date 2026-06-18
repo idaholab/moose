@@ -884,9 +884,9 @@ public:
   ///@}
 
   /**
-   * Get the Kokkos SystemBase of a specified number
+   * Get the Kokkos System of a specified number
    * @param sys_num The system number
-   * @returns The Kokkos SystemBase
+   * @returns The Kokkos System
    */
   ///@{
   Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num);

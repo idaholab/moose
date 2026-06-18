@@ -20,6 +20,9 @@
 namespace Moose::Kokkos
 {
 
+/**
+ * Base class for Kokkos linear finite volume kernels that contribute to the linear system
+ */
 class LinearFVKernel : public LinearSystemContributionObject,
                        public BlockRestrictable,
                        public NonADFunctorInterface
@@ -30,23 +33,37 @@ public:
   LinearFVKernel(const InputParameters & parameters);
   LinearFVKernel(const LinearFVKernel & object);
 
+  /// Tag dispatch type for the right-hand side computation loop
   struct RightHandSideLoop
   {
   };
+  /// Tag dispatch type for the matrix computation loop
   struct MatrixLoop
   {
   };
 
+  /**
+   * Compute the right-hand side contributions of this kernel
+   */
   virtual void computeRightHandSide() = 0;
+  /**
+   * Compute the matrix contributions of this kernel
+   */
   virtual void computeMatrix() = 0;
 
 protected:
+  /// The Kokkos variable this kernel acts on
   Variable _kokkos_var;
 
+  /// Dispatcher for the right-hand side computation loop
   std::unique_ptr<DispatcherBase> _rhs_dispatcher;
+  /// Dispatcher for the matrix computation loop
   std::unique_ptr<DispatcherBase> _matrix_dispatcher;
 };
 
+/**
+ * Base class for Kokkos linear finite volume kernels that contribute on elements (volumetric terms)
+ */
 class LinearFVElementalKernel : public LinearFVKernel
 {
 public:
@@ -58,10 +75,20 @@ public:
   virtual void computeRightHandSide() override;
   virtual void computeMatrix() override;
 
+  /**
+   * Right-hand side dispatch loop body; accumulates the elemental RHS contribution
+   * @param tid The thread ID of the current element
+   * @param kernel The concrete kernel object
+   */
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(RightHandSideLoop, const ThreadID tid, const Derived & kernel) const;
 
+  /**
+   * Matrix dispatch loop body; accumulates the elemental matrix contribution
+   * @param tid The thread ID of the current element
+   * @param kernel The concrete kernel object
+   */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const;
 };
@@ -94,6 +121,11 @@ LinearFVElementalKernel::operator()(MatrixLoop, const ThreadID tid, const Derive
                                 sys.getElemGlobalDofIndex(elem, 0, _kokkos_var.var()));
 }
 
+/**
+ * Base class for Kokkos linear finite volume kernels that contribute on faces (flux terms). On
+ * boundary faces the contribution comes from the boundary face data populated by the boundary
+ * conditions acting on this kernel's variable.
+ */
 class LinearFVFluxKernel : public LinearFVKernel, public FaceArgProducerInterface
 {
 public:
@@ -107,20 +139,36 @@ public:
   virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
   virtual void initialSetup() override;
 
+  /// Per-boundary-face contributions, populated by the boundary conditions and consumed by the kernel
   struct BoundaryFaceData
   {
+    /// Matrix contribution indexed by (side, element)
     Array2D<Real> matrix_coeff;
+    /// Right-hand side contribution indexed by (side, element)
     Array2D<Real> rhs_coeff;
   };
 
+  /**
+   * Right-hand side dispatch loop body; accumulates the face RHS contribution (interior faces from
+   * the kernel, boundary faces from the precomputed boundary face data)
+   * @param tid The thread ID of the current element side
+   * @param kernel The concrete kernel object
+   */
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(RightHandSideLoop, const ThreadID tid, const Derived & kernel) const;
 
+  /**
+   * Matrix dispatch loop body; accumulates the face matrix contribution (interior faces from the
+   * kernel, boundary faces from the precomputed boundary face data)
+   * @param tid The thread ID of the current element side
+   * @param kernel The concrete kernel object
+   */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const;
 
 protected:
+  /// Boundary face contributions shared with the boundary conditions acting on this kernel's variable
   BoundaryFaceData _bc_data;
 };
 

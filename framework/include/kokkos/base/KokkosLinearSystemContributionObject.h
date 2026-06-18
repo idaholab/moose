@@ -32,6 +32,11 @@ class FEProblemBase;
 namespace Moose::Kokkos
 {
 
+/**
+ * Base class for Kokkos objects that contribute to a linear system, i.e. the linear finite volume
+ * kernels and boundary conditions. It provides the device-side helpers for accumulating into the
+ * tagged vectors and matrices.
+ */
 class LinearSystemContributionObject : public MooseObject,
                                        public SetupInterface,
                                        public FunctionInterface,
@@ -56,20 +61,26 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedMatrix(Real value, dof_id_type row, dof_id_type col) const;
 
 protected:
+  /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
-  /**
-   * Kokkos variable
-   */
+  /// Kokkos variable
   Variable _kokkos_var;
 
+  /// Vector (residual) tags this object contributes to
   Array<TagID> _vector_tags;
+  /// Matrix tags this object contributes to
   Array<TagID> _matrix_tags;
 
+  /// Current time
   Scalar<Real> _t;
+  /// Old (previous time step) time
   Scalar<const Real> _t_old;
+  /// Current time step number
   Scalar<int> _t_step;
+  /// Current time step size
   Scalar<Real> _dt;
+  /// Previous time step size
   Scalar<Real> _dt_old;
 };
 

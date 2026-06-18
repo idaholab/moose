@@ -12,6 +12,11 @@
 #include "KokkosLinearFVBoundaryCondition.h"
 #include "KokkosParsedFunction.h"
 
+/**
+ * Provides Dirichlet boundary values for Kokkos linear finite volume advection-diffusion kernels.
+ * The boundary value is supplied through a Kokkos-compatible functor. It is the Kokkos analog of
+ * LinearFVAdvectionDiffusionFunctorDirichletBC.
+ */
 class KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
   : public Moose::Kokkos::LinearFVBoundaryCondition
 {

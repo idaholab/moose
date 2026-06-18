@@ -12,6 +12,10 @@
 #include "KokkosLinearFVKernel.h"
 #include "KokkosParsedFunction.h"
 
+/**
+ * Kokkos linear finite volume flux kernel implementing the diffusion term. It is the Kokkos analog
+ * of LinearFVDiffusion.
+ */
 class KokkosLinearFVDiffusion : public Moose::Kokkos::LinearFVFluxKernel
 {
 public:
@@ -45,7 +49,8 @@ template <typename Derived>
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const FVDatum & datum) const
 {
-  return datum.hasNeighbor() ? -faceDiffusivity(datum) : 0;
+  KOKKOS_ASSERT(datum.hasNeighbor());
+  return -faceDiffusivity(datum);
 }
 
 template <typename Derived>

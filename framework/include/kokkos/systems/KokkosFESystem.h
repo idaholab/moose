@@ -31,14 +31,14 @@ public:
    * Constructor for standalone use (pure FE simulations)
    * @param system The associated MOOSE system
    */
-  FESystem(::SystemBase & system);
+  FESystem(SystemBase & system);
 
   /**
    * Constructor for mixed FE+FV simulations, sharing device memory with an existing System
    * @param base The existing Kokkos System whose device memory to share
    * @param system The associated MOOSE system
    */
-  FESystem(System & base, ::SystemBase & system);
+  FESystem(System & base, SystemBase & system);
 
 #ifdef MOOSE_KOKKOS_SCOPE
   ///@}

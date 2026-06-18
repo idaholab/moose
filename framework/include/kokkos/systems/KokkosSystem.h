@@ -34,7 +34,7 @@ public:
    * Constructor
    * @param system The associated MOOSE system
    */
-  System(::SystemBase & system);
+  System(SystemBase & system);
 
   /**
    * Copy constructor - shallow-copies all Array<> members so that device memory is shared.
@@ -126,8 +126,8 @@ public:
    * @returns The MOOSE system
    */
   ///@{
-  ::SystemBase & getSystem() { return _system; }
-  const ::SystemBase & getSystem() const { return _system; }
+  SystemBase & getSystem() { return _system; }
+  const SystemBase & getSystem() const { return _system; }
 
   ///@}
   /**
@@ -278,7 +278,7 @@ protected:
   /**
    * Reference of the MOOSE system
    */
-  ::SystemBase & _system;
+  SystemBase & _system;
 
   /**
    * Reference of the MOOSE mesh

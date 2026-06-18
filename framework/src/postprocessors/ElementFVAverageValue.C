@@ -18,7 +18,7 @@ ElementFVAverageValue::validParams()
   params.addRequiredParam<MooseFunctorName>("functor",
                                             "The name of the functor that this object operates on");
   params.addClassDescription(
-      "Computes a volume integral of the specified functor. This functor will take element spatial "
+      "Computes a volume average of the specified functor. This functor will take element spatial "
       "arguments and does not use quadrature points");
   return params;
 }

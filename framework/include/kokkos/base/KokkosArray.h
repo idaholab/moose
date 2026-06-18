@@ -173,9 +173,15 @@ public:
   unsigned int useCount() const { return _counter.use_count(); }
 
   /**
-   * Get whether slot i has been initialized (via emplace or new[])
+   * Get whether slot i is tracked as constructed
+   *
+   * For an array created with initialization (initialize = true) every slot is default-constructed
+   * at allocation, so all slots are reported as constructed. For an array created without
+   * initialization (initialize = false) only slots constructed through emplace() are tracked;
+   * placement-new directly into the storage is not recorded here, so such a slot is reported as not
+   * constructed and its destructor is skipped on free (a leak for types that own resources).
    * @param i The slot index
-   * @returns true if the slot has been constructed
+   * @returns true if the slot is tracked as constructed
    */
   bool isSlotConstructed(index_type i) const;
 

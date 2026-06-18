@@ -67,10 +67,22 @@ public:
   virtual void reinit() override;
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Add a Kokkos linear finite volume kernel to this system
+   * @param kernel_name The type of the kernel to add
+   * @param name The name of the kernel to add
+   * @param parameters The input parameters of the kernel
+   */
   void addKokkosKernel(const std::string & kernel_name,
                        const std::string & name,
                        InputParameters & parameters);
 
+  /**
+   * Add a Kokkos linear finite volume boundary condition to this system
+   * @param bc_name The type of the boundary condition to add
+   * @param name The name of the boundary condition to add
+   * @param parameters The input parameters of the boundary condition
+   */
   void addKokkosBoundaryCondition(const std::string & bc_name,
                                   const std::string & name,
                                   InputParameters & parameters);
@@ -172,8 +184,16 @@ protected:
                                    const bool compute_gradients = true);
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Perform the initial setup of the Kokkos linear finite volume kernels and boundary conditions
+   */
   void initialSetupKokkosLinearFV();
 
+  /**
+   * Assemble the Kokkos contributions to the linear system for the given tags
+   * @param vector_tags The vector (right-hand side) tags to assemble
+   * @param matrix_tags The matrix tags to assemble
+   */
   void computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
                                  const std::set<TagID> & matrix_tags);
 #endif

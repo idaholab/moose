@@ -12,6 +12,10 @@
 #include "KokkosLinearFVKernel.h"
 #include "KokkosParsedFunction.h"
 
+/**
+ * Kokkos linear finite volume elemental kernel that adds a scaled volumetric source to the
+ * right-hand side. It is the Kokkos analog of LinearFVSource.
+ */
 class KokkosLinearFVSource : public Moose::Kokkos::LinearFVElementalKernel
 {
 public:
