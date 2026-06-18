@@ -10,7 +10,7 @@ vacuum_permeability = 1.0
 []
 
 [Mesh]
-    type = MFEMMesh
+    type = MFEMFileMesh
     file = ../mesh/split_embedded_concentric_torus.e
 []
 

@@ -1,7 +1,7 @@
 # MFEM diffusion problem sampled with MFEMLineValueSampler.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/mug.e
 []
 

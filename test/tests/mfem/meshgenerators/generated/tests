@@ -1,0 +1,31 @@
+[Tests]
+  design = 'MFEMGeneratedMeshGenerator.md MFEMElementAverageValue.md'
+  issues = '#32827'
+  [test]
+    requirement = 'The system shall be able to natively generate an MFEM mesh that is a'
+    [1d]
+      type = CSVDiff
+      csvdiff = 'oned.csv'
+      input = 'test.i'
+      detail = 'one dimensional line,'
+      cli_args = 'Outputs/out/file_base=oned'
+      capabilities = 'mfem'
+    []
+    [2d]
+      type = CSVDiff
+      csvdiff = 'twod.csv'
+      input = 'test.i'
+      detail = 'two dimensional rectangle, or'
+      cli_args = 'Outputs/out/file_base=twod Mesh/gen/dim=2 Mesh/gen/ny=5'
+      capabilities = 'mfem'
+    []
+    [3d]
+      type = CSVDiff
+      csvdiff = 'threed.csv'
+      input = 'test.i'
+      detail = 'three dimensional box.'
+      cli_args = 'Outputs/out/file_base=threed Mesh/gen/dim=3 Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2 Mesh/gen/elem_type=HEX'
+      capabilities = 'mfem'
+    []
+  []
+[]
