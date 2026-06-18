@@ -45,8 +45,6 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::PorousFlowMatrixInternalEnergyTempl(
                         : &declareProperty<std::vector<Real>>(
                               "dPorousFlow_matrix_internal_energy_nodal_dvar"))
 {
-  if (!_dictator.isFV() && !_nodal_material)
-    mooseError("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");
 }
 
 template <bool is_ad>
