@@ -1,7 +1,5 @@
 # Boltzmann constant in J/K
 k_B = 1.380649e-23
-mass = 2.0
-temperature = '${fparse mass / k_B }'
 
 [StochasticTools]
 []
@@ -9,8 +7,12 @@ temperature = '${fparse mass / k_B }'
 [Distributions]
   [distribution]
     type = Maxwellian
-    mass = ${mass}
-    temperature = ${temperature}
+    mass = 2.0
+    # this combination of mass and temperature
+    # result in a distribution equivalent to a
+    # normal distribution with a mean of 0 and
+    # a standard deviation of 1
+    temperature = ${fparse 2.0 / k_B}
   []
 []
 

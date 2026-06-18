@@ -10,11 +10,14 @@
 #pragma once
 
 #include "Distribution.h"
-#include "NormalBase.h"
+
+/// Boltzmann constant with units of J/K
+constexpr Real k_B = 1.380649e-23;
+
 /**
  * A class used to generate a normal distribution
  */
-class Maxwellian : public Distribution, public NormalBase
+class Maxwellian : public Distribution
 {
 public:
   static InputParameters validParams();
@@ -37,4 +40,6 @@ protected:
    * @returns the standard deviation of the equivalent normal distribution
    */
   static Real standardDeviation(const Real mass, const Real temperature);
+  /// the standard deviation for the equivalent normal distribution
+  const Real _standard_deviation;
 };

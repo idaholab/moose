@@ -8,11 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Maxwellian.h"
-#include "NormalBase.h"
+#include "Normal.h"
 registerMooseObject("StochasticToolsApp", Maxwellian);
-
-/// boltzman constant with units of J/K
-constexpr Real k_B = 1.380649e-23;
 
 InputParameters
 Maxwellian::validParams()
@@ -28,8 +25,9 @@ Maxwellian::validParams()
 
 Maxwellian::Maxwellian(const InputParameters & parameters)
   : Distribution(parameters),
-    NormalBase(0.0,
-               Maxwellian::standardDeviation(getParam<Real>("mass"), getParam<Real>("temperature")))
+    _standard_deviation(
+        Maxwellian::standardDeviation(getParam<Real>("mass"), getParam<Real>("temperature")))
+
 {
 }
 
@@ -42,35 +40,35 @@ Maxwellian::standardDeviation(const Real mass, const Real temperature)
 Real
 Maxwellian::pdf(const Real & x, const Real & mass, const Real & temperature)
 {
-  return NormalBase::pdf(x, 0, standardDeviation(mass, temperature));
+  return Normal::pdf(x, 0, standardDeviation(mass, temperature));
 }
 
 Real
 Maxwellian::cdf(const Real & x, const Real & mass, const Real & temperature)
 {
-  return NormalBase::cdf(x, 0, standardDeviation(mass, temperature));
+  return Normal::cdf(x, 0, standardDeviation(mass, temperature));
 }
 
 Real
 Maxwellian::quantile(const Real & p, const Real & mass, const Real & temperature)
 {
-  return NormalBase::quantile(p, 0, standardDeviation(mass, temperature));
+  return Normal::quantile(p, 0, standardDeviation(mass, temperature));
 }
 
 Real
 Maxwellian::pdf(const Real & x) const
 {
-  return NormalBase::pdf(x);
+  return Normal::pdf(x, 0, _standard_deviation);
 }
 
 Real
 Maxwellian::cdf(const Real & x) const
 {
-  return NormalBase::cdf(x);
+  return Normal::cdf(x, 0, _standard_deviation);
 }
 
 Real
 Maxwellian::quantile(const Real & p) const
 {
-  return NormalBase::quantile(p);
+  return Normal::quantile(p, 0, _standard_deviation);
 }
