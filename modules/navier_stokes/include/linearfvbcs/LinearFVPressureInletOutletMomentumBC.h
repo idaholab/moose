@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVInletOutletScalarBC.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 
 class ElemInfo;
@@ -30,13 +31,9 @@ public:
 protected:
   Real computeBackflowBoundaryValue() const override;
   Real computeBackflowBoundaryValueMatrixContribution() const override;
-  RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   RealVectorValue outwardUnitNormal() const;
 
   const unsigned int _dim;
-  const MooseLinearVariableFVReal * const _u_var;
-  const MooseLinearVariableFVReal * const _v_var;
-  const MooseLinearVariableFVReal * const _w_var;
-  std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
+  const NS::LinearFVVelocityVariableArray _velocity_vars;
   const unsigned int _index;
 };

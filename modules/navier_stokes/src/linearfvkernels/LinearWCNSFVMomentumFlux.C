@@ -9,6 +9,7 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
@@ -22,9 +23,7 @@ LinearWCNSFVMomentumFlux::validParams()
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of the "
                              "stress and advection terms of the momentum equation.");
-  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
-  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
-  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
+  NS::addLinearFVVelocityVariableParams(params);
   params.addRequiredParam<UserObjectName>(
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
@@ -71,7 +70,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _stress_matrix_contribution(0.0),
     _stress_rhs_contribution(0.0),
     _index(getParam<MooseEnum>("momentum_component")),
-    _velocity_vars{nullptr, nullptr, nullptr},
+    _velocity_vars(NS::getLinearFVVelocityVariables(*this, _fe_problem, _tid, _dim)),
     _coord_type(getBlockCoordSystem()),
     _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord())
 {
@@ -81,39 +80,6 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _var.computeCellGradients();
 
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
-
-
-  auto get_velocity_var = [&](const std::string & param_name)
-  {
-    return dynamic_cast<const MooseLinearVariableFVReal *>(
-        &_fe_problem.getVariable(_tid, getParam<SolverVariableName>(param_name)));
-  };
-
-  _velocity_vars[0] = get_velocity_var("u");
-  if (!_velocity_vars[0])
-    paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
-
-  if (_dim >= 2)
-  {
-    if (!params.isParamValid("v"))
-      paramError("v", "In two or more dimensions, the v velocity must be supplied.");
-    _velocity_vars[1] = get_velocity_var("v");
-    if (!_velocity_vars[1])
-      paramError("v",
-                 "In two or more dimensions, the v velocity must be supplied and it must be a "
-                 "MooseLinearVariableFVReal.");
-  }
-
-  if (_dim >= 3)
-  {
-    if (!params.isParamValid("w"))
-      paramError("w", "In three-dimensions, the w velocity must be supplied.");
-    _velocity_vars[2] = get_velocity_var("w");
-    if (!_velocity_vars[2])
-      paramError("w",
-                 "In three-dimensions, the w velocity must be supplied and it must be a "
-                 "MooseLinearVariableFVReal.");
-  }
 }
 
 Real
@@ -330,18 +296,16 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
   {
     // We support internal boundaries as well. In that case we have to decide on which side
     // of the boundary we are on.
-    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
+    const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
     // Unit vector to the boundary. Unfortunately, we have to recompute it because the value
     // stored in the face info is only correct for external boundaries
-    const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
+    const auto e_Cf = _current_face_info->faceCentroid() - elem_info.centroid();
     const auto correction_vector =
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
     const auto state_arg = determineState();
-    grad_contrib += _mu(face_arg, state_arg) * _var.gradSln(*elem_info, state_arg) *
+    grad_contrib += _mu(face_arg, state_arg) * _var.gradSln(elem_info, state_arg) *
                     _boundary_normal_factor * correction_vector;
   }
 
@@ -349,9 +313,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
   {
     // We might be on a face which is an internal boundary so we want to make sure we
     // get the gradient from the right side.
-    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
+    const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
 
     const auto state_arg = determineState();
 
@@ -361,7 +323,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     for (const auto dir : make_range(_dim))
     {
-      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info, state_arg);
+      grad_elem[dir] = velocityVar(dir).gradSln(elem_info, state_arg);
       trace_elem += grad_elem[dir](dir);
     }
 
@@ -369,7 +331,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     {
       const auto & radial_var = velocityVar(_rz_radial_coord);
       const Real elem_value =
-          radial_var.getElemValue(*elem_info, state_arg) / elem_info->centroid()(_rz_radial_coord);
+          radial_var.getElemValue(elem_info, state_arg) / elem_info.centroid()(_rz_radial_coord);
       trace_elem += elem_value;
     }
 

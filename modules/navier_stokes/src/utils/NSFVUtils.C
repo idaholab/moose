@@ -16,6 +16,8 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h"
+#include "FEProblemBase.h"
+#include "ElemInfo.h"
 
 namespace Moose
 {
@@ -112,6 +114,101 @@ addFVFaceInterpolationMethod(FEProblemBase & problem,
 
   InputParameters params = factory.getValidParams(method_type);
   problem.addFVInterpolationMethod(method_type, method_name, params);
+}
+
+void
+addLinearFVVelocityVariableParams(InputParameters & params)
+{
+  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
+  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
+  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
+}
+
+LinearFVVelocityVariableArray
+getLinearFVVelocityVariables(const MooseObject & obj,
+                             FEProblemBase & problem,
+                             const THREAD_ID tid,
+                             const unsigned int dim)
+{
+  LinearFVVelocityVariableArray velocity_vars{nullptr, nullptr, nullptr};
+
+  auto get_velocity_var = [&](const std::string & param_name)
+  {
+    return dynamic_cast<const MooseLinearVariableFVReal *>(
+        &problem.getVariable(tid, obj.getParam<SolverVariableName>(param_name)));
+  };
+
+  velocity_vars[0] = get_velocity_var("u");
+  if (!velocity_vars[0])
+    obj.paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
+
+  if (dim >= 2)
+  {
+    if (!obj.isParamValid("v"))
+      obj.paramError("v", "In two or more dimensions, the v velocity must be supplied.");
+    velocity_vars[1] = get_velocity_var("v");
+    if (!velocity_vars[1])
+      obj.paramError("v",
+                     "In two or more dimensions, the v velocity must be supplied and it must be a "
+                     "MooseLinearVariableFVReal.");
+  }
+
+  if (dim >= 3)
+  {
+    if (!obj.isParamValid("w"))
+      obj.paramError("w", "In three dimensions, the w velocity must be supplied.");
+    velocity_vars[2] = get_velocity_var("w");
+    if (!velocity_vars[2])
+      obj.paramError("w",
+                     "In three dimensions, the w velocity must be supplied and it must be a "
+                     "MooseLinearVariableFVReal.");
+  }
+
+  return velocity_vars;
+}
+
+RealVectorValue
+linearFVCellVelocity(const LinearFVVelocityVariableArray & velocity_vars,
+                     const unsigned int dim,
+                     const ElemInfo & elem_info,
+                     const Moose::StateArg & state)
+{
+  RealVectorValue velocity;
+  for (const auto dim_i : make_range(dim))
+    velocity(dim_i) = velocity_vars[dim_i]->getElemValue(elem_info, state);
+
+  return velocity;
+}
+
+const ElemInfo &
+linearFVBoundaryElemInfo(const FaceInfo & fi, const FaceInfo::VarFaceNeighbors face_type)
+{
+  return face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? *fi.neighborInfo() : *fi.elemInfo();
+}
+
+const ElemInfo &
+linearFVFaceSideElemInfo(const FaceInfo & fi, const FaceInfo::VarFaceNeighbors face_type)
+{
+  return face_type == FaceInfo::VarFaceNeighbors::ELEM ? *fi.elemInfo() : *fi.neighborInfo();
+}
+
+Real
+linearFVBoundaryNormalMultiplier(const FaceInfo::VarFaceNeighbors face_type)
+{
+  return face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
+}
+
+RealVectorValue
+linearFVOutwardUnitNormal(const FaceInfo & fi, const FaceInfo::VarFaceNeighbors face_type)
+{
+  auto normal = fi.normal();
+  normal *= linearFVBoundaryNormalMultiplier(face_type);
+
+  const Real normal_magnitude = normal.norm();
+  if (normal_magnitude <= libMesh::TOLERANCE)
+    return RealVectorValue();
+
+  return normal / normal_magnitude;
 }
 
 template <class T>

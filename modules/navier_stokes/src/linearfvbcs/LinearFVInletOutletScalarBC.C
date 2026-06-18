@@ -9,6 +9,8 @@
 
 #include "LinearFVInletOutletScalarBC.h"
 
+#include "NSFVUtils.h"
+
 registerMooseObject("NavierStokesApp", LinearFVInletOutletScalarBC);
 
 InputParameters
@@ -40,9 +42,7 @@ LinearFVInletOutletScalarBC::LinearFVInletOutletScalarBC(const InputParameters &
 const ElemInfo &
 LinearFVInletOutletScalarBC::fluidElemInfo() const
 {
-  return _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
-             ? *_current_face_info->neighborInfo()
-             : *_current_face_info->elemInfo();
+  return NS::linearFVBoundaryElemInfo(*_current_face_info, _current_face_type);
 }
 
 bool
@@ -55,9 +55,7 @@ Real
 LinearFVInletOutletScalarBC::outwardFaceFlux() const
 {
   const auto state = determineState();
-  const Real boundary_normal_multiplier =
-      _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  return boundary_normal_multiplier *
+  return NS::linearFVBoundaryNormalMultiplier(_current_face_type) *
          _face_flux(functorFaceArg(_face_flux, *_current_face_info), state);
 }
 

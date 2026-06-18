@@ -9,6 +9,8 @@
 
 #include "LinearFVPressureFluxBC.h"
 
+#include "NSFVUtils.h"
+
 registerMooseObject("NavierStokesApp", LinearFVPressureFluxBC);
 
 InputParameters
@@ -103,15 +105,13 @@ Real
 LinearFVPressureFluxBC::computeBoundaryValue() const
 {
   refreshBoundaryConstraintCache();
-  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                             ? _current_face_info->elemInfo()
-                             : _current_face_info->neighborInfo();
+  const auto & elem_info = NS::linearFVFaceSideElemInfo(*_current_face_info, _current_face_type);
   const Real distance = computeCellToFaceDistance();
   if (_constrained_pressure_normal_gradient)
-    return _var.getElemValue(*elem_info, determineState()) +
+    return _var.getElemValue(elem_info, determineState()) +
            _cached_constrained_pressure_normal_gradient * distance;
 
-  return _var.getElemValue(*elem_info, determineState()) -
+  return _var.getElemValue(elem_info, determineState()) -
          _cached_boundary_pressure_source_flux / std::max(_cached_boundary_normal_ainv, 1e-8) *
              distance;
 }

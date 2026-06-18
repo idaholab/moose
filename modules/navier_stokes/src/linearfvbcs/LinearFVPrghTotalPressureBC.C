@@ -28,9 +28,7 @@ LinearFVPrghTotalPressureBC::validParams()
       "face_flux",
       "corrected_face_phi",
       "The corrected face-flux functor used for the backflow dynamic-pressure switch.");
-  params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
-  params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
-  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
+  NS::addLinearFVVelocityVariableParams(params);
   params.addRequiredParam<RealVectorValue>("gravity", "The gravitational acceleration vector.");
   params.addParam<Point>("reference_pressure_point",
                          Point(0.0, 0.0, 0.0),
@@ -45,57 +43,19 @@ LinearFVPrghTotalPressureBC::validParams()
 LinearFVPrghTotalPressureBC::LinearFVPrghTotalPressureBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionFunctorDirichletBC(parameters),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
-        &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
-    _v_var(parameters.isParamValid("v")
-               ? dynamic_cast<const MooseLinearVariableFVReal *>(
-                     &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("v")))
-               : nullptr),
-    _w_var(parameters.isParamValid("w")
-               ? dynamic_cast<const MooseLinearVariableFVReal *>(
-                     &_fv_problem.getVariable(_tid, getParam<SolverVariableName>("w")))
-               : nullptr),
+    _velocity_vars(NS::getLinearFVVelocityVariables(*this, _fv_problem, _tid, _dim)),
     _density(getFunctor<Real>(NS::density)),
     _face_flux(getFunctor<Real>("face_flux")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _reference_pressure_point(getParam<Point>("reference_pressure_point")),
     _use_normal_velocity_only(getParam<bool>("use_normal_velocity_only"))
 {
-  if (!_u_var)
-    paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
-
-  _velocity_vars.push_back(_u_var);
-
-  if (_dim >= 2 && !_v_var)
-    paramError("v",
-               "In two or more dimensions, the v velocity must be supplied and it must be a "
-               "MooseLinearVariableFVReal.");
-  _velocity_vars.push_back(_v_var);
-
-  if (_dim >= 3 && !_w_var)
-    paramError("w",
-               "In three dimensions, the w velocity must be supplied and it must be a "
-               "MooseLinearVariableFVReal.");
-  _velocity_vars.push_back(_w_var);
 }
 
 const ElemInfo &
 LinearFVPrghTotalPressureBC::fluidElemInfo() const
 {
-  return _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
-             ? *_current_face_info->neighborInfo()
-             : *_current_face_info->elemInfo();
-}
-
-RealVectorValue
-LinearFVPrghTotalPressureBC::cellVelocity(const ElemInfo & elem_info,
-                                          const Moose::StateArg & state) const
-{
-  RealVectorValue velocity;
-  for (const auto dim_i : make_range(_dim))
-    velocity(dim_i) = _velocity_vars[dim_i]->getElemValue(elem_info, state);
-
-  return velocity;
+  return NS::linearFVBoundaryElemInfo(*_current_face_info, _current_face_type);
 }
 
 bool
@@ -108,9 +68,7 @@ Real
 LinearFVPrghTotalPressureBC::outwardFaceFlux() const
 {
   const auto state = determineState();
-  const Real boundary_normal_multiplier =
-      _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
-  return boundary_normal_multiplier *
+  return NS::linearFVBoundaryNormalMultiplier(_current_face_type) *
          _face_flux(functorFaceArg(_face_flux, *_current_face_info), state);
 }
 
@@ -122,7 +80,7 @@ LinearFVPrghTotalPressureBC::dynamicPressureCorrection() const
 
   const auto & elem_info = fluidElemInfo();
   const auto state = determineState();
-  const RealVectorValue velocity = cellVelocity(elem_info, state);
+  const RealVectorValue velocity = NS::linearFVCellVelocity(_velocity_vars, _dim, elem_info, state);
   Real speed_squared = velocity.norm_sq();
 
   if (_use_normal_velocity_only)

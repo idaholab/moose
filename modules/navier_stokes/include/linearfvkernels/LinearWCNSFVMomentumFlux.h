@@ -10,8 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-
-#include <array>
+#include "NSFVUtils.h"
 
 class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
@@ -135,7 +134,7 @@ protected:
   const unsigned int _index;
 
   /// Velocity variables for each coordinate direction
-  std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
+  const NS::LinearFVVelocityVariableArray _velocity_vars;
 
   /// Coordinate system of the blocks this kernel operates on
   const Moose::CoordinateSystemType _coord_type;

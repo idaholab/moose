@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
+#include "NSFVUtils.h"
 
 #include "libmesh/point.h"
 
@@ -35,15 +36,11 @@ protected:
   const ElemInfo & fluidElemInfo() const;
   bool isBackflow() const;
   Real outwardFaceFlux() const;
-  RealVectorValue cellVelocity(const ElemInfo & elem_info, const Moose::StateArg & state) const;
   Real dynamicPressureCorrection() const;
   Real hydrostaticPressureOffset() const;
 
   const unsigned int _dim;
-  const MooseLinearVariableFVReal * const _u_var;
-  const MooseLinearVariableFVReal * const _v_var;
-  const MooseLinearVariableFVReal * const _w_var;
-  std::vector<const MooseLinearVariableFVReal *> _velocity_vars;
+  const NS::LinearFVVelocityVariableArray _velocity_vars;
   const Moose::Functor<Real> & _density;
   const Moose::Functor<Real> & _face_flux;
   const RealVectorValue _gravity;
