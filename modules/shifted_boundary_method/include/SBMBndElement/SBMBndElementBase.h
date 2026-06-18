@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseMesh.h"
+#include "gtest/gtest.h"
 
 enum class IntersectionType
 {
@@ -100,4 +101,5 @@ private:
   void flipNormal() { _normal *= -1; };
 
   friend class SBMSurfaceMeshBuilder;
+  FRIEND_TEST(SBMBndElementTest, Edge2FlipNormal);
 };

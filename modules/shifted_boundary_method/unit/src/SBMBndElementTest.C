@@ -34,6 +34,20 @@ public:
   Point getNormal() const { return computeNormal(); }
 };
 
+// Minimal SBMBndElementBase subclass that is neither LineSegment nor Triangle.
+// Used to drive the unsupported-geometry mooseError branches in
+// SBMBndElementBase::intersect and ::computeBoundingBall.
+class SBMBndUnsupportedForTest : public SBMBndElementBase
+{
+public:
+  using SBMBndElementBase::SBMBndElementBase;
+  // Required override (computeNormal is pure virtual). The dispatchers under
+  // test short-circuit before touching the normal, so this stub must never
+  // run; if it ever does, the test should fail loudly rather than fabricate
+  // a normal vector.
+  const Point computeNormal() const override { mooseError("stub: should not be called"); }
+};
+
 TEST(SBMBndElementTest, Edge2Normal)
 {
   std::unique_ptr<Edge2> edge(new Edge2());
@@ -282,4 +296,68 @@ TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
 
   const Ball tri_ball = tri_base.computeBoundingBall();
   EXPECT_GT(tri_ball.radius(), 0.0);
+}
+
+TEST(SBMBndElementTest, UnsupportedGeometryDispatchersThrow)
+{
+  // Drive a SBMBndElementBase subclass that is neither LineSegment nor
+  // Triangle through the base-class dispatchers; both intersect() and
+  // computeBoundingBall() must mooseError on the unsupported geometry type.
+  std::unique_ptr<Edge2> edge(new Edge2());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
+  edge->set_node(0) = n0.get();
+  edge->set_node(1) = n1.get();
+
+  SBMBndUnsupportedForTest bnd(edge.get());
+  const SBMBndElementBase & base = bnd;
+
+  LineSegment line(Point(0.5, -1.0, 0.0), Point(0.5, 1.0, 0.0));
+  EXPECT_THROW(
+      {
+        try
+        {
+          base.intersect(line);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_NE(std::string(e.what()).find("unsupported geometry type"), std::string::npos);
+          throw;
+        }
+      },
+      std::exception);
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          base.computeBoundingBall();
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_NE(std::string(e.what()).find("unsupported geometry type"), std::string::npos);
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST(SBMBndElementTest, Edge2FlipNormal)
+{
+  // The undisturbed Edge2 sits on the x-axis and yields a normal along +/-y.
+  // flipNormal() must invert each component of the cached normal.
+  std::unique_ptr<Edge2> edge(new Edge2());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
+  edge->set_node(0) = n0.get();
+  edge->set_node(1) = n1.get();
+
+  SBMBndEdge2ForTest bnd(edge.get());
+  const Point n_orig = bnd.normal();
+  bnd.flipNormal();
+  const Point n_flipped = bnd.normal();
+
+  EXPECT_NEAR(n_flipped(0), -n_orig(0), 1e-12);
+  EXPECT_NEAR(n_flipped(1), -n_orig(1), 1e-12);
+  EXPECT_NEAR(n_flipped(2), -n_orig(2), 1e-12);
 }
