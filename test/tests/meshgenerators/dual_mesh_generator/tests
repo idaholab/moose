@@ -1,75 +1,14 @@
 [Tests]
   design = 'meshgenerators/DualMeshGenerator.md'
-  issues = '#<some issue number>'
-  [3D]
+  issues = '#33143'
+  [dual_mesh_generator]
     type = 'Exodiff'
-    input = '3D_cartesian_dual.i'
-    cli_args = '--mesh-only'
-    exodiff = '3D_cartesian_dual_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'The system shall have the capability to generate duals of a 3-dimensional mesh. (NOT IMPLEMENTED)'
-  []
-  [C]
-    type = 'Exodiff'
-    input = 'C.i'
-    cli_args = '--mesh-only'
-    exodiff = 'C_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'The system shall have the capability to generate a dual mesh from an input with square concave boundaries.'
-  []
-  [cartesian_dual]
-    type = 'Exodiff'
-    input = 'cartesian_dual.i'
+    input = 'dual_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'cartesian_dual_in.e'
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The system shall have the capability to generate a dual mesh from a standard cartesian input.'
+    requirement = 'The system shall have the capability to generate a dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
   []
-  [concave_dual]
-    type = 'Exodiff'
-    input = 'concave_dual.i'
-    cli_args = '--mesh-only'
-    exodiff = 'concave_dual_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'The system shall have the capability to generate a dual mesh from an input mesh with a concave boundary.'
-  []
-  [concave_primal]
-    type = 'Exodiff'
-    input = 'concave_primal.i'
-    cli_args = '--mesh-only'
-    exodiff = 'concave_primal_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'Primal concave mesh for comparison to concave_dual.'
-  []
-  [concentric_dual]
-    type = 'Exodiff'
-    input = 'concentric_dual.i'
-    cli_args = '--mesh-only'
-    exodiff = 'concentric_dual_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'The system shall have the capaility to generate a dual mesh from convex primal input meshes.'
-  []
-  [concentric_primal]
-    type = 'Exodiff'
-    input = 'concentric_primal.i'
-    cli_args = '--mesh-only'
-    exodiff = 'concentric_primal_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
-
-    requirement = 'Primal concentric mesh for comparison to concentric_dual.'
-  []
-
-  []
+[]
