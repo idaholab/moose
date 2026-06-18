@@ -7,13 +7,13 @@ nx = 10
 [Mesh]
   [boundary_mesh]
     type = FileMeshGenerator
-    file = 'bunny.msh'
+    file = 'cube_surface.msh'
   []
 
   [shift_boundary_mesh]
     type = TransformGenerator
     transform = TRANSLATE
-    vector_value = '2.0 2.0 2.0'
+    vector_value = '1.07 1.13 1.19'
     input = boundary_mesh
     save_with_name = 'shift_boundary_mesh'
   []
@@ -84,7 +84,7 @@ nx = 10
     [refine_based_on_aux]
       type = ValueThresholdMarker
       variable = distance
-      refine = 0.05
+      refine = 0.15
       coarsen = 0.5
       invert = true
     []

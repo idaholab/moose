@@ -11,13 +11,8 @@
 #include "Ball.h"
 
 SBMBndTri3::SBMBndTri3(const Elem * elem)
-  : SBMBndElementBase(elem), Triangle(elem->point(0), elem->point(1), elem->point(2))
+  : Triangle(elem->point(0), elem->point(1), elem->point(2)),
+    SBMBndElementBase(elem, Triangle::normal())
 {
   mooseAssert(elem->type() == TRI3, "Element must be of type TRI3");
-}
-
-const Point
-SBMBndTri3::computeNormal() const
-{
-  return Triangle::normal();
 }

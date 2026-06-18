@@ -15,16 +15,19 @@ registerMooseObject("ShiftedBoundaryMethodApp", ShortestDistanceToSurface);
 InputParameters
 ShortestDistanceToSurface::validParams()
 {
-  InputParameters params = ElementUserObject::validParams();
-  params.addRequiredParam<std::vector<FunctionName>>("surfaces",
-                                                     "Level-set function for distance.");
-
-  params.addClassDescription("Base distance user object.");
+  InputParameters params = GeneralUserObject::validParams();
+  params.addRequiredParam<std::vector<FunctionName>>(
+      "surfaces",
+      "Functions defining the surfaces to measure distance to; each must be a ParsedFunction "
+      "level set or an UnsignedDistanceToSurfaceMesh.");
+  params.addClassDescription(
+      "Computes the shortest distance vector and true normal to one or more surfaces defined by "
+      "parsed level-set functions and/or mesh-based distance functions.");
   return params;
 }
 
 ShortestDistanceToSurface::ShortestDistanceToSurface(const InputParameters & parameters)
-  : ElementUserObject(parameters)
+  : GeneralUserObject(parameters)
 {
   const auto function_names = getParam<std::vector<FunctionName>>("surfaces");
   _distance_functions = SBMUtils::buildDistanceFunctions(function_names, *this);
@@ -59,7 +62,7 @@ ShortestDistanceToSurface::trueNormalByIndex(unsigned int idx, const Point & pt)
   return SBMUtils::trueNormalFromFunction(func, pt, _t);
 }
 
-const RealVectorValue
+RealVectorValue
 ShortestDistanceToSurface::distanceVectorByFunc(const Point & pt,
                                                 Real t,
                                                 const Function * func) const
@@ -67,7 +70,7 @@ ShortestDistanceToSurface::distanceVectorByFunc(const Point & pt,
   return SBMUtils::distanceVectorFromFunction(func, pt, t);
 }
 
-const RealVectorValue
+RealVectorValue
 ShortestDistanceToSurface::trueNormalByFunc(const Point & pt, Real t, const Function * func) const
 {
   return SBMUtils::trueNormalFromFunction(func, pt, t);

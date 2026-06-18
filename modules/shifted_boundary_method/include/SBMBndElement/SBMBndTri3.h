@@ -13,7 +13,10 @@
 #include "Triangle.h"
 
 /// Derived class for 3-node triangular elements (Tri3)
-class SBMBndTri3 : public SBMBndElementBase, public Triangle
+/// Triangle is listed first so it is initialized before SBMBndElementBase;
+/// the base class constructor then receives the unit normal from
+/// Triangle::normal() (see the .C file).
+class SBMBndTri3 : public Triangle, public SBMBndElementBase
 {
 public:
   /// Constructor
@@ -23,8 +26,4 @@ public:
   using SBMBndElementBase::normal;
   using Triangle::computeBoundingBall;
   using Triangle::intersect;
-
-protected:
-  /// Compute the normal vector of the triangle
-  const Point computeNormal() const override;
 };

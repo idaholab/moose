@@ -11,7 +11,7 @@
       exodiff = '2D_distance_refine_out.e-s004'
       mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
       recover = false
-      detail = 'the distance field is computed correctly in 2D.'
+      detail = 'the distance field in 2D.'
     []
 
     [3D_distance_refine]
@@ -20,7 +20,7 @@
       exodiff = '3D_distance_refine_out.e-s004'
       mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
       recover = false
-      detail = 'the distance field is computed correctly in 3D.'
+      detail = 'the distance field in 3D.'
     []
 
     [2D_multiple_distance_refine]
@@ -29,7 +29,7 @@
       exodiff = '2D_multiple_distances_refine_test_out.e-s004'
       mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
       recover = false
-      detail = 'the distance field correctly when multiple distance representations (signed and mesh-based) are used together.'
+      detail = 'the distance field in 2D when signed level-set and mesh-based surfaces are combined.'
     []
 
     [3D_multiple_distance_refine]
@@ -38,7 +38,7 @@
       exodiff = '3D_multiple_distances_refine_out.e-s003'
       mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
       recover = false
-      detail = 'the distance field correctly when multiple distance representations (signed and mesh-based) are used together in 3D.'
+      detail = 'the distance field in 3D when signed level-set and mesh-based surfaces are combined.'
     []
 
   []
@@ -70,8 +70,8 @@
 
     [dim_mismatch]
       type = 'RunException'
-      input = '3D_distance_refine.i'
-      cli_args = 'Mesh/boundary_mesh/file=bunny_2D.msh'
+      input = '2D_distance_refine.i'
+      cli_args = 'Mesh/boundary_mesh/file=quad_surface.msh'
       expect_err = 'does not match the expected mesh dimension'
       mesh_mode = REPLICATED
       recover = false

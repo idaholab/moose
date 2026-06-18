@@ -7,7 +7,7 @@ nx = 10
 [Mesh]
   [boundary_mesh]
     type = FileMeshGenerator
-    file = 'bunny.msh'
+    file = 'cube_surface.msh'
   []
 
   [shift_boundary_mesh]

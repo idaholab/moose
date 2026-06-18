@@ -11,16 +11,11 @@
 #include "Ball.h"
 
 SBMBndEdge2::SBMBndEdge2(const Elem * elem)
-  : SBMBndElementBase(elem), LineSegment(elem->point(0), elem->point(1))
+  : LineSegment(elem->point(0), elem->point(1)),
+    SBMBndElementBase(elem, LineSegment::normal())
 {
   mooseAssert(elem->type() == EDGE2, "Element must be of type EDGE2");
   mooseAssert(MooseUtils::absoluteFuzzyEqual(elem->point(0)(2), elem->point(1)(2)),
               "Currently SBMBndEdge2 must be parallel to the x-y plane, i.e., z-coordinates of "
               "points must be equal");
-}
-
-const Point
-SBMBndEdge2::computeNormal() const
-{
-  return LineSegment::normal();
 }

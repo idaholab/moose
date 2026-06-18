@@ -52,11 +52,3 @@ RealVectorValue closestTrueNormalVector(const std::vector<const Function *> & fu
                                         const libMesh::Point & pt,
                                         Real t);
 }
-
-/// Enum for different distance function types.
-enum class DistanceFunctionType
-{
-  NONE = -1,
-  SIGNED_DISTANCE = 0,
-  SBM_BOUNDARY_DISTANCE = 1,
-};

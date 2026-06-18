@@ -13,7 +13,10 @@
 #include "LineSegment.h"
 
 /// Derived class for 2-node edge elements
-class SBMBndEdge2 : public SBMBndElementBase, public LineSegment
+/// LineSegment is listed first so it is initialized before SBMBndElementBase;
+/// the base class constructor then receives the unit normal from
+/// LineSegment::normal() (see the .C file).
+class SBMBndEdge2 : public LineSegment, public SBMBndElementBase
 {
 public:
   /// Constructor
@@ -23,8 +26,4 @@ public:
   using LineSegment::computeBoundingBall;
   using LineSegment::intersect;
   using SBMBndElementBase::normal;
-
-protected:
-  /// Compute the outward normal vector of the edge (2D)
-  const Point computeNormal() const override;
 };

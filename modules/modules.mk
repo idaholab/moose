@@ -267,7 +267,6 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  DEPEND_MODULES     := shifted_boundary_method
   SUFFIX             := sm
   include $(FRAMEWORK_DIR)/app.mk
 endif

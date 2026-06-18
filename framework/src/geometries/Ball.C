@@ -12,6 +12,9 @@
 
 #include <cmath>
 
+using libMesh::Point;
+using libMesh::Real;
+
 bool
 Ball::intersect(const LineSegment & line_segment) const
 {

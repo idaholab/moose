@@ -18,8 +18,8 @@ ElementCentroidToSurfaceDistanceAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addParam<UserObjectName>("distance_to_surface",
-                                  "UserObject that provides distance calculations.");
+  params.addRequiredParam<UserObjectName>("distance_to_surface",
+                                          "UserObject that provides distance calculations.");
 
   params.addClassDescription(
       "Creates a distance field based on the 'distance_to_surface' UserObject.");

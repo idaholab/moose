@@ -19,33 +19,15 @@
 
 using namespace libMesh;
 
-// Public wrapper classes to access protected computeNormal
-class SBMBndEdge2ForTest : public SBMBndEdge2
-{
-public:
-  using SBMBndEdge2::SBMBndEdge2;
-  Point getNormal() const { return computeNormal(); }
-};
-
-class SBMBndTri3ForTest : public SBMBndTri3
-{
-public:
-  using SBMBndTri3::SBMBndTri3;
-  Point getNormal() const { return computeNormal(); }
-};
-
 // Minimal SBMBndElementBase subclass that is neither LineSegment nor Triangle.
 // Used to drive the unsupported-geometry mooseError branches in
-// SBMBndElementBase::intersect and ::computeBoundingBall.
+// SBMBndElementBase::intersect and ::computeBoundingBall. The dispatchers
+// under test short-circuit before touching the normal, so the supplied
+// placeholder normal is never inspected.
 class SBMBndUnsupportedForTest : public SBMBndElementBase
 {
 public:
   using SBMBndElementBase::SBMBndElementBase;
-  // Required override (computeNormal is pure virtual). The dispatchers under
-  // test short-circuit before touching the normal, so this stub must never
-  // run; if it ever does, the test should fail loudly rather than fabricate
-  // a normal vector.
-  const Point computeNormal() const override { mooseError("stub: should not be called"); }
 };
 
 TEST(SBMBndElementTest, Edge2Normal)
@@ -58,8 +40,8 @@ TEST(SBMBndElementTest, Edge2Normal)
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
 
-  SBMBndEdge2ForTest bnd_edge(edge.get());
-  Point n = bnd_edge.getNormal();
+  SBMBndEdge2 bnd_edge(edge.get());
+  Point n = bnd_edge.normal();
 
   EXPECT_NEAR(n(0), 0.0, 1e-12);
   EXPECT_NEAR(n(2), 0.0, 1e-12);
@@ -95,8 +77,8 @@ TEST(SBMBndElementTest, Tri3Normal)
   tri->set_node(1) = n1.get();
   tri->set_node(2) = n2.get();
 
-  SBMBndTri3ForTest bnd_tri(tri.get());
-  Point n = bnd_tri.getNormal();
+  SBMBndTri3 bnd_tri(tri.get());
+  Point n = bnd_tri.normal();
 
   EXPECT_NEAR(n(0), 0.0, 1e-12);
   EXPECT_NEAR(n(1), 0.0, 1e-12);
@@ -130,8 +112,8 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
 
-  SBMBndEdge2ForTest bnd_edge(edge.get());
-  Point n = bnd_edge.getNormal();
+  SBMBndEdge2 bnd_edge(edge.get());
+  Point n = bnd_edge.normal();
 
   // Expected normal
   const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
@@ -170,7 +152,7 @@ TEST(SBMBndElementTest, Edge2DistanceNodeFallback)
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
 
-  SBMBndEdge2ForTest bnd_edge(edge.get());
+  SBMBndEdge2 bnd_edge(edge.get());
 
   // Projection of (2, 1, 0) onto the line is (2, 0, 0) which is outside [0,1].
   // Nearest entity is node (1, 0, 0).
@@ -193,8 +175,8 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
   tri->set_node(1) = n1.get();
   tri->set_node(2) = n2.get();
 
-  SBMBndTri3ForTest bnd_tri(tri.get());
-  Point n = bnd_tri.getNormal();
+  SBMBndTri3 bnd_tri(tri.get());
+  Point n = bnd_tri.normal();
 
   // Expected normal
   const double inv_sqrt3 = 1.0 / std::sqrt(3.0);
@@ -309,7 +291,8 @@ TEST(SBMBndElementTest, UnsupportedGeometryDispatchersThrow)
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
 
-  SBMBndUnsupportedForTest bnd(edge.get());
+  // Placeholder unit normal; the dispatchers under test never consult it.
+  SBMBndUnsupportedForTest bnd(edge.get(), Point(0.0, 0.0, 1.0));
   const SBMBndElementBase & base = bnd;
 
   LineSegment line(Point(0.5, -1.0, 0.0), Point(0.5, 1.0, 0.0));

@@ -9,6 +9,9 @@
 
 #include "SBMSurfaceMeshBuilder.h"
 #include "InputParameters.h"
+#include "SBMBndEdge2.h"
+#include "SBMBndTri3.h"
+#include "SBMUtils.h"
 
 // Register object
 registerMooseObject("ShiftedBoundaryMethodApp", SBMSurfaceMeshBuilder);
@@ -124,6 +127,17 @@ SBMSurfaceMeshBuilder::checkWatertightness() const
 {
   return SBMUtils::checkWatertightnessFromRawElems(std::vector<const Elem *>(
       _mesh->active_element_ptr_range().begin(), _mesh->active_element_ptr_range().end()));
+}
+
+KDTree &
+SBMSurfaceMeshBuilder::getKDTree() const
+{
+  if (!_kd_tree)
+    mooseError("SBMSurfaceMeshBuilder '",
+               name(),
+               "': KDTree was not built. Set 'build_kd_tree = true' on the builder to use "
+               "objects that require KDTree lookups (e.g. UnsignedDistanceToSurfaceMesh).");
+  return *_kd_tree;
 }
 
 const std::vector<std::unique_ptr<SBMBndElementBase>> &

@@ -11,22 +11,19 @@
 
 #include "MooseMesh.h"
 
-enum class IntersectionType
-{
-  NO_INTERSECT = 0,
-  INTERSECT = 1,
-  ON_GEOMETRY = 2
-};
-
 class Ball;
 class LineSegment;
 
-/// Abstract base class for SBM boundary elements
+/// Base class for SBM boundary elements
 class SBMBndElementBase
 {
 public:
-  /// Constructor takes a pointer to a boundary element
-  SBMBndElementBase(const Elem * elem);
+  /**
+   * Constructor takes a pointer to a boundary element and its precomputed unit
+   * normal. The normal is computed eagerly by derived classes (which know their
+   * geometry) so the base can store it const and shared concurrent reads are safe.
+   */
+  SBMBndElementBase(const Elem * elem, const Point & normal);
 
   /// Virtual destructor to ensure proper cleanup in derived classes
   virtual ~SBMBndElementBase() = default;
@@ -35,7 +32,7 @@ public:
   const Elem & elem() const { return *_elem; }
 
   /// Getter for the normal vector
-  const Point & normal();
+  const Point & normal() const { return _normal; }
 
   /**
    * Check if the given line segment intersects this boundary element.
@@ -77,22 +74,11 @@ public:
    */
   Real getProjectedBoundingBoxDiagonal(const Point & normal_dir) const;
 
-protected:
-  ///< Pointer to the libMesh element representing this boundary face
-  const Elem * _elem;
-  ///< Normal vector of the boundary element
-  mutable Point _normal;
-
-  /**
-   * Return the normal vector of the boundary element.
-   * This is a pure virtual function and must be implemented in derived classes.
-   */
-  virtual const Point computeNormal() const = 0;
-
 private:
-  /// Checking whether the normal vector has already computed
-  mutable bool _is_normal_initialized = false;
-
-  /// Ensure the normal vector is initialized before use
-  void ensureNormalInitialized() const;
+  ///< Pointer to the libMesh element representing this boundary face. Derived
+  ///< classes access it through elem() rather than this field directly.
+  const Elem * _elem;
+  ///< Unit normal vector of the boundary element, computed eagerly in the
+  ///< derived constructor and passed through the base constructor.
+  const Point _normal;
 };

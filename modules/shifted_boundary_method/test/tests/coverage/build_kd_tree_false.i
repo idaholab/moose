@@ -8,7 +8,7 @@
 [Mesh]
   [boundary_mesh]
     type = FileMeshGenerator
-    file = '../distance_calc/star.msh'
+    file = '../distance_calc/square_boundary.msh'
   []
   [shift_boundary_mesh]
     type = TransformGenerator

@@ -13,9 +13,6 @@
 #include "libmesh/mesh.h"
 #include "KDTree.h"
 #include "SBMBndElementBase.h"
-#include "SBMBndEdge2.h"
-#include "SBMBndTri3.h"
-#include "SBMUtils.h"
 
 class SBMSurfaceMeshBuilder : public GeneralUserObject
 {
@@ -28,7 +25,16 @@ public:
   virtual void execute() override {}
   virtual void finalize() override {}
 
-  const KDTree & getKDTree() const { return *_kd_tree; }
+  /// Returns a mutable reference because KDTree::neighborSearch is non-const (nanoflann's
+  /// knnSearch threads internal scratch state through the call). The operation is logically
+  /// read-only and knnSearch is re-entrant, so the same tree can be safely shared across
+  /// threads without a const_cast at the call site.
+  /// mooseError's if the builder was configured with build_kd_tree = false.
+  KDTree & getKDTree() const;
+
+  /// Whether this builder has a KDTree available. Consumers that require the tree should
+  /// check this in initialSetup and mooseError with a friendly message naming both objects.
+  bool hasKDTree() const { return _kd_tree != nullptr; }
 
   /// Get the SBM boundary elements
   const std::vector<std::unique_ptr<SBMBndElementBase>> & getBoundaryElements() const;
@@ -37,15 +43,17 @@ public:
   const std::vector<Point> & getCentroids() const;
 
   /**
-   * @brief Checks whether the boundary mesh is watertight.
+   * @brief Checks whether the boundary mesh is "closed" -- i.e. has no open
+   *        edges or faces.
    *
-   * For a 3D surface mesh, watertightness means that every edge (defined by two nodes)
-   * is shared exactly twice across all surface elements (e.g., triangles or quadrilaterals).
+   * The implementation walks every side of every boundary element and returns
+   * false as soon as it finds a side with no neighbor. On a manifold surface
+   * mesh this is equivalent to watertightness; non-manifold input
+   * (e.g. T-junctions, three faces sharing an edge) is not validated here
+   * because the SBM workflow expects boundary meshes extracted from manifold
+   * sidesets.
    *
-   * For a 2D curve mesh, watertightness means that every edge appears exactly once,
-   * and every node has degree two (i.e., connected to exactly two other nodes).
-   *
-   * @return true if the mesh is watertight; false otherwise.
+   * @return true if every side has a neighbor; false otherwise.
    */
   bool checkWatertightness() const;
 

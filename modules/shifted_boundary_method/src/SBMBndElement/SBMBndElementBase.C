@@ -9,20 +9,21 @@
 
 #include "SBMBndElementBase.h"
 #include "Ball.h"
+#include "GeometryBase.h"
 #include "LineSegment.h"
-#include "Triangle.h"
 #include "libmesh/string_to_enum.h"
 
-SBMBndElementBase::SBMBndElementBase(const Elem * elem) : _elem(elem)
+SBMBndElementBase::SBMBndElementBase(const Elem * elem, const Point & normal)
+  : _elem(elem), _normal(normal)
 {
   mooseAssert(elem, "Element must not be null");
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(_normal.norm(), 1),
+              "normal vector must be unit length, length = " << _normal.norm());
 }
 
 Point
 SBMBndElementBase::distanceFrom(const Point & pt) const
 {
-  ensureNormalInitialized();
-
   // (a) Project pt onto the normal direction
   const auto vec_to_first = _elem->point(0) - pt;
   const auto scale = vec_to_first * _normal;
@@ -103,13 +104,6 @@ SBMBndElementBase::distanceFrom(const Point & pt) const
   return closest_vec;
 }
 
-const Point &
-SBMBndElementBase::normal()
-{
-  ensureNormalInitialized();
-  return _normal;
-}
-
 Real
 SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & normal_dir) const
 {
@@ -134,10 +128,8 @@ SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & normal_dir) con
 bool
 SBMBndElementBase::intersect(const LineSegment & line_segment) const
 {
-  if (const auto * edge = dynamic_cast<const LineSegment *>(this))
-    return edge->intersect(line_segment);
-  if (const auto * tri = dynamic_cast<const Triangle *>(this))
-    return tri->intersect(line_segment);
+  if (const auto * geom = dynamic_cast<const GeometryBase *>(this))
+    return geom->intersect(line_segment);
 
   mooseError("SBMBndElementBase::intersect: unsupported geometry type");
 }
@@ -145,22 +137,8 @@ SBMBndElementBase::intersect(const LineSegment & line_segment) const
 Ball
 SBMBndElementBase::computeBoundingBall() const
 {
-  if (const auto * edge = dynamic_cast<const LineSegment *>(this))
-    return edge->computeBoundingBall();
-  if (const auto * tri = dynamic_cast<const Triangle *>(this))
-    return tri->computeBoundingBall();
+  if (const auto * geom = dynamic_cast<const GeometryBase *>(this))
+    return geom->computeBoundingBall();
 
   mooseError("SBMBndElementBase::computeBoundingBall: unsupported geometry type");
-}
-
-void
-SBMBndElementBase::ensureNormalInitialized() const
-{
-  if (!_is_normal_initialized)
-  {
-    _normal = computeNormal();
-    mooseAssert(MooseUtils::absoluteFuzzyEqual(_normal.norm(), 1),
-                "normal vector must be unit length, length = " << _normal.norm());
-    _is_normal_initialized = true;
-  }
 }

@@ -8,21 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 
-#include "ElementUserObject.h"
+#include "GeneralUserObject.h"
 
 /**
  * Base distance user object that manages function/mesh-based distance strategies.
  * Derived classes can specialize how the strategies are queried or cached.
+ *
+ * Modeled as a GeneralUserObject because this class is a stateless query backend:
+ * other objects call distanceVector()/trueNormal()/... directly, and there is no
+ * per-element work to do, so an ElementUserObject's element loop would be wasted.
  */
-class ShortestDistanceToSurface : public ElementUserObject
+class ShortestDistanceToSurface : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
   ShortestDistanceToSurface(const InputParameters & parameters);
-  void execute() override {};
-  void finalize() override {}
   void initialize() override {}
-  void threadJoin(const UserObject &) override {}
+  void execute() override {}
+  void finalize() override {}
 
   // This UO stores per-thread Function pointers. Parsed functions mutate
   // internal state during evaluation, so sharing the TID=0 copy across threads
@@ -47,10 +50,10 @@ public:
   RealVectorValue trueNormalByIndex(unsigned int idx, const Point & pt) const;
 
   /// Compute distance vector using a specific distance function
-  const RealVectorValue distanceVectorByFunc(const Point & pt, Real t, const Function * func) const;
+  RealVectorValue distanceVectorByFunc(const Point & pt, Real t, const Function * func) const;
 
   /// Compute true normal using a specific distance function
-  const RealVectorValue trueNormalByFunc(const Point & pt, Real t, const Function * func) const;
+  RealVectorValue trueNormalByFunc(const Point & pt, Real t, const Function * func) const;
 
 protected:
   /// Optional signed-distance function

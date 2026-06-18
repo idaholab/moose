@@ -12,8 +12,8 @@
       allow_test_objects = true
       mesh_mode = REPLICATED
       recover = false
-      detail = 'evaluate the closest distance and surface normal at element centroids using both '
-               'function-based and mesh-based distance strategies in ShortestDistanceToSurface.'
+      detail = 'report the closest distance vector and surface normal at element centroids when '
+               'parsed-function and mesh-based surfaces are combined in a single query.'
     []
 
     [build_kd_tree_false]
@@ -21,8 +21,8 @@
       input = 'build_kd_tree_false.i'
       mesh_mode = REPLICATED
       recover = false
-      detail = 'construct boundary element representations from an SBM surface mesh without '
-               'building a KDTree when KDTree construction is disabled.'
+      detail = 'build boundary element representations from an SBM surface mesh without a KDTree '
+               'when KDTree construction is disabled.'
     []
 
     [non_watertight]
@@ -41,9 +41,7 @@
       allow_test_objects = true
       mesh_mode = REPLICATED
       recover = false
-      detail = 'evaluate UnsignedDistanceToSurfaceMesh at a point on the surface mesh, '
-               'exercising the zero-distance early-return branch in gradient(): the queried '
-               'distance must be exactly zero.'
+      detail = 'return zero distance when the query point lies on the surface mesh.'
     []
 
   []

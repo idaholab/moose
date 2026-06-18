@@ -6,7 +6,7 @@ nx = 64
 [Mesh]
   [boundary_mesh]
     type = FileMeshGenerator
-    file = 'star.msh'
+    file = 'square_boundary.msh'
   []
 
   [shift_boundary_mesh]

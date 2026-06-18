@@ -15,23 +15,31 @@
 
 class LineSegment;
 
-using namespace libMesh;
-
 /**
- * ball primitive.
+ * Ball primitive: a circle in 2D or a sphere in 3D.
  *
- * - In 2D: represents a circle
- * - In 3D: represents a sphere
+ * Why not just use libMesh::Sphere?
+ *  - libMesh::Sphere is 3D only; Ball supports both 2D and 3D in a single type.
+ *  - Ball provides the operations the framework geometries layer needs:
+ *    intersection with a LineSegment and a tight bounding ball used for fast
+ *    nearest-neighbor / spatial searches. libMesh::Sphere exposes a different
+ *    set of surface queries (closest point, normal, above/below surface) that
+ *    we do not need here.
+ *  - Ball derives from GeometryBase so every framework geometry primitive can
+ *    be used through one virtual interface.
+ *
+ * If a caller does need the libMesh surface-query interface (e.g. ray tracing),
+ * use `toSphere()` to convert.
  */
 class Ball : public GeometryBase
 {
 public:
-  Ball(const Point & c, Real r) : _c(c), _r(r) {}
+  Ball(const libMesh::Point & c, libMesh::Real r) : _c(c), _r(r) {}
 
   ~Ball() override = default;
 
-  const Point & center() const { return _c; }
-  Real radius() const { return _r; }
+  const libMesh::Point & center() const { return _c; }
+  libMesh::Real radius() const { return _r; }
 
   /**
    * Check if a line segment intersects this ball.
@@ -48,6 +56,6 @@ public:
 #endif
 
 private:
-  Point _c;
-  Real _r;
+  libMesh::Point _c;
+  libMesh::Real _r;
 };

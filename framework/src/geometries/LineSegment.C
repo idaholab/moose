@@ -14,6 +14,10 @@
 #include "libmesh/plane.h"
 #include "libmesh/vector_value.h"
 
+using libMesh::Point;
+using libMesh::Real;
+using libMesh::RealVectorValue;
+
 LineSegment::LineSegment(const Point & p0, const Point & p1) : _p0(p0), _p1(p1) {}
 
 bool

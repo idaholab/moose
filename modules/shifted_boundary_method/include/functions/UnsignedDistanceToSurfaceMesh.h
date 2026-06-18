@@ -33,7 +33,7 @@ public:
   UnsignedDistanceToSurfaceMesh(const InputParameters & parameters);
 
   /// find closest boundary element using KDTree
-  SBMBndElementBase & closestBoundaryElem(const Point & p) const;
+  const SBMBndElementBase & closestBoundaryElem(const Point & p) const;
 
   /// find closest boundary element and return its distance vector
   RealVectorValue distanceVectorToSurface(const Point & p) const;

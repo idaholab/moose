@@ -36,14 +36,18 @@ UnsignedDistanceToSurfaceMesh::initialSetup()
 {
   const auto builder = &getUserObject<SBMSurfaceMeshBuilder>("builder");
 
-  _kd_tree = const_cast<KDTree *>(&builder->getKDTree());
-  _boundary_elements = &builder->getBoundaryElements();
+  if (!builder->hasKDTree())
+    mooseError("UnsignedDistanceToSurfaceMesh '",
+               name(),
+               "' requires SBMSurfaceMeshBuilder '",
+               builder->name(),
+               "' to be configured with 'build_kd_tree = true'.");
 
-  mooseAssert(_kd_tree, "UnsignedDistanceToSurfaceMesh: KDTree is null");
-  mooseAssert(_boundary_elements, "UnsignedDistanceToSurfaceMesh: boundary_elements is null");
+  _kd_tree = &builder->getKDTree();
+  _boundary_elements = &builder->getBoundaryElements();
 }
 
-SBMBndElementBase &
+const SBMBndElementBase &
 UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 {
   // KDTree nearest neighbor search
@@ -56,7 +60,7 @@ UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::distanceVectorToSurface(const Point & p) const
 {
-  SBMBndElementBase & elem = closestBoundaryElem(p);
+  const SBMBndElementBase & elem = closestBoundaryElem(p);
   return elem.distanceFrom(p);
 }
 
@@ -75,16 +79,16 @@ UnsignedDistanceToSurfaceMesh::gradient(Real /*t*/, const Point & p) const
   if (dist <= libMesh::TOLERANCE)
     return RealGradient(0, 0, 0);
 
-  // dv points from the query point toward the nearest surface.
-  // The distance gradient must point in the direction of decreasing distance,
-  // hence the negative normalization: gradient = - (distance_vector) / |distance_vector|
+  // dv points from the query point toward the nearest surface, so -dv points away from it.
+  // The gradient of a distance field points toward increasing distance (away from the surface),
+  // matching the signed-distance gradient convention used by SBMUtils::distanceVectorFromFunction.
   return -dv / dist;
 }
 
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::surfaceNormal(const Point & p) const
 {
-  SBMBndElementBase & elem = closestBoundaryElem(p);
+  const SBMBndElementBase & elem = closestBoundaryElem(p);
 
   RealVectorValue n = elem.normal();
   const Real n_norm = n.norm();
