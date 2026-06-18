@@ -36,17 +36,19 @@ Function::Function(const Function & function)
   : _wrapper_host(function._wrapper_host), _wrapper_device(function._wrapper_device)
 {
   // Copy function to device
-  _wrapper_host->copyFunction();
+  if (_wrapper_host)
+    _wrapper_host->copyFunction();
 }
 
 Function::~Function()
 {
   // Free device wrapper
-  if (_wrapper_host.use_count() == 1)
+  if (_wrapper_host && _wrapper_host.use_count() == 1)
     ::Kokkos::kokkos_free<ExecSpace::memory_space>(_wrapper_device);
 
   // Free host copy of function
-  _wrapper_host->freeFunction();
+  if (_wrapper_host)
+    _wrapper_host->freeFunction();
 }
 
 } // namespace Moose::Kokkos
