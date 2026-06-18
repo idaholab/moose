@@ -35,9 +35,9 @@
                   'of a subset of variables, using a convergence object.'
   []
   [custom_residual]
-    type = CSVDiff
+    type = Exodiff
     input = 'custom_residual.i'
-    csvdiff = 'custom_residual_out.csv'
+    exodiff = 'custom_residual_out.e'
     requirement = 'The system shall have the ability to base system convergence on the convergence '
                   'of a custom vector tag, using a convergence object.'
   []

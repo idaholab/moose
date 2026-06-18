@@ -8,7 +8,7 @@ coef=1
 
 [Problem]
   # type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref res'
+  extra_tag_vectors = 'u_ref u_res v_ref v_res'
 []
 
 [Variables]
@@ -21,36 +21,38 @@ coef=1
     type = CoefDiffusion
     variable = u
     coef = 1
-    extra_vector_tags = 'res'
+    extra_vector_tags = 'u_res'
   []
   [u_rxn]
     type = PReaction
     variable = u
     coefficient = 1
     power = 2
+    extra_vector_tags = 'u_res'
   []
   [u_f]
     type = BodyForce
     variable = u
-    value = 2
-    extra_vector_tags = 'res'
+    value = 1
+    extra_vector_tags = 'u_res'
   []
   [v_diff]
     type = Diffusion
     variable = v
-    extra_vector_tags = 'res'
+    extra_vector_tags = 'v_res'
   []
   [v_rxn]
     type = PReaction
     variable = v
     coefficient = 1
     power = 2
+    extra_vector_tags = 'v_res'
   []
   [v_f]
     type = BodyForce
     variable = v
     value = 1
-    extra_vector_tags = 'res'
+    extra_vector_tags = 'v_res'
   []
 []
 
@@ -60,22 +62,33 @@ coef=1
     boundary = 'left right'
     coef = ${coef}
     variable = u
-    extra_vector_tags = 'ref res'
+    extra_vector_tags = 'u_ref u_res'
   []
   [v]
     type = RobinBC
     boundary = 'left right'
     coef = 1
     variable = v
-    extra_vector_tags = 'ref res'
+    extra_vector_tags = 'v_ref v_res'
   []
 []
 
 [Convergence]
-  [conv]
+  [u_conv]
     type = ReferenceResidualConvergence
-    reference_vector = 'ref'
-    residual_vector = 'res'
+    reference_vector = 'u_ref'
+    residual_vector = 'u_res'
+  []
+  [v_conv]
+    type = ReferenceResidualConvergence
+    reference_vector = 'v_ref'
+    residual_vector = 'v_res'
+  []
+  [conv]
+    type = ParsedConvergence
+    convergence_expression = 'u_conv & v_conv'
+    symbol_names = 'u_conv v_conv'
+    symbol_values = 'u_conv v_conv'
   []
 []
 
@@ -84,19 +97,6 @@ coef=1
   nonlinear_convergence = conv
 []
 
-[Postprocessors]
-  [u_avg]
-    type = ElementAverageValue
-    variable = u
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [v_avg]
-    type = ElementAverageValue
-    variable = v
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-[]
-
 [Outputs]
-  csv = true
+  exodus = true
 []
