@@ -228,16 +228,11 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   // Resolve tangential scaling
   ADReal c_t;
   if (_dynamic_c_t)
-  {
-    using std::sqrt;
-    const auto vt_sq = *_tangential_vel_ptr[0] * *_tangential_vel_ptr[0] +
-                       *_tangential_vel_ptr[1] * *_tangential_vel_ptr[1] + ADReal(1e-48);
-    const auto vt_mag = sqrt(vt_sq);
-    if (MetaPhysicL::raw_value(vt_mag) < _vel_floor)
-      c_t = c;
-    else
-      c_t = c / (vt_mag * _dt);
-  }
+    // c_t = c_normal_eff: the tangential penalty matches the normal-constraint
+    // scaling.  Tangential contact stiffness (shear modulus ~ E/2) is the same
+    // order as normal (Young's modulus), so this is physically motivated and
+    // dimensionally correct.
+    c_t = c;
   else
     c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
@@ -325,15 +320,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   // Resolve tangential scaling
   ADReal c_t;
   if (_dynamic_c_t)
-  {
-    using std::sqrt;
-    const auto vt_sq = *_tangential_vel_ptr[0] * *_tangential_vel_ptr[0] + ADReal(1e-48);
-    const auto vt_mag = sqrt(vt_sq);
-    if (MetaPhysicL::raw_value(vt_mag) < _vel_floor)
-      c_t = c;
-    else
-      c_t = c / (vt_mag * _dt);
-  }
+    // c_t = c_normal_eff: see 3D path above for explanation.
+    c_t = c;
   else
     c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
