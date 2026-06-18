@@ -76,19 +76,9 @@ LinearFVFluxKernel::addMatrixContribution()
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    if (_current_face_info->boundaryIDs().size() > 1)
-      mooseError("We currently don't support multiple boundary conditions for the same variable on "
-                 "the same face. Current face center : " +
-                 Moose::stringify(_current_face_info->faceCentroid()) +
-                 " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
-
-    LinearFVBoundaryCondition * bc_pointer =
-        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-
+    LinearFVBoundaryCondition * bc_pointer = _var.getBoundaryCondition(*_current_face_info);
     if (bc_pointer || _force_boundary_execution)
     {
-      if (bc_pointer)
-        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
       const auto matrix_contribution = computeBoundaryMatrixContribution(*bc_pointer);
 
       // We allow internal (for the mesh) boundaries too, so we have to check on which side we
@@ -156,19 +146,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    if (_current_face_info->boundaryIDs().size() > 1)
-      mooseError("We currently don't support multiple boundary conditions for the same variable on "
-                 "the same face. Current face center : " +
-                 Moose::stringify(_current_face_info->faceCentroid()) +
-                 " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
-    LinearFVBoundaryCondition * bc_pointer =
-        _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
-
+    LinearFVBoundaryCondition * bc_pointer = _var.getBoundaryCondition(*_current_face_info);
     if (bc_pointer || _force_boundary_execution)
     {
-      if (bc_pointer)
-        bc_pointer->setupFaceData(_current_face_info, _current_face_type);
-
       const auto rhs_contribution = computeBoundaryRHSContribution(*bc_pointer);
 
       // We allow internal (for the mesh) boundaries too, so we have to check on which side we

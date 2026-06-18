@@ -1102,7 +1102,7 @@ LinearFVBoundaryCondition *
 RhieChowMassFlux::velocityBoundaryCondition(const FaceInfo * fi, const unsigned int component) const
 {
   mooseAssert(component < _vel.size(), "Velocity component index out of range.");
-  return boundaryCondition(fi, *_vel[component], _vel[component]->sys().number());
+  return fi ? _vel[component]->getBoundaryCondition(*fi) : nullptr;
 }
 
 Real
@@ -1195,7 +1195,7 @@ RhieChowMassFlux::isAdjustablePressureBoundaryFace(const FaceInfo * fi) const
   if (!fi || _vel[0]->isInternalFace(*fi) || fi->boundaryIDs().empty())
     return false;
 
-  if (const auto * bc_pointer = boundaryCondition(fi, *_p, _global_pressure_system_number))
+  if (const auto * bc_pointer = pressureBoundaryCondition(fi))
     return dynamic_cast<const LinearFVPressureFluxBC *>(bc_pointer) ||
            dynamic_cast<const LinearFVPressureSymmetryBC *>(bc_pointer);
 
@@ -1226,26 +1226,9 @@ RhieChowMassFlux::pressureBoundaryNormalAinv(const FaceInfo * fi) const
 }
 
 LinearFVBoundaryCondition *
-RhieChowMassFlux::boundaryCondition(const FaceInfo * fi,
-                                    const MooseLinearVariableFVReal & var,
-                                    const unsigned int system_number) const
-{
-  if (!fi || fi->boundaryIDs().empty())
-    return nullptr;
-
-  mooseAssert(fi->boundaryIDs().size() == 1,
-              "Expected at most one physical boundary id on a FV boundary face.");
-  auto * const bc_pointer = var.getBoundaryCondition(*fi->boundaryIDs().begin());
-  if (bc_pointer)
-    bc_pointer->setupFaceData(fi, fi->faceType(std::make_pair(var.number(), system_number)));
-
-  return bc_pointer;
-}
-
-LinearFVBoundaryCondition *
 RhieChowMassFlux::pressureBoundaryCondition(const FaceInfo * fi) const
 {
-  return boundaryCondition(fi, *_p, _global_pressure_system_number);
+  return fi ? _p->getBoundaryCondition(*fi) : nullptr;
 }
 
 Real

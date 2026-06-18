@@ -201,6 +201,12 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+  /**
+   * Get and initialize the boundary condition object which corresponds to the provided face.
+   * @param fi The face whose boundary condition should be fetched
+   */
+  LinearFVBoundaryCondition * getBoundaryCondition(const FaceInfo & fi) const;
+
   const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
   {
     return _boundary_id_to_bc;

@@ -130,9 +130,6 @@ protected:
                                           const Moose::StateArg & time_arg) const;
   /// Normal diffusion coefficient for the active pressure-correction space.
   virtual Real pressureBoundaryNormalAinv(const FaceInfo * fi) const;
-  LinearFVBoundaryCondition * boundaryCondition(const FaceInfo * fi,
-                                                const MooseLinearVariableFVReal & var,
-                                                unsigned int system_number) const;
   /// Fetch and initialize the pressure boundary condition attached to a boundary face.
   LinearFVBoundaryCondition * pressureBoundaryCondition(const FaceInfo * fi) const;
   /// Whether pressure-correction face fluxes include face area.

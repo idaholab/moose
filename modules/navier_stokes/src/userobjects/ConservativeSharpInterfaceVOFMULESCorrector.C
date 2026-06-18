@@ -23,7 +23,6 @@
 #include "ElemInfo.h"
 #include "MathFVUtils.h"
 #include "MathUtils.h"
-#include "Limiter.h"
 
 #include "timpi/parallel_sync.h"
 
@@ -207,25 +206,12 @@ ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
   }
 }
 
-LinearFVBoundaryCondition *
-ConservativeSharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & fi) const
-{
-  for (const auto bnd_id : fi.boundaryIDs())
-    if (auto * bc = _alpha_var->getBoundaryCondition(bnd_id))
-      return bc;
-
-  return nullptr;
-}
-
 Real
 ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(
     const FaceInfo & fi, const FaceTransportData & face_data) const
 {
   if (auto * bc = face_data.boundary_condition)
-  {
-    bc->setupFaceData(&fi, face_data.face_type);
     return boundedAlpha(bc->computeBoundaryValue());
-  }
 
   const auto * fluid_info = face_data.face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
                                 ? fi.neighborInfo()
@@ -244,7 +230,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & 
   data.volumetric_flux = vofTransportVolumetricFaceFlux(fi);
   data.integrated_flux = data.volumetric_flux * faceMeasure(fi);
   data.upwind_is_elem = data.volumetric_flux >= 0.0;
-  data.boundary_condition = boundaryCondition(fi);
+  data.boundary_condition = _alpha_var->getBoundaryCondition(fi);
   data.boundary_kind =
       classifyBoundaryFace(fi, data.face_type, data.volumetric_flux, data.boundary_condition);
   return data;
@@ -277,7 +263,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
   else if (auto * inlet_outlet_bc =
                dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
   {
-    inlet_outlet_bc->setupFaceData(&fi, face_data.face_type);
     donor_alpha = face_data.upwind_is_elem
                       ? elem_alpha
                       : boundedAlpha(inlet_outlet_bc->computeBoundaryValue(/* backflow = */ true));
@@ -308,7 +293,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
   else if (auto * inlet_outlet_bc =
                dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
   {
-    inlet_outlet_bc->setupFaceData(&fi, face_data.face_type);
     high_order_alpha = boundedAlpha(
         inlet_outlet_bc->computeBoundaryValue(/* backflow = */ !face_data.upwind_is_elem));
   }
@@ -330,16 +314,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::sharedVanLeerFaceValue(const FaceIn
   mooseAssert(fi.neighborPtr(), "Van Leer correction requires an internal face with a neighbor.");
 
   const auto state = Moose::currentState();
-  const auto & upwind_info = upwind_is_elem ? *fi.elemInfo() : *fi.neighborInfo();
-  const auto & downwind_info = upwind_is_elem ? *fi.neighborInfo() : *fi.elemInfo();
-
-  const Real phi_upwind = cellAlpha(upwind_info);
-  const Real phi_downwind = cellAlpha(downwind_info);
-  const VectorValue<Real> grad_upwind = _alpha_var->gradSln(upwind_info, state);
-  const auto limiter = Moose::FV::Limiter<Real>::build(Moose::FV::LimiterType::VanLeer);
-  const Real phi_face =
-      Moose::FV::interpolate(*limiter, phi_upwind, phi_downwind, &grad_upwind, fi, upwind_is_elem);
-  return boundedAlpha(phi_face);
+  const auto face_arg = makeFace(fi, Moose::FV::LimiterType::VanLeer, upwind_is_elem);
+  return boundedAlpha(MetaPhysicL::raw_value((*_alpha_var)(face_arg, state)));
 }
 
 ConservativeSharpInterfaceVOFMULESCorrector::BoundaryFaceKind
