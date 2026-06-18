@@ -70,12 +70,6 @@ private:
     BoundaryFaceKind boundary_kind = BoundaryFaceKind::Internal;
   };
 
-  struct AlphaFluxData
-  {
-    Real donor_flux = 0.0;
-    Real correction_flux = 0.0;
-  };
-
   struct FaceTransportData
   {
     FaceInfo::VarFaceNeighbors face_type = FaceInfo::VarFaceNeighbors::NEITHER;
@@ -112,13 +106,6 @@ private:
                                         FaceInfo::VarFaceNeighbors face_type,
                                         Real volumetric_flux,
                                         const LinearFVBoundaryCondition * bc) const;
-  AlphaFluxData buildAlphaFlux(const FaceInfo & fi,
-                               Real elem_alpha,
-                               Real neighbor_alpha,
-                               const FaceTransportData & face_data) const;
-  Real faceFunctorAverage(const FaceInfo & fi, const Moose::Functor<Real> & functor) const;
-  Real vofTransportVolumetricFaceFlux(const FaceInfo & fi) const;
-  Real integratedVofTransportFaceFlux(const FaceInfo & fi) const;
   Real rhoPhi(const FaceInfo & fi, const Real limited_alpha_flux) const;
   FaceCorrectionData buildFaceCorrectionData(const FaceInfo & fi) const;
   std::vector<FaceCorrectionData> collectFaceCorrectionData() const;
