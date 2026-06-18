@@ -22,13 +22,21 @@
         block = 10
     []
 
-    [SdmPerElemGen]
-        type = SubdomainPerElementGenerator
+    [myDualGen]
+        type = DualMeshGenerator
         input = cut_center
+    []
+
+    [myDiagnosticGenerator]
+        type = MeshDiagnosticsGenerator
+        input = myDualGen
+        examine_element_overlap = ERROR
+        examine_element_volumes = ERROR
+        minimum_element_volumes = 0
     []
 
     [convert]
         type = ElementsToSimplicesConverter
-        input = 'SdmPerElemGen'
+        input = myDiagnosticGenerator
     []
 []

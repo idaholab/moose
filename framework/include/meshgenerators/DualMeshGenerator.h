@@ -28,7 +28,11 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
+  // Angular tolerance for determining colinearity of boundary sides when detecting primal boundary
+  // vertices
   Real _boundary_node_angular_tol;
 
-  bool _clip_boundary;
+  // Dual type; either voronoi (dual nodes at primal element circumcenters) or barycentric (dual
+  // nodes at primal element centroids)
+  MooseEnum _dual_mesh_type;
 };

@@ -26,10 +26,11 @@ DualMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<bool>(
-      "clip_boundary",
-      true,
-      "Whether to clip the padded triangulation dual back to the primal mesh boundary.");
+  MooseEnum dual_mesh_type("voronoi barycentric", "barycentric");
+  params.addParam<MooseEnum>(
+      "dual_mesh_type",
+      dual_mesh_type,
+      "Whether to place dual nodes at Delaunay circumcenters or primal element centroids.");
   params.addRangeCheckedParam<Real>(
       "boundary_node_angular_tol",
       1e-8,
@@ -37,9 +38,9 @@ DualMeshGenerator::validParams()
       "Angular tolerance, in radians, used to decide whether a primal boundary node is collinear "
       "with its two adjacent boundary edges. Nodes whose boundary angle differs from pi by more "
       "than this tolerance are treated as primal boundary vertices.");
-  params.addClassDescription("Takes a 2D mesh as input and returns a Voronoi dual mesh, i.e.,"
+  params.addClassDescription("Takes a 2D mesh as input and returns a dual mesh, i.e.,"
                              "changes each input node into an element and each input element "
-                             "into a node located at its circumcenter.");
+                             "into a node located at its circumcenter or centroid.");
   return params;
 }
 
@@ -47,7 +48,7 @@ DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _boundary_node_angular_tol(getParam<Real>("boundary_node_angular_tol")),
-    _clip_boundary(getParam<bool>("clip_boundary"))
+    _dual_mesh_type(getParam<MooseEnum>("dual_mesh_type"))
 {
 }
 
@@ -92,9 +93,9 @@ DualMeshGenerator::circumcenter(const Elem * elem)
   return Point(cx, cy, 0.0);
 }
 
-// True only when two triangles share a full edge.
+// True only when two elements share a full edge.
 static bool
-trianglesShareTwoNodes(const Elem * a, const Elem * b)
+elementsShareTwoNodes(const Elem * a, const Elem * b)
 {
   unsigned int shared_nodes = 0;
 
@@ -229,9 +230,10 @@ DualMeshGenerator::generate()
   if (input_mesh->mesh_dimension() != 2)
     mooseError("DualMeshGenerator currently only supports 2D Meshes");
 
-  auto tri_mesh = buildReplicatedMesh(2);
+  const bool use_voronoi = _dual_mesh_type == "voronoi";
 
   std::unordered_map<dof_id_type, Point> boundary_node_points;
+  std::unordered_map<dof_id_type, std::vector<Point>> boundary_node_midpoints;
   std::vector<BoundarySegment> physical_boundary_segments;
 
   for (const auto & elem : input_mesh->element_ptr_range())
@@ -252,18 +254,13 @@ DualMeshGenerator::generate()
 
           boundary_node_points[node0] = side_elem->point(0);
           boundary_node_points[node1] = side_elem->point(1);
+
+          const Point midpoint = 0.5 * (side_elem->point(0) + side_elem->point(1));
+          boundary_node_midpoints[node0].push_back(midpoint);
+          boundary_node_midpoints[node1].push_back(midpoint);
         }
       }
     }
-  }
-
-  for (const auto & node : input_mesh->node_ptr_range())
-  {
-    Node * new_node = tri_mesh->add_point(*node);
-
-    auto node_elem = std::make_unique<NodeElem>();
-    node_elem->set_node(0) = new_node;
-    tri_mesh->add_elem(std::move(node_elem));
   }
 
   std::unordered_map<dof_id_type, std::vector<std::size_t>> boundary_node_to_segments;
@@ -373,47 +370,74 @@ DualMeshGenerator::generate()
     if (!used_boundary_segments[segment_id])
       traceBoundaryClipSegment(physical_boundary_segments[segment_id].node0, segment_id);
 
-  Node * p0 = tri_mesh->add_point(Point(-100.0, -100.0, 0.0));
-  Node * p1 = tri_mesh->add_point(Point(100.0, -100.0, 0.0));
-  Node * p2 = tri_mesh->add_point(Point(100.0, 100.0, 0.0));
-  Node * p3 = tri_mesh->add_point(Point(-100.0, 100.0, 0.0));
+  std::vector<Point> dual_centers;
+  std::unordered_map<dof_id_type, dof_id_type> source_elem_to_center_id;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> source_node_to_elems;
+  std::unique_ptr<ReplicatedMesh> tri_mesh;
 
-  auto big_square = std::make_unique<Quad4>();
-
-  big_square->set_node(0) = p0;
-  big_square->set_node(1) = p1;
-  big_square->set_node(2) = p2;
-  big_square->set_node(3) = p3;
-
-  tri_mesh->add_elem(std::move(big_square));
-
-  Poly2TriTriangulator triangulator(dynamic_cast<UnstructuredMesh &>(*tri_mesh));
-  triangulator.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
-  triangulator.minimum_angle() = 0;
-  triangulator.desired_area() = 0;
-
-  triangulator.insert_extra_points() = false;
-  triangulator.smooth_after_generating() = false;
-
-  triangulator.triangulate();
-
-  std::vector<Point> circumcenters;
-  std::unordered_map<dof_id_type, dof_id_type> tri_elem_to_cc_id;
-  std::unordered_map<dof_id_type, std::vector<const Elem *>> triangulation_node_to_triangles;
-
-  // Compute triangle circumcenters.
-  for (const auto & tri_elem : tri_mesh->element_ptr_range())
+  if (use_voronoi)
   {
-    if (tri_elem->n_vertices() != 3)
-      continue;
+    tri_mesh = buildReplicatedMesh(2);
 
-    const dof_id_type cc_id = circumcenters.size();
+    for (const auto & node : input_mesh->node_ptr_range())
+    {
+      Node * new_node = tri_mesh->add_point(*node);
 
-    circumcenters.push_back(circumcenter(tri_elem));
-    tri_elem_to_cc_id[tri_elem->id()] = cc_id;
+      auto node_elem = std::make_unique<NodeElem>();
+      node_elem->set_node(0) = new_node;
+      tri_mesh->add_elem(std::move(node_elem));
+    }
 
-    for (const auto n : make_range(tri_elem->n_nodes()))
-      triangulation_node_to_triangles[tri_elem->node_id(n)].push_back(tri_elem);
+    Node * p0 = tri_mesh->add_point(Point(-100.0, -100.0, 0.0));
+    Node * p1 = tri_mesh->add_point(Point(100.0, -100.0, 0.0));
+    Node * p2 = tri_mesh->add_point(Point(100.0, 100.0, 0.0));
+    Node * p3 = tri_mesh->add_point(Point(-100.0, 100.0, 0.0));
+
+    auto big_square = std::make_unique<Quad4>();
+
+    big_square->set_node(0) = p0;
+    big_square->set_node(1) = p1;
+    big_square->set_node(2) = p2;
+    big_square->set_node(3) = p3;
+
+    tri_mesh->add_elem(std::move(big_square));
+
+    Poly2TriTriangulator triangulator(dynamic_cast<UnstructuredMesh &>(*tri_mesh));
+    triangulator.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
+    triangulator.minimum_angle() = 0;
+    triangulator.desired_area() = 0;
+
+    triangulator.insert_extra_points() = false;
+    triangulator.smooth_after_generating() = false;
+
+    triangulator.triangulate();
+
+    for (const auto & tri_elem : tri_mesh->element_ptr_range())
+    {
+      if (tri_elem->n_vertices() != 3)
+        continue;
+
+      const dof_id_type center_id = dual_centers.size();
+
+      dual_centers.push_back(circumcenter(tri_elem));
+      source_elem_to_center_id[tri_elem->id()] = center_id;
+
+      for (const auto n : make_range(tri_elem->n_nodes()))
+        source_node_to_elems[tri_elem->node_id(n)].push_back(tri_elem);
+    }
+  }
+  else
+  {
+    for (const auto & elem : input_mesh->element_ptr_range())
+    {
+      const dof_id_type center_id = dual_centers.size();
+
+      dual_centers.push_back(elem->true_centroid());
+      source_elem_to_center_id[elem->id()] = center_id;
+
+      for (const auto n : make_range(elem->n_nodes()))
+        source_node_to_elems[elem->node_id(n)].push_back(elem);
+    }
   }
 
   auto dualMesh = buildReplicatedMesh(2);
@@ -570,16 +594,17 @@ DualMeshGenerator::generate()
       dualMesh->add_elem(std::move(dual_elem));
   };
 
-  // Build one dual element around each triangulation node.
-  for (const auto & node_triangles : triangulation_node_to_triangles)
+  // Build one dual element around each source node.
+  for (const auto & node_elems : source_node_to_elems)
   {
-    const auto & incident_tris = node_triangles.second;
+    const dof_id_type source_node_id = node_elems.first;
+    const auto & incident_elems = node_elems.second;
 
-    std::vector<std::vector<unsigned int>> adjacency(incident_tris.size());
+    std::vector<std::vector<unsigned int>> adjacency(incident_elems.size());
 
-    for (unsigned int i = 0; i < incident_tris.size(); ++i)
-      for (unsigned int j = i + 1; j < incident_tris.size(); ++j)
-        if (trianglesShareTwoNodes(incident_tris[i], incident_tris[j]))
+    for (unsigned int i = 0; i < incident_elems.size(); ++i)
+      for (unsigned int j = i + 1; j < incident_elems.size(); ++j)
+        if (elementsShareTwoNodes(incident_elems[i], incident_elems[j]))
         {
           adjacency[i].push_back(j);
           adjacency[j].push_back(i);
@@ -595,24 +620,25 @@ DualMeshGenerator::generate()
         break;
       }
 
-    std::vector<bool> used(incident_tris.size(), false);
-    std::vector<dof_id_type> ordered_cc_ids;
+    std::vector<bool> used(incident_elems.size(), false);
+    std::vector<dof_id_type> ordered_center_ids;
 
     unsigned int current = start;
     unsigned int previous = libMesh::invalid_uint;
 
-    // Walk triangle adjacency to collect circumcenters in connected order.
+    // Walk element adjacency to collect dual centers in connected order.
     while (true)
     {
-      const Elem * tri = incident_tris[current];
+      const Elem * elem = incident_elems[current];
 
-      auto it = tri_elem_to_cc_id.find(tri->id());
-      if (it != tri_elem_to_cc_id.end())
+      auto it = source_elem_to_center_id.find(elem->id());
+      if (it != source_elem_to_center_id.end())
       {
-        const dof_id_type cc_id = it->second;
+        const dof_id_type center_id = it->second;
 
-        if (std::find(ordered_cc_ids.begin(), ordered_cc_ids.end(), cc_id) == ordered_cc_ids.end())
-          ordered_cc_ids.push_back(cc_id);
+        if (std::find(ordered_center_ids.begin(), ordered_center_ids.end(), center_id) ==
+            ordered_center_ids.end())
+          ordered_center_ids.push_back(center_id);
       }
 
       used[current] = true;
@@ -634,18 +660,61 @@ DualMeshGenerator::generate()
     }
 
     std::vector<Point> dual_points;
+    std::vector<Point> source_center_points;
 
-    for (const auto cc_id : ordered_cc_ids)
-      addUniquePoint(dual_points, circumcenters[cc_id]);
+    for (const auto center_id : ordered_center_ids)
+    {
+      addUniquePoint(dual_points, dual_centers[center_id]);
+      source_center_points.push_back(dual_centers[center_id]);
+    }
 
-    if (_clip_boundary && dual_points.size() >= 3)
+    if (!use_voronoi)
+    {
+      const auto boundary_midpoint_it = boundary_node_midpoints.find(source_node_id);
+
+      if (boundary_midpoint_it != boundary_node_midpoints.end())
+      {
+        const auto boundary_point_it = boundary_node_points.find(source_node_id);
+
+        if (boundary_vertex_nodes.count(source_node_id) &&
+            boundary_point_it != boundary_node_points.end())
+          addUniquePoint(dual_points, boundary_point_it->second);
+
+        for (const auto & midpoint : boundary_midpoint_it->second)
+          addUniquePoint(dual_points, midpoint);
+
+        if (boundary_point_it != boundary_node_points.end() && !source_center_points.empty())
+        {
+          Point center_average;
+
+          for (const auto & center_point : source_center_points)
+            center_average += center_point;
+
+          center_average /= source_center_points.size();
+
+          const Point sort_center = 0.5 * (boundary_point_it->second + center_average);
+
+          std::sort(dual_points.begin(),
+                    dual_points.end(),
+                    [&sort_center](const Point & a, const Point & b)
+                    {
+                      return std::atan2(a(1) - sort_center(1), a(0) - sort_center(0)) <
+                             std::atan2(b(1) - sort_center(1), b(0) - sort_center(0));
+                    });
+        }
+      }
+    }
+
+    if (dual_points.size() >= 3)
       dual_points = clipDualPolygonToBoundary(dual_points);
 
     if (dual_points.size() < 3)
       continue;
 
-    const std::size_t concave_vertex_index =
-        _clip_boundary ? concaveBoundaryVertexIndex(dual_points) : dual_points.size();
+    const bool split_concave_boundary_polygon = !use_voronoi;
+    const std::size_t concave_vertex_index = split_concave_boundary_polygon
+                                                 ? concaveBoundaryVertexIndex(dual_points)
+                                                 : dual_points.size();
 
     if (concave_vertex_index < dual_points.size())
     {
