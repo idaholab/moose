@@ -59,7 +59,7 @@ protected:
                                         const Real abs_tol,
                                         std::ostringstream & oss);
 
-  ///Performs setup necessary for each call to checkConvergence
+  /// Performs setup necessary for each call to checkConvergence
   virtual void nonlinearConvergenceSetup() {}
 
   FEProblemBase & _fe_problem;

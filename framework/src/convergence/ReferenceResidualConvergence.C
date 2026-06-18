@@ -121,7 +121,7 @@ ReferenceResidualConvergence::initialSetup()
   // individual variables compared against their reference quantities in the
   // tag vector. The code depends on having _soln_var_names populated,
   // so fill that out if they didn't specify solution_variables.
-  for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+  for (const auto var_num : make_range(s.n_vars()))
     _soln_var_names.push_back(s.variable_name(var_num));
   const auto n_soln_vars = nonlinear_sys.nVariables();
 
@@ -141,7 +141,7 @@ ReferenceResidualConvergence::initialSetup()
     _converge_on_var.assign(n_soln_vars, true);
 
   unsigned int num_variables_in_groups = 0;
-  for (unsigned int i = 0; i < _group_variables.size(); ++i)
+  for (const auto i : index_range(_group_variables))
   {
     num_variables_in_groups += _group_variables[i].size();
     if (_group_variables[i].size() == 1)
@@ -163,8 +163,8 @@ ReferenceResidualConvergence::initialSetup()
   if (_use_group_variables)
   {
     std::set<std::string> check_duplicate;
-    for (unsigned int i = 0; i < _group_variables.size(); ++i)
-      for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
+    for (const auto i : index_range(_group_variables))
+      for (const auto j : index_range(_group_variables[i]))
         check_duplicate.insert(_group_variables[i][j]);
 
     if (check_duplicate.size() != num_variables_in_groups)
@@ -172,10 +172,10 @@ ReferenceResidualConvergence::initialSetup()
   }
 
   _soln_vars.clear();
-  for (unsigned int i = 0; i < n_soln_vars; ++i)
+  for (const auto i : make_range(n_soln_vars))
   {
     bool found_match = false;
-    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+    for (const auto var_num : make_range(s.n_vars()))
       if (_soln_var_names[i] == s.variable_name(var_num))
       {
         _soln_vars.push_back(var_num);
@@ -202,7 +202,7 @@ ReferenceResidualConvergence::initialSetup()
   {
     if (_use_group_variables)
     {
-      for (unsigned int j = 0; j < _group_variables.size(); ++j)
+      for (const auto j : index_range(_group_variables))
         if (std::find(_group_variables[j].begin(),
                       _group_variables[j].end(),
                       s.variable_name(_soln_vars[i])) != _group_variables[j].end())
@@ -230,14 +230,14 @@ ReferenceResidualConvergence::initialSetup()
   }
 
   // Check for variable groups containing both field and scalar variables
-  for (unsigned int i = 0; i < _group_variables.size(); ++i)
+  for (const auto i : index_range(_group_variables))
   {
     unsigned int num_scalar_vars = 0;
     unsigned int num_field_vars = 0;
     if (_group_variables[i].size() > 1)
     {
-      for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
-        for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
+      for (const auto j : index_range(_group_variables[i]))
+        for (const auto var_num : make_range(s.n_vars()))
           if (_group_variables[i][j] == s.variable_name(var_num))
           {
             if (nonlinear_sys.isScalarVariable(_soln_vars[var_num]))
@@ -253,11 +253,11 @@ ReferenceResidualConvergence::initialSetup()
                    i);
   }
 
-  for (unsigned int i = 0; i < _group_names.size(); ++i)
+  for (const auto i : index_range(_group_names))
   {
     // Accumulate names for a given group
     std::vector<NonlinearVariableName> names;
-    for (unsigned int j = 0; j < _group_index.size(); ++j)
+    for (const auto j : index_range(_group_index))
       if (_group_index[j] == i)
       {
         names.push_back(_soln_var_names[j]);
@@ -270,7 +270,7 @@ ReferenceResidualConvergence::initialSetup()
     else
     {
       _group_names[i] = "(";
-      for (unsigned int j = 0; j < names.size(); ++j)
+      for (const auto j : index_range(names))
       {
         _group_names[i] += names[j];
         if (j != names.size() - 1)
@@ -289,7 +289,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
   auto & current_nl_sys = _fe_problem.currentNonlinearSystem();
   auto & s = current_nl_sys.system();
 
-  for (unsigned int i = 0; i < _scaling_factors.size(); ++i)
+  for (const auto i : index_range(_scaling_factors))
     if (current_nl_sys.isScalarVariable(_soln_vars[i]))
       _scaling_factors[i] = current_nl_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
     else
@@ -339,7 +339,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
     }
   }
 
-  for (unsigned int i = 0; i < _group_resid.size(); ++i)
+  for (const auto i : index_range(_group_resid))
   {
     _group_resid[i] = std::sqrt(_group_resid[i]);
     _group_ref_resid[i] = std::sqrt(_group_ref_resid[i]);
@@ -363,11 +363,11 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
     // Set residual and references so that they always have a spacing of 8
     out << std::setprecision(2) << std::scientific;
     unsigned int var_space = 0;
-    for (unsigned int i = 0; i < _group_names.size(); ++i)
+    for (const auto i : index_range(_group_names))
       if (_group_names[i].size() > var_space)
         var_space = _group_names[i].size();
 
-    for (unsigned int i = 0; i < _group_names.size(); ++i)
+    for (const auto i : index_range(_group_names))
     {
       if (_converge_on_group[i])
       {
@@ -410,7 +410,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   //        convergence in an absolute way)
 
   bool convergedRelative = true;
-  for (unsigned int i = 0; i < _group_resid.size(); ++i)
+  for (const auto i : index_range(_group_resid))
     convergedRelative &=
         ((!_local_norm && _group_resid[i] < _group_ref_resid[i] * rel_tol) ||
          (_local_norm && _group_ref_resid[i] < rel_tol) || _group_resid[i] < abs_tol ||
