@@ -1,0 +1,92 @@
+[Tests]
+  design = 'syntax/Variables/index.md'
+  issues = '#33092'
+  [coupled_scalar_vector]
+    type = Exodiff
+    input = 'kokkos_coupled_scalar_vector.i'
+    exodiff = 'kokkos_coupled_scalar_vector_out.e'
+    abs_zero = 1e-8
+    requirement = "The Kokkos system shall be able to couple a vector variable into a standard kernel."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_scalar_vector_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_coupled_scalar_vector_jacobian.i'
+    recover = false
+    ratio_tol = 5e-7
+    difference_tol = 5e-7
+    requirement = "The Kokkos system shall be able to couple a vector variable into a standard kernel and produce the correct Jacobian."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_scalar_default_vector]
+    type = Exodiff
+    input = 'kokkos_coupled_scalar_default_vector_value.i'
+    exodiff = 'kokkos_coupled_scalar_default_vector_value_out.e'
+    requirement = "The Kokkos system shall be able to assign a default value for a vector variable."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_scalar_default_vector_input_and_warn]
+    type = Exodiff
+    input = 'kokkos_coupled_scalar_default_vector_value.i'
+    exodiff = 'kokkos_coupled_scalar_default_vector_value_alt_out.e'
+    allow_warnings = True
+    cli_args = "Kernels/advection/efield='.3 .3' Outputs/file_base=kokkos_coupled_scalar_default_vector_value_alt_out"
+    expect_out = "You supplied less than 3 arguments for the default vector value for variable efield"
+    requirement = "The Kokkos system shall warn when assigning a default value with number of components less than LIBMESH_DIM, "
+                  "and it shall be able to assign the default value from the input file."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_scalar_default_vector_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_coupled_scalar_default_vector_value.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    run_sim = True
+    cli_args = 'Mesh/nx=3 Mesh/ny=3 Outputs/exodus=false'
+    requirement = "The Kokkos system shall be able to assign a default value for a "
+                  "vector variable from the input file and still have the correct jacobian."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_vector_gradient]
+    type = Exodiff
+    input = 'kokkos_coupled_vector_gradient.i'
+    exodiff = 'kokkos_coupled_vector_gradient_out.e'
+    requirement = "The Kokkos system shall be able to obtain coupled vector variable gradients."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [lagrange_vec]
+    type = Exodiff
+    input = 'kokkos_lagrange_vec.i'
+    exodiff = 'kokkos_lagrange_vec_out.e'
+    abs_zero = 1e-8
+    requirement = "The Kokkos system shall be able to solve multi-dimensional "
+                  "problems with vector Lagrange variables."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [lagrange_vec_1d]
+    type = Exodiff
+    input = 'kokkos_lagrange_vec_1d.i'
+    exodiff = 'kokkos_lagrange_vec_1d_out.e'
+    abs_zero = 1e-8
+    requirement = "The Kokkos system shall be able to solve one-dimensional problems with vector Lagrange variables."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [lagrange_vec_1d_jac]
+    type = PetscJacobianTester
+    input = 'kokkos_lagrange_vec_1d.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = 'Outputs/exodus=false Mesh/nx=3'
+    requirement = "The Kokkos system shall be able to solve one-dimensional problems with vector Lagrange variables and produce the correct Jacobian."
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
