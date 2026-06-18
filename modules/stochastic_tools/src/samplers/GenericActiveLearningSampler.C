@@ -47,7 +47,9 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
-    _num_tries(getParam<unsigned int>("num_tries"))
+    _new_samples(declareRecoverableData<std::vector<std::vector<Real>>>("new_samples")),
+    _num_tries(getParam<unsigned int>("num_tries")),
+    _inputs_all(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_all"))
 {
   // Filling the `distributions` vector with the user-provided distributions.
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))

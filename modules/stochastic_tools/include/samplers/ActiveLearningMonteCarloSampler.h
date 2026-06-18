@@ -39,7 +39,7 @@ protected:
   const std::vector<bool> & _flag_sample;
 
   /// True if the sampling is completed
-  bool _is_sampling_completed = false;
+  bool & _is_sampling_completed;
 
 private:
   /// Track the current step of the main App
@@ -52,11 +52,11 @@ private:
   const int & _num_samples;
 
   /// Number of retraining performed
-  int _retraining_steps = 0;
+  int & _retraining_steps;
 
   /// Storage for previously accepted samples by the decision reporter system
-  std::vector<std::vector<Real>> _inputs_sto;
+  std::vector<std::vector<Real>> & _inputs_sto;
 
   /// Store the input params for which the GP fails
-  std::vector<std::vector<Real>> _inputs_gp_fails;
+  std::vector<std::vector<Real>> & _inputs_gp_fails;
 };
