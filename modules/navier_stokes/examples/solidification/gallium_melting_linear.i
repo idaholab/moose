@@ -15,11 +15,11 @@ L = 80160
 alpha_b = 1.2e-4
 T_solidus = 302.93
 T_liquidus = '${fparse T_solidus + 0.1}'
-advected_interp_method = 'upwind'
+advected_interp_method = 'average' #'upwind'
 T_cold = 301.15
 T_hot = 311.15
-Nx = 100
-Ny = 50
+Nx = 200
+Ny = 120
 
 [Mesh]
   [gen]
@@ -31,6 +31,7 @@ Ny = 50
     ymax = 63.5e-3
     nx = ${Nx}
     ny = ${Ny}
+    bias_x = 1.005
   []
 []
 
@@ -120,7 +121,7 @@ Ny = 50
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.5
+    initial_condition = 0.0
     solver_sys = u_system
   []
   [vel_y]
@@ -191,7 +192,7 @@ Ny = 50
     rho = '${rho_liquid}'
     gravity = '0 -9.81 0'
     alpha_name = ${alpha_b}
-    ref_temperature = ${T_cold}
+    ref_temperature = ${T_solidus}
     T_fluid = T
     momentum_component = 'x'
   []
@@ -201,7 +202,7 @@ Ny = 50
     rho = '${rho_liquid}'
     gravity = '0 -9.81 0'
     alpha_name = ${alpha_b}
-    ref_temperature = ${T_cold}
+    ref_temperature = ${T_solidus}
     T_fluid = T
     momentum_component = 'y'
   []
@@ -291,7 +292,7 @@ Ny = 50
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
     functor = '${T_cold}'
-    boundary = 'bottom'
+    boundary = 'right'
   []
 []
 
@@ -314,7 +315,7 @@ Ny = 50
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'
-    dendrite_spacing_scaling = 1e-1
+    dendrite_spacing_scaling = 1e-3
   []
   [darcy_coeff_friction]
     type = ParsedFunctorMaterial
@@ -347,7 +348,7 @@ Ny = 50
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.9
-  num_iterations = 50
+  num_iterations = 8
   pressure_absolute_tolerance = 1e-11
   momentum_absolute_tolerance = 1e-11
   energy_absolute_tolerance = 1e-11
@@ -359,11 +360,12 @@ Ny = 50
   energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  dt = 0.1
+  dt = 0.005
+  # scheme = 'bdf2'
   #num_steps = 300
 
   start_time = 0.0
-  end_time = 200.0
+  end_time = 60
   # [TimeStepper]
   #   type = IterationAdaptiveDT
   #   # Raise time step often but not by as much
@@ -406,6 +408,9 @@ Ny = 50
 # []
 
 [Outputs]
-  exodus = true
+  [out_avg]
+    type = Exodus
+    time_step_interval = 2000
+  []
   csv = false
 []
