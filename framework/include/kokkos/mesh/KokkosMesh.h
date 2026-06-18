@@ -98,12 +98,11 @@ public:
   auto getNumLocalElements() const { return _num_local_elems; }
   /**
    * Get the number of ghost (off-process neighbor) elements.
-   * Only nonzero when LinearFV is active.
    * @returns The number of ghost elements
    */
   auto getNumGhostElements() const { return _num_ghost_elems; }
   /**
-   * Get the total number of elements including semi-local elements
+   * Get the total number of elements, i.e. the local elements plus the ghost elements
    * @returns The total number of elements
    */
   auto getNumTotalElements() const { return _num_local_elems + _num_ghost_elems; }
@@ -306,6 +305,11 @@ public:
     return _linearfv_elem_centroid[elem];
   }
 
+  /**
+   * Allocate and populate the cached geometry data used by Kokkos LinearFV objects: element volumes
+   * and centroids, and per-face areas, centroids, cell-to-face and cell-to-neighbor vectors and
+   * their magnitudes, and boundary IDs
+   */
   void initLinearFV();
 
   /**
@@ -441,8 +445,7 @@ private:
      */
     std::unordered_map<const Node *, ContiguousNodeID> ghost_node_id_mapping;
     /**
-     * Map from off-process semi-local Elem* to its contiguous element ID on this process.
-     * Only populated when LinearFV is active.
+     * Map from off-process ghost Elem* to its contiguous element ID on this process
      */
     std::unordered_map<const Elem *, ContiguousElementID> ghost_elem_id_mapping;
     /**
@@ -479,7 +482,7 @@ private:
    */
   dof_id_type _num_local_elems = 0;
   /**
-   * Number of ghost (off-process neighbor) elements. Only nonzero when LinearFV is active.
+   * Number of ghost (off-process neighbor) elements
    */
   dof_id_type _num_ghost_elems = 0;
   /**

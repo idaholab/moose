@@ -37,7 +37,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     MeshHolder(
         *parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
     SystemHolder(
-        parameters.getCheckedPointerParam<::SystemBase *>("_sys")->feProblem().getKokkosSystems()),
+        parameters.getCheckedPointerParam<SystemBase *>("_sys")->feProblem().getKokkosSystems()),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),

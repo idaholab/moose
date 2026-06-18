@@ -218,9 +218,9 @@ public:
   virtual unsigned int oldestSolutionStateRequested() const = 0;
 
   /**
-   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
-   * default but derived variable classes may choose not to unless this API is
-   * called
+   * Request that quadrature point data be (pre)computed. FE variables (pre)compute quadrature point
+   * data by default, so this is a no-op for them. Some FV variables (e.g. linear FV variables) do
+   * not compute it by default and use this call to opt in.
    */
   virtual void requireQpComputations() const {}
 };

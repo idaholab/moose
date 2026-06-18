@@ -9,6 +9,10 @@
 
 #include "ElementPostprocessor.h"
 
+/**
+ * Postprocessor that computes the volume average of a functor over the elements. The functor is
+ * evaluated with element spatial arguments and does not use quadrature points.
+ */
 class ElementFVAverageValue : public ElementPostprocessor
 {
 public:
@@ -24,8 +28,12 @@ public:
   Real getValue() const override;
 
 protected:
+  /// The functor being averaged
   const Moose::Functor<Real> & _functor;
+  /// Running volume integral of the functor
   Real _integral = 0;
+  /// Running total element volume
   Real _volume = 0;
+  /// The resulting volume average (integral / volume)
   Real _avg = 0;
 };

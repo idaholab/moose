@@ -33,9 +33,14 @@ public:
   virtual void initialSetup() override;
 
 protected:
+  /// The mesh
   const MooseMesh & _mesh;
+  /// The variable being monitored
   MooseVariableField<Real> & _var;
+  /// The element solution values of the monitored variable
   const VariableValue & _var_sln;
+  /// The element on which the variable value is monitored
   const Elem * _element;
+  /// The computed elemental variable value
   Real _value;
 };

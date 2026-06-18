@@ -12,6 +12,11 @@
 #include "KokkosLinearFVBoundaryCondition.h"
 #include "KokkosParsedFunction.h"
 
+/**
+ * Applies a prescribed outward normal flux on a boundary for Kokkos linear finite volume
+ * advection-diffusion kernels. It is the Kokkos analog of
+ * LinearFVAdvectionDiffusionFunctorNeumannBC.
+ */
 class KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
   : public Moose::Kokkos::LinearFVBoundaryCondition
 {

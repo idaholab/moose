@@ -46,7 +46,7 @@ System::System(const System & src)
 {
 }
 
-System::System(::SystemBase & system)
+System::System(SystemBase & system)
   : PerfGraphInterface(system.feProblem().getMooseApp().perfGraph(), "KokkosSystem"),
     MeshHolder(*system.mesh().getKokkosMesh()),
     _system(system),

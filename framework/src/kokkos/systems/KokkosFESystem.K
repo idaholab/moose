@@ -21,7 +21,7 @@
 namespace Moose::Kokkos
 {
 
-FESystem::FESystem(::SystemBase & system)
+FESystem::FESystem(SystemBase & system)
   : System(system), AssemblyHolder(system.feProblem().kokkosAssembly())
 {
   setupVariables();
@@ -34,7 +34,7 @@ FESystem::FESystem(::SystemBase & system)
   _qp_solutions_grad.create(MAX_TAG);
 }
 
-FESystem::FESystem(System & base, ::SystemBase & system)
+FESystem::FESystem(System & base, SystemBase & system)
   : System(base), AssemblyHolder(system.feProblem().kokkosAssembly())
 {
   setupVariables();
