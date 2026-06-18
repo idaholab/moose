@@ -324,4 +324,3 @@ TEST(SBMBndElementTest, UnsupportedGeometryDispatchersThrow)
       },
       std::exception);
 }
-

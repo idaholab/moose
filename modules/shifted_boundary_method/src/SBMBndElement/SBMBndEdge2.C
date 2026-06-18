@@ -11,8 +11,7 @@
 #include "Ball.h"
 
 SBMBndEdge2::SBMBndEdge2(const Elem * elem)
-  : LineSegment(elem->point(0), elem->point(1)),
-    SBMBndElementBase(elem, LineSegment::normal())
+  : LineSegment(elem->point(0), elem->point(1)), SBMBndElementBase(elem, LineSegment::normal())
 {
   mooseAssert(elem->type() == EDGE2, "Element must be of type EDGE2");
   mooseAssert(MooseUtils::absoluteFuzzyEqual(elem->point(0)(2), elem->point(1)(2)),
