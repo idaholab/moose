@@ -37,10 +37,22 @@ PIMPLE::PIMPLE(const InputParameters & parameters) : TransientBase(parameters), 
 void
 PIMPLE::init()
 {
-  _pimple_solve.initialSetup();
+  auto & solve = pimpleSolve();
+  solve.initialSetup();
   TransientBase::init();
-  _pimple_solve.linkRhieChowUserObject();
-  _pimple_solve.setupPressurePin();
+  solve.linkRhieChowUserObject();
+  solve.setupPressurePin();
+}
+
+void
+PIMPLE::takeStep(Real input_dt)
+{
+  Real dt_to_take = input_dt;
+  if (dt_to_take == -1.0)
+    dt_to_take = computeConstrainedDT();
+
+  TransientBase::takeStep(dt_to_take);
+  postTakeStep();
 }
 
 Real
@@ -52,7 +64,7 @@ PIMPLE::relativeSolutionDifferenceNorm(bool check_aux) const
   {
     // Default criterion for now until we add a "steady-state-convergence-object" option
     Real residual = 0;
-    for (const auto sys : _pimple_solve.systemsToSolve())
+    for (const auto sys : pimpleSolve().systemsToSolve())
       residual +=
           std::pow(sys->solution().l2_norm_diff(sys->solutionOld()) / sys->solution().l2_norm(), 2);
     return std::sqrt(residual);
@@ -65,7 +77,7 @@ PIMPLE::getTimeIntegrators() const
   // We use a set because time integrators were added to every system, and we want a unique
   std::set<TimeIntegrator *> tis;
   // Get all time integrators from the systems in the FEProblemSolve
-  for (const auto sys : _pimple_solve.systemsToSolve())
+  for (const auto sys : pimpleSolve().systemsToSolve())
     for (const auto & ti : sys->getTimeIntegrators())
       tis.insert(ti.get());
   return tis;

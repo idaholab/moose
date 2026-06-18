@@ -50,7 +50,6 @@ protected:
 private:
   bool startupPressureInitializationEnabled() const;
   void initializeStartupPressureField(const SolverParams & solver_params);
-  void performStartupContinuityCorrections(const SolverParams & solver_params);
   unsigned int computeVolumeFractionSubcycles() const;
   void synchronizeSystemState(LinearSystem & system) const;
   std::vector<std::pair<unsigned int, Real>> solveVolumeFractionSystems();

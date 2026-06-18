@@ -25,11 +25,15 @@ public:
   PIMPLE(const InputParameters & parameters);
 
   virtual void init() override;
+  virtual void takeStep(Real input_dt = -1.0) override;
 
   virtual Real relativeSolutionDifferenceNorm(bool check_aux) const override;
 
 protected:
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;
+  virtual PIMPLESolve & pimpleSolve() { return _pimple_solve; }
+  virtual const PIMPLESolve & pimpleSolve() const { return _pimple_solve; }
+  virtual void postTakeStep() {}
 
   /// The solve object performing the PIMPLE iteration
   PIMPLESolve _pimple_solve;

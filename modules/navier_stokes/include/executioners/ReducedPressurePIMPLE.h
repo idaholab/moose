@@ -26,12 +26,10 @@ public:
 
   ReducedPressurePIMPLE(const InputParameters & parameters);
 
-  void init() override;
-  void takeStep(Real input_dt = -1.0) override;
-  Real relativeSolutionDifferenceNorm(bool check_aux) const override;
-
 protected:
-  std::set<TimeIntegrator *> getTimeIntegrators() const override;
+  PIMPLESolve & pimpleSolve() override { return _reduced_pimple_solve; }
+  const PIMPLESolve & pimpleSolve() const override { return _reduced_pimple_solve; }
+  void postTakeStep() override;
 
   ReducedPressurePIMPLESolve _reduced_pimple_solve;
 };

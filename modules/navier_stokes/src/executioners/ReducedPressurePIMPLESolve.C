@@ -303,25 +303,13 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
 
   assembleMomentumPredictorWithoutSolve();
   _rc_uo->initFaceMassFlux();
-  performStartupContinuityCorrections(solver_params);
-  synchronizeSystemState(_pressure_system);
-  _problem.execute(EXEC_NONLINEAR);
-}
-
-void
-ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverParams & solver_params)
-{
-  if (!startupPressureInitializationEnabled() || _problem.timeStep() != 1)
-    return;
-
-  if (!_should_solve_pressure || _momentum_systems.empty() || !_rc_uo)
-    return;
 
   _console << "Applying startup continuity corrections" << std::endl;
 
   for (unsigned int startup_it = 0; startup_it < _startup_flux_corrections; ++startup_it)
     (void)correctStartupContinuityOnce(solver_params);
 
+  synchronizeSystemState(_pressure_system);
   _problem.execute(EXEC_NONLINEAR);
 }
 
