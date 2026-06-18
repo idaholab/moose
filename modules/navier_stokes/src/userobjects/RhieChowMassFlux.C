@@ -315,8 +315,7 @@ RhieChowMassFlux::setupMeshInformation()
 
   _flow_face_info.clear();
   for (auto & fi : _fe_problem.mesh().faceInfo())
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
-        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    if (isFlowFace(*fi))
       _flow_face_info.push_back(fi);
 
   for (const auto * fi : _flow_face_info)
@@ -401,13 +400,8 @@ RhieChowMassFlux::initFaceMassFlux()
     // On the boundary, we just take the boundary values
     else
     {
-      const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-      const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
-
-      // We need this multiplier in case the face is an internal face and
-      const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+      const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+      const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, boundaryElemInfo(fi).elem());
 
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
@@ -549,8 +543,7 @@ RhieChowMassFlux::computeDiscretePressureFaceFlux(const FaceInfo * fi) const
 
   if (auto * bc_pointer = pressureBoundaryCondition(fi))
   {
-    const ElemInfo & elem_info =
-        hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+    const ElemInfo & elem_info = boundaryElemInfo(fi);
     const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
     const auto p_elem_value = p_reader(elem_dof);
     const auto matrix_contribution =
@@ -1060,11 +1053,8 @@ RhieChowMassFlux::updateVelocityBoundaryState()
       continue;
 
     RealVectorValue density_times_velocity;
-    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-    const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
-    const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-    const Moose::FaceArg boundary_face{
-        fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+    const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+    const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, boundaryElemInfo(fi).elem());
     const Real face_rho = _rho(boundary_face, time_arg);
 
     for (const auto component : index_range(_vel))
@@ -1075,8 +1065,7 @@ RhieChowMassFlux::updateVelocityBoundaryState()
       }
       else
       {
-        const ElemInfo & elem_info =
-            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+        const ElemInfo & elem_info = boundaryElemInfo(fi);
         _boundary_velocity_face_values[component][fi->id()] =
             _vel[component]->getElemValue(elem_info, time_arg);
       }
@@ -1123,9 +1112,7 @@ RhieChowMassFlux::boundaryVelocityValue(const FaceInfo * fi,
   if (auto * bc_pointer = velocityBoundaryCondition(fi, component))
     return bc_pointer->computeBoundaryValue();
 
-  const ElemInfo & elem_info =
-      hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-  return _vel[component]->getElemValue(elem_info, time_arg);
+  return _vel[component]->getElemValue(boundaryElemInfo(fi), time_arg);
 }
 
 Real
@@ -1135,11 +1122,8 @@ RhieChowMassFlux::boundaryMassFluxTarget(const FaceInfo * fi,
   mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
               "boundaryMassFluxTarget should only be called on boundary faces.");
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
-  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-  const Moose::FaceArg boundary_face{
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+  const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+  const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, boundaryElemInfo(fi).elem());
 
   const Real face_rho = _rho(boundary_face, time_arg);
   RealVectorValue density_times_velocity;
@@ -1157,8 +1141,7 @@ RhieChowMassFlux::boundaryVolumetricFluxTarget(const FaceInfo * fi,
   mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
               "boundaryVolumetricFluxTarget should only be called on boundary faces.");
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
+  const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
 
   RealVectorValue face_velocity;
   for (const auto component : index_range(_vel))
@@ -1235,6 +1218,47 @@ Real
 RhieChowMassFlux::pressureDiffusionFaceArea(const FaceInfo * /*fi*/) const
 {
   return 1.0;
+}
+
+bool
+RhieChowMassFlux::useConstrainedBoundaryPredictorState(const FaceInfo * fi) const
+{
+  if (!fi || _vel[0]->isInternalFace(*fi))
+    return false;
+
+  return _vel[0]->isDirichletBoundaryFace(*fi);
+}
+
+bool
+RhieChowMassFlux::isFlowFace(const FaceInfo & fi) const
+{
+  return hasBlocks(fi.elemPtr()->subdomain_id()) ||
+         (fi.neighborPtr() && hasBlocks(fi.neighborPtr()->subdomain_id()));
+}
+
+const ElemInfo &
+RhieChowMassFlux::boundaryElemInfo(const FaceInfo * fi) const
+{
+  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
+              "boundaryElemInfo should only be called on boundary faces.");
+  return hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+}
+
+Real
+RhieChowMassFlux::boundaryNormalMultiplier(const FaceInfo * fi) const
+{
+  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
+              "boundaryNormalMultiplier should only be called on boundary faces.");
+  return hasBlocks(fi->elemPtr()->subdomain_id()) ? 1.0 : -1.0;
+}
+
+Moose::FaceArg
+RhieChowMassFlux::makeCenteredFaceArg(const FaceInfo * fi,
+                                      const Elem * const face_side,
+                                      const Moose::StateArg * limiter_state) const
+{
+  return Moose::FaceArg{
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, face_side, limiter_state};
 }
 
 Real
@@ -1433,14 +1457,9 @@ RhieChowMassFlux::populateCouplingFunctors(
     }
     else
     {
-      const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-
-      // We need this multiplier in case the face is an internal face and
-      const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-
-      const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
-      const Moose::FaceArg boundary_face{
-          fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
+      const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+      const ElemInfo & elem_info = boundaryElemInfo(fi);
+      const Moose::FaceArg boundary_face = makeCenteredFaceArg(fi, elem_info.elem());
 
       const auto boundary_value_from_bc = [this, fi](const unsigned int dim_i)
       {
@@ -1450,7 +1469,7 @@ RhieChowMassFlux::populateCouplingFunctors(
         return std::numeric_limits<Real>::quiet_NaN();
       };
 
-      bool use_constrained_boundary_state = _vel[0]->isDirichletBoundaryFace(*fi);
+      const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
 
       // Local constrainHbyA analogue: only use the live boundary value when the
       // velocity patch is actually fixed on this iteration (Dirichlet or inletOutlet

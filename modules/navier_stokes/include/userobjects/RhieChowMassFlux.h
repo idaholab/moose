@@ -22,6 +22,7 @@
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
+class ElemInfo;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVBoundaryCondition;
@@ -134,6 +135,18 @@ protected:
   LinearFVBoundaryCondition * pressureBoundaryCondition(const FaceInfo * fi) const;
   /// Whether pressure-correction face fluxes include face area.
   virtual bool pressureCorrectionFluxIsIntegrated() const { return false; }
+  /// Whether a boundary face should use constrained boundary values for the predictor state.
+  virtual bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const;
+  /// Whether a face touches the active flow block set.
+  bool isFlowFace(const FaceInfo & fi) const;
+  /// Flow-side element information for a boundary face.
+  const ElemInfo & boundaryElemInfo(const FaceInfo * fi) const;
+  /// Orientation multiplier from flow-side boundary values to face normal convention.
+  Real boundaryNormalMultiplier(const FaceInfo * fi) const;
+  /// Build a central-difference face argument on the requested side.
+  Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
+                                     const Elem * face_side = nullptr,
+                                     const Moose::StateArg * limiter_state = nullptr) const;
   /// Geometric face measure used to convert between flux density and integrated flux.
   Real faceMeasure(const FaceInfo & fi) const;
   /// Face area supplied to the pressure diffusion kernel when reconstructing pressure fluxes.

@@ -126,10 +126,6 @@ protected:
                                                  const Real volumetric_phi,
                                                  const Moose::StateArg & time_arg) const;
 
-  Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
-                                     const Elem * face_side = nullptr,
-                                     const Moose::StateArg * limiter_state = nullptr) const;
-
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real predictorFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real facePhysicalVelocityComponent(const FaceInfo * fi,
@@ -184,7 +180,7 @@ protected:
   virtual RealVectorValue
   reconstructPressureCoupledCellVelocityDelta(const ElemInfo * elem_info,
                                               const Moose::StateArg & time_arg) const;
-  bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const;
+  bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const override;
   FaceScalarField _corrected_face_phi;
   FaceScalarField _previous_timestep_corrected_face_phi;
   FaceScalarField _vof_transport_phi;

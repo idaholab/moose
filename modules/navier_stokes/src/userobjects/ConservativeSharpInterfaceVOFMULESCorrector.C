@@ -191,12 +191,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
     if (!fi)
       continue;
 
-    const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
-    if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-      continue;
-
-    if (!hasBlocks(fi->elemSubdomainID()) &&
-        !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
+    if (transportFaceType(*fi) == FaceInfo::VarFaceNeighbors::NEITHER)
       continue;
 
     const auto face_id = fi->id();
@@ -219,11 +214,24 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(
   return fluid_info ? cellAlpha(*fluid_info) : 0.0;
 }
 
+FaceInfo::VarFaceNeighbors
+ConservativeSharpInterfaceVOFMULESCorrector::transportFaceType(const FaceInfo & fi) const
+{
+  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
+  if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+    return face_type;
+
+  return hasBlocks(fi.elemSubdomainID()) ||
+                 (fi.neighborPtr() && hasBlocks(fi.neighborSubdomainID()))
+             ? face_type
+             : FaceInfo::VarFaceNeighbors::NEITHER;
+}
+
 ConservativeSharpInterfaceVOFMULESCorrector::FaceTransportData
 ConservativeSharpInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & fi) const
 {
   FaceTransportData data;
-  data.face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
+  data.face_type = transportFaceType(fi);
   if (data.face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return data;
 
@@ -258,7 +266,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
     return 0.0;
 
   Real donor_alpha = elem_alpha;
-  if (fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (face_data.boundary_kind == BoundaryFaceKind::Internal)
     donor_alpha = face_data.upwind_is_elem ? elem_alpha : cellAlpha(*fi.neighborInfo());
   else if (auto * inlet_outlet_bc =
                dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
@@ -282,14 +290,11 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
     return 0.0;
 
   Real high_order_alpha = 0.0;
-  if (fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (face_data.boundary_kind == BoundaryFaceKind::Internal)
     high_order_alpha = sharedVanLeerFaceValue(fi, face_data.upwind_is_elem);
-  else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(
+  else if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(
                face_data.boundary_condition))
-  {
-    (void)dirichlet_bc;
     high_order_alpha = boundaryValue(fi, face_data);
-  }
   else if (auto * inlet_outlet_bc =
                dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
   {
@@ -448,7 +453,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
 
   data.face = &fi;
   data.elem_dof = fi.elemInfo()->dofIndices()[_sys_num][_var_num];
-  data.has_neighbor = fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH &&
+  data.has_neighbor = face_data.boundary_kind == BoundaryFaceKind::Internal &&
                       fi.neighborInfo()->dofIndices()[_sys_num][_var_num] != DofObject::invalid_id;
   if (data.has_neighbor)
     data.neighbor_dof = fi.neighborInfo()->dofIndices()[_sys_num][_var_num];
@@ -474,13 +479,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::collectFaceCorrectionData() const
 
   for (const auto * fi : _fe_problem.mesh().faceInfo())
   {
-    const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
-    if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
-      continue;
-    if (!hasBlocks(fi->elemSubdomainID()) &&
-        !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
-      continue;
-
     auto data = buildFaceCorrectionData(*fi);
     if (data.face)
       face_corrections.push_back(data);

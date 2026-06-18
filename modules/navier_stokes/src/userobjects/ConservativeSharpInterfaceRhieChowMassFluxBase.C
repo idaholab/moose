@@ -503,8 +503,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::rebuildSharpInterfaceFaceInfo()
 {
   _sharp_interface_face_info.clear();
   for (auto & fi : _fe_problem.mesh().faceInfo())
-    if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
-        (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    if (isFlowFace(*fi))
       _sharp_interface_face_info.push_back(fi);
 
   initializeAdditionalPressureFluxStorage();
@@ -586,14 +585,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
   }
 }
 
-Moose::FaceArg
-ConservativeSharpInterfaceRhieChowMassFluxBase::makeCenteredFaceArg(
-    const FaceInfo * fi, const Elem * const face_side, const Moose::StateArg * limiter_state) const
-{
-  return Moose::FaceArg{
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, face_side, limiter_state};
-}
-
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
@@ -601,8 +592,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
   if (_vel[0]->isInternalFace(*fi))
     return evaluateFaceScalarFunctor(&_rho, fi, time_arg, nullptr);
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
+  const ElemInfo & elem_info = boundaryElemInfo(fi);
 
   if (useConstrainedBoundaryPredictorState(fi))
     return _rho(makeCenteredFaceArg(fi, elem_info.elem()), time_arg);
@@ -692,8 +682,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(
   }
   else
   {
-    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-    const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
+    const ElemInfo & elem_info = boundaryElemInfo(fi);
 
     for (const auto dim_i : make_range(_dim))
     {
@@ -905,11 +894,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient
     return base_part + non_orth_correction_vector * face_grad_rho;
   }
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Elem * const fluid_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
   // On uncoupled boundary patches the explicit non-orthogonal correction is zero and the
   // operative snGrad comes from the boundary patch field.
-  return MetaPhysicL::raw_value(_rho.gradient(makeCenteredFaceArg(fi, fluid_elem), time_arg)) *
+  return MetaPhysicL::raw_value(
+             _rho.gradient(makeCenteredFaceArg(fi, boundaryElemInfo(fi).elem()), time_arg)) *
          fi->normal();
 }
 
@@ -932,16 +920,15 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradien
   if (_pressure_boundary_normal_gradient_valid)
     return libmesh_map_find(_pressure_boundary_normal_gradient, fi->id());
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Point fluid_centroid = elem_is_fluid ? fi->elemCentroid() : fi->neighborCentroid();
+  const ElemInfo & elem_info = boundaryElemInfo(fi);
+  const Point fluid_centroid = elem_info.centroid();
   const Point cell_to_face = fi->faceCentroid() - fluid_centroid;
   const Real normal_spacing = std::abs(cell_to_face * fi->normal());
 
   if (normal_spacing <= libMesh::TOLERANCE)
     return 0.0;
 
-  const Real elem_p =
-      _p->getElemValue(elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo(), time_arg);
+  const Real elem_p = _p->getElemValue(elem_info, time_arg);
 
   if (auto * bc_pointer = pressureBoundaryCondition(fi))
   {
@@ -988,9 +975,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradien
   if (_pressure_boundary_normal_gradient_valid)
     return libmesh_map_find(_pressure_boundary_normal_gradient, fi->id());
 
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
-  return cell_grad_dot_normal(elem_info);
+  return cell_grad_dot_normal(boundaryElemInfo(fi));
 }
 
 bool
@@ -1057,9 +1042,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
     }
     else
     {
-      const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-      const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-      const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
+      const Real boundary_normal_multiplier = boundaryNormalMultiplier(fi);
+      const ElemInfo & elem_info = boundaryElemInfo(fi);
       const bool use_constrained_boundary_state = useConstrainedBoundaryPredictorState(fi);
 
       if (use_constrained_boundary_state)

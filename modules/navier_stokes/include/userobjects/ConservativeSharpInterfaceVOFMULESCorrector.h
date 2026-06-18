@@ -95,6 +95,7 @@ private:
   bool locallyOwnedCell(const ElemInfo & elem_info) const;
   bool synchronizePartitionFaceLimiters(const std::vector<FaceCorrectionData> & face_corrections,
                                         std::vector<Real> & accepted_lambda) const;
+  FaceInfo::VarFaceNeighbors transportFaceType(const FaceInfo & fi) const;
   FaceTransportData faceTransportData(const FaceInfo & fi) const;
   Real boundaryValue(const FaceInfo & fi, const FaceTransportData & face_data) const;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
