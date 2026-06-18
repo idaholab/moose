@@ -18,8 +18,11 @@ a boundary face is
 where $A_b$ is the face area. This BC contributes nothing to the system matrix.
 
 !alert note
-This boundary condition should only be used for problems that involve diffusion or
-advection-diffusion.
+This boundary condition prescribes a known total outward normal flux, so it is well-posed only
+where that flux is known a priori. For problems with a diffusive term (diffusion or
+advection-diffusion) this is the standard Neumann condition on any boundary. For pure advection it
+is appropriate only on inflow boundaries, since on outflow the normal flux is determined by the
+interior solution.
 
 ## Example Syntax
 
