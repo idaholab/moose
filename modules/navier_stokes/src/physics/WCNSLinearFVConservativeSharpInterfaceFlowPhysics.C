@@ -100,6 +100,16 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumTimeKernelParams(
   params.set<bool>("use_old_state_factor_for_rhs") = true;
 }
 
+void
+WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setVelocityParams(InputParameters & params) const
+{
+  params.set<SolverVariableName>("u") = _velocity_names[0];
+  if (dimension() >= 2)
+    params.set<SolverVariableName>("v") = _velocity_names[1];
+  if (dimension() >= 3)
+    params.set<SolverVariableName>("w") = _velocity_names[2];
+}
+
 std::string
 WCNSLinearFVConservativeSharpInterfaceFlowPhysics::momentumOutletBCType(
     const BoundaryName & boundary, const MooseEnum & momentum_outlet_type) const
@@ -127,11 +137,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumOutletBCParams(
   if (!use_pressure_inlet_outlet_velocity)
     return;
 
-  params.set<SolverVariableName>("u") = _velocity_names[0];
-  if (dimension() >= 2)
-    params.set<SolverVariableName>("v") = _velocity_names[1];
-  if (dimension() >= 3)
-    params.set<SolverVariableName>("w") = _velocity_names[2];
+  setVelocityParams(params);
   params.set<MooseEnum>("momentum_component") = MooseEnum("x=0 y=1 z=2", NS::directions[component]);
   params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
 }
@@ -152,11 +158,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setPressureOutletBCParams(
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
   params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
-  params.set<SolverVariableName>("u") = _velocity_names[0];
-  if (dimension() >= 2)
-    params.set<SolverVariableName>("v") = _velocity_names[1];
-  if (dimension() >= 3)
-    params.set<SolverVariableName>("w") = _velocity_names[2];
+  setVelocityParams(params);
   params.set<MooseFunctorName>("face_flux") = "corrected_face_phi";
 }
 

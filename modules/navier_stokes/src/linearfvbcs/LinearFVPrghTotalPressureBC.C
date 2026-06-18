@@ -111,7 +111,7 @@ LinearFVPrghTotalPressureBC::outwardFaceFlux() const
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
   return boundary_normal_multiplier *
-         _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
+         _face_flux(functorFaceArg(_face_flux, *_current_face_info), state);
 }
 
 Real
@@ -138,7 +138,7 @@ LinearFVPrghTotalPressureBC::dynamicPressureCorrection() const
     }
   }
 
-  const Real rho = _density(functorFaceArg(_density, _current_face_info), state);
+  const Real rho = _density(functorFaceArg(_density, *_current_face_info), state);
   return 0.5 * rho * speed_squared;
 }
 
@@ -146,7 +146,7 @@ Real
 LinearFVPrghTotalPressureBC::hydrostaticPressureOffset() const
 {
   const auto state = determineState();
-  const Real rho = _density(functorFaceArg(_density, _current_face_info), state);
+  const Real rho = _density(functorFaceArg(_density, *_current_face_info), state);
   const Real gh = _gravity * (_current_face_info->faceCentroid() - _reference_pressure_point);
   return rho * gh;
 }
@@ -155,6 +155,6 @@ Real
 LinearFVPrghTotalPressureBC::computeBoundaryValue() const
 {
   const auto state = determineState();
-  const Real reference_value = _functor(functorFaceArg(_functor, _current_face_info), state);
+  const Real reference_value = _functor(functorFaceArg(_functor, *_current_face_info), state);
   return reference_value - dynamicPressureCorrection() - hydrostaticPressureOffset();
 }

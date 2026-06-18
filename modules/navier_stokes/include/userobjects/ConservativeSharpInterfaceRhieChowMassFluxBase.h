@@ -71,7 +71,6 @@ public:
   void freezeVOFTransportState(const bool use_previous_timestep_flux = false);
   void adoptPublishedVOFTransportState();
   void clearVOFTransportState();
-  void updateVelocityBoundaryState() override;
 
   /// Update the additional pressure-equation source-flux functors before the pressure solve.
   void updateAdditionalPressureFluxFunctors(const bool with_updated_pressure, const bool verbose);
@@ -110,6 +109,8 @@ protected:
                                   const Moose::StateArg & time_arg) const override;
   Real pressureBoundaryNormalAinv(const FaceInfo * fi) const override;
   bool pressureCorrectionFluxIsIntegrated() const override { return true; }
+  Real pressureDiffusionFaceArea(const FaceInfo * fi) const override;
+  void postUpdateVelocityBoundaryState() override;
   Real pressureFaceNormalAinv(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
@@ -131,14 +132,6 @@ protected:
 
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real predictorFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
-  virtual Real cellPhysicalVelocityComponent(const ElemInfo & elem_info,
-                                             const unsigned int component,
-                                             const Moose::StateArg & time_arg) const;
-  virtual Real boundaryPhysicalVelocityComponent(const FaceInfo * fi,
-                                                 const unsigned int component,
-                                                 const Moose::StateArg & time_arg) const;
-  Real boundaryPhysicalVolumetricFluxTarget(const FaceInfo * fi,
-                                            const Moose::StateArg & time_arg) const;
   Real facePhysicalVelocityComponent(const FaceInfo * fi,
                                      const unsigned int component,
                                      const Moose::StateArg & time_arg) const;
@@ -165,15 +158,11 @@ protected:
                                  const Moose::StateArg & time_arg,
                                  const Moose::StateArg * limiter_state) const;
 
-  Real computeFaceNormalRawAinv(const RealVectorValue & face_ainv_raw,
-                                const RealVectorValue & face_normal) const;
   Real computeDefaultTransientProjectionVolumetricFlux(const FaceInfo * fi,
                                                        const Moose::StateArg & time_arg,
                                                        const SharpFaceOperatorState & state);
   Real massFluxDensityToVolumetricNormalFlux(const FaceInfo * fi,
                                              const Real mass_flux_density) const;
-  Real computeDiscretePressureFaceVolumetricFlux(const FaceInfo * fi) const;
-  Real computeDiscretePressureFaceFlux(const FaceInfo * fi) const override;
   Real computeFaceNormalDensityGradient(const FaceInfo * fi,
                                         const Moose::StateArg & time_arg) const;
   Real computeFaceNormalPressureGradient(const FaceInfo * fi,

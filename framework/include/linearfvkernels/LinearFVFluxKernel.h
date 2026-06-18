@@ -75,18 +75,6 @@ public:
   virtual Real computeBoundaryFlux(const LinearFVBoundaryCondition & bc);
 
 protected:
-  /**
-   * Determine the single sided face argument when evaluating a functor on a face.
-   * @param fi the FaceInfo for this face
-   * @param limiter_type the limiter type, to be specified if more than the default average
-   *        interpolation is required for the parameters of the functor
-   * @param correct_skewness whether to perform skew correction at the face
-   */
-  Moose::FaceArg singleSidedFaceArg(
-      const FaceInfo * fi,
-      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false) const;
-
   /// Pointer to the face info we are operating on right now
   const FaceInfo * _current_face_info;
 

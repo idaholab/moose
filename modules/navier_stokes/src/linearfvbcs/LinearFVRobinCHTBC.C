@@ -59,8 +59,8 @@ LinearFVRobinCHTBC::computeBoundaryNormalGradient() const
                              : _current_face_info->neighborInfo();
   const auto state = determineState();
   const auto current_face = singleSidedFaceArg(_current_face_info);
-  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
-  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, *_current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, *_current_face_info);
 
   return (_htc(current_face, state) * (_var.getElemValue(*elem_info, determineState()) -
                                        _surface_temperature(surface_temperature_face, state)) +
@@ -99,8 +99,8 @@ LinearFVRobinCHTBC::computeBoundaryGradientRHSContribution() const
 {
   const auto state = determineState();
   const auto current_face = singleSidedFaceArg(_current_face_info);
-  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
-  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, *_current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, *_current_face_info);
 
   return _htc(current_face, state) * _surface_temperature(surface_temperature_face, state) +
          _incoming_flux(incoming_flux_face, state);

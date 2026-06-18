@@ -69,6 +69,7 @@ void
 PIMPLESolve::preparePressureCorrectorState(const bool subtract_updated_pressure)
 {
   _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
+  postPreparePressureCorrectorState(subtract_updated_pressure);
 }
 
 std::pair<unsigned int, Real>
@@ -126,6 +127,8 @@ PIMPLESolve::publishPressureCorrectedState(const bool recompute_face_mass_flux)
 
   if (_rc_uo)
     _rc_uo->computeCellVelocity();
+
+  postPublishPressureCorrectedState();
 }
 
 void

@@ -101,7 +101,7 @@ LinearFVPressureInletOutletMomentumBC::computeBackflowBoundaryValue() const
   const Real normal_component = normal(_index);
   const Real normal_velocity = cellVelocity(elem_info, state) * normal;
   const Real backflow_tangential_value =
-      _backflow_value(functorFaceArg(_backflow_value, _current_face_info), state);
+      _backflow_value(functorFaceArg(_backflow_value, *_current_face_info), state);
 
   return normal_component * normal_velocity +
          (1.0 - normal_component * normal_component) * backflow_tangential_value;

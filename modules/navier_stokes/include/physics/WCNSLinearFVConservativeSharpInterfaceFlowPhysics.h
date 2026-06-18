@@ -30,6 +30,7 @@ private:
   void addRhieChowUserObjects() override;
 
   MooseFunctorName generatedGeometryFunctorName(const std::string & base_name) const;
+  void setVelocityParams(InputParameters & params) const;
   bool shouldAddMomentumPressureKernels() const override;
   MooseFunctorName pressureDiffusionTensorName() const override { return "pressure_Ainv"; }
   MooseFunctorName pressureDivergenceFluxName() const override { return "pressure_predictor_flux"; }

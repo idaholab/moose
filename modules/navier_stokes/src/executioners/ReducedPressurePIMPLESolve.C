@@ -9,14 +9,10 @@
 
 #include "ReducedPressurePIMPLESolve.h"
 
-#include "FEProblem.h"
 #include "LinearSystem.h"
-#include "MooseApp.h"
-#include "SegregatedSolverUtils.h"
 #include "ConservativeSharpInterfaceRhieChowMassFlux.h"
 #include "ConservativeSharpInterfaceVOFMULESCorrector.h"
 #include "TheWarehouse.h"
-#include "libmesh/petsc_linear_solver.h"
 
 #include <algorithm>
 #include <cmath>
@@ -205,7 +201,7 @@ ReducedPressurePIMPLESolve::preMomentumPressureIteration(ResidualStorage & resid
 
     _problem.execute(EXEC_NONLINEAR);
     Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
-    const auto vf_residuals = solveVolumeFractionSystems(solver_params);
+    const auto vf_residuals = solveVolumeFractionSystems();
 
     if (auto * sharp_rc = sharpInterfaceRC())
       sharp_rc->adoptPublishedVOFTransportState();
@@ -222,12 +218,6 @@ ReducedPressurePIMPLESolve::shouldAssembleMomentumPredictorWithoutSolve() const
   return _should_solve_pressure && !_momentum_systems.empty() && _rc_uo;
 }
 
-void
-ReducedPressurePIMPLESolve::assembleMomentumPredictorWithoutSolve()
-{
-  assembleMomentumPredictorOnly();
-}
-
 bool
 ReducedPressurePIMPLESolve::shouldSolveActiveScalarsAfterFlowLoop() const
 {
@@ -239,16 +229,6 @@ ReducedPressurePIMPLESolve::finalizeSolve(const bool /* converged */)
 {
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
-}
-
-std::vector<std::pair<unsigned int, Real>>
-ReducedPressurePIMPLESolve::solveMomentumPredictor()
-{
-  auto nonlinear_state_snapshots = snapshotMomentumNonlinearSolutionStates();
-  auto residuals = LinearAssemblySegregatedSolve::solveMomentumPredictor();
-  restoreMomentumNonlinearSolutionStates(nonlinear_state_snapshots);
-
-  return residuals;
 }
 
 void
@@ -305,29 +285,6 @@ ReducedPressurePIMPLESolve::synchronizeSystemState(LinearSystem & system) const
 }
 
 void
-ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
-{
-  if (_momentum_systems.empty())
-    return;
-
-  if (_rc_uo)
-    _rc_uo->clearMomentumPredictorOperatorCache();
-
-  for (const auto system_i : index_range(_momentum_systems))
-  {
-    const auto assembly =
-        assembleMomentumPredictorOperator(system_i, /* prepare_without_solve = */ true);
-    assembly.system->update();
-  }
-
-  auto & momentum_system_0 =
-      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
-  auto & momentum_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
-  momentum_solver.reuse_preconditioner(false);
-}
-
-void
 ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & solver_params)
 {
   if (!startupPressureInitializationEnabled() || _problem.timeStep() != 1)
@@ -344,7 +301,7 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
     mooseError("ReducedPressurePIMPLESolve startup projection requires momentum systems and a "
                "Rhie-Chow user object.");
 
-  assembleMomentumPredictorOnly();
+  assembleMomentumPredictorWithoutSolve();
   _rc_uo->initFaceMassFlux();
   performStartupContinuityCorrections(solver_params);
   synchronizeSystemState(_pressure_system);
@@ -361,22 +318,16 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
     return;
 
   _console << "Applying startup continuity corrections" << std::endl;
-  Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
-  for (const auto startup_it : make_range(_startup_flux_corrections))
-  {
-    (void)startup_it;
-    (void)correctStartupContinuityOnce(true, true, solver_params);
-  }
+  for (unsigned int startup_it = 0; startup_it < _startup_flux_corrections; ++startup_it)
+    (void)correctStartupContinuityOnce(solver_params);
 
   _problem.execute(EXEC_NONLINEAR);
 }
 
 void
-ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_updated_pressure)
+ReducedPressurePIMPLESolve::postPreparePressureCorrectorState(const bool subtract_updated_pressure)
 {
-  _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
-
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
 
@@ -406,46 +357,8 @@ ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
   return std::max(subcycles, 1u);
 }
 
-void
-ReducedPressurePIMPLESolve::restoreMomentumNonlinearSolutionStates(
-    const NonlinearSolutionStateSnapshots & snapshots) const
-{
-  mooseAssert(snapshots.size() == _momentum_systems.size(),
-              "Momentum nonlinear-state snapshots must match the number of momentum systems.");
-
-  for (const auto system_i : index_range(_momentum_systems))
-    for (const auto state_i : index_range(snapshots[system_i]))
-    {
-      auto & nonlinear_state = _momentum_systems[system_i]->solutionState(
-          state_i + 1, Moose::SolutionIterationType::Nonlinear);
-      nonlinear_state = *snapshots[system_i][state_i];
-      nonlinear_state.close();
-    }
-}
-
-ReducedPressurePIMPLESolve::NonlinearSolutionStateSnapshots
-ReducedPressurePIMPLESolve::snapshotMomentumNonlinearSolutionStates() const
-{
-  NonlinearSolutionStateSnapshots snapshots(_momentum_systems.size());
-
-  for (const auto system_i : index_range(_momentum_systems))
-    for (unsigned int state = 1; _momentum_systems[system_i]->hasSolutionState(
-             state, Moose::SolutionIterationType::Nonlinear);
-         ++state)
-    {
-      const auto & nonlinear_state = _momentum_systems[system_i]->solutionState(
-          state, Moose::SolutionIterationType::Nonlinear);
-      auto snapshot = nonlinear_state.zero_clone();
-      *snapshot = nonlinear_state;
-      snapshot->close();
-      snapshots[system_i].push_back(std::move(snapshot));
-    }
-
-  return snapshots;
-}
-
 std::vector<std::pair<unsigned int, Real>>
-ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*solver_params*/)
+ReducedPressurePIMPLESolve::solveVolumeFractionSystems()
 {
   std::vector<std::pair<unsigned int, Real>> residuals(_active_scalar_system_names.size(),
                                                        std::make_pair(0, 1.0));
@@ -464,9 +377,7 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
   for (const auto i : index_range(_active_scalar_system_names))
   {
     auto * system = _active_scalar_systems[i];
-    auto saved_old_solution = system->solutionOld().zero_clone();
-    *saved_old_solution = system->solutionOld();
-    saved_old_solution->close();
+    system->saveOldSolutions();
 
     // solutionOld() must stay as the true timestep-old alpha for the whole
     // outer loop. solutionPreviousNewton() is only the local/subcycle field-
@@ -520,8 +431,7 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
       corrector->applyCorrection(subcycle_dt, subcycle_dt / global_dt);
     }
 
-    system->solutionOld() = *saved_old_solution;
-    system->solutionOld().close();
+    system->restoreOldSolutions();
     if (auto * previous_solution = system->solutionPreviousNewton())
     {
       *previous_solution = *(system->system().current_local_solution);
@@ -550,9 +460,7 @@ ReducedPressurePIMPLESolve::finalizeVolumeFractionTransportState()
 }
 
 std::pair<unsigned int, Real>
-ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_updated_pressure,
-                                                         const bool recompute_face_mass_flux,
-                                                         const SolverParams & solver_params)
+ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const SolverParams & solver_params)
 {
   LinearImplicitSystem & pressure_linear_system =
       libMesh::cast_ref<LinearImplicitSystem &>(_pressure_system.system());
@@ -587,10 +495,9 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(true);
   }
 
-  preparePressureCorrectorState(subtract_updated_pressure);
+  preparePressureCorrectorState(true);
 
-  const auto residuals =
-      applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
+  const auto residuals = applyPressureCorrectionStage(true, false, solver_params);
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
   // continuity cleanup should repair phi, not overwrite the physical p_rgh field
@@ -621,23 +528,7 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
 }
 
 void
-ReducedPressurePIMPLESolve::publishPressureCorrectedState(const bool recompute_face_mass_flux)
+ReducedPressurePIMPLESolve::postPublishPressureCorrectedState()
 {
-  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
-  _pressure_system.setSolution(pressure_current_solution);
-  _pressure_system.computeGradients();
-  _rc_uo->cachePressureEquationFlux();
-
-  if (recompute_face_mass_flux)
-    _rc_uo->computeFaceMassFlux();
-
-  // The face flux and velocity writeback must keep using the cached pressure-equation flux
-  // from the unrelaxed pressure solve. relaxPressureFieldForNextPredictor() refreshes
-  // pressure gradients for the next predictor, but does not invalidate the cached final
-  // pressure-equation flux.
-  relaxPressureFieldForNextPredictor();
-
-  _rc_uo->computeCellVelocity();
-
   _rc_uo->updateVelocityBoundaryState();
 }

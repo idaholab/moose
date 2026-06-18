@@ -117,6 +117,7 @@ protected:
   virtual void initializeSolveLoop(const SolverParams & solver_params);
   virtual void preMomentumPressureIteration(ResidualStorage & residual_storage,
                                             const SolverParams & solver_params);
+  virtual bool shouldCopyMomentumNonlinearSolutionHistory() const;
   virtual bool shouldAssembleMomentumPredictorWithoutSolve() const;
   virtual void assembleMomentumPredictorWithoutSolve();
   virtual bool shouldSolveActiveScalarsAfterFlowLoop() const;

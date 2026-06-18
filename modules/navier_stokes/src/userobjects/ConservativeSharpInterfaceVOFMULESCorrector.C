@@ -42,27 +42,6 @@ constexpr Real alpha_max = 1.0;
 constexpr Real correction_relaxation = 1.0;
 constexpr Real first_correction_relaxation = 1.0;
 constexpr Real later_correction_relaxation = 0.5;
-
-Moose::FaceArg
-functorFaceArg(const Moose::Functor<Real> & functor, const FaceInfo & fi)
-{
-  Moose::FaceArg face_arg{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
-  const auto on_elem = functor.hasFaceSide(fi, true);
-  const auto on_neighbor = functor.hasFaceSide(fi, false);
-
-  if (on_elem && on_neighbor)
-    face_arg.face_side = nullptr;
-  else if (on_elem)
-    face_arg.face_side = fi.elemPtr();
-  else if (on_neighbor)
-    face_arg.face_side = fi.neighborPtr();
-  else
-    mooseError(
-        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
-
-  return face_arg;
-}
 }
 
 InputParameters
@@ -240,17 +219,35 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & 
 
 Real
 ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(
-    const FaceInfo & fi, FaceInfo::VarFaceNeighbors face_type) const
+    const FaceInfo & fi, const FaceTransportData & face_data) const
 {
-  if (auto * bc = boundaryCondition(fi))
+  if (auto * bc = face_data.boundary_condition)
   {
-    bc->setupFaceData(&fi, face_type);
+    bc->setupFaceData(&fi, face_data.face_type);
     return boundedAlpha(bc->computeBoundaryValue());
   }
 
-  const auto * fluid_info =
-      face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? fi.neighborInfo() : fi.elemInfo();
+  const auto * fluid_info = face_data.face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
+                                ? fi.neighborInfo()
+                                : fi.elemInfo();
   return fluid_info ? cellAlpha(*fluid_info) : 0.0;
+}
+
+ConservativeSharpInterfaceVOFMULESCorrector::FaceTransportData
+ConservativeSharpInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & fi) const
+{
+  FaceTransportData data;
+  data.face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
+  if (data.face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+    return data;
+
+  data.volumetric_flux = vofTransportVolumetricFaceFlux(fi);
+  data.integrated_flux = data.volumetric_flux * faceMeasure(fi);
+  data.upwind_is_elem = data.volumetric_flux >= 0.0;
+  data.boundary_condition = boundaryCondition(fi);
+  data.boundary_kind =
+      classifyBoundaryFace(fi, data.face_type, data.volumetric_flux, data.boundary_condition);
+  return data;
 }
 
 bool
@@ -267,64 +264,61 @@ ConservativeSharpInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi) const
+ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
+                                                       const FaceTransportData & face_data,
+                                                       const Real elem_alpha) const
 {
-  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
-  if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+  if (face_data.face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return 0.0;
 
-  const Real volumetric_flux = vofTransportVolumetricFaceFlux(fi);
-  const bool upwind_is_elem = volumetric_flux >= 0.0;
-  const Real elem_alpha = cellAlpha(*fi.elemInfo());
-
   Real donor_alpha = elem_alpha;
-  if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    donor_alpha = upwind_is_elem ? elem_alpha : cellAlpha(*fi.neighborInfo());
+  if (fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    donor_alpha = face_data.upwind_is_elem ? elem_alpha : cellAlpha(*fi.neighborInfo());
   else if (auto * inlet_outlet_bc =
-               dynamic_cast<LinearFVInletOutletScalarBC *>(boundaryCondition(fi)))
+               dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
   {
-    inlet_outlet_bc->setupFaceData(&fi, face_type);
-    donor_alpha = upwind_is_elem
+    inlet_outlet_bc->setupFaceData(&fi, face_data.face_type);
+    donor_alpha = face_data.upwind_is_elem
                       ? elem_alpha
                       : boundedAlpha(inlet_outlet_bc->computeBoundaryValue(/* backflow = */ true));
   }
   else if (_alpha_var->isDirichletBoundaryFace(fi))
-    donor_alpha = upwind_is_elem ? elem_alpha : boundaryValue(fi, face_type);
+    donor_alpha = face_data.upwind_is_elem ? elem_alpha : boundaryValue(fi, face_data);
 
-  return volumetric_flux * donor_alpha * faceMeasure(fi);
+  return face_data.integrated_flux * donor_alpha;
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo & fi) const
+ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo & fi,
+                                                                const FaceTransportData & face_data,
+                                                                const Real elem_alpha) const
 {
-  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
-  if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+  if (face_data.face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return 0.0;
 
-  const Real volumetric_flux = vofTransportVolumetricFaceFlux(fi);
-  const bool upwind_is_elem = volumetric_flux >= 0.0;
-  auto * bc = boundaryCondition(fi);
-
   Real high_order_alpha = 0.0;
-  if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    high_order_alpha = sharedVanLeerFaceValue(fi, upwind_is_elem);
-  else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
+  if (fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    high_order_alpha = sharedVanLeerFaceValue(fi, face_data.upwind_is_elem);
+  else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(
+               face_data.boundary_condition))
   {
     (void)dirichlet_bc;
-    high_order_alpha = boundaryValue(fi, face_type);
+    high_order_alpha = boundaryValue(fi, face_data);
   }
-  else if (auto * inlet_outlet_bc = dynamic_cast<LinearFVInletOutletScalarBC *>(bc))
+  else if (auto * inlet_outlet_bc =
+               dynamic_cast<LinearFVInletOutletScalarBC *>(face_data.boundary_condition))
   {
-    inlet_outlet_bc->setupFaceData(&fi, face_type);
-    high_order_alpha =
-        boundedAlpha(inlet_outlet_bc->computeBoundaryValue(/* backflow = */ !upwind_is_elem));
+    inlet_outlet_bc->setupFaceData(&fi, face_data.face_type);
+    high_order_alpha = boundedAlpha(
+        inlet_outlet_bc->computeBoundaryValue(/* backflow = */ !face_data.upwind_is_elem));
   }
-  else if (upwind_is_elem && dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
-    high_order_alpha = boundaryValue(fi, face_type);
+  else if (face_data.upwind_is_elem &&
+           dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(face_data.boundary_condition))
+    high_order_alpha = boundaryValue(fi, face_data);
   else
-    return std::abs(volumetric_flux) > libMesh::TOLERANCE
-               ? donorFlux(fi) / (volumetric_flux * faceMeasure(fi))
-               : cellAlpha(*fi.elemInfo());
+    return std::abs(face_data.volumetric_flux) > libMesh::TOLERANCE
+               ? donorFlux(fi, face_data, elem_alpha) / face_data.integrated_flux
+               : elem_alpha;
 
   return high_order_alpha;
 }
@@ -352,7 +346,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::BoundaryFaceKind
 ConservativeSharpInterfaceVOFMULESCorrector::classifyBoundaryFace(
     const FaceInfo & fi,
     const FaceInfo::VarFaceNeighbors face_type,
-    const Real volumetric_flux) const
+    const Real volumetric_flux,
+    const LinearFVBoundaryCondition * const bc) const
 {
   if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return BoundaryFaceKind::Internal;
@@ -360,19 +355,18 @@ ConservativeSharpInterfaceVOFMULESCorrector::classifyBoundaryFace(
   if (std::abs(volumetric_flux) <= libMesh::TOLERANCE)
     return BoundaryFaceKind::Closed;
 
-  auto * bc = boundaryCondition(fi);
   if (!bc)
     return BoundaryFaceKind::Closed;
 
-  if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
+  if (dynamic_cast<const LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
     return volumetric_flux >= 0.0 ? BoundaryFaceKind::DirichletOutflow
                                   : BoundaryFaceKind::DirichletInflow;
 
-  if (dynamic_cast<LinearFVInletOutletScalarBC *>(bc))
+  if (dynamic_cast<const LinearFVInletOutletScalarBC *>(bc))
     return volumetric_flux >= 0.0 ? BoundaryFaceKind::OpenOutflow
                                   : BoundaryFaceKind::DirichletInflow;
 
-  if (dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
+  if (dynamic_cast<const LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
     return volumetric_flux >= 0.0 ? BoundaryFaceKind::OpenOutflow : BoundaryFaceKind::Closed;
 
   return BoundaryFaceKind::Closed;
@@ -383,24 +377,23 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildAlphaFlux(
     const FaceInfo & fi,
     const Real elem_alpha,
     const Real neighbor_alpha,
-    const BoundaryFaceKind boundary_kind) const
+    const FaceTransportData & face_data) const
 {
   AlphaFluxData flux;
 
-  const Real face_phi = vofTransportVolumetricFaceFlux(fi);
-  const Real face_measure = faceMeasure(fi);
-  const Real integrated_phi = face_phi * face_measure;
+  const Real integrated_phi = face_data.integrated_flux;
 
-  flux.donor_flux = donorFlux(fi);
-  const Real high_order_flux = integrated_phi * highOrderFaceValue(fi);
+  flux.donor_flux = donorFlux(fi, face_data, elem_alpha);
+  const Real high_order_alpha = highOrderFaceValue(fi, face_data, elem_alpha);
+  const Real high_order_flux = integrated_phi * high_order_alpha;
   Real total_flux = flux.donor_flux;
 
-  if (boundary_kind == BoundaryFaceKind::Closed)
+  if (face_data.boundary_kind == BoundaryFaceKind::Closed)
     return flux;
 
-  if (boundary_kind != BoundaryFaceKind::Internal)
+  if (face_data.boundary_kind != BoundaryFaceKind::Internal)
   {
-    if (boundary_kind == BoundaryFaceKind::DirichletOutflow)
+    if (face_data.boundary_kind == BoundaryFaceKind::DirichletOutflow)
       total_flux = high_order_flux;
 
     flux.correction_flux = total_flux - flux.donor_flux;
@@ -408,9 +401,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildAlphaFlux(
   }
 
   const auto state = Moose::currentState();
-  const Moose::FaceArg face_arg{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
-
+  const auto face_arg = makeCDFace(fi);
   const RealVectorValue face_normal = fi.normal();
   const Real face_normal_mag = face_normal.norm();
   const RealVectorValue face_unit_normal =
@@ -425,7 +416,6 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildAlphaFlux(
     const Real bounded_neighbor_alpha = boundedAlpha(neighbor_alpha);
     const Real linear_alpha =
         boundedAlpha(fi.gC() * bounded_elem_alpha + (1.0 - fi.gC()) * bounded_neighbor_alpha);
-    const Real high_order_alpha = highOrderFaceValue(fi);
     const Real compression_factor = MetaPhysicL::raw_value(_compression_factor(face_arg, state));
     const Real compressed_alpha = boundedAlpha(
         high_order_alpha + compression_factor * MathUtils::sign(integrated_phi) * linear_alpha *
@@ -456,13 +446,19 @@ ConservativeSharpInterfaceVOFMULESCorrector::vofTransportVolumetricFaceFlux(
 }
 
 Real
+ConservativeSharpInterfaceVOFMULESCorrector::integratedVofTransportFaceFlux(
+    const FaceInfo & fi) const
+{
+  return vofTransportVolumetricFaceFlux(fi) * faceMeasure(fi);
+}
+
+Real
 ConservativeSharpInterfaceVOFMULESCorrector::rhoPhi(const FaceInfo & fi,
                                                     const Real limited_alpha_flux) const
 {
   const Real gas_density = faceFunctorAverage(fi, _gas_density);
   const Real liquid_density = faceFunctorAverage(fi, _liquid_density);
-  const Real volumetric_mass_flux =
-      vofTransportVolumetricFaceFlux(fi) * faceMeasure(fi) * gas_density;
+  const Real volumetric_mass_flux = integratedVofTransportFaceFlux(fi) * gas_density;
   return volumetric_mass_flux + (liquid_density - gas_density) * limited_alpha_flux;
 }
 
@@ -470,25 +466,24 @@ ConservativeSharpInterfaceVOFMULESCorrector::FaceCorrectionData
 ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceInfo & fi) const
 {
   FaceCorrectionData data;
-  const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
-  if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+  const auto face_data = faceTransportData(fi);
+  if (face_data.face_type == FaceInfo::VarFaceNeighbors::NEITHER)
     return data;
 
   data.face = &fi;
   data.elem_dof = fi.elemInfo()->dofIndices()[_sys_num][_var_num];
-  data.has_neighbor = fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH &&
+  data.has_neighbor = fi.neighborPtr() && face_data.face_type == FaceInfo::VarFaceNeighbors::BOTH &&
                       fi.neighborInfo()->dofIndices()[_sys_num][_var_num] != DofObject::invalid_id;
   if (data.has_neighbor)
     data.neighbor_dof = fi.neighborInfo()->dofIndices()[_sys_num][_var_num];
 
-  const Real volumetric_flux = vofTransportVolumetricFaceFlux(fi);
   data.elem_alpha = cellAlpha(*fi.elemInfo());
 
-  data.boundary_kind = classifyBoundaryFace(fi, face_type, volumetric_flux);
+  data.boundary_kind = face_data.boundary_kind;
   data.neighbor_alpha = data.boundary_kind == BoundaryFaceKind::Internal
                             ? cellAlpha(*fi.neighborInfo())
-                            : boundaryValue(fi, face_type);
-  const auto flux = buildAlphaFlux(fi, data.elem_alpha, data.neighbor_alpha, data.boundary_kind);
+                            : boundaryValue(fi, face_data);
+  const auto flux = buildAlphaFlux(fi, data.elem_alpha, data.neighbor_alpha, face_data);
   data.donor_flux = flux.donor_flux;
   data.correction_flux = flux.correction_flux;
 

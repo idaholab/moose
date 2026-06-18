@@ -44,12 +44,14 @@ protected:
                   const SolverParams & solver_params) override;
 
   virtual void preparePressureCorrectorState(const bool subtract_updated_pressure);
+  virtual void postPreparePressureCorrectorState(const bool) {}
   virtual std::pair<unsigned int, Real>
   applyPressureCorrectionStage(const bool recompute_face_mass_flux,
                                const bool publish_pressure_corrected_state,
                                const SolverParams & solver_params);
   virtual void postPressureCorrectorSolve(const bool final_nonorthogonal_iteration);
   virtual void publishPressureCorrectedState(const bool recompute_face_mass_flux);
+  virtual void postPublishPressureCorrectedState() {}
   void storePressurePreviousOuterIterationState();
   void relaxPressureFieldForNextPredictor();
 

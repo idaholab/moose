@@ -39,37 +39,26 @@ protected:
   void preMomentumPressureIteration(ResidualStorage & residual_storage,
                                     const SolverParams & solver_params) override;
   bool shouldAssembleMomentumPredictorWithoutSolve() const override;
-  void assembleMomentumPredictorWithoutSolve() override;
   bool shouldSolveActiveScalarsAfterFlowLoop() const override;
   void finalizeSolve(const bool converged) override;
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) override;
-  std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
-  void preparePressureCorrectorState(const bool subtract_updated_pressure) override;
-  void publishPressureCorrectedState(const bool recompute_face_mass_flux) override;
+  bool shouldCopyMomentumNonlinearSolutionHistory() const override { return false; }
+  void postPreparePressureCorrectorState(const bool subtract_updated_pressure) override;
+  void postPublishPressureCorrectedState() override;
 
 private:
-  using NonlinearSolutionStateSnapshots =
-      std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>;
-
   bool startupPressureInitializationEnabled() const;
-  void assembleMomentumPredictorOnly();
   void initializeStartupPressureField(const SolverParams & solver_params);
   void performStartupContinuityCorrections(const SolverParams & solver_params);
   unsigned int computeVolumeFractionSubcycles() const;
-  NonlinearSolutionStateSnapshots snapshotMomentumNonlinearSolutionStates() const;
-  void
-  restoreMomentumNonlinearSolutionStates(const NonlinearSolutionStateSnapshots & snapshots) const;
   void synchronizeSystemState(LinearSystem & system) const;
-  std::vector<std::pair<unsigned int, Real>>
-  solveVolumeFractionSystems(const SolverParams & solver_params);
+  std::vector<std::pair<unsigned int, Real>> solveVolumeFractionSystems();
   void finalizeVolumeFractionTransportState();
   ConservativeSharpInterfaceVOFMULESCorrector *
   sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
 
-  std::pair<unsigned int, Real> correctStartupContinuityOnce(const bool subtract_updated_pressure,
-                                                             const bool recompute_face_mass_flux,
-                                                             const SolverParams & solver_params);
+  std::pair<unsigned int, Real> correctStartupContinuityOnce(const SolverParams & solver_params);
 
   ConservativeSharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
 

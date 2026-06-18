@@ -187,7 +187,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
 Real
 ConservativeSharpInterfaceRhieChowMassFluxBase::getMassFlux(const FaceInfo & fi) const
 {
-  const Real face_measure = fi.faceArea() * fi.faceCoord();
+  const Real face_measure = faceMeasure(fi);
   return face_measure > 0.0 ? vofRhoPhiIntegrated(fi) / face_measure : 0.0;
 }
 
@@ -348,7 +348,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(
   if (!fi)
     return 0.0;
 
-  return boundaryPhysicalVolumetricFluxTarget(fi, time_arg) * fi->faceArea() * fi->faceCoord();
+  return boundaryVolumetricFluxTarget(fi, time_arg) * faceMeasure(*fi);
 }
 
 Real
@@ -362,42 +362,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(
   if (it == _pressure_Ainv.end())
     return RhieChowMassFlux::pressureBoundaryNormalAinv(fi);
 
-  return computeFaceNormalRawAinv(it->second, fi->normal());
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::cellPhysicalVelocityComponent(
-    const ElemInfo & elem_info,
-    const unsigned int component,
-    const Moose::StateArg & time_arg) const
-{
-  mooseAssert(component < _vel.size(), "Velocity component index out of range.");
-  return _vel[component]->getElemValue(elem_info, time_arg);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::boundaryPhysicalVelocityComponent(
-    const FaceInfo * fi, const unsigned int component, const Moose::StateArg & time_arg) const
-{
-  return boundaryVelocityValue(fi, component, time_arg);
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::boundaryPhysicalVolumetricFluxTarget(
-    const FaceInfo * fi, const Moose::StateArg & time_arg) const
-{
-  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
-              "boundaryPhysicalVolumetricFluxTarget should only be called on boundary faces.");
-
-  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-
-  RealVectorValue face_velocity;
-  for (const auto component : index_range(_vel))
-    face_velocity(component) =
-        boundary_normal_multiplier * boundaryPhysicalVelocityComponent(fi, component, time_arg);
-
-  return face_velocity * fi->normal();
+  return computeFaceNormalAinv(it->second, fi->normal());
 }
 
 Real
@@ -416,7 +381,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureFaceNormalAinv(
   // directly, so the writeback stays aligned with the operator contract if the
   // pressure face interpolation changes.
   const RealVectorValue pressure_face_rau = _pressure_Ainv(makeCenteredFaceArg(fi), time_arg);
-  return computeFaceNormalRawAinv(pressure_face_rau, fi->normal());
+  return computeFaceNormalAinv(pressure_face_rau, fi->normal());
 }
 
 ConservativeSharpInterfaceRhieChowMassFluxBase::PressureVelocityFaceState
@@ -432,7 +397,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
   state.predictor_valid = _pressure_predictor_face_state_valid;
   if (state.predictor_valid)
   {
-    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    const Real face_measure = faceMeasure(*fi);
     auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
     { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
 
@@ -668,14 +633,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
   {
     const auto & elem_info = *fi->elemInfo();
     const auto & neighbor_info = *fi->neighborInfo();
-    return Moose::FV::linearInterpolation(
-        cellPhysicalVelocityComponent(elem_info, component, time_arg),
-        cellPhysicalVelocityComponent(neighbor_info, component, time_arg),
-        *fi,
-        true);
+    return Moose::FV::linearInterpolation(_vel[component]->getElemValue(elem_info, time_arg),
+                                          _vel[component]->getElemValue(neighbor_info, time_arg),
+                                          *fi,
+                                          true);
   }
 
-  return boundaryPhysicalVelocityComponent(fi, component, time_arg);
+  return boundaryVelocityValue(fi, component, time_arg);
 }
 
 Real
@@ -820,7 +784,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceOperatorState(
   state.face_normal = fi->normal();
   state.face_rho = interpolateFaceDensity(fi, time_arg);
   state.face_raw_ainv = interpolateFaceRawAinv(fi, raw_ainv_readers);
-  state.normal_raw_ainv = computeFaceNormalRawAinv(state.face_raw_ainv, state.face_normal);
+  state.normal_raw_ainv = computeFaceNormalAinv(state.face_raw_ainv, state.face_normal);
   state.negative_sn_grad_p = -(
       pressure_gradient_readers ? computeFaceNormalPressureGradient(fi, *pressure_gradient_readers)
                                 : computeFaceNormalPressureGradient(fi, time_arg));
@@ -847,17 +811,6 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
 
   return MetaPhysicL::raw_value(
       (*functor)(makeCenteredFaceArg(fi, nullptr, limiter_state), time_arg));
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalRawAinv(
-    const RealVectorValue & face_ainv_raw, const RealVectorValue & face_normal) const
-{
-  Real normal_ainv = 0.0;
-  for (const auto dim_i : make_range(_dim))
-    normal_ainv += face_ainv_raw(dim_i) * face_normal(dim_i) * face_normal(dim_i);
-
-  return normal_ainv;
 }
 
 Real
@@ -896,9 +849,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNorma
   const RealVectorValue face_normal = fi->normal();
   const RealVectorValue face_raw_ainv = interpolateFaceRawAinv(fi);
   const RealVectorValue face_density_weighted_ainv = libmesh_map_find(_Ainv, fi->id());
-  const Real normal_raw_ainv = computeFaceNormalRawAinv(face_raw_ainv, face_normal);
+  const Real normal_raw_ainv = computeFaceNormalAinv(face_raw_ainv, face_normal);
   const Real normal_density_weighted_ainv =
-      computeFaceNormalRawAinv(face_density_weighted_ainv, face_normal);
+      computeFaceNormalAinv(face_density_weighted_ainv, face_normal);
 
   if (std::abs(normal_density_weighted_ainv) <= libMesh::TOLERANCE)
   {
@@ -910,68 +863,9 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNorma
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceVolumetricFlux(
-    const FaceInfo * fi) const
+ConservativeSharpInterfaceRhieChowMassFluxBase::pressureDiffusionFaceArea(const FaceInfo * fi) const
 {
-  if (!fi)
-    return 0.0;
-
-  PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
-
-  _p_diffusion_kernel->setupFaceData(fi);
-  const Real face_measure = fi->faceArea() * fi->faceCoord();
-  _p_diffusion_kernel->setCurrentFaceArea(face_measure);
-
-  if (_p->isInternalFace(*fi))
-  {
-    const auto & elem_info = *fi->elemInfo();
-    const auto & neighbor_info = *fi->neighborInfo();
-    const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-    const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
-    const auto p_elem_value = p_reader(elem_dof);
-    const auto p_neighbor_value = p_reader(neighbor_dof);
-    const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
-    const auto neighbor_matrix_contribution =
-        _p_diffusion_kernel->computeNeighborMatrixContribution();
-    const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
-
-    // The sharp pressure projection stores the solved pressure-equation flux including face area.
-    // Transport converts back to a normal flux density when publishing corrected_face_phi.
-    return p_neighbor_value * neighbor_matrix_contribution +
-           p_elem_value * elem_matrix_contribution - elem_rhs_contribution;
-  }
-
-  if (!fi->boundaryIDs().empty())
-  {
-    mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-    if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
-    {
-      bc_pointer->setupFaceData(
-          fi, fi->faceType(std::make_pair(_p->number(), _global_pressure_system_number)));
-
-      const ElemInfo & elem_info =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-      const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-      const auto p_elem_value = p_reader(elem_dof);
-      const auto matrix_contribution =
-          _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
-      const auto rhs_contribution =
-          _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
-
-      // Boundary pressure diffusion follows the same integrated-flux contract
-      // as the interior pressure operator.
-      return p_elem_value * matrix_contribution - rhs_contribution;
-    }
-  }
-
-  return 0.0;
-}
-
-Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDiscretePressureFaceFlux(
-    const FaceInfo * fi) const
-{
-  return computeDiscretePressureFaceVolumetricFlux(fi);
+  return fi ? faceMeasure(*fi) : 0.0;
 }
 
 Real
@@ -1049,24 +943,15 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradien
   const Real elem_p =
       _p->getElemValue(elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo(), time_arg);
 
-  if (!fi->boundaryIDs().empty())
+  if (auto * bc_pointer = pressureBoundaryCondition(fi))
   {
-    mooseAssert(fi->boundaryIDs().size() == 1,
-                "Expected a single boundary id on a FV pressure boundary face.");
+    const Real bc_sn_grad = bc_pointer->computeBoundaryNormalGradient();
+    if (std::isfinite(bc_sn_grad))
+      return bc_sn_grad;
 
-    if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
-    {
-      bc_pointer->setupFaceData(
-          fi, fi->faceType(std::make_pair(_p->number(), _global_pressure_system_number)));
-
-      const Real bc_sn_grad = bc_pointer->computeBoundaryNormalGradient();
-      if (std::isfinite(bc_sn_grad))
-        return bc_sn_grad;
-
-      const Real bc_value = bc_pointer->computeBoundaryValue();
-      if (std::isfinite(bc_value))
-        return (bc_value - elem_p) / normal_spacing;
-    }
+    const Real bc_value = bc_pointer->computeBoundaryValue();
+    if (std::isfinite(bc_value))
+      return (bc_value - elem_p) / normal_spacing;
   }
 
   return 0.0;
@@ -1181,7 +1066,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       {
         for (const auto dim_i : make_range(_dim))
         {
-          const Real boundary_value = boundaryPhysicalVelocityComponent(fi, dim_i, time_arg);
+          const Real boundary_value = boundaryVelocityValue(fi, dim_i, time_arg);
           face_hbya(dim_i) = std::isfinite(boundary_value)
                                  ? -boundary_value
                                  : -MetaPhysicL::raw_value((*_vel[dim_i])(
@@ -1199,13 +1084,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
       }
     }
 
-    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    const Real face_measure = faceMeasure(*fi);
     const Real predictor_operator_volumetric_flux = face_hbya * fi->normal();
     const auto state =
         buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers, &pressure_gradient_readers);
     const RealVectorValue pressure_face_raw_ainv = state.face_raw_ainv;
     const Real normal_pressure_ainv =
-        computeFaceNormalRawAinv(pressure_face_raw_ainv, state.face_normal);
+        computeFaceNormalAinv(pressure_face_raw_ainv, state.face_normal);
     Real transient_projection_flux = 0.0;
     Real hydrostatic_flux = 0.0;
 
@@ -1267,22 +1152,16 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
     return false;
 
   bool use_constrained_boundary_state = _vel[0]->isDirichletBoundaryFace(*fi);
-  if (!use_constrained_boundary_state && !fi->boundaryIDs().empty())
+  if (!use_constrained_boundary_state)
   {
-    mooseAssert(fi->boundaryIDs().size() == 1,
-                "Expected at most one physical boundary id on a FV boundary face.");
-    const auto boundary_id = *fi->boundaryIDs().begin();
-
     for (const auto dim_i : make_range(_dim))
-      if (auto * bc_pointer = _vel[dim_i]->getBoundaryCondition(boundary_id))
+      if (auto * bc_pointer = velocityBoundaryCondition(fi, dim_i))
       {
         if (dynamic_cast<LinearFVPressureInletOutletMomentumBC *>(bc_pointer))
           continue;
 
         if (auto * adv_diff_bc = dynamic_cast<LinearFVAdvectionDiffusionBC *>(bc_pointer))
         {
-          adv_diff_bc->setupFaceData(
-              fi, fi->faceType(std::make_pair(_vel[dim_i]->number(), _vel[dim_i]->sys().number())));
           if (adv_diff_bc->computeBoundaryGradientMatrixContribution() > 0.0)
           {
             use_constrained_boundary_state = true;
@@ -1296,37 +1175,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::updateVelocityBoundaryState()
+ConservativeSharpInterfaceRhieChowMassFluxBase::postUpdateVelocityBoundaryState()
 {
-  const auto time_arg = Moose::currentState();
-
-  _velocity_boundary_state_valid = false;
-  for (auto & component_face_values : _boundary_velocity_face_values)
-    component_face_values.clear();
-
-  for (const auto * fi : flowFaceInfo())
-  {
-    if (_vel[0]->isInternalFace(*fi))
-      continue;
-
-    RealVectorValue density_times_velocity;
-    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
-    const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
-    const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
-    const Real face_rho = _rho(makeCenteredFaceArg(fi, boundary_elem), time_arg);
-
-    for (const auto component : index_range(_vel))
-    {
-      const Real boundary_velocity = boundaryPhysicalVelocityComponent(fi, component, time_arg);
-      _boundary_velocity_face_values[component][fi->id()] = boundary_velocity;
-      density_times_velocity(component) = boundary_normal_multiplier * face_rho * boundary_velocity;
-    }
-
-    if (!_pressure_equation_flux_valid)
-      _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
-  }
-
-  _velocity_boundary_state_valid = true;
   cacheCurrentCorrectedVolumetricFlux();
 }
 

@@ -58,13 +58,13 @@ LinearFVInletOutletScalarBC::outwardFaceFlux() const
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? -1.0 : 1.0;
   return boundary_normal_multiplier *
-         _face_flux(functorFaceArg(_face_flux, _current_face_info), state);
+         _face_flux(functorFaceArg(_face_flux, *_current_face_info), state);
 }
 
 Real
 LinearFVInletOutletScalarBC::computeBackflowBoundaryValue() const
 {
-  return _backflow_value(functorFaceArg(_backflow_value, _current_face_info), determineState());
+  return _backflow_value(functorFaceArg(_backflow_value, *_current_face_info), determineState());
 }
 
 Real

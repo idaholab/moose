@@ -24,7 +24,7 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
-class LinearFVPressureCorrectionDiffusion;
+class LinearFVBoundaryCondition;
 class LinearFVElementalKernel;
 namespace libMesh
 {
@@ -130,16 +130,31 @@ protected:
                                           const Moose::StateArg & time_arg) const;
   /// Normal diffusion coefficient for the active pressure-correction space.
   virtual Real pressureBoundaryNormalAinv(const FaceInfo * fi) const;
+  LinearFVBoundaryCondition * boundaryCondition(const FaceInfo * fi,
+                                                const MooseLinearVariableFVReal & var,
+                                                unsigned int system_number) const;
+  /// Fetch and initialize the pressure boundary condition attached to a boundary face.
+  LinearFVBoundaryCondition * pressureBoundaryCondition(const FaceInfo * fi) const;
   /// Whether pressure-correction face fluxes include face area.
   virtual bool pressureCorrectionFluxIsIntegrated() const { return false; }
+  /// Geometric face measure used to convert between flux density and integrated flux.
+  Real faceMeasure(const FaceInfo & fi) const;
+  /// Face area supplied to the pressure diffusion kernel when reconstructing pressure fluxes.
+  virtual Real pressureDiffusionFaceArea(const FaceInfo * fi) const;
   /// Evaluate or fetch the boundary face value for a velocity component.
   Real boundaryVelocityValue(const FaceInfo * fi,
                              const unsigned int component,
                              const Moose::StateArg & time_arg) const;
+  /// Fetch and initialize the velocity boundary condition for one component.
+  LinearFVBoundaryCondition * velocityBoundaryCondition(const FaceInfo * fi,
+                                                        const unsigned int component) const;
   /// Compute the target physical boundary mass flux rho U_b.n at a face.
   Real boundaryMassFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   /// Compute the target volumetric boundary flux U_b.n at a face.
   Real boundaryVolumetricFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
+  /// Compute the normal component of a face diagonal Ainv vector.
+  Real computeFaceNormalAinv(const RealVectorValue & face_ainv,
+                             const RealVectorValue & face_normal) const;
   /// Compute the normal component of the face diffusion coefficient used by pressure BCs.
   Real boundaryNormalAinv(const FaceInfo * fi) const;
   /// Determine whether a boundary face belongs to an adjustable fixed-flux pressure patch.
@@ -147,6 +162,8 @@ protected:
   /// Compute the face flux contributed by the solved pressure equation in the
   /// native pressure-correction space used by this Rhie-Chow object.
   virtual Real computeDiscretePressureFaceFlux(const FaceInfo * fi) const;
+  /// Optional extension point after boundary velocity state has been refreshed.
+  virtual void postUpdateVelocityBoundaryState() {}
 
   /// Accessor for the cached set of flow faces used by this Rhie-Chow object.
   const std::vector<const FaceInfo *> & flowFaceInfo() const { return _flow_face_info; }
@@ -210,7 +227,7 @@ protected:
   std::vector<const MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
-  LinearFVPressureCorrectionDiffusion * _p_diffusion_kernel;
+  LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
 
   /**
    * A map functor from faces to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -

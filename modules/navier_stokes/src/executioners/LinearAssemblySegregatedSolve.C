@@ -352,7 +352,8 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     LinearImplicitSystem & momentum_system =
         libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    if (shouldCopyMomentumNonlinearSolutionHistory())
+      _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
 
   // We reset this to ensure the preconditioner is recomputed new time we go to the momentum
@@ -711,6 +712,12 @@ LinearAssemblySegregatedSolve::preMomentumPressureIteration(
 }
 
 bool
+LinearAssemblySegregatedSolve::shouldCopyMomentumNonlinearSolutionHistory() const
+{
+  return true;
+}
+
+bool
 LinearAssemblySegregatedSolve::shouldAssembleMomentumPredictorWithoutSolve() const
 {
   return false;
@@ -719,6 +726,24 @@ LinearAssemblySegregatedSolve::shouldAssembleMomentumPredictorWithoutSolve() con
 void
 LinearAssemblySegregatedSolve::assembleMomentumPredictorWithoutSolve()
 {
+  if (_momentum_systems.empty())
+    return;
+
+  if (_rc_uo)
+    _rc_uo->clearMomentumPredictorOperatorCache();
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    const auto assembly =
+        assembleMomentumPredictorOperator(system_i, /* prepare_without_solve = */ true);
+    assembly.system->update();
+  }
+
+  auto & momentum_system_0 =
+      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[0]->system());
+  auto & momentum_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system_0.get_linear_solver());
+  momentum_solver.reuse_preconditioner(false);
 }
 
 bool

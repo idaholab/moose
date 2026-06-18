@@ -202,15 +202,6 @@ LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
     return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
 }
 
-Moose::FaceArg
-LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
-                                       const Moose::FV::LimiterType limiter_type,
-                                       const bool correct_skewness) const
-{
-  mooseAssert(fi, "FaceInfo should not be null!");
-  return makeFace(*fi, limiter_type, true, correct_skewness);
-}
-
 Real
 LinearFVFluxKernel::computeBoundaryFlux(const LinearFVBoundaryCondition & bc)
 {

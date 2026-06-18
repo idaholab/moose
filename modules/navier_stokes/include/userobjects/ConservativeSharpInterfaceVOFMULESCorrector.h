@@ -76,6 +76,16 @@ private:
     Real correction_flux = 0.0;
   };
 
+  struct FaceTransportData
+  {
+    FaceInfo::VarFaceNeighbors face_type = FaceInfo::VarFaceNeighbors::NEITHER;
+    LinearFVBoundaryCondition * boundary_condition = nullptr;
+    Real volumetric_flux = 0.0;
+    Real integrated_flux = 0.0;
+    bool upwind_is_elem = true;
+    BoundaryFaceKind boundary_kind = BoundaryFaceKind::Closed;
+  };
+
   void cacheSystemData();
   void initializeFluxStorage();
   void publishFaceFluxes(const std::vector<FaceCorrectionData> & face_corrections,
@@ -86,24 +96,29 @@ private:
   bool synchronizePartitionFaceLimiters(const std::vector<FaceCorrectionData> & face_corrections,
                                         std::vector<Real> & accepted_lambda) const;
   LinearFVBoundaryCondition * boundaryCondition(const FaceInfo & fi) const;
-  Real boundaryValue(const FaceInfo & fi, FaceInfo::VarFaceNeighbors face_type) const;
+  FaceTransportData faceTransportData(const FaceInfo & fi) const;
+  Real boundaryValue(const FaceInfo & fi, const FaceTransportData & face_data) const;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
   Real cellVolume(const ElemInfo & elem_info) const;
   Real faceMeasure(const FaceInfo & fi) const;
   Real cellAlpha(const ElemInfo & elem_info) const;
   Real boundedAlpha(Real value) const;
-  Real donorFlux(const FaceInfo & fi) const;
-  Real highOrderFaceValue(const FaceInfo & fi) const;
+  Real donorFlux(const FaceInfo & fi, const FaceTransportData & face_data, Real elem_alpha) const;
+  Real highOrderFaceValue(const FaceInfo & fi,
+                          const FaceTransportData & face_data,
+                          Real elem_alpha) const;
   Real sharedVanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   BoundaryFaceKind classifyBoundaryFace(const FaceInfo & fi,
                                         FaceInfo::VarFaceNeighbors face_type,
-                                        Real volumetric_flux) const;
+                                        Real volumetric_flux,
+                                        const LinearFVBoundaryCondition * bc) const;
   AlphaFluxData buildAlphaFlux(const FaceInfo & fi,
                                Real elem_alpha,
                                Real neighbor_alpha,
-                               BoundaryFaceKind boundary_kind) const;
+                               const FaceTransportData & face_data) const;
   Real faceFunctorAverage(const FaceInfo & fi, const Moose::Functor<Real> & functor) const;
   Real vofTransportVolumetricFaceFlux(const FaceInfo & fi) const;
+  Real integratedVofTransportFaceFlux(const FaceInfo & fi) const;
   Real rhoPhi(const FaceInfo & fi, const Real limited_alpha_flux) const;
   FaceCorrectionData buildFaceCorrectionData(const FaceInfo & fi) const;
   std::vector<FaceCorrectionData> collectFaceCorrectionData() const;
