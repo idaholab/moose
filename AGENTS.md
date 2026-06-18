@@ -57,12 +57,20 @@ The test: Every changed line should trace directly to the user's request.
 - Add comments when the code alone does not make clear what's happening.
 - Use ASCII characters.
 
-## 5. Tool Use
+## 5. Code Style
+
+- Use `make_range` for integer range-based for loops (e.g. `for (const auto i :
+  make_range(n))`) instead of raw index loops. Use `index_range(container)`
+  when iterating over the indices of a container.
+- MOOSE requires C++17, so modern C++ constructs up through that standard are
+  encouraged where they increase code readability.
+
+## 6. Tool Use
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
 
-## 6. Goal-Driven Execution
+## 7. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
