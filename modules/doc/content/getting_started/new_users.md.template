@@ -65,6 +65,10 @@ section of `{{PATH}}/your_app_name/Makefile` that is shown below.
 Then, to begin using a module's capabilities, recompile the application in the same manner described
 in the [#compile] section.
 
+!alert note
+You do not need to run `make clean` after enabling or disabling a module. The build automatically
+recompiles the affected registration code when the set of enabled modules changes.
+
 !alert tip title=Only enable modules needed
 Each module enabled will increase compilation times, thus it is recommended to enable modules
 as-needed.

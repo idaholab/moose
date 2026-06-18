@@ -11,6 +11,11 @@
 
 #include "MooseApp.h"
 
+// Establishes a header dependency on the set of enabled modules so that this file (and any
+// application *App.C that instantiates registerAllObjects below) is recompiled when a module is
+// added to or removed from the build, without requiring a clean. See modules/modules.mk.
+#include "ModulesEnabled.h"
+
 #ifdef CHEMICAL_REACTIONS_ENABLED
 #include "ChemicalReactionsApp.h"
 #endif

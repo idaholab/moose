@@ -163,6 +163,9 @@ test/tests/outputs/format/dump.i
 # Generated header file
 MooseRevision.h
 
+# Generated header recording the enabled-module set (see modules/modules.mk)
+ModulesEnabled.h
+
 # Precompiled headers
 moose/include/base/Precompiled.h.gch
 
