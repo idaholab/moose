@@ -21,13 +21,13 @@ FunctorSmootherTempl<T>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Creates smoother functor(s) using various averaging techniques");
-  params.addParam<std::vector<MooseFunctorName>>("functors_in",
-                                                 "The name(s) of the functors to smooth");
-  params.addParam<std::vector<MooseFunctorName>>("functors_out",
-                                                 "The name(s) of the smooth output functors");
+  params.addRequiredParam<std::vector<MooseFunctorName>>("functors_in",
+                                                         "The name(s) of the functors to smooth");
+  params.addRequiredParam<std::vector<MooseFunctorName>>(
+      "functors_out", "The name(s) of the smooth output functors");
   MooseEnum smoothing_techniques(
       "face_average node_average layered_elem_average remove_checkerboard");
-  params.addParam<MooseEnum>(
+  params.addRequiredParam<MooseEnum>(
       "smoothing_technique", smoothing_techniques, "How to smooth the functor");
 
   return params;
