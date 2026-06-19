@@ -74,33 +74,23 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 }
 
 bool
-DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int iter,
+DefaultNonlinearConvergence::checkResidualConvergence(const unsigned int iter,
                                                       const Real fnorm,
                                                       const Real ref_norm,
                                                       const Real rel_tol,
-                                                      const Real /*abs_tol*/,
-                                                      std::ostringstream & oss)
-{
-  if (iter && fnorm <= ref_norm * rel_tol)
-  {
-    oss << "Converged due to relative/normalized residual norm " << fnorm / ref_norm
-        << " < relative tolerance (" << rel_tol << ")\n";
-    return true;
-  }
-  else
-    return false;
-}
-
-bool
-DefaultNonlinearConvergence::checkAbsoluteConvergence(const unsigned int iter,
-                                                      const Real fnorm,
                                                       const Real abs_tol,
                                                       std::ostringstream & oss)
 {
-  if (iter >= _nl_forced_its && fnorm < abs_tol)
+  if (fnorm < abs_tol)
   {
     oss << "Converged due to absolute residual " << fnorm << " < absolute tolerance (" << abs_tol
         << ")\n";
+    return true;
+  }
+  else if (iter && fnorm <= ref_norm * rel_tol)
+  {
+    oss << "Converged due to relative/normalized residual norm " << fnorm / ref_norm
+        << " < relative tolerance (" << rel_tol << ")\n";
     return true;
   }
   else
@@ -194,13 +184,17 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   else
     _nl_current_pingpong = 0;
 
+  const auto ref_residual = system.referenceResidual();
   std::ostringstream oss;
-  if (fnorm != fnorm)
+  if (iter < _nl_forced_its)
+    oss << "Number of forced iterations not yet reached: " << iter << " < " << _nl_forced_its
+        << '\n';
+  else if (fnorm != fnorm)
   {
     oss << "Failed to converge, residual norm is NaN\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  else if (checkAbsoluteConvergence(iter, fnorm, abs_tol, oss))
+  else if (checkResidualConvergence(iter, fnorm, ref_residual, rel_tol, abs_tol, oss))
     status = MooseConvergenceStatus::CONVERGED;
   else if (nfuncs >= max_funcs)
   {
@@ -214,34 +208,28 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
     oss << "Nonlinear solve was blowing up!\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  if (iter >= _nl_forced_its && status == MooseConvergenceStatus::ITERATING)
+  else if (snorm < rel_step_tol * xnorm)
   {
-    const auto ref_residual = system.referenceResidual();
-    if (checkRelativeConvergence(iter, fnorm, ref_residual, rel_tol, abs_tol, oss))
-      status = MooseConvergenceStatus::CONVERGED;
-    else if (snorm < rel_step_tol * xnorm)
-    {
-      oss << "Converged due to small update length: " << snorm << " < " << rel_step_tol << " * "
-          << xnorm << '\n';
-      status = MooseConvergenceStatus::CONVERGED;
-    }
-    else if (_nl_rel_div_tol > 0 && fnorm > ref_residual * _nl_rel_div_tol)
-    {
-      oss << "Diverged due to relative residual " << ref_residual << " > divergence tolerance "
-          << _nl_rel_div_tol << " * relative residual " << ref_residual << '\n';
-      status = MooseConvergenceStatus::DIVERGED;
-    }
-    else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
-    {
-      oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
-          << _nl_abs_div_tol << '\n';
-      status = MooseConvergenceStatus::DIVERGED;
-    }
-    else if (_nl_current_pingpong > _nl_max_pingpong)
-    {
-      oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
-      status = MooseConvergenceStatus::DIVERGED;
-    }
+    oss << "Converged due to small update length: " << snorm << " < " << rel_step_tol << " * "
+        << xnorm << '\n';
+    status = MooseConvergenceStatus::CONVERGED;
+  }
+  else if (_nl_rel_div_tol > 0 && fnorm > ref_residual * _nl_rel_div_tol)
+  {
+    oss << "Diverged due to relative residual " << ref_residual << " > divergence tolerance "
+        << _nl_rel_div_tol << " * relative residual " << ref_residual << '\n';
+    status = MooseConvergenceStatus::DIVERGED;
+  }
+  else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
+  {
+    oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
+        << _nl_abs_div_tol << '\n';
+    status = MooseConvergenceStatus::DIVERGED;
+  }
+  else if (_nl_current_pingpong > _nl_max_pingpong)
+  {
+    oss << "Diverged due to maximum nonlinear residual pingpong achieved" << '\n';
+    status = MooseConvergenceStatus::DIVERGED;
   }
 
   system._last_nl_rnorm = fnorm;

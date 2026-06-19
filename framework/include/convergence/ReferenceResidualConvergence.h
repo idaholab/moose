@@ -47,15 +47,10 @@ public:
 protected:
   virtual void nonlinearConvergenceSetup() override;
 
-  virtual bool checkRelativeConvergence(const unsigned int it,
+  virtual bool checkResidualConvergence(const unsigned int it,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
-                                        const Real abs_tol,
-                                        std::ostringstream & oss) override;
-
-  virtual bool checkAbsoluteConvergence(const unsigned int it,
-                                        const Real fnorm,
                                         const Real abs_tol,
                                         std::ostringstream & oss) override;
 

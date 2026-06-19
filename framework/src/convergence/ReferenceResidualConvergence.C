@@ -422,7 +422,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
 }
 
 bool
-ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
+ReferenceResidualConvergence::checkResidualConvergence(const unsigned int it,
                                                        const Real fnorm,
                                                        const Real ref_norm,
                                                        const Real rel_tol,
@@ -431,7 +431,7 @@ ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
 {
   // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
   if (!_reference_vector)
-    return DefaultNonlinearConvergence::checkRelativeConvergence(
+    return DefaultNonlinearConvergence::checkResidualConvergence(
         it, fnorm, ref_norm, rel_tol, abs_tol, oss);
 
   if (checkConvergenceIndividVars(fnorm, abs_tol, rel_tol, ref_norm))
@@ -449,16 +449,5 @@ ReferenceResidualConvergence::checkRelativeConvergence(const unsigned int it,
     return true;
   }
 
-  return false;
-}
-
-bool
-ReferenceResidualConvergence::checkAbsoluteConvergence(const unsigned int it,
-                                                       const Real fnorm,
-                                                       const Real abs_tol,
-                                                       std::ostringstream & oss)
-{
-  if (!_reference_vector)
-    return DefaultNonlinearConvergence::checkAbsoluteConvergence(it, fnorm, abs_tol, oss);
   return false;
 }
