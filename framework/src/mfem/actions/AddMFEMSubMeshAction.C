@@ -29,11 +29,8 @@ AddMFEMSubMeshAction::AddMFEMSubMeshAction(const InputParameters & parameters)
 void
 AddMFEMSubMeshAction::act()
 {
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
-  if (mfem_problem)
-    mfem_problem->addSubMesh(_type, _name, _moose_object_pars);
-  else
-    mooseError("Cannot add SubMeshes unless an MFEMProblem is in use.");
+  if (_problem->feBackend() == Moose::FEBackend::MFEM)
+    static_cast<MFEMProblem &>(*_problem).addSubMesh(_type, _name, _moose_object_pars);
 }
 
 #endif

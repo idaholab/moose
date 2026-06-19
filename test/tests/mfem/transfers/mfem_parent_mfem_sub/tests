@@ -59,7 +59,6 @@
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex.csv'
         detail = 'between hex meshes,'
-        abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
@@ -69,7 +68,6 @@
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
         detail = 'between tetrahedral meshes,'
-        abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
@@ -82,7 +80,6 @@
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex.csv'
         detail = 'and from tetrahedral meshes to hex meshes.'
-        abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
@@ -98,7 +95,6 @@
         input = mfem_parent_embedded_submesh.i
         xmldiff = 'OutputData/EmbeddedSubmesh/Run0/Cycle000001/data.pvtu'
         detail = 'from a smaller submesh to a larger mesh containing the smaller submes as a subdomain.'
-        abs_zero = 1e-8
         max_parallel = 1 # XMLDiff on ParaViewDataCollection schemadiffs with multiple ranks
         capabilities = 'mfem'
         recover = false

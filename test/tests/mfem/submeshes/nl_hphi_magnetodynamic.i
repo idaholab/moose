@@ -12,8 +12,8 @@ e_c = 1.0
 []
 
 [Mesh]
-    type = MFEMMesh
-    file = ../mesh/split_embedded_concentric_torus.e
+  type = MFEMMesh
+  file = ../mesh/split_embedded_concentric_torus.e
 []
 
 [SubMeshes]

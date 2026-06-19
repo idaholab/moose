@@ -1,67 +1,49 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/mug.e
-  dim = 3
 []
 
 [Problem]
   type = MFEMProblem
+  solve = false
 []
 
 [Variables]
-  [scalar_var]
+  [h1]
     family = LAGRANGE
+    order = SECOND
+  []
+  [hcurl]
+    family = NEDELEC_ONE
+    order = SECOND
+  []
+  [hdiv]
+    family = RAVIART_THOMAS
+    order = SECOND
+  []
+  [l2]
+    family = L2_LAGRANGE
     order = FIRST
   []
-  [vector_var]
+  [h1_3]
     family = LAGRANGE_VEC
+    order = SECOND
+  []
+  [l2_3]
+    family = L2_LAGRANGE_VEC
     order = FIRST
   []
 []
 
 [AuxVariables]
-  [scalar_auxvar]
+  [l2_aux]
     family = MONOMIAL
     order = CONSTANT
   []
-  [vector_auxvar]
+  [l2_3_aux]
     family = MONOMIAL_VEC
     order = CONSTANT
   []
-[]
-
-[BCs]
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = scalar_var
-    boundary = '1'
-    coefficient = 1.0
-  []
-  [top]
-    type = MFEMScalarDirichletBC
-    variable = scalar_var
-    boundary = '2'
-  []
-[]
-
-[Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
-    variable = scalar_var
-  []
-[]
-
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-  []
-[]
-
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-16
-  l_max_its = 1000
 []
 
 [Executioner]

@@ -35,13 +35,12 @@ AddMFEMComplexKernelComponentAction::act()
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
 
-  if (mfem_problem && _name == "RealComponent")
-    mfem_problem->addRealComponentToKernel(
+  if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "RealComponent")
+    static_cast<MFEMProblem &>(*_problem).addRealComponentToKernel(
         _type, elements[elements.size() - 2], _moose_object_pars);
-  else if (mfem_problem && _name == "ImagComponent")
-    mfem_problem->addImagComponentToKernel(
+  else if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "ImagComponent")
+    static_cast<MFEMProblem &>(*_problem).addImagComponentToKernel(
         _type, elements[elements.size() - 2], _moose_object_pars);
 }
 

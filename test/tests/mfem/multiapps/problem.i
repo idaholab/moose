@@ -1,5 +1,6 @@
 [Problem]
   type = MFEMProblem
+  verbose_multiapps = true
 []
 
 [Mesh]
@@ -57,20 +58,5 @@
 [Solver]
   type = MFEMHyprePCG
   preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 100
-[]
-
-[Executioner]
-  type = MFEMTransient
-  num_steps = 2
-  dt = 0.01
-[]
-
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/sub_cycling_sub
-    vtk_format = ASCII
-  []
+  l_tol = 1e-12
 []

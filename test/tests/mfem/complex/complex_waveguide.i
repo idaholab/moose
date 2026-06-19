@@ -9,7 +9,6 @@ elec_cond_air = 1e-323
 [Mesh]
   type = MFEMMesh
   file = ../mesh/waveguide.g
-  dim = 3
 []
 
 [Problem]

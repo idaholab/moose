@@ -1,19 +1,19 @@
 [Mesh]
-    type = MFEMMesh
-    file = ../mesh/hinomaru.e
+  type = MFEMMesh
+  file = ../mesh/hinomaru.e
 []
 
 [Problem]
-    type = MFEMProblem
+  type = MFEMProblem
 []
 
 [FESpaces]
- [H1FESpace]
-   type = MFEMScalarFESpace
-   fec_type = H1
-   fec_order = FIRST
- []
- [HCurlFESpace]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+  [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
@@ -24,7 +24,7 @@
     fec_type = RT
     fec_order = CONSTANT
   []
-   [L2FESpace]
+  [L2FESpace]
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = CONSTANT
@@ -33,7 +33,7 @@
 []
 
 [Variables]
-   [Az]
+  [Az]
     type = MFEMVariable
     fespace = H1FESpace
   []

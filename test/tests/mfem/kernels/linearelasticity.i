@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/beam-tet.mesh
-  dim = 3
   uniform_refine = 2
   displacement = "displacement"
 []

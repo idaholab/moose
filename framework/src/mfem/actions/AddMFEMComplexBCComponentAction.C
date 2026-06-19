@@ -33,12 +33,13 @@ AddMFEMComplexBCComponentAction::act()
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
 
-  if (mfem_problem && _name == "RealComponent")
-    mfem_problem->addRealComponentToBC(_type, elements[elements.size() - 2], _moose_object_pars);
-  else if (mfem_problem && _name == "ImagComponent")
-    mfem_problem->addImagComponentToBC(_type, elements[elements.size() - 2], _moose_object_pars);
+  if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "RealComponent")
+    static_cast<MFEMProblem &>(*_problem).addRealComponentToBC(
+        _type, elements[elements.size() - 2], _moose_object_pars);
+  else if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "ImagComponent")
+    static_cast<MFEMProblem &>(*_problem).addImagComponentToBC(
+        _type, elements[elements.size() - 2], _moose_object_pars);
 }
 
 #endif

@@ -74,7 +74,7 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  X_new = _true_x;
+  X_new.MakeRef(_true_x, 0);
 }
 
 void

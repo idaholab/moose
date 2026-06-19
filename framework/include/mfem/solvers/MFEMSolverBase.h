@@ -33,6 +33,9 @@ public:
   /// Returns the wrapped MFEM solver
   mfem::Solver & getSolver();
 
+  /// Returns this solver's preconditioner
+  MFEMSolverBase * getPreconditioner() { return _preconditioner.get(); };
+
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 

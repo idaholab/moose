@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/beam-tet.mesh
-  dim = 3
 []
 
 [Problem]
@@ -68,7 +67,6 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   csv = true
   file_base = OutputData/MaxwellEigenproblem
 []

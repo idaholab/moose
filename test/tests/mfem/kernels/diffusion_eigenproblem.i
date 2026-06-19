@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
-  dim = 2
   serial_refine = 1
 []
 

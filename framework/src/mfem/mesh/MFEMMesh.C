@@ -107,7 +107,8 @@ MFEMMesh::displace(mfem::GridFunction const & displacement)
 void
 MFEMMesh::buildDummyMooseMesh()
 {
-  MeshTools::Generation::build_point(static_cast<UnstructuredMesh &>(getMesh()));
+  auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
+  MeshTools::Generation::build_square(dummy, 1, 1, 0., 1., 0., 1., ElemType::QUAD9);
 }
 
 void

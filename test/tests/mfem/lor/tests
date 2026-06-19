@@ -14,14 +14,13 @@
                'Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    capabilities = 'mfem & method!=dbg & platform=linux'
+    capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    max_threads = 1
     min_slots = 2 # memory heavy
-    abs_zero = 1e-6
+    abs_zero = 5e-7
   []
   [MFEMDiffusionLOR]
     type = XMLDiff
@@ -37,7 +36,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    abs_zero = 1e-6
+    abs_zero = 1e-9
   []
   [MFEMGradDivLOR]
     type = XMLDiff
@@ -55,7 +54,7 @@
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    abs_zero = 1e-6
+    abs_zero = 8e-10
   []
   [MFEMHeatConductionLOR]
     type = XMLDiff

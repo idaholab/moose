@@ -12,7 +12,7 @@
                   OutputData/dt_from_parent_sub/Run0/Run0.pvd
                   OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
       detail = "with a time step governed by the MFEM parent application,"
-      capabilities = 'mfem & platform=linux'
+      capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
@@ -20,7 +20,7 @@
     []
     [MFEM_sub_cycling]
       type = XMLDiff
-      input = 'sub_cycling_parent.i'
+      input = 'sub_cycling.i'
       xmldiff = 'OutputData/sub_cycling_parent/Run0/Run0.pvd
                   OutputData/sub_cycling_parent/Run0/Cycle000000/proc000000.vtu
                   OutputData/sub_cycling_parent/Run0/Cycle000002/proc000000.vtu
@@ -38,7 +38,7 @@
     requirement = "The system shall support executing a sub-application solving an entire sub-problem:"
     [MFEM_full_solve_transient]
       type = XMLDiff
-      input = 'full_solve_parent.i'
+      input = 'full_solve.i'
       xmldiff = 'OutputData/full_solve_parent/Run0/Run0.pvd
                   OutputData/full_solve_parent/Run0/Cycle000000/proc000000.vtu
                   OutputData/full_solve_parent/Run0/Cycle000002/proc000000.vtu

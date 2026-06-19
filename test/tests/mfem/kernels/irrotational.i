@@ -6,7 +6,6 @@ centre_y = 0.1
 [Mesh]
   type = MFEMMesh
   file = ../mesh/vortex.msh
-  dim = 2
 []
 
 [Problem]

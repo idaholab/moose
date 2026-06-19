@@ -30,21 +30,12 @@ SetMFEMMeshFESpaceAction::SetMFEMMeshFESpaceAction(const InputParameters & param
 void
 SetMFEMMeshFESpaceAction::act()
 {
-  auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
-
-  if (!mfem_problem)
+  if (_problem->feBackend() == Moose::FEBackend::MFEM)
   {
-    return;
+    auto & mfem_problem = static_cast<MFEMProblem &>(*_problem);
+    if (const auto displacement = mfem_problem.getMeshDisplacementGridFunction())
+      mfem_problem.mesh().getMFEMParMesh().SetNodalFESpace(displacement.value().get().ParFESpace());
   }
-
-  mfem::ParMesh & mesh = mfem_problem->mesh().getMFEMParMesh();
-  auto const displacement = mfem_problem->getMeshDisplacementGridFunction();
-  if (!displacement)
-  {
-    return;
-  }
-
-  mesh.SetNodalFESpace(displacement.value().get().ParFESpace());
 }
 
 #endif

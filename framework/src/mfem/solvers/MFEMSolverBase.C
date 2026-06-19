@@ -47,7 +47,7 @@ MFEMSolverBase::setPreconditioner(T & solver)
       _preconditioner = std::static_pointer_cast<MFEMSolverBase>(pre.shared_from_this());
     }
 
-    if (dynamic_cast<const MFEMEigensolverBase *>(_preconditioner.get()))
+    if (dynamic_cast<const MFEMEigensolverBase *>(getPreconditioner()))
       mooseError("Eigensolvers cannot be used as preconditioners.");
 
     auto & mfem_pre = _preconditioner->getSolver();

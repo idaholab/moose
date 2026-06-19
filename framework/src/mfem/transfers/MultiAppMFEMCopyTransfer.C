@@ -24,7 +24,7 @@ MultiAppMFEMCopyTransfer::validParams()
 MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & params)
   : MFEMMultiAppTransfer(params)
 {
-  checkValidTransferProblemTypes<MFEMProblem, MFEMProblem>();
+  checkValidTransferProblemTypes<Moose::FEBackend::MFEM, Moose::FEBackend::MFEM>();
 }
 
 MFEMProblem &

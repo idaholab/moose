@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/hinomaru.e
-  dim = 2
 []
 
 [Problem]

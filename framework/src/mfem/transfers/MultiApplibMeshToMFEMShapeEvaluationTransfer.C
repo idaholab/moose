@@ -29,7 +29,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
     InputParameters const & params)
   : MFEMMultiAppTransfer(params)
 {
-  checkValidTransferProblemTypes<MFEMProblem, FEProblemBase>();
+  checkValidTransferProblemTypes<Moose::FEBackend::MFEM, Moose::FEBackend::LibMesh>();
 }
 
 MFEMProblem &

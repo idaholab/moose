@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MultiAppTransfer.h"
+#include "FEProblemBase.h"
 
 /**
  * Virtual base class for MultiApp transfers to and/or from MFEMProblems.
@@ -91,7 +92,7 @@ protected:
   mfem::real_t getMFEMOutOfMeshValue() const { return _mfem_out_of_mesh_value; }
 
   /// Templated method to check source and destination problems are of the expected types
-  template <typename TO_PROBLEM, typename FROM_PROBLEM>
+  template <Moose::FEBackend TO_BACKEND, Moose::FEBackend FROM_BACKEND>
   void checkValidTransferProblemTypes();
 
 private:
@@ -111,46 +112,31 @@ private:
   mfem::real_t _mfem_out_of_mesh_value{std::numeric_limits<mfem::real_t>::infinity()};
 };
 
-template <typename TO_PROBLEM, typename FROM_PROBLEM>
+template <Moose::FEBackend TO_BACKEND, Moose::FEBackend FROM_BACKEND>
 inline void
 MFEMMultiAppTransfer::checkValidTransferProblemTypes()
 {
-  auto bad_problem = [this]()
-  {
-    mooseError(
-        type(),
-        " is not compatible with the provided source and/or destination Problem types of the "
-        "provided variables.");
-  };
-
+  // Check if source sub-apps exist, and if so, if they are of the expected type
   if (hasFromMultiApp())
   {
-    // Check if source sub-apps exist, and if so, if they are of the expected type
-    if (getFromMultiApp()->numGlobalApps())
-    {
-      for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
-        if (getFromMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
-          bad_problem();
-    }
-    else // check source sub-app is of the expected type if it is the transfer source
-      if (!dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->problemBase()))
-        bad_problem();
+    for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) &&
+          getFromMultiApp()->appProblemBase(i).feBackend() != FROM_BACKEND)
+        paramError("from_multi_app", type() + " is incompatible with the source app's backend.");
   }
+  else if (getToMultiApp()->problemBase().feBackend() != FROM_BACKEND)
+    mooseError(type() + " is incompatible with this (the source) app's backend.");
+
+  // Check if destination sub-apps exist, and if so, if they are of the expected type
   if (hasToMultiApp())
   {
-    // Check if destination sub-apps exist, and if so, if they are of the expected type
-    if (getToMultiApp()->numGlobalApps())
-    {
-      for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-        if (getToMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
-          bad_problem();
-    }
-    else // check destination sub-app is of the expected type if it is the transfer destination
-      if (!dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->problemBase()))
-        bad_problem();
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getToMultiApp()->hasLocalApp(i) &&
+          getToMultiApp()->appProblemBase(i).feBackend() != TO_BACKEND)
+        paramError("to_multi_app", type() + " is incompatible with the destination app's backend.");
   }
+  else if (getFromMultiApp()->problemBase().feBackend() != TO_BACKEND)
+    mooseError(type() + " is incompatible with this (the destination) app's backend.");
 }
 
 #endif
