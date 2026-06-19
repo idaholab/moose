@@ -4,9 +4,34 @@
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+# Resolve through the per-case symlink so this points at the real paper-cases
+# directory regardless of which case directory run.py was launched from.
+PRECON_FILE = Path(__file__).resolve().parent / "fs-plus-strumpack-preconditioner.i"
+
+def read_u_petsc_options(precon_file):
+    """
+    Return (iname, value) lists for the [u] block's petsc_options_iname and
+    petsc_options_value in the given preconditioner input file. Reading them
+    here avoids duplicating the full option strings in this script.
+    """
+    text = precon_file.read_text(encoding="utf-8")
+    block = re.search(r"^\s*\[u\]\s*$(.*?)^\s*\[\]\s*$", text, re.DOTALL | re.MULTILINE)
+    if not block:
+        raise RuntimeError(f"Could not find [u] block in {precon_file}")
+    body = block.group(1)
+
+    def _vec(name):
+        m = re.search(rf"{name}\s*=\s*'([^']*)'", body)
+        if not m:
+            raise RuntimeError(f"Could not find {name} in [u] block of {precon_file}")
+        return m.group(1).split()
+
+    return _vec("petsc_options_iname"), _vec("petsc_options_value")
 
 def run_case(exec_path,
              input_file,
@@ -42,18 +67,12 @@ def run_case(exec_path,
       cmd.append(f"Executioner/num_steps={num_steps}")
     if base_n is not None:
       cmd.append(f"n={base_n}")
-    if a_solve == "strumpack-lu":
-      # Override the A/velocity block preconditioner from STRUMPACK ILU to STRUMPACK LU.
-      cmd.append("Preconditioning/FSP/u/petsc_options='-ksp_converged_reason'")
-      cmd.append(
-          "Preconditioning/FSP/u/petsc_options_iname="
-          "'-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side "
-          "-pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'"
-      )
-      cmd.append(
-          "Preconditioning/FSP/u/petsc_options_value="
-          "'lu gmres 1e-2 300 right strumpack 300 1e-8 unpreconditioned'"
-      )
+    # Set the A/velocity block pc_type explicitly so the strategy does not depend
+    # on the input file. The only difference between the STRUMPACK ILU and LU
+    # strategies is pc_type; the remaining options are read from the [u] block.
+    iname, value = read_u_petsc_options(PRECON_FILE)
+    value[iname.index("-pc_type")] = "lu" if a_solve == "strumpack-lu" else "ilu"
+    cmd.append("Preconditioning/FSP/u/petsc_options_value='%s'" % " ".join(value))
 
     # Prepare environment (set MOOSE_PROFILE_BASE per run)
     env = os.environ.copy()
