@@ -15,7 +15,7 @@ registerMooseObject("ShiftedBoundaryMethodApp", ShortestDistanceToSurface);
 InputParameters
 ShortestDistanceToSurface::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = ThreadedGeneralUserObject::validParams();
   params.addRequiredParam<std::vector<FunctionName>>(
       "surfaces",
       "Functions defining the surfaces to measure distance to; each must be a ParsedFunction "
@@ -27,7 +27,7 @@ ShortestDistanceToSurface::validParams()
 }
 
 ShortestDistanceToSurface::ShortestDistanceToSurface(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
+  : ThreadedGeneralUserObject(parameters)
 {
   const auto function_names = getParam<std::vector<FunctionName>>("surfaces");
   _distance_functions = SBMUtils::buildDistanceFunctions(function_names, *this);

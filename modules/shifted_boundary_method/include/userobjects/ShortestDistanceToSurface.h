@@ -8,17 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 
 /**
- * Base distance user object that manages function/mesh-based distance strategies.
- * Derived classes can specialize how the strategies are queried or cached.
+ * User object that computes the shortest distance to one or more surfaces
+ * defined by function- and/or mesh-based distance strategies.
  *
- * Modeled as a GeneralUserObject because this class is a stateless query backend:
- * other objects call distanceVector()/trueNormal()/... directly, and there is no
- * per-element work to do, so an ElementUserObject's element loop would be wasted.
+ * This object only answers distance queries on demand; it does not store or
+ * build up any results of its own. Other objects call distanceVector()/
+ * trueNormal()/... directly, and there is no per-element work to do, so an
+ * ElementUserObject's element loop would not be used here. For that reason it
+ * is a ThreadedGeneralUserObject rather than an element-based user object.
+ *
+ * A ThreadedGeneralUserObject is constructed once per thread. Each copy stores
+ * its own per-thread Function pointers; parsed functions mutate internal state
+ * during evaluation, so sharing the TID=0 copy across threads can race and
+ * produce incorrect distances. The per-thread copies avoid that race.
  */
-class ShortestDistanceToSurface : public GeneralUserObject
+class ShortestDistanceToSurface : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();
@@ -27,10 +34,9 @@ public:
   void execute() override {}
   void finalize() override {}
 
-  // This UO stores per-thread Function pointers. Parsed functions mutate
-  // internal state during evaluation, so sharing the TID=0 copy across threads
-  // can race and produce incorrect distances. Request the thread-local UO copy.
-  bool needThreadedCopy() const override final { return true; }
+  // This object answers queries on demand and stores no results, so there is
+  // nothing to combine across threads.
+  void threadJoin(const UserObject &) override {}
 
   /// @brief Get the SBMSurfaceMeshBuilder user objects
   const std::vector<const Function *> & getDistanceFuncs() const { return _distance_functions; }
