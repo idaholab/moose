@@ -1,8 +1,9 @@
 [Tests]
   design = 'syntax/MultiApps/index.md syntax/Adaptivity/index.md'
+  issues = '#33153'
 
   [group]
-    requirement = "The system shall report a clear diagnostic when a sub-application backup is restored onto a different independently adapted mesh topology."
+    requirement = "The system shall restore an independently adapted sub-application mesh before restoring sub-application equation-system data."
 
     [first]
       type = RunApp
@@ -11,11 +12,10 @@
     []
 
     [second]
-      type = RunException
+      type = RunApp
       input = parent_restart.i
       prereq = group/first
-      expect_err = 'in-memory MultiApp backups do not restore independent sub-application mesh topology'
-      detail = "The test then reports the unsupported independent adaptive sub-application restore with a targeted error."
+      detail = "The test then restores the independently adapted sub-application mesh before restoring equation-system data."
     []
   []
 []

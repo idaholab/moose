@@ -66,6 +66,7 @@ class RelationshipManager;
 class ReporterData;
 class SolutionInvalidity;
 class MultiApp;
+class MooseMesh;
 #ifdef MOOSE_MFEM_ENABLED
 class MFEMProblemSolve;
 #endif
@@ -737,6 +738,21 @@ public:
    * @return The backup
    */
   std::unique_ptr<Backup> backup();
+
+  /**
+   * Whether this app has an initial in-memory backup that contains mesh checkpoint data.
+   */
+  bool hasInitialBackupMesh() const;
+
+  /**
+   * Whether this app has restored mesh topology from its initial in-memory backup.
+   */
+  bool restoredInitialBackupMesh() const { return _restored_initial_backup_mesh; }
+
+  /**
+   * Restore \p mesh from this app's initial in-memory backup and consume the backed-up mesh data.
+   */
+  void restoreMeshFromInitialBackup(MooseMesh & mesh);
 
   /**
    * Insertion point for other apps that is called before backup()
@@ -1696,6 +1712,9 @@ private:
   /// This is a pointer to a pointer because at the time of construction of the app,
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
+
+  /// Whether mesh topology has been restored from the initial in-memory backup.
+  bool _restored_initial_backup_mesh = false;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// The libtorch device this app is using (converted from compute_device)

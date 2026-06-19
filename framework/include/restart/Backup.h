@@ -11,6 +11,9 @@
 
 #include <sstream>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 /**
  * Helper class to hold streams for Backup and Restore operations.
@@ -19,6 +22,7 @@ struct Backup
 {
   std::unique_ptr<std::stringstream> header = std::make_unique<std::stringstream>();
   std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
+  std::vector<std::pair<std::string, std::string>> mesh_files;
 };
 
 void dataStore(std::ostream & stream, Backup & backup, void * context);
