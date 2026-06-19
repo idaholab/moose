@@ -81,7 +81,9 @@
 
 // C++ includes
 #include <numeric> // std::accumulate
+#include <atomic>
 #include <fstream>
+#include <iterator>
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstdlib> // for system()
@@ -90,6 +92,132 @@
 #include <filesystem>
 
 using namespace libMesh;
+
+namespace
+{
+std::filesystem::path
+temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
+{
+  static std::atomic<unsigned long> counter = 0;
+
+  std::string dirname;
+  if (!shared || app.processor_id() == 0)
+  {
+    dirname =
+        "moose_" + purpose + "_mesh_" + std::to_string(getpid()) + "_" + std::to_string(counter++);
+    if (!shared)
+      dirname += "_" + std::to_string(app.processor_id());
+  }
+
+  if (shared)
+    app.comm().broadcast(dirname);
+
+  const auto root = std::filesystem::temp_directory_path() / dirname;
+  std::error_code err;
+  if (!std::filesystem::create_directories(root, err) && err)
+    mooseError("Unable to create temporary mesh backup directory ",
+               std::filesystem::absolute(root),
+               ": ",
+               err.message());
+
+  return root / "mesh.cpr";
+}
+
+std::string
+readBackupMeshFile(const std::filesystem::path & path)
+{
+  std::ifstream file(path, std::ios::in | std::ios::binary);
+  if (!file.is_open())
+    mooseError("Unable to open temporary mesh backup file ",
+               std::filesystem::absolute(path),
+               " for reading");
+
+  return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+}
+
+void
+writeBackupMeshFile(const std::filesystem::path & path, const std::string & contents)
+{
+  std::error_code err;
+  if (!std::filesystem::create_directories(path.parent_path(), err) && err)
+    mooseError("Unable to create temporary mesh restore directory ",
+               std::filesystem::absolute(path.parent_path()),
+               ": ",
+               err.message());
+
+  std::ofstream file(path, std::ios::out | std::ios::binary);
+  if (!file.is_open())
+    mooseError("Unable to open temporary mesh restore file ",
+               std::filesystem::absolute(path),
+               " for writing");
+
+  file.write(contents.data(), contents.size());
+}
+
+void
+packMeshBackup(const MooseApp & app, Backup & backup)
+{
+  if (!app.getExecutioner())
+    return;
+
+  backup.mesh_files.clear();
+
+  const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);
+  {
+    CheckpointIO io(app.feProblem().mesh().getMesh(), false);
+    io.write(mesh_path.string());
+  }
+
+  app.comm().barrier();
+
+  for (const auto & entry : std::filesystem::recursive_directory_iterator(mesh_path))
+    if (entry.is_regular_file())
+    {
+      const auto relative_path =
+          std::filesystem::relative(entry.path(), mesh_path).generic_string();
+      backup.mesh_files.emplace_back(relative_path, readBackupMeshFile(entry.path()));
+    }
+
+  app.comm().barrier();
+
+  if (app.processor_id() == 0)
+  {
+    std::error_code err;
+    std::filesystem::remove_all(mesh_path.parent_path(), err);
+  }
+}
+
+bool
+restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
+{
+  if (backup.mesh_files.empty())
+    return false;
+
+  const auto mesh_path = temporaryBackupMeshPath(app, "restore", false);
+  for (const auto & [relative_path, contents] : backup.mesh_files)
+    writeBackupMeshFile(mesh_path / relative_path, contents);
+
+  auto & mesh_base = mesh.getMesh();
+  mesh_base.clear();
+
+  {
+    CheckpointIO io(mesh_base, false);
+    io.read(mesh_path.string());
+  }
+
+  for (auto & node : mesh_base.node_ptr_range())
+    node->clear_dofs();
+  for (auto & elem : mesh_base.element_ptr_range())
+    elem->clear_dofs();
+
+  backup.mesh_files.clear();
+
+  std::error_code err;
+  std::filesystem::remove_all(mesh_path.parent_path(), err);
+
+  return true;
+}
+}
 
 void
 MooseApp::addAppParam(InputParameters & params)
@@ -1563,9 +1691,23 @@ MooseApp::backup()
   preBackup();
 
   auto backup = std::make_unique<Backup>();
+  packMeshBackup(*this, *backup);
   writer.write(*backup->header, *backup->data);
 
   return backup;
+}
+
+bool
+MooseApp::hasInitialBackupMesh() const
+{
+  return hasInitialBackup() && !(*_initial_backup)->mesh_files.empty();
+}
+
+void
+MooseApp::restoreMeshFromInitialBackup(MooseMesh & mesh)
+{
+  mooseAssert(hasInitialBackup(), "Missing initial backup");
+  _restored_initial_backup_mesh = restoreMeshBackup(*this, **_initial_backup, mesh);
 }
 
 void
@@ -1596,6 +1738,15 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 
   auto data = std::move(backup->data);
   mooseAssert(data, "Data not available");
+
+  if (restoreMeshBackup(*this, *backup, feProblem().mesh()))
+  {
+    _restored_initial_backup_mesh = true;
+    feProblem().mesh().prepare(/*mesh_to_clone=*/nullptr);
+    feProblem().meshChanged(/*intermediate_change=*/false,
+                            /*contract_mesh=*/false,
+                            /*clean_refinement_flags=*/false);
+  }
 
   _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
@@ -1637,6 +1788,7 @@ MooseApp::finalizeRestore()
     backup = std::make_unique<Backup>();
     backup->header = std::move(header_sstream);
     backup->data = std::move(data_sstream);
+    packMeshBackup(*this, *backup);
   }
 
   return backup;

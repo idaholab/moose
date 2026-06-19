@@ -1249,7 +1249,7 @@ FEProblemBase::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering())
+  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh())
   {
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
