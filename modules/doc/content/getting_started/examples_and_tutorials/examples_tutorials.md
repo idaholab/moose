@@ -105,6 +105,7 @@ for some of the individual physics modules as listed below.
 MOOSE integrates with several optional packages that may be installed alongside it to expand MOOSE's base capabilities.
 Pages containing guidance for using these optional packages are listed below.
 
+- [Computational Backends and Accelerated Components](framework_development/computational_backends.md)
 - [LibTorch](source/libtorch/utils/LibtorchArtificialNeuralNet.md optional=True)
 - [NEML2](syntax/NEML2/index.md optional=True)
 - [MFEM](syntax/MFEM/index.md optional=True)

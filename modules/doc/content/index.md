@@ -45,6 +45,7 @@ email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subsc
 - Extensive [tutorials](getting_started/examples_and_tutorials/index.md)
 - Built-in [physics modules](modules/index.md)
 - Natural [multi-scale capability](syntax/MultiApps/index.md)
+- Overview of [computational backends](framework_development/computational_backends.md)
 
 !col-end!
 
@@ -108,7 +109,6 @@ email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subsc
 
 !col-end!
 !row-end!
-
 
 
 
