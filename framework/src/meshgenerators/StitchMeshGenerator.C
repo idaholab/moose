@@ -43,10 +43,13 @@ StitchMeshGenerator::validParams()
   params.addParam<bool>(
       "enforce_all_nodes_match_on_boundaries",
       false,
-      "Whether to have the stitcher be very picky about the nodes being stitched.");
+      "If true, an error occurs if not all nodes on the specified boundaries have matching "
+      "positions, and this overrides the value of 'merge_boundary_nodes_all_or_nothing'.");
   params.addParam<bool>("merge_boundary_nodes_all_or_nothing",
                         false,
-                        "Whether the stitcher is set to merge all nodes or none.");
+                        "If true, and 'enforce_all_nodes_match_on_boundaries' is false, then when "
+                        "not all nodes on the specified boundaries have matching positions, no "
+                        "nodes get merged, and no error occurs.");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -127,6 +130,8 @@ StitchMeshGenerator::generate()
         if (base_mesh_bids.count(bid))
           overlap_found = true;
 
+      // If there is any overlap, renumber all of the boundary IDs of the secondary mesh starting
+      // at an index past the max of either mesh
       if (overlap_found)
       {
         const auto max_boundary_id =
