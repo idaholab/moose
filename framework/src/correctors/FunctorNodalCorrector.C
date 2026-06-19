@@ -26,6 +26,10 @@ FunctorNodalCorrector::validParams()
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "functors", "Functors to compute the new variable values with");
 
+  // More options for evaluations
+  params.addParam<std::vector<BoundaryName>>(
+      "excluded_nodesets", {}, "Vector of nodesets to skip execution on");
+
   // Implement others as needed
   MooseEnum techniques("node_arg", "node_arg");
   params.addParam<MooseEnum>(
@@ -67,6 +71,9 @@ FunctorNodalCorrector::FunctorNodalCorrector(const InputParameters & parameters)
   _functors.resize(_functor_names.size());
   for (const auto i : index_range(_functor_names))
     _functors[i] = &getFunctor<Real>(_functor_names[i], 0);
+
+  const auto & excluded_nodesets = getParam<std::vector<BoundaryName>>("excluded_nodesets");
+  _excluded_nodeset_ids = MooseMeshUtils::getBoundaryIDs(_mesh.getMesh(), excluded_nodesets, false);
 }
 
 void
@@ -82,6 +89,12 @@ FunctorNodalCorrector::execute()
   auto & dof_map = _sys.system().get_dof_map();
   const auto local_dof_begin = dof_map.first_dof();
   const auto local_dof_end = dof_map.end_dof();
+
+  // Skip on excluded boundaries
+  const auto & binfo = _mesh.getMesh().get_boundary_info();
+  for (const auto exc_bid : _excluded_nodeset_ids)
+    if (binfo.has_boundary_id(_current_node, exc_bid))
+      return;
 
   std::vector<std::vector<dof_id_type>> dof_indices(_var_numbers.size());
   std::vector<Real> functor_values(_var_numbers.size());

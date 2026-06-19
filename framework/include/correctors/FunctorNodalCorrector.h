@@ -46,4 +46,7 @@ protected:
 
   /// Pointers to the functors
   std::vector<const Moose::Functor<Real> *> _functors;
+
+  /// Vector of boundaries to not execute on
+  std::vector<BoundaryID> _excluded_nodeset_ids;
 };
