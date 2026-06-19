@@ -19,22 +19,27 @@ SBMBndElementBase::SBMBndElementBase(const Elem * elem, const Point & normal)
   mooseAssert(elem, "Element must not be null");
   mooseAssert(MooseUtils::absoluteFuzzyEqual(_normal.norm(), 1),
               "normal vector must be unit length, length = " << _normal.norm());
+
+  // Validate side type once, here, so distanceFrom() can trust the invariant
+  // without paying a per-call check. libMesh standard elements have uniform
+  // side types, so probing side(0) is sufficient.
+  if (elem && elem->n_sides() > 0)
+  {
+    const auto t = elem->build_side_ptr(0)->type();
+    if (t != EDGE2 && t != NODEELEM)
+      mooseError("SBMBndElementBase: unsupported side type ",
+                 libMesh::Utility::enum_to_string(t),
+                 " (from element type ",
+                 libMesh::Utility::enum_to_string(elem->type()),
+                 "). distanceFrom() only handles EDGE2 and NODEELEM sides.");
+  }
 }
 
 Point
 SBMBndElementBase::distanceFrom(const Point & pt) const
 {
-  // Validate side type upfront so misconfigured elements fail loudly on the
-  // first query, even when the projection short-circuit below would otherwise
-  // skip the side loop and silently return a "valid" answer.
-  // libMesh's standard element types have uniform side types, so checking
-  // side(0) is sufficient.
-  if (_elem->n_sides() > 0)
-  {
-    const auto t = _elem->build_side_ptr(0)->type();
-    if (t != EDGE2 && t != NODEELEM)
-      mooseError("Unsupported side type in distanceFrom(): ", libMesh::Utility::enum_to_string(t));
-  }
+  // Side-type precondition is validated once in the base ctor; no per-call
+  // check needed here.
 
   // (a) Project pt onto the normal direction
   const auto vec_to_first = _elem->point(0) - pt;
@@ -88,7 +93,7 @@ SBMBndElementBase::distanceFrom(const Point & pt) const
       }
 
       default:
-        mooseAssert(false, "unreachable: side type validated at top of distanceFrom()");
+        mooseAssert(false, "unreachable: side type validated in SBMBndElementBase ctor");
     }
   }
 

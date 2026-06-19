@@ -281,12 +281,11 @@ TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
   EXPECT_GT(tri_ball.radius(), 0.0);
 }
 
-TEST(SBMBndElementTest, DistanceFromUnsupportedSideThrows)
+TEST(SBMBndElementTest, ConstructionRejectsUnsupportedSideType)
 {
-  // distanceFrom() validates side types at the top of the function, so any
-  // SBMBnd* wrapping an element whose sides are neither EDGE2 nor NODEELEM
-  // must throw on first call regardless of where the query point lies.
-  // Tet4 has Tri3 sides -> fires the check.
+  // SBMBndElementBase validates side(0)->type() in its ctor so misconfigured
+  // SBMBnd* subclasses fail to construct rather than producing wrong answers
+  // later. Tet4 has Tri3 sides (neither EDGE2 nor NODEELEM) and must throw.
   std::unique_ptr<Tet4> tet(new Tet4());
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
@@ -297,18 +296,15 @@ TEST(SBMBndElementTest, DistanceFromUnsupportedSideThrows)
   tet->set_node(2) = n2.get();
   tet->set_node(3) = n3.get();
 
-  SBMBndUnsupportedForTest bnd(tet.get(), Point(0.0, 0.0, 1.0));
-
   EXPECT_THROW(
       {
         try
         {
-          bnd.distanceFrom(Point(0.1, 0.1, 0.1));
+          SBMBndUnsupportedForTest bnd(tet.get(), Point(0.0, 0.0, 1.0));
         }
         catch (const std::exception & e)
         {
-          EXPECT_NE(std::string(e.what()).find("Unsupported side type in distanceFrom"),
-                    std::string::npos);
+          EXPECT_NE(std::string(e.what()).find("unsupported side type"), std::string::npos);
           throw;
         }
       },
