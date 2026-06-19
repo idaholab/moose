@@ -37,6 +37,9 @@ KokkosParsedFunction::KokkosParsedFunction(const InputParameters & parameters)
 {
   _builder->addDefaultVariables();
 
+  for (const auto & [symbol, _] : _math_symbols)
+    _builder->addVariable(symbol);
+
   std::vector<std::string> symbol_names;
 
   if (isParamValid("symbol_names"))
@@ -68,6 +71,9 @@ KokkosParsedFunction::KokkosParsedFunction(const KokkosParsedFunction & function
 void
 KokkosParsedFunction::initialSetup()
 {
+  for (const auto & [symbol, value] : _math_symbols)
+    _builder->associateScalar(symbol, &value);
+
   std::vector<std::string> symbol_names;
   std::vector<std::string> symbol_values;
 
