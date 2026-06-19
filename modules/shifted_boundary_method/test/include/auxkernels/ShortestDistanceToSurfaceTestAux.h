@@ -12,6 +12,7 @@
 #include "AuxKernel.h"
 
 class ShortestDistanceToSurface;
+class SBMSurfaceMeshBuilder;
 class Function;
 
 /**
@@ -26,11 +27,17 @@ public:
 
   explicit ShortestDistanceToSurfaceTestAux(const InputParameters & parameters);
 
+  /// If a 'builder' was supplied, calls SBMSurfaceMeshBuilder::getCentroids() once
+  /// and verifies it is non-empty. Used purely so coverage tests can touch the
+  /// otherwise-unused getter from production code paths.
+  virtual void initialSetup() override;
+
 protected:
   virtual Real computeValue() override;
 
 private:
   const ShortestDistanceToSurface & _distance_to_surface;
+  const SBMSurfaceMeshBuilder * const _builder;
   const MooseEnum _method;
   const MooseEnum _component;
   const unsigned int _index;

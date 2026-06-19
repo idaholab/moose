@@ -29,7 +29,7 @@ public:
   /// knnSearch threads internal scratch state through the call). The operation is logically
   /// read-only and knnSearch is re-entrant, so the same tree can be safely shared across
   /// threads without a const_cast at the call site.
-  /// mooseError's if the builder was configured with build_kd_tree = false.
+  /// Callers must check hasKDTree() first; this is asserted in debug builds.
   KDTree & getKDTree() const;
 
   /// Whether this builder has a KDTree available. Consumers that require the tree should

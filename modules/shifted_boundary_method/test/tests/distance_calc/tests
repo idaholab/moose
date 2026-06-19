@@ -98,5 +98,16 @@
                'replicated mesh for its In-Out test.'
     []
 
+    [unsigned_distance_without_kd_tree]
+      type = 'RunException'
+      input = '2D_distance_refine.i'
+      cli_args = 'UserObjects/TreeBuilder/build_kd_tree=false'
+      expect_err = "requires SBMSurfaceMeshBuilder"
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if an UnsignedDistanceToSurfaceMesh function is paired with an SBMSurfaceMeshBuilder '
+               'that was configured without a KDTree.'
+    []
+
   []
 []

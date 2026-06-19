@@ -132,11 +132,7 @@ SBMSurfaceMeshBuilder::checkWatertightness() const
 KDTree &
 SBMSurfaceMeshBuilder::getKDTree() const
 {
-  if (!_kd_tree)
-    mooseError("SBMSurfaceMeshBuilder '",
-               name(),
-               "': KDTree was not built. Set 'build_kd_tree = true' on the builder to use "
-               "objects that require KDTree lookups (e.g. UnsignedDistanceToSurfaceMesh).");
+  mooseAssert(_kd_tree, "KDTree not built; callers must guard with hasKDTree() first.");
   return *_kd_tree;
 }
 

@@ -31,9 +31,6 @@ ShortestDistanceToSurface::ShortestDistanceToSurface(const InputParameters & par
 {
   const auto function_names = getParam<std::vector<FunctionName>>("surfaces");
   _distance_functions = SBMUtils::buildDistanceFunctions(function_names, *this);
-
-  if (_distance_functions.empty())
-    paramError("surfaces", "ShortestDistanceToSurface requires at least one surface function.");
 }
 
 RealVectorValue

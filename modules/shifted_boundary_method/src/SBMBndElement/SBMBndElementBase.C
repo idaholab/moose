@@ -76,28 +76,8 @@ SBMBndElementBase::distanceFrom(const Point & pt) const
       }
 
       default:
-      {
-        mooseWarning("Skipping unsupported side type in distanceFrom(): ",
-                     libMesh::Utility::enum_to_string(curr_edge->type()));
-        break;
-      }
-    }
-  }
-
-  // (c) Fallback to nearest node if no valid edge/node was found
-  if (min_dist == std::numeric_limits<Real>::max())
-  {
-    const auto n_nodes = _elem->n_nodes();
-    Real fallback_min_dist = std::numeric_limits<Real>::max();
-
-    for (auto i : make_range(n_nodes))
-    {
-      const Real dist = (pt - _elem->point(i)).norm();
-      if (dist < fallback_min_dist)
-      {
-        fallback_min_dist = dist;
-        closest_vec = _elem->point(i) - pt;
-      }
+        mooseError("Unsupported side type in distanceFrom(): ",
+                   libMesh::Utility::enum_to_string(curr_edge->type()));
     }
   }
 

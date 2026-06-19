@@ -9,6 +9,7 @@
 
 #include "ShortestDistanceToSurfaceTestAux.h"
 #include "ShortestDistanceToSurface.h"
+#include "SBMSurfaceMeshBuilder.h"
 #include "Function.h"
 
 registerMooseObject("ShiftedBoundaryMethodTestApp", ShortestDistanceToSurfaceTestAux);
@@ -40,6 +41,11 @@ ShortestDistanceToSurfaceTestAux::validParams()
       "point instead of the current element's centroid (useful for hitting "
       "zero-distance branches at a surface-mesh node).");
 
+  params.addParam<UserObjectName>(
+      "builder",
+      "Optional SBMSurfaceMeshBuilder; when supplied, initialSetup queries "
+      "getCentroids() so coverage tests can touch that otherwise-unused getter.");
+
   params.addClassDescription("Test-only AuxKernel that exposes ShortestDistanceToSurface accessors "
                              "(trueNormal, *ByIndex, *ByFunc) for coverage testing.");
 
@@ -50,6 +56,7 @@ ShortestDistanceToSurfaceTestAux::ShortestDistanceToSurfaceTestAux(
     const InputParameters & parameters)
   : AuxKernel(parameters),
     _distance_to_surface(getUserObject<ShortestDistanceToSurface>("distance_to_surface")),
+    _builder(isParamValid("builder") ? &getUserObject<SBMSurfaceMeshBuilder>("builder") : nullptr),
     _method(getParam<MooseEnum>("method")),
     _component(getParam<MooseEnum>("component")),
     _index(getParam<unsigned int>("index")),
@@ -63,6 +70,15 @@ ShortestDistanceToSurfaceTestAux::ShortestDistanceToSurfaceTestAux(
   const bool needs_function = _method == "distance_by_func" || _method == "true_normal_by_func";
   if (needs_function && !_function)
     paramError("function", "A 'function' parameter is required for the *_by_func methods.");
+}
+
+void
+ShortestDistanceToSurfaceTestAux::initialSetup()
+{
+  if (_builder && _builder->getCentroids().empty())
+    mooseError("ShortestDistanceToSurfaceTestAux: builder '",
+               _builder->name(),
+               "' returned no centroids.");
 }
 
 Real

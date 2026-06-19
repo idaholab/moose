@@ -93,8 +93,5 @@ UnsignedDistanceToSurfaceMesh::surfaceNormal(const Point & p) const
   RealVectorValue n = elem.normal();
   const Real n_norm = n.norm();
 
-  if (n_norm <= libMesh::TOLERANCE)
-    return RealVectorValue(0, 0, 0);
-
   return n / n_norm;
 }
