@@ -178,6 +178,31 @@ public:
   }
 };
 
+class VectorVariablePhiCurl
+{
+public:
+  /**
+   * Get the curl of the current vector shape function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The curl of the vector shape function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.jfe();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
+  }
+};
+
 class VectorVariableTestValue
 {
 public:
@@ -222,6 +247,31 @@ public:
             : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
 
     return grad * datum.J(qp).transpose();
+  }
+};
+
+class VectorVariableTestCurl
+{
+public:
+  /**
+   * Get the curl of the current vector test function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The curl of the vector test function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.ife();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
   }
 };
 
@@ -779,6 +829,58 @@ private:
   Variable _var;
 };
 
+class VectorVariableCurl
+{
+public:
+  /**
+   * Default constructor
+   */
+  VectorVariableCurl() = default;
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VectorVariableCurl(Variable var) : _var(var) { checkVariable(_var, true, "VectorVariableCurl"); }
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VectorVariableCurl(const MooseVariableFieldBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
+  {
+    checkVariable(_var, true, "VectorVariableCurl");
+  }
+
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
+  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
+
+  /**
+   * Get the current vector variable curl
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The vector variable curl
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum,
+                                   unsigned int qp,
+                                   unsigned int comp = 0) const;
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
+};
+
 KOKKOS_FUNCTION inline Real3
 VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
 {
@@ -845,6 +947,45 @@ VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsig
   }
 
   return grad;
+}
+
+KOKKOS_FUNCTION inline Real3
+VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  Real3 curl = 0;
+
+  if (_var.coupled())
+  {
+    KOKKOS_ASSERT(!datum.isNodal());
+
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
+    auto tag = _var.tag();
+
+    if (side == libMesh::invalid_uint)
+      curl = sys.getVectorQpVectorCurl(elem, datum.qpOffset() + qp, var, tag);
+    else
+    {
+      auto fe = sys.getFETypeID(var);
+      auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
+      auto & grad_phi = datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
+      auto jacobian = datum.J(qp);
+      auto jacobian_transpose = jacobian.transpose();
+      Real33 grad = 0;
+
+      for (unsigned int i = 0; i < n_dofs; ++i)
+        grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
+                (grad_phi(i, qp) * jacobian_transpose);
+
+      curl = curlFromVectorGradient(grad, datum.assembly().getDimension());
+    }
+  }
+
+  return curl;
 }
 
 template <>

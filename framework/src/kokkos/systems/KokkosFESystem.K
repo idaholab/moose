@@ -36,6 +36,7 @@ FESystem::FESystem(SystemBase & system)
   _qp_solutions_grad.create(MAX_TAG);
   _qp_vector_solutions.create(MAX_TAG);
   _qp_vector_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions_curl.create(MAX_TAG);
 }
 
 FESystem::FESystem(System & base, SystemBase & system)
@@ -51,6 +52,7 @@ FESystem::FESystem(System & base, SystemBase & system)
   _qp_solutions_grad.create(MAX_TAG);
   _qp_vector_solutions.create(MAX_TAG);
   _qp_vector_solutions_grad.create(MAX_TAG);
+  _qp_vector_solutions_curl.create(MAX_TAG);
 }
 
 void
@@ -209,6 +211,9 @@ FESystem::reinit()
     if (!_qp_vector_solutions_grad[tag].isAlloc())
       _qp_vector_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
+    if (!_qp_vector_solutions_curl[tag].isAlloc())
+      _qp_vector_solutions_curl[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
+
     for (auto subdomain : _mesh.meshSubdomains())
     {
       auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
@@ -225,6 +230,9 @@ FESystem::reinit()
 
           if (!_qp_vector_solutions_grad[tag](sid, var).isAlloc())
             _qp_vector_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+
+          if (!_qp_vector_solutions_curl[tag](sid, var).isAlloc())
+            _qp_vector_solutions_curl[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
         }
         else
         {
@@ -241,12 +249,14 @@ FESystem::reinit()
     _qp_solutions_grad[tag].copyToDevice();
     _qp_vector_solutions[tag].copyToDevice();
     _qp_vector_solutions_grad[tag].copyToDevice();
+    _qp_vector_solutions_curl[tag].copyToDevice();
   }
 
   _qp_solutions.copyToDevice();
   _qp_solutions_grad.copyToDevice();
   _qp_vector_solutions.copyToDevice();
   _qp_vector_solutions_grad.copyToDevice();
+  _qp_vector_solutions_curl.copyToDevice();
 
   dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
@@ -302,6 +312,8 @@ FESystem::operator()(const ThreadID tid) const
 
     getVectorQpVectorValue(info, qp_offset + qp, var, tag) = value;
     getVectorQpVectorGrad(info, qp_offset + qp, var, tag) = grad;
+    getVectorQpVectorCurl(info, qp_offset + qp, var, tag) =
+        curlFromVectorGradient(grad, kokkosAssembly().getDimension());
   }
   else
   {
