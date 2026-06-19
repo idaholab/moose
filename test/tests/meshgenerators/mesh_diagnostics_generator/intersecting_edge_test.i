@@ -55,6 +55,7 @@
     type = StitchedMeshGenerator
     inputs = 'convert1 rotate'
     stitch_boundaries_pairs = 'front back'
+    require_boundaries_fully_stitch = false # faces do not match on boundary
   []
   [diag]
     type = MeshDiagnosticsGenerator
