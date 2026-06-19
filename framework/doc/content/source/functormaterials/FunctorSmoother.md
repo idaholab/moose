@@ -33,6 +33,11 @@ The value of the smoothed functor on elements can be visualized using a [Functor
 No volume or area weighting is currently implemented in the `FunctorSmoother`. Feel free to experiment
 with weighting schemes and make a contribution to MOOSE if they are valuable.
 
+!alert note
+While the block restriction of the functors created can be specified, the block or boundary restriction of the sources
+is not implemented. You can use intermediate filter functor materials (for example block-restricted [ParsedFunctorMaterial.d])
+to perform such a source restriction.
+
 !syntax parameters /FunctorMaterials/FunctorSmoother
 
 !syntax inputs /FunctorMaterials/FunctorSmoother
