@@ -163,9 +163,11 @@ Mesh::initElement()
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      _num_side_nodes[elem_type_id][side] = elem->side_ptr(side)->n_nodes();
+      const auto side_ptr = elem->build_side_ptr(side);
 
-      for (unsigned int node = 0; node < elem->side_ptr(side)->n_nodes(); ++node)
+      _num_side_nodes[elem_type_id][side] = side_ptr->n_nodes();
+
+      for (unsigned int node = 0; node < side_ptr->n_nodes(); ++node)
         _local_side_node[elem_type_id](node, side) = elem->local_side_node(side, node);
     }
 
