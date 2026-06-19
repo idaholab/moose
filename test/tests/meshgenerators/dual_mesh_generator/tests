@@ -1,15 +1,25 @@
 [Tests]
   design = 'meshgenerators/DualMeshGenerator.md'
   issues = '#33143'
-  [dual_mesh_generator]
+  [dual_mesh_generator_voronoi]
     type = 'Exodiff'
-    input = 'dual_mesh_generator.i'
+    input = 'dual_mesh_generator_voronoi.i'
     cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_in.e'
+    exodiff = 'dual_mesh_generator_voronoi_in.e'
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The system shall have the capability to generate a dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
+    requirement = 'The system shall have the capability to generate a Voronoi dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
+  []
+  [dual_mesh_generator]
+    type = 'Exodiff'
+    input = 'dual_mesh_generator_barycentric.i'
+    cli_args = '--mesh-only'
+    exodiff = 'dual_mesh_generator_barycentric_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a Barycentric dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
   []
 []
 [error_paths]
