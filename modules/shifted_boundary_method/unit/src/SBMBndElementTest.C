@@ -283,9 +283,10 @@ TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
 
 TEST(SBMBndElementTest, DistanceFromUnsupportedSideThrows)
 {
-  // distanceFrom()'s switch defaults to mooseError for side types that are
-  // neither EDGE2 nor NODEELEM. Wrapping a Tet4 forces sides of type Tri3,
-  // which trips the default branch via the projection-outside-element path.
+  // distanceFrom() validates side types at the top of the function, so any
+  // SBMBnd* wrapping an element whose sides are neither EDGE2 nor NODEELEM
+  // must throw on first call regardless of where the query point lies.
+  // Tet4 has Tri3 sides -> fires the check.
   std::unique_ptr<Tet4> tet(new Tet4());
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
@@ -296,18 +297,13 @@ TEST(SBMBndElementTest, DistanceFromUnsupportedSideThrows)
   tet->set_node(2) = n2.get();
   tet->set_node(3) = n3.get();
 
-  // Placeholder unit normal; distanceFrom() only consults it for the
-  // projection step, which we deliberately push off-element with the query
-  // point below so the side-loop runs.
   SBMBndUnsupportedForTest bnd(tet.get(), Point(0.0, 0.0, 1.0));
 
-  // Point well outside the tet so contains_point() is false and the side loop
-  // is entered.
   EXPECT_THROW(
       {
         try
         {
-          bnd.distanceFrom(Point(10.0, 10.0, 10.0));
+          bnd.distanceFrom(Point(0.1, 0.1, 0.1));
         }
         catch (const std::exception & e)
         {

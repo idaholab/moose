@@ -24,6 +24,18 @@ SBMBndElementBase::SBMBndElementBase(const Elem * elem, const Point & normal)
 Point
 SBMBndElementBase::distanceFrom(const Point & pt) const
 {
+  // Validate side type upfront so misconfigured elements fail loudly on the
+  // first query, even when the projection short-circuit below would otherwise
+  // skip the side loop and silently return a "valid" answer.
+  // libMesh's standard element types have uniform side types, so checking
+  // side(0) is sufficient.
+  if (_elem->n_sides() > 0)
+  {
+    const auto t = _elem->build_side_ptr(0)->type();
+    if (t != EDGE2 && t != NODEELEM)
+      mooseError("Unsupported side type in distanceFrom(): ", libMesh::Utility::enum_to_string(t));
+  }
+
   // (a) Project pt onto the normal direction
   const auto vec_to_first = _elem->point(0) - pt;
   const auto scale = vec_to_first * _normal;
@@ -76,8 +88,7 @@ SBMBndElementBase::distanceFrom(const Point & pt) const
       }
 
       default:
-        mooseError("Unsupported side type in distanceFrom(): ",
-                   libMesh::Utility::enum_to_string(curr_edge->type()));
+        mooseAssert(false, "unreachable: side type validated at top of distanceFrom()");
     }
   }
 
