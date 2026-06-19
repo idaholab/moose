@@ -47,7 +47,7 @@ DualMeshGenerator::validParams()
       "geometry_relative_tol>=0",
       "Relative tolerance used for geometric point comparison, intersection, and area checks. The "
       "generator scales this value by the input mesh bounding-box size.");
-  params.addClassDescription("Takes a 2D mesh as input and returns a dual mesh, i.e.,"
+  params.addClassDescription("Takes a 2D mesh as input and returns a dual mesh, i.e., "
                              "changes each input node into an element and each input element "
                              "into a node located at its circumcenter or centroid.");
   return params;
