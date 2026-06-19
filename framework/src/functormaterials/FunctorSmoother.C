@@ -25,7 +25,8 @@ FunctorSmootherTempl<T>::validParams()
                                                  "The name(s) of the functors to smooth");
   params.addParam<std::vector<MooseFunctorName>>("functors_out",
                                                  "The name(s) of the smooth output functors");
-  MooseEnum smoothing_techniques("face_average layered_elem_average remove_checkerboard");
+  MooseEnum smoothing_techniques(
+      "face_average node_average layered_elem_average remove_checkerboard");
   params.addParam<MooseEnum>(
       "smoothing_technique", smoothing_techniques, "How to smooth the functor");
 
@@ -63,6 +64,10 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
     if (!_app.addRelationshipManager(rm_obj))
       factory.releaseSharedObjects(*rm_obj);
   }
+
+  // Request the node to elem map so we don't build it in a threaded region
+  if (isNodal())
+    _mesh.nodeToElemMap();
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
 
@@ -121,6 +126,40 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                          MooseUtils::prettyCppType(&r),
                          ". Please contact a MOOSE developer or implement it yourself.");
           }
+          else if (_smoothing_technique == NODE_AVERAGE)
+          {
+            if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
+            {
+              const Node * r_node = nullptr;
+              if constexpr (std::is_same_v<const Moose::NodeArg &, decltype(r)>)
+                r_node = r.node;
+
+              unsigned int n_nodes = 0;
+              const auto & node_to_elem_map = _mesh.nodeToElemMap();
+              for (const auto & shared_elem : libmesh_map_find(node_to_elem_map, r_node->id()))
+              {
+                const auto node_index = shared_elem->get_node_index(r_node);
+                // Limit the stencil to edge-connected nodes to limit ghosting needs
+                for (const auto edge_index : shared_elem->edges_adjacent_to_node(r_node))
+                {
+                  for (const auto n : shared_elem->nodes_on_edge(edge_index))
+                  {
+                    if (n == node_index)
+                      continue;
+                    const NodeArg node_arg(shared_elem->node_ptr(n), blocks);
+                    average += functor_in(node_arg, t);
+                    n_nodes++;
+                  }
+                }
+              }
+              average /= n_nodes;
+            }
+            else
+              mooseError("Node averaging smoothing has only been defined for the "
+                         "NodeArg functor argument at this time, not for ",
+                         MooseUtils::prettyCppType(&r),
+                         ". Please contact a MOOSE developer or implement it yourself.");
+          }
           else if (_smoothing_technique == LAYERED_AVERAGE)
           {
             if constexpr (std::is_same_v<const Moose::ElemArg &, decltype(r)>)
@@ -140,7 +179,7 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                          MooseUtils::prettyCppType(&r),
                          ". Please contact a MOOSE developer or implement it yourself.");
           }
-          else
+          else // Checkerboard removing
           {
             if constexpr (std::is_same_v<const Moose::ElemArg &, decltype(r)>)
             {

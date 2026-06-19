@@ -11,6 +11,11 @@ the [Functor documentation](syntax/Functors/index.md).
 The elemental value of the smoothed functor is equal to the arithmetic average of the values of the previous
 functor on the faces of the element.
 
+- node averaging
+
+The nodal value of the smoothed functor is equal to the arithmetic average of the values of the previous functor
+on the nodes at the other end of the edges connected to this node.
+
 - neighbor averaging
 
 The elemental value of the smoothed functor is equal to the arithmetic average of the values of the previous
