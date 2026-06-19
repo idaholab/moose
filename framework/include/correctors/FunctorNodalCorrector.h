@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "NodalUserObject.h"
 #include "MooseMesh.h"
 
 class NonlinearSystemBase;
@@ -17,12 +17,12 @@ class NonlinearSystemBase;
 /**
  * Set (all or some) values of (one or more) nonlinear variable(s) using functor evaluations
  */
-class FunctorCorrector : public GeneralUserObject, public NonADFunctorInterface
+class FunctorNodalCorrector : public NodalUserObject, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  FunctorCorrector(const InputParameters & parameters);
+  FunctorNodalCorrector(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override;
