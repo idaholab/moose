@@ -147,10 +147,10 @@ def main():
     parser.add_argument(
         "--A-solve",
         choices=["strumpack-ilu", "strumpack-lu"],
-        default="strumpack-ilu",
+        default="strumpack-lu",
         help=(
-            "A/velocity block solve strategy: 'strumpack-ilu' (default) "
-            "or 'strumpack-lu'."
+            "A/velocity block solve strategy: 'strumpack-lu' (default) "
+            "or 'strumpack-ilu'."
         ),
     )
 
