@@ -200,6 +200,21 @@ public:
     return _qp_vector_solutions_grad[tag](info.subdomain, var)[qp];
   }
   /**
+   * Get the quadrature point curl of a vector variable from a tagged vector
+   * @param info The element information object
+   * @param qp The subdomain-local flattened quadrature point index
+   * @param var The variable number
+   * @param tag The vector tag
+   * @returns The quadrature vector curl
+   */
+  KOKKOS_FUNCTION Real3 & getVectorQpVectorCurl(const ElementInfo info,
+                                                const dof_id_type qp,
+                                                const unsigned int var,
+                                                const TagID tag) const
+  {
+    return _qp_vector_solutions_curl[tag](info.subdomain, var)[qp];
+  }
+  /**
    * Get the quadrature point gradient of a variable from a tagged vector for automatic
    * differentiation (AD)
    * @param info The element information object
@@ -363,6 +378,7 @@ private:
   Array<Array2D<Array<Real3>>> _qp_solutions_grad;
   Array<Array2D<Array<Real3>>> _qp_vector_solutions;
   Array<Array2D<Array<Real33>>> _qp_vector_solutions_grad;
+  Array<Array2D<Array<Real3>>> _qp_vector_solutions_curl;
   ///@}
 
   /**
