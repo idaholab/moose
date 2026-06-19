@@ -313,7 +313,12 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
   }
 
   for (auto node : nbc->getContiguousNodes())
-    dofs[_local_node_dof_index[var][node]] = true;
+  {
+    auto dof = _local_node_dof_index[var][node];
+
+    if (dof != libMesh::DofObject::invalid_id)
+      dofs[dof] = true;
+  }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
 
