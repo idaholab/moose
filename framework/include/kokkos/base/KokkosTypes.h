@@ -571,6 +571,17 @@ operator*(const ADReal3 & left, const Real3 right)
   return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
 }
 
+KOKKOS_INLINE_FUNCTION Real3
+curlFromVectorGradient(const Real33 grad, const unsigned int dim)
+{
+  if (dim < 2)
+    return 0;
+  else if (dim == 2)
+    return Real3(0, 0, grad(1, 0) - grad(0, 1));
+  else
+    return Real3(grad(2, 1) - grad(1, 2), grad(0, 2) - grad(2, 0), grad(1, 0) - grad(0, 1));
+}
+
 #endif
 
 template <typename T1, typename T2>
