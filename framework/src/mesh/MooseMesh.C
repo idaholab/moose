@@ -329,33 +329,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _provided_coord_blocks(other_mesh._provided_coord_blocks),
     _doing_p_refinement(other_mesh._doing_p_refinement)
 {
-  // Note: this calls BoundaryInfo::operator= without changing the
-  // ownership semantics of either Mesh's BoundaryInfo object.
-  getMesh().get_boundary_info() = other_mesh.getMesh().get_boundary_info();
-
-  const std::set<SubdomainID> & subdomains = other_mesh.meshSubdomains();
-  for (const auto & sbd_id : subdomains)
-    setSubdomainName(sbd_id, other_mesh.getMesh().subdomain_name(sbd_id));
-
-  // Get references to BoundaryInfo objects to make the code below cleaner...
-  const BoundaryInfo & other_boundary_info = other_mesh.getMesh().get_boundary_info();
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
-
-  // Use the other BoundaryInfo object to build the list of side boundary ids
-  std::vector<BoundaryID> side_boundaries;
-  other_boundary_info.build_side_boundary_ids(side_boundaries);
-
-  // Assign those boundary ids in our BoundaryInfo object
-  for (const auto & side_bnd_id : side_boundaries)
-    boundary_info.sideset_name(side_bnd_id) = other_boundary_info.get_sideset_name(side_bnd_id);
-
-  // Do the same thing for node boundary ids
-  std::vector<BoundaryID> node_boundaries;
-  other_boundary_info.build_node_boundary_ids(node_boundaries);
-
-  for (const auto & node_bnd_id : node_boundaries)
-    boundary_info.nodeset_name(node_bnd_id) = other_boundary_info.get_nodeset_name(node_bnd_id);
-
   _bounds.resize(other_mesh._bounds.size());
   for (std::size_t i = 0; i < _bounds.size(); ++i)
   {
