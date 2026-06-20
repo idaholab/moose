@@ -68,11 +68,13 @@ ActionWarehouse::sortUserObjectActions(std::list<Action *> & actions) const
 
   for (const auto act : actions)
   {
+    // A MooseObjectAction carries its dependencies in the parameters of the object it builds. Any
+    // other action that consumes a UserObject (e.g. a Physics that programmatically adds one) names
+    // it in the action's own parameters, so the dependency is ordered against just the same.
     const auto moose_object_action = dynamic_cast<MooseObjectAction *>(act);
-    if (!moose_object_action)
-      continue;
-    for (const auto & dep_name :
-         getUserObjectParamDependencies(moose_object_action->getObjectParams()))
+    const auto & relevant_params =
+        moose_object_action ? moose_object_action->getObjectParams() : act->parameters();
+    for (const auto & dep_name : getUserObjectParamDependencies(relevant_params))
     {
       const auto it = action_for_uo_name.find(dep_name);
       if (it != action_for_uo_name.end() && it->second != act)
