@@ -1,13 +1,12 @@
 [Tests]
-  design = 'PhysicsBase.md'
+  design = 'Physics/index.md'
   issues = '#7879'
-
   [resolves]
     type = RunApp
     input = 'user_object_construction_order.i'
     expect_out = 'hasUserObject success'
-    requirement = 'The system shall construct user objects added by a Physics after the user objects '
-                  'declared in the input, so that a Physics may add a user object that depends on a '
+    requirement = 'The system shall construct user objects added by a physics action after the user objects '
+                  'declared in the input, so that a physics action may add a user object that depends on a '
                   'user-supplied user object regardless of input file order.'
   []
 []
