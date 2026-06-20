@@ -83,18 +83,19 @@ ActionWarehouse::sortUserObjectActions(std::list<Action *> & actions) const
     }
   }
 
+  // A UserObjectName parameter does not necessarily denote a construction-time dependency: many
+  // UserObjects only resolve a referenced UserObject during initialSetup() or execution. Mutually
+  // referencing UserObjects therefore form a cycle here even though they construct fine in input
+  // order. So a cycle is not an error - fall back to the original input order, which is the
+  // behavior prior to this sorting. A genuine construction-time cycle still surfaces as the usual
+  // "UserObject not found" error when the object is constructed.
   try
   {
     const auto & sorted = resolver.getSortedValues();
     actions.assign(sorted.begin(), sorted.end());
   }
-  catch (CyclicDependencyException<Action *> & e)
+  catch (const CyclicDependencyException<Action *> &)
   {
-    std::vector<std::string> names;
-    for (const auto act : e.getCyclicDependencies())
-      names.push_back(act->name());
-    mooseError("Cyclic dependencies detected in user object construction: ",
-               MooseUtils::join(names, " <- "));
   }
 }
 
