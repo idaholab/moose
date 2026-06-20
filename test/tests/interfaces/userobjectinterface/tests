@@ -92,4 +92,26 @@
       detail = 'name and type.'
     []
   []
+
+  [construction_order]
+    requirement = 'The system shall order UserObject construction to satisfy dependencies on other '
+                  'UserObjects regardless of input file order by'
+    issues = '#7879'
+
+    [resolves]
+      type = RunApp
+      input = 'uoi_construction_order.i'
+      expect_out = 'hasUserObject success'
+
+      detail = 'resolving a referenced UserObject that is declared after the UserObject referencing '
+               'it, and'
+    []
+    [cyclic]
+      type = RunException
+      input = 'uoi_cyclic.i'
+      expect_err = 'Cyclic dependencies detected in user object construction: A <- B <- A'
+
+      detail = 'reporting an error when the construction dependencies form a cycle.'
+    []
+  []
 []
