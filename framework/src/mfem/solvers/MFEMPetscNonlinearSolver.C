@@ -49,7 +49,7 @@ MFEMPetscNonlinearSolver::ConstructSolver()
   const auto & prefix = getParam<std::string>("petsc_options_prefix");
   const auto normalized_prefix = !prefix.empty() && prefix.back() != '_' ? prefix + "_" : prefix;
 
-  Moose::PetscSupport::PetscOptions petsc_options;
+  Moose::PetscSupport::PetscOptions & petsc_options = getMFEMProblem().getPetscOptions();
   Moose::PetscSupport::addPetscFlagsToPetscOptions(
       getParam<MultiMooseEnum>("petsc_options"), normalized_prefix, *this, petsc_options);
   Moose::PetscSupport::addPetscPairsToPetscOptions(

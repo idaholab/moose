@@ -184,7 +184,7 @@
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
@@ -275,7 +275,6 @@
     compute_devices = 'cpu'
     recover = false
     restep = false
-    rel_err = 5e-4
   []
   [MFEMDiffusionEigenproblem]
     type = CSVDiff

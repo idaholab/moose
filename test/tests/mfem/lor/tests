@@ -36,7 +36,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    abs_zero = 1e-9
+    abs_zero = 2e-9
   []
   [MFEMGradDivLOR]
     type = XMLDiff

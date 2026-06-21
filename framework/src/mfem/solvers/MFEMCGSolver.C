@@ -20,7 +20,7 @@ MFEMCGSolver::validParams()
   InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the conjugate gradient method.");
-
+  params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");

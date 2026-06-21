@@ -91,6 +91,7 @@
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
+    use_initial_guess = true # problem is solved by initial condition
   []
 []
 
