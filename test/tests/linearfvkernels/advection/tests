@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVAdvection.md LinearFVAdvectionDiffusionOutflowBC.md FVInterpolationMethod.md FVAdvectedUpwind.md FVGeometricAverage.md FVAdvectedVenkatakrishnanDeferredCorrection.md FVAdvectedVanLeerWeightBased.md FVAdvectedMinmodWeightBased.md'
+  design = 'LinearFVAdvection.md LinearFVAdvectionDiffusionOutflowBC.md FVInterpolationMethod.md FVAdvectedUpwind.md FVGeometricAverage.md FVAdvectedMUSCLDeferredCorrection.md FVAdvectedVanLeerWeightBased.md FVAdvectedMinmodWeightBased.md'
   issues = '#25722 #31965'
   [mms-1d-upwind]
     type = MMSTest
@@ -15,11 +15,11 @@
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a one-dimensional domain.'
     max_threads = 1 # see libmesh issue #3808
   []
-  [mms-1d-venkat-deferred]
+  [mms-1d-muscl-deferred]
     type = PythonUnitTest
     input = 'test.py'
-    test_case = TestAdvection1DVenkatDeferred
-    requirement = 'The system shall display second-order convergence for advection problems with Venkatakrishnan deferred-correction interpolation solved using a linear finite volume system on a one-dimensional domain.'
+    test_case = TestAdvection1DMUSCLDeferred
+    requirement = 'The system shall display second-order convergence for advection problems with MUSCL deferred-correction interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
@@ -56,11 +56,11 @@
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
   []
-  [mms-2d-venkat-deferred]
+  [mms-2d-muscl-deferred]
     type = PythonUnitTest
     input = 'test.py'
-    test_case = TestAdvection2DVenkatDeferred
-    requirement = 'The system shall display second-order convergence for advection problems with Venkatakrishnan deferred-correction interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
+    test_case = TestAdvection2DMUSCLDeferred
+    requirement = 'The system shall display second-order convergence for advection problems with MUSCL deferred-correction interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
@@ -121,12 +121,12 @@
     cli_args = "Outputs/file_base=average LinearFVKernels/advection/advected_interp_method_name=average"
     max_threads = 1 # see libmesh issue #3808
   []
-  [diagonal-step-2d-venkat-deferred]
+  [diagonal-step-2d-muscl-deferred]
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'diagonal-step-2d_out_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection using deferred-correction Venkatakrishnan MUSCL interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
-    cli_args = "LinearFVKernels/advection/advected_interp_method_name=muscl_venkat Convergence/linear/max_iterations=100"
+    requirement = 'The system shall support linear finite volume advection using MUSCL deferred-correction interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    cli_args = "LinearFVKernels/advection/advected_interp_method_name=muscl Convergence/linear/max_iterations=100"
     max_threads = 1 # see libmesh issue #3808
   []
   [diagonal-step-2d-vanleer]
@@ -161,12 +161,12 @@
     cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-linear LinearFVKernels/advection/advected_interp_method_name=average"
     max_threads = 1 # see libmesh issue #3808
   []
-  [diagonal-step-2d-delaunay-venkat-deferred]
+  [diagonal-step-2d-delaunay-muscl-deferred]
     type = CSVDiff
     input = diagonal-step-2d-delaunay.i
-    csvdiff = 'diagonal-step-2d-delaunay-venkat-deferred_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection using deferred-correction Venkatakrishnan MUSCL interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
-    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-venkat-deferred LinearFVKernels/advection/advected_interp_method_name=muscl_venkat"
+    csvdiff = 'diagonal-step-2d-delaunay-muscl-deferred_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using MUSCL deferred-correction interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-muscl-deferred LinearFVKernels/advection/advected_interp_method_name=muscl"
     max_threads = 1 # see libmesh issue #3808
   []
   [diagonal-step-2d-delaunay-vanleer]
@@ -201,12 +201,12 @@
     cli_args = "Outputs/file_base=average_neg LinearFVKernels/advection/advected_interp_method_name=average LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
     max_threads = 1 # see libmesh issue #3808
   []
-  [diagonal-step-2d-neg-venkat-deferred]
+  [diagonal-step-2d-neg-muscl-deferred]
     type = CSVDiff
     input = diagonal-step-2d.i
-    csvdiff = 'venkat_neg_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume Venkatakrishnan deferred-correction advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
-    cli_args = "Outputs/file_base=venkat_neg LinearFVKernels/advection/advected_interp_method_name=muscl_venkat LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom' Convergence/linear/max_iterations=100"
+    csvdiff = 'muscl_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume MUSCL deferred-correction advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=muscl_neg LinearFVKernels/advection/advected_interp_method_name=muscl LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom' Convergence/linear/max_iterations=100"
     max_threads = 1 # see libmesh issue #3808
   []
   [diagonal-step-2d-neg-vanleer]

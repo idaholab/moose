@@ -31,6 +31,26 @@ such as those with high Reynolds numbers, complex geometries, viscous flows in n
 multiphase flows, problems with rapidly varying thermophysical properties, and,
 in general, when using high-resolution grids.
 
+The pressure-gradient term used by [LinearFVMomentumPressure.md] kernels comes from the kernel's
+gradient method. Production pressure-gradient feedback should use a pressure-field gradient method
+directly. Conservative Rhie-Chow face fluxes may be reconstructed for velocity and flux observables,
+but they should not be treated as pointwise pressure-gradient data on nonorthogonal meshes.
+
+For [FVReconstructedPressureGradient.md], Rhie-Chow uses the Aguerre-style reconstruction: it first
+removes the face-flux contribution from the previous velocity gradient, reconstructs a cell velocity
+from the corrected total conservative face flux, and then recovers the pressure gradient from the
+momentum balance.
+
+The reconstructed gradient is available after the first pressure correction; until then the gradient
+method falls back to its base gradient method. The current velocity correction uses the selected
+reconstructed quantity directly, and the pressure-gradient feedback used by the next momentum
+predictor is relaxed with
+[!param](/UserObjects/RhieChowMassFlux/reconstructed_pressure_gradient_feedback_relaxation). Set
+[!param](/UserObjects/RhieChowMassFlux/momentum_pressure_kernel) so Rhie-Chow uses the same pressure
+gradient field as the momentum predictor while constructing H/A. When the pressure diffusion kernel
+uses nonorthogonal correction, set [!param](/UserObjects/RhieChowMassFlux/pressure_projection_method)
+to `consistent`.
+
 !syntax parameters /UserObjects/RhieChowMassFlux
 
 !syntax inputs /UserObjects/RhieChowMassFlux

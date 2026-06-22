@@ -378,6 +378,14 @@ LinearAssemblySegregatedSolve::initialSetup()
   }
 }
 
+void
+LinearAssemblySegregatedSolve::updatePressureGradient()
+{
+  mooseAssert(_rc_uo, "The Rhie-Chow user object must be linked first.");
+  _rc_uo->preparePressureGradientUpdate();
+  _pressure_system.computeGradients();
+}
+
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solvePressureCorrector()
 {
@@ -536,10 +544,13 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   _pressure_system.setSolution(pressure_current_solution);
 
   // We recompute the updated pressure gradient
-  _pressure_system.computeGradients();
+  updatePressureGradient();
 
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
+
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
 
   return residuals;
 }
@@ -677,7 +688,7 @@ LinearAssemblySegregatedSolve::solve()
     // Initialize pressure gradients, after this we just reuse the last ones from each
     // iteration
     if (_should_solve_pressure && simple_iteration_counter == 1)
-      _pressure_system.computeGradients();
+      updatePressureGradient();
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 

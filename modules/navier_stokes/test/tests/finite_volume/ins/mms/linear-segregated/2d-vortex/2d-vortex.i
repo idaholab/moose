@@ -1,6 +1,7 @@
 mu = 1
 rho = 1
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -25,6 +26,7 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    momentum_pressure_kernel = u_pressure
   []
 []
 
@@ -44,6 +46,13 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0
+  []
+[]
+
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    rhie_chow_user_object = rc
   []
 []
 
@@ -75,12 +84,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -120,11 +131,21 @@ advected_interp_method = 'average'
     variable = vel_y
     functor = '0'
   []
+  # [pressure-extrapolation]
+  #   type = LinearFVExtrapolatedPressureBC
+  #   boundary = 'left right top bottom'
+  #   variable = pressure
+  #   use_two_term_expansion = false
+  # []
   [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
+    type = LinearFVPressureFluxBC
     boundary = 'left right top bottom'
     variable = pressure
-    use_two_term_expansion = true
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
 []
 
@@ -166,9 +187,9 @@ advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.8
+  momentum_equation_relaxation = 0.5
   pressure_variable_relaxation = 0.3
-  num_iterations = 2000
+  num_iterations = 10000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'

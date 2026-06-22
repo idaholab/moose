@@ -13,26 +13,26 @@
 #include "FVInterpolationMethod.h"
 
 /**
- * Multi-dimensional MUSCL reconstruction using Venkatakrishnan-limited cell gradients and
+ * Multi-dimensional MUSCL reconstruction using cell gradients from a named gradient method and
  * deferred correction.
  *
  * The matrix contribution is pure upwind; the high-order reconstruction is added to the right hand
  * side as a deferred correction.
  */
-class FVAdvectedVenkatakrishnanDeferredCorrection : public FVInterpolationMethod,
-                                                    public FVAdvectedInterpolationMethod
+class FVAdvectedMUSCLDeferredCorrection : public FVInterpolationMethod,
+                                          public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
-  FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
+  FVAdvectedMUSCLDeferredCorrection(const InputParameters & params);
 
   using FVAdvectedInterpolationMethod::advectedInterpolate;
   using FVAdvectedInterpolationMethod::advectedInterpolateValue;
 
   bool needsGradients() const override { return true; }
 
-  Moose::FV::GradientLimiterType gradientLimiter() const override { return _gradient_limiter; }
+  GradientMethodName gradientMethodName() const override { return _gradient_method_name; }
 
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
@@ -42,8 +42,8 @@ public:
                                                  Real mass_flux) const override;
 
 private:
-  Moose::FV::GradientLimiterType _gradient_limiter =
-      Moose::FV::GradientLimiterType::Venkatakrishnan;
+  /// Gradient method used for the high-order reconstruction.
+  const GradientMethodName _gradient_method_name;
   /// Scales the deferred correction strength (0 = upwind, 1 = full deferred correction).
   Real _deferred_correction_factor = 1.0;
 };

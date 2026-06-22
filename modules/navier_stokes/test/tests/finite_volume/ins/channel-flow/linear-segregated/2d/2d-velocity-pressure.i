@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
   [mesh]
@@ -26,6 +27,7 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    momentum_pressure_kernel = u_pressure
   []
 []
 
@@ -44,6 +46,16 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    rhie_chow_user_object = rc
   []
 []
 
@@ -75,12 +87,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusion

@@ -18,6 +18,8 @@
 #include "libmesh/threads.h"
 #include "libmesh/system.h"
 
+#include <unordered_set>
+
 class FEProblemBase;
 class SystemBase;
 
@@ -42,12 +44,15 @@ public:
    * Class constructor.
    * @param fe_problem Reference to the problem
    * @param system The system which contains variables that need gradients.
-   * @param temporary_gradient Scratch storage holding the gradients being assembled.
+   * @param input_gradient Scratch storage holding the unnormalized face sums.
+   * @param output_gradient Storage where normalized gradients are written.
    */
   ComputeLinearFVGreenGaussGradientVolumeThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient);
+      const std::vector<std::unique_ptr<NumericVector<Number>>> & input_gradient,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & output_gradient,
+      const std::unordered_set<unsigned int> & gradient_variables);
 
   /**
    * Splitting constructor.
@@ -87,6 +92,12 @@ protected:
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Cache for the temporary gradient being built.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
+  /// Unnormalized face-sum gradients to read from.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & _input_gradient;
+
+  /// Normalized gradients to write into.
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _output_gradient;
+
+  /// Variables this producer should compute.
+  const std::unordered_set<unsigned int> & _gradient_variables;
 };

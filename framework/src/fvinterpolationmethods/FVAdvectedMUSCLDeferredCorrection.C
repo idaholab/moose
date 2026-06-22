@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVAdvectedVenkatakrishnanDeferredCorrection.h"
+#include "FVAdvectedMUSCLDeferredCorrection.h"
 
-registerMooseObject("MooseApp", FVAdvectedVenkatakrishnanDeferredCorrection);
+registerMooseObject("MooseApp", FVAdvectedMUSCLDeferredCorrection);
 
 InputParameters
-FVAdvectedVenkatakrishnanDeferredCorrection::validParams()
+FVAdvectedMUSCLDeferredCorrection::validParams()
 {
   InputParameters params = FVInterpolationMethod::validParams();
   params.addClassDescription(
-      "MUSCL reconstruction with Venkatakrishnan-limited cell gradients using deferred "
+      "MUSCL reconstruction with cell gradients from a named gradient method using deferred "
       "correction.");
   params.addRangeCheckedParam<Real>(
       "deferred_correction_factor",
@@ -24,18 +24,23 @@ FVAdvectedVenkatakrishnanDeferredCorrection::validParams()
       "deferred_correction_factor>=0 & deferred_correction_factor<=1",
       "Scales the deferred correction strength; 0 gives pure upwind (no deferred correction), 1 "
       "gives full deferred correction. Values < 1 can improve fixed point robustness.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "green-gauss-venkatakrishnan",
+      "Gradient method used to compute cell gradients for the high-order reconstruction.");
   return params;
 }
 
-FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCorrection(
+FVAdvectedMUSCLDeferredCorrection::FVAdvectedMUSCLDeferredCorrection(
     const InputParameters & params)
   : FVInterpolationMethod(params),
+    _gradient_method_name(getParam<GradientMethodName>("gradient_method")),
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))
 {
 }
 
 FVAdvectedInterpolationMethod::AdvectedSystemContribution
-FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
+FVAdvectedMUSCLDeferredCorrection::advectedInterpolate(
     const FaceInfo & face,
     const Real elem_value,
     const Real neighbor_value,
@@ -44,7 +49,7 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
     const Real mass_flux) const
 {
   mooseAssert(elem_grad && neighbor_grad,
-              "Venkatakrishnan deferred correction requires both element and neighbor gradients.");
+              "MUSCL deferred correction requires both element and neighbor gradients.");
 
   const bool upwind_is_elem = mass_flux >= 0.0;
   const Real phi_upwind = upwind_is_elem ? elem_value : neighbor_value;
@@ -52,7 +57,7 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
 
   // Reconstruct a higher-order face value from the upwind cell using the (limited) cell gradient.
   const Point & upwind_centroid = upwind_is_elem ? face.elemCentroid() : face.neighborCentroid();
-  // For the Venkatakrishnan MUSCL scheme we reconstruct to the actual face centroid.
+  // For the MUSCL scheme we reconstruct to the actual face centroid.
   const Point face_delta = face.faceCentroid() - upwind_centroid;
 
   const Real phi_high = phi_upwind + (*grad_upwind * face_delta);

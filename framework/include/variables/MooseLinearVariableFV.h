@@ -14,7 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
-#include "GradientLimiterType.h"
+#include "LinearFVGradientInterface.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -23,6 +23,9 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
+#include <memory>
+#include <unordered_map>
+
 template <typename>
 class MooseLinearVariableFV;
 
@@ -30,6 +33,7 @@ typedef MooseLinearVariableFV<Real> MooseLinearVariableFVReal;
 class AuxiliarySystem;
 class FVDirichletBCBase;
 class FVFluxBC;
+class FVGradientMethod;
 class LinearFVBoundaryCondition;
 class LinearSystem;
 
@@ -83,35 +87,40 @@ public:
   using typename MooseVariableField<OutputType>::DotType;
   using typename MooseVariableField<OutputType>::GradientType;
 
+  /// Input parameters for a linear finite-volume variable.
   static InputParameters validParams();
+
+  /**
+   * @param parameters Input parameters used to construct the variable.
+   */
   MooseLinearVariableFV(const InputParameters & parameters);
 
   virtual bool isFV() const override { return true; }
 
   /**
    * If the variable has a dirichlet boundary condition at face described by \p fi .
+   * @param fi Face where boundary conditions should be queried.
    */
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Switch to request cell gradient computations.
+   * Register this variable's default gradient method on the owning system and return its reader.
    */
-  void computeCellGradients() { _needs_cell_gradients = true; }
+  const LinearFVGradientReader & computeCellGradients();
 
   /**
-   * Switch to request cell gradient computations with an optional gradient limiter.
+   * Register a named gradient method on the owning system and return its reader.
    *
-   * `GradientLimiterType::None` is equivalent to requesting the regular gradients only.
+   * An empty name requests this variable's default gradient method.
+   * @param method_name Gradient method name to register for this variable.
    */
-  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
+  const LinearFVGradientReader & computeCellGradients(const GradientMethodName & method_name);
 
   /**
-   * Switch to request limited cell gradient computations.
-   *
-   * Limited gradients are stored in limiter-specific containers on the system and are computed
-   * using the raw cell gradients.
+   * Register a specific gradient method on the owning system and return its reader.
+   * @param method Gradient method to register for this variable.
    */
-  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+  const LinearFVGradientReader & computeCellGradients(const FVGradientMethod & method);
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -130,31 +139,11 @@ public:
   VectorValue<Real> gradSln(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
-   * Get one raw gradient component at a cell center without materializing the full gradient.
+   * Get one default gradient component at a cell center without materializing the full gradient.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param component The gradient component to retrieve
    */
   Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
-
-  /**
-   * Get either the raw or limited gradient at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> gradSln(const ElemInfo & elem_info,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Get the limited gradient at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Compute interpolated gradient on the provided face.
@@ -162,26 +151,6 @@ public:
    * @param state State argument describing which solution state to evaluate
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
-
-  /**
-   * Compute interpolated raw/limited gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> gradSln(const FaceInfo & fi,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Compute interpolated limited gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const FaceInfo & fi,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
@@ -201,6 +170,7 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
+  /// Boundary-condition map keyed by boundary ID for this variable.
   const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
   {
     return _boundary_id_to_bc;
@@ -240,7 +210,14 @@ protected:
   [[noreturn]] void adError() const;
 
   /// Throw an error when somebody requests gradients at a non-current solution state
+  /// @param state State that was requested.
   [[noreturn]] void gradientStateError(const StateArg & state) const;
+
+  /**
+   * Register and cache a gradient method for this variable.
+   * @param method Gradient method to register on the owning system.
+   */
+  const LinearFVGradientReader & registerCellGradientMethod(const FVGradientMethod & method);
 
   /**
    * Setup the boundary to Dirichlet BC map
@@ -259,8 +236,15 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Pointer to the unlimited cell gradient stored by the owning concrete system
-  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
+  /// Read-only reader for the default cell gradient stored by the owning concrete system.
+  const LinearFVGradientReader * _gradient_reader;
+
+  /// Gradient readers keyed by the methods that produced them.
+  std::unordered_map<const FVGradientMethod *, std::unique_ptr<LinearFVGradientReader>>
+      _gradient_readers_by_method;
+
+  /// Default gradient method registered when consumers request gradients from this variable.
+  const GradientMethodName _default_gradient_method_name;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel

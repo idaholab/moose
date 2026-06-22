@@ -21,6 +21,7 @@
 #include "Syntax.h"
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
+#include "FVGradientMethod.h"
 
 #include "hit/parse.h"
 
@@ -160,6 +161,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_dirac_kernel",             VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,                  false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,                  false);
+  registerMooseObjectTask("add_gradient_method",          FVGradientMethod,          false);
   registerMooseObjectTask("add_interpolation_method",     FVInterpolationMethod,     false);
   registerMooseObjectTask("add_linear_fv_kernel",         LinearFVKernel,            false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,       false);
@@ -374,6 +376,7 @@ addActionTypes(Syntax & syntax)
                            " add_default_steady_state_convergence)"
                            "(add_positions)"
                            "(add_periodic_bc)"
+                           "(add_gradient_method)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_field_split)" // split objects required before field split preconditioner itself
                            "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
@@ -485,6 +488,10 @@ addActionTypes(Syntax & syntax)
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method");
+  // Linear FV kernels and BCs may register named FVGradientMethod instances in their constructors
+  addTaskDependency("add_user_object", "add_gradient_method");
+  addTaskDependency("add_linear_fv_kernel", "add_gradient_method");
+  addTaskDependency("add_linear_fv_bc", "add_gradient_method");
 
   registerTask("parse_neml2", /*required=*/false);
   addTaskDependency("add_material", "parse_neml2");
@@ -715,6 +722,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // FVInterpolationMethods
   registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
   syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
+
+  // FVGradientMethods
+  registerSyntax("AddFVGradientMethodAction", "FVGradientMethods/*");
+  syntax.registerSyntaxType("FVGradientMethods/*", "GradientMethodName");
 
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");

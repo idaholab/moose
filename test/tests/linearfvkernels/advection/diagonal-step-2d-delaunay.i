@@ -26,8 +26,8 @@
   [average]
     type = FVGeometricAverage
   []
-  [muscl_venkat]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
+  [muscl]
+    type = FVAdvectedMUSCLDeferredCorrection
     deferred_correction_factor = 1.0
   []
   [nvd_vanleer]
@@ -45,7 +45,7 @@
     type = LinearFVAdvection
     variable = u
     velocity = "1 1 0"
-    advected_interp_method_name = muscl_venkat
+    advected_interp_method_name = muscl
   []
 []
 

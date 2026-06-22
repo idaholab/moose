@@ -66,6 +66,7 @@ DerivativeStringToJSON(DistributionName);
 DerivativeStringToJSON(SamplerName);
 DerivativeStringToJSON(UserObjectName);
 DerivativeStringToJSON(InterpolationMethodName);
+DerivativeStringToJSON(GradientMethodName);
 DerivativeStringToJSON(IndicatorName);
 DerivativeStringToJSON(MarkerName);
 DerivativeStringToJSON(MultiAppName);

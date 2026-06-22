@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("MooseApp", LinearFVAnisotropicDiffusion);
 
@@ -40,10 +41,10 @@ LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters
         isParamValid("use_nonorthogonal_correction_on_boundary")
             ? getParam<bool>("use_nonorthogonal_correction_on_boundary")
             : _use_nonorthogonal_correction),
+    _gradient_field(_var.computeCellGradients()),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0)
 {
-  _var.computeCellGradients();
 }
 
 void
@@ -118,8 +119,8 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
     const auto state_arg = determineState();
 
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
-    const auto grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
+    const auto grad_elem = _gradient_field.gradient(*_current_face_info->elemInfo());
+    const auto grad_neighbor = _gradient_field.gradient(*_current_face_info->neighborInfo());
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs =
@@ -206,7 +207,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
                              : _current_face_info->neighborInfo();
   mooseAssert(elem_info, "We should always have an element info for the current face");
 
-  auto boundary_grad = _var.gradSln(*elem_info, state_arg);
+  auto boundary_grad = _gradient_field.gradient(*elem_info);
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
