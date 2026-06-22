@@ -26,14 +26,14 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  // Angular tolerance for determining colinearity of boundary sides when detecting primal boundary
-  // vertices
+  /// Determines the type of dual mesh to generate: Voronoi or Barycentric.
+  MooseEnum _dual_mesh_type;
+
+  /// Angular tolerance, in radians, for determining colinearity of boundary sides when detecting primal boundary
+  /// vertices. If the sides make an angle greater than this, their shared point is considered a vertex and is added to the dual mesh.
   Real _boundary_node_angular_tol;
 
-  // Relative tolerance for geometric comparisons, scaled by the input mesh size
+  /// Relative tolerance for geometric determinations, scaled by the primal mesh's bounding box size.
+  /// For Voronoi duals, determines the size of the circumscribing square.
   Real _geometry_relative_tol;
-
-  // Dual type; either voronoi (dual nodes at primal element circumcenters) or barycentric (dual
-  // nodes at primal element centroids)
-  MooseEnum _dual_mesh_type;
 };
