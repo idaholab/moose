@@ -361,14 +361,14 @@
     [parsed_material_requested_optimized_out_derivative]
       type = RunException
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/material_property_names="Q:=D[S,c]"'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/expression=1 Materials/prime/material_property_names="Q:=D[S,c]"'
       expect_err = 'Material property \'dS/dc\', requested by \'prime\' is not defined on block 0'
       detail = 'for explicitly requested derivatives but optimized out derivatives in ParsedMaterials'
     []
     [allow_override]
       type = RunApp
       input = required_property.i
-      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names="Q:=D[S,c]"'
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/expression=1 Materials/prime/error_on_missing_material_properties=false Materials/prime/material_property_names="Q:=D[S,c]"'
       detail = 'but provide for a user override to default non-existing properties to zero'
     []
     [derivative_parsed_material]
