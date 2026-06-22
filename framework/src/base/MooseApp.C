@@ -157,10 +157,15 @@ writeBackupMeshFile(const std::filesystem::path & path, const std::string & cont
 void
 packMeshBackup(const MooseApp & app, Backup & backup)
 {
+  backup.mesh_files.clear();
+
   if (!app.getExecutioner())
     return;
 
-  backup.mesh_files.clear();
+  // Only h-refined meshes need an explicit topology backup. Avoid changing
+  // ordinary non-adaptive Backup/restore ownership and teardown paths.
+  if (app.feProblem().mesh().maxHLevel() == 0)
+    return;
 
   const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);
   {
