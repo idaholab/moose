@@ -118,11 +118,6 @@ class RunApp(Tester):
             "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!",
         )
         params.addParam(
-            "no_error_deprecated",
-            False,
-            "Don't pass --error-deprecated on the command line even when running the TestHarness with --error-deprecated",
-        )
-        params.addParam(
             "no_additional_cli_args",
             False,
             "A Boolean indicating that no additional CLI args should be added from the TestHarness. Note: This parameter should be rarely used as it will not pass on additional options such as those related to mpi, threads, distributed mesh, errors, etc.",
@@ -446,7 +441,7 @@ class RunApp(Tester):
 
         if (
             "--error-deprecated" not in cli_args
-            and not specs["no_error_deprecated"]
+            and not specs["deprecated"]
             and (not specs["allow_deprecated"] or options.error_deprecated)
         ):
             cli_args.append("--error-deprecated")
