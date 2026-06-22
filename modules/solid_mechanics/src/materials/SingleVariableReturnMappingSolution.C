@@ -35,6 +35,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::validParams()
                         "Factor applied to relative and absolute "
                         "tolerance for acceptable convergence if "
                         "iterations are no longer making progress");
+  params.addParam<bool>("line_search", true, "Use line search to improve convergence");
 
   // diagnostic output parameters
   MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
@@ -59,7 +60,7 @@ template <bool is_ad>
 SingleVariableReturnMappingSolutionTempl<is_ad>::SingleVariableReturnMappingSolutionTempl(
     const InputParameters & parameters)
   : _check_range(false),
-    _line_search(true),
+    _line_search(parameters.get<bool>("line_search")),
     _bracket_solution(true),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
