@@ -34,6 +34,7 @@
       input = test.py
       test_case = TestFVOneVarDiffusionInterface
       detail = 'with an interfacing object'
+      min_slots = 2
     []
     [without-ik]
       type = MMSTest
@@ -50,6 +51,7 @@
     type = MMSTest
     input = test.py
     test_case = TestFVOneVarDiffusionInterfaceHarmonic
+    min_slots = 2
   []
   [resid_and_jac]
     requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'

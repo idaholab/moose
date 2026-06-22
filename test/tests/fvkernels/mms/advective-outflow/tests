@@ -15,12 +15,13 @@
       input = test.py
       test_case = TestOutflow
       detail = 'a weighted averaging advection interpolation, and'
+      min_slots = 2
     []
     [minmod]
       type = MMSTest
       input = test.py
       test_case = TestOutflowMinMod
-        detail = 'a min-mod advection interpolation scheme.'
+      detail = 'a min-mod advection interpolation scheme.'
       min_parallel = 2 # Test geometric and algebraic ghosting
     []
   []
@@ -30,6 +31,7 @@
     test_case = TestExtrapolation
     issues = '#16169 #14549'
     requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
+    min_slots = 2
   []
   [UpwindLimiter]
     type = MMSTest
@@ -37,6 +39,7 @@
     test_case = UpwindLimiter
     requirement = 'The system shall display first order convergence with an upwind limiter.'
     issues = '#14549'
+    min_slots = 2
   []
   [CentralDifferenceLimiter]
     type = MMSTest
@@ -44,6 +47,7 @@
     test_case = CentralDifferenceLimiter
     requirement = 'The system shall display second order convergence with a central-differencing limiter.'
     issues = '#14549'
+    min_slots = 2
   []
   [VanLeerLimiter]
     type = MMSTest
@@ -51,6 +55,7 @@
     test_case = VanLeerLimiter
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
     issues = '#14549'
+    min_slots = 2
   []
   [MinModLimiter]
     type = MMSTest
@@ -58,6 +63,7 @@
     test_case = MinModLimiter
     requirement = 'The system shall display second order convergence with a min-mod limiter.'
     issues = '#14549'
+    min_slots = 2
   []
   [SOULimiter]
     type = MMSTest
@@ -65,6 +71,7 @@
     test_case = SOULimiter
     requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
     issues = '#14549'
+    min_slots = 2
   []
   [QUICKLimiter]
     type = MMSTest

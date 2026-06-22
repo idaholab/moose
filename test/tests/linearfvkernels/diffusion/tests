@@ -35,6 +35,7 @@
     test_case = TestDiffusion2DOrthogonalNeumann
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh for Neumann boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-diffusion-2d-nonorthogonal_neumann]
     type = MMSTest
@@ -49,6 +50,7 @@
     test_case = TestDiffusion2DRZOrthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on an orthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-diffusion-2d-rz-nonorthogonal]
     type = MMSTest
@@ -56,5 +58,6 @@
     test_case = TestDiffusion2DRZNonorthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on nonorthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
 []

@@ -41,6 +41,7 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-upwind]
     type = MMSTest
@@ -73,6 +74,7 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-minmod]
     type = PythonUnitTest
@@ -82,6 +84,7 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-upwind-tris]
     type = MMSTest
@@ -89,6 +92,7 @@
     test_case = TestAdvection2DUpwindTris
     requirement = 'The system shall display first-order convergence for advection problems with upwind interpolation solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-linear-tris]
     type = MMSTest
@@ -104,6 +108,7 @@
     test_case = TestAdvection2DRZ
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [diagonal-step-2d-upwind]
     type = CSVDiff

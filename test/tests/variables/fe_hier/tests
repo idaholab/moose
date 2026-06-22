@@ -36,6 +36,7 @@
       exodiff = 'hier-1-2d_out.e'
       max_parallel = 1
       detail = "first-order on 2D elements,"
+      min_slots = 2
     []
 
     [test_hier_2_2d]

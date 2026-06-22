@@ -29,6 +29,7 @@
       type = MMSTest
       input = test.py
       test_case = TestNonlinearFV
+      min_slots = 2
     []
     [linear]
       detail = 'linear implementation.'

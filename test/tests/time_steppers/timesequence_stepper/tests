@@ -115,6 +115,7 @@
 
     requirement = 'The system shall support the ability to override time sequence time step sizes '
                   'when solves fail.'
+    min_slots = 2
   []
 
   [restart_from_timesequence]
@@ -169,7 +170,7 @@
       input = 'restart_from_steady.i'
       cli_args = 'Outputs/file_base=timesequence_restart1'
       recover = false
-      prereq = 'general_restart/steady_for_restart'   
+      prereq = 'general_restart/steady_for_restart'
 
       detail = 'restart from a non-transient into a transient simulation with sequence time stepper'
     []
@@ -200,7 +201,7 @@
       max_parallel = 1
       detail = 'when restarting where the time sequence is different prior to the failure.'
     []
-    
+
     [restart_too_few_values_in_sequence]
       type = 'RunException'
       input = 'timesequence_restart_failure.i'
@@ -212,6 +213,6 @@
       max_parallel = 1
       detail = 'when restarting where the time sequence has fewer values than the restarted input'
     []
-    
+
   []
 []
