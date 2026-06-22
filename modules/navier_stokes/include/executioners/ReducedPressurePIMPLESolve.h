@@ -49,10 +49,41 @@ protected:
 
 private:
   bool startupPressureInitializationEnabled() const;
+  bool shouldRunStartupInitialization() const;
+  bool solvesVolumeFraction() const;
   void initializeStartupPressureField(const SolverParams & solver_params);
+  void resetVOFTransportStateForNewSolve() const;
+  void initializeConsistentStartupState();
+  void commitAcceptedVOFTransportHistoryIfNeeded() const;
+  void advanceOuterIterationHistories();
+  void solveVolumeFractionBeforeFlowCorrection(ResidualStorage & residual_storage,
+                                               const SolverParams & solver_params);
+  void prepareVOFTransportStateForOuterIteration() const;
+  void adoptPublishedVOFTransportState() const;
+  void
+  storeActiveScalarResiduals(ResidualStorage & residual_storage,
+                             const std::vector<std::pair<unsigned int, Real>> & vf_residuals) const;
   unsigned int computeVolumeFractionSubcycles() const;
   void synchronizeSystemState(LinearSystem & system) const;
+  void setPreviousNewtonToCurrent(LinearSystem & system) const;
+  void advanceVolumeFractionSubcycleOldState(LinearSystem & system) const;
+  void setProblemSubcycleTime(const unsigned int subcycle,
+                              const Real subcycle_dt,
+                              const Real global_time_old);
   std::vector<std::pair<unsigned int, Real>> solveVolumeFractionSystems();
+  std::pair<unsigned int, Real> solveOneVolumeFractionSystem(const unsigned int i,
+                                                             const unsigned int num_subcycles,
+                                                             const Real subcycle_dt,
+                                                             const Real global_dt,
+                                                             const Real global_time_old);
+  std::pair<unsigned int, Real>
+  runOneVolumeFractionSubcycle(const unsigned int i,
+                               LinearSystem & system,
+                               ConservativeSharpInterfaceVOFMULESCorrector & corrector,
+                               const unsigned int subcycle,
+                               const Real subcycle_dt,
+                               const Real global_dt,
+                               const Real global_time_old);
   void finalizeVolumeFractionTransportState();
   ConservativeSharpInterfaceVOFMULESCorrector *
   sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
