@@ -42,7 +42,7 @@ public:
   void computeSet(const RealEigenMatrix & input);
 
   /// Helper for dataStore
-  void storeHelper(std::ostream & stream, void * context) const;
+  void dataStore(std::ostream & stream, void * context) const;
 
   /// Returns the standardized (centered and scaled) of the provided input
   void getStandardized(RealEigenMatrix & input) const;

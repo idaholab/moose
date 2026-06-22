@@ -78,7 +78,7 @@ public:
   const size_type & stride() const { return _stride; }
   ///@}
 
-  ///@{ Implement loadHelper and storeHelper for easier data (de)serialization
+  ///@{ Implement dataLoad and dataStore for easier data (de)serialization
   void dataStore(std::ostream & stream, void * context);
   void dataLoad(std::istream & stream, void * context);
   ///@}

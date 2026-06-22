@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Standardizer.h"
+#include "DataIO.h"
 
 namespace StochasticTools
 {
@@ -109,14 +110,14 @@ Standardizer::getScaled(RealEigenMatrix & input) const
 
 /// Helper for dataStore
 void
-Standardizer::storeHelper(std::ostream & stream, void * context) const
+Standardizer::dataStore(std::ostream & stream, void * context) const
 {
   unsigned int n = _mean.size();
-  dataStore(stream, n, context);
+  ::dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _mean[ii], context);
+    ::dataStore(stream, _mean[ii], context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _stdev[ii], context);
+    ::dataStore(stream, _stdev[ii], context);
 }
 
 } // StochasticTools namespace
@@ -125,7 +126,7 @@ template <>
 void
 dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context)
 {
-  standardizer.storeHelper(stream, context);
+  standardizer.dataStore(stream, context);
 }
 
 template <>

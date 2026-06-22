@@ -273,7 +273,7 @@ inline void
 MaterialPropertyBase<T, is_ad>::store(std::ostream & stream)
 {
   for (const auto i : index_range(_value))
-    storeHelper(stream, _value[i], nullptr);
+    dataStore(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>
@@ -281,7 +281,7 @@ inline void
 MaterialPropertyBase<T, is_ad>::load(std::istream & stream)
 {
   for (const auto i : index_range(_value))
-    loadHelper(stream, _value[i], nullptr);
+    dataLoad(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>

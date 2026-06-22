@@ -310,14 +310,14 @@ template <typename T>
 inline void
 RestartableData<T>::storeInternal(std::ostream & stream)
 {
-  storeHelper(stream, set(), _context);
+  dataStore(stream, set(), _context);
 }
 
 template <typename T>
 inline void
 RestartableData<T>::loadInternal(std::istream & stream)
 {
-  loadHelper(stream, set(), _context);
+  dataLoad(stream, set(), _context);
 }
 
 template <typename T>
@@ -331,3 +331,8 @@ RestartableData<T>::storeJSONValue(nlohmann::json & json) const
 }
 
 using DataNames = std::unordered_set<std::string>;
+
+template <>
+void dataStore(std::ostream &, RestartableDataValue::StoreJSONParams &, void *);
+template <>
+void dataLoad(std::istream &, RestartableDataValue::StoreJSONParams &, void *);
