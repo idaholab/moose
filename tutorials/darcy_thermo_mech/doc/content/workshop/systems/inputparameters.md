@@ -198,8 +198,7 @@ For a complete list, see the instantiations at the bottom of framework/include/u
 
 ## MooseEnum
 
-MOOSE includes a "smart" enum utility to overcome many of the deficiencies in the standard C++ enum
-type. It works in both integer and string contexts and is self-checked for consistency.
+MOOSE includes a "smart" enum utility that can replace the standard C++ enum type. It works in both integer and string contexts and is self-checked for consistency. `MooseEnum` stores one selected value from a list of valid options.
 
 ```cpp
 #include "MooseEnum.h"
@@ -247,7 +246,7 @@ If an invalid value is supplied, an error message is provided.
 
 ## Multiple Value MooseEnums (MultiMooseEnum)
 
-Operates the same way as `MooseEnum` but supports multiple ordered options.
+Operates the same way as `MooseEnum` in terms of definition but stores zero or more active, ordered values.
 
 ```cpp
 InputParameters MyObject::validParams()
