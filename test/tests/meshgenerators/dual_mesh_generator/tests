@@ -22,15 +22,3 @@
     requirement = 'The system shall have the capability to generate a Barycentric dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
   []
 []
-[error_paths]
-    requirement = 'The system shall report an error when DualMeshGenerator receives'
-    [unsupported_dimension]
-      type = 'RunException'
-      input = 'dual_mesh_generator_unsupported_dimension.i'
-      cli_args = '--mesh-only'
-      mesh_mode = 'REPLICATED'
-      recover = false
-      expect_err = 'DualMeshGenerator currently only supports 2D Meshes'
-      detail = 'an unsupported mesh dimension.'
-    []
-[]

@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
+#include "MooseUtils.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/node_elem.h"
 #include "libmesh/poly2tri_triangulator.h"
@@ -30,10 +31,10 @@ DualMeshGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   MooseEnum dual_mesh_type("voronoi barycentric", "barycentric");
-  params.addParam<MooseEnum>(
-      "dual_mesh_type",
-      dual_mesh_type,
-      "Whether to place dual nodes at Delaunay circumcenters or primal element centroids.");
+  params.addParam<MooseEnum>("dual_mesh_type",
+                             dual_mesh_type,
+                             "Whether to output a barycentric dual or a Voronoi dual of the "
+                             "Delaunay triangulation of the primal mesh.");
   params.addRangeCheckedParam<Real>(
       "boundary_node_angular_tol",
       1e-8,
@@ -56,9 +57,9 @@ DualMeshGenerator::validParams()
 DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
+    _dual_mesh_type(getParam<MooseEnum>("dual_mesh_type")),
     _boundary_node_angular_tol(getParam<Real>("boundary_node_angular_tol")),
-    _geometry_relative_tol(getParam<Real>("geometry_relative_tol")),
-    _dual_mesh_type(getParam<MooseEnum>("dual_mesh_type"))
+    _geometry_relative_tol(getParam<Real>("geometry_relative_tol"))
 {
 }
 
@@ -68,10 +69,14 @@ elementsShareTwoNodes(const Elem * a, const Elem * b)
 {
   unsigned int shared_nodes = 0;
 
-  for (unsigned int i = 0; i < a->n_nodes(); ++i)
-    for (unsigned int j = 0; j < b->n_nodes(); ++j)
+  unsigned int a_n_nodes = a->n_nodes();
+  unsigned int b_n_nodes = b->n_nodes();
+
+  for (unsigned int i = 0; i < a_n_nodes; ++i)
+    for (unsigned int j = 0; j < b_n_nodes; ++j)
       if (a->node_id(i) == b->node_id(j))
         ++shared_nodes;
+  mooseAssert((shared_nodes < 3), "Detected elements sharing > 3 nodes.");
 
   return shared_nodes == 2;
 }
@@ -82,17 +87,11 @@ cross2D(const Point & a, const Point & b, const Point & c)
   return (b(0) - a(0)) * (c(1) - a(1)) - (b(1) - a(1)) * (c(0) - a(0));
 }
 
-static bool
-samePoint2D(const Point & a, const Point & b, const Real length_tol)
-{
-  return (a - b).norm() <= length_tol;
-}
-
 static void
 addUniquePoint(std::vector<Point> & points, const Point & point, const Real length_tol)
 {
   for (const auto & existing_point : points)
-    if (samePoint2D(existing_point, point, length_tol))
+    if (MooseUtils::absoluteFuzzyEqual(existing_point, point, length_tol))
       return;
 
   points.push_back(point);
@@ -211,6 +210,7 @@ DualMeshGenerator::generate()
   if (input_mesh->mesh_dimension() != 2)
     mooseError("DualMeshGenerator currently only supports 2D Meshes");
 
+  // Calculating tolerances, so they are relative to the input mesh bounding box
   const auto input_bounding_box = MeshTools::create_bounding_box(*input_mesh);
   const Point mesh_extent = input_bounding_box.max() - input_bounding_box.min();
   const Real mesh_scale = std::max(std::max(std::abs(mesh_extent(0)), std::abs(mesh_extent(1))),
@@ -225,11 +225,14 @@ DualMeshGenerator::generate()
   std::unordered_map<dof_id_type, std::vector<Point>> boundary_node_midpoints;
   std::vector<BoundarySegment> physical_boundary_segments;
 
+  // Looping through primal elements
   for (const auto & elem : input_mesh->element_ptr_range())
   {
     for (const auto side : elem->side_index_range())
     {
-      if (elem->neighbor_ptr(side) == nullptr)
+      if (elem->neighbor_ptr(side) ==
+          nullptr) // If element has a nullptr neighbor (exterior-facing
+                   // side) we want to add vertex midpoints and record info
       {
         auto side_elem = elem->build_side_ptr(side);
 
@@ -253,17 +256,19 @@ DualMeshGenerator::generate()
   }
 
   std::unordered_map<dof_id_type, std::vector<std::size_t>> boundary_node_to_segments;
-
+  // Map for boundary segments
   for (std::size_t i = 0; i < physical_boundary_segments.size(); ++i)
   {
     boundary_node_to_segments[physical_boundary_segments[i].node0].push_back(i);
     boundary_node_to_segments[physical_boundary_segments[i].node1].push_back(i);
   }
 
+  // Helper so given a node we can get the other node that shares a line segment with it
   const auto otherBoundaryNode = [&](const BoundarySegment & segment,
                                      const dof_id_type node_id) -> dof_id_type
   { return segment.node0 == node_id ? segment.node1 : segment.node0; };
 
+  // Set of vertices we want to add/preserve
   std::unordered_set<dof_id_type> boundary_vertex_nodes;
 
   for (const auto & node_segments : boundary_node_to_segments)
@@ -299,12 +304,13 @@ DualMeshGenerator::generate()
     cos_angle = std::max(Real(-1.0), std::min(Real(1.0), cos_angle));
 
     if (std::abs(libMesh::pi - std::acos(cos_angle)) > _boundary_node_angular_tol)
-      boundary_vertex_nodes.insert(node_id);
+      boundary_vertex_nodes.insert(node_id); // Records vertices based on tolerance
   }
 
   std::vector<std::pair<Point, Point>> boundary_clip_segments;
   std::vector<bool> used_boundary_segments(physical_boundary_segments.size(), false);
 
+  // Helper for finding the boundary line we want to clip the dual mesh along
   const auto traceBoundaryClipSegment =
       [&](const dof_id_type start_node, const std::size_t start_segment_id)
   {
@@ -344,7 +350,7 @@ DualMeshGenerator::generate()
       current_segment_id = next_segment_id;
     }
   };
-
+  // Now we can clip along our primary vertices
   for (const auto boundary_vertex_node : boundary_vertex_nodes)
   {
     const auto node_segment_it = boundary_node_to_segments.find(boundary_vertex_node);
@@ -361,6 +367,7 @@ DualMeshGenerator::generate()
     if (!used_boundary_segments[segment_id])
       traceBoundaryClipSegment(physical_boundary_segments[segment_id].node0, segment_id);
 
+  // Now for actually finding the dual
   std::vector<Point> dual_centers;
   std::unordered_map<dof_id_type, dof_id_type> source_elem_to_center_id;
   std::unordered_map<dof_id_type, std::vector<const Elem *>> source_node_to_elems;
@@ -369,7 +376,7 @@ DualMeshGenerator::generate()
   if (use_voronoi)
   {
     tri_mesh = buildReplicatedMesh(2);
-
+    // tri_mesh input is the pure primal mesh
     for (const auto & node : input_mesh->node_ptr_range())
     {
       Node * new_node = tri_mesh->add_point(*node);
@@ -379,6 +386,8 @@ DualMeshGenerator::generate()
       tri_mesh->add_elem(std::move(node_elem));
     }
 
+    // We're circumscribing this inside a large box that is scaled to the bounding box of the primal
+    // mesh
     const Real outer_padding = 10.0 * mesh_scale;
     const Point outer_min(input_bounding_box.min()(0) - outer_padding,
                           input_bounding_box.min()(1) - outer_padding,
@@ -406,11 +415,12 @@ DualMeshGenerator::generate()
     triangulator.minimum_angle() = 0;
     triangulator.desired_area() = 0;
 
-    triangulator.insert_extra_points() = false;
-    triangulator.smooth_after_generating() = false;
+    triangulator.insert_extra_points() = false;     // Don't add new nodes
+    triangulator.smooth_after_generating() = false; // Don't mess up our geometry
 
     triangulator.triangulate();
 
+    // Now, for Voronoi, we loop over the triangles, get circumcenters, etc
     for (const auto & tri_elem : tri_mesh->element_ptr_range())
     {
       if (tri_elem->n_vertices() != 3)
@@ -426,7 +436,7 @@ DualMeshGenerator::generate()
         source_node_to_elems[tri_elem->node_id(n)].push_back(tri_elem);
     }
   }
-  else
+  else // For barycentric, much simpler treatment:
   {
     for (const auto & elem : input_mesh->element_ptr_range())
     {
@@ -440,8 +450,10 @@ DualMeshGenerator::generate()
     }
   }
 
+  // Now we've gathered our centers and bounadry info, we can now build the dual
   auto dualMesh = buildReplicatedMesh(2);
 
+  // Helper to determine if points are inside the boundary
   const auto pointInsideBoundary = [&](const Point & point)
   {
     bool inside = false;
@@ -465,6 +477,7 @@ DualMeshGenerator::generate()
     return inside;
   };
 
+  // Actual clipping action -- by this point it is traced
   const auto clipDualPolygonToBoundary = [&](const std::vector<Point> & dual_points)
   {
     std::vector<Point> clipped_points;
@@ -525,12 +538,14 @@ DualMeshGenerator::generate()
       addUniquePoint(unique_clipped_points, point, length_tol);
 
     if (unique_clipped_points.size() > 1 &&
-        samePoint2D(unique_clipped_points.front(), unique_clipped_points.back(), length_tol))
+        MooseUtils::absoluteFuzzyEqual(
+            unique_clipped_points.front(), unique_clipped_points.back(), length_tol))
       unique_clipped_points.pop_back();
 
     return unique_clipped_points;
   };
 
+  // Helper for finding if a node is a boundary vertex
   const auto isBoundaryVertexPoint = [&](const Point & point)
   {
     for (const auto boundary_vertex_node : boundary_vertex_nodes)
@@ -538,13 +553,13 @@ DualMeshGenerator::generate()
       const auto point_it = boundary_node_points.find(boundary_vertex_node);
 
       if (point_it != boundary_node_points.end() &&
-          samePoint2D(point, point_it->second, length_tol))
+          MooseUtils::absoluteFuzzyEqual(point, point_it->second, length_tol))
         return true;
     }
 
     return false;
   };
-
+  // Helper for finding if a node lies on a boundary segment
   const auto isBoundarySegmentPoint = [&](const Point & point)
   {
     for (const auto & boundary_segment : boundary_clip_segments)
@@ -555,6 +570,8 @@ DualMeshGenerator::generate()
     return false;
   };
 
+  // Concave element helper, used in our later decomposing of concave elems, for indexing through
+  // the fan
   const auto concaveBoundaryVertexIndex = [&](const std::vector<Point> & points) -> std::size_t
   {
     if (points.size() < 4)
@@ -679,6 +696,7 @@ DualMeshGenerator::generate()
 
     if (!use_voronoi)
     {
+      // barycentric boundary process, much simpler
       const auto boundary_midpoint_it = boundary_node_midpoints.find(source_node_id);
 
       if (boundary_midpoint_it != boundary_node_midpoints.end())
@@ -687,14 +705,15 @@ DualMeshGenerator::generate()
 
         if (boundary_vertex_nodes.count(source_node_id) &&
             boundary_point_it != boundary_node_points.end())
-          addUniquePoint(dual_points, boundary_point_it->second, length_tol);
+          addUniquePoint(dual_points, boundary_point_it->second, length_tol); // add primal vertices
 
         for (const auto & midpoint : boundary_midpoint_it->second)
-          addUniquePoint(dual_points, midpoint, length_tol);
+          addUniquePoint(dual_points, midpoint, length_tol); // Add midpoints
 
         if (boundary_point_it != boundary_node_points.end() && !source_center_points.empty())
         {
-          Point center_average;
+          Point center_average; // Our source cenbter is not quite the centroid, it's the midpoint
+                                // between the dual nodes' centroid and the primal boundary point
 
           for (const auto & center_point : source_center_points)
             center_average += center_point;
@@ -703,6 +722,8 @@ DualMeshGenerator::generate()
 
           const Point sort_center = 0.5 * (boundary_point_it->second + center_average);
 
+          // Sorting is necessary, as the centroid ordering is jumbled after adding
+          // vertices and midpoints
           std::sort(dual_points.begin(),
                     dual_points.end(),
                     [&sort_center](const Point & a, const Point & b)
@@ -715,7 +736,7 @@ DualMeshGenerator::generate()
     }
 
     if (dual_points.size() >= 3)
-      dual_points = clipDualPolygonToBoundary(dual_points);
+      dual_points = clipDualPolygonToBoundary(dual_points); // calling clipping helper
 
     if (dual_points.size() < 3)
       continue;
@@ -774,6 +795,7 @@ DualMeshGenerator::generate()
         }
       }
 
+      // Now alas we can fan out triangles to break up otherwise concave dual elements
       for (std::size_t i = 1; i + 1 < fan_points.size(); ++i)
       {
         const std::vector<Point> triangle_points = {
