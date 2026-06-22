@@ -85,7 +85,8 @@ v = 1.0
     executor_name = 'neml2'
     model = 'model'
     manage_state_advance = true
-    moose_input_kernels = 'strain'
+    input_kernels = 'neml2_strain'
+    auto_output = false
   []
 []
 
@@ -97,18 +98,18 @@ v = 1.0
     type = NEML2FEInterpolation
     assembly = 'assembly'
   []
-  [strain]
+  [neml2_strain]
     type = NEML2SmallStrain
     assembly = 'assembly'
     fe = 'fe'
-    to_neml2 = 'forces/E'
+    to_neml2 = 'neml2_strain'
   []
   [residual]
     type = NEML2StressDivergence
     assembly = 'assembly'
     fe = 'fe'
     executor = 'neml2'
-    stress = 'state/S'
+    stress = 'neml2_stress'
     residual = 'NONTIME'
   []
 []
