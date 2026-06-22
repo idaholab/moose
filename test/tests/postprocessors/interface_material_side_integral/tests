@@ -1,0 +1,10 @@
+[Tests]
+  [side_user_object_interface_material_property]
+    design = 'source/postprocessors/SideIntegralMaterialProperty.md'
+    type = RunException
+    input = interface_material_side_integral.i
+    expect_err = "Side user object 'bad_side_integral' consumes material property 'jump', which is declared by interface material 'jump'"
+    requirement = 'The system shall report an error when a side user object consumes a material property declared by an interface material.'
+    issues = '#30156'
+  []
+[]
