@@ -98,6 +98,7 @@ template <typename OutputType>
 const std::vector<dof_id_type> &
 MooseVariableDataLinearFV<OutputType>::initDofIndices()
 {
+  // We might not have a valid element, so we don't use the element to get the dof
   Moose::initDofIndices(*this, *_elem);
   return _dof_indices;
 }
@@ -106,7 +107,7 @@ template <typename OutputType>
 void
 MooseVariableDataLinearFV<OutputType>::computeValues()
 {
-  initDofIndices();
+  getDofIndices(_elem, _dof_indices);
   initializeSolnVars();
 
   unsigned int num_dofs = _dof_indices.size();
@@ -165,7 +166,16 @@ void
 MooseVariableDataLinearFV<OutputType>::getDofIndices(const Elem * elem,
                                                      std::vector<dof_id_type> & dof_indices) const
 {
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  // Avoid calling the dof map routine (for performance)
+  const auto n_dofs = elem->n_dofs(_sys.number(), _var_num);
+  if (n_dofs)
+  {
+    mooseAssert(n_dofs == 1, "Should be just one dof");
+    dof_indices.resize(1);
+    dof_indices[0] = elem->dof_number(_sys.number(), _var_num, 0);
+  }
+  else
+    dof_indices.clear();
 }
 
 template <typename OutputType>

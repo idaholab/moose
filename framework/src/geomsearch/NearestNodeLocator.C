@@ -55,9 +55,6 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     mooseError("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2,
   ", but boundary ", _boundary2, " does not exist");
   */
-
-  // Request the nodeToElem map upfront
-  _mesh.nodeToElemMap();
 }
 
 NearestNodeLocator::~NearestNodeLocator() = default;

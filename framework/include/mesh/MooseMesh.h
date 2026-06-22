@@ -2016,8 +2016,11 @@ private:
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> & _coord_sys;
 
+  /// If the coordinate system is shared, can avoid the map search
+  std::optional<Moose::CoordinateSystemType> & _unique_coord_system;
+
   /// Storage for RZ axis selection
-  unsigned int _rz_coord_axis;
+  unsigned int & _rz_coord_axis;
 
   /// Map of subdomain ID to general axisymmetric axis
   std::unordered_map<SubdomainID, std::pair<Point, RealVectorValue>> _subdomain_id_to_rz_coord_axis;
@@ -2027,7 +2030,7 @@ private:
   std::unique_ptr<MooseAppCoordTransform> _coord_transform;
 
   /// Whether the coordinate system has been set
-  bool _coord_system_set;
+  bool & _coord_system_set;
 
   /// Set for holding user-provided coordinate system type block names
   std::vector<SubdomainName> _provided_coord_blocks;

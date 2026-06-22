@@ -550,6 +550,18 @@ MooseVariableDataBase<OutputType>::fetchDofValues()
       _dof_values_dotdot_old.resize(n);
       _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
     }
+    if (_need_du_dot_du || _need_dof_du_dot_du)
+    {
+      _dof_du_dot_du.resize(n);
+      for (decltype(n) i = 0; i < n; ++i)
+        _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
+    }
+    if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
+    {
+      _dof_du_dotdot_du.resize(n);
+      for (decltype(n) i = 0; i < n; ++i)
+        _dof_du_dotdot_du[i] = _sys.duDotDotDu();
+    }
   }
 
   for (auto tag : _required_vector_tags)
@@ -577,30 +589,17 @@ MooseVariableDataBase<OutputType>::fetchDofValues()
 
     for (auto tag : active_coupleable_matrix_tags)
     {
-      _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
         if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
           mooseAssert(_sys.getMatrix(tag).closed(),
                       "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
+          _matrix_tags_dof_u[tag].resize(n);
           for (unsigned i = 0; i < n; i++)
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
         }
     }
-  }
-
-  if (_need_du_dot_du || _need_dof_du_dot_du)
-  {
-    _dof_du_dot_du.resize(n);
-    for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
-  }
-  if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
-  {
-    _dof_du_dotdot_du.resize(n);
-    for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dotdot_du[i] = _sys.duDotDotDu();
   }
 }
 
