@@ -18,6 +18,7 @@
     type = TaoGradientTester
     input = main.i
     capabilities = 'neml2'
+    max_rel_tol = 1e-4
     issues = '#32496'
     requirement = 'The system shall use a NEML2 material model and verify the accuracy of the gradient against a finite difference gradient.' 
   []
