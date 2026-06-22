@@ -53,15 +53,21 @@
 []
 
 [Kernels]
+  active = 'nl'
   [nl]
     type = MFEMNLDiffusionKernel
     variable = concentration
     k_coefficient = concentration
     dk_du_coefficient = 1.0
   []
+  [force]
+    type = MFEMDomainLFKernel
+    variable = concentration
+  []
 []
 
 [VectorPostprocessors]
+  active = ''
   [point_sample]
     type = MFEMPointValueSampler
     variable = concentration
@@ -78,7 +84,13 @@
 []
 
 [Outputs]
-  [out]
+  active = ParaViewDataCollection
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/NLDiffusion
+    vtk_format = ASCII
+  []
+  [csv]
     type = CSV
     execute_on = 'timestep_end'
   []

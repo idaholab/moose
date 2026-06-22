@@ -119,7 +119,7 @@ alpha = 1e-2
 []
 
 [Outputs]
-  file_base = OutputData/NLHeatConduction
+  file_base = NLHeatConduction
   csv = true
   time_step_interval = 10
 

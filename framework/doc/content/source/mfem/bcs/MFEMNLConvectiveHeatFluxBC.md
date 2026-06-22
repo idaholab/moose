@@ -23,7 +23,7 @@ for the temperature, $v=T'$ as the test variable, and $u_0=T_{\infty}$ as the eq
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/nl_heattransfer.i block=BCs
+!listing mfem/nonlinear/nlheattransfer.i block=BCs
 
 !syntax parameters /BCs/MFEMNLConvectiveHeatFluxBC
 

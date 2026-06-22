@@ -130,7 +130,7 @@
   []
   [CSV]
     type = CSV
-    file_base = OutputData/NLHeatTransfer
+    file_base = NLHeatTransfer
     time_step_interval = 3
   []
 []
