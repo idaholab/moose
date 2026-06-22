@@ -18,6 +18,7 @@
   [legacy_pin_transfer]
     type = RunApp
     input = 'legacy_pin_transfer.i'
+    recover = false
     requirement = 'The system shall preserve pin-transfer behavior when using the deprecated pin solution transfer name'
   []
 []
