@@ -245,6 +245,11 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
+  params.addParam<bool>(
+      "side_uo_interface_mat_prop_integrity_check",
+      true,
+      "Set to false to disable checking that side user objects do not consume material "
+      "properties declared by interface materials on the same boundary.");
   MooseEnum material_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>(
       "material_coverage_check",
@@ -373,7 +378,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check material_coverage_check "
+      "boundary_restricted_elem_integrity_check "
+      "side_uo_interface_mat_prop_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
@@ -489,6 +495,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
+    _side_uo_interface_mat_prop_integrity_check(
+        getParam<bool>("side_uo_interface_mat_prop_integrity_check")),
     _material_coverage_check(
         getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
     _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
