@@ -3,17 +3,21 @@
         {
             "name": "Apptainer moose-dev",
             "includePath": [
-                "/Users/ouelce/projects/moose_0/framework/include/",
-                "${workspaceFolder}/framework/include/meshgenerators",
-                "${workspaceFolder}/framework/include/base",
-                "${workspaceFolder}/framework/build/header_symlinks"
+                "${workspaceFolder}/**",
+                "/opt/libmesh/include/**",
+                "/opt/petsc/include/**",
+                "/opt/mpich/include/**",
+                "/opt/wasp/include/**",
+                "/opt/rh/gcc-toolset-12/root/usr/include/**",
+                "/usr/include/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
-}
+  }
+
