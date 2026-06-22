@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "LibtorchArtificialNeuralNet.h"
+#include <cstdint>
+
+#include "LibtorchActorNeuralNet.h"
 #include "LibtorchNeuralNetControl.h"
 
 /**
@@ -29,6 +31,9 @@ public:
   /// Construct using input parameters
   LibtorchDRLControl(const InputParameters & parameters);
 
+  /// Restore any restartable controller state after base setup completes.
+  virtual void initialSetup() override;
+
   /// We compute the actions in this function together with the corresponding logarithmic probabilities.
   virtual void execute() override;
 
@@ -39,25 +44,64 @@ public:
    */
   Real getSignalLogProbability(const unsigned int signal_index) const;
 
-protected:
   /**
-   * Function which computes the logarithmic probability of given actions.
-   * @param action The tensor containing the perturbed control signals (also known as the action of
-   * the controller)
-   * @param output_tensor The expected value of the signals predicted by the neural net
-   * @return The logarithmic probability of the action with respect to the neural net prediction
+   * Copy an actor network into this DRL controller.
+   * @param input_nn Actor network to copy into the controller.
    */
-  torch::Tensor computeLogProbability(const torch::Tensor & action,
-                                      const torch::Tensor & output_tensor);
+  void loadControlNeuralNet(const Moose::LibtorchActorNeuralNet & input_nn);
+
+  virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
+
+  virtual void loadControlNeuralNetFromFile() override;
+
+  /// Reset the owned policy-sampling generator to a known seed.
+  void setPolicySampleSeed(uint64_t seed);
+
+protected:
+  /// Apply the current smoothed control signals, including optional offsets.
+  void applyControlSignals();
+
+  /// Return the offset to add to a control signal at the current time.
+  Real computeControlOffset(unsigned int control_i) const;
 
   /// The log probability of control signals from the last evaluation of the controller
-  std::vector<Real> _current_control_signal_log_probabilities;
+  std::vector<Real> & _current_control_signal_log_probabilities;
 
-  /// Standard deviation for the actions, supplied by the user
-  const std::vector<Real> _action_std;
+  /// The smoothed control signal from the previous execution, saved for restart/recover.
+  std::vector<Real> & _previous_control_signal;
+  /// The current smoothed control signal applied to the controllable parameters.
+  std::vector<Real> & _current_smoothed_signal;
 
-  /// Standard deviations converted to a 2D diagonal tensor that can be used by Libtorch routines.
-  torch::Tensor _std;
+  /// Constant offsets added to each control signal before it is applied.
+  std::vector<Real> _control_offsets;
+  /// Whether any offset data was provided by the user.
+  bool _has_control_offsets;
+
+  /// Actor network used when the controller operates as a stochastic policy.
+  std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
+  /// Owned libtorch CPU generator used for policy sampling.
+  at::Generator _policy_generator;
+  /// Restartable serialized state for the owned policy-sampling generator.
+  std::vector<std::uint8_t> & _policy_generator_state;
+
+  /// Number of controller executions remaining before the next policy evaluation.
+  unsigned int & _executions_until_next_policy_evaluation;
+  /// Number of controller executions between policy evaluations.
+  const unsigned int _num_steps_in_period;
+  /// Relaxation factor applied while smoothing control updates.
+  const Real _smoother;
+  /// Whether to sample actions stochastically instead of using the deterministic actor output.
+  const bool _stochastic;
+
+private:
+  /// Advance the reuse schedule and report whether this execution should evaluate the policy.
+  bool shouldEvaluatePolicy();
+
+  /// Restore the owned libtorch generator state from restartable storage.
+  void restorePolicyGeneratorState();
+
+  /// Mirror the owned libtorch generator state into restartable storage.
+  void savePolicyGeneratorState();
 };
 
 #endif
