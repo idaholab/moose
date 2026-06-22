@@ -33,6 +33,17 @@
                   'response under tensile loading within the small incremental strain formulation '
                   'and using the b-bar element volume correction.'
   []
+  [isotropic_plasticity_incremental_line_search]
+    type = Exodiff
+    input = 'isotropic_plasticity_incremental_strain.i'
+    exodiff = 'isotropic_plasticity_incremental_strain_out.e'
+    cli_args = 'Materials/isotropic_plasticity/line_search=false'
+    prereq = 'isotropic_plasticity_incremental_Bbar'
+    design = 'IsotropicPlasticityStressUpdate.md'
+    requirement = 'The system shall allow disabling line search in the '
+                  'SingleVariableReturnMappingSolution return-mapping Newton solve and still '
+                  'converge to the same J2 isotropic plasticity response.'
+  []
   [isotropic_plasticity_finite]
     type = Exodiff
     input = 'isotropic_plasticity_finite_strain.i'
