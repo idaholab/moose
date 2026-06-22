@@ -80,11 +80,11 @@ doc/content/index.md -> ${HOME}/.local/share/moose/site/index.html
 ${MOOSE_DIR}/framework/doc/content/utilities/index.md -> ${HOME}/.local/share/moose/site/utilties/index.md
 ```
 
-In the advanced mode the root location can be specified for each location, in this case the
+In the advanced mode, the root location can be specified for each content entry. In this case, the
 content configuration section contains a dictionary of dictionaries as shown below. The top-level key
 is an arbitrary name, the second level has three keys available: "root_dir", "content", and
-"external". The root_dir is the directory to include and "content" is a list of folders and/or files
-within the root_dir to consider. The "external" key is described in
+"external". The "root_dir" is the directory to include and "content" is a list of folders and/or files
+within the "root_dir" to consider. The "external" key is described in
 [#optional-dependencies].
 
 
