@@ -54,11 +54,13 @@ NEML2CentralDifference::rebuildBoundaryElementList()
     mooseInfo("Dectected BCs on ", bnds.size(), " boundaries.");
 
     // deduplicate elements that have multiple boundaries
+    // skip ghosted elements so DoF indices stay in this rank's algebraic range
     std::unordered_set<const Elem *> unique_elems;
     const auto end = _fe_problem.mesh().bndElemsEnd();
     for (auto it = _fe_problem.mesh().bndElemsBegin(); it != end; ++it)
       if (bnds.find((*it)->_bnd_id) != bnds.end())
-        unique_elems.insert((*it)->_elem);
+        if ((*it)->_elem->processor_id() == _fe_problem.processor_id())
+          unique_elems.insert((*it)->_elem);
 
     _boundary_elems.assign(unique_elems.begin(), unique_elems.end());
     mooseInfo("Adding ", _boundary_elems.size(), " elements to the algebraic range.");

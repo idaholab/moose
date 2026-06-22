@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#30850'
+  issues = '#30850 #32934'
   design = 'NEML2/index.md NEML2Action.md'
 
   [explicit_dynamics]
@@ -42,5 +42,14 @@
     valgrind = heavy
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     recover = false
+  []
+
+  [slug_2d]
+    type = Exodiff
+    requirement = 'The system shall run a 2D NEML2-driven explicit-dynamics impact problem with manage_state_advance enabled and an integrated boundary condition.'
+    input = 'slug_2d.i'
+    exodiff = 'slug_2d_out.e'
+    capabilities = 'neml2'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
   []
 []
