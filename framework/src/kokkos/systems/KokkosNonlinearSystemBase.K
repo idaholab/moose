@@ -92,6 +92,35 @@ NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 }
 
 void
+NonlinearSystemBase::setupKokkos()
+{
+  if (!_kokkos_nodal_bcs.hasActiveObjects())
+    return;
+
+  const auto & system = _fe_problem.getKokkosSystem(number());
+  const auto & tags = _fe_problem.getMatrixTags();
+
+  for (const auto & [_, tag] : tags)
+  {
+    std::set<PetscInt> dofs;
+
+    const auto & nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse({tag}, 0);
+
+    for (const auto & obj : nodal_bcs.getActiveObjects())
+    {
+      const auto nbc = std::dynamic_pointer_cast<Moose::Kokkos::NodalBCBase>(obj);
+      const auto nodes = nbc->getContiguousNodes();
+      const auto var = nbc->variable().number();
+
+      for (const auto node : nodes)
+        dofs.insert(system.getNodeGlobalDofIndex(node, var));
+    }
+
+    _kokkos_nodal_bcs_dofs[tag] = std::vector<PetscInt>(dofs.begin(), dofs.end());
+  }
+}
+
+void
 NonlinearSystemBase::setKokkosInitialSolution()
 {
   // The preset Dirichlet BCs can have coupled variables from other systems, so we grab all systems
@@ -115,8 +144,6 @@ NonlinearSystemBase::setKokkosInitialSolution()
   for (auto & nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->presetSolution(tag);
 
-  Kokkos::fence();
-
   for (auto & system : systems)
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
@@ -134,7 +161,8 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   const auto & nodal_kernels = _kokkos_nodal_kernels.getVectorTagsObjectWarehouse(tags, 0);
   const auto & integrated_bcs = _kokkos_integrated_bcs.getVectorTagsObjectWarehouse(tags, 0);
 
-  if (!kernels.size() && !nodal_kernels.size() && !integrated_bcs.size())
+  if (!kernels.hasActiveObjects() && !nodal_kernels.hasActiveObjects() &&
+      !integrated_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -310,10 +338,9 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   const auto & kernels = _kokkos_kernels.getMatrixTagsObjectWarehouse(tags, 0);
   const auto & nodal_kernels = _kokkos_nodal_kernels.getMatrixTagsObjectWarehouse(tags, 0);
   const auto & integrated_bcs = _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0);
-  const auto & nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0);
 
   if (!kernels.hasActiveObjects() && !nodal_kernels.hasActiveObjects() &&
-      !integrated_bcs.hasActiveObjects() && !nodal_bcs.hasActiveObjects())
+      !integrated_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -339,9 +366,6 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   integrated_bcs.updateVariableDependency(needed_moose_vars);
   integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
   integrated_bcs.updateMatPropDependency(needed_mat_props);
-
-  nodal_bcs.updateVariableDependency(needed_moose_vars);
-  nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
   if (needed_mat_props.size())
   {
@@ -395,9 +419,6 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
     for (auto & ibc : integrated_bcs.getActiveObjects())
       ibc->computeJacobian();
-
-    for (auto & nbc : nodal_bcs.getActiveObjects())
-      nbc->computeJacobian();
   }
 
   // Close and restore vectors and matrices
@@ -421,13 +442,95 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 }
 
 void
+NonlinearSystemBase::computeKokkosNodalBCsJacobian(const std::set<TagID> & tags)
+{
+  TIME_SECTION("computeKokkosNodalBCsJacobian", 1);
+
+  // Get warehouses
+
+  const auto & nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0);
+
+  if (!nodal_bcs.hasActiveObjects())
+    return;
+
+  // Resolve dependencies
+
+  auto & systems = _fe_problem.getKokkosSystems();
+
+  systems[number()].setActiveMatrixTags(tags);
+
+  std::set<TagID> needed_fe_var_vector_tags;
+
+  for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
+    needed_fe_var_vector_tags.insert(tag._id);
+
+  nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  // Copy solution vectors and initialize matrices
+
+  for (auto & system : systems)
+  {
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    }
+  }
+
+  for (const auto tag : tags)
+  {
+    auto mat = systems[number()].getMatrix(tag).mat();
+
+    if (mat)
+    {
+      LibmeshPetscCall(MatSetOption(mat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
+      LibmeshPetscCall(MatSetOption(mat, MAT_NO_OFF_PROC_ZERO_ROWS, PETSC_TRUE));
+      LibmeshPetscCall(MatZeroRows(mat,
+                                   _kokkos_nodal_bcs_dofs[tag].size(),
+                                   _kokkos_nodal_bcs_dofs[tag].data(),
+                                   0,
+                                   PETSC_NULLPTR,
+                                   PETSC_NULLPTR));
+    }
+  }
+
+  systems.copyToDevice();
+
+  {
+    TIME_SECTION("KokkosKernel", 1);
+
+    // Compute kernels
+
+    for (auto & nbc : nodal_bcs.getActiveObjects())
+      nbc->computeJacobian();
+  }
+
+  // Close and restore vectors
+
+  {
+    TIME_SECTION("KokkosClose", 1);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  }
+
+  // Clear
+
+  systems[number()].clearActiveMatrixTags();
+
+  for (auto & system : systems)
+    system.clearActiveSolutionTags();
+}
+
+void
 NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & vector_tags,
                                                       const std::set<TagID> & matrix_tags)
 {
   TIME_SECTION("computeKokkosResidualAndJacobian", 1);
 
   if (!_kokkos_kernels.hasActiveObjects() && !_kokkos_nodal_kernels.hasActiveObjects() &&
-      !_kokkos_integrated_bcs.hasActiveObjects() && !_kokkos_nodal_bcs.hasActiveObjects())
+      !_kokkos_integrated_bcs.hasActiveObjects())
     return;
 
   // Resolve dependencies
@@ -454,9 +557,6 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   _kokkos_integrated_bcs.updateVariableDependency(needed_moose_vars);
   _kokkos_integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
   _kokkos_integrated_bcs.updateMatPropDependency(needed_mat_props);
-
-  _kokkos_nodal_bcs.updateVariableDependency(needed_moose_vars);
-  _kokkos_nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
   if (needed_mat_props.size())
   {
@@ -510,10 +610,6 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
     for (auto & ibc : _kokkos_integrated_bcs.getActiveObjects())
       ibc->computeResidualAndJacobian();
-
-    /// Nodal BC residuals are computed separately
-    for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
-      nbc->computeJacobian();
   }
 
   // Close and restore vectors and matrices
@@ -535,4 +631,85 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
   }
+}
+
+void
+NonlinearSystemBase::computeKokkosNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                                              const std::set<TagID> & matrix_tags)
+{
+  TIME_SECTION("computeKokkosNodalBCsResidualAndJacobian", 1);
+
+  if (!_kokkos_nodal_bcs.hasActiveObjects())
+    return;
+
+  // Resolve dependencies
+
+  auto & systems = _fe_problem.getKokkosSystems();
+
+  systems[number()].setActiveResidualTags(vector_tags);
+  systems[number()].setActiveMatrixTags(matrix_tags);
+
+  std::set<TagID> needed_fe_var_vector_tags;
+
+  for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
+    needed_fe_var_vector_tags.insert(tag._id);
+
+  _kokkos_nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  // Copy solution vectors and initialize matrices
+
+  for (auto & system : systems)
+  {
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    }
+  }
+
+  for (const auto tag : matrix_tags)
+  {
+    auto mat = systems[number()].getMatrix(tag).mat();
+
+    if (mat)
+    {
+      LibmeshPetscCall(MatSetOption(mat, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
+      LibmeshPetscCall(MatSetOption(mat, MAT_NO_OFF_PROC_ZERO_ROWS, PETSC_TRUE));
+      LibmeshPetscCall(MatZeroRows(mat,
+                                   _kokkos_nodal_bcs_dofs[tag].size(),
+                                   _kokkos_nodal_bcs_dofs[tag].data(),
+                                   0,
+                                   PETSC_NULLPTR,
+                                   PETSC_NULLPTR));
+    }
+  }
+
+  systems.copyToDevice();
+
+  {
+    TIME_SECTION("KokkosKernel", 1);
+
+    // Compute kernels
+
+    for (auto & nbc : _kokkos_nodal_bcs.getActiveObjects())
+      nbc->computeResidualAndJacobian();
+  }
+
+  // Close and restore vectors
+
+  {
+    TIME_SECTION("KokkosClose", 1);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  }
+
+  // Clear
+
+  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveMatrixTags();
+
+  for (auto & system : systems)
+    system.clearActiveSolutionTags();
 }

@@ -284,7 +284,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   {
     auto tag = _matrix_tags[t];
 
-    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+    if (sys.isMatrixTagActive(tag))
       ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke);
   }
 }
@@ -302,11 +302,10 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
   {
     auto tag = _matrix_tags[t];
 
-    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+    if (sys.isMatrixTagActive(tag))
       for (unsigned int j = 0; j < local_ke.size(); ++j)
       {
         auto col = local_ke.raw_index(j);
-
         ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke.raw_at(j));
       }
   }
@@ -337,10 +336,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
       if (add)
         matrix(row, col) += local_ke;
       else
-      {
-        matrix.zero(row);
         matrix(row, col) = local_ke;
-      }
     }
   }
 }
@@ -360,10 +356,6 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
     auto & matrix = sys.getMatrix(tag);
 
     if (sys.isMatrixTagActive(tag))
-    {
-      if (!add)
-        matrix.zero(row);
-
       for (unsigned int j = 0; j < local_ke.size(); ++j)
       {
         auto col = local_ke.raw_index(j);
@@ -373,7 +365,6 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
         else
           matrix(row, col) = local_ke.raw_at(j);
       }
-    }
   }
 }
 
