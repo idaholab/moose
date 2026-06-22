@@ -15,4 +15,9 @@
     expect_err = "The variable 'T' does not have DOFs on subchannel nodes"
     requirement = 'The system shall report an error when a variable is transferred with the wrong subchannel transfer type'
   []
+  [legacy_pin_transfer]
+    type = RunApp
+    input = 'legacy_pin_transfer.i'
+    requirement = 'The system shall preserve pin-transfer behavior when using the deprecated pin solution transfer name'
+  []
 []

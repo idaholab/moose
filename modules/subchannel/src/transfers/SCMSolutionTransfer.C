@@ -13,6 +13,16 @@
 #include "DisplacedProblem.h"
 #include "SubChannelMesh.h"
 
+namespace
+{
+bool
+isDeprecatedPinTransferType(const InputParameters & parameters)
+{
+  const auto & type = parameters.getObjectType();
+  return type == "SCMPinSolutionTransfer" || type == "PinSolutionTransfer";
+}
+}
+
 registerMooseObject("SubChannelApp", SCMSolutionTransfer);
 registerMooseObjectRenamed("SubChannelApp",
                            SolutionTransfer,
@@ -45,7 +55,9 @@ SCMSolutionTransfer::validParams()
 SCMSolutionTransfer::SCMSolutionTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _var_names(getParam<std::vector<AuxVariableName>>("variable")),
-    _pin_transfer(getParam<MooseEnum>("transfer_type") == "pin")
+    _pin_transfer(getParam<MooseEnum>("transfer_type") == "pin" ||
+                  (!parameters.isParamSetByUser("transfer_type") &&
+                   isDeprecatedPinTransferType(parameters)))
 {
   if (_directions.contains(Transfer::FROM_MULTIAPP))
     paramError("from_multiapp", "This transfer works only into multi-app.");
