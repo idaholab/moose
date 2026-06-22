@@ -132,7 +132,12 @@ class Loader(yaml.Loader):
         items = self.construct_scalar(node).split()
         try:
             obj = IncludeYamlFile(
-                items, self._root, self._filename, node.line, self._include, optional=True
+                items,
+                self._root,
+                self._filename,
+                node.line,
+                self._include,
+                optional=True,
             )
         except IOError:
             LOG.warning(
