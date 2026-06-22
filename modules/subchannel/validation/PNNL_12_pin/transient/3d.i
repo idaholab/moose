@@ -1,6 +1,6 @@
 [Mesh]
-  [subchannel]
-    type = SCMDetailedQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMDetailedQuadAssemblyMeshGenerator
     nx = 7
     ny = 3
     n_cells = 48
@@ -33,6 +33,7 @@
   [w_perim]
   []
   [q_prime]
+    block = fuel_pins
   []
 []
 

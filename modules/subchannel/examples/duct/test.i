@@ -2,8 +2,8 @@ T_in = 660
 mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 4
     n_cells = 100
     flat_to_flat = 0.085
@@ -18,7 +18,7 @@ P_out = 2.0e5 # Pa
 
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = sub_channel
+    input = subchannel
     nrings = 4
     n_cells = 100
     flat_to_flat = 0.085

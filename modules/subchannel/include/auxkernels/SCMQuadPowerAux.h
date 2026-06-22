@@ -34,7 +34,7 @@ protected:
   unsigned int _numberoflines;
   /// The name of the radial power profile file
   std::string _filename;
-  /// matrix that holds the values of the relative pin power
+  /// Matrix that holds the relative pin power
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
   /// Average linear heat rate over the whole pin [W/m]

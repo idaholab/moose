@@ -293,4 +293,6 @@ public:
                             Real unheated_length_exit,
                             unsigned int n_cells,
                             std::vector<Real> & z_grid);
+
+  friend class SCMQuadAssemblyMeshGenerator;
 };

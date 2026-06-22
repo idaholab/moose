@@ -11,8 +11,8 @@ vol_flow = 4.67E-05 #low flow case
 mass_flux_in = '${fparse rho *  vol_flow / flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 40
     flat_to_flat = 3.41e-2
@@ -49,6 +49,7 @@ P_out = 2.0e5 # Pa
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
+  pin_HTC_closure = 'Dittus-Boelter'
   # friction model
   friction_closure = 'cheng'
   full_output = true
@@ -63,6 +64,9 @@ P_out = 2.0e5 # Pa
     type = SCMMixingChengTodreas
     CT = 2.6
   []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [ICs]
@@ -73,6 +77,12 @@ P_out = 2.0e5 # Pa
     variable = q_prime
     power = 4966 #W
     filename = "pin_power_profile19.txt"
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 5.84e-3
   []
 
   [T_ic]
@@ -223,6 +233,7 @@ P_out = 2.0e5 # Pa
   [Total_power]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
+    block = fuel_pins
   []
 []
 
@@ -239,9 +250,15 @@ P_out = 2.0e5 # Pa
 []
 
 [Transfers]
-  [xfer]
+  [subchannel_transfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [pin_transfer]
+    type = SCMSolutionTransfer
+    transfer_type = pin
+    to_multi_app = viz
+    variable = q_prime
   []
 []

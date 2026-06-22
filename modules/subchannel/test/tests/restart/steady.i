@@ -5,7 +5,7 @@ P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = 10
@@ -26,16 +26,16 @@ P_out = 4.923e6 # Pa
 
 [AuxVariables]
   [Dpin]
-    block = sub_channel
+    block = fuel_pins
   []
   [Tduct]
-    block = sub_channel
+    block = subchannel
   []
   [Tpin]
-    block = sub_channel
+    block = fuel_pins
   []
   [duct_heat_flux]
-    block = sub_channel
+    block = subchannel
   []
 []
 
@@ -50,6 +50,8 @@ P_out = 4.923e6 # Pa
   friction_closure = 'MATRA'
   full_output = true
   mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
+
 []
 
 [SCMClosures]
@@ -60,6 +62,9 @@ P_out = 4.923e6 # Pa
     type = SCMMixingConstantBeta
     beta = 0.006
     CT = 1.8
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
@@ -89,6 +94,12 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = DP
     value = 0.0
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.00950
   []
 
   [rho_ic]

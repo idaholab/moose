@@ -9,18 +9,32 @@
 
 #pragma once
 
-#include "SCMSolutionTransferBase.h"
+#include "MultiAppTransfer.h"
+
+class SubChannelMesh;
 
 /**
- * Transfers subchannel solution from computational mesh onto visualization mesh
+ * Transfers subchannel and pin solutions from a SubChannel mesh onto a visualization mesh
  */
-class SCMSolutionTransfer : public SCMSolutionTransferBase
+class SCMSolutionTransfer : public MultiAppTransfer
 {
 public:
   SCMSolutionTransfer(const InputParameters & parameters);
 
+  virtual void execute() override;
+  void initialSetup() override;
+
 protected:
-  Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) override;
+  void transferToMultiApps();
+  void transferVarsToApp(unsigned int app_idx);
+  void transferNodalVars(unsigned int app_idx);
+  Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node);
+
+  /// Variable names to transfer
+  const std::vector<AuxVariableName> & _var_names;
+
+  /// Whether pin fields should be transferred instead of subchannel fields
+  const bool _pin_transfer;
 
 public:
   static InputParameters validParams();

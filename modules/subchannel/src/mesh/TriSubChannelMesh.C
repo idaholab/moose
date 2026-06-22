@@ -33,6 +33,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _hwire(other_mesh._hwire),
     _duct_to_pin_gap(other_mesh._duct_to_pin_gap),
     _nodes(other_mesh._nodes),
+    _pin_nodes(other_mesh._pin_nodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _gap_to_pin_map(other_mesh._gap_to_pin_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
@@ -81,17 +82,15 @@ TriSubChannelMesh::channelIndex(const Point & p) const
   // subchannel
   Real distance_outer_ring = _flat_to_flat / 2 - _duct_to_pin_gap - _pin_diameter / 2;
   Real channel_distance = std::sqrt(std::pow(p(0), 2) + std::pow(p(1), 2));
-  Real angle = std::abs(std::atan(p(1) / p(0)));
+  Real angle = std::abs(std::atan2(p(1), p(0)));
   Real projection_angle =
       angle - libMesh::pi / 6 - std::trunc(angle / (libMesh::pi / 3)) * (libMesh::pi / 3);
   channel_distance = channel_distance * std::cos(projection_angle);
 
   // Projecting point on top edge to determine if the point is a corner or edge subchannel by x
   // coordinate
-  Real loc_angle = std::atan(p(1) / p(0));
-  if (p(0) <= 0)
-    loc_angle += libMesh::pi;
-  else if (p(0) >= 0 && p(1) <= 0)
+  Real loc_angle = std::atan2(p(1), p(0));
+  if (loc_angle < 0.0)
     loc_angle += 2 * libMesh::pi;
   Real rem_ang = std::trunc(loc_angle / (libMesh::pi / 3)) * (libMesh::pi / 3) - libMesh::pi / 3;
   Real x_coord_new = (std::cos(-rem_ang) * p(0) - std::sin(-rem_ang) * p(1));
@@ -100,46 +99,36 @@ TriSubChannelMesh::channelIndex(const Point & p) const
   // looping over all channels
   for (unsigned int i = 0; i < _n_channels; i++)
   {
+    // Distance from the point to subchannel
+    distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
+                          std::pow((p(1) - _subchannel_position[i][1]), 2.0));
 
-    if (_n_rings == 1)
+    // If subchannel belongs to center ring
+    if (channel_distance < distance_outer_ring)
     {
-      Real angle = std::atan(p(1) / p(0));
-      if ((i * libMesh::pi / 6.0 < angle) && (angle <= (i + 1) * libMesh::pi / 6.0))
-        return i;
-    }
+      if ((distance1 < distance0) && (_subch_type[i] == EChannelType::CENTER))
+      {
+        j = i;
+        distance0 = distance1;
+      } // if
+    } // if
+    // If subchannel belongs to outer ring
     else
     {
-      // Distance from the point to subchannel
-      distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
-                            std::pow((p(1) - _subchannel_position[i][1]), 2.0));
-
-      // If subchannel belongs to center ring
-      if (channel_distance < distance_outer_ring)
+      if ((distance1 < distance0) &&
+          (_subch_type[i] == EChannelType::EDGE || _subch_type[i] == EChannelType::CORNER))
       {
-        if ((distance1 < distance0) && (_subch_type[i] == EChannelType::CENTER))
+        if (((x_coord_new > x_lim) || (x_coord_new < -x_lim)) &&
+            _subch_type[i] == EChannelType::CORNER)
         {
           j = i;
           distance0 = distance1;
         } // if
-      } // if
-      // If subchannel belongs to outer ring
-      else
-      {
-        if ((distance1 < distance0) &&
-            (_subch_type[i] == EChannelType::EDGE || _subch_type[i] == EChannelType::CORNER))
+        else if ((x_coord_new <= x_lim && x_coord_new >= -x_lim) &&
+                 _subch_type[i] == EChannelType::EDGE)
         {
-          if (((x_coord_new > x_lim) || (x_coord_new < -x_lim)) &&
-              _subch_type[i] == EChannelType::CORNER)
-          {
-            j = i;
-            distance0 = distance1;
-          } // if
-          else if (((x_coord_new > x_lim) || (x_coord_new > -x_lim)) &&
-                   _subch_type[i] == EChannelType::EDGE)
-          {
-            j = i;
-            distance0 = distance1;
-          }
+          j = i;
+          distance0 = distance1;
         }
       }
     }
@@ -287,7 +276,7 @@ TriSubChannelMesh::pinPositions(std::vector<Point> & positions,
   Real theta_corrected = 0.0;
   Real pi = libMesh::pi;
   unsigned int k = 0;
-  positions.emplace_back(0.0, 0.0);
+  positions.emplace_back(center(0), center(1));
   for (unsigned int i = 1; i < nrings; i++)
   {
     dtheta = 2.0 * pi / (i * 6);

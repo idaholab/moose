@@ -17,6 +17,7 @@ Familiarize yourself with the theory behind SCM, some important user notes and h
 - [Running SCM input file](general/using_SubChannel.md)
 - [SCM AuxVariables](general/SCMAuxVariables.md)
 - [User Notes](general/user_notes.md)
+- [Mesh Generator Migration](general/mesh_generator_migration.md)
 - [Publication List](general/publication_list.md)
 !col-end!
 

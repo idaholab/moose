@@ -6,7 +6,9 @@
 
 !! Intentional comment to provide extra spacing
 
-This class is used to transfer the subchannel associated variables to the visualization mesh.
+This class transfers either subchannel-associated or pin-associated variables to the visualization
+mesh. Use `transfer_type = subchannel` for channel-centered fields and `transfer_type = pin` for
+pin-centered fields.
 
 !syntax parameters /Transfers/SCMSolutionTransfer
 

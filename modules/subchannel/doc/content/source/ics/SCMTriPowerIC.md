@@ -6,7 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This IC assigns the axial heat rate ([!param](/ICs/SCMTriPowerIC/variable) = `q_prime`) on the subchannels or pins in the case of a problem with subchannels/pins in a triangular lattice arrangement.
+This IC assigns the axial heat rate ([!param](/ICs/SCMTriPowerIC/variable) = `q_prime`) to the fuel pins in a triangular lattice arrangement.
 
 The user must provide the total power of the subassembly [!param](/ICs/SCMTriPowerIC/power), the axial shape of the power profile and the radial
 power distribution (power per pin). The axial power profile is given as a function, which integral over the length of the heated portion of the pin, is equal
@@ -26,8 +26,7 @@ The axial heat rate at a specific height is the product of the total power of th
 
 !! Intentional comment to provide extra spacing
 
-If the user has created a mesh for the pins, the axial hear rate will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropiate heat rate will be assigned to
-the nodes of the subchannel mesh. When the user has defined a fuel-pin mesh, the axial heat rate ([!param](/ICs/SCMTriPowerIC/variable) = `q_prime`) is the heat rate at the surface of the fuels pins and it is distributed equally to each neighboring subchannel.
+This IC requires a pin mesh. The axial heat rate ([!param](/ICs/SCMTriPowerIC/variable) = `q_prime`) is assigned only to the nodes of the pin mesh. If the subchannel mesh has no pin mesh, this object reports an error. The subchannel solver distributes this pin heat to neighboring subchannels when computing the heat added to the coolant.
 
 !syntax parameters /ICs/SCMTriPowerIC
 

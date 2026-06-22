@@ -4,8 +4,8 @@ flow_area = 0.0004980799633447909
 mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [assembly]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 5
     flat_to_flat = 3.41e-2
@@ -14,14 +14,6 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
-  []
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = 3
-    n_cells = 5
-    heated_length = 0.5
-    pitch = 7.26e-3
   []
 []
 

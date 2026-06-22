@@ -20,8 +20,8 @@ InputParameters
 SCMQuadPowerIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
-  params.addClassDescription("Computes axial heat rate (W/m) that goes into the subchannel cells "
-                             "or is assigned to the fuel pins, in a square lattice arrangement");
+  params.addClassDescription("Computes axial heat rate (W/m) assigned to the fuel pins in a square "
+                             "lattice arrangement");
   // params.addRequiredParam<Real>("power", "The total power of the subassembly [W]");
   params.addRequiredParam<PostprocessorName>(
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
@@ -45,13 +45,15 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
   if (processor_id() > 0)
     return;
 
-  auto nx = _mesh.getNx();
-  auto ny = _mesh.getNy();
+  if (!_mesh.pinMeshExist())
+    mooseError(name(), ": This object requires a pin mesh.");
+
+  auto n_pins = _mesh.getNumOfPins();
   auto heated_length = _mesh.getHeatedLength();
 
-  _power_dis.resize((ny - 1) * (nx - 1), 1);
+  _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
-  _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
+  _pin_power_correction.resize(n_pins, 1);
   _pin_power_correction.setOnes();
 
   Real vin;
@@ -67,8 +69,8 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
   if (inFile.fail() && !inFile.eof())
     mooseError(name(), " non numerical input at line : ", _numberoflines);
 
-  if (_numberoflines != (ny - 1) * (nx - 1))
-    mooseError(name(), " Radial profile file doesn't have correct size : ", (ny - 1) * (nx - 1));
+  if (_numberoflines != n_pins)
+    mooseError(name(), " Radial profile file doesn't have correct size : ", n_pins);
   inFile.close();
 
   inFile.open(_filename);
@@ -95,9 +97,7 @@ SCMQuadPowerIC::initialSetup()
 {
   if (processor_id() > 0)
     return;
-  auto nx = _mesh.getNx();
-  auto ny = _mesh.getNy();
-  auto n_pins = (nx - 1) * (ny - 1);
+  auto n_pins = _mesh.getNumOfPins();
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto heated_length = _mesh.getHeatedLength();
@@ -168,31 +168,13 @@ SCMQuadPowerIC::value(const Point & p)
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
   Point P = p - p1;
-  auto pin_mesh_exist = _mesh.pinMeshExist();
 
   /// assign power to the nodes located within the heated section
   if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
       MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    if (pin_mesh_exist)
-    {
-      // project axial heat rate on pins
-      auto i_pin = _mesh.getPinIndexFromPoint(p);
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    }
-    else
-    {
-      // project axial heat rate on subchannels
-      auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
-      // if we are adjacent to the heated part of the fuel Pin
-      auto heat_rate = 0.0;
-      for (auto i_pin : _mesh.getChannelPins(i_ch))
-      {
-        heat_rate += 0.25 * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                     _axial_heat_rate.value(_t, P);
-      }
-      return heat_rate;
-    }
+    auto i_pin = _mesh.getPinIndexFromPoint(p);
+    return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
   }
   else
     return 0.0;

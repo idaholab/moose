@@ -1,6 +1,6 @@
 [QuadSubChannelMesh]
-  [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+  [subchannel]
+    type = SCMQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 3
@@ -41,6 +41,23 @@
   []
 []
 
+[Postprocessors]
+  [blocked_inlet]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 0
+    height = 0.0
+    execute_on = 'timestep_end'
+  []
+  [central_inlet]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 14
+    height = 0.0
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Problem]
   solve = false
 []
@@ -50,5 +67,5 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
