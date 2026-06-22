@@ -22,24 +22,34 @@ n_cells = 20
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [mu]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [w_perim]
+    block = subchannel
   []
   [q_prime]
     block = fuel_pins
