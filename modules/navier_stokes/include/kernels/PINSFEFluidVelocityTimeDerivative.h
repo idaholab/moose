@@ -25,14 +25,19 @@ public:
   PINSFEFluidVelocityTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   bool _conservative_form;
   const VariableValue & _pressure;
   const VariableValue & _temperature;
   const VariableValue & _temperature_dot;
   const VariableValue & _pressure_dot;
+  const VariableValue & _d_pressure_dot_du;
+  const VariableValue & _d_temperature_dot_du;
+  unsigned int _pressure_var_number;
+  unsigned int _temperature_var_number;
   const MaterialProperty<Real> & _rho;
   const SinglePhaseFluidProperties & _eos;
 };

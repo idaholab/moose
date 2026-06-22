@@ -27,10 +27,13 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   bool _conservative_form;
   const VariableValue & _pressure;
   const VariableValue & _pressure_dot;
+  const VariableValue & _d_pressure_dot_du;
+  unsigned int _pressure_var_number;
   const VariableValue & _porosity;
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _cp;
