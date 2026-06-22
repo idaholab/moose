@@ -16,6 +16,8 @@
 
 namespace Moose::MFEM
 {
+class EigensolverBase;
+
 /// Steady-state eigenproblem operator with an equation system.
 class EigenproblemESProblemOperator : public EquationSystemProblemOperator
 {
@@ -34,11 +36,8 @@ public:
         EquationSystemProblemOperator::GetEquationSystem());
   }
 
-  mfem::OperatorHandle _mass_rhs;
-
 private:
-  void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                   MFEMEigensolverBase * eigensolver);
+  void RecoverEigenproblemSolution(GridFunctions & gridfunctions, EigensolverBase * eigensolver);
 
 protected:
   /// Add kernels/bcs and assemble the linear part of the equation system

@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHyprePCG);
 InputParameters
 MFEMHyprePCG::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the preconditioned conjugate gradient method.");
 
@@ -30,37 +30,39 @@ MFEMHyprePCG::validParams()
   return params;
 }
 
-MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHyprePCG::constructSolver()
+MFEMHyprePCG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*solver);
+  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHyprePCG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
-    setPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
+    _preconditioner->SetupLOR(a, tdofs);
+    SetPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
   }
   else if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, getMFEMProblem().getComm());
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));

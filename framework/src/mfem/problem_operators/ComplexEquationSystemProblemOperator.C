@@ -54,14 +54,10 @@ ComplexEquationSystemProblemOperator::Solve()
 {
   BuildEquationSystemOperator();
 
-  if (_problem_data.jacobian_solver->isLOR())
-    mooseError("LOR solve is not supported for complex equation systems.");
+  auto * const es = GetEquationSystem();
+  SolveWithOperator(*es, _true_rhs, _true_x);
 
-  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
-  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
-
-  GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
+  es->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
 } // namespace Moose::MFEM

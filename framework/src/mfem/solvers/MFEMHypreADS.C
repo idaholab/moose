@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreADS);
 InputParameters
 MFEMHypreADS::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space divergence solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMFESpaceName>("fespace", "H(div) FESpace to use in HypreADS setup.");
@@ -27,28 +27,29 @@ MFEMHypreADS::validParams()
 }
 
 MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
+  : Moose::MFEM::LinearSolverBase(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreADS::constructSolver()
+MFEMHypreADS::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetPrintLevel(getParam<int>("print_level"));
 
   _solver = std::move(solver);
 }
 
 void
-MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreADS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");

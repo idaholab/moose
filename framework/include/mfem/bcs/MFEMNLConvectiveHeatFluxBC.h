@@ -23,15 +23,22 @@ class MFEMNLConvectiveHeatFluxBC : public MFEMIntegratedBC
 public:
   static InputParameters validParams();
 
+  /// Construct the nonlinear convective heat flux boundary condition.
   MFEMNLConvectiveHeatFluxBC(const InputParameters & parameters);
 
   /// Create MFEM non-linear integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() override;
 
 protected:
+  /// Heat transfer coefficient h(T).
   mfem::Coefficient & _heat_transfer_coef;
+  /// Derivative dh/dT of the heat transfer coefficient.
   mfem::Coefficient & _d_heat_transfer_dT_coef;
+  /// Far-field temperature T_inf(T).
   mfem::Coefficient & _T_inf_coef;
+  /// Derivative dT_inf/dT of the far-field temperature coefficient.
+  mfem::Coefficient & _d_T_inf_dT_coef;
+  /// Trial variable temperature T.
   mfem::Coefficient & _T_coef;
 };
 

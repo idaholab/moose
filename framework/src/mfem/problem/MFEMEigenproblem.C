@@ -43,9 +43,10 @@ MFEMEigenproblem::addMFEMSolver(const std::string & type,
                                 const std::string & name,
                                 InputParameters & parameters)
 {
-  getProblemData().jacobian_solver = addObject<MFEMSolverBase>(type, name, parameters).front();
+  getProblemData().jacobian_solver =
+      addObject<Moose::MFEM::LinearSolverBase>(type, name, parameters).front();
 
-  if (!std::dynamic_pointer_cast<MFEMEigensolverBase>(getProblemData().jacobian_solver))
+  if (!std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(getProblemData().jacobian_solver))
     mooseError("The selected solver '" + name +
                "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }

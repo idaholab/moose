@@ -69,7 +69,7 @@ public:
    * Based on mfem/tests/unit/linalg/test_direct_solvers.cpp.
    */
   template <typename SolverType>
-  void testDiffusionSolve(MFEMSolverBase & solver, mfem::real_t tol)
+  void testDiffusionSolve(Moose::MFEM::LinearSolverBase & solver, mfem::real_t tol)
   {
     mfem::ParMesh pmesh = makeMesh();
     int order = 3;
@@ -102,8 +102,8 @@ public:
     mfem::Vector B, X;
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-    solver.updateSolver(a, ess_tdof_list);
-    auto solver_ptr = dynamic_cast<SolverType *>(&solver.getSolver());
+    solver.SetupLOR(a, ess_tdof_list);
+    auto solver_ptr = dynamic_cast<SolverType *>(&solver.GetSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
     solver_ptr->SetOperator(*A);
@@ -208,7 +208,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
       addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
-  auto solver_downcast = dynamic_cast<mfem::HypreBoomerAMG *>(&solver.getSolver());
+  auto solver_downcast = dynamic_cast<mfem::HypreBoomerAMG *>(&solver.GetSolver());
   // HypreBoomerAMG warnings are tripped by zero rows in matrices; turn this off for this test
   solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
   ASSERT_NE(solver_downcast, nullptr);
@@ -237,7 +237,7 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
   MFEMHypreADS & solver = addObject<MFEMHypreADS>("MFEMHypreADS", "solver1", solver_params);
 
   // Test MFEMSolver returns a solver of the expected type
-  auto solver_downcast = dynamic_cast<mfem::HypreADS *>(&solver.getSolver());
+  auto solver_downcast = dynamic_cast<mfem::HypreADS *>(&solver.GetSolver());
   ASSERT_NE(solver_downcast, nullptr);
 }
 
@@ -263,7 +263,7 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
   MFEMHypreAMS & solver = addObject<MFEMHypreAMS>("MFEMHypreAMS", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
-  auto solver_downcast = dynamic_cast<mfem::HypreAMS *>(&solver.getSolver());
+  auto solver_downcast = dynamic_cast<mfem::HypreAMS *>(&solver.GetSolver());
   ASSERT_NE(solver_downcast, nullptr);
 }
 
@@ -398,9 +398,9 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::Vector B, X;
   a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-  solver.updateSolver(a, ess_tdof_list);
+  solver.SetupLOR(a, ess_tdof_list);
 
-  auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.getSolver());
+  auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.GetSolver());
   // Test MFEMKernel returns an integrator of the expected type
   ASSERT_TRUE(solver_ptr != nullptr);
 }

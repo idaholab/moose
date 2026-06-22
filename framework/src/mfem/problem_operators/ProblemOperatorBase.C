@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperatorBase.h"
+#include "EquationSystem.h"
 
 class MFEMProblem;
 
@@ -73,6 +74,52 @@ ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
     trial_var->SetFromTrueVector();
   }
 }
+
+void
+ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
+                                       const mfem::Vector & rhs,
+                                       mfem::Vector & x)
+{
+  const bool nonlinear = equation_system.Nonlinear();
+
+  // `nonlinear` describes the assembled MFEM operator, not whether the user configured a
+  // nonlinear solver object. A linear problem may still intentionally be solved through the
+  // nonlinear solver machinery when one is provided.
+  if (nonlinear || _problem_data.nonlinear_solver)
+  {
+    if (nonlinear && !_problem_data.nonlinear_solver)
+      mooseError("A nonlinear MFEM solve requires a nonlinear solver, but none was provided.");
+
+    auto & nonlinear_solver = *_problem_data.nonlinear_solver;
+    if (nonlinear_solver.RequiresExternalLinearSolver())
+    {
+      if (!_problem_data.jacobian_solver)
+        mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
+                   "none was provided.");
+      auto & linear_solver = *_problem_data.jacobian_solver;
+      equation_system.PrepareLinearSolver(linear_solver);
+      nonlinear_solver.SetLinearSolver(linear_solver.GetSolver());
+    }
+
+    nonlinear_solver.SetOperator(equation_system);
+    nonlinear_solver.Mult(rhs, x);
+    return;
+  }
+  else
+  {
+    //
+    // pure linear path
+    //
+
+    if (!_problem_data.jacobian_solver)
+      mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
+
+    auto & linear_solver = *_problem_data.jacobian_solver;
+    equation_system.PrepareLinearSolver(linear_solver);
+    linear_solver.GetSolver().Mult(rhs, x);
+  }
 }
+
+} // namespace Moose::MFEM
 
 #endif

@@ -17,19 +17,21 @@ registerMooseObject("MooseApp", MFEMHypreAME);
 InputParameters
 MFEMHypreAME::validParams()
 {
-  InputParameters params = MFEMEigensolverBase::validParams();
-  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
+  InputParameters params = Moose::MFEM::EigensolverBase::validParams();
+  params.addClassDescription("Hypre auxiliary-space Maxwell eigensolver to compute the lowest "
+                             "eigenmodes of a generalized eigenvalue problem.");
 
   return params;
 }
 
-MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters) : MFEMEigensolverBase(parameters)
+MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
+  : Moose::MFEM::EigensolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreAME::constructSolver()
+MFEMHypreAME::ConstructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreAME>(getMFEMProblem().getComm());
 
@@ -37,7 +39,7 @@ MFEMHypreAME::constructSolver()
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*_eigensolver);
+  SetPreconditioner(*_eigensolver);
 }
 
 #endif

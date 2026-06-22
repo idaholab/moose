@@ -17,26 +17,28 @@ registerMooseObject("MooseApp", MFEMSuperLU);
 InputParameters
 MFEMSuperLU::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
   return params;
 }
 
-MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMSuperLU::constructSolver()
+MFEMSuperLU::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   _solver = std::move(solver);
 }
 
 void
-MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMSuperLU::SetupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("SuperLU solver does not support LOR solve");

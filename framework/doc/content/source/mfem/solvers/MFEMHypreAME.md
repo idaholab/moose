@@ -20,13 +20,13 @@ conjunction with Low-Order-Refined (LOR) preconditioning.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/maxwell_eigenproblem.i block=Preconditioner Solver
+!listing test/tests/mfem/kernels/maxwell_eigenproblem.i block=Preconditioner Solvers
 
-!syntax parameters /Solver/MFEMHypreAME
+!syntax parameters /Solvers/MFEMHypreAME
 
-!syntax inputs /Solver/MFEMHypreAME
+!syntax inputs /Solvers/MFEMHypreAME
 
-!syntax children /Solver/MFEMHypreAME
+!syntax children /Solvers/MFEMHypreAME
 
 !if-end!
 

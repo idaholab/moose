@@ -7,10 +7,10 @@
 []
 
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/sub_cycling_parent
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = TIMESTEP_END
+    file_base = sub_cycling_parent
   []
 []
 
@@ -21,6 +21,6 @@
     input_files = sub_cycling.i
     sub_cycling = true
     # num_steps will be constrained by sub-cycling
-    cli_args = 'Executioner/dt=0.01;Outputs/ParaViewDataCollection/file_base=OutputData/sub_cycling_sub;MultiApps/active='
+    cli_args = 'Executioner/dt=0.01;Outputs/CSV/file_base=sub_cycling_sub;MultiApps/active='
   []
 []

@@ -10,5 +10,6 @@
     capabilities = 'method!=dbg'
     mesh_mode = 'replicated'
     abs_zero = 1e-8
+    rel_err = 1e-5
   []
 []

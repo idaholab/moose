@@ -109,10 +109,12 @@
   []
 []
 
-[Solver]
-  type = MFEMHyprePCG
-  preconditioner = boomeramg
-  l_tol = 1e-8
+[Solvers]
+  [PCG]
+    type = MFEMHyprePCG
+    preconditioner = boomeramg
+    l_tol = 1e-8
+  []
 []
 
 [VectorPostprocessors]

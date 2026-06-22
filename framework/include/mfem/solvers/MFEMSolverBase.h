@@ -13,68 +13,35 @@
 
 #include "MFEMObject.h"
 
-class MFEMProblemSolve;
-
+namespace Moose::MFEM
+{
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */
-class MFEMSolverBase : public MFEMObject
+class SolverBase : public MFEMObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMSolverBase(const InputParameters & parameters);
-
-  /// Retrieves the preconditioner userobject if present, sets the member pointer to
-  /// said object if still unset, and sets the solver to use this preconditioner.
-  template <typename T>
-  void setPreconditioner(T & solver);
+  SolverBase(const InputParameters & parameters);
 
   /// Returns the wrapped MFEM solver
-  mfem::Solver & getSolver();
+  mfem::Solver & GetSolver();
 
-  /// Returns this solver's preconditioner
-  MFEMSolverBase * getPreconditioner() { return _preconditioner.get(); };
-
-  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
-
-  /// Sets an already-assembled operator on the wrapped solver. Used by callers that
-  /// manage operator assembly themselves (e.g. the eigenproblem operator), bypassing
-  /// the bilinear-form-based updateSolver() path.
-  virtual void setOperator(mfem::OperatorHandle & op);
-
-  /// Returns whether or not this solver (or its preconditioner) uses LOR
-  bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
-
-  /// For eigensolvers, this method calls the underlying Solve method
-  virtual void solve() { mooseError("'solve' method not used in this solver type."); }
+  /// Override in derived classes to construct and set the solver options.
+  virtual void ConstructSolver() = 0;
 
 protected:
-  /// Override in derived classes to construct and set the solver options.
-  virtual void constructSolver() = 0;
-
-  /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
-  virtual void checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
-
-  /// Variable defining whether to use LOR solver
-  bool _lor;
-
   /// Solver to be used for the problem
   std::unique_ptr<mfem::Solver> _solver;
-
-  /// Preconditioner to be used for the problem
-  std::shared_ptr<MFEMSolverBase> _preconditioner;
-
-private:
-  friend class MFEMProblemSolve;
 };
 
 inline mfem::Solver &
-MFEMSolverBase::getSolver()
+SolverBase::GetSolver()
 {
   mooseAssert(_solver, "Attempting to retrieve solver before it's been constructed");
   return *_solver;
 }
+} // namespace Moose::MFEM
 
 #endif

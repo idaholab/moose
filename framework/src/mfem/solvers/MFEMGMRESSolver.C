@@ -17,10 +17,10 @@ registerMooseObject("MooseApp", MFEMGMRESSolver);
 InputParameters
 MFEMGMRESSolver::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the generalized minimal residual method.");
-
+  params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
@@ -30,37 +30,39 @@ MFEMGMRESSolver::validParams()
   return params;
 }
 
-MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMGMRESSolver::constructSolver()
+MFEMGMRESSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*solver);
+  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMGMRESSolver::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
-    setPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
+    _preconditioner->SetupLOR(a, tdofs);
+    SetPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs);
     lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));

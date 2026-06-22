@@ -57,11 +57,13 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 1000
+[Solvers]
+  [gmres]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-8
+    l_max_its = 1000
+  []
 []
 
 [Executioner]

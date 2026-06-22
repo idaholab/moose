@@ -19,7 +19,7 @@ The above terms arises from the weak form of the non-linear operator
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/nldiffusion.i block=/Kernels
+!listing mfem/nonlinear/nldiffusion_common.i block=/Kernels
 
 !syntax parameters /Kernels/MFEMNLDiffusionKernel
 

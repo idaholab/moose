@@ -17,22 +17,23 @@ registerMooseObject("MooseApp", MFEMHypreLOBPCG);
 InputParameters
 MFEMHypreLOBPCG::validParams()
 {
-  InputParameters params = MFEMEigensolverBase::validParams();
+  InputParameters params = Moose::MFEM::EigensolverBase::validParams();
 
-  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
+  params.addClassDescription("Locally Optimal Block PCG eigensolver to iteratively compute the "
+                             "lowest eigenmodes of a generalized eigenvalue problem.");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
 
   return params;
 }
 
 MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
-  : MFEMEigensolverBase(parameters)
+  : Moose::MFEM::EigensolverBase(parameters)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 void
-MFEMHypreLOBPCG::constructSolver()
+MFEMHypreLOBPCG::ConstructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
 
@@ -42,7 +43,7 @@ MFEMHypreLOBPCG::constructSolver()
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(*_eigensolver);
+  SetPreconditioner(*_eigensolver);
 }
 
 #endif

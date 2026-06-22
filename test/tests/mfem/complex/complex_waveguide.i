@@ -123,8 +123,10 @@ elec_cond_air = 1e-323
   []
 []
 
-[Solver]
-  type = MFEMMUMPS
+[Solvers]
+  [main]
+    type = MFEMMUMPS
+  []
 []
 
 [Executioner]

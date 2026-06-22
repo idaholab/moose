@@ -76,10 +76,12 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-12
+[Solvers]
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-12
+  []
 []
 
 [Executioner]
