@@ -63,6 +63,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
+  /// Switch to enable/disable projected center-to-center distance in the orthogonal term
+  const bool _use_nonorthogonal_projected_distance;
+
   /// Switch to enable/disable nonorthogonal correction on boundary, this is mostly used
   /// to disable boundary contributions to the right hand side.
   const bool _use_nonorthogonal_correction_on_boundary;

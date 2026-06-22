@@ -308,7 +308,8 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
                                                   NonlinearSystemBase & system,
                                                   const Real relaxation_factor,
                                                   libMesh::SolverConfiguration & solver_config,
-                                                  const Real absolute_tol)
+                                                  const Real absolute_tol,
+                                                  const Real field_relaxation)
 {
   _problem.setCurrentNonlinearSystem(system_num);
 
@@ -361,6 +362,13 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   // Solve the system and update current local solution
   auto its_res_pair = linear_solver.solve(mmat, mmat, solution, rhs);
   ni_system.update();
+
+  if (field_relaxation != 1.0)
+  {
+    auto & old_local_solution = *system.solutionPreviousNewton();
+    NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
+    old_local_solution = current_local_solution;
+  }
 
   if (_print_fields)
   {
@@ -421,6 +429,14 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
   auto its_res_pair = se_solver.solve(mat, mat, solution, rhs);
   se_system.update();
 
+  if (_solid_energy_field_relaxation != 1.0)
+  {
+    auto & old_local_solution = *_solid_energy_system->solutionPreviousNewton();
+    NS::FV::relaxSolutionUpdate(
+        current_local_solution, old_local_solution, _solid_energy_field_relaxation);
+    old_local_solution = current_local_solution;
+  }
+
   if (_print_fields)
   {
     _console << " Solid energy rhs " << std::endl;
@@ -452,7 +468,7 @@ SIMPLESolveNonlinearAssembly::solve()
   if (_has_turbulence_systems)
     no_systems += _turbulence_systems.size();
   std::vector<std::pair<unsigned int, Real>> ns_its_residuals(no_systems, std::make_pair(0, 1.0));
-  std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
+  std::vector<Real> ns_abs_tols(_momentum_absolute_tolerance);
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
   if (_has_energy_system)
   {
@@ -553,7 +569,8 @@ SIMPLESolveNonlinearAssembly::solve()
                                                              *_energy_system,
                                                              _energy_equation_relaxation,
                                                              _energy_linear_control,
-                                                             _energy_l_abs_tol);
+                                                             _energy_l_abs_tol,
+                                                             _energy_field_relaxation);
 
       if (_has_solid_energy_system)
       {
