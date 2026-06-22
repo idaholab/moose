@@ -11,6 +11,7 @@
 
 #include "MFEMMesh.h"
 #include "libmesh/mesh_generation.h"
+#include "MFEMPeriodicBCs.h"
 
 registerMooseObject("MooseApp", MFEMMesh);
 
@@ -37,6 +38,14 @@ MFEMMesh::validParams()
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
+  params.addParam<bool>(
+      "periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
+  params.addParam<std::vector<Real>>("translation_x",
+                                     "Vector specifying translation in x direction.");
+  params.addParam<std::vector<Real>>("translation_y",
+                                     "Vector specifying translation in y direction.");
+  params.addParam<std::vector<Real>>("translation_z",
+                                     "Vector specifying translation in z direction.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -57,6 +66,11 @@ MFEMMesh::buildMesh()
 
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
+
+  if (_periodic)
+  {
+    mfem_ser_mesh = applyPeriodicBoundaryByTranslation(mfem_ser_mesh);
+  }
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError(
@@ -93,6 +107,24 @@ MFEMMesh::buildMesh()
 
   if (isParamSetByUser("displacement"))
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+}
+
+void
+MFEMMesh::registerPeriodicBCs(MFEMPeriodicByVector & bc)
+{
+  _periodic = true;
+  _translations = bc.GetPeriodicBCs();
+}
+
+mfem::Mesh
+MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh & input)
+{
+  mooseAssert(((int)_translations.size() == input.SpaceDimension()),
+              "Number of translation vectors doesn't match the space dimension");
+  mooseAssert((input.SpaceDimension() == _translations[0].Size()),
+              "Size of translation vector doesn't match the space dimension");
+
+  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(_translations));
 }
 
 void
