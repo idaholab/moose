@@ -8,4 +8,11 @@
     recover = false
     requirement = 'The system shall be able to transfer the subchannel or pin solution onto a detailed mesh'
   []
+  [wrong_transfer_type]
+    type = RunException
+    input = 'quad.i'
+    cli_args = "Transfers/T_transfer/transfer_type=subchannel Outputs/file_base=wrong_transfer_type"
+    expect_err = "The variable 'T' does not have DOFs on subchannel nodes"
+    requirement = 'The system shall report an error when a variable is transferred with the wrong subchannel transfer type'
+  []
 []
