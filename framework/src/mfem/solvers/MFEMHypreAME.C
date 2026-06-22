@@ -18,7 +18,8 @@ InputParameters
 MFEMHypreAME::validParams()
 {
   InputParameters params = Moose::MFEM::EigensolverBase::validParams();
-  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
+  params.addClassDescription("Hypre auxiliary-space Maxwell eigensolver to compute the lowest "
+                             "eigenmodes of a generalized eigenvalue problem.");
 
   return params;
 }

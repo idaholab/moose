@@ -18,7 +18,7 @@ InputParameters
 EigensolverBase::validParams()
 {
   InputParameters params = LinearSolverBase::validParams();
-  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
+  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose");
 
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");

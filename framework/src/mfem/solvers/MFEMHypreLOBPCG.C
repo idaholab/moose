@@ -19,7 +19,8 @@ MFEMHypreLOBPCG::validParams()
 {
   InputParameters params = Moose::MFEM::EigensolverBase::validParams();
 
-  params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
+  params.addClassDescription("Locally Optimal Block PCG eigensolver to iteratively compute the "
+                             "lowest eigenmodes of a generalized eigenvalue problem.");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
 
   return params;
