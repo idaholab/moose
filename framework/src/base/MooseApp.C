@@ -95,6 +95,17 @@ using namespace libMesh;
 
 namespace
 {
+/**
+ * Return a temporary checkpoint path used to serialize mesh topology into an in-memory Backup.
+ *
+ * @param app App whose communicator and processor id determine temporary path ownership
+ * @param purpose Short label included in the directory name, e.g. "backup" or "restore"
+ * @param shared Whether all ranks in the app communicator should use one shared checkpoint
+ *               directory. Backup writes use a shared directory generated on rank 0 because
+ *               CheckpointIO writes one checkpoint directory collectively. Restore reads use
+ *               per-rank directories so each rank can materialize its in-memory file contents
+ *               independently.
+ */
 std::filesystem::path
 temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
 {
@@ -103,6 +114,8 @@ temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const
   std::string dirname;
   if (!shared || app.processor_id() == 0)
   {
+    // The process id avoids collisions between independent MOOSE processes using the same
+    // system temporary directory; processor_id() is only unique within this app communicator.
     dirname =
         "moose_" + purpose + "_mesh_" + std::to_string(getpid()) + "_" + std::to_string(counter++);
     if (!shared)
