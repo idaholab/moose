@@ -87,6 +87,14 @@
   device = cpu
 []
 
+[Postprocessors]
+  [solution_l2_norm]
+    type = MFEML2Error
+    variable = concentration
+    function = 0
+  []
+[]
+
 [Outputs]
   active = ParaViewDataCollection
   [ParaViewDataCollection]
