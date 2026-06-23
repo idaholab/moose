@@ -16,7 +16,9 @@ MFEMCoordinateCoefficients::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addParam<Real>(
-      "inv_r_eps", 1e-12, "Floor epsilon used in inv_r = sqrt(1/(r^2 + eps^2)) to avoid axis singularity.");
+      "inv_r_eps",
+      1e-12,
+      "Floor epsilon used in inv_r = sqrt(1/(r^2 + eps^2)) to avoid axis singularity.");
   return params;
 }
 
