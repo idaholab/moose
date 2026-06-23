@@ -37,12 +37,13 @@ INSPressureGradientDGKernel::INSPressureGradientDGKernel(const InputParameters &
 ADReal
 INSPressureGradientDGKernel::computeQpResidual(const Moose::DGResidualType type)
 {
+  const auto avg_pressure = 0.5 * (_pressure[_qp] + _pressure_neighbor[_qp]);
   switch (type)
   {
     case Moose::Element:
-      return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
+      return avg_pressure * _normals[_qp](_component) * _test[_i][_qp];
     case Moose::Neighbor:
-      return -_pressure_neighbor[_qp] * _normals[_qp](_component) * _test_neighbor[_i][_qp];
+      return -avg_pressure * _normals[_qp](_component) * _test_neighbor[_i][_qp];
     default:
       libmesh_assert(false);
       return 0;

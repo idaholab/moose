@@ -1,6 +1,7 @@
-mu = 1.1
-rho = 1.1
+mu = 1
+rho = 1
 vin = 1
+sigma = 10
 
 [Mesh]
   [gen]
@@ -19,11 +20,19 @@ vin = 1
 [Variables]
   [u]
     family = MONOMIAL
+    order = FIRST
   []
   [v]
     family = MONOMIAL
+    order = FIRST
   []
   [pressure]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [temperature]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
@@ -58,20 +67,25 @@ vin = 1
     velocity_material = velocity
     advected_quantity = -1
   []
+  [temperature_diffusion]
+    type = MatDiffusion
+    variable = temperature
+    diffusivity = 1
+  []
 []
 
 [DGKernels]
   [momentum_x_diffusion]
     type = DGDiffusion
     variable = u
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     diff = 'mu'
   []
   [momentum_y_diffusion]
     type = DGDiffusion
     variable = v
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     diff = 'mu'
   []
@@ -87,6 +101,18 @@ vin = 1
     pressure = pressure
     component = 1
   []
+  [temperature_diffusion]
+    type = DGDiffusion
+    epsilon = -1
+    sigma = ${sigma}
+    variable = temperature
+  []
+  [mass_convection]
+    type = ADDGAdvection
+    variable = pressure
+    velocity = 'velocity'
+    advected_quantity = '-1'
+  []
 []
 
 [Functions]
@@ -101,7 +127,7 @@ vin = 1
     type = DGFunctionDiffusionDirichletBC
     boundary = 'left'
     variable = u
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     function = '${vin}'
     diff = 'mu'
@@ -110,16 +136,24 @@ vin = 1
     type = DGFunctionDiffusionDirichletBC
     boundary = 'left'
     variable = v
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     function = '0'
     diff = 'mu'
+  []
+  [diffusion_temperature_in]
+    type = DGFunctionDiffusionDirichletBC
+    boundary = 'left'
+    function = '1'
+    epsilon = -1
+    sigma = ${sigma}
+    variable = temperature
   []
   [diffusion_momentum_x_walls]
     type = DGFunctionDiffusionDirichletBC
     boundary = 'bottom top'
     variable = u
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     function = '0'
     diff = 'mu'
@@ -128,7 +162,7 @@ vin = 1
     type = DGFunctionDiffusionDirichletBC
     boundary = 'bottom top'
     variable = v
-    sigma = 6
+    sigma = ${sigma}
     epsilon = -1
     function = '0'
     diff = 'mu'
@@ -149,7 +183,8 @@ vin = 1
   []
   [implicit_pressure_x_in_and_walls]
     type = INSPressureGradientBC
-    boundary = 'left top bottom'
+    # boundary = 'left top bottom'
+    boundary = 'left'
     component = 0
     pressure = pressure
     variable = u
@@ -217,5 +252,10 @@ vin = 1
     type = SideAverageValue
     boundary = 'right'
     variable = u
+  []
+  [side_average_temperature]
+    type = SideAverageValue
+    boundary = 'right'
+    variable = temperature
   []
 []
