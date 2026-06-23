@@ -52,4 +52,23 @@
     capabilities = 'neml2'
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
   []
+
+  [auto_output]
+    type = Exodiff
+    requirement = 'The system shall output a NEML2 model result as a MOOSE material property in the explicit-dynamics finite-element interpolation path, where outputs have a 2D batch shape.'
+    input = 'auto_output.i'
+    exodiff = 'auto_output_exodus.e'
+    capabilities = 'neml2'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+  [state_advance]
+    type = Exodiff
+    requirement = 'The system shall initialize uncached managed state history on the first step of a NEML2 explicit-dynamics simulation with manage_state_advance enabled.'
+    input = 'state_advance.i'
+    exodiff = 'state_advance_exodus.e'
+    capabilities = 'neml2'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
 []
