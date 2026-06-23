@@ -8,7 +8,7 @@
 
 [Solvers]
   [lin]
-    type = MFEMHypreGMRES
+    type = MFEMHyprePCG
     preconditioner = boomeramg
     print_level = 1
     l_tol = 1e-12

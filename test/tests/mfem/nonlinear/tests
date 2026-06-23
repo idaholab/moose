@@ -12,6 +12,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
+      max_parallel = 15 # mfem/mfem#5375
     []
     [MFEMNewtonNonLinearDiffusion]
       type = CSVDiff
