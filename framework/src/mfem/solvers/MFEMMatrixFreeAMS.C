@@ -17,23 +17,25 @@ registerMooseObject("MooseApp", MFEMMatrixFreeAMS);
 InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription("MFEM matrix-free auxiliary-space Maxwell preconditioner for the "
                              "iterative solution of MFEM equation systems.");
+  // mfem::MatrixFreeAMS is always an LOR solver
+  params.setParameters("low_order_refined", true);
+  params.suppressParameter<bool>("low_order_refined");
   return params;
 }
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
+  : Moose::MFEM::LinearSolverBase(parameters),
     MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh())
 {
 }
 
 void
-MFEMMatrixFreeAMS::setOperator(mfem::OperatorHandle & op)
+MFEMMatrixFreeAMS::SetOperator(mfem::OperatorHandle & op)
 {
-
   mfem::Coefficient * alpha_coef{nullptr};
   mfem::Coefficient * beta_coef{nullptr};
   // Fetch material coefficients from CurlCurlIntegrator and (optional) VectorFEMassIntegrator
@@ -60,7 +62,7 @@ MFEMMatrixFreeAMS::setOperator(mfem::OperatorHandle & op)
 }
 
 void
-MFEMMatrixFreeAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMMatrixFreeAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & /*tdofs*/)
 {
   // update the pointer to the bilinear form representing the curl-curl problem being preconditioned
   _aform = &a;
