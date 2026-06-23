@@ -457,6 +457,7 @@ TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired
     EXPECT_TRUE(message.find("require GetGradient()") != std::string::npos);
     EXPECT_TRUE(message.find("require legacy assembly") != std::string::npos);
   }
+}
 /**
  * Test MFEMMixedGradGradKernel creates an mfem::MixedGradGradIntegrator successfully.
  */

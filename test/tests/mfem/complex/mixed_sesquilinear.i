@@ -111,8 +111,10 @@ omega=10.0
   []
 []
 
-[Solver]
-  type = MFEMSuperLU
+[Solvers]
+  [main]
+    type = MFEMSuperLU
+  []
 []
 
 [Executioner]
