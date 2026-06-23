@@ -7,6 +7,7 @@
     test_case = TestDiffusion1D
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2 # memory heavy
   []
   [mms-diffusion-1d-cd_neumann]
     type = MMSTest
