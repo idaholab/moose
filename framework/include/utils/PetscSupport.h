@@ -256,6 +256,13 @@ void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_opt
                                        FEProblemBase * const problem = nullptr);
 
 /**
+ * Register a BibTeX entry with PETSc's citation list so that it is printed (alongside the
+ * run-specific citations from any PETSc solvers/preconditioners used) when the PETSc -citations
+ * option is enabled. The list is printed at PetscFinalize.
+ */
+void registerPetscCitation(const std::string & bibtex);
+
+/**
  * Insert command-line PETSc options into the active PETSc options database.
  *
  * When \p problem is provided, this also reapplies vector and matrix type options that may have

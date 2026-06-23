@@ -54,6 +54,9 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
+#ifdef MOOSE_MFEM_ENABLED
+#include "MFEMProblem.h"
+#endif
 #include "Parser.h"
 #include "CSGBase.h"
 #include "Capabilities.h"
@@ -222,6 +225,14 @@ MooseApp::validParams()
       "list_constructed_objects",
       "--list-constructed-objects",
       "List all moose object type names constructed by the master app factory");
+
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "citations",
+      "--citations [file]",
+      "",
+      "List the papers (in BibTeX format) that should be cited for the framework, PETSc, and the "
+      "modules and objects used in this simulation; optionally write them to [file] instead of the "
+      "console");
 
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
@@ -1892,6 +1903,78 @@ MooseApp::run()
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
   }
+
+  if (isParamSetByUser("citations"))
+    requestCitations();
+}
+
+void
+MooseApp::collectCitations(std::map<std::string, std::string> & citations) const
+{
+  // Gather the citations that apply to this app: for every object type actually constructed, the
+  // citations registered for its owning app/module. The framework paper is tied to "MooseApp", so
+  // it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it. The
+  // map is keyed by BibTeX key so a citation shared across apps is folded in only once.
+  for (const auto & objname : _factory.getConstructedObjects())
+  {
+    mooseAssert(Registry::isRegisteredObj(objname),
+                "Constructed object '" + objname + "' is not registered");
+    const auto & app_citations = Registry::getCitations(Registry::objData(objname)._label);
+    citations.insert(app_citations.begin(), app_citations.end());
+  }
+
+  // Credit the finite element backend actually used by this app. The app uses MFEM when its problem
+  // is an MFEMProblem; otherwise it uses libMesh, the default backend. These are mutually
+  // exclusive, so only the backend in use is cited.
+  std::string backend = "libMesh";
+#ifdef MOOSE_MFEM_ENABLED
+  if ((_executor || _executioner) && dynamic_cast<const MFEMProblem *>(&feProblem()))
+    backend = "MFEM";
+#endif
+  const auto & backend_citations = Registry::getCitations(backend);
+  citations.insert(backend_citations.begin(), backend_citations.end());
+
+  // Recurse into the MultiApp subapps so that objects/modules used only inside subapps are still
+  // attributed. Each subapp is a separate MooseApp whose run() (and thus requestCitations()) is
+  // never called, so the master gathers their citations here. feProblem() asserts when there is no
+  // executioner, so only descend once one exists; nested MultiApps are handled by the recursion.
+  if (_executor || _executioner)
+    for (const auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      for (unsigned int i = 0; i < multi_app->numLocalApps(); ++i)
+        multi_app->localApp(i)->collectCitations(citations);
+}
+
+void
+MooseApp::requestCitations()
+{
+  // Collect the de-duplicated citations across this app and, recursively, every MultiApp subapp.
+  std::map<std::string, std::string> citations;
+  collectCitations(citations);
+
+  // MultiApp subapps are distributed across the MPI ranks, so each rank has collected citations
+  // only for the subapps it owns. PETSc prints the citation list from rank 0 alone, so gather every
+  // rank's citations onto all ranks; otherwise a module used only by a subapp that lives off rank 0
+  // would be omitted. The map is keyed by BibTeX key (unique per citation), so the union
+  // de-duplicates naturally. The key/text pairs are flattened into one buffer for a single
+  // allgather, which is a no-op on a single process.
+  std::vector<std::string> flattened;
+  flattened.reserve(citations.size() * 2);
+  for (const auto & [key, bibtex] : citations)
+  {
+    flattened.push_back(key);
+    flattened.push_back(bibtex);
+  }
+  _comm->allgather(flattened);
+  for (std::size_t i = 0; i + 1 < flattened.size(); i += 2)
+    citations.emplace(flattened[i], flattened[i + 1]);
+
+  // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
+  // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
+  // used, at PetscFinalize (to the console or, if a file name was given, to that file).
+  for (const auto & citation : citations)
+    Moose::PetscSupport::registerPetscCitation(citation.second);
+
+  Moose::PetscSupport::setSinglePetscOption("-citations", getParam<std::string>("citations"));
 }
 
 bool
