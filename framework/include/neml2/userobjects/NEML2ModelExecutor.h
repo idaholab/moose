@@ -84,6 +84,10 @@ protected:
   /// Save stateful variables for on-device state advance
   void advanceState();
 
+  /// Seed managed history that is not yet in the device cache (i.e. on the first step) so a
+  /// stateful model can be evaluated before advanceState() has populated the cache
+  void seedUncachedHistory();
+
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
