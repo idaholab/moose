@@ -68,11 +68,15 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "geometry_alpha_lower_bound", 0.0, "Lower clipping bound for the volume fraction.");
   params.addParam<Real>(
       "geometry_alpha_upper_bound", 1.0, "Upper clipping bound for the volume fraction.");
+  params.addParam<MooseFunctorName>(
+      "surface_tension_coefficient",
+      "",
+      "Surface-tension coefficient functor. Leave empty to disable capillary forcing.");
   params.addParamNamesToGroup(
       "create_geometry_functors volume_fraction_functor geometry_delta_n "
       "clip_volume_fraction_for_geometry "
       "geometry_alpha_lower_bound geometry_alpha_upper_bound near_interface_lower "
-      "near_interface_upper",
+      "near_interface_upper surface_tension_coefficient",
       "Sharp Interface Geometry");
 
   return params;
@@ -240,6 +244,21 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setRhieChowUserObjectParams(
     params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
   params.set<MooseFunctorName>("vof_rho_phi_functor") =
       getParam<MooseFunctorName>("vof_rho_phi_functor");
+
+  const auto surface_tension_coefficient =
+      getParam<MooseFunctorName>("surface_tension_coefficient");
+  if (!surface_tension_coefficient.empty())
+  {
+    const auto volume_fraction_functor = getParam<MooseFunctorName>("volume_fraction_functor");
+    if (volume_fraction_functor.empty())
+      paramError("volume_fraction_functor",
+                 "Surface tension requires the volume-fraction functor used by the least-squares "
+                 "CSF curvature operator.");
+
+    params.set<MooseFunctorName>("surface_tension_coefficient") = surface_tension_coefficient;
+    params.set<MooseFunctorName>("surface_tension_volume_fraction_functor") =
+        volume_fraction_functor;
+  }
 }
 
 bool

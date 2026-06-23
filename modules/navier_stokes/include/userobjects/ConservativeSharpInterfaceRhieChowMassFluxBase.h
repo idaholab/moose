@@ -157,6 +157,9 @@ protected:
                                              const Real mass_flux_density) const;
   Real computeFaceNormalDensityGradient(const FaceInfo * fi,
                                         const Moose::StateArg & time_arg) const;
+  Real computeFaceNormalScalarGradient(const Moose::Functor<Real> & functor,
+                                       const FaceInfo * fi,
+                                       const Moose::StateArg & time_arg) const;
   Real computeFaceNormalPressureGradient(const FaceInfo * fi,
                                          const Moose::StateArg & time_arg) const;
   Real computeFaceNormalPressureGradient(
@@ -165,6 +168,22 @@ protected:
   Real
   computeDiscreteHydrostaticPredictorFaceNormalForceDensity(const FaceInfo * fi,
                                                             const Moose::StateArg & time_arg) const;
+  bool surfaceTensionEnabled() const;
+  Real computeLeastSquaresFaceScalarValue(const Moose::Functor<Real> & functor,
+                                          const FaceInfo * fi,
+                                          const Elem * elem,
+                                          const Moose::StateArg & time_arg) const;
+  RealVectorValue computeLeastSquaresCellGradient(const Moose::Functor<Real> & functor,
+                                                  const ElemInfo & elem_info,
+                                                  const Moose::StateArg & time_arg) const;
+  Real computeLeastSquaresCellInterfaceCurvature(const ElemInfo & elem_info,
+                                                 const Moose::StateArg & time_arg) const;
+  RealVectorValue
+  computeLeastSquaresCellSurfaceTensionForceDensity(const ElemInfo & elem_info,
+                                                    const Moose::StateArg & time_arg) const;
+  Real
+  computeLeastSquaresSurfaceTensionFaceNormalForceDensity(const FaceInfo * fi,
+                                                          const Moose::StateArg & time_arg) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
   RealVectorValue
   reconstructFaceNormalScalarToCellVector(const ElemInfo * elem_info,
@@ -186,8 +205,12 @@ protected:
   const Point _reference_pressure_point;
 
   const MooseFunctorName _vof_rho_phi_name;
+  const MooseFunctorName _surface_tension_coefficient_name;
+  const MooseFunctorName _surface_tension_volume_fraction_name;
 
   const Moose::Functor<Real> * _vof_rho_phi;
+  const Moose::Functor<Real> * _surface_tension_coefficient = nullptr;
+  const Moose::Functor<Real> * _surface_tension_volume_fraction = nullptr;
   bool _vof_transport_phi_valid = false;
   bool _corrected_face_phi_seeded = false;
   bool _suppress_explicit_hydrostatic_pressure_flux = false;

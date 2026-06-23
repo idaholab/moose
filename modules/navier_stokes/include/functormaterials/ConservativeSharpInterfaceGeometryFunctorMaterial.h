@@ -29,6 +29,10 @@ public:
   ConservativeSharpInterfaceGeometryFunctorMaterial(const InputParameters & parameters);
 
 private:
+  template <typename SpaceArg>
+  RealVectorValue alphaGradient(const SpaceArg & r, const Moose::StateArg & t) const;
+  RealVectorValue alphaGradient(const Moose::FaceArg & r, const Moose::StateArg & t) const;
+
   const Moose::Functor<Real> & _volume_fraction;
 
   const bool _clip_volume_fraction;

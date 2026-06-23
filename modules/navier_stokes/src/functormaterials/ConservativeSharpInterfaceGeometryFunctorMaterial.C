@@ -11,6 +11,7 @@
 
 #include "MooseFunctorArguments.h"
 #include "SubProblem.h"
+#include "FVUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -119,18 +120,45 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::
 
   addFunctorProperty<RealVectorValue>(
       _alpha_gradient_name,
-      [this](const auto & r, const auto & t) -> RealVectorValue
-      { return _volume_fraction.gradient(r, t); },
+      [this](const auto & r, const auto & t) -> RealVectorValue { return alphaGradient(r, t); },
       clearance_schedule);
 
   addFunctorProperty<RealVectorValue>(
       _interface_unit_normal_name,
       [this](const auto & r, const auto & t) -> RealVectorValue
       {
-        const auto grad_alpha = _volume_fraction.gradient(r, t);
-        const Real mag_grad_alpha = geometrySafeMagnitude(MetaPhysicL::raw_value(grad_alpha));
+        const RealVectorValue grad_alpha = alphaGradient(r, t);
+        const Real mag_grad_alpha = geometrySafeMagnitude(grad_alpha);
 
         return grad_alpha / (mag_grad_alpha + _delta_n);
       },
       clearance_schedule);
+}
+
+template <typename SpaceArg>
+RealVectorValue
+ConservativeSharpInterfaceGeometryFunctorMaterial::alphaGradient(const SpaceArg & r,
+                                                                 const Moose::StateArg & t) const
+{
+  return MetaPhysicL::raw_value(_volume_fraction.gradient(r, t));
+}
+
+RealVectorValue
+ConservativeSharpInterfaceGeometryFunctorMaterial::alphaGradient(const Moose::FaceArg & r,
+                                                                 const Moose::StateArg & t) const
+{
+  const FaceInfo * const fi = r.fi;
+  if (!fi || !fi->neighborPtr() || !_volume_fraction.hasBlocks(fi->elemSubdomainID()) ||
+      !_volume_fraction.hasBlocks(fi->neighborSubdomainID()))
+    return MetaPhysicL::raw_value(_volume_fraction.gradient(r, t));
+
+  const RealVectorValue elem_gradient =
+      MetaPhysicL::raw_value(_volume_fraction.gradient(r.makeElem(), t));
+  const RealVectorValue neighbor_gradient =
+      MetaPhysicL::raw_value(_volume_fraction.gradient(r.makeNeighbor(), t));
+
+  RealVectorValue face_gradient = 0.0;
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, face_gradient, elem_gradient, neighbor_gradient, *fi, true);
+  return face_gradient;
 }
