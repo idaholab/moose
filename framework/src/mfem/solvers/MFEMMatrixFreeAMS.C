@@ -16,6 +16,19 @@ registerMooseObject("MooseApp", MFEMMatrixFreeAMS);
 
 namespace Moose::MFEM
 {
+MatrixFreeAMS::MatrixFreeAMS(mfem::Coefficient * alpha_coef,
+                             mfem::Coefficient * beta_coef,
+                             const mfem::Array<int> & ess_bdr_markers,
+                             int inner_pi_its,
+                             int inner_g_its)
+  : _alpha_coef(alpha_coef),
+    _beta_coef(beta_coef),
+    _ess_bdr_markers(ess_bdr_markers),
+    _inner_pi_its(inner_pi_its),
+    _inner_g_its(inner_g_its)
+{
+}
+
 void
 MatrixFreeAMS::SetOperator(const mfem::Operator & op)
 {
@@ -30,10 +43,12 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
                                             _alpha_coef,
                                             _beta_coef,
                                             nullptr,
-                                            const_cast<mfem::Array<int> &>(_ess_bdr));
+                                            const_cast<mfem::Array<int> &>(_ess_bdr_markers),
+                                            _inner_pi_its,
+                                            _inner_g_its);
   _matrix_free_ams = std::move(matrix_free_ams);
 }
-}
+} // namespace Moose::MFEM
 
 InputParameters
 MFEMMatrixFreeAMS::validParams()

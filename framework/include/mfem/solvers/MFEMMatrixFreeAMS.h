@@ -26,16 +26,9 @@ class MatrixFreeAMS : public mfem::Solver
 public:
   MatrixFreeAMS(mfem::Coefficient * alpha_coef,
                 mfem::Coefficient * beta_coef,
-                const mfem::Array<int> & ess_bdr,
+                const mfem::Array<int> & ess_bdr_markers,
                 int inner_pi_its = 0,
-                int inner_g_its = 1,
-                mfem::Solver * nd_smoother = NULL)
-    : _alpha_coef(alpha_coef),
-      _beta_coef(beta_coef),
-      _ess_bdr(ess_bdr),
-      _inner_pi_its(inner_pi_its),
-      _inner_g_its(inner_g_its),
-      _nd_smoother(nd_smoother){};
+                int inner_g_its = 1);
 
   void SetBilinearForm(mfem::ParBilinearForm & a) { _aform = &a; }
   void SetOperator(const mfem::Operator & op) override;
@@ -49,10 +42,9 @@ private:
   mfem::ParBilinearForm * _aform;
   mfem::Coefficient * _alpha_coef;
   mfem::Coefficient * _beta_coef;
-  const mfem::Array<int> & _ess_bdr;
+  const mfem::Array<int> & _ess_bdr_markers;
   const int _inner_pi_its;
   const int _inner_g_its;
-  mfem::Solver * _nd_smoother;
 };
 } // namespace Moose::MFEM
 
@@ -74,7 +66,7 @@ protected:
 
 private:
   mfem::ParBilinearForm * _aform;
-  std::vector<BoundaryName> _ess_bdrs;
+  std::vector<BoundaryName> _ess_bdr_markerss;
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
 };
