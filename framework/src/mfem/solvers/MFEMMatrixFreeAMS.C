@@ -65,6 +65,10 @@ MFEMMatrixFreeAMS::validParams()
       "beta_coefficient",
       "1.",
       "Name of scalar coefficient used in mass component of target equation system.");
+  params.addParam<unsigned int>(
+      "inner_pi_iterations", 0, "Number of CG iterations on auxiliary Pi space.");
+  params.addParam<unsigned int>(
+      "inner_g_iterations", 1, "Number of CG iterations on auxiliary G space.");
   // mfem::MatrixFreeAMS is always an LOR solver
   params.setParameters("low_order_refined", true);
   params.suppressParameter<bool>("low_order_refined");
@@ -75,7 +79,9 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
     MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
-    _beta_coef(getScalarCoefficient("beta_coefficient"))
+    _beta_coef(getScalarCoefficient("beta_coefficient")),
+    _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),
+    _inner_g_its(getParam<unsigned int>("inner_g_iterations"))
 {
   ConstructSolver();
 }
@@ -83,8 +89,8 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
 void
 MFEMMatrixFreeAMS::ConstructSolver()
 {
-  auto solver =
-      std::make_unique<Moose::MFEM::MatrixFreeAMS>(&_alpha_coef, &_beta_coef, getBoundaryMarkers());
+  auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
+      &_alpha_coef, &_beta_coef, getBoundaryMarkers(), _inner_pi_its, _inner_g_its);
   solver->iterative_mode = getParam<bool>("use_initial_guess");
   _solver = std::move(solver);
 }

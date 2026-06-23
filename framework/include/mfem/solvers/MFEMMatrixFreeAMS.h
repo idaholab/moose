@@ -69,6 +69,8 @@ private:
   std::vector<BoundaryName> _ess_bdr_markerss;
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
+  const unsigned int _inner_pi_its;
+  const unsigned int _inner_g_its;
 };
 
 #endif
