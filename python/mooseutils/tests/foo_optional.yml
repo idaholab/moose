@@ -1,0 +1,6 @@
+a: 1
+b: !include? bar.yml
+c: !include? unknown.yml
+d: # list with a missing optional include and a kept item
+    - !include? unknown.yml
+    - keep

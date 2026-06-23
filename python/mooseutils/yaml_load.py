@@ -11,10 +11,53 @@
 
 import os
 import collections
+import logging
 import yaml
 import re
 
 from .eval_path import eval_path
+
+LOG = logging.getLogger(__name__)
+
+
+class _MissingInclude(object):
+    """
+    Sentinel returned by the optional include tag '!include?' when the target file does not exist.
+
+    Consumers (e.g. MooseDocs.common.load_config) prune mapping keys and list items whose value is
+    this sentinel so that optional dependencies (missing submodules) silently drop out of the
+    configuration rather than raising an error.
+    """
+
+
+# Single shared instance used for identity comparisons (value is MISSING_INCLUDE)
+MISSING_INCLUDE = _MissingInclude()
+
+
+def is_missing_include(value):
+    """Return True if the supplied value is the missing optional include sentinel."""
+    return value is MISSING_INCLUDE
+
+
+def prune_missing_includes(node):
+    """
+    Recursively remove any mapping keys or list items whose value is the MISSING_INCLUDE sentinel.
+
+    Returns the pruned node. Operates in-place for dict/list containers.
+    """
+    if isinstance(node, dict):
+        # identify sentinel-valued keys, then delete them
+        for key in [k for k, v in node.items() if is_missing_include(v)]:
+            del node[key]
+        for value in node.values():
+            prune_missing_includes(value)
+    elif isinstance(node, list):
+        # identify sentinel entries, then remove them
+        for value in [v for v in node if is_missing_include(v)]:
+            node.remove(value)
+        for value in node:
+            prune_missing_includes(value)
+    return node
 
 
 class IncludeYamlFile(object):
@@ -22,7 +65,9 @@ class IncludeYamlFile(object):
     Object for handling including and reproducing output without include.
     """
 
-    def __init__(self, items, root, parent, line="?", include=True):
+    def __init__(self, items, root, parent, line="?", include=True, optional=False):
+
+        self.optional = optional
 
         filename = eval_path(items[0])
         if not os.path.isabs(filename) and isinstance(root, str):
@@ -46,7 +91,8 @@ class IncludeYamlFile(object):
         """NOTE: I tried to get this to output without adding quotes to the items, but I can't figure
         out how to get that working. So, I just process the output in yaml_write.
         """
-        return dumper.represent_scalar("!include", " ".join(data.items))
+        tag = "!include?" if data.optional else "!include"
+        return dumper.represent_scalar(tag, " ".join(data.items))
 
 
 class Loader(yaml.Loader):
@@ -62,6 +108,7 @@ class Loader(yaml.Loader):
         self._include = include
         self._root = root or os.path.dirname(self._filename)
         self.add_constructor("!include", Loader.include)
+        self.add_constructor("!include?", Loader.include_optional)
         super(Loader, self).__init__(stream)
 
     def include(self, node):
@@ -72,6 +119,34 @@ class Loader(yaml.Loader):
         obj = IncludeYamlFile(
             items, self._root, self._filename, node.line, self._include
         )
+        return obj.content if self._include else obj
+
+    def include_optional(self, node):
+        """
+        Allow for the embedding of yaml files that may not exist.
+
+        If the referenced file is missing (e.g. an optional submodule that has not been checked
+        out), the MISSING_INCLUDE sentinel is returned instead of raising. Callers are expected to
+        prune sentinel values from the resulting data (see prune_missing_includes).
+        """
+        items = self.construct_scalar(node).split()
+        try:
+            obj = IncludeYamlFile(
+                items,
+                self._root,
+                self._filename,
+                node.line,
+                self._include,
+                optional=True,
+            )
+        except IOError:
+            LOG.warning(
+                "Optional include '%s' on line %s of %s was not found and is being skipped.",
+                " ".join(items),
+                node.line,
+                self._filename,
+            )
+            return MISSING_INCLUDE
         return obj.content if self._include else obj
 
     def compose_node(self, parent, index):
@@ -142,7 +217,7 @@ def yaml_write(filename, content, indent=4):
         content, None, lambda *args, **kwargs: make_dumper(*args, **kwargs)
     )
     document = re.sub(
-        r"(?P<tag>!include\s+)'(?P<string>.*?)'", r"\g<tag>\g<string>", document
+        r"(?P<tag>!include\??\s+)'(?P<string>.*?)'", r"\g<tag>\g<string>", document
     )
 
     with open(filename, "w") as fid:
