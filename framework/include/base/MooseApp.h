@@ -1098,7 +1098,7 @@ public:
    * Create/configure the MFEM device with the provided \p device_string. More than one device can
    * be configured. If supplying multiple devices, they should be comma separated
    */
-  void setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>);
+  void setMFEMDevice(const std::string & device_string, bool gpu_aware_mpi, Moose::PassKey<MFEMProblemSolve>);
 
   /**
    * Get the MFEM device object

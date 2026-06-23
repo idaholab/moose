@@ -3349,7 +3349,7 @@ MooseApp::isInTree()
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)
+MooseApp::setMFEMDevice(const std::string & device_string, bool gpu_aware_mpi, Moose::PassKey<MFEMProblemSolve>)
 {
   const auto string_vec = MooseUtils::split(device_string, ",");
   auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
@@ -3357,6 +3357,7 @@ MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMPr
   {
     _mfem_device = std::make_shared<mfem::Device>(device_string);
     _mfem_devices = std::move(string_set);
+    _mfem_device->SetGPUAwareMPI(gpu_aware_mpi);
     _mfem_device->Print(Moose::out);
   }
   else if (!device_string.empty() && string_set != _mfem_devices)
