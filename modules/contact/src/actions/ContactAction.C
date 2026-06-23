@@ -279,6 +279,44 @@ ContactAction::validParams()
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
   params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "segment_quadrature");
+
+  // Contact surface definition
+  params.addParamNamesToGroup("primary secondary displacements", "Contact Surface Definition");
+  // Automatic pairing
+  params.addParamNamesToGroup(
+      "automatic_pairing_boundaries automatic_pairing_distance automatic_pairing_method",
+      "Automatic Contact Pair Generation");
+  // Contact formulation and model
+  params.addParamNamesToGroup("formulation model", "Contact Formulation");
+  // Penalty parameters
+  params.addParamNamesToGroup(
+      "penalty penalty_friction penalty_multiplier penalty_multiplier_friction "
+      "max_penalty_multiplier normalize_penalty",
+      "Penalty Parameters");
+  // Augmented Lagrange settings
+  params.addParamNamesToGroup(
+      "al_penetration_tolerance al_incremental_slip_tolerance al_frictional_force_tolerance "
+      "adaptivity_penalty_normal adaptivity_penalty_friction",
+      "Augmented Lagrange");
+  // Friction
+  params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
+  // Mortar-specific parameters
+  params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
+                              "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
+                              "generate_mortar_mesh segment_quadrature wear_depth debug_mesh",
+                              "Mortar");
+  // Mortar dynamics (Newmark-beta)
+  params.addParamNamesToGroup("mortar_dynamics newmark_beta newmark_gamma", "Mortar Dynamics");
+  // Gap and tolerance settings
+  params.addParamNamesToGroup(
+      "secondary_gap_offset mapped_primary_gap_offset capture_tolerance "
+      "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
+      "Gap and Tolerance");
+  // Jacobian and solver options
+  params.addParamNamesToGroup("primary_secondary_jacobian ping_pong_protection", "Solver Options");
+  // Residual vector tags
+  params.addParamNamesToGroup("extra_vector_tags absolute_value_vector_tags", "Residual Tags");
+
   return params;
 }
 
