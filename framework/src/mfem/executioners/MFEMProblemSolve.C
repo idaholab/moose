@@ -33,7 +33,8 @@ MFEMProblemSolve::MFEMProblemSolve(
     _problem_operators(problem_operators)
 {
   if (const auto compute_device = _app.getComputeDevice())
-    _app.setMFEMDevice(*compute_device, getParam<bool>("gpu_aware_mpi"), Moose::PassKey<MFEMProblemSolve>());
+    _app.setMFEMDevice(
+        *compute_device, getParam<bool>("gpu_aware_mpi"), Moose::PassKey<MFEMProblemSolve>());
   else
     _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
                        : _app.isUltimateMaster() ? "cpu"
