@@ -295,6 +295,7 @@ TableOutput::outputScalarVariables()
 void
 TableOutput::clear()
 {
+  clearLastExecuteTime();
   _reporter_table.clear();
   _postprocessor_table.clear();
   for (auto & pair : _vector_postprocessor_tables)

@@ -281,6 +281,11 @@ protected:
   virtual void outputReporters();
 
   /**
+   * Clears bookkeeping used to suppress duplicate EXEC_FINAL output at the same time.
+   */
+  void clearLastExecuteTime();
+
+  /**
    * Flags to control nodal output
    */
   bool _elemental_as_nodal, _scalar_as_nodal;

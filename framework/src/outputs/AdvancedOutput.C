@@ -333,6 +333,12 @@ AdvancedOutput::output()
   }
 }
 
+void
+AdvancedOutput::clearLastExecuteTime()
+{
+  _last_execute_time.clear();
+}
+
 bool
 AdvancedOutput::wantOutput(const std::string & name, const ExecFlagType & type)
 {
