@@ -71,10 +71,6 @@ public:
    * Add an MFEM FESpace to the problem.
    */
   void addFESpace(const std::string & type, const std::string & name, InputParameters & parameters);
-  /**
-   * Set the device to use to solve the FE problem.
-   */
-  void setDevice();
 
   /**
    * Set the mesh used by MFEM.
