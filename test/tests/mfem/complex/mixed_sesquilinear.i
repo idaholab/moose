@@ -6,7 +6,6 @@ omega=10.0
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.msh
-  dim = 3
 []
 
 [Problem]
