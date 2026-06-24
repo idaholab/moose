@@ -1,6 +1,6 @@
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     n_cells = 2
     nrings = 3
     flat_to_flat = 0.60
@@ -16,6 +16,7 @@
 
 [Variables]
   [S]
+    block = subchannel
   []
 []
 
@@ -23,6 +24,31 @@
   [S_IC]
     type = SCMTriFlowAreaIC
     variable = S
+    block = subchannel
+  []
+[]
+
+[Postprocessors]
+  [center]
+    type = SubChannelPointValue
+    variable = S
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge]
+    type = SubChannelPointValue
+    variable = S
+    index = 24
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner]
+    type = SubChannelPointValue
+    variable = S
+    index = 25
+    execute_on = 'timestep_end'
+    height = 0.5
   []
 []
 
@@ -35,5 +61,6 @@
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
+  csv = true
 []

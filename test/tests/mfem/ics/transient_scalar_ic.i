@@ -59,12 +59,10 @@
   [h1_laplacian]
     type = MFEMDiffusionKernel
     variable = h1_scalar
-    coefficient = 1.0
   []
   [dh1_dt]
     type = MFEMTimeDerivativeMassKernel
     variable = h1_scalar
-    coefficient = 1.0
   []
 []
 
@@ -89,11 +87,12 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 100
+[Solvers]
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    use_initial_guess = true # problem is solved by initial condition
+  []
 []
 
 [Executioner]

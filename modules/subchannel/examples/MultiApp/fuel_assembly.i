@@ -12,9 +12,7 @@ mass_flux_in = '${fparse 2786}' # kg/(m2.s)
 ###################################################
 # Geometric parameters
 ###################################################
-
 n_cells = 50
-
 # units are cm - do not forget to convert to meter
 scale_factor = 0.01
 fuel_element_pitch = '${fparse 14.598*scale_factor}'
@@ -36,8 +34,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 ###################################################
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     flat_to_flat = '${fparse duct_inside}'
@@ -52,20 +50,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     spacer_k = '0.5 0.5'
   []
 
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = '${fparse n_rings}'
-    n_cells = ${n_cells}
-    unheated_length_entry = '${fparse length_entry_fuel}'
-    heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse length_outlet_fuel}'
-    pitch = '${fparse fuel_pin_pitch}'
-  []
-
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = fuel_pins
+    input = subchannel
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     flat_to_flat = '${fparse duct_inside}'
@@ -194,7 +181,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -203,7 +190,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
 []
 
@@ -235,7 +222,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     variable = 'mdot SumWij P DP h T rho mu S'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Tpin q_prime'
   []

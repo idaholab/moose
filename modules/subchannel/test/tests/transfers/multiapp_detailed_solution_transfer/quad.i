@@ -8,16 +8,11 @@
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     pin_diameter = 0.5
     side_gap = 0.1
     spacer_z = '0'
     spacer_k = '0'
-  []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
   []
 []
 
@@ -29,7 +24,7 @@
 
 [AuxVariables]
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [T]
     block = fuel_pins
@@ -81,7 +76,8 @@
     variable = 'P'
   []
   [T_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'T'
   []

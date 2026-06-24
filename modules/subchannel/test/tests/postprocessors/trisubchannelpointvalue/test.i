@@ -1,8 +1,8 @@
 T_in = 359.15
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 10
     flat_to_flat = 3.41e-2

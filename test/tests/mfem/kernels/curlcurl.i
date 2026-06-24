@@ -4,7 +4,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/small_fichera.mesh
-  dim = 3
 []
 
 [Problem]
@@ -120,10 +119,12 @@
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = ams
-  l_tol = 1e-12
+[Solvers]
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = ams
+    l_tol = 1e-12
+  []
 []
 
 [Executioner]

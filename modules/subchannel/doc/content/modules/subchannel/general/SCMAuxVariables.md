@@ -4,7 +4,7 @@ Depending on the mesh type defined in the SCM input file, SCM automatically crea
 
 ## SubChannel mesh
 
-This is the Subchannel mesh that gets created by: [SCMQuadSubChannelMeshGenerator](SCMQuadSubChannelMeshGenerator.md) and [SCMTriSubChannelMeshGenerator](SCMTriSubChannelMeshGenerator.md) for quadrilateral and triangular lattice respectively.
+This is the subchannel mesh that gets created by: [SCMQuadAssemblyMeshGenerator](SCMQuadAssemblyMeshGenerator.md) and [SCMTriAssemblyMeshGenerator](SCMTriAssemblyMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
 When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the subchannel mesh block, automatically defines the following auxiliary variables that live on the subchannel mesh nodes:
 
@@ -56,9 +56,9 @@ This `DP` auxvariable variable is not calculated for the monolithic solve, in wh
 
 ## Fuel pins mesh
 
-This is the fuel pin mesh that gets created by: [SCMQuadPinMeshGenerator](SCMQuadPinMeshGenerator.md) and [SCMTriPinMeshGenerator](SCMTriPinMeshGenerator.md) for quadrilateral and triangular lattice respectively.
+This is the fuel pin mesh that gets created by: [SCMQuadAssemblyMeshGenerator](SCMQuadAssemblyMeshGenerator.md) and [SCMTriAssemblyMeshGenerator](SCMTriAssemblyMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the fuel pin mesh block, automatically defines the following auxiliary variables that live on the fuel pin mesh nodes:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators automatically defines the following auxiliary variables that live on the fuel pin mesh nodes when the assembly contains fuel pins:
 
 - Fuel pin average surface temperature: "Tpin" $K$
 
@@ -72,7 +72,7 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 The variable `q_prime` is created on: the fuel pin mesh if a pin mesh is present otherwise on the subchannel mesh
 
 !alert note
-In general, the pin diameter is defined by the mesh and provided by the user through the mesh generator objects. As a result, it is assumed to be constant for all fuel pins. If a pin mesh is present, the auxiliary variable `Dpin` is automatically created and initialized to the mesh-generator pin diameter. This enforces the assumption that all fuel pins share the same diameter. If different pin diameters are required, the user can override this behavior by manually defining `Dpin` using a custom initial condition. In that case, the solver detects the variation and recomputes the geometric properties (surface area, wetted perimeter, and gap) before each time step.
+In general, the pin diameter is defined by the mesh and provided by the user through the mesh generator objects [!param](/Mesh/SCMTriAssemblyMeshGenerator/pin_diameter), [!param](/Mesh/SCMQuadAssemblyMeshGenerator/pin_diameter). As a result, it is assumed to be constant for all fuel pins. If a pin mesh is present, the auxiliary variable `Dpin` is automatically created and initialized to the mesh-generator pin diameter. This enforces the assumption that all fuel pins share the same diameter. If different pin diameters are required, the user can override this behavior by manually defining `Dpin` using a custom initial condition. In that case, the solver detects the variation and recomputes the geometric properties (surface area, wetted perimeter, and gap) before each time step.
 
 ## Duct mesh
 

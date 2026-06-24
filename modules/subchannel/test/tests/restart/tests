@@ -19,4 +19,15 @@
     max_threads = 1
     requirement = 'The system shall be able to restart after a transient solution'
   []
+  [transient_time_integrator_warning]
+    type = RunApp
+    input = transient.i
+    prereq = 'steady'
+    cli_args = 'Executioner/scheme=bdf2 Outputs/file_base=transient_time_integrator_warning'
+    allow_warnings = true
+    expect_out = "The subchannel solver always uses implicit (backward) Euler time integration; the requested 'BDF2' time integrator is ignored."
+    match_literal = true
+    max_threads = 1
+    requirement = 'The system shall warn when a subchannel transient input requests a MOOSE time integrator other than implicit Euler.'
+  []
 []

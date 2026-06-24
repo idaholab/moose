@@ -12,9 +12,12 @@
 #pragma once
 
 #include "MFEMProblem.h"
+#include <functional>
 
 namespace Moose::MFEM
 {
+class EquationSystem;
+
 /// Interface inherited by ProblemOperator and TimeDependentProblemOperator. Removes duplicated code in both classes.
 class ProblemOperatorBase
 {
@@ -33,6 +36,11 @@ public:
   mfem::BlockVector _true_x, _true_rhs;
 
 protected:
+  /// Solve the current equation system/operator using the configured nonlinear solver or linear
+  /// solver for a purely linear problem
+  void
+  SolveWithOperator(EquationSystem & equation_system, const mfem::Vector & rhs, mfem::Vector & x);
+
   /// Reference to the current problem.
   MFEMProblem & _problem;
   MFEMProblemData & _problem_data;

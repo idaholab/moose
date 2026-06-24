@@ -3,7 +3,7 @@ P_out = 101325 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 7
     ny = 3
     n_cells = 60
@@ -36,6 +36,8 @@ P_out = 101325 # Pa
   friction_closure = 'MATRA'
   full_output = true
   mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
+
 []
 
 [SCMClosures]
@@ -46,6 +48,9 @@ P_out = 101325 # Pa
     type = SCMMixingConstantBeta
     beta = 0.006
     CT = 2.6
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
@@ -69,6 +74,12 @@ P_out = 101325 # Pa
     type = ConstantIC
     variable = P
     value = 0.0
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.012065
   []
 
   [DP_ic]
@@ -188,6 +199,13 @@ P_out = 101325 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    transfer_type = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [xfer_q_prime]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    transfer_type = pin
+    variable = q_prime
   []
 []

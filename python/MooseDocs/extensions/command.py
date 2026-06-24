@@ -90,8 +90,11 @@ class CommandBase(components.ReaderComponent):
     """
 
     PARSE_SETTINGS = False
+    # The extension may be followed by a URL query/fragment (e.g. 'file.pdf?download=1'); treat
+    # '?' and '#' as boundaries so the extension is recognized rather than falling through to the
+    # generic HTTP handling.
     FILENAME_RE = re.compile(
-        r"(?P<filename>\S*\.(?P<ext>\w+))(?= |$)", flags=re.UNICODE
+        r"(?P<filename>\S*\.(?P<ext>\w+))(?=[ ?#]|$)", flags=re.UNICODE
     )
 
     def __init__(self, *args, **kwargs):

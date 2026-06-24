@@ -11,8 +11,8 @@ vacuum_permeability = 1.0
 []
 
 [Mesh]
-    type = MFEMMesh
-    file = ../mesh/split_embedded_concentric_torus.e
+  type = MFEMMesh
+  file = ../mesh/split_embedded_concentric_torus.e
 []
 
 [FunctorMaterials]
@@ -171,11 +171,13 @@ vacuum_permeability = 1.0
   []
 []
 
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 100
+[Solvers]
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-8
+    l_max_its = 100
+  []
 []
 
 [Executioner]

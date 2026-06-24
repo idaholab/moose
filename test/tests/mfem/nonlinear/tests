@@ -1,0 +1,84 @@
+[Tests]
+  issues = '#31772'
+  [nl_solvers]
+    design = 'MFEMPetscNonlinearSolver.md MFEMNewtonNonlinearSolver.md'
+    requirement = 'The system shall have the ability to solve a nonlinear diffusion problem using the'
+    [MFEMPetscNonLinearDiffusion]
+      type = CSVDiff
+      input = nldiffusion_petsc.i
+      cli_args = 'VectorPostprocessors/active=point_sample Outputs/active=csv'
+      csvdiff = 'nldiffusion_petsc_csv_point_sample_0001.csv'
+      detail = 'MFEM PETSc nonlinear solver, and the'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      max_parallel = 15 # mfem/mfem#5375
+    []
+    [MFEMNewtonNonLinearDiffusion]
+      type = CSVDiff
+      input = nldiffusion_newton.i
+      cli_args = 'VectorPostprocessors/active=point_sample Outputs/active=csv'
+      csvdiff = 'nldiffusion_newton_csv_point_sample_0001.csv'
+      detail = 'native MFEM Newton solver. Additionally the system shall support nesting both nonlinear and linear solvers under a common solvers syntax block.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+  []
+  [MFEMNonLinearDiffusionNonZeroRHS]
+    design = 'EquationSystem.md'
+    type = XMLDiff
+    input = nldiffusion_newton.i
+    cli_args = 'Kernels/active="nl force" '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/NLDiffusionNonZeroRHS '
+    xmldiff = 'OutputData/NLDiffusionNonZeroRHS/Run0/Run0.pvd
+                OutputData/NLDiffusionNonZeroRHS/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a non-linear diffusion with non-zero rhs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMNonLinearHeatTransfer]
+    design = 'EquationSystem.md'
+    requirement = 'The system shall have the ability to solve a transient non-linear problem with a non-linear boundary condition using MFEM, when '
+    [linearized]
+      detail = 'the non-linear BC is given constant coefficients, and '
+      type = CSVDiff
+      input = nlheattransfer.i
+      csvdiff = 'NLHeatTransferLinearized_line_sample_0003.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      cli_args = 'BCs/active="linearized" '
+                 'Outputs/CSV/file_base=NLHeatTransferLinearized '
+    []
+    [non-linear]
+      detail = 'when the non-linear BC is given state-dependent coefficients.'
+      type = CSVDiff
+      input = nlheattransfer.i
+      csvdiff = 'NLHeatTransfer_line_sample_0003.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+    []
+  []
+  [MFEMNonLinearHeatConduction]
+    design = 'EquationSystem.md'
+    requirement = 'The system shall have the ability to solve a transient non-linear problem including both linear and nonlinear domain integrators.'
+    type = CSVDiff
+    input = nlheatconduction.i
+    csvdiff = 'NLHeatConduction_centre_temperature_0000.csv
+                NLHeatConduction_centre_temperature_0010.csv
+                NLHeatConduction_centre_temperature_0020.csv
+                NLHeatConduction_centre_temperature_0030.csv
+                NLHeatConduction_centre_temperature_0040.csv
+                NLHeatConduction_centre_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    restep = false
+  []
+[]

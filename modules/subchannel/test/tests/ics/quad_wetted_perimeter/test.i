@@ -1,6 +1,6 @@
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = 10
@@ -25,6 +25,30 @@
   []
 []
 
+[Postprocessors]
+  [center]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 4
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 1
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+[]
+
 [Problem]
   solve = false
 []
@@ -34,5 +58,6 @@
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
+  csv = true
 []

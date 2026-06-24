@@ -39,7 +39,9 @@ parameter, so the caller does not need to extract the string itself.
 `MFEMObject` is the root of the MFEM object hierarchy. Direct subclasses include:
 
 - [MFEMExecutedObject.md] — objects that are scheduled and executed by `MFEMProblem` (aux kernels, postprocessors, transfers, initial conditions, etc.).
-- `MFEMSolverBase` — MFEM linear solver and preconditioner objects.
+- [MFEMSolverBase.md] - MFEM base solver class. This is further sub-classed by:
+  - [MFEMLinearSolverBase.md] — MFEM linear solver and preconditioner objects.
+  - [MFEMNonlinearSolverBase.md] — MFEM nonlinear solver objects.
 - `MFEMKernel` / `MFEMComplexKernel` — weak-form contributions to the equation system.
 - `MFEMBoundaryCondition` — boundary conditions applied to the equation system.
 

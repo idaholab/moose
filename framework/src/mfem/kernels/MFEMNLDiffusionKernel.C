@@ -20,7 +20,7 @@ MFEMNLDiffusionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the nonlinear form "
-                             "$(k(u) \\vec\\nabla u, \\vec\\nabla v)_\\Omega "
+                             "$(k(u) \\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the non-linear operator "
                              "$- \\vec\\nabla \\cdot (k(u) \\vec\\nabla u)$.");
   params.addParam<MFEMScalarCoefficientName>(

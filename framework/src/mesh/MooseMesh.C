@@ -329,33 +329,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _provided_coord_blocks(other_mesh._provided_coord_blocks),
     _doing_p_refinement(other_mesh._doing_p_refinement)
 {
-  // Note: this calls BoundaryInfo::operator= without changing the
-  // ownership semantics of either Mesh's BoundaryInfo object.
-  getMesh().get_boundary_info() = other_mesh.getMesh().get_boundary_info();
-
-  const std::set<SubdomainID> & subdomains = other_mesh.meshSubdomains();
-  for (const auto & sbd_id : subdomains)
-    setSubdomainName(sbd_id, other_mesh.getMesh().subdomain_name(sbd_id));
-
-  // Get references to BoundaryInfo objects to make the code below cleaner...
-  const BoundaryInfo & other_boundary_info = other_mesh.getMesh().get_boundary_info();
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
-
-  // Use the other BoundaryInfo object to build the list of side boundary ids
-  std::vector<BoundaryID> side_boundaries;
-  other_boundary_info.build_side_boundary_ids(side_boundaries);
-
-  // Assign those boundary ids in our BoundaryInfo object
-  for (const auto & side_bnd_id : side_boundaries)
-    boundary_info.sideset_name(side_bnd_id) = other_boundary_info.get_sideset_name(side_bnd_id);
-
-  // Do the same thing for node boundary ids
-  std::vector<BoundaryID> node_boundaries;
-  other_boundary_info.build_node_boundary_ids(node_boundaries);
-
-  for (const auto & node_bnd_id : node_boundaries)
-    boundary_info.nodeset_name(node_bnd_id) = other_boundary_info.get_nodeset_name(node_bnd_id);
-
   _bounds.resize(other_mesh._bounds.size());
   for (std::size_t i = 0; i < _bounds.size(); ++i)
   {
@@ -417,7 +390,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
-  bool called_prepare_for_use = false;
+  bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
 
@@ -434,13 +407,13 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   }
   else if (!_mesh->is_prepared())
   {
-    _mesh->prepare_for_use();
+    _mesh->complete_preparation();
     _moose_mesh_prepared = false;
-    called_prepare_for_use = true;
+    libmesh_mesh_prepared = true;
   }
 
   if (_moose_mesh_prepared)
-    return called_prepare_for_use;
+    return libmesh_mesh_prepared;
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
@@ -619,7 +592,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 
   _moose_mesh_prepared = true;
 
-  return called_prepare_for_use;
+  return libmesh_mesh_prepared;
 }
 
 void
@@ -1464,7 +1437,7 @@ MooseMesh::cacheInfo()
   _lower_d_interior_blocks.clear();
   _lower_d_boundary_blocks.clear();
 
-  auto & mesh = getMesh();
+  const auto & mesh = getMesh();
 
   // Cache higher and lowerD element information
   for (const auto & elem : mesh.element_ptr_range())
@@ -1500,7 +1473,7 @@ MooseMesh::cacheInfo()
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
-      Node & node = *elem->node_ptr(nd);
+      const Node & node = *elem->node_ptr(nd);
       _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
@@ -1518,7 +1491,7 @@ MooseMesh::cacheInfo()
       const auto & boundary_ids = elem_boundary_ids[side];
       sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
 
-      Elem * neig = elem->neighbor_ptr(side);
+      const Elem * neig = elem->neighbor_ptr(side);
       if (neig)
       {
         _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),

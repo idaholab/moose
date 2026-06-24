@@ -16,8 +16,8 @@ inner_duct_in = 3.41e-2
 heated_length = 1.0
 ###################################################
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = ${n_rings}
     n_cells = ${n_cells}
     flat_to_flat = ${inner_duct_in}
@@ -28,15 +28,6 @@ heated_length = 1.0
     hwire = ${wire_z_spacing}
     spacer_z = '0.0'
     spacer_k = '0.0'
-  []
-
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = ${n_rings}
-    n_cells = ${n_cells}
-    heated_length = ${heated_length}
-    pitch = ${fuel_pin_pitch}
   []
 []
 
@@ -154,7 +145,7 @@ heated_length = 1.0
     variable = T
     boundary = inlet
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -163,7 +154,7 @@ heated_length = 1.0
     area = S
     mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
 []
 
@@ -226,12 +217,14 @@ heated_length = 1.0
 [Transfers]
   [subchannel_transfer]
     type = SCMSolutionTransfer
+    transfer_type = subchannel
     to_multi_app = viz
     variable = 'mdot SumWij P h T rho mu S'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
-    variable = 'Dpin Tpin q_prime'
+    variable = 'Tpin q_prime Dpin'
   []
 []

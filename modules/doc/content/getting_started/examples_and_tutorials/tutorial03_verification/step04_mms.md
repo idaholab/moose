@@ -96,7 +96,7 @@ constant values defined in [tutorial03-snow-values].
 
 The boundary portions of the weak form are defined using the
 [Boundary Condition System](syntax/BCs/index.md) in the `[BCs]` block. At top of the domain ($y=0$) a
-Neumann condition is applied with a constant outward flux. On the button of the domain
+Neumann condition is applied with a constant outward flux. On the bottom of the domain
 ($y=-0.2 \textrm{m}$) a constant temperature is defined.
 
 !listing tutorial03_verification/app/test/tests/step04_mms/2d_main.i link=False block=BCs

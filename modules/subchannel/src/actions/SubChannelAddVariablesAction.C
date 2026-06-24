@@ -70,8 +70,26 @@ SubChannelAddVariablesAction::act()
 
     const auto & generator_type = mesh_action->getParam<std::string>("type");
 
-    if (generator_type == "SCMQuadSubChannelMeshGenerator" ||
-        generator_type == "SCMTriSubChannelMeshGenerator")
+    if (generator_type == "SCMQuadAssemblyMeshGenerator")
+    {
+      fluid_blocks = {"subchannel"};
+      const auto & mesh_generator_params = mesh_action->getObjectParams();
+      const auto nx = mesh_generator_params.get<unsigned int>("nx");
+      const auto ny = mesh_generator_params.get<unsigned int>("ny");
+      if (nx > 1 && ny > 1)
+      {
+        pin_mesh_exist = true;
+        pin_blocks = {"fuel_pins"};
+      }
+    }
+    else if (generator_type == "SCMTriAssemblyMeshGenerator")
+    {
+      fluid_blocks = {"subchannel"};
+      pin_mesh_exist = true;
+      pin_blocks = {"fuel_pins"};
+    }
+    else if (generator_type == "SCMQuadSubChannelMeshGenerator" ||
+             generator_type == "SCMTriSubChannelMeshGenerator")
     {
       // Use the user-provided mesh generator block name
       fluid_blocks = {mesh_action->name()};
@@ -94,7 +112,7 @@ SubChannelAddVariablesAction::act()
 
   // Backward-compatible fallback if no explicit subchannel mesh generator name was found
   if (fluid_blocks.empty())
-    fluid_blocks = {"sub_channel"};
+    fluid_blocks = {"subchannel"};
 
   std::vector<std::pair<std::string, std::vector<SubdomainName>>> vars_to_add;
 

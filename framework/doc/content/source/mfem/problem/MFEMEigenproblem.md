@@ -27,7 +27,7 @@ Computed eigenvalues can be exported using
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion_eigenproblem.i block=Problem Variables Solver
+!listing test/tests/mfem/kernels/diffusion_eigenproblem.i block=Problem Variables Solvers
 
 !syntax parameters /Problem/MFEMEigenproblem
 

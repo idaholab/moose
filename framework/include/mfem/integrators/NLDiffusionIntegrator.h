@@ -40,7 +40,6 @@ public:
 
 protected:
   mfem::DiffusionIntegrator _diffusion_integ;
-  mfem::ConstantCoefficient _neg_one{-1.0};
   mfem::GradientGridFunctionCoefficient _grad_trial;
   mfem::ScalarVectorProductCoefficient _neg_grad_trial;
   mfem::ScalarVectorProductCoefficient _neg_dk_du_grad_trial;

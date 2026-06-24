@@ -18,7 +18,7 @@ registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 InputParameters
 MFEMHypreBoomerAMG::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
                              "of MFEM equation systems.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
@@ -34,7 +34,7 @@ MFEMHypreBoomerAMG::validParams()
 }
 
 MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
+  : Moose::MFEM::LinearSolverBase(parameters),
     _mfem_fespace(
         isParamSetByUser("fespace")
             ? getMFEMProblem()
@@ -42,16 +42,17 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
                   .getFESpace()
             : nullptr)
 {
-  constructSolver();
+  ConstructSolver();
 }
 
 MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
 
 void
-MFEMHypreBoomerAMG::constructSolver()
+MFEMHypreBoomerAMG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
@@ -65,11 +66,11 @@ MFEMHypreBoomerAMG::constructSolver()
 }
 
 void
-MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreBoomerAMG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
-    checkSpectralEquivalence(a);
+    CheckSpectralEquivalence(a);
     auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));

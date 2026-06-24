@@ -18,8 +18,8 @@ vol_flow = 3.4E-03 #m3/s
 mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 36
     flat_to_flat = 0.0338514
@@ -59,6 +59,8 @@ P_out = 2.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = exponential
+  pin_HTC_closure = 'Dittus-Boelter'
+  # friction model
   friction_closure = 'cheng'
   full_output = true
   mixing_closure = 'cheng_todreas'
@@ -73,6 +75,9 @@ P_out = 2.0e5 # Pa
     type = SCMMixingChengTodreas
     CT = 2.0
   []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [ICs]
@@ -83,6 +88,12 @@ P_out = 2.0e5 # Pa
     variable = q_prime
     power = 332500.0 #W
     filename = "pin_power_profile_19.txt"
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.005842
   []
 
   [T_ic]

@@ -113,6 +113,9 @@ NewtonSolve(const T & x,
                    max_its,
                    ", exceeded");
 
+  // z was updated, we need to recompute the derivative
+  y_from_x_z(x, z, new_y, dy_dx, dy_dz);
+
   return {z, dy_dz};
 }
 

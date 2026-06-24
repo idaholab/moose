@@ -135,7 +135,7 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
 
-    // Initial guess for non-linear problems (initial condition or the previous time step solution)
+    // Initial guess for iterative solvers (initial condition or the previous time step solution)
     static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
@@ -291,7 +291,7 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    trueX.GetBlock(i).SyncMemory(trueX);
     _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }

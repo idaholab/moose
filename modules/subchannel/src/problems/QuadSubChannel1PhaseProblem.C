@@ -196,6 +196,9 @@ QuadSubChannel1PhaseProblem::initializeSolution()
 Real
 QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const
 {
+  if (!_pin_mesh_exist)
+    return 0.0;
+
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
   auto z1 = _z_grid[iz - 1];
@@ -206,25 +209,16 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
   {
     // Compute the height of this element.
     auto dz = z2 - z1;
-    if (_pin_mesh_exist)
+    auto heat_rate_in = 0.0;
+    auto heat_rate_out = 0.0;
+    for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
     {
-      auto heat_rate_in = 0.0;
-      auto heat_rate_out = 0.0;
-      for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
-      {
-        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
-        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-        heat_rate_out += 0.25 * (*_q_prime_soln)(node_out);
-        heat_rate_in += 0.25 * (*_q_prime_soln)(node_in);
-      }
-      return (heat_rate_in + heat_rate_out) * dz / 2.0;
+      auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+      auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+      heat_rate_out += 0.25 * (*_q_prime_soln)(node_out);
+      heat_rate_in += 0.25 * (*_q_prime_soln)(node_in);
     }
-    else
-    {
-      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
-    }
+    return (heat_rate_in + heat_rate_out) * dz / 2.0;
   }
   else
     return 0.0;

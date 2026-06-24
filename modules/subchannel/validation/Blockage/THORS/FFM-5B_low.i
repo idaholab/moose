@@ -18,8 +18,8 @@ inlet_vel = 0.48 #m/sec, low flow case
 mass_flux_in = '${fparse rho *  inlet_vel}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 50
     flat_to_flat = 0.0324290
@@ -57,6 +57,8 @@ P_out = 2.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = exponential
+  pin_HTC_closure = 'Dittus-Boelter'
+  # friction model
   friction_closure = 'cheng'
   full_output = true
   mixing_closure = 'cheng_todreas'
@@ -70,6 +72,9 @@ P_out = 2.0e5 # Pa
   [cheng_todreas]
     type = SCMMixingChengTodreas
     CT = 2.0
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
@@ -92,6 +97,12 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = DP
     value = 0.0
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.005842
   []
 
   [Viscosity_ic]
@@ -231,9 +242,16 @@ P_out = 2.0e5 # Pa
 []
 
 [Transfers]
-  [xfer]
+  [xfer_subchannel]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S w_perim'
+    transfer_type = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S displacement w_perim'
+  []
+  [xfer_q_prime]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    transfer_type = pin
+    variable = q_prime
   []
 []

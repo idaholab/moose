@@ -12,8 +12,7 @@ This AuxKernel does the same thing as the [SCMTriPowerIC](SCMTriPowerIC.md) IC k
 
 !! Intentional comment to provide extra spacing
 
-If the user has created a mesh for the pins, the axial heat rate `q_prime` will be assigned to the nodes of the pin mesh. If the user hasn't created a pin mesh the appropriate heat rate `q_prime` will be assigned to
-the nodes of the subchannel mesh.
+This AuxKernel requires a pin mesh. The axial heat rate `q_prime` is assigned only to the nodes of the pin mesh. If the subchannel mesh has no pin mesh, this object reports an error.
 
 !syntax parameters /AuxKernels/SCMTriPowerAux
 

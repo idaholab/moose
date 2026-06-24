@@ -5,7 +5,7 @@
 heated_length = 0.51
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMTriSubChannelMeshGenerator
+    type = SCMTriAssemblyMeshGenerator
     nrings = 4
     n_cells = 40
     flat_to_flat = 0.22
@@ -47,11 +47,56 @@ heated_length = 0.51
   []
 []
 
-
-[Outputs]
-  exodus = true
+[Postprocessors]
+  [center_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 54
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 55
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [center_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 54
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 55
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Outputs]
+  exodus = false
+  csv = true
 []

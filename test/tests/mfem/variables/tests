@@ -1,6 +1,6 @@
 [Tests]
-  design = 'syntax/Problem/index.md'
-  issues = '#29632'
+  design = 'MFEMProblem.md MFEMVariable.md'
+  issues = '#32940'
   [MFEMVariableSetupFromMOOSEVariables]
     type = XMLDiff
     input = mfem_variables_from_moose.i
@@ -12,5 +12,24 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
+  []
+  [MFEMDiffusionAltSyntax]
+    type = XMLDiff
+    input = ../kernels/diffusion.i
+    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
+                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'FESpaces/active= '
+               'Variables/concentration/type=MooseVariableBase Variables/concentration/family=LAGRANGE Variables/concentration/fespace= '
+               'AuxVariables/concentration_gradient/type=MooseVariableBase AuxVariables/concentration_gradient/family=NEDELEC_ONE AuxVariables/concentration_gradient/fespace= '
+               'AuxVariables/concentration_grad_curl/type=MooseVariableBase AuxVariables/concentration_grad_curl/family=RAVIART_THOMAS '
+               'AuxKernels/curl/type=MFEMCurlAux AuxKernels/curl/variable=concentration_grad_curl AuxKernels/curl/source=concentration_gradient '
+               'Postprocessors/conservative/type=MFEMVectorL2Error Postprocessors/conservative/variable=concentration_grad_curl Postprocessors/conservative/function="0 0 0" '
+               'Outputs/ParaViewDataCollection/hide=concentration_grad_curl'
+    allow_unused = true
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with variables created using the traditional syntax.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
   []
 []

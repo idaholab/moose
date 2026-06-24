@@ -142,7 +142,7 @@ can be done with the use of three `Kernel` objects as follows.
 
 The boundary portions of the equation weak form are defined using the
 Boundary Condition System in the `[BCs]` block. At top of the domain ($y=0$) a
-Neumann condition is applied with a constant outward flux. On the button of the domain
+Neumann condition is applied with a constant outward flux. On the bottom of the domain
 ($y=-0.2 \textrm{m}$) a constant temperature is defined. The remain boundaries are "insulated",
 which is known as the natural boundary condition.
 
@@ -175,7 +175,7 @@ Executing the simulation is straightforward, simply execute the heat transfer mo
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 2d_main.i
+~/projects/moose/modules/heat_transfer/heat_transfer-opt -i 2d_main.i
 ```
 
 !---

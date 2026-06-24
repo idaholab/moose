@@ -9,6 +9,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+import packaging
+
+if packaging.version.Version(vtk.__version__) >= packaging.version.parse("9.4"):
+    from vtk import vtkGenerateIds as vtkIdFilter
+else:
+    from vtk import vtkIdFilter
 
 from .ContourFilter import ContourFilter
 from .TransformFilter import TransformFilter
@@ -41,7 +47,7 @@ def create_basic_filter(vtkfilter_type):
 
 
 GeometryFilter = create_basic_filter(vtk.vtkCompositeDataGeometryFilter)
-IdFilter = create_basic_filter(vtk.vtkIdFilter)
+IdFilter = create_basic_filter(vtkIdFilter)
 CellCenters = create_basic_filter(vtk.vtkCellCenters)
 SelectVisiblePoints = create_basic_filter(vtk.vtkSelectVisiblePoints)
 CompositeDataProbeFilter = create_basic_filter(vtk.vtkCompositeDataProbeFilter)

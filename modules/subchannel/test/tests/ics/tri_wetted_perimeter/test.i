@@ -1,6 +1,6 @@
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 2
     flat_to_flat = 0.60
@@ -16,6 +16,7 @@
 
 [Variables]
   [w_perim]
+    block = subchannel
   []
 []
 
@@ -23,6 +24,31 @@
   [w_perim_IC]
     type = SCMTriWettedPerimIC
     variable = w_perim
+    block = subchannel
+  []
+[]
+
+[Postprocessors]
+  [center]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 24
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 25
+    execute_on = 'timestep_end'
+    height = 0.5
   []
 []
 
@@ -35,5 +61,6 @@
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
+  csv = true
 []

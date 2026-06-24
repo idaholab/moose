@@ -1,6 +1,6 @@
 [Tests]
   issues = '#29237'
-  design = 'SCMSolutionTransfer.md SCMPinSolutionTransfer.md'
+  design = 'SCMSolutionTransfer.md'
   [check]
     type = CSVDiff
     input = fuel_assembly.i

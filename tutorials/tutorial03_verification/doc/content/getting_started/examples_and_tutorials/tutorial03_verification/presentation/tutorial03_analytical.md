@@ -66,6 +66,14 @@ configuration of a first-order Lagrange finite element variable.
 
 !---
 
+### Initial Conditions
+
+The initial condition for temperature at the beginning of the simulation is set using the Initial Condition System in the `[ICs]` block. At $t=0$, an constant initial value of $T=300$ is applied uniformly across the problem.
+
+!listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=ICs
+
+!---
+
 ### Kernels
 
 The "volumetric" portions equation weak form are defined using the Kernel System in the `[Kernels]`
@@ -110,7 +118,7 @@ Executing the simulation is straightforward, simply execute the heat transfer mo
 with the input file included using the "-i" option as follows.
 
 ```
-~/projects/moose/modules/heat_transfer/heat_conduction-opt -i 1d_analytical.i
+~/projects/moose/modules/heat_transfer/heat_transfer-opt -i 1d_analytical.i
 ```
 
 !---
@@ -137,7 +145,7 @@ then the names in "symbol_names" can be used in the definition of the equation i
 ### $L_2$ Error
 
 The $L_2$-norm of the difference between the computed and exact solution
-can be computed using the `NodalL2Error` object. This is created within the `[Postprocessors]` block
+can be computed using the `ElementL2Error` object. This is created within the `[Postprocessors]` block
 along with the average element size.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Postprocessors

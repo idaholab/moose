@@ -4,6 +4,7 @@
   [test_signal]
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
+    cli_args = 'UserObjects/wait_for_signal/enable=true'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
     recover = false
     max_threads = 1
@@ -45,7 +46,7 @@
     requirement = 'The app should write out a parallel checkpoint file at any time by sending a signal to it.'
     min_parallel = 3
     max_parallel = 3
-    cli_args = 'Executioner/num_steps=70'
+    cli_args = 'Executioner/num_steps=70 UserObjects/wait_for_signal/enable=true'
     max_threads = 1
     recover = false
     capabilities = 'method=opt'
@@ -85,7 +86,7 @@
     type = SignalTester
     input = 'simple_transient_diffusion_scaled.i'
     requirement = 'The app should write out a checkpoint file at any time by sending a signal to it, in a debug build.'
-    cli_args = 'Mesh/uniform_refine=0 Outputs/file_base="simple_transient_diffusion_scaled_dbg"'
+    cli_args = 'Mesh/uniform_refine=0 Outputs/file_base="simple_transient_diffusion_scaled_dbg" UserObjects/wait_for_signal/enable=true'
     recover = false
     capabilities = 'method=dbg'
   []

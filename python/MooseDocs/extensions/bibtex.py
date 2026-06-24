@@ -34,6 +34,72 @@ BibtexCite = tokens.newToken("BibtexCite", keys=[])
 BibtexBibliography = tokens.newToken("BibtexBibliography", bib_style="")
 BibtexList = tokens.newToken("BibtexList", BibtexBibliography, bib_files=None)
 
+# Maps BibTeX entry types to RIS reference types; unknown types fall back to GEN.
+RIS_TYPES = {
+    "article": "JOUR",
+    "book": "BOOK",
+    "booklet": "BOOK",
+    "inbook": "CHAP",
+    "incollection": "CHAP",
+    "inproceedings": "CPAPER",
+    "conference": "CPAPER",
+    "manual": "GEN",
+    "mastersthesis": "THES",
+    "phdthesis": "THES",
+    "proceedings": "CONF",
+    "techreport": "RPRT",
+    "unpublished": "UNPB",
+    "misc": "GEN",
+}
+
+
+def bibtex_to_ris(entry):
+    """Convert a pybtex bibliography entry into an RIS-formatted string.
+
+    RIS is the interchange format imported by reference managers used outside of
+    LaTeX, such as Microsoft Word, EndNote, Zotero, and Mendeley. pybtex provides
+    no RIS writer, so the common fields are mapped here by hand.
+    """
+    to_text = LatexNodes2Text().latex_to_text
+    fields = entry.fields
+    lines = [("TY", RIS_TYPES.get(entry.type, "GEN"))]
+
+    persons = entry.persons.get("author") or entry.persons.get("editor") or []
+    for person in persons:
+        # RIS author names are "family, given, suffix"; the family name keeps any
+        # particle (e.g. "van") and the suffix holds the lineage (e.g. "Jr.").
+        last = to_text(" ".join(person.prelast_names + person.last_names))
+        given = to_text(" ".join(person.first_names + person.middle_names))
+        name = "{}, {}".format(last, given) if given else last
+        if person.lineage_names:
+            name += ", {}".format(to_text(" ".join(person.lineage_names)))
+        lines.append(("AU", name))
+
+    field_map = [
+        ("TI", "title"),
+        ("JO", "journal"),
+        ("T2", "booktitle"),
+        ("PY", "year"),
+        ("VL", "volume"),
+        ("IS", "number"),
+        ("PB", "publisher"),
+        ("CY", "address"),
+        ("DO", "doi"),
+        ("UR", "url"),
+    ]
+    for tag, field in field_map:
+        if field in fields:
+            lines.append((tag, to_text(fields[field])))
+
+    if "pages" in fields:
+        parts = fields["pages"].replace("--", "-").split("-")
+        lines.append(("SP", parts[0].strip()))
+        if len(parts) > 1:
+            lines.append(("EP", parts[-1].strip()))
+
+    lines.append(("ER", ""))
+    return "\n".join("{}  - {}".format(tag, value) for tag, value in lines)
+
 
 class BibtexExtension(command.CommandExtension):
     """
@@ -48,6 +114,11 @@ class BibtexExtension(command.CommandExtension):
             "Show a warning when duplicate entries detected.",
         )
         config["duplicates"] = (list(), "A list of duplicates that are allowed.")
+        config["citation_style"] = (
+            "author-year",
+            "The inline citation style: 'author-year' (e.g. 'Smith et al. (2024)') "
+            "or 'number' (e.g. '[1]').",
+        )
         return config
 
     def __init__(self, *args, **kwargs):
@@ -90,6 +161,19 @@ class BibtexExtension(command.CommandExtension):
     def preRead(self, page):
         """Initialize the page citations list."""
         page["citations"] = list()
+        page["citation_numbers"] = None
+
+    def citationNumbers(self, page):
+        """Return a {key: number} map for a page, numbered in order of first
+        citation appearance (deduplicated). Used by the 'number' citation style."""
+        numbers = page.get("citation_numbers")
+        if numbers is None:
+            numbers = dict()
+            for key in page.get("citations", list()):
+                if key not in numbers:
+                    numbers[key] = len(numbers) + 1
+            page["citation_numbers"] = numbers
+        return numbers
 
     def postTokenize(self, page, ast):
         if page["citations"]:
@@ -200,6 +284,9 @@ class RenderBibtexCite(components.RenderComponent):
         if cite == "nocite":
             return parent
 
+        if self.extension.get("citation_style") == "number":
+            return self._createNumberHTML(parent, token, page)
+
         citep = cite == "citep"
         if citep:
             html.String(parent, content="(")
@@ -213,38 +300,7 @@ class RenderBibtexCite(components.RenderComponent):
                 continue
 
             entry = self.extension.database().entries[key]
-            author_found = True
-            if (
-                not "author" in entry.persons.keys()
-                and not "Author" in entry.persons.keys()
-            ):
-                author_found = False
-                entities = ["institution", "organization"]
-                for entity in entities:
-                    if entity in entry.fields.keys():
-                        author_found = True
-                        name = ""
-                        for word in entry.fields[entity]:
-                            if word[0].isupper():
-                                name += word[0]
-                        entry.persons["author"] = [Person(name)]
-
-            if not author_found:
-                msg = "No author, institution, or organization for {}"
-                raise exceptions.MooseDocsException(msg, key)
-
-            a = entry.persons["author"]
-            n = len(a)
-            if n > 2:
-                author = "{} et al.".format(" ".join(a[0].last_names))
-            elif n == 2:
-                a0 = " ".join(a[0].last_names)
-                a1 = " ".join(a[1].last_names)
-                author = "{} and {}".format(a0, a1)
-            else:
-                author = " ".join(a[0].last_names)
-
-            author = LatexNodes2Text().latex_to_text(author)
+            author = self._authorString(key, entry)
 
             form = "{}, {}" if citep else "{} ({})"
             year = entry.fields.get("year", None)
@@ -270,6 +326,83 @@ class RenderBibtexCite(components.RenderComponent):
         if citep:
             html.String(parent, content=")")
 
+        return parent
+
+    def _authorString(self, key, entry):
+        """Return the inline author label for an entry, e.g. 'Slaughter et al.'.
+
+        Falls back to initials of the institution or organization when the entry
+        has no author."""
+        author_found = True
+        if (
+            not "author" in entry.persons.keys()
+            and not "Author" in entry.persons.keys()
+        ):
+            author_found = False
+            entities = ["institution", "organization"]
+            for entity in entities:
+                if entity in entry.fields.keys():
+                    author_found = True
+                    name = ""
+                    for word in entry.fields[entity]:
+                        if word[0].isupper():
+                            name += word[0]
+                    entry.persons["author"] = [Person(name)]
+
+        if not author_found:
+            msg = "No author, institution, or organization for {}"
+            raise exceptions.MooseDocsException(msg, key)
+
+        a = entry.persons["author"]
+        n = len(a)
+        if n > 2:
+            author = "{} et al.".format(" ".join(a[0].last_names))
+        elif n == 2:
+            a0 = " ".join(a[0].last_names)
+            a1 = " ".join(a[1].last_names)
+            author = "{} and {}".format(a0, a1)
+        else:
+            author = " ".join(a[0].last_names)
+
+        return LatexNodes2Text().latex_to_text(author)
+
+    def _createNumberHTML(self, parent, token, page):
+        """Render citations using bracketed numbers that match the reference list.
+
+        Parenthetical citations (!citep) render as just the number, e.g. '[1, 2]'.
+        Textual citations (!cite, !citet) prepend the author so the citation reads
+        as part of the sentence, e.g. 'Slaughter et al. [1]'."""
+        numbers = self.extension.citationNumbers(page)
+        textual = token["cite"] != "citep"
+        num_keys = len(token["keys"])
+        if not textual:
+            html.String(parent, content="[")
+        for i, key in enumerate(token["keys"]):
+            if key not in self.extension.database().entries:
+                LOG.error("Unknown BibTeX key: %s", key)
+                html.Tag(parent, "span", string=key, style="color:red;")
+            elif textual:
+                entry = self.extension.database().entries[key]
+                html.String(
+                    parent, content="{} ".format(self._authorString(key, entry))
+                )
+                html.Tag(
+                    parent,
+                    "a",
+                    href="#{}".format(key),
+                    string="[{}]".format(numbers.get(key)),
+                )
+            else:
+                html.Tag(
+                    parent,
+                    "a",
+                    href="#{}".format(key),
+                    string=str(numbers.get(key)),
+                )
+            if i != num_keys - 1:
+                html.String(parent, content=", ")
+        if not textual:
+            html.String(parent, content="]")
         return parent
 
     def createMaterialize(self, parent, token, page):
@@ -306,7 +439,11 @@ class RenderBibtexBibliography(components.RenderComponent):
             ol = html.Tag(div, "ol")
 
             backend = html_backend(encoding="utf-8")
-            for entry in formatted_bibliography:
+            entries = list(formatted_bibliography)
+            if self.extension.get("citation_style") == "number":
+                numbers = self.extension.citationNumbers(page)
+                entries.sort(key=lambda e: numbers.get(e.key, len(numbers) + 1))
+            for entry in entries:
                 text = entry.text.render(backend)
                 html.Tag(ol, "li", id_=entry.key, string=text)
 
@@ -322,9 +459,23 @@ class RenderBibtexBibliography(components.RenderComponent):
 
         for child in ol.children:
             key = child["id"]
+            entry = self.extension.database().entries[key]
+
             db = BibliographyData()
-            db.add_entry(key, self.extension.database().entries[key])
-            btex = db.to_string("bibtex")
+            db.add_entry(key, entry)
+            # The 'language-*' class lets Prism wrap each block in its toolbar
+            # (adding the Copy button and overflow scrolling). RIS and plain text
+            # have no Prism grammar, so 'language-none' gives them the same toolbar
+            # without syntax coloring.
+            formats = [
+                ("BibTeX", db.to_string("bibtex"), "language-latex"),
+                ("RIS", bibtex_to_ris(entry), "language-none"),
+                (
+                    "Plain Text",
+                    self._plainText(key, token["bib_style"]),
+                    "language-none",
+                ),
+            ]
 
             m_id = uuid.uuid4()
             html.Tag(
@@ -333,15 +484,26 @@ class RenderBibtexBibliography(components.RenderComponent):
                 style="padding-left:10px;",
                 class_="modal-trigger moose-bibtex-modal",
                 href="#{}".format(m_id),
-                string="[BibTeX]",
+                string="[Export]",
             )
 
             modal = html.Tag(child, "div", class_="modal", id_=m_id)
             content = html.Tag(modal, "div", class_="modal-content")
-            pre = html.Tag(content, "pre", style="line-height:1.25;")
-            html.Tag(pre, "code", class_="language-latex", string=btex)
+            for name, text, lang in formats:
+                html.Tag(content, "h6", string=name)
+                pre = html.Tag(content, "pre", style="line-height:1.25;")
+                html.Tag(pre, "code", class_=lang, string=text)
 
         return ol
+
+    def _plainText(self, key, bib_style):
+        """Render a single citation as a plain-text reference string."""
+        style = find_plugin("pybtex.style.formatting", bib_style or "plain")
+        formatted = style().format_bibliography(self.extension.database(), [key])
+        backend = find_plugin("pybtex.backends", "plaintext")(encoding="utf-8")
+        for entry in formatted:
+            return entry.text.render(backend)
+        return ""
 
     def createLatex(self, parent, token, page):
         pass

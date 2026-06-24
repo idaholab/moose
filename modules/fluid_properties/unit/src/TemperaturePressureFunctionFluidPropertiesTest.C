@@ -183,6 +183,30 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     ABS_TEST(_fp_cp->p_from_v_e(v, e), p, newton_tol);
     ABS_TEST(_fp_cp->mu_from_v_e(v, e), visc, large_tol);
   }
+
+  // Testing the incompressible fluid
+  {
+    Real p = 1.06841E8;
+    Real T = 300.0;
+    Real cp = 3000. + 3 * T + 5e-4 * p;
+    Real e = 17061150.0000000037;
+    Real v = 1. / 2000.;
+    Real h = e + p * v;
+    Real cv = cp;
+
+    // Some of these routines used to fail with cp_function input and incompressible fluid
+    ABS_TEST(_fp_incompressible->cp_from_p_T(p, T), cp, tol);
+    ABS_TEST(_fp_incompressible->cv_from_p_T(p, T), cv, tol);
+    ABS_TEST(_fp_incompressible->e_from_p_T(p, T), e, tol);
+    // ABS_TEST(_fp_incompressible->e_from_p_rho(p, 1. / v), e, tol); // T_from_p_rho cannot be done
+    // with incompressible
+    ABS_TEST(_fp_incompressible->T_from_p_h(p, _fp_incompressible->h_from_p_T(p, T)), T, large_tol);
+    ABS_TEST(_fp_incompressible->h_from_p_T(p, T), h, tol);
+
+    // Pressure derivative is not as accurate due to missing term in e(p,T) calculation
+    DERIV_TEST(_fp_incompressible->e_from_p_T, p, T, 1e-5);
+    DERIV_TEST(_fp_incompressible->h_from_p_T, p, T, 1e-5);
+  }
 }
 
 /**

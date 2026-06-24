@@ -32,8 +32,8 @@ Or, the user uses a function of temperature and pressure (same arguments as for 
 \begin{aligned}
   x = T \\
   y = P \\
-  cp = cp^{u}(t=0, (x=T, y=P, z=0))
-  cv = cp - \dfrac{\alpha^2 T}{\rho \beta_T}
+  c_p = c_p^{u}(t=0, (x=T, y=P, z=0)) \\
+  c_v = c_p - \dfrac{\alpha^2 T}{\rho \beta_T}
 \end{aligned}
 \end{equation}
 
@@ -56,6 +56,8 @@ conversions between specific enthalpy and specific energy.
 When using a function for the isobaric specific heat capacity, a numerical integration is performed to compute
 $e(p,T)$ as $e_{ref} + \int_{T_{ref}}^T c_v(p,T) dT$. Note that this neglects the $dV$ term. This is exact
 for incompressible fluids and ideal gases.
+
+For incompressible fluids, we enforce $c_p = c_v$ and avoid the division by $\beta_T$.
 
 ## Example Input File Syntax
 

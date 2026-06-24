@@ -19,13 +19,8 @@ heated_length = 1.0
 []
 
 [QuadSubChannelMesh]
-    [sub_channel]
-        type = SCMQuadSubChannelMeshGenerator
-    []
-
-    [fuel_pins]
-        type = SCMQuadPinMeshGenerator
-        input = sub_channel
+    [subchannel]
+        type = SCMQuadAssemblyMeshGenerator
     []
 []
 

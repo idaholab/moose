@@ -10,7 +10,7 @@
 
 [Mesh]
   [subchannel]
-    type = SCMDetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriAssemblyMeshGenerator
     nrings = 3
     n_cells = 36
     flat_to_flat = 3.41e-2
@@ -44,6 +44,7 @@
   [w_perim]
   []
   [q_prime]
+    block = fuel_pins
   []
 []
 

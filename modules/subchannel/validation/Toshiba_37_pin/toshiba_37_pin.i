@@ -3,8 +3,8 @@ T_in = 660
 mass_flux_in = '${fparse 1e+6 * 37.00 / 36000.*0.5}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 4
     n_cells = 20
     flat_to_flat = 0.085
@@ -24,6 +24,48 @@ P_out = 2.0e5 # Pa
   []
 []
 
+[AuxVariables]
+  [mdot]
+    block = subchannel
+  []
+  [SumWij]
+    block = subchannel
+  []
+  [P]
+    block = subchannel
+  []
+  [DP]
+    block = subchannel
+  []
+  [h]
+    block = subchannel
+  []
+  [T]
+    block = subchannel
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
+  []
+  [rho]
+    block = subchannel
+  []
+  [mu]
+    block = subchannel
+  []
+  [S]
+    block = subchannel
+  []
+  [w_perim]
+    block = subchannel
+  []
+  [q_prime]
+    block = fuel_pins
+  []
+[]
+
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
@@ -39,6 +81,8 @@ P_out = 2.0e5 # Pa
   staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
+  pin_HTC_closure = 'Dittus-Boelter'
+  # friction model
   friction_closure = 'cheng'
   full_output = true
   mixing_closure = 'cheng_todreas'
@@ -52,6 +96,9 @@ P_out = 2.0e5 # Pa
   [cheng_todreas]
     type = SCMMixingChengTodreas
   []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [ICs]
@@ -62,6 +109,12 @@ P_out = 2.0e5 # Pa
     variable = q_prime
     power = 1.000e5 # W
     filename = "pin_power_profile_37.txt"
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.01
   []
 
   [T_ic]
@@ -165,10 +218,17 @@ P_out = 2.0e5 # Pa
   []
 []
 
+###### Transfers to the detailedMesh at the end of the coupled simulations
 [Transfers]
-  [xfer]
+  [subchannel_transfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [pin_transfer]
+    type = SCMSolutionTransfer
+    transfer_type = pin
+    to_multi_app = viz
+    variable = 'Tpin q_prime'
   []
 []

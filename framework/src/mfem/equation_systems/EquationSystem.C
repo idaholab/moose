@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystem.h"
+#include "MFEMLinearSolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -235,7 +236,7 @@ EquationSystem::ApplyEssentialBCs()
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
 
-    // Initial guess for non-linear problems (initial condition or the previous time step solution)
+    // Initial guess for iterative solvers (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
@@ -386,20 +387,9 @@ EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRH
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  // Update gridfunctions that may be referenced by coefficients within nonlinear integrators
-  const mfem::BlockVector blockSolution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
-  SetTrialVariablesFromTrueVectors(blockSolution);
-
   if (_non_linear)
   {
-    mfem::BlockVector blockResidual(residual, _block_true_offsets);
-    for (unsigned int i = 0; i < _test_var_names.size(); i++)
-    {
-      auto & test_var_name = _test_var_names.at(i);
-      auto nlf = _nlfs.GetShared(test_var_name);
-      nlf->Mult(blockSolution.GetBlock(i), blockResidual.GetBlock(i));
-      blockResidual.GetBlock(i).SyncAliasMemory(blockResidual);
-    }
+    ComputeNonlinearResidual(sol, residual);
     _linear_operator->AddMult(sol, residual);
   }
   else
@@ -410,6 +400,25 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
   sol.HostRead();
   residual.HostRead();
+}
+
+void
+EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector & residual) const
+{
+  mooseAssert(_non_linear, "Should not be calling this method if our forms are not nonlinear");
+  residual = 0.0;
+
+  const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
+  SetTrialVariablesFromTrueVectors(block_solution);
+
+  mfem::BlockVector block_residual(residual, _block_true_offsets);
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    block_residual.GetBlock(i).SyncAliasMemory(block_residual);
+  }
 }
 
 void
@@ -447,7 +456,12 @@ mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   if (_non_linear)
+  {
+    if (_assembly_level != mfem::AssemblyLevel::LEGACY)
+      mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
+                 "assembly in EquationSystem.");
     const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
+  }
   else
     _jacobian = _linear_operator;
 
@@ -460,7 +474,7 @@ EquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    trueX.GetBlock(i).SyncMemory(trueX);
     _gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
@@ -503,8 +517,8 @@ EquationSystem::BuildNonlinearForms()
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map);
-    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map);
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
+    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
   }
 }
 
@@ -575,6 +589,137 @@ EquationSystem::BuildEquationSystem()
   BuildMixedBilinearForms();
   BuildLinearForms();
   BuildNonlinearForms();
+}
+
+void
+EquationSystem::ApplyDomainLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+{
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
+
+      if (integ)
+      {
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+void
+EquationSystem::ApplyDomainNLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParNonlinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    std::optional<mfem::real_t> scale_factor)
+{
+  if (kernels_map.Has(test_var_name))
+    for (const auto & [trial_var_name, kernels] : kernels_map.GetRef(test_var_name))
+      for (auto & kernel : *kernels)
+        if (auto * integ = kernel->createNLIntegrator())
+        {
+          if (_solver_requires_gradient && (trial_var_name != test_var_name))
+            mooseError("Support for off-diagonal MFEM nonlinear domain integrators in conjunction "
+                       "with a nonlinear solver that requires a gradient is not currently "
+                       "implemented. Kernel '",
+                       kernel->name(),
+                       "' contributes to test variable '",
+                       test_var_name,
+                       "' from trial variable '",
+                       trial_var_name,
+                       "'.");
+
+          _non_linear = true;
+          if (scale_factor.has_value())
+            integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+          kernel->isSubdomainRestricted()
+              ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+              : form->AddDomainIntegrator(std::move(integ));
+        }
+}
+
+void
+EquationSystem::ApplyBoundaryLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map)
+{
+  if (integrated_bc_map.Has(test_var_name) &&
+      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
+
+      if (integ)
+      {
+        bc->isBoundaryRestricted()
+            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+            : form->AddBoundaryIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+void
+EquationSystem::ApplyBoundaryNLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParNonlinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map,
+    std::optional<mfem::real_t> scale_factor)
+{
+  if (integrated_bc_map.Has(test_var_name))
+    for (const auto & [trial_var_name, bcs] : integrated_bc_map.GetRef(test_var_name))
+      for (auto & bc : *bcs)
+        if (auto * integ = bc->createNLIntegrator())
+        {
+          if (_solver_requires_gradient && (test_var_name != trial_var_name))
+            mooseError(
+                "Support for Off-diagonal MFEM nonlinear boundary integrators in conjunction with "
+                "a nonlinear solver that requires a gradient is not currently "
+                "implemented. Boundary condition '",
+                bc->name(),
+                "' contributes to test variable '",
+                test_var_name,
+                "' from trial variable '",
+                trial_var_name,
+                "'.");
+
+          _non_linear = true;
+          if (scale_factor.has_value())
+            integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+          bc->isBoundaryRestricted()
+              ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+              : form->AddBoundaryIntegrator(std::move(integ));
+        }
+}
+
+void
+EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
+{
+  if (solver.IsLOR())
+  {
+    if (Complex())
+      mooseError("LOR solve is not supported for complex equation systems.");
+    if (_test_var_names.size() > 1)
+      mooseError("LOR solve is only supported for single-variable systems");
+    solver.SetupLOR(*_blfs.Get(_test_var_names.at(0)), _ess_tdof_lists.at(0));
+  }
+
+  mooseAssert(_linear_operator.Ptr(),
+              "If we are preparing a linear solver, we better have a linear operator");
+  solver.SetOperator(_linear_operator);
 }
 
 } // namespace Moose::MFEM

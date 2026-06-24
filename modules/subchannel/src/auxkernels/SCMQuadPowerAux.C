@@ -19,8 +19,8 @@ SCMQuadPowerAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-      "Computes axial power rate (W/m) that goes into the subchannel cells "
-      "or is assigned to the fuel pins, in a quadrilateral lattice arrangement");
+      "Computes axial power rate (W/m) assigned to the fuel pins in a quadrilateral lattice "
+      "arrangement");
   params.addRequiredParam<PostprocessorName>(
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
@@ -43,12 +43,14 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
   if (processor_id() > 0)
     return;
 
-  auto nx = _quadMesh.getNx();
-  auto ny = _quadMesh.getNy();
+  if (!_quadMesh.pinMeshExist())
+    mooseError(name(), ": This object requires a pin mesh.");
+
+  auto n_pins = _quadMesh.getNumOfPins();
   // Matrix sizing
-  _power_dis.resize((ny - 1) * (nx - 1), 1);
+  _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
-  _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
+  _pin_power_correction.resize(n_pins, 1);
   _pin_power_correction.setOnes();
 
   Real vin;
@@ -64,8 +66,8 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
   if (inFile.fail() && !inFile.eof())
     mooseError(name(), " non numerical input at line : ", _numberoflines);
 
-  if (_numberoflines != (ny - 1) * (nx - 1))
-    mooseError(name(), " Radial profile file doesn't have correct size : ", (ny - 1) * (nx - 1));
+  if (_numberoflines != n_pins)
+    mooseError(name(), " Radial profile file doesn't have correct size : ", n_pins);
   inFile.close();
 
   inFile.open(_filename);
@@ -85,9 +87,7 @@ SCMQuadPowerAux::initialSetup()
   if (processor_id() > 0)
     return;
 
-  auto nx = _quadMesh.getNx();
-  auto ny = _quadMesh.getNy();
-  auto n_pins = (nx - 1) * (ny - 1);
+  auto n_pins = _quadMesh.getNumOfPins();
   auto nz = _quadMesh.getNumOfAxialCells();
   auto z_grid = _quadMesh.getZGrid();
   auto heated_length = _quadMesh.getHeatedLength();
@@ -168,31 +168,13 @@ SCMQuadPowerAux::computeValue()
   auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
   Point P = p - p1;
-  auto pin_mesh_exist = _quadMesh.pinMeshExist();
 
   /// assign power to the nodes located within the heated section
   if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
       MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    if (pin_mesh_exist)
-    {
-      // project axial heat rate on pins
-      auto i_pin = _quadMesh.getPinIndexFromPoint(p);
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    }
-    else
-    {
-      // project axial heat rate on subchannels
-      auto i_ch = _quadMesh.getSubchannelIndexFromPoint(p);
-      // if we are adjacent to the heated part of the fuel Pin
-      auto heat_rate = 0.0;
-      for (auto i_pin : _quadMesh.getChannelPins(i_ch))
-      {
-        heat_rate += 0.25 * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                     _axial_heat_rate.value(_t, P);
-      }
-      return heat_rate;
-    }
+    auto i_pin = _quadMesh.getPinIndexFromPoint(p);
+    return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
   }
   else
     return 0.0;

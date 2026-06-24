@@ -13,10 +13,9 @@
 
 #include "EquationSystem.h"
 
-class MFEMEigensolverBase;
-
 namespace Moose::MFEM
 {
+class EigensolverBase;
 
 /// Equation system specialization for eigenproblems.
 class EigenproblemEquationSystem : public EquationSystem
@@ -26,22 +25,27 @@ public:
   ~EigenproblemEquationSystem() override = default;
 
   /// Build eigenproblem system, with essential boundary conditions accounted for
-  void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
+  void BuildEigenproblemJacobian(mfem::BlockVector & trueX);
+
+  /// Prepare the provided eigensolver
+  void PrepareEigensolver(EigensolverBase & solver);
 
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
-  virtual void FormEigenproblemMatrix(mfem::OperatorHandle & op);
+  void FormEigenproblemMatrix();
 
   /// Form mass matrix for the eigensolver with Dirichlet BC elimination.
-  void FormMassMatrix(mfem::OperatorHandle & op);
+  void FormMassMatrix();
 
 private:
   friend class EigenproblemESProblemOperator;
 
   mfem::Array<int> _global_ess_markers;
+  /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
+  mfem::OperatorHandle _mass_rhs;
 };
 
 } // namespace Moose::MFEM

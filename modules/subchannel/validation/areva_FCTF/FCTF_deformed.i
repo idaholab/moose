@@ -37,8 +37,8 @@ unheated_length_exit = 0.855 #m
 ###################################################
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = ${n_rings}
     n_cells = 65
     flat_to_flat = ${inner_duct_in}
@@ -53,16 +53,6 @@ unheated_length_exit = 0.855 #m
     spacer_k = '0.0'
   []
 
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = ${n_rings}
-    n_cells = 65
-    unheated_length_entry = ${unheated_length_entry}
-    heated_length = ${heated_length}
-    unheated_length_exit = ${unheated_length_exit}
-    pitch = ${fuel_pin_pitch}
-  []
 []
 
 [Functions]
@@ -189,7 +179,7 @@ unheated_length_exit = 0.855 #m
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -230,7 +220,8 @@ unheated_length_exit = 0.855 #m
     variable = 'mdot SumWij P DP h T rho mu S displacement'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Dpin Tpin q_prime'
   []

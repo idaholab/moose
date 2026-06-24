@@ -66,7 +66,7 @@ If you find yourself creating autolinks across pages from different configuratio
 concerned about them failing when only building one of those configurations, consider using the
 `alternative` setting (see the [MooseDocs/extensions/autolink.md] page for more information).
 
-### Advanced Content
+### Advanced Content id=advanced-content
 
 There is also a more advanced interface for the content, but it is required to explain how these
 directories are used. When building content all relevant files (e.g., markdown) are extracted from
@@ -80,11 +80,12 @@ doc/content/index.md -> ${HOME}/.local/share/moose/site/index.html
 ${MOOSE_DIR}/framework/doc/content/utilities/index.md -> ${HOME}/.local/share/moose/site/utilties/index.md
 ```
 
-In the advanced mode the root location can be specified for each location, in this case the
+In the advanced mode, the root location can be specified for each content entry. In this case, the
 content configuration section contains a dictionary of dictionaries as shown below. The top-level key
-is an arbitrary name, the second level has two keys available: "root_dir" and "content". The
-root_dir is the directory to include and "content" is a list of folders and/or files within the
-root_dir to consider.
+is an arbitrary name, the second level has three keys available: "root_dir", "content", and
+"external". The "root_dir" is the directory to include and "content" is a list of folders and/or files
+within the "root_dir" to consider. The "external" key is described in
+[#optional-dependencies].
 
 
 ```yaml
@@ -105,7 +106,52 @@ doc/content/index.md -> ${HOME}/.local/share/moose/site/index.html
 ${MOOSE_DIR}/framework/doc/content/utilities/MooseDocs/setup.md -> ${HOME}/.local/share/moose/site/MooseDocs/setup.md
 ```
 
-## Extensions
+## Optional Dependencies id=optional-dependencies
+
+An application may pull documentation from dependencies that are not always present, such as
+submodules that are only checked out for some builds. By default a missing content directory or a
+missing `!include` file is an error, which prevents the documentation from building at all. The two
+mechanisms below allow such content to be skipped gracefully (with a warning) when the dependency is
+absent.
+
+### Optional Content
+
+Adding `external: true` to a [#advanced-content] entry marks that content source as optional. When
+the entry's `root_dir` does not exist, the content is skipped with a warning rather than causing an
+error, and any pages that are found are tagged as "external" (which, for example, allows the
+[appsyntax.md] extension to render a notice for syntax that belongs to an unavailable application).
+
+```yaml
+Content:
+    app:
+        root_dir: doc/content
+    optional_dep:
+        root_dir: ${OPTIONAL_DEP_DIR}/doc/content
+        external: true
+```
+
+### Optional Includes
+
+The `!include` YAML tag embeds the contents of another YAML file, and is used throughout the
+configuration (for example in the [#extensions] section). Its optional counterpart, `!include?`,
+behaves identically when the referenced file exists, but resolves to nothing---dropping the
+key (or list item) that used it---when the file is missing, instead of raising an error.
+
+```yaml
+Extensions:
+    MooseDocs.extensions.acronym:
+        acronyms:
+            framework: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+            optional_dep: !include? ${OPTIONAL_DEP_DIR}/doc/acronyms.yml
+```
+
+!alert note title=Use both for a fully optional dependency
+A single optional dependency is usually referenced from more than one place: its content directory
+*and* one or more `!include` files (e.g. acronyms or SQA categories). Use `external: true` for the
+content entry and `!include?` for each include so that the documentation builds whether or not the
+dependency is present.
+
+## Extensions id=extensions
 
 The Extensions section is used to enable non-default or custom extensions as well as change the
 configuration for existing extensions. The list of default extensions is shown in

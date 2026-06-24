@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/beam-tet.mesh
-  dim = 3
   uniform_refine = 2
   displacement = "displacement"
 []
@@ -86,13 +85,15 @@
   []
 []
 
-[Solver]
-  type = MFEMHyprePCG
-  preconditioner = boomeramg
-  l_max_its = 100
-  l_tol = 1e-4
-  l_abs_tol = 0.0
-  print_level = 2
+[Solvers]
+  [main]
+    type = MFEMHyprePCG
+    preconditioner = boomeramg
+    l_max_its = 100
+    l_tol = 1e-4
+    l_abs_tol = 0.0
+    print_level = 2
+  []
 []
 
 [Executioner]

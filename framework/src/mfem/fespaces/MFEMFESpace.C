@@ -18,7 +18,7 @@ MFEMFESpace::validParams()
   InputParameters params = MFEMObject::validParams();
   params.registerBase("MFEMFESpace");
   params.registerSystemAttributeName("MFEMFESpace");
-  MooseEnum ordering("NODES VDIM", "VDIM", false);
+  MooseEnum ordering("NODES VDIM", "VDIM");
   params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params.addParam<int>("vdim", 1, "The number of degrees of freedom per basis function.");
   params.addParam<std::string>("submesh",
