@@ -24,6 +24,10 @@ MOOSE_PYTHON_DIR = os.path.join(MOOSE_DIR, 'python')
 if MOOSE_PYTHON_DIR not in sys.path:
     sys.path.append(MOOSE_PYTHON_DIR)
 
+# Uncomment the following line if this application does not reference any 'large_media' content, to
+# skip initializing and indexing the large_media submodule. See MooseDocs/setup.md for details.
+# os.environ.setdefault('MOOSEDOCS_LARGE_MEDIA', 'false')
+
 from MooseDocs import main
 if __name__ == '__main__':
     sys.exit(main.run())
