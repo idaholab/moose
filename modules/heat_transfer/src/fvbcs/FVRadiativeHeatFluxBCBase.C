@@ -29,8 +29,6 @@ FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & par
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
     _tinf(getFunctor<ADReal>("Tinfinity"))
 {
-  if (!isParamValid("temperature"))
-    _var.requireQpComputations();
 }
 
 ADReal

@@ -34,7 +34,6 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
     _var_sln(_var.sln()),
     _value(0)
 {
-  _var.requireQpComputations();
   // This class may be too dangerous to use if renumbering is enabled,
   // as the nodeid parameter obviously depends on a particular
   // numbering.

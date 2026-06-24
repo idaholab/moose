@@ -35,4 +35,6 @@ public:
 protected:
   /// Current quadrature point
   unsigned int _qp;
+  /// Variable solutions with inner indexing corresponding to quadrature points
+  std::vector<const MooseArray<Real> *> _var_slns;
 };
