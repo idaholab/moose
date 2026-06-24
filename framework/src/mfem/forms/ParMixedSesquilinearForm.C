@@ -170,6 +170,26 @@ ParMixedSesquilinearForm::ParallelAssemble()
 }
 
 void
+ParMixedSesquilinearForm::AddMult(const mfem::ParComplexGridFunction & x,
+                                  mfem::ParComplexLinearForm & y,
+                                  const mfem::real_t a)
+{
+  const mfem::real_t s = (_conv == mfem::ComplexOperator::HERMITIAN) ? 1.0 : -1.0;
+
+  // y += a * (A_r + i A_i) * (x_r + i x_i)
+  if (RealInteg())
+  {
+    _pmblfr->AddMult(x.real(), y.real(), a);
+    _pmblfr->AddMult(x.imag(), y.imag(), s * a);
+  }
+  if (ImagInteg())
+  {
+    _pmblfi->AddMult(x.imag(), y.real(), -a);
+    _pmblfi->AddMult(x.real(), y.imag(), s * a);
+  }
+}
+
+void
 ParMixedSesquilinearForm::FormRectangularLinearSystem(const mfem::Array<int> & ess_trial_tdof_list,
                                                       const mfem::Array<int> & ess_test_tdof_list,
                                                       mfem::Vector & x,
