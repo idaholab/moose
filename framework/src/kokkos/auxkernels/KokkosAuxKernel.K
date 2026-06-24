@@ -40,6 +40,11 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
   auto tag = _sys.feProblem().addVectorTag("parallel_solution", Moose::VECTOR_TAG_SOLUTION);
 
   _kokkos_var.init(_var, tag);
+
+  // Kokkos aux kernels currently only consume variable information through finite element bases and
+  // quadrature points
+  for (auto * const var : getMooseVariableDependencies())
+    var->requireQpComputations();
 }
 
 AuxKernel::AuxKernel(const AuxKernel & object)

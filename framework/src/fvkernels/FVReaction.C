@@ -23,7 +23,6 @@ FVReaction::validParams()
 FVReaction::FVReaction(const InputParameters & parameters)
   : FVElementalKernel(parameters), _rate(getParam<Real>("rate"))
 {
-  _var.requireQpComputations();
 }
 
 ADReal
