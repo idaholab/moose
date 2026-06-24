@@ -59,6 +59,9 @@ public:
   /// Add complex essential BCs
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
+  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
+  void EliminateCoupledVariables() override;
+
   /// Form matrix-free representation of system operator.
   /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
   virtual void FormSystemOperator(mfem::OperatorHandle & op,

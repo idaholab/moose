@@ -119,6 +119,11 @@ public:
   /** The returned matrix has to be deleted by the caller. */
   mfem::ComplexHypreParMatrix * ParallelAssemble();
 
+  /// Adds @a a times the action of this form on @a x to the linear form @a y.
+  void AddMult(const mfem::ParComplexGridFunction & x,
+               mfem::ParComplexLinearForm & y,
+               const mfem::real_t a = 1.0);
+
   void FormRectangularLinearSystem(const mfem::Array<int> & ess_trial_tdof_list,
                                    const mfem::Array<int> & ess_test_tdof_list,
                                    mfem::Vector & x,

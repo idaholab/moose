@@ -1,6 +1,9 @@
 a=1.0
 b=2.0
 c=3.0
+d=4.0
+e=5.0
+f=6.0
 omega=10.0
 
 [Mesh]
@@ -17,12 +20,12 @@ omega=10.0
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
-    fec_order = FIRST
+    fec_order = SECOND
   []
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
-    fec_order = FIRST
+    fec_order = SECOND
   []
 []
 
@@ -40,13 +43,23 @@ omega=10.0
 [Functions]
   [V_exact_real]
     type = ParsedFunction
-    expression = '${a}*x+${b}*y+${c}*z'
+    expression = '${a}*x^2+${b}*y^2+${c}*z^2'
+  []
+  [V_exact_imag]
+    type = ParsedFunction
+    expression = '${d}*x^2+${e}*y^2+${f}*z^2'
+  []
+  [A_exact_real]
+    type = ParsedVectorFunction
+    expression_x = '-2*${d}*x/${omega}'
+    expression_y = '-2*${e}*y/${omega}'
+    expression_z = '-2*${f}*z/${omega}'
   []
   [A_exact_imag]
     type = ParsedVectorFunction
-    expression_x = '${a}/${omega}'
-    expression_y = '${b}/${omega}'
-    expression_z = '${c}/${omega}'
+    expression_x = '2*${a}*x/${omega}'
+    expression_y = '2*${b}*y/${omega}'
+    expression_z = '2*${c}*z/${omega}'
   []
 []
 
@@ -54,7 +67,7 @@ omega=10.0
   [A_vector_ic]
     type = MFEMComplexVectorIC
     variable = A
-    vector_coefficient_real = '0 0 0'
+    vector_coefficient_real = A_exact_real
     vector_coefficient_imag = A_exact_imag
   []
 []
@@ -64,7 +77,7 @@ omega=10.0
     type = MFEMComplexScalarDirichletBC
     variable = V
     coefficient_real = V_exact_real
-    coefficient_imag = 0.0
+    coefficient_imag = V_exact_imag
   []
 []
 
@@ -104,7 +117,7 @@ omega=10.0
     type = MFEMComplexL2Error
     variable = V
     function_real = V_exact_real
-    function_imag = 0.0
+    function_imag = V_exact_imag
   []
 []
 

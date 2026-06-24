@@ -60,8 +60,6 @@ ComplexEquationSystem::BuildLinearForms()
                    std::make_shared<mfem::ParComplexLinearForm>(_test_pfespaces.at(i)));
     _clfs.GetRef(test_var_name) = 0.0;
   }
-  // Apply boundary conditions
-  ApplyEssentialBCs();
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -77,6 +75,12 @@ ComplexEquationSystem::BuildLinearForms()
       clf->Assemble();
     }
   }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
+
+  // Eliminate trivially eliminated variables by subtracting contributions from linear forms
+  EliminateCoupledVariables();
 }
 
 void
@@ -251,6 +255,20 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
     _cmplx_essential_bc_map.Register(test_var_name, std::move(bcs));
   }
   _cmplx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+}
+
+void
+ComplexEquationSystem::EliminateCoupledVariables()
+{
+  for (const auto & test_var_name : _test_var_names)
+    for (const auto & eliminated_var_name : _eliminated_var_names)
+      if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(eliminated_var_name) &&
+          !VectorContainsName(_test_var_names, eliminated_var_name))
+      {
+        auto & mslf = *_mslfs.Get(test_var_name)->Get(eliminated_var_name);
+        mslf.AddMult(
+            *_cmplx_eliminated_variables.Get(eliminated_var_name), *_clfs.Get(test_var_name), -1);
+      }
 }
 
 void
