@@ -113,6 +113,7 @@
 []
 
 [Preconditioner]
+  active = ams
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
