@@ -480,8 +480,8 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
-  bool computesQpData() const override { return true; }
-  bool doesTrueFVAssembly() const override { return false; }
+  bool usesQpBasedLoops() const override { return true; }
+  bool usesGeometricInfoBasedLoops() const override { return false; }
 
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base

@@ -387,9 +387,9 @@ FEProblemBase::initKokkos()
     for (unsigned int v = 0; v < sys.nFieldVariables(); ++v)
     {
       const auto & var = sys.getVariable(0, v);
-      if (var.computesQpData())
+      if (var.usesQpBasedLoops())
         needs_fe = true;
-      if (var.doesTrueFVAssembly())
+      if (var.usesGeometricInfoBasedLoops())
         needs_fv = true;
       if (needs_fv && needs_fe)
         break;
