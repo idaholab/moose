@@ -13,6 +13,7 @@
 #include <Eigen/Dense>
 
 #include "CovarianceFunctionBase.h"
+#include "GPLinkFunction.h"
 
 namespace StochasticTools
 {
@@ -89,15 +90,90 @@ public:
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
-   * @param training_params The training parameter values (x values) for the
-   *                        covariance matrix.
-   * @param training_data The training data (y values) for the inversion of the
-   *                      covariance matrix.
+   * If virtual derivative observations have been configured via setDerivativeConstraints(),
+   * builds the full augmented covariance matrix incorporating those observations.
+   * @param training_params The training parameter values (x values, already standardized).
+   * @param training_data The training data (y values, link-transformed and standardized).
    * @param opts The optimizer options.
    */
   void setupCovarianceMatrix(const RealEigenMatrix & training_params,
                              const RealEigenMatrix & training_data,
                              const GPOptimizerOptions & opts);
+
+  /**
+   * Configure the output link function. Call before setupCovarianceMatrix.
+   * @param type  Link function type (Identity, Log, or Logit)
+   * @param lb    Lower bound (required for Log and Logit)
+   * @param ub    Upper bound (required for Logit)
+   */
+  void setLinkFunction(GPLinkFunctionType type, Real lb = 0.0, Real ub = 1.0);
+
+  /**
+   * Apply the forward link function to all entries of a data matrix (in-place).
+   * Validates that all values respect the link function's domain.
+   */
+  void applyLinkTransform(RealEigenMatrix & data) const;
+
+  /**
+   * Configure virtual derivative observations for monotonicity/derivative constraints.
+   * Call before setupCovarianceMatrix. The virtual_params must be in the same
+   * standardized space as the training parameters.
+   * @param virtual_params   Locations of virtual observations (n_virt x n_dims), standardized
+   * @param deriv_dims       Derivative dimension for each virtual observation
+   * @param target_value     Target derivative value (0 = zero-derivative constraint,
+   *                         positive = increasing, negative = decreasing)
+   * @param noise_variance   Noise variance added to the derivative covariance diagonal
+   */
+  void setDerivativeConstraints(const RealEigenMatrix & virtual_params,
+                                const std::vector<unsigned int> & deriv_dims,
+                                Real target_value,
+                                Real noise_variance);
+
+  /**
+   * Configure penalty constraints on the predicted mean at specified points.
+   * These are evaluated and added to the NLML loss and its gradient during Adam.
+   * The points and bounds must be in the standardized GP output space (post-link,
+   * post-standardize). Call after standardization is set up.
+   * @param penalty_points_std  Constraint point locations in standardized param space (n_c x d)
+   * @param lower_bounds_std    Lower bounds in standardized output space (use -inf to disable)
+   * @param upper_bounds_std    Upper bounds in standardized output space (use +inf to disable)
+   * @param weight              Penalty weight lambda
+   */
+  void setPenaltyConstraints(const RealEigenMatrix & penalty_points_std,
+                             const std::vector<Real> & lower_bounds_std,
+                             const std::vector<Real> & upper_bounds_std,
+                             Real weight);
+
+  /// Apply forward link function to a scalar
+  Real applyLink(Real y) const;
+  /// Apply inverse link function to a scalar
+  Real applyInvLink(Real z) const;
+  /// Derivative of the inverse link at z, for delta-method uncertainty propagation
+  Real invLinkDeriv(Real z) const;
+  /// log|g'(y)| for the Jacobian correction to NLML reporting
+  Real logLinkJacobian(Real y) const;
+  /// True if a non-identity link function is set
+  bool hasLinkFunction() const { return _link_type != GPLinkFunctionType::Identity; }
+
+  /// @{ Accessors for link function parameters (for serialization)
+  GPLinkFunctionType & linkType() { return _link_type; }
+  Real & linkLb() { return _link_lb; }
+  Real & linkUb() { return _link_ub; }
+  const GPLinkFunctionType & linkType() const { return _link_type; }
+  const Real & linkLb() const { return _link_lb; }
+  const Real & linkUb() const { return _link_ub; }
+  /// @}
+
+  /// @{ Accessors for virtual derivative observations (for serialization and prediction)
+  RealEigenMatrix & virtualParams() { return _virtual_params; }
+  std::vector<unsigned int> & virtualDerivDims() { return _virtual_deriv_dims; }
+  Real & virtualNoise() { return _virtual_noise; }
+  Real & virtualTarget() { return _virtual_target; }
+  const RealEigenMatrix & virtualParams() const { return _virtual_params; }
+  const std::vector<unsigned int> & virtualDerivDims() const { return _virtual_deriv_dims; }
+  const Real & virtualNoise() const { return _virtual_noise; }
+  bool hasDerivativeConstraints() const { return _virtual_params.rows() > 0; }
+  /// @}
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -282,6 +358,34 @@ protected:
 
   /// To return the GP length scales for active learning
   std::vector<Real> _length_scales;
+
+  // ---- Link function (serialized) ----
+  /// Link function type tag (stored as enum, serialized as int)
+  GPLinkFunctionType _link_type = GPLinkFunctionType::Identity;
+  /// Lower bound for Log/Logit link
+  Real _link_lb = 0.0;
+  /// Upper bound for Logit link
+  Real _link_ub = 1.0;
+
+  // ---- Virtual derivative observations (serialized; needed for prediction) ----
+  /// Locations of virtual observations in standardized parameter space (n_virt x n_dims)
+  RealEigenMatrix _virtual_params;
+  /// Derivative dimension for each virtual observation
+  std::vector<unsigned int> _virtual_deriv_dims;
+  /// Noise variance added to the derivative-derivative diagonal blocks of K_aug
+  Real _virtual_noise = 1e-6;
+  /// Target derivative value for virtual observations
+  Real _virtual_target = 0.0;
+
+  // ---- Penalty constraints (not serialized; only used during Adam tuning) ----
+  /// Constraint point locations in standardized parameter space (n_c x n_dims)
+  RealEigenMatrix _penalty_points_std;
+  /// Lower bounds in standardized output space (-inf disables lower constraint)
+  std::vector<Real> _penalty_lower_std;
+  /// Upper bounds in standardized output space (+inf disables upper constraint)
+  std::vector<Real> _penalty_upper_std;
+  /// Penalty weight lambda
+  Real _penalty_weight = 0.0;
 };
 
 } // StochasticTools namespac
