@@ -100,6 +100,8 @@ NodalBC::computeJacobian()
     const Real cached_val = computeQpJacobian();
     const dof_id_type cached_row = _var.nodalDofIndex();
 
+    constrainJacobianRow(_fe_problem.assembly(0, _sys.number()), cached_row);
+
     // Cache the user's computeQpJacobian() value for later use.
     addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                        cached_val,

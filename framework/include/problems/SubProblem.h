@@ -940,6 +940,13 @@ public:
    */
   virtual unsigned int currentNlSysNum() const = 0;
 
+  /// @return the row system number for Jacobian block assembly (ISys).
+  virtual unsigned int currentNlISysNum() const = 0;
+
+  /// @return the column system number for Jacobian block assembly (JSys).
+  /// AD seeding uses this system's DOFs.
+  virtual unsigned int currentNlJSysNum() const = 0;
+
   /**
    * @return the number of linear systems in the problem
    */

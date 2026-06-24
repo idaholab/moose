@@ -103,8 +103,6 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
     _need_JxW_neighbor(false),
-    _qrule_msm(nullptr),
-    _custom_mortar_qrule(false),
     _current_qrule_lower(nullptr),
 
     _current_elem(nullptr),
@@ -148,7 +146,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   buildFaceFE(FEType(helper_order, LAGRANGE));
   buildNeighborFE(FEType(helper_order, LAGRANGE));
   buildFaceNeighborFE(FEType(helper_order, LAGRANGE));
-  buildLowerDFE(FEType(helper_order, LAGRANGE));
+  if (_mesh_dimension > 0)
+    buildLowerDFE(FEType(helper_order, LAGRANGE));
   _building_helpers = false;
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current
@@ -167,17 +166,20 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   // request phi, dphi, xyz, JxW, etc. data
   helpersRequestData();
 
-  // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
-  // of discretization
-  _fe_msm = (_mesh_dimension == 2)
-                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
-                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
-  // This FE object should not take part in p-refinement
-  _fe_msm->add_p_level_in_reinit(false);
-  _JxW_msm = &_fe_msm->get_JxW();
-  // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
-  // _coord_msm
-  _fe_msm->get_xyz();
+  if (_mesh_dimension > 0)
+  {
+    // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
+    // of discretization
+    _fe_msm = (_mesh_dimension == 2)
+                  ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
+                  : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
+    // This FE object should not take part in p-refinement
+    _fe_msm->add_p_level_in_reinit(false);
+    _JxW_msm = &_fe_msm->get_JxW();
+    // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
+    // _coord_msm
+    _fe_msm->get_xyz();
+  }
 
   _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
   _neighbor_extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
@@ -201,9 +203,10 @@ Assembly::~Assembly()
     for (auto & it : _fe_face_neighbor[dim])
       delete it.second;
 
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
-    for (auto & it : _fe_lower[dim])
-      delete it.second;
+  if (_mesh_dimension > 0)
+    for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+      for (auto & it : _fe_lower[dim])
+        delete it.second;
 
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     for (auto & it : _vector_fe[dim])
@@ -221,9 +224,10 @@ Assembly::~Assembly()
     for (auto & it : _vector_fe_face_neighbor[dim])
       delete it.second;
 
-  for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
-    for (auto & it : _vector_fe_lower[dim])
-      delete it.second;
+  if (_mesh_dimension > 0)
+    for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
+      for (auto & it : _vector_fe_lower[dim])
+        delete it.second;
 
   for (auto & it : _ad_grad_phi_data)
     it.second.release();
@@ -644,11 +648,14 @@ Assembly::createQRules(QuadratureType type,
     q.arbitrary_face->allow_rules_with_negative_weights = allow_negative_qweights;
   }
 
-  delete _qrule_msm;
-  _custom_mortar_qrule = false;
-  _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
-  _qrule_msm->allow_rules_with_negative_weights = allow_negative_qweights;
-  _fe_msm->attach_quadrature_rule(_qrule_msm);
+  if (_mesh_dimension > 0)
+  {
+    delete _qrule_msm;
+    _custom_mortar_qrule = false;
+    _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
+    _qrule_msm->allow_rules_with_negative_weights = allow_negative_qweights;
+    _fe_msm->attach_quadrature_rule(_qrule_msm);
+  }
 }
 
 void
@@ -1049,7 +1056,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
   const auto sys_num = _sys.number();
   const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum();
 
   switch (dim)
   {
@@ -1363,7 +1370,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
   const auto sys_num = _sys.number();
-  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum();
+  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlJSysNum();
 
   if (_calculate_curvatures)
   {
@@ -2568,6 +2575,7 @@ Assembly::init(const CouplingMatrix * cm)
   _cached_jacobian_values.resize(num_matrix_tags);
   _cached_jacobian_rows.resize(num_matrix_tags);
   _cached_jacobian_cols.resize(num_matrix_tags);
+  _constrained_jacobian_rows.resize(num_matrix_tags);
 
   // Element matrices
   _sub_Kee.resize(num_matrix_tags);
@@ -4236,11 +4244,18 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 {
   if (dof_indices.size() == 0)
     return;
-  if (!(*_cm)(ivar, jvar))
+
+  const unsigned int j_sys_num = _subproblem.currentNlJSysNum();
+  const bool cross_system = j_sys_num != _sys.number();
+
+  // For same-system Jacobian, apply the coupling matrix check; skip it cross-system.
+  if (!cross_system && !(*_cm)(ivar, jvar))
     return;
 
   auto & iv = _sys.getVariable(_tid, ivar);
-  auto & jv = _sys.getVariable(_tid, jvar);
+  // For cross-system blocks, look up the column variable in JSys.
+  SystemBase & jsys = cross_system ? _subproblem.systemBaseNonlinear(j_sys_num) : _sys;
+  auto & jv = jsys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
   const unsigned int ivn = iv.number();
@@ -4256,9 +4271,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   const unsigned int i = ivar - ivn;
   const unsigned int j = jvar - jvn;
 
-  // DoF indices are independently given
+  // For cross-system blocks, column DOF indices come from the JSys variable.
   auto di = dof_indices;
-  auto dj = dof_indices;
+  auto dj = cross_system ? jv.dofIndices() : dof_indices;
 
   auto indof = di.size();
   auto jndof = dj.size();
@@ -4475,14 +4490,31 @@ Assembly::cacheJacobian(numeric_index_type i,
 }
 
 void
+Assembly::constrainJacobianRow(dof_id_type row, LocalDataKey, const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      _constrained_jacobian_rows[tag].push_back(row);
+}
+
+void
 Assembly::setCachedJacobian(GlobalDataKey)
 {
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
+  for (MooseIndex(_constrained_jacobian_rows) tag = 0;
+       tag < _constrained_jacobian_rows.size();
+       tag++)
     if (_sys.hasMatrix(tag))
     {
-      // First zero the rows (including the diagonals) to prepare for
-      // setting the cached values.
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
+#ifdef DEBUG
+      {
+        auto sorted = _constrained_jacobian_rows[tag];
+        std::sort(sorted.begin(), sorted.end());
+        mooseAssert(std::adjacent_find(sorted.begin(), sorted.end()) == sorted.end(),
+                    "Duplicate entries in _constrained_jacobian_rows");
+      }
+#endif
+      // Zero the constrained rows to prepare for setting the cached BC values.
+      _sys.getMatrix(tag).zero_rows(_constrained_jacobian_rows[tag], 0.0);
 
       // TODO: Use SparseMatrix::set_values() for efficiency
       for (MooseIndex(_cached_jacobian_values) i = 0; i < _cached_jacobian_values[tag].size(); ++i)
@@ -4495,16 +4527,6 @@ Assembly::setCachedJacobian(GlobalDataKey)
 }
 
 void
-Assembly::zeroCachedJacobian(GlobalDataKey)
-{
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
-    if (_sys.hasMatrix(tag))
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
-
-  clearCachedJacobian();
-}
-
-void
 Assembly::clearCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
@@ -4512,6 +4534,7 @@ Assembly::clearCachedJacobian()
     _cached_jacobian_rows[tag].clear();
     _cached_jacobian_cols[tag].clear();
     _cached_jacobian_values[tag].clear();
+    _constrained_jacobian_rows[tag].clear();
   }
 }
 

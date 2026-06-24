@@ -65,22 +65,6 @@ FEProblemSolve::validParams()
   InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  std::set<std::string> line_searches = mooseLineSearches();
-
-  std::set<std::string> alias_line_searches = {"default", "none", "basic"};
-  line_searches.insert(alias_line_searches.begin(), alias_line_searches.end());
-  std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
-  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
-  std::string line_search_string = Moose::stringify(line_searches, " ");
-  MooseEnum line_search(line_search_string, "default");
-  std::string addtl_doc_str(" (Note: none = basic)");
-  params.addParam<MooseEnum>(
-      "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
-  MooseEnum line_search_package("petsc moose", "petsc");
-  params.addParam<MooseEnum>("line_search_package",
-                             line_search_package,
-                             "The solver package to use to conduct the line-search");
-
   params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
                             2,
                             "The number of times lambda is allowed to be cut in half in the "
@@ -91,10 +75,10 @@ FEProblemSolve::validParams()
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
 
-  params += Moose::PetscSupport::getPetscValidParams();
-  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
-  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
-  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
+  params += Moose::PetscSupport::flagAndPairOptions();
+  params += Moose::PetscSupport::kspRelatedParams();
+  params += Moose::PetscSupport::newtonKrylovParams();
+
   params.addParam<std::vector<ConvergenceName>>(
       "nonlinear_convergence",
       "Name of the Convergence object(s) to use to assess convergence of the "
@@ -204,8 +188,7 @@ FEProblemSolve::validParams()
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling");
-  params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
-                              "contact_line_search_allowed_lambda_cuts",
+  params.addParamNamesToGroup("contact_line_search_ltol contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
   params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence "
                               "multi_system_fixed_point_relaxation_factor",
@@ -253,10 +236,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   // Set linear solve parameters in the equation system
   // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
-  es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
-  es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
-  es.parameters.set<unsigned int>("linear solver maximum iterations") =
-      getParam<unsigned int>("l_max_its");
+  Moose::PetscSupport::setESLinearSolverParams(es, *this);
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
@@ -507,7 +487,7 @@ FEProblemSolve::solve()
         {
           const auto linear_sys_number =
               cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
-          _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
+          _problem.solveLinearSystem(linear_sys_number);
         }
 
         // Check convergence

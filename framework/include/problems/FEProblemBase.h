@@ -45,6 +45,7 @@
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
 
+#include <functional>
 #include <unordered_map>
 #include <memory>
 
@@ -176,6 +177,7 @@ public:
   };
 
   virtual libMesh::EquationSystems & es() override { return _req.set().es(); }
+  const libMesh::EquationSystems & es() const { return _req.get().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
@@ -447,10 +449,8 @@ public:
   /**
    * Build and solve a linear system
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
-   * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num);
 
   ///@{
   /**
@@ -854,6 +854,13 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
+
+  /// Set a hook called from solve(sys_num) after setupDM() and before the inner solve.
+  /// Used by NewtonSNESExecutor to re-wire the NPC onto the freshly-created SNES each solve.
+  void setNLPreSolveHook(std::function<void(unsigned int)> hook)
+  {
+    _nl_pre_solve_hook = std::move(hook);
+  }
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
@@ -1775,6 +1782,14 @@ public:
                                const unsigned int nl_sys_num);
 
   /**
+   * Form a Jacobian matrix for the ij system pair with the default i-system tag
+   */
+  void computeJacobian(const NumericVector<libMesh::Number> & soln,
+                       libMesh::SparseMatrix<libMesh::Number> & jacobian,
+                       const unsigned int nl_sys_i_num,
+                       const unsigned int nl_sys_j_num);
+
+  /**
    * Form a Jacobian matrix for a given tag.
    */
   virtual void computeJacobianTag(const NumericVector<libMesh::Number> & soln,
@@ -2391,8 +2406,6 @@ public:
   virtual void execute(const ExecFlagType & exec_type);
   virtual void executeAllObjects(const ExecFlagType & exec_type);
 
-  virtual Executor & getExecutor(const std::string & name) { return _app.getExecutor(name); }
-
   /**
    * Call compute methods on UserObjects.
    */
@@ -2544,6 +2557,15 @@ public:
    * If PETSc options are already inserted
    */
   bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
+
+  /**
+   * Insert PETSc options into the database if not already done. This should be called the first
+   * time before any FooBarSetFromOptions() run as the FooBar consumers will mark the inserted PETSc
+   * options as used, preventing unused options warnings from appearing at the end of the
+   * simulation. If petscSetOptions is later called outside this interface, which has the previously
+   * inserted guard, then the used flags of the FooBar consumers will be reset
+   */
+  void insertPetscOptionsIfNeeded();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
@@ -2717,6 +2739,16 @@ public:
    */
   void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
   /**
+   * Sets the convergence object name for a single nonlinear system.
+   * Errors if a name has already been set for that system.
+   */
+  void setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                               const ConvergenceName & convergence_name);
+  /**
+   * Returns true if a convergence name has been explicitly set for the given nonlinear system.
+   */
+  bool hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const;
+  /**
    * Sets the linear convergence object name(s) if there is one
    */
   void setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
@@ -2785,6 +2817,14 @@ public:
   bool isSolverSystemNonlinear(const unsigned int sys_num) { return sys_num < _num_nl_sys; }
 
   virtual unsigned int currentNlSysNum() const override;
+  virtual unsigned int currentNlISysNum() const override;
+  virtual unsigned int currentNlJSysNum() const override;
+
+  /**
+   * Set the (ISys, JSys) context for cross-system Jacobian block assembly.
+   * ISys is the row system (residual), JSys is the column system (AD seeding).
+   */
+  void setJacobianBlockContext(unsigned int i_sys, unsigned int j_sys);
 
   virtual unsigned int currentLinearSysNum() const override;
 
@@ -3054,8 +3094,8 @@ protected:
   /// Map from linear system name to number
   std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
 
-  /// The current linear system that we are solving
-  LinearSystem * _current_linear_sys;
+  /// Index of the current linear system being solved; invalid_uint when none is active.
+  unsigned int _current_linear_sys_num;
 
   /// Boolean to check if we have the default nonlinear system
   const bool _using_default_nl;
@@ -3072,11 +3112,13 @@ protected:
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
 
-  /// The current nonlinear system that we are solving
-  NonlinearSystemBase * _current_nl_sys;
+  /// Hook called from solve(sys_num) after setupDM() and before the inner solve.
+  std::function<void(unsigned int)> _nl_pre_solve_hook;
 
-  /// The current solver system
-  SolverSystem * _current_solver_sys;
+  /// Row system index for Jacobian block assembly (ISys); set by setJacobianBlockContext.
+  unsigned int _nl_i_sys_num;
+  /// Column system index for Jacobian block assembly (JSys); AD seeding uses this system's DOFs.
+  unsigned int _nl_j_sys_num;
 
   /// Combined container to base pointer of every solver system
   std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
@@ -3389,9 +3431,7 @@ protected:
 
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions _petsc_option_data_base;
-#endif
 
   /// If or not PETSc options have been added to database
   bool _is_petsc_options_inserted;
@@ -3699,15 +3739,15 @@ FEProblemBase::getSolverSystem(const unsigned int sys_num) const
 inline NonlinearSystemBase &
 FEProblemBase::currentNonlinearSystem()
 {
-  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
-  return *_current_nl_sys;
+  mooseAssert(_nl_i_sys_num < _nl.size(), "The nonlinear system is not currently set");
+  return *_nl[_nl_i_sys_num];
 }
 
 inline const NonlinearSystemBase &
 FEProblemBase::currentNonlinearSystem() const
 {
-  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
-  return *_current_nl_sys;
+  mooseAssert(_nl_i_sys_num < _nl.size(), "The nonlinear system is not currently set");
+  return *_nl[_nl_i_sys_num];
 }
 
 inline LinearSystem &
@@ -3729,15 +3769,17 @@ FEProblemBase::getLinearSystem(const unsigned int sys_num) const
 inline LinearSystem &
 FEProblemBase::currentLinearSystem()
 {
-  mooseAssert(_current_linear_sys, "The linear system is not currently set");
-  return *_current_linear_sys;
+  mooseAssert(_current_linear_sys_num < _linear_systems.size(),
+              "The linear system is not currently set");
+  return *_linear_systems[_current_linear_sys_num];
 }
 
 inline const LinearSystem &
 FEProblemBase::currentLinearSystem() const
 {
-  mooseAssert(_current_linear_sys, "The linear system is not currently set");
-  return *_current_linear_sys;
+  mooseAssert(_current_linear_sys_num < _linear_systems.size(),
+              "The linear system is not currently set");
+  return *_linear_systems[_current_linear_sys_num];
 }
 
 inline Assembly &

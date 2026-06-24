@@ -192,7 +192,8 @@ ExplicitTimeIntegrator::setupSolver()
   }
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
-    Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
+    Moose::PetscSupport::setLinearSolverDefaults(
+        _fe_problem, libMesh::cast_ref<const SolverSystem &>(_sys), *_linear_solver);
 }
 
 bool

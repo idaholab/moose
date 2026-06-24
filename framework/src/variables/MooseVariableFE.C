@@ -71,15 +71,16 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
       this->_assembly.qRuleNeighbor(),
       this->_assembly.nodeNeighbor(),
       this->_assembly.neighbor());
-  _lower_data =
-      std::make_unique<MooseVariableData<OutputType>>(*this,
-                                                      _sys,
-                                                      _tid,
-                                                      Moose::ElementType::Lower,
-                                                      this->_assembly.qRuleFace(),
-                                                      this->_assembly.qRuleFace(), // Place holder
-                                                      this->_assembly.node(),      // Place holder
-                                                      this->_assembly.lowerDElem());
+  if (_mesh.dimension() > 0)
+    _lower_data =
+        std::make_unique<MooseVariableData<OutputType>>(*this,
+                                                        _sys,
+                                                        _tid,
+                                                        Moose::ElementType::Lower,
+                                                        this->_assembly.qRuleFace(),
+                                                        this->_assembly.qRuleFace(), // Place holder
+                                                        this->_assembly.node(),      // Place holder
+                                                        this->_assembly.lowerDElem());
 }
 
 template <typename OutputType>
@@ -844,7 +845,8 @@ MooseVariableFE<OutputType>::oldestSolutionStateRequested() const
   unsigned int state = 0;
   state = std::max(state, _element_data->oldestSolutionStateRequested());
   state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
-  state = std::max(state, _lower_data->oldestSolutionStateRequested());
+  if (_lower_data)
+    state = std::max(state, _lower_data->oldestSolutionStateRequested());
   return state;
 }
 
@@ -854,7 +856,8 @@ MooseVariableFE<OutputType>::clearAllDofIndices()
 {
   _element_data->clearDofIndices();
   _neighbor_data->clearDofIndices();
-  _lower_data->clearDofIndices();
+  if (_lower_data)
+    _lower_data->clearDofIndices();
 }
 
 template <typename OutputType>
@@ -1381,7 +1384,8 @@ MooseVariableFE<OutputType>::sizeMatrixTagData()
 {
   _element_data->sizeMatrixTagData();
   _neighbor_data->sizeMatrixTagData();
-  _lower_data->sizeMatrixTagData();
+  if (_lower_data)
+    _lower_data->sizeMatrixTagData();
 }
 
 template class MooseVariableFE<Real>;

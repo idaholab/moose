@@ -652,11 +652,19 @@ public:
   void makeParamNotRequired(const std::string & name);
 
   /**
-   * This method returns parameters that have been initialized in one fashion or another,
-   * i.e. The value was supplied as a default argument or read and properly converted from
+   * This method returns whether parameters have been initialized in one fashion or another,
+   * i.e. the value was supplied as a default argument or read and properly converted from
    * the input file
    */
   bool isParamValid(const std::string & name) const;
+
+  /**
+   * This method returns whether parameters have been initialized in one fashion or another,
+   * i.e. the value was supplied as a default argument or read and properly converted from
+   * the input file, *and* is of the supplied type T
+   */
+  template <typename T>
+  bool isParamValid(const std::string & name, const T * const) const;
 
   /**
    * Returns whether or not the parameter was set due to addParam. If not then it was either set
@@ -2273,7 +2281,8 @@ template <typename T>
 const T *
 InputParameters::queryParam(const std::string & name) const
 {
-  return isParamValid(name) ? &getParamHelper<T>(name, *this) : nullptr;
+  static const T * const ex = nullptr;
+  return isParamValid(name, ex) ? &getParamHelper<T>(name, *this) : nullptr;
 }
 
 template <typename T>
@@ -2587,4 +2596,43 @@ InputParameters::appendFunctorDescription(const std::string & doc_string) const
 #endif
                  "a functor") +
          " material property, a function, a postprocessor or a " + numeric_value_type() + ".";
+}
+
+template <typename T>
+bool
+InputParameters::isParamValid(const std::string & name_in, const T * const) const
+{
+  const auto name = checkForRename(name_in);
+
+  // Perform type check
+  if (!have_parameter<T>(name))
+    return false;
+
+  if constexpr (std::is_same_v<T, MooseEnum>)
+    return get<MooseEnum>(name).isValid();
+  else if constexpr (std::is_same_v<T, std::vector<MooseEnum>>)
+  {
+    for (const auto & moose_enum : get<std::vector<MooseEnum>>(name))
+      if (!moose_enum.isValid())
+        return false;
+    return true;
+  }
+  else if constexpr (std::is_same_v<T, MultiMooseEnum>)
+    return get<MultiMooseEnum>(name).isValid();
+  else if constexpr (std::is_same_v<T, std::vector<MultiMooseEnum>>)
+  {
+    for (const auto & multi_enum : get<std::vector<MultiMooseEnum>>(name))
+      if (!multi_enum.isValid())
+        return false;
+    return true;
+  }
+  else if constexpr (std::is_same_v<T, ExecFlagEnum>)
+    return get<ExecFlagEnum>(name).isValid();
+  else
+  {
+    if (auto it = _params.find(name); it != _params.end())
+      return it->second._valid;
+    else
+      return false;
+  }
 }

@@ -59,7 +59,8 @@ class BoundingBox;
 typedef libMesh::StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
 
 // List of supported geometrical elements
-const std::string LIST_GEOM_ELEM = "EDGE EDGE2 EDGE3 EDGE4 "
+const std::string LIST_GEOM_ELEM = "NODEELEM "
+                                   "EDGE EDGE2 EDGE3 EDGE4 "
                                    "QUAD QUAD4 QUAD8 QUAD9 "
                                    "TRI TRI3 TRI6 TRI7 "
                                    "HEX HEX8 HEX20 HEX27 "

@@ -8,4 +8,12 @@
     design = 'NonlinearSystem.md'
     issues = '#12601'
   []
+  [ad_reaction_jac]
+    input = scaling.i
+    type = PetscJacobianTester
+    cli_args = 'AD=AD Outputs/exodus=false'
+    requirement = "The system shall produce a correct Jacobian for nodal reaction terms using automatic differentiation"
+    design = 'ReactionNodalKernel.md'
+    issues = '#12601'
+  []
 []

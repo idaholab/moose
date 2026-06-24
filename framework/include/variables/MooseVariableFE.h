@@ -870,7 +870,8 @@ MooseVariableFE<OutputType>::setActiveTags(const std::set<TagID> & vtags)
 {
   _element_data->setActiveTags(vtags);
   _neighbor_data->setActiveTags(vtags);
-  _lower_data->setActiveTags(vtags);
+  if (_lower_data)
+    _lower_data->setActiveTags(vtags);
 }
 
 // Declare all the specializations, as the template specialization declarations below must know

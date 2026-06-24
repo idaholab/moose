@@ -135,12 +135,15 @@ ADNodalBCTempl<T, Base>::addJacobian(const ADResidual & residual,
 
   for (const auto i : index_range(dof_indices))
     if (_set_components[i])
+    {
+      this->constrainJacobianRow(_undisplaced_assembly, dof_indices[i]);
       // If we store into the displaced assembly for nodal bc objects the data never actually makes
       // it into the global Jacobian
       addJacobian(_undisplaced_assembly,
                   Moose::Span(&conversionHelper(residual, i), 1),
                   Moose::Span(&dof_indices[i], 1),
                   /*scaling_factor=*/1);
+    }
 }
 
 template <typename T, typename Base>

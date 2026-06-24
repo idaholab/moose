@@ -31,7 +31,7 @@ GeneratedMeshGenerator::validParams()
 
   MooseEnum elem_types(LIST_GEOM_ELEM); // no default
 
-  MooseEnum dims("1=1 2 3");
+  MooseEnum dims("0=0 1 2 3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
 
   params.addParam<unsigned int>("nx", 1, "Number of elements in the X direction");
@@ -84,7 +84,7 @@ GeneratedMeshGenerator::validParams()
                                                    "Names of extra element integers");
 
   params.addClassDescription(
-      "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
+      "Create a point, line, square, or cube mesh with uniformly spaced or biased elements.");
 
   return params;
 }
@@ -140,6 +140,9 @@ GeneratedMeshGenerator::generate()
     // Switching on MooseEnum
     switch (_dim)
     {
+      case 0:
+        elem_type_enum = "NODEELEM";
+        break;
       case 1:
         elem_type_enum = "EDGE2";
         break;
@@ -159,6 +162,10 @@ GeneratedMeshGenerator::generate()
   {
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the static_cast.
+    case 0:
+      MeshTools::Generation::build_point(
+          static_cast<UnstructuredMesh &>(*mesh), elem_type, _gauss_lobatto_grid);
+      break;
     case 1:
       MeshTools::Generation::build_line(static_cast<UnstructuredMesh &>(*mesh),
                                         _nx,
@@ -197,11 +204,18 @@ GeneratedMeshGenerator::generate()
   if (_has_subdomain_ids)
   {
     auto & bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
-    if (bids.size() != _nx * _ny * _nz && bids.size() != 1)
+    const auto num_elements = _dim == 0 ? 1 : _nx * _ny * _nz;
+    if (bids.size() != num_elements && bids.size() != 1)
       paramError("subdomain_ids",
                  "Size must equal to the product of number of elements in all directions, or one.");
     for (auto & elem : mesh->element_ptr_range())
     {
+      if (_dim == 0)
+      {
+        elem->subdomain_id() = bids[0];
+        continue;
+      }
+
       const Point p = elem->vertex_average();
       unsigned int ix = std::floor((p(0) - _xmin) / (_xmax - _xmin) * _nx);
       unsigned int iy = std::floor((p(1) - _ymin) / (_ymax - _ymin) * _ny);
@@ -254,7 +268,7 @@ GeneratedMeshGenerator::generate()
   mesh->unset_has_boundary_id_sets();
 
   // Apply the bias if any exists
-  if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
+  if (_dim != 0 && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
   {
     const auto MIN = std::numeric_limits<Real>::max();
 

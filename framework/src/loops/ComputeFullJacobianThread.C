@@ -20,6 +20,7 @@
 #include "NonlocalKernel.h"
 #include "NonlocalIntegratedBC.h"
 #include "FVElementalKernel.h"
+#include "ElementADScalarKernel.h"
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
@@ -131,6 +132,16 @@ ComputeFullJacobianThread::computeOnElement()
     for (auto fv_kernel : _fv_kernels)
       if (fv_kernel->isImplicit())
         fv_kernel->computeOffDiagJacobian();
+
+  if (_element_scalar_kernels.hasActiveBlockObjects(_subdomain, _tid))
+    for (const auto & esk : _element_scalar_kernels.getActiveBlockObjects(_subdomain, _tid))
+      computeElementScalarKernel(*esk);
+}
+
+void
+ComputeFullJacobianThread::computeElementScalarKernel(ElementADScalarKernel & esk)
+{
+  esk.computeJacobianOnElement();
 }
 
 void

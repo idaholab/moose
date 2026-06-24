@@ -515,6 +515,8 @@ getPetscPCSide(Moose::PCSideType pcs)
 {
   switch (pcs)
   {
+    case Moose::PCS_DEFAULT:
+      return PC_SIDE_DEFAULT;
     case Moose::PCS_LEFT:
       return PC_LEFT;
     case Moose::PCS_RIGHT:
@@ -549,33 +551,25 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 }
 
 void
-petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
+petscSetDefaultKSPNormType(const FEProblemBase & problem,
+                           const SolverSystem & solver_system,
+                           KSP ksp)
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
-  {
-    SolverSystem & sys = problem.getSolverSystem(i);
-    LibmeshPetscCallA(problem.comm().get(),
-                      KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType())));
-  }
+  LibmeshPetscCallA(problem.comm().get(),
+                    KSPSetNormType(ksp, getPetscKSPNormType(solver_system.getMooseKSPNormType())));
 }
 
 void
-petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
+petscSetDefaultPCSide(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
-  {
-    SolverSystem & sys = problem.getSolverSystem(i);
-
-    // PETSc 3.2.x+
-    if (sys.getPCSide() != Moose::PCS_DEFAULT)
-      LibmeshPetscCallA(problem.comm().get(), KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide())));
-  }
+  LibmeshPetscCallA(problem.comm().get(),
+                    KSPSetPCSide(ksp, getPetscPCSide(solver_system.getPCSide())));
 }
 
 void
-petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
+petscSetKSPDefaults(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
 {
-  auto & es = problem.es();
+  const auto & es = problem.es();
 
   PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");
   PetscReal atol = es.parameters.get<Real>("linear solver absolute tolerance");
@@ -589,9 +583,9 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
   // 1e100 is because we don't use divtol currently
   LibmeshPetscCallA(problem.comm().get(), KSPSetTolerances(ksp, rtol, atol, 1e100, maxits));
 
-  petscSetDefaultPCSide(problem, ksp);
+  petscSetDefaultPCSide(problem, solver_system, ksp);
 
-  petscSetDefaultKSPNormType(problem, ksp);
+  petscSetDefaultKSPNormType(problem, solver_system, ksp);
 }
 
 void
@@ -629,7 +623,7 @@ petscSetDefaults(FEProblemBase & problem)
         nl.comm().get(),
         SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
 
-    petscSetKSPDefaults(problem, ksp);
+    petscSetKSPDefaults(problem, nl, ksp);
   }
 
   for (auto sys_index : make_range(problem.numLinearSystems()))
@@ -1017,10 +1011,34 @@ getPetscValidLineSearches()
 }
 
 InputParameters
-getPetscValidParams()
+flagAndPairOptions()
 {
   InputParameters params = emptyInputParameters();
+  params.addParam<MultiMooseEnum>(
+      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string>>(
+      "petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+  params.addParamNamesToGroup("petsc_options petsc_options_iname petsc_options_value", "PETSc");
+  return params;
+}
 
+InputParameters
+kspRelatedParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
+  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
+  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
+  return params;
+}
+
+InputParameters
+newtonKrylovParams()
+{
+  InputParameters params = emptyInputParameters();
   MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
   params.addParam<MooseEnum>("solve_type",
                              solve_type,
@@ -1037,17 +1055,19 @@ getPetscValidParams()
                              "Jacobian-free solve types. Note that the "
                              "default is wp (for Walker and Pernice).");
 
-  params.addParam<MultiMooseEnum>(
-      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>(
-      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string>>(
-      "petsc_options_value",
-      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
-                              "PETSc");
+  std::set<std::string> line_searches = {"default", "none", "basic", "contact", "project"};
+  const auto petsc_line_searches = getPetscValidLineSearches();
+  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
+  MooseEnum line_search(Moose::stringify(line_searches, " "), "default");
+  params.addParam<MooseEnum>(
+      "line_search", line_search, "Specifies the line search type (Note: none = basic)");
 
+  MooseEnum line_search_package("petsc moose", "petsc");
+  params.addParam<MooseEnum>("line_search_package",
+                             line_search_package,
+                             "The solver package to use to conduct the line-search");
+
+  params.addParamNamesToGroup("solve_type mffd_type line_search line_search_package", "PETSc");
   return params;
 }
 
@@ -1332,6 +1352,16 @@ createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
   LibmeshPetscCallA(comm.get(), PetscViewerDestroy(&matviewer));
 
   return std::make_unique<PetscMatrix<Number>>(mat, comm);
+}
+
+void
+setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object)
+{
+  es.parameters.set<Real>("linear solver tolerance") = solver_object.getParam<Real>("l_tol");
+  es.parameters.set<Real>("linear solver absolute tolerance") =
+      solver_object.getParam<Real>("l_abs_tol");
+  es.parameters.set<unsigned int>("linear solver maximum iterations") =
+      solver_object.getParam<unsigned int>("l_max_its");
 }
 
 } // Namespace PetscSupport

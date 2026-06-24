@@ -89,7 +89,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     auto & nl = _nl[i];
     nl = std::make_shared<NonlinearEigenSystem>(*this, sys_name);
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
-    _current_nl_sys = nl.get();
+    setCurrentNonlinearSystem(i);
     _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
     nl->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
   }
@@ -250,7 +250,7 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
 
   _currently_computing_jacobian = true;
 
-  _current_nl_sys->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
+  currentNonlinearSystem().computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
 
   _currently_computing_jacobian = false;
 }
@@ -517,15 +517,15 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
-  mooseAssert(_current_nl_sys, "This needs to be non-null");
+  mooseAssert(_nl_i_sys_num < _nl.size(), "This needs to be non-null");
 
   doFreePowerIteration(true);
   // Set free power iterations
   Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
   // Call solver
-  _current_nl_sys->solve();
-  _current_nl_sys->update();
+  currentNonlinearSystem().solve();
+  currentNonlinearSystem().update();
 
   // Clear free power iterations
   auto executioner = getMooseApp().getExecutioner();
@@ -602,8 +602,8 @@ EigenProblem::solve(const unsigned int nl_sys_num)
       _console << " -------------------------------------" << std::endl << std::endl;
     }
 
-    _current_nl_sys->solve();
-    _current_nl_sys->update();
+    currentNonlinearSystem().solve();
+    currentNonlinearSystem().update();
 
     // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
     if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO)

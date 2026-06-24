@@ -20,6 +20,7 @@
 #include "SwapBackSentinel.h"
 #include "FVTimeKernel.h"
 #include "HDGKernel.h"
+#include "ElementADScalarKernel.h"
 
 #include "libmesh/threads.h"
 
@@ -44,6 +45,12 @@ void
 ComputeResidualAndJacobianThread::compute(ResidualObject & ro)
 {
   ro.computeResidualAndJacobian();
+}
+
+void
+ComputeResidualAndJacobianThread::computeElementScalarKernel(ElementADScalarKernel & esk)
+{
+  esk.computeResidualAndJacobianOnElement();
 }
 
 void

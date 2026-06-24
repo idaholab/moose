@@ -26,6 +26,7 @@ class Kernel;
 class ResidualObject;
 class FVElementalKernel;
 class HDGKernel;
+class ElementADScalarKernel;
 
 class NonlinearThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -82,6 +83,12 @@ protected:
    * derived class
    */
   virtual void compute(ResidualObject & ro) = 0;
+
+  /**
+   * Dispatch to computeResidualOnElement/computeJacobianOnElement/
+   * computeResidualAndJacobianOnElement based on the derived class
+   */
+  virtual void computeElementScalarKernel(ElementADScalarKernel & esk) = 0;
 
   ///@{
   /// Defaults to forwarding to the residual object class
@@ -165,6 +172,9 @@ protected:
 
   /// Current subdomain FVElementalKernels
   std::vector<FVElementalKernel *> _fv_kernels;
+
+  /// Reference to ElementADScalarKernel warehouse (threaded, block-restricted)
+  MooseObjectTagWarehouse<ElementADScalarKernel> & _element_scalar_kernels;
 
   /// Whether there are any active residual objects; otherwise we will do an early return
   const bool _has_active_objects;

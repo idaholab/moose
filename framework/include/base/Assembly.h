@@ -1104,9 +1104,10 @@ public:
   void setCachedJacobian(GlobalDataKey);
 
   /**
-   * Zero out previously-cached Jacobian rows.
+   * Register a Jacobian row as constrained (e.g. Dirichlet BC). The row will be zeroed and
+   * re-populated with set semantics when setCachedJacobian is called.
    */
-  void zeroCachedJacobian(GlobalDataKey);
+  void constrainJacobianRow(dof_id_type row, LocalDataKey, const std::set<TagID> & tags);
 
   /**
    * Get local residual block for a variable and a tag. Only blessed framework classes may call this
@@ -1294,21 +1295,25 @@ public:
   {
     return _cm_ff_entry;
   }
+
   const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   couplingEntries() const
   {
     return _cm_ff_entry;
   }
+
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries()
   {
     return _cm_nonlocal_entry;
   }
+
   const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
   fieldScalarCouplingEntries() const
   {
     return _cm_fs_entry;
   }
+
   const std::vector<std::pair<MooseVariableScalar *, MooseVariableFieldBase *>> &
   scalarFieldCouplingEntries() const
   {
@@ -2576,16 +2581,16 @@ private:
   /********** mortar stuff *************/
 
   /// A JxW for working on mortar segement elements
-  const std::vector<Real> * _JxW_msm;
+  const std::vector<Real> * _JxW_msm = nullptr;
   /// A FE object for working on mortar segement elements
   std::unique_ptr<FEBase> _fe_msm;
   /// A qrule object for working on mortar segement elements. This needs to be a
   /// raw pointer because we need to be able to return a reference to it because
   /// we will be constructing other objects that need the qrule before the qrule
   /// is actually created
-  libMesh::QBase * _qrule_msm;
+  libMesh::QBase * _qrule_msm = nullptr;
   /// Flag specifying whether a custom quadrature rule has been specified for mortar segment mesh
-  bool _custom_mortar_qrule;
+  bool _custom_mortar_qrule = false;
 
   /// quadrature rule used on lower dimensional elements. This should always be
   /// the same as the face qrule
@@ -2808,6 +2813,8 @@ protected:
   std::vector<std::vector<dof_id_type>> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
   std::vector<std::vector<dof_id_type>> _cached_jacobian_cols;
+  /// Rows registered as constrained (e.g. Dirichlet BCs); zeroed in setCachedJacobian
+  std::vector<std::vector<dof_id_type>> _constrained_jacobian_rows;
 
   unsigned int _max_cached_jacobians;
 

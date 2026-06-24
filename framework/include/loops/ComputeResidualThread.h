@@ -30,6 +30,7 @@ protected:
   virtual void compute(ResidualObject & ro) override;
   using NonlinearThread::computeOnInternalFace;
   virtual void computeOnInternalFace() override;
+  void computeElementScalarKernel(ElementADScalarKernel & esk) override;
 
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;
