@@ -1,8 +1,7 @@
 # NumDOFs
 
 The NumDOFs postprocessor provides information about the number of degrees of freedom (DOFs) in the simulation. This postprocessor
-is capable of providing the DOFs in either the Nonlinear system (the system of PDEs you are solving), the Auxiliary system, the
-system containing only explicit calculations, or both together.
+is capable of providing the DOFs in a named equation system, in the default Nonlinear or Auxiliary systems, or in all systems together.
 
 If you are using [Mesh Adaptivity](syntax/Adaptivity/index.md), the number of DOFs will likely change as your simulation progresses.
 You might consider using `execute_on = initial timestep_end` in that case. Otherwise `execute_on = initial` should be sufficient.

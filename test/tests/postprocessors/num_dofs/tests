@@ -11,4 +11,14 @@
 
     max_parallel = 16 # 16 element test (initially)
   [../]
+  [./named_system]
+    type = 'CSVDiff'
+    input = 'named_system.i'
+    csvdiff = 'named_system_out.csv'
+
+    requirement = 'The NumDOFs Postprocessor shall report the number of degrees of freedom
+                   (DOFS) from a named equation system in the simulation.'
+    design = '/NumDOFs.md'
+    issues = '#31796'
+  [../]
 []

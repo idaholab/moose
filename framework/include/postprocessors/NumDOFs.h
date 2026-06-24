@@ -30,15 +30,7 @@ public:
   virtual Real getValue() const override;
 
 protected:
-  enum SystemEnum
-  {
-    NL,
-    AUX,
-    ALL
-  };
-
-  const SystemEnum _system_enum;
-
+  bool _all_systems;
   const libMesh::System * _system_pointer;
   const EquationSystems * _es_pointer;
 };
