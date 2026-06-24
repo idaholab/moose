@@ -186,7 +186,7 @@ SideSetsFromBoundingBoxGenerator::generate()
         mesh->comm().send(source_pid, responses[p - 1], request, replies_tag);
       }
 
-      for (const auto p : make_range(uint(1), my_n_proc))
+      for (processor_id_type p = 1; p != my_n_proc; ++p)
       {
         Parallel::Status status(mesh->comm().probe(Parallel::any_source, replies_tag));
         const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
