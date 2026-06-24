@@ -194,6 +194,27 @@ Registry::getRepositoryURL(const std::string & repo_name)
   mooseError("Registry::getRepositoryURL(): The repository '", repo_name, "' is not registered.");
 }
 
+void
+Registry::addAppCitation(const std::string & app_name,
+                         const std::string & key,
+                         const std::string & bibtex)
+{
+  auto & app_citations = getRegistry()._app_citations[app_name];
+  const auto [it, inserted] = app_citations.emplace(key, bibtex);
+  if (!inserted && it->second != bibtex)
+    mooseError(
+        "Registry: the citation '", key, "' is already registered with different BibTeX text.");
+}
+
+const std::map<std::string, std::string> &
+Registry::getCitations(const std::string & app_name)
+{
+  static const std::map<std::string, std::string> empty;
+  const auto & app_citations = getRegistry()._app_citations;
+  const auto it = app_citations.find(app_name);
+  return it != app_citations.end() ? it->second : empty;
+}
+
 std::string
 Registry::determineDataFilePath(const std::string & name, const std::string & in_tree_path)
 {
