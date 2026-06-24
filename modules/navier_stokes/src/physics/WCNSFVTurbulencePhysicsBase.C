@@ -16,6 +16,7 @@
 #include "kEpsilonViscosityAux.h"
 #include "INSFVTKESourceSink.h"
 #include "INSFVTurbulentViscosityWallFunction.h"
+#include "NSFVUtils.h"
 #include "NSFVBase.h"
 
 InputParameters
@@ -78,7 +79,7 @@ WCNSFVTurbulencePhysicsBase::validParams()
 
   // K-Epsilon numerical scheme parameters
   MooseEnum face_interpol_types("average skewness-corrected", "average");
-  MooseEnum adv_interpol_types("average upwind", "upwind");
+  MooseEnum adv_interpol_types(NS::fvAdvectedInterpolationMethods());
   params.addParam<MooseEnum>("tke_face_interpolation",
                              face_interpol_types,
                              "The numerical scheme to interpolate the TKE to the "

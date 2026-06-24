@@ -483,7 +483,9 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
 #endif
 
-  // Linear FV kernels fetch FVInterpolationMethod instances in their constructors
+  // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
+  // add linear FV kernels on the generic FV kernel task.
+  addTaskDependency("add_fv_kernel", "add_interpolation_method");
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method");
 
   registerTask("parse_neml2", /*required=*/false);

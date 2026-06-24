@@ -29,12 +29,21 @@ LinearFVAnisotropicDiffusion::validParams()
       "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addRequiredParam<MooseFunctorName>("diffusion_tensor",
                                             "Functor describing a diagonal diffusion tensor.");
+  params.addParam<InterpolationMethodName>(
+      "coeff_interp_method",
+      "Optional finite volume interpolation method used to compute a face-centered diagonal "
+      "diffusion tensor. If omitted, the functor is evaluated directly on the face.");
   return params;
 }
 
 LinearFVAnisotropicDiffusion::LinearFVAnisotropicDiffusion(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _diffusion_tensor(getFunctor<RealVectorValue>("diffusion_tensor")),
+    _coeff_interp_method(isParamValid("coeff_interp_method")
+                             ? &getFVFaceInterpolationMethod(
+                                   getParam<InterpolationMethodName>("coeff_interp_method"))
+                             : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_nonorthogonal_correction_on_boundary(
         isParamValid("use_nonorthogonal_correction_on_boundary")
@@ -53,6 +62,29 @@ LinearFVAnisotropicDiffusion::initialSetup()
     if (!dynamic_cast<const LinearFVAdvectionDiffusionBC *>(bc.second))
       mooseError(
           bc.second->type(), " is not a compatible boundary condition with ", this->type(), "!");
+}
+
+RealVectorValue
+LinearFVAnisotropicDiffusion::faceDiffusionTensor() const
+{
+  const auto state = determineState();
+
+  if (!_coeff_interp_method)
+    return _diffusion_tensor(makeCDFace(*_current_face_info), state);
+
+  mooseAssert(_current_face_type == FaceInfo::VarFaceNeighbors::BOTH,
+              "Face interpolation is only valid for two-sided internal faces.");
+
+  const auto elem_tensor = _diffusion_tensor(makeElemArg(_current_face_info->elemPtr()), state);
+  const auto neighbor_tensor =
+      _diffusion_tensor(makeElemArg(_current_face_info->neighborPtr()), state);
+
+  RealVectorValue face_tensor;
+  for (const auto i : make_range(Moose::dim))
+    face_tensor(i) =
+        _coeff_interp_method->interpolate(*_current_face_info, elem_tensor(i), neighbor_tensor(i));
+
+  return face_tensor;
 }
 
 Real
@@ -85,15 +117,13 @@ LinearFVAnisotropicDiffusion::computeFluxMatrixContribution()
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
-
     // If we requested nonorthogonal correction, we use the normal component of the
     // cell to face vector.
     const auto d = _use_nonorthogonal_correction
                        ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
                        : _current_face_info->dCNMag();
 
-    auto scaled_diff_tensor = _diffusion_tensor(face_arg, determineState());
+    auto scaled_diff_tensor = faceDiffusionTensor();
 
     for (const auto i : make_range(Moose::dim))
       scaled_diff_tensor(i) = _current_face_info->normal()(i) * scaled_diff_tensor(i);
@@ -114,7 +144,6 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
   // Cache the RHS contribution
   if (!_cached_rhs_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
     const auto state_arg = determineState();
 
     // Get the gradients from the adjacent cells
@@ -128,7 +157,7 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
     const auto interpolated_gradient =
         (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor);
 
-    auto scaled_diff_tensor = _diffusion_tensor(face_arg, state_arg);
+    auto scaled_diff_tensor = faceDiffusionTensor();
 
     for (const auto i : make_range(Moose::dim))
       scaled_diff_tensor(i) = _current_face_info->normal()(i) * scaled_diff_tensor(i);
