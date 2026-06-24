@@ -311,9 +311,13 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
   // name, *is* appropriate to how this method is used in practice. See shallowCopyData and
   // shallowCopyDataBack in MaterialPropertyStorage.C
 
+#ifndef NDEBUG
   auto * different_type_prop = dynamic_cast<MaterialPropertyBase<T, !is_ad> *>(&rhs);
   mooseAssert(different_type_prop,
               "Wrong material property type T in MaterialPropertyBase<T, is_ad>::swap");
+#else
+  auto * different_type_prop = static_cast<MaterialPropertyBase<T, !is_ad> *>(&rhs);
+#endif
 
   this->resize(different_type_prop->size());
   for (const auto qp : make_range(this->size()))
