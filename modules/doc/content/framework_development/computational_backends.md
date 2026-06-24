@@ -28,6 +28,7 @@ MOOSE application and input file
 +-- MFEM-MOOSE
 |   +-- MFEMProblem, MFEMMesh, MFEM variables, kernels, BCs, and solvers
 |   +-- MFEM finite element spaces and assembly levels
+|   +-- Optional GPU and libCEED execution paths through MFEM
 ```
 
 ## Choosing a path
@@ -67,6 +68,8 @@ MFEM-MOOSE uses [MFEM](https://mfem.org) as its finite element backend. Inputs u
 problem, mesh, finite element space, variable, kernel, boundary condition, solver, executioner, and
 output objects. This path is useful for capabilities that are natural in MFEM, including high-order
 finite elements, H(div) and H(curl) spaces, partial assembly, and low-order-refined solvers.
+When MFEM-MOOSE is built with libCEED support, its `none` assembly level provides a matrix-free
+execution path through MFEM.
 
 MFEM-MOOSE is the path that most directly changes the finite element backend.
 
