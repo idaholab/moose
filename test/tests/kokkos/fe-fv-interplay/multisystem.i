@@ -96,9 +96,10 @@
     execute_on = FINAL
   []
   [fv_avg]
-    type = ElementFVAverageValue
+    type = ElementAverageFunctorPostprocessor
     functor = v
     execute_on = FINAL
+    evaluation_type = CELL_AVERAGE
   []
 []
 
