@@ -90,24 +90,18 @@ ComplexEquationSystem::BuildBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    if ((_cmplx_kernels_map.Has(test_var_name) &&
-         _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
-        (_cmplx_integrated_bc_map.Has(test_var_name) &&
-         _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
-    {
-      _slfs.Register(test_var_name,
-                     std::make_shared<mfem::ParSesquilinearForm>(_test_pfespaces.at(i)));
+    _slfs.Register(test_var_name,
+                   std::make_shared<mfem::ParSesquilinearForm>(_test_pfespaces.at(i)));
 
-      // Apply kernels
-      auto slf = _slfs.GetShared(test_var_name);
-      slf->SetAssemblyLevel(_assembly_level);
-      ApplyBoundaryBLFIntegrators<mfem::ParSesquilinearForm>(
-          test_var_name, test_var_name, slf, _cmplx_integrated_bc_map);
-      ApplyDomainBLFIntegrators<mfem::ParSesquilinearForm>(
-          test_var_name, test_var_name, slf, _cmplx_kernels_map);
-      // Assemble
-      slf->Assemble();
-    }
+    // Apply kernels
+    auto slf = _slfs.GetShared(test_var_name);
+    slf->SetAssemblyLevel(_assembly_level);
+    ApplyBoundaryBLFIntegrators<mfem::ParSesquilinearForm>(
+        test_var_name, test_var_name, slf, _cmplx_integrated_bc_map);
+    ApplyDomainBLFIntegrators<mfem::ParSesquilinearForm>(
+        test_var_name, test_var_name, slf, _cmplx_kernels_map);
+    // Assemble
+    slf->Assemble();
   }
 }
 
