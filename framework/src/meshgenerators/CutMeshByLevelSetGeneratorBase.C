@@ -98,7 +98,7 @@ CutMeshByLevelSetGeneratorBase::generate()
 
   if (!_cut_face_name.empty())
   {
-    if (MooseMeshUtils::hasBoundaryName(mesh, _cut_face_name))
+    if (MooseMeshUtils::hasBoundaryNameOrID(mesh, _cut_face_name))
     {
       const boundary_id_type exist_cut_face_id =
           MooseMeshUtils::getBoundaryID(_cut_face_name, mesh);
