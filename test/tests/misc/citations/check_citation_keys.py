@@ -20,8 +20,42 @@ import sys
 import glob
 import subprocess
 
-# moose/test/tests/misc/citations/this_file -> moose
-MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
+
+def is_moose_dir(path):
+    """Whether path looks like a MOOSE source checkout."""
+    return os.path.isdir(os.path.join(path, "framework", "src")) and os.path.isdir(
+        os.path.join(path, "modules")
+    )
+
+
+def candidate_dirs(path):
+    """A path and the CIVET source-tree name used while copied tests run."""
+    yield path
+    yield path + "_moved"
+
+
+def find_moose_dir():
+    # In-tree execution: moose/test/tests/misc/citations/this_file -> moose
+    local = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
+    for path in candidate_dirs(local):
+        if is_moose_dir(path):
+            return path
+
+    # Copied-test execution: the test tree no longer sits below the source checkout.
+    for var in ("MOOSE_DIR", "MOOSE_REPO", "REPO_DIR"):
+        value = os.environ.get(var)
+        if value:
+            for path in candidate_dirs(os.path.abspath(value)):
+                if is_moose_dir(path):
+                    return path
+
+    print(
+        "ERROR: could not locate the MOOSE source tree; set MOOSE_DIR to the source checkout."
+    )
+    sys.exit(1)
+
+
+MOOSE_DIR = find_moose_dir()
 
 # Where citations are registered in C++ and where the authoritative .bib entries live
 SOURCE_DIRS = [
