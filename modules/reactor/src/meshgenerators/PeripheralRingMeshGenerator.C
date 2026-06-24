@@ -164,7 +164,7 @@ PeripheralRingMeshGenerator::generate()
 
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
-  if (!MooseMeshUtils::hasBoundaryName(*input_mesh, _input_mesh_external_boundary))
+  if (!MooseMeshUtils::hasBoundaryNameOrID(*input_mesh, _input_mesh_external_boundary))
     paramError("input_mesh_external_boundary",
                "External boundary does not exist in the input mesh");
   // We check the element types of input mesh's external boundary here.

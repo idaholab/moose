@@ -1100,7 +1100,7 @@ transitionLayerGenerator(MeshBase & mesh,
   std::vector<boundary_id_type> boundary_ids;
   for (const auto & sideset : boundary_names)
   {
-    if (!MooseMeshUtils::hasBoundaryName(mesh, sideset))
+    if (!MooseMeshUtils::hasBoundaryNameOrID(mesh, sideset))
       throw MooseException("The provided boundary '", sideset, "' was not found within the mesh");
     boundary_ids.push_back(MooseMeshUtils::getBoundaryID(sideset, mesh));
     MooseMeshUtils::changeBoundaryId(mesh, boundary_ids.back(), uniform_tmp_bid, false);

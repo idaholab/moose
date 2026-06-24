@@ -273,7 +273,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
       for (const auto & bn : boundary_names)
-        if (!MooseMeshUtils::hasBoundaryName(from_moose_mesh.getMesh(), bn))
+        if (!MooseMeshUtils::hasBoundaryNameOrID(from_moose_mesh.getMesh(), bn))
           paramError("from_boundaries", "The boundary '", bn, "' was not found in the mesh");
 
       if (!boundary_names.empty())
@@ -352,7 +352,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
       for (const auto & bn : boundary_names)
-        if (!MooseMeshUtils::hasBoundaryName(to_moose_mesh.getMesh(), bn))
+        if (!MooseMeshUtils::hasBoundaryNameOrID(to_moose_mesh.getMesh(), bn))
           paramError("to_boundaries", "The boundary '", bn, "' was not found in the mesh");
 
       if (!boundary_names.empty())
