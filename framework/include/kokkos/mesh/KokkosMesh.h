@@ -95,17 +95,12 @@ public:
    * Get the number of local elements
    * @returns The number of local elements
    */
-  auto getNumLocalElements() const { return _num_local_elems; }
-  /**
-   * Get the number of ghost (off-process neighbor) elements.
-   * @returns The number of ghost elements
-   */
-  auto getNumGhostElements() const { return _num_ghost_elems; }
+  dof_id_type getNumLocalElements() const { return _num_local_elems; }
   /**
    * Get the total number of elements, i.e. the local elements plus the ghost elements
    * @returns The total number of elements
    */
-  auto getNumTotalElements() const { return _num_local_elems + _num_ghost_elems; }
+  dof_id_type getNumLocalAndPossiblyOneNeighborLayerGhostElements() const;
   /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -572,6 +567,12 @@ Mesh::isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const
   return target != end;
 }
 #endif
+
+inline dof_id_type
+Mesh::getNumLocalAndPossiblyOneNeighborLayerGhostElements() const
+{
+  return _num_local_elems + _num_ghost_elems;
+}
 
 /**
  * The Kokkos interface that holds the host reference of the Kokkos mesh and copies it to device

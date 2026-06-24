@@ -84,7 +84,7 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  const auto num_total_elems = kokkosMesh().getNumTotalElements();
+  const auto num_total_elems = kokkosMesh().getNumLocalAndPossiblyOneNeighborLayerGhostElements();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
