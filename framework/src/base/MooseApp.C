@@ -3359,7 +3359,7 @@ MooseApp::setMFEMDevice(const std::string & device_string,
   {
     _mfem_device = std::make_shared<mfem::Device>(device_string);
     _mfem_devices = std::move(string_set);
-    _mfem_device->SetGPUAwareMPI(gpu_aware_mpi);
+    _mfem_device->SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
     _mfem_device->Print(Moose::out);
   }
   else if (!device_string.empty() && string_set != _mfem_devices)
