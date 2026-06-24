@@ -9,6 +9,12 @@ expects information to be organized into a hierarchy of blocks with zero or more
 children at each level. It performs as much error checking as early as possible before
 building any MOOSE objects.
 
+## Brace expressions
+
+The current brace-expression implementation and a proposed rewrite that supports
+arbitrary nested `${...}` evaluation are described in
+[BraceExpressionRewrite.md](/source/parser/BraceExpressionRewrite.md).
+
 ## Includes
 
 See [Includes](input_syntax.md optional=True)
