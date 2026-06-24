@@ -1,4 +1,4 @@
-# Computational Backends and Accelerated Components
+# Computational Backends
 
 MOOSE has several computational paths that share the same input-file-driven framework, but they do
 not all replace the same layer of the stack. Some are alternative finite element backends, some are
