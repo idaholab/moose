@@ -116,9 +116,9 @@ WCNSFVTurbulencePhysicsBase::validParams()
                         "Whether to use an auxiliary variable instead of a functor material "
                         "property for the turbulent viscosity");
   params.addParam<bool>("output_mu_t", true, "Whether to add mu_t to the field outputs");
-  params.addParam<bool>("k_t_as_aux_variable",
+  params.addParam<bool>("k_eff_t_as_aux_variable",
                         false,
-                        "Whether to use an auxiliary variable for the turbulent conductivity");
+                        "Whether to use an auxiliary variable for the effective turbulent conductivity");
 
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
@@ -145,7 +145,7 @@ WCNSFVTurbulencePhysicsBase::validParams()
   params.addParamNamesToGroup("tke_face_interpolation tke_two_term_bc_expansion "
                               "tked_face_interpolation tked_two_term_bc_expansion "
                               "turbulent_viscosity_two_term_bc_expansion "
-                              "mu_t_as_aux_variable k_t_as_aux_variable",
+                              "mu_t_as_aux_variable k_eff_t_as_aux_variable",
                               "K-Epsilon model numerical");
 
   return params;
@@ -172,7 +172,7 @@ WCNSFVTurbulencePhysicsBase::WCNSFVTurbulencePhysicsBase(const InputParameters &
     saveSolverVariableName(_tked_name);
     if (getParam<bool>("mu_t_as_aux_variable"))
       saveAuxVariableName(_turbulent_viscosity_name);
-    if (getParam<bool>("k_t_as_aux_variable"))
+    if (getParam<bool>("k_eff_t_as_aux_variable"))
       saveAuxVariableName(NS::k_t);
   }
 
@@ -364,12 +364,12 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryVariables()
     else
       getProblem().addAuxVariable(var_type, _turbulent_viscosity_name, params);
   }
-  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_eff_t_as_aux_variable"))
   {
     auto params = getFactory().getValidParams(var_type);
     assignBlocks(params, _blocks);
-    if (shouldCreateVariable(NS::k_t, _blocks, /*error if aux*/ false))
-      getProblem().addAuxVariable(var_type, NS::k_t, params);
+    if (shouldCreateVariable(NS::k_eff_t, _blocks, /*error if aux*/ false))
+      getProblem().addAuxVariable(var_type, NS::k_eff_t, params);
   }
 }
 
@@ -402,16 +402,26 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
     getProblem().addAuxKernel("kEpsilonViscosityAux", name() + "_viscosity_aux", params);
   }
   if (_turbulence_model == "k-epsilon" && _has_energy_equation &&
-      getParam<bool>("k_t_as_aux_variable"))
+      getParam<bool>("k_eff_t_as_aux_variable"))
   {
-    auto params = getFactory().getValidParams("TurbulentConductivityAux");
+    auto params = getFactory().getValidParams("EffectiveTurbulentThermalConductivityAux");
     assignBlocks(params, _blocks);
-    params.set<AuxVariableName>("variable") = NS::k_t;
+    params.set<AuxVariableName>("variable") = NS::k_eff_t;
     params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+
+    const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
+    if (k_names.size() != 1)
+      paramError("thermal_conductivity_name",
+                "Thermal conductivity vector is not currently supported for obtaining "
+                "the effective thermal conductivity");
+
+    params.set<MooseFunctorName>(NS::k) = k_names[0];
+
     params.applySpecificParameters(parameters(), {"Pr_t"});
     getProblem().addAuxKernel(
-        "TurbulentConductivityAux", name() + "_thermal_conductivity_aux", params);
+        "EffectiveTurbulentThermalConductivityAux", name() + "_thermal_conductivity_aux", params);
   }
 }
 
@@ -447,15 +457,23 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
           "INSFVkEpsilonViscosityFunctorMaterial", prefix() + "compute_mu_t", params);
     }
 
-    if (_has_energy_equation && !getProblem().hasFunctor(NS::k_t, /*thread_id=*/0))
+    if (_has_energy_equation && !getProblem().hasFunctor(NS::k_eff_t, /*thread_id=*/0))
     {
-      mooseAssert(!getParam<bool>("k_t_as_aux_variable"), "k_t should not exist");
+      mooseAssert(!getParam<bool>("k_eff_t_as_aux_variable"), "k_eff_t should not exist");
       const auto object_type = is_linear ? "ParsedFunctorMaterial" : "ADParsedFunctorMaterial";
       InputParameters params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
       const auto mu_t_name = NS::mu_t;
-      const auto cp_name = _fluid_energy_physics->getSpecificHeatName();
-      const auto Pr_t_name = getParam<MooseFunctorName>("Pr_t");
+      const auto & cp_name = _fluid_energy_physics->getSpecificHeatName();
+
+      const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
+      if (k_names.size() != 1)
+        _fluid_energy_physics->paramError("thermal_conductivity_name",
+                  "Specifying multiple block-restricted thermal conductivities is not currently supported for obtaining "
+                  "the effective thermal conductivity");
+      const auto & k_name = k_names[0];
+
+      const auto & Pr_t_name = getParam<MooseFunctorName>("Pr_t");
 
       // Avoid defining floats as functors in the parsed expression
       if (!MooseUtils::isFloat(cp_name) && !MooseUtils::isFloat(Pr_t_name))
@@ -467,8 +485,8 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       else
         params.set<std::vector<std::string>>("functor_names") = {mu_t_name};
 
-      params.set<std::string>("expression") = mu_t_name + "*" + cp_name + "/" + Pr_t_name;
-      params.set<std::string>("property_name") = NS::k_t;
+      params.set<std::string>("expression") = k_name + "+" + mu_t_name + "*" + cp_name + "/" + Pr_t_name;
+      params.set<std::string>("property_name") = NS::k_eff_t;
       params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
       params.set<std::vector<OutputName>>("outputs") = {"all"};
       getProblem().addMaterial(object_type, prefix() + "turbulent_heat_eff_conductivity", params);
