@@ -96,15 +96,16 @@ using namespace libMesh;
 namespace
 {
 /**
- * Return a temporary checkpoint path used to serialize mesh topology into an in-memory Backup.
+ * Return a temporary checkpoint path used to move mesh topology through CheckpointIO.
  *
- * @param app App whose communicator and processor id determine temporary path ownership
+ * @param app App whose output file base, communicator, and processor id determine temporary path
+ *            ownership
  * @param purpose Short label included in the directory name, e.g. "backup" or "restore"
  * @param shared Whether all ranks in the app communicator should use one shared checkpoint
- *               directory. Backup writes use a shared directory generated on rank 0 because
- *               CheckpointIO writes one checkpoint directory collectively. Restore reads use
- *               per-rank directories so each rank can materialize its in-memory file contents
- *               independently.
+ *               directory. Backup performs one collective checkpoint write, then captures each
+ *               checkpoint entry as a relative path and byte contents in the Backup object. Restore
+ *               recreates that checkpoint layout in rank-local temporary directories before calling
+ *               CheckpointIO::read().
  */
 std::filesystem::path
 temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
@@ -114,24 +115,33 @@ temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const
   std::string dirname;
   if (!shared || app.processor_id() == 0)
   {
-    // The process id avoids collisions between independent MOOSE processes using the same
-    // system temporary directory; processor_id() is only unique within this app communicator.
-    dirname =
-        "moose_" + purpose + "_mesh_" + std::to_string(getpid()) + "_" + std::to_string(counter++);
-    if (!shared)
-      dirname += "_" + std::to_string(app.processor_id());
+    const auto file_base = std::filesystem::path(app.getOutputFileBase()).filename().string();
+    const auto dirname_base = (file_base.empty() ? "moose" : file_base) + "_" + purpose + "_mesh";
+    const auto tmp_dir = std::filesystem::temp_directory_path();
+    std::error_code err;
+
+    do
+    {
+      dirname = dirname_base + "_" + std::to_string(counter++);
+      if (!shared)
+        dirname += "_" + std::to_string(app.processor_id());
+
+      err.clear();
+    } while (!std::filesystem::create_directory(tmp_dir / dirname, err) && !err);
+
+    if (err)
+      mooseError("Unable to create temporary mesh ",
+                 purpose,
+                 " directory ",
+                 std::filesystem::absolute(tmp_dir / dirname),
+                 ": ",
+                 err.message());
   }
 
   if (shared)
     app.comm().broadcast(dirname);
 
   const auto root = std::filesystem::temp_directory_path() / dirname;
-  std::error_code err;
-  if (!std::filesystem::create_directories(root, err) && err)
-    mooseError("Unable to create temporary mesh backup directory ",
-               std::filesystem::absolute(root),
-               ": ",
-               err.message());
 
   return root / "mesh.cpr";
 }

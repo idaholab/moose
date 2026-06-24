@@ -18,9 +18,9 @@
 /**
  * Helper class to hold streams for Backup and Restore operations.
  *
- * The header and data streams hold restartable/recoverable data. The optional mesh file entries
- * hold an in-memory copy of libMesh checkpoint files for adapted meshes whose topology must be
- * restored before loading equation-system data.
+ * The header and data streams hold restartable/recoverable data. The optional mesh checkpoint data
+ * holds serialized libMesh checkpoint entries for adapted meshes whose topology must be restored
+ * before loading equation-system data.
  */
 struct Backup
 {
@@ -28,7 +28,7 @@ struct Backup
   std::unique_ptr<std::stringstream> header = std::make_unique<std::stringstream>();
   /// Restartable data payload stream.
   std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
-  /// Pairs of checkpoint-relative file names and binary file contents.
+  /// Pairs of checkpoint-relative entry names and binary payloads.
   std::vector<std::pair<std::string, std::string>> mesh_files;
 };
 
