@@ -24,13 +24,18 @@ namespace Moose::MFEM
 class MatrixFreeAMS : public mfem::Solver
 {
 public:
-  MatrixFreeAMS(mfem::Coefficient * alpha_coef,
-                mfem::Coefficient * beta_coef,
-                const mfem::Array<int> & ess_bdr_markers,
+  MatrixFreeAMS(mfem::Coefficient & alpha_coef,
+                mfem::Coefficient & beta_coef,
                 int inner_pi_its = 0,
                 int inner_g_its = 1);
 
+  /// Set the bilinear form corresponding to the curl-curl problem being preconditioned
   void SetBilinearForm(mfem::ParBilinearForm & a) { _aform = &a; }
+  /// Set the marker array labelling essential boundaries
+  void SetBoundaryMarkers(mfem::Array<int> & ess_bdr_markers)
+  {
+    _ess_bdr_markers = ess_bdr_markers;
+  }
   void SetOperator(const mfem::Operator & op) override;
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override
   {
@@ -39,19 +44,19 @@ public:
 
 private:
   std::unique_ptr<mfem::MatrixFreeAMS> _matrix_free_ams{nullptr};
-  mfem::ParBilinearForm * _aform;
-  mfem::Coefficient * _alpha_coef;
-  mfem::Coefficient * _beta_coef;
-  const mfem::Array<int> & _ess_bdr_markers;
+  mfem::Coefficient & _alpha_coef;
+  mfem::Coefficient & _beta_coef;
   const int _inner_pi_its;
   const int _inner_g_its;
+  mfem::ParBilinearForm * _aform;
+  mfem::Array<int> _ess_bdr_markers;
 };
 } // namespace Moose::MFEM
 
 /**
  * Wrapper for mfem::MatrixFreeAMS solver.
  */
-class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase, public MFEMBoundaryRestrictable
+class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase
 {
 public:
   static InputParameters validParams();
@@ -59,13 +64,13 @@ public:
   MFEMMatrixFreeAMS(const InputParameters &);
 
   /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & /*tdofs*/) override;
+  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
 
 protected:
   void ConstructSolver() override;
 
 private:
-  std::vector<BoundaryName> _ess_bdr_markerss;
+  std::vector<BoundaryName> _ess_bdr_markers;
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
   const unsigned int _inner_pi_its;

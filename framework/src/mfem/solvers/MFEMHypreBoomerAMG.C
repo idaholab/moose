@@ -66,12 +66,14 @@ MFEMHypreBoomerAMG::ConstructSolver()
 }
 
 void
-MFEMHypreBoomerAMG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreBoomerAMG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   if (_lor)
   {
     CheckSpectralEquivalence(a);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);
+    mfem::Array<int> ess_tdofs;
+    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, ess_tdofs);
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));

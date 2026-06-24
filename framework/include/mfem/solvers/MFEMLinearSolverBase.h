@@ -39,7 +39,7 @@ public:
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
   /// no-op; override in solvers or preconditioners that construct LOR-related data from the
   /// bilinear form.
-  virtual void SetupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) {}
+  virtual void SetupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*ess_bdr_markers*/) {}
 
   /// Updates the solver at the operator level. Default implementation sets the operator on the
   /// wrapped MFEM solver

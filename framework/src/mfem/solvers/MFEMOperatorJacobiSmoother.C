@@ -37,12 +37,14 @@ MFEMOperatorJacobiSmoother::ConstructSolver()
 }
 
 void
-MFEMOperatorJacobiSmoother::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMOperatorJacobiSmoother::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   if (_lor)
   {
     CheckSpectralEquivalence(a);
-    _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
+    mfem::Array<int> ess_tdofs;
+    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
+    _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, ess_tdofs));
   }
 }
 

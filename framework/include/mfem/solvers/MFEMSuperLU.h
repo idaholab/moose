@@ -51,7 +51,7 @@ protected:
   void ConstructSolver() override;
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
+  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
 };
 
 #endif

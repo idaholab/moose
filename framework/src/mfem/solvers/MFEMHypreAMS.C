@@ -52,7 +52,7 @@ MFEMHypreAMS::ConstructSolver()
 }
 
 void
-MFEMHypreAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   if (_lor)
   {
@@ -61,7 +61,9 @@ MFEMHypreAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");
 
-    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, tdofs);
+    mfem::Array<int> ess_tdofs;
+    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, ess_tdofs);
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     if (getParam<bool>("singular"))
       lor_solver->GetSolver().SetSingularProblem();

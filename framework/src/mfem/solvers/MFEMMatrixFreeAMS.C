@@ -16,14 +16,12 @@ registerMooseObject("MooseApp", MFEMMatrixFreeAMS);
 
 namespace Moose::MFEM
 {
-MatrixFreeAMS::MatrixFreeAMS(mfem::Coefficient * alpha_coef,
-                             mfem::Coefficient * beta_coef,
-                             const mfem::Array<int> & ess_bdr_markers,
+MatrixFreeAMS::MatrixFreeAMS(mfem::Coefficient & alpha_coef,
+                             mfem::Coefficient & beta_coef,
                              int inner_pi_its,
                              int inner_g_its)
   : _alpha_coef(alpha_coef),
     _beta_coef(beta_coef),
-    _ess_bdr_markers(ess_bdr_markers),
     _inner_pi_its(inner_pi_its),
     _inner_g_its(inner_g_its)
 {
@@ -36,16 +34,15 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
   width = op.Width();
   // The constructor of mfem::MatrixFreeAMS requires the target operator to be known, so this
   // constructs the solver
-  auto matrix_free_ams =
-      std::make_unique<mfem::MatrixFreeAMS>(*_aform,
-                                            const_cast<mfem::Operator &>(op),
-                                            *_aform->ParFESpace(),
-                                            _alpha_coef,
-                                            _beta_coef,
-                                            nullptr,
-                                            const_cast<mfem::Array<int> &>(_ess_bdr_markers),
-                                            _inner_pi_its,
-                                            _inner_g_its);
+  auto matrix_free_ams = std::make_unique<mfem::MatrixFreeAMS>(*_aform,
+                                                               const_cast<mfem::Operator &>(op),
+                                                               *_aform->ParFESpace(),
+                                                               &_alpha_coef,
+                                                               &_beta_coef,
+                                                               nullptr,
+                                                               _ess_bdr_markers,
+                                                               _inner_pi_its,
+                                                               _inner_g_its);
   _matrix_free_ams = std::move(matrix_free_ams);
 }
 } // namespace Moose::MFEM
@@ -54,7 +51,6 @@ InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
   InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
-  params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription("MFEM matrix-free auxiliary-space Maxwell preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMScalarCoefficientName>(
@@ -77,7 +73,6 @@ MFEMMatrixFreeAMS::validParams()
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
-    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
     _beta_coef(getScalarCoefficient("beta_coefficient")),
     _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),
@@ -90,16 +85,18 @@ void
 MFEMMatrixFreeAMS::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
-      &_alpha_coef, &_beta_coef, getBoundaryMarkers(), _inner_pi_its, _inner_g_its);
+      _alpha_coef, _beta_coef, _inner_pi_its, _inner_g_its);
   solver->iterative_mode = getParam<bool>("use_initial_guess");
   _solver = std::move(solver);
 }
 
 void
-MFEMMatrixFreeAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & /*tdofs*/)
+MFEMMatrixFreeAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   // update the pointer to the bilinear form representing the curl-curl problem being preconditioned
-  static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver).SetBilinearForm(a);
+  auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
+  matrix_free_ams.SetBilinearForm(a);
+  matrix_free_ams.SetBoundaryMarkers(ess_bdr_markers);
 }
 
 #endif

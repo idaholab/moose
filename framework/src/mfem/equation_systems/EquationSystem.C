@@ -714,7 +714,13 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
       mooseError("LOR solve is not supported for complex equation systems.");
     if (_test_var_names.size() > 1)
       mooseError("LOR solve is only supported for single-variable systems");
-    solver.SetupLOR(*_blfs.Get(_test_var_names.at(0)), _ess_tdof_lists.at(0));
+
+    const auto & test_var_name = _test_var_names.at(0);
+    const auto & trial_var_name = _trial_var_names.at(0);
+    mfem::ParGridFunction & trial_gf = _gfuncs->GetRef(trial_var_name);
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
+    solver.SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
   }
 
   mooseAssert(_linear_operator.Ptr(),
