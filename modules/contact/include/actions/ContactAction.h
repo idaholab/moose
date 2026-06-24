@@ -135,4 +135,9 @@ private:
    * close enough.
    */
   void createSidesetsFromNodeProximity();
+  /**
+   * Returns a name suffix encoding the boundary pair for multi-pair mortar setups,
+   * or an empty string when there is only one pair (preserving single-pair name backwards compat).
+   */
+  std::string pairSuffix(const std::pair<BoundaryName, BoundaryName> & pair) const;
 };
