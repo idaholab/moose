@@ -49,6 +49,16 @@
 
       detail = 'with only elements located outside of the bounding boxes.'
     []
+    [distributed]
+      type = 'RunApp'
+      input = 'generate_sidesets_bounding_box.i'
+      cli_args = '--mesh-only Mesh/parallel_type=distributed'
+      mesh_mode = 'distributed'
+      min_parallel = 2
+      recover = false
+
+      detail = 'on a distributed mesh.'
+    []
   []
 
   [errors]
