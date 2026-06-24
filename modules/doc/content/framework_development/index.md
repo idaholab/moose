@@ -22,7 +22,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Documentation
 
-[Computational Backends and Accelerated Components](framework_development/computational_backends.md)
+[Computational Backends](framework_development/computational_backends.md)
 
 [MOOSE Doxygen](https://mooseframework.inl.gov/docs/doxygen/moose/classes.html)
 
