@@ -17,6 +17,10 @@
 namespace Moose::Kokkos
 {
 
+/**
+ * Generic datum class containing geometric information related to the mesh. This is a base class
+ * for derived datum classes for both finite volume and finite element system assembly
+ */
 class MeshDatum
 {
 public:

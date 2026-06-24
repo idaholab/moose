@@ -177,13 +177,15 @@ Mesh::initElement()
 
   // Cache element data
 
-  const auto num_total_elems = getNumTotalElements();
+  const auto num_local_plus_one_neighbor_layer_elems =
+      getNumLocalAndPossiblyOneNeighborLayerGhostElements();
   const auto num_elems = getNumLocalElements();
   const auto num_subdomains = getNumSubdomains();
 
-  _elem_info.create(num_total_elems);
+  _elem_info.create(num_local_plus_one_neighbor_layer_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
-  _extra_elem_ids.create(num_total_elems, _mesh.getMesh().n_elem_integers());
+  _extra_elem_ids.create(num_local_plus_one_neighbor_layer_elems,
+                         _mesh.getMesh().n_elem_integers());
   _starting_elem_id.create(num_subdomains);
 
   _elem_neighbor = libMesh::DofObject::invalid_id;
@@ -231,7 +233,7 @@ Mesh::initElement()
   const auto num_nodes = getNumLocalNodes();
 
   _points.create(num_nodes);
-  _nodes.create(_mesh.getMaxNodesPerElem(), num_total_elems);
+  _nodes.create(_mesh.getMaxNodesPerElem(), num_local_plus_one_neighbor_layer_elems);
   _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
   for (const auto node : getLocalNodes())
@@ -300,11 +302,12 @@ void
 Mesh::initLinearFV()
 {
   const auto num_elems = getNumLocalElements();
-  const auto num_total_elems = getNumTotalElements();
+  const auto num_local_plus_one_neighbor_layer_elems =
+      getNumLocalAndPossiblyOneNeighborLayerGhostElements();
   const auto max_sides = _mesh.getMaxSidesPerElem();
 
-  _linearfv_elem_volume.create(num_total_elems);
-  _linearfv_elem_centroid.create(num_total_elems);
+  _linearfv_elem_volume.create(num_local_plus_one_neighbor_layer_elems);
+  _linearfv_elem_centroid.create(num_local_plus_one_neighbor_layer_elems);
   _linearfv_face_area.create(max_sides, num_elems);
   _linearfv_face_centroid.create(max_sides, num_elems);
   _linearfv_face_d_cf.create(max_sides, num_elems);

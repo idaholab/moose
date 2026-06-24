@@ -31,7 +31,7 @@ public:
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
-  KOKKOS_FUNCTION Real faceConductance(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real faceDiffusivity(const FVDatum & datum) const;
 
   /// Diffusion coefficient (same functor as the paired diffusion kernel)
   const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _diffusion_coeff;
@@ -44,7 +44,7 @@ KOKKOS_FUNCTION inline Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
     const FVDatum & datum) const
 {
-  return faceConductance(datum);
+  return faceDiffusivity(datum);
 }
 
 template <typename Derived>
@@ -53,11 +53,11 @@ KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeRightHandSideContribu
     const FVDatum & datum) const
 {
   const auto face_centroid = datum.faceCentroid();
-  return faceConductance(datum) * _functor->value(_t, face_centroid);
+  return faceDiffusivity(datum) * _functor->value(_t, face_centroid);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceConductance(const FVDatum & datum) const
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceDiffusivity(const FVDatum & datum) const
 {
   const auto face_centroid = datum.faceCentroid();
   return _diffusion_coeff->value(_t, face_centroid) * datum.faceArea() / datum.faceDCFMag();

@@ -10,7 +10,7 @@
     compute_devices = 'cpu cuda'
     max_threads = 1 # linear FV doesn't support threading
   []
-  [all_the_mixing]
+  [mixing_fe_fv]
     requirement = 'The system shall support mixing Kokkos and non-Kokkos assembly objects within both finite volume and finite element systems and shall permit fixed point iteration coupling between the two systems.'
     type = CSVDiff
     input = multisystem.i

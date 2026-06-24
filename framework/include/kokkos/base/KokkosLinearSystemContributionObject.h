@@ -93,7 +93,8 @@ LinearSystemContributionObject::accumulateTaggedVector(const Real value,
 
   KOKKOS_ASSERT(_kokkos_var.components() == 1);
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  for (dof_id_type index = 0; index < _vector_tags.size(); ++index)
+  const MOOSE_KOKKOS_INDEX_TYPE tags_size = _vector_tags.size();
+  for (MOOSE_KOKKOS_INDEX_TYPE index = 0; index < tags_size; ++index)
   {
     const auto tag = _vector_tags[index];
     if (sys.isResidualTagActive(tag))
@@ -111,7 +112,8 @@ LinearSystemContributionObject::accumulateTaggedMatrix(const Real value,
 
   KOKKOS_ASSERT(_kokkos_var.components() == 1);
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  for (dof_id_type index = 0; index < _matrix_tags.size(); ++index)
+  const MOOSE_KOKKOS_INDEX_TYPE tags_size = _matrix_tags.size();
+  for (MOOSE_KOKKOS_INDEX_TYPE index = 0; index < tags_size; ++index)
   {
     const auto tag = _matrix_tags[index];
     if (sys.isMatrixTagActive(tag))
