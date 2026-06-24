@@ -218,7 +218,7 @@ MooseVariableBase::getSolution(const Moose::StateArg & state) const
 }
 
 bool
-MooseVariableBase::computesQpData() const
+MooseVariableBase::usesQpBasedLoops() const
 {
   mooseError("Base class should not assume anything regarding this. In an ideal world this would "
              "be pure virtual but we can't do that because we register MooseVariableBase as an "
@@ -226,7 +226,7 @@ MooseVariableBase::computesQpData() const
 }
 
 bool
-MooseVariableBase::doesTrueFVAssembly() const
+MooseVariableBase::usesGeometricInfoBasedLoops() const
 {
   mooseError("Base class should not assume anything regarding this. In an ideal world this would "
              "be pure virtual but we can't do that because we register MooseVariableBase as an "

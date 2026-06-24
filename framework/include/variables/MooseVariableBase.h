@@ -130,13 +130,13 @@ public:
    * and for FV variables that have been opted in via requireQpComputations(). Returns false for
    * linear FV variables by default and for scalar variables.
    */
-  virtual bool computesQpData() const;
+  virtual bool usesQpBasedLoops() const;
 
   /**
    * Whether this variable assembles via the FV path (ElemInfo/FaceInfo loops, no QP reinit).
    * Static, per-class property - never toggled by requireQpComputations().
    */
-  virtual bool doesTrueFVAssembly() const;
+  virtual bool usesGeometricInfoBasedLoops() const;
 
   /**
    * Return the continuity of this variable
