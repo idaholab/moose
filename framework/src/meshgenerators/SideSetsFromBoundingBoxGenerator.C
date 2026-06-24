@@ -15,6 +15,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
 
 #include <typeinfo>
 
@@ -86,15 +87,9 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   const bool inside = (_location == "INSIDE");
 
-  // Attempt to get the new boundary id from the name
-  auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_names[0], *mesh);
-
-  // If the new boundary id is not valid, make it instead
-  if (boundary_id_new == Moose::INVALID_BOUNDARY_ID)
+  const auto boundary_id_new = MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true)[0];
+  if (_boundary_names[0].empty() || !MooseUtils::isDigits(_boundary_names[0]))
   {
-    boundary_id_new = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
-
-    // Write the name alias of the boundary id to the mesh boundary info
     boundary_info.sideset_name(boundary_id_new) = _boundary_names[0];
     boundary_info.nodeset_name(boundary_id_new) = _boundary_names[0];
   }
@@ -107,6 +102,19 @@ SideSetsFromBoundingBoxGenerator::generate()
 
     // Request to compute normal vectors
     const std::vector<Point> & face_normals = _fe_face->get_normals();
+
+    const processor_id_type my_n_proc = mesh->n_processors();
+    const processor_id_type my_proc_id = mesh->processor_id();
+    typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
+    std::vector<vec_type> queries(my_n_proc);
+
+    auto add_side = [&](const Elem * elem, const unsigned int side)
+    {
+      if (_replace)
+        boundary_info.remove_side(elem, side);
+      boundary_info.add_side(elem, side, boundary_id_new);
+      found_side_sets = true;
+    };
 
     // Loop over the elements
     for (const auto & elem : mesh->active_element_ptr_range())
@@ -125,16 +133,73 @@ SideSetsFromBoundingBoxGenerator::generate()
           // We'll just use the normal of the first qp
           const Point face_normal = face_normals[0];
 
-          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
-          {
-            // assign new boundary value to boundary which meets meshmodifier criteria
-            if (_replace)
-              boundary_info.remove_side(elem, side);
-            boundary_info.add_side(elem, side, boundary_id_new);
-            found_side_sets = true;
-          }
+          if (_check_neighbor_subdomains && elem->neighbor_ptr(side) == remote_elem)
+            queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
+          else if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+            add_side(elem, side);
         }
       }
+    }
+
+    if (!mesh->is_serial())
+    {
+      const auto queries_tag = mesh->comm().get_unique_tag(),
+                 replies_tag = mesh->comm().get_unique_tag();
+
+      std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
+
+      for (const auto p : make_range(my_n_proc))
+      {
+        if (p == my_proc_id)
+          continue;
+
+        Parallel::Request & request = side_requests[p - (p > my_proc_id)];
+        mesh->comm().send(p, queries[p], request, queries_tag);
+      }
+
+      std::vector<vec_type> responses(my_n_proc - 1);
+      for (const auto p : make_range(uint(1), my_n_proc))
+      {
+        vec_type query;
+
+        Parallel::Status status(mesh->comm().probe(Parallel::any_source, queries_tag));
+        const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
+
+        mesh->comm().receive(source_pid, query, queries_tag);
+
+        Parallel::Request & request = reply_requests[p - 1];
+
+        for (const auto & q : query)
+        {
+          const Elem * elem = mesh->elem_ptr(q.first);
+          const unsigned int side = q.second;
+
+          if (_bounding_box.contains_point(elem->vertex_average()) != inside)
+            continue;
+
+          _fe_face->reinit(elem, side);
+          const Point face_normal = _fe_face->get_normals()[0];
+          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+            responses[p - 1].push_back(std::make_pair(elem->id(), side));
+        }
+
+        mesh->comm().send(source_pid, responses[p - 1], request, replies_tag);
+      }
+
+      for (const auto p : make_range(uint(1), my_n_proc))
+      {
+        Parallel::Status status(mesh->comm().probe(Parallel::any_source, replies_tag));
+        const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
+
+        vec_type response;
+        mesh->comm().receive(source_pid, response, replies_tag);
+
+        for (const auto & r : response)
+          add_side(mesh->elem_ptr(r.first), r.second);
+      }
+
+      Parallel::wait(side_requests);
+      Parallel::wait(reply_requests);
     }
 
     comm().max(found_element);
