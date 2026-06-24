@@ -11,9 +11,8 @@
 
 #include "CastUniquePointer.h"
 
-#include "libmesh/replicated_mesh.h"
-#include "libmesh/distributed_mesh.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_tools.h"
 #include "MooseMeshUtils.h"
@@ -106,16 +105,7 @@ PatternedMeshGenerator::generate()
   _meshes.resize(_input_names.size());
   for (const auto i : index_range(_input_names))
   {
-    std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
-    if (!mesh)
-      paramError("inputs",
-                 "The input mesh '",
-                 _input_names[i],
-                 "' is not a replicated mesh.\n\n",
-                 type(),
-                 " only works with inputs that are replicated.\n\n",
-                 "Try running without distributed mesh.");
-    _meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(mesh);
+    _meshes[i] = std::move(*_mesh_ptrs[i]);
 
     // List of boundary ids corresponsind to left/right/top/bottom boundary names
     const auto ids = MooseMeshUtils::getBoundaryIDs(*_meshes[i], boundary_names, false);
@@ -182,6 +172,12 @@ PatternedMeshGenerator::generate()
     all_boundary_ids.insert(all_ids.begin(), all_ids.end());
   }
 
+  // Serialize any distributed input meshes for the duration of stitching
+  std::vector<std::unique_ptr<libMesh::MeshSerializer>> serializers;
+  serializers.reserve(_meshes.size());
+  for (auto & m : _meshes)
+    serializers.push_back(std::make_unique<libMesh::MeshSerializer>(*m));
+
   // Check if the user has provided the x, y and z widths.
   // If not (their value is 0 by default), compute them
   auto bbox = MeshTools::create_bounding_box(*_meshes[0]);
@@ -237,14 +233,14 @@ PatternedMeshGenerator::generate()
       if (j == 0)
       {
         auto clone = _meshes[_pattern[i][j]]->clone();
-        _row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
+        _row_meshes[i] = dynamic_pointer_cast<UnstructuredMesh>(clone);
 
         MeshTools::Modification::translate(*_row_meshes[i], deltax, -deltay, 0);
 
         continue;
       }
 
-      ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
+      MeshBase & cell_mesh = *_meshes[_pattern[i][j]];
 
       // Move the mesh into the right spot.  -i because we are starting at the top
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
@@ -293,8 +289,9 @@ PatternedMeshGenerator::generate()
       MeshTools::Modification::change_boundary_id(
           *_row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
 
+  _row_meshes[0]->allow_remote_element_removal(_mesh->allowRemoteElementRemoval());
   _row_meshes[0]->unset_is_prepared();
-  return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
+  return std::move(_row_meshes[0]);
 }
 
 void

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "libmesh/replicated_mesh.h"
+#include "libmesh/unstructured_mesh.h"
 
 /**
  * Reads one or more 2D mesh files and stitches them together based on
@@ -42,10 +42,10 @@ protected:
   const std::vector<std::vector<unsigned int>> & _pattern;
 
   /// Holds the pointers to the input generated meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
+  std::vector<std::unique_ptr<MeshBase>> _meshes;
 
   /// Holds a mesh for each row, these will be stitched together in the end
-  std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
+  std::vector<std::unique_ptr<UnstructuredMesh>> _row_meshes;
 
   /**
    * Merges the subdomain name maps between two meshes, throws an error
