@@ -30,26 +30,25 @@ public:
 
 protected:
   /**
-   * Check the relative convergence of the nonlinear solution
+   * Check the absolute and relative convergence of the nonlinear solution
+   * @param iter       Iteration number
    * @param fnorm      Norm of the residual vector
    * @param ref_norm   Norm to use for reference value
    * @param rel_tol    Relative tolerance
    * @param abs_tol    Absolute tolerance
+   * @param oss        Output streamstring
    * @return           Bool signifying convergence
    */
-  virtual bool checkRelativeConvergence(const unsigned int it,
+  virtual bool checkResidualConvergence(const unsigned int iter,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
                                         const Real abs_tol,
                                         std::ostringstream & oss);
 
-  /**
-   * Performs setup necessary for each call to checkConvergence
-   */
+  /// Performs setup necessary for each call to checkConvergence
   virtual void nonlinearConvergenceSetup() {}
 
-protected:
   FEProblemBase & _fe_problem;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;

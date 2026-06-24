@@ -34,14 +34,6 @@ public:
 
   virtual void initialSetup() override;
 
-  enum class NormalizationType
-  {
-    GLOBAL_L2 = 0,
-    LOCAL_L2 = 1,
-    GLOBAL_LINF = 2,
-    LOCAL_LINF = 3
-  };
-
   class ReferenceVectorTagIDKey
   {
     friend class TaggingInterface;
@@ -55,11 +47,11 @@ public:
 protected:
   virtual void nonlinearConvergenceSetup() override;
 
-  virtual bool checkRelativeConvergence(const unsigned int it,
+  virtual bool checkResidualConvergence(const unsigned int it,
                                         const Real fnorm,
-                                        const Real the_residual,
-                                        const Real rtol,
-                                        const Real abstol,
+                                        const Real ref_norm,
+                                        const Real rel_tol,
+                                        const Real abs_tol,
                                         std::ostringstream & oss) override;
 
   /**
@@ -68,16 +60,19 @@ protected:
    * variables are converged individually using either a relative or absolute
    * criterion.
    * @param fnorm Function norm (norm of full residual vector)
-   * @param abstol Absolute convergence tolerance
-   * @param rtol Relative convergence tolerance
+   * @param abs_tol Absolute convergence tolerance
+   * @param rel_tol Relative convergence tolerance
    * @param initial_residual_before_preset_bcs Initial norm of full residual vector
    *                                           before applying preset bcs
    * @return true if all variables are converged
    */
   bool checkConvergenceIndividVars(const Real fnorm,
-                                   const Real abstol,
-                                   const Real rtol,
+                                   const Real abs_tol,
+                                   const Real rel_tol,
                                    const Real initial_residual_before_preset_bcs);
+
+  /// Enum holding the normalization type
+  const MooseEnum _norm_type_enum;
 
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
@@ -87,10 +82,8 @@ protected:
   ///@}
 
   ///@{
-  /// List of grouped solution variable names whose reference residuals will be stored,
-  /// and the residual variable names that will store them.
-  std::vector<NonlinearVariableName> _group_soln_var_names;
-  std::vector<AuxVariableName> _group_ref_resid_var_names;
+  /// List of grouped solution variable names whose reference residuals will be stored
+  std::vector<NonlinearVariableName> _group_names;
   ///@}
 
   ///@{
@@ -103,33 +96,40 @@ protected:
   /// "Acceptable" absolute and relative tolerance multiplier and
   /// acceptable number of iterations.  Used when checking the
   /// convergence of individual variables.
-  Real _accept_mult;
-  unsigned int _accept_iters;
+  const Real _accept_mult;
+  const unsigned int _accept_iters;
   ///@}
 
   ///@{
-  /// Local storage for *discrete L2 residual norms* of the grouped variables listed in _group_ref_resid_var_names.
+  /// Local storage for *discrete L2 residual norms* of the grouped variables.
   std::vector<Real> _group_ref_resid;
   std::vector<Real> _group_resid;
-  std::vector<Real> _group_output_resid;
   ///@}
 
+  /// Vector of bools to signify if variable is in a group.
+  std::vector<bool> _is_var_grouped;
+
   /// Group number index for each variable
-  std::vector<unsigned int> _variable_group_num_index;
+  std::vector<unsigned int> _group_index;
 
   /// Local storage for the scaling factors applied to each of the variables to apply to _ref_resid_vars.
   std::vector<Real> _scaling_factors;
 
+  /// The optional vector storing the reference residual values
+  const NumericVector<Number> * _residual_vector;
+
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
 
-  /// Variables to use for individual variable convergence checks
-  std::vector<NonlinearVariableName> _converge_on;
-  /// Flag for each solution variable being in 'converge_on'
+  /// Flag for each solution variable or group being in 'converge_on'
   std::vector<bool> _converge_on_var;
+  std::vector<bool> _converge_on_group;
 
   /// Container for convergence treatment when the reference residual is zero
   const enum class ZeroReferenceType { ZERO_TOLERANCE, RELATIVE_TOLERANCE } _zero_ref_type;
+
+  /// Bool to unscale the residual before convergence checks and screen output
+  const bool _unscale_the_residual;
 
   /// Flag to optionally perform normalization of residual by reference residual before or after L2 norm is computed
   bool _local_norm;
@@ -139,6 +139,4 @@ protected:
 
   /// The reference vector tag id
   TagID _reference_vector_tag_id;
-
-  bool _initialized;
 };

@@ -186,7 +186,6 @@
 
 [Problem]
   type = AugmentedLagrangianContactProblem
-  solution_variables = 'disp_x disp_y'
   extra_tag_vectors = 'ref'
   reference_vector = 'ref'
   maximum_lagrangian_update_iterations = 25
