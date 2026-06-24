@@ -65,7 +65,6 @@ protected:
   void ConstructSolver() override;
 
 private:
-  mfem::ParBilinearForm * _aform;
   std::vector<BoundaryName> _ess_bdr_markerss;
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
