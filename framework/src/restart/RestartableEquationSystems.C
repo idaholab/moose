@@ -246,10 +246,10 @@ RestartableEquationSystems::load(std::istream & stream)
           _loaded_ordered_objects.size(),
           "). This means that equation-system data is being restored onto a different mesh "
           "topology. If this occurs while restoring a MultiApp sub-application that uses mesh "
-          "adaptivity, note that in-memory MultiApp backups do not restore independent "
-          "sub-application mesh topology. Use clone_parent_mesh = true when the sub-application "
-          "should share the parent application's mesh topology, or avoid changing the "
-          "sub-application mesh between backup and restore.");
+          "adaptivity, the backup may not contain mesh checkpoint data for the restored topology, "
+          "or the sub-application mesh may have changed after the backup was made. Use "
+          "clone_parent_mesh = true when the sub-application should share the parent application's "
+          "mesh topology, or avoid changing the sub-application mesh between backup and restore.");
     for (const auto i : index_range(_loaded_ordered_objects))
       if (_loaded_ordered_objects[i]->id() != from_ordered_objects_ids[i])
         mooseError(
@@ -259,10 +259,11 @@ RestartableEquationSystems::load(std::istream & stream)
             _loaded_ordered_objects[i]->id(),
             "). This means that equation-system data is being restored onto a different mesh "
             "topology. If this occurs while restoring a MultiApp sub-application that uses mesh "
-            "adaptivity, note that in-memory MultiApp backups do not restore independent "
-            "sub-application mesh topology. Use clone_parent_mesh = true when the sub-application "
-            "should share the parent application's mesh topology, or avoid changing the "
-            "sub-application mesh between backup and restore.");
+            "adaptivity, the backup may not contain mesh checkpoint data for the restored "
+            "topology, or the sub-application mesh may have changed after the backup was made. "
+            "Use clone_parent_mesh = true when the sub-application should share the parent "
+            "application's mesh topology, or avoid changing the sub-application mesh between "
+            "backup and restore.");
   }
 
   _loaded_stream_data_begin = static_cast<std::size_t>(stream.tellg());
