@@ -11,9 +11,9 @@
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
-      petsc_options = '-ksp_converged_reason'
+      petsc_options = '-ksp_converged_reason -mat_strumpack_verbose'
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
+      petsc_options_value = 'lu       gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
     []
     [p]
       vars = 'pressure_bar'

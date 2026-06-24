@@ -1,14 +1,25 @@
+!include ../fs-plus-strumpack-preconditioner.i
+
+rho = 1
+l = 1
+U = 1
+n = 32
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
-rho = 1
 
 [Mesh]
-  [file]
-    type = FileMeshGenerator
-    file = coarse12.msh
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = ${l}
+    ymin = 0
+    ymax = ${l}
+    nx = ${n}
+    ny = ${n}
+    elem_type = TRI6
   []
-  second_order = true
 []
 
 [Problem]
@@ -46,7 +57,7 @@ rho = 1
 []
 
 [HDGKernels]
-  [momentum_x_advection]
+  [momentum_x_convection]
     type = AdvectionIPHDGKernel
     variable = vel_x
     face_variable = vel_bar_x
@@ -63,7 +74,7 @@ rho = 1
     pressure_face_variable = pressure_bar
     component = 0
   []
-  [momentum_y_advection]
+  [momentum_y_convection]
     type = AdvectionIPHDGKernel
     variable = vel_y
     face_variable = vel_bar_y
@@ -80,6 +91,7 @@ rho = 1
     pressure_face_variable = pressure_bar
     component = 1
   []
+
   [pressure]
     type = MassContinuityIPHDGKernel
     variable = pressure
@@ -92,21 +104,21 @@ rho = 1
     type = MassFluxPenaltyIPHDG
     variable = vel_x
     face_variable = vel_bar_x
-    face_velocity = face_velocity
     u = vel_x
     v = vel_y
     component = 0
     gamma = ${gamma}
+    face_velocity = face_velocity
   []
   [v_jump]
     type = MassFluxPenaltyIPHDG
     variable = vel_y
     face_variable = vel_bar_y
-    face_velocity = face_velocity
     u = vel_x
     v = vel_y
     component = 1
     gamma = ${gamma}
+    face_velocity = face_velocity
   []
   [pb_mass]
     type = MassMatrixHDG
@@ -117,57 +129,9 @@ rho = 1
 []
 
 [BCs]
-  #
-  # inlet
-  #
-  [momentum_x_advection_inlet]
-    type = AdvectionIPHDGDirichletBC
-    boundary = '1'
-    face_variable = vel_bar_x
-    functor = u_inlet
-    variable = vel_x
-    velocity = velocity
-    coeff = ${rho}
-  []
-  [momentum_x_diffusion_inlet]
-    type = NavierStokesStressIPHDGDirichletBC
-    boundary = '1'
-    variable = vel_x
-    face_variable = vel_bar_x
-    pressure_variable = pressure
-    pressure_face_variable = pressure_bar
-    alpha = ${alpha}
-    functor = 'u_inlet'
-    diffusivity = 'mu'
-    component = 0
-  []
-  [momentum_y_diffusion_inlet]
-    type = NavierStokesStressIPHDGDirichletBC
-    boundary = '1'
-    variable = vel_y
-    face_variable = vel_bar_y
-    pressure_variable = pressure
-    pressure_face_variable = pressure_bar
-    alpha = ${alpha}
-    functor = 0
-    diffusivity = 'mu'
-    component = 1
-  []
-  [mass_inlet]
-    type = MassContinuityIPHDGBC
-    face_variable = pressure_bar
-    variable = pressure
-    boundary = '1'
-    face_velocity_functors = 'u_inlet 0'
-    interior_velocity_vars = 'vel_x vel_y'
-  []
-
-  #
-  # walls
-  #
   [momentum_x_diffusion_walls]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = '2'
+    boundary = 'left bottom right'
     variable = vel_x
     face_variable = vel_bar_x
     pressure_variable = pressure
@@ -177,78 +141,45 @@ rho = 1
     diffusivity = 'mu'
     component = 0
   []
-  [momentum_y_diffusion_walls]
+  [momentum_x_diffusion_top]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = '2'
+    boundary = 'top'
+    variable = vel_x
+    face_variable = vel_bar_x
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
+    alpha = ${alpha}
+    functor = '${U}'
+    diffusivity = 'mu'
+    component = 0
+  []
+  [momentum_y_diffusion_all]
+    type = NavierStokesStressIPHDGDirichletBC
+    boundary = 'left bottom right top'
     variable = vel_y
     face_variable = vel_bar_y
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     alpha = ${alpha}
-    functor = 0
+    functor = '0'
     diffusivity = 'mu'
     component = 1
   []
-  [mass_walls]
+
+  [pressure_walls]
     type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    boundary = '2'
+    boundary = 'left bottom right'
     face_velocity_functors = '0 0'
     interior_velocity_vars = 'vel_x vel_y'
   []
-
-  #
-  # Neumann
-  #
-  [momentum_x_advection_neumann]
-    type = AdvectionIPHDGOutflowBC
-    boundary = '3'
-    constrain_lm = false
-    face_variable = vel_bar_x
-    variable = vel_x
-    velocity = velocity
-    coeff = ${rho}
-  []
-  [momentum_y_advection_neumann]
-    type = AdvectionIPHDGOutflowBC
-    boundary = '3'
-    constrain_lm = false
-    face_variable = vel_bar_y
-    variable = vel_y
-    velocity = velocity
-    coeff = ${rho}
-  []
-  [momentum_x_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedTractionBC
-    boundary = '3'
-    component = 0
-    diffusivity = 'mu'
-    face_variable = vel_bar_x
-    prescribed_normal_flux = 0
-    pressure_face_variable = pressure_bar
-    pressure_variable = pressure
-    variable = vel_x
-    alpha = ${alpha}
-  []
-  [momentum_y_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedTractionBC
-    boundary = '3'
-    component = 1
-    diffusivity = 'mu'
-    face_variable = vel_bar_y
-    prescribed_normal_flux = 0
-    pressure_face_variable = pressure_bar
-    pressure_variable = pressure
-    variable = vel_y
-    alpha = ${alpha}
-  []
-  [mass_neumann]
+  [pressure_lid]
     type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    boundary = '3'
-    face_velocity_functors = 'vel_bar_x vel_bar_y'
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
     interior_velocity_vars = 'vel_x vel_y'
   []
 
@@ -256,7 +187,7 @@ rho = 1
     type = MassMatrixIntegratedBC
     variable = pressure_bar
     matrix_tags = 'mass'
-    boundary = '1 2 3'
+    boundary = 'left right bottom top'
     density = '${fparse -1/gamma}'
   []
 
@@ -267,9 +198,9 @@ rho = 1
     u = vel_x
     v = vel_y
     component = 0
-    boundary = '2'
+    boundary = 'left right bottom'
     gamma = ${gamma}
-    face_velocity = vel_walls
+    face_velocity = walls
     dirichlet_boundary = true
   []
   [v_jump_walls]
@@ -279,82 +210,38 @@ rho = 1
     u = vel_x
     v = vel_y
     component = 1
-    boundary = '2'
+    boundary = 'left right bottom'
     gamma = ${gamma}
-    face_velocity = vel_walls
+    face_velocity = walls
     dirichlet_boundary = true
   []
-  [u_jump_inlet]
+  [u_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_x
     face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
-    boundary = '1'
+    boundary = 'top'
     gamma = ${gamma}
-    face_velocity = vel_inlet
+    face_velocity = top_vel
     dirichlet_boundary = true
   []
-  [v_jump_inlet]
+  [v_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_y
     face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
-    boundary = '1'
+    boundary = 'top'
     gamma = ${gamma}
-    face_velocity = vel_inlet
+    face_velocity = top_vel
     dirichlet_boundary = true
-  []
-  [u_jump_outlet]
-    type = MassFluxPenaltyBC
-    variable = vel_x
-    face_variable = vel_bar_x
-    u = vel_x
-    v = vel_y
-    component = 0
-    boundary = '3'
-    gamma = ${gamma}
-    face_velocity = face_velocity
-    dirichlet_boundary = false
-  []
-  [v_jump_outlet]
-    type = MassFluxPenaltyBC
-    variable = vel_y
-    face_variable = vel_bar_y
-    u = vel_x
-    v = vel_y
-    component = 1
-    boundary = '3'
-    gamma = ${gamma}
-    face_velocity = face_velocity
-    dirichlet_boundary = false
-  []
-[]
-
-[Materials]
-  [vel]
-    type = ADVectorFromComponentVariablesMaterial
-    vector_prop_name = 'velocity'
-    u = vel_x
-    v = vel_y
-  []
-  [mu]
-    type = ADParsedMaterial
-    functor_names = 'reynolds'
-    functor_symbols = 'reynolds'
-    property_name = 'mu'
-    expression = '1 / reynolds'
   []
 []
 
 [Functions]
-  [u_inlet]
-    type = ParsedFunction
-    expression = '4*(2-y)*(y-1)'
-  []
   [reynolds]
     type = ParsedFunction
     expression = 't'
@@ -367,26 +254,36 @@ rho = 1
     prop_names = face_velocity
     prop_values = 'vel_bar_x vel_bar_y 0'
   []
-  [vel_inlet]
+  [top]
     type = GenericVectorFunctorMaterial
-    prop_names = vel_inlet
-    prop_values = 'u_inlet 0 0'
+    prop_names = top_vel
+    prop_values = '${U} 0 0'
   []
-  [vel_walls]
+  [walls]
     type = GenericVectorFunctorMaterial
-    prop_names = vel_walls
+    prop_names = walls
     prop_values = '0 0 0'
   []
 []
 
-[Postprocessors]
-  [reynolds]
-    type = FunctionValuePostprocessor
-    function = reynolds
+[Materials]
+  [const]
+    type = ADGenericConstantMaterial
+    prop_names = 'rho'
+    prop_values = '${rho}'
   []
-  [vel_mag_avg]
-    type = ElementAverageValue
-    variable = vel_mag
+  [vel]
+    type = ADVectorFromComponentVariablesMaterial
+    vector_prop_name = 'velocity'
+    u = vel_x
+    v = vel_y
+  []
+  [mu]
+    type = ADParsedMaterial
+    functor_names = 'reynolds'
+    functor_symbols = 'reynolds'
+    property_name = 'mu'
+    expression = '${U} * ${l} / reynolds'
   []
 []
 
@@ -406,11 +303,29 @@ rho = 1
 []
 
 [Outputs]
-  print_linear_residuals = false
+  print_linear_residuals = 'false'
   exodus = false
   checkpoint = true
   perf_graph = true
-  csv = true
+  [csv]
+    type = CSV
+    hide = 'pressure_average'
+  []
+[]
+
+[Postprocessors]
+  [Re]
+    type = FunctionValuePostprocessor
+    function = 'reynolds'
+  []
+  [pressure_average]
+    type = ElementAverageValue
+    variable = pressure
+  []
+  [vel_mag_avg]
+    type = ElementAverageValue
+    variable = vel_mag
+  []
 []
 
 [AuxVariables]
@@ -426,5 +341,14 @@ rho = 1
     variable = vel_mag
     x = vel_x
     y = vel_y
+  []
+[]
+
+[Correctors]
+  [set_pressure]
+    type = NSPressurePin
+    pin_type = 'average'
+    variable = pressure
+    pressure_average = 'pressure_average'
   []
 []
