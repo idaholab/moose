@@ -4,23 +4,14 @@ package:
   name: <PREFIX_PACKAGE_WITH><FORMATTED_APPLICATION>
   version: {{ version }}
 
-source:
-  path: .
-
 build:
-  number: 0  # [linux,osx]
+  number: 0
   string: build_0
-  skip: true # [win]
-  script_env:
-    - REQUESTS_CA_BUNDLE
-    - SSL_CERT_FILE
-requirements:
-  run:
-    - {{ moose_dev }}
+
 about:
-  home: https://mooseframework.inl.gov/
-  license: LGPL 2.1
-  summary: 'The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element, multiphysics framework primarily developed by Idaho National Laboratory. This superficial module (moose) if a future placeholder for binary releases of MOOSE.'
+  home: https://inl.gov/ncrc
+  license: NONE
+  summary: 'MOOSE-based application <APPLICATION> shell for indexing available versions.'
 
 extra:
   recipe-maintainers:

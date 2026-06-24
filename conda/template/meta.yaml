@@ -70,12 +70,9 @@ test:
     - moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
 
 about:
-  home: https://mooseframework.inl.gov/
-  license: LGPL 2.1
-  summary: >
-    The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,
-    multiphysics framework primarily developed by Idaho National Laboratory. This superficial
-    module is a future placeholder for binary releases of a MOOSE-based application.'
+  home: https://inl.gov/ncrc
+  license: OTHER
+  summary: 'MOOSE-based application <APPLICATION>.'
 
 extra:
   recipe-maintainers:
