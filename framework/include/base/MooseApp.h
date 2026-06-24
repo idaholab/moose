@@ -740,17 +740,17 @@ public:
   std::unique_ptr<Backup> backup();
 
   /**
-   * Whether this app has an initial in-memory backup that contains mesh checkpoint data.
+   * Whether this app has an initial Backup object with mesh checkpoint entries.
    */
   bool hasInitialBackupMesh() const;
 
   /**
-   * Whether this app has restored mesh topology from its initial in-memory backup.
+   * Whether this app has restored mesh topology from its initial Backup object.
    */
   bool restoredInitialBackupMesh() const { return _restored_initial_backup_mesh; }
 
   /**
-   * Restore \p mesh from this app's initial in-memory backup and consume the backed-up mesh data.
+   * Restore \p mesh from this app's initial Backup object and consume the mesh checkpoint entries.
    */
   void restoreMeshFromInitialBackup(MooseMesh & mesh);
 
@@ -1713,7 +1713,7 @@ private:
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
 
-  /// Whether mesh topology has been restored from the initial in-memory backup.
+  /// Whether mesh topology has been restored from the initial Backup object.
   bool _restored_initial_backup_mesh = false;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
