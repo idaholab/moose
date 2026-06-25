@@ -25,12 +25,11 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  4. Build NEML2"
   echo "  5. Install NEML2"
   echo
-  echo "NEML2 depends on libtorch as a dependency. It can be obtained using the following script:"
-  echo "  scripts/update_and_rebuild_libtorch.sh"
+  echo "NEML2 v3 depends on PyTorch (and nmhit). Both are discovered from the active Python"
+  echo "environment's site-packages, e.g. a conda env or venv with 'pip install torch nmhit'."
   echo
   echo "Influential environment variables:"
   echo "  MOOSE_DIR       The path to the MOOSE directory. Default to the parent directory of this script."
-  echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/pytorch/installed."
   echo "  NEML2_DIR       The path where to install NEML2. Default to <NEML2_SRC_DIR>/installed/moose."
   echo "  NEML2_SRC_DIR   The path to the NEML2 source directory if a custom NEML2 should be used. If set, "
   echo "                  --skip-submodule-update will be assumed."
@@ -61,9 +60,6 @@ for ARG in "$@" ; do
     EXTRA_ARGS+=("$ARG")
   fi
 done
-
-# Dependency: libtorch
-export LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/pytorch/installed}
 
 # Handle environment variables
 if [[ -n "$NEML2_SRC_DIR" ]]; then
@@ -100,7 +96,6 @@ fi
 SCRIPT_NAME=$(basename "$0")
 echo "****************************************************************************************************"
 echo "${SCRIPT_NAME} summary:"
-echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
 echo "  NEML2_DIR:                 ${NEML2_DIR}"
 echo "  NEML2_SRC_DIR:             ${NEML2_SRC_DIR}"
 echo "  NEML2_JOBS:                ${NEML2_JOBS}"
@@ -110,21 +105,13 @@ echo "  SKIP_SUBMODULE_UPDATE:     ${SKIP_SUBMODULE_UPDATE}"
 echo "  ADDITIONAL_CONFIGURE_ARGS: ${EXTRA_ARGS[*]}"
 echo "****************************************************************************************************"
 
-# Check that dependencies are available
-if [[ ! -d "${LIBTORCH_DIR}" ]]; then
-  echo "Error: The libtorch directory (${LIBTORCH_DIR}) does not exist. Please see --help for more information."
-  # Let's try to be nice and offer more help
-  # First see if python is in the environment
-  if command -v python >/dev/null 2>&1; then
-    if TORCH_PY_DIR=$(python -c 'import torch; print(torch.__path__[0])' 2>/dev/null); then
-      TORCH_PY_DIR=${TORCH_PY_DIR%/}
-      if [[ -n "${TORCH_PY_DIR}" ]] && [[ -d "${TORCH_PY_DIR}" ]]; then
-        echo "Found python torch package directory: ${TORCH_PY_DIR}"
-        echo "Hint: If you want to use this installation, set LIBTORCH_DIR before running this script, i.e."
-        echo "  export LIBTORCH_DIR=${TORCH_PY_DIR}"
-      fi
-    fi
-  fi
+# Check that dependencies are available. NEML2 v3 links against the torch (and nmhit)
+# found in the active Python environment's site-packages, so verify that torch is
+# importable before configuring.
+if ! python3 -c 'import torch' >/dev/null 2>&1; then
+  echo "Error: 'import torch' failed in the active Python environment."
+  echo "NEML2 v3 requires a Python-enabled torch (providing libtorch_python) and nmhit."
+  echo "Activate the environment that has them, e.g. 'pip install torch nmhit'."
   exit 1
 fi
 
@@ -182,7 +169,6 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
     configure_neml2 "${NEML2_SRC_DIR}" \
                     "${NEML2_BUILD_DIR}" \
                     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" \
-                    "-DNEML2_CONTRIB_PARALLEL=${NEML2_JOBS}" \
                     "${EXTRA_ARGS[@]}"
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]] ; then
@@ -227,7 +213,10 @@ if [[ $? -eq 0 ]]; then
   echo "To configure MOOSE with NEML2, run the following commands:"
   echo
   echo "  cd ${MOOSE_DIR}"
-  echo "  ./configure --with-neml2=${NEML2_DIR} --with-libtorch=${LIBTORCH_DIR}"
+  echo "  ./configure --with-neml2=${NEML2_DIR} --with-libtorch=<torch>"
+  echo
+  echo "where <torch> is the torch installation in your active Python environment, e.g."
+  echo "  \$(python3 -c 'import torch, os; print(os.path.dirname(torch.__file__))')"
   echo
   echo "Append other configure options as needed. See configure --help for more information."
   echo "****************************************************************************************************"

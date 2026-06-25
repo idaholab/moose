@@ -41,6 +41,7 @@
 []
 
 [NEML2]
+  eager = true
   input = 'elasticity.i'
   verbose = true
   device = 'cpu'

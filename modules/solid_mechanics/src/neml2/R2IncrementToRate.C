@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#if 0 // NEML2 v2->v3 migration: superseded by the Python model modules/solid_mechanics/data/neml2/R2IncrementToRate.py (loaded via the NEML2Action 'load' parameter)
 
 #include "R2IncrementToRate.h"
 
@@ -54,3 +55,5 @@ R2IncrementToRate::set_value(bool out, bool dout_din, bool /*d2out_din2*/)
 } // namespace neml2
 
 #endif // NEML2_ENABLED
+
+#endif // NEML2 v2->v3 migration: DEFERRED

@@ -1,6 +1,7 @@
 !include 'expdyn.i'
 
 [NEML2]
+  eager = true
   input = '../elasticity/elasticity_neml2.i'
   [all]
     executor_name = 'neml2'

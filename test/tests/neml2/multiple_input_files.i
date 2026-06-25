@@ -24,8 +24,11 @@
 []
 
 [NEML2]
+  eager = true
   verbose = true
   device = 'cpu'
+  # NEML2TestModel is hosted inside MOOSE as a Python module (shared by both sub-blocks).
+  load = 'models/test_models.py'
   [A]
     input = 'models/custom_model.i'
     model = 'model_A'

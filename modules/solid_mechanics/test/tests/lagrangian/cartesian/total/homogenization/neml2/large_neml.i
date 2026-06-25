@@ -191,6 +191,7 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   []
   [neml2_model_all]
     type = NEML2ModelExecutor
+    eager = true
     batch_index_generator = neml2_index_model_all
     device = cpu
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_END'

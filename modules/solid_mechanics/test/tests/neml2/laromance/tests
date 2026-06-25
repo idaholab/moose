@@ -16,6 +16,11 @@
     csvdiff = 'laromance_return_mapping_out.csv'
     capabilities = 'libtorch & neml2'
     rel_err = 2e-4
+    # abs_zero ignores the zero-stress von Mises floor (~sqrt(machine eps), ~1e-8): a
+    # relative comparison against that essentially-zero value is meaningless. The gold is
+    # the v3 (algorithm-faithful) result; the previous v2 gold deviated in the heavily
+    # extrapolated regime this coupled solve reaches.
+    abs_zero = 1e-6
     recover = false
     requirement = "The system shall use a LAROMANCE interpolation grid in NEML2 to solve for the "
                   "nonlinear material response in NEML2 using the radial return mapping."

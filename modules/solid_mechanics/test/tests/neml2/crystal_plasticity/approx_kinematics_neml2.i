@@ -1,15 +1,15 @@
 [Tensors]
   [a]
-    type = Scalar
-    values = '1.0'
+    type = Python
+    expr = 'Scalar(1.0)'
   []
   [sdirs]
-    type = MillerIndex
-    values = '1 1 0'
+    type = Python
+    expr = 'MillerIndex(torch.tensor([1, 1, 0], dtype=torch.int64))'
   []
   [splanes]
-    type = MillerIndex
-    values = '1 1 1'
+    type = Python
+    expr = 'MillerIndex(torch.tensor([1, 1, 1], dtype=torch.int64))'
   []
 []
 

@@ -36,6 +36,12 @@ neml2_INCLUDES += $(filter-out $(neml2_torch_INCLUDES),$(shell PKG_CONFIG_PATH=$
 neml2_LDFLAGS  += $(foreach libdir,$(filter-out $(neml2_torch_LDIRS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs-only-L $(NEML2_PC))),$(patsubst -L%,-Wl$(comma)-rpath$(comma)%,$(libdir)))
 neml2_LIBS     += $(filter-out $(neml2_torch_LIBS),$(shell PKG_CONFIG_PATH=$(NEML2_DIR)/share/pkgconfig:${PKG_CONFIG_PATH} pkg-config --libs $(NEML2_PC)))
 
+# NEML2 v3 ships two C++ libraries: libneml2 (the aoti runtime, listed by neml2.pc above)
+# and libneml2_eager (the embedded-Python eager runtime, used by MOOSE for the no-compile
+# path). The eager lib is not listed in any .pc file and depends on the aoti lib, so add it
+# explicitly and ahead of -lneml2 on the link line. It carries the same build-type suffix.
+neml2_LIBS     := -lneml2_eager$(NEML2_SUFFIX) $(neml2_LIBS)
+
 # Append to libmesh flags
 libmesh_CXXFLAGS += $(neml2_CPPFLAGS) # I think MOOSE Makefiles tend to abuse libmesh_CXXFLAGS for preprocessor flags
 libmesh_INCLUDE  += $(neml2_INCLUDES)

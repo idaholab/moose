@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#27493'
+  design = 'NEML2/index.md NEML2Action.md'
+  [parameter_derivative]
+    type = CSVDiff
+    requirement = 'The system shall compute the derivative of a NEML2 model output with respect to a '
+                  'NEML2 model parameter and provide it as a MOOSE material property.'
+    input = 'parameter_derivative.i'
+    csvdiff = 'parameter_derivative_out.csv'
+    capabilities = 'libtorch & neml2'
+  []
+  [parameter_setting]
+    type = CSVDiff
+    requirement = 'The system shall set a NEML2 model parameter from a MOOSE field evaluated at each '
+                  'quadrature point.'
+    input = 'parameter_setting.i'
+    csvdiff = 'parameter_setting_out.csv'
+    capabilities = 'libtorch & neml2'
+  []
+  [parameter_field_derivative]
+    type = CSVDiff
+    requirement = 'The system shall compute the derivative of a NEML2 model output with respect to a '
+                  'NEML2 model parameter that is itself set from a MOOSE field.'
+    input = 'parameter_field_derivative.i'
+    csvdiff = 'parameter_field_derivative_out.csv'
+    capabilities = 'libtorch & neml2'
+  []
+[]

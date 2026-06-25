@@ -8,14 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-function get_variable()
-{
-  if [ -z "${!1}" ]; then
-    >&2 echo "ERROR: Missing required variable $1"
-  fi
-  echo "${!1}"
-}
-
 # Configure NEML2 with the default MOOSE configuration options
 #
 # Separated so that it can be used across all NEML2 build scripts:
@@ -29,21 +21,20 @@ function get_variable()
 function configure_neml2()
 {
   ARGS=()
-  if [ -n "$HIT_SRC_DIR" ]; then
-    ARGS+=("-Dhit_SOURCE_DIR=$HIT_SRC_DIR")
-  fi
   if which ninja &> /dev/null; then
     ARGS+=("-GNinja")
   fi
   ARGS+=("${@:3}")
+  # NEML2 v3 discovers torch (and nmhit) from the active Python's site-packages.
+  # We pin Python3_EXECUTABLE so Findtorch.cmake / Findnmhit.cmake resolve the
+  # torch and nmhit installed in the current (e.g. conda) environment.
   cmake \
     -DCMAKE_BUILD_TYPE=Release \
-    -DNEML2_TESTS=OFF \
-    -DNEML2_WORK_DISPATCHER=ON \
-    -DNEML2_JSON=OFF \
+    -DBUILD_TESTING=OFF \
     -DNEML2_CONTRIB_PREFIX="$2/contrib" \
-    -Dtorch_ROOT="$(get_variable LIBTORCH_DIR)" \
-    -Dtorch_SEARCH_SITE_PACKAGES=OFF \
+    -DNEML2_MPI=ON \
+    -DPython3_EXECUTABLE="$(command -v python3)" \
+    -Dtorch_SEARCH_SITE_PACKAGES=ON \
     -G "Unix Makefiles" \
     -B "$2" \
     -S "$1" \

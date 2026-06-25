@@ -10,12 +10,15 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <utility>
+#include <algorithm>
 
 #ifdef NEML2_ENABLED
 
-#include "neml2/tensors/tensors.h"
-#include "neml2/base/Factory.h"
-#include "neml2/models/Model.h"
+// NEML2 v3's C++ API exchanges plain at::Tensor (libtorch/ATen); the rich neml2::Tensor /
+// typed-tensor library is no longer shipped, so we work with ATen directly here.
+#include <ATen/ATen.h>
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "SymmetricRankTwoTensor.h"
@@ -45,15 +48,34 @@ enum class MOOSEIOType
 
 std::string stringify(MOOSEIOType type);
 
-/**
- * @brief Get the NEML2 Model
- *
- * This is mostly the same as the plain neml2::get_model() method, but it also guards the default
- * dtype and sends the model to the target device.
- * @return neml2::Model&
- */
-std::shared_ptr<neml2::Model>
-getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype = neml2::kFloat64);
+/// Parse NEML2 v3 lag notation: "var~N" is the N-th old value of a variable (var~1 == old var,
+/// var~2 == older, ...). Returns {base_name, lag}; lag == 0 when there is no "~N" suffix. Defined
+/// here (shared, namespaced, inline) so the NEML2 unity build does not see duplicate definitions.
+inline std::pair<std::string, int>
+parseLag(const std::string & name)
+{
+  const auto pos = name.rfind('~');
+  if (pos == std::string::npos)
+    return {name, 0};
+  const auto suffix = name.substr(pos + 1);
+  if (suffix.empty() || suffix.find_first_not_of("0123456789") != std::string::npos)
+    return {name, 0};
+  return {name.substr(0, pos), std::stoi(suffix)};
+}
+
+/// Inverse of parseLag: build the variable name for a base name + lag.
+inline std::string
+lagName(const std::string & base, int lag)
+{
+  return lag == 0 ? base : base + "~" + std::to_string(lag);
+}
+
+/// Whether a vector of strings contains a given string.
+inline bool
+contains(const std::vector<std::string> & v, const std::string & s)
+{
+  return std::find(v.begin(), v.end(), s) != v.end();
+}
 
 template <typename T>
 struct Layout
@@ -62,61 +84,66 @@ struct Layout
 template <>
 struct Layout<Real>
 {
-  static constexpr std::array<neml2::Size, 0> shape{};
-  static constexpr std::array<neml2::Size, 1> strides{1};
+  static constexpr std::array<int64_t, 0> shape{};
+  static constexpr std::array<int64_t, 1> strides{1};
 };
 template <>
 struct Layout<RealVectorValue>
 {
-  static constexpr std::array<neml2::Size, 1> shape{3};
-  static constexpr std::array<neml2::Size, 2> strides{3, 1};
+  static constexpr std::array<int64_t, 1> shape{3};
+  static constexpr std::array<int64_t, 2> strides{3, 1};
 };
 template <>
 struct Layout<RankTwoTensor>
 {
-  static constexpr std::array<neml2::Size, 2> shape{3, 3};
-  static constexpr std::array<neml2::Size, 3> strides{9, 3, 1};
+  static constexpr std::array<int64_t, 2> shape{3, 3};
+  static constexpr std::array<int64_t, 3> strides{9, 3, 1};
 };
 template <>
 struct Layout<SymmetricRankTwoTensor>
 {
-  static constexpr std::array<neml2::Size, 1> shape{6};
-  static constexpr std::array<neml2::Size, 2> strides{6, 1};
+  static constexpr std::array<int64_t, 1> shape{6};
+  static constexpr std::array<int64_t, 2> strides{6, 1};
 };
 template <>
 struct Layout<RankFourTensor>
 {
-  static constexpr std::array<neml2::Size, 4> shape{3, 3, 3, 3};
-  static constexpr std::array<neml2::Size, 5> strides{81, 27, 9, 3, 1};
+  static constexpr std::array<int64_t, 4> shape{3, 3, 3, 3};
+  static constexpr std::array<int64_t, 5> strides{81, 27, 9, 3, 1};
 };
 template <>
 struct Layout<SymmetricRankFourTensor>
 {
-  static constexpr std::array<neml2::Size, 2> shape{6, 6};
-  static constexpr std::array<neml2::Size, 3> strides{36, 6, 1};
+  static constexpr std::array<int64_t, 2> shape{6, 6};
+  static constexpr std::array<int64_t, 3> strides{36, 6, 1};
 };
 
 /**
- * @brief Map from std::vector<T> to neml2::Tensor without copying the data
+ * @brief Map from std::vector<T> to an at::Tensor without copying the data
  *
  * This method is used in gatherers which gather data from MOOSE as input variables to the NEML2
  * material model. So in theory, we only need to provide Layout specializations for MOOSE types that
- * can potentially be used as NEML2 input variables.
+ * can potentially be used as NEML2 input variables. The returned tensor has shape
+ * (data.size(), *Layout<T>::shape), i.e. a leading batch axis followed by the variable's base shape,
+ * which is the (*B, *base_shape) convention NEML2 v3's C++ API expects.
  *
  * For this method to work, the underlying data in \p data must be reinterpretable as Real
- * (neml2::kFloat64). The data class T must also be aligned and follow the striding implied by
+ * (at::kDouble). The data class T must also be aligned and follow the striding implied by
  * Layout<T>::shape. The data class T must also have no padding or overhead.
  */
 template <typename T>
-neml2::Tensor
+at::Tensor
 fromBlob(const std::vector<T> & data)
 {
+  // Full shape: leading batch dim followed by the base shape.
+  std::vector<int64_t> shape;
+  shape.reserve(1 + Layout<T>::shape.size());
+  shape.push_back(static_cast<int64_t>(data.size()));
+  shape.insert(shape.end(), Layout<T>::shape.begin(), Layout<T>::shape.end());
   // The const_cast is fine because torch works with non-const ptr so that it can optionally handle
   // deallocation. But we are not going to let torch do that.
-  const auto torch_tensor = at::from_blob(const_cast<T *>(data.data()),
-                                          neml2::utils::add_shapes(data.size(), Layout<T>::shape),
-                                          at::TensorOptions().dtype(neml2::kFloat64));
-  return neml2::Tensor(torch_tensor, 1);
+  return at::from_blob(
+      const_cast<T *>(data.data()), shape, at::TensorOptions().dtype(at::kDouble));
 }
 
 /**
@@ -129,14 +156,14 @@ fromBlob(const std::vector<T> & data)
  * For this method to work,
  * 1. the address of \p dest must align with the first element of the data,
  * 2. the number of elements in \p dest must match the number of elements in \p src,
- * 3. the \p src tensor must be of type neml2::kFloat64, and
+ * 3. the \p src tensor must be of type at::kDouble, and
  * 4. data in \p dest must be reinterpretable as Real.
  */
 template <typename T>
 void
 copyTensorToMOOSEData(const at::Tensor & src, T & dest)
 {
-  if (src.dtype() != neml2::kFloat64)
+  if (src.dtype() != at::kDouble)
     mooseError(
         "Cannot copy at::Tensor with dtype ", src.dtype(), " into ", demangle(typeid(T).name()));
   if (src.numel() != Layout<T>::strides[0])
@@ -147,7 +174,7 @@ copyTensorToMOOSEData(const at::Tensor & src, T & dest)
                " with different number of elements.");
   auto dest_tensor = at::from_blob(reinterpret_cast<Real *>(&dest),
                                    Layout<T>::shape,
-                                   at::TensorOptions().dtype(neml2::kFloat64));
+                                   at::TensorOptions().dtype(at::kDouble));
   dest_tensor.copy_(src.reshape(Layout<T>::shape));
 }
 
