@@ -22,6 +22,10 @@ Increasing these may aid convergence when $\alpha$ and/or $\beta$ are highly dis
 The method used corresponds to a matrix-free version of Hypre's AMS preconditioner (with default
 cycle 1), as described in Hypre's [AMS documentation](https://hypre.readthedocs.io/en/latest/solvers-ams.html).
 
+Implementation details for the `mfem::MatrixFreeAMS` preconditioner, along with some performance
+comparisons against Hypre's AMS preconditioner for 2D problems, can be found in
+[this paper](https://www.osti.gov/servlets/purl/1835018).
+
 ## Example Input File Syntax
 
 !listing test/tests/mfem/kernels/curlcurl.i block=Preconditioner Solvers
