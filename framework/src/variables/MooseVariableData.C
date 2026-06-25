@@ -1415,6 +1415,15 @@ MooseVariableData<OutputType>::reinitNode()
     _dof_map.dof_indices(_node, _dof_indices, _var_num);
 
   const auto n_dofs = _dof_indices.size();
+
+  mooseAssert(n_dofs % _count == 0,
+              "The number of nodal dof indices should divide cleanly by the variable count in "
+              "reinitNode()");
+
+  const auto num_shapes = n_dofs / _count;
+  _vector_tags_dof_u[_solution_tag].resize(num_shapes);
+  _has_dof_values = false;
+
   if (n_dofs)
   {
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
