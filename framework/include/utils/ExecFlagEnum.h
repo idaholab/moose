@@ -65,11 +65,6 @@ public:
    */
   std::string getDocString() const;
 
-  /**
-   * Reference the all the available items.
-   */
-  const std::set<ExecFlagType> & items() const { return _items; }
-
 protected:
   /**
    *  Append the list of current flags.

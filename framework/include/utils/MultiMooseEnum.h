@@ -254,6 +254,9 @@ public:
   void addValidName(const std::initializer_list<std::string> & names);
   void addValidName(const MultiMooseEnum & names);
 
+  /// Return the set of the currently selected values
+  std::set<MooseEnumItem> selectedItems() const;
+
 protected:
   /// Check whether any of the current values are deprecated when called
   virtual void checkDeprecated() const override;
