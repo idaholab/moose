@@ -143,6 +143,7 @@
 
 // C++
 #include <cstring> // for "Jacobian" exception test
+#include <thread>
 
 // Anonymous namespace for helper function
 namespace
@@ -6155,9 +6156,11 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       if (multi_app_group.size() > 1)
         has_concurrent_apps = true;
     if (!has_concurrent_apps)
-      paramWarning("num_concurrent_multiapps",
-                   "Due to application dependencies or differences in execution schedules, "
-                   "concurrent multiapps are not actually used");
+      paramInfo(
+          "num_concurrent_multiapps",
+          "Due to the specified multiapp execution groups, or differences in execution schedules, "
+          "concurrent multiapps are not actually used on " +
+              Moose::stringify(exec_on));
   }
 
   // Execute MultiApps
@@ -6181,17 +6184,48 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       // We need the atomic to be able to 'exit' early in case of failures
       std::atomic<bool> group_success{true};
 
-#pragma omp parallel for schedule(dynamic) num_threads(_num_concurrent_multiapps)
-      for (const auto & multi_app : multi_app_group)
+      if (multi_app_group.size() > 1)
+      {
+        // Let the user know about concurrent multiapp use (new option: help them set it up)
+        if (_verbose_multiapps)
+        {
+          _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
+          for (const auto & multi_app : multi_app_group)
+            _console << multi_app->name() << " ";
+          _console << COLOR_DEFAULT << std::endl;
+        }
+      }
+
+      unsigned num_threads = _num_concurrent_multiapps;
+      std::vector<std::thread> threads;
+
+      const auto N = multi_app_group.size();
+      const auto chunk = (multi_app_group.size() + num_threads - 1) / num_threads;
+
+      for (const auto t : make_range(num_threads))
       {
         // Don't solve step if a single failure occurred
         if (!group_success.load(std::memory_order_relaxed))
           continue;
 
-        bool local = multi_app->solveStep(_dt, _time, auto_advance);
-        if (!local)
-          group_success.store(false, std::memory_order_relaxed);
+        const auto begin = t * chunk;
+        const auto end = std::min(begin + chunk, N);
+
+        threads.emplace_back(
+            [begin, end, this, &multi_app_group, &group_success, &auto_advance]() {
+            for (const auto i : make_range(begin, end))
+            {
+              auto & multi_app = multi_app_group[i];
+              bool local = multi_app->solveStep(_dt, _time, auto_advance);
+              if (!local)
+                group_success.store(false, std::memory_order_relaxed);
+            }
+          });
       }
+
+      // join all
+      for (auto & th : threads)
+        th.join();
 
       // No need to solve the other groups if this group failed
       if (!group_success)
