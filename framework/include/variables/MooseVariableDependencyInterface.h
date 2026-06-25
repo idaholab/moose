@@ -63,16 +63,28 @@ public:
 
   /**
    * Check whether all of the supplied variables have degree of freedom indices on the supplied
-   * degree of freedom object
-   * @param dof_object The degree of freedom object (an element or node) that we want to check for
+   * node
+   * @param node The node that we want to check for
    * existence of variable degrees of freedom on
    * @param vars_to_check the variables to check
    * @return Any variables that do not have degrees of freedom on the supplied degree of freedom
    * object
    */
-  template <typename DofObjectType>
+  virtual std::set<MooseVariableFieldBase *>
+  checkVariables(const libMesh::Node & node,
+                 const std::set<MooseVariableFieldBase *> & vars_to_check);
+
+  /**
+   * Check whether all of the supplied variables have degree of freedom indices on the supplied
+   * element
+   * @param element The element that we want to check for
+   * existence of variable degrees of freedom on
+   * @param vars_to_check the variables to check
+   * @return Any variables that do not have degrees of freedom on the supplied degree of freedom
+   * object
+   */
   std::set<MooseVariableFieldBase *>
-  checkVariables(const DofObjectType & dof_object,
+  checkVariables(const libMesh::Elem & element,
                  const std::set<MooseVariableFieldBase *> & vars_to_check);
 
   /**
@@ -89,6 +101,13 @@ public:
   }
 
 private:
+  /// Helper method for checking variables for dof indices. Returns the subset of variables of \p
+  /// vars_to_check that do \emph not have dof indices on the provided \p dof_object
+  template <typename DofObjectType>
+  std::set<MooseVariableFieldBase *>
+  checkVariablesHelper(const DofObjectType & dof_object,
+                       const std::set<MooseVariableFieldBase *> & vars_to_check);
+
   std::set<MooseVariableFieldBase *> _moose_variable_dependencies;
 
   /// A container for holding dof indices in order to avoid constant memory reallocation
@@ -110,4 +129,18 @@ MooseVariableDependencyInterface::checkAllVariables(
                       vars_to_omit.end(),
                       std::inserter(vars_to_check, vars_to_check.begin()));
   return checkVariables(dof_object, vars_to_check);
+}
+
+inline std::set<MooseVariableFieldBase *>
+MooseVariableDependencyInterface::checkVariables(
+    const libMesh::Node & node, const std::set<MooseVariableFieldBase *> & vars_to_check)
+{
+  return checkVariablesHelper(node, vars_to_check);
+}
+
+inline std::set<MooseVariableFieldBase *>
+MooseVariableDependencyInterface::checkVariables(
+    const libMesh::Elem & element, const std::set<MooseVariableFieldBase *> & vars_to_check)
+{
+  return checkVariablesHelper(element, vars_to_check);
 }

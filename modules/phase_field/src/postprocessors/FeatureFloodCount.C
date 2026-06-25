@@ -1497,7 +1497,7 @@ FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
 void
 FeatureFloodCount::expandPointHalos()
 {
-  const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   FeatureData::container_type expanded_local_ids;
   auto my_processor_id = processor_id();
 

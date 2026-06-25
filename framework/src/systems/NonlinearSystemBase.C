@@ -76,7 +76,7 @@
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
 #include "FVScalarLagrangeMultiplierInterface.h"
-#include "UserObject.h"
+#include "GeneralUserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
 #include "AutomaticMortarGeneration.h"
@@ -1777,7 +1777,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
-  std::vector<UserObject *> uos;
+  std::vector<GeneralUserObject *> uos;
   _fe_problem.theWarehouse()
       .query()
       .condition<AttribSystem>("UserObject")

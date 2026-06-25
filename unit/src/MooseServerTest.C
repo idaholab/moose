@@ -1149,6 +1149,13 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
     wall_time_interval = 3600
   []
 []
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = u
+    displacements = 'disp_x'
+  []
+[]
 )INPUT";
 
   // build didchange notification and handle it with the moose_server
@@ -1351,17 +1358,17 @@ label: Transient          text: Transient                            desc: Execu
 
 TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
-  // completion test parameters - on displacements parameter value in VacuumBC
+  // completion test parameters - on displacements parameter value in Diffusion kernel
   std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 10;
-  int request_line = 26;
+  int request_line = 55;
   int request_char = 21;
   std::size_t expect_count = 4;
   std::string expect_items = R"INPUT(
-label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
-label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
-label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
-label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
+label: disp_x text: disp_x desc: from /AuxVariables/* pos: [55.21]-[55.27] kind: 18 format: snippet
+label: disp_y text: disp_y desc: from /AuxVariables/* pos: [55.21]-[55.27] kind: 18 format: snippet
+label: u      text: u      desc: from /Variables/*    pos: [55.21]-[55.27] kind: 18 format: snippet
+label: v      text: v      desc: from /Variables/*    pos: [55.21]-[55.27] kind: 18 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1423,11 +1430,11 @@ document_uri: "file://...absolute.../framework/src/executioners/Transient.C"    
 
 TEST_F(MooseServerTest, DefinitionInputFileLookups)
 {
-  // definition test parameters - on AuxVariables defined displacements disp_x
+  // definition test parameters - on Kernels defined displacements disp_x
 
   int request_id = 12;
   std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
-  int line = 26;
+  int line = 55;
   int character = 21;
 
   // build definition request with the test parameters
@@ -1676,7 +1683,6 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
     type = VacuumBC
     boundary = right
     variable = v
-    displacements = 'u v u v u'
   []
 []
 [Executioner]
@@ -1726,7 +1732,7 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
       references_response, response_errors, response_id, locations_array));
   EXPECT_TRUE(response_errors.str().empty());
   EXPECT_EQ(request_id, response_id);
-  EXPECT_EQ(6u, locations_array.size());
+  EXPECT_EQ(3u, locations_array.size());
 
   // make formatted list of response references and check it is as expected
   std::ostringstream locations_actual;
@@ -1735,9 +1741,6 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
 document_uri: "file://...absolute.../unit/test.i"    location_start: [6.3]    location_end: [6.4]
 document_uri: "file://...absolute.../unit/test.i"    location_start: [12.15]    location_end: [12.18]
 document_uri: "file://...absolute.../unit/test.i"    location_start: [19.15]    location_end: [19.16]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.21]    location_end: [26.22]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.25]    location_end: [26.26]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.29]    location_end: [26.30]
 )INPUT";
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
@@ -2563,7 +2566,7 @@ TEST_F(MooseServerTest, CompletionVariousWarehouses)
     boundary = 'left right top bottom'
     variable      =  # NonlinearVariableName - inp_reg_var + act_reg_var + tst_reg_var
     save_in       =  # AuxVariableName       - inp_aux_var + tst_aux_var
-    displacements =  # VariableName          - inp_reg_var + act_reg_var + tst_reg_var + inp_aux_var + tst_aux_var
+
   []
 []
 [Materials]
@@ -2683,20 +2686,6 @@ label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [22.20]-[22
   expect_items = R"INPUT(
 label: inp_aux_var text: inp_aux_var desc: from AuxiliarySys... pos: [23.20]-[23.20] kind: 18 format: snippet
 label: tst_aux_var text: tst_aux_var desc: from AuxiliarySys... pos: [23.20]-[23.20] kind: 18 format: snippet
-)INPUT";
-  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
-
-  // check warehouse completion 03 - VariableName displacements in VacuumBC
-  request_id = 37;
-  request_line = 24;
-  request_char = 20;
-  expect_count = 5;
-  expect_items = R"INPUT(
-label: act_reg_var text: act_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
-label: inp_aux_var text: inp_aux_var desc: from AuxiliarySys... pos: [24.20]-[24.20] kind: 18 format: snippet
-label: inp_reg_var text: inp_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
-label: tst_aux_var text: tst_aux_var desc: from AuxiliarySys... pos: [24.20]-[24.20] kind: 18 format: snippet
-label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 

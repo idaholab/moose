@@ -75,6 +75,11 @@ public:
    */
   void determineWhetherCoincidentLowerDCalc();
 
+  using MooseVariableDependencyInterface::checkVariables;
+  virtual std::set<MooseVariableFieldBase *>
+  checkVariables(const libMesh::Node & node,
+                 const std::set<MooseVariableFieldBase *> & vars_to_check) override;
+
 protected:
   /**
    * Compute and return the value of the aux variable.

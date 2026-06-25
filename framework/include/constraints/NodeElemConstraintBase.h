@@ -100,7 +100,7 @@ protected:
   const VariableTestValue & _test_primary;
 
   /// MooseMesh map of current nodes to the connected elements
-  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
+  const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   /// maps secondary node ids to primary element ids
   std::map<dof_id_type, dof_id_type> _secondary_to_primary_map;
