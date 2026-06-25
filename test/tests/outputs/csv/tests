@@ -86,9 +86,10 @@
     issues = "#3229"
   []
   [scientific_notation]
-    type = CSVDiff
+    type = CheckFiles
     input = 'csv_scientific_notation.i'
-    csvdiff = 'csv_scientific_notation_out.csv'
+    check_files = 'csv_scientific_notation_out.csv'
+    file_expect_out = 'time,small.*1\.000000e\+00,1\.234000e-20'
 
     requirement = "The system shall support CSV output of floating point values in scientific notation."
     issues = "#31150"
