@@ -6140,19 +6140,11 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
     ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
         multi_app);
 
-  // Follow the original execution order
-  if (!_execute_siblings_transfer_after_source_multiapp_execution || ordered_multi_apps.size() == 0)
-  {
-    ordered_multi_apps.resize(multi_apps.size());
-    for (const auto i : index_range(multi_apps))
-      ordered_multi_apps[i] = {multi_apps[i]};
-  }
-
   // Check that concurrent multiapps will even be used
   if (multi_apps.size() && _num_concurrent_multiapps > 1)
   {
     bool has_concurrent_apps = false;
-    for (const auto & multi_app_group : ordered_multi_apps)
+    for (const auto & [group, multi_app_group] : ordered_multi_apps)
       if (multi_app_group.size() > 1)
         has_concurrent_apps = true;
     if (!has_concurrent_apps)
@@ -6174,15 +6166,14 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     bool success = true;
 
-    for (const auto & [group, multi_app_group] : ordered_multi_apps)
+    for (const auto & [group_id, multi_app_group] : ordered_multi_apps)
     {
-
-      if (_verbose_multiapps && ordered_multi_apps.size() > 1)
-        _console << COLOR_CYAN << "\nExecuting MultiApps from group " << group << COLOR_DEFAULT
-                 << std::endl;
 
       // We need the atomic to be able to 'exit' early in case of failures
       std::atomic<bool> group_success{true};
+      if (_verbose_multiapps && ordered_multi_apps.size() > 1)
+        _console << COLOR_CYAN << "\nExecuting MultiApps group " << Moose::stringify(group_id)
+                 << COLOR_DEFAULT << std::endl;
 
       if (multi_app_group.size() > 1)
       {
@@ -6210,17 +6201,25 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
         const auto begin = t * chunk;
         const auto end = std::min(begin + chunk, N);
+        const auto & app_group = multi_app_group;
 
         threads.emplace_back(
-            [begin, end, this, &multi_app_group, &group_success, &auto_advance]() {
-            for (const auto i : make_range(begin, end))
+            [begin, end, this, app_group, &group_success, &auto_advance]()
             {
-              auto & multi_app = multi_app_group[i];
-              bool local = multi_app->solveStep(_dt, _time, auto_advance);
-              if (!local)
-                group_success.store(false, std::memory_order_relaxed);
-            }
-          });
+              for (const auto i : make_range(begin, end))
+              {
+                // as far as libMesh is concerned, we're not
+                // {
+                //   Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+                //   libMesh::Threads::in_threads = false;
+                // }
+
+                auto & multi_app = app_group[i];
+                bool local = multi_app->solveStep(_dt, _time, auto_advance);
+                if (!local)
+                  group_success.store(false, std::memory_order_relaxed);
+              }
+            });
       }
 
       // join all
