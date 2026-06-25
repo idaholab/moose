@@ -18,12 +18,12 @@
 InputParameters
 SecantSolve::validParams()
 {
-  InputParameters params = FixedPointSolve::validParams();
+  InputParameters params = LibMeshFixedPointSolve::validParams();
 
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
+SecantSolve::SecantSolve(Executioner & ex) : LibMeshFixedPointSolve(ex)
 {
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)

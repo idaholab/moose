@@ -24,7 +24,7 @@ SteffensenSolve::validParams()
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) {}
+SteffensenSolve::SteffensenSolve(Executioner & ex) : LibMeshFixedPointSolve(ex) {}
 
 void
 SteffensenSolve::allocateStorage(const bool primary)

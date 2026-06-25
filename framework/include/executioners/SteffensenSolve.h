@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "FixedPointSolve.h"
+#include "LibMeshFixedPointSolve.h"
 #include "NonlinearSystemBase.h"
 
-class SteffensenSolve : public FixedPointSolve
+class SteffensenSolve : public LibMeshFixedPointSolve
 {
 public:
   SteffensenSolve(Executioner & ex);

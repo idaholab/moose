@@ -18,11 +18,11 @@
 InputParameters
 PicardSolve::validParams()
 {
-  InputParameters params = FixedPointSolve::validParams();
+  InputParameters params = LibMeshFixedPointSolve::validParams();
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex) {}
+PicardSolve::PicardSolve(Executioner & ex) : LibMeshFixedPointSolve(ex) {}
 
 void
 PicardSolve::allocateStorage(const bool primary)
