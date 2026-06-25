@@ -1,20 +1,20 @@
-# NEML2FEInterpolation
+# TorchFEInterpolation
 
-!if! function=hasCapability('neml2')
+!if! function=hasLibtorch()
 
-This userobject provides an interface to NEML2 for finite element interpolation (at quadrature points) of variables and their gradients. It loops through elements to cache shape functions, shape function gradients, and DOF maps, then provides them as NEML2 tensors for use in NEML2 models.
+This userobject provides an interface to libtorch for finite element interpolation (at quadrature points) of variables and their gradients. It loops through elements to cache shape functions, shape function gradients, and DOF maps, then provides them as libtorch tensors for use in batched finite-element kernels.
 
 ## Example usage
 
-This object requires a [NEML2Assembly](NEML2Assembly.md) object to provide assembly information:
+This object requires a [TorchAssembly](TorchAssembly.md) object to provide assembly information:
 
 ```
 [UserObjects]
   [assembly]
-    type = NEML2Assembly
+    type = TorchAssembly
   []
   [fe]
-    type = NEML2FEInterpolation
+    type = TorchFEInterpolation
     assembly = 'assembly'
   []
 []
@@ -46,16 +46,16 @@ where $n_e$ is the number of elements, $n_q$ is the number of quadrature points 
 
 - Only variables of type `MooseVariableFE<Real>` are supported
 - Variable scaling factors other than unity are not supported
-- All elements handled by a single `NEML2FEInterpolation` must share the same number of quadrature points and the same number of dofs per element for each FEType. Mixed element topologies or p-adaptivity need to be split into multiple block-restricted `NEML2FEInterpolation`/`NEML2Assembly` pairs (one per element type).
-- Only the current solution is interpolated; old variable values/gradients are not provided to NEML2 through this path.
+- All elements handled by a single `TorchFEInterpolation` must share the same number of quadrature points and the same number of dofs per element for each FEType. Mixed element topologies or p-adaptivity need to be split into multiple block-restricted `TorchFEInterpolation`/`TorchAssembly` pairs (one per element type).
+- Only the current solution is interpolated; old variable values/gradients are not provided through this path.
 - The implementation currently assumes PETSc vectors for the solution transfer.
 
 ## Syntax
 
-!syntax parameters /UserObjects/NEML2FEInterpolation
+!syntax parameters /UserObjects/TorchFEInterpolation
 
 !if-end!
 
 !else
 
-!include neml2/neml2_warning.md
+!include libtorch/libtorch_warning.md

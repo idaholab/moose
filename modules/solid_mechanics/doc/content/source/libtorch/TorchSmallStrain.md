@@ -1,8 +1,8 @@
-# NEML2SmallStrain
+# TorchSmallStrain
 
 !if! function=hasCapability('neml2')
 
-For a batch of material points, calculate the small strain given displacement gradients, i.e. $\varepsilon_{ij} = \dfrac{1}{2} \left( u_{i,j} + u_{j,i} \right)$.
+For a batch of material points, calculate the small strain given displacement gradients, i.e. $\varepsilon_{ij} = \dfrac{1}{2} \left( u_{i,j} + u_{j,i} \right)$, and provide it as a NEML2 model input (in 6-component Mandel form).
 
 ## Limitations
 
@@ -11,11 +11,11 @@ For a batch of material points, calculate the small strain given displacement gr
 
 ## Syntax
 
-!syntax parameters /UserObjects/NEML2SmallStrain
+!syntax parameters /UserObjects/TorchSmallStrain
 
 ## Example input files
 
-!syntax inputs /UserObjects/NEML2SmallStrain
+!syntax inputs /UserObjects/TorchSmallStrain
 
 !if-end!
 

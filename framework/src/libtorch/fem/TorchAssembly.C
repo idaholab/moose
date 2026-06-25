@@ -6,29 +6,25 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
-#ifdef NEML2_ENABLED
-
-// Torch includes
-#include <ATen/ops/from_blob.h>
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 // MOOSE includes
-#include "NEML2Assembly.h"
+#include "TorchAssembly.h"
 
 using namespace libMesh;
 
-registerMooseObject("MooseApp", NEML2Assembly);
+registerMooseObject("MooseApp", TorchAssembly);
 
 InputParameters
-NEML2Assembly::validParams()
+TorchAssembly::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
 
   params.addClassDescription(
       "This user object gathers the JxWxT values from all elements in the assembly and "
-      "provides them as a neml2 tensor. This is useful for assembling NEML2 models that "
-      "require the JxWxT values for each element.");
+      "provides them as a libtorch tensor. This is useful for assembling batched finite-element "
+      "kernels that require the JxWxT values for each element.");
 
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR};
@@ -38,16 +34,16 @@ NEML2Assembly::validParams()
   return params;
 }
 
-NEML2Assembly::NEML2Assembly(const InputParameters & parameters) : ElementUserObject(parameters) {}
+TorchAssembly::TorchAssembly(const InputParameters & parameters) : ElementUserObject(parameters) {}
 
 void
-NEML2Assembly::invalidate()
+TorchAssembly::invalidate()
 {
   _up_to_date = false;
 }
 
 void
-NEML2Assembly::initialize()
+TorchAssembly::initialize()
 {
   if (_up_to_date)
     return;
@@ -58,11 +54,11 @@ NEML2Assembly::initialize()
 }
 
 void
-NEML2Assembly::threadJoin(const UserObject & y)
+TorchAssembly::threadJoin(const UserObject & y)
 {
-  const auto & other = static_cast<const NEML2Assembly &>(y);
+  const auto & other = static_cast<const TorchAssembly &>(y);
   mooseAssert(_up_to_date == other._up_to_date,
-              "NEML2Assembly becomes out of sync with other thread");
+              "TorchAssembly becomes out of sync with other thread");
 
   if (_up_to_date)
     return;
@@ -75,7 +71,7 @@ NEML2Assembly::threadJoin(const UserObject & y)
 }
 
 void
-NEML2Assembly::execute()
+TorchAssembly::execute()
 {
   if (_up_to_date)
     return;
@@ -94,9 +90,9 @@ NEML2Assembly::execute()
 }
 
 void
-NEML2Assembly::finalize()
+TorchAssembly::finalize()
 {
-  TIME_SECTION("finalize", 1, "Updating FEM assembly for NEML2");
+  TIME_SECTION("finalize", 1, "Updating FEM assembly for the Torch FEM kernels");
 
   if (_up_to_date)
     return;
@@ -105,16 +101,12 @@ NEML2Assembly::finalize()
   if (_moose_JxWxT.size() != std::size_t(_nelem * _nqp))
     mooseError("JxWxT size mismatch, expected ", _nelem * _nqp, " but got ", _moose_JxWxT.size());
 
-  // convert gathered data to neml2 tensors (and send to device)
+  // convert gathered data to a libtorch tensor (and send to device)
   auto device = _app.getLibtorchDevice();
-  _neml2_JxWxT =
-      neml2::Tensor(at::from_blob(_moose_JxWxT.data(), {_nelem, _nqp}, torch::kFloat64), 2)
-          .to(device);
+  _JxWxT = at::from_blob(_moose_JxWxT.data(), {_nelem, _nqp}, torch::kFloat64).to(device);
 
   // done
   _up_to_date = true;
 }
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // MOOSE_LIBTORCH_ENABLED

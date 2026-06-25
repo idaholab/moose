@@ -6,26 +6,22 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #ifdef NEML2_ENABLED
 
-// NEML2 includes
-#include "neml2/tensors/functions/stack.h"
-#include "neml2/tensors/functions/sum.h"
-
 // MOOSE includes
-#include "NEML2StressDivergence.h"
+#include "TorchStressDivergence.h"
+#include "TorchFEMUtils.h"
 
-registerMooseObject("SolidMechanicsApp", NEML2StressDivergence);
+registerMooseObject("SolidMechanicsApp", TorchStressDivergence);
 
 InputParameters
-NEML2StressDivergence::validParams()
+TorchStressDivergence::validParams()
 {
-  InputParameters params = NEML2PostKernel::validParams();
+  InputParameters params = TorchPostKernel::validParams();
   params.addClassDescription(
       "This user object calculates the stress divergence for a given set of displacement "
-      "variables and assemble the contribution into the residual vector.");
+      "variables and assembles the contribution into the residual vector.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements",
       "The displacements variables whose function space will be used to define the test "
@@ -36,9 +32,9 @@ NEML2StressDivergence::validParams()
   return params;
 }
 
-NEML2StressDivergence::NEML2StressDivergence(const InputParameters & parameters)
-  : NEML2PostKernel(parameters),
-    _residual(dynamic_cast<PetscVector<Real> *>(&_sys.system().add_vector(
+TorchStressDivergence::TorchStressDivergence(const InputParameters & parameters)
+  : TorchPostKernel(parameters),
+    _residual(dynamic_cast<libMesh::PetscVector<Real> *>(&_sys.system().add_vector(
         getParam<std::string>("residual"), false, libMesh::ParallelType::GHOSTED))),
     _stress(_constitutive.getOutput(getParam<std::string>("stress"))),
     _disp_vars(getParam<std::vector<NonlinearVariableName>>("displacements")),
@@ -47,7 +43,7 @@ NEML2StressDivergence::NEML2StressDivergence(const InputParameters & parameters)
   mooseAssert(_residual, "Failed to cast residual to PetscVector<Real>");
 
   if (_disp_vars.size() < 1 || _disp_vars.size() > 3)
-    mooseError("NEML2StressDivergence requires 1 to 3 displacement variables, got ",
+    mooseError("TorchStressDivergence requires 1 to 3 displacement variables, got ",
                _disp_vars.size());
 
   _grad_test_x = &_fe.getPhiGradient(_disp_vars[0]);
@@ -56,38 +52,39 @@ NEML2StressDivergence::NEML2StressDivergence(const InputParameters & parameters)
 }
 
 void
-NEML2StressDivergence::forward()
+TorchStressDivergence::forward()
 {
   if (!_constitutive.outputReady())
     return;
 
   torch::InferenceMode guard;
+  using at::indexing::Slice;
 
-  auto dphix = neml2::Tensor(*_grad_test_x, 3);
-  auto dphiy = _ndisp >= 2 ? neml2::Tensor(*_grad_test_y, 3) : neml2::Tensor::zeros_like(dphix);
-  auto dphiz = _ndisp >= 3 ? neml2::Tensor(*_grad_test_z, 3) : neml2::Tensor::zeros_like(dphix);
-  auto dphi = neml2::base_stack({dphix, dphiy, dphiz}, 0);            // (nelem, ndofe, nqp; 3, 3)
-  auto stress = neml2::R2(neml2::SR2(_stress)).dynamic_unsqueeze(-2); // (nelem, 1,     nqp; 3, 3)
+  // test function gradients, each (nelem, ndofe, nqp, 3)
+  auto dphix = *_grad_test_x;
+  auto dphiy = _ndisp >= 2 ? *_grad_test_y : at::zeros_like(dphix);
+  auto dphiz = _ndisp >= 3 ? *_grad_test_z : at::zeros_like(dphix);
+  // stack along the displacement-component axis: dphi[e, a, q, i, j] = d phi_a / d x_j for
+  // component i, shape (nelem, ndofe, nqp, 3, 3)
+  auto dphi = at::stack({dphix, dphiy, dphiz}, 3);
+  // full stress sigma[e, q, i, j], broadcast over the dof axis: (nelem, 1, nqp, 3, 3)
+  auto stress = TorchFEM::mandelToFull(_stress).unsqueeze(1);
 
-  // weak form
-  auto re_qp = neml2::base_sum(dphi * neml2::Tensor(stress), -1); // (nelem, ndofe, nqp; 3)
+  // weak form: re_qp[e, a, q, i] = sum_j dphi_ij * sigma_ij, shape (nelem, ndofe, nqp, 3)
+  auto re_qp = (dphi * stress).sum(-1);
 
-  // element integration
-  auto JxWxT =
-      _neml2_assembly.JxWxT().dynamic_unsqueeze(-2).base_unsqueeze(0); // (nelem, 1, nqp; 1)
-  auto re = neml2::dynamic_sum(re_qp * JxWxT, -1)
-                .base_index({neml2::indexing::Slice(0, _ndisp)}); // (nelem, ndofe; ndisp)
+  // element integration over quadrature points
+  auto JxWxT = _assembly.JxWxT().unsqueeze(1).unsqueeze(-1); // (nelem, 1, nqp, 1)
+  auto re = (re_qp * JxWxT).sum(2);                          // (nelem, ndofe, 3)
 
-  // assemble residual
+  // assemble residual, one displacement component at a time
   for (auto i : make_range(_ndisp))
   {
-    auto re_i = re.base_index({i}).contiguous().cpu();
+    auto re_i = re.select(-1, i).contiguous().cpu(); // (nelem, ndofe)
     const auto & dofmap_i = _fe.getGlobalDofMap(_disp_vars[i]);
     _residual->add_vector(re_i.data_ptr<Real>(), dofmap_i);
   }
   _residual->close();
 }
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

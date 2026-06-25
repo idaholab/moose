@@ -6,17 +6,16 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #ifdef NEML2_ENABLED
 
 // MOOSE includes
-#include "NEML2PostKernel.h"
+#include "TorchPostKernel.h"
 
 InputParameters
-NEML2PostKernel::validParams()
+TorchPostKernel::validParams()
 {
-  InputParameters params = NEML2Kernel::validParams();
+  InputParameters params = TorchKernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "executor",
       "The NEML2ModelExecutor used to perform the constitutive update (where stress is an output "
@@ -31,11 +30,9 @@ NEML2PostKernel::validParams()
   return params;
 }
 
-NEML2PostKernel::NEML2PostKernel(const InputParameters & parameters)
-  : NEML2Kernel(parameters), _constitutive(getUserObject<NEML2ModelExecutor>("executor"))
+TorchPostKernel::TorchPostKernel(const InputParameters & parameters)
+  : TorchKernel(parameters), _constitutive(getUserObject<NEML2ModelExecutor>("executor"))
 {
 }
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

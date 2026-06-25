@@ -6,38 +6,38 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
+
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "MooseTypes.h"
 #include "IntegratedBCBase.h"
 
-#ifdef NEML2_ENABLED
-
 // MOOSE includes
-#include "NEML2CentralDifference.h"
+#include "TorchCentralDifference.h"
 
-registerMooseObject("SolidMechanicsApp", NEML2CentralDifference);
+registerMooseObject("SolidMechanicsApp", TorchCentralDifference);
 
 InputParameters
-NEML2CentralDifference::validParams()
+TorchCentralDifference::validParams()
 {
   InputParameters params = ExplicitMixedOrder::validParams();
   params.addClassDescription(
-      "Central difference time integrator using NEML2 material models and kernels.");
+      "Central difference time integrator using batched libtorch finite-element kernels (and "
+      "optionally NEML2 material models for the constitutive update).");
   params.addRequiredParam<UserObjectName>(
-      "assembly", "The NEML2Assembly object to use to provide assembly information");
+      "assembly", "The TorchAssembly object to use to provide assembly information");
   params.addRequiredParam<UserObjectName>(
-      "fe", "The NEML2FEInterpolation object to use to couple variables");
+      "fe", "The TorchFEInterpolation object to use to couple variables");
   return params;
 }
 
-NEML2CentralDifference::NEML2CentralDifference(const InputParameters & parameters)
+TorchCentralDifference::TorchCentralDifference(const InputParameters & parameters)
   : ExplicitMixedOrder(parameters)
 {
 }
 
 void
-NEML2CentralDifference::rebuildBoundaryElementList()
+TorchCentralDifference::rebuildBoundaryElementList()
 {
   if (!_nl)
     return;
@@ -69,35 +69,35 @@ NEML2CentralDifference::rebuildBoundaryElementList()
 }
 
 void
-NEML2CentralDifference::initialSetup()
+TorchCentralDifference::initialSetup()
 {
   ExplicitMixedOrder::initialSetup();
-  _neml2_assembly = &_fe_problem.getUserObject<NEML2Assembly>("assembly", /*tid=*/0);
-  _fe = &_fe_problem.getUserObject<NEML2FEInterpolation>("fe", /*tid=*/0);
+  _assembly = &_fe_problem.getUserObject<TorchAssembly>("assembly", /*tid=*/0);
+  _fe = &_fe_problem.getUserObject<TorchFEInterpolation>("fe", /*tid=*/0);
   rebuildBoundaryElementList();
 }
 
 void
-NEML2CentralDifference::meshChanged()
+TorchCentralDifference::meshChanged()
 {
   ExplicitMixedOrder::meshChanged();
   _boundary_elems_dirty = true;
 }
 
 void
-NEML2CentralDifference::postSolve()
+TorchCentralDifference::postSolve()
 {
   ExplicitMixedOrder::postSolve();
   _fe->invalidateInterpolations();
 }
 
 void
-NEML2CentralDifference::evaluateRHSResidual()
+TorchCentralDifference::evaluateRHSResidual()
 {
   if (_boundary_elems_dirty)
     rebuildBoundaryElementList();
 
-  if (_fe->contextUpToDate() && _neml2_assembly->upToDate())
+  if (_fe->contextUpToDate() && _assembly->upToDate())
   {
     libMesh::ConstElemRange boundary_elem_range(&_boundary_elems);
     _fe_problem.setCurrentAlgebraicElementRange(&boundary_elem_range);
@@ -113,6 +113,4 @@ NEML2CentralDifference::evaluateRHSResidual()
   _fe_problem.setCurrentAlgebraicNodeRange(nullptr);
 }
 
-#endif // NEML2_ENABLED
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // MOOSE_LIBTORCH_ENABLED

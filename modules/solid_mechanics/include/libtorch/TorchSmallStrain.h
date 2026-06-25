@@ -6,21 +6,20 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #pragma once
 
 #ifdef NEML2_ENABLED
 
 // MOOSE includes
-#include "NEML2PreKernel.h"
+#include "TorchPreKernel.h"
 
-class NEML2SmallStrain : public NEML2PreKernel
+class TorchSmallStrain : public TorchPreKernel
 {
 public:
   static InputParameters validParams();
 
-  NEML2SmallStrain(const InputParameters & parameters);
+  TorchSmallStrain(const InputParameters & parameters);
 
 protected:
   /// Calculate small strain from displacement gradients
@@ -28,12 +27,10 @@ protected:
 
   /// Displacement gradients
   ///@{
-  const neml2::Tensor * _grad_disp_x;
-  const neml2::Tensor * _grad_disp_y;
-  const neml2::Tensor * _grad_disp_z;
+  const at::Tensor * _grad_disp_x;
+  const at::Tensor * _grad_disp_y;
+  const at::Tensor * _grad_disp_z;
   ///@}
 };
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

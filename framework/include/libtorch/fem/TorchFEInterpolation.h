@@ -6,14 +6,15 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #pragma once
 
-#include <vector>
-#ifdef NEML2_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
+
+#include <torch/torch.h>
 
 // system includes
+#include <vector>
 #include <unordered_map>
 
 // libmesh includes
@@ -23,78 +24,75 @@
 
 // MOOSE includes
 #include "ElementUserObject.h"
-#include "NEML2Assembly.h"
+#include "TorchAssembly.h"
 #include "MooseVariableFE.h"
-
-// NEML2 includes
-#include "neml2/tensors/Tensor.h"
 
 /**
  * @brief This user object serves as the "interface" for interpolating MOOSE variable values and
- * gradients from the current solution vector.
+ * gradients from the current solution vector into batched libtorch tensors.
  *
- * Other objects can "couple" to variable values and/or gradients using through this interface.
+ * Other objects can "couple" to variable values and/or gradients through this interface.
  */
-class NEML2FEInterpolation : public ElementUserObject
+class TorchFEInterpolation : public ElementUserObject
 {
 public:
   static InputParameters validParams();
 
-  NEML2FEInterpolation(const InputParameters & parameters);
+  TorchFEInterpolation(const InputParameters & parameters);
 
   /**
-   * @brief Get the variable value of a MOOSE nonlinear variable converted to a NEML2 tensor.
+   * @brief Get the variable value of a MOOSE nonlinear variable converted to a libtorch tensor.
    *
-   * The NEML2 tensor will have shape (nelem, nqp;), where nelem is the number of elements, and nqp
+   * The tensor will have shape (nelem, nqp), where nelem is the number of elements, and nqp
    * is the number of quadrature points per element. The tensor is stored in the device memory.
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getValue(const std::string & var_name);
+  const at::Tensor & getValue(const std::string & var_name);
 
   /**
-   * @brief Get the variable gradient of a MOOSE nonlinear variable converted to a NEML2 tensor.
+   * @brief Get the variable gradient of a MOOSE nonlinear variable converted to a libtorch tensor.
    *
-   * The NEML2 tensor will have shape (nelem, nqp; 3), where nelem is the number of elements,
+   * The tensor will have shape (nelem, nqp, 3), where nelem is the number of elements,
    * and nqp is the number of quadrature points per element. The tensor is stored in the device
    * memory.
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getGradient(const std::string & var_name);
+  const at::Tensor & getGradient(const std::string & var_name);
 
   /**
    * @brief Get the shape function associated with a MOOSE variable.
    *
-   * The NEML2 tensor will have shape (nelem, ndofe, nqp;), where nelem is the number of elements,
+   * The tensor will have shape (nelem, ndofe, nqp), where nelem is the number of elements,
    * nqp is the number of quadrature points per element, and ndofe is the number of degrees of
    * freedom per element. The tensor is stored in the device memory.
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getPhi(const std::string & var_name);
+  const at::Tensor & getPhi(const std::string & var_name);
 
   /**
    * @brief Get the shape function gradient associated with a MOOSE variable.
    *
-   * The NEML2 tensor will have shape (nelem, ndofe, nqp; 3), where nelem is the number of elements,
+   * The tensor will have shape (nelem, ndofe, nqp, 3), where nelem is the number of elements,
    * nqp is the number of quadrature points per element, and ndofe is the number of degrees of
    * freedom per element. The tensor is stored in the device memory.
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getPhiGradient(const std::string & var_name);
+  const at::Tensor & getPhiGradient(const std::string & var_name);
 
   /**
    * @brief Get the local dof map associated with a MOOSE variable.
    *
-   * The NEML2 tensor will have shape (nelem, ndofe;), where nelem is the number of elements,
+   * The tensor will have shape (nelem, ndofe), where nelem is the number of elements,
    * and ndofe is the number of degrees of freedom per element. The tensor is stored in the device
    * memory.
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getDofMap(const std::string & var_name);
+  const at::Tensor & getDofMap(const std::string & var_name);
 
   /// Similar to getDofMap, but returns the global dof map (as a flattened vector of dof_id_type)
   const std::vector<dof_id_type> & getGlobalDofMap(const std::string & var_name);
@@ -127,7 +125,7 @@ protected:
   virtual void updateInterpolations();
 
   /// Assembly
-  const NEML2Assembly & _neml2_assembly;
+  const TorchAssembly & _assembly;
 
   /// Whether the current FEM context is up to date
   bool _fem_context_up_to_date = false;
@@ -136,10 +134,10 @@ protected:
   bool _interp_up_to_date = false;
 
   /// coupled variables (by value) requested by other objects
-  std::unordered_map<std::string, neml2::Tensor> _vars;
+  std::unordered_map<std::string, at::Tensor> _vars;
 
   /// coupled variables (by gradient) requested by other objects
-  std::unordered_map<std::string, neml2::Tensor> _grad_vars;
+  std::unordered_map<std::string, at::Tensor> _grad_vars;
 
   /// moose variables that have been coupled
   std::unordered_map<std::string, const MooseVariableFE<Real> *> _moose_vars;
@@ -155,13 +153,13 @@ protected:
   std::unordered_map<FEType, std::vector<Real>> _moose_phi;
   std::unordered_map<FEType, std::vector<Real>> _moose_grad_phi;
 
-  std::unordered_map<std::string, neml2::Tensor> _neml2_dof_map;
-  std::unordered_map<FEType, neml2::Tensor> _neml2_phi;
-  std::unordered_map<FEType, neml2::Tensor> _neml2_grad_phi;
+  std::unordered_map<std::string, at::Tensor> _torch_dof_map;
+  std::unordered_map<FEType, at::Tensor> _torch_phi;
+  std::unordered_map<FEType, at::Tensor> _torch_grad_phi;
   ///@}
 
   /// PETSc solution vector
-  const PetscVector<Real> * _petsc_solution;
+  const libMesh::PetscVector<Real> * _petsc_solution;
 
 private:
   /// Helper to get the MOOSE variable and check for common restrictions
@@ -174,6 +172,4 @@ private:
   int64_t _local_ndof;
 };
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // MOOSE_LIBTORCH_ENABLED

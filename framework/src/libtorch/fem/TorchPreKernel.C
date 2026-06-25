@@ -6,17 +6,16 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #ifdef NEML2_ENABLED
 
 // MOOSE includes
-#include "NEML2PreKernel.h"
+#include "TorchPreKernel.h"
 
 InputParameters
-NEML2PreKernel::validParams()
+TorchPreKernel::validParams()
 {
-  InputParameters params = NEML2Kernel::validParams();
+  InputParameters params = TorchKernel::validParams();
   params += MOOSEToNEML2::validParams();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -26,13 +25,11 @@ NEML2PreKernel::validParams()
   return params;
 }
 
-NEML2PreKernel::NEML2PreKernel(const InputParameters & parameters)
-  : NEML2Kernel(parameters), MOOSEToNEML2(parameters)
+TorchPreKernel::TorchPreKernel(const InputParameters & parameters)
+  : TorchKernel(parameters), MOOSEToNEML2(parameters)
 {
   if (name() != NEML2Name())
-    paramError("to_neml2", "NEML2PreKernel name must match to_neml2.");
+    paramError("to_neml2", "TorchPreKernel name must match to_neml2.");
 }
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

@@ -6,29 +6,29 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #pragma once
 
+// NEML2_ENABLED implies MOOSE_LIBTORCH_ENABLED (neml2 is built against libtorch), so the
+// TorchKernel base is available here.
 #ifdef NEML2_ENABLED
 
 // MOOSE includes
-#include "NEML2Kernel.h"
+#include "TorchKernel.h"
 #include "NEML2ModelExecutor.h"
 
-/// Base class for NEML2 kernels that operate _after_ the constitutive update
-class NEML2PostKernel : public NEML2Kernel
+/// Base class for Torch FEM kernels that operate _after_ the constitutive update, reading a NEML2
+/// model's batched output.
+class TorchPostKernel : public TorchKernel
 {
 public:
   static InputParameters validParams();
 
-  NEML2PostKernel(const InputParameters & parameters);
+  TorchPostKernel(const InputParameters & parameters);
 
 protected:
   /// the constitutive model
   const NEML2ModelExecutor & _constitutive;
 };
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

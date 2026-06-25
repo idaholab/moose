@@ -6,37 +6,39 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #pragma once
 
-#ifdef NEML2_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
+
+#include <torch/torch.h>
 
 // MOOSE includes
 #include "GeneralUserObject.h"
-#include "NEML2Assembly.h"
-#include "NEML2FEInterpolation.h"
+#include "TorchAssembly.h"
+#include "TorchFEInterpolation.h"
 
 /**
- * @brief NEML2Kernel is a conceptual extension of MOOSE kernel that operates on NEML2 tensors
+ * @brief TorchKernel is a conceptual extension of a MOOSE kernel that operates on batched libtorch
+ * tensors.
  *
  * While this is a general user object, it is conceptually a kernel in the sense that it defines the
  * same set of operations on a batch of input. Typical usage of this object includes
  *
  * 1. Calculating a batch of quantities given variable values/gradients interpolated onto the finite
- *    element space. In this case, the NEML2FEInterpolation should be used to get the interpolated
+ *    element space. In this case, the TorchFEInterpolation should be used to get the interpolated
  *    values. Note that this case could be roughly interpreted as being equivalent to a MOOSE
  *    Material.
- * 2. Calculating a batch of quantities given some NEML2 tensors. If the output represents the
+ * 2. Calculating a batch of quantities given some libtorch tensors. If the output represents the
  *    elemental residuals/Jacobians, this could be roughly interpreted as being equivalent to a
  *    MOOSE Kernel.
  */
-class NEML2Kernel : public GeneralUserObject
+class TorchKernel : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  NEML2Kernel(const InputParameters & parameters);
+  TorchKernel(const InputParameters & parameters);
 
   void initialize() override {}
   void execute() override;
@@ -47,15 +49,14 @@ protected:
   virtual void forward() = 0;
 
   /// The assembly object with cached assembly information
-  NEML2Assembly & _neml2_assembly;
+  TorchAssembly & _assembly;
 
-  /// The FEM interface for getting variable values/gradients interpolated onto the finite element space
-  NEML2FEInterpolation & _fe;
+  /// The FEM interface for getting variable values/gradients interpolated onto the finite element
+  /// space
+  TorchFEInterpolation & _fe;
 
   /// The output of the forward operator
-  neml2::Tensor _output;
+  at::Tensor _output;
 };
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // MOOSE_LIBTORCH_ENABLED

@@ -6,22 +6,19 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
 
 #ifdef NEML2_ENABLED
 
-// NEML2 includes
-#include "neml2/tensors/functions/stack.h"
-
 // MOOSE includes
-#include "NEML2SmallStrain.h"
+#include "TorchSmallStrain.h"
+#include "TorchFEMUtils.h"
 
-registerMooseObject("SolidMechanicsApp", NEML2SmallStrain);
+registerMooseObject("SolidMechanicsApp", TorchSmallStrain);
 
 InputParameters
-NEML2SmallStrain::validParams()
+TorchSmallStrain::validParams()
 {
-  InputParameters params = NEML2PreKernel::validParams();
+  InputParameters params = TorchPreKernel::validParams();
   params.addClassDescription(
       "This user object calculates the small strain from displacement gradients. "
       "It requires 1 to 3 displacement variables, which are used to compute the strain tensor.");
@@ -30,11 +27,11 @@ NEML2SmallStrain::validParams()
   return params;
 }
 
-NEML2SmallStrain::NEML2SmallStrain(const InputParameters & parameters) : NEML2PreKernel(parameters)
+TorchSmallStrain::TorchSmallStrain(const InputParameters & parameters) : TorchPreKernel(parameters)
 {
   auto disp_vars = getParam<std::vector<NonlinearVariableName>>("displacements");
   if (disp_vars.size() < 1 || disp_vars.size() > 3)
-    mooseError("NEML2SmallStrain requires 1 to 3 displacement variables, got ", disp_vars.size());
+    mooseError("TorchSmallStrain requires 1 to 3 displacement variables, got ", disp_vars.size());
 
   _grad_disp_x = &_fe.getGradient(disp_vars[0]);
   _grad_disp_y = disp_vars.size() >= 2 ? &_fe.getGradient(disp_vars[1]) : nullptr;
@@ -42,18 +39,18 @@ NEML2SmallStrain::NEML2SmallStrain(const InputParameters & parameters) : NEML2Pr
 }
 
 void
-NEML2SmallStrain::forward()
+TorchSmallStrain::forward()
 {
-  // gradient of displacements
+  // gradient of displacements, each (nelem, nqp, 3)
   const auto & dux = *_grad_disp_x;
-  auto duy = _grad_disp_y ? *_grad_disp_y : neml2::Tensor::zeros_like(dux);
-  auto duz = _grad_disp_z ? *_grad_disp_z : neml2::Tensor::zeros_like(dux);
-  auto du = neml2::R2(neml2::base_stack({dux, duy, duz}, -2));
+  auto duy = _grad_disp_y ? *_grad_disp_y : at::zeros_like(dux);
+  auto duz = _grad_disp_z ? *_grad_disp_z : at::zeros_like(dux);
 
-  // strain = 0.5 * (grad_u + grad_u^T), neml2::SR2 handles the symmetrization
-  _output = neml2::SR2(du);
+  // displacement gradient du[..., i, j] = d u_i / d x_j, shape (nelem, nqp, 3, 3)
+  auto du = at::stack({dux, duy, duz}, -2);
+
+  // strain = 0.5 * (grad_u + grad_u^T), stored in 6-component Mandel form
+  _output = TorchFEM::fullToMandel(0.5 * (du + du.transpose(-2, -1)));
 }
 
-#endif
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // NEML2_ENABLED

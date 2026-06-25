@@ -6,22 +6,21 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#if 0 // NEML2 v2->v3 migration: DEFERRED (FEM/discretization/typed-tensor path has no v3 C++ equivalent yet)
-
-#ifdef NEML2_ENABLED
 
 #pragma once
 
-#include "ExplicitMixedOrder.h"
-#include "NEML2Assembly.h"
-#include "NEML2FEInterpolation.h"
+#ifdef MOOSE_LIBTORCH_ENABLED
 
-class NEML2CentralDifference : public ExplicitMixedOrder
+#include "ExplicitMixedOrder.h"
+#include "TorchAssembly.h"
+#include "TorchFEInterpolation.h"
+
+class TorchCentralDifference : public ExplicitMixedOrder
 {
 public:
   static InputParameters validParams();
 
-  NEML2CentralDifference(const InputParameters & parameters);
+  TorchCentralDifference(const InputParameters & parameters);
 
   void initialSetup() override;
   void meshChanged() override;
@@ -32,10 +31,11 @@ protected:
   void rebuildBoundaryElementList();
 
   /// The assembly object with cached assembly information
-  NEML2Assembly * _neml2_assembly = nullptr;
+  TorchAssembly * _assembly = nullptr;
 
-  /// The FE interface for getting variable values/gradients interpolated onto the finite element space
-  NEML2FEInterpolation * _fe = nullptr;
+  /// The FE interface for getting variable values/gradients interpolated onto the finite element
+  /// space
+  TorchFEInterpolation * _fe = nullptr;
 
 private:
   /// Empty element vector to help zero out the algebraic range
@@ -48,6 +48,4 @@ private:
   bool _boundary_elems_dirty = true;
 };
 
-#endif // NEML2_ENABLED
-
-#endif // NEML2 v2->v3 migration: DEFERRED
+#endif // MOOSE_LIBTORCH_ENABLED
