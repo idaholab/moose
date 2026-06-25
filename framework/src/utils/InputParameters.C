@@ -589,24 +589,7 @@ void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
   const std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
-
-  // Required parameters
-  std::vector<std::string> required_param_errors;
-  for (const auto & it : *this)
-  {
-    const auto param_name = checkForRename(it.first);
-    if (!isParamValid(param_name) && isParamRequired(param_name))
-    {
-      // check if an old, deprecated name exists for this parameter that may be specified
-      auto oit = _new_to_deprecated_coupled_vars.find(param_name);
-      if (oit != _new_to_deprecated_coupled_vars.end() && isParamValid(oit->second))
-        continue;
-
-      required_param_errors.push_back("missing required parameter '" + parampath + "/" +
-                                      param_name + "'\n\tDoc String: \"" +
-                                      getDocString(param_name) + "\"");
-    }
-  }
+  const auto required_param_errors = missingRequiredParamErrors(parsing_syntax);
 
   if (required_param_errors.size())
     mooseError(MooseUtils::stringJoin(required_param_errors, "\n"));
@@ -643,6 +626,37 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     if (error)
       paramError(param_name, *error);
   }
+}
+
+std::vector<std::string>
+InputParameters::missingRequiredParamErrors(const std::string & parsing_syntax,
+                                            const std::set<std::string> & skip_required_params,
+                                            bool skip_private) const
+{
+  const std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
+
+  // Required parameters
+  std::vector<std::string> required_param_errors;
+  for (const auto & it : *this)
+  {
+    const auto param_name = checkForRename(it.first);
+    if (skip_required_params.count(param_name) || (skip_private && isPrivate(param_name)))
+      continue;
+
+    if (!isParamValid(param_name) && isParamRequired(param_name))
+    {
+      // check if an old, deprecated name exists for this parameter that may be specified
+      auto oit = _new_to_deprecated_coupled_vars.find(param_name);
+      if (oit != _new_to_deprecated_coupled_vars.end() && isParamValid(oit->second))
+        continue;
+
+      required_param_errors.push_back("missing required parameter '" + parampath + "/" +
+                                      param_name + "'\n\tDoc String: \"" +
+                                      getDocString(param_name) + "\"");
+    }
+  }
+
+  return required_param_errors;
 }
 
 std::optional<std::pair<bool, std::string>>
