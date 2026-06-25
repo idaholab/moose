@@ -102,7 +102,7 @@ public:
     mfem::Vector B, X;
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-    solver.SetupLOR(a, ess_tdof_list);
+    solver.SetupLOR(a, ess_bdr);
     auto solver_ptr = dynamic_cast<SolverType *>(&solver.GetSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
@@ -388,6 +388,8 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::ParMesh pmesh = makeMesh();
   mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3, 3));
   mfem::Array<int> ess_tdof_list;
+  mfem::Array<int> ess_bdr_markers(pmesh.bdr_attributes.Max());
+  fespace.GetEssentialTrueDofs(ess_bdr_markers, ess_tdof_list);
   mfem::ParBilinearForm a(&fespace);
   mfem::ParGridFunction x(&fespace);
   mfem::ParLinearForm b(&fespace);
@@ -398,7 +400,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::Vector B, X;
   a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-  solver.SetupLOR(a, ess_tdof_list);
+  solver.SetupLOR(a, ess_bdr_markers);
 
   auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.GetSolver());
   // Test MFEMKernel returns an integrator of the expected type
