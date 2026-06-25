@@ -10,5 +10,6 @@
     requirement = "The system shall be able to execute multiapps."
     # Transfers execute_on don't match the MultiApps
     allow_warnings = true
+    min_parallel = 4
   []
 []
