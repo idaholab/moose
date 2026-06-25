@@ -169,3 +169,54 @@ UserObjectBase::addReporterDependencyHelper(const ReporterName & reporter_name)
 {
   _depend_uo.insert(reporter_name.getObjectName());
 }
+
+void
+UserObjectBase::declareExecutionOrderGroupDependency(const UserObjectBase & other_uo)
+{
+  // dependency checking only applies if the two UOs share an execute_on flag
+  const auto this_execute_on_flags = getParam<ExecFlagEnum>("execute_on").selectedItems();
+  const auto other_execute_on_flags = other_uo.getParam<ExecFlagEnum>("execute_on").selectedItems();
+  std::set<ExecFlagType> shared_execute_on_flags;
+  std::set_intersection(this_execute_on_flags.begin(),
+                        this_execute_on_flags.end(),
+                        other_execute_on_flags.begin(),
+                        other_execute_on_flags.end(),
+                        std::inserter(shared_execute_on_flags, shared_execute_on_flags.begin()));
+  if (shared_execute_on_flags.size() == 0)
+    return;
+
+  const int this_group = getParam<int>("execution_order_group");
+  const int other_group = other_uo.getParam<int>("execution_order_group");
+
+  const auto this_uo_order = getUOExecutionOrderWithinGroup();
+  const auto other_uo_order = other_uo.getUOExecutionOrderWithinGroup();
+
+  // if the other type of UO executes before this one's type in a given execution order group,
+  // then they can be in the same execution order group.
+  if (other_uo_order < this_uo_order)
+  {
+    if (this_group < other_group)
+      mooseError("The 'execution_order_group' of this object (",
+                 this_group,
+                 ") must be greater than or equal to that of the user object '",
+                 other_uo.name(),
+                 "' (",
+                 other_group,
+                 ") due to a declared dependency of this object on '",
+                 other_uo.name(),
+                 "'.");
+  }
+  else
+  {
+    if (this_group <= other_group)
+      mooseError("The 'execution_order_group' of this object (",
+                 this_group,
+                 ") must be greater than that of the user object '",
+                 other_uo.name(),
+                 "' (",
+                 other_group,
+                 ") due to a declared dependency of this object on '",
+                 other_uo.name(),
+                 "'.");
+  }
+}

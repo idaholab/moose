@@ -34,6 +34,8 @@ public:
    */
   GeneralUserObject(const GeneralUserObject & object);
 
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 5; }
+
 private:
   // General user objects are not dispatched
   virtual void computeUserObject() override final {}

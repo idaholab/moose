@@ -37,6 +37,8 @@ public:
 
   ElementUserObject(const InputParameters & parameters);
 
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 0; }
+
 protected:
   MooseMesh & _mesh;
 
