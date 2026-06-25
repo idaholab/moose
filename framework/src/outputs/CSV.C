@@ -35,6 +35,8 @@ CSV::validParams()
       "Align the outputted csv data by padding the numbers with trailing whitespace");
   params.addParam<std::string>("delimiter", ",", "Assign the delimiter (default is ','");
   params.addParam<unsigned int>("precision", 14, "Set the output precision");
+  params.addParam<bool>(
+      "scientific_notation", false, "Output floating point values in scientific notation.");
   params.addParam<bool>("create_final_symlink",
                         false,
                         "Enable/disable the creation of a _FINAL symlink for vector postprocessor "
@@ -44,7 +46,8 @@ CSV::validParams()
       false,
       "Enable/disable the creation of a _LATEST symlink for vector postprocessor data.");
 
-  params.addParamNamesToGroup("sort_columns align delimiter precision", "Table formatting");
+  params.addParamNamesToGroup("sort_columns align delimiter precision scientific_notation",
+                              "Table formatting");
   params.addParamNamesToGroup("create_latest_symlink create_final_symlink", "Symbolic links");
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
@@ -57,6 +60,7 @@ CSV::CSV(const InputParameters & parameters)
   : TableOutput(parameters),
     _align(getParam<bool>("align")),
     _precision(getParam<unsigned int>("precision")),
+    _scientific_notation(getParam<bool>("scientific_notation")),
     _delimiter(getParam<std::string>("delimiter")),
     _write_all_table(false),
     _write_vector_table(false),
@@ -78,6 +82,7 @@ CSV::initialSetup()
 
   // Set the precision
   _all_data_table.setPrecision(_precision);
+  _all_data_table.setUseScientificNotation(_scientific_notation);
 
   if (_recovering)
     _all_data_table.append(true);
@@ -218,6 +223,7 @@ CSV::output()
       const auto & vpp_name = it.first;
       it.second.setDelimiter(_delimiter);
       it.second.setPrecision(_precision);
+      it.second.setUseScientificNotation(_scientific_notation);
       if (_sort_columns)
         it.second.sortColumns();
 
@@ -253,7 +259,11 @@ CSV::output()
         }
 
         if (_time_data)
+        {
+          _vector_postprocessor_time_tables[vpp_name].setUseScientificNotation(
+              _scientific_notation);
           _vector_postprocessor_time_tables[vpp_name].printCSV(fprefix + "_time.csv");
+        }
       }
     }
   }

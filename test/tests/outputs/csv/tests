@@ -85,6 +85,14 @@
     requirement = "The system shall support CSV output aligned columns and a custom delimiter."
     issues = "#3229"
   []
+  [scientific_notation]
+    type = CSVDiff
+    input = 'csv_scientific_notation.i'
+    csvdiff = 'csv_scientific_notation_out.csv'
+
+    requirement = "The system shall support CSV output of floating point values in scientific notation."
+    issues = "#31150"
+  []
   [sort]
     # Tests that csv output can be sorted
     type = CheckFiles
