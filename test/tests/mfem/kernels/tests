@@ -12,7 +12,7 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
-  [MFEMCurlCurlMatrixFree]
+  [MFEMCurlCurlPartial]
     type = XMLDiff
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd

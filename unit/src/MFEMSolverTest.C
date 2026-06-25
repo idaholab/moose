@@ -389,7 +389,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3, 3));
   mfem::Array<int> ess_tdof_list;
   mfem::Array<int> ess_bdr_markers(pmesh.bdr_attributes.Max());
-  fespace.GetEssentialTrueDofs(ess_bdr_markers, ess_tdof_list);
+  ess_bdr_markers = 0;
   mfem::ParBilinearForm a(&fespace);
   mfem::ParGridFunction x(&fespace);
   mfem::ParLinearForm b(&fespace);

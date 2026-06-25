@@ -12,13 +12,11 @@
 #pragma once
 
 #include "MFEMLinearSolverBase.h"
-#include "MFEMFESpace.h"
-#include "MFEMBoundaryRestrictable.h"
 
 namespace Moose::MFEM
 {
 /**
- * Wrapper for mfem::MatrixFreeAMS solver that creates a mfem::MatrixFreeAMS solver from the
+ * Wrapper for mfem::MatrixFreeAMS solver that creates an mfem::MatrixFreeAMS solver from the
  * operator when set.
  */
 class MatrixFreeAMS : public mfem::Solver
@@ -70,11 +68,10 @@ protected:
   void ConstructSolver() override;
 
 private:
-  std::vector<BoundaryName> _ess_bdr_markers;
   mfem::Coefficient & _alpha_coef;
   mfem::Coefficient & _beta_coef;
-  const unsigned int _inner_pi_its;
-  const unsigned int _inner_g_its;
+  const int _inner_pi_its;
+  const int _inner_g_its;
 };
 
 #endif
