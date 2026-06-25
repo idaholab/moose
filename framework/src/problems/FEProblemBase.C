@@ -6015,46 +6015,59 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   else
     execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
 
-  // Order the multiapps
-  DependencyResolver<MooseSharedPointer<MultiApp>> resolver;
+  // Order the multiapps based on their execution group
 
-  // Add all the apps executing on 'exec_on' to the resolution
+  // Gather the execution groups
+  // std::set<unsigned int> execution_groups;
+  // for (const auto & multi_app : multi_apps)
+  //   execution_groups.insert(multi_apps->getParam<unsigned int>("execution_order_group"));
+
+  // Build the ordered multiapp groups
+  std::map<unsigned int, std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
+  // ordered_multi_apps.resize(execution_groups.size());
+
   for (const auto & multi_app : multi_apps)
-    resolver.addItem(multi_app);
-  // Add all the dependencies found from active transfers executing on 'exec_on'
-  for (const auto & sibling_transfer : _between_multi_app_transfers[exec_on].getActiveObjects())
-  {
-    auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(sibling_transfer.get());
-    resolver.addEdge(multiapp_transfer->getFromMultiApp(), multiapp_transfer->getToMultiApp());
-  }
+    ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
+        multi_app);
 
-  std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
-  if (_execute_siblings_transfer_after_source_multiapp_execution && multi_apps.size())
-    try
-    {
-      ordered_multi_apps = resolver.getSortedValuesSets();
-    }
-    catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
-    {
-      mooseInfo("Cyclic dependencies detected in multiapps and siblings transfers"
-                "\nPlease execute one of the transfers between multiapps on a different "
-                "'execute_on' to break the cycle.");
-      ordered_multi_apps.resize(0);
-    }
+  // // Add all the apps executing on 'exec_on' to the resolution
+  // for (const auto & multi_app : multi_apps)
+  //   resolver.addItem(multi_app);
+  // // Add all the dependencies found from active transfers executing on 'exec_on'
+  // for (const auto & sibling_transfer : _between_multi_app_transfers[exec_on].getActiveObjects())
+  // {
+  //   auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(sibling_transfer.get());
+  //   resolver.addEdge(multiapp_transfer->getFromMultiApp(), multiapp_transfer->getToMultiApp());
+  // }
+
+  // std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
+  // if (_execute_siblings_transfer_after_source_multiapp_execution && multi_apps.size())
+  //   try
+  //   {
+  //     ordered_multi_apps = resolver.getSortedValuesSets();
+  //   }
+  //   catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
+  //   {
+  //     mooseInfo("Cyclic dependencies detected in multiapps and siblings transfers"
+  //               "\nPlease execute one of the transfers between multiapps on a different "
+  //               "'execute_on' to break the cycle.");
+  //     ordered_multi_apps.resize(0);
+  //   }
 
   // Follow the original execution order
-  if (!_execute_siblings_transfer_after_source_multiapp_execution || ordered_multi_apps.size() == 0)
-  {
-    ordered_multi_apps.resize(multi_apps.size());
-    for (const auto i : index_range(multi_apps))
-      ordered_multi_apps[i] = {multi_apps[i]};
-  }
+  // if (!_execute_siblings_transfer_after_source_multiapp_execution || ordered_multi_apps.size() ==
+  // 0)
+  // {
+  //   ordered_multi_apps.resize(multi_apps.size());
+  //   for (const auto i : index_range(multi_apps))
+  //     ordered_multi_apps[i] = {multi_apps[i]};
+  // }
 
   // Check that concurrent multiapps will even be used
   if (multi_apps.size() && _num_concurrent_multiapps > 1)
   {
     bool has_concurrent_apps = false;
-    for (const auto & multi_app_group : ordered_multi_apps)
+    for (const auto & [group, multi_app_group] : ordered_multi_apps)
       if (multi_app_group.size() > 1)
         has_concurrent_apps = true;
     if (!has_concurrent_apps)
@@ -6076,10 +6089,13 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     bool success = true;
 
-    for (const auto & multi_app_group : ordered_multi_apps)
+    for (const auto & [group_id, multi_app_group] : ordered_multi_apps)
     {
       // We need the atomic to be able to 'exit' early in case of failures
       std::atomic<bool> group_success{true};
+      if (_verbose_multiapps && ordered_multi_apps.size() > 1)
+        _console << COLOR_CYAN << "\nExecuting MultiApps group " << Moose::stringify(group_id)
+                 << COLOR_DEFAULT << std::endl;
 
       if (multi_app_group.size() > 1)
       {
@@ -6113,17 +6129,25 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
         const auto begin = t * chunk;
         const auto end = std::min(begin + chunk, N);
+        const auto & app_group = multi_app_group;
 
         threads.emplace_back(
-            [begin, end, this, &multi_app_group, &group_success, &auto_advance]() {
-            for (const auto i : make_range(begin, end))
+            [begin, end, this, app_group, &group_success, &auto_advance]()
             {
-              auto & multi_app = multi_app_group[i];
-              bool local = multi_app->solveStep(_dt, _time, auto_advance);
-              if (!local)
-                group_success.store(false, std::memory_order_relaxed);
-            }
-          });
+              for (const auto i : make_range(begin, end))
+              {
+                // as far as libMesh is concerned, we're not
+                // {
+                //   Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+                //   libMesh::Threads::in_threads = false;
+                // }
+
+                auto & multi_app = app_group[i];
+                bool local = multi_app->solveStep(_dt, _time, auto_advance);
+                if (!local)
+                  group_success.store(false, std::memory_order_relaxed);
+              }
+            });
       }
 
       // join all
