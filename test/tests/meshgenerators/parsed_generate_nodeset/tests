@@ -70,6 +70,14 @@
 
   [misc_errors]
     requirement = 'The system shall report an error'
+    [missing_new_nodeset_name]
+      type = RunException
+      input = missing_new_nodeset_name.i
+      expect_err = "missing required parameter 'Mesh/nodeset/new_nodeset_name'.*parameter 'Mesh/nodeset/new_nodeset' is private and cannot be set"
+      detail = 'if a ParsedGenerateNodeset input uses the suppressed inherited nodeset parameter instead of the required replacement parameter.'
+      mesh_mode = 'replicated'
+      issues = '#33156'
+    []
     [bad_expression]
       type = RunException
       input = parsed_generate_nodeset_subdomain_limited.i

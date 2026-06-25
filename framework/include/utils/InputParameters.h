@@ -837,6 +837,14 @@ public:
   void checkParams(const std::string & parsing_syntax);
 
   /**
+   * Return errors for missing required parameters.
+   */
+  std::vector<std::string>
+  missingRequiredParamErrors(const std::string & parsing_syntax,
+                             const std::set<std::string> & skip_required_params = {},
+                             bool skip_private = false) const;
+
+  /**
    * Performs a range check on the parameter (which must have a range check)
    *
    * @param value The parameter value
