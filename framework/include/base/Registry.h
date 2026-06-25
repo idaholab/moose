@@ -233,6 +233,12 @@ public:
   /// register a repository
   static void addRepository(const std::string & repo_name, const std::string & repo_url);
 
+  /// Register a citation (the full BibTeX \p bibtex text, identified by \p key) tied to the app
+  /// \p app_name; emitted by --citations when any object registered to that app is constructed. The
+  /// framework registers its paper under "MooseApp", so apps composed of MooseApp inherit it.
+  static void
+  addAppCitation(const std::string & app_name, const std::string & key, const std::string & bibtex);
+
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> & allObjects()
   {
@@ -272,6 +278,18 @@ public:
    * Returns a map of all registered repositories
    */
   static const std::map<std::string, std::string> & getRepos() { return getRegistry()._repos; }
+
+  /// Returns the registered citations, keyed by app/module name and then by BibTeX key
+  /// (app/module name -> (BibTeX key -> BibTeX entry text))
+  static const std::map<std::string, std::map<std::string, std::string>> & getCitations()
+  {
+    return getRegistry()._app_citations;
+  }
+  /// Returns the citations (BibTeX key -> BibTeX entry text) tied to \p app_name, or an empty map
+  /// if no citations are registered for it. Most apps/modules register none, so the empty result
+  /// is a normal case: callers iterate over all constructed objects' labels and gather whatever
+  /// citations exist.
+  static const std::map<std::string, std::string> & getCitations(const std::string & app_name);
 
   /// returns the name() for a registered class
   template <typename T>
@@ -345,6 +363,8 @@ private:
   /// Repository name -> repository URL; used for mooseDocumentedError
   std::map<std::string, std::string> _repos;
   std::map<std::string, std::string> _type_to_classname;
+  /// App/module name -> (citation key -> BibTeX entry text) for that app
+  std::map<std::string, std::map<std::string, std::string>> _app_citations;
 };
 
 template <typename T>

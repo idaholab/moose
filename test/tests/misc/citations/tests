@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#25412'
+  design = 'MooseApp.md'
+  [framework]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input --citations'
+    expect_out = 'harbour2025moose'
+    requirement = "The system shall report, in BibTeX format, the current framework reference that "
+                  "should be cited when the --citations command-line option is provided."
+  []
+  [petsc]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input --citations'
+    expect_out = 'petsc-efficient'
+    requirement = "The system shall report the PETSc references that should be cited when the "
+                  "--citations command-line option is provided."
+  []
+  [not_requested]
+    type = RunApp
+    input = citations.i
+    cli_args = '--check-input'
+    absent_out = 'harbour2025moose'
+    requirement = "The system shall not report citations when the --citations command-line option "
+                  "is not provided."
+  []
+  [key_sync]
+    type = RunCommand
+    command = 'python3 check_citation_keys.py'
+    requirement = "The system shall ensure that every citation key registered in source code is "
+                  "defined in a documentation BibTeX file."
+  []
+[]

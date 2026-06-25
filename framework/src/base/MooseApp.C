@@ -223,6 +223,14 @@ MooseApp::validParams()
       "--list-constructed-objects",
       "List all moose object type names constructed by the master app factory");
 
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "citations",
+      "--citations [file]",
+      "",
+      "List the papers (in BibTeX format) that should be cited for the framework, PETSc, and the "
+      "modules and objects used in this simulation; optionally write them to [file] instead of the "
+      "console");
+
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
   // This probably shouldn't be global, but the implications of removing this are currently
@@ -1892,6 +1900,34 @@ MooseApp::run()
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
   }
+
+  if (isParamSetByUser("citations"))
+    requestCitations();
+}
+
+void
+MooseApp::requestCitations()
+{
+  // Gather the citations that apply to this run: for every object type actually constructed, the
+  // citations registered for its owning app/module. The framework paper is tied to "MooseApp", so
+  // it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it. The
+  // map is keyed by BibTeX key so a citation shared across apps is resolved only once.
+  std::map<std::string, std::string> citations;
+  for (const auto & objname : _factory.getConstructedObjects())
+  {
+    mooseAssert(Registry::isRegisteredObj(objname),
+                "Constructed object '" + objname + "' is not registered");
+    const auto & app_citations = Registry::getCitations(Registry::objData(objname)._label);
+    citations.insert(app_citations.begin(), app_citations.end());
+  }
+
+  // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
+  // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
+  // used, at PetscFinalize (to the console or, if a file name was given, to that file).
+  for (const auto & citation : citations)
+    Moose::PetscSupport::registerPetscCitation(citation.second);
+
+  Moose::PetscSupport::setSinglePetscOption("-citations", getParam<std::string>("citations"));
 }
 
 bool
@@ -3349,7 +3385,9 @@ MooseApp::isInTree()
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)
+MooseApp::setMFEMDevice(const std::string & device_string,
+                        bool gpu_aware_mpi,
+                        Moose::PassKey<MFEMProblemSolve>)
 {
   const auto string_vec = MooseUtils::split(device_string, ",");
   auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
@@ -3357,6 +3395,7 @@ MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMPr
   {
     _mfem_device = std::make_shared<mfem::Device>(device_string);
     _mfem_devices = std::move(string_set);
+    _mfem_device->SetGPUAwareMPI(mfem::GetEnv("MFEM_GPU_AWARE_MPI") ? true : gpu_aware_mpi);
     _mfem_device->Print(Moose::out);
   }
   else if (!device_string.empty() && string_set != _mfem_devices)

@@ -16,11 +16,11 @@ ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "solution_variables", "Set of solution variables to be checked for relative convergence");
-  params.addParam<std::vector<AuxVariableName>>(
-      "reference_residual_variables",
-      "Set of variables that provide reference residuals for relative convergence check");
+  params.addParam<TagName>(
+      "residual_vector",
+      "The tag name of the custom vector tag to use in place of the residual vector. This can be "
+      "used to provide greater control over which variable is used in absolute and relative "
+      "tolerancing. If not provided, the full residual vector will be used.");
   params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
   params.addParam<Real>("acceptable_multiplier",
                         1.0,
@@ -37,6 +37,12 @@ ReferenceResidualInterface::validParams()
       "converge_on",
       {},
       "If supplied, use only these variables in the individual variable convergence check");
+  params.addParam<bool>("unscale_the_residual",
+                        false,
+                        "If set to true, utilize the variable specific residual scalar to unscale "
+                        "the residual before comparing against the absolute tolerance. This will "
+                        "also print the un-scaled residual to console. This will not change the "
+                        "relative tolerance check except for console output");
   MooseEnum Lnorm("global_L2 local_L2 global_Linf local_Linf", "global_L2");
   params.addParam<MooseEnum>(
       "normalization_type",
@@ -73,10 +79,8 @@ ReferenceResidualInterface::validParams()
 
   params.addParamNamesToGroup("acceptable_iterations acceptable_multiplier",
                               "Acceptable convergence");
-  params.addParamNamesToGroup("reference_vector reference_residual_variables",
-                              "Reference residual");
-  params.addParamNamesToGroup("solution_variables group_variables",
-                              "Variables to check for convergence");
+  params.addParamNamesToGroup("reference_vector", "Reference residual");
+  params.addParamNamesToGroup("group_variables", "Variables to check for convergence");
 
   return params;
 }

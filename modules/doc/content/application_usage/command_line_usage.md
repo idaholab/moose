@@ -15,6 +15,7 @@ To print out the available command-line options use `--help`.  An example from M
 
 Options:
   --app <type>                        Specify the application type to run (case-sensitive)
+  --citations [file]                  List the papers (BibTeX) to cite for the framework, PETSc, and the modules/objects used; optionally write them to [file]
   --copy-inputs <dir>                 Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>
   --disallow-test-objects             Don't register test objects and syntax
   -v --version                        Print application version
@@ -118,6 +119,32 @@ the left.
 ```
 ./yourapp-opt --dump SomeKernel
 ```
+
+### `--citations`
+
+`--citations` lists, in BibTeX format, the papers that should be cited for a given simulation. Each
+citation is tied to an app: the current MOOSE framework paper is tied to `MooseApp`, and any module
+that registers a citation is added only when one of its objects is actually used in the run (so an
+app composed of MooseApp and other apps inherits their citations as they are used):
+
+```
+./yourapp-opt -i input.i --citations
+```
+
+This is intended to make crediting the MOOSE ecosystem easier and more accurate: rather than citing
+a single framework paper for everything, users are pointed to the specific works behind the
+capabilities they used. The citations are emitted through PETSc, so PETSc and any of its
+sub-packages (e.g. SLEPc) that were used are credited as well. An optional file name writes the
+entries to a file (e.g. for import into a reference manager) instead of the console:
+
+```
+./yourapp-opt -i input.i --citations refs.bib
+```
+
+It can be combined with `--check-input` to report the citations without solving. The file name is
+optional, so when one is given it must immediately follow `--citations` (otherwise the next token on
+the command line is consumed as the file name). Module/app developers register their papers per
+module/app with `Registry::addAppCitation(app_name, key, bibtex)`.
 
 Would show you documentation for objects matching `SomeKernel`.
 

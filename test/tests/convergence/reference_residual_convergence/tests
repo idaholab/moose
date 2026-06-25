@@ -1,7 +1,6 @@
 [Tests]
   issues = '#9151 #24128'
   design = 'ReferenceResidualConvergence.md'
-
   [base]
     type = Exodiff
     input = 'reference_residual.i'
@@ -34,6 +33,13 @@
     cli_args = 'Convergence/conv/converge_on="u"'
     requirement = 'The system shall have the ability to base system convergence on the convergence '
                   'of a subset of variables, using a convergence object.'
+  []
+  [custom_residual]
+    type = Exodiff
+    input = 'custom_residual.i'
+    exodiff = 'custom_residual_out.e'
+    requirement = 'The system shall have the ability to base system convergence on the convergence '
+                  'of a custom vector tag, using a convergence object.'
   []
   [converge_on_group_error]
     type = RunException
@@ -124,6 +130,20 @@
     csvdiff = 'zero_rel_tolerance_ref_out.csv'
     cli_args = 'Problem/extra_tag_vectors=absref Convergence/conv/reference_vector=absref Convergence/conv/zero_reference_residual_treatment=relative_tolerance Convergence/conv/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
     requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance, using a convergence object.'
+  []
+
+  [formatting]
+    type = RunApp
+    input = 'formatting.i'
+    expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
+    requirement = 'The system shall be able to use a reference residual to converge to with two separate convergence options, and print to screen the relevant parameters for each convergence object.'
+  []
+  [unscale]
+    type = RunApp
+    input = 'formatting.i'
+    cli_args = 'scaling=true'
+    expect_out = '\(a, b, variable_f\)-> res: 5\.00e\+06  ref: 6\.12e\+06  res/ref: 8\.16e\-01'
+    requirement = 'The system shall be able to use a reference residual to converge to and reverse variable scaling to output the actual residual, while allowing variable scaling.'
   []
 
   [error]

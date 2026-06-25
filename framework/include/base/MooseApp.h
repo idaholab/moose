@@ -1098,7 +1098,9 @@ public:
    * Create/configure the MFEM device with the provided \p device_string. More than one device can
    * be configured. If supplying multiple devices, they should be comma separated
    */
-  void setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>);
+  void setMFEMDevice(const std::string & device_string,
+                     bool gpu_aware_mpi,
+                     Moose::PassKey<MFEMProblemSolve>);
 
   /**
    * Get the MFEM device object
@@ -1599,6 +1601,14 @@ private:
    * @return a Boolean value used to indicate whether the application should exit early
    */
   bool runInputs();
+
+  /**
+   * Handles the --citations command-line option: registers with PETSc the BibTeX entries that
+   * should be cited for the framework and the modules/objects used in this simulation, and enables
+   * PETSc's -citations option. PETSc prints them (together with its own and its sub-packages'
+   * citations) at PetscFinalize, to the console or to a file if one was given.
+   */
+  void requestCitations();
 
   /**
    * Internal method for adding a capability.

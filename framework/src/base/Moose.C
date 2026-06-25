@@ -71,6 +71,25 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerActions(s, af, {"MooseApp"});
   registerAppDataFilePath("moose");
   registerRepository("moose", "github.com/idaholab/moose");
+
+  // Citation emitted by the --citations command-line option: the current framework paper is tied to
+  // "MooseApp" (so it is cited whenever a MooseApp object is used, and apps composed of MooseApp
+  // inherit it), and modules register their own app citations (via Registry::addAppCitation) which
+  // are cited only when one of their objects is actually used. PETSc and its sub-packages register
+  // their own citations, which --citations emits through PETSc.
+  Registry::addAppCitation("MooseApp",
+                           "harbour2025moose",
+                           R"(@article{harbour2025moose,
+  title = {4.0 {MOOSE}: Enabling massively parallel Multiphysics simulation},
+  journal = {{SoftwareX}},
+  volume = {31},
+  pages = {102264},
+  year = {2025},
+  issn = {2352-7110},
+  doi = {https://doi.org/10.1016/j.softx.2025.102264},
+  url = {https://www.sciencedirect.com/science/article/pii/S2352711025002316},
+  author = {Logan Harbour and Guillaume Giudicelli and Alexander D. Lindsay and Peter German and Joshua Hansel and Casey Icenhour and Mengnan Li and Jason M. Miller and Roy H. Stogner and Patrick Behne and Daniel Yankura and Zachary M. Prince and Corey DeChant and Daniel Schwen and Benjamin W. Spencer and Mauricio Tano and Namjae Choi and Yaqi Wang and Max Nezdyur and Yinbin Miao and Tianchen Hu and Shikhar Kumar and Christopher Matthews and Brandon Langley and Nuno Nobre and Alexander Blair and Chris MacMackin and Henrique Bergallo Rocha and Edward Palmer and Jesse Carter and J{\"o}rg Meier and Andrew E. Slaughter and David Andr{\v{s}} and Robert W. Carlsen and Fande Kong and Derek R. Gaston and Cody J. Permann},
+})");
 }
 
 void
