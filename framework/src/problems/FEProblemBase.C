@@ -141,6 +141,7 @@
 
 // C++
 #include <cstring> // for "Jacobian" exception test
+#include <thread>
 
 using namespace libMesh;
 
@@ -6057,9 +6058,11 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       if (multi_app_group.size() > 1)
         has_concurrent_apps = true;
     if (!has_concurrent_apps)
-      paramWarning("num_concurrent_multiapps",
-                   "Due to application dependencies or differences in execution schedules, "
-                   "concurrent multiapps are not actually used");
+      paramInfo(
+          "num_concurrent_multiapps",
+          "Due to the specified multiapp execution groups, or differences in execution schedules, "
+          "concurrent multiapps are not actually used on " +
+              Moose::stringify(exec_on));
   }
 
   // Execute MultiApps
@@ -6090,23 +6093,42 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
         }
 
         // Avoid race conditions on output
-        // if (_num_concurrent_multiapps > 1)
-        //   for (const auto & multi_app : multi_app_group)
-        //     for (const auto app_i : make_range(multi_app->numLocalApps()))
-        //       multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
+        if (_num_concurrent_multiapps > 1)
+          for (const auto & multi_app : multi_app_group)
+            for (const auto app_i : make_range(multi_app->numLocalApps()))
+              multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
       }
 
-#pragma omp parallel for schedule(dynamic) num_threads(_num_concurrent_multiapps)
-      for (const auto & multi_app : multi_app_group)
+      unsigned num_threads = _num_concurrent_multiapps;
+      std::vector<std::thread> threads;
+
+      const auto N = multi_app_group.size();
+      const auto chunk = (multi_app_group.size() + num_threads - 1) / num_threads;
+
+      for (const auto t : make_range(num_threads))
       {
         // Don't solve step if a single failure occurred
         if (!group_success.load(std::memory_order_relaxed))
           continue;
 
-        bool local = multi_app->solveStep(_dt, _time, auto_advance);
-        if (!local)
-          group_success.store(false, std::memory_order_relaxed);
+        const auto begin = t * chunk;
+        const auto end = std::min(begin + chunk, N);
+
+        threads.emplace_back(
+            [begin, end, this, &multi_app_group, &group_success, &auto_advance]() {
+            for (const auto i : make_range(begin, end))
+            {
+              auto & multi_app = multi_app_group[i];
+              bool local = multi_app->solveStep(_dt, _time, auto_advance);
+              if (!local)
+                group_success.store(false, std::memory_order_relaxed);
+            }
+          });
       }
+
+      // join all
+      for (auto & th : threads)
+        th.join();
 
       // No need to solve the other groups if this group failed
       if (!group_success)
@@ -6116,11 +6138,11 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       }
 
       // Output outside of threaded regions
-      // if (_num_concurrent_multiapps > 1)
-      //   for (const auto & multi_app : multi_app_group)
-      //     for (const auto app_i : make_range(multi_app->numLocalApps()))
-      //       multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
-      //           .outputStep(EXEC_TIMESTEP_END);
+      if (_num_concurrent_multiapps > 1)
+        for (const auto & multi_app : multi_app_group)
+          for (const auto app_i : make_range(multi_app->numLocalApps()))
+            multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
+                .outputStep(EXEC_TIMESTEP_END);
 
       // Execute Transfers _between_ Multiapps after each app executes
       if (_execute_siblings_transfer_after_source_multiapp_execution)
