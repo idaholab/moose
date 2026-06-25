@@ -53,7 +53,6 @@
       type = 'RunApp'
       input = 'generate_sidesets_bounding_box.i'
       cli_args = '--mesh-only Mesh/parallel_type=distributed Mesh/createNewSidesetOne/boundary_new=box_left'
-      mesh_mode = 'distributed'
       min_parallel = 2
       recover = false
 
@@ -63,7 +62,6 @@
       type = 'RunApp'
       input = 'distributed_included_neighbors.i'
       cli_args = '--mesh-only Mesh/parallel_type=distributed'
-      mesh_mode = 'distributed'
       min_parallel = 2
       recover = false
 
