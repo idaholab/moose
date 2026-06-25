@@ -36,6 +36,8 @@ ViewFactorObjectSurfaceRadiation::initialSetup()
   // After resolving https://github.com/idaholab/moose/issues/7879, this can made into
   // a reference and all of this can be done in the constructor
   _view_factor_uo = &getUserObject<ViewFactorBase>("view_factor_object_name");
+
+  declareExecutionOrderGroupDependency(*_view_factor_uo);
 }
 
 std::vector<std::vector<Real>>
