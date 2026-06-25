@@ -59,7 +59,7 @@ protected:
   MooseEnum _partitioner_name;
 
   /// The sideset that will be subdivided
-  subdomain_id_type _sideset;
+  BoundaryID _sideset;
 
   /// number of elements of the boundary mesh
   dof_id_type _n_boundary_mesh_elems;
