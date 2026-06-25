@@ -81,8 +81,7 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
-                                  const bool primary) override final;
+  virtual void transformVariables(const bool primary) override final;
 
   /// Vector tag id for the previous solution variable, as a main app
   TagID _old_tag_id = Moose::INVALID_TAG_ID;

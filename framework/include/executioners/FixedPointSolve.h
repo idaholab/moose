@@ -126,6 +126,16 @@ public:
   //   _systems_to_copy_previous_solutions_for.insert(sys);
   // }
 
+  /**
+   * Use the fixed point algorithm to transform the variables.
+   * If this routine is not called, the next value of the variables will just be from
+   * the unrelaxed Picard fixed point algorithm.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void transformVariables(const bool primary) = 0;
+
 protected:
   /**
    * Returns true if there is relaxation.
@@ -133,6 +143,15 @@ protected:
    * @param primary True if this is the parent app; false if this is a child app.
    */
   bool performingRelaxation(const bool primary) const;
+
+  /**
+   * Returns true if there is relaxation.
+   *
+   * @param primary True if this is the parent app; false if this is a child app.
+   */
+  virtual void
+  updateVariableDoFsForTransform(const std::vector<std::string> & transformed_var_names,
+                                 const bool primary) = 0;
 
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -171,11 +190,12 @@ protected:
    * state.
    * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
    */
-  virtual bool solveStep(const std::set<dof_id_type> & transformed_dofs);
+  virtual bool solveStep();
 
   /// Save both the variable and postprocessor values
   virtual void saveAllValues(const bool primary) = 0;
 
+  virtual void copyPreviousFixedPointSolutions() = 0;
   /**
    * Use the fixed point algorithm to transform the postprocessors.
    * If this routine is not called, the next value of the postprocessors will just be from
