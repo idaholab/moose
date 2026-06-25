@@ -6037,32 +6037,13 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   else
     execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
 
-  // Order the multiapps
-  DependencyResolver<MooseSharedPointer<MultiApp>> resolver;
+  // Order the multiapps based on their execution group
+  // Build the ordered multiapp groups
+  std::map<unsigned int, std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
 
-  // Add all the apps executing on 'exec_on' to the resolution
   for (const auto & multi_app : multi_apps)
-    resolver.addItem(multi_app);
-  // Add all the dependencies found from active transfers executing on 'exec_on'
-  for (const auto & sibling_transfer : _between_multi_app_transfers[exec_on].getActiveObjects())
-  {
-    auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(sibling_transfer.get());
-    resolver.addEdge(multiapp_transfer->getFromMultiApp(), multiapp_transfer->getToMultiApp());
-  }
-
-  std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
-  if (_execute_siblings_transfer_after_source_multiapp_execution && multi_apps.size())
-    try
-    {
-      ordered_multi_apps = resolver.getSortedValuesSets();
-    }
-    catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
-    {
-      mooseInfo("Cyclic dependencies detected in multiapps and siblings transfers"
-                "\nPlease execute one of the transfers between multiapps on a different "
-                "'execute_on' to break the cycle.");
-      ordered_multi_apps.resize(0);
-    }
+    ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
+        multi_app);
 
   // Execute MultiApps
   if (multi_apps.size())
