@@ -28,12 +28,10 @@ public:
    * If this routine is not called, the next value of the variables will just be from
    * the unrelaxed Picard fixed point algorithm.
    *
-   * @param transformed_dofs The dofs that will be affected by the algorithm
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
-                                  const bool primary) = 0;
+  virtual void transformVariables(const bool primary) = 0;
 
 protected:
   /**
@@ -43,6 +41,10 @@ protected:
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
   virtual void saveVariableValues(const bool primary) = 0;
+
+  virtual void
+  updateVariableDoFsForTransform(const std::vector<std::string> & transformed_var_names,
+                                 const bool primary) override;
 
   /**
    * Saves the current values of the postprocessors, and update the old(er) vectors.
@@ -55,9 +57,13 @@ protected:
   /// Save both the variable and postprocessor values
   virtual void saveAllValues(const bool primary);
 
+  virtual void copyPreviousFixedPointSolutions();
   /// Find the system holding the variables to be transformed (accelerated or relaxed)
   /// @param primary whether we are looking at transformations as the parent or child app
   void findTransformedSystem(const bool primary);
+
+  std::set<dof_id_type> _transformed_dofs;
+  std::set<dof_id_type> _secondary_transformed_dofs;
 
   /// System holding the transformed variables
   SystemBase * _transformed_sys;

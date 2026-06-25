@@ -146,7 +146,7 @@ PicardSolve::transformPostprocessors(const bool primary)
 }
 
 void
-PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, const bool primary)
+PicardSolve::transformVariables(const bool primary)
 {
   Real relaxation_factor;
   TagID old_tag_id;
@@ -164,7 +164,7 @@ PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, 
   NumericVector<Number> & solution = _transformed_sys->solution();
   NumericVector<Number> & transformed_old = _transformed_sys->getVector(old_tag_id);
 
-  for (const auto & dof : transformed_dofs)
+  for (const auto & dof : (primary ? _transformed_dofs : _secondary_transformed_dofs))
     solution.set(dof,
                  (transformed_old(dof) * (1.0 - relaxation_factor)) +
                      (solution(dof) * relaxation_factor));

@@ -45,6 +45,37 @@ LibMeshFixedPointSolve::saveAllValues(const bool primary)
 }
 
 void
+LibMeshFixedPointSolve::copyPreviousFixedPointSolutions()
+{
+  // Save the previous fixed point iteration solution and aux variables if requested
+  for (auto * sys : _systems_to_copy_previous_solutions_for)
+    sys->copyPreviousFixedPointSolutions();
+}
+
+void
+LibMeshFixedPointSolve::updateVariableDoFsForTransform(
+    const std::vector<std::string> & transformed_var_names, const bool primary)
+{
+  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) &&
+      transformed_var_names.size() > 0)
+  {
+    // Snag all of the local dof indices for all of these variables
+    AllLocalDofIndicesThread aldit(_problem, transformed_var_names);
+    libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    if (primary)
+    {
+      _transformed_dofs = aldit.getDofIndices();
+    }
+    else
+    {
+      _secondary_transformed_dofs = aldit.getDofIndices();
+    }
+  }
+}
+
+void
 LibMeshFixedPointSolve::findTransformedSystem(const bool primary)
 {
   // Find the system for the transformed variables. They must all belong to the same system
