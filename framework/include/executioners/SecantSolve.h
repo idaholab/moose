@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "FixedPointSolve.h"
+#include "LibMeshFixedPointSolve.h"
 #include "NonlinearSystemBase.h"
 
-class SecantSolve : public FixedPointSolve
+class SecantSolve : public LibMeshFixedPointSolve
 {
 public:
   SecantSolve(Executioner & ex);

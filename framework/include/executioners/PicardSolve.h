@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FixedPointSolve.h"
+#include "LibMeshFixedPointSolve.h"
 #include "NonlinearSystemBase.h"
 
 // System includes
 #include <string>
 
-class PicardSolve : public FixedPointSolve
+class PicardSolve : public LibMeshFixedPointSolve
 {
 public:
   PicardSolve(Executioner & ex);
