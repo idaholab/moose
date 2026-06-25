@@ -188,8 +188,12 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
           msg << "id exists";
         else
           msg << "ids exist";
-        msg << " as " << (_bnd_nodal ? "side sets" : "node sets") << " but "
-            << (_bnd_nodal ? "node sets" : "side sets") << " are required:";
+        if (other_boundary_ids.size() == 1)
+          msg << " as " << (_bnd_nodal ? "a side set" : "a node set")
+              << " but is being requested as " << (_bnd_nodal ? "a node set" : "a side set") << ":";
+        else
+          msg << " as " << (_bnd_nodal ? "side sets" : "node sets")
+              << " but are being requested as " << (_bnd_nodal ? "node sets" : "side sets") << ":";
 
         sep = " ";
         for (const auto id : other_boundary_ids)
@@ -197,6 +201,10 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
           msg << sep << id;
           sep = ", ";
         }
+
+        if (!_bnd_nodal)
+          msg << "\n\nTry setting Mesh/construct_side_list_from_node_list=true if you want side "
+                 "sets constructed from node sets.";
       }
 
       _moose_object.paramError("boundary", msg.str());

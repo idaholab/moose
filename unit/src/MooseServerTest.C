@@ -952,13 +952,6 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 
   std::string diagnostics_expect = R"INPUT(
 line:18 column:4 - BCs/all/boundary: the following side sets (ids) do not exist on the mesh: top (2), bottom (3)
-
-MOOSE distinguishes between "node sets" and "side sets" depending on whether
-you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding
-to your side sets are constructed for you by default.
-
-Try setting "Mesh/construct_side_list_from_node_list=true" if you see this error.
-Note: If you are running with adaptivity you should prefer using side sets.
 )INPUT";
 
   EXPECT_EQ(diagnostics_expect, "\n" + diagnostics_actual.str());
