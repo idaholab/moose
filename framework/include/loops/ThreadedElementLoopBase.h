@@ -230,7 +230,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
     try
     {
       ParallelUniqueId puid;
-      _tid = bypass_threading ? 0 : puid.id;
+      _tid = 0; // bypass_threading ? 0 : puid.id;
 
       pre();
       printGeneralExecutionInformation();
