@@ -763,6 +763,36 @@ class testContentPagination(MooseDocsTestCase):
         self.assertHTMLString(res(1)(1)(1)(0), content="arrow_forward")
 
 
+class TestUnsupportedLatexContentCommands(MooseDocsTestCase):
+    EXTENSIONS = [
+        extensions.core,
+        extensions.command,
+        extensions.heading,
+        extensions.content,
+    ]
+
+    def testOutline(self):
+        with self.assertLogs("MooseDocs.extensions.content", level=logging.WARNING) as cm:
+            _, res = self.execute(
+                "!content outline location=extensions", renderer=base.LatexRenderer()
+            )
+        self.assertSize(res, 0)
+        self.assertIn(
+            "The Content Extension's 'outline' command is not supported for LaTeX documents.",
+            cm.output[0],
+        )
+
+    def testPagination(self):
+        text = "!content pagination previous=previous.md next=next.md"
+        with self.assertLogs("MooseDocs.extensions.content", level=logging.WARNING) as cm:
+            _, res = self.execute(text, renderer=base.LatexRenderer())
+        self.assertSize(res, 0)
+        self.assertIn(
+            "The Content Extension's 'pagination' command is not supported for LaTeX documents.",
+            cm.output[0],
+        )
+
+
 class TestMissingExternalContentList(MooseDocsTestCase):
     EXTENSIONS = [
         extensions.core,
