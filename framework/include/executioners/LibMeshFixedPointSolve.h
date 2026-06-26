@@ -41,7 +41,7 @@ protected:
   std::set<dof_id_type> _secondary_transformed_dofs;
 
   /// System holding the transformed variables
-  SystemBase * _transformed_sys;
+  SystemBase * _transformed_sys{nullptr};
   /// All the systems that should save their previous solutions
   std::set<SystemBase *> _systems_to_copy_previous_solutions_for;
 };
