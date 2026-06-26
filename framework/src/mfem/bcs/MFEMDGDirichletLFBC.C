@@ -27,12 +27,7 @@ MFEMDGDirichletLFBC::validParams()
 
 MFEMDGDirichletLFBC::MFEMDGDirichletLFBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _fe_order(getMFEMProblem()
-                  .getProblemData()
-                  .gridfunctions.Get(_test_var_name)
-                  ->ParFESpace()
-                  ->FEColl()
-                  ->GetOrder()),
+    _fe_order(getMFEMProblem().getGridFunction(_test_var_name)->ParFESpace()->FEColl()->GetOrder()),
     _one(1.0),
     _zero(0.0),
     _sigma(getParam<mfem::real_t>("sigma")),
