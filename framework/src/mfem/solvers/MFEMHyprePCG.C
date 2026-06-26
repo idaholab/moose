@@ -50,20 +50,22 @@ MFEMHyprePCG::ConstructSolver()
 }
 
 void
-MFEMHyprePCG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHyprePCG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
+  mfem::Array<int> ess_tdofs;
+  a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
   if (_preconditioner)
   {
-    _preconditioner->SetupLOR(a, tdofs);
+    _preconditioner->SetupLOR(a, ess_tdofs);
     SetPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
   }
   else if (_lor)
   {
     CheckSpectralEquivalence(a);
-    mfem::ParLORDiscretization lor_disc(a, tdofs);
+    mfem::ParLORDiscretization lor_disc(a, ess_tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, getMFEMProblem().getComm());
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));

@@ -117,12 +117,21 @@
     type = MFEMHypreAMS
     fespace = HCurlFESpace
   []
+  [matrix_free_ams]
+    type = MFEMMatrixFreeAMS
+  []
 []
 
 [Solvers]
-  [main]
+  active = gmres
+  [gmres]
     type = MFEMHypreGMRES
     preconditioner = ams
+    l_tol = 1e-12
+  []
+  [cg]
+    type = MFEMCGSolver
+    preconditioner = matrix_free_ams
     l_tol = 1e-12
   []
 []

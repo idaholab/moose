@@ -50,20 +50,22 @@ MFEMGMRESSolver::ConstructSolver()
 }
 
 void
-MFEMGMRESSolver::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMGMRESSolver::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
+  mfem::Array<int> ess_tdofs;
+  a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
   if (_preconditioner)
   {
-    _preconditioner->SetupLOR(a, tdofs);
+    _preconditioner->SetupLOR(a, ess_tdofs);
     SetPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)
   {
     CheckSpectralEquivalence(a);
-    auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, ess_tdofs);
     lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
