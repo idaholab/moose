@@ -23,41 +23,16 @@ public:
 
   virtual void initialSetup() override;
 
-  /**
-   * Use the fixed point algorithm to transform the variables.
-   * If this routine is not called, the next value of the variables will just be from
-   * the unrelaxed Picard fixed point algorithm.
-   *
-   * @param primary Whether this routine is to save the variables for the primary transformed
-   *                quantities (as main app) or the secondary ones (as a subapp)
-   */
-  virtual void transformVariables(const bool primary) = 0;
-
 protected:
-  /**
-   * Saves the current values of the variables, and update the old(er) vectors.
-   *
-   * @param primary Whether this routine is to save the variables for the primary transformed
-   *                quantities (as main app) or the secondary ones (as a subapp)
-   */
-  virtual void saveVariableValues(const bool primary) = 0;
-
   virtual void
   updateVariableDoFsForTransform(const std::vector<std::string> & transformed_var_names,
                                  const bool primary) override;
-
-  /**
-   * Saves the current values of the postprocessors, and update the old(er) vectors.
-   *
-   * @param primary Whether this routine is to save the variables for the primary transformed
-   *                quantities (as main app) or the secondary ones (as a subapp)
-   */
-  virtual void savePostprocessorValues(const bool primary) = 0;
 
   /// Save both the variable and postprocessor values
   virtual void saveAllValues(const bool primary);
 
   virtual void copyPreviousFixedPointSolutions();
+
   /// Find the system holding the variables to be transformed (accelerated or relaxed)
   /// @param primary whether we are looking at transformations as the parent or child app
   void findTransformedSystem(const bool primary);
