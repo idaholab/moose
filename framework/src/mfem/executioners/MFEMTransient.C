@@ -85,13 +85,6 @@ MFEMTransient::takeStep(Real input_dt)
   _time -= _dt;
 
   _problem.onTimestepBegin();
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
-  {
-    _last_solve_converged = false;
-    return;
-  }
-  _problem.execute(EXEC_TIMESTEP_BEGIN);
 
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to

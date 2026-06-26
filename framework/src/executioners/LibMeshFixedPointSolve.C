@@ -56,7 +56,9 @@ void
 LibMeshFixedPointSolve::updateVariableDoFsForTransform(
     const std::vector<std::string> & transformed_var_names, const bool primary)
 {
-  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) &&
+  const Real relax_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+
+  if ((relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) &&
       transformed_var_names.size() > 0)
   {
     // Snag all of the local dof indices for all of these variables
