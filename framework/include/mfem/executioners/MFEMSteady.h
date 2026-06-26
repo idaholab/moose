@@ -16,6 +16,7 @@
 #include "MFEMProblemSolve.h"
 #include "EquationSystemProblemOperator.h"
 #include "ComplexEquationSystemProblemOperator.h"
+#include "MFEMFixedPointSolve.h"
 
 class MFEMSteady : public Executioner, public Moose::MFEM::ProblemOperatorInterface
 {

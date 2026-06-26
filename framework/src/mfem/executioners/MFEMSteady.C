@@ -38,6 +38,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
+  _fixed_point_solve->setInnerSolve(_mfem_problem_solve);
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
