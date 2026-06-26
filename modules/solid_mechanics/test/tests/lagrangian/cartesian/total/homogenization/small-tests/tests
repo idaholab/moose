@@ -53,6 +53,19 @@
     requirement = "Homogenization with strain constraints hits the targets in 3D"
     capabilities = 'method!=dbg'
   []
+  [3d-strain-no-offdiag]
+    type = CSVDiff
+    input = '3d.i'
+    csvdiff = '3d-strain_out.csv'
+    prereq = '3d-strain'
+    cli_args = "Kernels/sdx/off_diagonal_jacobian=false Kernels/sdy/off_diagonal_jacobian=false "
+               "Kernels/sdz/off_diagonal_jacobian=false Outputs/file_base=3d-strain_out "
+               "constraint_types='strain none none strain strain none strain strain strain' "
+               "targets='strain11 strain12 strain22 strain13 strain23 strain33'"
+    requirement = "Homogenization with strain constraints in 3D should work without off-diagonal "
+                  "Jacobians from the constraints"
+    capabilities = 'method!=dbg'
+  []
   [3d-stress]
     type = CSVDiff
     input = '3d.i'

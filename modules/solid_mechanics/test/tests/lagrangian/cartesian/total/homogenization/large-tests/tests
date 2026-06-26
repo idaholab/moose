@@ -50,6 +50,20 @@
                   "kinematics"
     capabilities = 'method!=dbg'
   []
+  [3d-strain-no-offdiag]
+    type = CSVDiff
+    input = '3d.i'
+    prereq = '3d-strain'
+    csvdiff = '3d-strain_out.csv'
+    cli_args = "Kernels/sdx/off_diagonal_jacobian=false Kernels/sdy/off_diagonal_jacobian=false "
+               "Kernels/sdz/off_diagonal_jacobian=false Outputs/file_base=3d-strain_out "
+               "constraint_types='strain strain strain strain strain strain strain strain strain' "
+               "targets='strain11 strain21 strain31 strain12 strain22 strain32 strain13 strain23 "
+               "strain33'"
+    requirement = "Homogenization with strain constraints in 3D using large kinematics should work "
+                  "without off-diagonal Jacobians from the constraints"
+    capabilities = 'method!=dbg'
+  []
   [3d-stress]
     type = CSVDiff
     input = '3d.i'
