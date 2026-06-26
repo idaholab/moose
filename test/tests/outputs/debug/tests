@@ -382,5 +382,7 @@
                  "Blocks 'Box1' \(id 1\) \([0-9]+ items?\)\: [\s\S]*GenericConstantMaterial/restricted[\s\S]*"
                  "Boundary-Restriction Groups \([0-9]+ groups\)\: showing objects with matching boundary restrictions[\s\S]*"
                  "Boundaries 'top' \(id [0-9]+\) \([0-9]+ items?\)\: [\s\S]*GenericConstantMaterial/boundary"
+    absent_out = "Boundary-Restriction Groups \([0-9]+ groups\)\: showing objects with matching boundary restrictions[\s\S]*"
+                 "GenericConstantMaterial/restricted"
   []
 []

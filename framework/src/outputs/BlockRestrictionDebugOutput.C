@@ -480,11 +480,8 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
       }
 
   for (const auto & material : _problem_ptr->getMaterialWarehouse().getObjects(/*tid = */ 0))
-  {
-    const auto & ids =
-        material->boundaryRestricted() ? material->boundaryIDs() : material->meshBoundaryIDs();
-    groups[ids].insert(objectRestrictionName(*material));
-  }
+    if (material->boundaryRestricted())
+      groups[material->boundaryIDs()].insert(objectRestrictionName(*material));
 
   std::stringstream out;
   for (const auto & group : groups)
