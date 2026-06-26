@@ -16,7 +16,7 @@ system package manager to remove or suppress it.
 Having two completely different MPI wrappers being made available simultaneously is prone to
 failure.
 
-Download MPICH [!package!mpich]
+Download MPICH [!package!mpich_rocky8_apptainer]
 
 !package! code
 curl -L -O http://www.mpich.org/static/downloads/__MPICH__/mpich-__MPICH__.tar.gz
