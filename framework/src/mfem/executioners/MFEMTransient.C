@@ -107,10 +107,6 @@ MFEMTransient::takeStep(Real input_dt)
     return;
   }
 
-  _problem.execute(EXEC_TIMESTEP_END);
-  _problem.execTransfers(EXEC_TIMESTEP_END);
-  _problem.execMultiApps(EXEC_TIMESTEP_END, true);
-
   if (lastSolveConverged())
     _time_stepper->acceptStep();
   else
