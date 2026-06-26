@@ -117,9 +117,9 @@ SetupMeshAction::validParams()
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
   params.addParamNamesToGroup("use_split split_file", "Split Mesh");
 
-  // The default FileMesh type exists to support legacy [Mesh] file syntax, but this action can
-  // replace it with MeshGeneratorMesh after mesh generator actions are known.
-  params.set<std::vector<std::string>>("_object_params_set_by_action") = {"file"};
+  // The [Mesh] action may replace the requested mesh type with MeshGeneratorMesh, or reject it as
+  // incompatible with mesh generators, after mesh generator actions are known.
+  params.addPrivateParam<bool>("_defer_object_required_param_check", true);
 
   return params;
 }

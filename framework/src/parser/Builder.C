@@ -272,7 +272,10 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
                                       object_params_set_by_action.end());
         }
 
-        extractParams(n, object_params, skip_required_params);
+        const bool skip_required_param_errors =
+            params.have_parameter<bool>("_defer_object_required_param_check") &&
+            params.get<bool>("_defer_object_required_param_check");
+        extractParams(n, object_params, skip_required_params, skip_required_param_errors);
         object_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
@@ -672,7 +675,8 @@ Builder::buildFullTree(const std::string & search_string)
 void
 Builder::extractParams(const hit::Node * const section_node,
                        InputParameters & p,
-                       const std::set<std::string> & skip_required_params)
+                       const std::set<std::string> & skip_required_params,
+                       bool skip_required_param_errors)
 {
   if (section_node)
     mooseAssert(section_node->type() == hit::NodeType::Section, "Node type should be a section");
@@ -837,16 +841,19 @@ Builder::extractParams(const hit::Node * const section_node,
     }
   }
 
-  auto missing_required_skip_params = skip_required_params;
-  missing_required_skip_params.insert(params_with_errors.begin(), params_with_errors.end());
-
-  for (const auto & error : p.missingRequiredParamErrors(
-           section_node ? section_node->fullpath() : "", missing_required_skip_params, true))
+  if (!skip_required_param_errors)
   {
-    if (section_node)
-      _errors.emplace_back(error, section_node);
-    else
-      _errors.emplace_back(error);
+    auto missing_required_skip_params = skip_required_params;
+    missing_required_skip_params.insert(params_with_errors.begin(), params_with_errors.end());
+
+    for (const auto & error : p.missingRequiredParamErrors(
+             section_node ? section_node->fullpath() : "", missing_required_skip_params, true))
+    {
+      if (section_node)
+        _errors.emplace_back(error, section_node);
+      else
+        _errors.emplace_back(error);
+    }
   }
 
   _errors.insert(_errors.end(), param_errors.begin(), param_errors.end());
