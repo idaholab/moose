@@ -22,9 +22,8 @@ InputParameters
 MFEMSteady::validParams()
 {
   InputParameters params = MFEMProblemSolve::validParams();
-  params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
-  params.addParam<Real>("time", 0.0, "System time");
+  params += SteadyBase::validParams();
   return params;
 }
 
