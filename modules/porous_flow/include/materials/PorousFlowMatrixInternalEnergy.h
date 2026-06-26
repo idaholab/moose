@@ -39,10 +39,10 @@ protected:
   /// Heat capacity = _cp * _density
   const Real _heat_cap;
 
-  /// Temperature at the nodes
+  /// Temperature used to compute matrix internal energy: nodal for FE, qp for AD FV
   const GenericMaterialProperty<Real, is_ad> & _temperature;
 
-  /// d(temperature at the nodes)/d(PorousFlow variable)
+  /// d(temperature)/d(PorousFlow variable) for the non-AD FE path
   const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Matrix internal_energy at the nodes

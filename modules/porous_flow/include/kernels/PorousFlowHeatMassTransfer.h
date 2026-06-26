@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 // Forward Declaration
 
@@ -20,22 +20,31 @@
  * documentation can be overcome.
  * Alternatively, this kernel can also be used to model simplified precipitation/dissolution,
  * where the Variable is the concentration.
+ *
+ * Templated on is_ad: the false instantiation uses the hand-coded Jacobian;
+ * the true instantiation propagates derivatives through the AD residual.
  */
-class PorousFlowHeatMassTransfer : public Kernel
+template <bool is_ad>
+class PorousFlowHeatMassTransferTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowHeatMassTransfer(const InputParameters & parameters);
+  PorousFlowHeatMassTransferTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual Real jac(unsigned int jvar) const;
 
+  usingGenericKernelMembers;
+
 private:
   const unsigned int _v_var;
-  const VariableValue & _v;
+  const GenericVariableValue<is_ad> & _v;
   const VariableValue & _coef_var;
 };
+
+typedef PorousFlowHeatMassTransferTempl<false> PorousFlowHeatMassTransfer;
+typedef PorousFlowHeatMassTransferTempl<true> ADPorousFlowHeatMassTransfer;

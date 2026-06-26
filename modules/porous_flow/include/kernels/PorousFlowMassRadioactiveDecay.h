@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "PorousFlowLumpedKernelBase.h"
 #include "PorousFlowDictator.h"
 
 /**
@@ -17,18 +17,25 @@
  * where mass_component =
  * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * It is lumped to the nodes
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowMassRadioactiveDecay : public TimeKernel
+template <bool is_ad>
+class PorousFlowMassRadioactiveDecayTempl : public PorousFlowLumpedKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowMassRadioactiveDecay(const InputParameters & parameters);
+  PorousFlowMassRadioactiveDecayTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// Derivative of residual wrt PorousFlow variable pvar (non-AD path only)
+  Real computeQpJac(unsigned int pvar);
 
   /// The decay rate
   const Real _decay_rate;
@@ -48,40 +55,39 @@ protected:
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
-  /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the nodes (AD or non-AD depending on is_ad)
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
-  /// d(porosity)/d(PorousFlow variable) - these derivatives will be wrt variables at the nodes
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  /// d(porosity)/d(PorousFlow variable) at nodes -- null for AD path
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable) - remember these derivatives will be wrt grad(vars) at qps
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable) at qps -- null for AD path
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
-  /// The nearest qp to the node
+  /// The nearest qp to the node (always non-AD)
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
-  /// Nodal fluid density
-  const MaterialProperty<std::vector<Real>> & _fluid_density;
+  /// Nodal fluid density (AD or non-AD)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density;
 
-  /// d(nodal fluid density)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
+  /// d(nodal fluid density)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
-  /// Nodal fluid saturation
-  const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal;
+  /// Nodal fluid saturation (AD or non-AD)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_saturation_nodal;
 
-  /// d(nodal fluid saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_saturation_nodal_dvar;
+  /// d(nodal fluid saturation)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_nodal_dvar;
 
-  /// Nodal mass fraction
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
+  /// Nodal mass fraction (AD or non-AD)
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
 
-  /// d(nodal mass fraction)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
+  /// d(nodal mass fraction)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_frac_dvar;
 
-  /**
-   * Derivative of residual with respect to PorousFlow variable number pvar
-   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param pvar take the derivative of the residual wrt this PorousFlow variable
-   */
-  Real computeQpJac(unsigned int pvar);
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowMassRadioactiveDecayTempl<false> PorousFlowMassRadioactiveDecay;
+typedef PorousFlowMassRadioactiveDecayTempl<true> ADPorousFlowMassRadioactiveDecay;

@@ -12,54 +12,74 @@
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatConduction);
+registerMooseObject("PorousFlowApp", ADPorousFlowHeatConduction);
 
+template <bool is_ad>
 InputParameters
-PorousFlowHeatConduction::validParams()
+PorousFlowHeatConductionTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Heat conduction in the Porous Flow module");
   return params;
 }
 
-PorousFlowHeatConduction::PorousFlowHeatConduction(const InputParameters & parameters)
-  : Kernel(parameters),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _la(getMaterialProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp")),
-    _dla_dvar(getMaterialProperty<std::vector<RealTensorValue>>(
-        "dPorousFlow_thermal_conductivity_qp_dvar")),
-    _grad_t(getMaterialProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
-    _dgrad_t_dvar(
-        getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_grad_temperature_qp_dvar")),
-    _dgrad_t_dgradvar(
-        getMaterialProperty<std::vector<Real>>("dPorousFlow_grad_temperature_qp_dgradvar"))
+template <bool is_ad>
+PorousFlowHeatConductionTempl<is_ad>::PorousFlowHeatConductionTempl(
+    const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _dictator(this->template getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _la(this->template getGenericMaterialProperty<RealTensorValue, is_ad>(
+        "PorousFlow_thermal_conductivity_qp")),
+    _dla_dvar(is_ad ? nullptr
+                    : &this->template getMaterialProperty<std::vector<RealTensorValue>>(
+                          "dPorousFlow_thermal_conductivity_qp_dvar")),
+    _grad_t(this->template getGenericMaterialProperty<RealGradient, is_ad>(
+        "PorousFlow_grad_temperature_qp")),
+    _dgrad_t_dvar(is_ad ? nullptr
+                        : &this->template getMaterialProperty<std::vector<RealGradient>>(
+                              "dPorousFlow_grad_temperature_qp_dvar")),
+    _dgrad_t_dgradvar(is_ad ? nullptr
+                            : &this->template getMaterialProperty<std::vector<Real>>(
+                                  "dPorousFlow_grad_temperature_qp_dgradvar"))
 {
 }
 
-Real
-PorousFlowHeatConduction::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowHeatConductionTempl<is_ad>::computeQpResidual()
 {
   return _grad_test[_i][_qp] * (_la[_qp] * _grad_t[_qp]);
 }
 
+template <bool is_ad>
 Real
-PorousFlowHeatConduction::computeQpJacobian()
+PorousFlowHeatConductionTempl<is_ad>::computeQpJacobian()
 {
-  return computeQpOffDiagJacobian(_var.number());
+  if constexpr (!is_ad)
+    return computeQpOffDiagJacobian(_var.number());
+  return 0.0;
 }
 
+template <bool is_ad>
 Real
-PorousFlowHeatConduction::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowHeatConductionTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_dictator.notPorousFlowVariable(jvar))
-    return 0.0;
-
-  // The PorousFlow variable index corresponding to the variable number jvar
-  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
-
-  return _grad_test[_i][_qp] *
-         ((_dla_dvar[_qp][pvar] * _grad_t[_qp] + _la[_qp] * _dgrad_t_dvar[_qp][pvar]) *
-              _phi[_j][_qp] +
-          _la[_qp] * _dgrad_t_dgradvar[_qp][pvar] * _grad_phi[_j][_qp]);
+  if constexpr (!is_ad)
+  {
+    if (_dictator.notPorousFlowVariable(jvar))
+      return 0.0;
+    const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
+    return _grad_test[_i][_qp] *
+           (((*_dla_dvar)[_qp][pvar] * _grad_t[_qp] + _la[_qp] * (*_dgrad_t_dvar)[_qp][pvar]) *
+                _phi[_j][_qp] +
+            _la[_qp] * (*_dgrad_t_dgradvar)[_qp][pvar] * _grad_phi[_j][_qp]);
+  }
+  else
+    libmesh_ignore(jvar);
+  return 0.0;
 }
+
+template class PorousFlowHeatConductionTempl<false>;
+template class PorousFlowHeatConductionTempl<true>;
