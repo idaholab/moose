@@ -27,7 +27,6 @@ public:
   mfem::BilinearFormIntegrator * createBFIntegrator() override { return nullptr; };
 
 protected:
-  /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   int _fe_order;
   mfem::ConstantCoefficient _one;
   mfem::ConstantCoefficient _zero;

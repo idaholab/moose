@@ -22,7 +22,6 @@
 #include "MFEMVectorFEDomainLFKernel.h"
 #include "MFEMVectorFEMassKernel.h"
 #include "MFEMVectorFEWeakDivergenceKernel.h"
-#include "MFEMDGDirichletLFKernel.h"
 
 namespace
 {
@@ -265,23 +264,6 @@ TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::VectorDomainLFIntegrator *>(kernel.createLFIntegrator());
-  ASSERT_NE(integrator, nullptr);
-  delete integrator;
-}
-
-/**
- * Test MFEMDGDirichletLFKernel creates mfem::DGDirichletLFIntegrator successfully.
- */
-TEST_F(MFEMKernelTest, MFEMDGDirichletLFKernel)
-{
-  // Construct kernel
-  InputParameters kernel_params = _factory.getValidParams("MFEMDGDirichletLFKernel");
-  kernel_params.set<VariableName>("variable") = "test_variable_name";
-  MFEMDGDirichletLFKernel & kernel =
-      addObject<MFEMDGDirichletLFKernel>("MFEMDGDirichletLFKernel", "kernel1", kernel_params);
-
-  // Test MFEMKernel returns an integrator of the expected type
-  auto integrator = dynamic_cast<mfem::DGDirichletLFIntegrator *>(kernel.createFaceLFIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
 }

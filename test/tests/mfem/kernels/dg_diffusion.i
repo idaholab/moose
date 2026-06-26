@@ -9,7 +9,7 @@
 []
 
 [FESpaces]
-  [H1FESpace]
+  [L2FESpace]
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = FIRST
@@ -21,7 +21,7 @@
 [Variables]
   [concentration]
     type = MFEMVariable
-    fespace = H1FESpace
+    fespace = L2FESpace
   []
 []
 
@@ -44,7 +44,6 @@
   [dg_diff_bc]
     type = MFEMDGDiffusionBC
     variable = concentration
-    sigma = -1.0
   []
   [dg_diff_lf_bc]
     type = MFEMDGDirichletLFBC

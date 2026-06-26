@@ -13,7 +13,7 @@
 
 #include "MFEMKernel.h"
 
-// all this class needs to do differently is to implement createBFIntegrator
+// This class needs to implement createFaceBFIntegrator
 class MFEMDGDiffusionKernel : public MFEMKernel
 {
 public:
@@ -23,10 +23,8 @@ public:
   virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() override;
 
 protected:
-  /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   int _fe_order;
   mfem::ConstantCoefficient _one;
-  mfem::ConstantCoefficient _zero;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
 };
