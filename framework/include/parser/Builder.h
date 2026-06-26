@@ -89,7 +89,8 @@ public:
    */
   void extractParams(const hit::Node * const section_node,
                      InputParameters & p,
-                     const std::set<std::string> & skip_required_params = {});
+                     const std::set<std::string> & skip_required_params = {},
+                     bool skip_required_param_errors = false);
   /**
    * Attempt to extract values from input starting with the section in input defined
    * by the fullpath \p prefix based on the contents of the passed InputParameters \p p.
