@@ -19,7 +19,7 @@
 SecondaryNeighborhoodThread::SecondaryNeighborhoodThread(
     const MooseMesh & mesh,
     const std::vector<dof_id_type> & trial_primary_nodes,
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
     const unsigned int patch_size,
     KDTree & kd_tree)
   : _kd_tree(kd_tree),

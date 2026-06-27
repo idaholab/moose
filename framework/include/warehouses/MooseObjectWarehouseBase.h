@@ -96,6 +96,7 @@ public:
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
+  bool hasBoundaryObjects(THREAD_ID tid = 0) const;
   bool hasBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
   ///@}
 
@@ -271,6 +272,13 @@ protected:
    * Calls assert on thread id.
    */
   void checkThreadID(THREAD_ID tid) const;
+
+  /**
+   * Helper for determining whether we have boundary objects
+   */
+  bool hasBoundaryObjectsHelper(
+      const std::vector<std::map<BoundaryID, std::vector<std::shared_ptr<T>>>> & boundary_objects,
+      const THREAD_ID tid = 0) const;
 
   friend class MaterialWarehouse;
 };
@@ -561,13 +569,29 @@ MooseObjectWarehouseBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid
 
 template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::hasBoundaryObjectsHelper(
+    const std::vector<std::map<BoundaryID, std::vector<std::shared_ptr<T>>>> & boundary_objects,
+    THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  bool has_active_boundary_objects = false;
-  for (const auto & object_pair : _active_boundary_objects[tid])
-    has_active_boundary_objects |= !(object_pair.second.empty());
-  return has_active_boundary_objects;
+  bool has_boundary_objects = false;
+  for (const auto & object_pair : boundary_objects[tid])
+    has_boundary_objects |= !(object_pair.second.empty());
+  return has_boundary_objects;
+}
+
+template <typename T>
+bool
+MooseObjectWarehouseBase<T>::hasBoundaryObjects(THREAD_ID tid /* = 0*/) const
+{
+  return hasBoundaryObjectsHelper(_all_boundary_objects, tid);
+}
+
+template <typename T>
+bool
+MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid /* = 0*/) const
+{
+  return hasBoundaryObjectsHelper(_active_boundary_objects, tid);
 }
 
 template <typename T>

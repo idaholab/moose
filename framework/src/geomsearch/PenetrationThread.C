@@ -111,7 +111,7 @@ PenetrationThread::PenetrationThread(
     std::vector<std::vector<FEBase *>> & fes,
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map)
+    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map)
   : _subproblem(subproblem),
     _mesh(mesh),
     _primary_boundary(primary_boundary),

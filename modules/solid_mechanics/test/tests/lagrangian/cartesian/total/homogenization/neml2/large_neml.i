@@ -25,7 +25,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix1_x]
     type = DirichletBC
     boundary = fix_all
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_x
@@ -37,7 +36,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix1_y]
     type = DirichletBC
     boundary = fix_all
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_y
@@ -49,7 +47,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix1_z]
     type = DirichletBC
     boundary = fix_all
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_z
@@ -61,7 +58,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix2_x]
     type = DirichletBC
     boundary = fix_xy
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_x
@@ -73,7 +69,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix2_y]
     type = DirichletBC
     boundary = fix_xy
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_y
@@ -85,7 +80,6 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
   [fix3_z]
     type = DirichletBC
     boundary = fix_z
-    displacements = 'disp_x disp_y disp_z'
     matrix_tags = 'system time'
     value = 0
     variable = disp_z

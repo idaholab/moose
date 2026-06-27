@@ -1955,6 +1955,9 @@ public:
   }
   virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
+  /**
+   * Update this object's geometric search data as well as the displaced problem's if it exists
+   */
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual void updateMortarMesh();

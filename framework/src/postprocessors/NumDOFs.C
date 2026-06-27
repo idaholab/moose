@@ -9,7 +9,9 @@
 
 #include "NumDOFs.h"
 #include "SubProblem.h"
+#include "MooseStringUtils.h"
 
+#include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
 
 registerMooseObject("MooseApp", NumDOFs);
@@ -18,52 +20,50 @@ InputParameters
 NumDOFs::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  MooseEnum system_enum("NL AUX ALL", "ALL");
-  params.addParam<MooseEnum>("system",
-                             system_enum,
-                             "The system(s) for which you want to retrieve the number of DOFs (NL, "
-                             "AUX, ALL). Default == ALL");
+  params.addParam<std::string>(
+      "system",
+      "ALL",
+      "The system for which you want to retrieve the number of DOFs. Use ALL for all systems, "
+      "NL as an alias for nl0, AUX as an alias for aux0, or the name of a specific system.");
 
   params.addClassDescription(
-      "Return the number of Degrees of freedom from either the NL, Aux or both systems.");
+      "Return the number of Degrees of freedom from one or more equation systems.");
   return params;
 }
 
 NumDOFs::NumDOFs(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
+    _all_systems(false),
     _system_pointer(nullptr),
     _es_pointer(nullptr)
 {
-  switch (_system_enum)
+  const auto system_param = getParam<std::string>("system");
+  const auto system_upper = MooseUtils::toUpper(system_param);
+
+  if (system_upper == "ALL")
   {
-    case NL:
-      mooseAssert(_subproblem.es().has_system("nl0"), "No Nonlinear System found with name nl0");
-      _system_pointer = &_subproblem.es().get_system("nl0");
-      break;
-    case AUX:
-      mooseAssert(_subproblem.es().has_system("aux0"), "No Auxilary System found with name aux0");
-      _system_pointer = &_subproblem.es().get_system("aux0");
-      break;
-    case ALL:
-      _es_pointer = &_subproblem.es();
-      break;
-    default:
-      mooseError("Unhandled enum");
+    _all_systems = true;
+    _es_pointer = &_subproblem.es();
+    return;
   }
+
+  std::string system_name = system_param;
+  if (system_upper == "NL")
+    system_name = "nl0";
+  else if (system_upper == "AUX")
+    system_name = "aux0";
+
+  if (!_subproblem.es().has_system(system_name))
+    paramError("system", "No system found with name '", system_name, "'.");
+
+  _system_pointer = &_subproblem.es().get_system(system_name);
 }
 
 Real
 NumDOFs::getValue() const
 {
-  switch (_system_enum)
-  {
-    case NL:
-    case AUX:
-      return _system_pointer->n_dofs();
-    case ALL:
-      return _es_pointer->n_dofs();
-    default:
-      return 0;
-  }
+  if (_all_systems)
+    return _es_pointer->n_dofs();
+
+  return _system_pointer->n_dofs();
 }

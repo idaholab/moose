@@ -33,6 +33,10 @@ public:
 
   virtual void threadJoin(const UserObject & y) override;
 
+  virtual std::set<MooseVariableFieldBase *>
+  checkVariables(const libMesh::Node & node,
+                 const std::set<MooseVariableFieldBase *> & vars_to_check) override;
+
 protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;

@@ -2,11 +2,11 @@
   [missing_side_set]
     type = 'RunException'
     input = 'side_list_from_node_list.i'
-    expect_err = 'the following side sets \(ids\) do not exist on the mesh: 2'
+    expect_err = 'the following side sets \(ids\) do not exist on the mesh: 2.*The following boundary id exists as a node set but is being requested as a side set: 2.*Mesh/construct_side_list_from_node_list=true'
 
-    requirement = 'The system shall issue a diagnostic when a referenced side set does not exist in the mesh.'
+    requirement = 'The system shall issue a diagnostic when a boundary requested as a side set exists only as a node set and identify the mesh option for constructing side sets from node sets.'
     design = 'MooseMesh.md'
-    issues = '#13509'
+    issues = '#13509 #33022'
   []
 
   [construct_side_sets]

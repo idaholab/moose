@@ -1402,3 +1402,9 @@ SubProblem::getVariableHelper(const THREAD_ID tid,
                               Moose::VarFieldType expected_var_field_type,
                               const std::vector<std::unique_ptr<DisplacedSystem>> & nls,
                               const SystemBase & aux) const;
+
+void
+SubProblem::reinitGeomSearch()
+{
+  geomSearchData().reinit();
+}

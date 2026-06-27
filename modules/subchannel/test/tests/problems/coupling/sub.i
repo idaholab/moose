@@ -2,7 +2,6 @@ pin_diameter = 0.012065
 heated_length = 1.0
 
 [Mesh]
-  second_order = true
   [myMesh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -28,8 +27,6 @@ heated_length = 1.0
 
 [Variables]
   [temperature]
-    order = SECOND
-    family = LAGRANGE
   []
 []
 

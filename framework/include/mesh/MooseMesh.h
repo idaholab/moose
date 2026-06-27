@@ -252,16 +252,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are connected.
    */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
-
-  /**
-   * If not already created, creates a map from every node to all
-   * _active_ _semilocal_ elements to which they are connected.
-   * Semilocal elements include local elements and elements that share at least
-   * one node with a local element.
-   * \note Extra ghosted elements are not included in this map!
-   */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToActiveSemilocalElemMap();
+  const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -1558,6 +1549,13 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
+  /**
+   * rebuild the node to element map if it's been requsted previously
+   * @returns Whether the map was re-built, or equivalently whether the map had been requested
+   * previously
+   */
+  bool possiblyRebuildNodeToElemMap();
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
@@ -1657,12 +1655,10 @@ protected:
       _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
-  bool _node_to_elem_map_built;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
 
-  /// A map of all of the current nodes to the active elements that they are connected to.
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_active_semilocal_elem_map;
-  bool _node_to_active_semilocal_elem_map_built;
+  /// Whether @p _node_to_elem_map has been built.
+  bool _node_to_elem_map_built = false;
 
   /**
    * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
@@ -1746,6 +1742,12 @@ protected:
   void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
+  /**
+   * If not already created, creates a map from every node to all
+   * elements to which they are connected.
+   */
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> & internalNodeToElemMap();
+
   /// Map connecting elems with their corresponding ElemInfo, we use the element ID as
   /// the key
   mutable std::unordered_map<dof_id_type, ElemInfo> _elem_to_elem_info;
