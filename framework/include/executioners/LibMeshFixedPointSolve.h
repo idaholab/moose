@@ -29,9 +29,9 @@ protected:
                                  const bool primary) override;
 
   /// Save both the variable and postprocessor values
-  virtual void saveAllValues(const bool primary);
+  virtual void saveAllValues(const bool primary) override;
 
-  virtual void copyPreviousFixedPointSolutions();
+  virtual void copyPreviousFixedPointSolutions() override;
 
   /// Find the system holding the variables to be transformed (accelerated or relaxed)
   /// @param primary whether we are looking at transformations as the parent or child app

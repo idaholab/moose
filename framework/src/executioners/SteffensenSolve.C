@@ -19,8 +19,7 @@
 InputParameters
 SteffensenSolve::validParams()
 {
-  InputParameters params = FixedPointSolve::validParams();
-
+  InputParameters params = LibMeshFixedPointSolve::validParams();
   return params;
 }
 
@@ -71,7 +70,7 @@ SteffensenSolve::allocateStorage(const bool primary)
 void
 SteffensenSolve::initialSetup()
 {
-  FixedPointSolve::initialSetup();
+  LibMeshFixedPointSolve::initialSetup();
 
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
   if (!dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&convergence))
