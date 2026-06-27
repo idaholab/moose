@@ -120,12 +120,6 @@ public:
                                     const std::vector<Real> & timestep_begin_norms,
                                     const std::vector<Real> & timestep_end_norms) const = 0;
 
-  /// Add to the list of systems that should keep their previous fixed point solutions
-  void copyPreviousFixedPointSolutionForSystem(SystemBase * sys)
-  {
-    _systems_to_copy_previous_solutions_for.insert(sys);
-  }
-
 protected:
   /**
    * Returns true if there is relaxation.
@@ -133,6 +127,10 @@ protected:
    * @param primary True if this is the parent app; false if this is a child app.
    */
   bool performingRelaxation(const bool primary) const;
+
+  virtual void
+  updateVariableDoFsForTransform(const std::vector<std::string> & transformed_var_names,
+                                 const bool primary) = 0;
 
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -149,6 +147,9 @@ protected:
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
   virtual void savePostprocessorValues(const bool primary) = 0;
+
+  /// Save both the variable and postprocessor values
+  virtual void saveAllValues(const bool primary) = 0;
 
   /**
    * Use the fixed point algorithm transform instead of simply using the Picard update
@@ -171,10 +172,9 @@ protected:
    * state.
    * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
    */
-  virtual bool solveStep(const std::set<dof_id_type> & transformed_dofs);
+  virtual bool solveStep();
 
-  /// Save both the variable and postprocessor values
-  virtual void saveAllValues(const bool primary);
+  virtual void copyPreviousFixedPointSolutions() = 0;
 
   /**
    * Use the fixed point algorithm to transform the postprocessors.
@@ -191,22 +191,16 @@ protected:
    * If this routine is not called, the next value of the variables will just be from
    * the unrelaxed Picard fixed point algorithm.
    *
-   * @param transformed_dofs The dofs that will be affected by the algorithm
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
-                                  const bool primary) = 0;
+  virtual void transformVariables(const bool primary) = 0;
 
   /// Examine the various convergence metrics
   bool examineFixedPointConvergence(bool & converged);
 
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
-
-  /// Find the system holding the variables to be transformed (accelerated or relaxed)
-  /// @param primary whether we are looking at transformations as the parent or child app
-  void findTransformedSystem(const bool primary);
 
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
@@ -219,10 +213,6 @@ protected:
   const std::vector<PostprocessorName> _transformed_pps;
   /// Previous values of the relaxed postprocessors
   std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
-  /// System holding the transformed variables
-  SystemBase * _transformed_sys;
-  /// All the systems that should save their previous solutions
-  std::set<SystemBase *> _systems_to_copy_previous_solutions_for;
 
   /// Relaxation factor outside of fixed point iteration (used as a subapp)
   Real _secondary_relaxation_factor;
