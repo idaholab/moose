@@ -80,6 +80,14 @@ private:
   /// Current converged parameter value; persists across time steps (Restartable)
   Real & _param_value;
 
+  /// _param_value as it was at the start of the time step currently being solved; used to reset
+  /// _param_value when a time step is repeated (e.g. --test-restep or a cut time step)
+  Real & _param_value_step_begin;
+  /// Time step index of the most recent execute(); detecting the same index again means the step
+  /// is being repeated, so the internally-created MultiApp must be restored rather than re-backed
+  /// up (the framework does not roll it back because it is registered EXEC_NONE)
+  int & _executed_t_step;
+
   /// Optional main-app Receiver postprocessor name to publish the converged parameter
   const PostprocessorName _param_output_pp;
 

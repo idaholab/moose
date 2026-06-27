@@ -92,6 +92,9 @@ MultiAppNewtonIterationUserObject::MultiAppNewtonIterationUserObject(
     _rel_tol(getParam<Real>("rel_tol")),
     _max_its(getParam<unsigned int>("max_iterations")),
     _param_value(declareRestartableData<Real>("param_value", getParam<Real>("initial_parameter"))),
+    _param_value_step_begin(declareRestartableData<Real>("param_value_step_begin",
+                                                         getParam<Real>("initial_parameter"))),
+    _executed_t_step(declareRestartableData<int>("executed_t_step", -1)),
     _param_output_pp(isParamValid("parameter_postprocessor")
                          ? getParam<PostprocessorName>("parameter_postprocessor")
                          : PostprocessorName("")),
@@ -122,9 +125,21 @@ MultiAppNewtonIterationUserObject::execute()
 
   const Real y_target = _target_function.value(_t, libMesh::Point());
 
-  // Save the sub-app state at the beginning of this time step so every Newton
-  // trial starts from the same initial condition.
-  multiapp->backup();
+  if (_t_step == _executed_t_step)
+  {
+    // This time step is being repeated (e.g. --test-restep, or a parent time-step cut).
+    multiapp->restore();
+    _param_value = _param_value_step_begin;
+  }
+  else
+  {
+    // First solve of this time step: back up the sub-app state so every Newton trial starts from
+    // the same initial condition, and remember the starting parameter guess and step index so the
+    // step can be faithfully repeated if it is later rejected.
+    multiapp->backup();
+    _param_value_step_begin = _param_value;
+    _executed_t_step = _t_step;
+  }
 
   Real p = _param_value;
   bool converged = false;
