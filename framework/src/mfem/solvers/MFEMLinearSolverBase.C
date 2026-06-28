@@ -26,7 +26,10 @@ LinearSolverBase::validParams()
 }
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
-  : SolverBase(parameters), _lor{getParam<bool>("low_order_refined")}, _preconditioner{nullptr}
+  : SolverBase(parameters),
+    _lor{getParam<bool>("low_order_refined")},
+    _preconditioner{nullptr},
+    _equation_system(getMFEMProblem().getEquationSystem())
 {
 }
 

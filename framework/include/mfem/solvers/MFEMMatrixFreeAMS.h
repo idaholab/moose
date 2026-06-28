@@ -62,7 +62,7 @@ public:
   MFEMMatrixFreeAMS(const InputParameters &);
 
   /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
+  void SetupLOR() override;
 
 protected:
   void ConstructSolver() override;

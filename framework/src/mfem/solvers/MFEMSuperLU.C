@@ -38,7 +38,7 @@ MFEMSuperLU::ConstructSolver()
 }
 
 void
-MFEMSuperLU::SetupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMSuperLU::SetupLOR()
 {
   if (_lor)
     mooseError("SuperLU solver does not support LOR solve");

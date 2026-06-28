@@ -25,7 +25,7 @@ public:
   MFEMHypreAMS(const InputParameters &);
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
+  void SetupLOR() override;
 
 protected:
   void ConstructSolver() override;

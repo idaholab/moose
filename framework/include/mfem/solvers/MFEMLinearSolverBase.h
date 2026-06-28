@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMSolverBase.h"
+#include "EquationSystem.h"
 
 class MFEMProblemSolve;
 
@@ -39,7 +40,7 @@ public:
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
   /// no-op; override in solvers or preconditioners that construct LOR-related data from the
   /// bilinear form.
-  virtual void SetupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*ess_bdr_markers*/) {}
+  virtual void SetupLOR() {}
 
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool IsLOR() const { return _lor || (_preconditioner && _preconditioner->IsLOR()); }
@@ -56,6 +57,9 @@ protected:
 
   /// Preconditioner to be used for the problem
   std::shared_ptr<LinearSolverBase> _preconditioner;
+
+  /// Pointer to EquationSystem used for problem-specific solver setup
+  std::shared_ptr<EquationSystem> _equation_system;
 
 private:
   friend class ::MFEMProblemSolve;
