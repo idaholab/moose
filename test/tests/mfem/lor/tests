@@ -10,7 +10,7 @@
     cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
-               'Solvers/main/type=MFEMGMRESSolver Solvers/main/l_tol=1e-14 '
+               'Solvers/gmres/type=MFEMGMRESSolver Solvers/gmres/l_tol=1e-14 '
                'Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
