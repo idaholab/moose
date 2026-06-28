@@ -57,6 +57,11 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyEssentialBC(const std::string & var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -101,6 +106,11 @@ public:
   // whereas trial variables are associated with gridfunctions.
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
+
+  mfem::ParBilinearForm & GetBilinearForm(const std::string & test_var_name)
+  {
+    return _blfs.GetRef(test_var_name);
+  }
 
   /**
    * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
@@ -147,6 +157,11 @@ public:
   /// @returns Whether nonlinear integrators are present in the equation system
   bool IsNonlinear() const { return _non_linear; }
 
+  /**
+   * Whether this a complex equation system
+   */
+  virtual bool isComplex() const { return false; }
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -170,11 +185,6 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables

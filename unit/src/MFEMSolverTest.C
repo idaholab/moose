@@ -102,7 +102,7 @@ public:
     mfem::Vector B, X;
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-    solver.SetupLOR(a, ess_bdr);
+    solver.SetupLOR();
     auto solver_ptr = dynamic_cast<SolverType *>(&solver.GetSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);

@@ -713,13 +713,7 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
 {
   if (solver.IsLOR())
   {
-    if (IsComplex())
-      mooseError("LOR solve is not supported for complex equation systems.");
-    if (IsMultivariate())
-      mooseError("LOR solve is only supported for single-variable systems");
-
-    const auto & test_var_name = _test_var_names.at(0);
-    solver.SetupLOR(*_blfs.Get(test_var_name), GetEssentialBoundaryMarkers(test_var_name));
+    solver.SetupLOR();
   }
 
   mooseAssert(_linear_operator.Ptr(),

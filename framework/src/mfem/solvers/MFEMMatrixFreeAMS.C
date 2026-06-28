@@ -91,8 +91,22 @@ MFEMMatrixFreeAMS::ConstructSolver()
 }
 
 void
-MFEMMatrixFreeAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMMatrixFreeAMS::SetupLOR()
 {
+  if (_equation_system->isComplex())
+    mooseError("LOR solve is not supported for complex equation systems.");
+  if (_equation_system->GetTestVarNames().size() > 1)
+    mooseError("LOR solve is only supported for single-variable systems");
+
+  const auto & test_var_name = _equation_system->GetTestVarNames().at(0);
+  const auto & trial_var_name = _equation_system->GetTrialVarNames().at(0);
+  mfem::ParBilinearForm & a = _equation_system->GetBilinearForm(test_var_name);
+  mfem::ParGridFunction & trial_gf = *getMFEMProblem().getGridFunction(trial_var_name);
+
+  mfem::Array<int> ess_bdr_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+  ess_bdr_markers = 0;
+  _equation_system->ApplyEssentialBC(trial_var_name, trial_gf, ess_bdr_markers);
+
   // update the pointer to the bilinear form representing the curl-curl problem being preconditioned
   auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
   matrix_free_ams.SetBilinearForm(a);

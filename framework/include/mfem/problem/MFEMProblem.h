@@ -346,6 +346,14 @@ public:
   }
 
   /**
+   * @returns a shared pointer to an MFEM EquationSystem
+   */
+  std::shared_ptr<Moose::MFEM::EquationSystem> getEquationSystem()
+  {
+    return _problem_data.eqn_system;
+  }
+
+  /**
    * Enumerates the supported numeric representations for MFEM variables and operators.
    */
   enum class NumericType
