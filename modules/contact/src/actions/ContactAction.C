@@ -365,6 +365,14 @@ ContactAction::ContactAction(const InputParameters & params)
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
     paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
 
+  if ((_formulation == ContactFormulation::MORTAR ||
+       _formulation == ContactFormulation::MORTAR_PENALTY) &&
+      params.isParamSetByUser("ghost_whole_interface"))
+    paramError("ghost_whole_interface",
+               "The 'ghost_whole_interface' parameter is only supported for node-face contact "
+               "formulations. Mortar contact always geometrically and algebraically ghosts the "
+               "interface.");
+
   if (_formulation == ContactFormulation::TANGENTIAL_PENALTY && _model != ContactModel::COULOMB)
     paramError("formulation",
                "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");

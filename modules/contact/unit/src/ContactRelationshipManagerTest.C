@@ -16,11 +16,19 @@
 #include "Moose.h"
 #include "MooseApp.h"
 #include "MooseMain.h"
+#include "MooseUnitUtils.h"
 #include "RelationshipManager.h"
 
 class ContactRelationshipManagerTest : public ::testing::Test
 {
 protected:
+  enum class GhostWholeInterfaceInput
+  {
+    Default,
+    False,
+    True
+  };
+
   void SetUp() override
   {
     const char * argv[2] = {"foo", "\0"};
@@ -39,15 +47,26 @@ protected:
     _app->actionWarehouse().mesh() = moose_mesh;
   }
 
-  std::shared_ptr<ContactAction> buildContactAction(const bool set_ghost_whole_interface)
+  std::shared_ptr<ContactAction> buildContactAction(
+      const GhostWholeInterfaceInput ghost_whole_interface = GhostWholeInterfaceInput::Default,
+      const std::string & formulation = "kinematic")
   {
     auto params = _app->getActionFactory().getValidParams("ContactAction");
     params.set<std::string>("task") = "add_constraint";
     params.set<std::string>("registered_identifier") = "Contact/*";
     params.set<std::vector<BoundaryName>>("primary") = {"primary"};
     params.set<std::vector<BoundaryName>>("secondary") = {"secondary"};
-    if (set_ghost_whole_interface)
-      params.set<bool>("ghost_whole_interface") = true;
+    if (formulation != "kinematic")
+    {
+      params.set_attributes("formulation", false);
+      params.set<MooseEnum>("formulation") = formulation;
+    }
+    if (ghost_whole_interface != GhostWholeInterfaceInput::Default)
+    {
+      params.set_attributes("ghost_whole_interface", false);
+      params.set<bool>("ghost_whole_interface") =
+          ghost_whole_interface == GhostWholeInterfaceInput::True;
+    }
 
     auto action = _app->getActionFactory().create("ContactAction", "Contact/test", params);
     return std::dynamic_pointer_cast<ContactAction>(action);
@@ -55,7 +74,8 @@ protected:
 
   void testContactActionRelationshipManager(const bool enabled)
   {
-    const auto action = buildContactAction(enabled);
+    const auto action = buildContactAction(enabled ? GhostWholeInterfaceInput::True
+                                                   : GhostWholeInterfaceInput::Default);
     ASSERT_TRUE(action);
 
     action->addRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
@@ -72,6 +92,17 @@ protected:
               enabled ? "GhostNodeFaceInterface" : "GhostNodeFaceInterface (disabled)");
   }
 
+  void testMortarContactActionRejectsGhostWholeInterface(const std::string & formulation)
+  {
+    const std::string error =
+        "Mortar contact always geometrically and algebraically ghosts the interface.";
+    EXPECT_THROW_MSG_CONTAINS(
+        buildContactAction(GhostWholeInterfaceInput::True, formulation), std::runtime_error, error);
+    EXPECT_THROW_MSG_CONTAINS(buildContactAction(GhostWholeInterfaceInput::False, formulation),
+                              std::runtime_error,
+                              error);
+  }
+
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
 };
@@ -84,4 +115,14 @@ TEST_F(ContactRelationshipManagerTest, contactActionAddsDisabledRMByDefault)
 TEST_F(ContactRelationshipManagerTest, contactActionCanEnableWholeInterfaceRM)
 {
   testContactActionRelationshipManager(true);
+}
+
+TEST_F(ContactRelationshipManagerTest, mortarContactActionRejectsGhostWholeInterface)
+{
+  testMortarContactActionRejectsGhostWholeInterface("mortar");
+}
+
+TEST_F(ContactRelationshipManagerTest, mortarPenaltyContactActionRejectsGhostWholeInterface)
+{
+  testMortarContactActionRejectsGhostWholeInterface("mortar_penalty");
 }
