@@ -34,6 +34,26 @@ NodeFaceConstraint::validParams()
   params.addParam<std::string>("normal_smoothing_method",
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
+  params.addParam<bool>(
+      "ghost_whole_interface",
+      false,
+      "Whether to geometrically and algebraically ghost the entire primary-secondary interface for "
+      "node-face constraints.");
+  params.addRelationshipManager(
+      "GhostNodeFaceInterface",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        const auto enabled = obj_params.get<bool>("ghost_whole_interface");
+        rm_params.set<bool>("enabled") = enabled;
+        // If we don't actually want this object to ghost anything, then let's not have it impede
+        // possibly early (more like on-time) remote element deletion
+        rm_params.set<bool>("attach_geometric_early") = !enabled;
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+        rm_params.set<BoundaryName>("secondary_boundary") =
+            obj_params.get<BoundaryName>("secondary");
+        rm_params.set<BoundaryName>("primary_boundary") = obj_params.get<BoundaryName>("primary");
+      });
 
   params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
 

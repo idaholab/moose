@@ -69,6 +69,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
+- Before building or testing with conda, ask the user which conda environment
+  to activate rather than guessing.
 
 ## 7. Goal-Driven Execution
 

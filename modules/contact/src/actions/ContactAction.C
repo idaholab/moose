@@ -153,6 +153,11 @@ ContactAction::validParams()
       "primary_secondary_jacobian",
       true,
       "Whether to include Jacobian entries coupling primary and secondary nodes.");
+  params.addParam<bool>(
+      "ghost_whole_interface",
+      false,
+      "Whether to geometrically and algebraically ghost the entire primary-secondary interface for "
+      "node-face contact constraints.");
   params.addParam<Real>("al_penetration_tolerance",
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
@@ -313,7 +318,9 @@ ContactAction::validParams()
       "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
       "Gap and Tolerance");
   // Jacobian and solver options
-  params.addParamNamesToGroup("primary_secondary_jacobian ping_pong_protection", "Solver Options");
+  params.addParamNamesToGroup("primary_secondary_jacobian ghost_whole_interface "
+                              "ping_pong_protection",
+                              "Solver Options");
   // Residual vector tags
   params.addParamNamesToGroup("extra_vector_tags absolute_value_vector_tags", "Residual Tags");
 
@@ -791,6 +798,22 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
     params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
     addRelationshipManagers(input_rm_type, params);
+  }
+  else
+  {
+    const std::string constraint_type = _formulation == ContactFormulation::RANFS
+                                            ? "RANFSNormalMechanicalContact"
+                                            : "MechanicalContactConstraint";
+
+    for (const auto & contact_pair : _boundary_pairs)
+    {
+      auto params = _factory.getValidParams(constraint_type);
+      params.set<bool>("use_displaced_mesh") = true;
+      params.set<bool>("ghost_whole_interface") = getParam<bool>("ghost_whole_interface");
+      params.set<BoundaryName>("primary") = contact_pair.first;
+      params.set<BoundaryName>("secondary") = contact_pair.second;
+      addRelationshipManagers(input_rm_type, params);
+    }
   }
 }
 
