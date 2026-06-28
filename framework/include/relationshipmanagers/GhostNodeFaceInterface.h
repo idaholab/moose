@@ -21,8 +21,8 @@ using libMesh::MeshBase;
 using libMesh::processor_id_type;
 
 /**
- * Ghosts the higher-dimensional elements on a node-face constraint's primary and secondary
- * boundaries to processors that own elements on the secondary boundary.
+ * Ghosts the higher-dimensional elements on a node-face constraint's primary boundary to processors
+ * that own elements on the secondary boundary.
  */
 class GhostNodeFaceInterface : public RelationshipManager
 {

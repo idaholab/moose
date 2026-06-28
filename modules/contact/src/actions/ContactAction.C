@@ -156,8 +156,8 @@ ContactAction::validParams()
   params.addParam<bool>(
       "ghost_whole_interface",
       false,
-      "Whether to geometrically and algebraically ghost the entire primary-secondary interface for "
-      "node-face contact constraints.");
+      "Whether to geometrically and algebraically ghost the entire primary side of the interface "
+      "for node-face contact constraints.");
   params.addParam<Real>("al_penetration_tolerance",
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",

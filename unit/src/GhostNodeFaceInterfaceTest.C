@@ -63,8 +63,9 @@ public:
   }
 };
 
-registerMooseAction(
-    "MooseUnitApp", TestNodeFaceRelationshipManagerAction, "add_test_node_face_rms");
+registerMooseAction("MooseUnitApp",
+                    TestNodeFaceRelationshipManagerAction,
+                    "add_test_node_face_rms");
 
 Elem *
 addDisconnectedQuad(MeshBase & mesh,
@@ -74,9 +75,9 @@ addDisconnectedQuad(MeshBase & mesh,
 {
   std::array<Node *, 4> nodes;
   const std::array<Point, 4> points = {Point(x_offset, 0, 0),
-                                      Point(x_offset + 1, 0, 0),
-                                      Point(x_offset + 1, 1, 0),
-                                      Point(x_offset, 1, 0)};
+                                       Point(x_offset + 1, 0, 0),
+                                       Point(x_offset + 1, 1, 0),
+                                       Point(x_offset, 1, 0)};
   const auto first_node_id = 4 * elem_id;
 
   for (const auto i : make_range(nodes.size()))
@@ -113,10 +114,8 @@ buildNodeFaceInterfaceMesh(MeshBase & mesh)
   mesh.skip_partitioning(true);
   mesh.allow_remote_element_removal(true);
 
-  auto * const local_secondary =
-      addDisconnectedQuad(mesh, local_secondary_elem_id, rank0, 0);
-  auto * const remote_secondary =
-      addDisconnectedQuad(mesh, remote_secondary_elem_id, rank1, 3);
+  auto * const local_secondary = addDisconnectedQuad(mesh, local_secondary_elem_id, rank0, 0);
+  auto * const remote_secondary = addDisconnectedQuad(mesh, remote_secondary_elem_id, rank1, 3);
   auto * const remote_primary = addDisconnectedQuad(mesh, remote_primary_elem_id, rank1, 6);
   addDisconnectedQuad(mesh, remote_noninterface_elem_id, rank1, 9);
 
@@ -149,7 +148,8 @@ protected:
     params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
     params.set<bool>("allow_renumbering") = false;
 
-    auto moose_mesh = _factory->create<MeshGeneratorMesh>("MeshGeneratorMesh", "moose_mesh", params);
+    auto moose_mesh =
+        _factory->create<MeshGeneratorMesh>("MeshGeneratorMesh", "moose_mesh", params);
     moose_mesh->setMeshBase(moose_mesh->buildMeshBaseObject(2));
     moose_mesh->buildMesh();
     _app->actionWarehouse().mesh() = moose_mesh;
@@ -169,8 +169,8 @@ protected:
     rm_params.set<BoundaryName>("primary_boundary") = primary_boundary_name;
     rm_params.set<BoundaryName>("secondary_boundary") = secondary_boundary_name;
 
-    auto rm =
-        _factory->create<RelationshipManager>("GhostNodeFaceInterface", "ghost_node_face", rm_params);
+    auto rm = _factory->create<RelationshipManager>(
+        "GhostNodeFaceInterface", "ghost_node_face", rm_params);
     rm->init(moose_mesh, mesh);
     mesh.add_ghosting_functor(*rm);
     return rm;
@@ -200,7 +200,7 @@ protected:
   Factory * _factory;
 };
 
-TEST_F(GhostNodeFaceInterfaceTest, enabledRMKeepsRemoteInterfaceElements)
+TEST_F(GhostNodeFaceInterfaceTest, enabledRMKeepsRemotePrimaryInterfaceElements)
 {
   if (_app->n_processors() != 2)
     GTEST_SKIP() << "This test requires exactly two MPI ranks.";
@@ -216,7 +216,7 @@ TEST_F(GhostNodeFaceInterfaceTest, enabledRMKeepsRemoteInterfaceElements)
   if (mesh.processor_id() == 0)
   {
     EXPECT_NE(mesh.query_elem_ptr(local_secondary_elem_id), nullptr);
-    EXPECT_NE(mesh.query_elem_ptr(remote_secondary_elem_id), nullptr);
+    EXPECT_EQ(mesh.query_elem_ptr(remote_secondary_elem_id), nullptr);
     EXPECT_NE(mesh.query_elem_ptr(remote_primary_elem_id), nullptr);
     EXPECT_EQ(mesh.query_elem_ptr(remote_noninterface_elem_id), nullptr);
   }

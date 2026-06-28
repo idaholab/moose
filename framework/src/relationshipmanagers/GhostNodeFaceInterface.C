@@ -30,8 +30,8 @@ GhostNodeFaceInterface::validParams()
                                         "The name of the secondary boundary sideset.");
   params.addRequiredParam<bool>("enabled", "Whether this relationship manager should ghost.");
   params.addClassDescription(
-      "Ghosts node-face constraint primary and secondary interface elements to processors that own "
-      "secondary interface elements.");
+      "Ghosts node-face constraint primary interface elements to processors that own secondary "
+      "interface elements.");
   return params;
 }
 
@@ -128,8 +128,7 @@ GhostNodeFaceInterface::operator()(const MeshBase::const_element_iterator & rang
     }
     else
       for (const auto side : elem->side_index_range())
-        if (binfo.has_boundary_id(elem, side, primary_boundary_id) ||
-            binfo.has_boundary_id(elem, side, secondary_boundary_id))
+        if (binfo.has_boundary_id(elem, side, primary_boundary_id))
         {
           coupled_elements.emplace(elem, _null_mat);
           break;
