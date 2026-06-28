@@ -4,13 +4,13 @@
 
 #include "libmesh/libmesh.h"
 
-#include <iostream>
+#include <cstdio>
 
 int
 main(int argc, char ** argv)
 {
   libMesh::LibMeshInit init(argc, argv);
-  std::cout << "libMesh sanity OK: " << libMesh::global_n_processors()
-            << " processor(s)" << std::endl;
+  std::puts("libMesh sanity OK: " + std::to_string(libMesh::global_n_processors()) +
+            " processor(s)\n");
   return 0;
 }
