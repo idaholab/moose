@@ -14,10 +14,10 @@
 #include "ComplexEquationSystemProblemOperator.h"
 #include "ComplexEigenproblemEquationSystem.h"
 
-class MFEMEigensolverBase;
-
 namespace Moose::MFEM
 {
+
+class EigensolverBase;
 
 /// Steady-state eigenproblem operator for complex (Hermitian) equation systems.
 class ComplexEigenproblemESProblemOperator : public ComplexEquationSystemProblemOperator
@@ -46,7 +46,7 @@ private:
   void BuildEquationSystemOperator();
 
   /// Distribute the computed eigenvectors onto the complex grid functions.
-  void RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver);
+  void RecoverEigenproblemSolution(EigensolverBase * eigensolver);
 };
 
 } // namespace Moose::MFEM

@@ -42,10 +42,6 @@ MFEMEigenproblem::validParams()
 MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params)
 {
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
-
-  if (getNumericType() == NumericType::COMPLEX)
-    mooseError("MFEMEigenproblem is real-valued; use MFEMComplexEigenproblem for complex "
-               "eigenproblems.");
 }
 
 mfem::Coefficient &
