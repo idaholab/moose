@@ -1,29 +1,31 @@
 # Computational Backends
 
 A modeler can choose among several MOOSE computational backends depending on the problem being
-solved and the hardware being targeted. Some use the standard MOOSE object systems with libMesh data
-structures, some provide device-portable implementations of selected MOOSE object systems, and some
-use a different finite element backend.
+solved and the hardware being targeted. Some use MOOSE object systems with libMesh data structures,
+some provide device-portable implementations of selected MOOSE object systems, and some use a
+different finite element backend.
 
 This page gives a high-level map of those choices and points to the detailed documentation for each
 backend.
 
 ## Framework view
 
-The default MOOSE path uses MOOSE objects, libMesh data structures, and PETSc solvers. Other
-capabilities provide alternatives for parts of that path:
+The traditional MOOSE/libMesh path uses MOOSE objects, libMesh data structures, and PETSc solvers.
+Other capabilities provide alternatives for parts of that path:
 
 ```text
 MOOSE application and input file
 |
-+-- Default MOOSE/libMesh path
++-- MOOSE/libMesh path
 |   +-- FE/FV variables, Kernels, BCs, Materials, UserObjects
 |   +-- libMesh mesh and finite element data structures
 |   +-- PETSc nonlinear and linear solvers
 |
 +-- Kokkos-MOOSE
 |   +-- Kokkos implementations of selected MOOSE object systems
+|   +-- libMesh finite element backend, MeshBase-derived mesh, and DofMap
 |   +-- GPU-portable assembly and execution for supported objects
+|   +-- Compatible with MOOSE/libMesh systems with a few exceptions
 |
 +-- MFEM-MOOSE
 |   +-- MFEMProblem, MFEMMesh, MFEM variables, kernels, BCs, and solvers
@@ -35,30 +37,33 @@ MOOSE application and input file
 
 | Path | What it changes | Use it when | Starting points |
 | :- | :- | :- | :- |
-| Default MOOSE/libMesh | Standard MOOSE finite element and finite volume object systems using libMesh data structures | You want the broadest object coverage, module compatibility, examples, and application-development support | [Application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md), [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples) |
-| Kokkos-MOOSE | Device-portable implementations of selected MOOSE object systems | You want supported kernels, boundary conditions, and materials to run through Kokkos while retaining standard MOOSE meshes, postprocessing, and output workflows | [Getting started with Kokkos-MOOSE](syntax/Kokkos/index.md), [Kokkos installation](getting_started/installation/install_kokkos.md) |
+| MOOSE/libMesh | MOOSE finite element and finite volume object systems using libMesh data structures | You want the broadest object coverage, module compatibility, examples, and application-development support | [Application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md), [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples) |
+| Kokkos-MOOSE | Device-portable implementations of selected MOOSE object systems using the libMesh finite element backend | You want supported kernels, boundary conditions, and materials to run through Kokkos while retaining MOOSE meshes, postprocessing, and output workflows | [Getting started with Kokkos-MOOSE](syntax/Kokkos/index.md), [Kokkos installation](getting_started/installation/install_kokkos.md) |
 | MFEM-MOOSE | MFEM-backed problem, mesh, variable, finite element space, kernel, solver, and output objects | You want to formulate the application using MFEM features such as high-order spaces, H(div)/H(curl) spaces, or partial assembly | [Getting started with MFEM-MOOSE](syntax/MFEM/index.md), [MFEM installation](getting_started/installation/install_mfem.md) |
 
-## Default MOOSE/libMesh path
+## MOOSE/libMesh path
 
-Most MOOSE applications use the default MOOSE/libMesh path. In this mode, application developers
-create objects derived from the standard MOOSE object families, such as `Kernel`, `ADKernel`,
-`IntegratedBC`, `Material`, `UserObject`, `AuxKernel`, and related systems.
+Most MOOSE applications use MOOSE/libMesh objects. In this mode, application developers create
+objects derived from MOOSE object families, such as `Kernel`, `ADKernel`, `IntegratedBC`,
+`Material`, `UserObject`, `AuxKernel`, and related systems.
 
-For guidance on using the traditional MOOSE libMesh backend, see the
+For guidance on using the MOOSE/libMesh backend, see the
 [application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md)
 and the [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples).
 
 ## Kokkos-MOOSE
 
-Kokkos-MOOSE ports selected MOOSE object systems to GPU-portable execution while retaining the
-general MOOSE programming model. A developer typically chooses Kokkos-MOOSE by using Kokkos-specific
-object families, such as `Moose::Kokkos::Kernel`, `Moose::Kokkos::IntegratedBC`,
+Kokkos-MOOSE ports selected MOOSE object systems to GPU-portable execution. It continues to use
+libMesh `MeshBase` and `DofMap` data structures. A developer typically chooses Kokkos-MOOSE by using
+Kokkos-specific object families, such as `Moose::Kokkos::Kernel`, `Moose::Kokkos::IntegratedBC`,
 `Moose::Kokkos::Material`, or the corresponding Kokkos syntax pages.
 
 Kokkos-MOOSE is not a separate finite element backend in the same sense as MFEM-MOOSE. It is a
 device-portable implementation path for supported MOOSE systems, built around Kokkos data structures,
-memory-space rules, and parallel dispatch.
+memory-space rules, and parallel dispatch. It relies on libMesh as the finite element backend. Many
+Kokkos-MOOSE system objects are compatible with host MOOSE/libMesh objects, but exceptions exist; for
+example, host MOOSE nodal boundary conditions cannot be used in the same input as Kokkos-MOOSE
+residual objects.
 
 For details, see [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md).
 
@@ -70,7 +75,5 @@ output objects. This path is useful for capabilities that are natural in MFEM, i
 finite elements, H(div) and H(curl) spaces, partial assembly, and low-order-refined solvers. When
 MFEM-MOOSE is built with libCEED support, MFEM can provide matrix-free operator application through
 libCEED.
-
-MFEM-MOOSE is the path that most directly changes the finite element backend.
 
 For details, see [Getting started with MFEM-MOOSE](syntax/MFEM/index.md).
