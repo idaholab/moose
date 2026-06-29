@@ -29,9 +29,15 @@ protected:
   void addRadiationBCs() const;
   void addRayStudyObject() const;
   void addRayBCs() const;
+  void addHeatFluxAuxVariable() const;
+  void addHeatFluxAuxKernel() const;
 
   std::vector<std::vector<std::string>> radiationPatchNames() const;
   std::vector<std::vector<std::string>> bcRadiationPatchNames() const;
+  std::vector<BoundaryName>
+  patchBoundaryNames(const std::vector<BoundaryName> & boundary_names) const;
+  std::vector<BoundaryName> radiationPatchBoundaryNames() const;
+  std::vector<BoundaryName> adiabaticPatchBoundaryNames() const;
   UserObjectName viewFactorObjectName() const;
   UserObjectName radiationObjectName() const;
   UserObjectName rayStudyName() const;
@@ -47,4 +53,11 @@ protected:
 
   /// the type of view factor calculation being performed
   const MooseEnum _view_factor_calculator;
+
+  /// Whether to add heat flux aux
+  const bool _add_heat_flux_aux;
+  /// Heat flux aux name
+  VariableName _heat_flux_variable;
+  /// Blocks to use for heat flux aux
+  std::vector<SubdomainName> _heat_flux_aux_block;
 };
