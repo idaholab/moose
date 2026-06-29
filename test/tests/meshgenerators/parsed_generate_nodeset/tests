@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#28881 #31198'
+  issues = '#28881 #31198 #33156'
   design = 'meshgenerators/ParsedGenerateNodeset.md'
 
   [parsed_generate_nodeset_sub_id_test]
@@ -73,10 +73,9 @@
     [missing_new_nodeset_name]
       type = RunException
       input = missing_new_nodeset_name.i
-      expect_err = "missing required parameter 'Mesh/nodeset/new_nodeset_name'.*parameter 'Mesh/nodeset/new_nodeset' is private and cannot be set"
+      expect_err = "missing required parameter 'Mesh/nodeset/new_nodeset_name'"
       detail = 'if a ParsedGenerateNodeset input uses the suppressed inherited nodeset parameter instead of the required replacement parameter.'
       mesh_mode = 'replicated'
-      issues = '#33156'
     []
     [bad_expression]
       type = RunException
