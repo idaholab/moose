@@ -233,11 +233,4 @@
                   "same results as an incorrect edge dropping treatment when there is not edge "
                   "dropping, e.g. when the entire secondary surface projects to the primary surface."
   []
-  [weighted_gap_aux_node_face_reinit]
-    type = RunApp
-    input = weighted_gap_aux_node_face_reinit.i
-    capabilities = 'method=dbg'
-    requirement = 'The contact module shall compute a mortar nodal weighted gap auxiliary variable after node-face reinitialization without producing mismatched degree-of-freedom value and index sizes.'
-    issues = '#30209'
-  []
 []

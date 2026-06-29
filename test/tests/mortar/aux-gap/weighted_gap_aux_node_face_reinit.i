@@ -1,11 +1,3 @@
-# Regression test for #30209.
-# This used to fail in debug mode with:
-#   dof_values.size() == _dof_indices.size()
-# in MooseVariableDataBase::insert().
-#
-# The trigger is the mortar nodal WeightedGapAux path after node-face
-# reinitialization with minimum_projection_angle = 50.
-
 [Problem]
   kernel_coverage_check = false
   solve = false
@@ -14,7 +6,7 @@
 [Mesh]
   [input_file]
     type = FileMeshGenerator
-    file = iron.e
+    file = weighted_gap_aux_node_face_reinit.e
   []
 
   [secondary]

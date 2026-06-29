@@ -22,6 +22,13 @@
       detail = 'when the gap auxiliary variable and mesh are both second order'
       cli_args = 'Outputs/file_base=second_order AuxVariables/gap/order=SECOND'
     []
+    [node_face_reinit]
+      type = RunApp
+      input = weighted_gap_aux_node_face_reinit.i
+      capabilities = 'method=dbg'
+      detail = 'after node-face reinitialization'
+      issues = '#30209'
+    []
   []
   [no_constraint]
     type = RunApp
