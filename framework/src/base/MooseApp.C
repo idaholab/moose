@@ -54,9 +54,6 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
-#ifdef MOOSE_MFEM_ENABLED
-#include "MFEMProblem.h"
-#endif
 #include "Parser.h"
 #include "CSGBase.h"
 #include "Capabilities.h"
@@ -1924,12 +1921,11 @@ MooseApp::requestCitations()
     citations.insert(app_citations.begin(), app_citations.end());
   }
 
-  // Credit the finite element backend actually used in the run. The run uses MFEM when its problem
-  // is an MFEMProblem; otherwise it uses libMesh, the default backend. These are mutually
-  // exclusive, so only the backend in use is cited.
+  // Credit the finite element backend actually used in the run. These are mutually exclusive, so
+  // only the backend in use is cited.
   std::string backend = "libMesh";
 #ifdef MOOSE_MFEM_ENABLED
-  if ((_executor || _executioner) && dynamic_cast<const MFEMProblem *>(&feProblem()))
+  if ((_executor || _executioner) && feProblem().feBackend() == Moose::FEBackend::MFEM)
     backend = "MFEM";
 #endif
   const auto & backend_citations = Registry::getCitations(backend);

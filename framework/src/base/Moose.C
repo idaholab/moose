@@ -91,9 +91,9 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
   author = {Logan Harbour and Guillaume Giudicelli and Alexander D. Lindsay and Peter German and Joshua Hansel and Casey Icenhour and Mengnan Li and Jason M. Miller and Roy H. Stogner and Patrick Behne and Daniel Yankura and Zachary M. Prince and Corey DeChant and Daniel Schwen and Benjamin W. Spencer and Mauricio Tano and Namjae Choi and Yaqi Wang and Max Nezdyur and Yinbin Miao and Tianchen Hu and Shikhar Kumar and Christopher Matthews and Brandon Langley and Nuno Nobre and Alexander Blair and Chris MacMackin and Henrique Bergallo Rocha and Edward Palmer and Jesse Carter and J{\"o}rg Meier and Andrew E. Slaughter and David Andr{\v{s}} and Robert W. Carlsen and Fande Kong and Derek R. Gaston and Cody J. Permann},
 })");
 
-  // libMesh is the default finite element backend. The citation is registered under "libMesh" but
-  // not tied to any object label, so the per-object loop in MooseApp::requestCitations() does not
-  // emit it; emission is gated on the finite element backend actually used in the run.
+  // The libMesh citation is registered under "libMesh" but not tied to any object label, so the
+  // per-object loop in MooseApp::requestCitations() does not emit it; emission is gated on the
+  // finite element backend actually used in the run.
   Registry::addAppCitation("libMesh",
                            "libMeshPaper",
                            R"(@article{libMeshPaper,
@@ -109,19 +109,19 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
 })");
 
 #ifdef MOOSE_MFEM_ENABLED
-  // MFEM is the alternative finite element backend, available only when MOOSE is built with it.
-  // Like libMesh, the citation is registered under "MFEM" and emitted by
-  // MooseApp::requestCitations() only when the run actually uses the MFEM backend.
+  // Like libMesh, the MFEM citation is emitted by MooseApp::requestCitations() only when the run
+  // actually uses the MFEM backend.
   Registry::addAppCitation("MFEM",
-                           "anderson2021mfem",
-                           R"(@article{anderson2021mfem,
-  title = {{MFEM}: A modular finite element methods library},
-  author = {Anderson, Robert and Andrej, Julian and Barker, Andrew and Bramwell, Jamie and Camier, Jean-Sylvain and Cerveny, Jakub and Dobrev, Veselin and Dudouit, Yohann and Fisher, Aaron and Kolev, Tzanio and Pazner, Will and Stowell, Mark and Tomov, Vladimir and Akkerman, Ido and Dahm, Johann and Medina, David and Zampini, Stefano},
-  journal = {Computers \& Mathematics with Applications},
-  volume = {81},
-  pages = {42--74},
-  year = {2021},
-  doi = {https://doi.org/10.1016/j.camwa.2020.06.009},
+                           "mfem-2024",
+                           R"(@article{mfem-2024,
+  title = {High-Performance Finite Elements with {MFEM}},
+  author = {J. Andrej and N. Atallah and J.-P. B{\"a}cker and J.-S. Camier and D. Copeland and V. Dobrev and Y. Dudouit and T. Duswald and B. Keith and D. Kim and T. Kolev and B. Lazarov and K. Mittal and W. Pazner and S. Petrides and S. Shiraiwa and M. Stowell and V. Tomov},
+  journal = {The International Journal of High Performance Computing Applications},
+  volume = {38},
+  number = {5},
+  pages = {447--467},
+  year = {2024},
+  publisher = {SAGE Publications Sage UK: London, England},
 })");
 #endif
 }
