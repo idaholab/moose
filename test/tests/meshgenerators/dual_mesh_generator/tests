@@ -1,0 +1,55 @@
+[Tests]
+  design = 'meshgenerators/DualMeshGenerator.md'
+  issues = '#33143'
+  [dual_mesh_generator_2d_barycentric]
+    type = 'Exodiff'
+    input = 'dual_mesh_generator_2d_barycentric.i'
+    cli_args = '--mesh-only'
+    exodiff = 'dual_mesh_generator_2d_barycentric_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a barycentric dual mesh from a 2D primal mesh.'
+  []
+  [dual_mesh_generator_2d_voronoi]
+    type = 'Exodiff'
+    input = 'dual_mesh_generator_2d_voronoi.i'
+    cli_args = '--mesh-only'
+    exodiff = 'dual_mesh_generator_2d_voronoi_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a voronoi dual mesh from a 2D primal mesh.'
+  []
+  [dual_mesh_generator_3d]
+    type = 'Exodiff'
+    input = 'dual_mesh_generator_3d.i'
+    cli_args = '--mesh-only'
+    exodiff = 'dual_mesh_generator_3d_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the capability to generate a barycentric dual mesh from a 3D primal mesh.'
+  []
+[]
+[error_paths]
+  requirement = 'The system shall report an error when attempting to generate a dual mesh'
+  [unsupported_dimension]
+    type = 'RunException'
+    input = 'dual_mesh_generator_unsupported_dimension.i'
+    cli_args = '--mesh-only'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    expect_err = 'DualMeshGenerator currently only supports 2D and 3D Meshes'
+    detail = 'an unsupported mesh dimension.'
+  []
+  [voronoi_3d]
+    type = 'RunException'
+    input = 'dual_mesh_generator_unsupported_type_dim.i'
+    cli_args = '--mesh-only'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    expect_err = 'DualMeshGenerator does not support Voronoi duals for 3D meshes'
+    detail = 'an unsupported combination of dimension and mesh type'
+  []
+[]
