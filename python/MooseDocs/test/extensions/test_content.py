@@ -772,7 +772,9 @@ class TestUnsupportedLatexContentCommands(MooseDocsTestCase):
     ]
 
     def testOutline(self):
-        with self.assertLogs("MooseDocs.extensions.content", level=logging.WARNING) as cm:
+        with self.assertLogs(
+            "MooseDocs.extensions.content", level=logging.WARNING
+        ) as cm:
             _, res = self.execute(
                 "!content outline location=extensions", renderer=base.LatexRenderer()
             )
@@ -784,7 +786,9 @@ class TestUnsupportedLatexContentCommands(MooseDocsTestCase):
 
     def testPagination(self):
         text = "!content pagination previous=previous.md next=next.md"
-        with self.assertLogs("MooseDocs.extensions.content", level=logging.WARNING) as cm:
+        with self.assertLogs(
+            "MooseDocs.extensions.content", level=logging.WARNING
+        ) as cm:
             _, res = self.execute(text, renderer=base.LatexRenderer())
         self.assertSize(res, 0)
         self.assertIn(
