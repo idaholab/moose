@@ -295,21 +295,20 @@ EquationSystem::ApplyDomainBLFIntegrators(
     {
       mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
 
-      if (integ)
+      if (integ and kernel->IsDGKernel())
+      {
+        // AddInteriorFaceIntegrator doesn't have the overload for passing in the
+        // boundary markers as well
+        form->AddInteriorFaceIntegrator(std::move(integ));
+      }
+
+      else if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
-      }
-
-      mfem::BilinearFormIntegrator * dg_integ = kernel->createFaceBFIntegrator();
-      if (dg_integ)
-      {
-        // AddInteriorFaceIntegrator doesn't have the overload for passing in the
-        // boundary markers as well
-        form->AddInteriorFaceIntegrator(std::move(dg_integ));
       }
     }
   }
@@ -333,22 +332,20 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     {
       mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
 
-      if (integ)
+      if (integ and bc->IsDGBC())
+      {
+        bc->isBoundaryRestricted()
+            ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
+            : form->AddBdrFaceIntegrator(std::move(integ));
+      }
+
+      else if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
-      }
-
-      // Do the same with for DG
-      mfem::BilinearFormIntegrator * dg_integ = bc->createFaceBFIntegrator();
-      if (dg_integ)
-      {
-        bc->isBoundaryRestricted()
-            ? form->AddBdrFaceIntegrator(std::move(dg_integ), bc->getBoundaryMarkers())
-            : form->AddBdrFaceIntegrator(std::move(dg_integ));
       }
     }
   }

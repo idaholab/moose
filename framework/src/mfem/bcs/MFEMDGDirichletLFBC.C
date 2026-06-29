@@ -39,7 +39,7 @@ MFEMDGDirichletLFBC::MFEMDGDirichletLFBC(const InputParameters & parameters)
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMDGDirichletLFBC::createFaceLFIntegrator()
+MFEMDGDirichletLFBC::createLFIntegrator()
 {
   return new mfem::DGDirichletLFIntegrator(_zero, _one, _sigma, _kappa);
 }

@@ -37,7 +37,7 @@ MFEMDGDiffusionBC::MFEMDGDiffusionBC(const InputParameters & parameters)
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMDGDiffusionBC::createFaceBFIntegrator()
+MFEMDGDiffusionBC::createBFIntegrator()
 {
   return new mfem::DGDiffusionIntegrator(_one, _sigma, _kappa);
 }

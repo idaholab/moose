@@ -21,7 +21,9 @@ public:
   MFEMDGDiffusionBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+
+  virtual bool IsDGBC() const override { return true; }
 
 protected:
   int _fe_order;

@@ -35,7 +35,7 @@ MFEMDGDiffusionKernel::MFEMDGDiffusionKernel(const InputParameters & parameters)
 }
 
 mfem::BilinearFormIntegrator *
-MFEMDGDiffusionKernel::createFaceBFIntegrator()
+MFEMDGDiffusionKernel::createBFIntegrator()
 {
   return new mfem::DGDiffusionIntegrator(_one, _sigma, _kappa);
 }

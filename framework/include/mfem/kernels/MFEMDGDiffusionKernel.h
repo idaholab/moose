@@ -13,14 +13,15 @@
 
 #include "MFEMKernel.h"
 
-// This class needs to implement createFaceBFIntegrator
 class MFEMDGDiffusionKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
   MFEMDGDiffusionKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+
+  virtual bool IsDGKernel() const { return true; }
 
 protected:
   int _fe_order;
