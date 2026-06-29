@@ -50,7 +50,10 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    max_parallel = 1 # idaholab/moose#32250
+    # With two off-diagonal mixed blocks the complex assembly
+    # (MFEM ComplexHypreParMatrix::GetSystemMatrix) hangs or returns wrong
+    # results at n>=3; verified correct at n=2 (idaholab/moose#32250).
+    max_parallel = 2
   []
   [MFEMMixedSesquilinearIC]
     type = CSVDiff
@@ -61,7 +64,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    max_parallel = 1 # idaholab/moose#32250
   []
   [MFEMMixedSesquilinearRealImag]
     type = CSVDiff
@@ -72,6 +74,5 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    max_parallel = 1 # idaholab/moose#32250
   []
 []

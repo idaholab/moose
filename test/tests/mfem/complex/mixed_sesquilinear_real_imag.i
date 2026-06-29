@@ -22,7 +22,7 @@ beta=0.5
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
-    fec_order = FIRST
+    fec_order = SECOND
   []
   [HCurlFESpace]
     type = MFEMVectorFESpace
@@ -45,23 +45,23 @@ beta=0.5
 [Functions]
   [V_exact_real]
     type = ParsedFunction
-    expression = '${a}*x+${b}*y+${c}*z'
+    expression = '${a}*x*y+${b}*x*z+${c}*y*z'
   []
   [V_exact_imag]
     type = ParsedFunction
-    expression = '${d}*x+${e}*y+${f}*z'
+    expression = '${d}*x*y+${e}*x*z+${f}*y*z'
   []
   [A_exact_real]
     type = ParsedVectorFunction
-    expression_x = '-(${beta}*${a}+${alpha}*${d})/${omega}'
-    expression_y = '-(${beta}*${b}+${alpha}*${e})/${omega}'
-    expression_z = '-(${beta}*${c}+${alpha}*${f})/${omega}'
+    expression_x = '-(${beta}*(${a}*y+${b}*z)+${alpha}*(${d}*y+${e}*z))/${omega}'
+    expression_y = '-(${beta}*(${a}*x+${c}*z)+${alpha}*(${d}*x+${f}*z))/${omega}'
+    expression_z = '-(${beta}*(${b}*x+${c}*y)+${alpha}*(${e}*x+${f}*y))/${omega}'
   []
   [A_exact_imag]
     type = ParsedVectorFunction
-    expression_x = '(${alpha}*${a}-${beta}*${d})/${omega}'
-    expression_y = '(${alpha}*${b}-${beta}*${e})/${omega}'
-    expression_z = '(${alpha}*${c}-${beta}*${f})/${omega}'
+    expression_x = '(${alpha}*(${a}*y+${b}*z)-${beta}*(${d}*y+${e}*z))/${omega}'
+    expression_y = '(${alpha}*(${a}*x+${c}*z)-${beta}*(${d}*x+${f}*z))/${omega}'
+    expression_z = '(${alpha}*(${b}*x+${c}*y)-${beta}*(${e}*x+${f}*y))/${omega}'
   []
 []
 
@@ -122,7 +122,7 @@ beta=0.5
 
 [Solvers]
   [main]
-    type = MFEMSuperLU
+    type = MFEMMUMPS
   []
 []
 
