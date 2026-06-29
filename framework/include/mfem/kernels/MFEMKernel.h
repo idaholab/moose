@@ -34,16 +34,17 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() { return nullptr; }
 
-  // Create a new MFEM DG integrator to apply to the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createFaceLFIntegrator() { return nullptr; }
-  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() { return nullptr; }
-
   /// Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
+
+  /// Method to disambiguate whether we have a regular kernel or a DG Kernel.
+  /// DG Kernels are added to (Bi)linear forms with a different method, so
+  /// we first perform this check to see what we are dealing with.
+  virtual bool IsDGKernel() const { return false; }
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.

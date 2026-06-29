@@ -21,10 +21,9 @@ public:
   MFEMDGDirichletLFBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createFaceLFIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
-  mfem::LinearFormIntegrator * createLFIntegrator() override { return nullptr; };
-  mfem::BilinearFormIntegrator * createBFIntegrator() override { return nullptr; };
+  virtual bool IsDGBC() const override { return true; }
 
 protected:
   int _fe_order;
