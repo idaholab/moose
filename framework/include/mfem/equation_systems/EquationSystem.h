@@ -354,68 +354,6 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
   }
 }
 
-inline void
-EquationSystem::ApplyBoundaryLFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map)
-{
-  if (integrated_bc_map.Has(test_var_name) &&
-      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & bc : bcs)
-    {
-      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
-
-      if (integ)
-      {
-        bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
-            : form->AddBoundaryIntegrator(std::move(integ));
-      }
-
-      // Do the same for DG
-      mfem::LinearFormIntegrator * dg_integ = bc->createLFIntegrator();
-      if (dg_integ)
-      {
-        bc->isBoundaryRestricted()
-            ? form->AddBdrFaceIntegrator(std::move(dg_integ), bc->getBoundaryMarkers())
-            : form->AddBdrFaceIntegrator(std::move(dg_integ));
-      }
-    }
-  }
-}
-
-inline void
-EquationSystem::ApplyBoundaryNLFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParNonlinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map,
-    std::optional<mfem::real_t> scale_factor)
-{
-  if (integrated_bc_map.Has(test_var_name) &&
-      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & bc : bcs)
-    {
-      mfem::NonlinearFormIntegrator * integ = bc->createNLIntegrator();
-      if (integ)
-      {
-        _non_linear = true;
-        if (scale_factor.has_value())
-          integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
-        bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
-            : form->AddBoundaryIntegrator(std::move(integ));
-      }
-    }
-  }
-}
-
 } // namespace Moose::MFEM
 
 #endif
