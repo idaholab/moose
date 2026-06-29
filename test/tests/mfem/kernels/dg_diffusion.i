@@ -45,10 +45,6 @@
     type = MFEMDGDiffusionBC
     variable = concentration
   []
-  [dg_diff_lf_bc]
-    type = MFEMDGDirichletLFBC
-    variable = concentration
-  []
 []
 
 [Preconditioner]
