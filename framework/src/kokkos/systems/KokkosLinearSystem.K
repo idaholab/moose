@@ -10,7 +10,8 @@
 #include "LinearSystem.h"
 
 #include "Attributes.h"
-#include "KokkosLinearFVKernel.h"
+#include "KokkosLinearFVElementalKernel.h"
+#include "KokkosLinearFVFluxKernel.h"
 #include "KokkosLinearFVBoundaryCondition.h"
 #include "MooseUtils.h"
 #include "MaterialPropertyInterface.h"
@@ -42,7 +43,7 @@ LinearSystem::addKokkosBoundaryCondition(const std::string & bc_name,
   _fe_problem.theWarehouse().add(bc);
 
   const auto & boundary_ids = bc->boundaryIDs();
-  const auto * const bc_var = &bc->mooseVariable();
+  const auto * const bc_var = bc->variable().mooseVar();
   _vars[0].addBoundaryVar(boundary_ids, bc_var);
 }
 

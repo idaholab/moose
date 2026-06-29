@@ -107,11 +107,9 @@ NonlinearSystemBase::setKokkosInitialSolution()
     _kokkos_preset_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
         boundary, needed_fe_var_vector_tags);
 
-  auto & kokkos_fe_systems = _fe_problem.getKokkosFESystems();
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
-      kokkos_fe_systems[i].sync(needed_fe_var_vector_tags,
-                                Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+  for (const auto i : index_range(systems))
+    if (systems.isSlotConstructed(i))
+      systems[i].sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   systems.copyToDevice();
 
@@ -120,10 +118,9 @@ NonlinearSystemBase::setKokkosInitialSolution()
 
   Kokkos::fence();
 
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
-      kokkos_fe_systems[i].sync(needed_fe_var_vector_tags,
-                                Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  for (const auto i : index_range(systems))
+    if (systems.isSlotConstructed(i))
+      systems[i].sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
 }
@@ -272,14 +269,13 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   // Copy solution vectors and residuals
 
-  auto & kokkos_fe_systems = _fe_problem.getKokkosFESystems();
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
+  for (const auto i : index_range(systems))
+    if (systems.isSlotConstructed(i))
     {
-      kokkos_fe_systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
+      systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
       {
         TIME_SECTION("KokkosCopy", 1);
-        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+        systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
       }
     }
 
@@ -299,18 +295,18 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (const auto i : index_range(kokkos_fe_systems))
-      if (kokkos_fe_systems.isSlotConstructed(i))
-        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (const auto i : index_range(systems))
+      if (systems.isSlotConstructed(i))
+        systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
   // Clear
 
   systems[number()].clearActiveResidualTags();
 
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
-      kokkos_fe_systems[i].clearActiveSolutionTags();
+  for (const auto i : index_range(systems))
+    if (systems.isSlotConstructed(i))
+      systems[i].clearActiveSolutionTags();
 }
 
 void

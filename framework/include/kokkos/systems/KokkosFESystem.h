@@ -462,5 +462,5 @@ FESystem::getVectorQpADGradFace(const ElementInfo info,
 }
 #endif
 
-MakeHolder(FESystem);
+MakeSystemHolder(FESystem);
 } // namespace Moose::Kokkos

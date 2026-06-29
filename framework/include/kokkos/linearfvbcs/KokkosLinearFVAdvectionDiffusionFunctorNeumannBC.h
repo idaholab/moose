@@ -40,7 +40,7 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::computeRightHandSideContribution(
     const FVDatum & datum) const
 {

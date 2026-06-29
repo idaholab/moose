@@ -375,16 +375,16 @@ FEProblemBase::initKokkos()
 
     // Scan variables to determine what Kokkos infrastructure this system needs.
     // needs_fe: at least one variable precomputes QP-indexed solution arrays
-    //           → system needs a Kokkos::FESystem.
+    //           -> system needs a Kokkos::FESystem.
     // needs_fv: at least one variable assembles via the FV path (ElemInfo/FaceInfo,
-    //           no QP reinit) → system needs a standalone Kokkos::System.
+    //           no QP reinit) -> system needs a standalone Kokkos::System.
     // Both false (scalar-only): FESystem is absent, so FESystem's inherited
-    //   Kokkos::System cannot serve as the system entry — a standalone Kokkos::System
+    //   Kokkos::System cannot serve as the system entry; a standalone Kokkos::System
     //   is still required.
     bool needs_fv = false;
     bool needs_fe = false;
 
-    for (unsigned int v = 0; v < sys.nFieldVariables(); ++v)
+    for (const auto v : make_range(sys.nFieldVariables()))
     {
       const auto & var = sys.getVariable(0, v);
       if (var.usesQpBasedLoops())

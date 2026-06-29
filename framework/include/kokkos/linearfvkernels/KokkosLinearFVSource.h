@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosLinearFVKernel.h"
+#include "KokkosLinearFVElementalKernel.h"
 #include "KokkosParsedFunction.h"
 
 /**
@@ -22,12 +22,6 @@ public:
   static InputParameters validParams();
 
   KokkosLinearFVSource(const InputParameters & parameters);
-
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum &) const
-  {
-    return 0;
-  }
 
   template <typename Derived>
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;

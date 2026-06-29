@@ -11,14 +11,12 @@
 
 #include "KokkosLinearSystemContributionObject.h"
 #include "KokkosDatum.h"
-#include "KokkosVariable.h"
 
 #include "BoundaryRestrictableRequired.h"
 #include "GeometricSearchInterface.h"
 #include "NonADFunctorInterface.h"
-#include "FaceArgInterface.h"
 
-#include "KokkosLinearFVKernel.h"
+#include "KokkosLinearFVFluxKernel.h"
 
 namespace Moose::Kokkos
 {
@@ -31,8 +29,7 @@ namespace Moose::Kokkos
 class LinearFVBoundaryCondition : public LinearSystemContributionObject,
                                   public BoundaryRestrictableRequired,
                                   public GeometricSearchInterface,
-                                  public NonADFunctorInterface,
-                                  public FaceArgProducerInterface
+                                  public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -40,25 +37,14 @@ public:
   LinearFVBoundaryCondition(const InputParameters & parameters);
   LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object);
 
-  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
-
-  /// Tag dispatch type for the right-hand side computation loop
-  struct RightHandSideLoop
-  {
-  };
-  /// Tag dispatch type for the matrix computation loop
-  struct MatrixLoop
-  {
-  };
-
   /**
    * Compute the right-hand side contributions of this boundary condition
    */
-  virtual void computeRightHandSide();
+  virtual void computeRightHandSide() override;
   /**
    * Compute the matrix contributions of this boundary condition
    */
-  virtual void computeMatrix();
+  virtual void computeMatrix() override;
   /**
    * Bind this boundary condition to the owning flux kernel's boundary face data
    * @param data The owning flux kernel's boundary face data to write into
@@ -81,29 +67,7 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const;
 
-  /**
-   * Get the underlying MOOSE linear finite volume variable
-   * @returns The MOOSE variable this boundary condition acts on
-   */
-  const MooseLinearVariableFV<Real> & mooseVariable() const { return _moose_var; }
-
-  /**
-   * Get the Kokkos variable
-   * @returns The Kokkos variable this boundary condition acts on
-   */
-  Variable variable() const { return _var; }
-
 protected:
-  /// The MOOSE linear finite volume variable this boundary condition acts on
-  const MooseLinearVariableFV<Real> & _moose_var;
-  /// The Kokkos variable this boundary condition acts on
-  Variable _var;
-
-  /// Dispatcher for the right-hand side computation loop
-  std::unique_ptr<DispatcherBase> _rhs_dispatcher;
-  /// Dispatcher for the matrix computation loop
-  std::unique_ptr<DispatcherBase> _matrix_dispatcher;
-
   /// Shallow copies of the owning flux kernel's BoundaryFaceData arrays, written by BC dispatches
   Array2D<Real> _bc_data_matrix;
   Array2D<Real> _bc_data_rhs;

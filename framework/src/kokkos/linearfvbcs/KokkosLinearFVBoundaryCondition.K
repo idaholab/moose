@@ -28,15 +28,8 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
   : LinearSystemContributionObject(parameters),
     BoundaryRestrictableRequired(this, false),
     GeometricSearchInterface(this),
-    NonADFunctorInterface(this),
-    FaceArgProducerInterface(),
-    _moose_var(libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
-        _subproblem.getVariable(0,
-                                getParam<LinearVariableName>("variable"),
-                                Moose::VarKindType::VAR_SOLVER,
-                                Moose::VarFieldType::VAR_FIELD_STANDARD)))
+    NonADFunctorInterface(this)
 {
-  _var.init(_moose_var, Moose::SOLUTION_TAG);
 }
 
 LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object)
@@ -44,9 +37,6 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondi
     BoundaryRestrictableRequired(object, {}),
     GeometricSearchInterface(object, {}),
     NonADFunctorInterface(object, {}),
-    FaceArgProducerInterface(),
-    _moose_var(object._moose_var),
-    _var(object._var),
     _bc_data_matrix(object._bc_data_matrix),
     _bc_data_rhs(object._bc_data_rhs)
 {
@@ -75,16 +65,6 @@ LinearFVBoundaryCondition::computeMatrix()
   if (!_matrix_dispatcher)
     _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
   _matrix_dispatcher->parallelFor(policy);
-}
-
-bool
-LinearFVBoundaryCondition::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  const auto ft = fi.faceType(std::make_pair(_var.var(), _var.sys()));
-  if (fi_elem_side)
-    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
-  else
-    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
 }
 
 } // namespace Moose::Kokkos

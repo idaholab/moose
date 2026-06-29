@@ -17,35 +17,6 @@
 
 namespace Moose::Kokkos
 {
-
-System::System(const System & src)
-  : PerfGraphInterface(src._system.feProblem().getMooseApp().perfGraph(), "KokkosSystem"),
-    MeshHolder(src),
-    _system(src._system),
-    _mesh(src._mesh),
-    _dof_map(src._dof_map),
-    _comm(src._comm),
-    _num_vars(src._num_vars),
-    _num_local_dofs(src._num_local_dofs),
-    _num_ghost_dofs(src._num_ghost_dofs),
-    _vectors(src._vectors),
-    _matrices(src._matrices),
-    _local_elem_dof_index(src._local_elem_dof_index),
-    _local_to_global_dof_index(src._local_to_global_dof_index),
-    _max_dofs_per_elem(src._max_dofs_per_elem),
-    _var_subdomain_active(src._var_subdomain_active),
-    _active_variables(src._active_variables),
-    _active_solution_tags(src._active_solution_tags),
-    _active_residual_tags(src._active_residual_tags),
-    _active_matrix_tags(src._active_matrix_tags),
-    _residual_tag_active(src._residual_tag_active),
-    _matrix_tag_active(src._matrix_tag_active),
-    _local_comm_list(src._local_comm_list),
-    _ghost_comm_list(src._ghost_comm_list),
-    _sparsity(src._sparsity)
-{
-}
-
 System::System(SystemBase & system)
   : PerfGraphInterface(system.feProblem().getMooseApp().perfGraph(), "KokkosSystem"),
     MeshHolder(*system.mesh().getKokkosMesh()),

@@ -8,11 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosLinearFVKernel.h"
-#include "KokkosLinearFVBoundaryCondition.h"
-#include "LinearFVBoundaryCondition.h"
-
-#include "Attributes.h"
-#include "FEProblemBase.h"
 
 namespace Moose::Kokkos
 {
@@ -30,154 +25,13 @@ LinearFVKernel::validParams()
 LinearFVKernel::LinearFVKernel(const InputParameters & parameters)
   : LinearSystemContributionObject(parameters), BlockRestrictable(this), NonADFunctorInterface(this)
 {
-  const auto & var = libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
-      _subproblem.getVariable(0,
-                              getParam<LinearVariableName>("variable"),
-                              Moose::VarKindType::VAR_SOLVER,
-                              Moose::VarFieldType::VAR_FIELD_STANDARD));
-  _kokkos_var.init(var, Moose::SOLUTION_TAG);
 }
 
 LinearFVKernel::LinearFVKernel(const LinearFVKernel & object)
   : LinearSystemContributionObject(object),
     BlockRestrictable(object, {}),
-    NonADFunctorInterface(object, {}),
-    _kokkos_var(object._kokkos_var)
+    NonADFunctorInterface(object, {})
 {
-}
-
-InputParameters
-LinearFVElementalKernel::validParams()
-{
-  auto params = LinearFVKernel::validParams();
-  params.registerSystemAttributeName("LinearFVElementalKernel");
-  return params;
-}
-
-LinearFVElementalKernel::LinearFVElementalKernel(const InputParameters & parameters)
-  : LinearFVKernel(parameters)
-{
-}
-
-LinearFVElementalKernel::LinearFVElementalKernel(const LinearFVElementalKernel & object)
-  : LinearFVKernel(object)
-{
-}
-
-void
-LinearFVElementalKernel::computeRightHandSide()
-{
-  Policy policy(0, numKokkosBlockElements());
-  if (!_rhs_dispatcher)
-    _rhs_dispatcher = DispatcherRegistry::build<RightHandSideLoop>(this, type());
-  _rhs_dispatcher->parallelFor(policy);
-}
-
-void
-LinearFVElementalKernel::computeMatrix()
-{
-  Policy policy(0, numKokkosBlockElements());
-  if (!_matrix_dispatcher)
-    _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
-  _matrix_dispatcher->parallelFor(policy);
-}
-
-InputParameters
-LinearFVFluxKernel::validParams()
-{
-  auto params = LinearFVKernel::validParams();
-  params.registerSystemAttributeName("LinearFVFluxKernel");
-  params.addPrivateParam<bool>("_kokkos_flux_kernel", true);
-  return params;
-}
-
-LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & parameters)
-  : LinearFVKernel(parameters), FaceArgProducerInterface()
-{
-}
-
-LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
-  : LinearFVKernel(object), FaceArgProducerInterface(), _bc_data(object._bc_data)
-{
-}
-
-void
-LinearFVFluxKernel::initialSetup()
-{
-  const auto n_elems =
-      libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(kokkosMesh().getNumLocalElements());
-  const auto max_sides =
-      libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(_subproblem.mesh().getMaxSidesPerElem());
-  _bc_data.matrix_coeff.create(max_sides, n_elems);
-  _bc_data.rhs_coeff.create(max_sides, n_elems);
-  _bc_data.matrix_coeff = 0;
-  _bc_data.rhs_coeff = 0;
-
-  std::vector<LinearFVBoundaryCondition *> bcs;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSysNum>(_kokkos_var.sys())
-      .template condition<AttribSystem>("LinearFVBoundaryCondition")
-      .template condition<AttribKokkos>(true)
-      .template condition<AttribThread>(0)
-      .queryInto(bcs);
-
-  for (auto * bc : bcs)
-    if (bc->variable().var() == _kokkos_var.var())
-      bc->initBCData(_bc_data);
-
-  // Non-Kokkos BCs are never called by Kokkos flux kernels — they would be silently
-  // ignored, producing wrong results (typically a zero RHS).
-  std::vector<::LinearFVBoundaryCondition *> non_kokkos_bcs;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSysNum>(_kokkos_var.sys())
-      .template condition<AttribSystem>("LinearFVBoundaryCondition")
-      .template condition<AttribKokkos>(false)
-      .template condition<AttribThread>(0)
-      .queryInto(non_kokkos_bcs);
-
-  for (auto * bc : non_kokkos_bcs)
-    if (bc->variable().number() == _kokkos_var.var())
-      mooseError("Kokkos linear FV flux kernel '",
-                 name(),
-                 "' found non-Kokkos boundary condition '",
-                 bc->name(),
-                 "' (type '",
-                 bc->type(),
-                 "') for variable '",
-                 bc->variable().name(),
-                 "'. Non-Kokkos BCs are not called by Kokkos flux kernels and will produce "
-                 "incorrect results. Use the Kokkos equivalent, e.g. "
-                 "'KokkosLinearFVAdvectionDiffusionFunctorDirichletBC'.");
-}
-
-void
-LinearFVFluxKernel::computeRightHandSide()
-{
-  Policy policy(0, numKokkosBlockSides());
-  if (!_rhs_dispatcher)
-    _rhs_dispatcher = DispatcherRegistry::build<RightHandSideLoop>(this, type());
-  _rhs_dispatcher->parallelFor(policy);
-}
-
-void
-LinearFVFluxKernel::computeMatrix()
-{
-  Policy policy(0, numKokkosBlockSides());
-  if (!_matrix_dispatcher)
-    _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
-  _matrix_dispatcher->parallelFor(policy);
-}
-
-bool
-LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  const auto ft = fi.faceType(std::make_pair(_kokkos_var.var(), _kokkos_var.sys()));
-  if (fi_elem_side)
-    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
-  else
-    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
 }
 
 } // namespace Moose::Kokkos
