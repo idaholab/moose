@@ -473,17 +473,18 @@ protected:
     EXPECT_EQ(wasp::lsp::m_uri_prefix + test_input_path, diag_uri);
     EXPECT_EQ(expect_diagnostics_size, diag_array.size());
 
-    // lambda used to remove blank lines from formatted list of diagnostics
-    auto remove_blank_lines = [](std::string formatted_diagnostics)
+    // lambda to remove blank lines and normalize diagnostic absolute paths
+    auto normalize_diagnostics = [](std::string formatted_diagnostics)
     {
       pcrecpp::RE("\\n{2,}").GlobalReplace("\n", &formatted_diagnostics);
+      pcrecpp::RE("(^.*/unit/)(.*)").GlobalReplace("/absolute/path/\\2", &formatted_diagnostics);
       return formatted_diagnostics;
     };
 
     // build formatted list of diagnostics and check that it is as expected
     std::ostringstream actual_diagnostics_list;
     format_diagnostics(diag_array, actual_diagnostics_list);
-    EXPECT_EQ(expect_diagnostics_list, "\n" + remove_blank_lines(actual_diagnostics_list.str()));
+    EXPECT_EQ(expect_diagnostics_list, "\n" + normalize_diagnostics(actual_diagnostics_list.str()));
   }
 
   // create moose_unit_app, moose_server, and test_input_path for all tests
@@ -2505,14 +2506,52 @@ In csv_rows: Lengths of x and y data do not match.
 
   // ----------------------------------------------------------------------
 
-  // revert error introduced in csv file to clear out all diagnostic errors
+  // revert csv file error and update included file to add HIT syntax error
   csv_rows.open("csv_rows.csv");
   csv_rows << R"INPUT(
 100, 200, 300, 400, 500
 1.1, 2.2, 3.3, 4.4, 5.5
 )INPUT";
   csv_rows.close();
-  changed_resource_uris = {"file://" + cwd + "/csv_rows.csv"};
+  include_02.open("include_02.i");
+  include_02 << R"INPUT(
+[BCs]
+  [bc_csv_rows_func
+    type = FunctionDirichletBC
+    boundary = 1
+    variable = u
+    function = csv_rows
+  []
+[]
+)INPUT";
+  include_02.close();
+  changed_resource_uris = {"file://" + cwd + "/csv_rows.csv", "file://" + cwd + "/include_02.i"};
+
+  // expected diagnostics messages due to removing bracket in included file
+  expect_diagnostics_size = 1;
+  expect_diagnostics_list = R"INPUT(
+/absolute/path/include_02.i:4.1: syntax error, unexpected end of line, expecting ]
+)INPUT";
+
+  // notify server of changed resource files and check expected diagnostics
+  check_resource_updates(changed_resource_uris, expect_diagnostics_size, expect_diagnostics_list);
+
+  // ----------------------------------------------------------------------
+
+  // revert HIT syntax error from included file to clear up all diagnostics
+  include_02.open("include_02.i");
+  include_02 << R"INPUT(
+[BCs]
+  [bc_csv_rows_func]
+    type = FunctionDirichletBC
+    boundary = 1
+    variable = u
+    function = csv_rows
+  []
+[]
+)INPUT";
+  include_02.close();
+  changed_resource_uris = {"file://" + cwd + "/include_02.i"};
 
   // no diagnostics messages are expected now since csv file has been fixed
   expect_diagnostics_size = 0;
