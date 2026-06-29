@@ -100,6 +100,11 @@ private:
   void subdomainErrorMessage(SubdomainID sub_id,
                              const std::unordered_map<SubdomainID, C> & functors) const;
 
+  /**
+   * Format a subdomain ID with its name, when available.
+   */
+  std::string subdomainNameAndID(SubdomainID sub_id) const;
+
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
@@ -208,25 +213,35 @@ PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 }
 
 template <typename T>
+std::string
+PiecewiseByBlockLambdaFunctor<T>::subdomainNameAndID(const SubdomainID sub_id) const
+{
+  const auto & name = _mesh.getSubdomainName(sub_id);
+  if (name.empty())
+    return Moose::stringify(sub_id);
+  return "'" + name + "' (" + Moose::stringify(sub_id) + ")";
+}
+
+template <typename T>
 template <typename C>
 void
 PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(
     const SubdomainID sub_id, const std::unordered_map<SubdomainID, C> & functors) const
 {
-  std::vector<SubdomainID> block_ids;
-  block_ids.reserve(functors.size());
+  std::vector<std::string> block_names_and_ids;
+  block_names_and_ids.reserve(functors.size());
   for (const auto & [available_sub_id, functor] : functors)
   {
     libmesh_ignore(functor);
-    block_ids.push_back(available_sub_id);
+    block_names_and_ids.push_back(subdomainNameAndID(available_sub_id));
   }
-  mooseError("The provided subdomain ID ",
-             std::to_string(sub_id),
+  mooseError("The provided subdomain ",
+             subdomainNameAndID(sub_id),
              " doesn't exist in the map for lambda functor '",
              this->functorName(),
              "'! This is likely because you did not provide a functor material "
-             "definition on that subdomain.\nSubdomain IDs in the map: ",
-             Moose::stringify(block_ids));
+             "definition on that subdomain.\nSubdomains in the map: ",
+             Moose::stringify(block_names_and_ids));
 }
 
 template <typename T>
