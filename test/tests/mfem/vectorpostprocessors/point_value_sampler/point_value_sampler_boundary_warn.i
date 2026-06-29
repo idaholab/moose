@@ -24,6 +24,21 @@
   []
 []
 
+[Functions]
+  [parsed_function]
+    type = ParsedFunction
+    expression = 'x + y*y + z*z*z'
+  []
+[]
+
+[ICs]
+  [l2_scalar_ic]
+    type = MFEMScalarIC
+    variable = 'l2_scalar'
+    coefficient = parsed_function
+  []
+[]
+
 [Executioner]
   type = MFEMSteady
   device = cpu

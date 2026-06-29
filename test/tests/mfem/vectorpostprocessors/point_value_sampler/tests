@@ -50,4 +50,43 @@
     requirement = "An error will be produced for a point near a boundary when the tolerance is tight"
     capabilities = 'mfem'
   []
+  [MFEMPointValueSamplerAvgTypeNone]
+    type = CSVDiff
+    input = point_value_sampler_boundary_warn.i
+    csvdiff = 'OutputData/point_value_sampler_avgtype_none_point_sample_0001.csv'
+    cli_args = 'VectorPostprocessors/point_sample/average_type=NONE '
+               'Outputs/csv=true '
+               'Outputs/file_base=OutputData/point_value_sampler_avgtype_none'
+    requirement = 'The system has the ability to use no average near non-continuous boundaries'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # we will get a warning for being near the boundary
+    allow_warnings = 'true'
+  []
+  [MFEMPointValueSamplerAvgTypeArithmetic]
+    type = CSVDiff
+    input = point_value_sampler_boundary_warn.i
+    csvdiff = 'OutputData/point_value_sampler_avgtype_arithmetic_point_sample_0001.csv'
+    cli_args = 'VectorPostprocessors/point_sample/average_type=ARITHMETIC '
+               'Outputs/csv=true '
+               'Outputs/file_base=OutputData/point_value_sampler_avgtype_arithmetic'
+    requirement = 'The system has the ability to use arithmetic average near non-continuous boundaries'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # we will get a warning for being near the boundary
+    allow_warnings = 'true'
+  []
+  [MFEMPointValueSamplerAvgTypeHarmonic]
+    type = CSVDiff
+    input = point_value_sampler_boundary_warn.i
+    csvdiff = 'OutputData/point_value_sampler_avgtype_harmonic_point_sample_0001.csv'
+    cli_args = 'VectorPostprocessors/point_sample/average_type=HARMONIC '
+               'Outputs/csv=true '
+               'Outputs/file_base=OutputData/point_value_sampler_avgtype_harmonic'
+    requirement = 'The system has the ability to use harmonic average near non-continuous boundaries'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    # we will get a warning for being near the boundary
+    allow_warnings = 'true'
+  []
 []
