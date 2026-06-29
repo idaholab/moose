@@ -371,4 +371,18 @@
                    "Materials \(1 item\): block"
     []
   []
+
+  [restriction_groups]
+    type = RunApp
+    input = show_restriction_groups.i
+    requirement = 'The system shall include the ability to output groups of objects with matching block and boundary restrictions'
+    design = 'Debug/index.md'
+    issues = '#25643'
+    expect_out = "Block-Restriction Groups \([0-9]+ groups\)\: showing objects with matching block restrictions[\s\S]*"
+                 "Blocks 'Box1' \(id 1\) \([0-9]+ items?\)\: [\s\S]*GenericConstantMaterial/restricted[\s\S]*"
+                 "Boundary-Restriction Groups \([0-9]+ groups\)\: showing objects with matching boundary restrictions[\s\S]*"
+                 "Boundaries 'top' \(id [0-9]+\) \([0-9]+ items?\)\: [\s\S]*GenericConstantMaterial/boundary"
+    absent_out = "Boundary-Restriction Groups \([0-9]+ groups\)\: showing objects with matching boundary restrictions[\s\S]*"
+                 "GenericConstantMaterial/restricted"
+  []
 []
