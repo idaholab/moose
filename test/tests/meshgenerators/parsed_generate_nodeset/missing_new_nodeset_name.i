@@ -25,4 +25,3 @@
     new_nodeset = interior
   []
 []
-
