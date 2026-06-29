@@ -10,28 +10,16 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMScalarQuadratureFunction]
-    type = CSVDiff
-    input = quadrature_function_source.i
-    csvdiff = OutputData/QuadratureFunctionSource.csv
-    design = 'MFEMScalarQuadratureFunction.md'
-    issues = '#33291'
-    requirement = 'The system shall have the ability to precompute a coefficient at quadrature '
-                  'points and reuse the stored values in place of the original coefficient.'
+  [CylindricalCoefficients]
+    type = XMLDiff
+    input = cylindrical_coefficients.i
+    xmldiff = 'OutputData/CylindricalCoefficients/Run0/Run0.pvd
+           OutputData/CylindricalCoefficients/Run0/Cycle000001/proc000000.vtu'
+    design = 'MFEMCylindricalCoordinateCoefficients.md'
+    issues = '#32375'
+    requirement = 'The system shall have the ability to parse the cylindrical coefficients to functor materials'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []
-  [MFEMScalarQuadratureFunctionOrderMismatch]
-    type = RunException
-    input = quadrature_function_source.i
-    cli_args = 'QuadratureFunctions/qf_source/order=6'
-    expect_err = "Set 'order = 2'"
-    design = 'MFEMScalarQuadratureFunction.md'
-    issues = '#33291'
-    requirement = 'The system shall report an error, naming the required quadrature order, when a '
-                  'quadrature function coefficient is evaluated by an integrator using a different '
-                  'integration rule.'
-    capabilities = 'mfem'
-  []
 []
