@@ -6,14 +6,16 @@ The unit parser supports the `*`,`/`, and `^` operators as well as parenthesis `
 The argument of the `^` operator is expected to be a positive or negative integer.
 
 Upon parsing all units are resolved to a combination of the
-[seven base SI units](https://en.wikipedia.org/wiki/SI_base_unit) (`m`, `g`,
+[seven base SI units](https://en.wikipedia.org/wiki/SI_base_unit) (`m`, `kg`,
 `s`, `A`, `K`, `mol`, `cd`) with their respective exponents and a prefactor. A
 canonical form is generated that permits unit comparisons to determine
 conformity (i.e. whether two units can be converted between).
 
 `MooseUnits` supports prefixing all units with a
 [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) ranging from `Y` (yotta)
-to `y` (yocto).
+to `y` (yocto). The parser represents mass internally with the SI base unit
+`kg`, but accepts `g` as the mass token so prefixed units such as `kg` and `mg`
+can be parsed.
 
 ## Supported derived units
 
