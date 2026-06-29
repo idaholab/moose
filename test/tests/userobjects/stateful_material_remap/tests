@@ -1,0 +1,92 @@
+[Tests]
+  issues = '#0000'
+  design = 'userobjects/StatefulMaterialPropertyExporter.md userobjects/StatefulMaterialPropertyImporter.md'
+
+  [export]
+    type = 'RunApp'
+    input = 'export.i'
+    requirement = 'The system shall export stateful material property data with quadrature point '
+                  'positions and subdomain information to a binary file.'
+  []
+
+  [import]
+    type = 'RunApp'
+    input = 'import.i'
+    prereq = 'export'
+    requirement = 'The system shall import stateful material property data from a binary file and '
+                  'remap it onto a different mesh using closest-point matching.'
+  []
+
+  [export_parallel]
+    type = 'RunApp'
+    input = 'export.i'
+    cli_args = 'UserObjects/exporter/file_base=stateful_parallel_export '
+               'Outputs/file_base=parallel_export'
+    min_parallel = 2
+    max_parallel = 2
+    requirement = 'The system shall export stateful material property data from each MPI rank '
+                  'to rank-suffixed binary files.'
+  []
+
+  [import_parallel]
+    type = 'RunApp'
+    input = 'import.i'
+    prereq = 'export_parallel'
+    cli_args = 'UserObjects/importer/file_base=stateful_parallel_export '
+               'Outputs/file_base=parallel_import'
+    min_parallel = 2
+    max_parallel = 2
+    requirement = 'The system shall import stateful material property data from multiple '
+                  'rank-suffixed binary files in parallel.'
+  []
+
+  [import_partial]
+    type = 'RunApp'
+    input = 'import_partial.i'
+    prereq = 'export'
+    requirement = 'The system shall correctly initialize non-imported stateful properties via '
+                  'initStatefulProperties() when a material has both imported and non-imported '
+                  'stateful properties (partial import).'
+  []
+
+  [export_subset_source]
+    type = 'RunApp'
+    input = 'export_subset_source.i'
+    requirement = 'The system shall export multiple stateful material properties for subset '
+                  'import testing.'
+  []
+
+  [import_subset]
+    type = 'RunApp'
+    input = 'import_subset.i'
+    prereq = 'export_subset_source'
+    requirement = 'The system shall skip exported stateful properties that are not declared in '
+                  'the current simulation while still importing matching properties.'
+  []
+
+  [type_mismatch]
+    type = 'RunException'
+    input = 'type_mismatch.i'
+    prereq = 'export'
+    expect_err = 'Type mismatch for stateful property'
+    requirement = 'The system shall error when importing stateful material property data with a '
+                  'type that does not match the current simulation.'
+  []
+
+  [state_mismatch]
+    type = 'RunException'
+    input = 'state_mismatch.i'
+    prereq = 'export'
+    expect_err = 'State count mismatch for stateful property'
+    requirement = 'The system shall error when importing stateful material property data with a '
+                  'state count that does not match the current simulation.'
+  []
+
+  [bad_execute_on]
+    type = 'RunException'
+    input = 'bad_execute_on.i'
+    expect_err = 'must execute only on INITIAL'
+    requirement = 'The system shall reject StatefulMaterialPropertyImporter configurations that '
+                  'execute outside of INITIAL.'
+  []
+[]
