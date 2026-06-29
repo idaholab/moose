@@ -23,11 +23,15 @@ public:
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+
   virtual bool IsDGBC() const override { return true; }
 
 protected:
   int _fe_order;
   mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _zero;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
 };
