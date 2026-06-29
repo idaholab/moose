@@ -103,7 +103,7 @@ omega=10.0
 
 [Solvers]
   [main]
-    type = MFEMSuperLU
+    type = MFEMMUMPS
   []
 []
 
