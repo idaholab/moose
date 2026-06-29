@@ -50,6 +50,8 @@ The following tasks are performed by this syntax/action:
   object is created to compute view factors.
 - A [ViewFactorRayStudy.md] is created if [!param](/GrayDiffuseRadiation/view_factor_calculator) is `ray_tracing`.
 - [ViewFactorRayBC.md] and [ReflectRayBC.md] objects are created if [!param](/GrayDiffuseRadiation/view_factor_calculator) is `ray_tracing`.
+- A CONSTANT MONOMIAL aux variable is created with a [GrayLambertRadiationHeatFluxAux.md] aux kernel
+  if [!param](/GrayDiffuseRadiation/add_heat_flux_aux) is true.
 
 ## Associated Objects
 
