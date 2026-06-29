@@ -274,6 +274,10 @@ public:
     KOKKOS_ASSERT(_linearfv_initialized);
     return _linearfv_face_d_cn_mag(side, elem);
   }
+  /**
+   * @returns The boundary ID associated with an element side. If there is none, the returned value
+   * will be \p Moose::INVALID_BOUNDARY_ID
+   */
   KOKKOS_FUNCTION BoundaryID getFaceBoundaryID(ContiguousElementID elem, unsigned int side) const
   {
     KOKKOS_ASSERT(_linearfv_initialized);

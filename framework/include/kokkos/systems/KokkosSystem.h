@@ -37,10 +37,10 @@ public:
   System(SystemBase & system);
 
   /**
-   * Copy constructor - shallow-copies all Array<> members so that device memory is shared.
+   * Defaulted copy constructor
    * Used by FESystem in mixed FE+FV simulations.
    */
-  System(const System & src);
+  System(const System & src) = default;
 
   /**
    * CSR format sparsity data
@@ -128,8 +128,8 @@ public:
   ///@{
   SystemBase & getSystem() { return _system; }
   const SystemBase & getSystem() const { return _system; }
-
   ///@}
+
   /**
    * Get the libMesh DOF map
    * @returns The libMesh DOF map
@@ -415,7 +415,7 @@ private:
  * appropriate Kokkos systems depending on the architecture.
  */
 // clang-format off
-#define MakeHolder(SystemTypeName)                                                                 \
+#define MakeSystemHolder(SystemTypeName)                                                                 \
   class SystemTypeName##Holder                                                                     \
   {                                                                                                \
   public:                                                                                          \
@@ -434,5 +434,5 @@ private:
   }
 // clang-format on
 
-MakeHolder(System);
+MakeSystemHolder(System);
 } // namespace Moose::Kokkos

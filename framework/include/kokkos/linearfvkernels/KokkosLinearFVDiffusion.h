@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosLinearFVKernel.h"
+#include "KokkosLinearFVFluxKernel.h"
 #include "KokkosParsedFunction.h"
 
 /**
@@ -38,7 +38,7 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeMatrixContribution(const FVDatum & datum) const
 {
   return datum.hasNeighbor() ? faceConductance(datum)
@@ -46,7 +46,7 @@ KokkosLinearFVDiffusion::computeMatrixContribution(const FVDatum & datum) const
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const FVDatum & datum) const
 {
   KOKKOS_ASSERT(datum.hasNeighbor());
@@ -54,7 +54,7 @@ KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const FVDatum & datum
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeRightHandSideContribution(const FVDatum & datum) const
 {
   return datum.hasNeighbor() ? 0 : _bc_data.rhs_coeff(datum.side(), datum.elemID());

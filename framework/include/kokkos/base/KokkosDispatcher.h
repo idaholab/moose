@@ -424,6 +424,12 @@ private:
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::RightHandSideLoop, classname>(objectname);        \
     DispatcherRegistry::addDispatcher<classname::MatrixLoop, classname>(objectname);               \
+    DispatcherRegistry::hasUserMethod<classname::MatrixLoop>(                                      \
+        objectname,                                                                                \
+        &classname::computeMatrixContribution<classname> !=                                        \
+                classname::defaultMatrixContribution<classname>() ||                               \
+            &classname::computeNeighborMatrixContribution<classname> !=                            \
+                classname::defaultNeighborMatrixContribution<classname>());                        \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

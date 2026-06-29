@@ -26,9 +26,14 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
     MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
     AssemblyHolder(_fe_problem.kokkosAssembly()),
     FESystemHolder(_fe_problem.getKokkosFESystems()),
+    ::CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     ::MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     ::TransientInterface(this)
 {
+  // Kokkos user objects currently only consume variable information through finite element bases
+  // and quadrature points
+  for (auto * const var : getMooseVariableDependencies())
+    var->requireQpComputations();
 }
 
 GeneralUserObject::GeneralUserObject(const GeneralUserObject & object)
@@ -36,6 +41,7 @@ GeneralUserObject::GeneralUserObject(const GeneralUserObject & object)
     MeshHolder(object),
     AssemblyHolder(object),
     FESystemHolder(object),
+    ::CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
     ::MaterialPropertyInterface(object, {}),
     ::TransientInterface(object, {})
 {

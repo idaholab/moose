@@ -47,7 +47,8 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
   _kokkos_var.init(subproblem->getVariable(0,
                                            getParam<LinearVariableName>("variable"),
                                            Moose::VarKindType::VAR_SOLVER,
-                                           Moose::VarFieldType::VAR_FIELD_STANDARD));
+                                           Moose::VarFieldType::VAR_FIELD_STANDARD),
+                   Moose::SOLUTION_TAG);
 }
 
 LinearSystemContributionObject::LinearSystemContributionObject(

@@ -56,11 +56,43 @@ public:
   LinearSystemContributionObject(const InputParameters & parameters);
   LinearSystemContributionObject(const LinearSystemContributionObject & object);
 
-protected:
-  KOKKOS_FUNCTION void accumulateTaggedVector(Real value, dof_id_type row) const;
-  KOKKOS_FUNCTION void accumulateTaggedMatrix(Real value, dof_id_type row, dof_id_type col) const;
+  /**
+   * Get the Kokkos variable this object contributes to
+   * @returns The Kokkos variable
+   */
+  Variable variable() const { return _kokkos_var; }
+
+  /// Tag dispatch type for the right-hand side computation loop
+  struct RightHandSideLoop
+  {
+  };
+  /// Tag dispatch type for the matrix computation loop
+  struct MatrixLoop
+  {
+  };
+
+  /**
+   * Compute the right-hand side contributions of this object
+   */
+  virtual void computeRightHandSide() = 0;
+  /**
+   * Compute the matrix contributions of this object
+   */
+  virtual void computeMatrix() = 0;
 
 protected:
+  /// Whether tagged vector/matrix accumulation must use atomics
+  enum class AccumulationMode
+  {
+    Atomic,
+    NonAtomic
+  };
+
+  template <AccumulationMode mode = AccumulationMode::Atomic>
+  KOKKOS_FUNCTION void accumulateTaggedVector(Real value, dof_id_type row) const;
+  template <AccumulationMode mode = AccumulationMode::Atomic>
+  KOKKOS_FUNCTION void accumulateTaggedMatrix(Real value, dof_id_type row, dof_id_type col) const;
+
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
@@ -72,6 +104,15 @@ protected:
   /// Matrix tags this object contributes to
   Array<TagID> _matrix_tags;
 
+  /// Dispatcher for the right-hand side computation loop
+  std::unique_ptr<DispatcherBase> _rhs_dispatcher;
+  /// Dispatcher for the matrix computation loop
+  std::unique_ptr<DispatcherBase> _matrix_dispatcher;
+
+  /**
+   * TODO: Move to TransientInterface
+   */
+  ///@{
   /// Current time
   Scalar<Real> _t;
   /// Old (previous time step) time
@@ -82,8 +123,10 @@ protected:
   Scalar<Real> _dt;
   /// Previous time step size
   Scalar<Real> _dt_old;
+  ///@}
 };
 
+template <LinearSystemContributionObject::AccumulationMode mode>
 KOKKOS_FUNCTION inline void
 LinearSystemContributionObject::accumulateTaggedVector(const Real value,
                                                        const dof_id_type row) const
@@ -98,10 +141,16 @@ LinearSystemContributionObject::accumulateTaggedVector(const Real value,
   {
     const auto tag = _vector_tags[index];
     if (sys.isResidualTagActive(tag))
-      ::Kokkos::atomic_add(&sys.getVectorDofValue(row, tag), value);
+    {
+      if constexpr (mode == AccumulationMode::Atomic)
+        ::Kokkos::atomic_add(&sys.getVectorDofValue(row, tag), value);
+      else
+        sys.getVectorDofValue(row, tag) += value;
+    }
   }
 }
 
+template <LinearSystemContributionObject::AccumulationMode mode>
 KOKKOS_FUNCTION inline void
 LinearSystemContributionObject::accumulateTaggedMatrix(const Real value,
                                                        const dof_id_type row,
@@ -117,7 +166,12 @@ LinearSystemContributionObject::accumulateTaggedMatrix(const Real value,
   {
     const auto tag = _matrix_tags[index];
     if (sys.isMatrixTagActive(tag))
-      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), value);
+    {
+      if constexpr (mode == AccumulationMode::Atomic)
+        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), value);
+      else
+        sys.getMatrixValue(row, col, tag) += value;
+    }
   }
 }
 

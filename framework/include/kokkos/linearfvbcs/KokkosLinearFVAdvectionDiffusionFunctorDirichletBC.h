@@ -50,7 +50,7 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
     const FVDatum & datum) const
 {
@@ -58,7 +58,7 @@ KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeRightHandSideContribution(
     const FVDatum & datum) const
 {

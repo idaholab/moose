@@ -11,6 +11,7 @@
 
 #include "KokkosUserObject.h"
 
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 
@@ -21,6 +22,7 @@ class GeneralUserObject : public UserObject,
                           public MeshHolder,
                           public AssemblyHolder,
                           public FESystemHolder,
+                          public ::CoupleableMooseVariableDependencyIntermediateInterface,
                           public ::MaterialPropertyInterface,
                           public ::TransientInterface
 {
