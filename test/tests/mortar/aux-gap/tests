@@ -1,6 +1,6 @@
 [Tests]
   design = WeightedGapAux.md
-  issues = '#20001'
+  issues = '#20001 #30209'
   [gap]
     requirement = 'The system shall be able to compute the gap between secondary and primary bodies using the mortar method and auxiliary kernels'
     [first_order]
@@ -27,7 +27,6 @@
       input = weighted_gap_aux_node_face_reinit.i
       capabilities = 'method=dbg'
       detail = 'after node-face reinitialization'
-      issues = '#30209'
     []
   []
   [no_constraint]
