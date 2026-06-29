@@ -13,7 +13,6 @@
 
 #include "EquationSystem.h"
 
-class MFEMEigensolverBase;
 class MFEMEigenproblem;
 
 namespace Moose::MFEM
@@ -53,7 +52,6 @@ private:
 
   /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
   mfem::OperatorHandle _mass_rhs;
-  mfem::Coefficient & _rhs_coef;
   /// Eigenproblem owning the right-hand-side coefficient, queried at assembly time.
   MFEMEigenproblem & _eigen_problem;
 };

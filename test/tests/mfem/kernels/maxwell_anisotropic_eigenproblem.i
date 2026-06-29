@@ -59,12 +59,14 @@ sqrt2_inv = 0.70710678118654752
   []
 []
 
-[Solver]
-  type = MFEMHypreAME
-  preconditioner = ams
-  print_level = 0
-  l_tol = 1e-8
-  l_max_its = 100
+[Solvers]
+  [AME]
+    type = MFEMHypreAME
+    preconditioner = ams
+    print_level = 0
+    l_tol = 1e-8
+    l_max_its = 100
+  []
 []
 
 [Executioner]
