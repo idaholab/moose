@@ -31,7 +31,17 @@ public:
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
-  KOKKOS_FUNCTION Real faceDiffusivity(const FVDatum & datum) const;
+  /**
+   * Method for evaluating the face diffusivity times the face area divided by the length between
+   * the cell center and face center
+   * @param datum Finite volume datum used to query the face area and cell-center-to-face-center
+   * distance
+   * @param face_centroid The xyz coordinates of the face centroid. This is parameter instead of
+   * being queried from the \p datum in order to save a global memory lookup in the RHS computation
+   * call-chain
+   */
+  KOKKOS_FUNCTION Real faceConductance(const FVDatum & datum,
+                                       const Moose::Kokkos::Real3 face_centroid) const;
 
   /// Diffusion coefficient (same functor as the paired diffusion kernel)
   const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _diffusion_coeff;
@@ -44,7 +54,7 @@ KOKKOS_FUNCTION inline Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
     const FVDatum & datum) const
 {
-  return faceDiffusivity(datum);
+  return faceConductance(datum, datum.faceCentroid());
 }
 
 template <typename Derived>
@@ -53,12 +63,12 @@ KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeRightHandSideContribu
     const FVDatum & datum) const
 {
   const auto face_centroid = datum.faceCentroid();
-  return faceDiffusivity(datum) * _functor->value(_t, face_centroid);
+  return faceConductance(datum, face_centroid) * _functor->value(_t, face_centroid);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceDiffusivity(const FVDatum & datum) const
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceConductance(
+    const FVDatum & datum, const Moose::Kokkos::Real3 face_centroid) const
 {
-  const auto face_centroid = datum.faceCentroid();
   return _diffusion_coeff->value(_t, face_centroid) * datum.faceArea() / datum.faceDCFMag();
 }
