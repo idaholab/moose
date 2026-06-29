@@ -13,7 +13,6 @@
 
 #include "ComplexEquationSystem.h"
 
-class MFEMEigensolverBase;
 class MFEMEigenproblem;
 
 namespace Moose::MFEM

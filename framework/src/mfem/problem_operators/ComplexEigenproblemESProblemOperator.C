@@ -23,10 +23,11 @@ ComplexEigenproblemESProblemOperator::Solve()
   if (GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("Eigenproblems are only supported in single-variable systems");
 
-  auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver);
-  eigensolver->setMassMatrix(_mass_rhs);
-  eigensolver->setOperator(GetComplexEigenproblemEquationSystem()->_jacobian);
-  eigensolver->solve();
+  auto eigensolver =
+      std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(_problem_data.jacobian_solver);
+  eigensolver->SetMassMatrix(_mass_rhs);
+  eigensolver->SetOperator(GetComplexEigenproblemEquationSystem()->_jacobian);
+  eigensolver->Solve();
   RecoverEigenproblemSolution(eigensolver.get());
 }
 
@@ -38,10 +39,10 @@ ComplexEigenproblemESProblemOperator::BuildEquationSystemOperator()
 }
 
 void
-ComplexEigenproblemESProblemOperator::RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver)
+ComplexEigenproblemESProblemOperator::RecoverEigenproblemSolution(EigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->getEigenvalues(eigenvalues);
+  eigensolver->GetEigenvalues(eigenvalues);
 
   const auto & trial_var_name = _trial_var_names.at(0);
   const auto & sep = _problem_data.mode_separator;
@@ -50,11 +51,11 @@ ComplexEigenproblemESProblemOperator::RecoverEigenproblemSolution(MFEMEigensolve
   // true vector that ParComplexGridFunction::Distribute splits back into real and imaginary parts.
 
   // Distribute the zeroth mode onto the base variable.
-  _problem_data.cmplx_gridfunctions.Get(trial_var_name)->Distribute(eigensolver->getEigenvector(0));
+  _problem_data.cmplx_gridfunctions.Get(trial_var_name)->Distribute(eigensolver->GetEigenvector(0));
 
   for (int i = 0; i < eigenvalues.Size(); ++i)
     _problem_data.cmplx_gridfunctions.Get(trial_var_name + sep + std::to_string(i))
-        ->Distribute(eigensolver->getEigenvector(i));
+        ->Distribute(eigensolver->GetEigenvector(i));
 }
 
 } // namespace Moose::MFEM
