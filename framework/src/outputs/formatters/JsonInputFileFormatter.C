@@ -180,14 +180,18 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
     auto desc = nlohmann::to_string(param["description"]);
     addLine(l, max_len, desc);
 
-    if (param.contains("options"))
+    const auto cpp_type = param.contains("cpp_type") ? param["cpp_type"].get<std::string>() : "";
+    const bool is_moose_enum = cpp_type.find("MooseEnum") != std::string::npos ||
+                               cpp_type.find("ExecFlagEnum") != std::string::npos;
+
+    if (is_moose_enum)
     {
       const auto options_string = MooseUtils::trim(param["options"].get<std::string>());
       if (!options_string.empty())
       {
         std::vector<std::string> options;
         MooseUtils::tokenize(options_string, options, 1, " ");
-        addLine("", max_len + 1, "Options: " + Moose::stringify(options, ", "));
+        addLine("", max_len + 1, "Options: " + MooseUtils::join(options, ", "));
 
         if (param.contains("option_docs") && param["option_docs"].is_object())
           for (const auto & option : options)

@@ -20,6 +20,7 @@ TEST(JsonInputFileFormatterTest, enumOptions)
       {"doc_unit", ""},
       {"group_name", ""},
       {"required", false},
+      {"cpp_type", "MooseEnum"},
       {"options", "PJFNK NEWTON"},
       {"option_docs",
        {{"PJFNK", "Preconditioned Jacobian-free Newton Krylov"}, {"NEWTON", "Newton solve"}}}};
