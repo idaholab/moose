@@ -39,7 +39,7 @@ protected:
   const std::vector<unsigned int> & _num_layers;
 
   /// Subdomains to swap out for each elevation
-  const std::vector<std::vector<subdomain_id_type>> & _subdomain_swaps;
+  const std::vector<std::vector<SubdomainName>> & _subdomain_swaps;
 
   /// Boundaries to swap out for each elevation
   const std::vector<std::vector<boundary_id_type>> & _boundary_swaps;
