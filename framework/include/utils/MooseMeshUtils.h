@@ -134,6 +134,14 @@ std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
 
 /**
+ * Get all subdomain names from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of subdomain names and ids
+ */
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const libMesh::MeshBase & mesh);
+
+/**
  * Calculates the centroid of a MeshBase.
  * @param mesh input mesh whose centroid needs to be calculated
  * @return a Point corresponding to the mesh centroid

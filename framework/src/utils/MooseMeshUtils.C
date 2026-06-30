@@ -232,6 +232,17 @@ getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain
   return {blk_ids.begin(), blk_ids.end()};
 }
 
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<SubdomainName, SubdomainID>> subdomains;
+  std::set<subdomain_id_type> subdomain_ids;
+  mesh.subdomain_ids(subdomain_ids, /*global*/ true);
+  for (const auto id : subdomain_ids)
+    subdomains.insert(std::make_pair(mesh.subdomain_name(id), id));
+  return subdomains;
+}
+
 BoundaryID
 getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
 {
