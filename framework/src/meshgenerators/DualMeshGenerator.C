@@ -1838,7 +1838,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
   std::map<NodeSubdomainKey, std::vector<BoundaryFaceNormal3D>> boundary_node_normals;
   std::map<EdgeSubdomainKey, std::vector<Point>> boundary_edge_normals;
-  std::vector<std::vector<Point>> primal_boundary_surface_triangles;
+  std::map<SubdomainID, std::vector<std::vector<Point>>> primal_boundary_surface_triangles;
 
   for (const auto & elem : input_mesh->element_ptr_range())
   {
@@ -1846,8 +1846,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
     for (const auto side : elem->side_index_range())
     {
-      const bool physical_boundary_side = elem->neighbor_ptr(side) == nullptr;
-
       if (!preservedSide(*elem, side))
         continue;
 
@@ -1868,21 +1866,23 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       if (normal * (elem_centroid - face_centroid) > 0.0)
         normal = -1.0 * normal;
 
-      if (physical_boundary_side)
-        for (const auto n : make_range(std::size_t(1), side_points.size() - 1))
-        {
-          std::vector<Point> triangle = {side_points[0], side_points[n], side_points[n + 1]};
-          const Point triangle_normal =
-              (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
+      auto & boundary_surface_triangles =
+          primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
 
-          if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
-            continue;
+      for (const auto n : make_range(std::size_t(1), side_points.size() - 1))
+      {
+        std::vector<Point> triangle = {side_points[0], side_points[n], side_points[n + 1]};
+        const Point triangle_normal =
+            (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
 
-          if (triangle_normal * normal < 0.0)
-            std::swap(triangle[1], triangle[2]);
+        if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
+          continue;
 
-          primal_boundary_surface_triangles.push_back(triangle);
-        }
+        if (triangle_normal * normal < 0.0)
+          std::swap(triangle[1], triangle[2]);
+
+        boundary_surface_triangles.push_back(triangle);
+      }
 
       for (const auto n : make_range(side_elem->n_vertices()))
         addUniqueBoundaryFaceNormal3D(
@@ -2014,8 +2014,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     }
   };
 
-  std::map<PointKey3D, bool> primal_boundary_point_cache;
-  std::map<SegmentKey3D, bool> primal_boundary_segment_cache;
+  std::map<std::pair<SubdomainID, PointKey3D>, bool> primal_boundary_point_cache;
+  std::map<std::pair<SubdomainID, SegmentKey3D>, bool> primal_boundary_segment_cache;
   struct SplitDualCellSidePoints3D
   {
     std::vector<std::vector<Point>> direct_netgen_side_points;
@@ -2033,31 +2033,42 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
   std::vector<SplitDualCellSidePoints3D> split_dual_cell_side_points;
 
-  const auto pointInsidePrimalBoundary = [&](const Point & point)
+  const auto pointInsidePrimalBoundary = [&](const SubdomainID boundary_subdomain_id,
+                                             const Point & point)
   {
-    const auto point_key = pointKey3D(point);
+    const auto point_key = std::make_pair(boundary_subdomain_id, pointKey3D(point));
     const auto cached_point_it = primal_boundary_point_cache.find(point_key);
 
     if (cached_point_it != primal_boundary_point_cache.end())
       return cached_point_it->second;
 
+    const auto surface_triangles_it = primal_boundary_surface_triangles.find(boundary_subdomain_id);
+
+    if (surface_triangles_it == primal_boundary_surface_triangles.end())
+    {
+      primal_boundary_point_cache.emplace(point_key, false);
+      return false;
+    }
+
     const bool inside = pointInsideTriangulatedSurface3D(
-        point, primal_boundary_surface_triangles, primal_boundary_length_tol);
+        point, surface_triangles_it->second, primal_boundary_length_tol);
 
     primal_boundary_point_cache.emplace(point_key, inside);
     return inside;
   };
 
-  const auto segmentInsidePrimalBoundary = [&](const Point & point0, const Point & point1)
+  const auto segmentInsidePrimalBoundary = [&](const SubdomainID boundary_subdomain_id,
+                                               const Point & point0,
+                                               const Point & point1)
   {
-    const auto segment_key = segmentKey3D(point0, point1);
+    const auto segment_key = std::make_pair(boundary_subdomain_id, segmentKey3D(point0, point1));
     const auto cached_segment_it = primal_boundary_segment_cache.find(segment_key);
 
     if (cached_segment_it != primal_boundary_segment_cache.end())
       return cached_segment_it->second;
 
     for (const auto fraction : {0.25, 0.5, 0.75})
-      if (!pointInsidePrimalBoundary(point0 + fraction * (point1 - point0)))
+      if (!pointInsidePrimalBoundary(boundary_subdomain_id, point0 + fraction * (point1 - point0)))
       {
         primal_boundary_segment_cache.emplace(segment_key, false);
         return false;
@@ -2221,7 +2232,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     std::vector<std::vector<Point>> surface_triangles;
 
     const auto validSurfaceSegment = [&](const Point & point0, const Point & point1)
-    { return segmentInsidePrimalBoundary(point0, point1); };
+    { return segmentInsidePrimalBoundary(output_subdomain_id, point0, point1); };
 
     if (!surfaceTriangles3D(side_points, surface_triangles, validSurfaceSegment, length_tol))
       return 0;
@@ -2282,7 +2293,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         const Point tet_center =
             (tet_points[0] + tet_points[1] + tet_points[2] + tet_points[3]) / 4.0;
 
-        if (!pointInsidePrimalBoundary(tet_center))
+        if (!pointInsidePrimalBoundary(output_subdomain_id, tet_center))
           return std::size_t(0);
 
         generated_tets.push_back(tet_points);
