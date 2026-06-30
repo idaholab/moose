@@ -69,6 +69,24 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
       "interface_normal_functor",
       "interface_unit_normal_face",
       "Face-oriented interface unit normal used by the explicit compression flux.");
+  params.addParam<std::vector<VariableName>>(
+      "confined_scalar_variables",
+      {},
+      "Scalar amount variables q = alpha c to transport conservatively with the limited "
+      "volume-fraction flux.");
+  params.addParam<MooseFunctorName>(
+      "confined_scalar_backflow_concentration",
+      "0",
+      "Concentration imposed for confined scalar backflow on open volume-fraction boundaries.");
+  params.addRangeCheckedParam<Real>(
+      "confined_scalar_alpha_floor",
+      1e-12,
+      "confined_scalar_alpha_floor > 0",
+      "Minimum alpha used to recover confined scalar concentration c = q / alpha.");
+  params.addParam<Real>(
+      "confined_scalar_concentration_min", 0.0, "Minimum allowed confined scalar concentration.");
+  params.addParam<Real>(
+      "confined_scalar_concentration_max", 1.0, "Maximum allowed confined scalar concentration.");
   params.addRangeCheckedParam<unsigned int>("n_alpha_corrections",
                                             2,
                                             "n_alpha_corrections>=0",
@@ -94,7 +112,10 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
 
   params.addParamNamesToGroup("system_names passive_scalar_names initial_scalar_variables "
                               "passive_scalar_advection_interpolation compression_factor "
-                              "interface_normal_functor",
+                              "interface_normal_functor confined_scalar_variables "
+                              "confined_scalar_backflow_concentration confined_scalar_alpha_floor "
+                              "confined_scalar_concentration_min "
+                              "confined_scalar_concentration_max",
                               "Numerical scheme");
 
   params.suppressParameter<MooseEnum>("preconditioning");
@@ -215,6 +236,15 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   params.set<MooseFunctorName>("liquid_density") =
       getParam<MooseFunctorName>("liquid_density_name");
   params.set<MooseFunctorName>("gas_density") = getParam<MooseFunctorName>("gas_density_name");
+  params.set<std::vector<VariableName>>("confined_scalar_variables") =
+      getParam<std::vector<VariableName>>("confined_scalar_variables");
+  params.set<MooseFunctorName>("confined_scalar_backflow_concentration") =
+      getParam<MooseFunctorName>("confined_scalar_backflow_concentration");
+  params.set<Real>("confined_scalar_alpha_floor") = getParam<Real>("confined_scalar_alpha_floor");
+  params.set<Real>("confined_scalar_concentration_min") =
+      getParam<Real>("confined_scalar_concentration_min");
+  params.set<Real>("confined_scalar_concentration_max") =
+      getParam<Real>("confined_scalar_concentration_max");
   getProblem().addUserObject(object_type, object_name, params);
 }
 

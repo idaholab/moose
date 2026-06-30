@@ -65,6 +65,24 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "interface_normal",
       "Face-oriented interface unit normal used in the explicit compression correction.");
+  params.addParam<std::vector<VariableName>>(
+      "confined_scalar_variables",
+      {},
+      "Scalar amount variables q = alpha c to transport conservatively with the limited "
+      "volume-fraction flux.");
+  params.addParam<MooseFunctorName>(
+      "confined_scalar_backflow_concentration",
+      "0",
+      "Concentration imposed for confined scalar backflow on open volume-fraction boundaries.");
+  params.addRangeCheckedParam<Real>(
+      "confined_scalar_alpha_floor",
+      1e-12,
+      "confined_scalar_alpha_floor > 0",
+      "Minimum alpha used to recover confined scalar concentration c = q / alpha.");
+  params.addParam<Real>(
+      "confined_scalar_concentration_min", 0.0, "Minimum allowed confined scalar concentration.");
+  params.addParam<Real>(
+      "confined_scalar_concentration_max", 1.0, "Maximum allowed confined scalar concentration.");
   params.addRangeCheckedParam<unsigned int>(
       "n_alpha_corrections",
       2,
@@ -90,16 +108,28 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     BlockRestrictable(this),
     _system_name(getParam<SolverSystemName>("system_name")),
     _variable_name(getParam<VariableName>("variable")),
+    _confined_scalar_variable_names(
+        getParam<std::vector<VariableName>>("confined_scalar_variables")),
     _face_flux(getFunctor<Real>("face_flux")),
     _compression_factor(getFunctor<Real>("compression_factor")),
     _interface_normal(getFunctor<RealVectorValue>("interface_normal")),
     _liquid_density(getFunctor<Real>("liquid_density")),
     _gas_density(getFunctor<Real>("gas_density")),
+    _confined_scalar_backflow_concentration(
+        getFunctor<Real>("confined_scalar_backflow_concentration")),
+    _confined_scalar_alpha_floor(getParam<Real>("confined_scalar_alpha_floor")),
+    _confined_scalar_concentration_min(getParam<Real>("confined_scalar_concentration_min")),
+    _confined_scalar_concentration_max(getParam<Real>("confined_scalar_concentration_max")),
     _num_alpha_corrections(getParam<unsigned int>("n_alpha_corrections")),
     _num_limiter_iterations(getParam<unsigned int>("n_limiter_iterations")),
     _alpha_phi_limited(_fe_problem.mesh(), blockIDs(), "alpha_phi_limited"),
     _rho_phi(_fe_problem.mesh(), blockIDs(), "rho_phi")
 {
+  if (_confined_scalar_concentration_max < _confined_scalar_concentration_min)
+    paramError("confined_scalar_concentration_max",
+               "The confined scalar concentration maximum must be greater than or equal to the "
+               "minimum.");
+
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     UserObject::_subproblem.addFunctor("alpha_phi_limited", _alpha_phi_limited, tid);
@@ -133,6 +163,26 @@ ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
 
   _sys_num = _alpha_var->sys().number();
   _var_num = _alpha_var->number();
+
+  _confined_scalars.clear();
+  for (const auto & scalar_name : _confined_scalar_variable_names)
+  {
+    auto * scalar_var = dynamic_cast<MooseLinearVariableFVReal *>(
+        &UserObject::_subproblem.getVariable(0, scalar_name));
+
+    if (!scalar_var)
+      paramError("confined_scalar_variables",
+                 "Confined scalar variable '",
+                 scalar_name,
+                 "' must be a MooseLinearVariableFVReal.");
+
+    auto & scalar_system = _fe_problem.getLinearSystem(scalar_var->sys().number());
+    _confined_scalars.push_back({scalar_name,
+                                 scalar_var,
+                                 &scalar_system,
+                                 scalar_var->sys().number(),
+                                 scalar_var->number()});
+  }
 }
 
 void
@@ -443,6 +493,192 @@ ConservativeSharpInterfaceVOFMULESCorrector::collectFaceCorrectionData() const
   return face_corrections;
 }
 
+Real
+ConservativeSharpInterfaceVOFMULESCorrector::confinedScalarConcentration(
+    const ConfinedScalarData & scalar, const ElemInfo & elem_info) const
+{
+  const auto dof = elem_info.dofIndices()[scalar.sys_num][scalar.var_num];
+  if (dof == DofObject::invalid_id)
+    return 0.0;
+
+  const Real alpha = boundedAlpha(cellAlpha(elem_info));
+  if (alpha <= _confined_scalar_alpha_floor)
+    return 0.0;
+
+  return std::min(_confined_scalar_concentration_max,
+                  std::max(_confined_scalar_concentration_min,
+                           (*scalar.system->system().current_local_solution)(dof) / alpha));
+}
+
+void
+ConservativeSharpInterfaceVOFMULESCorrector::applyConfinedScalarTransport(
+    const std::vector<FaceCorrectionData> & face_corrections,
+    const std::vector<Real> & limited_alpha_fluxes,
+    const Real dt)
+{
+  if (_confined_scalars.empty() || dt <= 0.0)
+    return;
+
+  mooseAssert(face_corrections.size() == limited_alpha_fluxes.size(),
+              "Confined scalar transport needs one alpha flux per face correction.");
+
+  const auto state = Moose::currentState();
+  for (const auto & scalar : _confined_scalars)
+  {
+    struct ScalarFaceFlux
+    {
+      Real flux = 0.0;
+      dof_id_type from_dof = DofObject::invalid_id;
+      dof_id_type to_dof = DofObject::invalid_id;
+    };
+
+    auto & current_local_solution = *scalar.system->system().current_local_solution;
+    std::unordered_map<dof_id_type, Real> applied_change;
+    std::unordered_map<dof_id_type, Real> old_value_by_dof;
+    std::unordered_map<dof_id_type, Real> lower_bound_by_dof;
+    std::unordered_map<dof_id_type, Real> upper_bound_by_dof;
+    std::unordered_map<dof_id_type, Real> cell_volume_by_dof;
+    std::unordered_map<dof_id_type, Real> out_flux_by_dof;
+    std::unordered_map<dof_id_type, Real> in_flux_by_dof;
+    std::vector<ScalarFaceFlux> scalar_fluxes(face_corrections.size());
+
+    const auto cache_cell = [&](const ElemInfo & elem_info)
+    {
+      const auto dof = elem_info.dofIndices()[scalar.sys_num][scalar.var_num];
+      if (dof == DofObject::invalid_id || old_value_by_dof.count(dof))
+        return;
+
+      const Real alpha = boundedAlpha(cellAlpha(elem_info));
+      old_value_by_dof.emplace(dof, current_local_solution(dof));
+      lower_bound_by_dof.emplace(dof, alpha * _confined_scalar_concentration_min);
+      upper_bound_by_dof.emplace(dof, alpha * _confined_scalar_concentration_max);
+      cell_volume_by_dof.emplace(dof, cellVolume(elem_info));
+      out_flux_by_dof.emplace(dof, 0.0);
+      in_flux_by_dof.emplace(dof, 0.0);
+    };
+
+    for (const auto i : index_range(face_corrections))
+    {
+      const auto & data = face_corrections[i];
+      const Real alpha_flux = limited_alpha_fluxes[i];
+      if (std::abs(alpha_flux) <= libMesh::TOLERANCE)
+        continue;
+
+      const auto elem_dof = data.face->elemInfo()->dofIndices()[scalar.sys_num][scalar.var_num];
+      if (elem_dof == DofObject::invalid_id)
+        continue;
+      const auto neighbor_dof =
+          data.has_neighbor
+              ? data.face->neighborInfo()->dofIndices()[scalar.sys_num][scalar.var_num]
+              : DofObject::invalid_id;
+      cache_cell(*data.face->elemInfo());
+      if (data.has_neighbor)
+        cache_cell(*data.face->neighborInfo());
+
+      Real concentration = 0.0;
+      if (alpha_flux > 0.0)
+        concentration = confinedScalarConcentration(scalar, *data.face->elemInfo());
+      else if (data.has_neighbor)
+        concentration = confinedScalarConcentration(scalar, *data.face->neighborInfo());
+      else
+        concentration = std::min(
+            _confined_scalar_concentration_max,
+            std::max(
+                _confined_scalar_concentration_min,
+                _confined_scalar_backflow_concentration(
+                    functorFaceArg(_confined_scalar_backflow_concentration, *data.face), state)));
+
+      const Real scalar_flux = alpha_flux * concentration;
+      if (std::abs(scalar_flux) <= libMesh::TOLERANCE)
+        continue;
+
+      auto & flux_data = scalar_fluxes[i];
+      flux_data.flux = scalar_flux;
+      if (scalar_flux > 0.0)
+      {
+        flux_data.from_dof = elem_dof;
+        flux_data.to_dof = neighbor_dof;
+      }
+      else
+      {
+        flux_data.from_dof = neighbor_dof;
+        flux_data.to_dof = elem_dof;
+      }
+
+      if (flux_data.from_dof != DofObject::invalid_id)
+        out_flux_by_dof[flux_data.from_dof] += std::abs(scalar_flux);
+      if (flux_data.to_dof != DofObject::invalid_id)
+        in_flux_by_dof[flux_data.to_dof] += std::abs(scalar_flux);
+    }
+
+    std::unordered_map<dof_id_type, Real> out_limiter_by_dof;
+    std::unordered_map<dof_id_type, Real> in_limiter_by_dof;
+    for (const auto & pair : old_value_by_dof)
+    {
+      const auto dof = pair.first;
+      const Real cell_volume = libmesh_map_find(cell_volume_by_dof, dof);
+      const Real old_value = pair.second;
+      const Real lower_bound = libmesh_map_find(lower_bound_by_dof, dof);
+      const Real upper_bound = libmesh_map_find(upper_bound_by_dof, dof);
+      const Real out_flux = libmesh_map_find(out_flux_by_dof, dof);
+      const Real in_flux = libmesh_map_find(in_flux_by_dof, dof);
+      const Real loss_capacity = cell_volume * std::max(0.0, old_value - lower_bound) / dt;
+      const Real gain_capacity = cell_volume * std::max(0.0, upper_bound - old_value) / dt;
+      out_limiter_by_dof.emplace(
+          dof, out_flux > libMesh::TOLERANCE ? boundedAlpha(loss_capacity / out_flux) : 1.0);
+      in_limiter_by_dof.emplace(
+          dof, in_flux > libMesh::TOLERANCE ? boundedAlpha(gain_capacity / in_flux) : 1.0);
+    }
+
+    for (const auto i : index_range(face_corrections))
+    {
+      const auto raw_scalar_flux = scalar_fluxes[i].flux;
+      if (std::abs(raw_scalar_flux) <= libMesh::TOLERANCE)
+        continue;
+
+      Real limiter = 1.0;
+      const auto from_dof = scalar_fluxes[i].from_dof;
+      const auto to_dof = scalar_fluxes[i].to_dof;
+      if (from_dof != DofObject::invalid_id)
+        limiter = std::min(limiter, libmesh_map_find(out_limiter_by_dof, from_dof));
+      if (to_dof != DofObject::invalid_id)
+        limiter = std::min(limiter, libmesh_map_find(in_limiter_by_dof, to_dof));
+
+      const Real scalar_flux = limiter * raw_scalar_flux;
+      if (std::abs(scalar_flux) <= libMesh::TOLERANCE)
+        continue;
+
+      const auto & data = face_corrections[i];
+      const auto elem_dof = data.face->elemInfo()->dofIndices()[scalar.sys_num][scalar.var_num];
+      if (locallyOwnedCell(*data.face->elemInfo()))
+        applied_change[elem_dof] -= dt * scalar_flux / cellVolume(*data.face->elemInfo());
+
+      if (data.has_neighbor)
+      {
+        const auto neighbor_dof =
+            data.face->neighborInfo()->dofIndices()[scalar.sys_num][scalar.var_num];
+        if (neighbor_dof != DofObject::invalid_id && locallyOwnedCell(*data.face->neighborInfo()))
+          applied_change[neighbor_dof] += dt * scalar_flux / cellVolume(*data.face->neighborInfo());
+      }
+    }
+
+    if (applied_change.empty())
+      continue;
+
+    auto scalar_update = current_local_solution.zero_clone();
+    for (const auto & pair : applied_change)
+      scalar_update->add(pair.first, pair.second);
+    scalar_update->close();
+
+    current_local_solution.add(*scalar_update);
+    current_local_solution.close();
+    scalar.system->solution() = current_local_solution;
+    scalar.system->solution().close();
+    scalar.system->setSolution(current_local_solution);
+    scalar.system->computeGradients();
+  }
+}
+
 void
 ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
     const std::vector<FaceCorrectionData> & face_corrections,
@@ -551,6 +787,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
       donor_flux[i] = face_corrections[i].donor_flux;
 
     publishFaceFluxes(face_corrections, donor_flux, subcycle_fraction);
+    applyConfinedScalarTransport(face_corrections, donor_flux, dt);
     _system->computeGradients();
     return;
   }
@@ -787,7 +1024,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
     }
 
     if (correction_it + 1 == _num_alpha_corrections)
+    {
       publishFaceFluxes(face_corrections, accumulated_alpha_flux, subcycle_fraction);
+      applyConfinedScalarTransport(face_corrections, accumulated_alpha_flux, dt);
+    }
   }
 
   _system->computeGradients();

@@ -18,6 +18,10 @@ domain_dims_x = ${fparse 10.0 * a_length}
 domain_dims_y = ${fparse 1.25 * a_length}
 
 c_alpha = 0.01
+tracer_c0 = 1.0
+tracer_patch_x_min = ${fparse 0.75 * dam_x}
+tracer_patch_x_max = ${dam_x}
+tracer_patch_y = ${fparse 0.75 * dam_y}
 
 [Mesh]
   [mesh]
@@ -31,8 +35,15 @@ c_alpha = 0.01
 []
 
 [Problem]
-  linear_sys_names = 'u_system v_system pressure_system alpha_system'
+  linear_sys_names = 'u_system v_system pressure_system alpha_system tracer_system'
   previous_nl_solution_required = true
+[]
+
+[Variables]
+  [tracer_amount]
+    type = MooseLinearVariableFVReal
+    solver_sys = tracer_system
+  []
 []
 
 [Physics]
@@ -80,6 +91,9 @@ c_alpha = 0.01
         passive_scalar_advection_interpolation = 'upwind'
         compression_factor = '${c_alpha}'
         interface_normal_functor = 'flow_interface_unit_normal_face'
+        confined_scalar_variables = 'tracer_amount'
+        confined_scalar_concentration_min = 0
+        confined_scalar_concentration_max = 1
 
         n_alpha_corrections = 1
         n_limiter_iterations = 6
@@ -104,6 +118,18 @@ c_alpha = 0.01
   [pressure_init]
     type = ParsedFunction
     expression = 'if(x < ${dam_x} & y < ${dam_y}, -(${rho_l}-${rho_g})*${g}*(${domain_dims_y}-${dam_y}), 0)'
+  []
+  [tracer_amount_init]
+    type = ParsedFunction
+    expression = 'if(x > ${tracer_patch_x_min} & x < ${tracer_patch_x_max} & y > ${tracer_patch_y} & y < ${dam_y}, ${tracer_c0}, 0)'
+  []
+[]
+
+[ICs]
+  [tracer_amount]
+    type = FunctionIC
+    variable = tracer_amount
+    function = tracer_amount_init
   []
 []
 
@@ -169,10 +195,16 @@ c_alpha = 0.01
     variable = 'alpha'
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [total_tracer_amount]
+    type = ElementIntegralVariablePostprocessor
+    variable = 'tracer_amount'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [Outputs]
   execute_on = 'INITIAL TIMESTEP_END'
+  file_base = dam_break_openfoam_geometry_confined_scalar_front_mules
   [csv]
     type = CSV
     time_step_interval = 100

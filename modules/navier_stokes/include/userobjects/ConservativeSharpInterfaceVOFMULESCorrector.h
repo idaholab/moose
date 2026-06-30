@@ -14,8 +14,10 @@
 #include "BlockRestrictable.h"
 #include "FaceCenteredMapFunctor.h"
 #include "FaceArgInterface.h"
+#include "MooseLinearVariableFV.h"
 
 #include <unordered_map>
+#include <vector>
 
 class LinearSystem;
 class LinearFVBoundaryCondition;
@@ -80,6 +82,15 @@ private:
     BoundaryFaceKind boundary_kind = BoundaryFaceKind::Closed;
   };
 
+  struct ConfinedScalarData
+  {
+    VariableName variable_name;
+    MooseLinearVariableFVReal * variable = nullptr;
+    LinearSystem * system = nullptr;
+    unsigned int sys_num = libMesh::invalid_uint;
+    unsigned int var_num = libMesh::invalid_uint;
+  };
+
   void cacheSystemData();
   void initializeFluxStorage();
   void publishFaceFluxes(const std::vector<FaceCorrectionData> & face_corrections,
@@ -109,14 +120,24 @@ private:
   Real rhoPhi(const FaceInfo & fi, const Real limited_alpha_flux) const;
   FaceCorrectionData buildFaceCorrectionData(const FaceInfo & fi) const;
   std::vector<FaceCorrectionData> collectFaceCorrectionData() const;
+  Real confinedScalarConcentration(const ConfinedScalarData & scalar,
+                                   const ElemInfo & elem_info) const;
+  void applyConfinedScalarTransport(const std::vector<FaceCorrectionData> & face_corrections,
+                                    const std::vector<Real> & limited_alpha_fluxes,
+                                    Real dt);
 
   const SolverSystemName _system_name;
   const VariableName _variable_name;
+  const std::vector<VariableName> _confined_scalar_variable_names;
   const Moose::Functor<Real> & _face_flux;
   const Moose::Functor<Real> & _compression_factor;
   const Moose::Functor<RealVectorValue> & _interface_normal;
   const Moose::Functor<Real> & _liquid_density;
   const Moose::Functor<Real> & _gas_density;
+  const Moose::Functor<Real> & _confined_scalar_backflow_concentration;
+  const Real _confined_scalar_alpha_floor;
+  const Real _confined_scalar_concentration_min;
+  const Real _confined_scalar_concentration_max;
   const unsigned int _num_alpha_corrections;
   const unsigned int _num_limiter_iterations;
 
@@ -127,4 +148,5 @@ private:
   LinearSystem * _system = nullptr;
   unsigned int _sys_num = libMesh::invalid_uint;
   unsigned int _var_num = libMesh::invalid_uint;
+  std::vector<ConfinedScalarData> _confined_scalars;
 };
