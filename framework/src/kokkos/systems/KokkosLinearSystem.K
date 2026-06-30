@@ -179,12 +179,11 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
     needed_solution_vector_tags.insert(tag._id);
 
   auto & kokkos_systems = _fe_problem.getKokkosSystems();
-  for (const auto i : index_range(kokkos_systems))
-    if (kokkos_systems.isSlotConstructed(i))
-    {
-      kokkos_systems[i].setActiveSolutionTags(needed_solution_vector_tags);
-      kokkos_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-    }
+  for (auto & system : kokkos_systems.constructedEntries())
+  {
+    system.setActiveSolutionTags(needed_solution_vector_tags);
+    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+  }
 
   kokkos_systems.copyToDevice();
 
@@ -201,17 +200,15 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   for (auto kernel : flux_for_vector_tags)
     kernel->computeRightHandSide();
 
-  for (const auto i : index_range(kokkos_systems))
-    if (kokkos_systems.isSlotConstructed(i))
-      kokkos_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  for (auto & system : kokkos_systems.constructedEntries())
+    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
   our_kokkos_system.clearActiveResidualTags();
   our_kokkos_system.clearActiveMatrixTags();
 
-  for (const auto i : index_range(kokkos_systems))
-    if (kokkos_systems.isSlotConstructed(i))
-    {
-      kokkos_systems[i].clearActiveVariables();
-      kokkos_systems[i].clearActiveSolutionTags();
-    }
+  for (auto & system : kokkos_systems.constructedEntries())
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 }

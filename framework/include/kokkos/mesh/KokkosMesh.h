@@ -194,6 +194,8 @@ public:
    */
   KOKKOS_FUNCTION const auto & getElementInfo(ContiguousElementID elem) const
   {
+    KOKKOS_ASSERT(elem < _elem_info.size());
+
     return _elem_info[elem];
   }
   /**
@@ -347,6 +349,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getExtraElementID(ContiguousElementID elem, unsigned int index) const
   {
+    KOKKOS_ASSERT(elem < _extra_elem_ids.n(0));
     KOKKOS_ASSERT(index < _extra_elem_ids.n(1));
 
     return _extra_elem_ids(elem, index);

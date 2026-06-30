@@ -21,5 +21,14 @@
       compute_devices = 'cpu cuda'
       max_threads = 1
     []
+    [internal_neumann_block_restricted]
+      type = MMSTest
+      input = 'test.py'
+      test_case = TestKokkosLinearFVDiffusion2DInternalNeumann
+      detail = 'with Neumann boundary conditions on internal boundaries of two block-restricted variables.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      max_threads = 1
+    []
   []
 []

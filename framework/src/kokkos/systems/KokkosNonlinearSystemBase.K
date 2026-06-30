@@ -107,9 +107,8 @@ NonlinearSystemBase::setKokkosInitialSolution()
     _kokkos_preset_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
         boundary, needed_fe_var_vector_tags);
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-      systems[i].sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+  for (auto & system : systems.constructedEntries())
+    system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   systems.copyToDevice();
 
@@ -118,9 +117,8 @@ NonlinearSystemBase::setKokkosInitialSolution()
 
   Kokkos::fence();
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-      systems[i].sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  for (auto & system : systems.constructedEntries())
+    system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
 }
@@ -173,22 +171,20 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   // Copy solution vectors and residuals and cache variable values at element quadature
   // points
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveSolutionTags(needed_fe_var_vector_tags);
+  for (auto & system : systems.constructedEntries())
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      }
-      {
-        TIME_SECTION("KokkosReinit", 1);
-        system.reinit();
-      }
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
+    }
+  }
 
   systems.copyToDevice();
 
@@ -224,22 +220,19 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (const auto i : index_range(systems))
-      if (systems.isSlotConstructed(i))
-        systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (auto & system : systems.constructedEntries())
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
   // Clear
 
   systems[number()].clearActiveResidualTags();
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.clearActiveVariables();
-      system.clearActiveSolutionTags();
-    }
+  for (auto & system : systems.constructedEntries())
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 }
 
 void
@@ -269,15 +262,14 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   // Copy solution vectors and residuals
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
+  for (auto & system : systems.constructedEntries())
+  {
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
     {
-      systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      }
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
+  }
 
   systems.copyToDevice();
 
@@ -295,18 +287,16 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (const auto i : index_range(systems))
-      if (systems.isSlotConstructed(i))
-        systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (auto & system : systems.constructedEntries())
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
   // Clear
 
   systems[number()].clearActiveResidualTags();
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-      systems[i].clearActiveSolutionTags();
+  for (auto & system : systems.constructedEntries())
+    system.clearActiveSolutionTags();
 }
 
 void
@@ -362,22 +352,20 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   // Copy solution vectors, initialize matrices, and cache variable values at element quadature
   // points
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveSolutionTags(needed_fe_var_vector_tags);
+  for (auto & system : systems.constructedEntries())
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      }
-      {
-        TIME_SECTION("KokkosReinit", 1);
-        system.reinit();
-      }
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
+    }
+  }
 
   systems.copyToDevice();
 
@@ -416,22 +404,19 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (const auto i : index_range(systems))
-      if (systems.isSlotConstructed(i))
-        systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (auto & system : systems.constructedEntries())
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
   // Clear
 
   systems[number()].clearActiveMatrixTags();
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.clearActiveVariables();
-      system.clearActiveSolutionTags();
-    }
+  for (auto & system : systems.constructedEntries())
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 }
 
 void
@@ -482,22 +467,20 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   // Copy solution vectors and residuals, initialize matrices, and cache variable values at element
   // quadature points
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveSolutionTags(needed_fe_var_vector_tags);
+  for (auto & system : systems.constructedEntries())
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      }
-      {
-        TIME_SECTION("KokkosReinit", 1);
-        system.reinit();
-      }
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
+    }
+  }
 
   systems.copyToDevice();
 
@@ -537,9 +520,8 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (const auto i : index_range(systems))
-      if (systems.isSlotConstructed(i))
-        systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (auto & system : systems.constructedEntries())
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
   // Clear
@@ -547,11 +529,9 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   systems[number()].clearActiveResidualTags();
   systems[number()].clearActiveMatrixTags();
 
-  for (const auto i : index_range(systems))
-    if (systems.isSlotConstructed(i))
-    {
-      auto & system = systems[i];
-      system.clearActiveVariables();
-      system.clearActiveSolutionTags();
-    }
+  for (auto & system : systems.constructedEntries())
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 }

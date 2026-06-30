@@ -184,8 +184,7 @@ Mesh::initElement()
 
   _elem_info.create(num_local_plus_one_neighbor_layer_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
-  _extra_elem_ids.create(num_local_plus_one_neighbor_layer_elems,
-                         _mesh.getMesh().n_elem_integers());
+  _extra_elem_ids.create(num_elems, _mesh.getMesh().n_elem_integers());
   _starting_elem_id.create(num_subdomains);
 
   _elem_neighbor = libMesh::DofObject::invalid_id;
@@ -211,17 +210,13 @@ Mesh::initElement()
     _starting_elem_id[sid] = *getSubdomainContiguousElementIDRange(subdomain).begin();
   }
 
-  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+  // Linear FV needs ElementInfo for one-layer ghost neighbors to handle block-restricted variables
+  // on internal mesh faces.
+  for (const auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
   {
-    const auto elem_type = getElementTypeID(ghost_elem);
-    const auto sid = getContiguousSubdomainID(ghost_elem->subdomain_id());
-
-    _elem_info[ghost_eid].type = elem_type;
+    _elem_info[ghost_eid].type = getElementTypeID(ghost_elem);
     _elem_info[ghost_eid].id = ghost_eid;
-    _elem_info[ghost_eid].subdomain = sid;
-
-    for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
-      _extra_elem_ids(ghost_eid, i) = ghost_elem->get_extra_integer(i);
+    _elem_info[ghost_eid].subdomain = getContiguousSubdomainID(ghost_elem->subdomain_id());
   }
 
   _elem_info.moveToDevice();
