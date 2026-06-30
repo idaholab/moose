@@ -39,6 +39,8 @@ StitchMeshGenerator::validParams()
       true,
       "Treat input subdomain names as primary, preserving them and remapping IDs as needed");
   params.addParam<bool>(
+      "verbose_remapping", false, "Whether mesh subdomain remapping should have verbose output.");
+  params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
   params.addParam<bool>(
       "enforce_all_nodes_match_on_boundaries",
@@ -80,6 +82,9 @@ StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 StitchMeshGenerator::generate()
 {
+  // Parameters
+  const auto verbose_remapping = getParam<bool>("verbose_remapping");
+
   // We put the first mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(*_mesh_ptrs[0]);
   if (!mesh) // This should never happen until libMesh implements on-the-fly-Elem mesh types
@@ -181,6 +186,52 @@ StitchMeshGenerator::generate()
       }
     }
 
+    // Remap subdomains in MOOSE to tune the behavior to what we need
+    // TODO: avoid a number of global operations in subdomain ID gathering from the meshes
+    // for performance.
+    if (getParam<bool>("subdomain_remapping"))
+    {
+      const auto secondary_subdomains = MooseMeshUtils::getAllSubdomainNamesAndIDs(*meshes[i]);
+      // the free id must be present in neither mesh
+      auto next_free_id = std::max(MooseMeshUtils::getNextFreeSubdomainID(*mesh),
+                                   MooseMeshUtils::getNextFreeSubdomainID(*meshes[i]));
+
+      // Check subdomains in the secondary mesh for the remapping criteria
+      for (const auto & [bl_name, bl_id] : secondary_subdomains)
+      {
+        bool remap_to_primary_bid = false;
+        // If first mesh has the same-name subdomain, we'll change the subdomainID to merge
+        if (!bl_name.empty() && MooseMeshUtils::hasSubdomainName(*mesh, bl_name) &&
+            MooseMeshUtils::getSubdomainID(bl_name, *mesh) != bl_id)
+          remap_to_primary_bid = true;
+
+        if (remap_to_primary_bid)
+        {
+          const auto new_id = MooseMeshUtils::getSubdomainID(bl_name, *mesh);
+          if (verbose_remapping)
+            _console << "Remapping in input mesh " << _input_names[i + 1] << " subdomain "
+                     << bl_name << " (" << bl_id << ") to ID " << new_id << std::endl;
+          MooseMeshUtils::changeSubdomainId(*meshes[i], bl_id, new_id);
+        }
+
+        bool remap_to_a_free_id = false;
+        // If first mesh has the same ID BUT different name, change the subdomainID to avoid merging
+        if (!remap_to_primary_bid && MooseMeshUtils::hasSubdomainID(*mesh, bl_id))
+          remap_to_a_free_id = true;
+
+        if (remap_to_a_free_id)
+        {
+          const auto new_id = next_free_id++;
+          if (verbose_remapping)
+            _console << "Remapping in input mesh " << _input_names[i + 1] << " subdomain "
+                     << bl_name << " (" << bl_id << ") to ID " << new_id << std::endl;
+          MooseMeshUtils::changeSubdomainId(*meshes[i], bl_id, new_id);
+          mesh->subdomain_name(new_id) = bl_name;
+          // the name is pre-positioned, the ID will be added to mesh after stitching with meshes[i]
+        }
+      }
+    }
+
     mesh->stitch_meshes(*meshes[i],
                         first,
                         second,
@@ -192,7 +243,12 @@ StitchMeshGenerator::generate()
                         getParam<bool>("enforce_all_nodes_match_on_boundaries"),
                         /*merge_boundary_nodes_all_or_nothing=*/
                         getParam<bool>("merge_boundary_nodes_all_or_nothing"),
-                        getParam<bool>("subdomain_remapping"));
+                        false /* subdomain remapping done by MOOSE*/);
+
+    // Make sure subdomain names made it across
+    // Overlaps should have been removed already
+    for (const auto & [block_id, block_name] : meshes[i]->get_subdomain_name_map())
+      mesh->set_subdomain_name_map().insert(std::make_pair(block_id, block_name));
 
     if (_merge_boundaries_with_same_name)
       MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
