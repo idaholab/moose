@@ -11,9 +11,9 @@ Adds a boundary face integrator to the bilinear form. The DG parameters sigma an
 
 !listing test/tests/mfem/kernels/dg_diffusion.i block=BCs
 
-!syntax parameters /BCs/MFEMDGDirichletLFBC
+!syntax parameters /BCs/MFEMDGDiffusionBC
 
-!syntax inputs /BCs/MFEMDGDirichletLFBC
+!syntax inputs /BCs/MFEMDGDiffusionBC
 
 !if-end!
 

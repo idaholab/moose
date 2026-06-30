@@ -19,6 +19,8 @@ MFEMDGDiffusionBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Boundary condition for DG Diffusion kernel");
+  params.addParam<mfem::real_t>("coef", 1.0, "Name of property for diffusion coefficient k");
+  params.addParam<mfem::real_t>("dirichlet", 0.0, "Name of property for dirichlet coefficient");
   params.addParam<mfem::real_t>("sigma", -1.0, "One of the DG penalty params. Typically +/- 1.0");
   params.addParam<mfem::real_t>(
       "kappa", "One of the DG penalty params. Should be positive. Will default to (order+1)^2");
@@ -28,8 +30,8 @@ MFEMDGDiffusionBC::validParams()
 MFEMDGDiffusionBC::MFEMDGDiffusionBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _fe_order(getMFEMProblem().getGridFunction(_test_var_name)->ParFESpace()->FEColl()->GetOrder()),
-    _one(1.0),
-    _zero(0.0),
+    _coef(getParam<mfem::real_t>("coef")),
+    _dirichlet(getParam<mfem::real_t>("dirichlet")),
     _sigma(getParam<mfem::real_t>("sigma")),
     _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
                                        : (_fe_order + 1) * (_fe_order + 1))
@@ -40,7 +42,7 @@ MFEMDGDiffusionBC::MFEMDGDiffusionBC(const InputParameters & parameters)
 mfem::BilinearFormIntegrator *
 MFEMDGDiffusionBC::createBFIntegrator()
 {
-  return new mfem::DGDiffusionIntegrator(_one, _sigma, _kappa);
+  return new mfem::DGDiffusionIntegrator(_coef, _sigma, _kappa);
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
@@ -48,7 +50,7 @@ MFEMDGDiffusionBC::createBFIntegrator()
 mfem::LinearFormIntegrator *
 MFEMDGDiffusionBC::createLFIntegrator()
 {
-  return new mfem::DGDirichletLFIntegrator(_zero, _one, _sigma, _kappa);
+  return new mfem::DGDirichletLFIntegrator(_dirichlet, _coef, _sigma, _kappa);
 }
 
 #endif
