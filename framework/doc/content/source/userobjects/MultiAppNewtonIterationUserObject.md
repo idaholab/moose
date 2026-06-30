@@ -23,8 +23,8 @@ automatically with `execute_on = NONE` so that only this UserObject controls its
 
 At each time step the following procedure is performed:
 
-1. +Backup+ the sub-app at the start of the time step ($t$) so every Newton trial starts from the
-   same initial condition.
+1. +Backup+ the sub-app's state at the start of the time step (i.e. the converged solution from
+   the previous step) so that every Newton trial re-solves the step from this same starting state.
 2. +Newton iteration+ using a finite-difference Jacobian. Each iteration performs two solves on
    the same sub-app, restoring the start-of-timestep state between them:
 
@@ -41,20 +41,6 @@ At each time step the following procedure is performed:
      `true`, in which case the best estimate is accepted with a warning.
 
 3. +Advance+ the sub-app one time step at the converged $p(t)$.
-
-### Sequential vs. concurrent perturbation
-
-By default the two evaluations ($p_n(t)$ and $p_n(t) + \delta p$) reuse a single sub-app, solved twice per
-iteration with the start-of-timestep state restored in between. This uses the least memory. The
-base ($p_n(t)$) solve is performed last, so on convergence the sub-app already holds the $p_n(t)$-solution
-and only an extra solve at the reported $p_n(t)$ is needed if `max_iterations` is reached.
-
-Setting [!param](/UserObjects/MultiAppNewtonIterationUserObject/concurrent_perturbation) to `true`
-instead creates the MultiApp with two sub-apps (one for $p_n(t)$, one for $p_n(t) + \delta p$). MOOSE
-distributes these across the available MPI ranks, so both sub-app solves can be performed
-simultaneously, roughly halving the per-iteration wall-clock time. This requires `>= 2` MPI
-processes to be faster and uses roughly twice the sub-app memory; on a single process the two
-sub-apps still solve sequentially. The numerical result is identical to the sequential mode.
 
 The converged parameter value is stored as restartable data and is used as the initial guess for
 the next time step. It can also be written to an optional `Receiver` postprocessor in the main app

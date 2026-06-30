@@ -68,12 +68,6 @@ MultiAppNewtonIterationUserObject::validParams()
       "Optional name of a Receiver postprocessor in the main app to which the "
       "converged parameter value is written after each time step.");
 
-  params.addParam<bool>(
-      "concurrent_perturbation",
-      false,
-      "If true, evaluate the p and p+delta_parameter solves concurrently on two sub-apps "
-      "(faster on >= 2 MPI ranks, ~2x memory) instead of sequentially on one sub-app.");
-
   // Run at TIMESTEP_BEGIN so the converged sub-app state is available to FROM_MULTIAPP transfers.
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
 
@@ -98,24 +92,14 @@ MultiAppNewtonIterationUserObject::MultiAppNewtonIterationUserObject(
     _param_output_pp(isParamValid("parameter_postprocessor")
                          ? getParam<PostprocessorName>("parameter_postprocessor")
                          : PostprocessorName("")),
-    _concurrent(getParam<bool>("concurrent_perturbation")),
     _accept_on_max_iteration(getParam<bool>("accept_on_max_iteration"))
 {
   // Internally create the TransientMultiApp (execute_on = NONE so only this UserObject drives
-  // it) rather than requiring a [MultiApps] block. Concurrent mode uses two sub-apps so MOOSE
-  // can solve p and p+delta simultaneously across ranks; sequential mode uses one.
+  // it) rather than requiring a [MultiApps] block.
   InputParameters mp = _app.getFactory().getValidParams("TransientMultiApp");
   mp.set<std::vector<FileName>>("input_files") = {getParam<FileName>("sub_app_input")};
   mp.set<ExecFlagEnum>("execute_on") = EXEC_NONE;
-  if (_concurrent)
-    mp.set<std::vector<Point>>("positions") = {libMesh::Point(), libMesh::Point()};
   _fe_problem.addMultiApp("TransientMultiApp", _multiapp_name, mp);
-
-  if (_concurrent && _communicator.size() < 2)
-    mooseInfo(name(),
-              ": 'concurrent_perturbation' is enabled but the run uses a single MPI process, "
-              "so the two sub-app solves still execute sequentially (with roughly twice the "
-              "memory). Run with >= 2 MPI processes to benefit from concurrency.");
 }
 
 void
@@ -228,13 +212,12 @@ MultiAppNewtonIterationUserObject::execute()
   if (!_param_output_pp.empty())
     _fe_problem.setPostprocessorValueByName(_param_output_pp, p);
 
-  // Advance the sub-app(s) one time step at the converged p. The final solve at p is skipped
-  // only when sequential AND converged, since solveTrial's last solve was already at p. In
-  // concurrent mode sub-app 1 still holds p+delta and must be re-solved at p, because
-  // finishStep() advances every local sub-app and a stale state would corrupt the next step's
-  // backup. The solve uses auto_advance=false so finishStep() advances the clock exactly once
-  // (auto_advance=true would double-advance it and cause the next solve to be skipped).
-  if (!converged || _concurrent)
+  // Advance the sub-app one time step at the converged p. A final solve at p is needed only when
+  // the iteration did not converge (accept_on_max_iteration = true): p was updated after the last
+  // trial solve. On convergence the base (p) solve in solveTrial was already the last solve, so
+  // the sub-app holds the p-solution. The solve uses auto_advance=false so finishStep() advances
+  // the clock exactly once (auto_advance=true would double-advance it and skip the next solve).
+  if (!converged)
   {
     if (!finalSolveAtP(multiapp, p))
     {
@@ -262,30 +245,17 @@ MultiAppNewtonIterationUserObject::solveTrial(std::shared_ptr<MultiApp> & app,
                                               Real & y1,
                                               Real & y2) const
 {
-  if (_concurrent)
-  {
-    // Single solveStep evaluates sub-app 0 at p and sub-app 1 at p+delta; on >= 2 ranks these
-    // run simultaneously on disjoint ranks.
-    app->restore();
-    setSubAppParam(app, 0, p);
-    setSubAppParam(app, 1, p + _delta_param);
-    const bool ok = app->solveStep(_dt, _t, /*auto_advance=*/false);
-    y1 = ok ? getSubAppOutput(app, 0) : 0.0;
-    y2 = ok ? getSubAppOutput(app, 1) : 0.0;
-    return ok;
-  }
-
-  // Sequential: solve the single sub-app twice (restoring between). The base (p) solve is last
-  // so on convergence the sub-app already holds the p-solution, avoiding an extra final solve.
+  // Solve the sub-app twice (restoring between). The base (p) solve is last so on convergence the
+  // sub-app already holds the p-solution, avoiding an extra final solve.
   app->restore();
-  setSubAppParam(app, 0, p + _delta_param);
+  setSubAppParam(app, p + _delta_param);
   const bool ok_perturbed = app->solveStep(_dt, _t, /*auto_advance=*/false);
-  y2 = ok_perturbed ? getSubAppOutput(app, 0) : 0.0;
+  y2 = ok_perturbed ? getSubAppOutput(app) : 0.0;
 
   app->restore();
-  setSubAppParam(app, 0, p);
+  setSubAppParam(app, p);
   const bool ok_base = app->solveStep(_dt, _t, /*auto_advance=*/false);
-  y1 = ok_base ? getSubAppOutput(app, 0) : 0.0;
+  y1 = ok_base ? getSubAppOutput(app) : 0.0;
 
   return ok_base && ok_perturbed;
 }
@@ -294,23 +264,19 @@ bool
 MultiAppNewtonIterationUserObject::finalSolveAtP(std::shared_ptr<MultiApp> & app, Real p) const
 {
   app->restore();
-  for (unsigned int i = 0; i < app->numGlobalApps(); ++i)
-    setSubAppParam(app, i, p);
+  setSubAppParam(app, p);
   return app->solveStep(_dt, _t, /*auto_advance=*/false);
 }
 
 void
-MultiAppNewtonIterationUserObject::setSubAppParam(std::shared_ptr<MultiApp> & app,
-                                                  unsigned int index,
-                                                  Real value) const
+MultiAppNewtonIterationUserObject::setSubAppParam(std::shared_ptr<MultiApp> & app, Real value) const
 {
-  if (app->hasLocalApp(index))
-    app->appProblemBase(index).setPostprocessorValueByName(_param_pp, value);
+  if (app->hasLocalApp(0))
+    app->appProblemBase(0).setPostprocessorValueByName(_param_pp, value);
 }
 
 Real
-MultiAppNewtonIterationUserObject::getSubAppOutput(std::shared_ptr<MultiApp> & app,
-                                                   unsigned int index) const
+MultiAppNewtonIterationUserObject::getSubAppOutput(std::shared_ptr<MultiApp> & app) const
 {
   // The output postprocessor is a single scalar that MOOSE already replicates across the
   // sub-app's own communicator, so the sub-app's root rank holds the complete value. Read it
@@ -319,8 +285,8 @@ MultiAppNewtonIterationUserObject::getSubAppOutput(std::shared_ptr<MultiApp> & a
   // broadcast, not an aggregation: summing the value over all of a multi-rank sub-app's ranks
   // would over-count it, which the single-contributor guard is precisely there to avoid.
   Real value = 0.0;
-  if (app->hasLocalApp(index) && app->isRootProcessor())
-    value = app->appPostprocessorValue(index, _output_pp);
+  if (app->hasLocalApp(0) && app->isRootProcessor())
+    value = app->appPostprocessorValue(0, _output_pp);
 
   _communicator.sum(value);
   return value;

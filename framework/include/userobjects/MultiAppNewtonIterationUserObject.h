@@ -30,29 +30,27 @@ public:
 
 protected:
   /**
-   * Set the parameter postprocessor on global sub-app 'index' of the given MultiApp.
-   * No-op on ranks that do not own that sub-app (hasLocalApp check is applied internally).
+   * Set the parameter postprocessor on the sub-app.
+   * No-op on ranks that do not own the sub-app (hasLocalApp check is applied internally).
    */
-  void setSubAppParam(std::shared_ptr<MultiApp> & app, unsigned int index, Real value) const;
+  void setSubAppParam(std::shared_ptr<MultiApp> & app, Real value) const;
 
   /**
-   * Read the output postprocessor from global sub-app 'index' of the given MultiApp.  The
-   * owning sub-app's root rank contributes the value, which is then reduced across all MPI
-   * ranks so every processor holds the same result.
+   * Read the output postprocessor from the sub-app.  The owning sub-app's root rank contributes
+   * the value, which is then reduced across all MPI ranks so every processor holds the same result.
    */
-  Real getSubAppOutput(std::shared_ptr<MultiApp> & app, unsigned int index) const;
+  Real getSubAppOutput(std::shared_ptr<MultiApp> & app) const;
 
   /**
    * Perform one Newton trial: evaluate the sub-app output at p (y1) and at p + delta (y2).
-   * In sequential mode the base (p) solve is performed last, so on return sub-app 0 holds the
-   * p-solution.  Returns true if all underlying solves converged.
+   * The base (p) solve is performed last, so on return the sub-app holds the p-solution.
+   * Returns true if all underlying solves converged.
    */
   bool solveTrial(std::shared_ptr<MultiApp> & app, Real p, Real & y1, Real & y2) const;
 
   /**
-   * Solve every sub-app of the MultiApp at parameter p from the start-of-timestep state.
-   * Used for the final advance when the sub-app(s) are not already in the desired p-state.
-   * Returns true if all underlying solves converged.
+   * Solve the sub-app at parameter p from the start-of-timestep state.  Used for the final advance
+   * when the sub-app is not already in the desired p-state.  Returns true if the solve converged.
    */
   bool finalSolveAtP(std::shared_ptr<MultiApp> & app, Real p) const;
 
@@ -90,10 +88,6 @@ private:
 
   /// Optional main-app Receiver postprocessor name to publish the converged parameter
   const PostprocessorName _param_output_pp;
-
-  /// If true, evaluate the p and p+delta solves concurrently using two sub-apps (more memory,
-  /// faster on >= 2 MPI ranks); otherwise solve a single sub-app twice sequentially.
-  const bool _concurrent;
 
   /// Whether to accept the best estimate (true) or cut the time step (false) when the maximum
   /// number of Newton iterations is reached without convergence

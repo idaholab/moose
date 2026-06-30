@@ -9,15 +9,6 @@
     requirement = "The system shall solve an inverse coupling problem by finding, at each time step, "
                   "the parameter value that yields a target sub-app output."
   []
-  [newton_iteration_concurrent]
-    type = CSVDiff
-    input = main.i
-    cli_args = 'UserObjects/newton_uo/concurrent_perturbation=true Outputs/file_base=main_concurrent_out'
-    csvdiff = main_concurrent_out.csv
-    min_parallel = 2
-    requirement = "The system shall solve the inverse coupling problem with the base and perturbed "
-                  "sub-app solves running concurrently across MPI processes."
-  []
   [accept_on_max_iteration]
     type = RunApp
     input = main.i
