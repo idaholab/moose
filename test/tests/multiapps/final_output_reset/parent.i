@@ -34,7 +34,6 @@
 [Postprocessors]
   [fp_index]
     type = NumFixedPointIterations
-    get_index_instead_of_count = true
     execute_on = TIMESTEP_END
   []
 []
