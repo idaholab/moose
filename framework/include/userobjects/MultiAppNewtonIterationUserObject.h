@@ -14,8 +14,8 @@
 class MultiApp;
 
 /**
- * Drives a TransientMultiApp through a Newton iteration to solve an inverse problem at every time step:
- * find the parameter p at each time t such that output(p) = f_target(t).
+ * Drives a TransientMultiApp through a Newton iteration to solve an inverse problem at every time
+ * step: find the parameter p at each time t such that output(p) = f_target(t).
  */
 class MultiAppNewtonIterationUserObject : public GeneralUserObject
 {
