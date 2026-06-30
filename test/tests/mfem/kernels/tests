@@ -121,6 +121,7 @@
     compute_devices = 'cuda'
     min_parallel = 2
     recover = false
+  []
   [MFEMDiffusionDG]
     type = XMLDiff
     input = dg_diffusion.i
