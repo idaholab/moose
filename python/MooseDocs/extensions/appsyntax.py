@@ -935,6 +935,7 @@ class RenderParameterToken(components.RenderComponent):
         # Only display a unit if specified or if the type is likely to have a unit
         if (
             doc_unit
+            or "Real" in cpp_type
             or "double" in cpp_type
             or "Variable" in cpp_type
             or "Postprocessor" in cpp_type
