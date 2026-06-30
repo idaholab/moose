@@ -12,7 +12,6 @@
 #include "KokkosLinearSystemContributionObject.h"
 
 #include "BlockRestrictable.h"
-#include "NonADFunctorInterface.h"
 
 namespace Moose::Kokkos
 {
@@ -22,9 +21,7 @@ class FVDatum;
 /**
  * Base class for Kokkos linear finite volume kernels that contribute to the linear system
  */
-class LinearFVKernel : public LinearSystemContributionObject,
-                       public BlockRestrictable,
-                       public NonADFunctorInterface
+class LinearFVKernel : public LinearSystemContributionObject, public BlockRestrictable
 {
 public:
   static InputParameters validParams();

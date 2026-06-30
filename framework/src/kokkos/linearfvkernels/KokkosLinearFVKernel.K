@@ -17,20 +17,17 @@ LinearFVKernel::validParams()
 {
   auto params = LinearSystemContributionObject::validParams();
   params += BlockRestrictable::validParams();
-  params += NonADFunctorInterface::validParams();
   params.registerBase("LinearFVKernel");
   return params;
 }
 
 LinearFVKernel::LinearFVKernel(const InputParameters & parameters)
-  : LinearSystemContributionObject(parameters), BlockRestrictable(this), NonADFunctorInterface(this)
+  : LinearSystemContributionObject(parameters), BlockRestrictable(this)
 {
 }
 
 LinearFVKernel::LinearFVKernel(const LinearFVKernel & object)
-  : LinearSystemContributionObject(object),
-    BlockRestrictable(object, {}),
-    NonADFunctorInterface(object, {})
+  : LinearSystemContributionObject(object), BlockRestrictable(object, {})
 {
 }
 

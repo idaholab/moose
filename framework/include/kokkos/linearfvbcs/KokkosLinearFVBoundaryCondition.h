@@ -14,7 +14,6 @@
 
 #include "BoundaryRestrictableRequired.h"
 #include "GeometricSearchInterface.h"
-#include "NonADFunctorInterface.h"
 
 #include "KokkosLinearFVFluxKernel.h"
 
@@ -28,8 +27,7 @@ namespace Moose::Kokkos
  */
 class LinearFVBoundaryCondition : public LinearSystemContributionObject,
                                   public BoundaryRestrictableRequired,
-                                  public GeometricSearchInterface,
-                                  public NonADFunctorInterface
+                                  public GeometricSearchInterface
 {
 public:
   static InputParameters validParams();

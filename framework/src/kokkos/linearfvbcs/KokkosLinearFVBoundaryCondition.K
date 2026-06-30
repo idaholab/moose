@@ -18,7 +18,6 @@ LinearFVBoundaryCondition::validParams()
   auto params = LinearSystemContributionObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
   params += GeometricSearchInterface::validParams();
-  params += NonADFunctorInterface::validParams();
   params.registerBase("LinearFVBoundaryCondition");
   params.registerSystemAttributeName("LinearFVBoundaryCondition");
   return params;
@@ -27,8 +26,7 @@ LinearFVBoundaryCondition::validParams()
 LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & parameters)
   : LinearSystemContributionObject(parameters),
     BoundaryRestrictableRequired(this, false),
-    GeometricSearchInterface(this),
-    NonADFunctorInterface(this)
+    GeometricSearchInterface(this)
 {
 }
 
@@ -36,7 +34,6 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondi
   : LinearSystemContributionObject(object),
     BoundaryRestrictableRequired(object, {}),
     GeometricSearchInterface(object, {}),
-    NonADFunctorInterface(object, {}),
     _bc_data_matrix(object._bc_data_matrix),
     _bc_data_rhs(object._bc_data_rhs)
 {
