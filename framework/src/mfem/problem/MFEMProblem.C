@@ -34,6 +34,7 @@
 #include <sstream>
 
 registerMooseObject("MooseApp", MFEMProblem);
+<<<<<<< HEAD
 
 namespace
 {
@@ -57,6 +58,8 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 }
 }
 
+=======
+>>>>>>> 970a73538d (Registration design change. Refs #32375)
 InputParameters
 MFEMProblem::validParams()
 {
@@ -591,34 +594,6 @@ MFEMProblem::addFunction(const std::string & type,
 {
   ExternalProblem::addFunction(type, name, parameters);
   auto & func = getFunction(name);
-
-  if (type == "MFEMCoordinateTransformations")
-  {
-    auto & coord_func = dynamic_cast<MFEMCoordinateTransformations &>(func);
-
-    const std::string r_name = coord_func.coefficientName("r");
-    const std::string inv_r_name = coord_func.coefficientName("inv_r");
-    const std::string two_pi_r_name = coord_func.coefficientName("two_pi_r");
-    const std::string measure_weight_name = coord_func.coefficientName("measure_weight");
-
-    getCoefficients().declareScalar<mfem::CylindricalRadialCoefficient>(r_name);
-
-    auto & r_coeff = getCoefficients().getScalarCoefficient(r_name);
-
-    getCoefficients().declareScalar<InvRegularizedCoefficient>(
-        inv_r_name, r_coeff, static_cast<mfem::real_t>(coord_func.invREps()));
-
-    constexpr mfem::real_t two_pi = 6.283185307179586476925286766559;
-
-    getCoefficients().declareScalar<mfem::TransformedCoefficient>(
-        two_pi_r_name, &r_coeff, [](mfem::real_t a) -> mfem::real_t { return two_pi * a; });
-
-    getCoefficients().declareScalar<mfem::TransformedCoefficient>(
-        measure_weight_name, &r_coeff, [](mfem::real_t a) -> mfem::real_t { return a; });
-
-    return;
-  }
-
   // FIXME: Do we want to have optimised versions for when functions
   // are only of space or only of time.
   if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
