@@ -838,7 +838,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
-  registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");
