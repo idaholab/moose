@@ -131,6 +131,7 @@ CylinderComponent::addMeshGenerators()
       params.set<SubdomainName>("subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
+    params.set<bool>("output") = _verbose;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_base", params);
     _mg_names.push_back(name() + "_base");
@@ -190,6 +191,8 @@ CylinderComponent::addMeshGenerators()
     ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
     if (isParamValid("end_radius"))
     {
+      // avoid computing the radial extent from the mesh and suffering from polygonization
+      ext_params.set<Real>("start_radial_extent") = _radius;
       ext_params.set<Real>("end_radial_extent") = getParam<Real>("end_radius");
       ext_params.set<MooseEnum>("radial_growth_method") =
           getParam<MooseEnum>("radial_growth_method");
@@ -197,6 +200,7 @@ CylinderComponent::addMeshGenerators()
 
     const Point default_direction(1, 0, 0);
     ext_params.set<Point>("direction") = default_direction;
+    ext_params.set<bool>("output") = _verbose;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "AdvancedExtruderGenerator", name() + "_base", ext_params);
     _mg_names.push_back(name() + "_base");
