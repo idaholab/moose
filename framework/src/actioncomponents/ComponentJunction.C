@@ -291,10 +291,17 @@ ComponentJunction::addMeshGenerators()
       aeg_params.set<MooseEnum>("radial_growth_method") =
           getParam<MooseEnum>("radial_growth_method");
 
+      // named entity assignment
       aeg_params.set<BoundaryName>("bottom_boundary") = name() + "_aeg_bottom_boundary";
       aeg_params.set<BoundaryName>("top_boundary") = name() + "_aeg_top_boundary";
       if (isParamValid("block"))
-        paramError("block", "Not yet implemented for 2D or 3D junction");
+      {
+        // single layer for replacing block assignments
+        std::vector<std::vector<SubdomainName>> swaps(1);
+        swaps[0].push_back((SubdomainName)(name() + "_LowerDBlockSource"));
+        swaps[0].push_back(getParam<SubdomainName>("block"));
+        aeg_params.set<std::vector<std::vector<SubdomainName>>>("subdomain_swaps") = swaps;
+      }
       aeg_params.set<bool>("output") = _verbose;
       aeg_params.set<bool>("show_info") = _verbose;
 
