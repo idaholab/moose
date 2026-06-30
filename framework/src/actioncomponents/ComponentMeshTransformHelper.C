@@ -81,6 +81,7 @@ ComponentMeshTransformHelper::addMeshGenerators()
     params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "TRANSLATE";
     params.set<RealVectorValue>("vector_value") = getParam<Point>("position");
+    params.set<bool>("output") = _verbose;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_translated", params);
     _mg_names.push_back(name() + "_translated");
