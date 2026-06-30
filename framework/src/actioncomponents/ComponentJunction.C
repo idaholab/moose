@@ -148,6 +148,7 @@ ComponentJunction::addMeshGenerators()
         params.set<bool>("verbose_stitching") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") =
             _enforce_all_nodes_match_on_boundaries;
+        params.set<bool>("output") = _verbose;
         _app.getMeshGeneratorSystem().addMeshGenerator(
             "StitchMeshGenerator", name() + "_base", params);
         _mg_names.push_back(name() + "_base");
@@ -162,6 +163,7 @@ ComponentJunction::addMeshGenerators()
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
         params.set<bool>("show_info") = _verbose;
+        params.set<bool>("output") = _verbose;
         _app.getMeshGeneratorSystem().addMeshGenerator(
             "StitchBoundaryMeshGenerator", name() + "_close", params);
         _mg_names.push_back(name() + "_close");
@@ -223,6 +225,7 @@ ComponentJunction::addMeshGenerators()
         bspline_params.set<SubdomainName>("new_subdomain_name") = getParam<SubdomainName>("block");
       bspline_params.set<std::vector<BoundaryName>>("edge_nodesets") = {
           name() + "_bspline_start_node", name() + "_bspline_end_node"};
+      // final generator in 1D
       bspline_params.set<bool>("output") = _verbose;
     }
 
@@ -303,6 +306,7 @@ ComponentJunction::addMeshGenerators()
       stitcher_params.set<bool>("output") = _verbose;
       stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
+      stitcher_params.set<bool>("output") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
       _mg_names.push_back(name() + "_stitcher");
@@ -340,6 +344,7 @@ ComponentJunction::addMeshGenerators()
         boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{name() + "_bspline_end_node", second_boundary}};
       boundary_stitcher_params.set<bool>("show_info") = _verbose;
+      boundary_stitcher_params.set<bool>("output") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);
       _mg_names.push_back(name() + "_closed");
