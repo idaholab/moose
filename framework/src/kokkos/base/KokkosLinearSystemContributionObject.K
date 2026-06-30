@@ -44,11 +44,11 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     _dt_old(TransientInterface::_dt_old)
 {
   const auto * const subproblem = getCheckedPointerParam<SubProblem *>("_subproblem");
-  _kokkos_var.init(subproblem->getVariable(0,
-                                           getParam<LinearVariableName>("variable"),
-                                           Moose::VarKindType::VAR_SOLVER,
-                                           Moose::VarFieldType::VAR_FIELD_STANDARD),
-                   Moose::SOLUTION_TAG);
+  _var.init(subproblem->getVariable(0,
+                                    getParam<LinearVariableName>("variable"),
+                                    Moose::VarKindType::VAR_SOLVER,
+                                    Moose::VarFieldType::VAR_FIELD_STANDARD),
+            Moose::SOLUTION_TAG);
 }
 
 LinearSystemContributionObject::LinearSystemContributionObject(
@@ -66,7 +66,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(
     MeshHolder(object),
     SystemHolder(object),
     _fe_problem(object._fe_problem),
-    _kokkos_var(object._kokkos_var),
+    _var(object._var),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),

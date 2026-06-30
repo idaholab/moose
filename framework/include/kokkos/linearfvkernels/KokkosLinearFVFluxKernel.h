@@ -77,10 +77,10 @@ LinearFVFluxKernel::operator()(RightHandSideLoop, const ThreadID tid, const Deri
   if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
     return;
 
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  const auto & sys = kokkosSystem(_kokkos_var.sys());
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
   kernel.accumulateTaggedVector(kernel.template computeRightHandSideContribution<Derived>(datum),
-                                sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var()));
+                                sys.getElemLocalDofIndex(elem, 0, _var.var()));
 }
 
 template <typename Derived>
@@ -92,9 +92,9 @@ LinearFVFluxKernel::operator()(MatrixLoop, const ThreadID tid, const Derived & k
   if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
     return;
 
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  const auto & sys = kokkosSystem(_kokkos_var.sys());
-  const auto var_num = _kokkos_var.var();
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
+  const auto var_num = _var.var();
   const auto row = sys.getElemLocalDofIndex(elem, 0, var_num);
   kernel.accumulateTaggedMatrix(kernel.template computeMatrixContribution<Derived>(datum),
                                 row,
