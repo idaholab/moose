@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 
 #include <vector>
+#include <map>
 
 JsonInputFileFormatter::JsonInputFileFormatter() : _spaces(2), _level(0) {}
 
@@ -178,6 +179,23 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
     auto & l = lines[name];
     auto desc = nlohmann::to_string(param["description"]);
     addLine(l, max_len, desc);
+
+    if (param.contains("options"))
+    {
+      const auto options_string = MooseUtils::trim(param["options"].get<std::string>());
+      if (!options_string.empty())
+      {
+        std::vector<std::string> options;
+        MooseUtils::tokenize(options_string, options, 1, " ");
+        addLine("", max_len + 1, "Options: " + Moose::stringify(options, ", "));
+
+        if (param.contains("option_docs") && param["option_docs"].is_object())
+          for (const auto & option : options)
+            if (param["option_docs"].contains(option))
+              addLine(
+                  "", max_len + 1, option + ": " + param["option_docs"][option].get<std::string>());
+      }
+    }
 
     const auto doc_unit = nlohmann::to_string(param["doc_unit"]);
     if (!doc_unit.empty())
