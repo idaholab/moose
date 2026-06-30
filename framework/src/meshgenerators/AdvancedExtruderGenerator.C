@@ -140,6 +140,12 @@ AdvancedExtruderGenerator::validParams()
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
+  params.addParam<Real>("start_radial_extent",
+                        0,
+                        "If modifying the radial extent of the extruded geometry, radial "
+                        "extent at the beginning of the extrusion process. This can be "
+                        "specified manually to avoid computing it from the surface, which can "
+                        "be undesirable if the starting shape is approximated by polygonazition");
   params.addParam<Real>("end_radial_extent",
                         0,
                         "If modifying the radial extent of the extruded geometry, final radial "
@@ -588,8 +594,11 @@ AdvancedExtruderGenerator::generate()
       reference_direction = _direction;
 
     // now we measure the initial radial extent
-    start_radial_extent =
-        MooseMeshUtils::computeMaxDistanceToAxis(*input, reference_point, reference_direction);
+    if (!isParamValid("start_radial_extent"))
+      start_radial_extent =
+          MooseMeshUtils::computeMaxDistanceToAxis(*input, reference_point, reference_direction);
+    else
+      start_radial_extent = getParam<Real>("start_radial_extent");
   }
 
   // Compute the total extrusion distance along the axis
