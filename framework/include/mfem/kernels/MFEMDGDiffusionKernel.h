@@ -25,7 +25,7 @@ public:
 
 protected:
   int _fe_order;
-  mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _coef;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
 };
