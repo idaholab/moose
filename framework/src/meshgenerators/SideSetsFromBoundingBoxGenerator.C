@@ -15,8 +15,10 @@
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/parallel_sync.h"
 #include "libmesh/remote_elem.h"
 
+#include <map>
 #include <typeinfo>
 
 registerMooseObject("MooseApp", SideSetsFromBoundingBoxGenerator);
@@ -87,11 +89,12 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   const bool inside = (_location == "INSIDE");
 
-  const auto boundary_id_new = MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true)[0];
-  if (_boundary_names[0].empty() || !MooseUtils::isDigits(_boundary_names[0]))
+  const auto & boundary_name = _boundary_names.front();
+  const auto boundary_id_new = MooseMeshUtils::getBoundaryIDs(*mesh, {boundary_name}, true).front();
+  if (boundary_name.empty() || !MooseUtils::isDigits(boundary_name))
   {
-    boundary_info.sideset_name(boundary_id_new) = _boundary_names[0];
-    boundary_info.nodeset_name(boundary_id_new) = _boundary_names[0];
+    boundary_info.sideset_name(boundary_id_new) = boundary_name;
+    boundary_info.nodeset_name(boundary_id_new) = boundary_name;
   }
 
   // Boundaries do not need to overlap
@@ -103,10 +106,8 @@ SideSetsFromBoundingBoxGenerator::generate()
     // Request to compute normal vectors
     const std::vector<Point> & face_normals = _fe_face->get_normals();
 
-    const processor_id_type my_n_proc = mesh->n_processors();
-    const processor_id_type my_proc_id = mesh->processor_id();
     typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
-    std::vector<vec_type> queries(my_n_proc);
+    std::map<processor_id_type, vec_type> queries;
 
     auto add_side = [&](const Elem * elem, const unsigned int side)
     {
@@ -141,65 +142,43 @@ SideSetsFromBoundingBoxGenerator::generate()
       }
     }
 
-    if (!mesh->is_serial())
+    if (!queries.empty())
     {
-      const auto queries_tag = mesh->comm().get_unique_tag(),
-                 replies_tag = mesh->comm().get_unique_tag();
-
-      std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
-
-      for (const auto p : make_range(my_n_proc))
+      typedef unsigned char response_type;
+      auto gather_data = [&](processor_id_type /*pid*/,
+                             const vec_type & query,
+                             std::vector<response_type> & response)
       {
-        if (p == my_proc_id)
-          continue;
-
-        Parallel::Request & request = side_requests[p - (p > my_proc_id)];
-        mesh->comm().send(p, queries[p], request, queries_tag);
-      }
-
-      std::vector<vec_type> responses(my_n_proc - 1);
-      for (const auto p : make_range(uint(1), my_n_proc))
-      {
-        vec_type query;
-
-        Parallel::Status status(mesh->comm().probe(Parallel::any_source, queries_tag));
-        const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
-
-        mesh->comm().receive(source_pid, query, queries_tag);
-
-        Parallel::Request & request = reply_requests[p - 1];
+        response.reserve(query.size());
 
         for (const auto & q : query)
         {
           const Elem * elem = mesh->elem_ptr(q.first);
           const unsigned int side = q.second;
 
-          if (_bounding_box.contains_point(elem->vertex_average()) != inside)
-            continue;
-
-          _fe_face->reinit(elem, side);
-          const Point face_normal = _fe_face->get_normals()[0];
-          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
-            responses[p - 1].push_back(std::make_pair(elem->id(), side));
+          response_type side_satisfies_requirements = false;
+          if (_bounding_box.contains_point(elem->vertex_average()) == inside)
+          {
+            _fe_face->reinit(elem, side);
+            const Point face_normal = _fe_face->get_normals()[0];
+            side_satisfies_requirements =
+                elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal);
+          }
+          response.push_back(side_satisfies_requirements);
         }
+      };
 
-        mesh->comm().send(source_pid, responses[p - 1], request, replies_tag);
-      }
-
-      for (processor_id_type p = 1; p != my_n_proc; ++p)
+      auto act_on_data = [&](processor_id_type /*pid*/,
+                             const vec_type & query,
+                             const std::vector<response_type> & response)
       {
-        Parallel::Status status(mesh->comm().probe(Parallel::any_source, replies_tag));
-        const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
+        for (const auto i : index_range(query))
+          if (response[i])
+            add_side(mesh->elem_ptr(query[i].first), query[i].second);
+      };
 
-        vec_type response;
-        mesh->comm().receive(source_pid, response, replies_tag);
-
-        for (const auto & r : response)
-          add_side(mesh->elem_ptr(r.first), r.second);
-      }
-
-      Parallel::wait(side_requests);
-      Parallel::wait(reply_requests);
+      const response_type * example = nullptr;
+      Parallel::pull_parallel_vector_data(mesh->comm(), queries, gather_data, act_on_data, example);
     }
 
     comm().max(found_element);

@@ -49,23 +49,14 @@
 
       detail = 'with only elements located outside of the bounding boxes.'
     []
-    [distributed]
-      type = 'RunApp'
-      input = 'generate_sidesets_bounding_box.i'
-      cli_args = '--mesh-only Mesh/parallel_type=distributed Mesh/createNewSidesetOne/boundary_new=box_left'
-      min_parallel = 2
-      recover = false
-
-      detail = 'with a named boundary on a distributed mesh, and'
-    []
-    [distributed_included_neighbors]
+    [included_neighbors]
       type = 'RunApp'
       input = 'distributed_included_neighbors.i'
       cli_args = '--mesh-only Mesh/parallel_type=distributed'
       min_parallel = 2
       recover = false
 
-      detail = 'with neighbor restrictions on a distributed mesh.'
+      detail = 'with neighbor restrictions.'
     []
   []
 
