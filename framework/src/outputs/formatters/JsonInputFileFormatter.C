@@ -187,7 +187,7 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
       {
         std::vector<std::string> options;
         MooseUtils::tokenize(options_string, options, 1, " ");
-        addLine("", max_len + 1, "Options: " + Moose::stringify(options, ", "));
+        addLine("", max_len + 1, "Options: " + MooseUtils::join(options, ", "));
 
         if (param.contains("option_docs") && param["option_docs"].is_object())
           for (const auto & option : options)
