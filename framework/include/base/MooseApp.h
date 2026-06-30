@@ -1390,7 +1390,7 @@ protected:
   std::shared_ptr<libMesh::ExodusII_IO> _ex_reader;
 
   /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
-  bool _distributed_mesh_on_command_line;
+  const bool _distributed_mesh_on_command_line;
 
   /// Whether or not this is a recovery run
   bool _recover;
@@ -1422,7 +1422,7 @@ protected:
   std::map<std::string, unsigned int> _output_file_numbers;
 
   /// true if we want to just check the input file
-  bool _check_input;
+  const bool _check_input;
 
   /// The relationship managers that have been added
   std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
@@ -1639,10 +1639,10 @@ private:
   std::unique_ptr<TheWarehouse> _the_warehouse;
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
-  unsigned int _multiapp_level;
+  const unsigned int _multiapp_level;
 
   /// Numbering in all the sub-apps on the same level
-  unsigned int _multiapp_number;
+  const unsigned int _multiapp_number;
 
   /// Whether to use the parent app mesh for this app
   const bool _use_master_mesh;
