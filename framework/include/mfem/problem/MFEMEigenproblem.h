@@ -13,13 +13,15 @@
 
 #include "MFEMProblem.h"
 
+/**
+ * Finite element eigenproblem solved with the MFEM finite element library.
+ */
 class MFEMEigenproblem : public MFEMProblem
 {
 public:
   static InputParameters validParams();
 
   MFEMEigenproblem(const InputParameters & params);
-  virtual ~MFEMEigenproblem() {}
 
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
@@ -29,12 +31,18 @@ public:
                              InputParameters & parameters) override;
 
   /**
-   * Override of MFEMProblem::addVariable. Sets a
-   * MFEM grid function to be used in the MFEM solve.
+   * Override of MFEMProblem::addVariable. Adds the variable's grid function plus one grid function
+   * per requested eigenmode to store the corresponding eigenvector.
    */
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & parameters) override;
+
+  /// Returns the scalar coefficient used to scale the right-hand side of the eigenproblem equation.
+  mfem::Coefficient & getRHSCoefficient();
+
+  /// Returns the matrix coefficient used to scale the right-hand side of the eigenproblem equation.
+  mfem::MatrixCoefficient & getRHSMatrixCoefficient();
 };
 
 #endif

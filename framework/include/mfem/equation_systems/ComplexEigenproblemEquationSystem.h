@@ -11,46 +11,43 @@
 
 #pragma once
 
-#include "EquationSystem.h"
+#include "ComplexEquationSystem.h"
 
 class MFEMEigenproblem;
 
 namespace Moose::MFEM
 {
-class EigensolverBase;
 
-/// Equation system specialization for eigenproblems.
-class EigenproblemEquationSystem : public EquationSystem
+/// Equation system specialization for complex eigenproblems.
+class ComplexEigenproblemEquationSystem : public ComplexEquationSystem
 {
 public:
   /// Construct with the eigenproblem owning the right-hand-side coefficient. The coefficient is
   /// resolved at assembly time, since materials are not yet available when the equation
   /// system is created.
-  EigenproblemEquationSystem(MFEMEigenproblem & eigen_problem) : _eigen_problem(eigen_problem) {}
-  ~EigenproblemEquationSystem() override = default;
+  ComplexEigenproblemEquationSystem(MFEMEigenproblem & eigen_problem)
+    : _eigen_problem(eigen_problem)
+  {
+  }
+  ~ComplexEigenproblemEquationSystem() override = default;
 
   /// Build eigenproblem system, with essential boundary conditions accounted for
-  void BuildEigenproblemJacobian(mfem::BlockVector & trueX);
-
-  /// Prepare the provided eigensolver
-  void PrepareEigensolver(EigensolverBase & solver);
+  void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
 
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
-  void FormEigenproblemMatrix();
+  virtual void FormEigenproblemMatrix(mfem::OperatorHandle & op);
 
   /// Form mass matrix for the eigensolver with Dirichlet BC elimination.
-  void FormMassMatrix();
+  void FormMassMatrix(mfem::OperatorHandle & op);
 
 private:
-  friend class EigenproblemESProblemOperator;
+  friend class ComplexEigenproblemESProblemOperator;
 
   mfem::Array<int> _global_ess_markers;
-  /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
-  mfem::OperatorHandle _mass_rhs;
   /// Eigenproblem owning the right-hand-side coefficient, queried at assembly time.
   MFEMEigenproblem & _eigen_problem;
 };
