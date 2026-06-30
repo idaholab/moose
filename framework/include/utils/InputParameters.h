@@ -918,6 +918,22 @@ public:
   bool hasCoupledValue(const std::string & coupling_name) const;
 
   /**
+   * Set a coupled variable parameter to a single variable name.
+   *
+   * @param coupling_name The name of the coupling parameter to set.
+   * @param value The variable name to set.
+   */
+  void setCoupledVar(const std::string & coupling_name, const std::string & value);
+
+  /**
+   * Set a coupled variable parameter to multiple variable names.
+   *
+   * @param coupling_name The name of the coupling parameter to set.
+   * @param values The variable names to set.
+   */
+  void setCoupledVar(const std::string & coupling_name, const std::vector<VariableName> & values);
+
+  /**
    * Return whether or not the requested parameter has a default coupled value.
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
