@@ -39,7 +39,8 @@ TEST(BSplineTest, CP_MakerDegree2Test)
   // const std::vector<libMesh::Point> control_points = {
   //     {1, 2, 1}, {1.5, 2, 1}, {2, 2, 0.5}, {2, 1.5, 0}, {2, 1, 0}};
 
-  Moose::BSpline b_spline(degree, start, end, direction1, direction2, cps_per_half, sharpness);
+  Moose::BSpline b_spline(
+      degree, start, end, direction1, direction2, cps_per_half, sharpness, "test");
 
   const libMesh::Point point_0 = b_spline.getPoint(t0);
   const libMesh::Point point_1 = b_spline.getPoint(t1);
@@ -77,7 +78,8 @@ TEST(BSplineTest, CP_MakerDegree3Test)
   // const std::vector<libMesh::Point> control_points = {
   //     {1, 2, 1}, {1.5, 2, 1}, {2, 2, 0.5}, {2, 1.5, 0}, {2, 1, 0}};
 
-  Moose::BSpline b_spline(degree, start, end, direction1, direction2, cps_per_half, sharpness);
+  Moose::BSpline b_spline(
+      degree, start, end, direction1, direction2, cps_per_half, sharpness, "test");
   const libMesh::Point point_0 = b_spline.getPoint(t0);
   const libMesh::Point point_1 = b_spline.getPoint(t1);
   const libMesh::Point point_2 = b_spline.getPoint(t2);
@@ -114,7 +116,8 @@ TEST(BSplineTest, CP_MakerDegree4Test)
   // const std::vector<libMesh::Point> control_points = {
   //     {1, 2, 1}, {1.5, 2, 1}, {2, 2, 0.5}, {2, 1.5, 0}, {2, 1, 0}};
 
-  Moose::BSpline b_spline(degree, start, end, direction1, direction2, cps_per_half, sharpness);
+  Moose::BSpline b_spline(
+      degree, start, end, direction1, direction2, cps_per_half, sharpness, "test");
 
   const libMesh::Point point_0 = b_spline.getPoint(t0);
   const libMesh::Point point_1 = b_spline.getPoint(t1);
