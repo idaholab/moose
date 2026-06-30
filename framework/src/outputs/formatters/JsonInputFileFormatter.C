@@ -191,9 +191,13 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
 
         if (param.contains("option_docs") && param["option_docs"].is_object())
           for (const auto & option : options)
-            if (param["option_docs"].contains(option))
-              addLine(
-                  "", max_len + 1, option + ": " + param["option_docs"][option].get<std::string>());
+          {
+            const auto option_doc_key = MooseUtils::toUpper(option);
+            if (param["option_docs"].contains(option_doc_key))
+              addLine("",
+                      max_len + 1,
+                      option + ": " + param["option_docs"][option_doc_key].get<std::string>());
+          }
       }
     }
 
