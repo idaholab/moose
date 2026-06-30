@@ -55,11 +55,11 @@ LinearFVElementalKernel::operator()(RightHandSideLoop,
 {
   const auto elem = kokkosBlockElementID(tid);
   FVDatum datum(elem, libMesh::invalid_uint, kokkosMesh());
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  const auto & sys = kokkosSystem(_kokkos_var.sys());
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
   kernel.template accumulateTaggedVector<AccumulationMode::NonAtomic>(
       kernel.template computeRightHandSideContribution<Derived>(datum),
-      sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var()));
+      sys.getElemLocalDofIndex(elem, 0, _var.var()));
 }
 
 template <typename Derived>
@@ -68,9 +68,9 @@ LinearFVElementalKernel::operator()(MatrixLoop, const ThreadID tid, const Derive
 {
   const auto elem = kokkosBlockElementID(tid);
   FVDatum datum(elem, libMesh::invalid_uint, kokkosMesh());
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  const auto & sys = kokkosSystem(_kokkos_var.sys());
-  const auto var_num = _kokkos_var.var();
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
+  const auto var_num = _var.var();
   const auto row = sys.getElemLocalDofIndex(elem, 0, var_num);
   kernel.template accumulateTaggedMatrix<AccumulationMode::NonAtomic>(
       kernel.template computeMatrixContribution<Derived>(datum),

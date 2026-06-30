@@ -51,14 +51,14 @@ LinearFVFluxKernel::initialSetup()
   std::vector<LinearFVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSysNum>(_kokkos_var.sys())
+      .template condition<AttribSysNum>(_var.sys())
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(true)
       .template condition<AttribThread>(0)
       .queryInto(bcs);
 
   for (auto * bc : bcs)
-    if (bc->variable().var() == _kokkos_var.var())
+    if (bc->variable().var() == _var.var())
       bc->initBCData(_bc_data);
 
   // Non-Kokkos BCs are never called by Kokkos flux kernels; they would be silently
@@ -66,14 +66,14 @@ LinearFVFluxKernel::initialSetup()
   std::vector<::LinearFVBoundaryCondition *> non_kokkos_bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSysNum>(_kokkos_var.sys())
+      .template condition<AttribSysNum>(_var.sys())
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(false)
       .template condition<AttribThread>(0)
       .queryInto(non_kokkos_bcs);
 
   for (auto * bc : non_kokkos_bcs)
-    if (bc->variable().number() == _kokkos_var.var())
+    if (bc->variable().number() == _var.var())
       mooseError("Kokkos linear FV flux kernel '",
                  name(),
                  "' found non-Kokkos boundary condition '",

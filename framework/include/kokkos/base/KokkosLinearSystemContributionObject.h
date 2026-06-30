@@ -60,7 +60,7 @@ public:
    * Get the Kokkos variable this object contributes to
    * @returns The Kokkos variable
    */
-  Variable variable() const { return _kokkos_var; }
+  Variable variable() const { return _var; }
 
   /// Tag dispatch type for the right-hand side computation loop
   struct RightHandSideLoop
@@ -97,7 +97,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// Kokkos variable
-  Variable _kokkos_var;
+  Variable _var;
 
   /// Vector (residual) tags this object contributes to
   Array<TagID> _vector_tags;
@@ -134,8 +134,8 @@ LinearSystemContributionObject::accumulateTaggedVector(const Real value,
   if (!value)
     return;
 
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  KOKKOS_ASSERT(_var.components() == 1);
+  auto & sys = kokkosSystem(_var.sys());
   const MOOSE_KOKKOS_INDEX_TYPE tags_size = _vector_tags.size();
   for (MOOSE_KOKKOS_INDEX_TYPE index = 0; index < tags_size; ++index)
   {
@@ -159,8 +159,8 @@ LinearSystemContributionObject::accumulateTaggedMatrix(const Real value,
   if (!value)
     return;
 
-  KOKKOS_ASSERT(_kokkos_var.components() == 1);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  KOKKOS_ASSERT(_var.components() == 1);
+  auto & sys = kokkosSystem(_var.sys());
   const MOOSE_KOKKOS_INDEX_TYPE tags_size = _matrix_tags.size();
   for (MOOSE_KOKKOS_INDEX_TYPE index = 0; index < tags_size; ++index)
   {
