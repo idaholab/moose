@@ -260,8 +260,9 @@ ComplexEquationSystem::EliminateCoupledVariables()
           !VectorContainsName(_test_var_names, eliminated_var_name))
       {
         auto & mslf = *_mslfs.Get(test_var_name)->Get(eliminated_var_name);
-        mslf.AddMult(
-            *_cmplx_eliminated_variables.Get(eliminated_var_name), *_clfs.Get(test_var_name), -1);
+        auto & clf = *_clfs.Get(test_var_name);
+        mslf.AddMult(*_cmplx_eliminated_variables.Get(eliminated_var_name), clf, -1);
+        clf.SyncAlias();
       }
 }
 
