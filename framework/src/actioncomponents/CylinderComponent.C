@@ -198,6 +198,7 @@ CylinderComponent::addMeshGenerators()
           getParam<MooseEnum>("radial_growth_method");
     }
 
+    // the output is rotated
     const Point default_direction(1, 0, 0);
     ext_params.set<Point>("direction") = default_direction;
     ext_params.set<bool>("output") = _verbose;
