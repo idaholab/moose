@@ -77,11 +77,12 @@ AdvancedExtruderGenerator::validParams()
       "The number of layers for each elevation - must be num_elevations in length!");
 
   // Swaps on every height
-  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "subdomain_swaps",
       {},
       "For each row, every two entries are interpreted as a pair of "
-      "'from' and 'to' to remap the subdomains for that elevation");
+      "'from' and 'to' to remap the subdomains for that elevation. Subdomains may be specified by "
+      "name or ID. A 'to' name absent from the input mesh creates a new subdomain");
   params.addParam<std::vector<std::vector<boundary_id_type>>>(
       "boundary_swaps",
       {},
@@ -177,7 +178,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _biases(isParamValid("biases") ? getParam<std::vector<Real>>("biases")
                                    : std::vector<Real>(_heights.size(), 1.0)),
     _num_layers(getParam<std::vector<unsigned int>>("num_layers")),
-    _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
+    _subdomain_swaps(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_swaps")),
     _boundary_swaps(getParam<std::vector<std::vector<boundary_id_type>>>("boundary_swaps")),
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
     _elem_integers_swaps(
@@ -267,16 +268,6 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                      ") in ",
                  name());
     }
-  }
-
-  try
-  {
-    MooseMeshUtils::idSwapParametersProcessor(
-        name(), "subdomain_swaps", _subdomain_swaps, _subdomain_swap_pairs);
-  }
-  catch (const MooseException & e)
-  {
-    paramError("subdomain_swaps", e.what());
   }
 
   if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
@@ -452,8 +443,49 @@ AdvancedExtruderGenerator::generate()
   // Check that the swaps source blocks are present in the mesh
   for (const auto & swap : _subdomain_swaps)
     for (const auto i : index_range(swap))
-      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainID(*_input, swap[i]))
-        paramError("subdomain_swaps", "The block '", swap[i], "' was not found within the mesh");
+      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainName(*_input, swap[i]))
+        paramError("subdomain_swaps",
+                   "The block '",
+                   swap[i],
+                   "' was not found within the mesh.\nBlocks in the mesh: " +
+                       Moose::stringify(MooseMeshUtils::getAllSubdomainNamesAndIDs(*_input)));
+
+  // Convert the subdomain swaps from names to IDs. Target subdomains that are neither IDs nor
+  // names of subdomains in the input mesh are assigned new IDs, unused by the input mesh and by
+  // any other target ID
+  subdomain_id_type next_free_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*_input);
+  for (const auto & swap : _subdomain_swaps)
+    for (const auto i : index_range(swap))
+      if (i % 2 == 1 && MooseUtils::isDigits(swap[i]))
+        next_free_subdomain_id = std::max(
+            next_free_subdomain_id,
+            cast_int<subdomain_id_type>(MooseMeshUtils::getSubdomainID(swap[i], *_input) + 1));
+  std::map<SubdomainName, subdomain_id_type> new_subdomain_ids;
+  std::vector<std::vector<subdomain_id_type>> subdomain_swap_ids(_subdomain_swaps.size());
+  for (const auto row : index_range(_subdomain_swaps))
+    for (const auto i : index_range(_subdomain_swaps[row]))
+    {
+      const auto & subdomain = _subdomain_swaps[row][i];
+      if (i % 2 == 0 || MooseUtils::isDigits(subdomain) ||
+          MooseMeshUtils::hasSubdomainName(*_input, subdomain))
+        subdomain_swap_ids[row].push_back(MooseMeshUtils::getSubdomainID(subdomain, *_input));
+      else
+      {
+        if (!new_subdomain_ids.count(subdomain))
+          new_subdomain_ids[subdomain] = next_free_subdomain_id++;
+        subdomain_swap_ids[row].push_back(new_subdomain_ids[subdomain]);
+      }
+    }
+
+  try
+  {
+    MooseMeshUtils::idSwapParametersProcessor(
+        name(), "subdomain_swaps", subdomain_swap_ids, _subdomain_swap_pairs);
+  }
+  catch (const MooseException & e)
+  {
+    paramError("subdomain_swaps", e.what());
+  }
 
   // Check that the swaps source boundaries are present in the mesh
   for (const auto & swap : _boundary_swaps)
@@ -1673,6 +1705,8 @@ AdvancedExtruderGenerator::generate()
   // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
   if (!input_subdomain_map.empty())
     mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
+  for (const auto & [subdomain_name, subdomain_id] : new_subdomain_ids)
+    mesh->set_subdomain_name(subdomain_id, subdomain_name, true);
   if (!input_sideset_map.empty())
     mesh->get_boundary_info().set_sideset_name_map().insert(input_sideset_map.begin(),
                                                             input_sideset_map.end());
