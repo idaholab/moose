@@ -12,8 +12,6 @@
 #include "KokkosLinearFVKernel.h"
 #include "KokkosDatum.h"
 
-#include "FaceArgInterface.h"
-
 namespace Moose::Kokkos
 {
 
@@ -22,7 +20,7 @@ namespace Moose::Kokkos
  * boundary faces the contribution comes from the boundary face data populated by the boundary
  * conditions acting on this kernel's variable.
  */
-class LinearFVFluxKernel : public LinearFVKernel, public FaceArgProducerInterface
+class LinearFVFluxKernel : public LinearFVKernel
 {
 public:
   static InputParameters validParams();
@@ -32,7 +30,6 @@ public:
 
   virtual void computeRightHandSide() override;
   virtual void computeMatrix() override;
-  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
   virtual void initialSetup() override;
 
   /// Per-boundary-face contributions, populated by the boundary conditions and consumed by the kernel

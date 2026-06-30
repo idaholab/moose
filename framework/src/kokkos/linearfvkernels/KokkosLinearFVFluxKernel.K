@@ -27,12 +27,12 @@ LinearFVFluxKernel::validParams()
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & parameters)
-  : LinearFVKernel(parameters), FaceArgProducerInterface()
+  : LinearFVKernel(parameters)
 {
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
-  : LinearFVKernel(object), FaceArgProducerInterface(), _bc_data(object._bc_data)
+  : LinearFVKernel(object), _bc_data(object._bc_data)
 {
 }
 
@@ -106,16 +106,6 @@ LinearFVFluxKernel::computeMatrix()
       _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
     _matrix_dispatcher->parallelFor(policy);
   }
-}
-
-bool
-LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  const auto ft = fi.faceType(std::make_pair(_kokkos_var.var(), _kokkos_var.sys()));
-  if (fi_elem_side)
-    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
-  else
-    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
 }
 
 } // namespace Moose::Kokkos
