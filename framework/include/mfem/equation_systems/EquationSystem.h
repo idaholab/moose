@@ -239,8 +239,7 @@ protected:
   NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   NamedFieldsMap<mfem::ParLinearForm> _lfs;
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _mblfs; // named according to trial variable
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>> _mblfs; // named according to trial var
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
