@@ -662,8 +662,8 @@ AdvancedExtruderGenerator::generate()
   // Container to catch the boundary IDs handed back by the BoundaryInfo object
   std::vector<boundary_id_type> ids_to_copy;
 
-  // We need to compute the distance to the axis
-  Real start_radial_extent = 0;
+  // We need to compute the distance to the axis for radial expansions
+  Real start_radial_extent = std::numeric_limits<Real>::max();
   Point reference_point;
   if (_extrude_along_curve)
     reference_point = *(extrusion_curve->node_ptr(0));
@@ -696,7 +696,7 @@ AdvancedExtruderGenerator::generate()
   }
 
   // Compute the total extrusion distance along the axis
-  Real total_extrusion_distance_at_axis;
+  Real total_extrusion_distance_at_axis = 0;
   if (_extrude_along_curve)
   {
     if (!extrusion_curve->is_prepared())
@@ -704,7 +704,9 @@ AdvancedExtruderGenerator::generate()
     total_extrusion_distance_at_axis = MeshTools::volume(*extrusion_curve);
   }
   else
-    total_extrusion_distance_at_axis = std::accumulate(_heights.begin(), _heights.end(), 0);
+    for (const auto h : _heights)
+      total_extrusion_distance_at_axis += h;
+  mooseAssert(total_extrusion_distance_at_axis > 0, "Should not be 0");
 
   // When extruding along node normals, precompute each node's extrusion direction from the
   // normals of the elements connected to it
@@ -827,13 +829,20 @@ AdvancedExtruderGenerator::generate()
               // Both result in a slight deformation of the shape during extrusion.
               else
               {
-                auto axis = prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec);
-                const auto sin_th = axis.norm();
-                axis /= sin_th;
-                Real cos_th = prev_intersecting_plane_normal_vec * intersecting_plane_normal_vec;
-                // Rodrigues formula for rotation
-                const auto new_v = cos_th * b_vec + axis.cross(b_vec) * sin_th +
-                                   axis * (axis * b_vec) * (1. - cos_th);
+                // v = axis * sin(theta), unnormalized — avoids dividing by sin_th
+                const auto v =
+                    prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec);
+                const Real cos_th =
+                    prev_intersecting_plane_normal_vec * intersecting_plane_normal_vec;
+
+                mooseAssert(cos_th > -1.0 + 1e-10,
+                            "Degenerate 180-degree rotation between consecutive plane normals");
+
+                // Rodrigues formula, vector form
+                // R(x) = x*cos_th + (v cross x) + v*(v dot x)/(1+cos_th)
+                const auto new_v =
+                    cos_th * b_vec + v.cross(b_vec) + v * (v * b_vec) / (1. + cos_th);
+                mooseAssert(new_v * b_vec >= 0, "Should be positive");
 
                 mooseAssert(MooseUtils::absoluteFuzzyEqual(new_v.norm(), b_vec.norm()),
                             "Radial extent be conserved");
@@ -909,6 +918,7 @@ AdvancedExtruderGenerator::generate()
             // Calculate weighting for expansion
             const auto radial_ratio_m1 = AdvancedExtruderGenerator::radialExpansionRatio(tm1);
             const auto radial_ratio = AdvancedExtruderGenerator::radialExpansionRatio(t);
+            mooseAssert(radial_ratio > 0, "Should be positive");
 
             // Compute change in step
             orig_node_to_current += (start_radial_extent * (radial_ratio_m1 - radial_ratio) +
