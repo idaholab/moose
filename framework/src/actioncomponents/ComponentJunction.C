@@ -73,8 +73,19 @@ ComponentJunction::validParams()
   MooseEnum edge_elem_type("EDGE2 EDGE3 EDGE4", "EDGE2");
   params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
+  params.addParam<bool>("reverse_first_component_direction",
+                        false,
+                        "Whether to use the opposite of the first component direction for the "
+                        "spline start direction");
+  params.addParam<bool>(
+      "reverse_second_component_direction",
+      true,
+      "Whether to use the opposite of the second component direction for the spline end direction");
 
-  params.addParamNamesToGroup("sharpness num_cps edge_element_type", "1D mesh junction");
+  params.addParamNamesToGroup(
+      "sharpness num_cps edge_element_type reverse_first_component_direction "
+      "reverse_second_component_direction",
+      "1D extruded mesh junction");
   params.addParamNamesToGroup(
       "radial_growth_method start_radial_growth_rate end_radial_growth_rate",
       "Radial expansion in 2D and 3D junction");
@@ -146,6 +157,7 @@ ComponentJunction::addMeshGenerators()
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
         params.set<bool>("verbose_stitching") = _verbose;
+        params.set<bool>("verbose_remapping") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") =
             _enforce_all_nodes_match_on_boundaries;
         params.set<bool>("output") = _verbose;
@@ -204,8 +216,12 @@ ComponentJunction::addMeshGenerators()
     RealVectorValue end_direction = get_direction(second_component, "second_component");
 
     InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
-    bspline_params.set<RealVectorValue>("start_direction") = start_direction;
-    bspline_params.set<RealVectorValue>("end_direction") = -end_direction;
+    const bool reverse_start = getParam<bool>("reverse_first_component_direction");
+    const bool reverse_end = getParam<bool>("reverse_second_component_direction");
+    bspline_params.set<RealVectorValue>("start_direction") =
+        reverse_start ? -start_direction : start_direction;
+    bspline_params.set<RealVectorValue>("end_direction") =
+        reverse_end ? -end_direction : end_direction;
     bspline_params.set<unsigned int>("num_elements") = getParam<unsigned int>("n_elem_normal");
     if (isParamValid("sharpness"))
       bspline_params.set<Real>("sharpness") = getParam<Real>("sharpness");
@@ -262,8 +278,13 @@ ComponentJunction::addMeshGenerators()
       aeg_params.set<MeshGeneratorName>("input") =
           (MeshGeneratorName)(name() + "_blockToMeshSource");
 
-      aeg_params.set<RealVectorValue>("start_extrusion_direction") = start_direction;
-      aeg_params.set<RealVectorValue>("end_extrusion_direction") = end_direction;
+      const bool reverse_start = getParam<bool>("reverse_first_component_direction");
+      const bool reverse_end = getParam<bool>("reverse_second_component_direction");
+      aeg_params.set<RealVectorValue>("start_extrusion_direction") =
+          reverse_start ? -start_direction : start_direction;
+      // note: different convention than spline
+      aeg_params.set<RealVectorValue>("end_extrusion_direction") =
+          reverse_end ? end_direction : -end_direction;
 
       aeg_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
       aeg_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
@@ -275,6 +296,7 @@ ComponentJunction::addMeshGenerators()
       if (isParamValid("block"))
         paramError("block", "Not yet implemented for 2D or 3D junction");
       aeg_params.set<bool>("output") = _verbose;
+      aeg_params.set<bool>("show_info") = _verbose;
 
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "AdvancedExtruderGenerator", name() + "_aeg", aeg_params);
@@ -303,10 +325,11 @@ ComponentJunction::addMeshGenerators()
       }
 
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      stitcher_params.set<bool>("verbose_remapping") = _verbose;
       stitcher_params.set<bool>("output") = _verbose;
+      stitcher_params.set<bool>("show_info") = _verbose;
       stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
-      stitcher_params.set<bool>("output") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
       _mg_names.push_back(name() + "_stitcher");
@@ -326,6 +349,7 @@ ComponentJunction::addMeshGenerators()
         mesh_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{first_boundary, name() + "_bspline_start_node"}};
       mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      mesh_stitcher_params.set<bool>("verbose_remapping") = _verbose;
       // TODO: remove this once we understand why it errors without
       mesh_stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
       mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =

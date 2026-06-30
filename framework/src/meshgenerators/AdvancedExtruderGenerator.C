@@ -77,7 +77,7 @@ AdvancedExtruderGenerator::validParams()
       "The number of layers for each elevation - must be num_elevations in length!");
 
   // Swaps on every height
-  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "subdomain_swaps",
       {},
       "For each row, every two entries are interpreted as a pair of "
@@ -179,7 +179,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _biases(isParamValid("biases") ? getParam<std::vector<Real>>("biases")
                                    : std::vector<Real>(_heights.size(), 1.0)),
     _num_layers(getParam<std::vector<unsigned int>>("num_layers")),
-    _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
+    _subdomain_swaps(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_swaps")),
     _boundary_swaps(getParam<std::vector<std::vector<boundary_id_type>>>("boundary_swaps")),
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
     _elem_integers_swaps(
@@ -267,16 +267,6 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                      ") in ",
                  name());
     }
-  }
-
-  try
-  {
-    MooseMeshUtils::idSwapParametersProcessor(
-        name(), "subdomain_swaps", _subdomain_swaps, _subdomain_swap_pairs);
-  }
-  catch (const MooseException & e)
-  {
-    paramError("subdomain_swaps", e.what());
   }
 
   if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
@@ -452,8 +442,12 @@ AdvancedExtruderGenerator::generate()
   // Check that the swaps source blocks are present in the mesh
   for (const auto & swap : _subdomain_swaps)
     for (const auto i : index_range(swap))
-      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainID(*_input, swap[i]))
-        paramError("subdomain_swaps", "The block '", swap[i], "' was not found within the mesh");
+      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainName(*_input, swap[i]))
+        paramError("subdomain_swaps",
+                   "The block '",
+                   swap[i],
+                   "' was not found within the mesh.\nBlocks in the mesh: " +
+                       Moose::stringify(MooseMeshUtils::getAllSubdomainNamesAndIDs(*_input)));
 
   // Check that the swaps source boundaries are present in the mesh
   for (const auto & swap : _boundary_swaps)
@@ -474,6 +468,41 @@ AdvancedExtruderGenerator::generate()
                    "The block '",
                    bid,
                    "' was not found within the mesh");
+
+  // Process the subdomain swap parameters to work with IDs
+  if (_subdomain_swaps.size())
+  {
+    std::vector<std::vector<subdomain_id_type>> subdomain_swaps_ids(_subdomain_swaps.size());
+    for (const auto i : index_range(_subdomain_swaps))
+    {
+      subdomain_swaps_ids[i].resize(_subdomain_swaps[i].size());
+      // Source blocks exist in the mesh, we already checked
+      // Target blocks might now, we'll need to add them
+      for (const auto j : make_range(_subdomain_swaps[i].size() / 2))
+      {
+        subdomain_swaps_ids[i][2 * j] =
+            MooseMeshUtils::getSubdomainID(_subdomain_swaps[i][2 * j], *_input);
+        auto target_block_id =
+            MooseMeshUtils::getSubdomainID(_subdomain_swaps[i][2 * j + 1], *_input);
+        if (target_block_id == Moose::INVALID_BLOCK_ID)
+        {
+          target_block_id = MooseMeshUtils::getNextFreeSubdomainID(*_input);
+          // Add the subdomain names for any newly created subdomain
+          mesh->subdomain_name(target_block_id) = _subdomain_swaps[i][2 * j + 1];
+        }
+        subdomain_swaps_ids[i][2 * j + 1] = target_block_id;
+      }
+    }
+    try
+    {
+      MooseMeshUtils::idSwapParametersProcessor(
+          name(), "subdomain_swaps", subdomain_swaps_ids, _subdomain_swap_pairs);
+    }
+    catch (const MooseException & e)
+    {
+      paramError("subdomain_swaps", e.what());
+    }
+  }
 
   // Move the meshes as requested by the mesh generator system
   std::unique_ptr<MeshBase> input = std::move(_input);
