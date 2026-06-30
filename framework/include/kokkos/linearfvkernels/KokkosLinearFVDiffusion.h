@@ -41,15 +41,15 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeMatrixContribution(const FVDatum & datum) const
 {
-  return datum.hasNeighbor() ? faceConductance(datum)
-                             : _bc_data.matrix_coeff(datum.side(), datum.elemID());
+  return hasFaceNeighbor(datum) ? faceConductance(datum)
+                                : _bc_data.matrix_coeff(datum.side(), datum.elemID());
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const FVDatum & datum) const
 {
-  KOKKOS_ASSERT(datum.hasNeighbor());
+  KOKKOS_ASSERT(hasFaceNeighbor(datum));
   return -faceConductance(datum);
 }
 
@@ -57,13 +57,13 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeRightHandSideContribution(const FVDatum & datum) const
 {
-  return datum.hasNeighbor() ? 0 : _bc_data.rhs_coeff(datum.side(), datum.elemID());
+  return hasFaceNeighbor(datum) ? 0 : _bc_data.rhs_coeff(datum.side(), datum.elemID());
 }
 
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::faceConductance(const FVDatum & datum) const
 {
   const auto face_centroid = datum.faceCentroid();
-  const auto d_mag = datum.hasNeighbor() ? datum.faceDCNMag() : datum.faceDCFMag();
+  const auto d_mag = hasFaceNeighbor(datum) ? datum.faceDCNMag() : datum.faceDCFMag();
   return _diffusion_coeff->value(_t, face_centroid) * datum.faceArea() / d_mag;
 }

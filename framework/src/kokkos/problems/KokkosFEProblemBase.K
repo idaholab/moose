@@ -441,15 +441,14 @@ FEProblemBase::initKokkosStatefulProps()
 
   // Copy data and preallocate quadrature point solution vectors
 
-  for (const auto i : index_range(_kokkos_fe_systems))
-    if (_kokkos_fe_systems.isSlotConstructed(i))
-    {
-      _kokkos_fe_systems[i].setActiveVariables(needed_moose_vars);
-      _kokkos_fe_systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-      _kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      _kokkos_fe_systems[i].reinit();
-    }
+    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    system.reinit();
+  }
 
   _kokkos_fe_systems.copyToDevice();
 
@@ -479,14 +478,13 @@ FEProblemBase::initKokkosStatefulProps()
 
   // Clear
 
-  for (const auto i : index_range(_kokkos_fe_systems))
-    if (_kokkos_fe_systems.isSlotConstructed(i))
-    {
-      _kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
+  {
+    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-      _kokkos_fe_systems[i].clearActiveVariables();
-      _kokkos_fe_systems[i].clearActiveSolutionTags();
-    }
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 }
 
 void
@@ -577,21 +575,20 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
 
     // Copy vectors and cache variable values at element quadrature points
 
-    for (const auto i : index_range(_kokkos_fe_systems))
-      if (auto & system = _kokkos_fe_systems[i]; _kokkos_fe_systems.isSlotConstructed(i))
-      {
-        system.setActiveVariables(needed_moose_vars);
-        system.setActiveSolutionTags(needed_fe_var_vector_tags);
+    for (auto & system : _kokkos_fe_systems.constructedEntries())
+    {
+      system.setActiveVariables(needed_moose_vars);
+      system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-        {
-          TIME_SECTION("KokkosCopy", 1);
-          system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-        }
-        {
-          TIME_SECTION("KokkosReinit", 1);
-          system.reinit();
-        }
+      {
+        TIME_SECTION("KokkosCopy", 1);
+        system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
       }
+      {
+        TIME_SECTION("KokkosReinit", 1);
+        system.reinit();
+      }
+    }
 
     _kokkos_fe_systems.copyToDevice();
 
@@ -633,19 +630,17 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
     {
       TIME_SECTION("KokkosCopy", 1);
 
-      for (const auto i : index_range(_kokkos_fe_systems))
-        if (auto & system = _kokkos_fe_systems[i]; _kokkos_fe_systems.isSlotConstructed(i))
-          system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+      for (auto & system : _kokkos_fe_systems.constructedEntries())
+        system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
     }
 
     // Clear
 
-    for (const auto i : index_range(_kokkos_fe_systems))
-      if (auto & system = _kokkos_fe_systems[i]; _kokkos_fe_systems.isSlotConstructed(i))
-      {
-        system.clearActiveVariables();
-        system.clearActiveSolutionTags();
-      }
+    for (auto & system : _kokkos_fe_systems.constructedEntries())
+    {
+      system.clearActiveVariables();
+      system.clearActiveSolutionTags();
+    }
   }
   catch (...)
   {

@@ -189,7 +189,7 @@ public:
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
-   * @param var The vriable number
+   * @param var The variable number
    * @param tag The vector tag
    * @returns The face quadrature value
    */
@@ -204,7 +204,7 @@ public:
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
-   * @param var The vriable number
+   * @param var The variable number
    * @param tag The vector tag
    * @param seed The derivative seed
    * @returns The face quadrature AD value
@@ -267,6 +267,11 @@ private:
    * Setup DOF data
    */
   void setupDofs();
+  /**
+   * Setup coupling data between variables. This is currently a no-op for linear systems for which
+   * there is currently not any (block variable) off-diagonal coupling support
+   */
+  void setupCoupling();
 
   /**
    * Mark the DOFs covered by nodal BCs

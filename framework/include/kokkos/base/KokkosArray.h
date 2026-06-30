@@ -16,6 +16,8 @@
 #include "Conversion.h"
 #include "DataIO.h"
 
+#include <iterator>
+
 #define usingKokkosArrayBaseMembers(T, dimension, index_type)                                      \
 private:                                                                                           \
   using ArrayBase<T, dimension, index_type>::_n;                                                   \
@@ -184,6 +186,81 @@ public:
    * @returns true if the slot is tracked as constructed
    */
   bool isSlotConstructed(index_type i) const;
+
+  template <bool is_const>
+  class constructed_entry_range;
+
+  /**
+   * Iterator over tracked constructed entries.
+   */
+  template <bool is_const>
+  class constructed_entry_iterator
+  {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = std::conditional_t<is_const, const T *, T *>;
+    using reference = std::conditional_t<is_const, const T &, T &>;
+    using array_type = std::conditional_t<is_const, const ArrayBase, ArrayBase>;
+
+    reference operator*() const { return _array._host_data[_i]; }
+    pointer operator->() const { return _array._host_data + _i; }
+    constructed_entry_iterator & operator++();
+    constructed_entry_iterator operator++(int);
+    bool operator==(const constructed_entry_iterator & other) const;
+    bool operator!=(const constructed_entry_iterator & other) const;
+
+  private:
+    friend class constructed_entry_range<is_const>;
+
+    constructed_entry_iterator(array_type & array, index_type i);
+
+    void advanceToConstructed();
+
+    /**
+     * Array whose constructed entries are being iterated.
+     */
+    array_type & _array;
+    /**
+     * Current slot index in _array.
+     */
+    index_type _i = 0;
+  };
+
+  /**
+   * Range over tracked constructed entries.
+   */
+  template <bool is_const>
+  class constructed_entry_range
+  {
+  public:
+    using array_type = std::conditional_t<is_const, const ArrayBase, ArrayBase>;
+    using iterator = constructed_entry_iterator<is_const>;
+
+    explicit constructed_entry_range(array_type & array);
+
+    iterator begin() const;
+    iterator end() const;
+
+  private:
+    /**
+     * Array that provides the constructed-entry iteration bounds.
+     */
+    array_type & _array;
+  };
+
+  /**
+   * Get host-side range over entries tracked as constructed.
+   * @returns Range that skips slots for which isSlotConstructed() is false
+   */
+  constructed_entry_range<false> constructedEntries();
+
+  /**
+   * Get host-side range over entries tracked as constructed.
+   * @returns Range that skips slots for which isSlotConstructed() is false
+   */
+  constructed_entry_range<true> constructedEntries() const;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -645,6 +722,104 @@ private:
    */
   const LayoutType _layout;
 };
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::
+    constructed_entry_iterator(
+        typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<
+            is_const>::array_type & array,
+        index_type i)
+  : _array(array), _i(i)
+{
+  advanceToConstructed();
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<is_const> &
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator++()
+{
+  ++_i;
+  advanceToConstructed();
+  return *this;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator++(int)
+{
+  constructed_entry_iterator pre = *this;
+  ++(*this);
+  return pre;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+bool
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator==(
+    const constructed_entry_iterator & other) const
+{
+  return &_array == &other._array && _i == other._i;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+bool
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator!=(
+    const constructed_entry_iterator & other) const
+{
+  return !(*this == other);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+void
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::advanceToConstructed()
+{
+  while (_i < _array._size && !_array.isSlotConstructed(_i))
+    ++_i;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::constructed_entry_range(
+    typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<
+        is_const>::array_type & array)
+  : _array(array)
+{
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<is_const>::iterator
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::begin() const
+{
+  return iterator(_array, 0);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<is_const>::iterator
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::end() const
+{
+  return iterator(_array, _array._size);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<false>
+ArrayBase<T, dimension, index_type>::constructedEntries()
+{
+  return constructed_entry_range<false>(*this);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<true>
+ArrayBase<T, dimension, index_type>::constructedEntries() const
+{
+  return constructed_entry_range<true>(*this);
+}
 
 template <typename T, unsigned int dimension, typename index_type>
 bool

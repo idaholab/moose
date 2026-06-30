@@ -72,21 +72,20 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   auto & kokkos_fe_systems = _fe_problem.getKokkosFESystems();
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
-    {
-      kokkos_fe_systems[i].setActiveVariables(needed_moose_vars);
-      kokkos_fe_systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
+  for (auto & system : kokkos_fe_systems.constructedEntries())
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-      }
-      {
-        TIME_SECTION("KokkosReinit", 1);
-        kokkos_fe_systems[i].reinit();
-      }
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
+    }
+  }
 
   systems.copyToDevice();
 
@@ -119,9 +118,8 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   {
     TIME_SECTION("KokkosCopy", 1);
 
-    for (const auto i : index_range(kokkos_fe_systems))
-      if (kokkos_fe_systems.isSlotConstructed(i))
-        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (auto & system : kokkos_fe_systems.constructedEntries())
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
     systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
@@ -130,12 +128,11 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   // Clear
 
-  for (const auto i : index_range(kokkos_fe_systems))
-    if (kokkos_fe_systems.isSlotConstructed(i))
-    {
-      kokkos_fe_systems[i].clearActiveVariables();
-      kokkos_fe_systems[i].clearActiveSolutionTags();
-    }
+  for (auto & system : kokkos_fe_systems.constructedEntries())
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
 
   disassociateVectorFromTag(solution(), solution_tag);
 }

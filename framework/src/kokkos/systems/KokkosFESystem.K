@@ -26,6 +26,7 @@ FESystem::FESystem(SystemBase & system)
 {
   setupVariables();
   setupDofs();
+  setupCoupling();
 
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
     setupNodalBCDofs();
@@ -58,9 +59,11 @@ FESystem::setupVariables()
     _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
 
   _var_fe_types.copyToDevice();
+}
 
-  // Set coupling
-
+void
+FESystem::setupCoupling()
+{
   if (auto * const nl_system = dynamic_cast<NonlinearSystemBase *>(&_system))
   {
     _coupling.create(_num_vars);
@@ -73,7 +76,7 @@ FESystem::setupVariables()
       if (ivar->number() != jvar->number())
         coupling[ivar->number()].push_back(jvar->number());
 
-    for (unsigned int var = 0; var < _num_vars; ++var)
+    for (const auto var : make_range(_num_vars))
       _coupling[var] = coupling[var];
 
     _coupling.copyToDevice();
@@ -89,7 +92,8 @@ FESystem::setupDofs()
 
   _local_node_dof_index.create(_num_vars);
 
-  auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
+  auto * const solution =
+      libMesh::cast_ptr<PetscVector<Number> *>(sys.current_local_solution.get());
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
   // Kokkos array thinks OpenMP clause is device code when using OpenMP backend

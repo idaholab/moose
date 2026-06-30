@@ -49,7 +49,19 @@ public:
    * Get whether the current side has a neighbor
    * @returns Whether the current side has a neighbor
    */
-  KOKKOS_FUNCTION bool hasNeighbor() const { return _neighbor != libMesh::DofObject::invalid_id; }
+  KOKKOS_FUNCTION bool hasNeighbor() const;
+
+  /**
+   * Get the neighbor element information object
+   * @returns The neighbor element information object
+   */
+  KOKKOS_FUNCTION const ElementInfo & neighbor() const { return _neighbor; }
+
+  /**
+   * Get the contiguous neighbor element ID
+   * @returns The contiguous neighbor element ID or \p libMesh::DofObject::invalid_id
+   */
+  KOKKOS_FUNCTION ContiguousElementID neighborID() const { return _neighbor.id; }
 
   /**
    * Get whether the current datum is on a side
@@ -62,11 +74,23 @@ public:
    * @returns The contiguous subdomain ID
    */
   KOKKOS_FUNCTION ContiguousSubdomainID subdomain() const { return _elem.subdomain; }
+
+  /**
+   * Get the contiguous neighbor subdomain ID
+   * @returns The contiguous neighbor subdomain ID
+   */
+  KOKKOS_FUNCTION ContiguousSubdomainID neighborSubdomain() const { return _neighbor.subdomain; }
+
   /**
    * Get the side index
    * @returns The side index
    */
   KOKKOS_FUNCTION unsigned int side() const { return _side; }
+
+private:
+  static KOKKOS_FUNCTION ElementInfo neighborInfo(ContiguousElementID elem,
+                                                  const unsigned int side,
+                                                  const Mesh & mesh);
 
 protected:
   /**
@@ -85,9 +109,9 @@ protected:
   const unsigned int _side = libMesh::invalid_uint;
 
   /**
-   * Current contiguous element ID of neighbor
+   * Current neighbor element information object
    */
-  const ContiguousElementID _neighbor = libMesh::DofObject::invalid_id;
+  const ElementInfo _neighbor;
 };
 
 KOKKOS_FUNCTION inline MeshDatum::MeshDatum(ContiguousElementID elem,
@@ -96,8 +120,24 @@ KOKKOS_FUNCTION inline MeshDatum::MeshDatum(ContiguousElementID elem,
   : _mesh(mesh),
     _elem(elem != libMesh::DofObject::invalid_id ? _mesh.getElementInfo(elem) : ElementInfo{}),
     _side(side),
-    _neighbor(!isSide() ? libMesh::DofObject::invalid_id : _mesh.getNeighbor(_elem.id, side))
+    _neighbor(neighborInfo(_elem.id, _side, _mesh))
 {
+}
+
+KOKKOS_FUNCTION inline bool
+MeshDatum::hasNeighbor() const
+{
+  return _neighbor.id != libMesh::DofObject::invalid_id;
+}
+
+KOKKOS_FUNCTION inline ElementInfo
+MeshDatum::neighborInfo(ContiguousElementID elem, const unsigned int side, const Mesh & mesh)
+{
+  if (elem == libMesh::DofObject::invalid_id || side == libMesh::invalid_uint)
+    return {};
+
+  const auto neighbor = mesh.getNeighbor(elem, side);
+  return neighbor == libMesh::DofObject::invalid_id ? ElementInfo{} : mesh.getElementInfo(neighbor);
 }
 
 class FVDatum : public MeshDatum

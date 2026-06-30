@@ -61,9 +61,26 @@ public:
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const;
 
 protected:
+  /**
+   * Whether this face has a mesh neighbor on a subdomain where this kernel's variable is active.
+   * A mesh-internal face is treated as a boundary for a block-restricted variable when the adjacent
+   * element is outside the variable's block restriction.
+   */
+  KOKKOS_FUNCTION bool hasFaceNeighbor(const FVDatum & datum) const;
+
   /// Boundary face contributions shared with the boundary conditions acting on this kernel's variable
   BoundaryFaceData _bc_data;
 };
+
+KOKKOS_FUNCTION inline bool
+LinearFVFluxKernel::hasFaceNeighbor(const FVDatum & datum) const
+{
+  if (!datum.hasNeighbor())
+    return false;
+
+  const auto & sys = kokkosSystem(_var.sys());
+  return sys.isVariableActive(_var.var(), datum.neighborSubdomain());
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void
@@ -71,7 +88,7 @@ LinearFVFluxKernel::operator()(RightHandSideLoop, const ThreadID tid, const Deri
 {
   const auto [elem, side] = kokkosBlockElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
+  if (!hasFaceNeighbor(datum) && !_bc_data.matrix_coeff.isAlloc())
     return;
 
   KOKKOS_ASSERT(_var.components() == 1);
@@ -86,7 +103,7 @@ LinearFVFluxKernel::operator()(MatrixLoop, const ThreadID tid, const Derived & k
 {
   const auto [elem, side] = kokkosBlockElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
+  if (!hasFaceNeighbor(datum) && !_bc_data.matrix_coeff.isAlloc())
     return;
 
   KOKKOS_ASSERT(_var.components() == 1);
@@ -97,11 +114,10 @@ LinearFVFluxKernel::operator()(MatrixLoop, const ThreadID tid, const Derived & k
                                 row,
                                 sys.getElemGlobalDofIndex(elem, 0, var_num));
 
-  if (datum.hasNeighbor())
-    kernel.accumulateTaggedMatrix(
-        kernel.template computeNeighborMatrixContribution<Derived>(datum),
-        row,
-        sys.getElemGlobalDofIndex(datum.mesh().getNeighbor(elem, side), 0, var_num));
+  if (hasFaceNeighbor(datum))
+    kernel.accumulateTaggedMatrix(kernel.template computeNeighborMatrixContribution<Derived>(datum),
+                                  row,
+                                  sys.getElemGlobalDofIndex(datum.neighborID(), 0, var_num));
 }
 
 } // namespace Moose::Kokkos

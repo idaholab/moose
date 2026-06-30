@@ -54,5 +54,30 @@ class TestKokkosLinearFVDiffusion2DOrthogonalNeumann(unittest.TestCase):
             self.assertTrue(fuzzyEqual(value, 2.0, 0.1))
 
 
+class TestKokkosLinearFVDiffusion2DInternalNeumann(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial(
+            "kokkos_diffusion-2d-internal-neumann.i",
+            5,
+            file_base="kokkos_diffusion-2d-internal-neumann_csv",
+            y_pp=["left_error", "right_error"],
+        )
+
+        fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
+        fig.plot(
+            df1,
+            label=["u l2error", "v l2error"],
+            marker="o",
+            markersize=8,
+            num_fitted_points=3,
+            slope_precision=1,
+        )
+        fig.save("2d-kokkos-linear-fv-diffusion-internal-neumann.png")
+
+        for _, value in fig.label_to_slope.items():
+            print("The current slope: ", value)
+            self.assertTrue(fuzzyEqual(value, 2.0, 0.1))
+
+
 if __name__ == "__main__":
     unittest.main(__name__, verbosity=2)
