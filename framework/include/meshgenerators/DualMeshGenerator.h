@@ -12,6 +12,8 @@
 #include "MeshGenerator.h"
 #include "MultiMooseEnum.h"
 
+#include <vector>
+
 /**
  * MeshGenerator for creating dual mesh
  */
@@ -46,4 +48,7 @@ protected:
 
   /// Whether to preserve interfaces between primal subdomains in the dual construction.
   const bool _preserve_subdomain_interfaces;
+
+  /// Subdomains to copy to the output mesh without dualizing.
+  const std::vector<SubdomainName> _preserve_primal_subdomains;
 };

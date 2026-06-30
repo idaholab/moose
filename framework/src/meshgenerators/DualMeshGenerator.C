@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "GeometryUtils.h"
 #include "LineSegment.h"
+#include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/cell_tet4.h"
@@ -76,6 +77,10 @@ DualMeshGenerator::validParams()
       false,
       "Whether the dual construction should treat interfaces between primal subdomains like "
       "preserved boundary surfaces.");
+  params.addParam<std::vector<SubdomainName>>(
+      "preserve_primal_subdomains",
+      {},
+      "Subdomains to keep as primal elements while dualizing the rest of the mesh.");
   params.addClassDescription("Takes a 2D or 3D mesh as input and returns a dual mesh, i.e., "
                              "changes each input node into an element and each input element "
                              "into a node located at its Delaunay triangulation's circumcenter "
@@ -90,7 +95,8 @@ DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
     _concave_treatment(getParam<MultiMooseEnum>("concave_treatment")),
     _boundary_node_angular_tol(getParam<Real>("boundary_node_angular_tol")),
     _geometry_relative_tol(getParam<Real>("geometry_relative_tol")),
-    _preserve_subdomain_interfaces(getParam<bool>("preserve_subdomain_interfaces"))
+    _preserve_subdomain_interfaces(getParam<bool>("preserve_subdomain_interfaces")),
+    _preserve_primal_subdomains(getParam<std::vector<SubdomainName>>("preserve_primal_subdomains"))
 {
 }
 
@@ -1788,6 +1794,9 @@ DualMeshGenerator::generate()
 
   if (mesh_dimension != 2 && mesh_dimension != 3)
     mooseError("DualMeshGenerator currently only supports 2D and 3D Meshes");
+  if (mesh_dimension == 3 && !_preserve_primal_subdomains.empty())
+    paramError("preserve_primal_subdomains",
+               "Preserving primal subdomains is currently only implemented for 2D meshes.");
   if (mesh_dimension == 3 && use_voronoi)
     mooseError("DualMeshGenerator does not support Voronoi duals for 3D meshes");
   if (use_voronoi && _preserve_subdomain_interfaces)
@@ -1872,8 +1881,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       for (const auto n : make_range(std::size_t(1), side_points.size() - 1))
       {
         std::vector<Point> triangle = {side_points[0], side_points[n], side_points[n + 1]};
-        const Point triangle_normal =
-            (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
+        const Point triangle_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
 
         if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
           continue;
@@ -2033,8 +2041,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
   std::vector<SplitDualCellSidePoints3D> split_dual_cell_side_points;
 
-  const auto pointInsidePrimalBoundary = [&](const SubdomainID boundary_subdomain_id,
-                                             const Point & point)
+  const auto pointInsidePrimalBoundary =
+      [&](const SubdomainID boundary_subdomain_id, const Point & point)
   {
     const auto point_key = std::make_pair(boundary_subdomain_id, pointKey3D(point));
     const auto cached_point_it = primal_boundary_point_cache.find(point_key);
@@ -2057,9 +2065,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     return inside;
   };
 
-  const auto segmentInsidePrimalBoundary = [&](const SubdomainID boundary_subdomain_id,
-                                               const Point & point0,
-                                               const Point & point1)
+  const auto segmentInsidePrimalBoundary =
+      [&](const SubdomainID boundary_subdomain_id, const Point & point0, const Point & point1)
   {
     const auto segment_key = std::make_pair(boundary_subdomain_id, segmentKey3D(point0, point1));
     const auto cached_segment_it = primal_boundary_segment_cache.find(segment_key);
@@ -3040,6 +3047,24 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
 {
   const bool use_voronoi = _dual_mesh_type == "voronoi";
 
+  if (use_voronoi && !_preserve_primal_subdomains.empty())
+    paramError("preserve_primal_subdomains",
+               "Preserving primal subdomains is currently only implemented for barycentric 2D "
+               "duals.");
+
+  std::set<SubdomainID> preserve_primal_subdomain_ids;
+
+  if (!_preserve_primal_subdomains.empty())
+  {
+    for (const auto & name : _preserve_primal_subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(*input_mesh, name))
+        paramError(
+            "preserve_primal_subdomains", "The block '", name, "' was not found in the mesh");
+
+    const auto ids = MooseMeshUtils::getSubdomainIDs(*input_mesh, _preserve_primal_subdomains);
+    preserve_primal_subdomain_ids.insert(ids.begin(), ids.end());
+  }
+
   using NodeSubdomainKey = std::pair<dof_id_type, SubdomainID>;
   using RoundedPointKey2D = std::array<long long, 2>;
   struct BoundaryRegion2D
@@ -3053,6 +3078,10 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
     std::vector<std::pair<Point, Point>> boundary_clip_segments;
   };
   const SubdomainID merged_subdomain_key = Elem::invalid_subdomain_id;
+  const auto preservePrimalSubdomain = [&](const SubdomainID subdomain_id)
+  { return preserve_primal_subdomain_ids.count(subdomain_id) > 0; };
+  const auto dualizeElem = [&](const Elem & elem)
+  { return !preservePrimalSubdomain(elem.subdomain_id()); };
   const auto subdomainKey = [&](const SubdomainID subdomain_id)
   { return _preserve_subdomain_interfaces ? subdomain_id : merged_subdomain_key; };
   const auto nodeSubdomainKey = [&](const dof_id_type node_id, const SubdomainID subdomain_id)
@@ -3061,6 +3090,7 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
   {
     const auto * const neighbor = elem.neighbor_ptr(side);
     return neighbor == nullptr ||
+           (neighbor != nullptr && preservePrimalSubdomain(neighbor->subdomain_id())) ||
            (_preserve_subdomain_interfaces && neighbor->subdomain_id() != elem.subdomain_id());
   };
   // Rest of file is 2D mesh treatment
@@ -3078,6 +3108,9 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
   // Looping through primal elements
   for (const auto & elem : input_mesh->element_ptr_range())
   {
+    if (!dualizeElem(*elem))
+      continue;
+
     auto & boundary_region = boundary_regions[subdomainKey(elem->subdomain_id())];
 
     for (const auto side : elem->side_index_range())
@@ -3327,8 +3360,13 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
   std::unique_ptr<ReplicatedMesh> tri_mesh;
 
   for (const auto & elem : input_mesh->element_ptr_range())
+  {
+    if (!dualizeElem(*elem))
+      continue;
+
     for (const auto n : make_range(elem->n_nodes()))
       source_node_to_subdomains[elem->node_id(n)].insert(elem->subdomain_id());
+  }
 
   if (use_voronoi)
   {
@@ -3419,6 +3457,9 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
   {
     for (const auto & elem : input_mesh->element_ptr_range())
     {
+      if (!dualizeElem(*elem))
+        continue;
+
       const dof_id_type center_id = dual_centers.size();
 
       dual_centers.push_back(elem->true_centroid());
@@ -3450,6 +3491,85 @@ DualMeshGenerator::generate2D(std::unique_ptr<MeshBase> input_mesh)
     candidate_nodes.push_back(node);
     return node;
   };
+  const auto copyPreservedPrimalElements = [&]()
+  {
+    if (preserve_primal_subdomain_ids.empty())
+      return;
+
+    std::map<dof_id_type, Node *> copied_nodes;
+
+    for (const auto & elem : input_mesh->element_ptr_range())
+    {
+      if (dualizeElem(*elem))
+        continue;
+
+      std::map<std::pair<dof_id_type, dof_id_type>, Point> interface_edge_midpoints;
+
+      for (const auto side : elem->side_index_range())
+      {
+        const auto * const neighbor = elem->neighbor_ptr(side);
+
+        if (neighbor == nullptr || !dualizeElem(*neighbor))
+          continue;
+
+        auto side_elem = elem->build_side_ptr(side);
+
+        if (side_elem->n_nodes() == 2)
+          interface_edge_midpoints[edgeKey(side_elem->node_id(0), side_elem->node_id(1))] =
+              0.5 * (side_elem->point(0) + side_elem->point(1));
+      }
+
+      const auto getPreservedPrimalNode = [&](const dof_id_type source_node_id, const Point & point)
+      {
+        const auto copied_node_it = copied_nodes.find(source_node_id);
+
+        if (copied_node_it != copied_nodes.end())
+          return copied_node_it->second;
+
+        Node * const node = getDualNode(point);
+        copied_nodes[source_node_id] = node;
+        return node;
+      };
+
+      if (!interface_edge_midpoints.empty())
+      {
+        std::vector<Node *> polygon_nodes;
+
+        for (const auto n : make_range(elem->n_vertices()))
+        {
+          const dof_id_type source_node_id = elem->node_id(n);
+          const auto next_n = (n + 1) % elem->n_vertices();
+
+          polygon_nodes.push_back(getPreservedPrimalNode(source_node_id, elem->point(n)));
+
+          const auto midpoint_it =
+              interface_edge_midpoints.find(edgeKey(source_node_id, elem->node_id(next_n)));
+
+          if (midpoint_it != interface_edge_midpoints.end())
+            polygon_nodes.push_back(getDualNode(midpoint_it->second));
+        }
+
+        auto primal_elem = std::make_unique<libMesh::C0Polygon>(polygon_nodes.size());
+
+        for (const auto n : index_range(polygon_nodes))
+          primal_elem->set_node(n) = polygon_nodes[n];
+
+        primal_elem->subdomain_id() = elem->subdomain_id();
+        dualMesh->add_elem(std::move(primal_elem));
+        continue;
+      }
+
+      auto primal_elem = elem->build(elem->type());
+
+      for (const auto n : elem->node_index_range())
+        primal_elem->set_node(n) = getPreservedPrimalNode(elem->node_id(n), elem->point(n));
+
+      primal_elem->subdomain_id() = elem->subdomain_id();
+      dualMesh->add_elem(std::move(primal_elem));
+    }
+  };
+
+  copyPreservedPrimalElements();
   // Helper to determine if points are within the primal boundary
   const auto pointInsideBoundary =
       [&](const BoundaryRegion2D & boundary_region, const Point & point)
