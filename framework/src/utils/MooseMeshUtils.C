@@ -323,6 +323,11 @@ boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh)
   mesh.comm().sum(volume_weighted_centroid_sum);
   mesh.comm().sum(volume_sum);
 
+  if (volume_sum == 0)
+  {
+    mooseWarning("Boundary centroid was requested but boundary '" + boundary + "' is empty.");
+    return Point(0.);
+  }
   return volume_weighted_centroid_sum / volume_sum;
 }
 
