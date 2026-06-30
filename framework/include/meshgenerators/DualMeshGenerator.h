@@ -43,4 +43,7 @@ protected:
   /// Relative tolerance for geometric determinations, scaled by the primal mesh's bounding box size.
   /// For Voronoi duals, determines the size of the circumscribing square.
   Real _geometry_relative_tol;
+
+  /// Whether to preserve interfaces between primal subdomains in the dual construction.
+  const bool _preserve_subdomain_interfaces;
 };

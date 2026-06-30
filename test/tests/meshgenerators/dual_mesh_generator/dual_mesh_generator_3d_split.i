@@ -2,8 +2,8 @@
     [myCCMG]
         type = ConcentricCircleMeshGenerator
         num_sectors = 4
-        radii = '2 4'
-        rings = '3 3'
+        radii = '2 4 7'
+        rings = '3 3 4'
         has_outer_square = false
         preserve_volumes = false
     []
@@ -34,6 +34,7 @@
         input = extrude
         dual_mesh_type = barycentric
         concave_treatment = 'split polycut netgen'
+        preserve_subdomain_interfaces = true
     []
 
     [convert]
