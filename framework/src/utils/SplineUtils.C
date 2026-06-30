@@ -83,7 +83,9 @@ bSplineControlPoints(const libMesh::Point & start_point,
 
   // check if directions are parallel, use a special case if so
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
-  if (parallel)
+  const bool aligned =
+      ((start_direction.cross(end_point - start_point)).norm() < libMesh::TOLERANCE);
+  if (parallel && !aligned)
   {
     // We should not revert to a circle for this case
     if (MooseUtils::absoluteFuzzyEqual(start_direction.unit(), -end_direction.unit()))
@@ -190,10 +192,16 @@ closestPoints(const libMesh::Point & point_1,
               const libMesh::RealVectorValue & direction_2)
 {
   const auto n_vec = direction_1.cross(direction_2);
+  const bool aligned = ((direction_1.cross(point_2 - point_1)).norm() < libMesh::TOLERANCE);
 
   // check if n_vec is the zero vector (indicates parallel lines)
   if (n_vec.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
-    mooseError("Lines are parallel! Infinitely many closest points exist.");
+  {
+    if (!aligned)
+      mooseError("Lines are parallel! Infinitely many closest points exist.");
+    else
+      return std::make_pair((point_1 + point_2) / 2., (point_1 + point_2) / 2.);
+  }
 
   const auto n1_vec = direction_1.cross(n_vec);
   const auto n2_vec = direction_2.cross(n_vec);
