@@ -31,7 +31,8 @@ public:
           const libMesh::RealVectorValue & start_direction,
           const libMesh::RealVectorValue & end_direction,
           const unsigned int cps_per_half,
-          const libMesh::Real sharpness);
+          const libMesh::Real sharpness,
+          const std::string & caller_name);
 
   /**
    * Evaluate the BSpline interpolation at given value of t.
@@ -100,5 +101,7 @@ private:
   /// Size: degree + n_control_points + 1
   /// The multiplicity of each knot influences the continuity of the spline
   const std::vector<libMesh::Real> _knot_vector;
+  /// Name of the object working with this class, used for error reporting
+  const std::string & _caller_name;
 };
 }
