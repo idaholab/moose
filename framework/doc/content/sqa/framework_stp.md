@@ -140,7 +140,7 @@ straightforward than it is for other business system type software. The MOOSE re
 general-purpose, extendable "Test Harness", which is heavily leveraged to run the test cases. The
 Test Harness is used throughout all phases of MOOSE development from initial development, the change
 request process, deployment testing, and finally end-use in-situ testing. The Test Harness is even
-suitable for testing on large deployment clusters and supports the "PBS" queuing system.
+suitable for testing on large deployment clusters and supports the Slurm queuing system.
 
 The Test Harness includes a suite of "Tester" types to enable complete testing of [!ac](MOOSE) and
 MOOSE-based applications. For each of the types, the Test Harness is able to execute the application

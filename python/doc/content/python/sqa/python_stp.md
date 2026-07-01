@@ -127,7 +127,7 @@ for other business system type software. The MOOSE repository includes a general
 "Test Harness", which is heavily leveraged to run the test cases. The Test Harness is used throughout
 all phases of MOOSE development from initial development, the change request process, deployment testing,
 and finally end-use in-situ testing. The Test Harness is even suitable for testing on large deployment
-clusters and supports the "PBS" queuing system.
+clusters and supports the Slurm queuing system.
 
 The Test Harness includes a suite of "Tester" types to enable complete testing of [!ac](MOOSE) Tools. For each
 of the types. The Test Harness is able to execute the application with a developer designed input and
