@@ -1,0 +1,18 @@
+[Tests]
+  design = 'Restartable.md FileMeshGenerator.md'
+  issues = '#30008'
+
+  [checkpoint_mesh_base]
+    type = RunApp
+    input = checkpoint_mesh_base.i
+    requirement = 'The system shall create a checkpoint restart file with a mesh that has been refined after mesh generation.'
+  []
+
+  [checkpoint_mesh_restart]
+    type = CSVDiff
+    input = checkpoint_mesh_restart.i
+    csvdiff = checkpoint_mesh_restart.csv
+    prereq = checkpoint_mesh_base
+    requirement = 'The system shall construct the mesh for a checkpoint restart from the checkpoint file instead of the Mesh block in the restart input.'
+  []
+[]
