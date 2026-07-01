@@ -9,10 +9,13 @@
 #
 
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = FileMesh
   file = pressure_test.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -36,27 +39,15 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    use_automatic_differentiation = true
+    strain = small
+    incremental = false
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_automatic_differentiation = true
-  [../]
-[]
 
 [BCs]
   [./no_x]
@@ -81,20 +72,17 @@
     [./Side1]
       boundary = 1
       function = rampConstant
-      displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
     [../]
     [./Side2]
       boundary = 2
       function = zeroRamp
-      displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
       factor = 2.0
     [../]
     [./Side3]
       boundary = 3
       function = rampUnramp
-      displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
     [../]
   [../]
@@ -106,11 +94,6 @@
     block = 1
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  [../]
-  [./strain]
-    type = ADComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-    block = 1
   [../]
   [./stress]
     type = ADComputeLinearElasticStress

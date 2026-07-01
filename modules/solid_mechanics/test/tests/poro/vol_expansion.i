@@ -30,12 +30,6 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
   [./p]
   [../]
 []
@@ -72,9 +66,6 @@
     type = Diffusion
     variable = p
   [../]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
@@ -92,6 +83,15 @@
     variable = disp_z
     porepressure = p
     component = 2
+  [../]
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
+    block = 0
   [../]
 []
 
@@ -192,10 +192,6 @@
     # bulk modulus = 1, poisson ratio = 0.2
     C_ijkl = '0.5 0.75'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

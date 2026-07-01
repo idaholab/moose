@@ -4,21 +4,9 @@
   file = quarter_hole.e
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
-
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
-
 
 [BCs]
   [./zmin_zzero]
@@ -212,11 +200,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
   [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 1
@@ -227,6 +210,14 @@
     min_stepsize = 1
     max_stepsize_for_dumb = 1
     debug_fspb = crash
+  [../]
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = small
   [../]
 []
 

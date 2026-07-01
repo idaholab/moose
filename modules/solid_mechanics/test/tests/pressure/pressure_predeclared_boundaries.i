@@ -41,17 +41,14 @@
   []
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = false
+  [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  []
-[]
 
 [BCs]
   [no_x]
@@ -79,9 +76,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'
-  []
-  [strain]
-    type = ComputeSmallStrain
   []
   [stress]
     type = ComputeLinearElasticStress

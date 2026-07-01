@@ -1,28 +1,24 @@
 #This test has volumetric deformation gradient as identity
 #Test the interface
 #Results should match with elasticity
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
-  [../]
-[]
 
 [AuxVariables]
   [./stress_zz]
@@ -72,11 +68,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./volumetric_strain]
     type = ComputeVolumetricDeformGrad
     pre_deform_grad_name = deformation_gradient

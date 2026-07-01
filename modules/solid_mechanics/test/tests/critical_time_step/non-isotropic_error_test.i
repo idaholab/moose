@@ -19,17 +19,11 @@
   zmax = 1
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
   [../]
 []
 
@@ -59,9 +53,6 @@
     type = ComputeElasticityTensor
   C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   fill_method = symmetric9
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

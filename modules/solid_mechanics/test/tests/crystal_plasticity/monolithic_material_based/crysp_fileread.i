@@ -11,19 +11,10 @@
   zmin=0.0
   zmax=1.0
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-    block = 0
-  [../]
-  [./disp_y]
-    block = 0
-  [../]
-  [./disp_z]
-    block = 0
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [AuxVariables]
@@ -61,10 +52,12 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = finite
+    block = 0
   [../]
 []
 
@@ -150,11 +143,6 @@
     block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

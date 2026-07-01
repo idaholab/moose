@@ -27,6 +27,10 @@
 # be two triangular pulses, one peaking at 0.1 and another peaking at
 # 0.2.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 
 [Mesh]
   type = GeneratedMesh
@@ -43,28 +47,7 @@
   allow_renumbering = false # So NodalVariableValue can index by id
 []
 
-[Variables] # variables that are solved
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [AuxVariables] # variables that are calculated for output
-  [./accel_x]
-  [../]
-  [./vel_x]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_z]
-  [../]
-  [./vel_z]
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -91,62 +74,19 @@
   [../]
 []
 
-[Kernels]
-  [./DynamicSolidMechanics] # zeta*K*vel + K * disp
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    mass_damping_coefficient = 19.63
+    strain = SMALL
+    incremental = false
     stiffness_damping_coefficient = 0.000025
-  [../]
-  [./inertia_x] # M*accel + eta*M*vel
-    type = InertialForce
-    variable = disp_x
-    eta = 19.63
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    eta = 19.63
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-    eta = 19.63
   [../]
 []
 
 [AuxKernels]
-  [./accel_x] # These auxkernels are only to check output
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = accel_x
-    first = false
-  [../]
-  [./accel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = accel_y
-    first = false
-  [../]
-  [./accel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = accel_z
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = vel_x
-  [../]
-  [./vel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = vel_y
-  [../]
-  [./vel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = vel_z
-  [../]
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -235,12 +175,6 @@
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 0
-  [../]
-  [./strain]
-    #Computes the strain, assuming small strains
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     #Computes the stress, using linear elasticity

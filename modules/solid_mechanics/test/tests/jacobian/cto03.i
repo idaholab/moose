@@ -6,16 +6,8 @@
 []
 
 [GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
   block = 0
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
 []
 
 [ICs]
@@ -39,11 +31,15 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
+
 
 [UserObjects]
   [./str]
@@ -65,11 +61,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '1 2'
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

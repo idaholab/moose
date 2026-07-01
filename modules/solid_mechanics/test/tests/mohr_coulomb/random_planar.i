@@ -1,6 +1,9 @@
 # apply many random large deformations, checking that the algorithm returns correctly to
 # the yield surface each time.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
 
 [Mesh]
   type = GeneratedMesh
@@ -14,22 +17,6 @@
   ymax = 1250
   zmin = 0
   zmax = 1
-[]
-
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
 []
 
 
@@ -163,11 +150,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0.7E7 1E7'
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -175,6 +157,14 @@
     plastic_models = mc
     min_stepsize = 1
     max_stepsize_for_dumb = 1
+  [../]
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = finite
   [../]
 []
 
