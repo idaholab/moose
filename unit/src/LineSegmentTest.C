@@ -454,3 +454,69 @@ TEST_F(LineSegmentTest, lineIntersectTest)
   EXPECT_TRUE(_neg3y.intersect(t5, result));
   EXPECT_EQ(result, Point(0, 0, 0));
 }
+
+TEST_F(LineSegmentTest, lineIntersectCollinearContractTest)
+{
+  // Pins the contract of LineSegment::intersect(const LineSegment &, Point &) for the
+  // parallel / collinear branch:
+  //   - parallel but not collinear  -> returns false
+  //   - collinear and disjoint      -> returns false
+  //   - collinear and overlapping   -> returns true with a deterministic intersect_p that
+  //                                    lies on the overlap (one of the four endpoints)
+  Point result;
+
+  // Parallel but not collinear: no intersection.
+  LineSegment parallel_above(Point(0, 1), Point(5, 1));
+  EXPECT_FALSE(_posx.intersect(parallel_above, result));
+  EXPECT_FALSE(parallel_above.intersect(_posx, result));
+
+  LineSegment parallel_above_3d(Point(0, 1, 0), Point(5, 1, 0));
+  EXPECT_FALSE(_pos3x.intersect(parallel_above_3d, result));
+
+  // Collinear but the segments do not overlap.
+  LineSegment disjoint(Point(6, 0), Point(10, 0));
+  EXPECT_FALSE(_posx.intersect(disjoint, result));
+  EXPECT_FALSE(disjoint.intersect(_posx, result));
+
+  LineSegment disjoint_3d(Point(6, 0, 0), Point(10, 0, 0));
+  EXPECT_FALSE(_pos3x.intersect(disjoint_3d, result));
+
+  // Collinear, touching at a single shared endpoint.
+  LineSegment touching(Point(5, 0), Point(10, 0));
+  EXPECT_TRUE(_posx.intersect(touching, result));
+  EXPECT_EQ(result, Point(5, 0));
+
+  // Collinear, partial overlap: other's _p0 lies inside this segment.
+  LineSegment overlap_p0_inside(Point(3, 0), Point(10, 0));
+  EXPECT_TRUE(_posx.intersect(overlap_p0_inside, result));
+  EXPECT_EQ(result, Point(3, 0));
+
+  // Collinear, partial overlap: other's _p1 lies inside this segment (its _p0 is outside).
+  LineSegment overlap_p1_inside(Point(-3, 0), Point(2, 0));
+  EXPECT_TRUE(_posx.intersect(overlap_p1_inside, result));
+  EXPECT_EQ(result, Point(2, 0));
+
+  // Collinear, this segment fully contained inside the other: fall back to this->_p0.
+  LineSegment containing(Point(-3, 0), Point(10, 0));
+  EXPECT_TRUE(_posx.intersect(containing, result));
+  EXPECT_EQ(result, Point(0, 0));
+
+  // Identical segments.
+  LineSegment identical(Point(0, 0), Point(5, 0));
+  EXPECT_TRUE(_posx.intersect(identical, result));
+  EXPECT_EQ(result, Point(0, 0));
+
+  // Reversed direction overlap: the contained point is the other's _p1.
+  LineSegment reversed(Point(10, 0), Point(3, 0));
+  EXPECT_TRUE(_posx.intersect(reversed, result));
+  EXPECT_EQ(result, Point(3, 0));
+
+  // 3D collinear overlap on the positive diagonal.
+  LineSegment diag_overlap(Point(3, 3, 3), Point(10, 10, 10));
+  EXPECT_TRUE(_pos3diag.intersect(diag_overlap, result));
+  EXPECT_EQ(result, Point(3, 3, 3));
+
+  // _posdiag and _negdiag are collinear and meet only at the origin.
+  EXPECT_TRUE(_posdiag.intersect(_negdiag, result));
+  EXPECT_EQ(result, Point(0, 0));
+}
