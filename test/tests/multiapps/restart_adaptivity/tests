@@ -1,0 +1,21 @@
+[Tests]
+  design = 'syntax/MultiApps/index.md syntax/Adaptivity/index.md'
+  issues = '#33153'
+
+  [group]
+    requirement = "The system shall restore an independently adapted sub-application mesh before restoring sub-application equation-system data."
+
+    [first]
+      type = RunApp
+      input = parent.i
+      detail = "The test first creates a checkpoint containing a MultiApp backup with an initially adapted sub-application mesh."
+    []
+
+    [second]
+      type = RunApp
+      input = parent_restart.i
+      prereq = group/first
+      detail = "The test then restores the independently adapted sub-application mesh before restoring equation-system data."
+    []
+  []
+[]
