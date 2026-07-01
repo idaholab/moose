@@ -62,6 +62,8 @@ NEML2Action::validParams()
       "<block-name> is this action sub-block's name.");
   params.addParam<std::vector<SubdomainName>>(
       "block", {}, "List of blocks (subdomains) where the material model is defined");
+  params.addParam<std::vector<BoundaryName>>(
+      "interface", {}, "List of interfaces where the material model is defined");
   return params;
 }
 
@@ -74,6 +76,7 @@ NEML2Action::NEML2Action(const InputParameters & params)
                             ? getParam<std::string>("batch_index_generator_name")
                             : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block")),
+    _interface(getParam<std::vector<BoundaryName>>("interface")),
     _skip_input_variables(getParam<std::vector<std::string>>("skip_input_variables"))
 {
   NEML2Utils::assertNEML2Enabled();
@@ -121,6 +124,18 @@ NEML2Action::getCommonAction() const
   return *common_block[0];
 }
 
+void
+NEML2Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  // The NEML2 gatherers and batch index generator are DomainUserObjects, which require one layer of
+  // neighbor ghosting (declared in DomainUserObject::validParams) so that neighbor data can be
+  // reinitialized on internal sides in parallel. These user objects are created during the
+  // add_user_object task, which is too late for their relationship managers to attach, so declare
+  // the ghosting here on the action's behalf.
+  auto params = _factory.getValidParams("NEML2BatchIndexGenerator");
+  Action::addRelationshipManagers(input_rm_type, params);
+}
+
 #ifndef NEML2_ENABLED
 
 void
@@ -159,6 +174,10 @@ NEML2Action::act()
     return it->second;
   };
 
+  // Whether this action is block/interface restricted
+  const bool is_blk = !_block.empty();
+  const bool is_interface = !_interface.empty();
+
   if (_current_task == "add_user_object")
   {
     setupInputMappings(*_model);
@@ -183,7 +202,10 @@ NEML2Action::act()
       obj_params.set<std::string>("from_moose") = moose_name;
       obj_params.set<std::string>("to_neml2") = neml2_name;
       obj_params.set<MooseEnum>("quantity_type").assign(static_cast<int>(moose_type));
-      obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      if (is_blk)
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      if (is_interface)
+        obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
       _problem->addUserObject(obj_type, obj_name, obj_params);
       return obj_name;
     };
@@ -221,6 +243,10 @@ NEML2Action::act()
       auto type = "NEML2BatchIndexGenerator";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
+      if (is_blk)
+        params.set<std::vector<SubdomainName>>("block") = _block;
+      if (is_interface)
+        params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
       _problem->addUserObject(type, _idx_generator_name, params);
     }
 

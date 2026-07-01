@@ -25,7 +25,7 @@ InputParameters
 MOOSEQuantityToNEML2<T, state>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
-  params += ElementUserObject::validParams();
+  params += DomainUserObject::validParams();
 
   params.addClassDescription(
       "Gather a MOOSE quantity of type " + demangle(typeid(T).name()) +
@@ -49,7 +49,7 @@ MOOSEQuantityToNEML2<T, state>::validParams()
 template <typename T, unsigned int state>
 MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & params)
   : MOOSEToNEML2(params),
-    ElementUserObject(params)
+    DomainUserObject(params)
 #ifdef NEML2_ENABLED
     ,
     _type(getParam<MooseEnum>("quantity_type").template getEnum<NEML2Utils::MOOSEIOType>()),
@@ -81,6 +81,39 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
                  ? &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose"))
                         .slnOld()
                  : nullptr),
+    // Side/neighbor data is only gathered for interface setups (interface_boundaries set). For
+    // volume-only setups these are not requested, so the object behaves like a plain element
+    // gatherer and does not pull in (possibly remote) neighbor material/variable data.
+    _face_mat_prop(_type == NEML2Utils::MOOSEIOType::MATERIAL && state == 0 &&
+                           !_interface_bnd_ids.empty()
+                       ? &this->template getMaterialPropertyByName<T>(
+                             getParam<std::string>("from_moose"), this->_face_material_data, 0)
+                       : nullptr),
+    _face_mat_prop_old(_type == NEML2Utils::MOOSEIOType::MATERIAL && state == 1 &&
+                               !_interface_bnd_ids.empty()
+                           ? &this->template getMaterialPropertyByName<T>(
+                                 getParam<std::string>("from_moose"), this->_face_material_data, 1)
+                           : nullptr),
+    _neighbor_mat_prop(_type == NEML2Utils::MOOSEIOType::MATERIAL && state == 0 &&
+                               !_interface_bnd_ids.empty()
+                           ? &this->template getNeighborMaterialPropertyByName<T>(
+                                 getParam<std::string>("from_moose"), 0)
+                           : nullptr),
+    _neighbor_mat_prop_old(_type == NEML2Utils::MOOSEIOType::MATERIAL && state == 1 &&
+                                   !_interface_bnd_ids.empty()
+                               ? &this->template getNeighborMaterialPropertyByName<T>(
+                                     getParam<std::string>("from_moose"), 1)
+                               : nullptr),
+    _var_neighbor(
+        _type == NEML2Utils::MOOSEIOType::VARIABLE && state == 0 && !_interface_bnd_ids.empty()
+            ? &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose"))
+                   .slnNeighbor()
+            : nullptr),
+    _var_neighbor_old(
+        _type == NEML2Utils::MOOSEIOType::VARIABLE && state == 1 && !_interface_bnd_ids.empty()
+            ? &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose"))
+                   .slnOldNeighbor()
+            : nullptr),
     _batched(_type != NEML2Utils::MOOSEIOType::TIME && _type != NEML2Utils::MOOSEIOType::SCALAR)
 #endif
 {
@@ -92,17 +125,60 @@ void
 MOOSEQuantityToNEML2<T, state>::initialize()
 {
   _buffer.clear();
+  _visited_elem_sides.clear();
 }
 
 template <typename T, unsigned int state>
 void
-MOOSEQuantityToNEML2<T, state>::execute()
+MOOSEQuantityToNEML2<T, state>::executeOnElement()
 {
   if (!_batched)
     return;
 
-  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
-    _buffer.emplace_back(qpData(qp));
+  for (unsigned int qp = 0; qp < qRule().n_points(); qp++)
+    _buffer.emplace_back(qpData(qp, DataSource::Elem));
+}
+
+template <typename T, unsigned int state>
+void
+MOOSEQuantityToNEML2<T, state>::executeOnBoundary()
+{
+  // Only interface setups gather side data; volume-only setups gather in executeOnElement only
+  if (!_batched || _interface_bnd_ids.empty())
+    return;
+
+  // Interface sides are handled by executeOnInterface (which also sees the neighbor)
+  if (_current_elem->neighbor_ptr(_current_side))
+    return;
+
+  const auto elem_side = ElemSide(_current_elem->id(), _current_side);
+  if (_visited_elem_sides.insert(elem_side).second)
+    for (unsigned int qp = 0; qp < qRule().n_points(); qp++)
+      _buffer.emplace_back(qpData(qp, DataSource::ElemSide));
+}
+
+template <typename T, unsigned int state>
+void
+MOOSEQuantityToNEML2<T, state>::executeOnInterface()
+{
+  if (!_batched)
+    return;
+
+  const auto elem_side = ElemSide(_current_elem->id(), _current_side);
+  if (_visited_elem_sides.insert(elem_side).second)
+    for (unsigned int qp = 0; qp < qRule().n_points(); qp++)
+      _buffer.emplace_back(qpData(qp, DataSource::ElemSide));
+
+  const auto * neighbor_elem = _current_elem->neighbor_ptr(_current_side);
+
+  if (neighbor_elem)
+  {
+    const auto neighbor_side = neighbor_elem->which_neighbor_am_i(_current_elem);
+    const auto neighbor_elem_side = ElemSide(neighbor_elem->id(), neighbor_side);
+    if (_visited_elem_sides.insert(neighbor_elem_side).second)
+      for (unsigned int qp = 0; qp < qRule().n_points(); qp++)
+        _buffer.emplace_back(qpData(qp, DataSource::NeighborSide));
+  }
 }
 
 template <typename T, unsigned int state>
@@ -114,6 +190,7 @@ MOOSEQuantityToNEML2<T, state>::threadJoin(const UserObject & uo)
   // append vectors
   const auto & m2n = static_cast<const MOOSEQuantityToNEML2<T, state> &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
+  _visited_elem_sides.insert(m2n._visited_elem_sides.begin(), m2n._visited_elem_sides.end());
 }
 
 template <typename T, unsigned int state>
@@ -145,15 +222,30 @@ MOOSEQuantityToNEML2<T, state>::gatheredData() const
 
 template <typename T, unsigned int state>
 T
-MOOSEQuantityToNEML2<T, state>::qpData(unsigned int qp) const
+MOOSEQuantityToNEML2<T, state>::qpData(unsigned int qp, DataSource source) const
 {
   mooseAssert(
       _batched,
-      "elemMOOSEData should only be called for batched quantities. This should never happen.");
+      "qpData should only be called for batched quantities. This should never happen.");
+
+  // Pick the material property to read from for the requested data source
+  auto matProp = [&]() -> const MaterialProperty<T> &
+  {
+    switch (source)
+    {
+      case DataSource::Elem:
+        return state == 0 ? *_mat_prop : *_mat_prop_old;
+      case DataSource::ElemSide:
+        return state == 0 ? *_face_mat_prop : *_face_mat_prop_old;
+      case DataSource::NeighborSide:
+        return state == 0 ? *_neighbor_mat_prop : *_neighbor_mat_prop_old;
+    }
+    mooseError("Invalid data source. This should never happen.");
+  };
 
   // non-scalar type can only be MATERIAL
   if constexpr (!std::is_same_v<T, Real>)
-    return state == 0 ? (*_mat_prop)[qp] : (*_mat_prop_old)[qp];
+    return matProp()[qp];
   else
     switch (_type)
     {
@@ -162,11 +254,16 @@ MOOSEQuantityToNEML2<T, state>::qpData(unsigned int qp) const
       case NEML2Utils::MOOSEIOType::SCALAR:
         mooseError("Batched quantity cannot be of type SCALAR. This should never happen.");
       case NEML2Utils::MOOSEIOType::FUNCTION:
-        return _func->value(state == 0 ? _t : _t_old, _q_point[qp]);
+        // The current quadrature points (qPoints()) already reflect element-interior or face
+        // points; on a neighbor side the face points are physically the same.
+        return _func->value(state == 0 ? _t : _t_old, qPoints()[qp]);
       case NEML2Utils::MOOSEIOType::VARIABLE:
+        if (source == DataSource::NeighborSide)
+          return state == 0 ? (*_var_neighbor)[qp] : (*_var_neighbor_old)[qp];
+        // Elem and ElemSide both read the element solution, which is refilled on face reinit
         return state == 0 ? (*_var)[qp] : (*_var_old)[qp];
       case NEML2Utils::MOOSEIOType::MATERIAL:
-        return state == 0 ? (*_mat_prop)[qp] : (*_mat_prop_old)[qp];
+        return matProp()[qp];
       default:
         mooseError("Invalid MOOSE quantity type. This should never happen.");
     }

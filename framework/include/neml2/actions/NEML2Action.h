@@ -33,6 +33,8 @@ public:
 
   virtual void act() override;
 
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
 protected:
   const NEML2ActionCommon & getCommonAction() const;
 
@@ -114,6 +116,9 @@ protected:
 
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
+
+  /// Interfaces this sub-block action applies to
+  const std::vector<BoundaryName> _interface;
 
   /// Input variables to skip (i.e., not to set up mappings for)
   std::vector<std::string> _skip_input_variables;
