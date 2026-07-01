@@ -85,6 +85,15 @@
     requirement = "The system shall support CSV output aligned columns and a custom delimiter."
     issues = "#3229"
   []
+  [scientific_notation]
+    type = CheckFiles
+    input = 'csv_scientific_notation.i'
+    check_files = 'csv_scientific_notation_out.csv'
+    file_expect_out = 'time,small.*1\.000000e\+00,1\.234000e-20'
+
+    requirement = "The system shall support CSV output of floating point values in scientific notation."
+    issues = "#31150"
+  []
   [sort]
     # Tests that csv output can be sorted
     type = CheckFiles
