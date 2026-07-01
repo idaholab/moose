@@ -41,12 +41,21 @@ StitchMeshGenerator::validParams()
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
   params.addParam<bool>(
+      "require_boundaries_fully_stitch",
+      true,
+      "If true, an error if occurs if after the stitch operation, any element "
+      "does not have a neighbor across the stitch boundary. This should be disabled if you know "
+      "that part of a boundary in a stitch boundary pair will not be stitched in that step.");
+  params.addParam<bool>(
       "enforce_all_nodes_match_on_boundaries",
       false,
-      "Whether to have the stitcher be very picky about the nodes being stitched.");
+      "If true, an error occurs if not all nodes on the specified boundaries have matching "
+      "positions, and this overrides the value of 'merge_boundary_nodes_all_or_nothing'.");
   params.addParam<bool>("merge_boundary_nodes_all_or_nothing",
                         false,
-                        "Whether the stitcher is set to merge all nodes or none.");
+                        "If true, and 'enforce_all_nodes_match_on_boundaries' is false, then when "
+                        "not all nodes on the specified boundaries have matching positions, no "
+                        "nodes get merged, and no error occurs.");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -60,7 +69,8 @@ StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
     _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap")),
-    _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name"))
+    _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name")),
+    _require_boundaries_fully_stitch(getParam<bool>("require_boundaries_fully_stitch"))
 {
   // Check inputs
   if (_input_names.size() - 1 != _stitch_boundaries_pairs.size() && getParam<bool>("_check_inputs"))
@@ -127,6 +137,8 @@ StitchMeshGenerator::generate()
         if (base_mesh_bids.count(bid))
           overlap_found = true;
 
+      // If there is any overlap, renumber all of the boundary IDs of the secondary mesh starting
+      // at an index past the max of either mesh
       if (overlap_found)
       {
         const auto max_boundary_id =
@@ -181,6 +193,10 @@ StitchMeshGenerator::generate()
       }
     }
 
+    // Save BCTuples for possibly checking stitch success
+    const auto & boundary_info = mesh->get_boundary_info();
+    const auto prestitch_active_side_list = boundary_info.build_active_side_list();
+
     mesh->stitch_meshes(*meshes[i],
                         first,
                         second,
@@ -188,11 +204,13 @@ StitchMeshGenerator::generate()
                         _clear_stitched_boundary_ids,
                         getParam<bool>("verbose_stitching"),
                         use_binary_search,
-                        /*enforce_all_nodes_match_on_boundaries=*/
                         getParam<bool>("enforce_all_nodes_match_on_boundaries"),
-                        /*merge_boundary_nodes_all_or_nothing=*/
                         getParam<bool>("merge_boundary_nodes_all_or_nothing"),
                         getParam<bool>("subdomain_remapping"));
+
+    // Check that stitching was successful: each face on the first boundary must have a neighbor
+    if (_require_boundaries_fully_stitch)
+      checkFullBoundaryHasNeighbor(*mesh, first, prestitch_active_side_list, _input_names[i + 1]);
 
     if (_merge_boundaries_with_same_name)
       MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
@@ -200,4 +218,31 @@ StitchMeshGenerator::generate()
 
   mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+StitchMeshGenerator::checkFullBoundaryHasNeighbor(
+    const MeshBase & mesh,
+    const BoundaryID boundary_id,
+    const std::vector<libMesh::BoundaryInfo::BCTuple> & active_side_list,
+    const MeshGeneratorName & mg_name) const
+{
+  if (!MooseMeshUtils::boundaryIsFullyInternal(mesh, boundary_id, active_side_list))
+  {
+    const auto & boundary_info = mesh.get_boundary_info();
+    const auto & boundary_name = boundary_info.get_sideset_name(boundary_id);
+
+    std::stringstream ss;
+    ss << "After stitching mesh '" << mg_name << "', boundary '" << boundary_name
+       << "' (id = " << boundary_id
+       << ") is not fully internal: one or more elements on this boundary does not have a "
+          "neighbor, which means that either (A) part of one or both of the boundaries in the "
+          "provided boundary pair were not intended to be stitched, or (B) a stitch failure has "
+          "occurred. If (A), set 'require_boundaries_fully_stitch' to false. If (B), reasons for "
+          "stitch failure may include: (1) nodes along the stitch boundary do not "
+          "have matching positions, (2) faces to be stitched together do not match. To determine "
+          "which is the reason, try setting 'enforce_all_nodes_match_on_boundaries' to true. If "
+          "the associated error is triggered, then (1) is the reason; else (2) is the reason.";
+    mooseError(ss.str());
+  }
 }

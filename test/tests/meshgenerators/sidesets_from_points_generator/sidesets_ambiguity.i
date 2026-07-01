@@ -1,5 +1,6 @@
 [GlobalParams]
   prevent_boundary_ids_overlap = false
+  require_boundaries_fully_stitch = false # testing for other error
 []
 
 [Mesh]
