@@ -50,6 +50,10 @@ protected:
   virtual void nonlinearConvergenceSetup() {}
 
   FEProblemBase & _fe_problem;
+  /// Nonlinear absolute tolerance
+  PetscReal _abs_tol;
+  /// Nonlinear relative tolerance
+  PetscReal _rel_tol;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
   /// Nonlinear relative divergence tolerance

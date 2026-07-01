@@ -372,19 +372,25 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
       if (_converge_on_group[i])
       {
         // Print residual
-        out << "   " << std::setw(var_space + 8) << std::right
-            << _group_names[i] + "-> res: " << std::setw(8) << _group_resid[i];
+        out << "   " << std::setw(var_space + 8) << std::right << _group_names[i] + "-> res: "
+            << (_group_resid[i] < _abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
+            << _group_resid[i] << COLOR_DEFAULT;
 
         // Print res/ref ratio
         if (_local_norm)
-          out << "  local res/ref: " << std::setw(8) << _group_ref_resid[i] << "\n";
+          out << "  local res/ref: "
+              << (_group_resid[i] / _group_ref_resid[i] < _rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
+              << std::setw(8) << _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         else
         {
           // Print reference first if not local norm
-          out << "  ref: " << std::setw(8) << _group_ref_resid[i];
-          out << "  res/ref: " << std::setw(8)
-              << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i])
-              << "\n";
+          out << "  ref: " << std::setw(8) << _group_ref_resid[i] << "  res/ref: ";
+
+          if (!_group_ref_resid[i])
+            out << _group_resid[i] << "\n";
+          else
+            out << (_group_resid[i] / _group_ref_resid[i] < _rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
+                << std::setw(8) << _group_resid[i] / _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         }
       }
     }

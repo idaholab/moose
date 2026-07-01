@@ -150,6 +150,7 @@ scaling = false
     group_variables = 'a b variable_f; c d'
     converge_on = 'a b variable_f c d g'
     nl_rel_tol = 1e-9
+    nl_abs_tol = 1e-9
     unscale_the_residual = ${scaling}
   []
   [conv_two]
@@ -157,6 +158,7 @@ scaling = false
     reference_vector = 'ref'
     converge_on = 'verylongvariable_e g'
     nl_rel_tol = 1e-9
+    nl_abs_tol = 1e-9
     unscale_the_residual = ${scaling}
     normalization_type = LOCAL_L2
   []
