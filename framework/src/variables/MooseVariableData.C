@@ -1415,6 +1415,7 @@ MooseVariableData<OutputType>::reinitNode()
     _dof_map.dof_indices(_node, _dof_indices, _var_num);
 
   const auto n_dofs = _dof_indices.size();
+
   if (n_dofs)
   {
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
