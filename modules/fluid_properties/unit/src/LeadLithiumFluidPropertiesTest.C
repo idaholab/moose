@@ -32,9 +32,9 @@ TEST_F(LeadLithiumFluidPropertiesTest, molarMass)
  *   rho(T) = 10520.35 - 1.19051*T
  *   h(T)   = 195*(T - 508) - 0.5*9.116e-3*(T^2 - 508^2)    (T_mo = 508 K)
  *   e      = h - p/rho
- *   k(T)   = 9.144 + 0.019631*T
+ *   k(T)   = 14.51 + 0.019631 * (T - 273.15);
  *   E(T)   = (44.73077 - 0.02634615*T + 5.76923e-6*T^2)*1e9
- *   c(T)   = 1959.63 - 0.306*T
+ *   c(T)   = 1876. - 0.306 * (T - 273.15);
  *   cp(T)  = 195 - 9.116e-3*T
  *   cv(T)  = cp/(1 + alpha^2*E*T/(rho*cp)),  alpha  = 1.19051/(10520.35 - 1.19051*T)
  *   mu(T)  = 1.87e-4 * exp(11640/(R*T))
@@ -62,9 +62,9 @@ TEST_F(LeadLithiumFluidPropertiesTest, properties)
       // Compute reference internal energy:
       const Real e_ref = h_ref - p / rho_ref;
       // Compute thermal conductivity:
-      const Real k_ref = 14.51 + 0.019631 * T;
+      const Real k_ref = 14.51 + 0.019631 * (T - 273.15);
       // Compute speed of sound:
-      const Real c_ref = 1876. - 0.306 * T;
+      const Real c_ref = 1876. - 0.306 * (T - 273.15);
       // Compute bulk modulus:
       const Real E_ref = c_ref * c_ref * rho_ref;
       // Compute isobaric specific heat:
