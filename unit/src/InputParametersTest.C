@@ -148,6 +148,32 @@ TEST(InputParametersTest, checkSetDocStringError)
       "Unable to set the documentation string (using setDocString)");
 }
 
+TEST(InputParametersTest, setCoupledVar)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCoupledVar("single_var", "A single coupled variable");
+  params.addCoupledVar("multiple_vars", "Multiple coupled variables");
+
+  params.setCoupledVar("single_var", NonlinearVariableName("u"));
+  const auto & single_var = params.get<std::vector<VariableName>>("single_var");
+  ASSERT_EQ(single_var.size(), 1);
+  EXPECT_EQ(single_var[0], "u");
+
+  const std::vector<VariableName> variables = {"disp_x", "disp_y"};
+  params.setCoupledVar("multiple_vars", variables);
+  EXPECT_EQ(params.get<std::vector<VariableName>>("multiple_vars"), variables);
+}
+
+TEST(InputParametersTest, setCoupledVarError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::vector<VariableName>>("variable_names", "A regular parameter");
+
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.setCoupledVar("variable_names", "u"); },
+      "was not added with addCoupledVar or addRequiredCoupledVar");
+}
+
 void
 testBadParamName(const std::string & name)
 {

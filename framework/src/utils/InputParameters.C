@@ -823,6 +823,26 @@ InputParameters::hasCoupledValue(const std::string & coupling_name) const
   return _coupled_vars.find(coupling_name) != _coupled_vars.end();
 }
 
+void
+InputParameters::setCoupledVar(const std::string & coupling_name, const std::string & value)
+{
+  setCoupledVar(coupling_name, std::vector<VariableName>{value});
+}
+
+void
+InputParameters::setCoupledVar(const std::string & coupling_name,
+                               const std::vector<VariableName> & values)
+{
+  const auto actual_name = checkForRename(coupling_name);
+
+  if (!hasCoupledValue(actual_name))
+    mooseError("Unable to set coupled variable parameter '",
+               coupling_name,
+               "' because it was not added with addCoupledVar or addRequiredCoupledVar.");
+
+  set<std::vector<VariableName>>(actual_name) = values;
+}
+
 bool
 InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 {
