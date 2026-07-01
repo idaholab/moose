@@ -46,4 +46,7 @@ protected:
 
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
+
+  /// Prefix to prepend to boundary names declared by this generator
+  const std::string _boundary_name_prefix;
 };

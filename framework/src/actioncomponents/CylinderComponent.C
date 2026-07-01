@@ -160,6 +160,7 @@ CylinderComponent::addMeshGenerators()
       circle_params.set<std::vector<SubdomainName>>("subdomain_name") = block_names;
       _blocks.insert(_blocks.end(), block_names.begin(), block_names.end());
     }
+    circle_params.set<std::string>("boundary_name_prefix") = name() + "_";
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");
