@@ -221,6 +221,7 @@ CylinderComponent::addMeshGenerators()
   _top_mg_name = _mg_names.back();
 
   ComponentMeshTransformHelper::addMeshGenerators();
+  setOwnMeshMeshGeneratorName(_mg_names.back());
 }
 
 void
