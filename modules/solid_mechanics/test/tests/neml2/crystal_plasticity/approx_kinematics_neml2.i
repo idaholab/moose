@@ -125,7 +125,7 @@
   [predictor]
     type = ConstantExtrapolationPredictor
     unknowns_SR2 = 'elastic_strain'
-    unknowns_Rot = 'orientation'
+    unknowns_MRP = 'orientation'
     unknowns_Scalar = 'slip_hardening'
   []
   [model_without_stress]

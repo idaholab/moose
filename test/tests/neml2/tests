@@ -30,6 +30,20 @@
     capabilities = 'libtorch & neml2'
     valgrind = none
   []
+  # Same cpp-aoti artifact, but with device_batch > 0 so the work is dispatched in
+  # device-batch-sized chunks through NEML2's MPISimpleScheduler (device = 'cpu' -> this
+  # rank chunks its local batch on the CPU). Chunk boundaries cannot change the result, so
+  # it reuses aoti_run's gold; prereq = aoti_run serializes the shared output file.
+  [aoti_dispatch]
+    requirement = 'The framework shall dispatch cpp-aoti NEML2 evaluation in device-batch-sized chunks (device_batch > 0) via the MPI work scheduler, reproducing the unchunked result.'
+    type = Exodiff
+    prereq = 'aoti_run'
+    input = 'custom_model_aoti.i'
+    cli_args = 'NEML2/all/device_batch=32'
+    exodiff = 'custom_model_aoti_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
   [neml2_error]
     requirement = 'The framework shall be capable of capturing errors that occur during the evaluation of a NEML2 model.'
     type = RunException

@@ -50,15 +50,17 @@ NEML2ActionCommon::commonParams()
   params.addParam<std::vector<std::vector<std::string>>>(
       "derivatives",
       {},
-      "List of pairs of NEML2 variables to take derivatives (i.e., first in the pair w.r.t. the "
-      "second in the pair).");
+      "List of NEML2 derivatives to retrieve. Each entry is (output, input) -- the derivative of "
+      "'output' w.r.t. 'input' -- with an optional third element aliasing it to a custom MOOSE "
+      "material property name (default d(output)/d(input)).");
 
   // Parameter derivatives
   params.addParam<std::vector<std::vector<std::string>>>(
       "parameter_derivatives",
       {},
-      "List of pairs of NEML2 variables to take derivatives (i.e., first in the pair w.r.t. the "
-      "second in the pair).");
+      "List of NEML2 parameter derivatives to retrieve. Each entry is (output, parameter) -- the "
+      "derivative of 'output' w.r.t. model 'parameter' -- with an optional third element aliasing "
+      "it to a custom MOOSE material property name (default d(output)/d(parameter)).");
 
   // Error checking, logging, etc
   params.addParam<std::vector<std::string>>(

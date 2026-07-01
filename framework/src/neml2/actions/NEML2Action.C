@@ -479,8 +479,10 @@ NEML2Action::setupDerivativeMappings(const NEML2ModelHandle & model)
 
   for (auto i : index_range(derivs))
   {
-    if (derivs[i].size() != 2)
-      paramError("derivatives", "The length of each pair in derivatives must be 2.");
+    if (derivs[i].size() != 2 && derivs[i].size() != 3)
+      paramError("derivatives",
+                 "Each entry in derivatives must have 2 elements (output, input) or 3 "
+                 "(output, input, alias).");
 
     const auto & y = derivs[i][0];
     const auto & x = derivs[i][1];
@@ -501,7 +503,10 @@ NEML2Action::setupDerivativeMappings(const NEML2ModelHandle & model)
                  x,
                  " has a base shape not yet mapped to a MOOSE type.");
 
-    const auto deriv_name = derivativePropertyNameFirst(y, x);
+    // An optional third element aliases the derivative to a custom material property name.
+    const MaterialPropertyName deriv_name = derivs[i].size() == 3
+                                                ? MaterialPropertyName(derivs[i][2])
+                                                : derivativePropertyNameFirst(y, x);
     _derivs.push_back({deriv_name, y, x, mtype});
   }
 }
@@ -575,9 +580,10 @@ NEML2Action::setupParameterDerivativeMappings(const NEML2ModelHandle & model)
 
   for (auto i : index_range(derivs))
   {
-    if (derivs[i].size() != 2)
+    if (derivs[i].size() != 2 && derivs[i].size() != 3)
       paramError("parameter_derivatives",
-                 "The length of each pair in parameter_derivatives must be 2.");
+                 "Each entry in parameter_derivatives must have 2 elements (output, parameter) "
+                 "or 3 (output, parameter, alias).");
 
     const auto & y = derivs[i][0];
     const auto & x_user = derivs[i][1];
@@ -598,9 +604,11 @@ NEML2Action::setupParameterDerivativeMappings(const NEML2ModelHandle & model)
                  x,
                  " has a base shape not yet mapped to a MOOSE type.");
 
-    // The material-property name uses the user-written parameter name; the qualified name drives
-    // the NEML2-side parameter derivative.
-    const auto deriv_name = derivativePropertyNameFirst(y, x_user);
+    // By default the material-property name uses the user-written parameter name (the qualified
+    // name drives the NEML2-side parameter derivative); an optional third element aliases it.
+    const MaterialPropertyName deriv_name = derivs[i].size() == 3
+                                                ? MaterialPropertyName(derivs[i][2])
+                                                : derivativePropertyNameFirst(y, x_user);
     _param_derivs.push_back({deriv_name, y, x, mtype});
   }
 }

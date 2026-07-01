@@ -25,4 +25,12 @@
     csvdiff = 'parameter_field_derivative_out.csv'
     capabilities = 'libtorch & neml2'
   []
+  [derivative_alias]
+    type = CSVDiff
+    requirement = 'The system shall allow aliasing a NEML2 output derivative and model-parameter '
+                  'derivative to custom MOOSE material property names.'
+    input = 'derivative_alias.i'
+    csvdiff = 'derivative_alias_out.csv'
+    capabilities = 'libtorch & neml2'
+  []
 []
