@@ -1,0 +1,31 @@
+[Tests]
+  design = 'MultiAppNewtonIterationUserObject.md'
+  issues = '#33205'
+
+  [newton_iteration]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out.csv
+    requirement = "The system shall solve an inverse coupling problem by finding, at each time step, "
+                  "the parameter value that yields a target sub-app output."
+  []
+  [accept_on_max_iteration]
+    type = RunApp
+    input = main.i
+    cli_args = 'UserObjects/newton_uo/max_iterations=1 UserObjects/newton_uo/accept_on_max_iteration=true'
+    allow_warnings = true
+    expect_out = 'Proceeding with the best estimate'
+    requirement = "The system shall, when the maximum Newton iteration count is reached without "
+                  "convergence and accept_on_max_iteration is true, accept the best estimate and "
+                  "continue with a warning."
+  []
+  [error_on_max_iteration]
+    type = RunException
+    input = main.i
+    cli_args = 'UserObjects/newton_uo/max_iterations=1 Executioner/dtmin=0.3'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = "The system shall, when the maximum Newton iteration count is reached without "
+                  "convergence and accept_on_max_iteration is false, cut the time step and error "
+                  "once it can no longer be reduced."
+  []
+[]
