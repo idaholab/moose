@@ -240,9 +240,7 @@ NEML2ModelExecutor::fillInputs()
       uo->insertInto(_model_params);
 
     if (_manage_state_advance && _t_step > 0)
-      for (const auto & [name, val] : _state_vars)
-        if (val.defined())
-          _in[name] = val;
+      seedUncachedHistory();
 
     // Send input variables and parameters to device
     for (auto & [var, val] : _in)
@@ -265,6 +263,29 @@ NEML2ModelExecutor::fillInputs()
                e.what(),
                NEML2Utils::NEML2_help_message);
   }
+}
+
+void
+NEML2ModelExecutor::seedUncachedHistory()
+{
+  std::vector<neml2::Tensor> gathered;
+  for (const auto & [name, val] : _in)
+    if (val.defined())
+      gathered.push_back(val);
+  const auto batch = neml2::utils::broadcast_dynamic_sizes(gathered);
+  const auto opts = gathered.front().options();
+  const auto sep = model().settings().history_separator();
+
+  for (const auto & [name, val] : _state_vars)
+    if (val.defined())
+      _in[name] = val;
+    else
+    {
+      // Seed time `t` with the previous time so dt > 0 on step 1; other history starts at zero.
+      const auto seed = neml2::parse_history(name, sep).first == "t" ? _t - _dt : 0.0;
+      const auto & var = model().input_variable(name);
+      _in[name] = neml2::Tensor::full(batch, var.intmd_sizes(), var.base_sizes(), seed, opts);
+    }
 }
 
 void
