@@ -51,5 +51,8 @@ protected:
     return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
   }
   virtual Point translation() const override;
-  virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const override { return _outer_boundaries; };
+  virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const override
+  {
+    return _outer_boundaries;
+  };
 };
