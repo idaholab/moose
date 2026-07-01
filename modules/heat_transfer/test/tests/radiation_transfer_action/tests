@@ -55,4 +55,14 @@
     mesh_mode = REPLICATED
     requirement = 'The system shall provide an action to set up radiative heat transfer problems where sidesets participating in the radiative exchange are external faces of the domain, with view factors computed by ray tracing.'
   []
+
+  [nonexistent_boundary]
+    type = RunException
+    input = 'radiative_transfer_action.i'
+    cli_args = "GrayDiffuseRadiation/cavity/boundary='4 5 6 fake'"
+    expect_err = "The provided boundary name or ID \(fake\) does not exist in the mesh"
+    mesh_mode = REPLICATED # PatchSideSetGenerator is not allowed to use distributed mesh
+    requirement = 'The system shall report an error if an invalid boundary is provided for the radiative heat transfer action.'
+    issues = '#32724'
+  []
 []

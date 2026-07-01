@@ -29,7 +29,7 @@ axis and will have a single element in 1 (2) directions for 3 (2)-dimensional pr
   \begin{aligned}
     n_1 &= \lfloor \sqrt{\frac{\Delta_1}{\Delta_2} n_p} \rfloor \\
     n_2 &= \lfloor \sqrt{\frac{\Delta_2}{\Delta_1} n_p} \rfloor,
-  \end{aligned}  
+  \end{aligned}
   \end{equation}
 
   where $n_1$ and $n_2$ are the subdivisions along the longest and second longest axes and $n_p$ is equal to `n_patches`. Due to the rounding,
@@ -37,7 +37,7 @@ axis and will have a single element in 1 (2) directions for 3 (2)-dimensional pr
 
 ## Example Input Syntax
 
-!listing modules/heat_transfer/test/tests/generate_radiation_patch/generate_radiation_patch.i start=[patch] end=[] include-end=true
+!listing modules/heat_transfer/test/tests/meshgenerators/patch_sideset_generator/patch_sideset_generator.i start=[patch] end=[] include-end=true
 
 !syntax parameters /Mesh/PatchSidesetGenerator
 

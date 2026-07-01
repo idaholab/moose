@@ -153,7 +153,7 @@ MeshDiagnosticsGenerator::generate()
   // check that specified boundary is valid, convert BoundaryNames to BoundaryIDs, and sort
   for (const auto & boundary_name : _watertight_boundary_names)
   {
-    if (!MooseMeshUtils::hasBoundaryName(*mesh, boundary_name))
+    if (!MooseMeshUtils::hasBoundaryNameOrID(*mesh, boundary_name))
       mooseError("User specified boundary_to_check \'", boundary_name, "\' does not exist");
   }
   _watertight_boundaries = MooseMeshUtils::getBoundaryIDs(*mesh, _watertight_boundary_names, false);
