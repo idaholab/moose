@@ -5,11 +5,11 @@
     dx = '3 3'
     dy = '4 4'
     dz = '5 5'
-    subdomain_id = '1 2
-                    3 4
+    subdomain_id = '1 1
+                    1 1
 
-                    5 6
-                    7 8'
+                    1 1
+                    1 4'
   []
 
   [myDualGen]
