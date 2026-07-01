@@ -1,24 +1,82 @@
 [Tests]
   design = 'meshgenerators/DualMeshGenerator.md'
   issues = '#33143'
-  [dual_mesh_generator_voronoi]
-    type = 'Exodiff'
-    input = 'dual_mesh_generator_voronoi.i'
-    cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_voronoi_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
 
-    requirement = 'The system shall have the capability to generate a Voronoi dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
+  [dual_mesh_generator_2d]
+    requirement = 'The system shall have the capability to generate a 2D dual mesh '
+
+    [barycentric]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_barycentric.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_barycentric_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using barycentric dual nodes.'
+    []
+
+    [voronoi]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_voronoi.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_voronoi_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using Voronoi dual nodes.'
+    []
+
+    [preserve_primal_subdomains]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_subdomain_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_subdomain_preserve_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while preserving requested primal subdomains.'
+    []
+
+    [preserve_subdomain_interfaces]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_interface_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_interface_preserve_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while treating primal subdomain interfaces as preserved boundaries.'
+    []
   []
-  [dual_mesh_generator]
-    type = 'Exodiff'
-    input = 'dual_mesh_generator_barycentric.i'
-    cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_barycentric_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
 
-    requirement = 'The system shall have the capability to generate a Barycentric dual mesh from a 2D primal mesh while maintaining primal boundary geometry.'
+  [error_paths]
+    requirement = 'The system shall report an error when attempting to generate a dual mesh '
+
+    [unsupported_dimension]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_dimension.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'DualMeshGenerator currently only supports 2D Meshes'
+      detail = 'from an unsupported mesh dimension.'
+    []
+
+    [voronoi_preserve_primal_subdomains]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_type_preserve.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'Preserving primal subdomains is currently only implemented for barycentric 2D duals'
+      detail = 'from an unsupported preserved-subdomain Voronoi configuration.'
+    []
+
+    [voronoi_preserve_subdomain_interfaces]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_type_interface.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'DualMeshGenerator does not support preserving subdomain interfaces with Voronoi duals for meshes with multiple subdomains'
+      detail = 'from an unsupported preserved-interface Voronoi configuration.'
+    []
   []
 []
