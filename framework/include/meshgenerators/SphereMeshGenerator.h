@@ -31,7 +31,7 @@ protected:
   const unsigned int & _nr;
 
   /// element type
-  const MooseEnum _elem_type;
+  MooseEnum _elem_type;
 
   /// number of smoothing operations
   const unsigned int & _n_smooth;
