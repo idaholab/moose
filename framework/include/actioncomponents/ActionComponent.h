@@ -45,6 +45,15 @@ public:
   {
     _top_mg_name = mg_name;
   }
+  /// Return the name of the mesh generator that gives the mesh for this component
+  /// This will likely always be one of the mesh generators of the component.
+  /// If the component does not have a mesh, should be the empty string.
+  MeshGeneratorName getOwnMeshMeshGeneratorName() const { return _own_mesh_mg_name; }
+  /// Set the name of the final mesh generator that contains this component
+  void setOwnMeshMeshGeneratorName(const MeshGeneratorName & mg_name)
+  {
+    _own_mesh_mg_name = mg_name;
+  }
 
   /// Returns the subdomains for the component mesh, if any
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -121,6 +130,9 @@ protected:
   std::vector<MeshGeneratorName> _mg_names;
   /// Name of the top-most mesh generator in the hierarchy of MGs on top of the ones generating this component
   MeshGeneratorName _top_mg_name;
+  /// Name of the mesh generator that gives the mesh for just this component. This can different from
+  /// the top-most mesh generator, because the top-most mesh generator could be stitching to another
+  MeshGeneratorName _own_mesh_mg_name;
 
   /// Names of the blocks the component is comprised of
   std::vector<SubdomainName> _blocks;

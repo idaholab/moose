@@ -221,7 +221,6 @@ CavityComponent::addMeshGenerators()
       if (std::find(_components_to_enclose.begin(), _components_to_enclose.end(), conn_name) !=
           _components_to_enclose.end())
         continue;
-      // TODO: avoid deleting near the same connected component twice
 
       InputParameters proxy_del_params = _factory.getValidParams("DeleteElementsNearMeshGenerator");
       proxy_del_params.set<MeshGeneratorName>("input") = _mg_names.back();
@@ -229,20 +228,21 @@ CavityComponent::addMeshGenerators()
       proxy_del_params.set<std::vector<SubdomainName>>("blocks_included") = _blocks;
       // reform the external boundary
       proxy_del_params.set<BoundaryName>("new_boundary") = name() + "_outer";
-      // TODO fixme
-      if (std::dynamic_cast<ComponentJunction *>(conn_comp))
-        proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames()[conn_comp->meshGeneratorNames().size() - 2];
-      else
-        proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames().back();
+      proxy_del_params.set<MeshGeneratorName>("proximity_mesh") =
+          conn_comp->getOwnMeshMeshGeneratorName();
       proxy_del_params.set<Real>("distance") = 1e-10;
-      // MooseEnum side_order("CONSTANT");
-      // proxy_del_params.set<MooseEnum>("side_order") = side_order;
       proxy_del_params.set<bool>("output") = _verbose;
       proxy_del_params.set<bool>("show_info") = _verbose;
       const auto mg_name = name() + "_rm_overlap_" + conn_name;
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "DeleteElementsNearMeshGenerator", mg_name, proxy_del_params);
-      _mg_names.push_back(mg_name);
+      // Avoid deleting if connected component does not have a mesh
+      // Avoid adding the same deletion next to the same connected component twice
+      if (!conn_comp->getOwnMeshMeshGeneratorName().empty() &&
+          std::find(_mg_names.begin(), _mg_names.end(), mg_name) == _mg_names.end())
+      {
+        _app.getMeshGeneratorSystem().addMeshGenerator(
+            "DeleteElementsNearMeshGenerator", mg_name, proxy_del_params);
+        _mg_names.push_back(mg_name);
+      }
     }
   }
 

@@ -313,6 +313,9 @@ ComponentJunction::addMeshGenerators()
       _mg_names.push_back(name() + "_aeg");
     }
 
+    // The curve mesh (in 1D) or the extrusion (in 2D)
+    setOwnMeshMeshGeneratorName(_mg_names.back());
+
     // Stitch the extrusion / curve (in 1D) to the components
     if (first_component.getCurrentTopLevelMeshGeneratorName() !=
         second_component.getCurrentTopLevelMeshGeneratorName())
