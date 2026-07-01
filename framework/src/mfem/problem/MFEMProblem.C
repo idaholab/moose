@@ -17,6 +17,7 @@
 #include "MFEMExecutedObject.h"
 #include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
+#include "MFEMCoordinateTransformations.h"
 
 #include <vector>
 #include <algorithm>
@@ -26,7 +27,6 @@
 #include <sstream>
 
 registerMooseObject("MooseApp", MFEMProblem);
-
 InputParameters
 MFEMProblem::validParams()
 {
@@ -478,7 +478,7 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type)
+  else if ("MFEMParsedFunction" != type && "MFEMCoordinateTransformations" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,
