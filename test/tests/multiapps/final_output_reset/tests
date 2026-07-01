@@ -1,0 +1,10 @@
+[Tests]
+  [final_output_reset]
+    type = CSVDiff
+    input = parent.i
+    csvdiff = parent_out_sub0_csv.csv
+    issues = '#20302'
+    design = 'multiapps/FullSolveMultiApp.md'
+    requirement = "The system shall reset final-output bookkeeping between repeated full-solve MultiApp executions."
+  []
+[]
