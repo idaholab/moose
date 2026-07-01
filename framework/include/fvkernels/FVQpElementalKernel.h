@@ -9,16 +9,17 @@
 
 #pragma once
 
-#include "FVQpElementalKernel.h"
+#include "FVElementalKernel.h"
 
-class FVReaction : public FVQpElementalKernel
+/**
+ * Base class for FV elemental kernels that need qp-indexed solution values.
+ */
+class FVQpElementalKernel : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  FVReaction(const InputParameters & parameters);
+  FVQpElementalKernel(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
-
-  const Real & _rate;
+  const ADVariableValue & _u;
 };

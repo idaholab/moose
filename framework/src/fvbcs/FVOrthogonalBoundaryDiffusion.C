@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", FVOrthogonalBoundaryDiffusion);
 InputParameters
 FVOrthogonalBoundaryDiffusion::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = FVQpFluxBC::validParams();
   params.addClassDescription(
       "Imposes an orthogonal diffusion boundary term with specified boundary function.");
   params.addRequiredParam<FunctionName>("function",
@@ -28,7 +28,7 @@ FVOrthogonalBoundaryDiffusion::validParams()
 }
 
 FVOrthogonalBoundaryDiffusion::FVOrthogonalBoundaryDiffusion(const InputParameters & parameters)
-  : FVFluxBC(parameters),
+  : FVQpFluxBC(parameters),
     _function(getFunction("function")),
     _coeff_elem(getADMaterialProperty<Real>("coeff")),
     _coeff_neighbor(getNeighborADMaterialProperty<Real>("coeff")),

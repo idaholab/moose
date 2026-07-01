@@ -14,11 +14,13 @@ registerMooseObject("MooseTestApp", FVBurgersOutflowBC);
 InputParameters
 FVBurgersOutflowBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = FVQpFluxBC::validParams();
   return params;
 }
 
-FVBurgersOutflowBC::FVBurgersOutflowBC(const InputParameters & parameters) : FVFluxBC(parameters) {}
+FVBurgersOutflowBC::FVBurgersOutflowBC(const InputParameters & parameters) : FVQpFluxBC(parameters)
+{
+}
 
 ADReal
 FVBurgersOutflowBC::computeQpResidual()

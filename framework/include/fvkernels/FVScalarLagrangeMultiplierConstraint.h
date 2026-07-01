@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "FVQpElementalKernel.h"
 
 /**
  * Base class for implementing constraints on finite volume variable elemental values using scalar
  * Lagrange multipliers
  */
-class FVScalarLagrangeMultiplierConstraint : public FVElementalKernel
+class FVScalarLagrangeMultiplierConstraint : public FVQpElementalKernel
 {
 public:
   static InputParameters validParams();
@@ -31,7 +31,7 @@ protected:
 private:
   void computeResidual() override final;
   void computeJacobian() override final;
-  using FVElementalKernel::computeOffDiagJacobian;
+  using FVQpElementalKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final;
   void computeResidualAndJacobian() override final;
   ADReal computeQpResidual() override = 0;

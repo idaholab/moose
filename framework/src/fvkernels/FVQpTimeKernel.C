@@ -7,18 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "FVQpTimeKernel.h"
 
-#include "FVQpElementalKernel.h"
-
-class FVReaction : public FVQpElementalKernel
+InputParameters
+FVQpTimeKernel::validParams()
 {
-public:
-  static InputParameters validParams();
-  FVReaction(const InputParameters & parameters);
+  InputParameters params = FVTimeKernel::validParams();
+  return params;
+}
 
-protected:
-  ADReal computeQpResidual() override;
-
-  const Real & _rate;
-};
+FVQpTimeKernel::FVQpTimeKernel(const InputParameters & parameters)
+  : FVTimeKernel(parameters), _u(_var.adSln())
+{
+}
