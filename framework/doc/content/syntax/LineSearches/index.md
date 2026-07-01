@@ -31,12 +31,13 @@ following values:
 | `l2` | PETSc | Secant search using the L2 norm of the nonlinear function or objective function. In recent PETSc versions this is the `secant` line search implementation. |
 | `cp` | PETSc | Critical-point line search. PETSc searches for a step length based on the directional condition \(F(x) \cdot Y\), where \(Y\) is the search direction. |
 | `shell` | PETSc | PETSc shell line search type. In MOOSE this is mostly useful as infrastructure for MOOSE-provided custom line searches. |
-| `contact` | MOOSE | Contact-specific line search implemented by `ContactLineSearch`. It can cut the Newton step and optionally loosen the linear tolerance while the contact state changes. |
-| `project` | MOOSE | MOOSE line search that projects a displaced contact solution onto bounds before recomputing the residual. |
+| `contact` | MOOSE Contact module | Contact-specific line search implemented by `ContactLineSearch`. It can cut the Newton step and optionally loosen the linear tolerance while the contact state changes. |
+| `project` | MOOSE Contact module | MOOSE line search that projects a displaced contact solution onto bounds before recomputing the residual. |
 
 The `contact` and `project` options are MOOSE line searches backed by PETSc's shell line search
-mechanism, so they require PETSc as the nonlinear solver package. The `contact` line search also uses
-the [!param](/Executioner/Steady/contact_line_search_ltol) and
+mechanism, so they require PETSc as the nonlinear solver package and an application linked with the
+Contact module. The `contact` line search also uses the
+[!param](/Executioner/Steady/contact_line_search_ltol) and
 [!param](/Executioner/Steady/contact_line_search_allowed_lambda_cuts) parameters.
 
 To inspect a line search during a run, pass PETSc options through the `Executioner` block:
