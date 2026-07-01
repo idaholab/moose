@@ -114,7 +114,6 @@ CylinderComponent::addMeshGenerators()
     params.set<MooseEnum>("dim") = _dimension;
     params.set<Real>("xmax") = {getParam<Real>("length")};
     params.set<unsigned int>("nx") = {getParam<unsigned int>("n_axial")};
-    params.set<std::string>("boundary_name_prefix") = name();
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
@@ -131,6 +130,14 @@ CylinderComponent::addMeshGenerators()
       params.set<SubdomainName>("subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
+    // Set boundary names to keep them consistent between 1D, 2D and 3D
+    params.set<std::string>("boundary_name_prefix") = name();
+    if (_dimension == 1)
+      params.set<std::vector<BoundaryName>>("boundary_names") = {"bottom_boundary", "top_boundary"};
+    else
+      params.set<std::vector<BoundaryName>>("boundary_names") = {
+          "bottom_boundary", "outer", "top_boundary", "center"};
+
     params.set<bool>("output") = _verbose;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_base", params);
