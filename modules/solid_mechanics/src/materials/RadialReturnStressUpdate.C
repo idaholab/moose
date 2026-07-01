@@ -239,7 +239,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
     const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
     GenericRankTwoTensor<is_ad> & stress_new,
-    const RankTwoTensor & /*stress_old*/,
+    [[maybe_unused]] const RankTwoTensor & stress_old,
     const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
     bool compute_full_tangent_operator,
@@ -264,12 +264,16 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
       _three_shear_modulus != 0.0,
       "Shear modulus is zero. Ensure that the base class computeStressInitialize() is called.");
 
+  auto initial_guess = GenericReal<is_ad>(0.0);
+
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   _effective_inelastic_strain_increment = 0.0;
   if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
   {
-    this->returnMappingSolve(
-        effective_trial_stress, _effective_inelastic_strain_increment, this->_console);
+    this->returnMappingSolve(effective_trial_stress,
+                             _effective_inelastic_strain_increment,
+                             this->_console,
+                             initial_guess);
     if (_effective_inelastic_strain_increment != 0.0)
       inelastic_strain_increment =
           deviatoric_trial_stress *
