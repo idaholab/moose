@@ -51,6 +51,9 @@ public:
   bool isEmpty() const { return _batch_index == 0; }
 
 protected:
+  /// When true, skip volume-element indexing and assign batch indices for interface side QPs only.
+  const bool _interface_only;
+
   /// Whether the batch index map is outdated
   bool _outdated;
 

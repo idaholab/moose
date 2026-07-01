@@ -19,6 +19,11 @@ NEML2BatchIndexGenerator::validParams()
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
+  params.addParam<bool>("interface_only",
+                        false,
+                        "When true, skip volume-element index generation and only assign batch "
+                        "indices for interface quadrature points.");
+
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
@@ -30,7 +35,7 @@ NEML2BatchIndexGenerator::validParams()
 }
 
 NEML2BatchIndexGenerator::NEML2BatchIndexGenerator(const InputParameters & params)
-  : DomainUserObject(params), _outdated(true)
+  : DomainUserObject(params), _interface_only(getParam<bool>("interface_only")), _outdated(true)
 {
 }
 
@@ -65,6 +70,10 @@ NEML2BatchIndexGenerator::executeOnElement()
   if (!_outdated)
     return;
 
+  // In interface_only mode there is no volume material; index interface side QPs only.
+  if (_interface_only)
+    return;
+
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
   _batch_index += qPoints().size();
 }
@@ -78,8 +87,10 @@ NEML2BatchIndexGenerator::executeOnBoundary()
   if (!_outdated)
     return;
 
-  // Only interface setups index side data; volume-only setups index in executeOnElement only
-  if (_interface_bnd_ids.empty())
+  // Only interface setups index side data; volume-only setups index in executeOnElement only.
+  // In interface_only mode, interface sides are indexed in executeOnInterface; external boundary
+  // sides do not contribute, so skip them here to stay aligned with the gatherers.
+  if (_interface_bnd_ids.empty() || _interface_only)
     return;
 
   // Sides on interfaces can appear in both boundary and internal-side callbacks.

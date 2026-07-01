@@ -56,15 +56,27 @@ protected:
   /// Where to read the per-quadrature-point data from
   enum class DataSource
   {
-    Elem,        ///< element interior
-    ElemSide,    ///< current element side (face)
-    NeighborSide ///< neighboring element side (on internal/interface sides)
+    Elem,         ///< element interior
+    ElemSide,     ///< current element side (face)
+    NeighborSide, ///< neighboring element side (on internal/interface sides)
+    Interface     ///< interface material data
   };
 
   T qpData(unsigned int, DataSource) const;
 
+  void checkMaterialProperty(const std::string & name, const unsigned int prop_state) override;
+
   /// MOOSE quantity type to read from
   const NEML2Utils::MOOSEIOType _type;
+
+  /// When true, skip element-interior gathering and gather interface sides only.
+  const bool _interface_only;
+
+  /// When true, read material properties from Moose::INTERFACE_MATERIAL_DATA.
+  const bool _from_interface_material;
+
+  /// Whether this object gathers data from interface boundaries.
+  const bool _has_interface;
 
   ///@{
   /// candidate MOOSE quantities to read data from
@@ -83,6 +95,8 @@ protected:
   const MaterialProperty<T> * _face_mat_prop_old = nullptr;
   const MaterialProperty<T> * _neighbor_mat_prop = nullptr;
   const MaterialProperty<T> * _neighbor_mat_prop_old = nullptr;
+  const MaterialProperty<T> * _interface_mat_prop = nullptr;
+  const MaterialProperty<T> * _interface_mat_prop_old = nullptr;
   const VariableValue * _var_neighbor = nullptr;
   const VariableValue * _var_neighbor_old = nullptr;
   ///@}

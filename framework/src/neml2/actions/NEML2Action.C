@@ -13,6 +13,8 @@
 #include "Factory.h"
 #include "NEML2Utils.h"
 #include "InputParameterWarehouse.h"
+#include "MaterialBase.h"
+#include "AddMaterialAction.h"
 
 #ifdef NEML2_ENABLED
 #include "neml2/neml2.h"
@@ -64,6 +66,11 @@ NEML2Action::validParams()
       "block", {}, "List of blocks (subdomains) where the material model is defined");
   params.addParam<std::vector<BoundaryName>>(
       "interface", {}, "List of interfaces where the material model is defined");
+  params.addParam<bool>("interface_only",
+                        false,
+                        "If true, only create the interface material on the boundaries listed in "
+                        "'interface' and skip "
+                        "creating any volume material. Requires 'interface' to be set.");
   return params;
 }
 
@@ -77,6 +84,7 @@ NEML2Action::NEML2Action(const InputParameters & params)
                             : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block")),
     _interface(getParam<std::vector<BoundaryName>>("interface")),
+    _interface_only(getParam<bool>("interface_only")),
     _skip_input_variables(getParam<std::vector<std::string>>("skip_input_variables"))
 {
   NEML2Utils::assertNEML2Enabled();
@@ -154,6 +162,70 @@ obscureObjectName(const std::string & name,
   return "__" + prefix + "_" + name + "_" + suffix + "_" + block + "__";
 }
 
+bool
+NEML2Action::isInterfaceMaterialInput(const std::string & moose_name) const
+{
+  if (_interface.empty())
+    return false;
+
+  const auto is_interface_boundary = [this](const InputParameters & params)
+  {
+    if (!params.isParamValid("boundary"))
+      return true;
+
+    const auto & boundaries = params.get<std::vector<BoundaryName>>("boundary");
+    for (const auto & boundary : boundaries)
+      if (std::find(_interface.begin(), _interface.end(), boundary) != _interface.end())
+        return true;
+
+    return false;
+  };
+
+  const auto parameterNamesContain =
+      [](const auto & params, const std::string & param_name, const std::string & moose_name)
+  {
+    if (!params.template have_parameter<std::vector<MaterialPropertyName>>(param_name) ||
+        !params.isParamValid(param_name))
+      return false;
+
+    const auto & prop_names = params.template get<std::vector<MaterialPropertyName>>(param_name);
+    return std::find(prop_names.begin(), prop_names.end(), moose_name) != prop_names.end();
+  };
+
+  const auto parameterNameMatches =
+      [](const auto & params, const std::string & param_name, const std::string & moose_name)
+  {
+    return params.template have_parameter<MaterialPropertyName>(param_name) &&
+           params.isParamValid(param_name) &&
+           params.template get<MaterialPropertyName>(param_name) == moose_name;
+  };
+
+  for (const auto action : _awh.getActions<AddMaterialAction>())
+  {
+    const auto & params = action->getObjectParams();
+    if (!params.get<bool>("_interface") || !is_interface_boundary(params))
+      continue;
+
+    if (action->name() == moose_name || parameterNameMatches(params, "prop_name", moose_name) ||
+        parameterNamesContain(params, "prop_names", moose_name))
+      return true;
+  }
+
+  const auto boundary_ids = _problem->mesh().getBoundaryIDs(_interface);
+  const auto & materials = _problem->getInterfaceMaterialsWarehouse();
+  for (const auto boundary_id : boundary_ids)
+  {
+    if (!materials.hasActiveBoundaryObjects(boundary_id))
+      continue;
+
+    for (const auto & material : materials.getActiveBoundaryObjects(boundary_id))
+      if (material->getSuppliedItems().count(moose_name))
+        return true;
+  }
+
+  return false;
+}
+
 void
 NEML2Action::act()
 {
@@ -177,6 +249,14 @@ NEML2Action::act()
   // Whether this action is block/interface restricted
   const bool is_blk = !_block.empty();
   const bool is_interface = !_interface.empty();
+
+  if (_interface_only)
+  {
+    if (!is_interface)
+      paramError("interface_only",
+                 "'interface_only' is true, but 'interface' is unset. When 'interface_only' is "
+                 "true, 'interface' must list the boundaries on which to create the material.");
+  }
 
   if (_current_task == "add_user_object")
   {
@@ -206,6 +286,10 @@ NEML2Action::act()
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
       if (is_interface)
         obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
+      if (_interface_only)
+        obj_params.set<bool>("interface_only") = true;
+      if (moose_type == NEML2Utils::MOOSEIOType::MATERIAL && isInterfaceMaterialInput(moose_name))
+        obj_params.set<bool>("from_interface_material") = true;
       _problem->addUserObject(obj_type, obj_name, obj_params);
       return obj_name;
     };
@@ -247,6 +331,7 @@ NEML2Action::act()
         params.set<std::vector<SubdomainName>>("block") = _block;
       if (is_interface)
         params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
+      params.set<bool>("interface_only") = _interface_only;
       _problem->addUserObject(type, _idx_generator_name, params);
     }
 
@@ -287,7 +372,12 @@ NEML2Action::act()
       obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
       obj_params.set<MaterialPropertyName>("to_moose") = moose_name;
       obj_params.set<std::string>("from_neml2") = neml2_var;
-      obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      // In interface_only mode the model is only evaluated at interface QPs (no volume batch
+      // indices), so the retriever must be boundary-restricted to look up side batch indices.
+      if (_interface_only)
+        obj_params.set<std::vector<BoundaryName>>("boundary") = _interface;
+      else
+        obj_params.set<std::vector<SubdomainName>>("block") = _block;
       if (_export_output_targets.count(moose_name))
         obj_params.set<std::vector<OutputName>>("outputs") = _export_output_targets[moose_name];
       extra(obj_params);
