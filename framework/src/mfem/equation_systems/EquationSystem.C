@@ -661,7 +661,14 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     {
       mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
 
-      if (integ)
+      if (integ and bc->IsDGBC())
+      {
+        bc->isBoundaryRestricted()
+            ? form->AddBdrFaceIntegrator(std::move(integ), bc->getBoundaryMarkers())
+            : form->AddBdrFaceIntegrator(std::move(integ));
+      }
+
+      else if (integ)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
