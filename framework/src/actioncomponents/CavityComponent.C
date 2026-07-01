@@ -29,8 +29,8 @@ CavityComponent::validParams()
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
   params.addClassDescription(
-      "Cavity component meshing around selected components. If these components are connected to "
-      "other components inside the enclosure, these must be specified as well");
+      "Cavity component meshing around selected components. The mesh will be formed around the component mesh and thus the cavity surface mesh must be larger than the component. If these enclosed components are connected to "
+      "other components inside the enclosure, the cavity mesh will be trimmed to avoid overlapping with these other components");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
                                      dims,
@@ -90,9 +90,15 @@ CavityComponent::addMeshGenerators()
   // Gather the mesh generators creating the component meshes. Note that we should not stitch to
   // those as the components could be part of a bigger group of components.
   std::vector<MeshGeneratorName> holes_mgs;
+  std::vector<BoundaryName> holes_boundaries;
   for (const auto & comp_name : _components_to_enclose)
+  {
+    const auto & comp = _awh.getAction<ActionComponent>(comp_name);
     // NOTE: this introduces an ordering dependency in the execution of "addMeshGenerator"
-    holes_mgs.push_back(_awh.getAction<ActionComponent>(comp_name).meshGeneratorNames().back());
+    holes_mgs.push_back(comp.meshGeneratorNames().back());
+    // use the same hole boundary name for components that will be stitched at the same time
+    holes_boundaries.push_back("hole_bdy_" + comp.getCurrentTopLevelMeshGeneratorName());
+  }
 
   // Displace the surface mesh if requested
   MeshGeneratorName enclosure_surface_mg = _surface_mesh_mg;
@@ -128,6 +134,7 @@ CavityComponent::addMeshGenerators()
     params.set<MeshGeneratorName>("boundary") = enclosure_surface_mg;
     params.set<BoundaryName>("output_boundary") = name() + "_outer";
     params.set<std::vector<MeshGeneratorName>>("holes") = holes_mgs;
+    params.set<std::vector<BoundaryName>>("hole_boundaries") = holes_boundaries;
     params.set<Real>("desired_area") = _target_elem_volume;
     if (isParamValid("block"))
     {
@@ -178,7 +185,7 @@ CavityComponent::addMeshGenerators()
     _mg_names.push_back(final_mg + "_fused_exterior_surfaces");
 
     // Form stitching pairs for each final mesh generator
-    final_stitching_boundaries.push_back({name() + "_outer", fused_boundary});
+    final_stitching_boundaries.push_back({"hole_bdy_" + final_mg, fused_boundary});
     // These MGs with the fused surface serve as inputs to the stitcher
     mgs_to_stitch_vec.push_back(final_mg + "_fused_exterior_surfaces");
   }
@@ -192,9 +199,40 @@ CavityComponent::addMeshGenerators()
   stitcher_params.set<bool>("verbose_stitching") = _verbose;
   stitcher_params.set<bool>("verbose_remapping") = _verbose;
   stitcher_params.set<bool>("output") = _verbose;
+  stitcher_params.set<bool>("show_info") = _verbose;
   _app.getMeshGeneratorSystem().addMeshGenerator(
       "StitchMeshGenerator", name() + "_stitched", stitcher_params);
   _mg_names.push_back(name() + "_stitched");
+
+  // The triangulation that goes around the component could be overlapping with other components
+  // Delete the elements overlapping.
+  // We use the connected components, and we delete one by one as the DeleteElementsNearMeshGenerator
+  // forms a giant KD-Tree with side Qps to create the deletion criterion
+  // TODO: add a check on other component meshes (can already be done with diagnostics) or
+  // add an option to delete more (can already be done with an additional MG in Mesh block)
+  for (const auto & comp_name : _components_to_enclose)
+  {
+    const auto & component = _awh.getAction<ActionComponent>(comp_name);
+    for (const auto & conn_comp : component.getConnectedComponents())
+    {
+      InputParameters proxy_del_params = _factory.getValidParams("DeleteElementsNearMeshGenerator");
+      proxy_del_params.set<MeshGeneratorName>("input") = _mg_names.back();
+      // only delete from the cavity
+      proxy_del_params.set<std::vector<SubdomainName>>("blocks_included") = _blocks;
+      // reform the external boundary
+      proxy_del_params.set<BoundaryName>("new_boundary") = name() + "_outer";
+      proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames().back();
+      proxy_del_params.set<Real>("distance") = 1e-10;
+      // MooseEnum side_order("CONSTANT");
+      // proxy_del_params.set<MooseEnum>("side_order") = side_order;
+      proxy_del_params.set<bool>("output") = _verbose;
+      proxy_del_params.set<bool>("show_info") = _verbose;
+      const auto mg_name = name() + "_rm_overlap_" + conn_comp->name();
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "DeleteElementsNearMeshGenerator", mg_name, proxy_del_params);
+      _mg_names.push_back(mg_name);
+    }
+  }
 
   _top_mg_name = _mg_names.back();
 }
