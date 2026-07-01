@@ -12,6 +12,7 @@
 #include "EFAFragment.h"
 
 #include <limits>
+#include <set>
 
 class EFAEdge;
 class EFAFace;
@@ -40,7 +41,8 @@ public:
   virtual std::set<EFANode *> getAllNodes() const;
   virtual bool isConnected(EFAFragment * other_fragment) const;
   virtual bool isEdgeConnected(EFAFragment * other_fragment) const;
-  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes);
+  virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                          std::vector<EFANode *> & invalid_emb_out);
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
@@ -64,7 +66,8 @@ public:
 private:
   EFAFragment3D * connectSubfaces(EFAFace * start_face,
                                   unsigned int startOldFaceID,
-                                  std::vector<std::vector<EFAFace *>> & subfaces);
+                                  std::vector<std::vector<EFAFace *>> & subfaces,
+                                  std::set<EFAFace *> & claimed_subfaces);
   EFAEdge * loneEdgeOnFace(unsigned int face_id) const;
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };

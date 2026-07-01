@@ -9,8 +9,14 @@
 
 #include "gtest/gtest.h"
 
+#include <exception>
+
 #include "MooseUtils.h"
+#include "MooseException.h"
 #include "ElementFragmentAlgorithm.h"
+#include "EFAElement3D.h"
+#include "EFAFace.h"
+#include "EFAEdge.h"
 
 // set this global to true to enable a lot of mesh data output to the console
 const bool debug_print_mesh = false;
@@ -3368,4 +3374,53 @@ TEST(ElementFragmentAlgorithm, test7a)
   std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
   std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
   CheckNodes(embedded_nodes, en_gold);
+}
+
+TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdgeCurrentFailure)
+{
+  ElementFragmentAlgorithm mesh(Moose::out);
+
+  // Single HEX8 with the standard local coordinates:
+  // node 0 = (0,0,0), node 1 = (1,0,0), node 2 = (1,1,0), node 3 = (0,1,0)
+  // node 4 = (0,0,1), node 5 = (1,0,1), node 6 = (1,1,1), node 7 = (0,1,1)
+  //
+  // This unit test does not reproduce the full application propagation history across multiple
+  // structural elements. It reproduces the local condition at the exact throw site in
+  // EFAElement3D::addFaceEdgeCut():
+  //   two different faces of the same HEX8 reference the same physical edge point, and the second
+  //   path arrives with a different embedded node pointer.
+  //
+  // In the application failure, face 5 and face 4 both touch the shared physical edge and a later
+  // propagation path reaches that same edge position with a different embedded node id. Here:
+  //   1. face 5 edge 3 seeds the shared physical edge and mirrors it onto face 4 edge 2 through
+  //      add_to_adjacent=true
+  //   2. face 4 edge 2 is then revisited directly with a different embedded node
+  // This is narrower than the full application history, but it matches the same "different faces,
+  // same physical edge, different embedded node" failure condition.
+  std::vector<unsigned int> elem = {0, 1, 2, 3, 4, 5, 6, 7};
+  mesh.add3DElement(elem, 0);
+
+  auto * base_elem = dynamic_cast<EFAElement3D *>(mesh.getElemByID(0));
+  ASSERT_NE(base_elem, nullptr);
+
+  std::map<unsigned int, EFANode *> embedded_nodes;
+  EFANode embedded_a(1000, EFANode::N_CATEGORY_EMBEDDED);
+  EFANode embedded_b(1001, EFANode::N_CATEGORY_EMBEDDED);
+  auto * face5_edge3 = base_elem->getFace(5)->getEdge(3);
+  auto * face4_edge2 = base_elem->getFace(4)->getEdge(2);
+
+  // Face 5 edge 3 and face 4 edge 2 are the same physical HEX8 edge with opposite face-local
+  // orientation. Seed that shared edge from face 5 first, allowing adjacent-face propagation to
+  // populate face 4 with the same embedded node.
+  base_elem->addFaceEdgeCut(5, 3, 0.5, &embedded_a, embedded_nodes, false, true);
+  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
+
+  // Revisit the same physical edge through the other face with a different embedded node.
+  // Current code throws here. The intended behavior after the fix is to reuse the existing
+  // embedded node on that edge/position instead of erroring out, so this test is expected to
+  // fail until that logic is changed.
+  base_elem->addFaceEdgeCut(4, 2, 0.5, &embedded_b, embedded_nodes, false, true);
+  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
 }

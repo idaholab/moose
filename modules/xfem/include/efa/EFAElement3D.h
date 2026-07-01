@@ -71,6 +71,10 @@ public:
 
   virtual unsigned int getNumCuts() const;
   virtual bool isFinalCut() const;
+  virtual void prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                        std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                        std::vector<EFANode *> & invalid_emb_out);
+  virtual void purgeEmbeddedNodeReferences(EFANode * emb_node);
   virtual void updateFragments(const std::set<EFAElement *> & CrackTipElements,
                                std::map<unsigned int, EFANode *> & EmbeddedNodes);
   virtual void fragmentSanityCheck(unsigned int n_old_frag_faces,
@@ -161,7 +165,6 @@ private:
                             unsigned int edge_id,
                             double position,
                             EFANode * from_node,
-                            EFANode * embedded_node,
                             EFANode *& local_embedded);
   void mapParametricCoordinateFrom2DTo3D(unsigned int face_id,
                                          std::vector<double> & xi_2d,
