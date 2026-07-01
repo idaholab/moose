@@ -14,7 +14,10 @@ import sys
 import mooseutils
 import subprocess
 import copy
-from mock import patch
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 MOOSE_DIR = mooseutils.git_root_dir()
 sys.path.insert(0, os.path.join(MOOSE_DIR, "scripts"))
@@ -126,10 +129,14 @@ class Test(unittest.TestCase):
     def testCondaList(self):
         # Can only test this if we actually have conda
         if os.environ.get("CONDA_PREFIX") is not None:
+            try:
+                cmd = PreMake.condaListCommand()[:-1]
+            except FileNotFoundError as e:
+                self.skipTest(str(e))
+
             conda_list = PreMake.condaList()
 
-            # Run our own conda list to make sure it all looks right
-            cmd = ["conda", "list"]
+            # Run our own package list to make sure it all looks right
             out = subprocess.check_output(cmd)
             result = out.decode("utf-8").splitlines()
             for line in result:
@@ -151,6 +158,40 @@ class Test(unittest.TestCase):
                         self.assertEqual(version, gold_entry.get("version"))
                         self.assertEqual(build_string, gold_entry.get("build_string"))
                 self.assertTrue(found)
+
+    def testCondaListCommandUsesCondaExe(self):
+        conda_exe = "/bin/sh"
+        with patch.dict(os.environ, {"CONDA_EXE": conda_exe}, clear=True):
+            self.assertEqual(
+                PreMake.condaListCommand(), [conda_exe, "list", "--json"]
+            )
+
+    @patch("premake.shutil.which")
+    def testCondaListCommandUsesMicromambaFallback(self, mock_which):
+        def which(exe):
+            if exe == "micromamba":
+                return "/usr/bin/micromamba"
+            return None
+
+        mock_which.side_effect = which
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(
+                PreMake.condaListCommand(),
+                ["/usr/bin/micromamba", "list", "--json"],
+            )
+
+    @patch.object(PreMake, "condaList")
+    def testGetCondaEnvWithoutPackageManager(self, mock_conda_list):
+        mock_conda_list.side_effect = FileNotFoundError("missing package manager")
+        CONDA_PREFIX = os.environ.get("CONDA_PREFIX")
+        os.environ["CONDA_PREFIX"] = "foo"
+
+        self.assertEqual(PreMake.getCondaEnv(), None)
+
+        if CONDA_PREFIX is not None:
+            os.environ["CONDA_PREFIX"] = CONDA_PREFIX
+        else:
+            del os.environ["CONDA_PREFIX"]
 
     @patch.object(PreMake, "condaList")
     def testGetCondaEnv(self, mock_conda_list):
