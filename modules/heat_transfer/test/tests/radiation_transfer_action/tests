@@ -65,4 +65,13 @@
     requirement = 'The system shall report an error if an invalid boundary is provided for the radiative heat transfer action.'
     issues = '#32724'
   []
+
+  [heat_flux_aux]
+    type = Exodiff
+    input = 'heat_flux_aux.i'
+    exodiff = 'heat_flux_aux_out.e'
+    mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
+    requirement = 'The system shall provide a way to output the radiative heat flux from the radiation heat transfer action.'
+    issues = '#33213'
+  []
 []

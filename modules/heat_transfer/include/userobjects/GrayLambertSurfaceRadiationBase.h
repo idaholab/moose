@@ -54,6 +54,9 @@ protected:
   /// a purely virtual function that defines where view factors come from
   virtual std::vector<std::vector<Real>> setViewFactors() = 0;
 
+  /// Gets the index within \c _side_id_index of the given boundary ID
+  unsigned int getSideIDIndex(BoundaryID id) const;
+
   /// Stefan-Boltzmann constant
   const Real _sigma_stefan_boltzmann;
 

@@ -271,53 +271,48 @@ GrayLambertSurfaceRadiationBase::getSurfaceIDs() const
   return surface_ids;
 }
 
+unsigned int
+GrayLambertSurfaceRadiationBase::getSideIDIndex(BoundaryID id) const
+{
+  const auto it = _side_id_index.find(id);
+  if (it == _side_id_index.end())
+    mooseError("Sideset ID ", id, " not found in map.");
+  return it->second;
+}
+
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceIrradiation(BoundaryID id) const
 {
-  if (_side_id_index.find(id) == _side_id_index.end())
-    return 0;
-  return _surface_irradiation[_side_id_index.find(id)->second];
+  return _surface_irradiation[getSideIDIndex(id)];
 }
 
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceHeatFluxDensity(BoundaryID id) const
 {
-  if (_side_id_index.find(id) == _side_id_index.end())
-    return 0;
-  return _heat_flux_density[_side_id_index.find(id)->second];
+  return _heat_flux_density[getSideIDIndex(id)];
 }
 
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceTemperature(BoundaryID id) const
 {
-  if (_side_id_index.find(id) == _side_id_index.end())
-    return 0;
-  return _side_temperature[_side_id_index.find(id)->second];
+  return _side_temperature[getSideIDIndex(id)];
 }
 
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceRadiosity(BoundaryID id) const
 {
-  if (_side_id_index.find(id) == _side_id_index.end())
-    return 0;
-  return _radiosity[_side_id_index.find(id)->second];
+  return _radiosity[getSideIDIndex(id)];
 }
 
 Real
 GrayLambertSurfaceRadiationBase::getSurfaceEmissivity(BoundaryID id) const
 {
-  auto p = _side_id_index.find(id);
-  if (p == _side_id_index.end())
-    return 1;
-  return _emissivity[p->second]->value(_side_temperature[p->second], Point());
+  const auto ind = getSideIDIndex(id);
+  return _emissivity[ind]->value(_side_temperature[ind], Point());
 }
 
 Real
 GrayLambertSurfaceRadiationBase::getViewFactor(BoundaryID from_id, BoundaryID to_id) const
 {
-  if (_side_id_index.find(from_id) == _side_id_index.end())
-    return 0;
-  if (_side_id_index.find(to_id) == _side_id_index.end())
-    return 0;
-  return _view_factors[_side_id_index.find(from_id)->second][_side_id_index.find(to_id)->second];
+  return _view_factors[getSideIDIndex(from_id)][getSideIDIndex(to_id)];
 }
