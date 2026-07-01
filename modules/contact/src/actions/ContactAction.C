@@ -14,6 +14,7 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 #include "MortarConstraintBase.h"
+#include "MortarConsumerInterface.h"
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 #include "AugmentedLagrangianContactProblem.h"
@@ -235,6 +236,7 @@ ContactAction::validParams()
       "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
       "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
       "contributions will be set (strongly) to 0.");
+  params += MortarConsumerInterface::triangulationParams();
   params.addParam<bool>(
       "generate_mortar_mesh",
       true,
@@ -418,6 +420,15 @@ ContactAction::ContactAction(const InputParameters & params)
           "correct_edge_dropping",
           "The 'correct_edge_dropping' option can only be used with the 'mortar' formulation "
           "(weighted)");
+    else if (params.isParamSetByUser("triangulation") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("triangulation",
+                 "The 'triangulation' option can only be used with mortar-based formulations.");
+    else if (params.isParamSetByUser("triangulate_triangles") &&
+             _formulation != ContactFormulation::MORTAR_PENALTY)
+      paramError("triangulate_triangles",
+                 "The 'triangulate_triangles' option can only be used with mortar-based "
+                 "formulations.");
     else if (params.isParamSetByUser("use_dual") &&
              _formulation != ContactFormulation::MORTAR_PENALTY)
       paramError("use_dual",
@@ -947,8 +958,12 @@ ContactAction::addMortarContact()
         uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
       uo_params.set<bool>("use_displaced_mesh") = true;
       uo_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
-      uo_params.applySpecificParameters(
-          parameters(), {"correct_edge_dropping", "use_petrov_galerkin", "debug_mesh"});
+      uo_params.applySpecificParameters(parameters(),
+                                        {"correct_edge_dropping",
+                                         "triangulation",
+                                         "triangulate_triangles",
+                                         "use_petrov_galerkin",
+                                         "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
         uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
@@ -977,8 +992,12 @@ ContactAction::addMortarContact()
       if (ndisp > 2)
         uo_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
             tangential_lagrange_multiplier_3d_name};
-      uo_params.applySpecificParameters(
-          parameters(), {"correct_edge_dropping", "use_petrov_galerkin", "debug_mesh"});
+      uo_params.applySpecificParameters(parameters(),
+                                        {"correct_edge_dropping",
+                                         "triangulation",
+                                         "triangulate_triangles",
+                                         "use_petrov_galerkin",
+                                         "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
         uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
@@ -1002,6 +1021,8 @@ ContactAction::addMortarContact()
       // AL parameters
       uo_params.applySpecificParameters(parameters(),
                                         {"correct_edge_dropping",
+                                         "triangulation",
+                                         "triangulate_triangles",
                                          "penalty",
                                          "debug_mesh",
                                          "max_penalty_multiplier",
@@ -1071,7 +1092,11 @@ ContactAction::addMortarContact()
         uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       uo_params.applySpecificParameters(parameters(),
-                                        {"friction_coefficient", "penalty", "penalty_friction"});
+                                        {"triangulation",
+                                         "triangulate_triangles",
+                                         "friction_coefficient",
+                                         "penalty",
+                                         "penalty_friction"});
 
       _problem->addUserObject(
           "PenaltyFrictionUserObject",
@@ -1118,6 +1143,8 @@ ContactAction::addMortarContact()
 
       params.applySpecificParameters(parameters(),
                                      {"correct_edge_dropping",
+                                      "triangulation",
+                                      "triangulate_triangles",
                                       "normalize_c",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
@@ -1176,8 +1203,12 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
-      params.applySpecificParameters(
-          parameters(), {"extra_vector_tags", "absolute_value_vector_tags", "debug_mesh"});
+      params.applySpecificParameters(parameters(),
+                                     {"triangulation",
+                                      "triangulate_triangles",
+                                      "extra_vector_tags",
+                                      "absolute_value_vector_tags",
+                                      "debug_mesh"});
 
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
@@ -1210,8 +1241,12 @@ ContactAction::addMortarContact()
       // The second frictional LM acts on a perpendicular direction.
       if (is_additional_frictional_constraint)
         params.set<MooseEnum>("direction") = "direction_2";
-      params.applySpecificParameters(
-          parameters(), {"extra_vector_tags", "absolute_value_vector_tags", "debug_mesh"});
+      params.applySpecificParameters(parameters(),
+                                     {"triangulation",
+                                      "triangulate_triangles",
+                                      "extra_vector_tags",
+                                      "absolute_value_vector_tags",
+                                      "debug_mesh"});
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {

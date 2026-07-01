@@ -75,7 +75,9 @@ public:
                             bool periodic,
                             const bool debug,
                             const bool correct_edge_dropping,
-                            const Real minimum_projection_angle);
+                            const Real minimum_projection_angle,
+                            const MortarSegmentTriangulationMode triangulation_mode,
+                            const bool triangulate_triangles);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -560,6 +562,12 @@ private:
   /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
+
+  /// Triangulation mode used for clipped 3D mortar polygons.
+  const MortarSegmentTriangulationMode _triangulation_mode;
+
+  /// Whether already-triangular clipped polygons should still be centroid-subdivided.
+  const bool _triangulate_triangles;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

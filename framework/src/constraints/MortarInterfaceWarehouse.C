@@ -11,8 +11,28 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseError.h"
+#include "MooseEnum.h"
 #include "MortarExecutorInterface.h"
 #include "AutomaticMortarGeneration.h"
+
+namespace
+{
+MortarSegmentTriangulationMode
+toTriangulationMode(const MooseEnum & triangulation)
+{
+  if (triangulation == "vertex")
+    return MortarSegmentTriangulationMode::Vertex;
+  if (triangulation == "centroid")
+    return MortarSegmentTriangulationMode::Centroid;
+  if (triangulation == "ear_clipping")
+    return MortarSegmentTriangulationMode::EarClipping;
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
+  if (triangulation == "delaunay")
+    return MortarSegmentTriangulationMode::Delaunay;
+#endif
+  mooseError("Unsupported mortar triangulation option: ", triangulation);
+}
+}
 
 MortarInterfaceWarehouse::MortarInterfaceWarehouse(const libMesh::ParallelObject & other)
   : libMesh::ParallelObject(other), _mortar_initd(false)
@@ -28,7 +48,9 @@ MortarInterfaceWarehouse::createMortarInterface(
     bool periodic,
     const bool debug,
     const bool correct_edge_dropping,
-    const Real minimum_projection_angle)
+    const Real minimum_projection_angle,
+    const MooseEnum & triangulation,
+    const bool triangulate_triangles)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -38,33 +60,33 @@ MortarInterfaceWarehouse::createMortarInterface(
 
   MeshBase & mesh = subproblem.mesh().getMesh();
 
-  auto & periodic_map = on_displaced ? _displaced_periodic_map : _periodic_map;
-  auto & debug_flag_map = on_displaced ? _displaced_debug_flag_map : _debug_flag_map;
   auto & mortar_interfaces = on_displaced ? _displaced_mortar_interfaces : _mortar_interfaces;
+  const auto triangulation_mode = toTriangulationMode(triangulation);
 
-  // Periodic flag
-  auto periodic_map_iterator = periodic_map.find(boundary_key);
-  if (periodic_map_iterator != periodic_map.end() && periodic_map_iterator->second != periodic)
-    mooseError("We do not currently support enforcing both periodic and non-periodic constraints "
-               "on the same boundary primary-secondary pair");
-  else
-    periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
-
-  // Debug mesh flag displaced
-  auto debug_flag_map_iterator = debug_flag_map.find(boundary_key);
-  if (debug_flag_map_iterator != debug_flag_map.end() && debug_flag_map_iterator->second != debug)
-    mooseError(
-        "We do not currently support generating and not generating debug output "
-        "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
-        "all constraints sharing the same primary-secondary surface pairs");
-  else
-    debug_flag_map.insert(debug_flag_map_iterator, std::make_pair(boundary_key, debug));
-
-  // Generate lower-d mesh
-  if (mortar_interfaces.find(boundary_key) == mortar_interfaces.end())
+  auto interface_iterator = mortar_interfaces.find(boundary_key);
+  if (interface_iterator != mortar_interfaces.end())
   {
-    auto [it, inserted] = mortar_interfaces.emplace(
-        boundary_key,
+    // Existing entry: every per-interface flag must agree across constraints sharing the same
+    // primary-secondary surface pair.
+    const auto & existing = interface_iterator->second;
+    if (existing.periodic != periodic)
+      mooseError("We do not currently support enforcing both periodic and non-periodic constraints "
+                 "on the same boundary primary-secondary pair");
+    if (existing.debug != debug)
+      mooseError(
+          "We do not currently support generating and not generating debug output "
+          "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
+          "all constraints sharing the same primary-secondary surface pairs");
+    if (existing.triangulation != triangulation_mode)
+      mooseError("We do not currently support multiple values of 'triangulation' on the same "
+                 "boundary primary-secondary surface pair.");
+    if (existing.triangulate_triangles != triangulate_triangles)
+      mooseError("We do not currently support multiple values of 'triangulate_triangles' on the "
+                 "same boundary primary-secondary surface pair.");
+  }
+  else
+  {
+    MortarInterfaceConfig config{
         std::make_unique<AutomaticMortarGeneration>(subproblem.getMooseApp(),
                                                     mesh,
                                                     boundary_key,
@@ -73,9 +95,15 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     periodic,
                                                     debug,
                                                     correct_edge_dropping,
-                                                    minimum_projection_angle));
-    if (inserted)
-      it->second->initOutput();
+                                                    minimum_projection_angle,
+                                                    triangulation_mode,
+                                                    triangulate_triangles),
+        periodic,
+        debug,
+        triangulation_mode,
+        triangulate_triangles};
+    config.amg->initOutput();
+    mortar_interfaces.emplace(boundary_key, std::move(config));
   }
 
   // See whether to query the mesh
@@ -125,7 +153,7 @@ MortarInterfaceWarehouse::getMortarInterface(
   if (it == mortar_interfaces.end())
     mooseError(
         "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
-  return *it->second;
+  return *it->second.amg;
 }
 
 AutomaticMortarGeneration &
@@ -143,9 +171,9 @@ void
 MortarInterfaceWarehouse::update()
 {
   for (auto & mortar_pair : _mortar_interfaces)
-    update(*mortar_pair.second);
+    update(*mortar_pair.second.amg);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    update(*mortar_pair.second);
+    update(*mortar_pair.second.amg);
 
   _mortar_initd = true;
 }
@@ -154,9 +182,9 @@ void
 MortarInterfaceWarehouse::meshChanged()
 {
   for (auto & mortar_pair : _mortar_interfaces)
-    mortar_pair.second->meshChanged();
+    mortar_pair.second.amg->meshChanged();
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    mortar_pair.second->meshChanged();
+    mortar_pair.second.amg->meshChanged();
   update();
 }
 
