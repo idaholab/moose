@@ -11,6 +11,9 @@
 
 #include "MeshGenerator.h"
 
+#include <set>
+#include <vector>
+
 /**
  * MeshGenerator for creating dual mesh
  */
@@ -24,9 +27,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  std::set<SubdomainID> preservedPrimalSubdomainIDs(const MeshBase & input_mesh) const;
+
   std::unique_ptr<MeshBase> & _input;
 
-  /// Determines the type of dual mesh to generate: Voronoi or Barycentric.
+  /// Determines the type of dual mesh to generate: Voronoi or barycentric.
   MooseEnum _dual_mesh_type;
 
   /// Angular tolerance, in radians, for determining colinearity of boundary sides when detecting primal boundary
@@ -36,4 +41,10 @@ protected:
   /// Relative tolerance for geometric determinations, scaled by the primal mesh's bounding box size.
   /// For Voronoi duals, determines the size of the circumscribing square.
   Real _geometry_relative_tol;
+
+  /// Whether to preserve interfaces between primal subdomains in the dual construction.
+  const bool _preserve_subdomain_interfaces;
+
+  /// Subdomains to copy to the output mesh without dualizing.
+  const std::vector<SubdomainName> _preserve_primal_subdomains;
 };
