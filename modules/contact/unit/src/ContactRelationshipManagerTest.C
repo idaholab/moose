@@ -84,12 +84,11 @@ protected:
     ASSERT_EQ(relationship_managers.size(), 1);
 
     auto & rm = **relationship_managers.begin();
-    EXPECT_EQ(rm.type(), "GhostNodeFaceInterface");
+    EXPECT_EQ(rm.type(), "GhostPrimaryFace");
     EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::GEOMETRIC));
     EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::ALGEBRAIC));
     EXPECT_EQ(rm.attachGeometricEarly(), !enabled);
-    EXPECT_EQ(rm.getInfo(),
-              enabled ? "GhostNodeFaceInterface" : "GhostNodeFaceInterface (disabled)");
+    EXPECT_EQ(rm.getInfo(), enabled ? "GhostPrimaryFace" : "GhostPrimaryFace (disabled)");
   }
 
   void testMortarContactActionRejectsGhostWholeInterface(const std::string & formulation)

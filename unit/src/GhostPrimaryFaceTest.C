@@ -12,7 +12,7 @@
 #include "Action.h"
 #include "ActionFactory.h"
 #include "Factory.h"
-#include "GhostNodeFaceInterface.h"
+#include "GhostPrimaryFace.h"
 #include "MeshGeneratorMesh.h"
 #include "Moose.h"
 #include "MooseApp.h"
@@ -131,7 +131,7 @@ buildNodeFaceInterfaceMesh(MeshBase & mesh)
 }
 }
 
-class GhostNodeFaceInterfaceTest : public ::testing::Test
+class GhostPrimaryFaceTest : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -159,18 +159,18 @@ protected:
   std::shared_ptr<RelationshipManager>
   createAndAttachRelationshipManager(MooseMesh & moose_mesh, MeshBase & mesh, const bool enabled)
   {
-    auto rm_params = _factory->getValidParams("GhostNodeFaceInterface");
+    auto rm_params = _factory->getValidParams("GhostPrimaryFace");
     rm_params.set<Moose::RelationshipManagerType>("rm_type") =
         Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
-    rm_params.set<std::string>("for_whom") = "GhostNodeFaceInterfaceTest";
+    rm_params.set<std::string>("for_whom") = "GhostPrimaryFaceTest";
     rm_params.set<MooseMesh *>("mesh") = &moose_mesh;
     rm_params.set<bool>("use_displaced_mesh") = false;
     rm_params.set<bool>("enabled") = enabled;
     rm_params.set<BoundaryName>("primary_boundary") = primary_boundary_name;
     rm_params.set<BoundaryName>("secondary_boundary") = secondary_boundary_name;
 
-    auto rm = _factory->create<RelationshipManager>(
-        "GhostNodeFaceInterface", "ghost_node_face", rm_params);
+    auto rm =
+        _factory->create<RelationshipManager>("GhostPrimaryFace", "ghost_primary_face", rm_params);
     rm->init(moose_mesh, mesh);
     mesh.add_ghosting_functor(*rm);
     return rm;
@@ -200,7 +200,7 @@ protected:
   Factory * _factory;
 };
 
-TEST_F(GhostNodeFaceInterfaceTest, enabledRMKeepsRemotePrimaryInterfaceElements)
+TEST_F(GhostPrimaryFaceTest, enabledRMKeepsRemotePrimaryInterfaceElements)
 {
   if (_app->n_processors() != 2)
     GTEST_SKIP() << "This test requires exactly two MPI ranks.";
@@ -222,7 +222,7 @@ TEST_F(GhostNodeFaceInterfaceTest, enabledRMKeepsRemotePrimaryInterfaceElements)
   }
 }
 
-TEST_F(GhostNodeFaceInterfaceTest, disabledRMAllowsRemoteInterfaceElementsToBeRemoved)
+TEST_F(GhostPrimaryFaceTest, disabledRMAllowsRemoteInterfaceElementsToBeRemoved)
 {
   if (_app->n_processors() != 2)
     GTEST_SKIP() << "This test requires exactly two MPI ranks.";
@@ -244,7 +244,7 @@ TEST_F(GhostNodeFaceInterfaceTest, disabledRMAllowsRemoteInterfaceElementsToBeRe
   }
 }
 
-TEST_F(GhostNodeFaceInterfaceTest, nodeFaceDerivedConstraintAddsDisabledRMByDefault)
+TEST_F(GhostPrimaryFaceTest, nodeFaceDerivedConstraintAddsDisabledRMByDefault)
 {
   buildMooseMesh();
   const auto action = buildTestAction();
@@ -257,14 +257,14 @@ TEST_F(GhostNodeFaceInterfaceTest, nodeFaceDerivedConstraintAddsDisabledRMByDefa
   ASSERT_EQ(relationship_managers.size(), 1);
 
   auto & rm = **relationship_managers.begin();
-  EXPECT_EQ(rm.type(), "GhostNodeFaceInterface");
+  EXPECT_EQ(rm.type(), "GhostPrimaryFace");
   EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::GEOMETRIC));
   EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::ALGEBRAIC));
   EXPECT_TRUE(rm.attachGeometricEarly());
-  EXPECT_EQ(rm.getInfo(), "GhostNodeFaceInterface (disabled)");
+  EXPECT_EQ(rm.getInfo(), "GhostPrimaryFace (disabled)");
 }
 
-TEST_F(GhostNodeFaceInterfaceTest, nodeFaceDerivedConstraintCanEnableWholeInterfaceRM)
+TEST_F(GhostPrimaryFaceTest, nodeFaceDerivedConstraintCanEnableWholeInterfaceRM)
 {
   buildMooseMesh();
   const auto action = buildTestAction();
@@ -277,9 +277,9 @@ TEST_F(GhostNodeFaceInterfaceTest, nodeFaceDerivedConstraintCanEnableWholeInterf
   ASSERT_EQ(relationship_managers.size(), 1);
 
   auto & rm = **relationship_managers.begin();
-  EXPECT_EQ(rm.type(), "GhostNodeFaceInterface");
+  EXPECT_EQ(rm.type(), "GhostPrimaryFace");
   EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::GEOMETRIC));
   EXPECT_TRUE(rm.isType(Moose::RelationshipManagerType::ALGEBRAIC));
   EXPECT_FALSE(rm.attachGeometricEarly());
-  EXPECT_EQ(rm.getInfo(), "GhostNodeFaceInterface");
+  EXPECT_EQ(rm.getInfo(), "GhostPrimaryFace");
 }

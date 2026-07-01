@@ -24,12 +24,12 @@ using libMesh::processor_id_type;
  * Ghosts the higher-dimensional elements on a node-face constraint's primary boundary to processors
  * that own elements on the secondary boundary.
  */
-class GhostNodeFaceInterface : public RelationshipManager
+class GhostPrimaryFace : public RelationshipManager
 {
 public:
-  GhostNodeFaceInterface(const InputParameters & params);
+  GhostPrimaryFace(const InputParameters & params);
 
-  GhostNodeFaceInterface(const GhostNodeFaceInterface & other);
+  GhostPrimaryFace(const GhostPrimaryFace & other);
 
   static InputParameters validParams();
 

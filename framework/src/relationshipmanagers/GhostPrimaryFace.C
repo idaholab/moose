@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GhostNodeFaceInterface.h"
+#include "GhostPrimaryFace.h"
 #include "MooseApp.h"
 
 // libMesh includes
@@ -16,12 +16,12 @@
 
 #include <sstream>
 
-registerMooseObject("MooseApp", GhostNodeFaceInterface);
+registerMooseObject("MooseApp", GhostPrimaryFace);
 
 using namespace libMesh;
 
 InputParameters
-GhostNodeFaceInterface::validParams()
+GhostPrimaryFace::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<BoundaryName>("primary_boundary",
@@ -35,7 +35,7 @@ GhostNodeFaceInterface::validParams()
   return params;
 }
 
-GhostNodeFaceInterface::GhostNodeFaceInterface(const InputParameters & params)
+GhostPrimaryFace::GhostPrimaryFace(const InputParameters & params)
   : RelationshipManager(params),
     _primary_boundary_name(getParam<BoundaryName>("primary_boundary")),
     _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
@@ -43,7 +43,7 @@ GhostNodeFaceInterface::GhostNodeFaceInterface(const InputParameters & params)
 {
 }
 
-GhostNodeFaceInterface::GhostNodeFaceInterface(const GhostNodeFaceInterface & other)
+GhostPrimaryFace::GhostPrimaryFace(const GhostPrimaryFace & other)
   : RelationshipManager(other),
     _primary_boundary_name(other._primary_boundary_name),
     _secondary_boundary_name(other._secondary_boundary_name),
@@ -52,24 +52,23 @@ GhostNodeFaceInterface::GhostNodeFaceInterface(const GhostNodeFaceInterface & ot
 }
 
 void
-GhostNodeFaceInterface::internalInitWithMesh(const MeshBase &)
+GhostPrimaryFace::internalInitWithMesh(const MeshBase &)
 {
 }
 
 std::string
-GhostNodeFaceInterface::getInfo() const
+GhostPrimaryFace::getInfo() const
 {
   std::ostringstream oss;
-  oss << "GhostNodeFaceInterface" << (_enabled ? "" : " (disabled)");
+  oss << "GhostPrimaryFace" << (_enabled ? "" : " (disabled)");
   return oss.str();
 }
 
 bool
-GhostNodeFaceInterface::hasSecondaryBoundaryFace(
-    const MeshBase::const_element_iterator & range_begin,
-    const MeshBase::const_element_iterator & range_end,
-    const BoundaryID secondary_boundary_id,
-    const bool generating_mesh) const
+GhostPrimaryFace::hasSecondaryBoundaryFace(const MeshBase::const_element_iterator & range_begin,
+                                           const MeshBase::const_element_iterator & range_end,
+                                           const BoundaryID secondary_boundary_id,
+                                           const bool generating_mesh) const
 {
   const auto mesh_dim = _mesh->mesh_dimension();
   const BoundaryInfo & binfo = _mesh->get_boundary_info();
@@ -94,10 +93,10 @@ GhostNodeFaceInterface::hasSecondaryBoundaryFace(
 }
 
 void
-GhostNodeFaceInterface::operator()(const MeshBase::const_element_iterator & range_begin,
-                                   const MeshBase::const_element_iterator & range_end,
-                                   const processor_id_type p,
-                                   map_type & coupled_elements)
+GhostPrimaryFace::operator()(const MeshBase::const_element_iterator & range_begin,
+                             const MeshBase::const_element_iterator & range_end,
+                             const processor_id_type p,
+                             map_type & coupled_elements)
 {
   if (!_enabled)
     return;
@@ -137,25 +136,25 @@ GhostNodeFaceInterface::operator()(const MeshBase::const_element_iterator & rang
 }
 
 bool
-GhostNodeFaceInterface::operator>=(const RelationshipManager & other) const
+GhostPrimaryFace::operator>=(const RelationshipManager & other) const
 {
-  const auto * const nfi = dynamic_cast<const GhostNodeFaceInterface *>(&other);
-  if (!nfi || !baseGreaterEqual(*nfi))
+  const auto * const primary_face = dynamic_cast<const GhostPrimaryFace *>(&other);
+  if (!primary_face || !baseGreaterEqual(*primary_face))
     return false;
 
-  if (_enabled && !nfi->_enabled)
+  if (_enabled && !primary_face->_enabled)
     return true;
 
   if (!_enabled)
-    return !nfi->_enabled;
+    return !primary_face->_enabled;
 
-  return nfi->_enabled && _use_displaced_mesh == nfi->_use_displaced_mesh &&
-         _primary_boundary_name == nfi->_primary_boundary_name &&
-         _secondary_boundary_name == nfi->_secondary_boundary_name;
+  return primary_face->_enabled && _use_displaced_mesh == primary_face->_use_displaced_mesh &&
+         _primary_boundary_name == primary_face->_primary_boundary_name &&
+         _secondary_boundary_name == primary_face->_secondary_boundary_name;
 }
 
 std::unique_ptr<GhostingFunctor>
-GhostNodeFaceInterface::clone() const
+GhostPrimaryFace::clone() const
 {
   return _app.getFactory().copyConstruct(*this);
 }

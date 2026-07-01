@@ -40,7 +40,7 @@ NodeFaceConstraint::validParams()
       "Whether to geometrically and algebraically ghost the entire primary side of the interface "
       "for node-face constraints.");
   params.addRelationshipManager(
-      "GhostNodeFaceInterface",
+      "GhostPrimaryFace",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
       [](const InputParameters & obj_params, InputParameters & rm_params)
       {
