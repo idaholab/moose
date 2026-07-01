@@ -23,6 +23,8 @@ public:
 
   InterfaceUserObject(const InputParameters & parameters);
 
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 0; }
+
 protected:
   /**
    * Execute method.

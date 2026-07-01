@@ -163,12 +163,32 @@ public:
    */
   virtual bool needThreadedCopy() const { return false; }
 
+  /**
+   * Gets the order of types of user objects within an execution order group
+   *
+   * As of June 2026, the ordering is:
+   * 0: side, element, internal side, domain, interface (in no particular order)
+   * 1: nodal
+   * 2: mortar
+   * 3: threaded general
+   * 4: general
+   * 5: others that do not get executed
+   */
+  virtual unsigned int getUOExecutionOrderWithinGroup() const = 0;
+
 protected:
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
   virtual void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override;
   virtual void addUserObjectDependencyHelper(const UserObjectBase & uo) const override;
   void addReporterDependencyHelper(const ReporterName & reporter_name) override;
+
+  /**
+   * Throws error if the execution order group of this UO is <= the provided UO's group
+   *
+   * @param[in] other_uo  User object that this user object depends upon
+   */
+  void declareExecutionOrderGroupDependency(const UserObjectBase & other_uo);
 
   /// Thread ID of this postprocessor
   const THREAD_ID _tid;

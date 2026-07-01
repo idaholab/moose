@@ -42,6 +42,8 @@ SurfaceRadiationVectorPostprocessor::SurfaceRadiationVectorPostprocessor(
 {
   for (unsigned int j = 0; j < _n_data; ++j)
     _data[j] = &declareVector(_information_types[j]);
+
+  declareExecutionOrderGroupDependency(_glsr_uo);
 }
 
 void

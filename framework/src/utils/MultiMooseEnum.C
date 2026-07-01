@@ -371,3 +371,10 @@ MultiMooseEnum::addValidName(const MultiMooseEnum & names)
   for (const auto & item : names._items)
     addEnumerationItem(MooseEnumItem(item.name(), getNextValidID()));
 }
+
+std::set<MooseEnumItem>
+MultiMooseEnum::selectedItems() const
+{
+  std::set<MooseEnumItem> selected_items(_current_values.begin(), _current_values.end());
+  return selected_items;
+}

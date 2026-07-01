@@ -106,6 +106,8 @@ public:
 
   void checkVariable(const MooseVariableFieldBase & variable) const override;
 
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 0; }
+
 protected:
   const MooseArray<Point> & qPoints() const { return *_current_q_point; }
   const QBase & qRule() const { return *_current_q_rule; }
