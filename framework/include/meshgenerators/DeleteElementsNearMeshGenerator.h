@@ -29,6 +29,10 @@ protected:
   virtual bool shouldDelete(const Elem * elem) override;
 
 private:
+  /// Subdomain names to include when deleting elements
+  const std::vector<SubdomainName> & _blocks_included;
+  /// Subdomain IDs to include when deleting elements
+  std::vector<SubdomainID> _blocks_included_ids;
   /// Mesh used to define the proximity deletion criterion
   std::unique_ptr<MeshBase> & _proximity_mesh;
   /// Point locator to weed out elements inside the proximity mesh

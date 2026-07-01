@@ -28,6 +28,7 @@ DeleteElementsNearMeshGenerator::validParams()
       "Removes elements lying \"near\" another mesh. The proximity is examined by the distance "
       "from "
       "the element's centroid to the faces of elements of the \"proximity_mesh\"");
+  params.addParam<std::vector<SubdomainName>>("blocks_included", "Subdomains from the input mesh that may have their elements deleted if they are close to the proximity mesh");
   params.addRequiredParam<MeshGeneratorName>("proximity_mesh",
                                              "Mesh providing the deletion criterion");
   params.addRequiredRangeCheckedParam<Real>(
@@ -36,7 +37,7 @@ DeleteElementsNearMeshGenerator::validParams()
       "The distance from the centroid of elements in the 'input' mesh to elements in the "
       "'proximity_mesh' under which they are marked for deletion");
   auto options_order = SetupQuadratureAction::getQuadratureOrderEnum();
-  options_order.assign(CONSTANT);
+  options_order.assign("CONSTANT");
   params.addParam<MooseEnum>("side_order",
                              options_order,
                              "Order of the face quadrature used to find the nearest face in the "
@@ -47,6 +48,7 @@ DeleteElementsNearMeshGenerator::validParams()
 
 DeleteElementsNearMeshGenerator::DeleteElementsNearMeshGenerator(const InputParameters & parameters)
   : ElementDeletionGeneratorBase(parameters),
+    _blocks_included(getParam<std::vector<SubdomainName>>("blocks_included")),
     _proximity_mesh(getMesh("proximity_mesh")),
     _distance(getParam<Real>("distance"))
 {
@@ -55,6 +57,9 @@ DeleteElementsNearMeshGenerator::DeleteElementsNearMeshGenerator(const InputPara
 std::unique_ptr<MeshBase>
 DeleteElementsNearMeshGenerator::generate()
 {
+  // Process the inclusion list of subdomains
+  _blocks_included_ids = MooseMeshUtils::getSubdomainIDs(*_input, _blocks_included);
+
   // Build the point locator to detect elements inside
   _pl = _proximity_mesh->sub_point_locator();
   _pl->enable_out_of_mesh_mode();
@@ -113,6 +118,12 @@ DeleteElementsNearMeshGenerator::shouldDelete(const Elem * elem)
 
     return distance < _distance;
   };
+
+  // Check if element is in the included subdomains
+  if (_blocks_included_ids.size() &&
+      std::find(_blocks_included_ids.begin(), _blocks_included_ids.end(), elem->subdomain_id()) ==
+          _blocks_included_ids.end())
+    return false;
 
   // Check element centroid
   const auto centroid = elem->vertex_average();
