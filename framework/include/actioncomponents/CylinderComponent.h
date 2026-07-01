@@ -42,6 +42,8 @@ protected:
   const Real _height;
   /// Whether to center the cylinder
   const bool _offset_position_to_center;
+  /// Outer boundaries of the cylinder
+  std::vector<BoundaryName> _outer_boundaries;
 
   virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius); }
   virtual Real outerSurfaceArea() const override
@@ -49,4 +51,5 @@ protected:
     return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
   }
   virtual Point translation() const override;
+  virtual const std::vector<BoundaryName> & outerSurfaceBoundaries() const override { return _outer_boundaries; };
 };
