@@ -1418,14 +1418,6 @@ MooseVariableData<OutputType>::reinitNode()
 
   if (n_dofs)
   {
-    mooseAssert(n_dofs % _count == 0,
-                "The number of nodal dof indices should divide cleanly by the variable count in "
-                "reinitNode()");
-
-    const auto num_shapes = n_dofs / _count;
-    _vector_tags_dof_u[_solution_tag].resize(num_shapes);
-    _has_dof_values = false;
-
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
     // NodalBC for example
     _nodal_dof_index = _dof_indices[0];

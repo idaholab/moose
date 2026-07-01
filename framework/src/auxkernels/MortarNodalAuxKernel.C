@@ -119,6 +119,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
+  _var.computeNodalValues();
 
   // If the node doesn't have corresponding mortar segments, force the value assigned in this step
   // to be zero. This can be useful when nodes initially do not project but will project at a
