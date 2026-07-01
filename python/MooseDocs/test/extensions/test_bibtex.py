@@ -81,6 +81,30 @@ class TestBibtexNumber(MooseDocsTestCase):
         self.assertEqual(ol(1)["id"], "gaston2015physics")
 
 
+class TestBibtexTitleMath(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, bibtex]
+    TEXT = "[!cite](math_title)\n\n!bibtex bibliography"
+
+    def setupContent(self):
+        config = [
+            dict(
+                root_dir="python/MooseDocs/test/content",
+                content=["extensions/bibtex_math_title.bib"],
+            )
+        ]
+        return common.get_content(config, ".bib")
+
+    def testTitleMathHTML(self):
+        _, res = self.execute(self.TEXT)
+        text = res.write()
+        self.assertIn("Behavior of UO", text)
+        self.assertIn("fuel at $5", text)
+        self.assertIn('katex.render("_2"', text)
+        self.assertIn("moose-katex-inline-equation", text)
+        self.assertNotIn("$_2$", text)
+        self.assertNotIn(r"\$5", text)
+
+
 class TestBibtexToRIS(unittest.TestCase):
     def testRIS(self):
         entry = Entry(

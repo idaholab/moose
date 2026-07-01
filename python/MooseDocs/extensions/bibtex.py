@@ -9,11 +9,13 @@
 import sys
 import uuid
 import logging
+import re
 
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
 from pybtex.errors import set_strict_mode
+from pybtex.style.template import field, sentence, tag
 from pylatexenc.latex2text import LatexNodes2Text
 
 import moosetree
@@ -24,6 +26,8 @@ from ..tree import tokens, html, latex
 from . import core, command
 
 LOG = logging.getLogger("MooseDocs.extensions.bibtex")
+
+INLINE_MATH_RE = re.compile(r"(?<!\\)\$(?=\S)(?P<tex>.*?)(?<=\S)(?<!\\)\$")
 
 
 def make_extension(**kwargs):
@@ -99,6 +103,60 @@ def bibtex_to_ris(entry):
 
     lines.append(("ER", ""))
     return "\n".join("{}  - {}".format(tag, value) for tag, value in lines)
+
+
+def _contains_inline_math(entry, field_name):
+    return field_name in entry.fields and INLINE_MATH_RE.search(
+        entry.fields[field_name]
+    )
+
+
+def _strip_bibtex_protection_outside_math(text):
+    """Remove capitalization-protection braces without touching TeX inside math spans."""
+    parts = []
+    pos = 0
+    for match in INLINE_MATH_RE.finditer(text):
+        parts.append(text[pos : match.start()].replace("{", "").replace("}", ""))
+        parts.append(match.group(0))
+        pos = match.end()
+    parts.append(text[pos:].replace("{", "").replace("}", ""))
+    return "".join(parts)
+
+
+def _style_with_raw_math_titles(style):
+    """Preserve raw BibTeX title math so it can be rendered by MooseDocs KaTeX.
+
+    Pybtex's default title formatting parses fields as LaTeX-rich text. That is
+    useful for accents and protected capitalization, but it leaves inline math
+    fragments as literal text in HTML bibliography output. For title fields that
+    contain inline math, keep the raw field text and let MooseDocs handle the
+    math rendering after pybtex has formatted the rest of the entry.
+    """
+
+    class MooseDocsBibtexStyle(style):
+        def format_title(self, e, which_field, as_sentence=True):
+            if _contains_inline_math(e, which_field):
+                formatted_title = field(
+                    which_field,
+                    raw=True,
+                    apply_func=_strip_bibtex_protection_outside_math,
+                )
+                return sentence[formatted_title] if as_sentence else formatted_title
+            return super().format_title(e, which_field, as_sentence)
+
+        def format_btitle(self, e, which_field, as_sentence=True):
+            if _contains_inline_math(e, which_field):
+                formatted_title = tag("em")[
+                    field(
+                        which_field,
+                        raw=True,
+                        apply_func=_strip_bibtex_protection_outside_math,
+                    )
+                ]
+                return sentence[formatted_title] if as_sentence else formatted_title
+            return super().format_btitle(e, which_field, as_sentence)
+
+    return MooseDocsBibtexStyle
 
 
 class BibtexExtension(command.CommandExtension):
@@ -420,6 +478,36 @@ class RenderBibtexBibliography(components.RenderComponent):
     def getCitations(self, parent, token, page):
         return page.get("citations", list())
 
+    def _addKatexAssets(self, page):
+        self.renderer.addCSS("katex", "contrib/katex/katex.min.css", page)
+        self.renderer.addCSS("katex_moose", "css/katex_moose.css", page)
+        self.renderer.addJavaScript(
+            "katex", "contrib/katex/katex.min.js", page, head=True
+        )
+
+    def _inlineKatexHTML(self, tex):
+        eq_id = "moose-equation-{}".format(uuid.uuid4())
+        config = "displayMode:false,throwOnError:false"
+        tex = tex.encode("unicode_escape").decode("utf-8")
+        content = 'var element = document.getElementById("%s");' % eq_id
+        content += 'katex.render("%s", element, {%s});' % (tex, config)
+
+        return (
+            '<span class="moose-katex-inline-equation" id="{}">'
+            "<script>{}</script>"
+            "</span>"
+        ).format(eq_id, content)
+
+    def _renderInlineMath(self, text, page):
+        if not INLINE_MATH_RE.search(text):
+            return text.replace(r"\$", "$")
+
+        self._addKatexAssets(page)
+        rendered = INLINE_MATH_RE.sub(
+            lambda match: self._inlineKatexHTML(match.group("tex")), text
+        )
+        return rendered.replace(r"\$", "$")
+
     def createHTML(self, parent, token, page):
 
         try:
@@ -429,9 +517,9 @@ class RenderBibtexBibliography(components.RenderComponent):
             raise exceptions.MooseDocsException(msg, token["bib_style"])
 
         citations = self.getCitations(parent, token, page)
-        formatted_bibliography = style().format_bibliography(
-            self.extension.database(), citations
-        )
+        formatted_bibliography = _style_with_raw_math_titles(
+            style
+        )().format_bibliography(self.extension.database(), citations)
 
         if formatted_bibliography.entries:
             html_backend = find_plugin("pybtex.backends", "html")
@@ -445,6 +533,7 @@ class RenderBibtexBibliography(components.RenderComponent):
                 entries.sort(key=lambda e: numbers.get(e.key, len(numbers) + 1))
             for entry in entries:
                 text = entry.text.render(backend)
+                text = self._renderInlineMath(text, page)
                 html.Tag(ol, "li", id_=entry.key, string=text)
 
             return ol
