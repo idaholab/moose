@@ -31,7 +31,7 @@ AddMeshGeneratorAction::AddMeshGeneratorAction(const InputParameters & params)
 void
 AddMeshGeneratorAction::act()
 {
-  if (_app.isRestarting() && !_app.useMasterMesh())
+  if (_app.isRestarting() && !_app.useMasterMesh() && !_app.getRestartRecoverFileBase().empty())
     return;
 
   if (!_mesh)

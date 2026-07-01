@@ -242,7 +242,8 @@ SetupMeshAction::useCheckpointRestartMesh(const std::string & restart_file_base)
   _moose_object_pars.applyParameters(original_params);
 
   auto file_mesh_generator_params = _factory.getValidParams("FileMeshGenerator");
-  file_mesh_generator_params.set<MeshFileName>("file") = restart_file_base;
+  file_mesh_generator_params.set<MeshFileName>("file") =
+      restart_file_base + MooseApp::checkpointSuffix();
   file_mesh_generator_params.set<bool>("skip_partitioning") = true;
   file_mesh_generator_params.set<bool>("allow_renumbering") = false;
   _app.addMeshGenerator("FileMeshGenerator",
