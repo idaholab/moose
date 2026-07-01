@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVQpFluxKernel.h"
 
-class FVBurgers1D : public FVFluxKernel
+class FVBurgers1D : public FVQpFluxKernel
 {
 public:
   static InputParameters validParams();

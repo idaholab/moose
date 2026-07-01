@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "FVQpElementalKernel.h"
 
-class FVElementalAdvection : public FVElementalKernel
+class FVElementalAdvection : public FVQpElementalKernel
 {
 public:
   static InputParameters validParams();

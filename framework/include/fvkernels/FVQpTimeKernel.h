@@ -9,16 +9,17 @@
 
 #pragma once
 
-#include "FVQpElementalKernel.h"
+#include "FVTimeKernel.h"
 
-class FVReaction : public FVQpElementalKernel
+/**
+ * Base class for FV time kernels that need qp-indexed solution values in addition to _u_dot.
+ */
+class FVQpTimeKernel : public FVTimeKernel
 {
 public:
   static InputParameters validParams();
-  FVReaction(const InputParameters & parameters);
+  FVQpTimeKernel(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
-
-  const Real & _rate;
+  const ADVariableValue & _u;
 };
