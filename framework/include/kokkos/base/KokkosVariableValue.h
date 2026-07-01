@@ -11,10 +11,25 @@
 
 #include "KokkosDatum.h"
 
+#include "MooseError.h"
 #include "MooseVariableFieldBase.h"
 
 namespace Moose::Kokkos
 {
+
+inline void
+checkVariable(const Variable & var, bool expect_vector, const std::string & wrapper_name)
+{
+  if (!var.initialized())
+    mooseError("Attempted to construct Kokkos ", wrapper_name, " with an uninitialized variable.");
+
+  if (var.vector() != expect_vector)
+    mooseError("Kokkos",
+               wrapper_name,
+               " cannot be constructed with ",
+               var.vector() ? "vector" : "scalar",
+               " variables.");
+}
 
 /**
  * The Kokkos wrapper classes for MOOSE-like shape function access
@@ -115,6 +130,150 @@ using ADVariablePhiGradient = VariablePhiGradient;
 using ADVariableTestValue = VariableTestValue;
 using ADVariableTestGradient = VariableTestGradient;
 
+class VectorVariablePhiValue
+{
+public:
+  /**
+   * Get the current vector shape function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The vector shape function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.jfe();
+
+    return side == libMesh::invalid_uint
+               ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : datum.assembly().getVectorPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+  }
+};
+
+class VectorVariablePhiGradient
+{
+public:
+  /**
+   * Get the gradient of the current vector shape function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The gradient of the vector shape function
+   */
+  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.jfe();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return grad * datum.J(qp).transpose();
+  }
+};
+
+class VectorVariablePhiCurl
+{
+public:
+  /**
+   * Get the curl of the current vector shape function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The curl of the vector shape function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.jfe();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
+  }
+};
+
+class VectorVariableTestValue
+{
+public:
+  /**
+   * Get the current vector test function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The vector test function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.ife();
+
+    return side == libMesh::invalid_uint
+               ? datum.assembly().getVectorPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : datum.assembly().getVectorPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+  }
+};
+
+class VectorVariableTestGradient
+{
+public:
+  /**
+   * Get the gradient of the current vector test function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The gradient of the vector test function
+   */
+  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.ife();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return grad * datum.J(qp).transpose();
+  }
+};
+
+class VectorVariableTestCurl
+{
+public:
+  /**
+   * Get the curl of the current vector test function
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The curl of the vector test function
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
+  {
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto fe = datum.ife();
+
+    auto grad =
+        side == libMesh::invalid_uint
+            ? datum.assembly().getVectorGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+            : datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+
+    return curlFromVectorGradient(grad * datum.J(qp).transpose(), datum.assembly().getDimension());
+  }
+};
+
 ///@}
 
 /**
@@ -136,7 +295,10 @@ public:
    * @param var The Kokkos variable
    * @param dof Whether to get DOF values
    */
-  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof) {}
+  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -148,6 +310,7 @@ public:
                      bool dof = false)
     : _var(var, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   /**
    * Constructor
@@ -161,12 +324,14 @@ public:
                      bool dof = false)
     : _var(vars, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   VariableValueTempl(const std::vector<MooseVariableFieldBase *> & vars,
                      const TagName & tag = Moose::SOLUTION_TAG,
                      bool dof = false)
     : _var(vars, tag), _dof(dof)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
   ///@}
 
@@ -356,7 +521,10 @@ public:
    * Constructor
    * @param var The Kokkos variable
    */
-  VariableGradientTempl(Variable var) : _var(var) {}
+  VariableGradientTempl(Variable var) : _var(var)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
@@ -366,6 +534,7 @@ public:
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(var, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   /**
    * Constructor
@@ -377,11 +546,13 @@ public:
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(vars, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   VariableGradientTempl(const std::vector<MooseVariableFieldBase *> & vars,
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(vars, tag)
   {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
   ///@}
 
@@ -537,6 +708,284 @@ using VariableValue = VariableValueTempl<false>;
 using ADVariableValue = VariableValueTempl<true>;
 using VariableGradient = VariableGradientTempl<false>;
 using ADVariableGradient = VariableGradientTempl<true>;
+
+class VectorVariableValue
+{
+public:
+  /**
+   * Default constructor
+   */
+  VectorVariableValue() = default;
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   * @param dof Whether to get DOF values
+   */
+  VectorVariableValue(Variable var, bool dof = false) : _var(var), _dof(dof)
+  {
+    checkVariable(_var, true, "VectorVariableValue");
+  }
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   * @param dof Whether to get DOF values
+   */
+  VectorVariableValue(const MooseVariableFieldBase & var,
+                      const TagName & tag = Moose::SOLUTION_TAG,
+                      bool dof = false)
+    : _var(var, tag), _dof(dof)
+  {
+    checkVariable(_var, true, "VectorVariableValue");
+  }
+
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
+  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
+
+  /**
+   * Get the current vector variable value
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The vector variable value
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum,
+                                   unsigned int qp,
+                                   unsigned int comp = 0) const;
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
+  /**
+   * Flag whether DOF values are requested
+   */
+  bool _dof = false;
+};
+
+class VectorVariableGradient
+{
+public:
+  /**
+   * Default constructor
+   */
+  VectorVariableGradient() = default;
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VectorVariableGradient(Variable var) : _var(var)
+  {
+    checkVariable(_var, true, "VectorVariableGradient");
+  }
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VectorVariableGradient(const MooseVariableFieldBase & var,
+                         const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
+  {
+    checkVariable(_var, true, "VectorVariableGradient");
+  }
+
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
+  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
+
+  /**
+   * Get the current vector variable gradient
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The vector variable gradient
+   */
+  KOKKOS_FUNCTION Real33 operator()(AssemblyDatum & datum,
+                                    unsigned int qp,
+                                    unsigned int comp = 0) const;
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
+};
+
+class VectorVariableCurl
+{
+public:
+  /**
+   * Default constructor
+   */
+  VectorVariableCurl() = default;
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VectorVariableCurl(Variable var) : _var(var) { checkVariable(_var, true, "VectorVariableCurl"); }
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VectorVariableCurl(const MooseVariableFieldBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
+  {
+    checkVariable(_var, true, "VectorVariableCurl");
+  }
+
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
+  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
+
+  /**
+   * Get the current vector variable curl
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @returns The vector variable curl
+   */
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum,
+                                   unsigned int qp,
+                                   unsigned int comp = 0) const;
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
+};
+
+KOKKOS_FUNCTION inline Real3
+VectorVariableValue::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  Real3 value = 0;
+
+  if (_var.coupled())
+  {
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
+    auto tag = _var.tag();
+
+    if (_dof)
+    {
+      KOKKOS_ASSERT(datum.isNodal());
+
+      auto node = datum.node();
+      auto dimension = datum.assembly().getDimension();
+
+      for (unsigned int comp = 0; comp < dimension; ++comp)
+        value(comp) = sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, comp, var), tag);
+    }
+    else
+    {
+      KOKKOS_ASSERT(!datum.isNodal());
+
+      auto & elem = datum.elem();
+      auto side = datum.side();
+
+      if (side == libMesh::invalid_uint)
+        value = sys.getVectorQpVectorValue(elem, datum.qpOffset() + qp, var, tag);
+      else
+        value = sys.getVectorQpVectorValueFace(elem, side, qp, var, tag);
+    }
+  }
+  else
+    value = _var.vectorValue(comp);
+
+  return value;
+}
+
+KOKKOS_FUNCTION inline Real33
+VectorVariableGradient::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  Real33 grad = 0;
+
+  if (_var.coupled())
+  {
+    KOKKOS_ASSERT(!datum.isNodal());
+
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
+    auto tag = _var.tag();
+
+    if (side == libMesh::invalid_uint)
+      grad = sys.getVectorQpVectorGrad(elem, datum.qpOffset() + qp, var, tag);
+    else
+      grad = sys.getVectorQpVectorGradFace(elem, side, datum.J(qp), qp, var, tag);
+  }
+
+  return grad;
+}
+
+KOKKOS_FUNCTION inline Real3
+VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  Real3 curl = 0;
+
+  if (_var.coupled())
+  {
+    KOKKOS_ASSERT(!datum.isNodal());
+
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
+    auto tag = _var.tag();
+
+    if (side == libMesh::invalid_uint)
+      curl = sys.getVectorQpVectorCurl(elem, datum.qpOffset() + qp, var, tag);
+    else
+    {
+      auto fe = sys.getFETypeID(var);
+      auto n_dofs = datum.assembly().getNumDofs(elem.type, fe);
+      auto & grad_phi = datum.assembly().getVectorGradPhiFace(elem.subdomain, elem.type, fe)(side);
+      auto jacobian = datum.J(qp);
+      auto jacobian_transpose = jacobian.transpose();
+      Real33 grad = 0;
+
+      for (unsigned int i = 0; i < n_dofs; ++i)
+        grad += sys.getVectorDofValue(sys.getElemLocalDofIndex(elem.id, i, var), tag) *
+                (grad_phi(i, qp) * jacobian_transpose);
+
+      curl = curlFromVectorGradient(grad, datum.assembly().getDimension());
+    }
+  }
+
+  return curl;
+}
 
 template <>
 struct ArrayDeepCopy<ADVariableValue>

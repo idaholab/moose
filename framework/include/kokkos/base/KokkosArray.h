@@ -1181,7 +1181,12 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
   else
   {
     if (_is_host_alloc)
-      std::memcpy(_host_data, array._host_data, _size * sizeof(T));
+    {
+      if constexpr (std::is_trivially_copyable<T>())
+        std::memcpy(_host_data, array._host_data, _size * sizeof(T));
+      else
+        std::copy(array.begin(), array.end(), begin());
+    }
 
     if (_is_device_alloc)
       copyInternal<MemSpace, MemSpace>(_device_data, array._device_data, _size);
@@ -1543,7 +1548,12 @@ public:
     this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
     if (host)
-      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+    {
+      if constexpr (std::is_trivially_copyable<T>())
+        std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+      else
+        std::copy(vector.begin(), vector.end(), this->begin());
+    }
 
     if (device)
       this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(

@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#33093'
+  design = 'KokkosVectorTimeDerivative.md'
+
+  [transient_vector_diffusion]
+    type = 'Exodiff'
+    input = 'kokkos_transient_vector_diffusion.i'
+    exodiff = 'kokkos_transient_vector_diffusion_out.e'
+    requirement = 'The Kokkos system shall be able to reproduce the simple_transient_diffusion test with KokkosVectorTimeDerivative (hand-coded Jacobian).'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [jac_transient_vector_diffusion]
+    type = 'PetscJacobianTester'
+    input = 'kokkos_transient_vector_diffusion.i'
+    cli_args = 'Outputs/exodus=false Mesh/generator/nx=4 Mesh/generator/ny=4 Executioner/num_steps=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from KokkosVectorTimeDerivative shall be perfect'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

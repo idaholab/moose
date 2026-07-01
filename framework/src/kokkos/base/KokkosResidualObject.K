@@ -46,14 +46,15 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
                                  getParam<NonlinearVariableName>("variable"),
                                  Moose::VarKindType::VAR_SOLVER,
                                  field_type)),
+    _dimension(_fe_problem.mesh().dimension()),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  if (_var.isVector())
-    paramError("variable", "Kokkos residual objects do not support vector variables yet.");
+  if (_var.isVector() && field_type != Moose::VarFieldType::VAR_FIELD_VECTOR)
+    paramError("variable", "Vector variable specified to a scalar Kokkos residual object.");
 
   _kokkos_var.init(_var);
 }
@@ -66,6 +67,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _var(object._var),
     _kokkos_var(object._kokkos_var),
     _thread(object._thread),
+    _dimension(object._dimension),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
