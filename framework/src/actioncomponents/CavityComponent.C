@@ -123,7 +123,6 @@ CavityComponent::addMeshGenerators()
     _app.getMeshGeneratorSystem().addMeshGenerator("TransformGenerator", translation_mg, params);
     _mg_names.push_back(translation_mg);
     enclosure_surface_mg = translation_mg;
-    _mg_names.push_back(translation_mg);
   }
 
   // Create the cavity mesh using a general meshes (for now, Delaunay triangulation or
@@ -143,6 +142,7 @@ CavityComponent::addMeshGenerators()
       _blocks.push_back(block_name);
     }
     params.set<bool>("output") = _verbose;
+    params.set<bool>("show_info") = _verbose;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "XYDelaunayGenerator", name() + "_triangulation", params);
     _mg_names.push_back(name() + "_triangulation");
@@ -213,21 +213,33 @@ CavityComponent::addMeshGenerators()
   for (const auto & comp_name : _components_to_enclose)
   {
     const auto & component = _awh.getAction<ActionComponent>(comp_name);
-    for (const auto & conn_comp : component.getConnectedComponents())
+    const auto & connected_components = component.getConnectedComponents();
+    for (const auto & conn_comp : connected_components)
     {
+      const auto & conn_name = conn_comp->name();
+      // don't delete in proximity to the enclosed components
+      if (std::find(_components_to_enclose.begin(), _components_to_enclose.end(), conn_name) !=
+          _components_to_enclose.end())
+        continue;
+      // TODO: avoid deleting near the same connected component twice
+
       InputParameters proxy_del_params = _factory.getValidParams("DeleteElementsNearMeshGenerator");
       proxy_del_params.set<MeshGeneratorName>("input") = _mg_names.back();
       // only delete from the cavity
       proxy_del_params.set<std::vector<SubdomainName>>("blocks_included") = _blocks;
       // reform the external boundary
       proxy_del_params.set<BoundaryName>("new_boundary") = name() + "_outer";
-      proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames().back();
+      // TODO fixme
+      if (std::dynamic_cast<ComponentJunction *>(conn_comp))
+        proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames()[conn_comp->meshGeneratorNames().size() - 2];
+      else
+        proxy_del_params.set<MeshGeneratorName>("proximity_mesh") = conn_comp->meshGeneratorNames().back();
       proxy_del_params.set<Real>("distance") = 1e-10;
       // MooseEnum side_order("CONSTANT");
       // proxy_del_params.set<MooseEnum>("side_order") = side_order;
       proxy_del_params.set<bool>("output") = _verbose;
       proxy_del_params.set<bool>("show_info") = _verbose;
-      const auto mg_name = name() + "_rm_overlap_" + conn_comp->name();
+      const auto mg_name = name() + "_rm_overlap_" + conn_name;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "DeleteElementsNearMeshGenerator", mg_name, proxy_del_params);
       _mg_names.push_back(mg_name);
