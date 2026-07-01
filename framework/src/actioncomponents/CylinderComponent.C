@@ -105,6 +105,12 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
 void
 CylinderComponent::addMeshGenerators()
 {
+  // Set outer boundaries
+  if (_dimension == 1)
+    _outer_boundaries = {name() + "_bottom_boundary", name() + "_top_boundary"};
+  else
+    _outer_boundaries = {name() + "_bottom_boundary", name() + "_outer", name() + "_top_boundary"};
+
   // Create the base mesh for the component using a mesh generator
   if (_dimension == 0)
     paramError("dimension", "0D cylinder not implemented");
