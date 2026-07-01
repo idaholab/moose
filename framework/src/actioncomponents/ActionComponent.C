@@ -29,6 +29,7 @@ ActionComponent::ActionComponent(const InputParameters & params)
   : Action(params),
     InputParametersChecksUtils<ActionComponent>(this),
     _dimension(libMesh::invalid_uint),
+    _own_mesh_mg_name(""),
     _verbose(getParam<bool>("verbose")),
     _connected_components(std::make_shared<std::set<ActionComponent *>>())
 {
