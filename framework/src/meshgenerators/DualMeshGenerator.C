@@ -2176,6 +2176,90 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           elem); // Grabs the primal vertices we need to preserve geometry
   }
 
+  const auto polyhedronSurfaceCanBePassedToC0 =
+      [&](const std::vector<std::vector<Point>> & c0_side_points, const Real length_tol)
+  {
+    std::vector<Point> unique_points;
+    const Real area_tol = length_tol * length_tol;
+
+    for (const auto & side : c0_side_points)
+    {
+      if (side.size() != 3 || !hasNonzeroArea3D(side, area_tol))
+        return false;
+
+      for (const auto & point : side)
+        addUniquePoint(unique_points, point, length_tol);
+    }
+
+    if (unique_points.size() < 4)
+      return false;
+
+    const auto pointIndex = [&](const Point & point)
+    {
+      for (const auto i : index_range(unique_points))
+        if (samePoint3D(unique_points[i], point, length_tol))
+          return i;
+
+      return unique_points.size();
+    };
+
+    std::map<std::pair<std::size_t, std::size_t>, unsigned int> edge_counts;
+    std::map<std::pair<std::size_t, std::size_t>, unsigned int> directed_edge_counts;
+
+    for (const auto & side : c0_side_points)
+    {
+      std::array<std::size_t, 3> point_ids;
+
+      for (const auto i : make_range(std::size_t(3)))
+      {
+        point_ids[i] = pointIndex(side[i]);
+
+        if (point_ids[i] == unique_points.size())
+          return false;
+      }
+
+      if (point_ids[0] == point_ids[1] || point_ids[1] == point_ids[2] ||
+          point_ids[2] == point_ids[0])
+        return false;
+
+      for (const auto i : make_range(std::size_t(3)))
+      {
+        const auto point0_id = point_ids[i];
+        const auto point1_id = point_ids[(i + 1) % 3];
+
+        edge_counts[{std::min(point0_id, point1_id), std::max(point0_id, point1_id)}]++;
+        directed_edge_counts[{point0_id, point1_id}]++;
+      }
+    }
+
+    if (edge_counts.empty())
+      return false;
+
+    for (const auto & edge_count : edge_counts)
+    {
+      if (edge_count.second != 2)
+        return false;
+
+      const auto point0_id = edge_count.first.first;
+      const auto point1_id = edge_count.first.second;
+
+      if (directed_edge_counts[{point0_id, point1_id}] != 1 ||
+          directed_edge_counts[{point1_id, point0_id}] != 1)
+        return false;
+    }
+
+    Real volume6 = 0.0;
+    const Point & reference_point = unique_points.front();
+
+    for (const auto & side : c0_side_points)
+      volume6 += tetVolume6(reference_point, side[0], side[1], side[2]);
+
+    if (std::abs(volume6) <= length_tol * length_tol * length_tol)
+      return false;
+
+    return !hasPointOutsidePolyhedronFacePlanes3D(c0_side_points, length_tol);
+  };
+
   /* C0Polyhedron throws mooseErrors when we try to build ill-behaved polyhedra directly. So, to be
    * able to build concave polyhedra, we need to run our own tests that emulate C0Polyhedron's
    * requirements, determine what's wrong, and then act accordingly. This is crucial for the
@@ -2192,6 +2276,9 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     std::vector<std::vector<Point>> c0_side_points;
 
     if (!c0PolyhedronSidePoints3D(side_points, c0_side_points, length_tol))
+      return false;
+
+    if (!polyhedronSurfaceCanBePassedToC0(c0_side_points, length_tol))
       return false;
 
     std::vector<Node *> local_nodes;
