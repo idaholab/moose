@@ -775,11 +775,25 @@ MechanicalContactConstraint::computeContactForce(const Node & node,
       !newly_captured && _tension_release >= 0.0 &&
       (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
   {
-    const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(node);
-    if (-contact_pressure >= _tension_release)
+    // If _tension_release is zero (the default), we don't need
+    // to query a nodalArea because we only care about the sign of
+    // contact pressure.
+    if (!_tension_release)
     {
-      pinfo->release();
-      pinfo->_contact_force.zero();
+      if (pinfo->_normal * pinfo->_contact_force >= 0)
+      {
+        pinfo->release();
+        pinfo->_contact_force.zero();
+      }
+    }
+    else
+    {
+      const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(node);
+      if (-contact_pressure >= _tension_release)
+      {
+        pinfo->release();
+        pinfo->_contact_force.zero();
+      }
     }
   }
 }
