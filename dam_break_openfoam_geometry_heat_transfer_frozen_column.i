@@ -104,9 +104,9 @@ T_bottom = 300
         confined_scalar_variables = 'tracer_amount'
         confined_scalar_concentration_min = 0
         confined_scalar_concentration_max = 1
-        thermal_energy_variable = 'thermal_energy'
-        thermal_energy_temperature = 'temperature'
-        thermal_energy_backflow_temperature = 'T_air'
+        conserved_enthalpy_variable = 'rho_h'
+        conserved_enthalpy_temperature = 'temperature'
+        conserved_enthalpy_backflow_temperature = 'T_air'
 
         n_alpha_corrections = 1
         n_limiter_iterations = 6
@@ -117,8 +117,8 @@ T_bottom = 300
         coupled_flow_physics = 'flow'
         system_names = 'energy_system'
         fluid_temperature_variable = 'temperature'
-        solve_for_conserved_energy = true
-        fluid_conserved_energy_variable = 'thermal_energy'
+        solve_for_conserved_enthalpy = true
+        fluid_conserved_enthalpy_variable = 'rho_h'
 
         thermal_conductivity = 'k_mixture'
         specific_heat = 'cp_mixture'
@@ -127,7 +127,7 @@ T_bottom = 300
         use_vof_consistent_energy_advection = true
 
         initial_temperature = 'temperature_init'
-        initial_conserved_energy = 'thermal_energy_init'
+        initial_conserved_enthalpy = 'rho_h_init'
 
         energy_wall_boundaries = 'bottom'
         energy_wall_types = 'fixed-temperature'
@@ -184,7 +184,7 @@ T_bottom = 300
     type = ParsedFunction
     expression = 'if(x < ${dam_x} & y < ${dam_y}, ${T_hot_liquid}, ${T_air})'
   []
-  [thermal_energy_init]
+  [rho_h_init]
     type = ParsedFunction
     expression = 'if(x < ${dam_x} & y < ${dam_y}, ${rho_l} * ${cp_l} * ${T_hot_liquid}, ${rho_g} * ${cp_g} * ${T_air})'
   []
@@ -291,7 +291,7 @@ T_bottom = 300
   []
   [total_heat]
     type = ElementIntegralVariablePostprocessor
-    variable = 'thermal_energy'
+    variable = 'rho_h'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

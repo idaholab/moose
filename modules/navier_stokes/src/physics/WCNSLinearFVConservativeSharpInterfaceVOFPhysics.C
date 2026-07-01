@@ -81,13 +81,23 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   params.addParam<VariableName>(
       "thermal_energy_variable",
       "Conserved mixture thermal energy variable to transport with the limited VOF flux.");
+  params.addParam<VariableName>(
+      "conserved_enthalpy_variable",
+      "Conserved mixture sensible enthalpy variable rho * h to transport with the limited VOF "
+      "flux.");
   params.addParam<MooseFunctorName>(
       "thermal_energy_temperature",
       "Temperature functor used to advect conserved mixture thermal energy.");
   params.addParam<MooseFunctorName>(
+      "conserved_enthalpy_temperature",
+      "Temperature functor used to advect conserved mixture sensible enthalpy.");
+  params.addParam<MooseFunctorName>(
       "thermal_energy_backflow_temperature",
       "0",
       "Temperature imposed for thermal-energy backflow on open volume-fraction boundaries.");
+  params.addParam<MooseFunctorName>(
+      "conserved_enthalpy_backflow_temperature",
+      "Temperature imposed for conserved-enthalpy backflow on open volume-fraction boundaries.");
   params.addRangeCheckedParam<Real>(
       "confined_scalar_alpha_floor",
       1e-12,
@@ -133,7 +143,9 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
                               "confined_scalar_backflow_concentration confined_scalar_alpha_floor "
                               "confined_scalar_concentration_min "
                               "confined_scalar_concentration_max thermal_energy_variable "
-                              "thermal_energy_temperature thermal_energy_backflow_temperature",
+                              "thermal_energy_temperature thermal_energy_backflow_temperature "
+                              "conserved_enthalpy_variable conserved_enthalpy_temperature "
+                              "conserved_enthalpy_backflow_temperature",
                               "Numerical scheme");
   params.addParamNamesToGroup("liquid_specific_heat_name gas_specific_heat_name rho_cp_phi_name",
                               "Material properties");
@@ -273,14 +285,26 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
   }
   params.set<std::vector<VariableName>>("confined_scalar_variables") =
       getParam<std::vector<VariableName>>("confined_scalar_variables");
-  if (isParamValid("thermal_energy_variable"))
+  if (isParamValid("conserved_enthalpy_variable") || isParamValid("thermal_energy_variable"))
   {
-    params.set<VariableName>("thermal_energy_variable") =
-        getParam<VariableName>("thermal_energy_variable");
-    params.set<MooseFunctorName>("thermal_energy_temperature") =
-        getParam<MooseFunctorName>("thermal_energy_temperature");
-    params.set<MooseFunctorName>("thermal_energy_backflow_temperature") =
-        getParam<MooseFunctorName>("thermal_energy_backflow_temperature");
+    if (isParamValid("conserved_enthalpy_variable"))
+    {
+      params.set<VariableName>("conserved_enthalpy_variable") =
+          getParam<VariableName>("conserved_enthalpy_variable");
+      params.set<MooseFunctorName>("conserved_enthalpy_temperature") =
+          getParam<MooseFunctorName>("conserved_enthalpy_temperature");
+      params.set<MooseFunctorName>("conserved_enthalpy_backflow_temperature") =
+          getParam<MooseFunctorName>("conserved_enthalpy_backflow_temperature");
+    }
+    else
+    {
+      params.set<VariableName>("thermal_energy_variable") =
+          getParam<VariableName>("thermal_energy_variable");
+      params.set<MooseFunctorName>("thermal_energy_temperature") =
+          getParam<MooseFunctorName>("thermal_energy_temperature");
+      params.set<MooseFunctorName>("thermal_energy_backflow_temperature") =
+          getParam<MooseFunctorName>("thermal_energy_backflow_temperature");
+    }
   }
   params.set<MooseFunctorName>("confined_scalar_backflow_concentration") =
       getParam<MooseFunctorName>("confined_scalar_backflow_concentration");

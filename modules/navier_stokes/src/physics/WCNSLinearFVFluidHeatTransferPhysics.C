@@ -65,8 +65,9 @@ WCNSLinearFVFluidHeatTransferPhysics::WCNSLinearFVFluidHeatTransferPhysics(
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media not supported at this time");
   checkSecondParamSetOnlyIfFirstOneTrue("solve_for_enthalpy", NS::fluid);
-  checkSecondParamSetOnlyIfFirstOneTrue("solve_for_conserved_energy",
-                                        "energy_mass_heat_capacity_face_flux");
+  if (!getParam<bool>("solve_for_conserved_enthalpy"))
+    checkSecondParamSetOnlyIfFirstOneTrue("solve_for_conserved_energy",
+                                          "energy_mass_heat_capacity_face_flux");
   if (_solve_for_conserved_energy && !isParamValid("energy_mass_heat_capacity_face_flux"))
     paramError("energy_mass_heat_capacity_face_flux",
                "A rho * cp face flux is required when solving for conserved thermal energy.");

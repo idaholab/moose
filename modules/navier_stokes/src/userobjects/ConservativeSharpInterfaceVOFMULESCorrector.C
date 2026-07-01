@@ -80,9 +80,16 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
   params.addParam<VariableName>(
       "thermal_energy_variable",
       "Conserved mixture thermal energy variable to transport with the limited VOF flux.");
+  params.addParam<VariableName>(
+      "conserved_enthalpy_variable",
+      "Conserved mixture sensible enthalpy variable rho * h to transport with the limited VOF "
+      "flux.");
   params.addParam<MooseFunctorName>(
       "thermal_energy_temperature",
       "Temperature functor used to advect conserved mixture thermal energy.");
+  params.addParam<MooseFunctorName>(
+      "conserved_enthalpy_temperature",
+      "Temperature functor used to advect conserved mixture sensible enthalpy.");
   params.addParam<MooseFunctorName>(
       "confined_scalar_backflow_concentration",
       "0",
@@ -91,6 +98,11 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       "thermal_energy_backflow_temperature",
       "0",
       "Temperature imposed for mixture thermal energy backflow on open volume-fraction boundaries.");
+  params.addParam<MooseFunctorName>(
+      "conserved_enthalpy_backflow_temperature",
+      "0",
+      "Temperature imposed for mixture sensible enthalpy backflow on open volume-fraction "
+      "boundaries.");
   params.addRangeCheckedParam<Real>(
       "confined_scalar_alpha_floor",
       1e-12,
@@ -127,7 +139,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
     _variable_name(getParam<VariableName>("variable")),
     _confined_scalar_variable_names(
         getParam<std::vector<VariableName>>("confined_scalar_variables")),
-    _thermal_energy_variable_name(isParamValid("thermal_energy_variable")
+    _thermal_energy_variable_name(isParamValid("conserved_enthalpy_variable")
+                                      ? getParam<VariableName>("conserved_enthalpy_variable")
+                                  : isParamValid("thermal_energy_variable")
                                       ? getParam<VariableName>("thermal_energy_variable")
                                       : ""),
     _face_flux(getFunctor<Real>("face_flux")),
@@ -139,12 +153,17 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
         isParamValid("liquid_specific_heat") ? &getFunctor<Real>("liquid_specific_heat") : nullptr),
     _gas_specific_heat(isParamValid("gas_specific_heat") ? &getFunctor<Real>("gas_specific_heat")
                                                          : nullptr),
-    _thermal_energy_temperature(isParamValid("thermal_energy_temperature")
+    _thermal_energy_temperature(isParamValid("conserved_enthalpy_temperature")
+                                    ? &getFunctor<Real>("conserved_enthalpy_temperature")
+                                : isParamValid("thermal_energy_temperature")
                                     ? &getFunctor<Real>("thermal_energy_temperature")
                                     : nullptr),
     _confined_scalar_backflow_concentration(
         getFunctor<Real>("confined_scalar_backflow_concentration")),
-    _thermal_energy_backflow_temperature(getFunctor<Real>("thermal_energy_backflow_temperature")),
+    _thermal_energy_backflow_temperature(
+        isParamValid("conserved_enthalpy_backflow_temperature")
+            ? getFunctor<Real>("conserved_enthalpy_backflow_temperature")
+            : getFunctor<Real>("thermal_energy_backflow_temperature")),
     _confined_scalar_alpha_floor(getParam<Real>("confined_scalar_alpha_floor")),
     _confined_scalar_concentration_min(getParam<Real>("confined_scalar_concentration_min")),
     _confined_scalar_concentration_max(getParam<Real>("confined_scalar_concentration_max")),
@@ -168,13 +187,16 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
                "The confined scalar concentration maximum must be greater than or equal to the "
                "minimum.");
 
-  if (isParamValid("thermal_energy_variable") && (!_liquid_specific_heat || !_gas_specific_heat))
-    paramError("thermal_energy_variable",
-               "Liquid and gas specific heat functors must be supplied for VOF-consistent thermal "
-               "energy transport.");
-  if (isParamValid("thermal_energy_variable") && !_thermal_energy_temperature)
-    paramError("thermal_energy_temperature",
-               "A temperature functor is required for VOF-consistent thermal energy transport.");
+  const bool has_conserved_enthalpy = isParamValid("conserved_enthalpy_variable") ||
+                                      isParamValid("thermal_energy_variable");
+  if (has_conserved_enthalpy && (!_liquid_specific_heat || !_gas_specific_heat))
+    paramError("conserved_enthalpy_variable",
+               "Liquid and gas specific heat functors must be supplied for VOF-consistent "
+               "conserved enthalpy transport.");
+  if (has_conserved_enthalpy && !_thermal_energy_temperature)
+    paramError("conserved_enthalpy_temperature",
+               "A temperature functor is required for VOF-consistent conserved enthalpy "
+               "transport.");
 
   for (const auto tid : make_range(libMesh::n_threads()))
   {
@@ -259,9 +281,12 @@ ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
     _thermal_energy_sys_num = _thermal_energy_var->sys().number();
     _thermal_energy_var_num = _thermal_energy_var->number();
 
-    if (isParamValid("thermal_energy_temperature"))
+    if (isParamValid("conserved_enthalpy_temperature") || isParamValid("thermal_energy_temperature"))
     {
-      const auto & temperature_name = getParam<MooseFunctorName>("thermal_energy_temperature");
+      const auto & temperature_name =
+          isParamValid("conserved_enthalpy_temperature")
+              ? getParam<MooseFunctorName>("conserved_enthalpy_temperature")
+              : getParam<MooseFunctorName>("thermal_energy_temperature");
       if (UserObject::_subproblem.hasLinearVariable(temperature_name) ||
           UserObject::_subproblem.hasAuxiliaryVariable(temperature_name))
       {
@@ -961,6 +986,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
     if (data.has_neighbor && neighbor_dof != DofObject::invalid_id)
       cache_cell(*data.face->neighborInfo());
 
+    const Real rho_flux = rhoPhi(*data.face, limited_alpha_fluxes[i]);
     const Real rho_cp_flux = rhoCpPhi(*data.face, limited_alpha_fluxes[i]);
     if (std::abs(rho_cp_flux) <= libMesh::TOLERANCE)
       continue;
@@ -974,20 +1000,25 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
       donor_temperature = MetaPhysicL::raw_value(_thermal_energy_backflow_temperature(
           functorFaceArg(_thermal_energy_backflow_temperature, *data.face), state));
 
-    const Real energy_flux = rho_cp_flux * donor_temperature;
-    if (std::abs(energy_flux) <= libMesh::TOLERANCE)
+    // This is rho_phi * h_face, with h_face = (rho_cp_phi / rho_phi) * T.
+    // The fallback preserves the same VOF-consistent heat-capacity flux if rho_phi is tiny.
+    const Real enthalpy_flux =
+        std::abs(rho_flux) > libMesh::TOLERANCE
+            ? rho_flux * (rho_cp_flux / rho_flux) * donor_temperature
+            : rho_cp_flux * donor_temperature;
+    if (std::abs(enthalpy_flux) <= libMesh::TOLERANCE)
       continue;
 
     if (locallyOwnedCell(*data.face->elemInfo()))
     {
-      applied_change[elem_dof] -= dt * energy_flux / cellVolume(*data.face->elemInfo());
+      applied_change[elem_dof] -= dt * enthalpy_flux / cellVolume(*data.face->elemInfo());
       capacity_change_by_dof[elem_dof] -= dt * rho_cp_flux / cellVolume(*data.face->elemInfo());
     }
 
     if (data.has_neighbor && neighbor_dof != DofObject::invalid_id &&
         locallyOwnedCell(*data.face->neighborInfo()))
     {
-      applied_change[neighbor_dof] += dt * energy_flux / cellVolume(*data.face->neighborInfo());
+      applied_change[neighbor_dof] += dt * enthalpy_flux / cellVolume(*data.face->neighborInfo());
       capacity_change_by_dof[neighbor_dof] +=
           dt * rho_cp_flux / cellVolume(*data.face->neighborInfo());
     }
