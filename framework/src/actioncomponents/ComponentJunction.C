@@ -389,11 +389,16 @@ ComponentJunction::addMeshGenerators()
     mooseError("junction_method specified is invalid!");
 
   _top_mg_name = _mg_names.back();
+  // connect to each other
   first_component.addConnectedComponent(second_component);
+  second_component.addConnectedComponent(first_component);
   // Sets it for all connected components
   // Connected might not be the right abstraction here. It's more like "included in a common mesh"
   for (auto * component : first_component.getConnectedComponents())
     component->setCurrentTopLevelMeshGeneratorName(_top_mg_name);
+  // connect to the junction
+  first_component.addConnectedComponent(*this);
+  second_component.addConnectedComponent(*this);
 
   // For now this is a safe choice. We might want to decide otherwise once we
   // do mixed-dimensions. Build the junction with the dimension of the first component?
