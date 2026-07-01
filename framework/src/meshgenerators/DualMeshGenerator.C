@@ -684,61 +684,6 @@ sameSegment3D(const Point & point0,
 }
 
 static bool
-hasWatertightPolyhedronSurface3D(const std::vector<std::vector<Point>> & side_points,
-                                 const Real tol = 1e-12)
-{
-  if (side_points.size() < 4)
-    return false;
-
-  std::vector<Point> unique_points;
-
-  for (const auto & side : side_points)
-  {
-    if (side.size() < 3 || !hasNonzeroArea3D(side, tol))
-      return false;
-
-    for (const auto & point : side)
-      addUniquePoint(unique_points, point, tol);
-  }
-
-  if (unique_points.size() < 4)
-    return false;
-
-  const auto pointIndex = [&](const Point & point)
-  {
-    for (const auto i : index_range(unique_points))
-      if (samePoint3D(unique_points[i], point, tol))
-        return i;
-
-    return unique_points.size();
-  };
-
-  std::map<std::pair<std::size_t, std::size_t>, unsigned int> edge_counts;
-
-  for (const auto & side : side_points)
-    for (const auto i : index_range(side))
-    {
-      const std::size_t point0_id = pointIndex(side[i]);
-      const std::size_t point1_id = pointIndex(side[(i + 1) % side.size()]);
-
-      if (point0_id == point1_id || point0_id == unique_points.size() ||
-          point1_id == unique_points.size())
-        return false;
-
-      edge_counts[{std::min(point0_id, point1_id), std::max(point0_id, point1_id)}]++;
-    }
-
-  if (edge_counts.empty())
-    return false;
-
-  for (const auto & edge_count : edge_counts)
-    if (edge_count.second != 2)
-      return false;
-
-  return true;
-}
-
-static bool
 pointOnSegment3D(const Point & point,
                  const Point & segment_point0,
                  const Point & segment_point1,
@@ -1823,10 +1768,7 @@ c0PolyhedronSidePoints3D(const std::vector<std::vector<Point>> & side_points,
 {
   const auto validSegment = [](const Point &, const Point &) { return true; };
 
-  if (!surfaceTriangles3D(side_points, c0_side_points, validSegment, tol))
-    return false;
-
-  return hasWatertightPolyhedronSurface3D(c0_side_points, tol);
+  return surfaceTriangles3D(side_points, c0_side_points, validSegment, tol);
 }
 
 std::unique_ptr<MeshBase>
