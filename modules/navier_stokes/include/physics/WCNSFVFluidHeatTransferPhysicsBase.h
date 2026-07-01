@@ -92,8 +92,12 @@ protected:
   const bool _has_energy_equation;
   /// User-selected option to solve for enthalpy
   const bool _solve_for_enthalpy;
+  /// User-selected option to solve for conserved thermal energy rho * cp * T
+  const bool _solve_for_conserved_energy;
   /// Name of the fluid specific enthalpy
   const VariableName _fluid_enthalpy_name;
+  /// Name of the conserved thermal energy
+  const VariableName _fluid_conserved_energy_name;
   /// Fluid temperature name
   VariableName _fluid_temperature_name;
   /// Name of the specific heat material property

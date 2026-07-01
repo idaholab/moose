@@ -659,6 +659,7 @@ ReducedPressurePIMPLESolve::runOneVolumeFractionSubcycle(
   if (subcycle > 0)
     advanceVolumeFractionSubcycleOldState(system);
 
+  corrector.cachePreSubcycleAlpha();
   _problem.execute(EXEC_NONLINEAR);
 
   // This path bounds alpha through the limited face fluxes instead of projecting the solved field.

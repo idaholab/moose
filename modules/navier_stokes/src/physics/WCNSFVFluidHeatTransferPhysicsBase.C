@@ -32,6 +32,13 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParam<bool>("solve_for_enthalpy",
                         false,
                         "Whether to solve for the enthalpy or the temperature of the fluid");
+  params.addParam<bool>("solve_for_conserved_energy",
+                        false,
+                        "Whether to solve for conserved thermal energy rho * cp * T and compute "
+                        "temperature as a derived field.");
+  params.addParam<NonlinearVariableName>("fluid_conserved_energy_variable",
+                                         "thermal_energy",
+                                         "Name of the conserved thermal energy variable.");
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
 
@@ -42,6 +49,9 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParam<FunctionName>(
       "initial_enthalpy",
       "Initial value of the enthalpy variable, only to be used when solving for enthalpy");
+  params.addParam<FunctionName>("initial_conserved_energy",
+                                "Initial value of rho * cp * T, only to be used when solving for "
+                                "conserved thermal energy.");
 
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
@@ -71,7 +81,10 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
             ? getParam<bool>("add_energy_equation")
             : (usingNavierStokesFVSyntax() ? isParamSetByUser("energy_inlet_functors") : true)),
     _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy")),
+    _solve_for_conserved_energy(getParam<bool>("solve_for_conserved_energy")),
     _fluid_enthalpy_name(getSpecificEnthalpyName()),
+    _fluid_conserved_energy_name(
+        getParam<NonlinearVariableName>("fluid_conserved_energy_variable")),
     _fluid_temperature_name(getParam<NonlinearVariableName>("fluid_temperature_variable")),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
@@ -92,8 +105,14 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
   if (!_has_energy_equation)
     return;
 
+  if (_solve_for_enthalpy && _solve_for_conserved_energy)
+    paramError("solve_for_conserved_energy",
+               "Cannot solve for both enthalpy and conserved thermal energy.");
+
   if (_solve_for_enthalpy)
     saveSolverVariableName(_fluid_enthalpy_name);
+  else if (_solve_for_conserved_energy)
+    saveSolverVariableName(_fluid_conserved_energy_name);
   else
     saveSolverVariableName(_fluid_temperature_name);
 
@@ -104,6 +123,7 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
 
   // Parameter checks
   checkSecondParamSetOnlyIfFirstOneTrue("solve_for_enthalpy", "initial_enthalpy");
+  checkSecondParamSetOnlyIfFirstOneTrue("solve_for_conserved_energy", "initial_conserved_energy");
   checkVectorParamsSameLengthIfSet<MooseFunctorName, MooseFunctorName>("ambient_convection_alpha",
                                                                        "ambient_temperature");
   checkSecondParamSetOnlyIfFirstOneSet("external_heat_source", "external_heat_source_coeff");
@@ -136,8 +156,10 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVKernels()
   if (!_has_energy_equation)
     return;
 
-  if (shouldCreateTimeDerivative(_solve_for_enthalpy ? _fluid_enthalpy_name
-                                                     : _fluid_temperature_name,
+  const auto variable_name = _solve_for_enthalpy           ? _fluid_enthalpy_name
+                             : _solve_for_conserved_energy ? _fluid_conserved_energy_name
+                                                           : _fluid_temperature_name;
+  if (shouldCreateTimeDerivative(variable_name,
                                  _blocks,
                                  /*error if already defined*/ false))
     addEnergyTimeKernels();
@@ -292,6 +314,22 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 
     if (!temperature_ic_used && isParamSetByUser("initial_temperature"))
       reportPotentiallyMissedParameters({"initial_temperature"}, "FunctionIC");
+  }
+  if (_solve_for_conserved_energy && shouldCreateIC(_fluid_conserved_energy_name,
+                                                    _blocks,
+                                                    /*whether IC is a default*/ false,
+                                                    /*error if already an IC*/ false))
+  {
+    if (!isParamValid("initial_conserved_energy"))
+      paramError("initial_conserved_energy",
+                 "An initial rho * cp * T field is required when solving for conserved thermal "
+                 "energy unless the variable is initialized elsewhere.");
+
+    params.set<VariableName>("variable") = _fluid_conserved_energy_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_conserved_energy");
+
+    getProblem().addFVInitialCondition(
+        "FVFunctionIC", _fluid_conserved_energy_name + "_ic", params);
   }
   if (isParamValid("initial_enthalpy") && _solve_for_enthalpy &&
       shouldCreateIC(_fluid_enthalpy_name,

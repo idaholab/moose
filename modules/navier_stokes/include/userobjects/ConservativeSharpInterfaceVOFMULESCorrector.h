@@ -16,10 +16,12 @@
 #include "FaceArgInterface.h"
 #include "MooseLinearVariableFV.h"
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 class LinearSystem;
+class SystemBase;
 class LinearFVBoundaryCondition;
 
 /**
@@ -44,6 +46,7 @@ public:
 
   void resetSubcycleFluxes();
   void refreshPublishedRhoPhi();
+  void cachePreSubcycleAlpha();
   void applyCorrection(const Real dt, const Real subcycle_fraction = 1.0);
 
   const SolverSystemName & systemName() const { return _system_name; }
@@ -107,7 +110,10 @@ private:
   Real cellVolume(const ElemInfo & elem_info) const;
   Real faceMeasure(const FaceInfo & fi) const;
   Real cellAlpha(const ElemInfo & elem_info) const;
+  Real oldCellAlpha(const ElemInfo & elem_info) const;
   Real boundedAlpha(Real value) const;
+  Real cellRhoCp(const ElemInfo & elem_info, Real alpha) const;
+  Real thermalEnergyTemperature(const ElemInfo & elem_info) const;
   Real donorFlux(const FaceInfo & fi, const FaceTransportData & face_data, Real elem_alpha) const;
   Real highOrderFaceValue(const FaceInfo & fi,
                           const FaceTransportData & face_data,
@@ -118,6 +124,7 @@ private:
                                         Real volumetric_flux,
                                         const LinearFVBoundaryCondition * bc) const;
   Real rhoPhi(const FaceInfo & fi, const Real limited_alpha_flux) const;
+  Real rhoCpPhi(const FaceInfo & fi, const Real limited_alpha_flux) const;
   FaceCorrectionData buildFaceCorrectionData(const FaceInfo & fi) const;
   std::vector<FaceCorrectionData> collectFaceCorrectionData() const;
   Real confinedScalarConcentration(const ConfinedScalarData & scalar,
@@ -125,16 +132,24 @@ private:
   void applyConfinedScalarTransport(const std::vector<FaceCorrectionData> & face_corrections,
                                     const std::vector<Real> & limited_alpha_fluxes,
                                     Real dt);
+  void applyThermalEnergyTransport(const std::vector<FaceCorrectionData> & face_corrections,
+                                   const std::vector<Real> & limited_alpha_fluxes,
+                                   Real dt);
 
   const SolverSystemName _system_name;
   const VariableName _variable_name;
   const std::vector<VariableName> _confined_scalar_variable_names;
+  const VariableName _thermal_energy_variable_name;
   const Moose::Functor<Real> & _face_flux;
   const Moose::Functor<Real> & _compression_factor;
   const Moose::Functor<RealVectorValue> & _interface_normal;
   const Moose::Functor<Real> & _liquid_density;
   const Moose::Functor<Real> & _gas_density;
+  const Moose::Functor<Real> * const _liquid_specific_heat;
+  const Moose::Functor<Real> * const _gas_specific_heat;
+  const Moose::Functor<Real> * const _thermal_energy_temperature;
   const Moose::Functor<Real> & _confined_scalar_backflow_concentration;
+  const Moose::Functor<Real> & _thermal_energy_backflow_temperature;
   const Real _confined_scalar_alpha_floor;
   const Real _confined_scalar_concentration_min;
   const Real _confined_scalar_concentration_max;
@@ -143,10 +158,21 @@ private:
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _alpha_phi_limited;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _rho_phi;
+  std::unique_ptr<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>> _rho_cp_phi;
 
   MooseLinearVariableFVReal * _alpha_var = nullptr;
   LinearSystem * _system = nullptr;
   unsigned int _sys_num = libMesh::invalid_uint;
   unsigned int _var_num = libMesh::invalid_uint;
   std::vector<ConfinedScalarData> _confined_scalars;
+  std::unordered_map<dof_id_type, Real> _pre_subcycle_alpha_by_dof;
+  std::unordered_map<dof_id_type, Real> _pre_subcycle_temperature_by_dof;
+  MooseLinearVariableFVReal * _thermal_energy_var = nullptr;
+  LinearSystem * _thermal_energy_system = nullptr;
+  unsigned int _thermal_energy_sys_num = libMesh::invalid_uint;
+  unsigned int _thermal_energy_var_num = libMesh::invalid_uint;
+  MooseLinearVariableFVReal * _temperature_var = nullptr;
+  SystemBase * _temperature_system = nullptr;
+  unsigned int _temperature_sys_num = libMesh::invalid_uint;
+  unsigned int _temperature_var_num = libMesh::invalid_uint;
 };
