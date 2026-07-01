@@ -183,6 +183,7 @@ CylinderComponent::addMeshGenerators()
       for (const auto & block : blocks)
         _blocks.push_back(block);
     }
+    circle_params.set<std::string>("boundary_name_prefix") = name() + "_";
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");

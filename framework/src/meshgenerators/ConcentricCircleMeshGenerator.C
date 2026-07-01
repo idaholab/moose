@@ -51,6 +51,7 @@ ConcentricCircleMeshGenerator::validParams()
   params.addParam<MooseEnum>("portion", portion, "Control of which part of mesh is created");
   params.addRequiredParam<bool>(
       "preserve_volumes", "Volume of concentric circles can be preserved using this function.");
+  params.addParam<std::string>("boundary_name_prefix", "", "Prefix to prepend to boundary names");
   params.addParam<unsigned int>("smoothing_max_it", 1, "Number of Laplacian smoothing iterations");
   params.addClassDescription(
       "This ConcentricCircleMeshGenerator source code is to generate concentric "
@@ -68,7 +69,8 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _pitch(getParam<Real>("pitch")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
-    _portion(getParam<MooseEnum>("portion"))
+    _portion(getParam<MooseEnum>("portion")),
+    _boundary_name_prefix(getParam<std::string>("boundary_name_prefix"))
 {
   declareMeshProperty("use_distributed_mesh", false);
 
@@ -682,57 +684,57 @@ ConcentricCircleMeshGenerator::generate()
   }
 
   // This is to set boundary names.
-  boundary_info.sideset_name(1) = "left";
-  boundary_info.sideset_name(2) = "bottom";
+  boundary_info.sideset_name(1) = _boundary_name_prefix + "left";
+  boundary_info.sideset_name(2) = _boundary_name_prefix + "bottom";
 
   if (!_has_outer_square)
-    boundary_info.sideset_name(3) = "outer";
+    boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
   else
   {
-    boundary_info.sideset_name(3) = "right";
-    boundary_info.sideset_name(4) = "top";
+    boundary_info.sideset_name(3) = _boundary_name_prefix + "right";
+    boundary_info.sideset_name(4) = _boundary_name_prefix + "top";
   }
 
   if (_portion == "top_left")
   {
     MeshTools::Modification::rotate(*mesh, 90, 0, 0);
-    boundary_info.sideset_name(1) = "bottom";
-    boundary_info.sideset_name(2) = "right";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "bottom";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "right";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "top";
-      boundary_info.sideset_name(4) = "left";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "top";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "left";
     }
   }
   else if (_portion == "bottom_left")
   {
     MeshTools::Modification::rotate(*mesh, 180, 0, 0);
-    boundary_info.sideset_name(1) = "right";
-    boundary_info.sideset_name(2) = "top";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "right";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "top";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "left";
-      boundary_info.sideset_name(4) = "bottom";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "left";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "bottom";
     }
   }
   else if (_portion == "bottom_right")
   {
     MeshTools::Modification::rotate(*mesh, 270, 0, 0);
-    boundary_info.sideset_name(1) = "top";
-    boundary_info.sideset_name(2) = "left";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "top";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "left";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "bottom";
-      boundary_info.sideset_name(4) = "right";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "bottom";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "right";
     }
   }
 
@@ -753,10 +755,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -769,8 +771,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "bottom";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -792,10 +794,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 2, 4, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -807,8 +809,8 @@ ConcentricCircleMeshGenerator::generate()
       mesh->stitch_meshes(other_mesh, 2, 2, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -840,10 +842,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 4, 2, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -856,8 +858,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "right";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -888,10 +890,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -904,8 +906,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "top";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "top";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -946,10 +948,10 @@ ConcentricCircleMeshGenerator::generate()
       // 'full'
       mesh->stitch_meshes(portion_bottom, 2, 4, TOLERANCE, true, /*verbose=*/false);
 
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
       portion_bottom.clear();
     }
     else
@@ -969,7 +971,7 @@ ConcentricCircleMeshGenerator::generate()
       portion_bottom.prepare_for_use();
       mesh->stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true, /*verbose=*/false);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 1);
-      mesh->get_boundary_info().sideset_name(1) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "outer";
       portion_bottom.clear();
     }
     portion_two.clear();
