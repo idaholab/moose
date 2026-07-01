@@ -1,64 +1,126 @@
 [Tests]
   design = 'meshgenerators/DualMeshGenerator.md'
   issues = '#33143'
-  [dual_mesh_generator_2d_barycentric]
-    type = 'Exodiff'
-    input = 'dual_mesh_generator_2d_barycentric.i'
-    cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_2d_barycentric_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
 
-    requirement = 'The system shall have the capability to generate a barycentric dual mesh from a 2D primal mesh.'
-  []
-  [dual_mesh_generator_2d_voronoi]
-    type = 'Exodiff'
-    input = 'dual_mesh_generator_2d_voronoi.i'
-    cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_2d_voronoi_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
+  [dual_mesh_generator_2d]
+    requirement = 'The system shall have the capability to generate a 2D dual mesh '
 
-    requirement = 'The system shall have the capability to generate a voronoi dual mesh from a 2D primal mesh.'
+    [barycentric]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_2d_barycentric.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_2d_barycentric_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using barycentric dual nodes.'
+    []
+
+    [voronoi]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_2d_voronoi.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_2d_voronoi_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using Voronoi dual nodes.'
+    []
+
+    [preserve_primal_subdomains]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_2d_subdomain_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_2d_subdomain_preserve_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while preserving requested primal subdomains.'
+    []
   []
+
   [dual_mesh_generator_3d]
-    type = 'Exodiff'
-    input = 'dual_mesh_generator_3d.i'
-    cli_args = '--mesh-only'
-    exodiff = 'dual_mesh_generator_3d_in.e'
-    mesh_mode = 'REPLICATED'
-    recover = false
+    requirement = 'The system shall have the capability to generate a 3D barycentric dual mesh '
 
-    requirement = 'The system shall have the capability to generate a barycentric dual mesh from a 3D primal mesh.'
-  []
-  [dual_mesh_generator_3d_preserve_subdomain_interfaces]
-    type = 'RunApp'
-    input = 'dual_mesh_generator_3d_preserve_subdomain_interfaces.i'
-    cli_args = '--mesh-only'
-    mesh_mode = 'REPLICATED'
-    recover = false
+    [split]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_3d_split.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_3d_split_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using the split concave-cell treatment.'
+    []
 
-    requirement = 'The system shall have the capability to preserve primal subdomain interfaces as protected surfaces during 3D dual mesh generation.'
+    [polycut]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_3d_polycut.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_3d_polycut_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using the polycut concave-cell treatment.'
+    []
+
+    [netgen]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_3d_netgen.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_3d_netgen_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'using the NetGen concave-cell treatment.'
+    []
+
+    [preserve_primal_subdomains]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_3d_subdomain_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_3d_subdomain_preserve_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while preserving requested primal subdomains.'
+    []
+
+    [preserve_subdomain_interfaces]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_3d_interface_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_3d_interface_preserve_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while treating primal subdomain interfaces as preserved surfaces.'
+    []
   []
-[]
-[error_paths]
-  requirement = 'The system shall report an error when attempting to generate a dual mesh'
-  [unsupported_dimension]
-    type = 'RunException'
-    input = 'dual_mesh_generator_unsupported_dimension.i'
-    cli_args = '--mesh-only'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    expect_err = 'DualMeshGenerator currently only supports 2D and 3D Meshes'
-    detail = 'an unsupported mesh dimension.'
-  []
-  [voronoi_3d]
-    type = 'RunException'
-    input = 'dual_mesh_generator_unsupported_type_dim.i'
-    cli_args = '--mesh-only'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    expect_err = 'DualMeshGenerator does not support Voronoi duals for 3D meshes'
-    detail = 'an unsupported combination of dimension and mesh type'
+
+  [error_paths]
+    requirement = 'The system shall report an error when attempting to generate a dual mesh '
+
+    [unsupported_dimension]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_dimension.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'DualMeshGenerator currently only supports 2D and 3D Meshes'
+      detail = 'from an unsupported mesh dimension.'
+    []
+
+    [voronoi_3d]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_type_dim.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'DualMeshGenerator does not support Voronoi duals for 3D meshes'
+      detail = 'from an unsupported combination of dual mesh type and mesh dimension.'
+    []
+
+    [voronoi_preserve_primal_subdomains]
+      type = 'RunException'
+      input = 'dual_mesh_generator_unsupported_type_preserve.i'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      expect_err = 'DualMeshGenerator does not support Voronoi duals for 3D meshes'
+      detail = 'from an unsupported preserved-subdomain Voronoi configuration.'
+    []
   []
 []

@@ -12,6 +12,7 @@
 #include "MeshGenerator.h"
 #include "MultiMooseEnum.h"
 
+#include <set>
 #include <vector>
 
 /**
@@ -29,6 +30,7 @@ public:
 protected:
   std::unique_ptr<MeshBase> generate2D(std::unique_ptr<MeshBase> input_mesh);
   std::unique_ptr<MeshBase> generate3D(std::unique_ptr<MeshBase> input_mesh);
+  std::set<SubdomainID> preservedPrimalSubdomainIDs(const MeshBase & input_mesh) const;
 
   std::unique_ptr<MeshBase> & _input;
 
