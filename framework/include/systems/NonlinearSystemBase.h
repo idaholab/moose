@@ -773,6 +773,14 @@ public:
    */
   void destroyColoring();
 
+  /**
+   * Apply active nodal boundary-condition residuals to \p residual.
+   *
+   * This is useful for auxiliary linearized operations that assemble a custom right-hand side but
+   * still need the same constrained rows as the nonlinear residual.
+   */
+  void applyNodalBCsResidual(NumericVector<Number> & residual);
+
 protected:
   /**
    * Compute the residual for a given tag
