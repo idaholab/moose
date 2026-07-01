@@ -156,6 +156,9 @@ ComponentJunction::addMeshGenerators()
             second_component.getCurrentTopLevelMeshGeneratorName()};
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
+        // We could clear the boundary IDs if we got better at detecting external boundaries
+        // and can avoid specifying all known possibly-exterior boundaries in the cavity component
+        params.set<bool>("clear_stitched_boundary_ids") = false;
         params.set<bool>("verbose_stitching") = _verbose;
         params.set<bool>("verbose_remapping") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") =
@@ -319,17 +322,18 @@ ComponentJunction::addMeshGenerators()
           std::vector<MeshGeneratorName>{first_component.getCurrentTopLevelMeshGeneratorName(),
                                          _mg_names.back(),
                                          second_component.getCurrentTopLevelMeshGeneratorName()};
+
+      // We could clear the boundary IDs if we got better at detecting external boundaries
+      // and can avoid specifying all known possibly-exterior boundaries in the cavity component
+      stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
       if (dimension_first > 1)
         stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, name() + "_aeg_bottom_boundary"},
             {name() + "_aeg_top_boundary", second_boundary}};
       else
-      {
-        stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
         stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, name() + "_bspline_start_node"},
             {name() + "_bspline_end_node", second_boundary}};
-      }
 
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
       stitcher_params.set<bool>("verbose_remapping") = _verbose;
