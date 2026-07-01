@@ -453,7 +453,11 @@ AdvancedExtruderGenerator::generate()
   for (const auto & swap : _boundary_swaps)
     for (const auto i : index_range(swap))
       if (i % 2 == 0 && !MooseMeshUtils::hasBoundaryID(*_input, swap[i]))
-        paramError("boundary_swaps", "The boundary '", swap[i], "' was not found within the mesh");
+        paramError("boundary_swaps",
+                   "The boundary '",
+                   swap[i],
+                   "' was not found within the mesh.\nBoundaries in the mesh: " +
+                       Moose::stringify(MooseMeshUtils::getAllBoundaryNamesAndIDs(*_input)));
 
   // Check that the source blocks for layer top/bottom boundaries exist in the mesh
   for (const auto & layer_vec : _upward_boundary_source_blocks)

@@ -195,6 +195,23 @@ getBoundaryIDSet(const MeshBase & mesh,
   return std::set<BoundaryID>(boundaries.begin(), boundaries.end());
 }
 
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<BoundaryName, BoundaryID>> boundaries;
+  const auto & binfo = mesh.get_boundary_info();
+  const auto & boundary_ids = binfo.get_boundary_ids();
+  for (const auto id : boundary_ids)
+  {
+    // if neither a sideset or nodeset, then empty
+    if (binfo.get_sideset_name(id).size())
+      boundaries.insert(std::make_pair(binfo.get_sideset_name(id), id));
+    else
+      boundaries.insert(std::make_pair(binfo.get_nodeset_name(id), id));
+  }
+  return boundaries;
+}
+
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {

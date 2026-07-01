@@ -114,6 +114,14 @@ std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
 BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh);
 
 /**
+ * Get all boundary names and IDs from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of boundary names and ids
+ */
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const libMesh::MeshBase & mesh);
+
+/**
  * Gets the subdomain ID associated with the given SubdomainName.
  *
  * This is needed because the SubdomainName can be either an ID or a name.
@@ -134,7 +142,7 @@ std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
 
 /**
- * Get all subdomain names from a mesh
+ * Get all subdomain names and ids from a mesh
  * @param mesh the mesh of interest
  * @return a set of pairs of subdomain names and ids
  */
