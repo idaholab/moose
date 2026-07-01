@@ -36,5 +36,17 @@
   [error]
     type = NEML2TestModel
     error = true
+    jit = false
+  []
+  [interface_source]
+    type = NEML2TestModel2
+  []
+[]
+
+[Schedulers]
+  [simple]
+    type = SimpleScheduler
+    batch_size = 42
+    device = 'cpu'
   []
 []

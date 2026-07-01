@@ -101,8 +101,14 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
     return;
   }
 
+  if (_bnd && !_execute_neml2_model.isSideBatchIndexExist(
+                  NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side)))
+    return;
+
   // look up start index for current element
-  const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
+  const auto i = _bnd ? _execute_neml2_model.getSideBatchIndex(
+                            NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side))
+                      : _execute_neml2_model.getBatchIndex(_current_elem->id());
   // The NEML2 output/derivative tensor is (batch, *base_shape) when batched; a leading batch
   // axis is present iff the tensor has more dims than the base shape of the MOOSE type T.
   const auto base_ndim = static_cast<int64_t>(NEML2Utils::Layout<T>::shape.size());

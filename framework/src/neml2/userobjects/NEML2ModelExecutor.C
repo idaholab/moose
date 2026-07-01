@@ -203,6 +203,19 @@ NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
   return _batch_index_generator.getBatchIndex(elem_id);
 }
 
+std::size_t
+NEML2ModelExecutor::getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.getSideBatchIndex(elem_side);
+}
+
+bool
+NEML2ModelExecutor::isSideBatchIndexExist(
+    const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.isSideBatchIndexExist(elem_side);
+}
+
 void
 NEML2ModelExecutor::addGatheredVariable(const UserObjectName & gatherer_name,
                                         const std::string & var)
@@ -524,6 +537,10 @@ NEML2ModelExecutor::extractOutputs(bool compute_derivative)
                e.what(),
                NEML2Utils::NEML2_help_message);
   }
+
+  // Mark outputs ready as soon as the tensors are populated so downstream material retrieval
+  // during the same execute phase can see the fresh values.
+  _output_ready = true;
 }
 
 void
