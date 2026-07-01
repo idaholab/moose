@@ -335,7 +335,10 @@ WCNSFVFlowPhysicsBase::addPorousMediumSpeedMaterial()
 void
 WCNSFVFlowPhysicsBase::addNonPorousMediumSpeedMaterial()
 {
-  const std::string class_name = "ADVectorMagnitudeFunctorMaterial";
+  // Not very future-proof but it works
+  const bool use_ad = !dynamic_cast<WCNSLinearFVFlowPhysics *>(this);
+  const std::string class_name =
+      use_ad ? "ADVectorMagnitudeFunctorMaterial" : "VectorMagnitudeFunctorMaterial";
   InputParameters params = getFactory().getValidParams(class_name);
   assignBlocks(params, _blocks);
 
