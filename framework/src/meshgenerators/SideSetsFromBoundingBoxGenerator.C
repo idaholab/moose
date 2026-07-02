@@ -72,7 +72,11 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
         paramError(param_name, "Parameter should not be used with boundary_id_overlap = true.");
   }
 
-  _boundary_names.push_back(parameters.get<BoundaryName>("boundary_new"));
+  const auto & boundary_name = parameters.get<BoundaryName>("boundary_new");
+  if (boundary_name.empty())
+    paramError("boundary_new", "Boundary name must not be empty.");
+
+  _boundary_names.push_back(boundary_name);
 }
 
 std::unique_ptr<MeshBase>
@@ -91,7 +95,7 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   const auto & boundary_name = _boundary_names.front();
   const auto boundary_id_new = MooseMeshUtils::getBoundaryIDs(*mesh, {boundary_name}, true).front();
-  if (boundary_name.empty() || !MooseUtils::isDigits(boundary_name))
+  if (!MooseUtils::isDigits(boundary_name))
   {
     boundary_info.sideset_name(boundary_id_new) = boundary_name;
     boundary_info.nodeset_name(boundary_id_new) = boundary_name;
@@ -159,6 +163,7 @@ SideSetsFromBoundingBoxGenerator::generate()
           response_type side_satisfies_requirements = false;
           if (_bounding_box.contains_point(elem->vertex_average()) == inside)
           {
+            libmesh_assert(elem->neighbor_ptr(side) != remote_elem);
             _fe_face->reinit(elem, side);
             const Point face_normal = _fe_face->get_normals()[0];
             side_satisfies_requirements =

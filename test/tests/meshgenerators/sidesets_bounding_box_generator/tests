@@ -96,6 +96,14 @@
 
       detail = "if the incorrect boundary inputs are supplied."
     []
+    [empty_boundary_name]
+      type = 'RunException'
+      input = 'generate_sidesets_bounding_box.i'
+      cli_args = "Mesh/createNewSidesetOne/boundary_new=''"
+      expect_err = 'Boundary name must not be empty.'
+
+      detail = 'if the new boundary name is empty.'
+    []
   []
 
   [overlap]
