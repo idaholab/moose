@@ -98,9 +98,18 @@ AS_IF([test "$neml2_support" = yes],
         AC_SUBST([neml2_support],[true])
         AS_IF([test "$neml2_library" = yes],
               [
+                    dnl No path was given to --with-neml2. Prefer the NEML2_DIR environment
+                    dnl variable; otherwise locate the neml2 installed in the active Python
+                    dnl environment (this is where scripts/update_and_rebuild_neml2.sh installs
+                    dnl it -- alongside torch). There is no longer a fixed install location to
+                    dnl fall back to, so error out with guidance if neither is available.
                     AS_IF([test "${NEML2_DIR+set}" = set],
                           [neml2_library="${NEML2_DIR}"],
-                          [neml2_library="$ac_pwd/framework/contrib/neml2/installed/moose"])
+                          dnl Use importlib rather than neml2.__file__: m4 would expand the
+                          dnl __file__ builtin into the configure.ac filename.
+                          [neml2_library=`python3 -c 'import importlib.util as U, os; print(os.path.dirname(U.find_spec("neml2").origin))' 2>/dev/null`])
+                    AS_IF([test "x$neml2_library" = x],
+                          [AC_MSG_ERROR([Could not locate neml2. Pass --with-neml2=<path>, set NEML2_DIR, or run scripts/update_and_rebuild_neml2.sh to build and install neml2 (it prints the path to use).])])
               ])
         AC_DEFINE_UNQUOTED(NEML2_DIR, [$neml2_library], [The directory where neml2 is installed])
         AC_SUBST([neml2_library])
