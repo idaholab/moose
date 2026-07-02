@@ -155,13 +155,13 @@ TEST(InputParametersTest, setCoupledVar)
   params.addCoupledVar("multiple_vars", "Multiple coupled variables");
 
   params.setCoupledVar("single_var", NonlinearVariableName("u"));
-  const auto & single_var = params.get<std::vector<VariableName>>("single_var");
+  const auto & single_var = params.getCoupledVar("single_var");
   ASSERT_EQ(single_var.size(), 1);
   EXPECT_EQ(single_var[0], "u");
 
   const std::vector<VariableName> variables = {"disp_x", "disp_y"};
   params.setCoupledVar("multiple_vars", variables);
-  EXPECT_EQ(params.get<std::vector<VariableName>>("multiple_vars"), variables);
+  EXPECT_EQ(params.getCoupledVar("multiple_vars"), variables);
 }
 
 TEST(InputParametersTest, setCoupledVarError)
@@ -171,6 +171,10 @@ TEST(InputParametersTest, setCoupledVarError)
 
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
       [&params]() { params.setCoupledVar("variable_names", "u"); },
+      "was not added with addCoupledVar or addRequiredCoupledVar");
+
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.getCoupledVar("variable_names"); },
       "was not added with addCoupledVar or addRequiredCoupledVar");
 }
 
@@ -456,12 +460,12 @@ TEST(InputParametersTest, transferParameters)
   // Same parameters
   EXPECT_EQ(p1.have_parameter<Real>("r1"), p2.have_parameter<Real>("r1"));
   EXPECT_EQ(p1.have_parameter<Real>("r2"), p2.have_parameter<Real>("r2"));
-  EXPECT_EQ(p1.hasCoupledValue("r3"), p2.hasCoupledValue("r3"));
+  EXPECT_EQ(p1.hasCoupledVar("r3"), p2.hasCoupledVar("r3"));
   EXPECT_EQ(p1.have_parameter<MooseEnum>("r4"), p2.have_parameter<MooseEnum>("r4"));
   EXPECT_EQ(p1.have_parameter<MultiMooseEnum>("r5"), p2.have_parameter<MultiMooseEnum>("r5"));
   EXPECT_EQ(p1.have_parameter<Real>("o1"), p2.have_parameter<Real>("o1"));
   EXPECT_EQ(p1.have_parameter<Real>("o2"), p2.have_parameter<Real>("o2"));
-  EXPECT_EQ(p1.hasCoupledValue("o3"), p2.hasCoupledValue("o3"));
+  EXPECT_EQ(p1.hasCoupledVar("o3"), p2.hasCoupledVar("o3"));
   EXPECT_EQ(p1.have_parameter<MooseEnum>("o4"), p2.have_parameter<MooseEnum>("o4"));
   EXPECT_EQ(p1.have_parameter<MultiMooseEnum>("o5"), p2.have_parameter<MultiMooseEnum>("o5"));
   EXPECT_EQ(p1.have_parameter<Real>("od1"), p2.have_parameter<Real>("od1"));
