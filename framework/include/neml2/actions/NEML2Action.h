@@ -83,9 +83,6 @@ protected:
   NEML2Utils::MOOSEIOType inferMOOSEIOType(const neml2::VariableName & name,
                                            const neml2::TensorType & type) const;
 
-  /// Whether a MATERIAL input should be gathered from interface material data
-  bool isInterfaceMaterialInput(const std::string & moose_name) const;
-
   /// Name of the NEML2 input file
   FileName _fname;
 
@@ -125,6 +122,9 @@ protected:
 
   /// If true, only create the boundary (interface) material and batch interface side data
   const bool _interface_only;
+
+  /// MATERIAL inputs supplied by a true InterfaceMaterial (read from INTERFACE_MATERIAL_DATA)
+  const std::vector<std::string> _interface_material_inputs;
 
   /// Input variables to skip (i.e., not to set up mappings for)
   std::vector<std::string> _skip_input_variables;

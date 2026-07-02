@@ -119,6 +119,11 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
                                ? &this->template getNeighborMaterialPropertyByName<T>(
                                      getParam<std::string>("from_moose"), 1)
                                : nullptr),
+    // A true InterfaceMaterial supplies a single value living in INTERFACE_MATERIAL_DATA (distinct
+    // from the block material read on the two sides above as FACE/NEIGHBOR data). Any neighbor
+    // dependence is already consumed inside the material (e.g. jump = u - u_neighbor), so there is
+    // no element/neighbor split here. from_interface_material selects this store; the action sets
+    // it only for inputs listed in 'interface_material_inputs'.
     _interface_mat_prop(
         _type == NEML2Utils::MOOSEIOType::MATERIAL && state == 0 && _from_interface_material
             ? &this->template getMaterialPropertyByName<T>(
@@ -133,6 +138,10 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
                   this->_fe_problem.getMaterialData(Moose::INTERFACE_MATERIAL_DATA, _tid, this),
                   1)
             : nullptr),
+    // A variable is a block (subdomain) field; MOOSE has no interface-only variable. At an
+    // interface it is simply the element-side solution (_var) plus the neighbor-side solution
+    // (_var_neighbor), so there is no INTERFACE data source and from_interface_material never
+    // applies to VARIABLE.
     _var_neighbor(
         _type == NEML2Utils::MOOSEIOType::VARIABLE && state == 0 && _has_interface
             ? &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose"))

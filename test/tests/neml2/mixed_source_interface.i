@@ -1,3 +1,12 @@
+# Mixed material-input sources feeding one NEML2 interface model.
+#
+# The single [NEML2] action below takes two MATERIAL inputs from DIFFERENT MOOSE material-data
+# stores:
+#   - 'jump'  from JumpInterfaceMaterial, a true InterfaceMaterial (INTERFACE_MATERIAL_DATA)
+#   - 'scale' from a block GenericConstantMaterial evaluated on the interface sides (FACE/NEIGHBOR)
+# Only 'jump' is listed in interface_material_inputs. This is the case a single sub-block-global
+# flag could not express: a global true would wrongly route 'scale' to interface data, a global
+# false would wrongly route 'jump' to volume/side data. Per-input routing keeps both correct.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -55,29 +64,45 @@
 []
 
 [Materials]
+  # True interface material: supplies 'jump' on the interface itself.
   [jump]
     type = JumpInterfaceMaterial
     boundary = 'A_B'
     var = u
     neighbor_var = u
   []
+  # Block material: supplies 'scale' on the volume, read on the interface sides. Made spatially
+  # varying so that mis-routing it through interface data (or mis-routing 'jump' through block
+  # data) changes the result, not just the code path.
+  [scale]
+    type = GenericFunctionMaterial
+    prop_names = 'scale'
+    prop_values = 'scale_fn'
+    block = 'A B'
+  []
+[]
+
+[Functions]
+  [scale_fn]
+    type = ParsedFunction
+    expression = '0.2 + x + y'
+  []
 []
 
 [NEML2]
-  input = 'models/linear_cohesive_model.i'
+  input = 'models/mixed_cohesive_model.i'
   device = 'cpu'
 
-  input_types = 'MATERIAL'
-  inputs = 'jump'
+  input_types = 'MATERIAL MATERIAL'
+  inputs = 'jump scale'
 
   derivatives = 'q jump'
 
   [cohesive]
-    model = 'linear_cohesive'
+    model = 'mixed_cohesive'
     interface = 'A_B'
     interface_only = true
-    # 'jump' is supplied by JumpInterfaceMaterial (a true InterfaceMaterial), so it must be
-    # read from interface material data rather than the volume/side material data.
+    # Only 'jump' is from a true InterfaceMaterial; 'scale' stays on the block/side source.
     interface_material_inputs = 'jump'
   []
 []

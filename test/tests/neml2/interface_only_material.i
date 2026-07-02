@@ -92,3 +92,7 @@
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-08
 []
+
+[Outputs]
+  exodus = true
+[]
