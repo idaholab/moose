@@ -196,27 +196,27 @@ UserObjectBase::declareExecutionOrderGroupDependency(const UserObjectBase & othe
   if (other_uo_order < this_uo_order)
   {
     if (this_group < other_group)
-      mooseError("The 'execution_order_group' of this object (",
-                 this_group,
-                 ") must be greater than or equal to that of the user object '",
-                 other_uo.name(),
-                 "' (",
-                 other_group,
-                 ") due to a declared dependency of this object on '",
-                 other_uo.name(),
-                 "'.");
+      mooseWarning("The 'execution_order_group' of this object (",
+                   this_group,
+                   ") must be greater than or equal to that of the user object '",
+                   other_uo.name(),
+                   "' (",
+                   other_group,
+                   ") due to a declared dependency of this object on '",
+                   other_uo.name(),
+                   "'.");
   }
   else
   {
     if (this_group <= other_group)
-      mooseError("The 'execution_order_group' of this object (",
-                 this_group,
-                 ") must be greater than that of the user object '",
-                 other_uo.name(),
-                 "' (",
-                 other_group,
-                 ") due to a declared dependency of this object on '",
-                 other_uo.name(),
-                 "'.");
+      mooseWarning("The 'execution_order_group' of this object (",
+                   this_group,
+                   ") must be greater than that of the user object '",
+                   other_uo.name(),
+                   "' (",
+                   other_group,
+                   ") due to a declared dependency of this object on '",
+                   other_uo.name(),
+                   "'.");
   }
 }
