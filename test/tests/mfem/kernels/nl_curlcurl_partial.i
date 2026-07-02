@@ -99,14 +99,24 @@
 
 [Preconditioner]
   [ams]
-    type = MFEMOperatorJacobiSmoother
+    type = MFEMMatrixFreeAMS
   []
 []
 
-[Solver]
-  type = MFEMCGSolver
-  preconditioner = ams
-  l_tol = 1e-12
+[Solvers]
+  [lin]
+    type = MFEMCGSolver
+    preconditioner = ams
+    l_max_its = 100
+    l_tol = 1e-12
+  []
+  [native_mfem_nl]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 100
+    abs_tol = 1.0e-10
+    rel_tol = 1.0e-9
+    print_level = 1
+  []
 []
 
 [Executioner]

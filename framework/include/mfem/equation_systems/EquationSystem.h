@@ -329,6 +329,10 @@ protected:
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
+
+  // We need a SumOperator to handle some crazy stuff
+  mutable std::unique_ptr<mfem::SumOperator> _sumOperator;
+
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;

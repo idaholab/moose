@@ -454,9 +454,19 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   if (_assembly_level == mfem::AssemblyLevel::PARTIAL and _test_var_names.size() == 1 and
       _nlfs.Has(_test_var_names.at(0)))
   {
-    auto test_var_name = _test_var_names.at(0);
+    // Keep GridFunctions in sync for coefficients used by nonlinear integrators.
+    const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(u), _block_true_offsets);
+    SetTrialVariablesFromTrueVectors(block_solution);
+
+    const auto & test_var_name = _test_var_names.at(0);
     auto nlf = _nlfs.Get(test_var_name);
-    return nlf->GetGradient(u);
+    auto blf = _blfs.Get(test_var_name);
+
+    // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
+    _sumOperator = std::make_unique<mfem::SumOperator>(
+        &nlf->GetGradient(u), 1.0, blf, 1.0, false, false);
+
+    return *_sumOperator;
   }
 
   if (_non_linear)
