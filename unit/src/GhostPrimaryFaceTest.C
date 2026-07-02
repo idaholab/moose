@@ -46,6 +46,10 @@ constexpr dof_id_type remote_secondary_elem_id = 1;
 constexpr dof_id_type remote_primary_elem_id = 2;
 constexpr dof_id_type remote_noninterface_elem_id = 3;
 constexpr unique_id_type elem_unique_id_offset = 1000;
+constexpr processor_id_type local_processor_id = 0;
+
+// Direct ghosting functor tests only require an owner id that differs from the queried processor.
+constexpr processor_id_type nonlocal_processor_id = 1;
 
 class TestNodeFaceRelationshipManagerAction : public Action
 {
@@ -106,18 +110,18 @@ addDisconnectedQuad(MeshBase & mesh,
 void
 buildNodeFaceInterfaceMesh(MeshBase & mesh)
 {
-  const processor_id_type rank0 = 0;
-  const processor_id_type rank1 = 1;
-
   mesh.set_mesh_dimension(2);
   mesh.allow_renumbering(false);
   mesh.skip_partitioning(true);
   mesh.allow_remote_element_removal(true);
 
-  auto * const local_secondary = addDisconnectedQuad(mesh, local_secondary_elem_id, rank0, 0);
-  auto * const remote_secondary = addDisconnectedQuad(mesh, remote_secondary_elem_id, rank1, 3);
-  auto * const remote_primary = addDisconnectedQuad(mesh, remote_primary_elem_id, rank1, 6);
-  addDisconnectedQuad(mesh, remote_noninterface_elem_id, rank1, 9);
+  auto * const local_secondary =
+      addDisconnectedQuad(mesh, local_secondary_elem_id, local_processor_id, 0);
+  auto * const remote_secondary =
+      addDisconnectedQuad(mesh, remote_secondary_elem_id, nonlocal_processor_id, 3);
+  auto * const remote_primary =
+      addDisconnectedQuad(mesh, remote_primary_elem_id, nonlocal_processor_id, 6);
+  addDisconnectedQuad(mesh, remote_noninterface_elem_id, nonlocal_processor_id, 9);
 
   auto & boundary_info = mesh.get_boundary_info();
   boundary_info.sideset_name(primary_boundary_id) = primary_boundary_name;
@@ -128,6 +132,17 @@ buildNodeFaceInterfaceMesh(MeshBase & mesh)
   boundary_info.add_side(local_secondary, 0, secondary_boundary_id);
   boundary_info.add_side(remote_secondary, 0, secondary_boundary_id);
   boundary_info.add_side(remote_primary, 0, primary_boundary_id);
+}
+
+GhostingFunctor::map_type
+coupledElementsForProcessor(RelationshipManager & rm, MeshBase & mesh)
+{
+  GhostingFunctor::map_type coupled_elements;
+  rm(mesh.active_pid_elements_begin(local_processor_id),
+     mesh.active_pid_elements_end(local_processor_id),
+     local_processor_id,
+     coupled_elements);
+  return coupled_elements;
 }
 }
 
@@ -200,48 +215,39 @@ protected:
   Factory * _factory;
 };
 
-TEST_F(GhostPrimaryFaceTest, enabledRMKeepsRemotePrimaryInterfaceElements)
+TEST_F(GhostPrimaryFaceTest, enabledRMCouplesNonlocalPrimaryInterfaceElements)
 {
-  if (_app->n_processors() != 2)
-    GTEST_SKIP() << "This test requires exactly two MPI ranks.";
-
   auto moose_mesh = buildMooseMesh();
   auto & mesh = moose_mesh->getMesh();
   buildNodeFaceInterfaceMesh(mesh);
   const auto rm = createAndAttachRelationshipManager(*moose_mesh, mesh, true);
   ASSERT_TRUE(rm);
 
-  mesh.complete_preparation();
+  const auto * const remote_primary = mesh.query_elem_ptr(remote_primary_elem_id);
+  ASSERT_NE(remote_primary, nullptr);
+  const auto * const remote_secondary = mesh.query_elem_ptr(remote_secondary_elem_id);
+  ASSERT_NE(remote_secondary, nullptr);
+  const auto * const remote_noninterface = mesh.query_elem_ptr(remote_noninterface_elem_id);
+  ASSERT_NE(remote_noninterface, nullptr);
 
-  if (mesh.processor_id() == 0)
-  {
-    EXPECT_NE(mesh.query_elem_ptr(local_secondary_elem_id), nullptr);
-    EXPECT_EQ(mesh.query_elem_ptr(remote_secondary_elem_id), nullptr);
-    EXPECT_NE(mesh.query_elem_ptr(remote_primary_elem_id), nullptr);
-    EXPECT_EQ(mesh.query_elem_ptr(remote_noninterface_elem_id), nullptr);
-  }
+  const auto coupled_elements = coupledElementsForProcessor(*rm, mesh);
+
+  ASSERT_EQ(coupled_elements.size(), 1);
+  EXPECT_EQ(coupled_elements.count(remote_primary), 1);
+  EXPECT_EQ(coupled_elements.count(remote_secondary), 0);
+  EXPECT_EQ(coupled_elements.count(remote_noninterface), 0);
+  EXPECT_EQ(coupled_elements.begin()->second, nullptr);
 }
 
-TEST_F(GhostPrimaryFaceTest, disabledRMAllowsRemoteInterfaceElementsToBeRemoved)
+TEST_F(GhostPrimaryFaceTest, disabledRMDoesNotCoupleNonlocalPrimaryInterfaceElements)
 {
-  if (_app->n_processors() != 2)
-    GTEST_SKIP() << "This test requires exactly two MPI ranks.";
-
   auto moose_mesh = buildMooseMesh();
   auto & mesh = moose_mesh->getMesh();
   buildNodeFaceInterfaceMesh(mesh);
   const auto rm = createAndAttachRelationshipManager(*moose_mesh, mesh, false);
   ASSERT_TRUE(rm);
 
-  mesh.complete_preparation();
-
-  if (mesh.processor_id() == 0)
-  {
-    EXPECT_NE(mesh.query_elem_ptr(local_secondary_elem_id), nullptr);
-    EXPECT_EQ(mesh.query_elem_ptr(remote_secondary_elem_id), nullptr);
-    EXPECT_EQ(mesh.query_elem_ptr(remote_primary_elem_id), nullptr);
-    EXPECT_EQ(mesh.query_elem_ptr(remote_noninterface_elem_id), nullptr);
-  }
+  EXPECT_TRUE(coupledElementsForProcessor(*rm, mesh).empty());
 }
 
 TEST_F(GhostPrimaryFaceTest, nodeFaceDerivedConstraintAddsDisabledRMByDefault)
