@@ -33,6 +33,8 @@ public:
 
   virtual void act() override;
 
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
 protected:
   const NEML2ActionCommon & getCommonAction() const;
 
@@ -81,6 +83,9 @@ protected:
   NEML2Utils::MOOSEIOType inferMOOSEIOType(const neml2::VariableName & name,
                                            const neml2::TensorType & type) const;
 
+  /// Whether a MATERIAL input should be gathered from interface material data
+  bool isInterfaceMaterialInput(const std::string & moose_name) const;
+
   /// Name of the NEML2 input file
   FileName _fname;
 
@@ -114,6 +119,12 @@ protected:
 
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
+
+  /// Interfaces this sub-block action applies to
+  const std::vector<BoundaryName> _interface;
+
+  /// If true, only create the boundary (interface) material and batch interface side data
+  const bool _interface_only;
 
   /// Input variables to skip (i.e., not to set up mappings for)
   std::vector<std::string> _skip_input_variables;
