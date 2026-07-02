@@ -873,6 +873,8 @@ class TestHarness:
                 part2_params = part2.parameters()
                 part2_params["prereq"].append(part1.getTestNameShort())
                 part2_params["delete_output_before_running"] = False
+                if hasattr(part2, "setDeleteOutputAfterRunning"):
+                    part2.setDeleteOutputAfterRunning(False)
                 part2_params["cli_args"].append(
                     "--recover --recoversuffix " + self.options.recoversuffix
                 )

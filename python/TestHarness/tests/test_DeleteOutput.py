@@ -8,8 +8,33 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
+import tempfile
 
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarnessTestCase import MOOSE_DIR, MOOSE_PYTHON, TestHarnessTestCase
+
+TESTER_DIR = os.path.join(MOOSE_PYTHON, "TestHarness", "testers")
+if TESTER_DIR not in sys.path:
+    sys.path.append(TESTER_DIR)
+
+from CheckFiles import CheckFiles
+
+
+def _make_check_files_params(test_dir):
+    params = CheckFiles.validParams()
+    params["type"] = "CheckFiles"
+    params["test_name"] = "test_dir.test_name"
+    params["test_name_short"] = "test_name"
+    params["command"] = "/usr/bin/touch"
+    params["check_files"] = ["cleanup.txt"]
+    params["moose_dir"] = MOOSE_DIR
+    params["moose_python_dir"] = MOOSE_PYTHON
+    params["test_dir"] = test_dir
+    params["spec_file"] = "tests"
+    params["unique_test_id"] = "abc123"
+    params["min_reported_time"] = 0
+    params.addPrivateParam("_validation_classes", [])
+    return params
 
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -59,3 +84,23 @@ class TestHarnessTester(TestHarnessTestCase):
             minimal_capabilities=True,
             post_run=post_run,
         )
+
+    def testRecoverPart2KeepsOutputAfterRun(self):
+        """
+        Test that the harness-generated recover part2 cleanup setting does not delete outputs.
+        """
+
+        with tempfile.TemporaryDirectory() as test_dir:
+            output = os.path.join(test_dir, "cleanup.txt")
+            open(output, "w").close()
+
+            params = _make_check_files_params(test_dir)
+            params.setParamByUser("delete_output_before_running", False)
+            tester = CheckFiles("recover_keeps_output", params)
+            self.assertTrue(tester._delete_output_after_running)
+
+            tester.parameters()["delete_output_before_running"] = False
+            tester.setDeleteOutputAfterRunning(False)
+            tester.postRun(None)
+
+            self.assertTrue(os.path.exists(output))
