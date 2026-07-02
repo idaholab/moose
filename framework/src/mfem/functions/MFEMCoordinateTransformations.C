@@ -11,6 +11,8 @@
 
 #include "MFEMCoordinateTransformations.h"
 
+#include "FEProblemBase.h"
+
 #include <cmath>
 
 registerMooseObject("MooseApp", MFEMCoordinateTransformations);
@@ -18,23 +20,20 @@ registerMooseObject("MooseApp", MFEMCoordinateTransformations);
 InputParameters
 MFEMCoordinateTransformations::validParams()
 {
-  InputParameters params = MooseParsedFunction::validParams();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "Function object that declares MFEM coordinate-dependent coefficients.");
   params.addRequiredParam<MooseEnum>(
       "coord_type", MooseEnum("RZ"), "Coordinate system type. Currently only RZ is supported.");
   params.addParam<Real>(
       "inv_r_eps", 1e-12, "Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2).");
-
-  params.set<std::string>("expression") = "0";
-  params.suppressParameter<std::string>("expression");
-
   return params;
 }
 
 MFEMCoordinateTransformations::MFEMCoordinateTransformations(const InputParameters & parameters)
-  : MooseParsedFunction(parameters),
-    _mfem_problem(static_cast<MFEMProblem &>(_pfb_feproblem)),
+  : Function(parameters),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(
+        *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))),
     _coord_type(getParam<MooseEnum>("coord_type")),
     _inv_r_eps(getParam<Real>("inv_r_eps"))
 {

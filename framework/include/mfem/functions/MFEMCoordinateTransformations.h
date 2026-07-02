@@ -23,13 +23,16 @@
  *   <name>_inv_r
  *   <name>_two_pi_r
  */
-class MFEMCoordinateTransformations : public MooseParsedFunction
+class MFEMCoordinateTransformations : public Function
 {
 public:
   static InputParameters validParams();
 
   MFEMCoordinateTransformations(const InputParameters & parameters);
   virtual ~MFEMCoordinateTransformations() = default;
+
+  using Function::value;
+  virtual Real value(Real /*t*/, const Point & /*p*/) const override { return 0.0; }
 
   const MooseEnum & coordType() const { return _coord_type; }
   Real invREps() const { return _inv_r_eps; }
@@ -42,11 +45,9 @@ protected:
 
   /// Reference to the MFEMProblem instance
   MFEMProblem & _mfem_problem;
-
   /// Coordinate system type
   const MooseEnum _coord_type;
-
-  ///Regularization parameter for inv_r = 1 / sqrt(r^2 + eps^2)
+  /// Regularization parameter used in inv_r = 1/sqrt(r^2 + eps^2)
   const Real _inv_r_eps;
 };
 
