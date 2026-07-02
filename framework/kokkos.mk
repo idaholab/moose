@@ -69,38 +69,42 @@ ifeq ($(PETSC_HAVE_SYCL),1)
 endif
 
 ifneq ($(PETSC_HAVE_CUDA),)
-  KOKKOS_DEVICE     := CUDA
-  KOKKOS_ARCH       := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
-  KOKKOS_COMPILER   := NVCC
-  KOKKOS_CXX         = $(CUDA_COMPILER)
-  KOKKOS_CXXFLAGS    = -arch=sm_$(CUDA_ARCH) --extended-lambda
-  KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
-  KOKKOS_CXXFLAGS   += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
-  KOKKOS_CPPFLAGS    = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
-  KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler -arch=sm_$(CUDA_ARCH)
+  KOKKOS_DEVICE             := CUDA
+  KOKKOS_ARCH               := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
+  KOKKOS_COMPILER           := NVCC
+  KOKKOS_CXX                 = $(CUDA_COMPILER)
+  KOKKOS_CXXFLAGS            = -arch=sm_$(CUDA_ARCH) --extended-lambda --relocatable-device-code=true --dlink-time-opt
+  KOKKOS_CXXFLAGS           += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
+  KOKKOS_CXXFLAGS           += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
+  KOKKOS_CPPFLAGS            = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
+  KOKKOS_LDFLAGS             = --forward-unknown-to-host-compiler --relocatable-device-code=true --dlink-time-opt -arch=sm_$(CUDA_ARCH)
+  KOKKOS_LIBS                = -lpetsckokkos
+  libmesh_PETSC_KOKKOS_LIBS := $(filter %petsckokkos %petsckokkosdlink,$(libmesh_LIBS))
+  libmesh_LIBS              := $(filter-out %petsckokkos %petsckokkosdlink,$(libmesh_LIBS))
 else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
-  KOKKOS_DEVICE     := HIP
-  KOKKOS_ARCH       :=
-  KOKKOS_COMPILER   := HIPCC
-  KOKKOS_CXX         = $(HIP_COMPILER)
-  KOKKOS_CXXFLAGS    =
-  KOKKOS_CPPFLAGS    =
-  KOKKOS_LDFLAGS     =
+  KOKKOS_DEVICE             := HIP
+  KOKKOS_ARCH               :=
+  KOKKOS_COMPILER           := HIPCC
+  KOKKOS_CXX                 = $(HIP_COMPILER)
+  KOKKOS_CXXFLAGS            =
+  KOKKOS_CPPFLAGS            =
+  KOKKOS_LDFLAGS             =
 else ifneq ($(PETSC_HAVE_SYCL),) # To be determined for SYCL
-  KOKKOS_DEVICE     := SYCL
-  KOKKOS_ARCH       :=
-  KOKKOS_COMPILER   := DPCPP
-  KOKKOS_CXX         = $(SYCL_COMPILER)
-  KOKKOS_CXXFLAGS    = -fsycl
-  KOKKOS_CPPFLAGS    =
-  KOKKOS_LDFLAGS     =
+  KOKKOS_DEVICE             := SYCL
+  KOKKOS_ARCH               :=
+  KOKKOS_COMPILER           := DPCPP
+  KOKKOS_CXX                 = $(SYCL_COMPILER)
+  KOKKOS_CXXFLAGS            = -fsycl
+  KOKKOS_CPPFLAGS            =
+  KOKKOS_LDFLAGS             =
 else
-  KOKKOS_COMPILER   := CPU
-  KOKKOS_CXX         = $(libmesh_CXX)
-  KOKKOS_CXXFLAGS    = $(CXXFLAGS) $(libmesh_CXXFLAGS) -x c++
-  KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
-  KOKKOS_LDFLAGS     =
-  ENABLE_KOKKOS_GPU := false
+  KOKKOS_COMPILER           := CPU
+  KOKKOS_CXX                 = $(libmesh_CXX)
+  KOKKOS_CXXFLAGS            = $(CXXFLAGS) $(libmesh_CXXFLAGS) -x c++
+  KOKKOS_CPPFLAGS            = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
+  KOKKOS_LDFLAGS             =
+  KOKKOS_LIBS                =
+  ENABLE_KOKKOS_GPU         := false
 endif
 
 ifeq ($(ENABLE_KOKKOS_GPU),false)
@@ -113,15 +117,21 @@ endif
 KOKKOS_CXXFLAGS += -DMOOSE_KOKKOS_SCOPE=1 -DMETAPHYSICL_KOKKOS_COMPILATION=1 -fPIC
 KOKKOS_LDFLAGS  += $(libmesh_LDFLAGS)
 KOKKOS_INCLUDE   = $(libmesh_INCLUDE)
-KOKKOS_LIBS      = $(libmesh_LIBS)
 
 ifeq ($(METHOD),opt)
   KOKKOS_CXXFLAGS += -DNDEBUG
 endif
 
 ifeq ($(KOKKOS_COMPILER),CPU)
+  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).la
+else ifeq ($(KOKKOS_COMPILER),NVCC)
+  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).a
+else
+  KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).so
+endif
 
-KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).la
+ifeq ($(KOKKOS_COMPILER),CPU)
+
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
@@ -131,7 +141,6 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
 
 else
 
-KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).so
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
