@@ -68,6 +68,7 @@ public:
   virtual void AssembleGradPA(const mfem::Vector &x, const mfem::FiniteElementSpace& fes) override;
   virtual void AddMultPA(const mfem::Vector &x, mfem::Vector &y) const override;
   virtual void AddMultGradPA(const mfem::Vector &x, mfem::Vector &y) const override;
+  virtual void AssembleGradDiagonalPA(mfem::Vector &diag) const override;
 
   // pass in pointer to a quadrature space, so that the assembly method
   // can fetch what it needs

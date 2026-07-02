@@ -172,6 +172,22 @@ void NLCurlCurlIntegrator::AddMultPA(const mfem::Vector &x, mfem::Vector &y) con
                       mapsC->Gt, pa_res_data, x, y, false);
 }
 
+void NLCurlCurlIntegrator::AssembleGradDiagonalPA(mfem::Vector &diag) const {
+  mfem::CurlCurlIntegrator::DiagonalPAKernels::Run(dim,
+                                                   dofs1D,
+                                                   quad1D,
+                                                   dofs1D,
+                                                   quad1D,
+                                                   symmetric,
+                                                   ne,
+                                                   mapsO->B,
+                                                   mapsC->B,
+                                                   mapsO->G,
+                                                   mapsC->G,
+                                                   pa_grad_data,
+                                                   diag);
+}
+
 // For now, we call this from AssemblePA and AssembleGradPA
 void NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace& fes, mfem::QuadratureSpace*& qs) {
   // start with some basic stuff
