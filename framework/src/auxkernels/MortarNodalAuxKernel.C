@@ -119,6 +119,11 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
+  mooseAssert(
+      _var.isNodalDefined(),
+      "MortarNodalAuxKernel expected the auxiliary variable '"
+          << _var.name()
+          << "' to have nodal degrees of freedom at the current node after reinitializing.");
   _var.computeNodalValues();
 
   // If the node doesn't have corresponding mortar segments, force the value assigned in this step
