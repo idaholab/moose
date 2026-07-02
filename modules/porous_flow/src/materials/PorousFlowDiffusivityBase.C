@@ -77,7 +77,7 @@ PorousFlowDiffusivityBaseTempl<is_ad>::computeQpProperties()
 
     for (unsigned int comp = 0; comp < _num_components; ++comp)
     {
-      _diffusion_coeff[_qp][ph][comp] = _input_diffusion_coeff[ph + comp];
+      _diffusion_coeff[_qp][ph][comp] = _input_diffusion_coeff[ph * _num_components + comp];
 
       if (!is_ad)
         (*_ddiffusion_coeff_dvar)[_qp][ph][comp].assign(_num_var, 0.0);
