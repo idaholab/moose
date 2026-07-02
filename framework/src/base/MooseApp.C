@@ -1936,8 +1936,11 @@ MooseApp::collectCitations(std::map<std::string, std::string> & citations) const
   // executioner, so only descend once one exists; nested MultiApps are handled by the recursion.
   if (_executor || _executioner)
     for (const auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
-      for (unsigned int i = 0; i < multi_app->numLocalApps(); ++i)
+    {
+      multi_app->createAppsIfNeeded();
+      for (const auto i : make_range(multi_app->numLocalApps()))
         multi_app->localApp(i)->collectCitations(citations);
+    }
 }
 
 void

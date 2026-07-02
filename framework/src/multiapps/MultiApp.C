@@ -384,6 +384,13 @@ MultiApp::setupPositions()
 }
 
 void
+MultiApp::createAppsIfNeeded()
+{
+  if (!_use_positions && _apps.empty())
+    createApps();
+}
+
+void
 MultiApp::createApps()
 {
   if (!_has_an_app)
