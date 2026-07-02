@@ -924,6 +924,8 @@ public:
    */
   bool hasCoupledValue(const std::string & coupling_name) const
   {
+    mooseDeprecated("InputParameters::hasCoupledValue() is deprecated. Use "
+                    "InputParameters::hasCoupledVar() instead.");
     return hasCoupledVar(coupling_name);
   }
 
