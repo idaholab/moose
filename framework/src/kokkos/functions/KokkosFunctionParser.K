@@ -338,9 +338,9 @@ RPNEvaluator::RPNEvaluator(const RPNEvaluator & evaluator)
     else if (type == VariableType::FIELD)
       _fields[idx] = *static_cast<const VariableValue *>(ptr);
     else if (type == VariableType::MATERIAL)
-      _properties.emplace(idx, *static_cast<const MaterialProperty<Real> *>(ptr));
+      _properties.emplace({idx}, *static_cast<const MaterialProperty<Real> *>(ptr));
     else if (type == VariableType::FUNCTION)
-      _functions.emplace(idx, *static_cast<const Function *>(ptr));
+      _functions.emplace({idx}, *static_cast<const Function *>(ptr));
   }
 
   _scalars.copyToDevice();

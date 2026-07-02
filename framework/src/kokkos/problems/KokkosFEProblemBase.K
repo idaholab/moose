@@ -398,21 +398,21 @@ FEProblemBase::initKokkos()
     if (!needs_fe)
       // No FE/QP-based variables: allocate a plain Kokkos::System. Covers FV-only and
       // scalar-only.
-      _kokkos_systems.emplace(sys_num, sys);
+      _kokkos_systems.emplace({sys_num}, sys);
     else if (needs_fv)
     {
       // Mixed FV + FE/QP: construct Kokkos::System first, then FESystem via the
       // sharing constructor so both objects operate on the same device memory.
       // FV kernels write through Kokkos::System; FE/QP kernels read and write
       // through FESystem; shared device pointers keep them consistent.
-      _kokkos_systems.emplace(sys_num, sys);
-      _kokkos_fe_systems.emplace(sys_num, _kokkos_systems[sys_num], sys);
+      _kokkos_systems.emplace({sys_num}, sys);
+      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num], sys);
     }
     else
       // Pure FE/QP (or FE/QP + scalar): FESystem inherits Kokkos::System, so a standalone
       // FESystem is self-contained. No separate Kokkos::System entry is needed;
       // scalar variable data is accessible through the inherited base.
-      _kokkos_fe_systems.emplace(sys_num, sys);
+      _kokkos_fe_systems.emplace({sys_num}, sys);
   };
 
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)

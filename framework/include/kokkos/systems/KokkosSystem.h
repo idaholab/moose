@@ -415,7 +415,7 @@ private:
  * appropriate Kokkos systems depending on the architecture.
  */
 // clang-format off
-#define MakeSystemHolder(SystemTypeName)                                                                 \
+#define MakeSystemHolder(SystemTypeName)                                                           \
   class SystemTypeName##Holder                                                                     \
   {                                                                                                \
   public:                                                                                          \

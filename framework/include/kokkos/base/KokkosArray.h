@@ -439,15 +439,6 @@ public:
     createInternal<false, true, false>(n...);
   }
   /**
-   * Placement-new construct slot i from args, recording initialization
-   * @param i The slot index
-   * @param args Arguments forwarded to T's constructor
-   * @returns Reference to the constructed element
-   */
-  template <typename... Args>
-  T & emplace(index_type i, Args &&... args);
-
-  /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
    */
@@ -653,6 +644,14 @@ protected:
    */
   template <typename TargetSpace, typename SourceSpace>
   void copyInternal(T * target, const T * source, index_type n);
+  /**
+   * Placement-new construct slot i from args, recording initialization
+   * @param i The dimensionless slot index
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename... Args>
+  T & emplaceAt(index_type i, Args &&... args);
 #endif
 
 private:
@@ -837,11 +836,11 @@ ArrayBase<T, dimension, index_type>::isSlotConstructed(index_type i) const
 template <typename T, unsigned int dimension, typename index_type>
 template <typename... Args>
 T &
-ArrayBase<T, dimension, index_type>::emplace(index_type i, Args &&... args)
+ArrayBase<T, dimension, index_type>::emplaceAt(index_type i, Args &&... args)
 {
   mooseAssert(_is_host_alloc && _is_malloc,
-              "emplace requires a malloc-allocated array (create<false>)");
-  mooseAssert(i < _size, "emplace index out of bounds");
+              "emplaceAt requires a malloc-allocated array (create<false>)");
+  mooseAssert(i < _size, "emplaceAt index out of bounds");
   mooseAssert(_slots_constructed, "_slots_constructed must exist for malloc arrays");
 
   new (_host_data + i) T(std::forward<Args>(args)...);
@@ -1411,7 +1410,7 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
   if constexpr (ArrayDeepCopy<T>::value)
   {
     for (index_type i = 0; i < _size; ++i)
-      emplace(i, array._host_data[i]);
+      emplaceAt(i, array._host_data[i]);
 
     copyToDevice();
   }
@@ -1645,74 +1644,87 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[dimension]) const
   {
-    return operatorInternal(idx, std::make_integer_sequence<unsigned int, dimension>{});
+    return this->operator[](linearIndex(idx));
   }
+  /**
+   * Placement-new construct an entry from args, recording initialization
+   * @param idx The array storing the indices
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename idx_type, typename... Args>
+  T & emplace(const idx_type (&idx)[dimension], Args &&... args);
 #endif
 
 private:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Internal method for calling operator() with array indices
+   * Get the dimensionless index for a multi-dimensional index
    */
-  template <unsigned int... i>
-  KOKKOS_FUNCTION T & operatorInternal(const signed_index_type (&idx)[dimension],
-                                       std::integer_sequence<unsigned int, i...>) const
-  {
-    return operator()(idx[i]...);
-  }
+  template <typename... indices>
+  KOKKOS_FUNCTION index_type linearIndex(indices... i) const;
+  /**
+   * Get the dimensionless index for indices stored in an array
+   */
+  template <typename idx_type>
+  KOKKOS_FUNCTION index_type linearIndex(const idx_type (&idx)[dimension]) const;
 #endif
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename idx_type, typename... Args>
+T &
+Array<T, dimension, index_type, layout>::emplace(const idx_type (&idx)[dimension], Args &&... args)
+{
+  return this->emplaceAt(linearIndex(idx), std::forward<Args>(args)...);
+}
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 template <typename... indices>
-KOKKOS_FUNCTION T &
-Array<T, dimension, index_type, layout>::operator()(indices... i) const
+KOKKOS_FUNCTION index_type
+Array<T, dimension, index_type, layout>::linearIndex(indices... i) const
 {
   static_assert((std::is_convertible<indices, signed_index_type>::value && ...),
                 "All arguments must be convertible to signed_index_type");
   static_assert(sizeof...(i) == dimension, "Number of arguments should match array dimension");
 
-#ifndef NDEBUG
+  const signed_index_type idx[dimension] = {static_cast<signed_index_type>(i)...};
+
+  return linearIndex(idx);
+}
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename idx_type>
+KOKKOS_FUNCTION index_type
+Array<T, dimension, index_type, layout>::linearIndex(const idx_type (&idx)[dimension]) const
+{
+  static_assert(std::is_convertible<idx_type, signed_index_type>::value,
+                "All indices must be convertible to signed_index_type");
+
+  index_type linear_idx = 0;
+
+  for (unsigned int d = 0; d < dimension; ++d)
   {
-    signed_index_type idx[dimension] = {static_cast<signed_index_type>(i)...};
+    const auto i = static_cast<signed_index_type>(idx[d]);
 
-    for (unsigned int d = 0; d < sizeof...(i); ++d)
-      KOKKOS_ASSERT(idx[d] - _d[d] >= 0 && static_cast<index_type>(idx[d] - _d[d]) < _n[d]);
-  }
-#endif
+    KOKKOS_ASSERT(i - _d[d] >= 0 && static_cast<index_type>(i - _d[d]) < _n[d]);
 
-  index_type idx = 0;
-  unsigned int d = 0;
-
-  if (_is_offset)
-  {
-    if constexpr (layout == LayoutType::LEFT)
-      (((idx += (d == 0 ? static_cast<signed_index_type>(i) - _d[d]
-                        : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
-        ++d),
-       ...);
+    if (_is_offset)
+      linear_idx += static_cast<index_type>(i - _d[d]) * _s[d];
     else
-      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i) - _d[d]
-                                    : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
-        ++d),
-       ...);
-  }
-  else
-  {
-    if constexpr (layout == LayoutType::LEFT)
-      (((idx +=
-         (d == 0 ? static_cast<signed_index_type>(i) : static_cast<signed_index_type>(i) * _s[d])),
-        ++d),
-       ...);
-    else
-      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i)
-                                    : static_cast<signed_index_type>(i) * _s[d])),
-        ++d),
-       ...);
+      linear_idx += static_cast<index_type>(i) * _s[d];
   }
 
-  return this->operator[](idx);
+  return linear_idx;
+}
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename... indices>
+KOKKOS_FUNCTION T &
+Array<T, dimension, index_type, layout>::operator()(indices... i) const
+{
+  return this->operator[](linearIndex(i...));
 }
 #endif
 
@@ -1831,13 +1843,16 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(signed_index_type i) const
   {
-    KOKKOS_ASSERT(i - _d[0] >= 0 && static_cast<index_type>(i - _d[0]) < _n[0]);
-
-    if (_is_offset)
-      return this->operator[](i - _d[0]);
-    else
-      return this->operator[](i);
+    return this->operator[](linearIndex(i));
   }
+  /**
+   * Placement-new construct an entry from args, recording initialization
+   * @param idx The array storing the index
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename idx_type, typename... Args>
+  T & emplace(const idx_type (&idx)[1], Args &&... args);
   /**
    * Device BLAS operations
    */
@@ -1869,9 +1884,38 @@ public:
    */
   T nrm2();
   ///}@
+
+private:
+  /**
+   * Get the dimensionless index for an array index
+   */
+  KOKKOS_FUNCTION index_type linearIndex(signed_index_type i) const;
 #endif
 };
 ///@}
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, typename index_type>
+template <typename idx_type, typename... Args>
+T &
+Array<T, 1, index_type, LayoutType::LEFT>::emplace(const idx_type (&idx)[1], Args &&... args)
+{
+  return this->emplaceAt(linearIndex(idx[0]), std::forward<Args>(args)...);
+}
+
+template <typename T, typename index_type>
+KOKKOS_FUNCTION index_type
+Array<T, 1, index_type, LayoutType::LEFT>::linearIndex(
+    typename Array<T, 1, index_type, LayoutType::LEFT>::signed_index_type i) const
+{
+  KOKKOS_ASSERT(i - _d[0] >= 0 && static_cast<index_type>(i - _d[0]) < _n[0]);
+
+  if (_is_offset)
+    return i - _d[0];
+  else
+    return i;
+}
+#endif
 
 template <typename T, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
 using Array1D = Array<T, 1, index_type, LayoutType::LEFT>;

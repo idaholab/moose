@@ -51,8 +51,8 @@ TEST_F(KokkosArrayTest, constructedEntriesSparseArray)
 {
   Moose::Kokkos::Array<unsigned int, 1> array;
   array.createHost<false>(5);
-  array.emplace(1, 10u);
-  array.emplace(3, 30u);
+  array.emplace({1}, 10u);
+  array.emplace({3}, 30u);
 
   std::vector<unsigned int> values;
   for (auto & entry : array.constructedEntries())
@@ -73,6 +73,42 @@ TEST_F(KokkosArrayTest, constructedEntriesSparseArray)
 
   const std::vector<unsigned int> expected_const = {11u, 31u};
   EXPECT_EQ(values, expected_const);
+}
+
+TEST_F(KokkosArrayTest, constructedEntriesSparseArray2D)
+{
+  Moose::Kokkos::Array<unsigned int, 2> array;
+  array.createHost<false>(3, 4);
+  array.offset(-1, 2);
+  array.emplace({-1, 2}, 12u);
+  array.emplace({1, 5}, 15u);
+
+  std::vector<unsigned int> values;
+  for (auto & entry : array.constructedEntries())
+    values.push_back(entry);
+
+  const std::vector<unsigned int> expected = {12u, 15u};
+  EXPECT_EQ(values, expected);
+  EXPECT_EQ(array[0], 12u);
+  EXPECT_EQ(array[11], 15u);
+}
+
+TEST_F(KokkosArrayTest, constructedEntriesSparseArray2DRightLayout)
+{
+  Moose::Kokkos::Array<unsigned int, 2, MOOSE_KOKKOS_INDEX_TYPE, Moose::Kokkos::LayoutType::RIGHT>
+      array;
+  array.createHost<false>(3, 4);
+  array.emplace({1, 2}, 12u);
+  array.emplace({2, 0}, 20u);
+
+  std::vector<unsigned int> values;
+  for (auto & entry : array.constructedEntries())
+    values.push_back(entry);
+
+  const std::vector<unsigned int> expected = {12u, 20u};
+  EXPECT_EQ(values, expected);
+  EXPECT_EQ(array[6], 12u);
+  EXPECT_EQ(array[8], 20u);
 }
 
 TEST_F(KokkosArrayTest, Array2D)
