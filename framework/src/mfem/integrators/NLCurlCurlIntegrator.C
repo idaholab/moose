@@ -129,9 +129,9 @@ void NLCurlCurlIntegrator::AssembleGradPA(const mfem::Vector &/*x*/, const mfem:
   mfem::QuadratureSpace* qs;
   PreAssemblySetup(fes, qs);
 
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::SYMMETRIC);  k_coeff.Project(_k_coef);
-  mfem::CoefficientVector dk_coeff(*qs, mfem::CoefficientStorage::SYMMETRIC); dk_coeff.Project(_dk_du_u_coef);
-  mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::SYMMETRIC); curl_coeff.Project(_curlu_vec);
+  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);  k_coeff.Project(_k_coef);
+  mfem::CoefficientVector dk_coeff(*qs, mfem::CoefficientStorage::FULL); dk_coeff.Project(_dk_du_u_coef);
+  mfem::CoefficientVector curl_coeff(*qs, mfem::CoefficientStorage::FULL); curl_coeff.Project(_curlu_vec);
 
   // todo - check if this clears out what's in the array
   pa_grad_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
@@ -150,7 +150,7 @@ void NLCurlCurlIntegrator::AssemblePA(const mfem::FiniteElementSpace& fes) {
   PreAssemblySetup(fes, qs);
 
   // now the qs has been allocated, we can project. Here we only need the k function
-  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::SYMMETRIC);  k_coeff.Project(_k_coef);
+  mfem::CoefficientVector k_coeff(*qs, mfem::CoefficientStorage::FULL);  k_coeff.Project(_k_coef);
 
   pa_res_data.SetSize(ndata * nq * ne, mfem::Device::GetMemoryType());
   NLCurlCurlPASetup(quad1D, ne, ir->GetWeights(), geom->J, k_coeff, pa_res_data);
@@ -222,17 +222,9 @@ void NLCurlCurlIntegrator::PreAssemblySetup(const mfem::FiniteElementSpace& fes,
   // the open basis is just for verification
   mooseAssert(dofs1D == mapsO->ndof + 1 && quad1D == mapsO->nqpt, "");
 
+  // This is just so we can project our coefficients in the caller.
+  // Should be deleted after use.
   qs = new mfem::QuadratureSpace(*mesh, *ir);
-  // mfem::QuadratureSpace qs(*mesh, *ir);
-  // mfem::CoefficientVector k_coeff(qs, mfem::CoefficientStorage::SYMMETRIC);
-  // mfem::CoefficientVector dk_coeff(qs, mfem::CoefficientStorage::SYMMETRIC);
-  // mfem::CoefficientVector curl_coeff(qs, mfem::CoefficientStorage::SYMMETRIC);
-
-  // // don't check, like in the normal version. Just project.
-  // // This is probably a performance bottleneck
-  // k_coeff.Project(_k_coef);
-  // dk_coeff.Project(_dk_du_u_coef);
-  // curl_coeff.Project(_curlu_vec);
 
   symmetric = true; // we can hardcode this
   const int sym_dims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
