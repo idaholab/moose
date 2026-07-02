@@ -220,15 +220,19 @@ MooseVariableBase::getSolution(const Moose::StateArg & state) const
 bool
 MooseVariableBase::usesQpBasedLoops() const
 {
-  mooseError("Base class should not assume anything regarding this. In an ideal world this would "
-             "be pure virtual but we can't do that because we register MooseVariableBase as an "
-             "available variable type for the user");
+  mooseAssert(false,
+              "Base class should not assume anything regarding this. In an ideal world this would "
+              "be pure virtual but we can't do that because we register MooseVariableBase as an "
+              "available variable type for the user");
+  return {};
 }
 
 bool
 MooseVariableBase::usesGeometricInfoBasedLoops() const
 {
-  mooseError("Base class should not assume anything regarding this. In an ideal world this would "
-             "be pure virtual but we can't do that because we register MooseVariableBase as an "
-             "available variable type for the user");
+  mooseAssert(false,
+              "Base class should not assume anything regarding this. In an ideal world this would "
+              "be pure virtual but we can't do that because we register MooseVariableBase as an "
+              "available variable type for the user");
+  return {};
 }

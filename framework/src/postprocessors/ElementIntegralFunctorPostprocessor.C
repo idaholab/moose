@@ -60,7 +60,7 @@ ElementIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
 {
   Moose::ElemQpArg elem_qp = {_current_elem, _qp, _qrule, _q_point[_qp]};
   return MetaPhysicL::raw_value(_prefactor(elem_qp, determineState()) *
-                                _functor(elem_qp, determineState()));
+                                MetaPhysicL::raw_value(_functor(elem_qp, determineState())));
 }
 
 template <bool is_ad>
@@ -69,7 +69,7 @@ ElementIntegralFunctorPostprocessorTempl<is_ad>::cellAverage()
 {
   const Moose::ElemArg elem_arg = makeElemArg(_current_elem);
   return MetaPhysicL::raw_value(_prefactor(elem_arg, determineState()) *
-                                _functor(elem_arg, determineState()));
+                                MetaPhysicL::raw_value(_functor(elem_arg, determineState())));
 }
 
 template class ElementIntegralFunctorPostprocessorTempl<false>;
