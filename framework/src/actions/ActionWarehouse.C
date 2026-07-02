@@ -11,6 +11,7 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 #include "MooseObjectAction.h"
+#include "PhysicsBase.h"
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
@@ -59,6 +60,12 @@ ActionWarehouse::sortUserObjectActions(std::list<Action *> & actions) const
   for (const auto act : actions)
     if (dynamic_cast<MooseObjectAction *>(act))
       action_for_uo_name.emplace(act->name(), act);
+    // A Physics does not build its UserObjects under its own action name, so it declares the names
+    // it supplies through getSuppliedUserObjects(). Key those to the Physics action so an object
+    // referencing a Physics-supplied UserObject is constructed after the Physics adds it.
+    else if (const auto physics = dynamic_cast<const PhysicsBase *>(act))
+      for (const auto & uo_name : physics->getSuppliedUserObjects())
+        action_for_uo_name.emplace(uo_name, act);
 
   // Seed the resolver in the current (input-file) order so that independent UserObjects keep their
   // input order (DependencyResolver resolves in insertion order modulo dependencies).

@@ -16,11 +16,13 @@ InputParameters
 AddUserObjectPhysics::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
-  params.addClassDescription(
-      "Test Physics that adds a UserObject depending on another UserObject at construction.");
-  params.addRequiredParam<UserObjectName>("dependency",
-                                          "Name of a UserObject that the UserObject added by this "
-                                          "Physics resolves in its constructor.");
+  params.addClassDescription("Test Physics that adds a UserObject, optionally depending on another "
+                             "UserObject at construction.");
+  params.addParam<UserObjectName>("dependency",
+                                  "Name of a UserObject that the UserObject added by this Physics "
+                                  "resolves in its constructor. If unset, the added UserObject has "
+                                  "no dependency and only serves as one other objects may depend "
+                                  "on.");
   return params;
 }
 
@@ -29,13 +31,22 @@ AddUserObjectPhysics::AddUserObjectPhysics(const InputParameters & parameters)
 {
 }
 
+std::vector<UserObjectName>
+AddUserObjectPhysics::getSuppliedUserObjects() const
+{
+  return {name() + "_uo"};
+}
+
 void
 AddUserObjectPhysics::addUserObjects()
 {
   auto params = getFactory().getValidParams("UserObjectInterfaceTest");
-  params.set<UserObjectName>("uo") = getParam<UserObjectName>("dependency");
-  // 'has' makes the added UserObject check, in its constructor, that 'dependency' already exists;
-  // it errors if the dependency has not been constructed yet.
-  params.set<bool>("has") = true;
-  getProblem().addUserObject("UserObjectInterfaceTest", name() + "_uo", params);
+  if (isParamValid("dependency"))
+  {
+    params.set<UserObjectName>("uo") = getParam<UserObjectName>("dependency");
+    // 'has' makes the added UserObject check, in its constructor, that 'dependency' already exists;
+    // it errors if the dependency has not been constructed yet.
+    params.set<bool>("has") = true;
+  }
+  addUserObject("UserObjectInterfaceTest", name() + "_uo", params);
 }

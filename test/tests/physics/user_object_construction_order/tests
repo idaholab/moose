@@ -9,4 +9,12 @@
                   'declared in the input, so that a physics action may add a user object that depends on a '
                   'user-supplied user object regardless of input file order.'
   []
+  [resolves_supplier]
+    type = RunApp
+    input = 'user_object_construction_order_supplier.i'
+    expect_out = 'hasUserObject success'
+    requirement = 'The system shall construct user objects declared in the input after the user objects added '
+                  'by a physics action that they depend on, so that a user-supplied user object may depend on '
+                  'a user object added by a physics action regardless of input file order.'
+  []
 []
