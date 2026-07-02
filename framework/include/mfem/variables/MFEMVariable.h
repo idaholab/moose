@@ -44,7 +44,7 @@ public:
 protected:
   /// Non-owning pointer to the MOOSE FESpace; null when using fespace_hierarchy.
   const MFEMFESpace * _fespace_ptr = nullptr;
-  /// The underlying MFEM FESpace — always populated regardless of which parameter was used.
+  /// The underlying MFEM FESpace - always populated regardless of which parameter was used.
   std::shared_ptr<mfem::ParFiniteElementSpace> _par_fespace;
   bool _is_scalar = false;
 

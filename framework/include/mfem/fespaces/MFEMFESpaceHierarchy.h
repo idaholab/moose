@@ -21,8 +21,8 @@
  * applying a sequence of h- and/or p-refinements.
  *
  * The `refinements` parameter is a vector of strings.  Each entry is either:
- *   - "h"  — add one uniformly h-refined level (same FEC, refined mesh)
- *   - "N"  — add one p-refined level at polynomial order N (N must be strictly
+ *   - "h"  - add one uniformly h-refined level (same FEC, refined mesh)
+ *   - "N"  - add one p-refined level at polynomial order N (N must be strictly
  *             greater than the current finest level's order)
  *
  * Total number of levels: refinements.size() + 1.
@@ -54,7 +54,7 @@ public:
 private:
   void buildHierarchy();
 
-  /// The hierarchy — shared_ptr so that GMS and ProblemData can co-own.
+  /// The hierarchy - shared_ptr so that GMS and ProblemData can co-own.
   std::shared_ptr<mfem::ParFiniteElementSpaceHierarchy> _hierarchy;
 
   /// FECs for p-refined levels. MFEM does not own them, so we keep them alive here.

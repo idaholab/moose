@@ -120,7 +120,7 @@ private:
 
   MGProxy * _mg_proxy = nullptr; ///< Non-owning pointer into _solver
 
-  // ---- per-level forms — kept alive across SetOperator calls ----
+  // ---- per-level forms - kept alive across SetOperator calls ----
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> _level_blfs;
   std::vector<std::shared_ptr<mfem::ParNonlinearForm>> _level_nlfs;
   // ---- constrained level operators; must be destroyed before forms ----

@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-// Forward declaration — full header (mfem/fem/fespacehierarchy.hpp) included by
+// Forward declaration - full header (mfem/fem/fespacehierarchy.hpp) included by
 // translation units that create or directly access FESpaceHierarchies.
 namespace mfem
 {

@@ -23,7 +23,7 @@ MFEMOperatorChebyshevSmoother::validParams()
       "Symmetric positive definite by construction; the maximum eigenvalue of D^{-1}A "
       "is estimated automatically via a power method. Suitable as a multigrid smoother "
       "without requiring a manual damping parameter.");
-  params.addParam<int>("order", 2, "Degree of the Chebyshev polynomial (1–4).");
+  params.addParam<int>("order", 2, "Degree of the Chebyshev polynomial (1-4).");
   return params;
 }
 

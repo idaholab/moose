@@ -103,7 +103,7 @@ MFEMFESpaceHierarchy::buildHierarchy()
                    name(),
                    "': cannot infer polynomial order from FEC name '",
                    current_fec_name,
-                   "' — expected a '_P<N>' suffix.");
+                   "' - expected a '_P<N>' suffix.");
 
       const int current_order = std::stoi(current_fec_name.substr(pos + 2));
       if (new_order <= current_order)

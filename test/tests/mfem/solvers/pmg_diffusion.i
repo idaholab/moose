@@ -1,13 +1,13 @@
 # MMS verification of p-multigrid (geometric multigrid) preconditioner.
 #
-# PDE:  -∇²u = f  on [0,1]²
-# Exact solution: u = sin(πx)sin(πy)
-# Forcing:        f = 2π²sin(πx)sin(πy)
-# BCs:            u = 0 on all four sides (exact solution is zero on ∂Ω)
+# PDE:  -Laplacian(u) = f  on [0,1]^2
+# Exact solution: u = sin(pi x)sin(pi y)
+# Forcing:        f = 2 pi^2 sin(pi x)sin(pi y)
+# BCs:            u = 0 on all four sides (exact solution is zero on boundary)
 #
 # Multigrid hierarchy (two levels):
 #   level 0 (coarse): H1 order 1
-#   level 1 (fine):   H1 order 2  — variable lives here via fespace = h1_hierarchy
+#   level 1 (fine):   H1 order 2  - variable lives here via fespace = h1_hierarchy
 #
 # Solvers:
 #   coarse_solver = coarse     (CG + BoomerAMG on the coarse system)
