@@ -14,16 +14,15 @@ registerADMooseObject("MooseApp", FVReaction);
 InputParameters
 FVReaction::validParams()
 {
-  InputParameters params = FVElementalKernel::validParams();
+  InputParameters params = FVQpElementalKernel::validParams();
   params.addClassDescription("Simple consuming reaction term");
   params.addParam<Real>("rate", 1.0, "Relative amount consumed per unit time.");
   return params;
 }
 
 FVReaction::FVReaction(const InputParameters & parameters)
-  : FVElementalKernel(parameters), _rate(getParam<Real>("rate"))
+  : FVQpElementalKernel(parameters), _rate(getParam<Real>("rate"))
 {
-  _var.requireQpComputations();
 }
 
 ADReal

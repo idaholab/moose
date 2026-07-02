@@ -1,0 +1,34 @@
+[Tests]
+  design = 'KokkosLinearFVDiffusion.md'
+  issues = '#30655'
+  [mms-kokkos-diffusion-2d-orthogonal]
+    requirement = 'The system shall be able to solve an orthogonal two-dimensional diffusion problem with a linear finite volume discretization using Kokkos for process-local parallel dispatch'
+    [dirichlet_only]
+      type = MMSTest
+      input = 'test.py'
+      test_case = TestKokkosLinearFVDiffusion2DOrthogonal
+      detail = 'with only Dirichlet boundary conditions or'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      max_threads = 1
+    []
+    [mixed_dirichlet_neumann]
+      type = MMSTest
+      input = 'test.py'
+      test_case = TestKokkosLinearFVDiffusion2DOrthogonalNeumann
+      detail = 'with mixed Dirichlet and Neumann boundary conditions.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      max_threads = 1
+    []
+    [internal_neumann_block_restricted]
+      type = MMSTest
+      input = 'test.py'
+      test_case = TestKokkosLinearFVDiffusion2DInternalNeumann
+      detail = 'with Neumann boundary conditions on internal boundaries of two block-restricted variables.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      max_threads = 1
+    []
+  []
+[]

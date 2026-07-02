@@ -17,7 +17,7 @@ namespace Moose::Kokkos
 ReducerBase::ReducerBase(const MooseObject * object)
   : MeshHolder(*object->getMooseApp().feProblem().mesh().getKokkosMesh()),
     AssemblyHolder(object->getMooseApp().feProblem().kokkosAssembly()),
-    SystemHolder(object->getMooseApp().feProblem().getKokkosSystems()),
+    FESystemHolder(object->getMooseApp().feProblem().getKokkosFESystems()),
     _reducer_object(object)
 {
 }
@@ -25,7 +25,7 @@ ReducerBase::ReducerBase(const MooseObject * object)
 ReducerBase::ReducerBase(const ReducerBase & reducer)
   : MeshHolder(reducer),
     AssemblyHolder(reducer),
-    SystemHolder(reducer),
+    FESystemHolder(reducer),
     _reducer_object(reducer._reducer_object)
 {
 }

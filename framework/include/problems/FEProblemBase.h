@@ -11,7 +11,7 @@
 
 #ifdef MOOSE_KOKKOS_ENABLED
 #include "KokkosAssembly.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 #endif
 
 // MOOSE includes
@@ -242,9 +242,9 @@ public:
    */
   void trustUserCouplingMatrix();
 
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
 
   virtual bool hasVariable(const std::string & var_name) const override;
@@ -857,8 +857,8 @@ public:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Get all Kokkos systems that are associated with MOOSE nonlinear and auxiliary systems
-   * @returns The array of Kokkos systems
+   * Get the Kokkos System array (always populated when any Kokkos object exists)
+   * @returns The array of Kokkos System objects
    */
   ///@{
   Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
@@ -867,15 +867,40 @@ public:
     return _kokkos_systems;
   }
   ///@}
+
   /**
-   * Get the Kokkos system of a specified number that is associated with MOOSE nonlinear and
-   * auxiliary systems
+   * Get the Kokkos FESystem array (populated only when FE Kokkos objects exist)
+   * @returns The array of Kokkos FESystem objects
+   */
+  ///@{
+  Moose::Kokkos::Array<Moose::Kokkos::FESystem> & getKokkosFESystems()
+  {
+    return _kokkos_fe_systems;
+  }
+  const Moose::Kokkos::Array<Moose::Kokkos::FESystem> & getKokkosFESystems() const
+  {
+    return _kokkos_fe_systems;
+  }
+  ///@}
+
+  /**
+   * Get the Kokkos System of a specified number
    * @param sys_num The system number
-   * @returns The Kokkos system
+   * @returns The Kokkos System
    */
   ///@{
   Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num);
   const Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num) const;
+  ///@}
+
+  /**
+   * Get the Kokkos FESystem of a specified number
+   * @param sys_num The system number
+   * @returns The Kokkos FESystem
+   */
+  ///@{
+  Moose::Kokkos::FESystem & getKokkosFESystem(const unsigned int sys_num);
+  const Moose::Kokkos::FESystem & getKokkosFESystem(const unsigned int sys_num) const;
   ///@}
 #endif
 
@@ -979,6 +1004,12 @@ public:
   virtual void addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters);
+  virtual void addKokkosLinearFVKernel(const std::string & kernel_name,
+                                       const std::string & name,
+                                       InputParameters & parameters);
+  virtual void addKokkosLinearFVBC(const std::string & bc_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
 #endif
 
   virtual void
@@ -3100,7 +3131,10 @@ protected:
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  /// System array - sparsely populated (only slots for systems needing a Kokkos::System)
   Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
+  /// FESystem array - sparsely populated (only slots for systems needing a Kokkos::FESystem)
+  Moose::Kokkos::Array<Moose::Kokkos::FESystem> _kokkos_fe_systems;
 #endif
 
   /// Dimension of the subspace spanned by the vectors with a given prefix

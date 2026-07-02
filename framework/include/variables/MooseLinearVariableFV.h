@@ -206,7 +206,7 @@ public:
     return _boundary_id_to_bc;
   }
 
-  virtual void prepareIC() override {}
+  virtual void prepareIC() override;
 
   virtual bool isNodal() const override final { return false; }
 
@@ -225,6 +225,10 @@ public:
   virtual bool usesSecondPhiNeighbor() const override final { return false; }
 
   virtual void sizeMatrixTagData() override;
+
+  void requireQpComputations() const override { _compute_qp_data = true; }
+  bool usesQpBasedLoops() const override { return _compute_qp_data; }
+  bool usesGeometricInfoBasedLoops() const override { return true; }
 
 protected:
   /// Throw an error when somebody requests time-related data from this variable
@@ -248,6 +252,9 @@ protected:
   void cacheBoundaryBCMap();
 
   usingMooseVariableBaseMembers;
+
+  /// Whether QP computation has been requested for this variable (opt-in)
+  mutable bool _compute_qp_data = false;
 
   /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;

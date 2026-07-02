@@ -55,6 +55,8 @@ The test: Every changed line should trace directly to the user's request.
 
 - Never delete correct preexisting code comments.
 - Add comments when the code alone does not make clear what's happening.
+- Add Doxygen comments for classes and class members whose purpose is not
+  obvious from their names.
 - Use ASCII characters.
 
 ## 5. Code Style
@@ -64,11 +66,14 @@ The test: Every changed line should trace directly to the user's request.
   when iterating over the indices of a container.
 - MOOSE requires C++17, so modern C++ constructs up through that standard are
   encouraged where they increase code readability.
+- Put multiline method implementations outside class definitions.
 
 ## 6. Tool Use
 
 - Prefer builtin tools over bash commands whenever possible in the vein of
   reducing permission prompting.
+- Before building, always ask the user whether there is a conda environment that
+  should be activated.
 
 ## 7. Goal-Driven Execution
 

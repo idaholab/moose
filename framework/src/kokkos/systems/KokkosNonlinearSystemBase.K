@@ -95,7 +95,7 @@ void
 NonlinearSystemBase::setKokkosInitialSolution()
 {
   // The preset Dirichlet BCs can have coupled variables from other systems, so we grab all systems
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   auto tag = _fe_problem.addVectorTag("parallel_solution", Moose::VECTOR_TAG_SOLUTION);
 
@@ -107,7 +107,7 @@ NonlinearSystemBase::setKokkosInitialSolution()
     _kokkos_preset_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
         boundary, needed_fe_var_vector_tags);
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   systems.copyToDevice();
@@ -117,7 +117,7 @@ NonlinearSystemBase::setKokkosInitialSolution()
 
   Kokkos::fence();
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
@@ -139,7 +139,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
   // Resolve dependencies
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   systems[number()].setActiveResidualTags(tags);
 
@@ -171,7 +171,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   // Copy solution vectors and residuals and cache variable values at element quadature
   // points
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -220,7 +220,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (auto & system : systems)
+    for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
@@ -228,7 +228,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
   systems[number()].clearActiveResidualTags();
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
@@ -249,7 +249,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   // Resolve dependencies
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   systems[number()].setActiveResidualTags(tags);
 
@@ -262,10 +262,9 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   // Copy solution vectors and residuals
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
-
     {
       TIME_SECTION("KokkosCopy", 1);
       system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
@@ -288,7 +287,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (auto & system : systems)
+    for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
@@ -296,7 +295,7 @@ NonlinearSystemBase::computeKokkosNodalBCsResidual(const std::set<TagID> & tags)
 
   systems[number()].clearActiveResidualTags();
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
     system.clearActiveSolutionTags();
 }
 
@@ -318,7 +317,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
   // Resolve dependencies
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   systems[number()].setActiveMatrixTags(tags);
 
@@ -353,7 +352,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   // Copy solution vectors, initialize matrices, and cache variable values at element quadature
   // points
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -405,7 +404,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (auto & system : systems)
+    for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
@@ -413,7 +412,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
   systems[number()].clearActiveMatrixTags();
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
     system.clearActiveSolutionTags();
@@ -432,7 +431,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
   // Resolve dependencies
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   systems[number()].setActiveResidualTags(vector_tags);
   systems[number()].setActiveMatrixTags(matrix_tags);
@@ -468,7 +467,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   // Copy solution vectors and residuals, initialize matrices, and cache variable values at element
   // quadature points
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -521,7 +520,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   {
     TIME_SECTION("KokkosClose", 1);
 
-    for (auto & system : systems)
+    for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
   }
 
@@ -530,7 +529,7 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
   systems[number()].clearActiveResidualTags();
   systems[number()].clearActiveMatrixTags();
 
-  for (auto & system : systems)
+  for (auto & system : systems.constructedEntries())
   {
     system.clearActiveVariables();
     system.clearActiveSolutionTags();

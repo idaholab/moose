@@ -9,6 +9,8 @@
 
 #include "KokkosArrayTest.h"
 
+#include <vector>
+
 TEST_F(KokkosArrayTest, Array1D)
 {
   Moose::Kokkos::Array<unsigned int, 1> array(3);
@@ -21,6 +23,56 @@ TEST_F(KokkosArrayTest, Array1D)
 
   for (unsigned int i = 0; i < 3; ++i)
     EXPECT_EQ(array[i], i);
+}
+
+TEST_F(KokkosArrayTest, constructedEntriesInitializedArray)
+{
+  Moose::Kokkos::Array<unsigned int, 1> array(3);
+
+  unsigned int value = 0;
+  for (auto & entry : array.constructedEntries())
+    entry = ++value;
+
+  EXPECT_EQ(value, 3u);
+  EXPECT_EQ(array[0], 1u);
+  EXPECT_EQ(array[1], 2u);
+  EXPECT_EQ(array[2], 3u);
+
+  const auto & const_array = array;
+  std::vector<unsigned int> values;
+  for (const auto & entry : const_array.constructedEntries())
+    values.push_back(entry);
+
+  const std::vector<unsigned int> expected = {1u, 2u, 3u};
+  EXPECT_EQ(values, expected);
+}
+
+TEST_F(KokkosArrayTest, constructedEntriesSparseArray)
+{
+  Moose::Kokkos::Array<unsigned int, 1> array;
+  array.createHost<false>(5);
+  array.emplace(1, 10u);
+  array.emplace(3, 30u);
+
+  std::vector<unsigned int> values;
+  for (auto & entry : array.constructedEntries())
+  {
+    values.push_back(entry);
+    ++entry;
+  }
+
+  const std::vector<unsigned int> expected = {10u, 30u};
+  EXPECT_EQ(values, expected);
+  EXPECT_EQ(array[1], 11u);
+  EXPECT_EQ(array[3], 31u);
+
+  const auto & const_array = array;
+  values.clear();
+  for (const auto & entry : const_array.constructedEntries())
+    values.push_back(entry);
+
+  const std::vector<unsigned int> expected_const = {11u, 31u};
+  EXPECT_EQ(values, expected_const);
 }
 
 TEST_F(KokkosArrayTest, Array2D)

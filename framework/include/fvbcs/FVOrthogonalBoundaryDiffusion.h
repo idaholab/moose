@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "FVQpFluxBC.h"
 
 class Function;
 
@@ -18,7 +18,7 @@ class Function;
  * boundary value and the boundary cell centroid value. This only captures the orthogonal component
  * of the boundary diffusive flux
  */
-class FVOrthogonalBoundaryDiffusion : public FVFluxBC
+class FVOrthogonalBoundaryDiffusion : public FVQpFluxBC
 {
 public:
   FVOrthogonalBoundaryDiffusion(const InputParameters & parameters);

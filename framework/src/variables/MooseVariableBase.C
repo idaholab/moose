@@ -196,12 +196,12 @@ MooseVariableBase::initialSetup()
 {
   // Currently the scaling vector is only used through AD residual computing objects
   if ((_var_kind == Moose::VAR_SOLVER) && _subproblem.haveADObjects() &&
-      (_subproblem.automaticScaling() || (std::find_if(_scaling_factor.begin(),
-                                                       _scaling_factor.end(),
-                                                       [](const Real element) {
-                                                         return !MooseUtils::absoluteFuzzyEqual(
-                                                             element, 1.);
-                                                       }) != _scaling_factor.end())))
+      (_subproblem.automaticScaling() ||
+       (std::find_if(_scaling_factor.begin(),
+                     _scaling_factor.end(),
+                     [](const Real element)
+                     { return !MooseUtils::absoluteFuzzyEqual(element, 1.); }) !=
+        _scaling_factor.end())))
 
     _sys.addScalingVector();
 }
@@ -215,4 +215,20 @@ MooseVariableBase::getSolution(const Moose::StateArg & state) const
   // while the libMesh solution is frozen in the non-perturbed state
   return (state.state == 0) ? *this->_sys.currentSolution()
                             : this->_sys.solutionState(state.state, state.iteration_type);
+}
+
+bool
+MooseVariableBase::usesQpBasedLoops() const
+{
+  mooseError("Base class should not assume anything regarding this. In an ideal world this would "
+             "be pure virtual but we can't do that because we register MooseVariableBase as an "
+             "available variable type for the user");
+}
+
+bool
+MooseVariableBase::usesGeometricInfoBasedLoops() const
+{
+  mooseError("Base class should not assume anything regarding this. In an ideal world this would "
+             "be pure virtual but we can't do that because we register MooseVariableBase as an "
+             "available variable type for the user");
 }

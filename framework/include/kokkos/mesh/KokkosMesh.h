@@ -72,6 +72,11 @@ public:
   void update();
 
   /**
+   * Mark that LinearFV geometry data is needed; initLinearFV() will be called on the next update()
+   */
+  void setNeedsLinearFV() { _needs_linearfv = true; }
+
+  /**
    * Get the number of subdomains
    * @returns The number of subdomains
    */
@@ -90,7 +95,12 @@ public:
    * Get the number of local elements
    * @returns The number of local elements
    */
-  auto getNumLocalElements() const { return _num_local_elems; }
+  dof_id_type getNumLocalElements() const { return _num_local_elems; }
+  /**
+   * Get the total number of elements, i.e. the local elements plus the ghost elements
+   * @returns The total number of elements
+   */
+  dof_id_type getNumLocalAndPossiblyOneNeighborLayerGhostElements() const;
   /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -136,6 +146,11 @@ public:
    */
   ContiguousElementID getContiguousElementID(const Elem * elem) const;
   /**
+   * Get the ghost element ID map (host-side only)
+   * @returns Map from ghost Elem* to contiguous element ID
+   */
+  const auto & getGhostElemIdMapping() const { return _maps->ghost_elem_id_mapping; }
+  /**
    * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The range of contiguous element IDs in the subdomain
@@ -179,6 +194,8 @@ public:
    */
   KOKKOS_FUNCTION const auto & getElementInfo(ContiguousElementID elem) const
   {
+    KOKKOS_ASSERT(elem < _elem_info.size());
+
     return _elem_info[elem];
   }
   /**
@@ -191,6 +208,111 @@ public:
   {
     return _elem_neighbor(side, elem);
   }
+  /**
+   * Get the face area of an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The face area
+   */
+  KOKKOS_FUNCTION Real getFaceArea(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_area(side, elem);
+  }
+  /**
+   * Get the face centroid of an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The face centroid
+   */
+  KOKKOS_FUNCTION Real3 getFaceCentroid(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_centroid(side, elem);
+  }
+  /**
+   * Get the cell-center to face-center distance vector for an element side (all faces)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-face distance vector
+   */
+  KOKKOS_FUNCTION Real3 getFaceDCF(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cf(side, elem);
+  }
+  /**
+   * Get the cell-center to face-center distance magnitude for an element side (all faces)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-face distance magnitude
+   */
+  KOKKOS_FUNCTION Real getFaceDCFMag(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cf_mag(side, elem);
+  }
+  /**
+   * Get the cell-center to neighbor-center distance vector for an element side (internal faces
+   * only)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-neighbor distance vector
+   */
+  KOKKOS_FUNCTION Real3 getFaceDCN(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cn(side, elem);
+  }
+  /**
+   * Get the cell-center to neighbor-center distance magnitude for an element side (internal faces
+   * only)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-neighbor distance magnitude
+   */
+  KOKKOS_FUNCTION Real getFaceDCNMag(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cn_mag(side, elem);
+  }
+  /**
+   * @returns The boundary ID associated with an element side. If there is none, the returned value
+   * will be \p Moose::INVALID_BOUNDARY_ID
+   */
+  KOKKOS_FUNCTION BoundaryID getFaceBoundaryID(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_boundary_id(side, elem);
+  }
+  /**
+   * Get the element volume cached for Kokkos LinearFV
+   * @param elem The contiguous element ID
+   * @returns The element volume
+   */
+  KOKKOS_FUNCTION Real getElementVolume(ContiguousElementID elem) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_elem_volume[elem];
+  }
+  /**
+   * Get the element centroid cached for Kokkos LinearFV
+   * @param elem The contiguous element ID
+   * @returns The element centroid
+   */
+  KOKKOS_FUNCTION Real3 getElementCentroid(ContiguousElementID elem) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_elem_centroid[elem];
+  }
+
+  /**
+   * Allocate and populate the cached geometry data used by Kokkos LinearFV objects: element volumes
+   * and centroids, and per-face areas, centroids, cell-to-face and cell-to-neighbor vectors and
+   * their magnitudes, and boundary IDs
+   */
+  void initLinearFV();
+
   /**
    * Get the number of sides of an element type
    * @param elem_type The element type ID
@@ -227,6 +349,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getExtraElementID(ContiguousElementID elem, unsigned int index) const
   {
+    KOKKOS_ASSERT(elem < _extra_elem_ids.n(0));
     KOKKOS_ASSERT(index < _extra_elem_ids.n(1));
 
     return _extra_elem_ids(elem, index);
@@ -320,9 +443,13 @@ private:
      */
     std::vector<Node *> local_nodes;
     /**
-     * Map from the libMesh semi-local node to the contiguous node ID
+     * Map from off-process ghost node to the contiguous node ID
      */
-    std::unordered_map<const Node *, ContiguousNodeID> semi_local_node_id_mapping;
+    std::unordered_map<const Node *, ContiguousNodeID> ghost_node_id_mapping;
+    /**
+     * Map from off-process ghost Elem* to its contiguous element ID on this process
+     */
+    std::unordered_map<const Elem *, ContiguousElementID> ghost_elem_id_mapping;
     /**
      * Range of the contiguous element IDs in each subdomain
      */
@@ -356,6 +483,10 @@ private:
    * Number of local elements
    */
   dof_id_type _num_local_elems = 0;
+  /**
+   * Number of ghost (off-process neighbor) elements
+   */
+  dof_id_type _num_ghost_elems = 0;
   /**
    * Number of local nodes including semi-local nodes
    */
@@ -404,6 +535,29 @@ private:
    * Contiguous node IDs on each boundary
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
+
+  /// Whether initLinearFV() has been called and the geometry cache is populated
+  bool _linearfv_initialized = false;
+  /// Whether initLinearFV() should be called on the next update()
+  bool _needs_linearfv = false;
+  /// Cached element volumes indexed by contiguous element ID
+  Array<Real> _linearfv_elem_volume;
+  /// Cached element centroids indexed by contiguous element ID
+  Array<Real3> _linearfv_elem_centroid;
+  /// Cached face areas indexed by (side, contiguous element ID)
+  Array2D<Real> _linearfv_face_area;
+  /// Cached face centroids indexed by (side, contiguous element ID)
+  Array2D<Real3> _linearfv_face_centroid;
+  /// Cell-center to face-center distance vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _linearfv_face_d_cf;
+  /// Cell-center to face-center distance magnitudes indexed by (side, contiguous element ID)
+  Array2D<Real> _linearfv_face_d_cf_mag;
+  /// Cell-center to neighbor-center distance vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _linearfv_face_d_cn;
+  /// Cell-center to neighbor-center distance magnitudes indexed by (side, contiguous element ID)
+  Array2D<Real> _linearfv_face_d_cn_mag;
+  /// Boundary IDs for each face indexed by (side, contiguous element ID)
+  Array2D<BoundaryID> _linearfv_face_boundary_id;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -420,6 +574,12 @@ Mesh::isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const
   return target != end;
 }
 #endif
+
+inline dof_id_type
+Mesh::getNumLocalAndPossiblyOneNeighborLayerGhostElements() const
+{
+  return _num_local_elems + _num_ghost_elems;
+}
 
 /**
  * The Kokkos interface that holds the host reference of the Kokkos mesh and copies it to device
