@@ -363,11 +363,11 @@ MooseVariableDataBase<OutputType>::dofValuesPreviousNL() const
 
 template <typename OutputType>
 void
-MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
+MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  mooseAssert(idx < dof_values.size(), "idx is out of the bounds of degree of freedom values");
-  dof_values[idx] = value; // update variable nodal value
+  dof_values.resize(1);
+  dof_values[0] = value; // update variable nodal value
   _has_dof_values = true;
   _nodal_value = value;
 
@@ -379,12 +379,12 @@ MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value, unsig
 
 template <>
 void
-MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value,
-                                                      unsigned int idx)
+MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  for (decltype(idx) i = 0; i < dof_values.size(); ++i, ++idx)
-    dof_values[idx] = value(i);
+  dof_values.resize(Moose::dim);
+  for (const auto i : index_range(dof_values))
+    dof_values[i] = value(i);
 
   _has_dof_values = true;
   _nodal_value = value;

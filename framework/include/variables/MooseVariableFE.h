@@ -510,7 +510,7 @@ public:
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   virtual void setDofValue(const DofValue & value, unsigned int index) override;
 

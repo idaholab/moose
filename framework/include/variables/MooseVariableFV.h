@@ -166,7 +166,7 @@ public:
 
   virtual bool isNodalDefined() const override final { return false; }
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   virtual void setDofValue(const DofValue & value, unsigned int index) override;
 

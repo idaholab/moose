@@ -358,7 +358,7 @@ public:
     return _element_data->getContinuity();
   };
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   [[noreturn]] virtual const DofValues & nodalVectorTagValue(TagID) const override;
 

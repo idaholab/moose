@@ -687,7 +687,7 @@ MooseLinearVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/)
 {
   nodalError();
 }
