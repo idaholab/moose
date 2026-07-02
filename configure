@@ -1916,12 +1916,16 @@ printf "%s\n" "#define NEML2_ENABLED 1" >>confdefs.h
         if test "$neml2_library" = yes
 then :
 
-                    if test "${NEML2_DIR+set}" = set
+                                                                                                                        if test "${NEML2_DIR+set}" = set
 then :
   neml2_library="${NEML2_DIR}"
 else case e in #(
-  e) neml2_library="$ac_pwd/framework/contrib/neml2/installed/moose" ;;
+  e)                                                     neml2_library=`python3 -c 'import importlib.util as U, os; print(os.path.dirname(U.find_spec("neml2").origin))' 2>/dev/null` ;;
 esac
+fi
+                    if test "x$neml2_library" = x
+then :
+  as_fn_error $? "Could not locate neml2. Pass --with-neml2=<path>, set NEML2_DIR, or run scripts/update_and_rebuild_neml2.sh to build and install neml2 (it prints the path to use)." "$LINENO" 5
 fi
 
 fi

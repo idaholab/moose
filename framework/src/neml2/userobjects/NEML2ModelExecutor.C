@@ -16,10 +16,13 @@
 #ifdef NEML2_ENABLED
 #include <ATen/ATen.h>
 #include "libmesh/id_types.h"
-#include "neml2/tensors/functions/jacrev.h"
-#include "neml2/dispatchers/ValueMapLoader.h"
-#include "neml2/misc/string_utils.h"
-#include "neml2/base/Settings.h"
+#include "neml2/csrc/aoti/Exception.h"
+
+// parseLag / lagName / contains are shared with NEML2Action and live in NEML2Utils so the NEML2
+// unity build does not see duplicate definitions.
+using NEML2Utils::contains;
+using NEML2Utils::lagName;
+using NEML2Utils::parseLag;
 #endif
 
 registerMooseObject("MooseApp", NEML2ModelExecutor);
@@ -31,7 +34,7 @@ NEML2ModelExecutor::actionParams()
   params.addParam<bool>(
       "manage_state_advance",
       false,
-      "Keep state and forces on the device and advance it to old_state and old_forces without a "
+      "Keep state and forces on the device and advance it to old state and old forces without a "
       "roundtrip through MOOSE materials. This is only recommended for explicit time integration "
       "or when absolutely no restepping occurs (e.g. failed timesteps).");
   params.addParam<bool>(
@@ -104,12 +107,11 @@ NEML2ModelExecutor::initialSetup()
     // dependencies (that's already done in the constructor).
     const auto & uo = getUserObjectByName<MOOSEToNEML2>(gatherer_name, /*is_dependency=*/false);
 
-    // there's no need to gather old/older variables if we're managing state advance
-    auto sep = model().settings().history_separator();
-    auto [base_name, history_order] = neml2::parse_history(uo.NEML2Name(), sep);
-    if (_manage_state_advance && history_order > 0)
+    // there's no need to gather old values if we're managing state advance
+    const auto [base_name, lag] = parseLag(uo.NEML2Name());
+    if (_manage_state_advance && lag > 0)
       paramError("gatherers",
-                 "The gatherer for history variable `",
+                 "The gatherer for old variable `",
                  uo.NEML2Name(),
                  "` is not needed when `manage_state_advance = true`.");
 
@@ -120,28 +122,35 @@ NEML2ModelExecutor::initialSetup()
   // deal with user object provided model parameters
   for (const auto & gatherer_name : getParam<std::vector<UserObjectName>>("param_gatherers"))
   {
-    // gather coupled user objects late to ensure they are constructed. Do not add them as
-    // dependencies (that's already done in the constructor).
     const auto & uo = getUserObjectByName<MOOSEToNEML2>(gatherer_name, /*is_dependency=*/false);
     addGatheredParameter(gatherer_name, uo.NEML2Name());
     _param_gatherers.push_back(&uo);
   }
 
   // iterate over set of required inputs and error out if we find one that is not provided
-  for (const auto & [iname, ivar] : model().input_variables())
+  for (const auto & iname : model().input_names())
   {
     // if tensors are kept on device, we are not going to gather old values from moose
-    if (_manage_state_advance && ivar->history_order() > 0)
+    if (_manage_state_advance && parseLag(iname).second > 0)
       continue;
     if (!_gathered_variable_names.count(iname))
       paramError("gatherers", "The required model input `", iname, "` is not gathered");
   }
 
-  // keep track of stateful variables if manage_state_advance is true
+  // Keep track of stateful (old) variables if manage_state_advance is true. NEML2 v3's eager
+  // runtime requires every declared input to be present on each call (unlike v2, which silently
+  // zeroed undefined inputs), so we seed each lagged state variable with a base-shaped zero tensor
+  // (the correct initial "old" value; it broadcasts over the batch). After each converged step
+  // advanceState() overwrites these with the cached current values.
   if (_manage_state_advance)
-    for (const auto & [iname, ivar] : model().input_variables())
-      if (ivar->history_order() > 0)
-        _state_vars[iname] = neml2::Tensor();
+  {
+    const auto & in_names = model().input_names();
+    const auto & in_shapes = model().input_base_shapes();
+    const auto opts = at::TensorOptions().dtype(at::kDouble).device(device());
+    for (const auto i : index_range(in_names))
+      if (parseLag(in_names[i]).second > 0)
+        _state_vars[in_names[i]] = at::zeros(in_shapes[i], opts);
+  }
 }
 
 std::size_t
@@ -152,7 +161,7 @@ NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 
 void
 NEML2ModelExecutor::addGatheredVariable(const UserObjectName & gatherer_name,
-                                        const neml2::VariableName & var)
+                                        const std::string & var)
 {
   if (_gathered_variable_names.count(var))
     paramError("gatherers",
@@ -169,7 +178,7 @@ NEML2ModelExecutor::addGatheredParameter(const UserObjectName & gatherer_name,
                                          const std::string & param)
 {
   if (_gathered_parameter_names.count(param))
-    paramError("gatherers",
+    paramError("param_gatherers",
                "The NEML2 model parameter `",
                param,
                "` gathered by UO '",
@@ -244,20 +253,15 @@ NEML2ModelExecutor::fillInputs()
         if (val.defined())
           _in[name] = val;
 
-    // Send input variables and parameters to device
+    // Send input variables to the compute device
     for (auto & [var, val] : _in)
       val = val.to(device());
-    for (auto & [param, pval] : _model_params)
-      pval = pval.to(device());
 
-    // Update model parameters
-    model().set_parameters(_model_params);
+    // Push the gathered model parameters into the NEML2 model (on the compute device) so the
+    // subsequent evaluation and its parameter Jacobian use the MOOSE-provided values.
+    for (auto & [pname, pval] : _model_params)
+      model().set_parameter(pname, pval.to(device()));
     _model_params.clear();
-
-    // Request gradient for the model parameters that we request AD for
-    for (const auto & [y, dy] : _retrieved_parameter_derivatives)
-      for (const auto & [p, tensor] : dy)
-        model().get_parameter(p).requires_grad_(true);
   }
   catch (std::exception & e)
   {
@@ -268,21 +272,6 @@ NEML2ModelExecutor::fillInputs()
 }
 
 void
-NEML2ModelExecutor::expandInputs()
-{
-  // Figure out what our batch size is
-  std::vector<neml2::Tensor> defined;
-  for (const auto & [key, value] : _in)
-    defined.push_back(value);
-  const auto s = neml2::utils::broadcast_dynamic_sizes(defined);
-
-  // Make all inputs conformal
-  for (auto & [key, value] : _in)
-    if (value.dynamic_sizes() != s)
-      _in[key] = value.dynamic_unsqueeze(0).dynamic_expand(s);
-}
-
-void
 NEML2ModelExecutor::advanceState()
 {
   if (!_manage_state_advance || _t_step == 0)
@@ -290,18 +279,17 @@ NEML2ModelExecutor::advanceState()
 
   for (const auto & [name, val] : _state_vars)
   {
-    auto sep = model().settings().history_separator();
-    auto [base_name, order] = neml2::parse_history(name, sep);
-    mooseAssert(order > 0, "Invalid history order");
-    // cache value from the current step
-    // favor output over input
-    auto curr_name = order == 1 ? base_name : base_name + sep + std::to_string(order - 1);
+    const auto [base_name, lag] = parseLag(name);
+    mooseAssert(lag > 0, "Invalid lag for a stateful variable");
+    // cache the value from the current step (favor output over input); the value that feeds
+    // "base~lag" next step is the current "base~(lag-1)" (which is "base" itself for lag == 1).
+    const auto curr_name = lagName(base_name, lag - 1);
     if (_out.count(curr_name))
       _state_vars[name] = _out.at(curr_name);
     else if (_in.count(curr_name))
       _state_vars[name] = _in.at(curr_name);
     else
-      mooseError("Failed to find cached value for history variable: ", name);
+      mooseError("Failed to find cached value for old variable: ", name);
   }
 }
 
@@ -310,54 +298,48 @@ NEML2ModelExecutor::solve()
 {
   try
   {
-    // Evaluate the NEML2 material model
+    // Evaluate the NEML2 material model (value + Jacobian)
     TIME_SECTION("NEML2 solve", 3, "Solving NEML2 material model");
 
-    // NEML2 requires double precision
-    auto prev_dtype = neml2::get_default_dtype();
-    neml2::set_default_dtype(neml2::kFloat64);
+    auto [out, dout_din] = model().jacobian(_in);
+    _out = std::move(out);
+    _dout_din = std::move(dout_din);
 
-    if (scheduler())
+    // Parameter Jacobian d(output)/d(parameter), only when some object requested it.
+    // param_jacobian recomputes the (identical) outputs via reverse-mode AD over the model
+    // parameters; the input chain rule above is independent of it.
+    if (!_retrieved_parameter_derivatives.empty())
     {
-      // We only need consistent batch sizes if we are using the dispatcher
-      expandInputs();
-      neml2::ValueMapLoader loader(_in, 0);
-      std::tie(_out, _dout_din) = dispatcher()->run(loader);
+      // .first repeats the (identical) outputs already obtained from jacobian(); keep only the
+      // parameter-derivative blocks.
+      auto param_jac = model().param_jacobian(_in);
+      _dout_dparam = std::move(param_jac.second);
     }
-    else
-      std::tie(_out, _dout_din) = model().value_and_dvalue(_in);
+
     if (!_manage_state_advance)
       _in.clear();
-
-    // Restore the default dtype
-    neml2::set_default_dtype(prev_dtype);
   }
-  catch (std::exception & e)
+  catch (const neml2::aoti::Exception & e)
   {
+    // NEML2 v3 distinguishes recoverable numerical failures (e.g. ConvergenceError: a Newton
+    // divergence / max-iters) from non-recoverable ones (FatalError: shape / device / config). A
+    // retry can only clear the former -- by cutting the time step -- so a non-recoverable error
+    // must hard-fail instead of triggering a futile sequence of time-step cuts.
+    if (!e.recoverable())
+      mooseError("NEML2 model evaluation failed with a non-recoverable error:\n",
+                 e.what(),
+                 NEML2Utils::NEML2_help_message);
+
     _error_message = e.what();
     _error = true;
     if (_debug_inputs_on_failure)
     {
-      auto shape_to_string = [](const neml2::TensorShapeRef & shape) -> std::string
-      {
-        std::ostringstream os;
-        os << "(";
-        for (std::size_t i = 0; i < shape.size(); ++i)
-        {
-          if (i)
-            os << ", ";
-          os << shape[i];
-        }
-        os << ")";
-        return os.str();
-      };
-
       std::ostringstream os;
       os << "\nNEML2 input variables:\n";
-      for (const auto & [var, val] : model().input_variables())
+      for (const auto & iname : model().input_names())
       {
-        os << "  - " << var << ": ";
-        const auto it = _in.find(var);
+        os << "  - " << iname << ": ";
+        const auto it = _in.find(iname);
         if (it == _in.end())
           os << "missing\n";
         else if (!it->second.defined())
@@ -365,74 +347,29 @@ NEML2ModelExecutor::solve()
         else
         {
           const auto & val = it->second;
-          const auto & v = model().input_variable(var);
-          neml2::TensorShape expected;
-          const auto & intmd_sizes = v.intmd_sizes();
-          expected.insert(expected.end(), intmd_sizes.begin(), intmd_sizes.end());
-          const auto & base_sizes = v.base_sizes();
-          expected.insert(expected.end(), base_sizes.begin(), base_sizes.end());
-
           os << "device=" << val.device() << " dtype=" << val.scalar_type()
-             << " sizes=" << shape_to_string(val.sizes())
-             << " batch=" << shape_to_string(val.batch_sizes().concrete())
-             << " expected_base=" << shape_to_string(expected);
-
+             << " sizes=" << val.sizes();
           if (val.numel() > 0)
           {
             auto cpu = val.detach().to(val.options().device(at::kCPU));
             auto flat = cpu.reshape({-1});
-            auto min = flat.min().item<double>();
-            auto max = flat.max().item<double>();
-            auto mean = flat.mean().item<double>();
-            auto has_nan = at::isnan(flat).any().item<bool>();
-            auto has_inf = at::isinf(flat).any().item<bool>();
-            os << " min=" << min << " max=" << max << " mean=" << mean
-               << " nan=" << (has_nan ? "true" : "false")
-               << " inf=" << (has_inf ? "true" : "false");
+            os << " min=" << flat.min().item<double>() << " max=" << flat.max().item<double>()
+               << " mean=" << flat.mean().item<double>()
+               << " nan=" << (at::isnan(flat).any().item<bool>() ? "true" : "false")
+               << " inf=" << (at::isinf(flat).any().item<bool>() ? "true" : "false");
           }
-
           os << "\n";
-        }
-      }
-
-      if (_manage_state_advance)
-      {
-        os << "NEML2 stateful variables:\n";
-        for (const auto & [var, cached_val] : _state_vars)
-        {
-          os << "  - " << var << ": ";
-          const auto it_out = _out.find(var);
-          const auto it_in = _in.find(var);
-          if (it_out == _out.end() || it_in == _in.end())
-            os << "missing\n";
-          else
-          {
-            const auto it = it_out != _out.end() ? it_out : it_in;
-            const auto & val = it->second;
-            os << "device=" << val.device() << " dtype=" << val.scalar_type()
-               << " sizes=" << shape_to_string(val.sizes())
-               << " batch=" << shape_to_string(val.batch_sizes().concrete());
-
-            if (val.numel() > 0)
-            {
-              auto cpu = val.detach().to(val.options().device(at::kCPU));
-              auto flat = cpu.reshape({-1});
-              auto min = flat.min().item<double>();
-              auto max = flat.max().item<double>();
-              auto mean = flat.mean().item<double>();
-              auto has_nan = at::isnan(flat).any().item<bool>();
-              auto has_inf = at::isinf(flat).any().item<bool>();
-              os << " min=" << min << " max=" << max << " mean=" << mean
-                 << " nan=" << (has_nan ? "true" : "false")
-                 << " inf=" << (has_inf ? "true" : "false");
-            }
-
-            os << "\n";
-          }
         }
       }
       _error_message += os.str();
     }
+  }
+  catch (const std::exception & e)
+  {
+    // Not a NEML2 exception -- unexpected; do not silently retry it as a recoverable failure.
+    mooseError("NEML2 model evaluation raised an unexpected error:\n",
+               e.what(),
+               NEML2Utils::NEML2_help_message);
   }
 
   return !_error;
@@ -443,37 +380,35 @@ NEML2ModelExecutor::extractOutputs()
 {
   try
   {
-    const auto N = _batch_index_generator.getBatchIndex();
-
     // retrieve outputs
     for (auto & [y, target] : _retrieved_outputs)
       target = _out[y].to(output_device());
-
-    // retrieve parameter derivatives
-    for (auto & [y, dy] : _retrieved_parameter_derivatives)
-      for (auto & [p, target] : dy)
-        target = neml2::jacrev(_out[y],
-                               model().get_parameter(p),
-                               /*retain_graph=*/true,
-                               /*create_graph=*/false,
-                               /*allow_unused=*/false)
-                     .to(output_device());
 
     // clear output unless we need it for on-device state advance
     if (!_manage_state_advance)
       _out.clear();
 
-    // retrieve derivatives
+    // retrieve derivatives J[y][x]
     for (auto & [y, dy] : _retrieved_derivatives)
       for (auto & [x, target] : dy)
       {
         const auto & source = _dout_din[y][x];
         if (source.defined())
-          target = source.to(output_device()).dynamic_expand({neml2::Size(N)});
+          target = source.to(output_device());
+      }
+
+    // retrieve parameter derivatives P[y][p]
+    for (auto & [y, dy] : _retrieved_parameter_derivatives)
+      for (auto & [p, target] : dy)
+      {
+        const auto & source = _dout_dparam[y][p];
+        if (source.defined())
+          target = source.to(output_device());
       }
 
     // clear derivatives
     _dout_din.clear();
+    _dout_dparam.clear();
   }
   catch (std::exception & e)
   {
@@ -521,31 +456,31 @@ NEML2ModelExecutor::checkExecutionStage() const
                "construction. This is a code problem.");
 }
 
-const neml2::Tensor &
-NEML2ModelExecutor::getOutput(const neml2::VariableName & output_name) const
+const at::Tensor &
+NEML2ModelExecutor::getOutput(const std::string & output_name) const
 {
   checkExecutionStage();
 
-  if (!model().output_variables().count(output_name))
+  if (!contains(model().output_names(), output_name))
     mooseError("Trying to retrieve a non-existent NEML2 output variable '", output_name, "'.");
 
   return _retrieved_outputs[output_name];
 }
 
-const neml2::Tensor &
-NEML2ModelExecutor::getOutputDerivative(const neml2::VariableName & output_name,
-                                        const neml2::VariableName & input_name) const
+const at::Tensor &
+NEML2ModelExecutor::getOutputDerivative(const std::string & output_name,
+                                        const std::string & input_name) const
 {
   checkExecutionStage();
 
-  if (!model().output_variables().count(output_name))
+  if (!contains(model().output_names(), output_name))
     mooseError("Trying to retrieve the derivative of NEML2 output variable '",
                output_name,
                "' with respect to NEML2 input variable '",
                input_name,
                "', but the NEML2 output variable does not exist.");
 
-  if (!model().input_variables().count(input_name))
+  if (!contains(model().input_names(), input_name))
     mooseError("Trying to retrieve the derivative of NEML2 output variable '",
                output_name,
                "' with respect to NEML2 input variable '",
@@ -555,20 +490,20 @@ NEML2ModelExecutor::getOutputDerivative(const neml2::VariableName & output_name,
   return _retrieved_derivatives[output_name][input_name];
 }
 
-const neml2::Tensor &
-NEML2ModelExecutor::getOutputParameterDerivative(const neml2::VariableName & output_name,
+const at::Tensor &
+NEML2ModelExecutor::getOutputParameterDerivative(const std::string & output_name,
                                                  const std::string & parameter_name) const
 {
   checkExecutionStage();
 
-  if (!model().output_variables().count(output_name))
+  if (!contains(model().output_names(), output_name))
     mooseError("Trying to retrieve the derivative of NEML2 output variable '",
                output_name,
                "' with respect to NEML2 model parameter '",
                parameter_name,
                "', but the NEML2 output variable does not exist.");
 
-  if (model().named_parameters().count(parameter_name) != 1)
+  if (!model().parameter_base_shapes().count(parameter_name))
     mooseError("Trying to retrieve the derivative of NEML2 output variable '",
                output_name,
                "' with respect to NEML2 model parameter '",

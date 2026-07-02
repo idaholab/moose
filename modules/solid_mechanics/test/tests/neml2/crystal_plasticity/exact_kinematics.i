@@ -29,6 +29,7 @@ N = 2
 []
 
 [NEML2]
+  eager = true
   input = 'exact_kinematics_neml2.i'
   [all]
     model = 'model'

@@ -59,6 +59,7 @@ N = 2
 []
 
 [NEML2]
+  eager = true
   input = 'neml2.i'
   [all]
     model = 'model'
