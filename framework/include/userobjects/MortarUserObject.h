@@ -35,5 +35,5 @@ public:
   virtual void reinit() = 0;
   virtual void threadJoin(const UserObject &) override final {}
 
-  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 2; }
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 3; }
 };

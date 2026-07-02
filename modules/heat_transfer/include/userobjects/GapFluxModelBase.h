@@ -37,7 +37,7 @@ public:
   virtual void finalize() final{};
   virtual void threadJoin(const UserObject &) final{};
 
-  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 5; }
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 6; }
 
 protected:
   mutable unsigned int _qp;

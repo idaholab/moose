@@ -24,5 +24,5 @@ public:
 
   bool needThreadedCopy() const override final { return true; }
 
-  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 3; }
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 4; }
 };

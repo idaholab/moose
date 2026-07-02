@@ -37,5 +37,5 @@ public:
   virtual void subdomainSetup() override;
   ///@}
 
-  virtual unsigned int getUOExecutionOrderWithinGroup() const override { return 4; }
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override { return 5; }
 };

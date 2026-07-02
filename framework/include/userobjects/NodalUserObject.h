@@ -35,7 +35,7 @@ public:
 
   virtual void subdomainSetup() override /*final*/;
 
-  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 1; }
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 2; }
 
   bool isUniqueNodeExecute() { return _unique_node_execute; }
 

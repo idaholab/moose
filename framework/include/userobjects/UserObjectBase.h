@@ -167,12 +167,13 @@ public:
    * Gets the order of types of user objects within an execution order group
    *
    * As of June 2026, the ordering is:
-   * 0: side, element, internal side, domain, interface (in no particular order)
-   * 1: nodal
-   * 2: mortar
-   * 3: threaded general
-   * 4: general
-   * 5: others that do not get executed
+   * 0: Kokkos user object (all types)
+   * 1: side, element, internal side, domain, interface (in no particular order)
+   * 2: nodal
+   * 3: mortar
+   * 4: threaded general
+   * 5: general
+   * 6: others that do not get executed
    */
   virtual unsigned int getUOExecutionOrderWithinGroup() const = 0;
 
