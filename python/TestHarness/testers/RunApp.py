@@ -181,6 +181,11 @@ class RunApp(Tester):
                 "cannot be supplied together"
             )
 
+        self._delete_output_after_running = (
+            params.isParamSetByUser("delete_output_before_running")
+            and not params["delete_output_before_running"]
+        )
+
         # The capabilities file that we need to set with
         # --testharness-capabilities, if any. This should
         # only be valid if we have a 'capabilities' spec
@@ -661,8 +666,11 @@ class RunApp(Tester):
     def postRun(self, options):
         super().postRun(options)
 
-        if not self.specs["delete_output_before_running"]:
+        if self._delete_output_after_running:
             util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
+
+    def setDeleteOutputAfterRunning(self, value):
+        self._delete_output_after_running = value
 
     def mustOutputExist(self, exit_code):
         if self.specs["expect_exit_code"] != 0:
