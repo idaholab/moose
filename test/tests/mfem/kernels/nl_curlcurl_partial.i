@@ -85,6 +85,8 @@
   [curlcurl]
     type = MFEMNLCurlCurlKernel
     variable = h_field
+    k_coefficient = k
+    dk_dcurl_u_coefficient = dk_ds_s
   []
   [mass]
     type = MFEMVectorFEMassKernel
