@@ -82,7 +82,7 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::IntegrationOverVariableRangeMa
   _integrated_properties.resize(_num_props);
   _matprop_grid.resize(_num_props);
   for (const auto i : make_range(_num_props))
-    _matprop_grid[i].resize(std::floor(_v_grid_max - _v_grid_min) / _dv);
+    _matprop_grid[i].resize(std::floor((_v_grid_max - _v_grid_min) / _dv));
 
   // Retrieve input properties, declare output integrated properties
   for (const auto i : make_range(_num_props))
@@ -135,17 +135,21 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::computeQpProperties()
     const auto sign = _var[_qp] > _v_ref ? 1 : -1;
 
     // start from the reference
-    const unsigned int i_start = std::floor(_v_ref - _v_grid_min) / _dv;
+    const unsigned int i_start = std::floor((_v_ref - _v_grid_min) / _dv);
 
     // Step integration
     for (const auto j : make_range(n_intervals))
       integral += _dv * _matprop_grid[i][i_start + sign * j];
 
-    // Last interval, interval size from the current variable value, and material property at the current value
-    // TODO: not second order
-    integral += (_var[_qp] - _v_ref - n_intervals * _dv) * (*_properties[i])[_qp];
+    // Last interval, interval size from the current variable value, and material property at the
+    // current value
+    // TODO: make it second order
+    if (sign > 0)
+      integral += (_var[_qp] - _v_ref - (n_intervals * _dv)) * (*_properties[i])[_qp];
+    else
+      integral += (_var[_qp] - _v_ref + (n_intervals * _dv)) * (*_properties[i])[_qp];
 
-    (*_integrated_properties[i])[_qp] = _matprop_ref[i] + integral;
+    (*_integrated_properties[i])[_qp] = _matprop_ref[i] + sign * integral;
   }
 
   _looping = false;
@@ -167,12 +171,12 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::computeMatPropGrid(Real v_min,
   // _writeable_var.number(), 0);
 
   const auto n_intervals = std::floor((v_max - v_min) / dv);
-  const unsigned int i_start = std::floor(v_min - _v_grid_min) / _dv;
-  for (const auto j : make_range(n_intervals))
+  const unsigned int i_start = std::floor((v_min - _v_grid_min) / _dv);
+  for (const auto j : make_range(n_intervals + 1))
   {
     // Set the variable dof values, at the center of the interval for second order integration
     // Set to to all dofs to make it constant over the element
-    DenseVector<Real> new_dofs(saved_dof_values.size(), v_min + (j + 0.5) * _dv);
+    DenseVector<Real> new_dofs(saved_dof_values.size(), v_min + (j - 0.5) * _dv);
     _writeable_var.setDofValues(new_dofs);
 
     // Recompute the material properties
