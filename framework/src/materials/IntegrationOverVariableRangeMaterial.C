@@ -56,6 +56,7 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::IntegrationOverVariableRangeMa
     _integrated_names(getParam<std::vector<std::string>>("output_prop_names")),
     _num_props(_input_names.size()),
     _var(coupledGenericValue<is_ad>("integration_variable")),
+    _var_dofs(coupledDofValues("integration_variable")),
     _writeable_var(writableVariable("integration_variable")),
     _dv(getParam<Real>("integration_dv")),
     _matprop_ref(getParam<std::vector<Real>>("prop_reference_values")),
@@ -94,12 +95,14 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::IntegrationOverVariableRangeMa
 
 template <bool is_ad>
 void
-IntegrationOverVariableRangeMaterialTempl<is_ad>::initialSetup()
+IntegrationOverVariableRangeMaterialTempl<is_ad>::initQpStatefulProperties()
 {
   // should not matter
   _qp = 0;
   if (_precompute_matprop_grid)
     computeMatPropGrid(_v_grid_min, _v_grid_max, _dv);
+  else
+    MaterialBase::initQpStatefulProperties();
 }
 
 template <bool is_ad>
@@ -155,7 +158,8 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::computeMatPropGrid(Real v_min,
                                                                      Real dv)
 {
   mooseAssert(_matprop_grid.size() == _num_props, "Grid size is not as expected");
-  const auto v_current = _var[_qp];
+  // Save dof values
+  DenseVector<Real> saved_dof_values(_var_dofs.stdVector());
   const auto qp_old = _qp;
 
   // This only works for a constant monomial
@@ -166,8 +170,10 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::computeMatPropGrid(Real v_min,
   const unsigned int i_start = std::floor(v_min - _v_grid_min) / _dv;
   for (const auto j : make_range(n_intervals))
   {
-    // Set the variable value, at the center of the interval for second order
-    _writeable_var.setDofValue(v_min + (j + 0.5) * dv, _qp);
+    // Set the variable dof values, at the center of the interval for second order integration
+    // Set to to all dofs to make it constant over the element
+    DenseVector<Real> new_dofs(saved_dof_values.size(), v_min + (j + 0.5) * _dv);
+    _writeable_var.setDofValues(new_dofs);
 
     // Recompute the material properties
     mooseAssert(_current_elem, "Only implemented for elements");
@@ -184,7 +190,7 @@ IntegrationOverVariableRangeMaterialTempl<is_ad>::computeMatPropGrid(Real v_min,
   }
 
   // Re-init at the current variable value, in case another property uses it
-  _writeable_var.setDofValue(MetaPhysicL::raw_value(v_current), _qp); //dof_index);
+  _writeable_var.setDofValues(saved_dof_values);
   // To optimize: only reinit the properties of interest
   _fe_problem.reinitMaterials(_current_elem->subdomain_id(), _tid);
   _qp = qp_old;

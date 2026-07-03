@@ -22,10 +22,9 @@ public:
 
   IntegrationOverVariableRangeMaterialTempl(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-
 protected:
   virtual void computeQpProperties() override;
+  virtual void initQpStatefulProperties() override;
 
   /// Names of the material properties to integrate
   std::vector<std::string> _input_names;
@@ -38,7 +37,9 @@ protected:
 
   /// Variable to read values from
   const GenericVariableValue<is_ad> & _var;
-  /// Variable to integrate over
+  /// Variable DOFs to reset the variable with
+  const VariableValue & _var_dofs;
+  /// Variable to re-write at each integration point
   MooseWritableVariable & _writeable_var;
 
   /// Integration step size
