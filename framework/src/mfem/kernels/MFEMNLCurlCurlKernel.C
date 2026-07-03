@@ -38,7 +38,7 @@ MFEMNLCurlCurlKernel::validParams()
       "\\times \\vec u|)/\\partial |\\nabla \\times \\vec u|$");
   params.addParam<MFEMScalarCoefficientName>(
         "dk_dcurl_u_coefficient",
-        "1.", "Name of coeff representing $ \\partial k(|\\nabla \\times \\vec u|)/\\partial |\\nabla \\times \\vec u| * ( 1 / |\\nabla \\times \\vec u| )$"
+        "0.", "Name of coeff representing $ \\partial k(|\\nabla \\times \\vec u|)/\\partial |\\nabla \\times \\vec u| * ( 1 / |\\nabla \\times \\vec u| )$"
   );
   params.addParam<mfem::real_t>(
       "curlu_zero_tol",

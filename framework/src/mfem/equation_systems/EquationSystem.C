@@ -296,6 +296,10 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   trueRHS.SyncFromBlocks();
 
   op.Reset(aux_a.Ptr());
+
+  // hold a reference to op
+  _system_operator = &op;
+
   aux_a.SetOperatorOwner(false);
 }
 
@@ -460,11 +464,10 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 
     const auto & test_var_name = _test_var_names.at(0);
     auto nlf = _nlfs.Get(test_var_name);
-    auto blf = _blfs.Get(test_var_name);
 
     // The returned operators are owned by nlf/blf, so SumOperator must not delete them.
-    _sumOperator = std::make_unique<mfem::SumOperator>(
-        &nlf->GetGradient(u), 1.0, blf, 1.0, false, false);
+    _sumOperator = std::make_unique<SumOperatorExtension>(
+        &nlf->GetGradient(u), 1.0, _system_operator->Ptr(), 1.0);
 
     return *_sumOperator;
   }

@@ -52,9 +52,9 @@
 
   [k]
     type = MFEMParsedFunction
-    expression = 'j^2'
-    symbol_names = 'j'
-    symbol_values = 'h_field_curl_mag'
+    expression = '1'
+    # symbol_names = 'j'
+    # symbol_values = 'h_field_curl_mag'
   []
 
   ## note this is j * derivative, hence why it isnt just 2j
@@ -69,7 +69,7 @@
   # something nontrivial, but here it is just 2
   [dk_ds_s]
     type = MFEMParsedFunction
-    expression = '2'
+    expression = '0'
   []
 []
 

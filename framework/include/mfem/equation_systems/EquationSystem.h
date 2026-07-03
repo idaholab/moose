@@ -26,6 +26,10 @@ namespace Moose::MFEM
 {
 class CoefficientManager;
 
+// We need another operator, which is a small extension to the SumOperator.
+// We forward declare it here, and flesh it out at the bottom of this header.
+class SumOperatorExtension;
+
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
  *
@@ -331,7 +335,10 @@ protected:
   mutable mfem::OperatorHandle _jacobian;
 
   // We need a SumOperator to handle some crazy stuff
-  mutable std::unique_ptr<mfem::SumOperator> _sumOperator;
+  mutable std::unique_ptr<SumOperatorExtension> _sumOperator;
+
+  // Store the op that comes out of FormLinearSystem
+  mfem::OperatorHandle * _system_operator;
 
   // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
@@ -417,6 +424,54 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     }
   }
 }
+
+// Since the member variables of SumOperator are private, we have
+// to define our own class anyway...
+class SumOperatorExtension : public mfem::Operator
+{
+  const mfem::Operator *A, *B;
+  const mfem::real_t _alpha, _beta;
+  mutable mfem::Vector z;
+public:
+  SumOperatorExtension(const mfem::Operator *A, const mfem::real_t alpha, const mfem::Operator *B, const mfem::real_t beta)
+    : Operator(A->Height(), A->Width()), A(A), B(B), _alpha(alpha), _beta(beta), z(A->Height())
+  {
+    mooseAssert(A->Width() == B->Width(), "Operator Widths must match");
+    mooseAssert(A->Height() == B->Height(), "Operator Heights must match");
+
+    // skipping check for if A or B casts into a mfem::Solver. They should
+    // not be in iterative mode.
+  }
+
+  virtual ~SumOperatorExtension() {}
+
+  void Mult(const mfem::Vector &x, mfem::Vector &y) const override
+  {
+    z.SetSize(A->Height()); A->Mult(x, z); B->Mult(x, y); add(_alpha, z, _beta, y, y);
+  }
+
+  void MultTranspose(const mfem::Vector &x, mfem::Vector &y) const override
+  {
+    z.SetSize(A->Width()); A->Mult(x, z); B->Mult(x, y); add(_alpha, z, _beta, y, y);
+  }
+
+  void AssembleDiagonal(mfem::Vector &diag) const override {
+    // slow and steady. Yes we could reuse the z vector here...
+    mfem::Vector tempA(diag.Size());
+    mfem::Vector tempB(diag.Size());
+
+    // send temp A down
+    A->AssembleDiagonal(tempA);
+
+    // ditto for B
+    B->AssembleDiagonal(tempB);
+
+    // mix them together
+    add(_alpha, tempA, _beta, tempB, diag);
+  }
+
+};
+
 
 } // namespace Moose::MFEM
 
