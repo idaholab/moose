@@ -73,6 +73,7 @@ MFEMMatrixFreeAMS::validParams()
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
+    Moose::MFEM::LORInterface(parameters),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
     _beta_coef(getScalarCoefficient("beta_coefficient")),
     _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),

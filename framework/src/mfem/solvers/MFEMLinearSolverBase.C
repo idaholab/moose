@@ -27,16 +27,9 @@ LinearSolverBase::validParams()
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
   : SolverBase(parameters),
-    LORInterface(*this),
     _preconditioner{nullptr},
     _equation_system(getMFEMProblem().getEquationSystem())
 {
-}
-
-void LinearSolverBase::Update()
-{
-  if (IsLOR())
-    SetupLOR();
 }
 
 template <typename T>

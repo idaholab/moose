@@ -714,11 +714,6 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
 void
 EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
 {
-  if (solver.IsLOR())
-  {
-    solver.SetupLOR();
-  }
-
   solver.Update();
   mooseAssert(_linear_operator.Ptr(),
               "If we are preparing a linear solver, we better have a linear operator");

@@ -23,7 +23,7 @@ namespace Moose::MFEM
 /**
  * Base class for linear MFEM solvers and preconditioners.
  */
-class LinearSolverBase : public SolverBase, public LORInterface
+class LinearSolverBase : public SolverBase
 {
 public:
   static InputParameters validParams();
@@ -39,14 +39,10 @@ public:
   LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
 
   /// Update the solver following any changes to the EquationSystem it is responsible for solving.
-  virtual void Update();
+  virtual void Update(){};
 
   /// For eigensolvers, this method calls the underlying Solve method
   virtual void Solve() { mooseError("'solve' method not used in this solver type."); }
-
-  /// Returns whether or not this solver (or its preconditioner) uses LOR
-  bool IsLOR() const { return _lor || (_preconditioner && _preconditioner->IsLOR()); }
-  // bool IsLOR() const { return _lor || (GetPreconditioner() && GetPreconditioner()->IsLOR()); }
 
 protected:
   /// Preconditioner to be used for the problem

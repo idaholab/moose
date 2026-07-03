@@ -25,7 +25,8 @@ MFEMMUMPS::validParams()
   return params;
 }
 
-MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
+MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
 {
   ConstructSolver();
 }

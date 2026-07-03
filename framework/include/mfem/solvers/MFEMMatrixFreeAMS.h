@@ -54,7 +54,7 @@ private:
 /**
  * Wrapper for mfem::MatrixFreeAMS solver.
  */
-class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase
+class MFEMMatrixFreeAMS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
 {
 public:
   static InputParameters validParams();
@@ -63,6 +63,12 @@ public:
 
   /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
   void SetupLOR() override;
+
+  void Update() override
+  {
+    if (IsLOR(*this))
+      SetupLOR();
+  }
 
 protected:
   void ConstructSolver() override;

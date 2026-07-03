@@ -32,7 +32,7 @@ MFEMHypreGMRES::validParams()
 }
 
 MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters)
+  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
 {
   ConstructSolver();
 }
@@ -73,9 +73,10 @@ MFEMHypreGMRES::SetupLOR()
 
   mfem::Array<int> ess_tdofs;
   a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-  if (_preconditioner)
+  LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
+  if (lor_preconditioner)
   {
-    _preconditioner->SetupLOR();
+    lor_preconditioner->SetupLOR();
     SetPreconditioner(static_cast<mfem::HypreGMRES &>(*_solver));
   }
   else if (_lor)

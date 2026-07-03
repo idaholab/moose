@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 #include "EquationSystem.h"
 
 class MFEMProblemSolve;
@@ -19,14 +19,20 @@ class MFEMProblemSolve;
 namespace Moose::MFEM
 {
 /**
- * Base class for linear MFEM solvers and preconditioners.
+ * Interface for LOR compatible linear MFEM solvers and preconditioners.
  */
 class LORInterface
 {
 public:
   static InputParameters validParams();
 
-  LORInterface(LinearSolverBase & solver_base);
+  LORInterface(const InputParameters & parameters);
+
+  /// Returns whether or not this solver (or its preconditioner) uses LOR
+  bool IsLOR(LinearSolverBase & solver) const;
+
+  /// Returns a pointer to the provided LOR interface of the solver's preconditioner if present.
+  LORInterface * GetPreconditionerLORInterface(LinearSolverBase & solver) const;
 
   /// Rebuild any Low-Order-Refined components from the unreduced bilinear form. Called only when
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
@@ -38,9 +44,6 @@ protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 
-  /// Reference to associated base linear solver object
-  LinearSolverBase & _solver_base;
-    
   /// Variable defining whether to use LOR solver
   bool _lor;
 };
