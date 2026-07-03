@@ -719,6 +719,7 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
     solver.SetupLOR();
   }
 
+  solver.Update();
   mooseAssert(_linear_operator.Ptr(),
               "If we are preparing a linear solver, we better have a linear operator");
   solver.SetOperator(*_linear_operator);
