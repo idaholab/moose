@@ -21,6 +21,7 @@
     test_case = TestVortexSNL
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
+    heavy = true
   []
   [snl-deviatoric]
     type = MMSTest
@@ -28,6 +29,7 @@
     test_case = TestVortexSNLDeviatoric
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    heavy = true
   []
   [sl]
     type = MMSTest
@@ -36,6 +38,7 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
   []
   [sl-deviatoric]
     type = MMSTest
@@ -44,5 +47,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
   []
 []
