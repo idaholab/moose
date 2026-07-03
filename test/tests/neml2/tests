@@ -95,6 +95,17 @@
     valgrind = heavy
     collections = 'SYSTEM'
   []
+  [interface_material_input_required]
+    requirement = 'The framework shall throw an error when a NEML2 material input supplied by a true interface material is not routed through interface material data, because it is then validated as a block material property that no block supplies.'
+    type = RunException
+    issues = '#32413'
+    input = 'linear_cohesive_interface.i'
+    cli_args = 'NEML2/cohesive/interface_material_inputs='
+    expect_err = "Material property 'jump'.*is not defined on block"
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+    collections = 'SYSTEM'
+  []
   [interface_only_no_interface]
     requirement = 'The framework shall throw an error when a NEML2 model is set to be interface-only but no interface is specified.'
     type = RunException
@@ -121,6 +132,16 @@
     issues = '#32413'
     input = 'mixed_source_interface.i'
     exodiff = 'mixed_source_interface_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = heavy
+    collections = 'SYSTEM'
+  []
+  [two_sided_block_material]
+    requirement = 'The framework shall read a block material input to a NEML2 interface model independently on the element and neighbor sides of the interface, so that a material differing across the interface produces a different output on each side.'
+    type = Exodiff
+    issues = '#32413'
+    input = 'interface_block_material_two_sided.i'
+    exodiff = 'interface_block_material_two_sided_out.e'
     capabilities = 'libtorch & neml2'
     valgrind = heavy
     collections = 'SYSTEM'

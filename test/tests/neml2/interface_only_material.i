@@ -55,7 +55,7 @@
 
 [InterfaceKernels]
   [source]
-    type = NEML2CohesiveFlux
+    type = SimpleCohesiveFlux
     variable = u
     neighbor_var = u
     boundary = 'A_B'
@@ -84,7 +84,7 @@
 [Executioner]
   type = Steady
   # PJFNK (matrix-free): the NEML2 input is a block material, so the flux is not a function of the
-  # FE jump. NEML2CohesiveFlux therefore cannot form an exact Jacobian; the matrix-free operator
+  # FE jump. SimpleCohesiveFlux therefore cannot form an exact Jacobian; the matrix-free operator
   # supplies the true Jacobian action while the assembled matrix serves as the preconditioner.
   solve_type = PJFNK
   petsc_options_iname = '-pc_type'

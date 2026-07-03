@@ -7,23 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NEML2CohesiveFlux.h"
+#include "SimpleCohesiveFlux.h"
 
-registerMooseObject("MooseTestApp", NEML2CohesiveFlux);
+registerMooseObject("MooseTestApp", SimpleCohesiveFlux);
 
 InputParameters
-NEML2CohesiveFlux::validParams()
+SimpleCohesiveFlux::validParams()
 {
   InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription(
-      "Applies a scalar cohesive flux from NEML2 and uses the NEML2 derivative for the Jacobian.");
+      "Applies a scalar cohesive flux supplied as a material property and uses the material "
+      "property derivative for the Jacobian.");
   params.addRequiredParam<MaterialPropertyName>("flux", "The scalar cohesive flux.");
   params.addRequiredParam<MaterialPropertyName>(
       "dflux_djump", "The derivative of the scalar cohesive flux with respect to the jump.");
   return params;
 }
 
-NEML2CohesiveFlux::NEML2CohesiveFlux(const InputParameters & parameters)
+SimpleCohesiveFlux::SimpleCohesiveFlux(const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _q(getMaterialProperty<Real>("flux")),
     _dq_djump(getMaterialProperty<Real>("dflux_djump"))
@@ -31,7 +32,7 @@ NEML2CohesiveFlux::NEML2CohesiveFlux(const InputParameters & parameters)
 }
 
 Real
-NEML2CohesiveFlux::computeQpResidual(Moose::DGResidualType type)
+SimpleCohesiveFlux::computeQpResidual(Moose::DGResidualType type)
 {
   switch (type)
   {
@@ -46,7 +47,7 @@ NEML2CohesiveFlux::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-NEML2CohesiveFlux::computeQpJacobian(Moose::DGJacobianType type)
+SimpleCohesiveFlux::computeQpJacobian(Moose::DGJacobianType type)
 {
   switch (type)
   {

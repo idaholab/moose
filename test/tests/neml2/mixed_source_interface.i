@@ -109,7 +109,7 @@
 
 [InterfaceKernels]
   [cohesive]
-    type = NEML2CohesiveFlux
+    type = SimpleCohesiveFlux
     variable = u
     neighbor_var = u
     boundary = 'A_B'

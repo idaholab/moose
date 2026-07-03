@@ -14,12 +14,12 @@
 /**
  * Applies a scalar cohesive flux and its derivative supplied as material properties.
  */
-class NEML2CohesiveFlux : public InterfaceKernel
+class SimpleCohesiveFlux : public InterfaceKernel
 {
 public:
   static InputParameters validParams();
 
-  NEML2CohesiveFlux(const InputParameters & parameters);
+  SimpleCohesiveFlux(const InputParameters & parameters);
 
 protected:
   Real computeQpResidual(Moose::DGResidualType type) override;
