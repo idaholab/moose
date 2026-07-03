@@ -86,18 +86,12 @@ PatchSidesetGenerator::generate()
   // get a list of all sides; vector of tuples (elem, loc_side, side_set)
   auto side_list = boundary_info.build_active_side_list();
 
-  // check if the provided sideset name is actually a sideset id
-  // if _sideset_name can be converted to integer it's interpreted
-  // as sideset id
-  std::stringstream ss;
-  ss << _sideset_name;
-  ss >> _sideset;
-  if (ss.fail())
-    _sideset = boundary_info.get_id_by_name(_sideset_name);
+  if (!MooseMeshUtils::hasBoundaryNameOrID(*mesh, _sideset_name))
+    paramError("boundary",
+               "The provided boundary name or ID (" + _sideset_name +
+                   ") does not exist in the mesh.");
 
-  // make sure that _sideset exists
-  if (_sideset == BoundaryInfo::invalid_id)
-    paramError("sideset_name", "Not a valid boundary");
+  _sideset = MooseMeshUtils::getBoundaryID(_sideset_name, *mesh);
 
   // create a dim - 1 dimensional mesh
   auto boundary_mesh = buildReplicatedMesh(mesh->mesh_dimension() - 1);

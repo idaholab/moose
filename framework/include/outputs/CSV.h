@@ -87,6 +87,9 @@ private:
   /// Decimal digits per number in the CSV file
   unsigned int _precision;
 
+  /// Flag for writing floating point values in scientific notation
+  bool _scientific_notation;
+
   /// The delimiter used when writing the CSV file
   std::string _delimiter;
 

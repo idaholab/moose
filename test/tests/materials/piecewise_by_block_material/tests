@@ -21,4 +21,14 @@
     requirement = 'The system shall provide a material object that can, for a single functor material property, map subdomain IDs to different functors.'
     design = 'PiecewiseByBlockFunctorMaterial.md'
   []
+  [named_subdomain_error]
+    type = RunException
+    input = named_subdomain_error.i
+    expect_err = "The provided subdomain 'right' \(1\) doesn't exist.*Subdomains in the map: "
+                 "'left' \(0\)"
+    requirement = 'The system shall include a subdomain name and ID when reporting a functor '
+                  'material property evaluation outside of the property subdomain restriction.'
+    issues = '#33209'
+    design = 'PiecewiseByBlockFunctorMaterial.md'
+  []
 []

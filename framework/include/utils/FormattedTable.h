@@ -222,6 +222,14 @@ public:
   void setPrecision(unsigned int precision) { _csv_precision = precision; }
 
   /**
+   * Set whether printCSV uses scientific notation for floating point values.
+   */
+  void setUseScientificNotation(bool use_scientific_notation)
+  {
+    _csv_use_scientific_notation = use_scientific_notation;
+  }
+
+  /**
    * Sorts columns alphabetically.
    */
   void sortColumns();
@@ -318,6 +326,9 @@ private:
 
   /// *.csv file precision, defaults to 14
   unsigned int _csv_precision;
+
+  /// Whether to print floating point CSV values in scientific notation
+  bool _csv_use_scientific_notation;
 
   /// Flag indicating that sorting is necessary (used by sortColumns method).
   bool _column_names_unsorted = true;

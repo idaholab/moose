@@ -146,7 +146,8 @@ FormattedTable::FormattedTable()
     _append(false),
     _output_time(true),
     _csv_delimiter(DEFAULT_CSV_DELIMITER),
-    _csv_precision(DEFAULT_CSV_PRECISION)
+    _csv_precision(DEFAULT_CSV_PRECISION),
+    _csv_use_scientific_notation(false)
 {
 }
 
@@ -159,6 +160,7 @@ FormattedTable::FormattedTable(const FormattedTable & o)
     _output_time(o._output_time),
     _csv_delimiter(o._csv_delimiter),
     _csv_precision(o._csv_precision),
+    _csv_use_scientific_notation(o._csv_use_scientific_notation),
     _column_names_unsorted(o._column_names_unsorted)
 {
   if (_output_file.is_open())
@@ -374,6 +376,8 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
         // Update the time _align_width
         {
           std::ostringstream oss;
+          if (_csv_use_scientific_notation)
+            oss << std::scientific;
           oss << std::setprecision(_csv_precision) << it.first;
           unsigned int w = oss.str().size();
           _align_widths["time"] = std::max(_align_widths["time"], w);
@@ -383,6 +387,8 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
         for (const auto & jt : it.second)
         {
           std::ostringstream oss;
+          if (_csv_use_scientific_notation)
+            oss << std::scientific;
           oss << std::setprecision(_csv_precision) << *jt.second;
           unsigned int w = oss.str().size();
           _align_widths[jt.first] = std::max(_align_widths[jt.first], w);
@@ -431,6 +437,11 @@ FormattedTable::printRow(
     std::pair<Real, std::map<std::string, std::shared_ptr<TableValueBase>>> & row_data, bool align)
 {
   bool first = true;
+
+  if (_csv_use_scientific_notation)
+    _output_file << std::scientific;
+  else
+    _output_file << std::defaultfloat;
 
   if (_output_time)
   {

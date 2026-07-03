@@ -556,6 +556,7 @@ void
 Exodus::clear()
 {
   _exodus_io_ptr.reset();
+  clearLastExecuteTime();
 }
 
 void

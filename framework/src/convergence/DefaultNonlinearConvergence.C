@@ -105,9 +105,6 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
   MooseConvergenceStatus status = MooseConvergenceStatus::ITERATING;
 
-  // Needed by ResidualReferenceConvergence
-  nonlinearConvergenceSetup();
-
   SNES snes = system.getSNES();
 
   // ||u||
@@ -127,11 +124,11 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetNumberFunctionEvals(snes, &nfuncs));
 
   // Get tolerances from SNES
-  PetscReal abs_tol, rel_tol, rel_step_tol;
+  PetscReal rel_step_tol;
   PetscInt max_its, max_funcs;
   LibmeshPetscCallA(
       _fe_problem.comm().get(),
-      SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs));
+      SNESGetTolerances(snes, &_abs_tol, &_rel_tol, &rel_step_tol, &max_its, &max_funcs));
 
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   PetscBool force_iteration = PETSC_FALSE;
@@ -162,6 +159,9 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
     status = MooseConvergenceStatus::DIVERGED;
 #endif
+
+  // Needed by ResidualReferenceConvergence
+  nonlinearConvergenceSetup();
 
   Real fnorm_old;
   // This is the first residual before any iterations have been done, but after
@@ -194,7 +194,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
     oss << "Failed to converge, residual norm is NaN\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  else if (checkResidualConvergence(iter, fnorm, ref_residual, rel_tol, abs_tol, oss))
+  else if (checkResidualConvergence(iter, fnorm, ref_residual, _rel_tol, _abs_tol, oss))
     status = MooseConvergenceStatus::CONVERGED;
   else if (nfuncs >= max_funcs)
   {

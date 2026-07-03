@@ -563,10 +563,18 @@ hasBoundaryID(const MeshBase & input_mesh, const BoundaryID id)
 }
 
 bool
-hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name)
+hasBoundaryName(const MeshBase & mesh, const BoundaryName & name)
 {
-  const auto id = getBoundaryID(name, input_mesh);
-  return hasBoundaryID(input_mesh, id);
+  const BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const BoundaryID id = boundary_info.get_id_by_name(name);
+  return id != Moose::INVALID_BOUNDARY_ID;
+}
+
+bool
+hasBoundaryNameOrID(const MeshBase & mesh, const BoundaryName & name_or_id)
+{
+  const auto id = getBoundaryID(name_or_id, mesh);
+  return hasBoundaryID(mesh, id);
 }
 
 void
@@ -1037,7 +1045,7 @@ createSubdomainFromSidesets(MeshBase & mesh,
 
   // Check that the sidesets are present in the mesh
   for (const auto & sideset : boundary_names)
-    if (!MooseMeshUtils::hasBoundaryName(mesh, sideset))
+    if (!MooseMeshUtils::hasBoundaryNameOrID(mesh, sideset))
       mooseException("The sideset '", sideset, "' was not found within the mesh");
 
   auto sideset_ids = MooseMeshUtils::getBoundaryIDs(mesh, boundary_names, true);

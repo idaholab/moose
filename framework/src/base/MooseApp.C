@@ -1921,6 +1921,16 @@ MooseApp::requestCitations()
     citations.insert(app_citations.begin(), app_citations.end());
   }
 
+  // Credit the finite element backend actually used in the run. These are mutually exclusive, so
+  // only the backend in use is cited.
+  std::string backend = "libMesh";
+#ifdef MOOSE_MFEM_ENABLED
+  if ((_executor || _executioner) && feProblem().feBackend() == Moose::FEBackend::MFEM)
+    backend = "MFEM";
+#endif
+  const auto & backend_citations = Registry::getCitations(backend);
+  citations.insert(backend_citations.begin(), backend_citations.end());
+
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
   // used, at PetscFinalize (to the console or, if a file name was given, to that file).

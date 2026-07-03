@@ -91,7 +91,7 @@ CircularBoundaryCorrectionGenerator::generate()
   // Check if the input mesh has the given boundaries
   for (const auto & bd : _input_mesh_circular_boundaries)
   {
-    if (!MooseMeshUtils::hasBoundaryName(*input_mesh, bd))
+    if (!MooseMeshUtils::hasBoundaryNameOrID(*input_mesh, bd))
       paramError("input_mesh_circular_boundaries",
                  "the boundary '" + bd + "' does not exist in the input mesh.");
   }
