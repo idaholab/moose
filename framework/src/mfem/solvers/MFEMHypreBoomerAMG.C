@@ -35,6 +35,7 @@ MFEMHypreBoomerAMG::validParams()
 
 MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
+    Moose::MFEM::LORInterface(parameters),
     _mfem_fespace(
         isParamSetByUser("fespace")
             ? getMFEMProblem()

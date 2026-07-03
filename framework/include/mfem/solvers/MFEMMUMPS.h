@@ -16,7 +16,7 @@
 /**
  * Wrapper for mfem::MUMPSSolver
  */
-class MFEMMUMPS : public Moose::MFEM::LinearSolverBase
+class MFEMMUMPS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
 {
 public:
   static InputParameters validParams();

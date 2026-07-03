@@ -21,10 +21,22 @@ LORInterface::validParams()
   return params;
 }
 
-LORInterface::LORInterface(LinearSolverBase & solver_base)
-  : _solver_base(solver_base),
-    _lor{solver_base.parameters().get<bool>("low_order_refined")}
+LORInterface::LORInterface(const InputParameters & parameters)
+  : _lor{parameters.get<bool>("low_order_refined")}
 {
+}
+
+bool
+LORInterface::IsLOR(LinearSolverBase & solver) const
+{
+  LORInterface * lor_preconditioner = GetPreconditionerLORInterface(solver);
+  return _lor || (lor_preconditioner && lor_preconditioner->IsLOR(*solver.GetPreconditioner()));
+}
+
+LORInterface *
+LORInterface::GetPreconditionerLORInterface(LinearSolverBase & solver) const
+{
+  return dynamic_cast<LORInterface *>(solver.GetPreconditioner());
 }
 
 void

@@ -40,7 +40,7 @@ private:
 /**
  * Wrapper for Moose::MFEM::SuperLUSolver.
  */
-class MFEMSuperLU : public Moose::MFEM::LinearSolverBase
+class MFEMSuperLU : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
 {
 public:
   static InputParameters validParams();

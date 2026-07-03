@@ -17,7 +17,7 @@
 /**
  * Wrapper for mfem::HypreADS solver.
  */
-class MFEMHypreADS : public Moose::MFEM::LinearSolverBase
+class MFEMHypreADS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
 {
 public:
   static InputParameters validParams();
@@ -26,6 +26,12 @@ public:
 
   /// Updates the solver with the bilinear form in case LOR solve is required
   void SetupLOR() override;
+
+  void Update() override
+  {
+    if (IsLOR(*this))
+      SetupLOR();
+  }
 
 protected:
   void ConstructSolver() override;

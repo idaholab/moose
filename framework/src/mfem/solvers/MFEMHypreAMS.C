@@ -32,6 +32,7 @@ MFEMHypreAMS::validParams()
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
+    Moose::MFEM::LORInterface(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
