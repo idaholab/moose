@@ -92,7 +92,7 @@ MFEMMatrixFreeAMS::ConstructSolver()
 }
 
 void
-MFEMMatrixFreeAMS::SetupLOR()
+MFEMMatrixFreeAMS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_equation_system->isComplex())
     mooseError("LOR solve is not supported for complex equation systems.");

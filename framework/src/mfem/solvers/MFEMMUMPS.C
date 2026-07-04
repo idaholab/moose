@@ -25,8 +25,7 @@ MFEMMUMPS::validParams()
   return params;
 }
 
-MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
+MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
   ConstructSolver();
 }
@@ -38,13 +37,6 @@ MFEMMUMPS::ConstructSolver()
   solver->iterative_mode = getParam<bool>("use_initial_guess");
   solver->SetPrintLevel(getParam<int>("print_level"));
   _solver = std::move(solver);
-}
-
-void
-MFEMMUMPS::SetupLOR()
-{
-  if (_lor)
-    mooseError("MUMPS solver does not support LOR solve");
 }
 
 #endif

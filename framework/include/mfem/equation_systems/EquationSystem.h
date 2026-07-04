@@ -107,12 +107,31 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
+  /**
+   * @returns a reference to the MFEM ParBilinearForm corresponding to test_var_name
+   */
   mfem::ParBilinearForm & GetBilinearForm(const std::string & test_var_name)
   {
     return _blfs.GetRef(test_var_name);
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
+   */
+  mfem::ParGridFunction & getGridFunction(const std::string & trial_var_name)
+  {
+    return _gfuncs->GetRef(trial_var_name);
+  }
+
+  /**
+   * @returns Whether nonlinear integrators are present
+   */
+  bool Nonlinear() const { return _non_linear; }
+
+  /**
+>>>>>>> a5b80579564 (Create base LOR setup method implementation for use in derived classes)
    * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
    * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
    * operator

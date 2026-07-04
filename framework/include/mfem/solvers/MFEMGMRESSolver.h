@@ -24,12 +24,12 @@ public:
   MFEMGMRESSolver(const InputParameters & parameters);
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR() override;
+  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
 
   void Update() override
   {
     if (IsLOR(*this))
-      SetupLOR();
+      SetupLOR(*_equation_system);
   }
 
 protected:
