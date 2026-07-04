@@ -62,12 +62,12 @@ public:
   MFEMMatrixFreeAMS(const InputParameters &);
 
   /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
-  void SetupLOR() override;
+  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
 
   void Update() override
   {
     if (IsLOR(*this))
-      SetupLOR();
+      SetupLOR(*_equation_system);
   }
 
 protected:

@@ -41,7 +41,7 @@ MFEMOperatorJacobiSmoother::ConstructSolver()
 }
 
 void
-MFEMOperatorJacobiSmoother::SetupLOR()
+MFEMOperatorJacobiSmoother::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor)
   {

@@ -53,7 +53,7 @@ MFEMHypreAMS::ConstructSolver()
 }
 
 void
-MFEMHypreAMS::SetupLOR()
+MFEMHypreAMS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor)
   {

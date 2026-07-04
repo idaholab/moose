@@ -50,7 +50,7 @@ MFEMGMRESSolver::ConstructSolver()
 }
 
 void
-MFEMGMRESSolver::SetupLOR()
+MFEMGMRESSolver::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
@@ -74,12 +74,11 @@ MFEMGMRESSolver::SetupLOR()
   LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
   if (lor_preconditioner)
   {
-    lor_preconditioner->SetupLOR();
+    lor_preconditioner->SetupLOR(equation_system);
     SetPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)
   {
-    CheckSpectralEquivalence(a);
     auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, ess_tdofs);
     lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));

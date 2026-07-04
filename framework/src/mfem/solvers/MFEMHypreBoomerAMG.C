@@ -67,7 +67,7 @@ MFEMHypreBoomerAMG::ConstructSolver()
 }
 
 void
-MFEMHypreBoomerAMG::SetupLOR()
+MFEMHypreBoomerAMG::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor)
   {

@@ -46,32 +46,17 @@ MFEMHypreADS::ConstructSolver()
 }
 
 void
-MFEMHypreADS::SetupLOR()
+MFEMHypreADS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor)
   {
-    if (_equation_system->isComplex())
-      mooseError("LOR solve is not supported for complex equation systems.");
-    if (_equation_system->GetTestVarNames().size() > 1)
-      mooseError("LOR solve is only supported for single-variable systems");
+    LORInterface::SetupLOR(equation_system);
 
-    const auto & test_var_name = _equation_system->GetTestVarNames().at(0);
-    const auto & trial_var_name = _equation_system->GetTrialVarNames().at(0);
-    mfem::ParBilinearForm & a = _equation_system->GetBilinearForm(test_var_name);
-    mfem::ParGridFunction & trial_gf = *getMFEMProblem().getGridFunction(trial_var_name);
-
-    mfem::Array<int> ess_bdr_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    ess_bdr_markers = 0;
-    _equation_system->ApplyEssentialBC(trial_var_name, trial_gf, ess_bdr_markers);
-
-    CheckSpectralEquivalence(a);
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");
 
-    mfem::Array<int> ess_tdofs;
-    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, ess_tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(*_a, _ess_tdofs);
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     _solver.reset(lor_solver);
   }

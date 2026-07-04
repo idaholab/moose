@@ -16,7 +16,7 @@
 /**
  * Wrapper for mfem::MUMPSSolver
  */
-class MFEMMUMPS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMMUMPS : public Moose::MFEM::LinearSolverBase
 {
 public:
   static InputParameters validParams();
@@ -25,9 +25,6 @@ public:
 
 protected:
   void ConstructSolver() override;
-
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR() override;
 };
 
 #endif

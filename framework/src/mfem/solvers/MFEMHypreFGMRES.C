@@ -49,7 +49,7 @@ MFEMHypreFGMRES::ConstructSolver()
 }
 
 void
-MFEMHypreFGMRES::SetupLOR()
+MFEMHypreFGMRES::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
@@ -73,7 +73,7 @@ MFEMHypreFGMRES::SetupLOR()
   LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
   if (lor_preconditioner)
   {
-    lor_preconditioner->SetupLOR();
+    lor_preconditioner->SetupLOR(equation_system);
     SetPreconditioner(static_cast<mfem::HypreFGMRES &>(*_solver));
   }
   else if (_lor)
