@@ -38,26 +38,7 @@ public:
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
   /// no-op; override in solvers or preconditioners that construct LOR-related data from the
   /// bilinear form.
-  virtual void SetupLOR(Moose::MFEM::EquationSystem & equation_system)
-  {
-    if (equation_system.isComplex())
-      mooseError("LOR solve is not supported for complex equation systems.");
-    if (equation_system.GetTestVarNames().size() > 1)
-      mooseError("LOR solve is only supported for single-variable systems");
-
-    const auto & test_var_name = equation_system.GetTestVarNames().at(0);
-    const auto & trial_var_name = equation_system.GetTrialVarNames().at(0);
-    mfem::ParGridFunction & trial_gf = equation_system.getGridFunction(trial_var_name);
-    _a = &equation_system.GetBilinearForm(test_var_name);
-    CheckSpectralEquivalence(*_a);
-
-    mfem::Array<int> ess_bdr_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    ess_bdr_markers = 0;
-    equation_system.ApplyEssentialBC(trial_var_name, trial_gf, ess_bdr_markers);
-
-    mfem::Array<int> ess_tdofs;
-    _a->ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-  }
+  virtual void SetupLOR(Moose::MFEM::EquationSystem & equation_system);
 
 protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
@@ -66,6 +47,7 @@ protected:
   /// Variable defining whether to use LOR solver
   bool _lor;
   mfem::ParBilinearForm * _a;
+  mfem::Array<int> _ess_bdr_markers;
   mfem::Array<int> _ess_tdofs;
 };
 } // namespace Moose::MFEM
