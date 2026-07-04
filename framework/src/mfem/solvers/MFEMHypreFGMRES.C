@@ -54,22 +54,7 @@ MFEMHypreFGMRES::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
-  if (_equation_system->isComplex())
-    mooseError("LOR solve is not supported for complex equation systems.");
-  if (_equation_system->GetTestVarNames().size() > 1)
-    mooseError("LOR solve is only supported for single-variable systems");
-
-  const auto & test_var_name = _equation_system->GetTestVarNames().at(0);
-  const auto & trial_var_name = _equation_system->GetTrialVarNames().at(0);
-  mfem::ParBilinearForm & a = _equation_system->GetBilinearForm(test_var_name);
-  mfem::ParGridFunction & trial_gf = *getMFEMProblem().getGridFunction(trial_var_name);
-
-  mfem::Array<int> ess_bdr_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-  ess_bdr_markers = 0;
-  _equation_system->ApplyEssentialBC(trial_var_name, trial_gf, ess_bdr_markers);
-
-  mfem::Array<int> ess_tdofs;
-  a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
+  LORInterface::SetupLOR(equation_system);
   LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
   if (lor_preconditioner)
   {
@@ -78,8 +63,7 @@ MFEMHypreFGMRES::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
   }
   else if (_lor)
   {
-    CheckSpectralEquivalence(a);
-    mfem::ParLORDiscretization lor_disc(a, ess_tdofs);
+    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(lor_disc, getMFEMProblem().getComm());
     lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
