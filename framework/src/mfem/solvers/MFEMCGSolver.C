@@ -37,41 +37,23 @@ MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
 }
 
 void
-MFEMCGSolver::ConstructSolver()
+MFEMCGSolver::SetSolverParameters(mfem::Solver & solver)
 {
-  auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
-  SetPreconditioner(*solver);
-  _solver = std::move(solver);
+  auto & mfem_solver = static_cast<mfem::CGSolver &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  mfem_solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
+  mfem_solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
+  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMCGSolver::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMCGSolver::ConstructSolver()
 {
-  if (_lor && _preconditioner)
-    mooseError("LOR solver cannot take a preconditioner");
-
-  LORInterface::SetupLOR(*_equation_system);
-  LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
-  if (lor_preconditioner)
-  {
-    lor_preconditioner->SetupLOR(equation_system);
-    SetPreconditioner(static_cast<mfem::CGSolver &>(*_solver));
-  }
-  else if (_lor)
-  {
-    auto lor_solver = new mfem::LORSolver<mfem::CGSolver>(*_a, _ess_tdofs);
-    lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
+  SetSolverParameters(*solver);
+  SetPreconditioner(*solver);
+  _solver = std::move(solver);
 }
 
 #endif
