@@ -60,6 +60,26 @@ LORInterface::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
   _a->ParFESpace()->GetEssentialTrueDofs(_ess_bdr_markers, _ess_tdofs);
 }
 
+template <typename MFEMSolverType>
+void
+LORInterface::SetupLOR(LinearSolverBase & solver_base,
+                       Moose::MFEM::EquationSystem & equation_system)
+{
+  if (_lor && solver_base.GetPreconditioner())
+    mooseError("LOR solver cannot take a preconditioner");
+
+  SetupLOR(equation_system);
+  if (_lor)
+  {
+    auto lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
+    solver_base.SetSolverParameters(lor_solver->GetSolver());
+    solver_base.SetSolver(lor_solver);
+  }
+}
+
+template void LORInterface::SetupLOR<mfem::CGSolver>(LinearSolverBase & solver,
+                                                     Moose::MFEM::EquationSystem & equation_system);
+
 void
 LORInterface::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {

@@ -40,6 +40,9 @@ public:
   /// bilinear form.
   virtual void SetupLOR(Moose::MFEM::EquationSystem & equation_system);
 
+  template <typename MFEMSolverType>
+  void SetupLOR(LinearSolverBase & solver, Moose::MFEM::EquationSystem & equation_system);
+
 protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const;

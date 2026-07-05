@@ -39,7 +39,11 @@ public:
   LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
 
   /// Update the solver following any changes to the EquationSystem it is responsible for solving.
-  virtual void Update(){};
+  virtual void Update()
+  {
+    if (_preconditioner)
+      _preconditioner->Update();
+  };
 
   /// For eigensolvers, this method calls the underlying Solve method
   virtual void Solve() { mooseError("'solve' method not used in this solver type."); }

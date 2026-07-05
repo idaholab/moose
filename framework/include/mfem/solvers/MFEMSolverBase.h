@@ -28,6 +28,12 @@ public:
   /// Returns the wrapped MFEM solver
   mfem::Solver & GetSolver();
 
+  /// Set the wrapped MFEM solver
+  void SetSolver(mfem::Solver * solver) { _solver.reset(solver); }
+
+  /// Set the wrapped MFEM solver
+  virtual void SetSolverParameters(mfem::Solver & solver) {}
+
   /// Override in derived classes to construct and set the solver options.
   virtual void ConstructSolver() = 0;
 
