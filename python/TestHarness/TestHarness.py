@@ -868,6 +868,8 @@ class TestHarness:
                     part1_params["cli_args"].append("Outputs/out/type=Checkpoint")
                     part1_params["cli_args"].append("Outputs/out/binary=false")
                 part1_params["skip_checks"] = True
+                if hasattr(part1, "setDeleteOutputAfterRunning"):
+                    part1.setDeleteOutputAfterRunning(False)
 
                 # Part 2:
                 part2_params = part2.parameters()

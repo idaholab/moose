@@ -85,9 +85,9 @@ class TestHarnessTester(TestHarnessTestCase):
             post_run=post_run,
         )
 
-    def testRecoverPart2KeepsOutputAfterRun(self):
+    def testGeneratedRecoverPartsKeepOutputAfterRun(self):
         """
-        Test that the harness-generated recover part2 cleanup setting does not delete outputs.
+        Test that harness-generated recover tests can keep outputs from inherited cleanup settings.
         """
 
         with tempfile.TemporaryDirectory() as test_dir:
@@ -99,6 +99,12 @@ class TestHarnessTester(TestHarnessTestCase):
             tester = CheckFiles("recover_keeps_output", params)
             self.assertTrue(tester._delete_output_after_running)
 
+            tester.setDeleteOutputAfterRunning(False)
+            tester.postRun(None)
+
+            self.assertTrue(os.path.exists(output))
+
+            tester.setDeleteOutputAfterRunning(True)
             tester.parameters()["delete_output_before_running"] = False
             tester.setDeleteOutputAfterRunning(False)
             tester.postRun(None)
