@@ -71,9 +71,25 @@ LORInterface::SetupLOR(LinearSolverBase & solver_base,
   SetupLOR(equation_system);
   if (_lor)
   {
+    auto lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
+    solver_base.SetSolverParameters(lor_solver->GetSolver());
+    solver_base.SetSolver(lor_solver);
+  }
+}
 
+template <>
+void
+LORInterface::SetupLOR<mfem::HypreGMRES>(LinearSolverBase & solver_base,
+                                         Moose::MFEM::EquationSystem & equation_system)
+{
+  if (_lor && solver_base.GetPreconditioner())
+    mooseError("LOR solver cannot take a preconditioner");
+
+  SetupLOR(equation_system);
+  if (_lor)
+  {
     mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<MFEMSolverType>(lor_disc, _a->ParFESpace()->GetComm());
+    auto lor_solver = new mfem::LORSolver<mfem::HypreGMRES>(lor_disc, _a->ParFESpace()->GetComm());
     solver_base.SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
@@ -81,8 +97,8 @@ LORInterface::SetupLOR(LinearSolverBase & solver_base,
 
 template <>
 void
-LORInterface::SetupLOR<mfem::HypreBoomerAMG>(LinearSolverBase & solver_base,
-                                             Moose::MFEM::EquationSystem & equation_system)
+LORInterface::SetupLOR<mfem::HypreFGMRES>(LinearSolverBase & solver_base,
+                                          Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor && solver_base.GetPreconditioner())
     mooseError("LOR solver cannot take a preconditioner");
@@ -90,7 +106,8 @@ LORInterface::SetupLOR<mfem::HypreBoomerAMG>(LinearSolverBase & solver_base,
   SetupLOR(equation_system);
   if (_lor)
   {
-    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(*_a, _ess_tdofs);
+    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(lor_disc, _a->ParFESpace()->GetComm());
     solver_base.SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
@@ -98,7 +115,7 @@ LORInterface::SetupLOR<mfem::HypreBoomerAMG>(LinearSolverBase & solver_base,
 
 template <>
 void
-LORInterface::SetupLOR<mfem::HypreADS>(LinearSolverBase & solver_base,
+LORInterface::SetupLOR<mfem::HyprePCG>(LinearSolverBase & solver_base,
                                        Moose::MFEM::EquationSystem & equation_system)
 {
   if (_lor && solver_base.GetPreconditioner())
@@ -107,49 +124,12 @@ LORInterface::SetupLOR<mfem::HypreADS>(LinearSolverBase & solver_base,
   SetupLOR(equation_system);
   if (_lor)
   {
-    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(*_a, _ess_tdofs);
+    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, _a->ParFESpace()->GetComm());
     solver_base.SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
 }
-
-template <>
-void
-LORInterface::SetupLOR<mfem::HypreAMS>(LinearSolverBase & solver_base,
-                                       Moose::MFEM::EquationSystem & equation_system)
-{
-  if (_lor && solver_base.GetPreconditioner())
-    mooseError("LOR solver cannot take a preconditioner");
-
-  SetupLOR(equation_system);
-  if (_lor)
-  {
-    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(*_a, _ess_tdofs);
-    solver_base.SetSolverParameters(lor_solver->GetSolver());
-    solver_base.SetSolver(lor_solver);
-  }
-}
-
-template <>
-void
-LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(LinearSolverBase & solver_base,
-                                                     Moose::MFEM::EquationSystem & equation_system)
-{
-  if (_lor && solver_base.GetPreconditioner())
-    mooseError("LOR solver cannot take a preconditioner");
-
-  SetupLOR(equation_system);
-  if (_lor)
-  {
-    auto lor_solver = new mfem::LORSolver<mfem::OperatorJacobiSmoother>(*_a, _ess_tdofs);
-    solver_base.SetSolverParameters(lor_solver->GetSolver());
-    solver_base.SetSolver(lor_solver);
-  }
-}
-
-// template void LORInterface::SetupLOR<mfem::CGSolver>(LinearSolverBase & solver,
-//                                                      Moose::MFEM::EquationSystem &
-//                                                      equation_system);
 
 void
 LORInterface::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
