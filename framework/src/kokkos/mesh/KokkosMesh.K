@@ -25,8 +25,8 @@ Mesh::update()
 
   _initialized = true;
 
-  if (_needs_linearfv)
-    initLinearFV();
+  if (_needs_element_side_geometry)
+    initElementSideGeometry();
 }
 
 void
@@ -92,8 +92,8 @@ Mesh::initMap()
     _maps->boundary_node_ids[boundary];
   }
 
-  // Enumerate one off-process neighbor layer needed for FV flux kernels
-  if (_needs_linearfv)
+  // Enumerate one off-process neighbor layer for element-side geometry data.
+  if (_needs_element_side_geometry)
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
@@ -210,8 +210,8 @@ Mesh::initElement()
     _starting_elem_id[sid] = *getSubdomainContiguousElementIDRange(subdomain).begin();
   }
 
-  // Linear FV needs ElementInfo for one-layer ghost neighbors to handle block-restricted variables
-  // on internal mesh faces.
+  // Cache ElementInfo for one-layer ghost neighbors so side-based computations can identify
+  // off-process neighbor element subdomains.
   for (const auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
   {
     _elem_info[ghost_eid].type = getElementTypeID(ghost_elem);
@@ -294,32 +294,32 @@ Mesh::getContiguousNodeID(const Node * node) const
 }
 
 void
-Mesh::initLinearFV()
+Mesh::initElementSideGeometry()
 {
   const auto num_elems = getNumLocalElements();
   const auto num_local_plus_one_neighbor_layer_elems =
       getNumLocalAndPossiblyOneNeighborLayerGhostElements();
   const auto max_sides = _mesh.getMaxSidesPerElem();
 
-  _linearfv_elem_volume.create(num_local_plus_one_neighbor_layer_elems);
-  _linearfv_elem_centroid.create(num_local_plus_one_neighbor_layer_elems);
-  _linearfv_face_area.create(max_sides, num_elems);
-  _linearfv_face_centroid.create(max_sides, num_elems);
-  _linearfv_face_d_cf.create(max_sides, num_elems);
-  _linearfv_face_d_cf_mag.create(max_sides, num_elems);
-  _linearfv_face_d_cn.create(max_sides, num_elems);
-  _linearfv_face_d_cn_mag.create(max_sides, num_elems);
-  _linearfv_face_boundary_id.create(max_sides, num_elems);
+  _elem_volume.create(num_local_plus_one_neighbor_layer_elems);
+  _elem_centroid.create(num_local_plus_one_neighbor_layer_elems);
+  _side_area.create(max_sides, num_elems);
+  _side_centroid.create(max_sides, num_elems);
+  _elem_centroid_to_side_centroid.create(max_sides, num_elems);
+  _elem_centroid_to_side_centroid_distance.create(max_sides, num_elems);
+  _elem_centroid_to_neighbor_centroid.create(max_sides, num_elems);
+  _elem_centroid_to_neighbor_centroid_distance.create(max_sides, num_elems);
+  _side_boundary_id.create(max_sides, num_elems);
 
-  _linearfv_elem_volume = 0;
-  _linearfv_elem_centroid = Real3();
-  _linearfv_face_area = 0;
-  _linearfv_face_centroid = Real3();
-  _linearfv_face_d_cf = Real3();
-  _linearfv_face_d_cf_mag = 0;
-  _linearfv_face_d_cn = Real3();
-  _linearfv_face_d_cn_mag = 0;
-  _linearfv_face_boundary_id = Moose::INVALID_BOUNDARY_ID;
+  _elem_volume = 0;
+  _elem_centroid = Real3();
+  _side_area = 0;
+  _side_centroid = Real3();
+  _elem_centroid_to_side_centroid = Real3();
+  _elem_centroid_to_side_centroid_distance = 0;
+  _elem_centroid_to_neighbor_centroid = Real3();
+  _elem_centroid_to_neighbor_centroid_distance = 0;
+  _side_boundary_id = Moose::INVALID_BOUNDARY_ID;
 
   libMesh::ElemSideBuilder side_builder;
 
@@ -328,8 +328,8 @@ Mesh::initLinearFV()
     const auto eid = getContiguousElementID(elem);
     const auto elem_centroid = elem->vertex_average();
 
-    _linearfv_elem_volume[eid] = elem->volume();
-    _linearfv_elem_centroid[eid] = elem_centroid;
+    _elem_volume[eid] = elem->volume();
+    _elem_centroid[eid] = elem_centroid;
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
@@ -344,20 +344,23 @@ Mesh::initLinearFV()
         _elem_neighbor(side, eid) = neighbor_eid;
       }
 
-      const auto d_cf = face_centroid - elem_centroid;
+      const auto elem_centroid_to_side_centroid = face_centroid - elem_centroid;
       const bool has_neighbor = neighbor_eid != libMesh::DofObject::invalid_id;
-      const auto d_cn = has_neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
+      const auto elem_centroid_to_neighbor_centroid =
+          has_neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
 
-      _linearfv_face_area(side, eid) = face.volume();
-      _linearfv_face_centroid(side, eid) = face_centroid;
-      _linearfv_face_d_cf(side, eid) = d_cf;
-      _linearfv_face_d_cf_mag(side, eid) = d_cf.norm();
-      _linearfv_face_d_cn(side, eid) = d_cn;
-      _linearfv_face_d_cn_mag(side, eid) = has_neighbor ? d_cn.norm() : Real(0);
+      _side_area(side, eid) = face.volume();
+      _side_centroid(side, eid) = face_centroid;
+      _elem_centroid_to_side_centroid(side, eid) = elem_centroid_to_side_centroid;
+      _elem_centroid_to_side_centroid_distance(side, eid) = elem_centroid_to_side_centroid.norm();
+      _elem_centroid_to_neighbor_centroid(side, eid) = elem_centroid_to_neighbor_centroid;
+      _elem_centroid_to_neighbor_centroid_distance(side, eid) =
+          has_neighbor ? elem_centroid_to_neighbor_centroid.norm() : Real(0);
 
       const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
       if (boundary_ids.size() > 1)
-        mooseError("KokkosLinearFV does not support multiple boundary IDs on a single face. "
+        mooseError("Kokkos element-side geometry does not support multiple boundary IDs on a "
+                   "single side. "
                    "Element ",
                    eid,
                    " side ",
@@ -366,28 +369,28 @@ Mesh::initLinearFV()
                    boundary_ids.size(),
                    " boundary IDs.");
       if (!boundary_ids.empty())
-        _linearfv_face_boundary_id(side, eid) = boundary_ids.front();
+        _side_boundary_id(side, eid) = boundary_ids.front();
     }
   }
 
   for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
   {
-    _linearfv_elem_volume[ghost_eid] = ghost_elem->volume();
-    _linearfv_elem_centroid[ghost_eid] = ghost_elem->vertex_average();
+    _elem_volume[ghost_eid] = ghost_elem->volume();
+    _elem_centroid[ghost_eid] = ghost_elem->vertex_average();
   }
 
   _elem_neighbor.moveToDevice();
-  _linearfv_elem_volume.moveToDevice();
-  _linearfv_elem_centroid.moveToDevice();
-  _linearfv_face_area.moveToDevice();
-  _linearfv_face_centroid.moveToDevice();
-  _linearfv_face_d_cf.moveToDevice();
-  _linearfv_face_d_cf_mag.moveToDevice();
-  _linearfv_face_d_cn.moveToDevice();
-  _linearfv_face_d_cn_mag.moveToDevice();
-  _linearfv_face_boundary_id.moveToDevice();
+  _elem_volume.moveToDevice();
+  _elem_centroid.moveToDevice();
+  _side_area.moveToDevice();
+  _side_centroid.moveToDevice();
+  _elem_centroid_to_side_centroid.moveToDevice();
+  _elem_centroid_to_side_centroid_distance.moveToDevice();
+  _elem_centroid_to_neighbor_centroid.moveToDevice();
+  _elem_centroid_to_neighbor_centroid_distance.moveToDevice();
+  _side_boundary_id.moveToDevice();
 
-  _linearfv_initialized = true;
+  _element_side_geometry_initialized = true;
 }
 
 } // namespace Moose::Kokkos

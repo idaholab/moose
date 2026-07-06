@@ -126,17 +126,16 @@ public:
   virtual bool hasDoFsOnNodes() const { mooseError("Base class cannot determine this"); };
 
   /**
-   * Whether this variable computes values at quadrature points. Returns true for FE variables
-   * and for FV variables that have been opted in via requireQpComputations(). Returns false for
-   * linear FV variables by default and for scalar variables.
+   * Whether this variable supports QP-indexed loops. Returns true for FE variables and nonlinear
+   * FV variables. Returns false for linear FV variables by default and for scalar variables.
    */
-  virtual bool usesQpBasedLoops() const;
+  virtual bool supportsQpBasedLoops() const;
 
   /**
-   * Whether this variable assembles via the FV path (ElemInfo/FaceInfo loops, no QP reinit).
+   * Whether this variable supports geometric-info-based loops, such as ElemInfo/FaceInfo loops.
    * Static, per-class property - never toggled by requireQpComputations().
    */
-  virtual bool usesGeometricInfoBasedLoops() const;
+  virtual bool supportsGeometricInfoBasedLoops() const;
 
   /**
    * Return the continuity of this variable

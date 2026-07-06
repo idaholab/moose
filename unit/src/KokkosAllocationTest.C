@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "MooseLinearVariableFV.h"
+#include "MooseVariableFV.h"
 #include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
@@ -58,6 +59,12 @@ protected:
   {
     InputParameters params = _factory.getValidParams("MooseVariable");
     _fe_problem->addVariable("MooseVariable", name, params);
+  }
+
+  void addFVVar(const std::string & name)
+  {
+    InputParameters params = _factory.getValidParams("MooseVariableFVReal");
+    _fe_problem->addVariable("MooseVariableFVReal", name, params);
   }
 
   void addLinearFVVar(const std::string & name)
@@ -131,6 +138,22 @@ TEST_F(KokkosAllocationTest, PureFESystemAllocatesFESystemOnly)
 
   const auto nl_num = _fe_problem->getNonlinearSystemBase(0).number();
   EXPECT_FALSE(_fe_problem->getKokkosSystems().isSlotConstructed(nl_num));
+  EXPECT_TRUE(_fe_problem->getKokkosFESystems().isSlotConstructed(nl_num));
+}
+
+// Nonlinear FV system - dual allocation (System + FESystem)
+TEST_F(KokkosAllocationTest, NonlinearFVSystemAllocatesBoth)
+{
+  if (!_fe_problem->mesh().getKokkosMesh())
+    GTEST_SKIP() << "Kokkos mesh not available";
+
+  addFVVar("v");
+
+  initSystems();
+  _fe_problem->initKokkos();
+
+  const auto nl_num = _fe_problem->getNonlinearSystemBase(0).number();
+  EXPECT_TRUE(_fe_problem->getKokkosSystems().isSlotConstructed(nl_num));
   EXPECT_TRUE(_fe_problem->getKokkosFESystems().isSlotConstructed(nl_num));
 }
 

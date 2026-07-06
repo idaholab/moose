@@ -218,7 +218,7 @@ MooseVariableBase::getSolution(const Moose::StateArg & state) const
 }
 
 bool
-MooseVariableBase::usesQpBasedLoops() const
+MooseVariableBase::supportsQpBasedLoops() const
 {
   mooseAssert(false,
               "Base class should not assume anything regarding this. In an ideal world this would "
@@ -228,7 +228,7 @@ MooseVariableBase::usesQpBasedLoops() const
 }
 
 bool
-MooseVariableBase::usesGeometricInfoBasedLoops() const
+MooseVariableBase::supportsGeometricInfoBasedLoops() const
 {
   mooseAssert(false,
               "Base class should not assume anything regarding this. In an ideal world this would "

@@ -63,7 +63,7 @@ protected:
 TEST_F(INSFVVariableTest, INSFVVariableDefaultNoQpData)
 {
   auto & var = addINSFVVar("p");
-  EXPECT_FALSE(var.usesQpBasedLoops());
+  EXPECT_FALSE(var.supportsQpBasedLoops());
 }
 
 // INSFVVariable opts in via requireQpComputations()
@@ -71,20 +71,20 @@ TEST_F(INSFVVariableTest, INSFVVariableOptsInViaRequireQpComputations)
 {
   auto & var = addINSFVVar("p");
   dynamic_cast<INSFVVariable &>(var).requireQpComputations();
-  EXPECT_TRUE(var.usesQpBasedLoops());
+  EXPECT_TRUE(var.supportsQpBasedLoops());
 }
 
-// INSFVVariable always uses FV assembly
-TEST_F(INSFVVariableTest, INSFVVariableAlwaysTrueFVAssembly)
+// INSFVVariable supports geometric-info loops
+TEST_F(INSFVVariableTest, INSFVVariableSupportsGeometricInfoLoops)
 {
   auto & var = addINSFVVar("p");
-  EXPECT_TRUE(var.usesGeometricInfoBasedLoops());
+  EXPECT_TRUE(var.supportsGeometricInfoBasedLoops());
 }
 
-// usesGeometricInfoBasedLoops() on INSFVVariable is unaffected by requireQpComputations()
-TEST_F(INSFVVariableTest, INSFVVariableTrueFVAssemblyUnaffectedByRequireQp)
+// supportsGeometricInfoBasedLoops() on INSFVVariable is unaffected by requireQpComputations()
+TEST_F(INSFVVariableTest, INSFVVariableGeometricInfoLoopSupportUnaffectedByRequireQp)
 {
   auto & var = addINSFVVar("p");
   dynamic_cast<INSFVVariable &>(var).requireQpComputations();
-  EXPECT_TRUE(var.usesGeometricInfoBasedLoops());
+  EXPECT_TRUE(var.supportsGeometricInfoBasedLoops());
 }

@@ -76,7 +76,7 @@ public:
   /**
    * Get the local DOF index of a variable for a node
    * @param node The contiguous node ID
-   * @param idx The node-local DOF index
+   * @param i The node-local DOF index
    * @param var The variable number
    * @returns The local DOF index
    */
@@ -120,9 +120,9 @@ public:
                                              const TagID tag,
                                              const Real seed) const;
   /**
-   * Get the quadrature value of a variable from a tagged vector
+   * Get the quadrature point value of a variable from a tagged vector
    * @param info The element information object
-   * @param qp The global quadrature point index
+   * @param qp The subdomain-local flattened quadrature point index
    * @param var The variable number
    * @param tag The vector tag
    * @returns The quadrature value
@@ -135,9 +135,10 @@ public:
     return _qp_solutions[tag](info.subdomain, var)[qp];
   }
   /**
-   * Get the quadrature value of a variable from a tagged vector for automatic differentiation (AD)
+   * Get the quadrature point value of a variable from a tagged vector for automatic differentiation
+   * (AD)
    * @param info The element information object
-   * @param offset The offset into the global quadrature point index
+   * @param offset The element's offset into the subdomain-local flattened quadrature point index
    * @param qp The local quadrature point index
    * @param var The variable number
    * @param tag The vector tag
@@ -151,9 +152,9 @@ public:
                                             const TagID tag,
                                             const Real seed) const;
   /**
-   * Get the quadrature gradient of a variable from a tagged vector
+   * Get the quadrature point gradient of a variable from a tagged vector
    * @param info The element information object
-   * @param qp The global quadrature point index
+   * @param qp The subdomain-local flattened quadrature point index
    * @param var The variable number
    * @param tag The vector tag
    * @returns The quadrature gradient
@@ -166,11 +167,11 @@ public:
     return _qp_solutions_grad[tag](info.subdomain, var)[qp];
   }
   /**
-   * Get the quadrature gradient of a variable from a tagged vector for automatic differentiation
-   * (AD)
+   * Get the quadrature point gradient of a variable from a tagged vector for automatic
+   * differentiation (AD)
    * @param info The element information object
    * @param jacobian The inverse Jacobian matrix
-   * @param offset The offset into the global quadrature point index
+   * @param offset The element's offset into the subdomain-local flattened quadrature point index
    * @param qp The local quadrature point index
    * @param var The variable number
    * @param tag The vector tag
@@ -185,7 +186,7 @@ public:
                                             const TagID tag,
                                             const Real seed) const;
   /**
-   * Get the face quadrature value of a variable from a tagged vector
+   * Get the face quadrature point value of a variable from a tagged vector
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
@@ -199,8 +200,8 @@ public:
                                             const unsigned int var,
                                             const TagID tag) const;
   /**
-   * Get the face quadrature value of a variable from a tagged vector for automatic differentiation
-   * (AD)
+   * Get the face quadrature point value of a variable from a tagged vector for automatic
+   * differentiation (AD)
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
@@ -216,7 +217,7 @@ public:
                                                 const TagID tag,
                                                 const Real seed) const;
   /**
-   * Get the face quadrature gradient of a variable from a tagged vector
+   * Get the face quadrature point gradient of a variable from a tagged vector
    * @param info The element information object
    * @param side The side index
    * @param jacobian The inverse Jacobian matrix
@@ -233,7 +234,7 @@ public:
                                             const TagID tag) const;
 
   /**
-   * Get the face quadrature gradient of a variable from a tagged vector for automatic
+   * Get the face quadrature point gradient of a variable from a tagged vector for automatic
    * differentiation (AD)
    * @param info The element information object
    * @param side The side index
@@ -263,13 +264,14 @@ private:
    * Setup variable data
    */
   void setupVariables();
+
   /**
    * Setup DOF data
    */
   void setupDofs();
+
   /**
-   * Setup coupling data between variables. This is currently a no-op for linear systems for which
-   * there is currently not any (block variable) off-diagonal coupling support
+   * Setup coupling data between variables
    */
   void setupCoupling();
 
@@ -281,7 +283,7 @@ private:
   /**
    * Get the list of DOFs covered by a nodal BC
    * @param nbc The Kokkos nodal BC object
-   * @param dofs The flag whether each DOF is covered by the nodal BC
+   * @param dofs Local-plus-ghost DOF mask; entries are set true for DOFs covered by the nodal BC
    */
   void getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs);
 
@@ -314,7 +316,7 @@ private:
   Array<Array<unsigned int>> _coupling;
 
   /**
-   * Flag whether each DOF is covered by a nodal BC for each matrix tag
+   * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
 };

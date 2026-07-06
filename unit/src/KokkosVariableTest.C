@@ -128,37 +128,37 @@ protected:
   std::shared_ptr<FEProblem> _fe_problem;
 };
 
-// --- usesQpBasedLoops() tests ---
+// --- supportsQpBasedLoops() tests ---
 
 TEST_F(KokkosVariableTest, FEVariableComputesQpData)
 {
   auto & var = addFEVar("v");
-  EXPECT_TRUE(var.usesQpBasedLoops());
+  EXPECT_TRUE(var.supportsQpBasedLoops());
 }
 
 TEST_F(KokkosVariableTest, FVVariableBaseComputesQpData)
 {
   auto & var = addFVVar("v");
-  EXPECT_TRUE(var.usesQpBasedLoops());
+  EXPECT_TRUE(var.supportsQpBasedLoops());
 }
 
 TEST_F(KokkosVariableTest, LinearFVDefaultNoQpData)
 {
   auto & var = addLinearFVVar("u");
-  EXPECT_FALSE(var.usesQpBasedLoops());
+  EXPECT_FALSE(var.supportsQpBasedLoops());
 }
 
 TEST_F(KokkosVariableTest, LinearFVOptsInViaRequireQpComputations)
 {
   auto & var = addLinearFVVar("u");
   dynamic_cast<MooseLinearVariableFV<Real> &>(var).requireQpComputations();
-  EXPECT_TRUE(var.usesQpBasedLoops());
+  EXPECT_TRUE(var.supportsQpBasedLoops());
 }
 
 TEST_F(KokkosVariableTest, ScalarVariableNoQpData)
 {
   auto & var = addScalarVar("s");
-  EXPECT_FALSE(var.usesQpBasedLoops());
+  EXPECT_FALSE(var.supportsQpBasedLoops());
 }
 
 // Coupleable construction with a MooseLinearVariableFV<Real> coupled variable
@@ -166,7 +166,7 @@ TEST_F(KokkosVariableTest, ScalarVariableNoQpData)
 TEST_F(KokkosVariableTest, CoupleableTriggerRequireQpComputations)
 {
   auto & lin_var = addLinearFVVar("u_lin");
-  EXPECT_FALSE(lin_var.usesQpBasedLoops());
+  EXPECT_FALSE(lin_var.supportsQpBasedLoops());
 
   // Add an aux variable as the kernel write target
   addAuxFEVar("dummy_aux");
@@ -179,38 +179,38 @@ TEST_F(KokkosVariableTest, CoupleableTriggerRequireQpComputations)
   params.set<std::vector<VariableName>>("coupled") = {"u_lin"};
   _fe_problem->addAuxKernel("TestLinearFVCoupledAux", "kern", params);
 
-  EXPECT_TRUE(lin_var.usesQpBasedLoops());
+  EXPECT_TRUE(lin_var.supportsQpBasedLoops());
 }
 
-// --- usesGeometricInfoBasedLoops() tests ---
+// --- supportsGeometricInfoBasedLoops() tests ---
 
-TEST_F(KokkosVariableTest, FEVariableNoTrueFVAssembly)
+TEST_F(KokkosVariableTest, FEVariableDoesNotSupportGeometricInfoLoops)
 {
   auto & var = addFEVar("v");
-  EXPECT_FALSE(var.usesGeometricInfoBasedLoops());
+  EXPECT_FALSE(var.supportsGeometricInfoBasedLoops());
 }
 
-TEST_F(KokkosVariableTest, FVVariableBaseNoTrueFVAssembly)
+TEST_F(KokkosVariableTest, FVVariableSupportsGeometricInfoLoops)
 {
   auto & var = addFVVar("v");
-  EXPECT_FALSE(var.usesGeometricInfoBasedLoops());
+  EXPECT_TRUE(var.supportsGeometricInfoBasedLoops());
 }
 
-TEST_F(KokkosVariableTest, LinearFVAlwaysTrueFVAssembly)
+TEST_F(KokkosVariableTest, LinearFVSupportsGeometricInfoLoops)
 {
   auto & var = addLinearFVVar("u");
-  EXPECT_TRUE(var.usesGeometricInfoBasedLoops());
+  EXPECT_TRUE(var.supportsGeometricInfoBasedLoops());
 }
 
-TEST_F(KokkosVariableTest, LinearFVTrueFVAssemblyUnaffectedByRequireQp)
+TEST_F(KokkosVariableTest, LinearFVGeometricInfoLoopSupportUnaffectedByRequireQp)
 {
   auto & var = addLinearFVVar("u");
   dynamic_cast<MooseLinearVariableFV<Real> &>(var).requireQpComputations();
-  EXPECT_TRUE(var.usesGeometricInfoBasedLoops());
+  EXPECT_TRUE(var.supportsGeometricInfoBasedLoops());
 }
 
-TEST_F(KokkosVariableTest, ScalarVariableNoTrueFVAssembly)
+TEST_F(KokkosVariableTest, ScalarVariableDoesNotSupportGeometricInfoLoops)
 {
   auto & var = addScalarVar("s");
-  EXPECT_FALSE(var.usesGeometricInfoBasedLoops());
+  EXPECT_FALSE(var.supportsGeometricInfoBasedLoops());
 }

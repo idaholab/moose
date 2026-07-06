@@ -127,7 +127,7 @@ FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
   logAdd("KokkosLinearFVKernel", name, kernel_name, parameters);
   _linear_systems[sys_num - _num_nl_sys]->addKokkosKernel(kernel_name, name, parameters);
 
-  _mesh.getKokkosMesh()->setNeedsLinearFV();
+  _mesh.getKokkosMesh()->setNeedsElementSideGeometry();
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
@@ -151,7 +151,7 @@ FEProblemBase::addKokkosLinearFVBC(const std::string & bc_name,
   logAdd("KokkosLinearFVBoundaryCondition", name, bc_name, parameters);
   _linear_systems[sys_num - _num_nl_sys]->addKokkosBoundaryCondition(bc_name, name, parameters);
 
-  _mesh.getKokkosMesh()->setNeedsLinearFV();
+  _mesh.getKokkosMesh()->setNeedsElementSideGeometry();
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
@@ -387,9 +387,9 @@ FEProblemBase::initKokkos()
     for (const auto v : make_range(sys.nFieldVariables()))
     {
       const auto & var = sys.getVariable(0, v);
-      if (var.usesQpBasedLoops())
+      if (var.supportsQpBasedLoops())
         needs_fe = true;
-      if (var.usesGeometricInfoBasedLoops())
+      if (var.supportsGeometricInfoBasedLoops())
         needs_fv = true;
       if (needs_fv && needs_fe)
         break;

@@ -72,9 +72,10 @@ public:
   void update();
 
   /**
-   * Mark that LinearFV geometry data is needed; initLinearFV() will be called on the next update()
+   * Mark that element-side geometry data is needed; initElementSideGeometry() will be called on the
+   * next update()
    */
-  void setNeedsLinearFV() { _needs_linearfv = true; }
+  void setNeedsElementSideGeometry() { _needs_element_side_geometry = true; }
 
   /**
    * Get the number of subdomains
@@ -209,109 +210,113 @@ public:
     return _elem_neighbor(side, elem);
   }
   /**
-   * Get the face area of an element side
+   * Get the area of an element side
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The face area
+   * @returns The side area
    */
-  KOKKOS_FUNCTION Real getFaceArea(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real getSideArea(ContiguousElementID elem, unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_area(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_area(side, elem);
   }
   /**
-   * Get the face centroid of an element side
+   * Get the centroid of an element side
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The face centroid
+   * @returns The side centroid
    */
-  KOKKOS_FUNCTION Real3 getFaceCentroid(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real3 getSideCentroid(ContiguousElementID elem, unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_centroid(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_centroid(side, elem);
   }
   /**
-   * Get the cell-center to face-center distance vector for an element side (all faces)
+   * Get the element-centroid to side-centroid vector for an element side
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The cell-to-face distance vector
+   * @returns The element-centroid to side-centroid vector
    */
-  KOKKOS_FUNCTION Real3 getFaceDCF(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real3 getElementCentroidToSideCentroidVector(ContiguousElementID elem,
+                                                               unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_d_cf(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_side_centroid(side, elem);
   }
   /**
-   * Get the cell-center to face-center distance magnitude for an element side (all faces)
+   * Get the element-centroid to side-centroid distance for an element side
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The cell-to-face distance magnitude
+   * @returns The element-centroid to side-centroid distance
    */
-  KOKKOS_FUNCTION Real getFaceDCFMag(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real getElementCentroidToSideCentroidDistance(ContiguousElementID elem,
+                                                                unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_d_cf_mag(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_side_centroid_distance(side, elem);
   }
   /**
-   * Get the cell-center to neighbor-center distance vector for an element side (internal faces
-   * only)
+   * Get the element-centroid to neighbor-centroid vector for an element side with a neighbor
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The cell-to-neighbor distance vector
+   * @returns The element-centroid to neighbor-centroid vector, or a zero vector when the side has
+   *          no contiguous neighbor ID
    */
-  KOKKOS_FUNCTION Real3 getFaceDCN(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real3 getElementCentroidToNeighborCentroidVector(ContiguousElementID elem,
+                                                                   unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_d_cn(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_neighbor_centroid(side, elem);
   }
   /**
-   * Get the cell-center to neighbor-center distance magnitude for an element side (internal faces
-   * only)
+   * Get the element-centroid to neighbor-centroid distance for an element side with a neighbor
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The cell-to-neighbor distance magnitude
+   * @returns The element-centroid to neighbor-centroid distance, or zero when the side has no
+   *          contiguous neighbor ID
    */
-  KOKKOS_FUNCTION Real getFaceDCNMag(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION Real getElementCentroidToNeighborCentroidDistance(ContiguousElementID elem,
+                                                                    unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_d_cn_mag(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_neighbor_centroid_distance(side, elem);
   }
   /**
    * @returns The boundary ID associated with an element side. If there is none, the returned value
    * will be \p Moose::INVALID_BOUNDARY_ID
    */
-  KOKKOS_FUNCTION BoundaryID getFaceBoundaryID(ContiguousElementID elem, unsigned int side) const
+  KOKKOS_FUNCTION BoundaryID getSideBoundaryID(ContiguousElementID elem, unsigned int side) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_face_boundary_id(side, elem);
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_boundary_id(side, elem);
   }
   /**
-   * Get the element volume cached for Kokkos LinearFV
+   * Get the element volume
    * @param elem The contiguous element ID
    * @returns The element volume
    */
   KOKKOS_FUNCTION Real getElementVolume(ContiguousElementID elem) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_elem_volume[elem];
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_volume[elem];
   }
   /**
-   * Get the element centroid cached for Kokkos LinearFV
+   * Get the element centroid
    * @param elem The contiguous element ID
    * @returns The element centroid
    */
   KOKKOS_FUNCTION Real3 getElementCentroid(ContiguousElementID elem) const
   {
-    KOKKOS_ASSERT(_linearfv_initialized);
-    return _linearfv_elem_centroid[elem];
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid[elem];
   }
 
   /**
-   * Allocate and populate the cached geometry data used by Kokkos LinearFV objects: element volumes
-   * and centroids, and per-face areas, centroids, cell-to-face and cell-to-neighbor vectors and
-   * their magnitudes, and boundary IDs
+   * Allocate and populate cached element and side geometry: element volumes and centroids, side
+   * areas and centroids, element-centroid to side-centroid and element-centroid to
+   * neighbor-centroid vectors and their magnitudes, and boundary IDs
    */
-  void initLinearFV();
+  void initElementSideGeometry();
 
   /**
    * Get the number of sides of an element type
@@ -536,28 +541,28 @@ private:
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
 
-  /// Whether initLinearFV() has been called and the geometry cache is populated
-  bool _linearfv_initialized = false;
-  /// Whether initLinearFV() should be called on the next update()
-  bool _needs_linearfv = false;
+  /// Whether initElementSideGeometry() has been called and the geometry cache is populated
+  bool _element_side_geometry_initialized = false;
+  /// Whether initElementSideGeometry() should be called on the next update()
+  bool _needs_element_side_geometry = false;
   /// Cached element volumes indexed by contiguous element ID
-  Array<Real> _linearfv_elem_volume;
+  Array<Real> _elem_volume;
   /// Cached element centroids indexed by contiguous element ID
-  Array<Real3> _linearfv_elem_centroid;
-  /// Cached face areas indexed by (side, contiguous element ID)
-  Array2D<Real> _linearfv_face_area;
-  /// Cached face centroids indexed by (side, contiguous element ID)
-  Array2D<Real3> _linearfv_face_centroid;
-  /// Cell-center to face-center distance vectors indexed by (side, contiguous element ID)
-  Array2D<Real3> _linearfv_face_d_cf;
-  /// Cell-center to face-center distance magnitudes indexed by (side, contiguous element ID)
-  Array2D<Real> _linearfv_face_d_cf_mag;
-  /// Cell-center to neighbor-center distance vectors indexed by (side, contiguous element ID)
-  Array2D<Real3> _linearfv_face_d_cn;
-  /// Cell-center to neighbor-center distance magnitudes indexed by (side, contiguous element ID)
-  Array2D<Real> _linearfv_face_d_cn_mag;
-  /// Boundary IDs for each face indexed by (side, contiguous element ID)
-  Array2D<BoundaryID> _linearfv_face_boundary_id;
+  Array<Real3> _elem_centroid;
+  /// Cached side areas indexed by (side, contiguous element ID)
+  Array2D<Real> _side_area;
+  /// Cached side centroids indexed by (side, contiguous element ID)
+  Array2D<Real3> _side_centroid;
+  /// Element-centroid to side-centroid vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _elem_centroid_to_side_centroid;
+  /// Element-centroid to side-centroid distances indexed by (side, contiguous element ID)
+  Array2D<Real> _elem_centroid_to_side_centroid_distance;
+  /// Element-centroid to neighbor-centroid vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _elem_centroid_to_neighbor_centroid;
+  /// Element-centroid to neighbor-centroid distances indexed by (side, contiguous element ID)
+  Array2D<Real> _elem_centroid_to_neighbor_centroid_distance;
+  /// Boundary IDs for each side indexed by (side, contiguous element ID)
+  Array2D<BoundaryID> _side_boundary_id;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE

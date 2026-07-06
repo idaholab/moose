@@ -32,7 +32,7 @@ public:
   /**
    * Right-hand side dispatch loop body; accumulates the elemental RHS contribution
    * @param tid The thread ID of the current element
-   * @param kernel The concrete kernel object
+   * @param kernel The derived kernel object whose contribution methods are invoked
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
@@ -41,7 +41,7 @@ public:
   /**
    * Matrix dispatch loop body; accumulates the elemental matrix contribution
    * @param tid The thread ID of the current element
-   * @param kernel The concrete kernel object
+   * @param kernel The derived kernel object whose contribution methods are invoked
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const;

@@ -53,7 +53,10 @@ public:
 
   /**
    * Get the neighbor element information object
-   * @returns The neighbor element information object
+   * @returns The neighbor element information object. If there is no neighbor or if this datum is
+   * not meant to represent face data, then this will point to a default constructed \p ElementInfo
+   * whose data members represent invalid state (e.g. hold \p invalid_uint, \p invalid_id like
+   * values)
    */
   KOKKOS_FUNCTION const ElementInfo & neighbor() const { return _neighbor; }
 
@@ -62,6 +65,12 @@ public:
    * @returns The contiguous neighbor element ID or \p libMesh::DofObject::invalid_id
    */
   KOKKOS_FUNCTION ContiguousElementID neighborID() const { return _neighbor.id; }
+
+  /**
+   * Get the side index
+   * @returns The side index
+   */
+  KOKKOS_FUNCTION unsigned int side() const { return _side; }
 
   /**
    * Get whether the current datum is on a side
@@ -81,18 +90,24 @@ public:
    */
   KOKKOS_FUNCTION ContiguousSubdomainID neighborSubdomain() const { return _neighbor.subdomain; }
 
+protected:
   /**
-   * Get the side index
-   * @returns The side index
+   * Get the neighbor element information object for an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @param mesh The Kokkos mesh
+   * @returns The neighbor element information object, or a default \p ElementInfo (a default
+   *          constructed \p ElementInfo's data members all represent invalid state) when \p elem is
+   *          \p libMesh::DofObject::invalid_id, \p side is \p libMesh::invalid_uint, or the Kokkos
+   *          mesh has no contiguous neighbor ID for the side. The latter includes exterior
+   *          boundary sides with no libMesh neighbor and sides whose libMesh neighbor is
+   *          \p libMesh::remote_elem. Off-process neighbors present as ghost elements have
+   *          contiguous IDs and return their \p ElementInfo.
    */
-  KOKKOS_FUNCTION unsigned int side() const { return _side; }
-
-private:
   static KOKKOS_FUNCTION ElementInfo neighborInfo(ContiguousElementID elem,
                                                   const unsigned int side,
                                                   const Mesh & mesh);
 
-protected:
   /**
    * Reference to the Kokkos mesh
    */
@@ -147,16 +162,22 @@ public:
   FVDatum(ContiguousElementID elem, const unsigned int side, const Mesh & mesh);
 
   KOKKOS_FUNCTION
-  Real3 faceCentroid() const { return _mesh.getFaceCentroid(_elem.id, _side); }
+  Real3 faceCentroid() const { return _mesh.getSideCentroid(_elem.id, _side); }
 
   KOKKOS_FUNCTION
-  Real faceDCNMag() const { return _mesh.getFaceDCNMag(_elem.id, _side); }
+  Real faceDCNMag() const
+  {
+    return _mesh.getElementCentroidToNeighborCentroidDistance(_elem.id, _side);
+  }
 
   KOKKOS_FUNCTION
-  Real faceDCFMag() const { return _mesh.getFaceDCFMag(_elem.id, _side); }
+  Real faceDCFMag() const
+  {
+    return _mesh.getElementCentroidToSideCentroidDistance(_elem.id, _side);
+  }
 
   KOKKOS_FUNCTION
-  Real faceArea() const { return _mesh.getFaceArea(_elem.id, _side); }
+  Real faceArea() const { return _mesh.getSideArea(_elem.id, _side); }
 
   KOKKOS_FUNCTION
   Real3 elementCentroid() const { return _mesh.getElementCentroid(_elem.id); }

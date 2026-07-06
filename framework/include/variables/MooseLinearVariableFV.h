@@ -227,8 +227,8 @@ public:
   virtual void sizeMatrixTagData() override;
 
   void requireQpComputations() const override { _compute_qp_data = true; }
-  bool usesQpBasedLoops() const override { return _compute_qp_data; }
-  bool usesGeometricInfoBasedLoops() const override { return true; }
+  bool supportsQpBasedLoops() const override { return _compute_qp_data; }
+  bool supportsGeometricInfoBasedLoops() const override { return true; }
 
 protected:
   /// Throw an error when somebody requests time-related data from this variable

@@ -34,8 +34,8 @@ public:
   MooseVariableScalar(const InputParameters & parameters);
   virtual ~MooseVariableScalar();
 
-  bool usesQpBasedLoops() const override { return false; }
-  bool usesGeometricInfoBasedLoops() const override { return false; }
+  bool supportsQpBasedLoops() const override { return false; }
+  bool supportsGeometricInfoBasedLoops() const override { return false; }
 
   /**
    * Fill out the VariableValue arrays from the system solution vector
