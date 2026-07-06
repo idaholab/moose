@@ -71,8 +71,9 @@ MFEMValueSamplerBase::validParams()
   params.addParam<MooseEnum>(
       "point_ordering", ordering, "Ordering style to use for point vector DoFs.");
   MooseEnum avg_type("NONE ARITHMETIC HARMONIC", "ARITHMETIC", false);
-  params.addParam<MooseEnum>(
-      "average_type", avg_type, "Average type used when sampling L2 functions at boundaries.");
+  params.addParam<MooseEnum>("average_type",
+                             avg_type,
+                             "Average type used when sampling L2 functions at element boundaries.");
   params.addParam<double>("mesh_boundary_tolerance",
                           1e-8,
                           "Distance from point to mesh boundary below which the point is "
@@ -97,8 +98,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   if (getMFEMProblem().mesh().shouldDisplace())
     mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
 
-  const mfem::FindPointsGSLIB::AvgType avg_type = get_avg_type(getParam<MooseEnum>("average_type"));
-  _finder.SetL2AvgType(avg_type);
+  _finder.SetL2AvgType(get_avg_type(getParam<MooseEnum>("average_type")));
   _finder.SetDistanceToleranceForPointsFoundOnBoundary(getParam<double>("mesh_boundary_tolerance"));
 
   // set up points vector
@@ -119,12 +119,10 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
         break;
       case 1:
         if (fe_boundary_discontinuous)
-        {
           mooseWarning("MFEMValueSamplerBase found a point on an element boundary but "
                        "the FE space is discontinuous at boundaries: ",
                        points[i],
                        ".");
-        }
         break;
       default:
         mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");

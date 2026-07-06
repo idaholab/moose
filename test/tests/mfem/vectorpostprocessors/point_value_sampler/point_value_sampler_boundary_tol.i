@@ -33,7 +33,7 @@
     type = MFEMPointValueSampler
     variable = 'h1_scalar'
     # this point is considered found
-    # unless tolerance is increased, then it is outside the mesh
+    # unless tolerance is tightened, then it is outside the mesh
     points = '0.01 0.01 -2.37501'
   []
 []
