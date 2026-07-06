@@ -53,6 +53,25 @@ protected:
   mfem::Array<int> _ess_bdr_markers;
   mfem::Array<int> _ess_tdofs;
 };
+
+// Template specializations required for LOR solvers for Hypre preconditioners solvers due to
+// upstream specializations
+template <>
+void LORInterface::SetupLOR<mfem::HypreBoomerAMG>(LinearSolverBase & solver_base,
+                                                  Moose::MFEM::EquationSystem & equation_system);
+
+template <>
+void LORInterface::SetupLOR<mfem::HypreADS>(LinearSolverBase & solver_base,
+                                            Moose::MFEM::EquationSystem & equation_system);
+template <>
+void LORInterface::SetupLOR<mfem::HypreAMS>(LinearSolverBase & solver_base,
+                                            Moose::MFEM::EquationSystem & equation_system);
+
+template <>
+void
+LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(LinearSolverBase & solver_base,
+                                                     Moose::MFEM::EquationSystem & equation_system);
+
 } // namespace Moose::MFEM
 
 #endif

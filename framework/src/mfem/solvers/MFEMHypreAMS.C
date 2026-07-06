@@ -40,35 +40,21 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreAMS::ConstructSolver()
+MFEMHypreAMS::SetSolverParameters(mfem::Solver & solver)
 {
-  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  auto & mfem_solver = static_cast<mfem::HypreAMS &>(solver);
   if (getParam<bool>("singular"))
-    solver->SetSingularProblem();
-
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetPrintLevel(getParam<int>("print_level"));
-
-  _solver = std::move(solver);
+    mfem_solver.SetSingularProblem();
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMHypreAMS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMHypreAMS::ConstructSolver()
 {
-  if (_lor)
-  {
-    LORInterface::SetupLOR(equation_system);
-    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
-        mfem::Geometry::Type::CUBE)
-      mooseError("LOR HypreAMS Solver only supports hex meshes.");
-
-    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(*_a, _ess_tdofs);
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    if (getParam<bool>("singular"))
-      lor_solver->GetSolver().SetSingularProblem();
-
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

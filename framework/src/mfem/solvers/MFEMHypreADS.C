@@ -36,30 +36,19 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreADS::ConstructSolver()
+MFEMHypreADS::SetSolverParameters(mfem::Solver & solver)
 {
-  auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetPrintLevel(getParam<int>("print_level"));
-
-  _solver = std::move(solver);
+  auto & mfem_solver = static_cast<mfem::HypreADS &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMHypreADS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMHypreADS::ConstructSolver()
 {
-  if (_lor)
-  {
-    LORInterface::SetupLOR(equation_system);
-
-    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
-        mfem::Geometry::Type::CUBE)
-      mooseError("LOR HypreADS Solver only supports hex meshes.");
-
-    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(*_a, _ess_tdofs);
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

@@ -34,20 +34,18 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 }
 
 void
-MFEMOperatorJacobiSmoother::ConstructSolver()
+MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::Solver & solver)
 {
-  _solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
-  _solver->iterative_mode = getParam<bool>("use_initial_guess");
+  auto & mfem_solver = static_cast<mfem::OperatorJacobiSmoother &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 void
-MFEMOperatorJacobiSmoother::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMOperatorJacobiSmoother::ConstructSolver()
 {
-  if (_lor)
-  {
-    LORInterface::SetupLOR(equation_system);
-    _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(*_a, _ess_tdofs));
-  }
+  auto solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

@@ -49,41 +49,26 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
 
 void
-MFEMHypreBoomerAMG::ConstructSolver()
+MFEMHypreBoomerAMG::SetSolverParameters(mfem::Solver & solver)
 {
-  auto solver = std::make_unique<mfem::HypreBoomerAMG>();
-
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
-  solver->SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
-  solver->SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
+  auto & mfem_solver = static_cast<mfem::HypreBoomerAMG &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  mfem_solver.SetTol(getParam<mfem::real_t>("l_tol"));
+  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
+  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
+  mfem_solver.SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
+  mfem_solver.SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
 
   if (_mfem_fespace && !mfem::HypreUsingGPU())
-    solver->SetElasticityOptions(_mfem_fespace.get());
-
-  _solver = std::move(solver);
+    mfem_solver.SetElasticityOptions(_mfem_fespace.get());
 }
 
 void
-MFEMHypreBoomerAMG::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMHypreBoomerAMG::ConstructSolver()
 {
-  if (_lor)
-  {
-    LORInterface::SetupLOR(equation_system);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(*_a, _ess_tdofs);
-    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    lor_solver->GetSolver().SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
-
-    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
-    if (_mfem_fespace && !mfem::HypreUsingGPU())
-      lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
-
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HypreBoomerAMG>();
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

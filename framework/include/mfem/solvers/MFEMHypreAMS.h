@@ -24,13 +24,19 @@ public:
 
   MFEMHypreAMS(const InputParameters &);
 
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::Solver & solver) override;
 
   void Update() override
   {
-    if (IsLOR(*this))
-      SetupLOR(*_equation_system);
+    Moose::MFEM::LinearSolverBase::Update();
+    if (_lor)
+    {
+      if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
+          mfem::Geometry::Type::CUBE)
+        mooseError("LOR HypreAMS Solver only supports hex meshes.");
+      LORInterface::SetupLOR<mfem::HypreAMS>(*this, *_equation_system);
+    }
   }
 
 protected:
