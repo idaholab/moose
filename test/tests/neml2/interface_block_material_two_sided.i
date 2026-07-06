@@ -1,13 +1,6 @@
-# A block material feeding a NEML2 interface model must be read INDEPENDENTLY on the two sides of
-# the interface: the element side from FACE material data and the neighbor side from NEIGHBOR
-# material data. The block material 'u' is given a DIFFERENT constant on each subdomain (0.3 on A,
-# 0.7 on B), so the NEML2 output s = u*u - 0.1 differs between the two sides. MaterialPropertySource
-# consumes the output on BOTH sides (getMaterialProperty on the element side and
-# getNeighborMaterialProperty on the neighbor side), so if the two sides were collapsed to a single
-# store the solution would change. The gold file therefore locks in the two-sided behavior.
+# Test block material inputs read from both sides of a NEML2 interface model.
 #
-# 'u' is a block material (not a true InterfaceMaterial), so it is NOT listed in
-# 'interface_material_inputs'.
+# 'u' differs on the two blocks and is not listed in interface_material_inputs.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -54,7 +47,7 @@
 []
 
 [Materials]
-  # Block material with a DIFFERENT value on each side of the interface.
+  # Different values on the two sides of the interface.
   [uA]
     type = GenericConstantMaterial
     prop_names = 'u'
@@ -70,9 +63,7 @@
 []
 
 [InterfaceKernels]
-  # Reads the NEML2 output 's' on BOTH sides: getMaterialProperty (element) and
-  # getNeighborMaterialProperty (neighbor). The source does not depend on the FE variable (the
-  # NEML2 input is a block material), so both jump derivatives are zero.
+  # MaterialPropertySource reads 's' from both interface sides.
   [source]
     type = MaterialPropertySource
     variable = u

@@ -1,12 +1,7 @@
 # Mixed material-input sources feeding one NEML2 interface model.
 #
-# The single [NEML2] action below takes two MATERIAL inputs from DIFFERENT MOOSE material-data
-# stores:
-#   - 'jump'  from JumpInterfaceMaterial, a true InterfaceMaterial (INTERFACE_MATERIAL_DATA)
-#   - 'scale' from a block GenericConstantMaterial evaluated on the interface sides (FACE/NEIGHBOR)
-# Only 'jump' is listed in interface_material_inputs. This is the case a single sub-block-global
-# flag could not express: a global true would wrongly route 'scale' to interface data, a global
-# false would wrongly route 'jump' to volume/side data. Per-input routing keeps both correct.
+# 'jump' comes from an InterfaceMaterial. 'scale' comes from block material
+# data read on the interface sides.
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -64,16 +59,14 @@
 []
 
 [Materials]
-  # True interface material: supplies 'jump' on the interface itself.
+  # True interface material.
   [jump]
     type = JumpInterfaceMaterial
     boundary = 'A_B'
     var = u
     neighbor_var = u
   []
-  # Block material: supplies 'scale' on the volume, read on the interface sides. Made spatially
-  # varying so that mis-routing it through interface data (or mis-routing 'jump' through block
-  # data) changes the result, not just the code path.
+  # Spatially varying block material.
   [scale]
     type = GenericFunctionMaterial
     prop_names = 'scale'
@@ -102,7 +95,7 @@
     model = 'mixed_cohesive'
     interface = 'A_B'
     interface_only = true
-    # Only 'jump' is from a true InterfaceMaterial; 'scale' stays on the block/side source.
+    # Only 'jump' is from a true InterfaceMaterial.
     interface_material_inputs = 'jump'
   []
 []

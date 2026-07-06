@@ -83,9 +83,7 @@
 
 [Executioner]
   type = Steady
-  # PJFNK (matrix-free): the NEML2 input is a block material, so the flux is not a function of the
-  # FE jump. SimpleCohesiveFlux therefore cannot form an exact Jacobian; the matrix-free operator
-  # supplies the true Jacobian action while the assembled matrix serves as the preconditioner.
+  # Use matrix-free Jacobian action because the flux comes from a block material.
   solve_type = PJFNK
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'

@@ -76,8 +76,7 @@
     model = 'linear_cohesive'
     interface = 'A_B'
     interface_only = true
-    # 'jump' is supplied by JumpInterfaceMaterial (a true InterfaceMaterial), so it must be
-    # read from interface material data rather than the volume/side material data.
+    # 'jump' is supplied by a true InterfaceMaterial.
     interface_material_inputs = 'jump'
   []
 []
