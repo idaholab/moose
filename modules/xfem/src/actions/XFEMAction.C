@@ -137,7 +137,6 @@ XFEMAction::XFEMAction(const InputParameters & params)
       _cut_off_bc = getParam<std::vector<BoundaryName>>("cut_off_boundary");
     else
       mooseError("To add crack tip enrichment, cut_off_boundary must be provided.");
-
   }
 }
 
