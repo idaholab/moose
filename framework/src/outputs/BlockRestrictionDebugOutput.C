@@ -577,7 +577,8 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosElemAuxWarehouse(), false);
 #endif
 
-  addWarehouseBoundaryRestrictionObjects(groups, _problem_ptr->getInitialConditionWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(
+      groups, _problem_ptr->getInitialConditionWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, _nl.getConstraintWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, _problem_ptr->getMaterialWarehouse(), false);
 
