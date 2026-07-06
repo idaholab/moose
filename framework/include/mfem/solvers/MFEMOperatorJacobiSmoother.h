@@ -24,13 +24,14 @@ public:
 
   MFEMOperatorJacobiSmoother(const InputParameters & parameters);
 
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::Solver & solver) override;
 
   void Update() override
   {
-    if (IsLOR(*this))
-      SetupLOR(*_equation_system);
+    Moose::MFEM::LinearSolverBase::Update();
+    if (_lor)
+      LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(*this, *_equation_system);
   }
 
 protected:

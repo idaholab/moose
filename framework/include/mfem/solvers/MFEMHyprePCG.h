@@ -23,13 +23,19 @@ public:
 
   MFEMHyprePCG(const InputParameters & parameters);
 
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::Solver & solver) override;
 
   void Update() override
   {
+    Moose::MFEM::LinearSolverBase::Update();
     if (IsLOR(*this))
-      SetupLOR(*_equation_system);
+    {
+      if (_lor)
+        LORInterface::SetupLOR<mfem::HyprePCG>(*this, *_equation_system);
+      else
+        SetPreconditioner(static_cast<mfem::HyprePCG &>(GetSolver()));
+    }
   }
 
 protected:

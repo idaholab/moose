@@ -61,13 +61,17 @@ public:
 
   MFEMMatrixFreeAMS(const InputParameters &);
 
-  /// Updates the solver with the bilinear form, as MFEMMatrixFreeAMS is an LOR-based solver
-  void SetupLOR(Moose::MFEM::EquationSystem & equation_system) override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::Solver & solver) override;
 
   void Update() override
   {
-    if (IsLOR(*this))
-      SetupLOR(*_equation_system);
+    LORInterface::SetupLOR(*_equation_system);
+    // update the pointer to the bilinear form representing the curl-curl problem being
+    // preconditioned
+    auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
+    matrix_free_ams.SetBilinearForm(*_a);
+    matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
   }
 
 protected:

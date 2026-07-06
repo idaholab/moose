@@ -37,42 +37,23 @@ MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
 }
 
 void
-MFEMHyprePCG::ConstructSolver()
+MFEMHyprePCG::SetSolverParameters(mfem::Solver & solver)
 {
-  auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
-  SetPreconditioner(*solver);
-  _solver = std::move(solver);
+  auto & mfem_solver = static_cast<mfem::HyprePCG &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  mfem_solver.SetTol(getParam<mfem::real_t>("l_tol"));
+  mfem_solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
+  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMHyprePCG::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+MFEMHyprePCG::ConstructSolver()
 {
-  if (_lor && _preconditioner)
-    mooseError("LOR solver cannot take a preconditioner");
-
-  LORInterface::SetupLOR(equation_system);
-  LORInterface * lor_preconditioner = GetPreconditionerLORInterface(*this);
-  if (lor_preconditioner)
-  {
-    lor_preconditioner->SetupLOR(equation_system);
-    SetPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
-  }
-  else if (_lor)
-  {
-    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, getMFEMProblem().getComm());
-    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
+  SetSolverParameters(*solver);
+  SetPreconditioner(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

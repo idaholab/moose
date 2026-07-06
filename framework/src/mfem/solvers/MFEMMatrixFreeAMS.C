@@ -83,23 +83,19 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
 }
 
 void
+MFEMMatrixFreeAMS::SetSolverParameters(mfem::Solver & solver)
+{
+  auto & mfem_solver = static_cast<Moose::MFEM::MatrixFreeAMS &>(solver);
+  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+}
+
+void
 MFEMMatrixFreeAMS::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
       _alpha_coef, _beta_coef, _inner_pi_its, _inner_g_its);
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
+  SetSolverParameters(*solver);
   _solver = std::move(solver);
-}
-
-void
-MFEMMatrixFreeAMS::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
-{
-  LORInterface::SetupLOR(equation_system);
-
-  // update the pointer to the bilinear form representing the curl-curl problem being preconditioned
-  auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
-  matrix_free_ams.SetBilinearForm(*_a);
-  matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
 }
 
 #endif
