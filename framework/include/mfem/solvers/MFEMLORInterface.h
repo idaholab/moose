@@ -54,23 +54,19 @@ protected:
   mfem::Array<int> _ess_tdofs;
 };
 
-// Template specializations required for LOR solvers for Hypre preconditioners solvers due to
-// upstream specializations
+// Template specializations required for LOR solvers for Hypre iterative solvers that lack default
+// constructors
 template <>
-void LORInterface::SetupLOR<mfem::HypreBoomerAMG>(LinearSolverBase & solver_base,
-                                                  Moose::MFEM::EquationSystem & equation_system);
+void LORInterface::SetupLOR<mfem::HypreGMRES>(LinearSolverBase & solver_base,
+                                              Moose::MFEM::EquationSystem & equation_system);
 
 template <>
-void LORInterface::SetupLOR<mfem::HypreADS>(LinearSolverBase & solver_base,
-                                            Moose::MFEM::EquationSystem & equation_system);
-template <>
-void LORInterface::SetupLOR<mfem::HypreAMS>(LinearSolverBase & solver_base,
-                                            Moose::MFEM::EquationSystem & equation_system);
+void LORInterface::SetupLOR<mfem::HypreFGMRES>(LinearSolverBase & solver_base,
+                                               Moose::MFEM::EquationSystem & equation_system);
 
 template <>
-void
-LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(LinearSolverBase & solver_base,
-                                                     Moose::MFEM::EquationSystem & equation_system);
+void LORInterface::SetupLOR<mfem::HyprePCG>(LinearSolverBase & solver_base,
+                                            Moose::MFEM::EquationSystem & equation_system);
 
 } // namespace Moose::MFEM
 

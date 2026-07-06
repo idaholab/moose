@@ -38,6 +38,9 @@ public:
   /// Returns this solver's preconditioner
   LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
 
+  /// Set the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::Solver & solver){};
+
   /// Update the solver following any changes to the EquationSystem it is responsible for solving.
   virtual void Update()
   {
