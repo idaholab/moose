@@ -1,0 +1,126 @@
+[Tests]
+  issues = '#32934'
+  design = 'HourglassCorrectionQuad4.md HourglassCorrectionHex8.md'
+
+  [mode]
+    [g1]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1.i'
+      csvdiff = 'hourglass_residual_g1_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The QUAD4 hourglass correction shall penalize the first hourglass base vector with the analytic rotation-invariant scale.'
+    []
+    [g1_rot37]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1_rot37.i'
+      csvdiff = 'hourglass_residual_g1_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The QUAD4 hourglass correction shall produce the identical hourglass residual on a mesh rotated by 37 degrees.'
+    []
+    [g2]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g2.i'
+      csvdiff = 'hourglass_residual_g2_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The QUAD4 hourglass correction shall penalize the second hourglass base vector with the analytic rotation-invariant scale.'
+    []
+  []
+
+  [affine]
+    [rot0_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot0.i'
+      csvdiff = 'affine_rot0_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The QUAD4 hourglass correction shall produce zero residual for affine displacement fields.'
+    []
+    [rot37_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot37.i'
+      csvdiff = 'affine_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The QUAD4 hourglass correction shall produce zero residual for affine displacement fields on rotated meshes.'
+    []
+  []
+
+  [beam]
+    # beam_equiv_quad4b.i: WIP from the source branch, needs the unported DynamicSolidMechanicsPhysics implicit=false wiring
+    [ref]
+      type = 'CSVDiff'
+      input = 'beam_equiv_ref.i'
+      csvdiff = 'beam_equiv_ref_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The system shall provide a fully integrated QUAD4 dynamic beam reference solution for hourglass-correction equivalence checks.'
+    []
+  []
+
+  [hex_mode]
+    # all four Flanagan-Belytschko modes give the same analytic residual norm
+    # sqrt(8*4^2) = 11.313708... on the unit cube (A = 2I, h^2 = 2, V = 1)
+    [g1]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      requirement = 'The HEX8 hourglass correction shall penalize the xi*eta hourglass mode with the analytic rotation-invariant scale.'
+    []
+    [g2]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="(1-2*y)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g1'
+      requirement = 'The HEX8 hourglass correction shall penalize the eta*zeta hourglass mode with the analytic rotation-invariant scale.'
+    []
+    [g3]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="(1-2*x)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g2'
+      requirement = 'The HEX8 hourglass correction shall penalize the xi*zeta hourglass mode with the analytic rotation-invariant scale.'
+    []
+    [g4]
+      type = 'CSVDiff'
+      input = 'hex_residual_mode.i'
+      cli_args = 'ICs/u/function="-(1-2*x)*(1-2*y)*(1-2*z)"'
+      csvdiff = 'hex_residual_mode_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+      prereq = 'hex_mode/g3'
+      requirement = 'The HEX8 hourglass correction shall penalize the xi*eta*zeta hourglass mode with the analytic rotation-invariant scale.'
+    []
+  []
+  [hex_affine]
+    [rot37]
+      type = 'CSVDiff'
+      input = 'affine_hex_rot37.i'
+      csvdiff = 'affine_hex_rot37_out.csv'
+      abs_zero = 1.0E-12
+      requirement = 'The HEX8 hourglass correction shall produce zero residual for affine displacement fields on rotated meshes.'
+    []
+  []
+  [hex_lagrangian]
+    [expdyn]
+      type = 'CSVDiff'
+      input = 'hex_lagrangian_expdyn.i'
+      csvdiff = 'hex_lagrangian_expdyn_out.csv'
+      rel_err = 1.0E-10
+      abs_zero = 1.0E-12
+      restep = false
+      recover = false
+      requirement = 'The system shall run reduced-integration total-Lagrangian explicit dynamics on HEX8 elements stabilized by the hourglass correction.'
+    []
+  []
+[]

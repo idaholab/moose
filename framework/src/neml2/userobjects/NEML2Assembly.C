@@ -54,6 +54,7 @@ NEML2Assembly::initialize()
   _nelem = 0;
   _nqp = 0;
   _moose_JxWxT.clear();
+  _moose_q_points.clear();
 }
 
 void
@@ -71,6 +72,8 @@ NEML2Assembly::threadJoin(const UserObject & y)
               "The number of quadrature points per element must be the same in all threads.");
 
   _moose_JxWxT.insert(_moose_JxWxT.end(), other._moose_JxWxT.begin(), other._moose_JxWxT.end());
+  _moose_q_points.insert(
+      _moose_q_points.end(), other._moose_q_points.begin(), other._moose_q_points.end());
 }
 
 void
@@ -90,6 +93,11 @@ NEML2Assembly::execute()
   // JxWxT
   for (auto qp : index_range(_q_point))
     _moose_JxWxT.push_back(_JxW[qp] * _coord[qp]);
+
+  // quadrature point coordinates
+  for (auto qp : index_range(_q_point))
+    for (auto d : make_range(3))
+      _moose_q_points.push_back(_q_point[qp](d));
 }
 
 void
@@ -103,11 +111,19 @@ NEML2Assembly::finalize()
   // sanity checks on sizes
   if (_moose_JxWxT.size() != std::size_t(_nelem * _nqp))
     mooseError("JxWxT size mismatch, expected ", _nelem * _nqp, " but got ", _moose_JxWxT.size());
+  if (_moose_q_points.size() != std::size_t(_nelem * _nqp * 3))
+    mooseError("Quadrature point size mismatch, expected ",
+               _nelem * _nqp * 3,
+               " but got ",
+               _moose_q_points.size());
 
   // convert gathered data to neml2 tensors (and send to device)
   auto device = _app.getLibtorchDevice();
   _neml2_JxWxT =
       neml2::Tensor(at::from_blob(_moose_JxWxT.data(), {_nelem, _nqp}, torch::kFloat64), 2)
+          .to(device);
+  _neml2_q_points =
+      neml2::Tensor(at::from_blob(_moose_q_points.data(), {_nelem, _nqp, 3}, torch::kFloat64), 2)
           .to(device);
 
   // done

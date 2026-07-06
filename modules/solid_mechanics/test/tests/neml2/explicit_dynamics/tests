@@ -44,6 +44,71 @@
     recover = false
   []
 
+  [explicit_dynamics_rz]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform explicit dynamics simulations in axisymmetric (RZ) coordinates.'
+    input = 'neml2_rz.i'
+    exodiff = 'neml2_rz_exodus.e'
+    capabilities = 'libtorch & neml2'
+    compute_devices = 'cpu cuda'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+  [explicit_dynamics_rz_validation]
+    type = Exodiff
+    requirement = 'The NEML2 based axisymmetric explicit dynamics simulation results shall match those of an equivalent MOOSE simulation integrated on the reference configuration.'
+    input = 'moose_rz.i'
+    exodiff = 'moose_rz_exodus.e'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+
+  [explicit_dynamics_large_def]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform large-deformation (total Lagrangian) explicit dynamics simulations, gathering the deformation gradient and assembling the first Piola-Kirchhoff stress.'
+    input = 'neml2_large_def.i'
+    exodiff = 'neml2_large_def_exodus.e'
+    capabilities = 'libtorch & neml2'
+    compute_devices = 'cpu cuda'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+  [explicit_dynamics_large_def_validation]
+    type = Exodiff
+    requirement = 'The NEML2 based large-deformation explicit dynamics simulation results shall match those of an equivalent MOOSE simulation using the total Lagrangian kernel system with the same NEML2 constitutive model.'
+    input = 'moose_large_def.i'
+    exodiff = 'moose_large_def_exodus.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+
+  [explicit_dynamics_large_def_rz]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform large-deformation (total Lagrangian) explicit dynamics simulations in axisymmetric (RZ) coordinates, including the hoop stretch in the deformation gradient and the hoop term in the residual.'
+    input = 'neml2_large_def_rz.i'
+    exodiff = 'neml2_large_def_rz_exodus.e'
+    capabilities = 'libtorch & neml2'
+    compute_devices = 'cpu cuda'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+  [explicit_dynamics_large_def_rz_validation]
+    type = Exodiff
+    requirement = 'The NEML2 based axisymmetric large-deformation explicit dynamics simulation results shall match those of an equivalent MOOSE simulation using the total Lagrangian axisymmetric kernel system with the same NEML2 constitutive model.'
+    input = 'moose_large_def_rz.i'
+    exodiff = 'moose_large_def_rz_exodus.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+
   [slug_2d]
     type = Exodiff
     requirement = 'The system shall run a 2D NEML2-driven explicit-dynamics impact problem with manage_state_advance enabled and an integrated boundary condition.'
@@ -69,6 +134,47 @@
     exodiff = 'state_advance_exodus.e'
     capabilities = 'neml2'
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+
+  [hourglass_rz]
+    type = Exodiff
+    requirement = 'The system shall stabilize underintegrated axisymmetric QUAD4 explicit dynamics in the NEML2 nodal-force path with a batched hourglass correction.'
+    input = 'neml2_rz_hourglass.i'
+    exodiff = 'neml2_rz_hourglass_exodus.e'
+    cli_args = 'Outputs/file_base=neml2_rz_hourglass_exodus'
+    capabilities = 'libtorch & neml2'
+    compute_devices = 'cpu cuda'
+    restep = false
+    recover = false
+  []
+  [hourglass_rz_validation]
+    type = Exodiff
+    requirement = 'The batched axisymmetric hourglass correction shall match the per-element HourglassCorrectionQuad4 kernel at machine precision.'
+    input = 'moose_rz_hourglass.i'
+    exodiff = 'moose_rz_hourglass_exodus.e'
+    cli_args = 'Outputs/file_base=moose_rz_hourglass_exodus'
+    restep = false
+    recover = false
+  []
+  [hourglass_hex]
+    type = Exodiff
+    requirement = 'The system shall stabilize underintegrated HEX8 explicit dynamics in the NEML2 nodal-force path with a batched Flanagan-Belytschko hourglass correction.'
+    input = 'neml2_hex_hourglass.i'
+    exodiff = 'neml2_hex_hourglass_exodus.e'
+    cli_args = 'Outputs/file_base=neml2_hex_hourglass_exodus'
+    capabilities = 'libtorch & neml2'
+    compute_devices = 'cpu cuda'
+    restep = false
+    recover = false
+  []
+  [hourglass_hex_validation]
+    type = Exodiff
+    requirement = 'The batched HEX8 hourglass correction shall match the per-element HourglassCorrectionHex8 kernel at machine precision.'
+    input = 'moose_hex_hourglass.i'
+    exodiff = 'moose_hex_hourglass_exodus.e'
+    cli_args = 'Outputs/file_base=moose_hex_hourglass_exodus'
+    restep = false
     recover = false
   []
 []

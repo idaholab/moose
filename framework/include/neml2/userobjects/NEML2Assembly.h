@@ -40,6 +40,16 @@ public:
    */
   const neml2::Tensor & JxWxT() const { return _neml2_JxWxT; }
 
+  /**
+   * @brief Get the cached quadrature point coordinates for each element, each quadrature point
+   *
+   * The NEML2 tensor will have shape (nelem, nqp; 3), where nelem is the number of elements, and
+   * nqp is the number of quadrature points per element. The tensor is stored in the device memory.
+   *
+   * @warning The value is only available after finalize() is called.
+   */
+  const neml2::Tensor & qPoints() const { return _neml2_q_points; }
+
   /// Whether the current assembly cache is up to date
   bool upToDate() const { return _up_to_date; }
 
@@ -65,6 +75,10 @@ protected:
   /// JxWxT (product of Jacobian determinant, quadrature weight, and coordinate transformation factor) for each element, qp
   std::vector<Real> _moose_JxWxT;
   neml2::Tensor _neml2_JxWxT;
+
+  /// Quadrature point coordinates for each element, qp
+  std::vector<Real> _moose_q_points;
+  neml2::Tensor _neml2_q_points;
 };
 
 #endif

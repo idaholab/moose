@@ -117,6 +117,24 @@ NEML2FEInterpolation::getDofMap(const std::string & var_name)
   return _neml2_dof_map[var_name];
 }
 
+const neml2::Tensor &
+NEML2FEInterpolation::getNodalValue(const std::string & var_name)
+{
+  auto [it, success] = _nodal_vars.emplace(var_name, neml2::Tensor());
+
+  if (success)
+    _moose_vars.emplace(var_name, getMOOSEVariable(var_name));
+
+  return it->second;
+}
+
+const neml2::Tensor &
+NEML2FEInterpolation::getNodeCoordinates()
+{
+  _need_node_coords = true;
+  return _neml2_node_coords;
+}
+
 const std::vector<dof_id_type> &
 NEML2FEInterpolation::getGlobalDofMap(const std::string & var_name)
 {
@@ -192,6 +210,7 @@ NEML2FEInterpolation::initialize()
     return;
 
   _ndofe.clear();
+  _moose_node_coords.clear();
   _moose_dof_map.clear();
   _moose_dof_map_global.clear();
   _moose_phi.clear();
@@ -210,7 +229,11 @@ NEML2FEInterpolation::syncWithMainThread()
       getPhi(var_name);
     if (main_uo._grad_phis.count(var->feType()))
       getPhiGradient(var_name);
+    if (main_uo._nodal_vars.count(var_name))
+      getNodalValue(var_name);
   }
+  if (main_uo._need_node_coords)
+    _need_node_coords = true;
 }
 
 void
@@ -233,6 +256,10 @@ NEML2FEInterpolation::threadJoin(const UserObject & y)
   };
 
   merge_map_vecs(_moose_dof_map, other._moose_dof_map);
+  _moose_node_coords.insert(
+      _moose_node_coords.end(), other._moose_node_coords.begin(), other._moose_node_coords.end());
+  if (other._nnodes)
+    _nnodes = other._nnodes;
   merge_map_vecs(_moose_phi, other._moose_phi);
   merge_map_vecs(_moose_grad_phi, other._moose_grad_phi);
 }
@@ -263,6 +290,23 @@ NEML2FEInterpolation::execute()
       moose_dof_map.push_back(_petsc_solution->map_global_to_local_index(dof));
       moose_dof_map_global.push_back(dof);
     }
+  }
+
+  // reference node coordinates
+  if (_need_node_coords)
+  {
+    if (_nnodes == 0)
+      _nnodes = _current_elem->n_nodes();
+    if (_nnodes != _current_elem->n_nodes())
+      mooseError("getNodeCoordinates requires a uniform node count across elements, but found "
+                 "elements with ",
+                 _nnodes,
+                 " and ",
+                 _current_elem->n_nodes(),
+                 " nodes.");
+    for (const auto i : make_range(_current_elem->n_nodes()))
+      for (const auto j : make_range(3))
+        _moose_node_coords.push_back(_current_elem->node_ref(i)(j));
   }
 
   // shape function values
@@ -305,6 +349,7 @@ NEML2FEInterpolation::updateFEMContext()
   updateDofMap();
   updatePhi();
   updateGradPhi();
+  updateNodeCoordinates();
 
   // done
   _fem_context_up_to_date = true;
@@ -383,6 +428,27 @@ NEML2FEInterpolation::updateGradPhi()
 }
 
 void
+NEML2FEInterpolation::updateNodeCoordinates()
+{
+  if (!_need_node_coords)
+    return;
+
+  auto device = _app.getLibtorchDevice();
+  auto nelem = _neml2_assembly.numElem();
+
+  if (_moose_node_coords.size() != std::size_t(nelem) * _nnodes * 3)
+    mooseError("Node coordinate size mismatch, expected ",
+               nelem * _nnodes * 3,
+               " but got ",
+               _moose_node_coords.size());
+  _neml2_node_coords =
+      neml2::Tensor(
+          at::from_blob(_moose_node_coords.data(), {nelem, int64_t(_nnodes), 3}, torch::kFloat64),
+          2)
+          .to(device);
+}
+
+void
 NEML2FEInterpolation::updateInterpolations()
 {
   TIME_SECTION("updateInterpolations", 2, "Updating FEM interpolations for NEML2");
@@ -401,6 +467,13 @@ NEML2FEInterpolation::updateInterpolations()
     const auto & phi = _neml2_phi[fetype];
     auto sol_scattered = neml2::discretization::scatter(sol, dof_map);
     val = neml2::discretization::interpolate(sol_scattered, phi);
+  }
+
+  // per-element nodal values (no interpolation)
+  for (auto & [var_name, val] : _nodal_vars)
+  {
+    const auto & dof_map = _neml2_dof_map[var_name];
+    val = neml2::discretization::scatter(sol, dof_map);
   }
 
   // interpolate variable gradients
