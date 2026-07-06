@@ -69,22 +69,11 @@ ComplexEigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
   std::unique_ptr<mfem::ParSesquilinearForm> m =
       std::make_unique<mfem::ParSesquilinearForm>(fespace);
 
-  const bool use_matrix = _eigen_problem.isParamSetByUser("rhs_matrix_coefficient");
-  if (use_matrix && _eigen_problem.isParamSetByUser("rhs_coefficient"))
-    mooseError("Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
-               "non-default value.");
-
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-  {
-    if (use_matrix)
-      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
     m->AddDomainIntegrator(new mfem::MassIntegrator(_eigen_problem.getRHSCoefficient()), nullptr);
-  }
   else
-    m->AddDomainIntegrator(
-        use_matrix ? new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSMatrixCoefficient())
-                   : new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()),
-        nullptr);
+    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()),
+                           nullptr);
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the

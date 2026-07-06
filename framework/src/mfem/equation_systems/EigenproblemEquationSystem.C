@@ -11,7 +11,6 @@
 
 #include "EigenproblemEquationSystem.h"
 #include "MFEMEigensolverBase.h"
-#include "MFEMEigenproblem.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -26,8 +25,7 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   _global_ess_markers = 0;
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _global_ess_markers);
+  trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
   trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(0));
 }
 
@@ -45,24 +43,14 @@ EigenproblemEquationSystem::FormEigenproblemMatrix()
 void
 EigenproblemEquationSystem::FormMassMatrix()
 {
+  mfem::ConstantCoefficient one(1.0);
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
   std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
-  const bool use_matrix = _eigen_problem.isParamSetByUser("rhs_matrix_coefficient");
-  if (use_matrix && _eigen_problem.isParamSetByUser("rhs_coefficient"))
-    mooseError("Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
-               "non-default value.");
-
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
-  {
-    if (use_matrix)
-      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
-    m->AddDomainIntegrator(new mfem::MassIntegrator(_eigen_problem.getRHSCoefficient()));
-  }
+    m->AddDomainIntegrator(new mfem::MassIntegrator(one));
   else
-    m->AddDomainIntegrator(
-        use_matrix ? new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSMatrixCoefficient())
-                   : new mfem::VectorFEMassIntegrator(_eigen_problem.getRHSCoefficient()));
+    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
 
   m->Assemble();
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
