@@ -26,8 +26,7 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   _global_ess_markers = 0;
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _global_ess_markers);
+  trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
   trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(0));
 }
 
