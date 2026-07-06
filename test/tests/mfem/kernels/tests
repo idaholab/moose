@@ -272,4 +272,13 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMMaxwellAnisotropicEigenproblem]
+    type = CSVDiff
+    input = maxwell_anisotropic_eigenproblem.i
+    csvdiff = 'OutputData/MaxwellAnisotropicEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve an anisotropic vector-valued eigenproblem with a matrix right-hand-side coefficient and Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
