@@ -94,6 +94,12 @@ protected:
   /// Advance state on device (rather than via MOSOE material properties)
   const bool _manage_state_advance;
 
+  /// State variables whose uncached history seeds to the second-order identity instead of zero
+  const std::vector<std::string> _identity_seeded_state;
+
+  /// Previous step size, used to enforce a constant dt under manage_state_advance
+  Real _dt_prev = -1;
+
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;
 

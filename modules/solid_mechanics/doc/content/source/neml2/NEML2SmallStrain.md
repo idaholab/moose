@@ -6,7 +6,7 @@ For a batch of material points, calculate the small strain given displacement gr
 
 ## Limitations
 
-- The current formulation assumes Cartesian kinematics; axisymmetric and spherical terms (e.g., hoop strain) are not included.
+- The current formulation assumes Cartesian kinematics; axisymmetric and spherical terms (e.g., hoop strain) are not included. For axisymmetric (RZ) problems, use [NEML2SmallStrainRZ.md].
 - Only the current displacement gradients are used; there is no access to old values through this path.
 
 ## Syntax
