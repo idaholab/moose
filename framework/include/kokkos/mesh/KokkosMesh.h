@@ -72,10 +72,20 @@ public:
   void update();
 
   /**
+   * Mark that element geometry data is needed; initElementGeometry() will be called on the next
+   * update()
+   */
+  void setNeedsElementGeometry() { _needs_element_geometry = true; }
+
+  /**
    * Mark that element-side geometry data is needed; initElementSideGeometry() will be called on the
    * next update()
    */
-  void setNeedsElementSideGeometry() { _needs_element_side_geometry = true; }
+  void setNeedsElementSideGeometry()
+  {
+    _needs_element_side_geometry = true;
+    setNeedsElementGeometry();
+  }
 
   /**
    * Get the number of subdomains
@@ -297,7 +307,7 @@ public:
    */
   KOKKOS_FUNCTION Real getElementVolume(ContiguousElementID elem) const
   {
-    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    KOKKOS_ASSERT(_element_geometry_initialized);
     return _elem_volume[elem];
   }
   /**
@@ -307,14 +317,19 @@ public:
    */
   KOKKOS_FUNCTION Real3 getElementCentroid(ContiguousElementID elem) const
   {
-    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    KOKKOS_ASSERT(_element_geometry_initialized);
     return _elem_centroid[elem];
   }
 
   /**
-   * Allocate and populate cached element and side geometry: element volumes and centroids, side
-   * areas and centroids, element-centroid to side-centroid and element-centroid to
-   * neighbor-centroid vectors and their magnitudes, and boundary IDs
+   * Allocate and populate cached element geometry: element volumes and centroids
+   */
+  void initElementGeometry();
+
+  /**
+   * Allocate and populate cached side geometry: side areas and centroids, element-centroid to
+   * side-centroid and element-centroid to neighbor-centroid vectors and their magnitudes, and
+   * boundary IDs
    */
   void initElementSideGeometry();
 
@@ -541,7 +556,11 @@ private:
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
 
-  /// Whether initElementSideGeometry() has been called and the geometry cache is populated
+  /// Whether initElementGeometry() has been called and the element geometry cache is populated
+  bool _element_geometry_initialized = false;
+  /// Whether initElementGeometry() should be called on the next update()
+  bool _needs_element_geometry = false;
+  /// Whether initElementSideGeometry() has been called and the side geometry cache is populated
   bool _element_side_geometry_initialized = false;
   /// Whether initElementSideGeometry() should be called on the next update()
   bool _needs_element_side_geometry = false;

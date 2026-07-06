@@ -25,6 +25,8 @@ Mesh::update()
 
   _initialized = true;
 
+  if (_needs_element_geometry)
+    initElementGeometry();
   if (_needs_element_side_geometry)
     initElementSideGeometry();
 }
@@ -294,15 +296,46 @@ Mesh::getContiguousNodeID(const Node * node) const
 }
 
 void
-Mesh::initElementSideGeometry()
+Mesh::initElementGeometry()
 {
-  const auto num_elems = getNumLocalElements();
   const auto num_local_plus_one_neighbor_layer_elems =
       getNumLocalAndPossiblyOneNeighborLayerGhostElements();
-  const auto max_sides = _mesh.getMaxSidesPerElem();
 
   _elem_volume.create(num_local_plus_one_neighbor_layer_elems);
   _elem_centroid.create(num_local_plus_one_neighbor_layer_elems);
+
+  _elem_volume = 0;
+  _elem_centroid = Real3();
+
+  for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+  {
+    const auto eid = getContiguousElementID(elem);
+
+    _elem_volume[eid] = elem->volume();
+    _elem_centroid[eid] = elem->vertex_average();
+  }
+
+  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+  {
+    _elem_volume[ghost_eid] = ghost_elem->volume();
+    _elem_centroid[ghost_eid] = ghost_elem->vertex_average();
+  }
+
+  _elem_volume.moveToDevice();
+  _elem_centroid.moveToDevice();
+
+  _element_geometry_initialized = true;
+}
+
+void
+Mesh::initElementSideGeometry()
+{
+  mooseAssert(_element_geometry_initialized,
+              "initElementGeometry() must be called before initElementSideGeometry().");
+
+  const auto num_elems = getNumLocalElements();
+  const auto max_sides = _mesh.getMaxSidesPerElem();
+
   _side_area.create(max_sides, num_elems);
   _side_centroid.create(max_sides, num_elems);
   _elem_centroid_to_side_centroid.create(max_sides, num_elems);
@@ -311,8 +344,6 @@ Mesh::initElementSideGeometry()
   _elem_centroid_to_neighbor_centroid_distance.create(max_sides, num_elems);
   _side_boundary_id.create(max_sides, num_elems);
 
-  _elem_volume = 0;
-  _elem_centroid = Real3();
   _side_area = 0;
   _side_centroid = Real3();
   _elem_centroid_to_side_centroid = Real3();
@@ -327,9 +358,6 @@ Mesh::initElementSideGeometry()
   {
     const auto eid = getContiguousElementID(elem);
     const auto elem_centroid = elem->vertex_average();
-
-    _elem_volume[eid] = elem->volume();
-    _elem_centroid[eid] = elem_centroid;
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
@@ -373,15 +401,7 @@ Mesh::initElementSideGeometry()
     }
   }
 
-  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
-  {
-    _elem_volume[ghost_eid] = ghost_elem->volume();
-    _elem_centroid[ghost_eid] = ghost_elem->vertex_average();
-  }
-
   _elem_neighbor.moveToDevice();
-  _elem_volume.moveToDevice();
-  _elem_centroid.moveToDevice();
   _side_area.moveToDevice();
   _side_centroid.moveToDevice();
   _elem_centroid_to_side_centroid.moveToDevice();
