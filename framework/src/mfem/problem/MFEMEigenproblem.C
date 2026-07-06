@@ -31,10 +31,6 @@ MFEMEigenproblem::validParams()
       "rhs_coefficient",
       "1.",
       "Name of the coefficient to scale the right-hand side of the eigenproblem equation by.");
-  params.addParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient",
-                                             "1.",
-                                             "Name of the matrix coefficient to scale the "
-                                             "right-hand side of the eigenproblem equation by.");
 
   return params;
 }
@@ -49,13 +45,6 @@ MFEMEigenproblem::getRHSCoefficient()
 {
   return getCoefficients().getScalarCoefficient(
       getParam<MFEMScalarCoefficientName>("rhs_coefficient"));
-}
-
-mfem::MatrixCoefficient &
-MFEMEigenproblem::getRHSMatrixCoefficient()
-{
-  return getCoefficients().getMatrixCoefficient(
-      getParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient"));
 }
 
 void

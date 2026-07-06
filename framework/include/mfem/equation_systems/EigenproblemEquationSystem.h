@@ -13,8 +13,6 @@
 
 #include "EquationSystem.h"
 
-class MFEMEigenproblem;
-
 namespace Moose::MFEM
 {
 class EigensolverBase;
@@ -23,10 +21,7 @@ class EigensolverBase;
 class EigenproblemEquationSystem : public EquationSystem
 {
 public:
-  /// Construct with the eigenproblem owning the right-hand-side coefficient. The coefficient is
-  /// resolved at assembly time, since materials are not yet available when the equation
-  /// system is created.
-  EigenproblemEquationSystem(MFEMEigenproblem & eigen_problem) : _eigen_problem(eigen_problem) {}
+  EigenproblemEquationSystem() = default;
   ~EigenproblemEquationSystem() override = default;
 
   /// Build eigenproblem system, with essential boundary conditions accounted for
@@ -52,8 +47,6 @@ private:
 
   /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
   mfem::OperatorHandle _mass_rhs;
-  /// Eigenproblem owning the right-hand-side coefficient, queried at assembly time.
-  MFEMEigenproblem & _eigen_problem;
 };
 
 } // namespace Moose::MFEM
