@@ -35,5 +35,7 @@ protected:
   std::vector<VariableName> _enrich_displacements;
   std::vector<VariableName> _displacements;
   std::vector<BoundaryName> _cut_off_bc;
+  bool _has_cut_off_radius;
   Real _cut_off_radius;
+  std::vector<SubdomainName> _blocks;
 };
