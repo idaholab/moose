@@ -12,6 +12,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between nodal variables,'
     []
     [elem_elem]
@@ -23,6 +24,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between elemental variables,'
     []
     [nodal_elem]
@@ -34,6 +36,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'from nodal to elemental variables,'
     []
     [1_to_N_nodal]
@@ -47,6 +50,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
     []
   []
@@ -74,6 +78,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between elemental variables,'
     []
     [nodal_elem]
@@ -86,6 +91,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'from nodal to elemental variables,'
     []
     [nodal_mixed_mesh]
@@ -99,6 +105,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types,'
     []
     [1_to_N_nodal_parallel]
@@ -126,6 +133,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between nodal variables sent between MFEM sub-apps defined on meshes comprised of a single element type,'
     []
     [1_to_N_nodal]
@@ -143,6 +151,7 @@
       max_parallel = 1 # XML schemadiff with multiple ranks
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps,'
     []
     [1_to_N_nodal_parallel]
@@ -154,6 +163,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
     []
     [nodal_mixed_mesh]
@@ -167,6 +177,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      allow_warnings = true
       detail = 'and between nodal variables sent between MFEM sub-apps defined on meshes comprised of mixed element types.'
     []
   []
