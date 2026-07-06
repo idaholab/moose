@@ -27,6 +27,14 @@ MFEMEigenproblem::validParams()
       "_",
       "Separator string inserted between a variable name and its eigenmode index when "
       "registering the gridfunction that stores the corresponding eigenvector.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "rhs_coefficient",
+      "1.",
+      "Name of the coefficient to scale the right-hand side of the eigenproblem equation by.");
+  params.addParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient",
+                                             "1.",
+                                             "Name of the matrix coefficient to scale the "
+                                             "right-hand side of the eigenproblem equation by.");
 
   return params;
 }
@@ -36,6 +44,20 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
   if (_num_type == NumericType::COMPLEX)
     mooseError("Complex numbers are not currently supported for eigenproblems.");
+}
+
+mfem::Coefficient &
+MFEMEigenproblem::getRHSCoefficient()
+{
+  return getCoefficients().getScalarCoefficient(
+      getParam<MFEMScalarCoefficientName>("rhs_coefficient"));
+}
+
+mfem::MatrixCoefficient &
+MFEMEigenproblem::getRHSMatrixCoefficient()
+{
+  return getCoefficients().getMatrixCoefficient(
+      getParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient"));
 }
 
 void
