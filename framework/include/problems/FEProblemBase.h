@@ -185,6 +185,8 @@ public:
   void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
+  void zeroEnrichmentOnBoundary(const BoundaryName & bname);
+
   /**
    * Set the coupling between variables
    * TODO: allow user-defined coupling
