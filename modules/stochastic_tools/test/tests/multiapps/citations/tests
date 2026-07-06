@@ -14,8 +14,8 @@
   [sampler_check_input_backend]
     type = RunApp
     input = sampler_check_input.i
-    cli_args = "MultiApps/sub/input_files=mfem_citations_sub.i sub0:Outputs/active='' "
-               "--check-input --citations"
+    cli_args = "MultiApps/sub/input_files=../../../../../../test/tests/mfem/kernels/diffusion.i "
+               "sub0:Outputs/active='' --check-input --citations"
     expect_out = 'mfem-2024'
     capabilities = 'mfem'
     recover = false
