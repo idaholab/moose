@@ -43,7 +43,7 @@ InputParameters interpolationParameters();
 namespace NS
 {
 /**
- * Builds the advected interpolation methods supported by FVInterpolationMethod objects.
+ * Enum of the advected interpolation methods supported by FVInterpolationMethod objects.
  */
 MooseEnum fvAdvectedInterpolationMethods();
 
@@ -56,7 +56,7 @@ MooseEnum fvAdvectedInterpolationMethods();
 std::string fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method);
 
 /**
- * Builds the face interpolation methods supported by FVInterpolationMethod objects.
+ * Enum of the interpolation methods supported by FVInterpolationMethod objects.
  */
 MooseEnum fvFaceInterpolationMethods();
 
