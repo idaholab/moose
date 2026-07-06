@@ -10,7 +10,6 @@
 #include "NSFVUtils.h"
 #include "FEProblemBase.h"
 #include "Factory.h"
-#include "MooseBase.h"
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
@@ -80,36 +79,6 @@ fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method)
     return "FVAdvectedVenkatakrishnanDeferredCorrection";
 
   mooseError("Unsupported linear FV advected interpolation method '", method_name, "'.");
-}
-
-void
-addFVAdvectedInterpolationMethod(FEProblemBase & problem,
-                                 Factory & factory,
-                                 const MooseEnum & interpolation_method)
-{
-  const std::string method_name = interpolation_method;
-  if (problem.hasFVInterpolationMethod(method_name))
-    return;
-
-  const auto method_type = fvAdvectedInterpolationMethodType(interpolation_method);
-
-  InputParameters params = factory.getValidParams(method_type);
-  problem.addFVInterpolationMethod(method_type, method_name, params);
-}
-
-std::string
-fvAdvectedInterpolationMethodName(const MooseBase & obj,
-                                  FEProblemBase & problem,
-                                  Factory & factory,
-                                  const std::string & interpolation_param,
-                                  const std::string & interpolation_name_param)
-{
-  if (obj.isParamValid(interpolation_name_param))
-    return obj.getParam<InterpolationMethodName>(interpolation_name_param);
-
-  const auto & interpolation_method = obj.getParam<MooseEnum>(interpolation_param);
-  addFVAdvectedInterpolationMethod(problem, factory, interpolation_method);
-  return interpolation_method;
 }
 
 MooseEnum

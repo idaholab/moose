@@ -15,9 +15,11 @@
 #include "INSFVTurbulentViscosityWallFunction.h"
 #include "INSFVTKESourceSink.h"
 #include "NSFVBase.h"
-#include "NSFVUtils.h"
 
 registerWCNSFVTurbulenceBaseTasks("NavierStokesApp", WCNSLinearFVTurbulencePhysics);
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVTurbulencePhysics,
+                    "add_interpolation_method_physics");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTurbulencePhysics, "add_functor_material");
 
 InputParameters
@@ -76,11 +78,25 @@ WCNSLinearFVTurbulencePhysics::validParams()
 WCNSLinearFVTurbulencePhysics::WCNSLinearFVTurbulencePhysics(const InputParameters & parameters)
   : WCNSFVTurbulencePhysicsBase(parameters)
 {
+  addRequiredPhysicsTask("add_interpolation_method_physics");
+
   if (_turbulence_model != "k-epsilon")
     errorDependentParameter("turbulence_handling", "k-epsilon", {"use_nonorthogonal_correction"});
   if (_turbulence_model == "mixing-length")
     paramError("turbulence_handling",
                "Mixing length is not implemented for the linear finite volume discretization");
+}
+
+void
+WCNSLinearFVTurbulencePhysics::addFVInterpolationMethods()
+{
+  if (_turbulence_model != "k-epsilon")
+    return;
+
+  if (!isParamValid("tke_advection_interpolation_method_name"))
+    addFVAdvectedInterpolationMethod(getParam<MooseEnum>("tke_advection_interpolation"));
+  if (!isParamValid("tked_advection_interpolation_method_name"))
+    addFVAdvectedInterpolationMethod(getParam<MooseEnum>("tked_advection_interpolation"));
 }
 
 void
@@ -189,17 +205,15 @@ void
 WCNSLinearFVTurbulencePhysics::addKEpsilonAdvection()
 {
   const auto tke_method_name =
-      NS::fvAdvectedInterpolationMethodName(*this,
-                                            getProblem(),
-                                            getFactory(),
-                                            "tke_advection_interpolation",
-                                            "tke_advection_interpolation_method_name");
+      isParamValid("tke_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("tke_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("tke_advection_interpolation")));
   const auto tked_method_name =
-      NS::fvAdvectedInterpolationMethodName(*this,
-                                            getProblem(),
-                                            getFactory(),
-                                            "tked_advection_interpolation",
-                                            "tked_advection_interpolation_method_name");
+      isParamValid("tked_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("tked_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("tked_advection_interpolation")));
 
   const std::string kernel_type = "LinearFVTurbulentAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);

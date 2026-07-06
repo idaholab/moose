@@ -18,6 +18,7 @@
 #include "NS.h"
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_interpolation_method_physics");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_functor_material");
@@ -80,6 +81,8 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
   : WCNSFVFlowPhysicsBase(parameters),
     _non_orthogonal_correction(getParam<bool>("orthogonality_correction"))
 {
+  addRequiredPhysicsTask("add_interpolation_method_physics");
+
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media unsupported");
   if (!_has_flow_equations)
@@ -92,6 +95,15 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
     paramError("pin_pressure",
                "Pressure pinning is implemented in the executioner for the linear finite volume "
                "segregated solves");
+}
+
+void
+WCNSLinearFVFlowPhysics::addFVInterpolationMethods()
+{
+  if (!_has_flow_equations || isParamValid("momentum_advection_interpolation_method_name"))
+    return;
+
+  addFVAdvectedInterpolationMethod(getParam<MooseEnum>("momentum_advection_interpolation"));
 }
 
 void
@@ -256,11 +268,10 @@ void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
   const auto momentum_advection_method_name =
-      NS::fvAdvectedInterpolationMethodName(*this,
-                                            getProblem(),
-                                            getFactory(),
-                                            "momentum_advection_interpolation",
-                                            "momentum_advection_interpolation_method_name");
+      isParamValid("momentum_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("momentum_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("momentum_advection_interpolation")));
 
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";

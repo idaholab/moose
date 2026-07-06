@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 
 class MooseObject;
-class MooseBase;
 class InputParameters;
 class FEProblemBase;
 class Factory;
@@ -55,29 +54,6 @@ MooseEnum fvAdvectedInterpolationMethods();
  * Errors when no FVInterpolationMethod equivalent is supported.
  */
 std::string fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method);
-
-/**
- * Add the FVInterpolationMethod object for an advected interpolation method name, if absent.
- * @param problem The problem to which the interpolation method should be added
- * @param factory The factory used to build interpolation method parameters
- * @param interpolation_method The interpolation method enum to add
- *
- * The method name must be supported by fvAdvectedInterpolationMethodType().
- */
-void addFVAdvectedInterpolationMethod(FEProblemBase & problem,
-                                      Factory & factory,
-                                      const MooseEnum & interpolation_method);
-
-/**
- * Gets the FVInterpolationMethod name to pass to a linear FV kernel.
- * If the object name parameter is supplied, the object is expected to be created externally.
- * Otherwise, this creates the method object from the enum parameter if it is absent.
- */
-std::string fvAdvectedInterpolationMethodName(const MooseBase & obj,
-                                              FEProblemBase & problem,
-                                              Factory & factory,
-                                              const std::string & interpolation_param,
-                                              const std::string & interpolation_name_param);
 
 /**
  * Builds the face interpolation methods supported by FVInterpolationMethod objects.

@@ -24,6 +24,7 @@ public:
 
 private:
   virtual void addSolverVariables() override;
+  virtual void addFVInterpolationMethods() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport

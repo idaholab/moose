@@ -9,6 +9,7 @@
 
 #include "NavierStokesPhysicsBase.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "NSFVUtils.h"
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysics.h"
 
@@ -36,6 +37,19 @@ NavierStokesPhysicsBase::validParams()
 NavierStokesPhysicsBase::NavierStokesPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters), _define_variables(getParam<bool>("define_variables"))
 {
+}
+
+void
+NavierStokesPhysicsBase::addFVAdvectedInterpolationMethod(const MooseEnum & interpolation_method)
+{
+  const std::string method_name = interpolation_method;
+  if (getProblem().hasFVInterpolationMethod(method_name))
+    return;
+
+  const auto method_type = NS::fvAdvectedInterpolationMethodType(interpolation_method);
+
+  InputParameters params = getFactory().getValidParams(method_type);
+  getProblem().addFVInterpolationMethod(method_type, method_name, params);
 }
 
 InputParameters

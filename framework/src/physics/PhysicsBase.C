@@ -140,6 +140,9 @@ PhysicsBase::act()
     addInitialConditions();
 
   // Kernels
+  else if (_current_task == "add_interpolation_method_physics" &&
+           !getParam<bool>("dont_create_kernels"))
+    addFVInterpolationMethods();
   else if (_current_task == "add_kernel" && !getParam<bool>("dont_create_kernels"))
     addFEKernels();
   else if (_current_task == "add_nodal_kernel" && !getParam<bool>("dont_create_kernels"))

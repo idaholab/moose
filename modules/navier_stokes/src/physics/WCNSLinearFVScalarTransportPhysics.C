@@ -14,6 +14,9 @@
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVScalarTransportPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSLinearFVScalarTransportPhysics);
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVScalarTransportPhysics,
+                    "add_interpolation_method_physics");
 
 InputParameters
 WCNSLinearFVScalarTransportPhysics::validParams()
@@ -45,9 +48,20 @@ WCNSLinearFVScalarTransportPhysics::WCNSLinearFVScalarTransportPhysics(
     const InputParameters & parameters)
   : WCNSFVScalarTransportPhysicsBase(parameters)
 {
+  addRequiredPhysicsTask("add_interpolation_method_physics");
+
   if (_porous_medium_treatment)
     _flow_equations_physics->paramError("porous_medium_treatment",
                                         "Porous media scalar advection is currently unimplemented");
+}
+
+void
+WCNSLinearFVScalarTransportPhysics::addFVInterpolationMethods()
+{
+  if (!_has_scalar_equation || isParamValid("passive_scalar_advection_interpolation_method_name"))
+    return;
+
+  addFVAdvectedInterpolationMethod(getParam<MooseEnum>("passive_scalar_advection_interpolation"));
 }
 
 void
@@ -98,11 +112,10 @@ void
 WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
   const auto method_name =
-      NS::fvAdvectedInterpolationMethodName(*this,
-                                            getProblem(),
-                                            getFactory(),
-                                            "passive_scalar_advection_interpolation",
-                                            "passive_scalar_advection_interpolation_method_name");
+      isParamValid("passive_scalar_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("passive_scalar_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("passive_scalar_advection_interpolation")));
 
   const std::string kernel_type = "LinearFVScalarAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
