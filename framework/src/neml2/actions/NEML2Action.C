@@ -69,24 +69,14 @@ NEML2Action::validParams()
                         "If true, only create the interface material on the boundaries listed in "
                         "'interface' and skip "
                         "creating any volume material. Requires 'interface' to be set.");
-  // Why interface material inputs must be named explicitly:
-  // MOOSE natively resolves an ordinary block material into its interior/side stores on its own --
-  // the SAME block material is reinit'd as BLOCK data on the element interior, FACE data on the
-  // element side, and NEIGHBOR data on the other side. So a block-material input needs no hint; the
-  // gatherer just reads the right store for where it is (see the FACE/NEIGHBOR members in
-  // MOOSEQuantityToNEML2). What MOOSE does NOT auto-resolve is INTERFACE_MATERIAL_DATA: a true
-  // InterfaceMaterial is a separate object with its own dedicated store that the native
-  // block/face/neighbor selection never picks (MaterialPropertyInterface::getMaterialDataType only
-  // ever returns BLOCK or BOUNDARY data). An interface material must opt in to that store via
-  // _material_data_type. Given only a property NAME, the gatherer cannot tell a block-material
-  // property from an interface-material one, and it cannot query the warehouse to find out because
-  // interface materials are not constructed until the later add_material task (this action builds
-  // its gatherers on add_user_object, when the warehouse is still empty). Hence the user names the
-  // interface-material inputs here. Per-input (not one flag) so a single action can mix both, e.g.
-  // 'jump' from an InterfaceMaterial and 'stiffness' from a block material on the sides. VARIABLE
-  // inputs never use this: a variable is a block field with no interface store -- at an interface
-  // it is simply the element-side and neighbor-side solution.
-  params.addParam<std::vector<std::string>>(
+  // Block materials need no hint: the same material is reinit'd as BLOCK/FACE/NEIGHBOR data and the
+  // gatherer reads the store for where it is. A true InterfaceMaterial instead lives in the
+  // separate INTERFACE_MATERIAL_DATA store, which the native block/face/neighbor selection never
+  // picks. Since this action builds its gatherers on add_user_object -- before materials exist --
+  // it cannot query the warehouse to tell the two apart from a property name alone, so the
+  // interface-material inputs are named here. Per-input so one action can mix both (e.g. 'jump'
+  // from an InterfaceMaterial and 'stiffness' from a block material).
+  params.addParam<std::vector<MaterialPropertyName>>(
       "interface_material_inputs",
       {},
       "MATERIAL inputs supplied by a true InterfaceMaterial (read from interface material data "
@@ -105,7 +95,8 @@ NEML2Action::NEML2Action(const InputParameters & params)
     _block(getParam<std::vector<SubdomainName>>("block")),
     _interface(getParam<std::vector<BoundaryName>>("interface")),
     _interface_only(getParam<bool>("interface_only")),
-    _interface_material_inputs(getParam<std::vector<std::string>>("interface_material_inputs")),
+    _interface_material_inputs(
+        getParam<std::vector<MaterialPropertyName>>("interface_material_inputs")),
     _skip_input_variables(getParam<std::vector<std::string>>("skip_input_variables"))
 {
   NEML2Utils::assertNEML2Enabled();
