@@ -1435,6 +1435,13 @@ MooseApp::errorCheck()
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
 
+  // MultiApps that do not use positions create their subapps during initialSetup(), which the
+  // --check-input path does not run. Create them here so subapp command-line arguments are consumed
+  // before the unused-parameter check below.
+  if ((_executor || _executioner) && !isParamSetByUser("mesh_only"))
+    for (const auto & app : feProblem().getMultiAppWarehouse().getObjects())
+      app->createAppsIfNeeded();
+
   _builder.errorCheck(*_comm, warn, err);
 
   // Return early for mesh only mode, since we want error checking to run even though

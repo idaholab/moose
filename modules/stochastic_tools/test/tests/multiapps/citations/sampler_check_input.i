@@ -43,6 +43,6 @@
   [sub]
     type = SamplerFullSolveMultiApp
     sampler = sample
-    input_files = '../../../../../../test/tests/misc/citations/citations.i'
+    input_files = 'citations_sub.i'
   []
 []
