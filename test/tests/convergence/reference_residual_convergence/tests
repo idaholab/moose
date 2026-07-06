@@ -144,7 +144,7 @@
     input = 'split.i'
     exodiff = 'split_out.e'
     expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
-    requirement = 'The system shall be able to use a reference residual to converge to with two different nonlinear systems.'
+    requirement = 'The system shall be able to use the reference residual technique to converge two different nonlinear systems with separate reference residuals for each system.'
   []
   [unscale]
     type = RunApp
