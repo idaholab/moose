@@ -25,10 +25,32 @@
   []
 []
 
+[AuxVariables]
+  [block_aux]
+  []
+  [boundary_aux]
+  []
+[]
+
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
+  []
+[]
+
+[AuxKernels]
+  [block_aux]
+    type = ConstantAux
+    variable = block_aux
+    block = 1
+    value = 1
+  []
+  [boundary_aux]
+    type = ConstantAux
+    variable = boundary_aux
+    boundary = top
+    value = 2
   []
 []
 

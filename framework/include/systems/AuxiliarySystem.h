@@ -147,6 +147,7 @@ public:
   void clearScalarVariableCoupleableTags();
 
   const ExecuteMooseObjectWarehouse<AuxKernel> & nodalAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<AuxKernel> & mortarNodalAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & nodalVectorAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & nodalArrayAuxWarehouse() const;
 
@@ -234,6 +235,12 @@ inline const ExecuteMooseObjectWarehouse<AuxKernel> &
 AuxiliarySystem::nodalAuxWarehouse() const
 {
   return _nodal_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<AuxKernel> &
+AuxiliarySystem::mortarNodalAuxWarehouse() const
+{
+  return _mortar_nodal_aux_storage;
 }
 
 inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
