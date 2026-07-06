@@ -11,7 +11,7 @@ The `SphereMeshGenerator` creates a mesh of a sphere (a ball, not its boundary).
 
 The dimension of the generated mesh is determined by the selected
 `elem_type`.  3D element types will cause a ball volume to be meshed,
-2D element types will cause a circular area to be meshed, and 1D
+2D element types will cause a circular area (disk) to be meshed, and 1D
 element types will cause a line segment to be meshed.
 
 !syntax parameters /Mesh/SphereMeshGenerator
