@@ -15,7 +15,7 @@
     # derivative name follow moose convention, e.g., 'doutput/dinput'
     derivatives = 'k_T T'
 
-    export_outputs = 'k_T dK_T/dT'
+    export_outputs = 'k_T dk_T/dT'
     export_output_targets = 'exodus; exodus'
   []
 []
