@@ -11,6 +11,7 @@
 
 // XFEM includes
 #include "XFEMAppTypes.h"
+#include "SolidMechanicsAppTypes.h"
 #include "XFEMCutElem2D.h"
 #include "XFEMCutElem3D.h"
 #include "XFEMFuncs.h"
@@ -194,6 +195,12 @@ XFEM::didNearTipEnrichmentChange()
       break;
   }
   return cutter_mesh_changed;
+}
+
+void
+XFEM::executeSubdomainModifiers()
+{
+  _fe_problem->execute(EXEC_XFEM_SUBDOMAIN_MODIFIER);
 }
 
 void
@@ -1405,14 +1412,31 @@ XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & n
       if (_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
         _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
 
-      if (_bnd_material_data[0]->getMaterialPropertyStorage().hasStatefulProperties())
+      auto & bnd_material_storage = _bnd_material_data[0]->getMaterialPropertyStorage();
+      if (bnd_material_storage.hasStatefulProperties())
         for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
         {
           _mesh->get_boundary_info().boundary_ids(parent_elem, side, parent_boundary_ids);
           std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
           for (; it_bd != parent_boundary_ids.end(); ++it_bd)
           {
-            if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+            if (!_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+              continue;
+
+            bool parent_side_has_state = true;
+            for (const auto state : bnd_material_storage.stateIndexRange())
+            {
+              const auto & state_props = bnd_material_storage.props(state);
+              const auto elem_props_it = state_props.find(parent_elem);
+              if (elem_props_it == state_props.end() ||
+                  elem_props_it->second.find(side) == elem_props_it->second.end())
+              {
+                parent_side_has_state = false;
+                break;
+              }
+            }
+
+            if (parent_side_has_state)
               _bnd_material_data[0]->copy(*libmesh_elem, *parent_elem, side);
           }
         }

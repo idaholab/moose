@@ -148,6 +148,8 @@ public:
                       const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                       AuxiliarySystem & aux) override;
 
+  virtual void executeSubdomainModifiers() override;
+
   virtual void initSolution(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                             AuxiliarySystem & aux) override;
 
