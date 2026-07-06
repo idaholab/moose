@@ -1,9 +1,9 @@
+# Definite Maxwell problem solved with Nedelec elements of the first kind
+# based on MFEM Example 3.
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/cube_hex27.e
-  dim = 3
-  uniform_refine = 2
+  file = ../mesh/cube_hex3.e
 []
 
 [Problem]
@@ -58,11 +58,19 @@
     symbol_values = 'h_field_curl_mag'
   []
 
+  ## note this is j * derivative, hence why it isnt just 2j
   [j_dk_dj]
     type = MFEMParsedFunction
     expression = '2*j^2'
     symbol_names = 'j'
     symbol_values = 'h_field_curl_mag'
+  []
+  # we need dk/ds / s in the finished kernel.
+  # so we just input that here. it is usually
+  # something nontrivial, but here it is just 2
+  [dk_ds_s]
+    type = MFEMParsedFunction
+    expression = '2'
   []
 []
 
@@ -91,16 +99,18 @@
 []
 
 [Preconditioner]
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
+  [matrix_free_ams]
+    type = MFEMMatrixFreeAMS
+  []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
   []
 []
 
 [Solvers]
   [lin]
-    type = MFEMHypreGMRES
-    preconditioner = ams
+    type = MFEMGMRESSolver
+    preconditioner = jacobi
     l_tol = 1e-12
   []
   [native_mfem_nl]
@@ -115,6 +125,7 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+  # assembly_level = partial
 []
 
 [Outputs]

@@ -469,6 +469,8 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
     _sumOperator = std::make_unique<SumOperatorExtension>(
         &nlf->GetGradient(u), 1.0, _system_operator->Ptr(), 1.0);
 
+    static int pa_print = 0; if (pa_print++<1) _sumOperator->PrintMatlab(std::cout);
+
     return *_sumOperator;
   }
 
@@ -481,6 +483,8 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
   }
   else
     _jacobian = _linear_operator;
+
+  static int fa_print = 0; if (fa_print++<1) _jacobian.Ptr()->PrintMatlab(std::cout);
 
   return *_jacobian;
 }
