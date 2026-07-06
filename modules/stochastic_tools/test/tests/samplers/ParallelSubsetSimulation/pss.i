@@ -23,7 +23,6 @@
     num_parallel_chains = 2
     output_reporter = 'constant/reporter_transfer:average:value'
     inputs_reporter = 'adaptive_MC/inputs'
-    num_random_seeds = 1000
     seed = 1012
     num_random_seeds = 200
     execute_on = 'initial timestep_end'

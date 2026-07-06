@@ -26,7 +26,6 @@
     initial_values = '-0.103 1.239'
     inputs_reporter = 'adaptive_MC/inputs'
     use_absolute_value = true
-    num_random_seeds = 1000
     seed = 1012
     num_random_seeds = 100
     execute_on = 'initial multiapp_fixed_point_begin'

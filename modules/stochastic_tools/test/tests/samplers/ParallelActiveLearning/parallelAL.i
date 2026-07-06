@@ -27,7 +27,6 @@
     sorted_indices = 'conditional/sorted_indices'
     num_parallel_proposals = 5
     num_tries = 1000
-    num_random_seeds = 1000
     seed = 100
     num_random_seeds = 100
     initial_values = '0.1 0.1'
