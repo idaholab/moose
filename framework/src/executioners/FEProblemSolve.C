@@ -481,6 +481,10 @@ FEProblemSolve::solve()
     converged = false;
     while (!converged)
     {
+      _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
+               << ":" << COLOR_DEFAULT << "\n"
+               << std::endl;
+
       // Loop over each system
       for (const auto sys_i : index_range(_systems))
       {
@@ -515,11 +519,12 @@ FEProblemSolve::solve()
           {
             if (apply_fp_relax)
               sys->applyFixedPointRelaxation();
-            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << std::endl;
+            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
+                     << std::endl;
           }
           else
           {
-            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT
+            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT << "\n"
                      << std::endl;
             if (apply_fp_relax)
               sys->clearFixedPointRelaxation();
@@ -527,7 +532,8 @@ FEProblemSolve::solve()
           }
         }
         else
-          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
+          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << "\n"
+                   << std::endl;
 
         if (!is_nonlinear)
         {
