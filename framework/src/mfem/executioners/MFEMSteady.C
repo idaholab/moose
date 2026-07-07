@@ -38,37 +38,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
-  // If no ProblemOperators have been added by the user, add a default
-  if (getProblemOperators().empty())
-  {
-    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
-    {
-      if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
-      {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-      else
-      {
-        _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-        auto problem_operator =
-            std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
-        addProblemOperator(std::move(problem_operator));
-      }
-    }
-    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
-    {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
-      addProblemOperator(std::move(problem_operator));
-    }
-    else
-      mooseError("Unknown numeric type. "
-                 "Please set the Problem numeric type to either 'real' or 'complex'.");
-  }
+
 }
 
 void

@@ -17,6 +17,7 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "ProblemOperatorBuilderInterface.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -374,6 +375,11 @@ protected:
    * The numeric representation currently active for this problem.
    */
   NumericType _num_type;
+
+  /**
+   * The problem operator builder
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderInterface>> probOpBuilder;
 };
 
 template <typename T>
