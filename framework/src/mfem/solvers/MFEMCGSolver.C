@@ -56,4 +56,11 @@ MFEMCGSolver::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void 
+MFEMCGSolver::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  LORInterface::Update<mfem::CGSolver>(*this, *_equation_system);
+}
+
 #endif

@@ -64,16 +64,8 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::Solver & solver) override;
 
-  void Update() override
-  {
-    LORInterface::SetupLOR(*_equation_system);
-    // update the pointer to the bilinear form representing the curl-curl problem being
-    // preconditioned
-    auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
-    matrix_free_ams.SetBilinearForm(*_a);
-    matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
-  }
-
+  void Update() override;
+  
 protected:
   void ConstructSolver() override;
 

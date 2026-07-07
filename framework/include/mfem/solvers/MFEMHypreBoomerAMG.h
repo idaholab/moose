@@ -27,11 +27,7 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::Solver & solver) override;
 
-  void Update() override
-  {
-    if (IsLOR(*this))
-      LORInterface::SetupLOR<mfem::HypreBoomerAMG>(*this, *_equation_system);
-  }
+  void Update() override;
 
 protected:
   void ConstructSolver() override;

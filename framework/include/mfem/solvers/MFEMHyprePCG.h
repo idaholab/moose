@@ -26,11 +26,7 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::Solver & solver) override;
 
-  void Update() override
-  {
-    Moose::MFEM::LinearSolverBase::Update();
-    LORInterface::Update<mfem::HyprePCG>(*this, *_equation_system);
-  }
+  void Update() override;
 
 protected:
   void ConstructSolver() override;

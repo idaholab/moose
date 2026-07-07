@@ -51,4 +51,17 @@ MFEMHypreADS::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void
+MFEMHypreADS::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+  {
+    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
+        mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreADS Solver only supports hex meshes.");
+    LORInterface::SetupLOR<mfem::HypreADS>(*this, *_equation_system);
+  }
+}
+
 #endif
