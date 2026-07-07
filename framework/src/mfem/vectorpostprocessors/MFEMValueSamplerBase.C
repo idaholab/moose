@@ -19,6 +19,15 @@
 
 namespace
 {
+/** Enum for values returned by gslib for point location relative to mesh
+ */
+enum class GSLibLocationCode : unsigned int
+{
+  INTERNAL = 0,
+  BORDER = 1,
+  NOT_FOUND = 2,
+};
+
 void
 MFEMVectorToPostprocessorPoints(
     const mfem::Vector & mfem_points,
@@ -105,11 +114,11 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   mfem::Array<unsigned int> point_codes = _finder.GetCode();
   for (size_t i = 0; i < points.size(); i++)
   {
-    switch (point_codes[i])
+    switch (GSLibLocationCode(point_codes[i]))
     {
-      case 0:
+      case GSLibLocationCode::INTERNAL:
         break;
-      case 1:
+      case GSLibLocationCode::BORDER:
         if (fe_boundary_discontinuous)
           mooseWarning("MFEMValueSamplerBase found a point on an element boundary but "
                        "the FE space is discontinuous at boundaries: ",
