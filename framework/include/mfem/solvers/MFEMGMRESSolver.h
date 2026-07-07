@@ -26,6 +26,14 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::GMRESSolver & solver) override;
 
+  void Update() override
+  {
+    SetupLOR(*this, *_equation_system);
+    // Reset preconditioner if it has had an LOR update
+    if (IsLOR(*this) && !_lor)
+      SetPreconditioner(static_cast<mfem::GMRESSolver &>(GetSolver()));
+  }
+
 protected:
   void ConstructSolver() override;  
 };
