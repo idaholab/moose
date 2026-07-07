@@ -52,7 +52,7 @@ MFEMOperatorJacobiSmoother::Update()
 {
   Moose::MFEM::LinearSolverBase::Update();
   if (_lor)
-    Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::SetupLOR(*this, *_equation_system);
+    SetLORSolver(*this, *_equation_system);
 }
 
 #endif

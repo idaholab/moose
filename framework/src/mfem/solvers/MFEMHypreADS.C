@@ -58,7 +58,7 @@ MFEMHypreADS::Update()
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");
-    Moose::MFEM::LORLinearSolverBase<mfem::HypreADS>::SetupLOR(*this, *_equation_system);
+    SetLORSolver(*this, *_equation_system);
   }
 }
 
