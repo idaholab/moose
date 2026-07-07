@@ -43,7 +43,7 @@
   [MFEMValueSamplerBoundaryTolNotOnBoundary]
     type = RunApp
     input = point_value_sampler_boundary_tol.i
-    requirement = "No error will be produced for a point near a boundary when the tolerance is loose"
+    requirement = "The system shall not issue an error for a point near but outside a boundary when the tolerance is loose."
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
@@ -53,7 +53,7 @@
     input = point_value_sampler_boundary_tol.i
     expect_err = 'MFEMValueSamplerBase could not find point at'
     cli_args = 'VectorPostprocessors/point_sample/mesh_boundary_tolerance=1e-10'
-    requirement = "An error will be produced for a point near a boundary when the tolerance is tight"
+    requirement = "The system shall issue an error for a point near but outside a boundary when the tolerance is tight."
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
