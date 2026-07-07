@@ -76,6 +76,15 @@
     valgrind = heavy
     collections = 'SYSTEM'
   []
+  [boundary_restriction_jacobian]
+    requirement = 'The framework shall compute a correct Jacobian for a NEML2 model defined on a material interface with volume (block) evaluation, using the derivative provided by the NEML2 model.'
+    type = PetscJacobianTester
+    issues = '#32413'
+    input = 'interface_material.i'
+    run_sim = true
+    capabilities = 'libtorch & neml2'
+    collections = 'SYSTEM'
+  []
   [interface_only_restriction]
     requirement = 'The framework shall be capable of defining NEML2 models on material interfaces using block material properties without volume-element evaluation.'
     type = Exodiff
@@ -102,6 +111,28 @@
     input = 'linear_cohesive_interface.i'
     cli_args = 'NEML2/cohesive/interface_material_inputs='
     expect_err = "Material property 'jump'.*is not defined on block"
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+    collections = 'SYSTEM'
+  []
+  [interface_material_input_not_found]
+    requirement = 'The framework shall throw an error when a name listed in interface_material_inputs is not a NEML2 input of the model.'
+    type = RunException
+    issues = '#32413'
+    input = 'interface_material.i'
+    cli_args = 'NEML2/source/interface_material_inputs=typo'
+    expect_err = "'typo' is not a NEML2 input"
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+    collections = 'SYSTEM'
+  []
+  [interface_material_input_not_material]
+    requirement = 'The framework shall throw an error when a name listed in interface_material_inputs is a NEML2 input that is not mapped as a MATERIAL.'
+    type = RunException
+    issues = '#32413'
+    input = 'interface_material.i'
+    cli_args = 'NEML2/source/interface_material_inputs=u'
+    expect_err = "'u' is mapped as .*not MATERIAL"
     capabilities = 'libtorch & neml2'
     valgrind = none
     collections = 'SYSTEM'

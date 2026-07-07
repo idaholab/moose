@@ -214,6 +214,25 @@ NEML2Action::act()
     setupDerivativeMappings(*_model);
     setupParameterDerivativeMappings(*_model);
 
+    // Every interface_material_inputs entry must be a real MATERIAL input. Otherwise a typo or a
+    // non-MATERIAL name would be silently dropped in addGatherer and revert to the default
+    // volume/side routing, producing wrong results with no error.
+    for (const auto & name : _interface_material_inputs)
+    {
+      const auto it = std::find_if(
+          _inputs.begin(), _inputs.end(), [&](const auto & in) { return in.name == name; });
+      if (it == _inputs.end())
+        paramError("interface_material_inputs", "'", name, "' is not a NEML2 input of this model.");
+      if (it->moose_type != NEML2Utils::MOOSEIOType::MATERIAL)
+        paramError(
+            "interface_material_inputs",
+            "'",
+            name,
+            "' is mapped as ",
+            NEML2Utils::stringify(it->moose_type),
+            ", not MATERIAL; only MATERIAL inputs can be routed to interface material data.");
+    }
+
     printSummary();
 
     // Create and register a MOOSEToNEML2 gatherer user object, returning its name
