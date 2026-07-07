@@ -14,6 +14,7 @@
     test_case = TestCGDGP2P1
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a hybrid CG-DG scheme with first order Lagrange pressure and second order monomial velocity and demonstrate third order convergence for the velocity and second order convergence for pressure in the L2 error measure.'
     min_parallel = 8
+    heavy = true
   []
   [hybrid-p2p1-l2-lagrange]
     type = MMSTest

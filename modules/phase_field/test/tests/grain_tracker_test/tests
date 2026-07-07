@@ -102,6 +102,7 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
     prereq = 'test_remapping_serial'
+    heavy = true
 
     min_parallel = 8 # Test distributed merge work with grain tracker
 
@@ -132,6 +133,7 @@
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
     restep = false # Restep isn't compatible with recover tests
+    heavy = true
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
                   "serial."
