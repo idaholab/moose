@@ -768,17 +768,13 @@ public:
   /**
    * This method sets the name for \p subdomain_id to \p name
    */
-  void setSubdomainName(SubdomainID subdomain_id,
-                        const SubdomainName & name,
-                        const bool synchronous = false);
+  void setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name);
 
   /**
    * This method sets the name for \p subdomain_id on the provided \p mesh to \p name
    */
-  static void setSubdomainName(MeshBase & mesh,
-                               SubdomainID subdomain_id,
-                               const SubdomainName & name,
-                               const bool synchronous = false);
+  static void
+  setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name);
 
   /**
    * Return the name of a block given an id.

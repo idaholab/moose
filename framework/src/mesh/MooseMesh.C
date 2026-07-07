@@ -418,6 +418,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   for (const auto & elem : getMesh().element_ptr_range())
     _mesh_subdomains.insert(elem->subdomain_id());
 
+  bool need_subdomain_name_map_sync = false;
   // add explicitly requested subdomains
   if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
@@ -434,8 +435,9 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // add subdomain id
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
-      setSubdomainName(sub_id, sub_name, true);
+      setSubdomainName(sub_id, sub_name);
     }
+    need_subdomain_name_map_sync = true;
   }
   else if (isParamValid("add_subdomain_names"))
   {
@@ -457,9 +459,12 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // add subdomain id
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
-      setSubdomainName(sub_id, sub_name, true);
+      setSubdomainName(sub_id, sub_name);
     }
+    need_subdomain_name_map_sync = true;
   }
+  if (need_subdomain_name_map_sync)
+    _mesh->sync_subdomain_name_map();
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
@@ -1736,21 +1741,17 @@ MooseMesh::getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const
 }
 
 void
-MooseMesh::setSubdomainName(const SubdomainID subdomain_id,
-                            const SubdomainName & name,
-                            const bool synchronous)
+MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
 {
-  setSubdomainName(getMesh(), subdomain_id, name, synchronous);
+  mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
+  getMesh().subdomain_name(subdomain_id) = name;
 }
 
 void
-MooseMesh::setSubdomainName(MeshBase & mesh,
-                            SubdomainID subdomain_id,
-                            const SubdomainName & name,
-                            const bool synchronous)
+MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
 {
   mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  mesh.set_subdomain_name(subdomain_id, name, synchronous);
+  mesh.subdomain_name(subdomain_id) = name;
 }
 
 const std::string &
