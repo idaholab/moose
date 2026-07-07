@@ -83,6 +83,13 @@ public:
   void addSubMesh(const std::string & type, const std::string & name, InputParameters & parameters);
 
   /**
+   * Add an MFEM QuadratureFunction-backed coefficient to the problem.
+   */
+  void addQuadratureFunction(const std::string & type,
+                             const std::string & name,
+                             InputParameters & parameters);
+
+  /**
    * Add transfers between MultiApps and/or MFEM SubMeshes.
    */
   void addTransfer(const std::string & transfer_name,

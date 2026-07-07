@@ -20,6 +20,7 @@ MFEMScalarQuadratureFunction::validParams()
 {
   InputParameters params = MFEMObject::validParams();
   params.registerBase("MFEMQuadratureFunction");
+  params.registerSystemAttributeName("MFEMQuadratureFunction");
   params.addClassDescription(
       "Declares a scalar MFEM coefficient holding precomputed values of a source coefficient at "
       "quadrature points. Values are (re)projected lazily when the coefficient is used.");
