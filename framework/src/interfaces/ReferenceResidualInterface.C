@@ -16,6 +16,8 @@ ReferenceResidualInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
+  params.addParam<SolverSystemName>(
+      "solver_sys", "nl0", "Solver system for which this object applies.");
   params.addParam<TagName>(
       "residual_vector",
       "The tag name of the custom vector tag to use in place of the residual vector. This can be "

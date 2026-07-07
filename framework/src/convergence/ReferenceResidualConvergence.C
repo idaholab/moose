@@ -50,24 +50,28 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _unscale_the_residual(getParam<bool>("unscale_the_residual")),
     _reference_vector_tag_id(Moose::INVALID_TAG_ID)
 {
-  // This restriction is primarily due to reference and residual vector parameters
-  if (_fe_problem.numNonlinearSystems() > 1)
-    paramError("nl_sys_names",
-               "reference residual problem does not currently support multiple nonlinear systems");
+  if (_fe_problem.numNonlinearSystems() > 1 && !isParamSetByUser("solver_sys"))
+    paramError("solver_sys",
+               "Reference residual problem does not currently support multiple nonlinear systems "
+               "in a single Convergence object. Multiple Convergence objects can be used, one for "
+               "each nonlinear system, via the 'solver_sys' parameter.");
 
+  const auto solver_sys = getParam<SolverSystemName>("solver_sys");
+  const auto num = _fe_problem.solverSysNum(solver_sys);
   if (parameters.isParamValid("residual_vector"))
   {
     const auto residual_vector_tag_id =
         _fe_problem.getVectorTagID(getParam<TagName>("residual_vector"));
-    _residual_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(residual_vector_tag_id);
+    _residual_vector = &_fe_problem.getNonlinearSystemBase(num).getVector(residual_vector_tag_id);
   }
   else
-    _residual_vector = &_fe_problem.getNonlinearSystemBase(0).RHS();
+    _residual_vector = &_fe_problem.getNonlinearSystemBase(num).RHS();
 
   if (parameters.isParamValid("reference_vector"))
   {
     _reference_vector_tag_id = _fe_problem.getVectorTagID(getParam<TagName>("reference_vector"));
-    _reference_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
+    _reference_vector =
+        &_fe_problem.getNonlinearSystemBase(num).getVector(_reference_vector_tag_id);
   }
   else
     mooseDeprecated(
@@ -114,7 +118,10 @@ ReferenceResidualConvergence::initialSetup()
   if (!_reference_vector)
     return;
 
-  auto & nonlinear_sys = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0);
+  const auto solver_sys = getParam<SolverSystemName>("solver_sys");
+  const auto num = _fe_problem.solverSysNum(solver_sys);
+
+  auto & nonlinear_sys = _fe_problem.getNonlinearSystemBase(num);
   auto & s = nonlinear_sys.system();
 
   // If the user provides reference_vector, that implies that they want the
