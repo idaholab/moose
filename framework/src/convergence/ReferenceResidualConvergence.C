@@ -373,14 +373,14 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
       {
         // Print residual
         out << "   " << std::setw(var_space + 8) << std::right << _group_names[i] + "-> res: "
-            << (_group_resid[i] < _abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
+            << (_group_resid[i] < _nl_abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
             << _group_resid[i] << COLOR_DEFAULT;
 
         // Print res/ref ratio
         if (_local_norm)
           out << "  local res/ref: "
-              << (_group_resid[i] / _group_ref_resid[i] < _rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
-              << std::setw(8) << _group_ref_resid[i] << COLOR_DEFAULT << "\n";
+              << (_group_ref_resid[i] < _nl_rel_tol ? COLOR_GREEN : COLOR_DEFAULT) << std::setw(8)
+              << _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         else
         {
           // Print reference first if not local norm
@@ -389,7 +389,8 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
           if (!_group_ref_resid[i])
             out << _group_resid[i] << "\n";
           else
-            out << (_group_resid[i] / _group_ref_resid[i] < _rel_tol ? COLOR_GREEN : COLOR_DEFAULT)
+            out << (_group_resid[i] / _group_ref_resid[i] < _nl_rel_tol ? COLOR_GREEN
+                                                                        : COLOR_DEFAULT)
                 << std::setw(8) << _group_resid[i] / _group_ref_resid[i] << COLOR_DEFAULT << "\n";
         }
       }
@@ -442,7 +443,7 @@ ReferenceResidualConvergence::checkResidualConvergence(const unsigned int it,
 
   if (checkConvergenceIndividVars(fnorm, abs_tol, rel_tol, ref_norm))
   {
-    oss << "Converged normally";
+    oss << name() << ": Converged normally";
     return true;
   }
   else if (it >= _accept_iters &&

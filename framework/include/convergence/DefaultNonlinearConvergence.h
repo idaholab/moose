@@ -51,9 +51,13 @@ protected:
 
   FEProblemBase & _fe_problem;
   /// Nonlinear absolute tolerance
-  PetscReal _abs_tol;
+  const Real _nl_rel_tol;
   /// Nonlinear relative tolerance
-  PetscReal _rel_tol;
+  const Real _nl_abs_tol;
+  /// Max residual functions
+  const unsigned int _nl_max_funcs;
+  /// Nonlinear relative step tolerance
+  const Real _nl_rel_step_tol;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
   /// Nonlinear relative divergence tolerance

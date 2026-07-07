@@ -151,14 +151,18 @@ scaling = false
     converge_on = 'a b variable_f c d g'
     nl_rel_tol = 1e-9
     nl_abs_tol = 1e-9
+    nl_max_funcs = 100
+    nl_max_its = 20
     unscale_the_residual = ${scaling}
   []
   [conv_two]
     type = ReferenceResidualConvergence
     reference_vector = 'ref'
     converge_on = 'verylongvariable_e g'
-    nl_rel_tol = 1e-9
-    nl_abs_tol = 1e-9
+    nl_rel_tol = 1e-100
+    nl_abs_tol = 1e-5
+    nl_max_funcs = 200
+    nl_max_its = 50
     unscale_the_residual = ${scaling}
     normalization_type = LOCAL_L2
   []
