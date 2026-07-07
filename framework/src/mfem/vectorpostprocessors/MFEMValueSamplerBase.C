@@ -39,7 +39,7 @@ MFEMVectorToPostprocessorPoints(
 }
 
 mfem::FindPointsGSLIB::AvgType
-get_avg_type(const MooseEnum & avg_type)
+getAvgType(const MooseEnum & avg_type)
 {
   if (avg_type == "NONE")
     return mfem::FindPointsGSLIB::AvgType::NONE;
@@ -90,7 +90,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   if (getMFEMProblem().mesh().shouldDisplace())
     mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
 
-  _finder.SetL2AvgType(get_avg_type(getParam<MooseEnum>("average_type")));
+  _finder.SetL2AvgType(getAvgType(getParam<MooseEnum>("average_type")));
   _finder.SetDistanceToleranceForPointsFoundOnBoundary(getParam<double>("mesh_boundary_tolerance"));
 
   // set up points vector
