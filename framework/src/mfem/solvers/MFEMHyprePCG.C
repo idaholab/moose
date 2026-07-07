@@ -56,4 +56,11 @@ MFEMHyprePCG::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void
+MFEMHyprePCG::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  LORInterface::Update<mfem::HyprePCG>(*this, *_equation_system);
+}
+
 #endif

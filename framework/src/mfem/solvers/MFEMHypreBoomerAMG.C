@@ -71,4 +71,11 @@ MFEMHypreBoomerAMG::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void
+MFEMHypreBoomerAMG::Update()
+{
+  if (IsLOR(*this))
+    LORInterface::SetupLOR<mfem::HypreBoomerAMG>(*this, *_equation_system);
+}
+
 #endif

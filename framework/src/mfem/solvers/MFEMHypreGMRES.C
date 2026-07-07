@@ -58,4 +58,12 @@ MFEMHypreGMRES::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void
+MFEMHypreGMRES::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  LORInterface::Update<mfem::HypreGMRES>(*this, *_equation_system);
+}
+
+
 #endif

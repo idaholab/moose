@@ -48,4 +48,12 @@ MFEMOperatorJacobiSmoother::ConstructSolver()
   _solver = std::move(solver);
 }
 
+void
+MFEMOperatorJacobiSmoother::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+    LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(*this, *_equation_system);
+}
+
 #endif
