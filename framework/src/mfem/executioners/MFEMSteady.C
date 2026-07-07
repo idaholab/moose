@@ -38,7 +38,18 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
+  if( _mfem_problem.problemOperatorBuilderIsEmpty() )
+  {
+    std::string name_tmp = "default_steady";
+    std::string type_tmp = "ProblemOperatorBuilderSteady";
+    InputParameters params_tmp = emptyInputParameters();
+    _mfem_problem.addMFEMProblemOperator(type_tmp, name_tmp, params_tmp);
+  }
 
+  addProblemOperator
+  (
+    _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem)
+  );
 }
 
 void
