@@ -29,13 +29,7 @@ public:
   void Update() override
   {
     Moose::MFEM::LinearSolverBase::Update();
-    if (IsLOR(*this))
-    {
-      if (_lor)
-        LORInterface::SetupLOR<mfem::CGSolver>(*this, *_equation_system);
-      else
-        SetPreconditioner(static_cast<mfem::CGSolver &>(GetSolver()));
-    }
+    LORInterface::Update<mfem::CGSolver>(*this, *_equation_system);
   }
 
 protected:

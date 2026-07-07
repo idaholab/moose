@@ -131,6 +131,21 @@ LORInterface::SetupLOR<mfem::HyprePCG>(LinearSolverBase & solver_base,
   }
 }
 
+template <typename MFEMSolverType>
+void
+LORInterface::Update(LinearSolverBase & solver_base, Moose::MFEM::EquationSystem & equation_system)
+{
+  if (IsLOR(solver_base))
+  {
+    if (_lor && solver_base.GetPreconditioner())
+      mooseError("LOR solver cannot take a preconditioner");
+    if (_lor)
+      LORInterface::SetupLOR<MFEMSolverType>(solver_base, equation_system);
+    if (solver_base.GetPreconditioner())
+      solver_base.SetPreconditioner(static_cast<MFEMSolverType &>(solver_base.GetSolver()));
+  }
+}
+
 void
 LORInterface::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
