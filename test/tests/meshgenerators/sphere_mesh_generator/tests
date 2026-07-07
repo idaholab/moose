@@ -29,4 +29,14 @@
     recover = false
     issues = '#22591'
   []
+  [quad]
+    type = Exodiff
+    input = sphere_quad.i
+    cli_args = '--mesh-only'
+    exodiff = sphere_quad_in.e
+    requirement = 'The system shall be able to generate a disk volume mesh with QUAD4 elements.'
+    design = 'meshgenerators/SphereMeshGenerator.md'
+    recover = false
+    issues = '#22591'
+  []
 []

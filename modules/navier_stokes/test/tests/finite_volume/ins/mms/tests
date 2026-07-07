@@ -7,6 +7,7 @@
     test_case = TestRC
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
     min_parallel = 8
+    heavy = true
   []
   [rc-approx]
     type = MMSTest
@@ -14,5 +15,6 @@
     test_case = TestApproximateRC
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using an approximate Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
     min_parallel = 8
+    heavy = true
   []
 []

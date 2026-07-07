@@ -362,9 +362,12 @@ This will normalize the convergence criteria.
 
 ### Line search did not converge
 
-Line searches attempt to compute optimal updates in Newton-Krylov solves. MOOSE gives access to several PETSc line searches using
-the [!param](/Executioner/Steady/line_search) parameter. Unfortunately, the default used in MOOSE does not converge for every
-problem, and it is regularly necessary to turn the line search off as shown in the example below.
+Line searches attempt to compute optimal updates in Newton-Krylov solves. MOOSE gives access to
+several PETSc and MOOSE-specific line searches using the
+[!param](/Executioner/Steady/line_search) parameter. See the
+[Line Search System](syntax/LineSearches/index.md) page for a summary of the available choices.
+Unfortunately, the default line search does not converge for every problem, and it is regularly
+necessary to turn the line search off as shown in the example below.
 
 ```
 [Executioner]
@@ -381,4 +384,3 @@ If your linear iterations are dropping fine but it takes lots of nonlinear itera
 !alert note
 Automatic scaling, offered through the [!param](/Executioner/Steady/automatic_scaling) parameter, will often suffice to
 handle scaling issues, e.g. normalize desired residual convergence, between equations.
-

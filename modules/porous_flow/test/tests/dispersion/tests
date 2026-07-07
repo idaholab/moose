@@ -23,6 +23,15 @@
     design = 'porous_flow/tests/dispersion/dispersion_tests.md'
     requirement = 'The system shall correctly simulate molecular diffusion using finite volumes.'
   []
+  [diff_multiphase]
+    type = 'CSVDiff'
+    input = 'diff_multiphase.i'
+    csvdiff = 'diff_multiphase_out_xmass_0002.csv'
+    issues = '#13155'
+    design = 'porous_flow/tests/dispersion/dispersion_tests.md'
+    requirement = 'The system shall assign molecular diffusion coefficients to the correct fluid '
+                  'phase and component when there are multiple phases and multiple components.'
+  []
   [disp01]
     type = 'CSVDiff'
     input = 'disp01.i'

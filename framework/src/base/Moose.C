@@ -43,6 +43,8 @@ const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_BEGIN");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_CONVERGENCE");
+const ExecFlagType EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE =
+    registerDefaultExecFlag("MULTISYSTEM_FIXED_POINT_CONVERGENCE");
 const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");

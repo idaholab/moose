@@ -166,7 +166,7 @@ Coupleable::isCoupled(const std::string & var_name_in, unsigned int i) const
   else
   {
     // Make sure the user originally requested this value in the InputParameter syntax
-    if (!_c_parameters.hasCoupledValue(var_name))
+    if (!_c_parameters.hasCoupledVar(var_name))
       mooseError(_c_name,
                  ": The coupled variable \"",
                  var_name,

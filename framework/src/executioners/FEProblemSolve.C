@@ -189,9 +189,7 @@ FEProblemSolve::validParams()
       "otherwise the vector must match the number/order of systems being solved.");
   params.addParam<ConvergenceName>(
       "multi_system_fixed_point_convergence",
-      "Convergence object to determine the convergence of the multi-system fixed point iteration. "
-      "If unspecified, defaults to checking that every system is converged (based on their own "
-      "convergence criterion)");
+      "Convergence object to determine the convergence of the multi-system fixed point iteration.");
 
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
@@ -479,12 +477,15 @@ FEProblemSolve::solve()
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
-    // Use a convergence object if provided, if not, use a reasonable default of every nested system
-    // being converged
     num_fp_multisys_iters = 0;
     converged = false;
     while (!converged)
     {
+      if (_using_multi_sys_fp_iterations)
+        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
+                 << ":" << COLOR_DEFAULT << "\n"
+                 << std::endl;
+
       // Loop over each system
       for (const auto sys_i : index_range(_systems))
       {
@@ -519,11 +520,12 @@ FEProblemSolve::solve()
           {
             if (apply_fp_relax)
               sys->applyFixedPointRelaxation();
-            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << std::endl;
+            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
+                     << std::endl;
           }
           else
           {
-            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT
+            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT << "\n"
                      << std::endl;
             if (apply_fp_relax)
               sys->clearFixedPointRelaxation();
@@ -531,7 +533,8 @@ FEProblemSolve::solve()
           }
         }
         else
-          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
+          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << "\n"
+                   << std::endl;
 
         if (!is_nonlinear)
         {
@@ -554,10 +557,12 @@ FEProblemSolve::solve()
         converged = true;
       else
       {
-        converged = _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-                    Convergence::MooseConvergenceStatus::CONVERGED;
-        if (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-            Convergence::MooseConvergenceStatus::DIVERGED)
+        _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE);
+
+        const auto convergence_status =
+            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters);
+        converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
+        if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
           break;
       }
       num_fp_multisys_iters++;
@@ -567,9 +572,5 @@ FEProblemSolve::solve()
       _problem.uniformRefine();
   }
 
-  if (_multi_sys_fp_convergence)
-    return (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-            Convergence::MooseConvergenceStatus::CONVERGED);
-  else
-    return converged;
+  return converged;
 }

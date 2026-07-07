@@ -818,9 +818,42 @@ InputParameters::hasDefault(const std::string & param_name) const
 }
 
 bool
-InputParameters::hasCoupledValue(const std::string & coupling_name) const
+InputParameters::hasCoupledVar(const std::string & coupling_name) const
 {
   return _coupled_vars.find(coupling_name) != _coupled_vars.end();
+}
+
+void
+InputParameters::setCoupledVar(const std::string & coupling_name, const std::string & value)
+{
+  setCoupledVar(coupling_name, std::vector<VariableName>{value});
+}
+
+void
+InputParameters::setCoupledVar(const std::string & coupling_name,
+                               const std::vector<VariableName> & values)
+{
+  const auto actual_name = checkForRename(coupling_name);
+
+  if (!hasCoupledVar(actual_name))
+    mooseError("Unable to set coupled variable parameter '",
+               coupling_name,
+               "' because it was not added with addCoupledVar or addRequiredCoupledVar.");
+
+  set<std::vector<VariableName>>(actual_name) = values;
+}
+
+const std::vector<VariableName> &
+InputParameters::getCoupledVar(const std::string & coupling_name) const
+{
+  const auto actual_name = checkForRename(coupling_name);
+
+  if (!hasCoupledVar(actual_name))
+    mooseError("Unable to get coupled variable parameter '",
+               coupling_name,
+               "' because it was not added with addCoupledVar or addRequiredCoupledVar.");
+
+  return get<std::vector<VariableName>>(actual_name);
 }
 
 bool
@@ -1180,7 +1213,7 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
 
   // If the local parameters has a coupled variable, populate it with the value from the common
   // parameters, if the common parameters has the coupled variable too
-  if (hasCoupledValue(var_name))
+  if (hasCoupledVar(var_name))
   {
     if (common.hasDefaultCoupledValue(var_name))
     {
@@ -1190,7 +1223,7 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
         defaults[j] = common.defaultCoupledValue(var_name, j);
       addCoupledVar(var_name, defaults, common.getDocString(var_name));
     }
-    else if (common.hasCoupledValue(var_name))
+    else if (common.hasCoupledVar(var_name))
       addCoupledVar(var_name, common.getDocString(var_name));
   }
 

@@ -92,7 +92,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name_in, unsigned int 
   else
   {
     // Make sure the user originally requested this value in the InputParameter syntax
-    if (!_sc_parameters.hasCoupledValue(var_name))
+    if (!_sc_parameters.hasCoupledVar(var_name))
       mooseError(_sc_name,
                  ": The coupled scalar variable \"",
                  var_name,

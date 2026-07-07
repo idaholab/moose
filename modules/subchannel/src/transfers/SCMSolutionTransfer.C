@@ -13,6 +13,16 @@
 #include "DisplacedProblem.h"
 #include "SubChannelMesh.h"
 
+namespace
+{
+bool
+isDeprecatedPinTransferType(const InputParameters & parameters)
+{
+  const auto & type = parameters.getObjectType();
+  return type == "SCMPinSolutionTransfer" || type == "PinSolutionTransfer";
+}
+}
+
 registerMooseObject("SubChannelApp", SCMSolutionTransfer);
 registerMooseObjectRenamed("SubChannelApp",
                            SolutionTransfer,
@@ -45,7 +55,9 @@ SCMSolutionTransfer::validParams()
 SCMSolutionTransfer::SCMSolutionTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _var_names(getParam<std::vector<AuxVariableName>>("variable")),
-    _pin_transfer(getParam<MooseEnum>("transfer_type") == "pin")
+    _pin_transfer(
+        getParam<MooseEnum>("transfer_type") == "pin" ||
+        (!parameters.isParamSetByUser("transfer_type") && isDeprecatedPinTransferType(parameters)))
 {
   if (_directions.contains(Transfer::FROM_MULTIAPP))
     paramError("from_multiapp", "This transfer works only into multi-app.");
@@ -133,6 +145,7 @@ SCMSolutionTransfer::transferNodalVars(unsigned int app_idx)
 
   const SubChannelMesh & from_mesh = dynamic_cast<SubChannelMesh &>(*_from_meshes[0]);
   FEProblemBase & from_problem = *_from_problems[0];
+  validateVariableLocations(from_mesh, to_problem);
 
   for (auto & node : mesh->getMesh().local_node_ptr_range())
   {
@@ -170,6 +183,49 @@ SCMSolutionTransfer::transferNodalVars(unsigned int app_idx)
   {
     getToMultiApp()->appTransferVector(app_idx, var_name).close();
     find_sys(to_problem.es(), var_name)->update();
+  }
+}
+
+void
+SCMSolutionTransfer::validateVariableLocations(const SubChannelMesh & from_mesh,
+                                               FEProblemBase & to_problem)
+{
+  if (processor_id() != 0)
+    return;
+
+  Node * from_node = _pin_transfer ? from_mesh.getPinNode(0, 0) : from_mesh.getChannelNode(0, 0);
+  mooseAssert(from_node, "The representative source node must be non-null.");
+
+  FEProblemBase & from_problem = *_from_problems[0];
+  const auto transfer_type = _pin_transfer ? "pin" : "subchannel";
+  const auto other_transfer_type = _pin_transfer ? "subchannel" : "pin";
+  const auto expected_block = _pin_transfer ? "fuel_pins" : "subchannel";
+  const auto source_block_id = from_mesh.getSubdomainID(expected_block);
+  const auto target_block_id = to_problem.mesh().getSubdomainID(expected_block);
+
+  for (const auto & var_name : _var_names)
+  {
+    MooseVariableFieldBase & from_var = from_problem.getVariable(
+        0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    MooseVariableFieldBase & to_var = to_problem.getVariable(
+        0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    System * from_sys = find_sys(from_problem.es(), var_name);
+    const auto from_sys_num = from_sys->number();
+    const auto from_var_num = from_sys->variable_number(var_name);
+
+    if (!from_var.activeOnSubdomain(source_block_id) ||
+        !to_var.activeOnSubdomain(target_block_id) ||
+        from_node->n_dofs(from_sys_num, from_var_num) == 0)
+      paramError("variable",
+                 "The variable '",
+                 var_name,
+                 "' does not have DOFs on ",
+                 transfer_type,
+                 " nodes. Use a separate SCMSolutionTransfer with transfer_type = '",
+                 other_transfer_type,
+                 "' for variables centered on ",
+                 other_transfer_type,
+                 " nodes.");
   }
 }
 

@@ -1,0 +1,23 @@
+[Tests]
+  issues = '#33273'
+  design = 'FEProblemSolve.md'
+  [tests]
+    requirement = 'The system shall be able to solve a coupled diffusion-reaction finite element problem'
+    [single_system]
+      type = Exodiff
+      input = single_system.i
+      exodiff = 'single_system.e'
+      detail = 'using the single-system approach,'
+    []
+    [multi_system]
+      type = Exodiff
+      input = multi_system.i
+      # The same gold file is used for both tests because the fully converged multi-system
+      # solution should give an equivalent solution.
+      cli_args = 'Outputs/file_base=single_system'
+      exodiff = 'single_system.e'
+      prereq = 'tests/single_system'
+      detail = 'using the multi-system fixed point solve approach with a custom convergence criteria.'
+    []
+  []
+[]
