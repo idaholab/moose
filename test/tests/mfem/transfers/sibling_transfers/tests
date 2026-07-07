@@ -12,6 +12,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between nodal variables,'
     []
@@ -24,6 +26,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between elemental variables,'
     []
@@ -36,6 +40,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'from nodal to elemental variables,'
     []
@@ -50,6 +56,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
     []
@@ -78,6 +86,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between elemental variables,'
     []
@@ -91,6 +101,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'from nodal to elemental variables,'
     []
@@ -105,6 +117,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types,'
     []
@@ -133,6 +147,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between nodal variables sent between MFEM sub-apps defined on meshes comprised of a single element type,'
     []
@@ -151,6 +167,8 @@
       max_parallel = 1 # XML schemadiff with multiple ranks
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps,'
     []
@@ -163,6 +181,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
     []
@@ -177,6 +197,8 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
+      # Allow warnings, needed as we are sampling constant L2 variables on element boundaries,
+      # however we know these element boundaries are not shared so this should not cause problems.
       allow_warnings = true
       detail = 'and between nodal variables sent between MFEM sub-apps defined on meshes comprised of mixed element types.'
     []
