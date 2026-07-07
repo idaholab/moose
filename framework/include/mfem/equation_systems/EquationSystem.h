@@ -25,6 +25,7 @@
 namespace Moose::MFEM
 {
 class LinearSolverBase;
+class CoefficientManager;
 
 /**
  * Class to store weak form components (bilinear and linear forms, and optionally
@@ -66,6 +67,13 @@ public:
   void SetSolverRequiresGradient(bool requires_gradient)
   {
     _solver_requires_gradient = requires_gradient;
+  }
+
+  /// Set the coefficient manager to notify when trial variables are updated, so that stored
+  /// projections of solution-dependent coefficients are invalidated.
+  void SetCoefficientManager(CoefficientManager & coefficients)
+  {
+    _coefficient_manager = &coefficients;
   }
 
   // Test variables are associated with linear forms,
@@ -270,6 +278,9 @@ protected:
   bool _non_linear = false;
   // Whether a nonlinear solver exists and whether it requires Jacobian/gradient information.
   bool _solver_requires_gradient = false;
+  // Coefficient manager notified when trial variables are updated, so that stored projections
+  // of solution-dependent coefficients are invalidated.
+  CoefficientManager * _coefficient_manager = nullptr;
 
 private:
   friend class EquationSystemProblemOperator;

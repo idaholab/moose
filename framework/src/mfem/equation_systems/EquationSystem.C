@@ -11,6 +11,7 @@
 
 #include "EquationSystem.h"
 #include "MFEMLinearSolverBase.h"
+#include "CoefficientManager.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -477,6 +478,9 @@ EquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX
     trueX.GetBlock(i).SyncMemory(trueX);
     _gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
+  // Solution variables changed: stored projections of solution-dependent coefficients are stale.
+  if (_coefficient_manager)
+    _coefficient_manager->invalidateQuadratureFunctions();
 }
 
 void

@@ -51,6 +51,8 @@ MFEMTransient::init()
     _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
         _mfem_problem_data.nonlinear_solver->RequiresGradient());
 
+  _mfem_problem_data.eqn_system->SetCoefficientManager(_mfem_problem_data.coefficients);
+
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(
       _mfem_problem_data.gridfunctions,

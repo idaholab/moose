@@ -24,14 +24,29 @@
 class MFEMQuadratureFunctionCoefficient : public mfem::QuadratureFunctionCoefficient
 {
 public:
+  /// Policy controlling when the stored values are re-projected from the source coefficient.
+  enum class UpdatePolicy
+  {
+    NONE, ///< the source never changes after initialization; project exactly once
+    TIME, ///< the source changes with time only; re-project when the time is set
+    SOLVE ///< the source may additionally depend on solution variables; also re-project
+          ///< whenever trial variables are updated (e.g. between nonlinear iterations)
+  };
+
   MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
                                     mfem::QuadratureFunction & qf,
-                                    bool constant);
+                                    UpdatePolicy update_policy);
 
-  /// Mark the stored values as stale so the source is re-projected on next use.
-  void invalidate() { _dirty = true; }
+  /// Mark the stored values as stale following a change of solution variables, forcing the
+  /// source to be re-projected on next use. No-op unless the update policy is SOLVE.
+  void invalidate()
+  {
+    if (_update_policy == UpdatePolicy::SOLVE)
+      _dirty = true;
+  }
 
-  /// Set the time for the coefficient, invalidating the stored values unless constant.
+  /// Set the time for the coefficient, invalidating the stored values unless the update
+  /// policy is NONE.
   void SetTime(mfem::real_t t) override;
 
   /// Return the stored value at @a ip, re-projecting the source first if invalidated.
@@ -48,8 +63,8 @@ private:
   mfem::Coefficient & _source;
   /// Storage for the projected values, shared with the owning MOOSE object.
   mfem::QuadratureFunction & _qf;
-  /// Whether the source coefficient never changes after initialization.
-  const bool _constant;
+  /// When the stored values are re-projected from the source coefficient.
+  const UpdatePolicy _update_policy;
   /// Whether the stored values are stale and must be re-projected before use.
   bool _dirty;
 };

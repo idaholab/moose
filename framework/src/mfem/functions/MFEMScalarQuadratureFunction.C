@@ -31,11 +31,13 @@ MFEMScalarQuadratureFunction::validParams()
       "order>=0",
       "Order of the quadrature rule the projected values are stored on. This must match the "
       "integration rule used by the objects consuming this coefficient.");
-  params.addParam<bool>(
-      "constant",
-      false,
-      "Set to true if the source coefficient never changes after initialization, in which case "
-      "it is projected only once instead of once per solve.");
+  MooseEnum updates("none time solve", "solve");
+  params.addParam<MooseEnum>(
+      "updates",
+      updates,
+      "When the stored values are re-projected from the source coefficient: 'none' projects "
+      "exactly once, 'time' re-projects when the simulation time changes, 'solve' additionally "
+      "re-projects whenever solution variables change (e.g. between nonlinear iterations).");
   return params;
 }
 
@@ -46,8 +48,15 @@ MFEMScalarQuadratureFunction::MFEMScalarQuadratureFunction(const InputParameters
 {
   // Zero-initialize the storage; real values are projected lazily on first use.
   _qf = 0.0;
+
+  const auto & updates = getParam<MooseEnum>("updates");
+  const auto update_policy = updates == "none"
+                                 ? MFEMQuadratureFunctionCoefficient::UpdatePolicy::NONE
+                                 : updates == "time"
+                                       ? MFEMQuadratureFunctionCoefficient::UpdatePolicy::TIME
+                                       : MFEMQuadratureFunctionCoefficient::UpdatePolicy::SOLVE;
   getMFEMProblem().getCoefficients().declareScalar<MFEMQuadratureFunctionCoefficient>(
-      name(), getScalarCoefficient("coefficient"), _qf, getParam<bool>("constant"));
+      name(), getScalarCoefficient("coefficient"), _qf, update_policy);
 }
 
 #endif

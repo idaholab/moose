@@ -172,6 +172,11 @@ public:
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
   void setTime(const mfem::real_t time);
 
+  /// Notify quadrature function coefficients that solution variables have changed, marking the
+  /// stored values of those with a SOLVE update policy as stale so their source coefficients
+  /// are re-projected on next use.
+  void invalidateQuadratureFunctions();
+
 private:
   ScalarMap _scalar_coeffs;
   VectorMap _vector_coeffs;

@@ -14,9 +14,9 @@
 
 MFEMQuadratureFunctionCoefficient::MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
                                                                      mfem::QuadratureFunction & qf,
-                                                                     bool constant)
-  : mfem::QuadratureFunctionCoefficient(qf), _source(source), _qf(qf), _constant(constant),
-    _dirty(true)
+                                                                     UpdatePolicy update_policy)
+  : mfem::QuadratureFunctionCoefficient(qf), _source(source), _qf(qf),
+    _update_policy(update_policy), _dirty(true)
 {
 }
 
@@ -24,7 +24,7 @@ void
 MFEMQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
 {
   mfem::Coefficient::SetTime(t);
-  if (!_constant)
+  if (_update_policy != UpdatePolicy::NONE)
     _dirty = true;
 }
 
