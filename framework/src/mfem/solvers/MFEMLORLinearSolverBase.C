@@ -39,7 +39,8 @@ LORLinearSolverBase<MFEMSolverType>::Update()
   {
     if (_lor && GetPreconditioner())
       mooseError("LOR solver cannot take a preconditioner");
-    LORLinearSolverBase<MFEMSolverType>::SetupLOR(*this, *_equation_system);
+    if (_lor)
+      LORLinearSolverBase<MFEMSolverType>::SetupLOR(*this, *_equation_system);
   }  
 }
 
@@ -133,8 +134,6 @@ LORLinearSolverBase<mfem::HypreGMRES>::SetupLOR(LinearSolverBase & solver_base,
     SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
-  if (GetPreconditioner())
-    SetPreconditioner(static_cast<mfem::HypreGMRES &>(GetSolver()));
 }
 
 template <>
@@ -150,8 +149,6 @@ LORLinearSolverBase<mfem::HypreFGMRES>::SetupLOR(LinearSolverBase & solver_base,
     SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
-  if (GetPreconditioner())
-    SetPreconditioner(static_cast<mfem::HypreFGMRES &>(GetSolver()));  
 }
 
 template <>
@@ -167,8 +164,6 @@ LORLinearSolverBase<mfem::HyprePCG>::SetupLOR(LinearSolverBase & solver_base,
     SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
   }
-  if (GetPreconditioner())
-    SetPreconditioner(static_cast<mfem::HyprePCG &>(GetSolver()));  
 }
 
 template <>
