@@ -1960,15 +1960,10 @@ public:
   const Elem * const & msmElem() const { return _msm_elem; }
 
   /**
-   * Indicate that we have p-refinement. This method will perform the following tasks:
-   * - Disable p-refinement as requested by the user with \p disable_p_refinement_for_families
-   * -.Disable p-refinement of Lagrange helper types that we use for getting things like the
-   *   physical locations of quadrature points and JxW. (Don't worry, we still use the element
-   *   p-level when initializing the quadrature rule attached to the Lagrange helper so the number
-   *   of quadrature points reflects the element p-level)
-   * @param disable_p_refinement_for_families Families that we should disable p-refinement for
+   * Prepare helper FEs for p-refinement. The helper FEs are used for physical locations of
+   * quadrature points and JxW, and should not apply element p-levels to their own basis.
    */
-  void havePRefinement(const std::unordered_set<FEFamily> & disable_p_refinement_for_families);
+  void preparePRefinement();
 
   /**
    * Set the current lower dimensional element. This may be null
@@ -2897,8 +2892,8 @@ protected:
   /// storing the dof indices
   std::vector<dof_id_type> _row_indices, _column_indices;
 
-  /// Whether we have ever conducted p-refinement
-  bool _have_p_refinement;
+  /// Whether helper FEs have been prepared for p-refinement
+  bool _prepared_for_p_refinement;
 
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;

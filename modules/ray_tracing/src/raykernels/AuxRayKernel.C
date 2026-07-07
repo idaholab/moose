@@ -38,7 +38,7 @@ AuxRayKernel::AuxRayKernel(const InputParameters & params)
     _aux(_fe_problem.getAuxiliarySystem()),
     _var(*mooseVariable())
 {
-  if (_var.feType() != FEType(CONSTANT, MONOMIAL))
+  if (_var.feType().order != CONSTANT || _var.feType().family != MONOMIAL)
     paramError("variable", "Only CONSTANT MONOMIAL variables are supported");
 
   addMooseVariableDependency(mooseVariable());

@@ -10,9 +10,46 @@
 #include "gtest/gtest.h"
 
 // Moose includes
+#include "InputParameters.h"
+#include "MooseEnum.h"
+#include "MooseUnitUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+
+namespace
+{
+InputParameters
+variableParams(const std::string & order, const std::string & family)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<MooseEnum>("order",
+                             MooseEnum("CONSTANT FIRST SECOND", "FIRST", true),
+                             "Variable order");
+  params.addParam<MooseEnum>(
+      "family", MooseEnum("LAGRANGE MONOMIAL MONOMIAL_VEC HERMITE", "LAGRANGE"), "Variable family");
+  params.addParam<bool>("p_refinement", "Whether to p-refine this FE type");
+  params.addDeprecatedParam<bool>(
+      "disable_p_refinement", "Disable p-refinement", "Use p_refinement instead");
+
+  params.set<MooseEnum>("order") = order;
+  params.set<MooseEnum>("family") = family;
+
+  return params;
+}
+
+void
+expectVariableFEType(const InputParameters & params,
+                     const libMesh::Order order,
+                     const libMesh::FEFamily family,
+                     const bool p_refinement)
+{
+  const auto fe_type = MooseUtils::variableFEType(params);
+  EXPECT_EQ(order, fe_type.order);
+  EXPECT_EQ(family, fe_type.family);
+  EXPECT_EQ(p_refinement, fe_type.p_refinement);
+}
+}
 
 TEST(MooseUtils, camelCaseToUnderscore)
 {
@@ -28,6 +65,50 @@ TEST(MooseUtils, camelCaseToUnderscore)
 
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FOO_BAR"), "foo_bar");
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FoO__BAR"), "fo_o__bar");
+}
+
+TEST(MooseUtils, variableFETypeDefaults)
+{
+  expectVariableFEType(
+      variableParams("CONSTANT", "MONOMIAL"), libMesh::CONSTANT, libMesh::MONOMIAL, false);
+  expectVariableFEType(
+      variableParams("CONSTANT", "MONOMIAL_VEC"), libMesh::CONSTANT, libMesh::MONOMIAL_VEC, false);
+  expectVariableFEType(
+      variableParams("FIRST", "LAGRANGE"), libMesh::FIRST, libMesh::LAGRANGE, false);
+  expectVariableFEType(
+      variableParams("FIRST", "MONOMIAL"), libMesh::FIRST, libMesh::MONOMIAL, true);
+  expectVariableFEType(
+      variableParams("FIRST", "HERMITE"), libMesh::FIRST, libMesh::HERMITE, true);
+}
+
+TEST(MooseUtils, variableFETypePRefinementOverrides)
+{
+  auto params = variableParams("CONSTANT", "MONOMIAL");
+  params.set<bool>("p_refinement") = true;
+  expectVariableFEType(params, libMesh::CONSTANT, libMesh::MONOMIAL, true);
+
+  params = variableParams("FIRST", "HERMITE");
+  params.set<bool>("p_refinement") = false;
+  expectVariableFEType(params, libMesh::FIRST, libMesh::HERMITE, false);
+
+  params = variableParams("FIRST", "HERMITE");
+  params.set<bool>("disable_p_refinement") = true;
+  expectVariableFEType(params, libMesh::FIRST, libMesh::HERMITE, false);
+
+  params = variableParams("CONSTANT", "MONOMIAL");
+  params.set<bool>("disable_p_refinement") = false;
+  expectVariableFEType(params, libMesh::CONSTANT, libMesh::MONOMIAL, true);
+}
+
+TEST(MooseUtils, variableFETypeRejectsConflictingPRefinementParams)
+{
+  auto params = variableParams("CONSTANT", "MONOMIAL");
+  params.set<bool>("p_refinement") = false;
+  params.set<bool>("disable_p_refinement") = true;
+
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { MooseUtils::variableFEType(params); },
+      "Cannot be supplied together with 'p_refinement'");
 }
 
 TEST(MooseUtils, underscoreToCamelCase)

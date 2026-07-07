@@ -268,7 +268,7 @@ SampledOutput::initSample()
         else
         {
           const auto & var_name = source_sys.variable_name(var_num);
-          if (fe_type != FEType(CONSTANT, MONOMIAL))
+          if (fe_type.order != CONSTANT || fe_type.family != MONOMIAL)
           {
             mooseInfoRepeated("Sampled output projects variable '" + var_name +
                               "' onto a constant monomial");
@@ -277,7 +277,8 @@ SampledOutput::initSample()
                            "Projection without serialization may fail with insufficient ghosting. "
                            "Consider setting 'serialize_sampling' to true.");
           }
-          dest_sys.add_variable(var_name, FEType(CONSTANT, MONOMIAL), subdomains);
+          dest_sys.add_variable(
+              var_name, FEType(CONSTANT, MONOMIAL).set_p_refinement(false), subdomains);
         }
         // Note: we could do more, using the generic projector. But exodus output of higher order
         // or more exotic variables is limited anyway

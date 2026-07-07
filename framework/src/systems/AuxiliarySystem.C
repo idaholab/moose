@@ -23,6 +23,7 @@
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
+#include "MooseUtils.h"
 
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
@@ -261,8 +262,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 {
   SystemBase::addVariable(var_type, name, parameters);
 
-  auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_type = MooseUtils::variableFEType(parameters);
 
   if (var_type == "MooseVariableScalar")
     return;

@@ -734,9 +734,7 @@ SystemBase::addVariable(const std::string & var_type,
     blocks.insert(blk_id);
   }
 
-  const auto fe_type =
-      FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_type = MooseUtils::variableFEType(parameters);
   const auto fe_field_type = FEInterface::field_type(fe_type);
 
   unsigned int var_num;

@@ -446,18 +446,14 @@ AdvancedOutput::initAvailableLists()
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        // A note that if we have p-refinement we assume "worst-case" scenario that our constant
-        // monomial/monomial-vec families have been refined and we can no longer write them as
-        // elemental
-        if (type.order == CONSTANT && !_problem_ptr->havePRefinement() &&
-            type.family != MONOMIAL_VEC)
+        if (type.order == CONSTANT && !type.p_refinement && type.family != MONOMIAL_VEC)
           _execute_data["elemental"].available.insert(vname);
         else if (FEInterface::field_type(type) == TYPE_VECTOR)
         {
-          const auto geom_type = ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) &&
-                                  !_problem_ptr->havePRefinement())
-                                     ? "elemental"
-                                     : "nodal";
+          const auto geom_type =
+              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) && !type.p_refinement)
+                  ? "elemental"
+                  : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
@@ -538,12 +534,14 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         if (var.isArray())
           vname = var.arrayVariableComponent(i);
 
-        if (type.order == CONSTANT)
+        if (type.order == CONSTANT && !type.p_refinement && type.family != MONOMIAL_VEC)
           _execute_data["elemental"].show.insert(vname);
         else if (FEInterface::field_type(type) == TYPE_VECTOR)
         {
           const auto geom_type =
-              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
+              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT) && !type.p_refinement)
+                  ? "elemental"
+                  : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:

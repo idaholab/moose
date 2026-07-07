@@ -50,7 +50,7 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
-    _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
+    _flow_fe_type(FEType(CONSTANT, MONOMIAL).set_p_refinement(false)),
     _implicit_time_integration(true),
     _check_jacobian(false),
     _output_vector_velocity(true),
