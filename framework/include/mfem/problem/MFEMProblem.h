@@ -201,6 +201,14 @@ public:
   void addMFEMPreconditioner(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
+
+  /**
+   * Method called in AddMFEMProblemOperatorAction which will create the ProblemOperator builder.
+   */
+  void addMFEMProblemOperator(const std::string & user_object_name,
+                              const std::string & name,
+                              InputParameters & parameters);
+
   /**
    * Override of FEProblemBase::addIndicator. Creates the MFEMIndicator used when setting up
    * adaptive mesh refinement later.
