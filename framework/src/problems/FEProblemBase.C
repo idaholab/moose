@@ -8663,6 +8663,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
+  _app.markMeshChangedForBackup();
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material

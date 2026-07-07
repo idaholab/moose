@@ -185,9 +185,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
   if (!app.getExecutioner())
     return;
 
-  // Only h-refined meshes need an explicit topology backup. Avoid changing
-  // ordinary non-adaptive Backup/restore ownership and teardown paths.
-  if (app.feProblem().mesh().maxHLevel() == 0)
+  if (!app.meshChangedForBackup())
     return;
 
   const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);

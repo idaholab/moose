@@ -750,6 +750,16 @@ public:
   bool restoredInitialBackupMesh() const { return _restored_initial_backup_mesh; }
 
   /**
+   * Mark this app as requiring mesh topology data in its next Backup object.
+   */
+  void markMeshChangedForBackup() { _mesh_changed_for_backup = true; }
+
+  /**
+   * Whether this app requires mesh topology data in its next Backup object.
+   */
+  bool meshChangedForBackup() const { return _mesh_changed_for_backup; }
+
+  /**
    * Restore \p mesh from this app's initial Backup object and consume the mesh checkpoint entries.
    */
   void restoreMeshFromInitialBackup(MooseMesh & mesh);
@@ -1715,6 +1725,9 @@ private:
 
   /// Whether mesh topology has been restored from the initial Backup object.
   bool _restored_initial_backup_mesh = false;
+
+  /// Whether mesh topology has changed and should be included in Backup objects.
+  bool _mesh_changed_for_backup = false;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// The libtorch device this app is using (converted from compute_device)
