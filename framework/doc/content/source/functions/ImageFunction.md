@@ -17,7 +17,7 @@ snow captured using cryospheric micro-CT scanner at the
 ## Setup
 
 To utilize the image reading portion of the phase-field module VTK must be enabled when building
-libMesh. Please see MOOSE [FAQ](faq.md#libmesh-vtk optional=True) for more information.
+libMesh. Please see [help/faq/faq_custom_libmesh_petsc.md] for more information.
 
 ## Examples
 
