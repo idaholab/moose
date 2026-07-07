@@ -141,7 +141,7 @@
   [different_tolerances]
     type = RunApp
     input = 'formatting.i'
-    expect_out = 'conv_one: params-> abs_tol=1e-09 rel_tol=1e-09 nl_rel_step_tol=0 nl_max_funcs=100.*conv_two: params-> abs_tol=1e-05 rel_tol=1e-100 nl_rel_step_tol=0 nl_max_funcs=200'
+    expect_out = 'conv_one: params-> abs_tol=1e-09 rel_tol=1e-100 nl_rel_step_tol=0 nl_max_funcs=100.*conv_two: params-> abs_tol=1e-05 rel_tol=1e-100 nl_rel_step_tol=0 nl_max_funcs=200'
     requirement = 'The system shall be able to use a reference residual to converge to with two separate convergence options, each with different tolerances, and print to screen the relevant parameters for each convergence object.'
   []
   [unscale]

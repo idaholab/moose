@@ -135,6 +135,11 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
       SNESGetTolerances(
           snes, &abs_tol_dummy, &rel_tol_dummy, &rel_step_tol_dummy, &max_its, &max_funcs_dummy));
 
+  // This revert is required to ensure that the relative tolerance modification in the power
+  // iteration in EigenExecutionerBase is respected. Ideally this is not required, and indeed
+  // prevents custom relative tolerances for each convergence object.
+  _nl_rel_tol = rel_tol_dummy;
+
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   PetscBool force_iteration = PETSC_FALSE;
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));

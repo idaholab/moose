@@ -51,7 +51,7 @@ protected:
 
   FEProblemBase & _fe_problem;
   /// Nonlinear absolute tolerance
-  const Real _nl_rel_tol;
+  Real _nl_rel_tol;
   /// Nonlinear relative tolerance
   const Real _nl_abs_tol;
   /// Max residual functions
