@@ -1435,13 +1435,6 @@ MooseApp::errorCheck()
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
 
-  // MultiApps that do not use positions create their subapps during initialSetup(), which the
-  // --check-input path does not run. Create them here so subapp command-line arguments are consumed
-  // before the unused-parameter check below.
-  if ((_executor || _executioner) && !isParamSetByUser("mesh_only"))
-    for (const auto & app : feProblem().getMultiAppWarehouse().getObjects())
-      app->createAppsIfNeeded();
-
   _builder.errorCheck(*_comm, warn, err);
 
   // Return early for mesh only mode, since we want error checking to run even though
@@ -1943,11 +1936,8 @@ MooseApp::collectCitations(std::map<std::string, std::string> & citations) const
   // executioner, so only descend once one exists; nested MultiApps are handled by the recursion.
   if (_executor || _executioner)
     for (const auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
-    {
-      multi_app->createAppsIfNeeded();
       for (const auto i : make_range(multi_app->numLocalApps()))
         multi_app->localApp(i)->collectCitations(citations);
-    }
 }
 
 void
@@ -1960,9 +1950,7 @@ MooseApp::requestCitations()
   // MultiApp subapps are distributed across the MPI ranks, so each rank has collected citations
   // only for the subapps it owns. PETSc prints the citation list from rank 0 alone, so gather every
   // rank's citations onto all ranks; otherwise a module used only by a subapp that lives off rank 0
-  // would be omitted. The map is keyed by BibTeX key (unique per citation), so the union
-  // de-duplicates naturally. The key/text pairs are flattened into one buffer for a single
-  // allgather, which is a no-op on a single process.
+  // would be omitted.
   std::vector<std::string> flattened;
   flattened.reserve(citations.size() * 2);
   for (const auto & [key, bibtex] : citations)
@@ -1972,7 +1960,11 @@ MooseApp::requestCitations()
   }
   _comm->allgather(flattened);
   for (std::size_t i = 0; i + 1 < flattened.size(); i += 2)
-    citations.emplace(flattened[i], flattened[i + 1]);
+  {
+    [[maybe_unused]] const auto [it, inserted] = citations.emplace(flattened[i], flattened[i + 1]);
+    mooseAssert(inserted || it->second == flattened[i + 1],
+                "The same citation key was registered with different BibTeX entries");
+  }
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually

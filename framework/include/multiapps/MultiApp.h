@@ -138,11 +138,6 @@ public:
   void setupPositions();
 
   /**
-   * Creates local apps when they are deferred until initialSetup().
-   */
-  void createAppsIfNeeded();
-
-  /**
    * Create the i-th local app
    * @param[in] i local app index
    */
