@@ -57,7 +57,10 @@ getAvgType(const MooseEnum & avg_type)
   else if (avg_type == "HARMONIC")
     return mfem::FindPointsGSLIB::AvgType::HARMONIC;
   else
-    mooseError("Unknown average type: ", avg_type);
+    mooseError(
+        "Unknown average type: ",
+        avg_type,
+        ", this is an internal MOOSE error, new enum variants must be handled by this function.");
 }
 }
 
