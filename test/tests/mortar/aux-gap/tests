@@ -1,6 +1,6 @@
 [Tests]
   design = WeightedGapAux.md
-  issues = '#20001'
+  issues = '#20001 #30209'
   [gap]
     requirement = 'The system shall be able to compute the gap between secondary and primary bodies using the mortar method and auxiliary kernels'
     [first_order]
@@ -21,6 +21,12 @@
       exodiff = second_order.e
       detail = 'when the gap auxiliary variable and mesh are both second order'
       cli_args = 'Outputs/file_base=second_order AuxVariables/gap/order=SECOND'
+    []
+    [node_face_reinit]
+      type = RunApp
+      input = weighted_gap_aux_node_face_reinit.i
+      capabilities = 'method=dbg'
+      detail = 'after node-face reinitialization'
     []
   []
   [no_constraint]
