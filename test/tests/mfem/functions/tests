@@ -10,4 +10,15 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMScalarQuadratureFunction]
+    type = CSVDiff
+    input = quadrature_function_source.i
+    csvdiff = OutputData/QuadratureFunctionSource.csv
+    design = 'MFEMScalarQuadratureFunction.md'
+    requirement = 'The system shall have the ability to precompute a coefficient at quadrature '
+                  'points and reuse the stored values in place of the original coefficient'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
