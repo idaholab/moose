@@ -48,6 +48,7 @@ MooseLinearVariableFV<OutputType>::validParams()
       "Default gradient computation method to register when a consumer requests gradients from "
       "this variable. This may be a built-in method name like 'green-gauss' or "
       "'green-gauss-venkatakrishnan', or the name of an object in [FVGradientMethods].");
+  params.set<bool>("p_refinement") = false;
   return params;
 }
 
@@ -63,17 +64,15 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
     // auxiliary systems
-    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face_neighbor(
-        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly.template fePhi<OutputShape>(this->_fe_type)),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(this->_fe_type)),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(this->_fe_type)),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(this->_fe_type)),
+    _phi_face_neighbor(this->_assembly.template fePhiFaceNeighbor<OutputShape>(this->_fe_type)),
     _grad_phi_face_neighbor(
-        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(this->_fe_type)),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(this->_fe_type)),
+    _grad_phi_neighbor(this->_assembly.template feGradPhiNeighbor<OutputShape>(this->_fe_type))
 {
   if (!_linear_system && !_auxiliary_system)
     this->paramError("solver_sys",

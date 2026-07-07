@@ -41,7 +41,7 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
     mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
-  if (_var.feType() != FEType(CONSTANT, MONOMIAL))
+  if (_var.feType().order != CONSTANT || _var.feType().family != MONOMIAL)
     paramError("variable",
                "'",
                name(),

@@ -1019,17 +1019,6 @@ public:
   [[nodiscard]] bool doingPRefinement() const;
 
   /**
-   * Query whether p-refinement has been requested at any point during the simulation
-   */
-  [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
-
-  /**
-   * Mark a variable family for either disabling or enabling p-refinement with valid parameters of a
-   * variable
-   */
-  void markFamilyPRefinement(const InputParameters & params);
-
-  /**
    * Set the current lower dimensional element. This can be null
    */
   virtual void setCurrentLowerDElem(const Elem * const lower_d_elem, const THREAD_ID tid);
@@ -1215,14 +1204,6 @@ private:
   std::unordered_map<libMesh::GhostingFunctor *,
                      std::vector<std::shared_ptr<libMesh::GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
-
-  /// Whether p-refinement has been requested at any point during the simulation
-  bool _have_p_refinement;
-
-  /// Indicate whether a family is disabled for p-refinement
-  std::unordered_map<FEFamily, bool> _family_for_p_refinement;
-  /// The set of variable families by default disable p-refinement
-  static const std::unordered_set<FEFamily> _default_families_without_p_refinement;
 
   friend class Restartable;
 };
