@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <exception>
 #include <limits>
 #include <map>
 #include <memory>
@@ -642,6 +643,10 @@ struct SideFacePart3D
 {
   std::vector<dof_id_type> node_ids;
   std::vector<Point> points;
+  bool has_dual_point = false;
+  Point dual_point;
+  bool has_selected_diagonal = false;
+  std::pair<dof_id_type, dof_id_type> selected_diagonal;
 };
 
 // Face centroids
@@ -657,6 +662,15 @@ centroid3D(const std::vector<Point> & points)
     centroid /= points.size();
 
   return centroid;
+}
+
+static Point
+sideFacePartDualPoint3D(const SideFacePart3D & side_face_part)
+{
+  if (side_face_part.has_dual_point)
+    return side_face_part.dual_point;
+
+  return centroid3D(side_face_part.points);
 }
 
 // Remember, in 3d, we have both face-centroids and body-centroids
@@ -721,24 +735,24 @@ projectSideFacePoints3D(const std::vector<Point> & points,
   return true;
 }
 
-static bool
-sideFaceHasReflexVertex3D(const std::vector<Point> & points,
-                          const Real length_tol,
-                          unsigned int * const reflex_index = nullptr)
+static std::vector<unsigned int>
+sideFaceReflexVertexIndices3D(const std::vector<Point> & points, const Real length_tol)
 {
+  std::vector<unsigned int> reflex_indices;
+
   if (points.size() <= 3)
-    return false;
+    return reflex_indices;
 
   std::vector<Point> projected_points;
 
   if (!projectSideFacePoints3D(points, projected_points, length_tol))
-    return false;
+    return reflex_indices;
 
   const Real area_tol = length_tol * length_tol;
   const Real signed_area = polygonSignedArea2D(projected_points);
 
   if (std::abs(signed_area) <= area_tol)
-    return false;
+    return reflex_indices;
 
   for (const auto i : index_range(projected_points))
   {
@@ -754,14 +768,56 @@ sideFaceHasReflexVertex3D(const std::vector<Point> & points,
       continue;
 
     if (cross * signed_area < 0.0)
-    {
-      if (reflex_index)
-        *reflex_index = cast_int<unsigned int>(i);
-      return true;
-    }
+      reflex_indices.push_back(cast_int<unsigned int>(i));
   }
 
-  return false;
+  return reflex_indices;
+}
+
+static bool
+sideFaceHasReflexVertex3D(const std::vector<Point> & points,
+                          const Real length_tol,
+                          unsigned int * const reflex_index = nullptr)
+{
+  const auto reflex_indices = sideFaceReflexVertexIndices3D(points, length_tol);
+
+  if (reflex_indices.empty())
+    return false;
+
+  if (reflex_index)
+    *reflex_index = reflex_indices.front();
+
+  return true;
+}
+
+static Real
+sideFaceNonPlanarity3D(const std::vector<Point> & points, const Real length_tol)
+{
+  if (points.size() <= 3)
+    return 0.0;
+
+  const Real area_tol = length_tol * length_tol;
+
+  for (const auto i : index_range(points))
+    for (const auto j : make_range(i + 1, points.size()))
+      for (const auto k : make_range(j + 1, points.size()))
+      {
+        Point normal = (points[j] - points[i]).cross(points[k] - points[i]);
+
+        if (normal.norm() <= area_tol)
+          continue;
+
+        normal /= normal.norm();
+
+        Real max_distance = 0.0;
+
+        for (const auto & point : points)
+          max_distance = std::max(max_distance, std::abs(normal * (point - points[i])));
+
+        return max_distance;
+      }
+
+  return 0.0;
 }
 
 static bool
@@ -770,123 +826,114 @@ sideFaceIsNonPlanar3D(const std::vector<Point> & points, const Real length_tol)
   if (points.size() <= 3)
     return false;
 
-  const Real area_tol = length_tol * length_tol;
-  Point normal = faceNormal3D(points, area_tol);
-
-  if (normal.norm() <= area_tol)
-    return false;
-
-  normal /= normal.norm();
-
-  const Point center = centroid3D(points);
-
-  for (const auto & point : points)
-    if (std::abs(normal * (point - center)) > length_tol)
-      return true;
-
-  return false;
-}
-
-static void
-addSideFacePart3D(std::vector<SideFacePart3D> & side_face_parts,
-                  const std::vector<dof_id_type> & node_ids,
-                  const std::vector<Point> & points,
-                  const std::array<unsigned int, 3> & point_indices,
-                  const Real length_tol)
-{
-  SideFacePart3D side_face_part;
-
-  for (const auto point_index : point_indices)
-  {
-    side_face_part.node_ids.push_back(node_ids[point_index]);
-    side_face_part.points.push_back(points[point_index]);
-  }
-
-  if (hasNonzeroArea3D(side_face_part.points, length_tol * length_tol))
-    side_face_parts.push_back(std::move(side_face_part));
+  return sideFaceNonPlanarity3D(points, length_tol) > length_tol;
 }
 
 static std::vector<SideFacePart3D>
 sideFaceParts3D(const std::vector<dof_id_type> & node_ids,
                 const std::vector<Point> & points,
-                const Elem & primal_parent_elem,
-                std::map<std::vector<dof_id_type>, std::pair<dof_id_type, dof_id_type>> &
-                    side_face_split_diagonals,
                 const Real length_tol)
 {
   mooseAssert(node_ids.size() == points.size(),
               "Primal side face node ids and points must have matching sizes.");
 
-  const auto originalSideFacePart = [&]()
-  {
-    SideFacePart3D side_face_part;
-    side_face_part.node_ids = node_ids;
-    side_face_part.points = points;
-    return std::vector<SideFacePart3D>{side_face_part};
-  };
+  SideFacePart3D side_face_part;
+  side_face_part.node_ids = node_ids;
+  side_face_part.points = points;
 
   if (points.size() != 4)
-    return originalSideFacePart();
+    return std::vector<SideFacePart3D>{side_face_part};
 
-  const bool has_reflex_vertex = sideFaceHasReflexVertex3D(points, length_tol);
+  const auto reflex_indices = sideFaceReflexVertexIndices3D(points, length_tol);
 
-  if (!has_reflex_vertex && !sideFaceIsNonPlanar3D(points, length_tol))
-    return originalSideFacePart();
+  if (reflex_indices.size() > 1)
+    mooseError("Could not uniquely detect the selected diagonal for a primal QUAD4 side face.");
 
-  std::vector<dof_id_type> side_face_key = node_ids;
-  std::sort(side_face_key.begin(), side_face_key.end());
-
-  const auto diagonal02_key = edgeKey(node_ids[0], node_ids[2]);
-  const auto diagonal13_key = edgeKey(node_ids[1], node_ids[3]);
-  const auto cached_diagonal_it = side_face_split_diagonals.find(side_face_key);
-  bool split_along_diagonal02 = false;
-
-  if (cached_diagonal_it != side_face_split_diagonals.end())
+  if (reflex_indices.size() == 1)
   {
-    if (cached_diagonal_it->second == diagonal02_key)
-      split_along_diagonal02 = true;
-    else if (cached_diagonal_it->second == diagonal13_key)
-      split_along_diagonal02 = false;
+    const auto reflex_index = reflex_indices.front();
+    const auto previous_index = (reflex_index + points.size() - 1) % points.size();
+    const auto next_index = (reflex_index + 1) % points.size();
+    side_face_part.has_selected_diagonal = true;
+    side_face_part.selected_diagonal = edgeKey(node_ids[previous_index], node_ids[next_index]);
+    side_face_part.has_dual_point = true;
+    side_face_part.dual_point = 0.5 * (points[previous_index] + points[next_index]);
+  }
+  else if (sideFaceIsNonPlanar3D(points, length_tol))
+  {
+    // Match libMesh's 3D all_tri() face rule so shared quad faces choose the same diagonal.
+    std::size_t highest_node_index = 0;
+
+    for (const auto i : make_range(std::size_t(1), node_ids.size()))
+      if (node_ids[i] > node_ids[highest_node_index])
+        highest_node_index = i;
+
+    const auto opposite_index = (highest_node_index + 2) % points.size();
+    side_face_part.has_selected_diagonal = true;
+    side_face_part.selected_diagonal =
+        edgeKey(node_ids[highest_node_index], node_ids[opposite_index]);
+    side_face_part.has_dual_point = true;
+    side_face_part.dual_point = 0.5 * (points[highest_node_index] + points[opposite_index]);
+  }
+
+  return std::vector<SideFacePart3D>{side_face_part};
+}
+
+static std::vector<std::vector<Point>>
+sideFacePartTriangles3D(const SideFacePart3D & side_face_part, const Real length_tol)
+{
+  const auto & node_ids = side_face_part.node_ids;
+  const auto & points = side_face_part.points;
+  std::vector<std::vector<Point>> triangles;
+
+  if (points.size() < 3)
+    return triangles;
+
+  const auto addTriangle = [&](const std::array<std::size_t, 3> & point_indices)
+  {
+    std::vector<Point> triangle = {
+        points[point_indices[0]], points[point_indices[1]], points[point_indices[2]]};
+
+    if (hasNonzeroArea3D(triangle, length_tol * length_tol))
+      triangles.push_back(std::move(triangle));
+  };
+
+  if (points.size() == 4 && side_face_part.has_selected_diagonal)
+  {
+    std::array<std::size_t, 2> diagonal_indices = {{points.size(), points.size()}};
+
+    for (const auto i : index_range(node_ids))
+      if (node_ids[i] == side_face_part.selected_diagonal.first)
+        diagonal_indices[0] = i;
+      else if (node_ids[i] == side_face_part.selected_diagonal.second)
+        diagonal_indices[1] = i;
+
+    if (diagonal_indices[0] == points.size() || diagonal_indices[1] == points.size())
+      mooseError("Selected primal QUAD4 diagonal nodes were not found in the side face.");
+
+    if ((diagonal_indices[0] + 2) % points.size() != diagonal_indices[1] &&
+        (diagonal_indices[1] + 2) % points.size() != diagonal_indices[0])
+      mooseError("Selected primal QUAD4 diagonal is not between opposite vertices.");
+
+    if ((diagonal_indices[0] == 0 && diagonal_indices[1] == 2) ||
+        (diagonal_indices[0] == 2 && diagonal_indices[1] == 0))
+    {
+      addTriangle({{0, 1, 2}});
+      addTriangle({{0, 2, 3}});
+    }
     else
-      mooseError("Cached primal quad side face split diagonal is not a diagonal in the current "
-                 "side face ordering.");
-  }
-  else
-  {
-    const Point diagonal02_midpoint = 0.5 * (points[0] + points[2]);
-    const Point diagonal13_midpoint = 0.5 * (points[1] + points[3]);
-    const bool diagonal02_inside =
-        primal_parent_elem.contains_point(diagonal02_midpoint, length_tol);
-    const bool diagonal13_inside =
-        primal_parent_elem.contains_point(diagonal13_midpoint, length_tol);
+    {
+      addTriangle({{1, 2, 3}});
+      addTriangle({{1, 3, 0}});
+    }
 
-    if (diagonal02_inside == diagonal13_inside)
-      mooseError("Could not uniquely choose a split diagonal for detected concave/non-planar "
-                 "primal quad side face using primal parent cell diagonal midpoint containment.");
-
-    split_along_diagonal02 = diagonal02_inside;
-
-    side_face_split_diagonals.emplace(side_face_key,
-                                      split_along_diagonal02 ? diagonal02_key : diagonal13_key);
+    return triangles;
   }
 
-  std::vector<SideFacePart3D> side_face_parts;
+  for (const auto n : make_range(std::size_t(1), points.size() - 1))
+    addTriangle({{0, n, n + 1}});
 
-  if (split_along_diagonal02)
-  {
-    addSideFacePart3D(side_face_parts, node_ids, points, {{0, 1, 2}}, length_tol);
-    addSideFacePart3D(side_face_parts, node_ids, points, {{0, 2, 3}}, length_tol);
-  }
-  else
-  {
-    addSideFacePart3D(side_face_parts, node_ids, points, {{1, 2, 3}}, length_tol);
-    addSideFacePart3D(side_face_parts, node_ids, points, {{1, 3, 0}}, length_tol);
-  }
-
-  if (side_face_parts.size() != 2)
-    mooseError("Could not split detected concave/non-planar primal quad side face.");
-
-  return side_face_parts;
+  return triangles;
 }
 
 /* There are a lot of boolean-returning methods here: They are used to distinguish boundary
@@ -1976,8 +2023,13 @@ surfaceTriangles3D(const std::vector<std::vector<Point>> & side_points,
           break;
         }
 
-        if (hasNonzeroArea3D(triangle, tol))
-          side_triangles.push_back(triangle);
+        if (!hasNonzeroArea3D(triangle, tol))
+        {
+          valid_fan = false;
+          break;
+        }
+
+        side_triangles.push_back(triangle);
       }
 
       if (valid_fan)
@@ -2079,7 +2131,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   std::map<NodeSubdomainKey, std::vector<BoundaryFaceNormal3D>> boundary_node_normals;
   std::map<EdgeSubdomainKey, std::vector<Point>> boundary_edge_normals;
   std::map<SubdomainID, std::vector<std::vector<Point>>> primal_boundary_surface_triangles;
-  std::map<std::vector<dof_id_type>, std::pair<dof_id_type, dof_id_type>> side_face_split_diagonals;
 
   for (const auto & elem : input_mesh->element_ptr_range())
   {
@@ -2106,11 +2157,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         side_points.push_back(side_elem->point(n));
       }
 
-      for (const auto & side_face_part : sideFaceParts3D(side_node_ids,
-                                                         side_points,
-                                                         *elem,
-                                                         side_face_split_diagonals,
-                                                         primal_boundary_length_tol))
+      for (const auto & side_face_part :
+           sideFaceParts3D(side_node_ids, side_points, primal_boundary_length_tol))
       {
         const auto & side_face_points = side_face_part.points;
         Point normal = faceNormal3D(side_face_points);
@@ -2118,7 +2166,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         if (normal.norm() <= 1e-12)
           continue;
 
-        const Point face_centroid = centroid3D(side_face_points);
+        const Point face_centroid = sideFacePartDualPoint3D(side_face_part);
 
         // Make sure face normals are oriented properly
         if (normal * (elem_centroid - face_centroid) > 0.0)
@@ -2127,10 +2175,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         auto & boundary_surface_triangles =
             primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
 
-        for (const auto n : make_range(std::size_t(1), side_face_points.size() - 1))
+        for (auto triangle : sideFacePartTriangles3D(side_face_part, primal_boundary_length_tol))
         {
-          std::vector<Point> triangle = {
-              side_face_points[0], side_face_points[n], side_face_points[n + 1]};
           const Point triangle_normal =
               (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
 
@@ -2801,12 +2847,19 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   };
 
   // Polyhedra that are bad enough need to be tetrahedralized via NetGen
-  const auto addTetrahedralizedPolyhedron =
-      [&](const std::vector<std::vector<Point>> & side_points,
-          const SubdomainID output_subdomain_id) -> std::size_t
+  const auto addTetrahedralizedPolyhedron = [&](const std::vector<std::vector<Point>> & side_points,
+                                                const SubdomainID output_subdomain_id,
+                                                std::string & failure_reason) -> std::size_t
   {
+    failure_reason.clear();
+
+    const auto setFailureReason = [&](const std::string & reason) { failure_reason = reason; };
+
     if (side_points.size() < 4)
+    {
+      setFailureReason("Fewer than four side faces were supplied.");
       return 0;
+    }
 
     const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
     const Real polyhedron_scale = polyhedronScale3D(side_points);
@@ -2818,7 +2871,150 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     { return segmentInsidePrimalBoundary(output_subdomain_id, point0, point1); };
 
     if (!surfaceTriangles3D(side_points, surface_triangles, validSurfaceSegment, length_tol))
+    {
+      setFailureReason(
+          "Could not triangulate the dual polyhedron surface using primal-boundary-valid "
+          "diagonals.");
       return 0;
+    }
+
+    const auto nonPlanarSurfaceFaceSummary = [&]()
+    {
+      std::ostringstream summary;
+      bool found_nonplanar_face = false;
+
+      for (const auto i : index_range(side_points))
+      {
+        if (side_points[i].size() <= 3)
+          continue;
+
+        const Real nonplanarity = sideFaceNonPlanarity3D(side_points[i], length_tol);
+
+        if (nonplanarity <= length_tol)
+          continue;
+
+        if (!found_nonplanar_face)
+        {
+          summary << " Non-planar input surface faces:";
+          found_nonplanar_face = true;
+        }
+        else
+          summary << ";";
+
+        summary << " face " << i << " has " << side_points[i].size()
+                << " points, max off-plane distance " << nonplanarity;
+      }
+
+      return summary.str();
+    };
+
+    const auto surfaceTriangleManifoldSummary = [&]()
+    {
+      struct EdgeUse3D
+      {
+        Point point0;
+        Point point1;
+        std::vector<std::pair<std::size_t, std::size_t>> triangle_edges;
+      };
+
+      std::vector<EdgeUse3D> edge_uses;
+
+      for (const auto triangle_index : index_range(surface_triangles))
+      {
+        const auto & triangle = surface_triangles[triangle_index];
+
+        if (triangle.size() != 3)
+          continue;
+
+        for (const auto edge_index : make_range(std::size_t(0), std::size_t(3)))
+        {
+          const Point & point0 = triangle[edge_index];
+          const Point & point1 = triangle[(edge_index + 1) % 3];
+          auto edge_use_it = std::find_if(
+              edge_uses.begin(),
+              edge_uses.end(),
+              [&](const EdgeUse3D & edge_use)
+              {
+                return sameSegment3D(edge_use.point0, edge_use.point1, point0, point1, length_tol);
+              });
+
+          if (edge_use_it == edge_uses.end())
+          {
+            edge_uses.push_back({point0, point1, {}});
+            edge_use_it = edge_uses.end();
+            --edge_use_it;
+          }
+
+          edge_use_it->triangle_edges.push_back({triangle_index, edge_index});
+        }
+      }
+
+      std::ostringstream details;
+      std::size_t bad_edge_count = 0;
+
+      for (const auto edge_index : index_range(edge_uses))
+      {
+        const auto & edge_use = edge_uses[edge_index];
+
+        if (edge_use.triangle_edges.size() == 2)
+          continue;
+
+        if (bad_edge_count < 8)
+        {
+          details << "\n  surface edge " << edge_index << ": (" << edge_use.point0(0) << ", "
+                  << edge_use.point0(1) << ", " << edge_use.point0(2) << ") to ("
+                  << edge_use.point1(0) << ", " << edge_use.point1(1) << ", " << edge_use.point1(2)
+                  << "), used " << edge_use.triangle_edges.size() << " times";
+
+          for (const auto & triangle_edge : edge_use.triangle_edges)
+            details << "\n    triangle " << triangle_edge.first << ", edge "
+                    << triangle_edge.second;
+
+          details << "\n    input faces with matching edge:";
+          bool found_matching_face_edge = false;
+
+          for (const auto side_index : index_range(side_points))
+            if (faceContainsEdge3D(
+                    side_points[side_index], edge_use.point0, edge_use.point1, length_tol))
+            {
+              details << " " << side_index;
+              found_matching_face_edge = true;
+            }
+
+          if (!found_matching_face_edge)
+            details << " none";
+
+          details << "\n    input faces containing both endpoints:";
+          bool found_endpoint_face = false;
+
+          for (const auto side_index : index_range(side_points))
+            if (faceContainsPoint3D(side_points[side_index], edge_use.point0, length_tol) &&
+                faceContainsPoint3D(side_points[side_index], edge_use.point1, length_tol))
+            {
+              details << " " << side_index;
+              found_endpoint_face = true;
+            }
+
+          if (!found_endpoint_face)
+            details << " none";
+        }
+
+        ++bad_edge_count;
+      }
+
+      if (!bad_edge_count)
+        return std::string();
+
+      std::ostringstream summary;
+      summary << " Surface triangle manifold check: " << surface_triangles.size() << " triangles, "
+              << bad_edge_count << " edges with incidence != 2.";
+      summary << details.str();
+
+      if (bad_edge_count > 8)
+        summary << "\n  omitted " << (bad_edge_count - 8) << " more non-manifold edges.";
+
+      return summary.str();
+    };
 
     const auto addNetgenTetrahedralizedSurface = [&]()
     {
@@ -2856,8 +3052,31 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       netgen.smooth_after_generating() = false;
       netgen.desired_volume() = netgen_desired_volume;
 
-      libmesh_try { netgen.triangulate(); }
-      libmesh_catch(...) { return std::size_t(0); }
+#ifdef LIBMESH_ENABLE_EXCEPTIONS
+      try
+      {
+        netgen.triangulate();
+      }
+      catch (const std::exception & ex)
+      {
+        std::ostringstream reason;
+        reason << "NetGen threw while tetrahedralizing the triangulated surface: " << ex.what()
+               << nonPlanarSurfaceFaceSummary() << surfaceTriangleManifoldSummary();
+        setFailureReason(reason.str());
+        return std::size_t(0);
+      }
+      catch (...)
+      {
+        std::ostringstream reason;
+        reason << "NetGen threw while tetrahedralizing the triangulated surface with an unknown "
+                  "non-std exception."
+               << nonPlanarSurfaceFaceSummary() << surfaceTriangleManifoldSummary();
+        setFailureReason(reason.str());
+        return std::size_t(0);
+      }
+#else
+      netgen.triangulate();
+#endif
 
       std::vector<std::array<Point, 4>> generated_tets;
 
@@ -2877,13 +3096,22 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             (tet_points[0] + tet_points[1] + tet_points[2] + tet_points[3]) / 4.0;
 
         if (!pointInsidePrimalBoundary(output_subdomain_id, tet_center))
+        {
+          std::ostringstream reason;
+          reason << "NetGen tet center outside primal boundary: (" << tet_center(0) << ", "
+                 << tet_center(1) << ", " << tet_center(2) << ")";
+          setFailureReason(reason.str());
           return std::size_t(0);
+        }
 
         generated_tets.push_back(tet_points);
       }
 
       if (generated_tets.empty())
+      {
+        setFailureReason("NetGen produced no non-degenerate Tet4 elements.");
         return std::size_t(0);
+      }
 
       for (const auto & tet_points : generated_tets)
       {
@@ -2909,6 +3137,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
       return generated_tets.size();
 #else
+      setFailureReason("NetGen support is not enabled.");
       return std::size_t(0);
 #endif
     };
@@ -3066,6 +3295,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     const bool concave_edge_search_failed =
         searched_concave_edge && !has_concave_edge && !split_plan;
     const Point & source_point = *input_mesh->node_ptr(source_node_id);
+    std::string netgen_failure_reason;
 
     if (!force_tetrahedralize && !has_concave_edge && !split_plan)
     {
@@ -3130,8 +3360,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           return;
         }
 
-        const std::size_t netgen_elements =
-            addTetrahedralizedPolyhedron(direct_netgen_side_points, output_subdomain_id);
+        const std::size_t netgen_elements = addTetrahedralizedPolyhedron(
+            direct_netgen_side_points, output_subdomain_id, netgen_failure_reason);
 
         if (netgen_elements)
         {
@@ -3149,6 +3379,12 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
     std::map<dof_id_type, Point> rejected_primal_nodes;
     std::map<std::vector<dof_id_type>, std::vector<dof_id_type>> rejected_primal_faces;
+    struct RejectedPrimalQuad4Diagonal
+    {
+      std::vector<dof_id_type> face_node_ids;
+      std::pair<dof_id_type, dof_id_type> selected_diagonal;
+    };
+    std::map<std::vector<dof_id_type>, RejectedPrimalQuad4Diagonal> rejected_primal_quad4_diagonals;
 
     for (const auto * const elem : primal_elems)
       if (elem)
@@ -3168,6 +3404,19 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           auto face_key = face_node_ids;
           std::sort(face_key.begin(), face_key.end());
           rejected_primal_faces.emplace(face_key, face_node_ids);
+
+          std::vector<Point> face_points;
+          face_points.reserve(side_elem->n_vertices());
+
+          for (const auto n : make_range(side_elem->n_vertices()))
+            face_points.push_back(side_elem->point(n));
+
+          for (const auto & side_face_part :
+               sideFaceParts3D(face_node_ids, face_points, primal_boundary_length_tol))
+            if (side_face_part.has_selected_diagonal)
+              rejected_primal_quad4_diagonals.emplace(
+                  face_key,
+                  RejectedPrimalQuad4Diagonal{face_node_ids, side_face_part.selected_diagonal});
         }
       }
 
@@ -3175,6 +3424,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
     rejected_polyhedron_message << "DualMeshGenerator rejected 3D dual polyhedron has "
                                 << rejected_polyhedron_nodes.size() << " unique dual nodes:";
+    if (!netgen_failure_reason.empty())
+      rejected_polyhedron_message << "\nNetGen failure reason: " << netgen_failure_reason;
     for (const auto i : index_range(rejected_polyhedron_nodes))
       rejected_polyhedron_message << "\n  node " << i << ": (" << rejected_polyhedron_nodes[i](0)
                                   << ", " << rejected_polyhedron_nodes[i](1) << ", "
@@ -3212,6 +3463,34 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       rejected_polyhedron_message << "\n  face " << face_index++ << " nodes:";
       for (const auto node_id : primal_face.second)
         rejected_polyhedron_message << " " << node_id;
+    }
+
+    if (!rejected_primal_quad4_diagonals.empty())
+    {
+      rejected_polyhedron_message << "\nPrimal context has "
+                                  << rejected_primal_quad4_diagonals.size()
+                                  << " selected QUAD4 diagonals:";
+      std::size_t diagonal_index = 0;
+      for (const auto & primal_quad4_diagonal : rejected_primal_quad4_diagonals)
+      {
+        const auto & quad4_diagonal = primal_quad4_diagonal.second;
+        rejected_polyhedron_message << "\n  diagonal " << diagonal_index++ << " on face nodes:";
+        for (const auto node_id : quad4_diagonal.face_node_ids)
+          rejected_polyhedron_message << " " << node_id;
+
+        rejected_polyhedron_message
+            << "\n    diagonal nodes: " << quad4_diagonal.selected_diagonal.first << " "
+            << quad4_diagonal.selected_diagonal.second;
+
+        const auto point0_it = rejected_primal_nodes.find(quad4_diagonal.selected_diagonal.first);
+        const auto point1_it = rejected_primal_nodes.find(quad4_diagonal.selected_diagonal.second);
+
+        if (point0_it != rejected_primal_nodes.end() && point1_it != rejected_primal_nodes.end())
+          rejected_polyhedron_message
+              << "\n    diagonal points: (" << point0_it->second(0) << ", " << point0_it->second(1)
+              << ", " << point0_it->second(2) << ") to (" << point1_it->second(0) << ", "
+              << point1_it->second(1) << ", " << point1_it->second(2) << ")";
+      }
     }
 
     mooseInfoRepeated(rejected_polyhedron_message.str());
@@ -3403,15 +3682,12 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
         const bool side_is_preserved = preservedSide(*elem, side);
 
-        for (const auto & side_face_part : sideFaceParts3D(side_node_ids,
-                                                           side_points,
-                                                           *elem,
-                                                           side_face_split_diagonals,
-                                                           primal_boundary_length_tol))
+        for (const auto & side_face_part :
+             sideFaceParts3D(side_node_ids, side_points, primal_boundary_length_tol))
         {
           const auto & current_side_node_ids = side_face_part.node_ids;
           const auto & current_side_points = side_face_part.points;
-          const Point face_centroid = centroid3D(current_side_points);
+          const Point face_centroid = sideFacePartDualPoint3D(side_face_part);
           const auto source_node_it =
               std::find(current_side_node_ids.begin(), current_side_node_ids.end(), source_node_id);
 
