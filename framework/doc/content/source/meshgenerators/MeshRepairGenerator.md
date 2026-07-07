@@ -67,6 +67,16 @@ The operations currently implemented are:
   side** (the 3D analog of absorbing a 2D sliver triangle into its longest-edge neighbor), which becomes a
   `C0Polyhedron`. A wedge with no admissible repair is left in place and reported.
 
+- repairing flat-slab sliver `HEX8` elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A hexahedron is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or if one of its
+  three pairs of opposite faces is separated by less than [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol)
+  times sqrt(face area) (a slab thin in one axis direction). It is repaired by **collapsing that squashed pair of
+  opposite faces together** so the elements on either side of the slab meet; like the wedge collapse this is a
+  sub-tolerance move, committed only if the four connecting side faces are unshared and it inverts or degenerates no
+  neighbor, otherwise the hexahedron is left in place. (A hex thin in more than one direction, or whose collapse would
+  distort a shared side, is left in place and reported.)
+
 - renumbering the nodes and elements to have a contiguous ordering.
 
 - splitting non-convex polygons into convex polygons

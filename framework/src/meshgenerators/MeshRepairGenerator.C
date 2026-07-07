@@ -18,6 +18,7 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_c0polygon.h"
+#include "libmesh/face_polygon.h"
 #include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/cell_polyhedron.h"
 
@@ -63,9 +64,9 @@ MeshRepairGenerator::validParams()
       "polyhedron. A flat PRISM6 (wedge) sliver is collapsed onto its opposite triangular face so "
       "its neighbors meet, while a thin-cross-section wedge is absorbed into the element across "
       "its "
-      "longest quad side. Each repair keeps the mesh conformal, or leaves the sliver in place if "
-      "no "
-      "valid repair exists.");
+      "longest quad side. A flat-slab HEX8 sliver is collapsed along its squashed pair of opposite "
+      "faces. Each repair keeps the mesh conformal, or leaves the sliver in place if no valid "
+      "repair exists.");
   params.addRangeCheckedParam<Real>(
       "sliver_element_area_fraction",
       1e-10,
@@ -83,22 +84,26 @@ MeshRepairGenerator::validParams()
       "TET4, the quad base for a PYRAMID5) as a fraction of sqrt(that face's area). For a PRISM6 "
       "it "
       "flags both a flat wedge (top triangle within this fraction of sqrt(area) of the bottom) and "
-      "a thin-cross-section wedge (a triangle vertex within this fraction of the longest edge).");
+      "a thin-cross-section wedge (a triangle vertex within this fraction of the longest edge). "
+      "For "
+      "a HEX8 it flags a flat slab (a pair of opposite faces within this fraction of sqrt(area) of "
+      "each other).");
   params.addRangeCheckedParam<Real>(
       "sliver_element_volume_fraction",
       1e-10,
       "sliver_element_volume_fraction>=0",
-      "A TET4, PYRAMID5, or PRISM6 whose volume is below this fraction of the mesh bounding-box "
-      "volume is treated as a sliver (set to 0 to disable this test). Only used when "
+      "A TET4, PYRAMID5, PRISM6, or HEX8 whose volume is below this fraction of the mesh "
+      "bounding-box volume is treated as a sliver (set to 0 to disable this test). Only used when "
       "'fix_sliver_elements' is enabled.");
   params.addRangeCheckedParam<Real>(
       "tet_collapse_volume_floor",
       1e-9,
       "tet_collapse_volume_floor>=0",
-      "When repairing a TET4 or flat PRISM6 (wedge) sliver by collapse, a reshaped neighbor is "
-      "rejected (the collapse is not performed) if its volume would drop below this fraction of "
-      "the "
-      "mesh bounding-box volume, to avoid inverting elements or creating new slivers.");
+      "When repairing a TET4, flat PRISM6 (wedge), or flat-slab HEX8 sliver by collapse, a "
+      "reshaped "
+      "neighbor is rejected (the collapse is not performed) if its volume would drop below this "
+      "fraction of the mesh bounding-box volume, to avoid inverting elements or creating new "
+      "slivers.");
 
   params.addParam<bool>(
       "renumber_contiguously",
@@ -166,6 +171,10 @@ MeshRepairGenerator::generate()
   // Repair sliver PRISM6 (wedge) elements by collapse (flat) or absorption (thin blade)
   if (_fix_sliver_elements)
     repairWedgeSlivers(mesh);
+
+  // Repair sliver HEX8 elements by collapsing their squashed pair of opposite faces
+  if (_fix_sliver_elements)
+    repairHexSlivers(mesh);
 
   // Flip orientation of elements to keep positive volumes
   if (_fix_element_orientation)
@@ -1343,6 +1352,130 @@ MeshRepairGenerator::absorbAcrossSharedFace(std::unique_ptr<MeshBase> & mesh,
   return true;
 }
 
+bool
+MeshRepairGenerator::collapseByFaceMerge(
+    std::unique_ptr<MeshBase> & mesh,
+    Elem * sliver,
+    const std::vector<std::pair<Node *, Node *>> & gone_kept,
+    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+    std::unordered_set<dof_id_type> & touched_nodes,
+    const Real invert_floor) const
+{
+  // Substitution gone-node-id -> kept Node*, and the collapse star (all elements at a gone node).
+  // The gone Node pointers are captured by the caller before any mutation: the sliver is in its own
+  // star, so the substitution below overwrites its gone-node slots.
+  std::map<dof_id_type, Node *> sub;
+  std::set<dof_id_type> star;
+  for (const auto & [gn, kn] : gone_kept)
+  {
+    sub[gn->id()] = kn;
+    for (const auto eid : libmesh_map_find(node_to_elems, gn->id()))
+      star.insert(eid);
+  }
+
+  // Do not act if any star element was already modified this pass (keeps repairs node-disjoint)
+  for (const auto eid : star)
+  {
+    const Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    for (const auto i : make_range(e->n_nodes()))
+      if (touched_nodes.count(e->node_id(i)))
+        return false;
+  }
+
+  // Refresh the cached triangulation of a polyhedron/polygon whose nodes have moved
+  auto retriangulate = [](Elem * e)
+  {
+    if (auto * ph = dynamic_cast<libMesh::Polyhedron *>(e))
+      ph->retriangulate();
+    else if (auto * pg = dynamic_cast<libMesh::Polygon *>(e))
+      pg->retriangulate();
+  };
+
+  // Apply the substitution to the star, saving originals so we can roll back if it is invalid
+  std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
+  std::set<Elem *> changed;
+  for (const auto eid : star)
+  {
+    Elem * e = mesh->query_elem_ptr(eid);
+    if (!e)
+      continue;
+    for (const auto n : make_range(e->n_nodes()))
+    {
+      auto it = sub.find(e->node_id(n));
+      if (it != sub.end())
+      {
+        saved.emplace_back(e, n, e->node_ptr(n));
+        e->set_node(n, it->second);
+        changed.insert(e);
+      }
+    }
+  }
+
+  // Validate. A moved polyhedron/polygon is retriangulated so its mapping reflects the new node
+  // positions; retriangulate() throws if the reshaped cell cannot be tetrahedralized (inverted),
+  // which we treat as an invalid collapse. Every other star element (besides the sliver, which is
+  // meant to become degenerate) must stay non-degenerate and keep a positive volume above the
+  // floor.
+  bool ok = true;
+  for (auto * e : changed)
+  {
+    try
+    {
+      retriangulate(e);
+    }
+    catch (const std::exception &)
+    {
+      ok = false;
+      break;
+    }
+  }
+  if (ok)
+    for (const auto eid : star)
+    {
+      Elem * e = mesh->query_elem_ptr(eid);
+      if (!e || e == sliver)
+        continue;
+      std::set<dof_id_type> distinct;
+      for (const auto n : make_range(e->n_nodes()))
+        distinct.insert(e->node_id(n));
+      if (distinct.size() != e->n_nodes() || e->volume() <= invert_floor)
+      {
+        ok = false;
+        break;
+      }
+    }
+  if (!ok)
+  {
+    for (auto & [e, n, orig] : saved)
+      e->set_node(n, orig);
+    for (auto * e : changed)
+      try
+      {
+        retriangulate(e); // restore each moved cell's triangulation to match the restored nodes
+      }
+      catch (const std::exception &)
+      {
+      }
+    return false; // collapse would invert/degenerate a neighbor: leave the sliver in place
+  }
+
+  // Commit: the sliver is now degenerate (each gone node coincides with its kept node); delete it
+  // and the now-orphaned gone nodes, and record the touched nodes so this pass stays node-disjoint.
+  std::vector<Node *> gone_nodes;
+  for (const auto & [gn, kn] : gone_kept)
+  {
+    touched_nodes.insert(gn->id());
+    touched_nodes.insert(kn->id());
+    gone_nodes.push_back(gn);
+  }
+  mesh->delete_elem(sliver);
+  for (auto * g : gone_nodes)
+    mesh->delete_node(g);
+  return true;
+}
+
 void
 MeshRepairGenerator::repairPyramidSlivers(std::unique_ptr<MeshBase> & mesh) const
 {
@@ -1684,87 +1817,16 @@ MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
         // Collapse the top triangle (3,4,5) onto the bottom (0,1,2). Because the wedge is flat, the
         // top nodes are within flap_tol of the bottom plane, so this is a sub-tolerance move and
         // cannot distort the boundary by more than the sliver's own (negligible) thickness; the
-        // bottom triangle and any element below it are left untouched.
-        const std::array<unsigned int, 3> gone{3, 4, 5}, kept{0, 1, 2};
-
-        // Capture the gone nodes now: the wedge is in its own star, so the substitution below
-        // overwrites its gone-node slots and these pointers could no longer be recovered from it.
-        std::array<Node *, 3> gone_nodes{
-            w->node_ptr(gone[0]), w->node_ptr(gone[1]), w->node_ptr(gone[2])};
-
-        // Substitution gone-node-id -> kept Node*, and the collapse star (elements at a gone node)
-        std::map<dof_id_type, Node *> sub;
-        std::set<dof_id_type> star;
-        bool busy = false;
-        for (const auto i : make_range(3u))
+        // bottom triangle and any element below it are left untouched. Capture the gone->kept node
+        // pairs before the merge (the wedge is in its own star, so its slots get overwritten).
+        std::vector<std::pair<Node *, Node *>> gone_kept{{w->node_ptr(3), w->node_ptr(0)},
+                                                         {w->node_ptr(4), w->node_ptr(1)},
+                                                         {w->node_ptr(5), w->node_ptr(2)}};
+        if (collapseByFaceMerge(mesh, w, gone_kept, node_to_elems, touched_nodes, invert_floor))
         {
-          sub[w->node_id(gone[i])] = w->node_ptr(kept[i]);
-          for (const auto eid : libmesh_map_find(node_to_elems, w->node_id(gone[i])))
-          {
-            const Elem * e = mesh->query_elem_ptr(eid);
-            if (e && touches_repaired(*e))
-              busy = true;
-            star.insert(eid);
-          }
+          ++num_repaired;
+          repaired_in_pass = true;
         }
-        if (busy)
-          continue;
-
-        // Apply the substitution to the star, saving originals so we can roll back if it is invalid
-        std::vector<std::tuple<Elem *, unsigned int, Node *>> saved;
-        for (const auto eid : star)
-        {
-          Elem * e = mesh->query_elem_ptr(eid);
-          if (!e)
-            continue;
-          for (const auto n : make_range(e->n_nodes()))
-          {
-            auto it = sub.find(e->node_id(n));
-            if (it != sub.end())
-            {
-              saved.emplace_back(e, n, e->node_ptr(n));
-              e->set_node(n, it->second);
-            }
-          }
-        }
-
-        // Validate: every star element other than the wedge itself must stay non-degenerate (no
-        // repeated node) and keep a positive volume above the floor (no inversion / new sliver).
-        bool ok = true;
-        for (const auto eid : star)
-        {
-          Elem * e = mesh->query_elem_ptr(eid);
-          if (!e || e == w)
-            continue;
-          std::set<dof_id_type> distinct;
-          for (const auto n : make_range(e->n_nodes()))
-            distinct.insert(e->node_id(n));
-          if (distinct.size() != e->n_nodes() || e->volume() <= invert_floor)
-          {
-            ok = false;
-            break;
-          }
-        }
-        if (!ok)
-        {
-          for (auto & [e, n, orig] : saved)
-            e->set_node(n, orig);
-          continue; // collapse would invert/degenerate a neighbor: leave the wedge in place
-        }
-
-        // Commit: the wedge is now degenerate (its top and bottom nodes coincide); delete it, and
-        // delete the now-orphaned gone nodes. Record the kept nodes as touched so this pass does
-        // not also modify an element adjacent to the freshly collapsed region.
-        for (const auto i : make_range(3u))
-        {
-          touched_nodes.insert(gone_nodes[i]->id());
-          touched_nodes.insert(w->node_id(kept[i]));
-        }
-        mesh->delete_elem(w);
-        for (auto * g : gone_nodes)
-          mesh->delete_node(g);
-        ++num_repaired;
-        repaired_in_pass = true;
       }
     }
   }
@@ -1781,6 +1843,164 @@ MeshRepairGenerator::repairWedgeSlivers(std::unique_ptr<MeshBase> & mesh) const
     _console << "Number of wedge sliver elements repaired: " << num_repaired << std::endl;
     if (num_skipped)
       _console << "Number of wedge slivers that could not be repaired (left in place): "
+               << num_skipped << std::endl;
+  }
+}
+
+void
+MeshRepairGenerator::repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const
+{
+  // Bounding-box volume scale and floors
+  const auto bbox = MeshTools::create_bounding_box(*mesh);
+  const Point ext = bbox.max() - bbox.min();
+  const Real vol_scale = std::max(std::abs(ext(0) * ext(1) * ext(2)), Real(1e-30));
+  const Real vol_thresh = vol_scale * _sliver_volume_tol;
+  const Real invert_floor = vol_scale * _tet_collapse_volume_floor;
+
+  auto quadKey = [](dof_id_type a, dof_id_type b, dof_id_type c, dof_id_type d)
+  {
+    std::array<dof_id_type, 4> f{a, b, c, d};
+    std::sort(f.begin(), f.end());
+    return f;
+  };
+
+  // The three pairs of opposite faces of a HEX8. corr lists the four connecting edges as
+  // {cap-A local node, cap-B local node} flattened (a0,b0,a1,b1,...); the collapse merges cap A
+  // onto cap B. connecting holds the four side faces that are neither cap (they degenerate on
+  // collapse, so they must be unshared).
+  struct HexPair
+  {
+    std::array<unsigned int, 8> corr;
+    std::array<unsigned int, 4> connecting;
+  };
+  static const std::array<HexPair, 3> hex_pairs = {{
+      {{{0, 4, 1, 5, 2, 6, 3, 7}}, {{1, 2, 3, 4}}}, // sides 0 & 5
+      {{{0, 3, 1, 2, 5, 6, 4, 7}}, {{0, 2, 4, 5}}}, // sides 1 & 3
+      {{{1, 0, 2, 3, 6, 7, 5, 4}}, {{0, 1, 3, 5}}}, // sides 2 & 4
+  }};
+
+  // Index of the most-squashed opposite-face pair if the hex is a flat-slab sliver, else -1
+  auto squashedPair = [&](const Elem & e) -> int
+  {
+    if (e.type() != HEX8)
+      return -1;
+    int best = 0;
+    Real best_sep = std::numeric_limits<Real>::max();
+    for (const auto p : index_range(hex_pairs))
+    {
+      const auto & c = hex_pairs[p].corr;
+      Real sep = 0;
+      for (const auto i : make_range(4u))
+        sep += (e.point(c[2 * i + 1]) - e.point(c[2 * i])).norm();
+      sep *= 0.25;
+      if (sep < best_sep)
+      {
+        best_sep = sep;
+        best = cast_int<int>(p);
+      }
+    }
+    // Cap-A area scale (the four corr[2i] nodes), via two triangles
+    const auto & c = hex_pairs[best].corr;
+    const Point a0 = e.point(c[0]), a1 = e.point(c[2]), a2 = e.point(c[4]), a3 = e.point(c[6]);
+    const Real area = 0.5 * ((a1 - a0).cross(a2 - a0).norm() + (a2 - a0).cross(a3 - a0).norm());
+    const bool small_vol = _sliver_volume_tol > 0 && std::abs(e.volume()) < vol_thresh;
+    const bool flat =
+        _sliver_flap_tol > 0 && area > 0 && best_sep < _sliver_flap_tol * std::sqrt(area);
+    return (flat || small_vol) ? best : -1;
+  };
+
+  std::size_t num_repaired = 0;
+  std::size_t num_skipped = 0;
+
+  bool repaired_in_pass = true;
+  while (repaired_in_pass)
+  {
+    repaired_in_pass = false;
+
+    // quad-face key -> 3D elements using it (to tell whether a connecting side is shared); and
+    // node -> incident elements (the collapse star)
+    std::map<std::array<dof_id_type, 4>, std::vector<dof_id_type>> quad_to_elems;
+    std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems;
+    std::vector<dof_id_type> sliver_ids;
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      for (const auto n : make_range(elem->n_nodes()))
+        node_to_elems[elem->node_id(n)].push_back(elem->id());
+      if (elem->dim() == 3)
+        for (const auto s : make_range(elem->n_sides()))
+        {
+          const auto ns = elem->nodes_on_side(s);
+          if (ns.size() == 4)
+            quad_to_elems[quadKey(elem->node_id(ns[0]),
+                                  elem->node_id(ns[1]),
+                                  elem->node_id(ns[2]),
+                                  elem->node_id(ns[3]))]
+                .push_back(elem->id());
+        }
+      if (squashedPair(*elem) >= 0)
+        sliver_ids.push_back(elem->id());
+    }
+
+    std::unordered_set<dof_id_type> touched_nodes;
+    auto touches_repaired = [&touched_nodes](const Elem & e)
+    {
+      for (const auto i : make_range(e.n_nodes()))
+        if (touched_nodes.count(e.node_id(i)))
+          return true;
+      return false;
+    };
+
+    for (const auto sid : sliver_ids)
+    {
+      Elem * h = mesh->query_elem_ptr(sid);
+      if (!h || h->type() != HEX8 || touches_repaired(*h))
+        continue;
+      const int p = squashedPair(*h);
+      if (p < 0)
+        continue;
+      const auto & hp = hex_pairs[p];
+
+      // Each connecting side face must be unshared, otherwise the collapse would degenerate the
+      // neighbor across it (the thin face shrinks to an edge).
+      bool side_shared = false;
+      for (const auto s : hp.connecting)
+      {
+        const auto qn = h->nodes_on_side(s);
+        if (libmesh_map_find(
+                quad_to_elems,
+                quadKey(h->node_id(qn[0]), h->node_id(qn[1]), h->node_id(qn[2]), h->node_id(qn[3])))
+                .size() > 1)
+          side_shared = true;
+      }
+      if (side_shared)
+        continue;
+
+      // Collapse cap A onto cap B; the move is sub-flap-tolerance (the slab thickness), so it
+      // cannot distort the boundary by more than the sliver's own thickness. Capture the gone->kept
+      // node pairs before the merge (the hex is in its own star, so its slots get overwritten).
+      std::vector<std::pair<Node *, Node *>> gone_kept;
+      for (const auto i : make_range(4u))
+        gone_kept.emplace_back(h->node_ptr(hp.corr[2 * i]), h->node_ptr(hp.corr[2 * i + 1]));
+      if (collapseByFaceMerge(mesh, h, gone_kept, node_to_elems, touched_nodes, invert_floor))
+      {
+        ++num_repaired;
+        repaired_in_pass = true;
+      }
+    }
+  }
+
+  // Count any hexahedral slivers that remain (no sufficiently squashed pair with a valid collapse)
+  for (const auto & elem : mesh->active_element_ptr_range())
+    if (elem->type() == HEX8 && squashedPair(*elem) >= 0)
+      ++num_skipped;
+
+  if (num_repaired)
+    mesh->prepare_for_use();
+  if (num_repaired || num_skipped)
+  {
+    _console << "Number of hexahedral sliver elements repaired: " << num_repaired << std::endl;
+    if (num_skipped)
+      _console << "Number of hexahedral slivers that could not be repaired (left in place): "
                << num_skipped << std::endl;
   }
 }
