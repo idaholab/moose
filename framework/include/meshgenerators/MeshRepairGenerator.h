@@ -12,7 +12,9 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 /**
@@ -125,4 +127,26 @@ private:
                               Elem * neighbor,
                               const std::vector<dof_id_type> & shared_key,
                               std::unordered_set<dof_id_type> & touched_nodes) const;
+
+  /// @brief Collapse a sliver element by merging each @p gone_kept node pair (moving the first node
+  ///        onto the second), e.g. one flat cap face of a wedge or hexahedron onto its opposite.
+  ///        The sliver is deleted and its neighbors stay valid: the merge is committed only if it
+  ///        leaves every other element in the collapse star non-degenerate and non-inverted (volume
+  ///        above @p invert_floor), otherwise the mesh is left unchanged. The caller is responsible
+  ///        for capturing the gone node pointers up front and for ensuring the connecting side faces
+  ///        are unshared. Returns true and records the affected nodes in @p touched_nodes on commit.
+  bool collapseByFaceMerge(
+      std::unique_ptr<MeshBase> & mesh,
+      Elem * sliver,
+      const std::vector<std::pair<Node *, Node *>> & gone_kept,
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elems,
+      std::unordered_set<dof_id_type> & touched_nodes,
+      Real invert_floor) const;
+
+  /// @brief Repair sliver (near-degenerate, flat-slab) HEX8 elements by collapsing the squashed
+  ///        pair of opposite faces together so the elements on either side meet. A hex is left in
+  ///        place if no pair is sufficiently squashed, a connecting side face is shared, or the
+  ///        collapse would invert/degenerate a neighbor.
+  /// @param mesh the mesh to modify
+  void repairHexSlivers(std::unique_ptr<MeshBase> & mesh) const;
 };
