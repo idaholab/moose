@@ -104,21 +104,21 @@ LeadLithiumFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
 Real
 LeadLithiumFluidProperties::c_from_p_T(Real /*p*/, Real T) const
 {
-  return 1876 - 0.306 * T;
+  return 1876 - 0.306 * (T - 273.15);
 }
 
 Real
 LeadLithiumFluidProperties::c_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
-  return 1876 - 0.306 * T;
+  return 1876 - 0.306 * (T - 273.15);
 }
 
 ADReal
 LeadLithiumFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
 {
   ADReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
-  return 1876 - 0.306 * T;
+  return 1876 - 0.306 * (T - 273.15);
 }
 
 Real
@@ -231,7 +231,7 @@ LeadLithiumFluidProperties::k_from_v_e(Real v, Real e) const
   Real T = T_from_v_e(v, e);
   if (T < _T_mo || T > 873)
     flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
-  return 14.51 + 1.9631e-2 * T;
+  return 14.51 + 1.9631e-2 * (T - 273.15);
 }
 
 void
@@ -394,7 +394,7 @@ LeadLithiumFluidProperties::k_from_p_T(Real /*p*/, Real T) const
 {
   if (T < _T_mo || T > 873)
     flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
-  return 14.51 + 1.9631e-2 * T;
+  return 14.51 + 1.9631e-2 * (T - 273.15);
 }
 
 void
