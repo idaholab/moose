@@ -102,7 +102,7 @@
     type = ParsedFunction
     expression = 'exp(-2.0 *(x^2 + y^2 + z^2)/(beam_radii^2))'
     symbol_names = 'beam_radii'
-    symbol_values = '.025'
+    symbol_values = '0.1'
   []
 []
 
