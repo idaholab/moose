@@ -43,6 +43,10 @@ public:
   template <typename MFEMSolverType>
   void SetupLOR(LinearSolverBase & solver, Moose::MFEM::EquationSystem & equation_system);
 
+  /// Update LOR solver following changes to the EquationSystem
+  template <typename MFEMSolverType>
+  void Update(LinearSolverBase & solver, Moose::MFEM::EquationSystem & equation_system);
+
 protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const;
@@ -54,7 +58,7 @@ protected:
   mfem::Array<int> _ess_tdofs;
 };
 
-// Template specializations required for LOR solvers for Hypre iterative solvers that lack default
+// Template specializations required for LOR wrappers for Hypre iterative solvers that lack default
 // constructors
 template <>
 void LORInterface::SetupLOR<mfem::HypreGMRES>(LinearSolverBase & solver_base,
