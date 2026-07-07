@@ -12,6 +12,7 @@
 #include "MultiAppTransfer.h"
 
 class SubChannelMesh;
+class FEProblemBase;
 
 /**
  * Transfers subchannel and pin solutions from a SubChannel mesh onto a visualization mesh
@@ -28,6 +29,7 @@ protected:
   void transferToMultiApps();
   void transferVarsToApp(unsigned int app_idx);
   void transferNodalVars(unsigned int app_idx);
+  void validateVariableLocations(const SubChannelMesh & from_mesh, FEProblemBase & to_problem);
   Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node);
 
   /// Variable names to transfer
