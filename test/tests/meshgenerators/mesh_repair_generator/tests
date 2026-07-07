@@ -257,4 +257,28 @@
     requirement = "The system shall leave a sliver wedge in place, rather than corrupting the mesh, when no valid repair exists (no element across its longest quad side)."
     mesh_mode = 'replicated'
   []
+  [repair_hex_sliver]
+    type = RunApp
+    input = repair_hex_sliver.i
+    expect_out = 'hexahedral sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat-slab sliver hexahedron by collapsing its squashed pair of opposite faces together, so the elements on either side meet, keeping a valid conformal mesh."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_sliver_xsquashed]
+    type = RunApp
+    input = repair_hex_sliver_xsquashed.i
+    expect_out = 'hexahedral sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall identify which of a hexahedron's three opposite-face pairs is squashed and collapse that pair, for a slab thin in any axis direction."
+    mesh_mode = 'replicated'
+  []
+  [repair_hex_sliver_pyramids]
+    type = RunApp
+    input = repair_hex_sliver_pyramids.i
+    expect_out = 'hexahedral sliver elements repaired: 1'
+    issues = '#33151'
+    requirement = "The system shall repair a flat-slab sliver hexahedron whose squashed faces are shared with non-hexahedral (pyramid) neighbors, keeping the mesh conformal."
+    mesh_mode = 'replicated'
+  []
 []
