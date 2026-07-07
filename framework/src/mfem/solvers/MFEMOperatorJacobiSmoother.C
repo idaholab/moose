@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
 InputParameters
 MFEMOperatorJacobiSmoother::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
   params.addParam<double>(
       "damping",
@@ -28,16 +28,15 @@ MFEMOperatorJacobiSmoother::validParams()
 }
 
 MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>(parameters)
 {
   ConstructSolver();
 }
 
 void
-MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::Solver & solver)
+MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::OperatorJacobiSmoother & solver)
 {
-  auto & mfem_solver = static_cast<mfem::OperatorJacobiSmoother &>(solver);
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 void
@@ -53,7 +52,7 @@ MFEMOperatorJacobiSmoother::Update()
 {
   Moose::MFEM::LinearSolverBase::Update();
   if (_lor)
-    LORInterface::SetupLOR<mfem::OperatorJacobiSmoother>(*this, *_equation_system);
+    Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::SetupLOR(*this, *_equation_system);
 }
 
 #endif

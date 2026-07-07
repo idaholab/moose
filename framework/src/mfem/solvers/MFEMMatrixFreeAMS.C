@@ -50,7 +50,7 @@ MatrixFreeAMS::SetOperator(const mfem::Operator & op)
 InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<Moose::MFEM::MatrixFreeAMS>::validParams();
   params.addClassDescription("MFEM matrix-free auxiliary-space Maxwell preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMScalarCoefficientName>(
@@ -72,8 +72,7 @@ MFEMMatrixFreeAMS::validParams()
 }
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
-    Moose::MFEM::LORInterface(parameters),
+  : Moose::MFEM::LORLinearSolverBase<Moose::MFEM::MatrixFreeAMS>(parameters),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
     _beta_coef(getScalarCoefficient("beta_coefficient")),
     _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),
@@ -83,10 +82,9 @@ MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
 }
 
 void
-MFEMMatrixFreeAMS::SetSolverParameters(mfem::Solver & solver)
+MFEMMatrixFreeAMS::SetSolverParameters(Moose::MFEM::MatrixFreeAMS & solver)
 {
-  auto & mfem_solver = static_cast<Moose::MFEM::MatrixFreeAMS &>(solver);
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 void
@@ -101,7 +99,7 @@ MFEMMatrixFreeAMS::ConstructSolver()
 void
 MFEMMatrixFreeAMS::Update()
 {
-  LORInterface::SetupLOR(*_equation_system);
+  Moose::MFEM::LORLinearSolverBase<Moose::MFEM::MatrixFreeAMS>::SetupLOR(*_equation_system);
   // update the pointer to the bilinear form representing the curl-curl problem being
   // preconditioned
   auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);

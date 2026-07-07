@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::GMRESSolver.
  */
-class MFEMGMRESSolver : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMGMRESSolver : public Moose::MFEM::LORLinearSolverBase<mfem::GMRESSolver>
 {
 public:
   static InputParameters validParams();
@@ -24,12 +24,10 @@ public:
   MFEMGMRESSolver(const InputParameters & parameters);
 
   /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::Solver & solver) override;
-
-  void Update() override;
+  virtual void SetSolverParameters(mfem::GMRESSolver & solver) override;
 
 protected:
-  void ConstructSolver() override;
+  void ConstructSolver() override;  
 };
 
 #endif

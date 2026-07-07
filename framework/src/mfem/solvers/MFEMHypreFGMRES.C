@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreFGMRES);
 InputParameters
 MFEMHypreFGMRES::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreFGMRES>::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the flexible generalized minimal residual method.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
@@ -30,20 +30,19 @@ MFEMHypreFGMRES::validParams()
 }
 
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::HypreFGMRES>(parameters)
 {
   ConstructSolver();
 }
 
 void
-MFEMHypreFGMRES::SetSolverParameters(mfem::Solver & solver)
+MFEMHypreFGMRES::SetSolverParameters(mfem::HypreFGMRES & solver)
 {
-  auto & mfem_solver = static_cast<mfem::HypreFGMRES &>(solver);
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
-  mfem_solver.SetTol(getParam<mfem::real_t>("l_tol"));
-  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
-  mfem_solver.SetKDim(getParam<int>("kdim"));
-  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetKDim(getParam<int>("kdim"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
@@ -53,13 +52,6 @@ MFEMHypreFGMRES::ConstructSolver()
   SetSolverParameters(*solver);
   SetPreconditioner(*solver);
   _solver = std::move(solver);
-}
-
-void
-MFEMHypreFGMRES::Update()
-{
-  Moose::MFEM::LinearSolverBase::Update();
-  LORInterface::Update<mfem::HypreFGMRES>(*this, *_equation_system);
 }
 
 #endif

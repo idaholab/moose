@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMCGSolver);
 InputParameters
 MFEMCGSolver::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::CGSolver>::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the conjugate gradient method.");
   params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
@@ -31,20 +31,19 @@ MFEMCGSolver::validParams()
 }
 
 MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::CGSolver>(parameters)
 {
   ConstructSolver();
 }
 
 void
-MFEMCGSolver::SetSolverParameters(mfem::Solver & solver)
+MFEMCGSolver::SetSolverParameters(mfem::CGSolver & solver)
 {
-  auto & mfem_solver = static_cast<mfem::CGSolver &>(solver);
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
-  mfem_solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
-  mfem_solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
-  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
@@ -54,13 +53,6 @@ MFEMCGSolver::ConstructSolver()
   SetSolverParameters(*solver);
   SetPreconditioner(*solver);
   _solver = std::move(solver);
-}
-
-void 
-MFEMCGSolver::Update()
-{
-  Moose::MFEM::LinearSolverBase::Update();
-  LORInterface::Update<mfem::CGSolver>(*this, *_equation_system);
 }
 
 #endif
