@@ -189,9 +189,7 @@ FEProblemSolve::validParams()
       "otherwise the vector must match the number/order of systems being solved.");
   params.addParam<ConvergenceName>(
       "multi_system_fixed_point_convergence",
-      "Convergence object to determine the convergence of the multi-system fixed point iteration. "
-      "If unspecified, defaults to checking that every system is converged (based on their own "
-      "convergence criterion)");
+      "Convergence object to determine the convergence of the multi-system fixed point iteration.");
 
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
@@ -479,8 +477,6 @@ FEProblemSolve::solve()
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
-    // Use a convergence object if provided, if not, use a reasonable default of every nested system
-    // being converged
     num_fp_multisys_iters = 0;
     converged = false;
     while (!converged)
@@ -554,10 +550,10 @@ FEProblemSolve::solve()
         converged = true;
       else
       {
-        converged = _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-                    Convergence::MooseConvergenceStatus::CONVERGED;
-        if (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-            Convergence::MooseConvergenceStatus::DIVERGED)
+        const auto convergence_status =
+            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters);
+        converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
+        if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
           break;
       }
       num_fp_multisys_iters++;
@@ -567,9 +563,5 @@ FEProblemSolve::solve()
       _problem.uniformRefine();
   }
 
-  if (_multi_sys_fp_convergence)
-    return (_multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters) ==
-            Convergence::MooseConvergenceStatus::CONVERGED);
-  else
-    return converged;
+  return converged;
 }
