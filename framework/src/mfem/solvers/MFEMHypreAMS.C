@@ -31,8 +31,7 @@ MFEMHypreAMS::validParams()
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
-    Moose::MFEM::LORInterface(parameters),
+  : Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
@@ -40,13 +39,12 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreAMS::SetSolverParameters(mfem::Solver & solver)
+MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
 {
-  auto & mfem_solver = static_cast<mfem::HypreAMS &>(solver);
   if (getParam<bool>("singular"))
-    mfem_solver.SetSingularProblem();
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
-  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
+    solver.SetSingularProblem();
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
@@ -66,7 +64,7 @@ MFEMHypreAMS::Update()
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");
-    LORInterface::SetupLOR<mfem::HypreAMS>(*this, *_equation_system);
+    Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>::SetupLOR(*this, *_equation_system);
   }
 }
 

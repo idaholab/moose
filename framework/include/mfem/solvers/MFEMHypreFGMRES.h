@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::HypreFGMRES solver.
  */
-class MFEMHypreFGMRES : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMHypreFGMRES : public Moose::MFEM::LORLinearSolverBase<mfem::HypreFGMRES>
 {
 public:
   static InputParameters validParams();
@@ -24,9 +24,7 @@ public:
   MFEMHypreFGMRES(const InputParameters & parameters);
 
   /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::Solver & solver) override;
-
-  void Update() override;
+  virtual void SetSolverParameters(mfem::HypreFGMRES & solver) override;
   
 protected:
   void ConstructSolver() override;

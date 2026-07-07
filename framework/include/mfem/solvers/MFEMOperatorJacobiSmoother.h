@@ -11,13 +11,12 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::OperatorJacobiSmoother solver.
  */
-class MFEMOperatorJacobiSmoother : public Moose::MFEM::LinearSolverBase,
-                                   public Moose::MFEM::LORInterface
+class MFEMOperatorJacobiSmoother : public Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>
 {
 public:
   static InputParameters validParams();
@@ -25,7 +24,7 @@ public:
   MFEMOperatorJacobiSmoother(const InputParameters & parameters);
 
   /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::Solver & solver) override;
+  virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
 
   void Update() override;
 

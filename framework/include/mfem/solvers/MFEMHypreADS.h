@@ -17,7 +17,7 @@
 /**
  * Wrapper for mfem::HypreADS solver.
  */
-class MFEMHypreADS : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMHypreADS : public Moose::MFEM::LORLinearSolverBase<mfem::HypreADS>
 {
 public:
   static InputParameters validParams();
@@ -25,7 +25,7 @@ public:
   MFEMHypreADS(const InputParameters &);
 
   /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::Solver & solver) override;
+  virtual void SetSolverParameters(mfem::HypreADS & solver) override;
 
   void Update() override;
 

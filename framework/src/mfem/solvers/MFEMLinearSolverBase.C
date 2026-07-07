@@ -19,7 +19,6 @@ InputParameters
 LinearSolverBase::validParams()
 {
   InputParameters params = SolverBase::validParams();
-  params += LORInterface::validParams();
   params.addClassDescription(
       "Base class for defining linear mfem::Solver derived classes for Moose.");
   return params;

@@ -31,20 +31,9 @@ MFEMGMRESSolver::validParams()
 }
 
 MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters), Moose::MFEM::LORInterface(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::GMRESSolver>(parameters)
 {
   ConstructSolver();
-}
-
-void
-MFEMGMRESSolver::SetSolverParameters(mfem::Solver & solver)
-{
-  auto & mfem_solver = static_cast<mfem::GMRESSolver &>(solver);
-  mfem_solver.iterative_mode = getParam<bool>("use_initial_guess");
-  mfem_solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
-  mfem_solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  mfem_solver.SetMaxIter(getParam<int>("l_max_its"));
-  mfem_solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
@@ -56,11 +45,14 @@ MFEMGMRESSolver::ConstructSolver()
   _solver = std::move(solver);
 }
 
-void 
-MFEMGMRESSolver::Update()
+void
+MFEMGMRESSolver::SetSolverParameters(mfem::GMRESSolver & solver)
 {
-  Moose::MFEM::LinearSolverBase::Update();
-  LORInterface::Update<mfem::GMRESSolver>(*this, *_equation_system);
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 #endif

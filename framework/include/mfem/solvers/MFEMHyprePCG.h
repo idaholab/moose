@@ -16,7 +16,7 @@
 /**
  * Wrapper for mfem::HyprePCG solver.
  */
-class MFEMHyprePCG : public Moose::MFEM::LinearSolverBase, public Moose::MFEM::LORInterface
+class MFEMHyprePCG : public Moose::MFEM::LORLinearSolverBase<mfem::HyprePCG>
 {
 public:
   static InputParameters validParams();
@@ -24,9 +24,7 @@ public:
   MFEMHyprePCG(const InputParameters & parameters);
 
   /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::Solver & solver) override;
-
-  void Update() override;
+  virtual void SetSolverParameters(mfem::HyprePCG & solver) override;
 
 protected:
   void ConstructSolver() override;
