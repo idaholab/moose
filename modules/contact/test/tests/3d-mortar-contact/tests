@@ -70,6 +70,40 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-action-minimum-projection-angle]
+    issues = '#33282'
+    requirement = 'The system shall accept a nondefault 3D mortar minimum projection angle through '
+                  'the contact action for'
+    [petrov-galerkin]
+      type = 'RunApp'
+      input = 'frictionless-mortar-3d-action.i'
+      check_input = true
+      recover = false # check_input does not advance a timestep
+      restep = false # check_input does not advance a timestep
+      cli_args = 'Contact/mortar/use_petrov_galerkin=true '
+                 'Contact/mortar/minimum_projection_angle=35 '
+                 'Contact/mortar/segment_quadrature=fifth '
+                 'Outputs/file_base=frictionless-mortar-3d-minimum-projection-angle-pg-action_out'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'a 3D mortar formulation using dual mortar, the Petrov-Galerkin approach, and '
+               'fifth-order segment quadrature, and'
+      valgrind = 'none'
+    []
+    [penalty]
+      type = 'RunApp'
+      input = 'frictionless-mortar-3d-action.i'
+      check_input = true
+      recover = false # check_input does not advance a timestep
+      restep = false # check_input does not advance a timestep
+      cli_args = 'Contact/mortar/formulation=mortar_penalty '
+                 'Contact/mortar/minimum_projection_angle=35 '
+                 'Postprocessors/active="" VectorPostprocessors/active="" '
+                 'Outputs/file_base=frictionless-mortar-3d-minimum-projection-angle-penalty-action_out'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'a 3D mortar-penalty formulation.'
+      valgrind = 'none'
+    []
+  []
   [frictionless-mortar-3d-action-lm-space]
     requirement = 'The system shall support the contact action Lagrange multiplier space option '
                   'for 3D mortar contact'
@@ -140,6 +174,7 @@
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       valgrind = 'none'
+      recover = false # this check intentionally stops after initial debug mesh generation
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-action-triangulation/centroid-with-retessellation'
     []
@@ -231,6 +266,7 @@
                  'UserObjects/weighted_gap_uo/triangulate_triangles=false'
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
+      recover = false # this check intentionally stops after initial debug mesh generation
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
     []

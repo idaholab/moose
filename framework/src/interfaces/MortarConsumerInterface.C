@@ -83,14 +83,16 @@ MortarConsumerInterface::validParams()
                         false,
                         "Whether we should ghost point neighbors of secondary face elements, and "
                         "consequently also their mortar interface couples.");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "minimum_projection_angle",
       40.0,
+      "minimum_projection_angle>=0 & minimum_projection_angle<=90",
       "Parameter to control which angle (in degrees) is admissible for the creation of mortar "
       "segments.  If set to a value close to zero, very oblique projections are allowed, which "
       "can result in mortar segments solving physics not meaningfully, and overprojection of "
-      "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
-      "intended for mortar mesh debugging purposes in two dimensions.");
+      "primary nodes onto the mortar segment mesh in extreme cases. In 3D, this parameter also "
+      "controls which primary and secondary subpatch normal pairings are admissible before "
+      "polygon clipping.");
   params += MortarConsumerInterface::triangulationParams();
 
   params.addParam<bool>(

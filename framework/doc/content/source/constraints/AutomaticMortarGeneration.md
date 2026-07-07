@@ -44,4 +44,15 @@ Elements defined on second order geometries are curvilinear so to simplify the '
 
 Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements.
 
+The local plane normal for each linearized secondary subpatch is computed from the geometry of that
+subpatch. Triangular subpatches use an edge cross product; quadrilateral subpatches use the cross
+product of the bilinear center tangents so the normal represents the full bilinear subpatch instead
+of one of its two diagonals. The geometric normal is oriented to agree with the averaged secondary
+nodal normal so the primary-to-secondary orientation convention is unchanged.
+
+For sharp 3D corners with adjacent sidesets, [!param](/Constraints/EqualValueConstraint/minimum_projection_angle)
+also rejects primary and secondary subpatch pairings whose normals are too close to orthogonal
+before polygon clipping. This preserves the intended face-to-face contact on each side of the corner
+while avoiding lower-dimensional cross-corner coupling.
+
 !bibtex bibliography

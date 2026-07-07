@@ -1,6 +1,6 @@
 [Tests]
   design = 'Constraints/index.md EqualValueConstraint.md PenaltyEqualValueConstraint.md'
-  issues = '#13080 #21329 #33277'
+  issues = '#13080 #21329 #33277 #33282'
   [continuity_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'
@@ -63,6 +63,17 @@
                'Outputs/file_base=continuity_sphere_hex20_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'for a curved HEX20 mortar interface.'
+    recover = false
+  []
+  [continuity_sphere_hex8-debug-mesh]
+    type = 'Exodiff'
+    prereq = 'continuity_sphere_hex20-debug-mesh'
+    input = 'continuity_sphere_hex.i'
+    exodiff = 'continuity_sphere_hex8_debug_2_1_undisplaced_mortar_segment_mesh.e'
+    cli_args = 'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+               'Outputs/file_base=continuity_sphere_hex8_debug'
+    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
+                  'for a curved HEX8 mortar interface.'
     recover = false
   []
   [triangulation-modes]
@@ -159,7 +170,7 @@
   []
   [continuity_tet10-debug-mesh]
     type = 'Exodiff'
-    prereq = 'continuity_sphere_hex20-debug-mesh'
+    prereq = 'continuity_sphere_hex8-debug-mesh'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet10_debug_107_2_undisplaced_mortar_segment_mesh.e'
     cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 '

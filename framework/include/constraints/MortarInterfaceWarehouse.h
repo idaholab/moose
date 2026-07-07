@@ -28,13 +28,15 @@ class MooseEnum;
 /**
  * Per-mortar-interface configuration. Owns the AutomaticMortarGeneration object together with
  * the user-supplied flags that must remain consistent across all constraints sharing a primary-
- * secondary surface pair (periodic, debug, triangulation mode, triangulate-triangles).
+ * secondary surface pair (periodic, debug, minimum projection angle, triangulation mode,
+ * triangulate-triangles).
  */
 struct MortarInterfaceConfig
 {
   std::unique_ptr<AutomaticMortarGeneration> amg;
   bool periodic;
   bool debug;
+  Real minimum_projection_angle;
   MortarSegmentTriangulationMode triangulation;
   bool triangulate_triangles;
 };
