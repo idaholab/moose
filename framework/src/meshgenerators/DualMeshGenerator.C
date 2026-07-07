@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/cell_c0polyhedron.h"
+#include "libmesh/cell_pyramid5.h"
 #include "libmesh/cell_tet4.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_c0polygon.h"
@@ -34,6 +35,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -59,8 +61,8 @@ DualMeshGenerator::validParams()
       concave_treatment,
       "Ordered treatments to attempt for concave 3D dual cells. Split attempts to split the "
       "candidate polyhedron by adding midpoint vertices, polycut attempts to split it into convex "
-      "polyhedra using existing vertices, and netgen tetrahedralizes it, adding additional nodes "
-      "when necessary.");
+      "polyhedra using existing vertices, and netgen first tries a source-node fan with pyramids "
+      "where valid before tetrahedralizing it, adding additional nodes when necessary.");
   params.addRangeCheckedParam<Real>(
       "boundary_node_angular_tol",
       1e-8,
@@ -636,6 +638,12 @@ struct SplitCutFaceCandidate3D
   std::vector<std::vector<Point>> child1_side_points;
 };
 
+struct SideFacePart3D
+{
+  std::vector<dof_id_type> node_ids;
+  std::vector<Point> points;
+};
+
 // Face centroids
 static Point
 centroid3D(const std::vector<Point> & points)
@@ -662,6 +670,223 @@ polyhedronCentroid3D(const std::vector<std::vector<Point>> & side_points, const 
       addUniquePoint(unique_points, point, tol);
 
   return centroid3D(unique_points);
+}
+
+static bool
+projectSideFacePoints3D(const std::vector<Point> & points,
+                        std::vector<Point> & projected_points,
+                        const Real length_tol)
+{
+  const Real area_tol = length_tol * length_tol;
+  Point normal = faceNormal3D(points, area_tol);
+
+  if (normal.norm() <= area_tol)
+    return false;
+
+  normal /= normal.norm();
+
+  Point e1;
+  for (const auto i : index_range(points))
+  {
+    e1 = points[(i + 1) % points.size()] - points[i];
+    e1 -= (e1 * normal) * normal;
+
+    if (e1.norm() > length_tol)
+    {
+      e1 /= e1.norm();
+      break;
+    }
+  }
+
+  if (e1.norm() <= length_tol)
+    return false;
+
+  Point e2 = normal.cross(e1);
+
+  if (e2.norm() <= length_tol)
+    return false;
+
+  e2 /= e2.norm();
+
+  const Point center = centroid3D(points);
+  projected_points.clear();
+  projected_points.reserve(points.size());
+
+  for (const auto & point : points)
+  {
+    const Point point_delta = point - center;
+    projected_points.push_back(Point(point_delta * e1, point_delta * e2, 0.0));
+  }
+
+  return true;
+}
+
+static bool
+sideFaceHasReflexVertex3D(const std::vector<Point> & points,
+                          const Real length_tol,
+                          unsigned int * const reflex_index = nullptr)
+{
+  if (points.size() <= 3)
+    return false;
+
+  std::vector<Point> projected_points;
+
+  if (!projectSideFacePoints3D(points, projected_points, length_tol))
+    return false;
+
+  const Real area_tol = length_tol * length_tol;
+  const Real signed_area = polygonSignedArea2D(projected_points);
+
+  if (std::abs(signed_area) <= area_tol)
+    return false;
+
+  for (const auto i : index_range(projected_points))
+  {
+    const Point & previous =
+        projected_points[(i + projected_points.size() - 1) % projected_points.size()];
+    const Point & current = projected_points[i];
+    const Point & next = projected_points[(i + 1) % projected_points.size()];
+    const Point previous_edge = current - previous;
+    const Point next_edge = next - current;
+    const Real cross = previous_edge(0) * next_edge(1) - previous_edge(1) * next_edge(0);
+
+    if (std::abs(cross) <= area_tol)
+      continue;
+
+    if (cross * signed_area < 0.0)
+    {
+      if (reflex_index)
+        *reflex_index = cast_int<unsigned int>(i);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static bool
+sideFaceIsNonPlanar3D(const std::vector<Point> & points, const Real length_tol)
+{
+  if (points.size() <= 3)
+    return false;
+
+  const Real area_tol = length_tol * length_tol;
+  Point normal = faceNormal3D(points, area_tol);
+
+  if (normal.norm() <= area_tol)
+    return false;
+
+  normal /= normal.norm();
+
+  const Point center = centroid3D(points);
+
+  for (const auto & point : points)
+    if (std::abs(normal * (point - center)) > length_tol)
+      return true;
+
+  return false;
+}
+
+static void
+addSideFacePart3D(std::vector<SideFacePart3D> & side_face_parts,
+                  const std::vector<dof_id_type> & node_ids,
+                  const std::vector<Point> & points,
+                  const std::array<unsigned int, 3> & point_indices,
+                  const Real length_tol)
+{
+  SideFacePart3D side_face_part;
+
+  for (const auto point_index : point_indices)
+  {
+    side_face_part.node_ids.push_back(node_ids[point_index]);
+    side_face_part.points.push_back(points[point_index]);
+  }
+
+  if (hasNonzeroArea3D(side_face_part.points, length_tol * length_tol))
+    side_face_parts.push_back(std::move(side_face_part));
+}
+
+static std::vector<SideFacePart3D>
+sideFaceParts3D(const std::vector<dof_id_type> & node_ids,
+                const std::vector<Point> & points,
+                const Elem & primal_parent_elem,
+                std::map<std::vector<dof_id_type>, std::pair<dof_id_type, dof_id_type>> &
+                    side_face_split_diagonals,
+                const Real length_tol)
+{
+  mooseAssert(node_ids.size() == points.size(),
+              "Primal side face node ids and points must have matching sizes.");
+
+  const auto originalSideFacePart = [&]()
+  {
+    SideFacePart3D side_face_part;
+    side_face_part.node_ids = node_ids;
+    side_face_part.points = points;
+    return std::vector<SideFacePart3D>{side_face_part};
+  };
+
+  if (points.size() != 4)
+    return originalSideFacePart();
+
+  const bool has_reflex_vertex = sideFaceHasReflexVertex3D(points, length_tol);
+
+  if (!has_reflex_vertex && !sideFaceIsNonPlanar3D(points, length_tol))
+    return originalSideFacePart();
+
+  std::vector<dof_id_type> side_face_key = node_ids;
+  std::sort(side_face_key.begin(), side_face_key.end());
+
+  const auto diagonal02_key = edgeKey(node_ids[0], node_ids[2]);
+  const auto diagonal13_key = edgeKey(node_ids[1], node_ids[3]);
+  const auto cached_diagonal_it = side_face_split_diagonals.find(side_face_key);
+  bool split_along_diagonal02 = false;
+
+  if (cached_diagonal_it != side_face_split_diagonals.end())
+  {
+    if (cached_diagonal_it->second == diagonal02_key)
+      split_along_diagonal02 = true;
+    else if (cached_diagonal_it->second == diagonal13_key)
+      split_along_diagonal02 = false;
+    else
+      mooseError("Cached primal quad side face split diagonal is not a diagonal in the current "
+                 "side face ordering.");
+  }
+  else
+  {
+    const Point diagonal02_midpoint = 0.5 * (points[0] + points[2]);
+    const Point diagonal13_midpoint = 0.5 * (points[1] + points[3]);
+    const bool diagonal02_inside =
+        primal_parent_elem.contains_point(diagonal02_midpoint, length_tol);
+    const bool diagonal13_inside =
+        primal_parent_elem.contains_point(diagonal13_midpoint, length_tol);
+
+    if (diagonal02_inside == diagonal13_inside)
+      mooseError("Could not uniquely choose a split diagonal for detected concave/non-planar "
+                 "primal quad side face using primal parent cell diagonal midpoint containment.");
+
+    split_along_diagonal02 = diagonal02_inside;
+
+    side_face_split_diagonals.emplace(side_face_key,
+                                      split_along_diagonal02 ? diagonal02_key : diagonal13_key);
+  }
+
+  std::vector<SideFacePart3D> side_face_parts;
+
+  if (split_along_diagonal02)
+  {
+    addSideFacePart3D(side_face_parts, node_ids, points, {{0, 1, 2}}, length_tol);
+    addSideFacePart3D(side_face_parts, node_ids, points, {{0, 2, 3}}, length_tol);
+  }
+  else
+  {
+    addSideFacePart3D(side_face_parts, node_ids, points, {{1, 2, 3}}, length_tol);
+    addSideFacePart3D(side_face_parts, node_ids, points, {{1, 3, 0}}, length_tol);
+  }
+
+  if (side_face_parts.size() != 2)
+    mooseError("Could not split detected concave/non-planar primal quad side face.");
+
+  return side_face_parts;
 }
 
 /* There are a lot of boolean-returning methods here: They are used to distinguish boundary
@@ -1702,8 +1927,8 @@ tetVolume6(const Point & point0, const Point & point1, const Point & point2, con
   return libMesh::triple_product(point1 - point0, point2 - point0, point3 - point0);
 }
 
-// Triangulation, used for checking inside/outsideness of points, polyhedron watertightness, netgen
-// tetrahedralization
+// Triangulation, used for checking inside/outsideness of points, polyhedron watertightness,
+// source-node fan filling, and netgen tetrahedralization.
 template <typename ValidSegment>
 static bool
 surfaceTriangles3D(const std::vector<std::vector<Point>> & side_points,
@@ -1719,8 +1944,18 @@ surfaceTriangles3D(const std::vector<std::vector<Point>> & side_points,
       continue;
 
     bool added_side_triangles = false;
+    std::vector<std::size_t> anchor_indices;
+    anchor_indices.reserve(side.size());
 
     for (const auto anchor : index_range(side))
+      anchor_indices.push_back(anchor);
+
+    std::sort(anchor_indices.begin(),
+              anchor_indices.end(),
+              [&side](const std::size_t a, const std::size_t b)
+              { return pointKey3D(side[a]) < pointKey3D(side[b]); });
+
+    for (const auto anchor : anchor_indices)
     {
       std::vector<std::vector<Point>> side_triangles;
       bool valid_fan = true;
@@ -1844,6 +2079,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   std::map<NodeSubdomainKey, std::vector<BoundaryFaceNormal3D>> boundary_node_normals;
   std::map<EdgeSubdomainKey, std::vector<Point>> boundary_edge_normals;
   std::map<SubdomainID, std::vector<std::vector<Point>>> primal_boundary_surface_triangles;
+  std::map<std::vector<dof_id_type>, std::pair<dof_id_type, dof_id_type>> side_face_split_diagonals;
 
   for (const auto & elem : input_mesh->element_ptr_range())
   {
@@ -1859,53 +2095,69 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         continue;
 
       auto side_elem = elem->build_side_ptr(side);
+      std::vector<dof_id_type> side_node_ids;
       std::vector<Point> side_points;
+      side_node_ids.reserve(side_elem->n_vertices());
       side_points.reserve(side_elem->n_vertices());
 
       for (const auto n : make_range(side_elem->n_vertices()))
-        side_points.push_back(side_elem->point(n));
-
-      Point normal = faceNormal3D(side_points);
-
-      if (normal.norm() <= 1e-12)
-        continue;
-
-      const Point face_centroid = side_elem->true_centroid();
-
-      // Make sure face normals are oriented properly
-      if (normal * (elem_centroid - face_centroid) > 0.0)
-        normal = -1.0 * normal;
-
-      auto & boundary_surface_triangles =
-          primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
-
-      for (const auto n : make_range(std::size_t(1), side_points.size() - 1))
       {
-        std::vector<Point> triangle = {side_points[0], side_points[n], side_points[n + 1]};
-        const Point triangle_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
-
-        if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
-          continue;
-
-        if (triangle_normal * normal < 0.0)
-          std::swap(triangle[1], triangle[2]);
-
-        boundary_surface_triangles.push_back(triangle);
+        side_node_ids.push_back(side_elem->node_id(n));
+        side_points.push_back(side_elem->point(n));
       }
 
-      for (const auto n : make_range(side_elem->n_vertices()))
-        addUniqueBoundaryFaceNormal3D(
-            boundary_node_normals[nodeSubdomainKey(side_elem->node_id(n), elem->subdomain_id())],
-            normal,
-            face_centroid);
-
-      for (const auto n : make_range(side_elem->n_vertices()))
+      for (const auto & side_face_part : sideFaceParts3D(side_node_ids,
+                                                         side_points,
+                                                         *elem,
+                                                         side_face_split_diagonals,
+                                                         primal_boundary_length_tol))
       {
-        const dof_id_type node0 = side_elem->node_id(n);
-        const dof_id_type node1 = side_elem->node_id((n + 1) % side_elem->n_vertices());
+        const auto & side_face_points = side_face_part.points;
+        Point normal = faceNormal3D(side_face_points);
 
-        addUniqueDirection3D(
-            boundary_edge_normals[edgeSubdomainKey(node0, node1, elem->subdomain_id())], normal);
+        if (normal.norm() <= 1e-12)
+          continue;
+
+        const Point face_centroid = centroid3D(side_face_points);
+
+        // Make sure face normals are oriented properly
+        if (normal * (elem_centroid - face_centroid) > 0.0)
+          normal = -1.0 * normal;
+
+        auto & boundary_surface_triangles =
+            primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
+
+        for (const auto n : make_range(std::size_t(1), side_face_points.size() - 1))
+        {
+          std::vector<Point> triangle = {
+              side_face_points[0], side_face_points[n], side_face_points[n + 1]};
+          const Point triangle_normal =
+              (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
+
+          if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
+            continue;
+
+          if (triangle_normal * normal < 0.0)
+            std::swap(triangle[1], triangle[2]);
+
+          boundary_surface_triangles.push_back(triangle);
+        }
+
+        for (const auto n : index_range(side_face_part.node_ids))
+          addUniqueBoundaryFaceNormal3D(boundary_node_normals[nodeSubdomainKey(
+                                            side_face_part.node_ids[n], elem->subdomain_id())],
+                                        normal,
+                                        face_centroid);
+
+        for (const auto n : index_range(side_face_part.node_ids))
+        {
+          const dof_id_type node0 = side_face_part.node_ids[n];
+          const dof_id_type node1 =
+              side_face_part.node_ids[(n + 1) % side_face_part.node_ids.size()];
+
+          addUniqueDirection3D(
+              boundary_edge_normals[edgeSubdomainKey(node0, node1, elem->subdomain_id())], normal);
+        }
       }
     }
   }
@@ -2109,6 +2361,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   {
     std::vector<std::vector<Point>> direct_netgen_side_points;
     std::vector<std::vector<Point>> polycut_side_points;
+    dof_id_type source_node_id = std::numeric_limits<dof_id_type>::max();
+    std::vector<const Elem *> primal_elems;
     SubdomainID output_subdomain_id = Elem::invalid_subdomain_id;
     bool has_concave_edge = false;
     PolyCutEdge3D concave_edge;
@@ -2118,6 +2372,17 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   };
 
   std::vector<SplitDualCellSidePoints3D> split_dual_cell_side_points;
+  std::size_t detected_concave_dual_polyhedra = 0;
+  std::size_t treated_dual_polyhedra = 0;
+  std::size_t direct_dual_polyhedra = 0;
+  std::size_t split_dual_polyhedra = 0;
+  std::size_t split_created_elements = 0;
+  std::size_t polycut_dual_polyhedra = 0;
+  std::size_t polycut_created_elements = 0;
+  std::size_t source_fan_dual_polyhedra = 0;
+  std::size_t source_fan_created_elements = 0;
+  std::size_t netgen_dual_polyhedra = 0;
+  std::size_t netgen_created_elements = 0;
 
   const auto pointInsidePrimalBoundary =
       [&](const SubdomainID boundary_subdomain_id, const Point & point)
@@ -2400,6 +2665,141 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     return true;
   };
 
+  const auto addSourcePointFanPolyhedron = [&](const std::vector<std::vector<Point>> & side_points,
+                                               const Point & source_point,
+                                               const SubdomainID output_subdomain_id) -> std::size_t
+  {
+    if (side_points.size() < 4)
+      return 0;
+
+    const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
+    const Real polyhedron_scale = polyhedronScale3D(side_points);
+    const Real length_tol = tol * polyhedron_scale;
+    const Real volume_tol = length_tol * length_tol * length_tol;
+    std::vector<std::vector<Point>> surface_triangles;
+
+    const auto validSurfaceSegment = [&](const Point & point0, const Point & point1)
+    { return segmentInsidePrimalBoundary(output_subdomain_id, point0, point1); };
+
+    if (!surfaceTriangles3D(side_points, surface_triangles, validSurfaceSegment, length_tol))
+      return 0;
+
+    if (!pointInsideTriangulatedSurface3D(source_point, surface_triangles, length_tol) ||
+        !pointInsidePrimalBoundary(output_subdomain_id, source_point))
+      return 0;
+
+    std::vector<std::vector<Point>> fan_sides;
+
+    for (const auto & side : side_points)
+    {
+      if (side.size() == 4 && !sideFaceHasReflexVertex3D(side, length_tol))
+      {
+        fan_sides.push_back(side);
+        continue;
+      }
+
+      std::vector<std::vector<Point>> side_triangles;
+      const std::vector<std::vector<Point>> single_side = {side};
+
+      if (!surfaceTriangles3D(single_side, side_triangles, validSurfaceSegment, length_tol))
+        return 0;
+
+      for (const auto & triangle : side_triangles)
+        if (triangle.size() == 3)
+          fan_sides.push_back(triangle);
+    }
+
+    if (fan_sides.empty())
+      return 0;
+
+    const auto pyramidVolume = [](const std::array<Point, 5> & pyramid_points)
+    {
+      const Point v40 = pyramid_points[0] - pyramid_points[4];
+      const Point v13 = pyramid_points[3] - pyramid_points[1];
+      const Point v02 = pyramid_points[2] - pyramid_points[0];
+      const Point v03 = pyramid_points[3] - pyramid_points[0];
+      const Point v01 = pyramid_points[1] - pyramid_points[0];
+
+      return libMesh::triple_product(v40, v13, v02) / 6.0 +
+             libMesh::triple_product(v02, v01, v03) / 12.0;
+    };
+
+    for (const auto & fan_side : fan_sides)
+    {
+      Point fan_element_centroid = source_point;
+
+      for (const auto & point : fan_side)
+        fan_element_centroid += point;
+
+      fan_element_centroid /= static_cast<Real>(fan_side.size() + 1);
+
+      if (!pointInsideTriangulatedSurface3D(fan_element_centroid, surface_triangles, length_tol) ||
+          !pointInsidePrimalBoundary(output_subdomain_id, fan_element_centroid))
+        return 0;
+
+      if (fan_side.size() == 3 &&
+          std::abs(tetVolume6(source_point, fan_side[0], fan_side[1], fan_side[2])) <= volume_tol)
+        return 0;
+
+      if (fan_side.size() == 4)
+      {
+        const std::array<Point, 5> pyramid_points = {
+            fan_side[0], fan_side[3], fan_side[2], fan_side[1], source_point};
+
+        if (std::abs(pyramidVolume(pyramid_points)) <= volume_tol)
+          return 0;
+      }
+    }
+
+    for (const auto & fan_side : fan_sides)
+    {
+      if (fan_side.size() == 3)
+      {
+        std::array<Point, 4> tet_points = {source_point, fan_side[0], fan_side[1], fan_side[2]};
+
+        auto tet = std::make_unique<Tet4>();
+        tet->set_node(0) = getDualNode(tet_points[0]).first;
+        tet->set_node(1) = getDualNode(tet_points[1]).first;
+
+        if (tetVolume6(tet_points[0], tet_points[1], tet_points[2], tet_points[3]) > 0.0)
+        {
+          tet->set_node(2) = getDualNode(tet_points[2]).first;
+          tet->set_node(3) = getDualNode(tet_points[3]).first;
+        }
+        else
+        {
+          tet->set_node(2) = getDualNode(tet_points[3]).first;
+          tet->set_node(3) = getDualNode(tet_points[2]).first;
+        }
+
+        if (output_subdomain_id != Elem::invalid_subdomain_id)
+          tet->subdomain_id() = output_subdomain_id;
+        dualMesh->add_elem(std::move(tet));
+        continue;
+      }
+
+      if (fan_side.size() == 4)
+      {
+        std::array<Point, 5> pyramid_points = {
+            fan_side[0], fan_side[3], fan_side[2], fan_side[1], source_point};
+
+        if (pyramidVolume(pyramid_points) < 0.0)
+          std::swap(pyramid_points[1], pyramid_points[3]);
+
+        auto pyramid = std::make_unique<Pyramid5>();
+
+        for (const auto i : make_range(std::size_t(5)))
+          pyramid->set_node(i) = getDualNode(pyramid_points[i]).first;
+
+        if (output_subdomain_id != Elem::invalid_subdomain_id)
+          pyramid->subdomain_id() = output_subdomain_id;
+        dualMesh->add_elem(std::move(pyramid));
+      }
+    }
+
+    return fan_sides.size();
+  };
+
   // Polyhedra that are bad enough need to be tetrahedralized via NetGen
   const auto addTetrahedralizedPolyhedron =
       [&](const std::vector<std::vector<Point>> & side_points,
@@ -2658,23 +3058,34 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           const bool force_tetrahedralize,
           const bool searched_concave_edge,
           const bool has_concave_edge,
+          const dof_id_type source_node_id,
+          const std::vector<const Elem *> & primal_elems,
           const SubdomainID output_subdomain_id,
           const SplitCutFaceCandidate3D * split_plan = nullptr)
   {
     const bool concave_edge_search_failed =
         searched_concave_edge && !has_concave_edge && !split_plan;
+    const Point & source_point = *input_mesh->node_ptr(source_node_id);
 
     if (!force_tetrahedralize && !has_concave_edge && !split_plan)
     {
       if (addPolyhedron(direct_netgen_side_points, output_subdomain_id))
+      {
+        ++direct_dual_polyhedra;
         return;
+      }
     }
 
     if (use_split && !force_tetrahedralize && !has_concave_edge && !split_plan)
     {
       if (addPolyhedron(polycut_side_points, output_subdomain_id))
+      {
+        ++direct_dual_polyhedra;
         return;
+      }
     }
+
+    ++treated_dual_polyhedra;
 
     for (const auto & concave_treatment : _concave_treatment)
       if (concave_treatment == "split")
@@ -2686,7 +3097,11 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             addSplitPolyhedra(polycut_side_points, output_subdomain_id, split_plan);
 
         if (created_elements)
+        {
+          ++split_dual_polyhedra;
+          split_created_elements += created_elements;
           return;
+        }
       }
       else if (concave_treatment == "polycut")
       {
@@ -2697,16 +3112,109 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             addPolyCutPolyhedra(polycut_side_points, output_subdomain_id);
 
         if (created_elements)
+        {
+          ++polycut_dual_polyhedra;
+          polycut_created_elements += created_elements;
           return;
+        }
       }
       else if (concave_treatment == "netgen")
       {
-        const std::size_t created_elements =
+        const std::size_t source_fan_elements = addSourcePointFanPolyhedron(
+            direct_netgen_side_points, source_point, output_subdomain_id);
+
+        if (source_fan_elements)
+        {
+          ++source_fan_dual_polyhedra;
+          source_fan_created_elements += source_fan_elements;
+          return;
+        }
+
+        const std::size_t netgen_elements =
             addTetrahedralizedPolyhedron(direct_netgen_side_points, output_subdomain_id);
 
-        if (created_elements)
+        if (netgen_elements)
+        {
+          ++netgen_dual_polyhedra;
+          netgen_created_elements += netgen_elements;
           return;
+        }
       }
+
+    std::vector<Point> rejected_polyhedron_nodes;
+
+    for (const auto & side : direct_netgen_side_points)
+      for (const auto & point : side)
+        addUniquePoint(rejected_polyhedron_nodes, point, primal_boundary_length_tol);
+
+    std::map<dof_id_type, Point> rejected_primal_nodes;
+    std::map<std::vector<dof_id_type>, std::vector<dof_id_type>> rejected_primal_faces;
+
+    for (const auto * const elem : primal_elems)
+      if (elem)
+      {
+        for (const auto n : make_range(elem->n_vertices()))
+          rejected_primal_nodes.emplace(elem->node_id(n), elem->point(n));
+
+        for (const auto side : elem->side_index_range())
+        {
+          auto side_elem = elem->build_side_ptr(side);
+          std::vector<dof_id_type> face_node_ids;
+          face_node_ids.reserve(side_elem->n_vertices());
+
+          for (const auto n : make_range(side_elem->n_vertices()))
+            face_node_ids.push_back(side_elem->node_id(n));
+
+          auto face_key = face_node_ids;
+          std::sort(face_key.begin(), face_key.end());
+          rejected_primal_faces.emplace(face_key, face_node_ids);
+        }
+      }
+
+    std::ostringstream rejected_polyhedron_message;
+
+    rejected_polyhedron_message << "DualMeshGenerator rejected 3D dual polyhedron has "
+                                << rejected_polyhedron_nodes.size() << " unique dual nodes:";
+    for (const auto i : index_range(rejected_polyhedron_nodes))
+      rejected_polyhedron_message << "\n  node " << i << ": (" << rejected_polyhedron_nodes[i](0)
+                                  << ", " << rejected_polyhedron_nodes[i](1) << ", "
+                                  << rejected_polyhedron_nodes[i](2) << ")";
+    rejected_polyhedron_message << "\nAttempted dual faces:";
+    for (const auto i : index_range(direct_netgen_side_points))
+    {
+      rejected_polyhedron_message << "\n  face " << i << " has "
+                                  << direct_netgen_side_points[i].size() << " points:";
+      for (const auto j : index_range(direct_netgen_side_points[i]))
+        rejected_polyhedron_message
+            << "\n    point " << j << ": (" << direct_netgen_side_points[i][j](0) << ", "
+            << direct_netgen_side_points[i][j](1) << ", " << direct_netgen_side_points[i][j](2)
+            << ")";
+    }
+    rejected_polyhedron_message << "\nPrimal source node " << source_node_id;
+    const auto source_node_it = rejected_primal_nodes.find(source_node_id);
+    if (source_node_it != rejected_primal_nodes.end())
+      rejected_polyhedron_message << ": (" << source_node_it->second(0) << ", "
+                                  << source_node_it->second(1) << ", " << source_node_it->second(2)
+                                  << ")";
+
+    rejected_polyhedron_message << "\nPrimal context has " << rejected_primal_nodes.size()
+                                << " unique nodes:";
+    for (const auto & primal_node : rejected_primal_nodes)
+      rejected_polyhedron_message << "\n  node " << primal_node.first << ": ("
+                                  << primal_node.second(0) << ", " << primal_node.second(1) << ", "
+                                  << primal_node.second(2) << ")";
+
+    rejected_polyhedron_message << "\nPrimal context has " << rejected_primal_faces.size()
+                                << " unique faces:";
+    std::size_t face_index = 0;
+    for (const auto & primal_face : rejected_primal_faces)
+    {
+      rejected_polyhedron_message << "\n  face " << face_index++ << " nodes:";
+      for (const auto node_id : primal_face.second)
+        rejected_polyhedron_message << " " << node_id;
+    }
+
+    mooseInfoRepeated(rejected_polyhedron_message.str());
 
     mooseError("Could not resolve rejected non-convex 3D dual polyhedron.");
   };
@@ -2881,117 +3389,131 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       for (const auto side : elem->side_index_range())
       {
         auto side_elem = elem->build_side_ptr(side);
-        const Point face_centroid = side_elem->true_centroid();
-
-        std::vector<dof_id_type> current_side_node_ids;
-        std::vector<Point> current_side_points;
-        current_side_node_ids.reserve(side_elem->n_vertices());
-        current_side_points.reserve(side_elem->n_vertices());
+        std::vector<dof_id_type> side_node_ids;
+        std::vector<Point> side_points;
+        side_node_ids.reserve(side_elem->n_vertices());
+        side_points.reserve(side_elem->n_vertices());
 
         // For interior dual elements
         for (const auto n : make_range(side_elem->n_vertices()))
         {
-          current_side_node_ids.push_back(side_elem->node_id(n));
-          current_side_points.push_back(side_elem->point(n));
+          side_node_ids.push_back(side_elem->node_id(n));
+          side_points.push_back(side_elem->point(n));
         }
 
-        const auto source_node_it =
-            std::find(current_side_node_ids.begin(), current_side_node_ids.end(), source_node_id);
+        const bool side_is_preserved = preservedSide(*elem, side);
 
-        if (source_node_it == current_side_node_ids.end())
-          continue;
-
-        const auto source_side_index =
-            cast_int<unsigned int>(source_node_it - current_side_node_ids.begin());
-        const dof_id_type previous_node_id =
-            current_side_node_ids[(source_side_index + current_side_node_ids.size() - 1) %
-                                  current_side_node_ids.size()];
-        const dof_id_type next_node_id =
-            current_side_node_ids[(source_side_index + 1) % current_side_node_ids.size()];
-
-        const auto previous_edge_key = edgeKey(source_node_id, previous_node_id);
-        const auto next_edge_key = edgeKey(source_node_id, next_node_id);
-        auto & previous_edge_points = edge_to_points[previous_edge_key];
-        auto & next_edge_points = edge_to_points[next_edge_key];
-
-        addConnectedFacePoint3D(previous_edge_points, elem_centroid, primal_boundary_length_tol);
-        addConnectedFacePoint3D(next_edge_points, elem_centroid, primal_boundary_length_tol);
-
-        if (!preservedSide(*elem, side))
+        for (const auto & side_face_part : sideFaceParts3D(side_node_ids,
+                                                           side_points,
+                                                           *elem,
+                                                           side_face_split_diagonals,
+                                                           primal_boundary_length_tol))
         {
-          const Point neighbor_centroid = elem->neighbor_ptr(side)->true_centroid();
+          const auto & current_side_node_ids = side_face_part.node_ids;
+          const auto & current_side_points = side_face_part.points;
+          const Point face_centroid = centroid3D(current_side_points);
+          const auto source_node_it =
+              std::find(current_side_node_ids.begin(), current_side_node_ids.end(), source_node_id);
 
-          addConnectedFaceSegment3D(
-              previous_edge_points, elem_centroid, neighbor_centroid, primal_boundary_length_tol);
-          addConnectedFaceSegment3D(
-              next_edge_points, elem_centroid, neighbor_centroid, primal_boundary_length_tol);
-        }
-        else
-        {
-          addConnectedFaceSegment3D(
-              previous_edge_points, elem_centroid, face_centroid, primal_boundary_length_tol);
-          addConnectedFaceSegment3D(
-              next_edge_points, elem_centroid, face_centroid, primal_boundary_length_tol);
-          addConnectedFacePoint3D(boundary_face_points, face_centroid, primal_boundary_length_tol);
+          if (source_node_it == current_side_node_ids.end())
+            continue;
 
-          const auto previous_boundary_edge_key =
-              EdgeSubdomainKey{previous_edge_key, source_subdomain_key};
-          const auto next_boundary_edge_key = EdgeSubdomainKey{next_edge_key, source_subdomain_key};
-          addUniquePoint(boundary_edge_face_centroids[previous_boundary_edge_key],
-                         face_centroid,
-                         primal_boundary_length_tol);
-          addUniquePoint(boundary_edge_face_centroids[next_boundary_edge_key],
-                         face_centroid,
-                         primal_boundary_length_tol);
+          const auto source_side_index =
+              cast_int<unsigned int>(source_node_it - current_side_node_ids.begin());
+          const dof_id_type previous_node_id =
+              current_side_node_ids[(source_side_index + current_side_node_ids.size() - 1) %
+                                    current_side_node_ids.size()];
+          const dof_id_type next_node_id =
+              current_side_node_ids[(source_side_index + 1) % current_side_node_ids.size()];
 
-          const Point * const previous_midpoint = boundaryEdgeMidpoint(previous_boundary_edge_key);
-          const Point * const next_midpoint = boundaryEdgeMidpoint(next_boundary_edge_key);
+          const auto previous_edge_key = edgeKey(source_node_id, previous_node_id);
+          const auto next_edge_key = edgeKey(source_node_id, next_node_id);
+          auto & previous_edge_points = edge_to_points[previous_edge_key];
+          auto & next_edge_points = edge_to_points[next_edge_key];
 
-          if (boundary_vertex_nodes.count(source_node_subdomain_key))
+          addConnectedFacePoint3D(previous_edge_points, elem_centroid, primal_boundary_length_tol);
+          addConnectedFacePoint3D(next_edge_points, elem_centroid, primal_boundary_length_tol);
+
+          if (!side_is_preserved)
           {
-            if (previous_midpoint)
-            {
-              addConnectedFaceSegment3D(previous_edge_points,
-                                        face_centroid,
-                                        *previous_midpoint,
-                                        primal_boundary_length_tol);
-              addUniquePoint(midpoint_boundary_face_centroids[previous_boundary_edge_key],
-                             face_centroid,
-                             primal_boundary_length_tol);
-            }
+            const Point neighbor_centroid = elem->neighbor_ptr(side)->true_centroid();
 
-            if (next_midpoint)
-            {
-              addConnectedFaceSegment3D(
-                  next_edge_points, face_centroid, *next_midpoint, primal_boundary_length_tol);
-              addUniquePoint(midpoint_boundary_face_centroids[next_boundary_edge_key],
-                             face_centroid,
-                             primal_boundary_length_tol);
-            }
+            addConnectedFaceSegment3D(
+                previous_edge_points, elem_centroid, neighbor_centroid, primal_boundary_length_tol);
+            addConnectedFaceSegment3D(
+                next_edge_points, elem_centroid, neighbor_centroid, primal_boundary_length_tol);
           }
-
-          Point normal = faceNormal3D(current_side_points);
-
-          if (normal.norm() > 1e-12)
+          else
           {
-            if (normal * (elem_centroid - face_centroid) > 0.0)
-              normal = -1.0 * normal;
+            addConnectedFaceSegment3D(
+                previous_edge_points, elem_centroid, face_centroid, primal_boundary_length_tol);
+            addConnectedFaceSegment3D(
+                next_edge_points, elem_centroid, face_centroid, primal_boundary_length_tol);
+            addConnectedFacePoint3D(
+                boundary_face_points, face_centroid, primal_boundary_length_tol);
 
-            boundary_normal += normal / normal.norm();
+            const auto previous_boundary_edge_key =
+                EdgeSubdomainKey{previous_edge_key, source_subdomain_key};
+            const auto next_boundary_edge_key =
+                EdgeSubdomainKey{next_edge_key, source_subdomain_key};
+            addUniquePoint(boundary_edge_face_centroids[previous_boundary_edge_key],
+                           face_centroid,
+                           primal_boundary_length_tol);
+            addUniquePoint(boundary_edge_face_centroids[next_boundary_edge_key],
+                           face_centroid,
+                           primal_boundary_length_tol);
 
-            addBoundaryPlaneFace(normal,
-                                 face_centroid,
-                                 previous_node_id,
-                                 next_node_id,
-                                 previous_midpoint,
-                                 next_midpoint);
+            const Point * const previous_midpoint =
+                boundaryEdgeMidpoint(previous_boundary_edge_key);
+            const Point * const next_midpoint = boundaryEdgeMidpoint(next_boundary_edge_key);
+
+            if (boundary_vertex_nodes.count(source_node_subdomain_key))
+            {
+              if (previous_midpoint)
+              {
+                addConnectedFaceSegment3D(previous_edge_points,
+                                          face_centroid,
+                                          *previous_midpoint,
+                                          primal_boundary_length_tol);
+                addUniquePoint(midpoint_boundary_face_centroids[previous_boundary_edge_key],
+                               face_centroid,
+                               primal_boundary_length_tol);
+              }
+
+              if (next_midpoint)
+              {
+                addConnectedFaceSegment3D(
+                    next_edge_points, face_centroid, *next_midpoint, primal_boundary_length_tol);
+                addUniquePoint(midpoint_boundary_face_centroids[next_boundary_edge_key],
+                               face_centroid,
+                               primal_boundary_length_tol);
+              }
+            }
+
+            Point normal = faceNormal3D(current_side_points);
+
+            if (normal.norm() > 1e-12)
+            {
+              if (normal * (elem_centroid - face_centroid) > 0.0)
+                normal = -1.0 * normal;
+
+              boundary_normal += normal / normal.norm();
+
+              addBoundaryPlaneFace(normal,
+                                   face_centroid,
+                                   previous_node_id,
+                                   next_node_id,
+                                   previous_midpoint,
+                                   next_midpoint);
+            }
           }
         }
       }
     }
 
-    // Keep the direct/netgen and polycut boundary face workflows separate. polycut needs
-    // whole boundary-plane faces, while direct C0Polyhedron/netgen keep the legacy split faces.
+    // Keep the direct/source-fan/netgen and polycut boundary face workflows separate. polycut needs
+    // whole boundary-plane faces, while direct C0Polyhedron/source-fan/netgen keep the legacy split
+    // faces.
     std::vector<std::vector<Point>> direct_netgen_side_points;
     std::vector<std::vector<Point>> polycut_side_points;
     std::vector<std::pair<Point, Point>> midpoint_split_boundary_faces;
@@ -3131,9 +3653,14 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     const bool force_tetrahedralize =
         (has_concave_boundary_normals && has_concave_edge) || has_nonconvex_face_plane;
 
+    if (has_concave_edge || has_nonconvex_face_plane)
+      ++detected_concave_dual_polyhedra;
+
     if (use_split)
       split_dual_cell_side_points.push_back({direct_netgen_side_points,
                                              polycut_side_points,
+                                             source_node_id,
+                                             node_elems.second,
                                              source_subdomain_key,
                                              has_concave_edge,
                                              concave_edge,
@@ -3146,6 +3673,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                     force_tetrahedralize,
                                     searched_concave_edge,
                                     has_concave_edge,
+                                    source_node_id,
+                                    node_elems.second,
                                     source_subdomain_key);
   }
 
@@ -3205,12 +3734,38 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                     split_dual_cell_side_point.force_tetrahedralize,
                                     true,
                                     split_dual_cell_side_point.has_concave_edge,
+                                    split_dual_cell_side_point.source_node_id,
+                                    split_dual_cell_side_point.primal_elems,
                                     split_dual_cell_side_point.output_subdomain_id,
                                     split_dual_cell_side_point.has_split_plan
                                         ? &split_dual_cell_side_point.split_plan
                                         : nullptr);
     }
   }
+
+  mooseInfo("DualMeshGenerator 3D concave-cell process: found ",
+            detected_concave_dual_polyhedra,
+            " concave/nonconvex dual polyhedra; treated ",
+            treated_dual_polyhedra,
+            " after direct add was skipped or failed; added ",
+            direct_dual_polyhedra,
+            " directly, ",
+            split_dual_polyhedra,
+            " using split (",
+            split_created_elements,
+            " output elements), ",
+            polycut_dual_polyhedra,
+            " using polycut (",
+            polycut_created_elements,
+            " output elements), ",
+            source_fan_dual_polyhedra,
+            " using source fan (",
+            source_fan_created_elements,
+            " output elements), ",
+            netgen_dual_polyhedra,
+            " using netgen (",
+            netgen_created_elements,
+            " output elements).");
 
   dualMesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(dualMesh);
