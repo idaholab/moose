@@ -91,4 +91,15 @@ evaluation points lie on their respective finite element faces but need not alig
 $\boldsymbol{n}_m$. MOOSE reports an error if a retained mortar segment cannot build a complete
 reference map; it does not fall back to `normal_projection`.
 
+The local plane normal for each linearized secondary subpatch is computed from the geometry of that
+subpatch. Triangular subpatches use an edge cross product; quadrilateral subpatches use the cross
+product of the bilinear center tangents so the normal represents the full bilinear subpatch instead
+of one of its two diagonals. The geometric normal is oriented to agree with the averaged secondary
+nodal normal so the primary-to-secondary orientation convention is unchanged.
+
+For sharp 3D corners with adjacent sidesets, [!param](/Constraints/EqualValueConstraint/minimum_projection_angle)
+also rejects primary and secondary subpatch pairings whose normals are too close to orthogonal
+before polygon clipping. This preserves the intended face-to-face contact on each side of the corner
+while avoiding lower-dimensional cross-corner coupling.
+
 !bibtex bibliography

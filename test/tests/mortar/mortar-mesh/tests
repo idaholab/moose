@@ -19,6 +19,27 @@
       detail = 'three dimensional mortar mesh.'
     []
   []
+  [adjacent_corner_mortar_segment_mesh]
+    issues = '#33282'
+    requirement = 'The system shall be able to build a three dimensional mortar segment mesh for '
+                  'adjacent corner sidesets'
+    [statistics]
+      type = JSONDiff
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      jsondiff = 'mortar_stats_reporter_3d_adjacent_corner_sidesets_out.json'
+      keep_reporter_types = true
+      absent_out = 'Some secondary elements on mortar interface'
+      detail = 'with stable reported segment statistics and no missing-primary warning, and'
+    []
+    [missing_primary]
+      type = RunException
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      cli_args = 'Mesh/primary_lower/sidesets=primary_top Constraints/mortar/primary_boundary=primary_top'
+      expect_err = 'Some secondary elements on mortar interface were unable to identify'
+      prereq = 'adjacent_corner_mortar_segment_mesh/statistics'
+      detail = 'with a missing-primary diagnostic when part of the primary corner interface is absent.'
+    []
+  []
   [mortar_segment_mesh]
     requirement = 'When requested through a mortar constraint, the system shall be able to write out a spatially'
     [2d]

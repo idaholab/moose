@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 #include "MooseEnum.h"
+#include "MooseUtils.h"
 #include "MortarExecutorInterface.h"
 #include "AutomaticMortarGeneration.h"
 
@@ -78,6 +79,10 @@ MortarInterfaceWarehouse::createMortarInterface(
           "We do not currently support generating and not generating debug output "
           "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
           "all constraints sharing the same primary-secondary surface pairs");
+    if (!MooseUtils::absoluteFuzzyEqual(existing.minimum_projection_angle,
+                                        minimum_projection_angle))
+      mooseError("We do not currently support multiple values of 'minimum_projection_angle' on "
+                 "the same boundary primary-secondary surface pair.");
     if (existing.triangulation != triangulation_mode)
       mooseError("We do not currently support multiple values of 'triangulation' on the same "
                  "boundary primary-secondary surface pair.");
@@ -105,6 +110,7 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     mortar_3d_qp_mapping),
         periodic,
         debug,
+        minimum_projection_angle,
         triangulation_mode,
         triangulate_triangles,
         mortar_3d_qp_mapping};
