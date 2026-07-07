@@ -51,6 +51,7 @@
                'Outputs/file_base=continuity_sphere_hex27_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'for a curved HEX27 mortar interface.'
+    recover = false
   []
   [continuity_sphere_hex20-debug-mesh]
     type = 'Exodiff'
@@ -62,6 +63,7 @@
                'Outputs/file_base=continuity_sphere_hex20_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'for a curved HEX20 mortar interface.'
+    recover = false
   []
   [continuity_tet4]
     type = 'Exodiff'
@@ -112,6 +114,7 @@
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet10_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'for a TET10 mortar interface.'
+    recover = false
   []
   [continuity_tet14-debug-mesh]
     type = 'Exodiff'
@@ -123,6 +126,7 @@
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet14_debug'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
                   'for a TET14 mortar interface.'
+    recover = false
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
