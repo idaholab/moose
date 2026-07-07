@@ -481,9 +481,10 @@ FEProblemSolve::solve()
     converged = false;
     while (!converged)
     {
-      _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
-               << ":" << COLOR_DEFAULT << "\n"
-               << std::endl;
+      if (_using_multi_sys_fp_iterations)
+        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
+                 << ":" << COLOR_DEFAULT << "\n"
+                 << std::endl;
 
       // Loop over each system
       for (const auto sys_i : index_range(_systems))
