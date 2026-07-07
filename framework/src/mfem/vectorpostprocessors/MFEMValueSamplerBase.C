@@ -42,21 +42,13 @@ mfem::FindPointsGSLIB::AvgType
 get_avg_type(const MooseEnum & avg_type)
 {
   if (avg_type == "NONE")
-  {
     return mfem::FindPointsGSLIB::AvgType::NONE;
-  }
   else if (avg_type == "ARITHMETIC")
-  {
     return mfem::FindPointsGSLIB::AvgType::ARITHMETIC;
-  }
   else if (avg_type == "HARMONIC")
-  {
     return mfem::FindPointsGSLIB::AvgType::HARMONIC;
-  }
   else
-  {
     mooseError("Unknown average type: ", avg_type);
-  }
 }
 }
 
