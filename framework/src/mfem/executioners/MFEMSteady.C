@@ -42,7 +42,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   {
     std::string name_tmp = "default_steady";
     std::string type_tmp = "ProblemOperatorBuilderSteady";
-    InputParameters params_tmp = emptyInputParameters();
+    InputParameters params_tmp = _factory.getValidParams("ProblemOperatorBuilderSteady");
     _mfem_problem.addMFEMProblemOperator(type_tmp, name_tmp, params_tmp);
   }
 

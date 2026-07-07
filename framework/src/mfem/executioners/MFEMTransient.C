@@ -36,7 +36,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
   {
     std::string name_tmp = "default_transient";
     std::string type_tmp = "ProblemOperatorBuilderTransient";
-    InputParameters params_tmp = emptyInputParameters();
+    InputParameters params_tmp = _factory.getValidParams("ProblemOperatorBuilderTransient");
     _mfem_problem.addMFEMProblemOperator(type_tmp, name_tmp, params_tmp);
   }
 
