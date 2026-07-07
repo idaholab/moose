@@ -11,6 +11,9 @@
 
 #include "AuxKernel.h"
 
+/**
+ * Auxiliary kernel to return the current element ID from the mesh.
+ */
 class ElementIDAux : public AuxKernel
 {
 public:
