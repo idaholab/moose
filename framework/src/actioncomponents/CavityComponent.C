@@ -147,6 +147,30 @@ CavityComponent::addMeshGenerators()
         "XYDelaunayGenerator", name() + "_triangulation", params);
     _mg_names.push_back(name() + "_triangulation");
   }
+  else
+  {
+    InputParameters params = _factory.getValidParams("XYZDelaunayGenerator");
+    params.set<MeshGeneratorName>("boundary") = enclosure_surface_mg;
+    params.set<BoundaryName>("output_boundary") = name() + "_outer";
+    params.set<std::vector<MeshGeneratorName>>("holes") = holes_mgs;
+    params.set<std::vector<BoundaryName>>("hole_boundaries") = holes_boundaries;
+    params.set<Real>("desired_volume") = _target_elem_volume;
+    if (isParamValid("block"))
+    {
+      const auto block_name = getParam<SubdomainName>("block");
+      params.set<SubdomainName>("output_subdomain_name") = block_name;
+      _blocks.push_back(block_name);
+    }
+    // TODO: figure out the stitching. we want to keep our hex mesh in the volume
+    // and have the transition layer be in the reflector.
+    params.set<MooseEnum>("conversion_method") = "SURFACE";
+    params.set<bool>("convert_holes_for_stitching") = true;
+    params.set<bool>("output") = _verbose;
+    params.set<bool>("show_info") = _verbose;
+    const auto mg_name = name() + "_tetrahedralization";
+    _app.getMeshGeneratorSystem().addMeshGenerator("XYZDelaunayGenerator", mg_name, params);
+    _mg_names.push_back(mg_name);
+  }
 
   // Now stitch to these components' meshes. The components may already be part of one or
   // more larger group(s) of components so we retrieve the mesh generators creating those
