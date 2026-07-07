@@ -2,7 +2,8 @@
     [sphere]
         type = SphereMeshGenerator
         nr = 2
-        radius = 4
+        radius = 2
+        n_smooth = 1
     []
 
     [myDualGen]

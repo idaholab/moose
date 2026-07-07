@@ -22,7 +22,7 @@ This mesh generator does not support taking Voronoi duals of 3D meshes.
 In 3D, barycentric dual polyhedra may be non-convex near boundaries, reentrant corners, or preserved
 interfaces. The [!param](/Mesh/DualMeshGenerator/concave_treatment) parameter controls the ordered
 treatments used for these cells. The available treatments can split the polyhedron, cut it into
-convex child polyhedra, or tetrahedralize it with Netgen.
+convex child polyhedra, or tetrahedralize it with NetGen.
 
 The [!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) parameter treats interfaces
 between primal subdomains like preserved external boundaries. The
