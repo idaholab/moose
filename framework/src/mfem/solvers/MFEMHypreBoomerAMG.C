@@ -73,7 +73,7 @@ void
 MFEMHypreBoomerAMG::Update()
 {
   if (IsLOR(*this))
-    Moose::MFEM::LORLinearSolverBase<mfem::HypreBoomerAMG>::SetupLOR(*this, *_equation_system);
+    SetLORSolver(*this, *_equation_system);
 }
 
 #endif
