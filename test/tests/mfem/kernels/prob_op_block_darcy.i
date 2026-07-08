@@ -84,7 +84,9 @@
 []
 
 [ProblemOperator]
- type = MFEMProblemOperatorBuilderSteady
+  [default_steady1]
+    type = ProblemOperatorBuilderSteady
+  []
 []
 
 [Executioner]

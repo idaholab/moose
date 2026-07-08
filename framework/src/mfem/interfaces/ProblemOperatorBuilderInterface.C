@@ -21,6 +21,7 @@ Moose::MFEM::ProblemOperatorBuilderInterface::validParams()
   InputParameters params = MFEMObject::validParams();
   params.registerBase("Moose::MFEM::ProblemOperatorBuilderInterface");
   params.registerSystemAttributeName("Moose::MFEM::ProblemOperatorBuilderInterface");
+  params.addParam<VariableName>("variable","Variable labelling the problem operator");
   return params;
 };
 
