@@ -336,16 +336,14 @@ CavityComponent::addMeshGenerators()
     _mg_names.push_back(final_mg + "_fused_exterior_surfaces");
 
     // Form stitching pairs for each final mesh generator
-    final_stitching_boundaries.push_back({cavity_inner_boundaries[i_mg], fused_boundary});
+    final_stitching_boundaries.push_back({fused_boundary, cavity_inner_boundaries[i_mg]});
     // These MGs with the fused surface serve as inputs to the stitcher
-    mgs_to_stitch_vec.push_back(final_mg + "_fused_exterior_surfaces");
+    mgs_to_stitch_vec.insert(mgs_to_stitch_vec.begin(), final_mg + "_fused_exterior_surfaces");
   }
 
   // Stitch the (cavity + boundary) layers to the components
   InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
-  std::cout << "Input MGs " << Moose::stringify(mgs_to_stitch_vec) << std::endl;
   stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = mgs_to_stitch_vec;
-  std::cout << "Stitching bdies " << Moose::stringify(final_stitching_boundaries) << std::endl;
   stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
       final_stitching_boundaries;
   stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = false;
