@@ -83,6 +83,17 @@ TEST(Conversion, ExecFlagType)
   EXPECT_EQ(Moose::stringify(EXEC_NONE), "NONE");
 }
 
+TEST(Conversion, TimeIntegratorType)
+{
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_IMPLICIT_EULER), "IMPLICIT_EULER");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_EXPLICIT_EULER), "EXPLICIT_EULER");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_CRANK_NICOLSON), "CRANK_NICOLSON");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_BDF2), "BDF2");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_EXPLICIT_MIDPOINT), "EXPLICIT_MIDPOINT");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_LSTABLE_DIRK2), "LSTABLE_DIRK2");
+  EXPECT_EQ(Moose::stringify(Moose::TimeIntegratorType::TI_EXPLICIT_TVD_RK_2), "EXPLICIT_TVDRK2");
+}
+
 TEST(Conversion, stringifyExact)
 {
   EXPECT_EQ(Moose::stringifyExact(libMesh::pi), "3.1415926535897931");

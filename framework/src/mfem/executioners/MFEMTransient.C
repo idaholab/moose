@@ -47,6 +47,12 @@ MFEMTransient::init()
 {
   TransientBase::init();
 
+  // verify that the requested time integration scheme is actually supported by MFEM transient
+  if (getTimeScheme() != Moose::TimeIntegratorType::TI_IMPLICIT_EULER)
+    paramError("scheme",
+               "Time Integration scheme \"" + stringify(getTimeScheme()) +
+                   "\" is not supported by MFEMTransient Executioner.");
+
   if (_mfem_problem_data.nonlinear_solver)
     _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
         _mfem_problem_data.nonlinear_solver->RequiresGradient());

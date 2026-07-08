@@ -201,6 +201,15 @@
     recover = false
     restep = false
   []
+  [MFEMTransientScheme]
+    type = RunException
+    input = heattransfer.i
+    cli_args = 'Executioner/scheme=bdf2'
+    expect_err = 'Time Integration scheme "BDF2" is not supported by MFEMTransient Executioner.'
+    requirement = 'The system shall report an error if the user specifies an unsupported time integration scheme.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+  []
   [MFEMMixedHeatTransfer]
     type = XMLDiff
     input = mixed_heattransfer.i
