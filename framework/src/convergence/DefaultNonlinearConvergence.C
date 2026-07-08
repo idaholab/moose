@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "ConvergenceIterationTypes.h"
 
-#include "libmesh/equation_systems.h"
+#include "libmesh/system.h"
 
 // PETSc includes
 #include <petsc.h>
@@ -46,22 +46,19 @@ DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters &
     _nl_max_pingpong(getSharedExecutionerParam<unsigned int>("n_max_nonlinear_pingpong")),
     _nl_current_pingpong(0)
 {
-  EquationSystems & es = _fe_problem.es();
+}
 
-  es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getSharedExecutionerParam<unsigned int>("nl_max_its");
-  es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getSharedExecutionerParam<unsigned int>("nl_max_funcs");
-  es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_abs_tol");
-  es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_rel_tol");
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") =
-      getSharedExecutionerParam<Real>("nl_div_tol");
-  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getSharedExecutionerParam<Real>("nl_abs_step_tol");
-  es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getSharedExecutionerParam<Real>("nl_rel_step_tol");
+void
+DefaultNonlinearConvergence::initialSetup()
+{
+  DefaultConvergenceBase::initialSetup();
+
+  // This method is also called in preSolve(), which will overwrite the parameters set here.
+  // It needs to be called here to collect the names of any duplicate parameters for the
+  // checkDuplicateSetSharedExecutionerParams() check. It needs to be called in preSolve()
+  // because it needs to know the current nonlinear system; Convergence objects do not know
+  // their "associated" nonlinear system (and they could in fact have multiple).
+  setNonlinearSystemParameters();
 }
 
 void
@@ -71,6 +68,36 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 
   if (it_type != ConvergenceIterationTypes::NONLINEAR)
     mooseError("DefaultNonlinearConvergence can only be used with nonlinear solves.");
+}
+
+void
+DefaultNonlinearConvergence::preSolve()
+{
+  DefaultConvergenceBase::preSolve();
+
+  setNonlinearSystemParameters();
+}
+
+void
+DefaultNonlinearConvergence::setNonlinearSystemParameters()
+{
+  NonlinearSystemBase & nl_sys = _fe_problem.currentNonlinearSystem();
+
+  auto & params = nl_sys.system().parameters;
+  params.set<unsigned int>("nonlinear solver maximum iterations") =
+      getSharedExecutionerParam<unsigned int>("nl_max_its");
+  params.set<unsigned int>("nonlinear solver maximum function evaluations") =
+      getSharedExecutionerParam<unsigned int>("nl_max_funcs");
+  params.set<Real>("nonlinear solver absolute residual tolerance") =
+      getSharedExecutionerParam<Real>("nl_abs_tol");
+  params.set<Real>("nonlinear solver relative residual tolerance") =
+      getSharedExecutionerParam<Real>("nl_rel_tol");
+  params.set<Real>("nonlinear solver divergence tolerance") =
+      getSharedExecutionerParam<Real>("nl_div_tol");
+  params.set<Real>("nonlinear solver absolute step tolerance") =
+      getSharedExecutionerParam<Real>("nl_abs_step_tol");
+  params.set<Real>("nonlinear solver relative step tolerance") =
+      getSharedExecutionerParam<Real>("nl_rel_step_tol");
 }
 
 bool
