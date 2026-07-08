@@ -10,12 +10,14 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorQuadratureFunctionCoefficient.h"
-#include "libmesh/int_range.h"
 
 MFEMVectorQuadratureFunctionCoefficient::MFEMVectorQuadratureFunctionCoefficient(
-    mfem::VectorCoefficient & source, mfem::QuadratureFunction & qf, UpdatePolicy update_policy)
+    mfem::VectorCoefficient & source,
+    mfem::QuadratureFunction & qf,
+    UpdatePolicy update_policy,
+    const std::string & name)
   : mfem::VectorQuadratureFunctionCoefficient(qf),
-    MFEMQuadratureFunctionCoefficientBase(update_policy),
+    MFEMQuadratureFunctionCoefficientBase(update_policy, name),
     _source(source),
     _qf(qf)
 {
@@ -35,6 +37,7 @@ MFEMVectorQuadratureFunctionCoefficient::Eval(mfem::Vector & V,
 {
   if (_dirty)
     refresh();
+  checkIntegrationRule(_qf, T, ip);
   mfem::VectorQuadratureFunctionCoefficient::Eval(V, T, ip);
 }
 

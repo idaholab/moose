@@ -13,10 +13,6 @@
 
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 /**
  * Scalar coefficient holding precomputed values of a source coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
@@ -29,7 +25,8 @@ class MFEMScalarQuadratureFunctionCoefficient : public mfem::QuadratureFunctionC
 public:
   MFEMScalarQuadratureFunctionCoefficient(mfem::Coefficient & source,
                                           mfem::QuadratureFunction & qf,
-                                          UpdatePolicy update_policy);
+                                          UpdatePolicy update_policy,
+                                          const std::string & name);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.

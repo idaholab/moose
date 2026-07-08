@@ -11,6 +11,13 @@
 
 #pragma once
 
+namespace mfem
+{
+class QuadratureFunction;
+class ElementTransformation;
+class IntegrationPoint;
+}
+
 /**
  * Shared lazy-update state for quadrature function coefficients. Holds the update policy and a
  * dirty flag marking whether the stored quadrature point values are stale and must be
@@ -29,8 +36,8 @@ public:
           ///< whenever trial variables are updated (e.g. between nonlinear iterations)
   };
 
-  MFEMQuadratureFunctionCoefficientBase(UpdatePolicy update_policy)
-    : _update_policy(update_policy), _dirty(true)
+  MFEMQuadratureFunctionCoefficientBase(UpdatePolicy update_policy, const std::string & name)
+    : _update_policy(update_policy), _name(name), _dirty(true)
   {
   }
 
@@ -52,8 +59,18 @@ protected:
       _dirty = true;
   }
 
+  /// Verify that the integration point @a ip supplied by a consuming integrator belongs to the
+  /// same quadrature rule the values in @a qf are stored on. Errors, naming the quadrature order
+  /// the coefficient should use, if the rules do not match. The stored values are indexed by
+  /// quadrature point, so a mismatched rule would silently read values from the wrong points.
+  void checkIntegrationRule(const mfem::QuadratureFunction & qf,
+                            mfem::ElementTransformation & T,
+                            const mfem::IntegrationPoint & ip) const;
+
   /// When the stored values are re-projected from the source coefficient.
   const UpdatePolicy _update_policy;
+  /// Name of the owning MOOSE object, used in error messages.
+  const std::string _name;
   /// Whether the stored values are stale and must be re-projected before use.
   bool _dirty;
 };

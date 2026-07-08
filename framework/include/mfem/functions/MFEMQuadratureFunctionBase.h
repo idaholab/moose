@@ -14,10 +14,6 @@
 #include "MFEMObject.h"
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 /**
  * Base class for MOOSE objects declaring an MFEM coefficient backed by precomputed values of a
  * source coefficient on quadrature points. Owns the quadrature space shared by the derived

@@ -21,4 +21,15 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMScalarQuadratureFunctionOrderMismatch]
+    type = RunException
+    input = quadrature_function_source.i
+    cli_args = 'QuadratureFunctions/qf_source/order=6'
+    expect_err = "Set 'order = 2'"
+    design = 'MFEMScalarQuadratureFunction.md'
+    requirement = 'The system shall report an error, naming the required quadrature order, when a '
+                  'quadrature function coefficient is evaluated by an integrator using a different '
+                  'integration rule.'
+    capabilities = 'mfem'
+  []
 []

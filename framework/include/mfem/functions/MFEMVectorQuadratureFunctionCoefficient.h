@@ -13,10 +13,6 @@
 
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 /**
  * Vector coefficient holding precomputed values of a source vector coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
@@ -29,7 +25,8 @@ class MFEMVectorQuadratureFunctionCoefficient : public mfem::VectorQuadratureFun
 public:
   MFEMVectorQuadratureFunctionCoefficient(mfem::VectorCoefficient & source,
                                           mfem::QuadratureFunction & qf,
-                                          UpdatePolicy update_policy);
+                                          UpdatePolicy update_policy,
+                                          const std::string & name);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.
