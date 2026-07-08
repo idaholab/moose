@@ -4299,3 +4299,9 @@ NonlinearSystemBase::getFieldSplitPreconditioner()
 
   return *_fsp;
 }
+
+Convergence &
+NonlinearSystemBase::convergence()
+{
+  return _fe_problem.getConvergence(_convergence_name);
+}

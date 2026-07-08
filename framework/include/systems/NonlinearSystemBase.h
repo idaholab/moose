@@ -47,6 +47,7 @@ class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
+class Convergence;
 
 // libMesh forward declarations
 namespace libMesh
@@ -773,6 +774,15 @@ public:
    */
   void destroyColoring();
 
+  /// Sets the name of the associated Convergence object
+  void setConvergenceName(const ConvergenceName & convergence_name)
+  {
+    _convergence_name = convergence_name;
+  }
+
+  /// Retrieves the associated Convergence object
+  Convergence & convergence();
+
 protected:
   /**
    * Compute the residual for a given tag
@@ -1110,4 +1120,7 @@ private:
 
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
+
+  /// Associated convergence object name
+  ConvergenceName _convergence_name;
 };
