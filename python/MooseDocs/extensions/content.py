@@ -525,8 +525,8 @@ class RenderContentOutline(components.RenderComponent):
                     previous = current
 
     def createLatex(self, parent, token, page):
-        msg = "Warning: The Content Extension's 'outline' command is not supported for LaTex documents."
-        latex.String(parent, content=msg)
+        msg = "The Content Extension's 'outline' command is not supported for LaTeX documents."
+        LOG.warning(msg)
 
 
 class RenderPagination(components.RenderComponent):
@@ -572,5 +572,5 @@ class RenderPagination(components.RenderComponent):
         )
 
     def createLatex(self, parent, token, page):
-        msg = "Warning: The Content Extension's 'pagination' command is not supported for LaTeX documents."
-        latex.String(parent, content=msg)
+        msg = "The Content Extension's 'pagination' command is not supported for LaTeX documents."
+        LOG.warning(msg)

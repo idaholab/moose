@@ -422,7 +422,7 @@ PorousFlowActionBase::addMassFractionMaterial(bool at_nodes)
   if (_current_task == "add_material")
   {
     if (!(parameters().hasDefaultCoupledValue("mass_fraction_vars") ||
-          parameters().hasCoupledValue("mass_fraction_vars")))
+          parameters().hasCoupledVar("mass_fraction_vars")))
       mooseError("Attempt to add a PorousFlowMassFraction material without setting the "
                  "mass_fraction_vars");
 

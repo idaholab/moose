@@ -1,0 +1,22 @@
+[Tests]
+  design = 'meshgenerators/RBBMappingConverter.md'
+  issues = '#18768'
+  [test]
+    requirement = "The system shall be able to "
+    [quad_disk_rbb]
+      type = 'CSVDiff'
+      input = 'circle_rbb.i'
+      csvdiff = 'circle_rbb_output.csv'
+      recover = false
+      detail ='construct an isogeometric 2D circle.'
+    []
+    [tri_disk_rbb]
+      type = 'CSVDiff'
+      input = 'circle_rbb.i'
+      csvdiff = 'tri_circle_rbb_output.csv'
+      cli_args = 'Mesh/sphere/elem_type=TRI6 Outputs/file_base=tri_circle_rbb_output'
+      recover = false
+      detail ='construct an isogeometric 2D circle from triangles.'
+    []
+  []
+[]

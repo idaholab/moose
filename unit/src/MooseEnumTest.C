@@ -236,7 +236,7 @@ TEST(MultiMooseEnum, testExecuteOn)
   EXPECT_EQ(exec_enum.getRawNames(),
             "NONE INITIAL LINEAR LINEAR_CONVERGENCE NONLINEAR NONLINEAR_CONVERGENCE POSTCHECK "
             "TIMESTEP_END TIMESTEP_BEGIN MULTIAPP_FIXED_POINT_END MULTIAPP_FIXED_POINT_BEGIN "
-            "MULTIAPP_FIXED_POINT_CONVERGENCE FINAL CUSTOM");
+            "MULTIAPP_FIXED_POINT_CONVERGENCE MULTISYSTEM_FIXED_POINT_CONVERGENCE FINAL CUSTOM");
   std::vector<std::string> opts = {"NONE",
                                    "INITIAL",
                                    "LINEAR",
@@ -249,6 +249,7 @@ TEST(MultiMooseEnum, testExecuteOn)
                                    "MULTIAPP_FIXED_POINT_END",
                                    "MULTIAPP_FIXED_POINT_BEGIN",
                                    "MULTIAPP_FIXED_POINT_CONVERGENCE",
+                                   "MULTISYSTEM_FIXED_POINT_CONVERGENCE",
                                    "FINAL",
                                    "CUSTOM"};
   EXPECT_EQ(exec_enum.getNames(), opts);

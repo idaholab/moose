@@ -491,7 +491,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _ready_to_exit(false),
     _exit_code(0),
     _initial_from_file(false),
-    _distributed_mesh_on_command_line(false),
+    _distributed_mesh_on_command_line(getParam<bool>("distributed_mesh")),
     _recover(false),
     _restart(false),
     _split_mesh(false),
@@ -867,8 +867,6 @@ MooseApp::setupOptions()
 
   if (getParam<bool>("error_override"))
     setErrorOverridden();
-
-  _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
   if (getParam<bool>("trap_fpe"))
   {
