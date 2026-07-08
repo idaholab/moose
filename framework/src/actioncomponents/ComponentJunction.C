@@ -405,7 +405,9 @@ ComponentJunction::addMeshGenerators()
 
   // For now this is a safe choice. We might want to decide otherwise once we
   // do mixed-dimensions. Build the junction with the dimension of the first component?
-  mooseAssert(dimension_first == dimension_second, "Should be the same");
+  mooseAssert(dimension_first == dimension_second,
+              "Should be the same: " + std::to_string(dimension_first) + " " +
+                  std::to_string(dimension_second));
   _dimension = std::max(dimension_first, dimension_second);
 }
 
