@@ -82,6 +82,7 @@
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
 #include "AutomaticMortarGeneration.h"
+#include "Convergence.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -4267,6 +4268,8 @@ NonlinearSystemBase::preSolve()
   // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
+
+  convergence().preSolve();
 
   return true;
 }
