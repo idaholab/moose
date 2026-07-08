@@ -1,4 +1,4 @@
-# MMS verification of p-multigrid (geometric multigrid) preconditioner.
+# Diffusion solve using a p-multigrid (geometric multigrid) preconditioner.
 #
 # PDE:  -Laplacian(u) = f  on [0,1]^2
 # Exact solution: u = sin(pi x)sin(pi y)
@@ -34,6 +34,7 @@
   [h1_hierarchy]
     type = MFEMFESpaceHierarchy
     fespace = H1FESpace
+    # One refinement entry adds the fine p=2 level, giving two total levels.
     refinements = '2'
   []
 []

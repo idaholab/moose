@@ -11,15 +11,19 @@
 
 #pragma once
 
+#include "MooseError.h"
+
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
-// Forward declaration - full header (mfem/fem/fespacehierarchy.hpp) included by
-// translation units that create or directly access FESpaceHierarchies.
 namespace mfem
 {
+class FiniteElementCollection;
+class ParFiniteElementSpace;
+class ParSubMesh;
+class ParGridFunction;
+class ParComplexGridFunction;
 class ParFiniteElementSpaceHierarchy;
 }
 
@@ -232,12 +236,11 @@ private:
   const std::string null_str;
 };
 
-using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
-using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
-using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
-using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
-using ComplexGridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction>;
-
+using FECollections = NamedFieldsMap<mfem::FiniteElementCollection>;
+using FESpaces = NamedFieldsMap<mfem::ParFiniteElementSpace>;
+using SubMeshes = NamedFieldsMap<mfem::ParSubMesh>;
+using GridFunctions = NamedFieldsMap<mfem::ParGridFunction>;
+using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
 using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
 
 } // namespace Moose::MFEM

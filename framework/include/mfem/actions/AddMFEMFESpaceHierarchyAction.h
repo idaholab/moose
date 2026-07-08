@@ -16,7 +16,7 @@
 
 /**
  * Action for the [FESpaceHierarchies] input block. Each sub-block adds a
- * Moose::MFEM::FESpaceHierarchy object to the problem.
+ * MFEMFESpaceHierarchy object to the problem.
  *
  * [FESpaceHierarchies]
  *   [my_hierarchy]

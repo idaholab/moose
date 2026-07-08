@@ -17,7 +17,7 @@ InputParameters
 AddMFEMFESpaceHierarchyAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a Moose::MFEM::FESpaceHierarchy object to the simulation.");
+  params.addClassDescription("Add an MFEMFESpaceHierarchy object to the simulation.");
   return params;
 }
 

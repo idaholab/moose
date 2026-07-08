@@ -17,7 +17,7 @@
 namespace Moose::MFEM
 {
 /**
- * Steady-state ProblemOperator that prepares and solves a single EquationSystem each step.
+ * Steady-state ProblemOperator that prepares and solves a single EquationSystem.
  *
  * On each call to Solve() this class:
  *   1. Forms equation-system data (kernels -> weak forms -> constrained linear part and

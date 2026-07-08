@@ -40,10 +40,8 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 {
   std::vector<MFEMSolverName> dependencies;
 
-  for (const auto & [param_name, value] : parameters)
+  for (const auto & [param_name, _] : parameters)
   {
-    libmesh_ignore(value);
-
     if (parameters.isPrivate(param_name) || !parameters.isParamValid(param_name))
       continue;
 

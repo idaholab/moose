@@ -52,10 +52,10 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
   const bool has_fespace = isParamSetByUser("fespace");
   const bool has_hierarchy = isParamSetByUser("fespace_hierarchy");
 
-  if (has_fespace == has_hierarchy)
-    mooseError("Variable '",
-               name(),
-               "': exactly one of 'fespace' or 'fespace_hierarchy' must be provided.");
+  if (has_fespace && has_hierarchy)
+    paramError("fespace_hierarchy", "Cannot specify both 'fespace' and 'fespace_hierarchy'.");
+  if (!has_fespace && !has_hierarchy)
+    paramError("fespace", "Either 'fespace' or 'fespace_hierarchy' must be provided.");
 
   if (has_fespace)
   {

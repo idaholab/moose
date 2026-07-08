@@ -28,7 +28,7 @@ public:
   std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
 
   /// Returns a reference to the fespace used by the gridfunction. Only valid when constructed via
-  /// `fespace`; throws if the variable was constructed via `fespace_hierarchy`.
+  /// `fespace`; asserts if the variable was constructed via `fespace_hierarchy`.
   const MFEMFESpace & getFESpace() const
   {
     mooseAssert(_fespace_ptr, "getFESpace() called on a hierarchy-backed variable");

@@ -24,8 +24,8 @@ MFEMFESpaceHierarchy::validParams()
   params.addClassDescription(
       "Builds a mfem::ParFiniteElementSpaceHierarchy from a base FESpace by applying a "
       "sequence of h-refinements ('h') and/or p-refinements (integer order strings).");
-  params.addRequiredParam<std::string>("fespace",
-                                       "Name of the base (coarsest-level) FESpace object.");
+  params.addRequiredParam<MFEMFESpaceName>("fespace",
+                                           "Name of the base (coarsest-level) FESpace object.");
   params.addRequiredParam<std::vector<std::string>>(
       "refinements",
       "Ordered sequence of refinements. Each entry is 'h' for uniform h-refinement or "
@@ -43,11 +43,11 @@ MFEMFESpaceHierarchy::MFEMFESpaceHierarchy(const InputParameters & parameters)
 void
 MFEMFESpaceHierarchy::buildHierarchy()
 {
-  const auto & fespace_name = getParam<std::string>("fespace");
+  const auto & fespace_name = getParam<MFEMFESpaceName>("fespace");
   const auto & refinements = getParam<std::vector<std::string>>("refinements");
 
   if (refinements.empty())
-    mooseError("MFEMFESpaceHierarchy '", name(), "': 'refinements' must not be empty.");
+    paramError("refinements", "must not be empty.");
 
   const auto & base_fespace_object =
       getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace", fespace_name);
@@ -68,9 +68,7 @@ MFEMFESpaceHierarchy::buildHierarchy()
   for (const auto & entry : refinements)
   {
     if (entry == "h")
-    {
       _hierarchy->AddUniformlyRefinedLevel(vdim, ordering);
-    }
     else
     {
       // p-refinement: parse the target polynomial order.
@@ -81,36 +79,28 @@ MFEMFESpaceHierarchy::buildHierarchy()
       }
       catch (const std::exception &)
       {
-        mooseError("MFEMFESpaceHierarchy '",
-                   name(),
-                   "': refinement entry '",
+        paramError("refinements",
+                   "entry '",
                    entry,
                    "' is neither 'h' nor a valid integer polynomial order.");
       }
 
       if (new_order < 1)
-        mooseError("MFEMFESpaceHierarchy '",
-                   name(),
-                   "': p-refinement order must be >= 1, got ",
-                   new_order,
-                   ".");
+        paramError("refinements", "p-refinement order must be >= 1, got ", new_order, ".");
 
       // Derive the new FEC name from the current finest level's FEC.
       const std::string current_fec_name = _hierarchy->GetFinestFESpace().FEColl()->Name();
       const auto pos = current_fec_name.rfind("_P");
       if (pos == std::string::npos)
-        mooseError("MFEMFESpaceHierarchy '",
-                   name(),
-                   "': cannot infer polynomial order from FEC name '",
+        paramError("refinements",
+                   "cannot infer polynomial order from FEC name '",
                    current_fec_name,
                    "' - expected a '_P<N>' suffix.");
 
       const int current_order = std::stoi(current_fec_name.substr(pos + 2));
       if (new_order <= current_order)
-        mooseError("MFEMFESpaceHierarchy '",
-                   name(),
-                   "': p-refinement orders must be strictly increasing; "
-                   "requested order ",
+        paramError("refinements",
+                   "p-refinement orders must be strictly increasing; requested order ",
                    new_order,
                    " is not greater than the current finest level's order ",
                    current_order,

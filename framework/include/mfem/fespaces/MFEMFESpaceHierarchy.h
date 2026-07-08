@@ -28,7 +28,7 @@
  * Total number of levels: refinements.size() + 1.
  *
  * The returned shared_ptr (getHierarchyShared()) may be co-owned by
- * Moose::MFEM::GeometricMultigridSolver and stored in ProblemData::fespace_hierarchies
+ * MFEMGeometricMultigridSolver and stored in ProblemData::fespace_hierarchies
  * to guarantee the hierarchy outlives any solver that references it.
  */
 class MFEMFESpaceHierarchy : public MFEMObject
@@ -54,7 +54,7 @@ public:
 private:
   void buildHierarchy();
 
-  /// The hierarchy - shared_ptr so that GMS and ProblemData can co-own.
+  /// The hierarchy - shared_ptr so that MFEMGeometricMultigridSolver and ProblemData can co-own.
   std::shared_ptr<mfem::ParFiniteElementSpaceHierarchy> _hierarchy;
 
   /// FECs for p-refined levels. MFEM does not own them, so we keep them alive here.

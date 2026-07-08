@@ -21,18 +21,17 @@
  * P-multigrid / geometric multigrid preconditioner backed by
  * mfem::GeometricMultigrid.
  *
- * The hierarchy is provided by a Moose::MFEM::FESpaceHierarchy object. The
+ * The hierarchy is provided by an MFEMFESpaceHierarchy object. The
  * finest-level operator is the constrained operator passed to SetOperator().
  * Coarser levels are rediscretized from the equation system's bilinear or
  * nonlinear integrators.
  *
- * Limitations (current implementation):
+ * Current implementation:
  *  - Only single-variable equation systems are supported.
- *  - Equation systems with active mixed bilinear form contributions are not
- *    supported (see open question #7 in pMG_plan.md).
- *  - For nonlinear equation systems the coarse-level linearization points are
- *    restricted from the most recent fine-level EquationSystem::GetGradient()
- *    point.
+ *  - For nonlinear equation systems, coarse-level operators are rediscretized at
+ *    linearization points obtained by restricting the state vector used for the most recent
+ *    fine-level EquationSystem::GetGradient() call, rather than by applying a Galerkin projection
+ *    to the fine-level Jacobian.
  *
  * Example input:
  * @code
@@ -44,9 +43,9 @@
  *     type = MFEMGeometricMultigridSolver
  *     variable          = u
  *     fespace_hierarchy = h1_hierarchy
- *     smoothers         = 'boomeramg'   # broadcast to all interior levels
+ *     smoothers         = 'boomeramg'   # use on all interior levels
  *     coarse_solver     = boomeramg
- *     assembly_levels   = 'legacy'      # broadcast to all levels
+ *     assembly_levels   = 'legacy'      # use on all levels
  *   []
  *   [main]
  *     type = MFEMCGSolver
@@ -71,8 +70,9 @@ public:
 private:
   /// Map assembly-level string ("legacy", "full", "element", "partial", "none")
   /// to the corresponding mfem::AssemblyLevel enum value.
-  static mfem::AssemblyLevel ParseAssemblyLevel(const std::string & s);
+  mfem::AssemblyLevel ParseAssemblyLevel(const std::string & s) const;
 
+  /// Rebuild the multigrid object and per-level operators for the supplied finest-level operator.
   void BuildMultigrid(const mfem::Operator & op);
 
   /**
@@ -86,47 +86,54 @@ private:
   class MGProxy : public mfem::Solver
   {
   public:
-    MGProxy(MFEMGeometricMultigridSolver & owner) : _owner(owner) { iterative_mode = false; }
+    /// Constructs a proxy that delegates multigrid rebuilding to the owning MOOSE solver.
+    MGProxy(MFEMGeometricMultigridSolver & owner);
 
-    void setMG(mfem::GeometricMultigrid * mg)
-    {
-      _mg = mg;
-      if (mg)
-      {
-        height = mg->Height();
-        width = mg->Width();
-      }
-    }
+    /// Updates the concrete MFEM multigrid object used by Mult().
+    void setMG(mfem::GeometricMultigrid & mg);
 
-    void SetOperator(const mfem::Operator & op) override { _owner.BuildMultigrid(op); }
+    /// Rebuilds the owner's multigrid hierarchy for the new outer-solver operator.
+    void SetOperator(const mfem::Operator & op) override;
 
-    void Mult(const mfem::Vector & x, mfem::Vector & y) const override
-    {
-      MFEM_VERIFY(_mg, "MGProxy: GeometricMultigrid not yet built");
-      _mg->Mult(x, y);
-    }
+    /// Applies the current concrete MFEM multigrid preconditioner.
+    void Mult(const mfem::Vector & x, mfem::Vector & y) const override;
 
   private:
+    /// Solver object that owns the concrete multigrid and level data.
     MFEMGeometricMultigridSolver & _owner;
+
+    /// Non-owning pointer to the currently active concrete MFEM multigrid object.
     mfem::GeometricMultigrid * _mg = nullptr;
   };
 
-  // ---- parameters (resolved at construction) ----
+  /// Trial variable whose operator is preconditioned by this solver.
   const std::string _var_name;
+
+  /// Finite element space hierarchy defining the multigrid levels.
   std::shared_ptr<mfem::ParFiniteElementSpaceHierarchy> _hierarchy;
-  const std::vector<MFEMSolverName> _smoother_names; ///< Names of interior-level smoothers
+
+  /// Names of solvers used as smoothers on interior multigrid levels.
+  const std::vector<MFEMSolverName> _smoother_names;
+
+  /// Name of the solver used on the coarsest multigrid level.
   const MFEMSolverName _coarse_solver_name;
-  std::vector<mfem::AssemblyLevel> _assembly_levels; ///< Per-level; broadcast if length 1
 
-  MGProxy * _mg_proxy = nullptr; ///< Non-owning pointer into _solver
+  /// Assembly level requested for each multigrid level after optional single-value expansion.
+  std::vector<mfem::AssemblyLevel> _assembly_levels;
 
-  // ---- per-level forms - kept alive across SetOperator calls ----
+  /// Non-owning pointer to the proxy solver stored in _solver.
+  MGProxy * _mg_proxy = nullptr;
+
+  /// Rediscretized bilinear forms kept alive for the active linear coarse-level operators.
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> _level_blfs;
+
+  /// Rediscretized nonlinear forms kept alive for the active nonlinear coarse-level operators.
   std::vector<std::shared_ptr<mfem::ParNonlinearForm>> _level_nlfs;
-  // ---- constrained level operators; must be destroyed before forms ----
+
+  /// Constrained linear coarse-level operators; destroyed before the forms that own their data.
   std::vector<std::unique_ptr<mfem::OperatorHandle>> _level_ops;
 
-  // ---- actual GeometricMultigrid (replaced each SetOperator call) ----
+  /// Concrete MFEM multigrid preconditioner rebuilt on each SetOperator() call.
   std::unique_ptr<mfem::GeometricMultigrid> _mg;
 };
 

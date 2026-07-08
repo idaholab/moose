@@ -392,7 +392,9 @@ protected:
 
   /**
    * Solver definitions recorded by AddMFEMSolverAction before the dependency resolver constructs
-   * them.
+   * them. Each key is the user-provided solver object name, which corresponds to a child block
+   * name under [Solvers]. Solver parameters of type MFEMSolverName refer to these same keys when
+   * declaring dependencies between solver objects.
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
 };

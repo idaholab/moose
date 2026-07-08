@@ -37,6 +37,7 @@ protected:
   void ConstructSolver() override;
 
 private:
+  /// Degree of the Chebyshev polynomial used by the MFEM smoother.
   const int _order;
 
   /// Assembled diagonal
