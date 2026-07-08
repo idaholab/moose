@@ -9732,7 +9732,11 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
   if (convergence_names.size() != numNonlinearSystems())
     paramError("nonlinear_convergence",
                "There must be one convergence object per nonlinear system");
+
   _nonlinear_convergence_names = convergence_names;
+
+  for (const auto i : make_range(numNonlinearSystems()))
+    _nl[i]->setConvergenceName(convergence_names[i]);
 }
 
 void
