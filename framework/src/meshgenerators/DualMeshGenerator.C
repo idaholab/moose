@@ -896,12 +896,23 @@ static bool
 pointOnSegment3D(const Point & point,
                  const Point & segment_point0,
                  const Point & segment_point1,
-                 const Real = 1e-12)
+                 const Real tol = 1e-12)
 {
-  if (segment_point0.absolute_fuzzy_equals(segment_point1))
-    return segment_point0.absolute_fuzzy_equals(point);
+  const Point segment = segment_point1 - segment_point0;
+  const Real segment_length = segment.norm();
 
-  return LineSegment(segment_point0, segment_point1).contains_point(point);
+  if (segment_length <= tol)
+    return samePoint3D(segment_point0, point, tol);
+
+  const Point point_delta = point - segment_point0;
+
+  if (libMesh::cross_norm(segment, point_delta) > tol * segment_length)
+    return false;
+
+  const Real parameter = (point_delta * segment) / (segment_length * segment_length);
+  const Real parameter_tol = tol / segment_length;
+
+  return parameter >= -parameter_tol && parameter <= 1.0 + parameter_tol;
 }
 
 static void
@@ -1918,6 +1929,177 @@ tetVolume6(const Point & point0, const Point & point1, const Point & point2, con
   return libMesh::triple_product(point1 - point0, point2 - point0, point3 - point0);
 }
 
+template <typename ValidSegment>
+static bool
+triangulateSurfaceFace3D(const std::vector<Point> & side,
+                         std::vector<std::vector<Point>> & surface_triangles,
+                         const ValidSegment & valid_segment,
+                         const Real tol = 1e-12)
+{
+  if (side.size() < 3)
+    return true;
+
+  if (side.size() == 3)
+  {
+    if (!hasNonzeroArea3D(side, tol))
+      return false;
+
+    surface_triangles.push_back(side);
+    return true;
+  }
+
+  const Real area_tol = tol * tol;
+  Point normal = faceNormal3D(side, area_tol);
+
+  if (normal.norm() <= area_tol)
+    return false;
+
+  normal /= normal.norm();
+
+  Point e1;
+
+  for (const auto i : index_range(side))
+  {
+    e1 = side[(i + 1) % side.size()] - side[i];
+    e1 -= (e1 * normal) * normal;
+
+    if (e1.norm() > tol)
+    {
+      e1 /= e1.norm();
+      break;
+    }
+  }
+
+  if (e1.norm() <= tol)
+    return false;
+
+  Point e2 = normal.cross(e1);
+
+  if (e2.norm() <= tol)
+    return false;
+
+  e2 /= e2.norm();
+
+  const Point center = centroid3D(side);
+  std::vector<Point> projected_points;
+  projected_points.reserve(side.size());
+
+  for (const auto & point : side)
+  {
+    const Point point_delta = point - center;
+    projected_points.push_back(Point(point_delta * e1, point_delta * e2, 0.0));
+  }
+
+  const Real signed_area = polygonSignedArea2D(projected_points);
+
+  if (std::abs(signed_area) <= area_tol)
+    return false;
+
+  const Real orientation = signed_area > 0.0 ? 1.0 : -1.0;
+  std::vector<std::size_t> remaining_indices;
+  remaining_indices.reserve(side.size());
+
+  for (const auto i : index_range(side))
+    remaining_indices.push_back(i);
+
+  const auto pointInProjectedTriangle =
+      [&](const Point & point, const Point & a, const Point & b, const Point & c)
+  {
+    const Real signed_area0 = cross2D(point, a, b);
+    const Real signed_area1 = cross2D(point, b, c);
+    const Real signed_area2 = cross2D(point, c, a);
+
+    return (signed_area0 >= -area_tol && signed_area1 >= -area_tol && signed_area2 >= -area_tol) ||
+           (signed_area0 <= area_tol && signed_area1 <= area_tol && signed_area2 <= area_tol);
+  };
+
+  std::vector<std::vector<Point>> side_triangles;
+  side_triangles.reserve(side.size() - 2);
+
+  while (remaining_indices.size() > 3)
+  {
+    std::vector<std::size_t> candidate_positions;
+    candidate_positions.reserve(remaining_indices.size());
+
+    for (const auto position : index_range(remaining_indices))
+      candidate_positions.push_back(position);
+
+    std::sort(candidate_positions.begin(),
+              candidate_positions.end(),
+              [&](const std::size_t position0, const std::size_t position1)
+              {
+                return pointKey3D(side[remaining_indices[position0]]) <
+                       pointKey3D(side[remaining_indices[position1]]);
+              });
+
+    bool clipped_ear = false;
+
+    for (const auto position : candidate_positions)
+    {
+      const std::size_t previous_position =
+          (position + remaining_indices.size() - 1) % remaining_indices.size();
+      const std::size_t next_position = (position + 1) % remaining_indices.size();
+      const std::size_t previous_index = remaining_indices[previous_position];
+      const std::size_t current_index = remaining_indices[position];
+      const std::size_t next_index = remaining_indices[next_position];
+
+      if (!valid_segment(side[previous_index], side[next_index]))
+        continue;
+
+      const Real corner_cross = cross2D(projected_points[previous_index],
+                                        projected_points[current_index],
+                                        projected_points[next_index]);
+
+      if (orientation * corner_cross <= area_tol)
+        continue;
+
+      std::vector<Point> triangle = {side[previous_index], side[current_index], side[next_index]};
+
+      if (!hasNonzeroArea3D(triangle, area_tol))
+        continue;
+
+      bool contains_other_point = false;
+
+      for (const auto other_index : remaining_indices)
+      {
+        if (other_index == previous_index || other_index == current_index ||
+            other_index == next_index)
+          continue;
+
+        if (pointInProjectedTriangle(projected_points[other_index],
+                                     projected_points[previous_index],
+                                     projected_points[current_index],
+                                     projected_points[next_index]))
+        {
+          contains_other_point = true;
+          break;
+        }
+      }
+
+      if (contains_other_point)
+        continue;
+
+      side_triangles.push_back(std::move(triangle));
+      remaining_indices.erase(remaining_indices.begin() + position);
+      clipped_ear = true;
+      break;
+    }
+
+    if (!clipped_ear)
+      return false;
+  }
+
+  std::vector<Point> triangle = {
+      side[remaining_indices[0]], side[remaining_indices[1]], side[remaining_indices[2]]};
+
+  if (!hasNonzeroArea3D(triangle, area_tol))
+    return false;
+
+  side_triangles.push_back(std::move(triangle));
+  surface_triangles.insert(surface_triangles.end(), side_triangles.begin(), side_triangles.end());
+  return true;
+}
+
 // Triangulation, used for checking inside/outsideness of points, polyhedron watertightness,
 // and netgen tetrahedralization.
 template <typename ValidSegment>
@@ -1934,62 +2116,320 @@ surfaceTriangles3D(const std::vector<std::vector<Point>> & side_points,
     if (side.size() < 3)
       continue;
 
-    bool added_side_triangles = false;
-    std::vector<std::size_t> anchor_indices;
-    anchor_indices.reserve(side.size());
-
-    for (const auto anchor : index_range(side))
-      anchor_indices.push_back(anchor);
-
-    std::sort(anchor_indices.begin(),
-              anchor_indices.end(),
-              [&side](const std::size_t a, const std::size_t b)
-              { return pointKey3D(side[a]) < pointKey3D(side[b]); });
-
-    for (const auto anchor : anchor_indices)
-    {
-      std::vector<std::vector<Point>> side_triangles;
-      bool valid_fan = true;
-
-      for (const auto i : make_range(std::size_t(1), side.size() - 1))
-      {
-        const Point & point0 = side[anchor];
-        const Point & point1 = side[(anchor + i) % side.size()];
-        const Point & point2 = side[(anchor + i + 1) % side.size()];
-        const std::vector<Point> triangle = {point0, point1, point2};
-        const bool point0_point1_is_diagonal = i > 1;
-        const bool point2_point0_is_diagonal = i < side.size() - 2;
-
-        if ((point0_point1_is_diagonal && !valid_segment(point0, point1)) ||
-            (point2_point0_is_diagonal && !valid_segment(point2, point0)))
-        {
-          valid_fan = false;
-          break;
-        }
-
-        if (!hasNonzeroArea3D(triangle, tol))
-        {
-          valid_fan = false;
-          break;
-        }
-
-        side_triangles.push_back(triangle);
-      }
-
-      if (valid_fan)
-      {
-        surface_triangles.insert(
-            surface_triangles.end(), side_triangles.begin(), side_triangles.end());
-        added_side_triangles = true;
-        break;
-      }
-    }
-
-    if (!added_side_triangles)
+    if (!triangulateSurfaceFace3D(side, surface_triangles, valid_segment, tol))
       return false;
   }
 
   return !surface_triangles.empty();
+}
+
+static bool
+orientSurfaceTriangles3D(std::vector<std::vector<Point>> & surface_triangles,
+                         const Real tol = 1e-12)
+{
+  if (surface_triangles.empty())
+    return false;
+
+  std::vector<Point> unique_points;
+  std::vector<std::array<std::size_t, 3>> triangle_point_ids;
+  triangle_point_ids.reserve(surface_triangles.size());
+
+  const auto pointIndex = [&](const Point & point)
+  {
+    for (const auto i : index_range(unique_points))
+      if (samePoint3D(unique_points[i], point, tol))
+        return i;
+
+    unique_points.push_back(point);
+    return unique_points.size() - 1;
+  };
+
+  for (const auto & triangle : surface_triangles)
+  {
+    if (triangle.size() != 3)
+      return false;
+
+    std::array<std::size_t, 3> point_ids;
+
+    for (const auto i : index_range(point_ids))
+      point_ids[i] = pointIndex(triangle[i]);
+
+    if (point_ids[0] == point_ids[1] || point_ids[1] == point_ids[2] ||
+        point_ids[2] == point_ids[0])
+      return false;
+
+    triangle_point_ids.push_back(point_ids);
+  }
+
+  const auto surfaceEdgeKey = [](const std::size_t point0_id, const std::size_t point1_id)
+  { return std::make_pair(std::min(point0_id, point1_id), std::max(point0_id, point1_id)); };
+
+  std::map<std::pair<std::size_t, std::size_t>, std::vector<std::size_t>> edge_to_triangles;
+
+  for (const auto triangle_index : index_range(triangle_point_ids))
+  {
+    const auto & point_ids = triangle_point_ids[triangle_index];
+
+    for (const auto i : make_range(std::size_t(3)))
+      edge_to_triangles[surfaceEdgeKey(point_ids[i], point_ids[(i + 1) % point_ids.size()])]
+          .push_back(triangle_index);
+  }
+
+  for (const auto & edge_triangles : edge_to_triangles)
+    if (edge_triangles.second.size() != 2)
+      return false;
+
+  const auto edgeDirection =
+      [&](const std::size_t triangle_index,
+          const std::pair<std::size_t, std::size_t> & edge) -> std::pair<std::size_t, std::size_t>
+  {
+    const auto & point_ids = triangle_point_ids[triangle_index];
+
+    for (const auto i : make_range(std::size_t(3)))
+    {
+      const std::size_t point0_id = point_ids[i];
+      const std::size_t point1_id = point_ids[(i + 1) % point_ids.size()];
+
+      if (surfaceEdgeKey(point0_id, point1_id) == edge)
+        return {point0_id, point1_id};
+    }
+
+    return {unique_points.size(), unique_points.size()};
+  };
+
+  std::vector<bool> oriented_triangles(triangle_point_ids.size(), false);
+
+  for (const auto start_triangle : index_range(triangle_point_ids))
+  {
+    if (oriented_triangles[start_triangle])
+      continue;
+
+    std::vector<std::size_t> triangle_stack = {start_triangle};
+    oriented_triangles[start_triangle] = true;
+
+    while (!triangle_stack.empty())
+    {
+      const std::size_t triangle_index = triangle_stack.back();
+      triangle_stack.pop_back();
+      const auto & point_ids = triangle_point_ids[triangle_index];
+
+      for (const auto i : make_range(std::size_t(3)))
+      {
+        const auto edge = surfaceEdgeKey(point_ids[i], point_ids[(i + 1) % point_ids.size()]);
+        const auto & adjacent_triangles = edge_to_triangles[edge];
+        const std::size_t neighbor_triangle =
+            adjacent_triangles[0] == triangle_index ? adjacent_triangles[1] : adjacent_triangles[0];
+        const auto direction = edgeDirection(triangle_index, edge);
+        const auto neighbor_direction = edgeDirection(neighbor_triangle, edge);
+
+        if (direction.first == unique_points.size() ||
+            neighbor_direction.first == unique_points.size())
+          return false;
+
+        if (!oriented_triangles[neighbor_triangle])
+        {
+          if (direction == neighbor_direction)
+            std::swap(triangle_point_ids[neighbor_triangle][1],
+                      triangle_point_ids[neighbor_triangle][2]);
+
+          oriented_triangles[neighbor_triangle] = true;
+          triangle_stack.push_back(neighbor_triangle);
+        }
+        else if (direction == neighbor_direction)
+          return false;
+      }
+    }
+  }
+
+  for (const auto & edge_triangles : edge_to_triangles)
+  {
+    const auto direction0 = edgeDirection(edge_triangles.second[0], edge_triangles.first);
+    const auto direction1 = edgeDirection(edge_triangles.second[1], edge_triangles.first);
+
+    if (direction0.first == unique_points.size() || direction1.first == unique_points.size() ||
+        direction0 == direction1)
+      return false;
+  }
+
+  const Point reference_point = centroid3D(unique_points);
+  Real volume6 = 0.0;
+
+  for (const auto & point_ids : triangle_point_ids)
+    volume6 += tetVolume6(reference_point,
+                          unique_points[point_ids[0]],
+                          unique_points[point_ids[1]],
+                          unique_points[point_ids[2]]);
+
+  if (std::abs(volume6) <= tol * tol * tol)
+    return false;
+
+  if (volume6 < 0.0)
+    for (auto & point_ids : triangle_point_ids)
+      std::swap(point_ids[1], point_ids[2]);
+
+  for (const auto triangle_index : index_range(surface_triangles))
+    for (const auto i : make_range(std::size_t(3)))
+      surface_triangles[triangle_index][i] = unique_points[triangle_point_ids[triangle_index][i]];
+
+  return true;
+}
+
+// NetGen expects a conforming TRI3 surface. Topological edge pairing is not enough for surfaces
+// with embedded vertices or self-intersections, which can make NetGen fail below exception
+// handling.
+static bool
+surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_triangles,
+                                const Real tol = 1e-12)
+{
+  const auto triangleContainsPoint = [&](const std::vector<Point> & triangle, const Point & point)
+  {
+    for (const auto & triangle_point : triangle)
+      if (samePoint3D(triangle_point, point, tol))
+        return true;
+
+    return false;
+  };
+
+  const auto sharedPoints =
+      [&](const std::vector<Point> & triangle0, const std::vector<Point> & triangle1)
+  {
+    std::vector<Point> shared_points;
+
+    for (const auto & point0 : triangle0)
+      for (const auto & point1 : triangle1)
+        if (samePoint3D(point0, point1, tol))
+          addUniquePoint(shared_points, point0, tol);
+
+    return shared_points;
+  };
+
+  const auto intersectionIsOnSharedFeature =
+      [&](const Point & intersection, const std::vector<Point> & shared_points)
+  {
+    for (const auto & shared_point : shared_points)
+      if (samePoint3D(intersection, shared_point, tol))
+        return true;
+
+    if (shared_points.size() >= 2)
+      return pointOnSegment3D(intersection, shared_points[0], shared_points[1], tol);
+
+    return false;
+  };
+
+  const auto segmentIntersectsTriangle = [&](const Point & segment_point0,
+                                             const Point & segment_point1,
+                                             const std::vector<Point> & triangle,
+                                             Point & intersection)
+  {
+    const Point normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
+    const Real normal_norm = normal.norm();
+
+    if (normal_norm <= tol * tol)
+      return false;
+
+    const Real signed_distance0 = normal * (segment_point0 - triangle[0]);
+    const Real signed_distance1 = normal * (segment_point1 - triangle[0]);
+    const Real plane_tol = tol * normal_norm;
+
+    if (std::abs(signed_distance0) <= plane_tol && std::abs(signed_distance1) <= plane_tol)
+      return false;
+
+    if ((signed_distance0 > plane_tol && signed_distance1 > plane_tol) ||
+        (signed_distance0 < -plane_tol && signed_distance1 < -plane_tol))
+      return false;
+
+    const Real denominator = signed_distance0 - signed_distance1;
+
+    if (std::abs(denominator) <= plane_tol)
+      return false;
+
+    const Real parameter = signed_distance0 / denominator;
+    const Real segment_length = (segment_point1 - segment_point0).norm();
+    const Real parameter_tol = segment_length > tol ? tol / segment_length : tol;
+
+    if (parameter < -parameter_tol || parameter > 1.0 + parameter_tol)
+      return false;
+
+    intersection = segment_point0 + parameter * (segment_point1 - segment_point0);
+    return pointOnTriangle3D(intersection, triangle[0], triangle[1], triangle[2], tol);
+  };
+
+  for (const auto triangle_i : index_range(surface_triangles))
+  {
+    const auto & triangle = surface_triangles[triangle_i];
+
+    if (triangle.size() != 3 || !hasNonzeroArea3D(triangle, tol * tol))
+      return false;
+
+    for (const auto edge_i : make_range(std::size_t(3)))
+    {
+      const Point & edge_point0 = triangle[edge_i];
+      const Point & edge_point1 = triangle[(edge_i + 1) % triangle.size()];
+
+      for (const auto other_triangle_i : index_range(surface_triangles))
+      {
+        const auto & other_triangle = surface_triangles[other_triangle_i];
+
+        for (const auto point_i : make_range(std::size_t(3)))
+        {
+          const Point & point = other_triangle[point_i];
+
+          if (samePoint3D(point, edge_point0, tol) || samePoint3D(point, edge_point1, tol))
+            continue;
+
+          if (pointOnSegment3D(point, edge_point0, edge_point1, tol))
+            return false;
+        }
+      }
+    }
+  }
+
+  for (const auto triangle0_i : index_range(surface_triangles))
+    for (const auto triangle1_i : make_range(triangle0_i + 1, surface_triangles.size()))
+    {
+      const auto & triangle0 = surface_triangles[triangle0_i];
+      const auto & triangle1 = surface_triangles[triangle1_i];
+      const auto shared_points = sharedPoints(triangle0, triangle1);
+
+      for (const auto point_i : make_range(std::size_t(3)))
+      {
+        const Point & point = triangle0[point_i];
+
+        if (!triangleContainsPoint(triangle1, point) &&
+            pointOnTriangle3D(point, triangle1[0], triangle1[1], triangle1[2], tol))
+          return false;
+      }
+
+      for (const auto point_i : make_range(std::size_t(3)))
+      {
+        const Point & point = triangle1[point_i];
+
+        if (!triangleContainsPoint(triangle0, point) &&
+            pointOnTriangle3D(point, triangle0[0], triangle0[1], triangle0[2], tol))
+          return false;
+      }
+
+      for (const auto edge_i : make_range(std::size_t(3)))
+      {
+        Point intersection;
+
+        if (segmentIntersectsTriangle(triangle0[edge_i],
+                                      triangle0[(edge_i + 1) % triangle0.size()],
+                                      triangle1,
+                                      intersection) &&
+            !intersectionIsOnSharedFeature(intersection, shared_points))
+          return false;
+
+        if (segmentIntersectsTriangle(triangle1[edge_i],
+                                      triangle1[(edge_i + 1) % triangle1.size()],
+                                      triangle0,
+                                      intersection) &&
+            !intersectionIsOnSharedFeature(intersection, shared_points))
+          return false;
+      }
+    }
+
+  return true;
 }
 
 static bool
@@ -2336,6 +2776,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
   std::map<std::pair<SubdomainID, PointKey3D>, bool> primal_boundary_point_cache;
   std::map<std::pair<SubdomainID, SegmentKey3D>, bool> primal_boundary_segment_cache;
+
   struct SplitDualCellSidePoints3D
   {
     std::vector<std::vector<Point>> direct_netgen_side_points;
@@ -2622,18 +3063,81 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     if (!surfaceTriangles3D(side_points, surface_triangles, validSurfaceSegment, length_tol))
       return 0;
 
+    if (!orientSurfaceTriangles3D(surface_triangles, length_tol))
+      return 0;
+
+    if (!surfaceTrianglesAreConforming3D(surface_triangles, length_tol))
+      return 0;
+
     const auto addNetgenTetrahedralizedSurface = [&]()
     {
 #ifdef LIBMESH_HAVE_NETGEN
+      // NetGen is sensitive to very thin local coordinate scales. Tetrahedralize an
+      // affine-normalized copy of the surface, then map generated tetrahedra back to the original
+      // coordinates.
+      Point min_point = surface_triangles.front().front();
+      Point max_point = min_point;
+
+      for (const auto & triangle : surface_triangles)
+        for (const auto & point : triangle)
+          for (const auto component : make_range(Moose::dim))
+          {
+            min_point(component) = std::min(min_point(component), point(component));
+            max_point(component) = std::max(max_point(component), point(component));
+          }
+
+      const Point normalization_center = 0.5 * (min_point + max_point);
+      const Point normalization_extent = max_point - min_point;
+      const Real max_extent = std::max(std::max(normalization_extent(0), normalization_extent(1)),
+                                       std::max(normalization_extent(2), length_tol));
+      Point normalization_scale;
+
+      for (const auto component : make_range(Moose::dim))
+        normalization_scale(component) = normalization_extent(component) > length_tol
+                                             ? 1.0 / normalization_extent(component)
+                                             : 1.0 / max_extent;
+
+      const auto normalizePoint = [&](const Point & point)
+      {
+        Point normalized_point;
+
+        for (const auto component : make_range(Moose::dim))
+          normalized_point(component) =
+              (point(component) - normalization_center(component)) * normalization_scale(component);
+
+        return normalized_point;
+      };
+
+      const auto denormalizePoint = [&](const Point & point)
+      {
+        Point denormalized_point;
+
+        for (const auto component : make_range(Moose::dim))
+          denormalized_point(component) =
+              point(component) / normalization_scale(component) + normalization_center(component);
+
+        return denormalized_point;
+      };
+
+      std::vector<std::vector<Point>> netgen_surface_triangles = surface_triangles;
+
+      for (auto & triangle : netgen_surface_triangles)
+        for (auto & point : triangle)
+          point = normalizePoint(point);
+
+      const Real netgen_polyhedron_scale = polyhedronScale3D(netgen_surface_triangles);
+      const Real netgen_length_tol = tol * netgen_polyhedron_scale;
+      const Real netgen_volume_tol = netgen_length_tol * netgen_length_tol * netgen_length_tol;
       const Real netgen_desired_volume =
-          std::max(volume_tol, polyhedron_scale * polyhedron_scale * polyhedron_scale);
+          std::max(netgen_volume_tol,
+                   netgen_polyhedron_scale * netgen_polyhedron_scale * netgen_polyhedron_scale);
       auto netgen_mesh = buildReplicatedMesh(3);
       std::vector<Node *> boundary_nodes;
 
       const auto getBoundaryNode = [&](const Point & point)
       {
         for (auto * const node : boundary_nodes)
-          if (MooseUtils::absoluteFuzzyEqual(*node, point, length_tol))
+          if (MooseUtils::absoluteFuzzyEqual(*node, point, netgen_length_tol))
             return node;
 
         Node * const node = netgen_mesh->add_point(point);
@@ -2642,7 +3146,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         return node;
       };
 
-      for (const auto & triangle : surface_triangles)
+      for (const auto & triangle : netgen_surface_triangles)
       {
         auto tri = std::make_unique<Tri3>();
 
@@ -2678,8 +3182,10 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         if (elem->dim() != 3 || elem->n_vertices() != 4)
           continue;
 
-        std::array<Point, 4> tet_points = {
-            elem->point(0), elem->point(1), elem->point(2), elem->point(3)};
+        std::array<Point, 4> tet_points = {denormalizePoint(elem->point(0)),
+                                           denormalizePoint(elem->point(1)),
+                                           denormalizePoint(elem->point(2)),
+                                           denormalizePoint(elem->point(3))};
 
         if (std::abs(tetVolume6(tet_points[0], tet_points[1], tet_points[2], tet_points[3])) <=
             volume_tol)
