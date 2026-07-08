@@ -158,6 +158,8 @@
       type = 'CSVDiff'
       input = frictionless-mortar-action-lm-space.i
       csvdiff = 'frictionless-mortar-action-lm-space-default.csv'
+      recover = false # Setup-only DOF-count test; no transient step is advanced
+      restep = false # Setup-only DOF-count test; no transient step is advanced
       detail = 'using the displacement variable order by default'
     []
     [linear]
@@ -167,6 +169,8 @@
                  'Outputs/file_base=frictionless-mortar-action-lm-space-linear'
       csvdiff = 'frictionless-mortar-action-lm-space-linear.csv'
       prereq = 'contact_action_lm_space/match_displacement'
+      recover = false # Setup-only DOF-count test; no transient step is advanced
+      restep = false # Setup-only DOF-count test; no transient step is advanced
       detail = 'and using first-order LAGRANGE mortar variables when requested'
     []
   []
