@@ -45,6 +45,8 @@ public:
   TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
 
 protected:
+  virtual NonlinearSystemBase & nonlinearSystem() override;
+
   virtual void nonlinearConvergenceSetup() override;
 
   virtual bool checkResidualConvergence(const unsigned int it,
@@ -99,6 +101,9 @@ protected:
   const Real _accept_mult;
   const unsigned int _accept_iters;
   ///@}
+
+  /// Nonlinear system to which this convergence object applies.
+  const unsigned int _nl_sys_num;
 
   ///@{
   /// Local storage for *discrete L2 residual norms* of the grouped variables.

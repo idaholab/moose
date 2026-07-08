@@ -43,6 +43,7 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     _norm_type_enum(getParam<MooseEnum>("normalization_type")),
     _accept_mult(getParam<Real>("acceptable_multiplier")),
     _accept_iters(getParam<unsigned int>("acceptable_iterations")),
+    _nl_sys_num(_fe_problem.solverSysNum(getParam<SolverSystemName>("solver_sys"))),
     _residual_vector(nullptr),
     _reference_vector(nullptr),
     _zero_ref_type(
@@ -56,22 +57,21 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
                "in a single Convergence object. Multiple Convergence objects can be used, one for "
                "each nonlinear system, via the 'solver_sys' parameter.");
 
-  const auto solver_sys = getParam<SolverSystemName>("solver_sys");
-  const auto num = _fe_problem.solverSysNum(solver_sys);
   if (parameters.isParamValid("residual_vector"))
   {
     const auto residual_vector_tag_id =
         _fe_problem.getVectorTagID(getParam<TagName>("residual_vector"));
-    _residual_vector = &_fe_problem.getNonlinearSystemBase(num).getVector(residual_vector_tag_id);
+    _residual_vector =
+        &_fe_problem.getNonlinearSystemBase(_nl_sys_num).getVector(residual_vector_tag_id);
   }
   else
-    _residual_vector = &_fe_problem.getNonlinearSystemBase(num).RHS();
+    _residual_vector = &_fe_problem.getNonlinearSystemBase(_nl_sys_num).RHS();
 
   if (parameters.isParamValid("reference_vector"))
   {
     _reference_vector_tag_id = _fe_problem.getVectorTagID(getParam<TagName>("reference_vector"));
     _reference_vector =
-        &_fe_problem.getNonlinearSystemBase(num).getVector(_reference_vector_tag_id);
+        &_fe_problem.getNonlinearSystemBase(_nl_sys_num).getVector(_reference_vector_tag_id);
   }
   else
     mooseDeprecated(
@@ -110,6 +110,12 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
 }
 
+NonlinearSystemBase &
+ReferenceResidualConvergence::nonlinearSystem()
+{
+  return _fe_problem.getNonlinearSystemBase(_nl_sys_num);
+}
+
 void
 ReferenceResidualConvergence::initialSetup()
 {
@@ -118,10 +124,7 @@ ReferenceResidualConvergence::initialSetup()
   if (!_reference_vector)
     return;
 
-  const auto solver_sys = getParam<SolverSystemName>("solver_sys");
-  const auto num = _fe_problem.solverSysNum(solver_sys);
-
-  auto & nonlinear_sys = _fe_problem.getNonlinearSystemBase(num);
+  auto & nonlinear_sys = nonlinearSystem();
   auto & s = nonlinear_sys.system();
 
   // If the user provides reference_vector, that implies that they want the
@@ -293,14 +296,14 @@ ReferenceResidualConvergence::updateReferenceResidual()
 {
   // If no reference_vector is provided, this method is completely skipped
 
-  auto & current_nl_sys = _fe_problem.currentNonlinearSystem();
-  auto & s = current_nl_sys.system();
+  auto & nonlinear_sys = nonlinearSystem();
+  auto & s = nonlinear_sys.system();
 
   for (const auto i : index_range(_scaling_factors))
-    if (current_nl_sys.isScalarVariable(_soln_vars[i]))
-      _scaling_factors[i] = current_nl_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
+    if (nonlinear_sys.isScalarVariable(_soln_vars[i]))
+      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _soln_vars[i]).scalingFactor();
     else
-      _scaling_factors[i] = current_nl_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
+      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _soln_vars[i]).scalingFactor();
 
   std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
   std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);

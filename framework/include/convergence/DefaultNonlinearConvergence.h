@@ -13,6 +13,8 @@
 #include "MooseApp.h"
 #include "Executioner.h"
 
+class NonlinearSystemBase;
+
 /**
  * Default nonlinear convergence criteria for FEProblem
  */
@@ -29,6 +31,11 @@ public:
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
 protected:
+  /**
+   * Nonlinear system whose convergence state should be checked.
+   */
+  virtual NonlinearSystemBase & nonlinearSystem();
+
   /**
    * Check the absolute and relative convergence of the nonlinear solution
    * @param iter       Iteration number

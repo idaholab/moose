@@ -73,6 +73,12 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
     mooseError("DefaultNonlinearConvergence can only be used with nonlinear solves.");
 }
 
+NonlinearSystemBase &
+DefaultNonlinearConvergence::nonlinearSystem()
+{
+  return _fe_problem.currentNonlinearSystem();
+}
+
 bool
 DefaultNonlinearConvergence::checkResidualConvergence(const unsigned int iter,
                                                       const Real fnorm,
@@ -102,7 +108,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
 {
   TIME_SECTION(_perfid_check_convergence);
 
-  NonlinearSystemBase & system = _fe_problem.currentNonlinearSystem();
+  NonlinearSystemBase & system = nonlinearSystem();
   MooseConvergenceStatus status = MooseConvergenceStatus::ITERATING;
 
   SNES snes = system.getSNES();
