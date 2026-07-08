@@ -84,7 +84,7 @@
 []
 
 [ProblemOperator]
-  [default_steady1]
+  [default_steady]
     type = ProblemOperatorBuilderSteady
   []
 []
