@@ -31,6 +31,15 @@ public:
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
+  /**
+   * Method for evaluating the face diffusion coefficient times the face area divided by the
+   * distance between cell centers, or between the cell center and face center on a boundary. The
+   * name "conductance" is used here for this finite volume face coefficient because heat conduction
+   * problems provide a thermal conductivity as the diffusion coefficient, which has conductance
+   * units after multiplying by area over length. Similar "diffusive conductance" terminology is
+   * also used in mass transport contexts; see
+   * https://www.goldsim.com/Courses/ContaminantTransport/Unit8/Lesson3/
+   */
   KOKKOS_FUNCTION Real faceConductance(const FVDatum & datum) const;
 
   /// Diffusion coefficient

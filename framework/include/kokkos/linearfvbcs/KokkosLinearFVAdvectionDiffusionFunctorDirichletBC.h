@@ -32,8 +32,12 @@ public:
 
 private:
   /**
-   * Method for evaluating the face diffusivity times the face area divided by the length between
-   * the cell center and face center
+   * Method for evaluating the face diffusion coefficient times the face area divided by the length
+   * between the cell center and face center. The name "conductance" is used here for this finite
+   * volume face coefficient because heat conduction problems provide a thermal conductivity as the
+   * diffusion coefficient, which has conductance units after multiplying by area over length.
+   * Similar "diffusive conductance" terminology is also used in mass transport contexts; see
+   * https://www.goldsim.com/Courses/ContaminantTransport/Unit8/Lesson3/
    * @param datum Finite volume datum used to query the face area and cell-center-to-face-center
    * distance
    * @param face_centroid The xyz coordinates of the face centroid. This is parameter instead of
