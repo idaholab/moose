@@ -108,7 +108,7 @@ void
 MFEMMesh::buildDummyMooseMesh()
 {
   auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
-  MeshTools::Generation::build_square(dummy, 1, 1, 0., 1., 0., 1., ElemType::QUAD9);
+  MeshTools::Generation::build_line(dummy, 1, 0., 1., ElemType::EDGE2);
 }
 
 void
