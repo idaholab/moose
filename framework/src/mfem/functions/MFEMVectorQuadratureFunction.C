@@ -32,9 +32,7 @@ MFEMVectorQuadratureFunction::MFEMVectorQuadratureFunction(const InputParameters
   : MFEMQuadratureFunctionBase(parameters), _qf(&_qspace)
 {
   mfem::VectorCoefficient & source = getVectorCoefficient("vector_coefficient");
-  // Size the storage to the vector dimension of the source coefficient.
   _qf.SetVDim(source.GetVDim());
-  // Zero-initialize the storage; real values are projected lazily on first use.
   _qf = 0.0;
   getMFEMProblem().getCoefficients().declareVector<MFEMVectorQuadratureFunctionCoefficient>(
       name(), source, _qf, updatePolicy());

@@ -23,13 +23,13 @@
  * triggers a projection of the source coefficient only if the values have been invalidated
  * since the last projection.
  */
-class MFEMQuadratureFunctionCoefficient : public mfem::QuadratureFunctionCoefficient,
-                                          public MFEMQuadratureFunctionCoefficientBase
+class MFEMScalarQuadratureFunctionCoefficient : public mfem::QuadratureFunctionCoefficient,
+                                                public MFEMQuadratureFunctionCoefficientBase
 {
 public:
-  MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
-                                    mfem::QuadratureFunction & qf,
-                                    UpdatePolicy update_policy);
+  MFEMScalarQuadratureFunctionCoefficient(mfem::Coefficient & source,
+                                          mfem::QuadratureFunction & qf,
+                                          UpdatePolicy update_policy);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.

@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMScalarQuadratureFunction.h"
-#include "MFEMQuadratureFunctionCoefficient.h"
+#include "MFEMScalarQuadratureFunctionCoefficient.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMScalarQuadratureFunction);
@@ -32,7 +32,7 @@ MFEMScalarQuadratureFunction::MFEMScalarQuadratureFunction(const InputParameters
 {
   // Zero-initialize the storage; real values are projected lazily on first use.
   _qf = 0.0;
-  getMFEMProblem().getCoefficients().declareScalar<MFEMQuadratureFunctionCoefficient>(
+  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarQuadratureFunctionCoefficient>(
       name(), getScalarCoefficient("coefficient"), _qf, updatePolicy());
 }
 

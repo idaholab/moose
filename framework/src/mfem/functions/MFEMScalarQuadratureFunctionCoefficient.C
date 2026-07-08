@@ -9,12 +9,11 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMQuadratureFunctionCoefficient.h"
+#include "MFEMScalarQuadratureFunctionCoefficient.h"
 #include "libmesh/int_range.h"
 
-MFEMQuadratureFunctionCoefficient::MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
-                                                                     mfem::QuadratureFunction & qf,
-                                                                     UpdatePolicy update_policy)
+MFEMScalarQuadratureFunctionCoefficient::MFEMScalarQuadratureFunctionCoefficient(
+    mfem::Coefficient & source, mfem::QuadratureFunction & qf, UpdatePolicy update_policy)
   : mfem::QuadratureFunctionCoefficient(qf),
     MFEMQuadratureFunctionCoefficientBase(update_policy),
     _source(source),
@@ -23,14 +22,14 @@ MFEMQuadratureFunctionCoefficient::MFEMQuadratureFunctionCoefficient(mfem::Coeff
 }
 
 void
-MFEMQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
+MFEMScalarQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
 {
   mfem::Coefficient::SetTime(t);
   markTimeChanged();
 }
 
 mfem::real_t
-MFEMQuadratureFunctionCoefficient::Eval(mfem::ElementTransformation & T,
+MFEMScalarQuadratureFunctionCoefficient::Eval(mfem::ElementTransformation & T,
                                         const mfem::IntegrationPoint & ip)
 {
   if (_dirty)
@@ -39,7 +38,7 @@ MFEMQuadratureFunctionCoefficient::Eval(mfem::ElementTransformation & T,
 }
 
 void
-MFEMQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
+MFEMScalarQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
 {
   if (_dirty)
     refresh();
@@ -47,7 +46,7 @@ MFEMQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
 }
 
 void
-MFEMQuadratureFunctionCoefficient::refresh()
+MFEMScalarQuadratureFunctionCoefficient::refresh()
 {
   // Equivalent to _source.Project(_qf), except performed with a caller-owned element
   // transformation: the mesh-owned shared transformation used by mfem::Coefficient::Project
