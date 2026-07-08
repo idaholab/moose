@@ -37,19 +37,18 @@
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
   [MFEMDiffusion1D]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion1D/Run0/Run0.pvd
-                OutputData/Diffusion1D/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion1D.csv'
     cli_args = 'Mesh/file=../mesh/ref-segment.mesh '
                'Mesh/uniform_refine=5 '
                'BCs/bottom/boundary=1 '
                'BCs/top/boundary=2 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/Diffusion1D'
+               'Outputs/active=csv Outputs/csv=true '
+               'Outputs/file_base=OutputData/Diffusion1D'
     requirement = 'The system shall have the ability to solve a 1D diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*1.*Spatial Dimension.*1.*Elems.*32.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []  
