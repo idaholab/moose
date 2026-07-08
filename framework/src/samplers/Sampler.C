@@ -248,8 +248,8 @@ Sampler::getSampleRow(dof_id_type row_index) const
                ") exceeds the allowed limit of ",
                _limit_get_row,
                ".");
-  mooseAssert(row_index >= _local_row_begin && row_index < _local_row_end,
-              "Requested row " + std::to_string(row_index) + " is not local to this processor.");
+  mooseAssert(row_index < _n_rows,
+              "Requested row " + std::to_string(row_index) + " is greater than sampler size.");
 
   std::vector<Real> row(_n_cols, 0);
   computeSampleRow(row_index, row);
@@ -260,8 +260,8 @@ Real
 Sampler::getSample(dof_id_type row_index, dof_id_type col_index) const
 {
   checkReinitStatus();
-  mooseAssert(row_index >= _local_row_begin && row_index < _local_row_end,
-              "Requested row " + std::to_string(row_index) + " is not local to this processor.");
+  mooseAssert(row_index < _n_rows,
+              "Requested row " + std::to_string(row_index) + " is greater than sampler size.");
   mooseAssert(col_index < _n_cols, "Column index out of range.");
   return computeSample(row_index, col_index);
 }
