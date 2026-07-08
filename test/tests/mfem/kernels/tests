@@ -51,7 +51,7 @@
     compute_devices = 'cpu cuda'
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*1.*Spatial Dimension.*1.*Elems.*32.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
-  []  
+  []
   [MFEMDiffusionAMR]
     design = 'MFEMRefinementMarker.md MFEMIndicator.md MFEML2ZienkiewiczZhuIndicator.md'
     issues = '#30943'
