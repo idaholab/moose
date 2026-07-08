@@ -28,7 +28,8 @@ LatinHypercubeSampler::validParams()
 
 LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
   : Sampler(parameters),
-    _shufflers(declareRestartableData<std::vector<std::unique_ptr<MooseRandomPerturbation>>>("lhs_shufflers"))
+    _shufflers(declareRestartableData<std::vector<std::unique_ptr<MooseRandomPerturbation>>>(
+        "lhs_shufflers"))
 {
   const auto & distribution_names = getParam<std::vector<DistributionName>>("distributions");
   for (const DistributionName & name : distribution_names)

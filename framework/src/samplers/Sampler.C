@@ -87,7 +87,8 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_row(getParam<dof_id_type>("limit_get_row")),
-    _rank_config(declareRecoverableData<std::pair<LocalRankConfig, LocalRankConfig>>("rank_config")),
+    _rank_config(
+        declareRecoverableData<std::pair<LocalRankConfig, LocalRankConfig>>("rank_config")),
     _auto_advance_generators(true)
 {
 }
