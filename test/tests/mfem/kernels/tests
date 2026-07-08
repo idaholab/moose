@@ -237,15 +237,7 @@
   []
   [MFEMGravityQuadratureFunction]
     type = XMLDiff
-    input = gravity.i
-    # the quadrature rule order matches the one used by VectorDomainLFIntegrator
-    # for first-order elements (2 * fe_order = 2)
-    cli_args = 'QuadratureFunctions/qf_gravity/type=MFEMVectorQuadratureFunction
-                QuadratureFunctions/qf_gravity/coefficient=gravitational_force_density
-                QuadratureFunctions/qf_gravity/order=2
-                QuadratureFunctions/qf_gravity/updates=none
-                Kernels/gravity/vector_coefficient=qf_gravity
-                Outputs/ParaViewDataCollection/file_base=OutputData/GravityQF'
+    input = gravity_qf.i
     xmldiff = 'OutputData/GravityQF/Run0/Run0.pvd
                 OutputData/GravityQF/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMVectorQuadratureFunction.md'

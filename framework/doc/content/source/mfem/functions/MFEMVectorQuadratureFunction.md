@@ -31,7 +31,7 @@ silently returns values belonging to different points. For example,
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/gravity.i block=Kernels
+!listing test/tests/mfem/kernels/gravity_qf.i
 
 !syntax parameters /QuadratureFunctions/MFEMVectorQuadratureFunction
 

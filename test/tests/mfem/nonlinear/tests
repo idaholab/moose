@@ -85,14 +85,7 @@
     design = 'MFEMScalarQuadratureFunction.md'
     requirement = 'The system shall re-project quadrature function coefficients on each nonlinear iteration such that solution-dependent coefficients stored on quadrature points reproduce the reference nonlinear solve.'
     type = CSVDiff
-    input = nlheatconduction.i
-    # the quadrature rule order matches the one used by DiffusionIntegrator for
-    # second-order H1 elements on quadrilaterals (2 * fe_order + dim - 1 = 5)
-    cli_args = 'QuadratureFunctions/qf_k/type=MFEMScalarQuadratureFunction
-                QuadratureFunctions/qf_k/coefficient=diffusivity_temperature_dependence
-                QuadratureFunctions/qf_k/order=5
-                Kernels/nl_diffusion/k_coefficient=qf_k
-                Outputs/file_base=NLHeatConductionQF'
+    input = nlheatconduction_qf.i
     csvdiff = 'NLHeatConductionQF_centre_temperature_0000.csv
                 NLHeatConductionQF_centre_temperature_0010.csv
                 NLHeatConductionQF_centre_temperature_0020.csv

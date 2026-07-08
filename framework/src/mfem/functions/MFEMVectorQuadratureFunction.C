@@ -24,14 +24,14 @@ MFEMVectorQuadratureFunction::validParams()
       "coefficient at quadrature points. Values are (re)projected lazily when the coefficient "
       "is used.");
   params.addRequiredParam<MFEMVectorCoefficientName>(
-      "coefficient", "Vector coefficient to project onto the quadrature points.");
+      "vector_coefficient", "Vector coefficient to project onto the quadrature points.");
   return params;
 }
 
 MFEMVectorQuadratureFunction::MFEMVectorQuadratureFunction(const InputParameters & parameters)
   : MFEMQuadratureFunctionBase(parameters), _qf(&_qspace)
 {
-  mfem::VectorCoefficient & source = getVectorCoefficient("coefficient");
+  mfem::VectorCoefficient & source = getVectorCoefficient("vector_coefficient");
   // Size the storage to the vector dimension of the source coefficient.
   _qf.SetVDim(source.GetVDim());
   // Zero-initialize the storage; real values are projected lazily on first use.
