@@ -104,8 +104,7 @@ namespace
  * @param shared Whether all ranks in the app communicator should use one shared checkpoint
  *               directory. Backup performs one collective checkpoint write, then captures each
  *               checkpoint entry as a relative path and byte contents in the Backup object. Restore
- *               recreates that checkpoint layout in rank-local temporary directories before calling
- *               CheckpointIO::read().
+ *               recreates that checkpoint layout once before calling CheckpointIO::read().
  */
 std::filesystem::path
 temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
@@ -219,9 +218,12 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
   if (backup.mesh_files.empty())
     return false;
 
-  const auto mesh_path = temporaryBackupMeshPath(app, "restore", false);
-  for (const auto & [relative_path, contents] : backup.mesh_files)
-    writeBackupMeshFile(mesh_path / relative_path, contents);
+  const auto mesh_path = temporaryBackupMeshPath(app, "restore", true);
+  if (app.processor_id() == 0)
+    for (const auto & [relative_path, contents] : backup.mesh_files)
+      writeBackupMeshFile(mesh_path / relative_path, contents);
+
+  app.comm().barrier();
 
   auto & mesh_base = mesh.getMesh();
   mesh_base.clear();
@@ -238,8 +240,13 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
 
   backup.mesh_files.clear();
 
-  std::error_code err;
-  std::filesystem::remove_all(mesh_path.parent_path(), err);
+  app.comm().barrier();
+
+  if (app.processor_id() == 0)
+  {
+    std::error_code err;
+    std::filesystem::remove_all(mesh_path.parent_path(), err);
+  }
 
   return true;
 }
