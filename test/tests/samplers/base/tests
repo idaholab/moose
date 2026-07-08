@@ -105,7 +105,7 @@
     [setNumberOfRows]
       type = RunException
       input = errors.i
-      expect_err = "Changing the size of the sample must not occur during matrix access"
+      expect_err = "A call to '.*?' was made after initialization"
       cli_args = "Samplers/sample/error_test=call_set_number_of_rows"
       capabilities = 'method=dbg | method=devel' # message from assert
 
@@ -114,7 +114,7 @@
     [setNumberOfCols]
       type = RunException
       input = errors.i
-      expect_err = "Changing the size of the sample must not occur during matrix access"
+      expect_err = "A call to '.*?' was made after initialization"
       cli_args = "Samplers/sample/error_test=call_set_number_of_cols"
       capabilities = 'method=dbg | method=devel' # message from assert
 
