@@ -26,11 +26,15 @@ public:
 
   DefaultNonlinearConvergence(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void checkIterationType(IterationType it_type) const override;
-
+  virtual void preSolve() override;
   virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
 protected:
+  /// Sets the nonlinear system parameters, such as tolerances
+  void setNonlinearSystemParameters();
+
   /**
    * Nonlinear system whose convergence state should be checked.
    */
