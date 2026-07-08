@@ -50,4 +50,23 @@ protected:
    * Prints block-restriction information
    */
   void printBlockRestrictionMap() const;
+
+  /**
+   * Prints object groups with identical block restrictions
+   */
+  void printBlockRestrictionGroups() const;
+
+  /**
+   * Prints object groups with identical boundary restrictions
+   */
+  void printBoundaryRestrictionGroups() const;
+
+  /// Whether to print the existing per-block restriction map
+  const bool & _show_block_restriction_map;
+
+  /// Whether to print object groups by identical block restriction
+  const bool & _show_block_restriction_groups;
+
+  /// Whether to print object groups by identical boundary restriction
+  const bool & _show_boundary_restriction_groups;
 };

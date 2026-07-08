@@ -75,6 +75,12 @@ SetupDebugAction::validParams()
       "show_block_restriction",
       BlockRestrictionDebugOutput::getScopes("none"),
       "Print out active objects like variables supplied for each block.");
+  params.addParam<bool>("show_block_restriction_groups",
+                        false,
+                        "Print groups of objects with identical block restrictions.");
+  params.addParam<bool>("show_boundary_restriction_groups",
+                        false,
+                        "Print groups of objects with identical boundary restrictions.");
   params.addParam<bool>(
       "error_on_residual_nan",
       false,
@@ -178,11 +184,19 @@ SetupDebugAction::act()
   // Block-restriction
   const MultiMooseEnum & block_restriction_scope =
       _pars.get<MultiMooseEnum>("show_block_restriction");
-  if (block_restriction_scope.isValid() && !block_restriction_scope.contains("none"))
+  const bool show_block_restriction_map =
+      block_restriction_scope.isValid() && !block_restriction_scope.contains("none");
+  const bool show_block_restriction_groups = getParam<bool>("show_block_restriction_groups");
+  const bool show_boundary_restriction_groups = getParam<bool>("show_boundary_restriction_groups");
+  if (show_block_restriction_map || show_block_restriction_groups ||
+      show_boundary_restriction_groups)
   {
     const std::string type = "BlockRestrictionDebugOutput";
     auto params = _factory.getValidParams(type);
     params.set<MultiMooseEnum>("scope") = block_restriction_scope;
+    params.set<bool>("show_block_restriction_map") = show_block_restriction_map;
+    params.set<bool>("show_block_restriction_groups") = show_block_restriction_groups;
+    params.set<bool>("show_boundary_restriction_groups") = show_boundary_restriction_groups;
     _problem->addOutput(type, "_moose_block_restriction_debug_output", params);
   }
 
