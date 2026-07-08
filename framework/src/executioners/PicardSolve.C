@@ -37,9 +37,10 @@ PicardSolve::allocateStorage(const bool primary)
   {
     if (_transformed_sys)
     {
-      _old_tag_id =
-          _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-      _transformed_sys->needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+      _old_tag_id = _problem.addVectorTag(Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG,
+                                          Moose::VECTOR_TAG_SOLUTION);
+      _transformed_sys->needSolutionState(
+          1, Moose::SolutionIterationType::MultiAppFixedPoint, PARALLEL);
     }
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
@@ -65,7 +66,7 @@ PicardSolve::allocateStorage(const bool primary)
 void
 PicardSolve::saveVariableValues(const bool primary)
 {
-  // Primary is copied back by _transformed_sys->copyPreviousFixedPointSolutions()
+  // Primary is copied back by _transformed_sys->copyPreviousMultiAppFixedPointSolutions()
   if (!performingRelaxation(primary) || primary)
     return;
 

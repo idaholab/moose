@@ -475,7 +475,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 
   // Save the previous fixed point iteration solution and aux variables if requested
   for (auto * sys : _systems_to_copy_previous_solutions_for)
-    sys->copyPreviousFixedPointSolutions();
+    sys->copyPreviousMultiAppFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
