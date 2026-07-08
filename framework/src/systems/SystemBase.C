@@ -1301,15 +1301,15 @@ SystemBase::copyOldSolutions()
 }
 
 void
-SystemBase::copyPreviousFixedPointSolutions()
+SystemBase::copyPreviousMultiAppFixedPointSolutions()
 {
-  const auto n_states =
-      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::FixedPoint)]
-          .size();
+  const auto n_states = _solution_states[static_cast<unsigned short>(
+                                             Moose::SolutionIterationType::MultiAppFixedPoint)]
+                            .size();
   if (n_states > 1)
     for (unsigned int i = n_states - 1; i > 0; --i)
-      solutionState(i, Moose::SolutionIterationType::FixedPoint) =
-          solutionState(i - 1, Moose::SolutionIterationType::FixedPoint);
+      solutionState(i, Moose::SolutionIterationType::MultiAppFixedPoint) =
+          solutionState(i - 1, Moose::SolutionIterationType::MultiAppFixedPoint);
 }
 
 /**
@@ -1394,8 +1394,8 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
   }
   else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
     return Moose::PREVIOUS_NL_SOLUTION_TAG;
-  else if (iteration_type == Moose::SolutionIterationType::FixedPoint && state == 1)
-    return Moose::PREVIOUS_FP_SOLUTION_TAG;
+  else if (iteration_type == Moose::SolutionIterationType::MultiAppFixedPoint && state == 1)
+    return Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }

@@ -20,10 +20,10 @@ FunctorChangeFunctorMaterialTempl<is_ad>::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
   params.addRequiredParam<MooseFunctorName>("functor", "Functor for which to compute the change");
-  MooseEnum change_over("time_step nonlinear fixed_point");
+  MooseEnum change_over("time_step nonlinear fixed_point multiapp_fixed_point");
   change_over.addDocumentation("time_step", "Over the time step");
   change_over.addDocumentation("nonlinear", "Over the nonlinear iteration");
-  change_over.addDocumentation("fixed_point", "Over the MultiApp fixed point iteration");
+  change_over.addDocumentation("multiapp_fixed_point", "Over the MultiApp fixed point iteration");
   params.addRequiredParam<MooseEnum>(
       "change_over", change_over, "Interval over which to compute the change");
   params.addRequiredParam<bool>("take_absolute_value",
@@ -48,11 +48,19 @@ FunctorChangeFunctorMaterialTempl<is_ad>::FunctorChangeFunctorMaterialTempl(
     _prop_name(getParam<std::string>("prop_name"))
 {
   // Request the previous fixed point solution be saved for the relevant systems
-  if (_fe_problem.hasAuxiliaryVariable(getParam<MooseFunctorName>("functor")))
-    _fe_problem.needsPreviousMultiAppFixedPointIterationAuxiliary(true);
-  if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
-    _fe_problem.needsPreviousMultiAppFixedPointIterationSolution(
-        true, _fe_problem.getSystem(getParam<MooseFunctorName>("functor")).number());
+  const auto & change_over = getParam<MooseEnum>("change_over");
+  if (change_over == "multiapp_fixed_point" || change_over == "fixed_point")
+  {
+    if (_fe_problem.hasAuxiliaryVariable(getParam<MooseFunctorName>("functor")))
+      _fe_problem.needsPreviousMultiAppFixedPointIterationAuxiliary(true);
+    if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
+      _fe_problem.needsPreviousMultiAppFixedPointIterationSolution(
+          true, _fe_problem.getSystem(getParam<MooseFunctorName>("functor")).number());
+  }
+
+  if (change_over == "fixed_point")
+    mooseDeprecated(
+        "'change_over' option 'fixed_point' is deprecated; use 'multiapp_fixed_point' instead.");
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   addFunctorProperty<GenericReal<is_ad>>(
@@ -86,10 +94,10 @@ FunctorChangeFunctorMaterialTempl<is_ad>::referenceState(const MooseEnum & chang
     _fe_problem.needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
     return Moose::previousNonlinearState();
   }
-  else if (change_over == "fixed_point")
+  else if (change_over == "multiapp_fixed_point" || change_over == "fixed_point")
   {
-    _fe_problem.needSolutionState(1, Moose::SolutionIterationType::FixedPoint);
-    return Moose::previousFixedPointState();
+    _fe_problem.needSolutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint);
+    return Moose::previousMultiAppFixedPointState();
   }
   else
     mooseError("Invalid value");
