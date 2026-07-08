@@ -108,9 +108,8 @@ void
 MFEMMesh::buildDummyMooseMesh()
 {
   auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
-  if (dimension() == 1)
-    MeshTools::Generation::build_line(dummy, 1, 0., 1., ElemType::EDGE3);
-  else
+  MeshTools::Generation::build_point(dummy);
+  if (dimension() >= 2)
     MeshTools::Generation::build_square(dummy, 1, 1, 0., 1., 0., 1., ElemType::QUAD9);
 }
 
