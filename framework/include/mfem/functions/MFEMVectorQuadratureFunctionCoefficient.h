@@ -18,25 +18,28 @@
 #include "libmesh/restore_warnings.h"
 
 /**
- * Scalar coefficient holding precomputed values of a source coefficient at the quadrature
+ * Vector coefficient holding precomputed values of a source vector coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
  * triggers a projection of the source coefficient only if the values have been invalidated
  * since the last projection.
  */
-class MFEMQuadratureFunctionCoefficient : public mfem::QuadratureFunctionCoefficient,
-                                          public MFEMQuadratureFunctionCoefficientBase
+class MFEMVectorQuadratureFunctionCoefficient : public mfem::VectorQuadratureFunctionCoefficient,
+                                                public MFEMQuadratureFunctionCoefficientBase
 {
 public:
-  MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
-                                    mfem::QuadratureFunction & qf,
-                                    UpdatePolicy update_policy);
+  MFEMVectorQuadratureFunctionCoefficient(mfem::VectorCoefficient & source,
+                                          mfem::QuadratureFunction & qf,
+                                          UpdatePolicy update_policy);
 
   /// Set the time for the coefficient, invalidating the stored values unless the update
   /// policy is NONE.
   void SetTime(mfem::real_t t) override;
 
-  /// Return the stored value at @a ip, re-projecting the source first if invalidated.
-  mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
+  using mfem::VectorQuadratureFunctionCoefficient::Eval;
+  /// Return the stored values at @a ip, re-projecting the source first if invalidated.
+  void Eval(mfem::Vector & V,
+            mfem::ElementTransformation & T,
+            const mfem::IntegrationPoint & ip) override;
 
   /// Copy the stored values into @a qf, re-projecting the source first if invalidated.
   void Project(mfem::QuadratureFunction & qf) override;
@@ -46,7 +49,7 @@ private:
   void refresh();
 
   /// Source coefficient the stored values are projected from.
-  mfem::Coefficient & _source;
+  mfem::VectorCoefficient & _source;
   /// Storage for the projected values, shared with the owning MOOSE object.
   mfem::QuadratureFunction & _qf;
 };

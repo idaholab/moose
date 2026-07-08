@@ -14,15 +14,15 @@
 #include "MFEMQuadratureFunctionBase.h"
 
 /**
- * Declares a scalar MFEM coefficient represented as a precomputed vector of values of a source
- * coefficient on quadrature points.
+ * Declares a vector MFEM coefficient represented as a precomputed vector of values of a source
+ * vector coefficient on quadrature points.
  */
-class MFEMScalarQuadratureFunction : public MFEMQuadratureFunctionBase
+class MFEMVectorQuadratureFunction : public MFEMQuadratureFunctionBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarQuadratureFunction(const InputParameters & parameters);
+  MFEMVectorQuadratureFunction(const InputParameters & parameters);
 
 protected:
   /// Storage for the projected values of the source coefficient.

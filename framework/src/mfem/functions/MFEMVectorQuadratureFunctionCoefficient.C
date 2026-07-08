@@ -9,13 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMQuadratureFunctionCoefficient.h"
+#include "MFEMVectorQuadratureFunctionCoefficient.h"
 #include "libmesh/int_range.h"
 
-MFEMQuadratureFunctionCoefficient::MFEMQuadratureFunctionCoefficient(mfem::Coefficient & source,
-                                                                     mfem::QuadratureFunction & qf,
-                                                                     UpdatePolicy update_policy)
-  : mfem::QuadratureFunctionCoefficient(qf),
+MFEMVectorQuadratureFunctionCoefficient::MFEMVectorQuadratureFunctionCoefficient(
+    mfem::VectorCoefficient & source, mfem::QuadratureFunction & qf, UpdatePolicy update_policy)
+  : mfem::VectorQuadratureFunctionCoefficient(qf),
     MFEMQuadratureFunctionCoefficientBase(update_policy),
     _source(source),
     _qf(qf)
@@ -23,40 +22,42 @@ MFEMQuadratureFunctionCoefficient::MFEMQuadratureFunctionCoefficient(mfem::Coeff
 }
 
 void
-MFEMQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
+MFEMVectorQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
 {
-  mfem::Coefficient::SetTime(t);
+  mfem::VectorCoefficient::SetTime(t);
   markTimeChanged();
 }
 
-mfem::real_t
-MFEMQuadratureFunctionCoefficient::Eval(mfem::ElementTransformation & T,
-                                        const mfem::IntegrationPoint & ip)
+void
+MFEMVectorQuadratureFunctionCoefficient::Eval(mfem::Vector & V,
+                                              mfem::ElementTransformation & T,
+                                              const mfem::IntegrationPoint & ip)
 {
   if (_dirty)
     refresh();
-  return mfem::QuadratureFunctionCoefficient::Eval(T, ip);
+  mfem::VectorQuadratureFunctionCoefficient::Eval(V, T, ip);
 }
 
 void
-MFEMQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
+MFEMVectorQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
 {
   if (_dirty)
     refresh();
-  mfem::QuadratureFunctionCoefficient::Project(qf);
+  mfem::VectorQuadratureFunctionCoefficient::Project(qf);
 }
 
 void
-MFEMQuadratureFunctionCoefficient::refresh()
+MFEMVectorQuadratureFunctionCoefficient::refresh()
 {
   // Equivalent to _source.Project(_qf), except performed with a caller-owned element
-  // transformation: the mesh-owned shared transformation used by mfem::Coefficient::Project
+  // transformation: the mesh-owned shared transformation used by mfem::VectorCoefficient::Project
   // may belong to an in-flight assembly loop that is evaluating this coefficient, and
   // projecting through it would corrupt that loop's state.
   const mfem::QuadratureSpaceBase & qspace = *_qf.GetSpace();
   const mfem::Mesh & mesh = *qspace.GetMesh();
   mfem::IsoparametricTransformation T;
-  mfem::Vector values;
+  mfem::DenseMatrix values;
+  mfem::Vector col;
   for (const auto iel : libMesh::make_range(qspace.GetNE()))
   {
     _qf.GetValues(iel, values);
@@ -66,7 +67,8 @@ MFEMQuadratureFunctionCoefficient::refresh()
     {
       const mfem::IntegrationPoint & ip = ir[iq];
       T.SetIntPoint(&ip);
-      values[iq] = _source.Eval(T, ip);
+      values.GetColumnReference(iq, col);
+      _source.Eval(col, T, ip);
     }
   }
   _dirty = false;

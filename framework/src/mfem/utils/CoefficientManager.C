@@ -11,7 +11,7 @@
 
 #include "MooseStringUtils.h"
 #include "CoefficientManager.h"
-#include "MFEMQuadratureFunctionCoefficient.h"
+#include "MFEMQuadratureFunctionCoefficientBase.h"
 #include <algorithm>
 
 namespace Moose::MFEM
@@ -208,12 +208,13 @@ CoefficientManager::setTime(const mfem::real_t time)
 void
 CoefficientManager::invalidateQuadratureFunctions()
 {
-  this->_scalar_coeffs.apply(
-      [](mfem::Coefficient & coef)
-      {
-        if (auto * const qf_coef = dynamic_cast<MFEMQuadratureFunctionCoefficient *>(&coef))
-          qf_coef->invalidate();
-      });
+  auto invalidate = [](auto & coef)
+  {
+    if (auto * const qf_coef = dynamic_cast<MFEMQuadratureFunctionCoefficientBase *>(&coef))
+      qf_coef->invalidate();
+  };
+  this->_scalar_coeffs.apply(invalidate);
+  this->_vector_coeffs.apply(invalidate);
 }
 }
 
