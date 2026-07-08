@@ -19,8 +19,8 @@ InputParameters
 Moose::MFEM::ProblemOperatorBuilderInterface::validParams()
 {
   InputParameters params = MFEMObject::validParams();
-  params.registerBase("ProblemOperator");
-  params.registerSystemAttributeName("ProblemOperator");
+  params.registerBase("Moose::MFEM::ProblemOperatorBuilderInterface");
+  params.registerSystemAttributeName("Moose::MFEM::ProblemOperatorBuilderInterface");
   return params;
 };
 

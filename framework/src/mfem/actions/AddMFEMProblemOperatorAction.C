@@ -30,7 +30,8 @@ AddMFEMProblemOperatorAction::AddMFEMProblemOperatorAction(const InputParameters
 void
 AddMFEMProblemOperatorAction::act()
 {
-  static_cast<MFEMProblem &>(*_problem).addMFEMProblemOperator(_type, _name, _moose_object_pars);
+  if (_problem->feBackend() == Moose::FEBackend::MFEM)
+    static_cast<MFEMProblem &>(*_problem).addMFEMProblemOperator(_type, _name, _moose_object_pars);
 }
 
 #endif
