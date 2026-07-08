@@ -57,8 +57,14 @@ CavityComponent::validParams()
                                     0,
                                     "target_element_volume>=0",
                                     "Target element volume (area in 2D). 0 for no target");
+  params.addParam<unsigned int>(
+      "n_boundary_layers",
+      0,
+      "Number of boundary layers in between the components and the bulk mesh of the cavity");
+  params.addParam<Real>("boundary_layer_width", "Total width of the meshed boundary layer");
 
-  params.addParamNamesToGroup("target_element_volume", "Discretization");
+  params.addParamNamesToGroup("target_element_volume n_boundary_layers boundary_layer_width",
+                              "Discretization");
   params.addParamNamesToGroup("enclosing_surface_mesh_mg recenter_surface_mesh_to",
                               "Enclosing mesh geometry");
 
@@ -99,6 +105,7 @@ CavityComponent::addMeshGenerators()
     // use the same hole boundary name for components that will be stitched at the same time
     holes_boundaries.push_back("hole_bdy_" + comp.getCurrentTopLevelMeshGeneratorName());
   }
+  std::vector<BoundaryName> cavity_inner_boundaries = holes_boundaries;
 
   // Displace the surface mesh if requested
   MeshGeneratorName enclosure_surface_mg = _surface_mesh_mg;
@@ -125,6 +132,102 @@ CavityComponent::addMeshGenerators()
     enclosure_surface_mg = translation_mg;
   }
 
+  // Build boundary layers before filling the surface / volume
+  if (getParam<unsigned int>("n_boundary_layers") > 0)
+  {
+    // Gather outer boundaries
+    std::vector<BoundaryName> gathered_exerior_bdies;
+    MeshGeneratorName comp_final_mg = "";
+    for (const auto & comp_name : _components_to_enclose)
+    {
+      const auto & component = _awh.getAction<ActionComponent>(comp_name);
+      if (comp_final_mg == "")
+        comp_final_mg = component.getCurrentTopLevelMeshGeneratorName();
+      else if (comp_final_mg != component.getCurrentTopLevelMeshGeneratorName())
+        paramError("enclosed_components",
+                   "Disconnected components not supported for boundary layers at this time");
+
+      for (const auto & bdy_name : component.outerSurfaceBoundaries())
+        gathered_exerior_bdies.push_back(bdy_name);
+    }
+
+    // Extract the surface into a mesh, the format that the extruder expects it
+    InputParameters lowD_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+    lowD_params.set<MeshGeneratorName>("input") = comp_final_mg;
+    const auto lowD_block_name = name() + "lowD_for_boundary_layer";
+    lowD_params.set<SubdomainName>("new_block_name") = lowD_block_name;
+    lowD_params.set<std::vector<BoundaryName>>("sidesets") = gathered_exerior_bdies;
+    lowD_params.set<bool>("output") = _verbose;
+    lowD_params.set<bool>("show_info") = _verbose;
+    const auto lowD_mg_name = name() + "_create_lowerD";
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "LowerDBlockFromSidesetGenerator", lowD_mg_name, lowD_params);
+    _mg_names.push_back(lowD_mg_name);
+
+    InputParameters blockToMesh_params = _factory.getValidParams("BlockToMeshConverterGenerator");
+    blockToMesh_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    blockToMesh_params.set<std::vector<SubdomainName>>("target_blocks") = {lowD_block_name};
+    blockToMesh_params.set<bool>("output") = _verbose;
+    blockToMesh_params.set<bool>("show_info") = _verbose;
+    const auto blockToMesh_mg_name = name() + "_lowerD_into_block";
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "BlockToMeshConverterGenerator", blockToMesh_mg_name, blockToMesh_params);
+    _mg_names.push_back(blockToMesh_mg_name);
+
+    // Create a boundary layer by extruding from the component surfaces
+    // NOTE: this should become an option, a parameter we can turn on
+    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    ext_params.set<std::vector<unsigned int>>("num_layers") = {
+        getParam<unsigned int>("n_boundary_layers")};
+    ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    if (isParamValid("boundary_layer_width"))
+      ext_params.set<std::vector<Real>>("heights") = {getParam<Real>("boundary_layer_width")};
+    else
+      paramError("boundary_layer_width", "Must be passed if n_boundary_layers > 0");
+    ext_params.set<BoundaryName>("bottom_boundary") = name() + "_base_layer";
+    ext_params.set<BoundaryName>("top_boundary") = name() + "_boundary_layers";
+    ext_params.set<bool>("extrude_along_node_normals") = true;
+
+    ext_params.set<bool>("output") = _verbose;
+    ext_params.set<bool>("show_info") = _verbose;
+    const auto ext_mg_name = name() + "_boundary_layers";
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", ext_mg_name, ext_params);
+    _mg_names.push_back(ext_mg_name);
+
+    if (_dimension == 3)
+    {
+      // Add a transition layer on the side that will connect to the tets
+      InputParameters tet_layer_params =
+          _factory.getValidParams("BoundaryElementConversionGenerator");
+      tet_layer_params.set<MeshGeneratorName>("input") = _mg_names.back();
+      tet_layer_params.set<std::vector<BoundaryName>>("boundary_names") = {name() +
+                                                                           "_boundary_layers"};
+      tet_layer_params.set<bool>("output") = _verbose;
+      tet_layer_params.set<bool>("show_info") = _verbose;
+      const auto tet_mg_name = name() + "_tet_transition_layer";
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "BoundaryElementConversionGenerator", tet_mg_name, tet_layer_params);
+      _mg_names.push_back(tet_mg_name);
+    }
+
+    // replace the holes and boundaries
+    // currently all the support we have is for a single component
+    holes_mgs.clear();
+    holes_mgs.push_back(ext_mg_name);
+    holes_boundaries.clear();
+    holes_boundaries.push_back(name() + "_boundary_layers");
+    cavity_inner_boundaries.clear();
+    cavity_inner_boundaries.push_back(name() + "_base_layer");
+
+    if (isParamValid("block"))
+    {
+      const auto block_name = getParam<SubdomainName>("block");
+      _blocks.push_back(block_name + "_to_tet");
+      _blocks.push_back(block_name + "_to_pyramid");
+    }
+  }
+
   // Create the cavity mesh using a general meshes (for now, Delaunay triangulation or
   // tetrahedralization)
   if (_dimension == 2)
@@ -149,6 +252,7 @@ CavityComponent::addMeshGenerators()
   }
   else
   {
+    // Mesh the cavity with tets
     InputParameters params = _factory.getValidParams("XYZDelaunayGenerator");
     params.set<MeshGeneratorName>("boundary") = enclosure_surface_mg;
     params.set<BoundaryName>("output_boundary") = name() + "_outer";
@@ -161,15 +265,37 @@ CavityComponent::addMeshGenerators()
       params.set<SubdomainName>("output_subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
-    // TODO: figure out the stitching. we want to keep our hex mesh in the volume
-    // and have the transition layer be in the reflector.
+    // we don't stitch to the boundary layer here because the conversion methods don't handle
+    // triangulating on only one exterior side
     params.set<MooseEnum>("conversion_method") = "SURFACE";
     params.set<bool>("convert_holes_for_stitching") = true;
+
     params.set<bool>("output") = _verbose;
     params.set<bool>("show_info") = _verbose;
     const auto mg_name = name() + "_tetrahedralization";
     _app.getMeshGeneratorSystem().addMeshGenerator("XYZDelaunayGenerator", mg_name, params);
     _mg_names.push_back(mg_name);
+
+    // Stitch the tetrahedralization to the boundary layer
+    // The boundary layer should have a transition layer too
+    if (getParam<unsigned int>("n_boundary_layers") > 0)
+    {
+      InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+      stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = {
+          name() + "_tet_transition_layer", name() + "_tetrahedralization"};
+      stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+          {holes_boundaries.back(), holes_boundaries.back()}};
+      stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
+      stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
+      stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      stitcher_params.set<bool>("verbose_remapping") = _verbose;
+      stitcher_params.set<bool>("output") = _verbose;
+      stitcher_params.set<bool>("show_info") = _verbose;
+      const auto stitch_bl_mg_name = name() + "_stitched_bl";
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "StitchMeshGenerator", stitch_bl_mg_name, stitcher_params);
+      _mg_names.push_back(stitch_bl_mg_name);
+    }
   }
 
   // Now stitch to these components' meshes. The components may already be part of one or
@@ -183,8 +309,9 @@ CavityComponent::addMeshGenerators()
   std::vector<MeshGeneratorName> mgs_to_stitch_vec;
   mgs_to_stitch_vec.push_back(_mg_names.back());
   std::vector<std::vector<std::string>> final_stitching_boundaries;
-  for (const auto & final_mg : mgs_to_stitch)
+  for (const auto & i_mg : index_range(mgs_to_stitch))
   {
+    const auto & final_mg = *std::next(mgs_to_stitch.begin(), i_mg);
     const auto fused_boundary = final_mg + "_fused_outer_bdy";
 
     // Gather outer boundaries for all
@@ -209,13 +336,16 @@ CavityComponent::addMeshGenerators()
     _mg_names.push_back(final_mg + "_fused_exterior_surfaces");
 
     // Form stitching pairs for each final mesh generator
-    final_stitching_boundaries.push_back({"hole_bdy_" + final_mg, fused_boundary});
+    final_stitching_boundaries.push_back({cavity_inner_boundaries[i_mg], fused_boundary});
     // These MGs with the fused surface serve as inputs to the stitcher
     mgs_to_stitch_vec.push_back(final_mg + "_fused_exterior_surfaces");
   }
 
+  // Stitch the (cavity + boundary) layers to the components
   InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+  std::cout << "Input MGs " << Moose::stringify(mgs_to_stitch_vec) << std::endl;
   stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = mgs_to_stitch_vec;
+  std::cout << "Stitching bdies " << Moose::stringify(final_stitching_boundaries) << std::endl;
   stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
       final_stitching_boundaries;
   stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = false;
