@@ -52,9 +52,6 @@ MFEMMesh::buildMesh()
 {
   TIME_SECTION("buildMesh", 2, "Reading Mesh");
 
-  // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
-  buildDummyMooseMesh();
-
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
@@ -93,6 +90,9 @@ MFEMMesh::buildMesh()
 
   if (isParamSetByUser("displacement"))
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+
+  // Build a dummy MOOSE mesh to enable this class to work with other MOOSE classes.
+  buildDummyMooseMesh();
 }
 
 void
@@ -108,7 +108,10 @@ void
 MFEMMesh::buildDummyMooseMesh()
 {
   auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
-  MeshTools::Generation::build_line(dummy, 1, 0., 1., ElemType::EDGE2);
+  if (dimension() == 1)
+    MeshTools::Generation::build_line(dummy, 1, 0., 1., ElemType::EDGE3);
+  else
+    MeshTools::Generation::build_square(dummy, 1, 1, 0., 1., 0., 1., ElemType::QUAD9);
 }
 
 void
