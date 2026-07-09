@@ -28,6 +28,7 @@ CavityComponent::validParams()
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
+  params += ComponentMeshGenerationHelper::validParams();
   params.addClassDescription(
       "Cavity component meshing around selected components. The mesh will be formed around the component mesh and thus the cavity surface mesh must be larger than the component. If these enclosed components are connected to "
       "other components inside the enclosure, the cavity mesh will be trimmed to avoid overlapping with these other components");
@@ -77,6 +78,7 @@ CavityComponent::CavityComponent(const InputParameters & params)
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
+    ComponentMeshGenerationHelper(params),
     _target_elem_volume(getParam<Real>("target_element_volume")),
     _center_surface_mesh(getParam<Point>("recenter_surface_mesh_to")),
     _surface_mesh_mg(getParam<MeshGeneratorName>("enclosing_surface_mesh_mg")),
@@ -112,24 +114,17 @@ CavityComponent::addMeshGenerators()
   if (isParamSetByUser("recenter_surface_mesh_to"))
   {
     // Re-center the mesh to the origin
-    const auto translation_mg_origin = _surface_mesh_mg + "_translated_to_origin";
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _surface_mesh_mg;
     params.set<MooseEnum>("transform") = "TRANSLATE_CENTER_ORIGIN";
-    params.set<bool>("output") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", translation_mg_origin, params);
-    _mg_names.push_back(translation_mg_origin);
+    addMeshGenerator("TransformGenerator", "translated_to_origin", params);
 
     // Re-center to the user-input coordinates
-    const auto translation_mg = _surface_mesh_mg + "_translated";
-    params.set<MeshGeneratorName>("input") = translation_mg_origin;
+    params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "TRANSLATE";
     params.set<RealVectorValue>("vector_value") = _center_surface_mesh;
-    params.set<bool>("output") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator("TransformGenerator", translation_mg, params);
-    _mg_names.push_back(translation_mg);
-    enclosure_surface_mg = translation_mg;
+    addMeshGenerator("TransformGenerator", "translated", params);
+    enclosure_surface_mg = _mg_names.back();
   }
 
   // Build boundary layers before filling the surface / volume
@@ -157,22 +152,12 @@ CavityComponent::addMeshGenerators()
     const auto lowD_block_name = name() + "lowD_for_boundary_layer";
     lowD_params.set<SubdomainName>("new_block_name") = lowD_block_name;
     lowD_params.set<std::vector<BoundaryName>>("sidesets") = gathered_exerior_bdies;
-    lowD_params.set<bool>("output") = _verbose;
-    lowD_params.set<bool>("show_info") = _verbose;
-    const auto lowD_mg_name = name() + "_create_lowerD";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "LowerDBlockFromSidesetGenerator", lowD_mg_name, lowD_params);
-    _mg_names.push_back(lowD_mg_name);
+    addMeshGenerator("LowerDBlockFromSidesetGenerator", "create_lowerD", lowD_params);
 
     InputParameters blockToMesh_params = _factory.getValidParams("BlockToMeshConverterGenerator");
     blockToMesh_params.set<MeshGeneratorName>("input") = _mg_names.back();
     blockToMesh_params.set<std::vector<SubdomainName>>("target_blocks") = {lowD_block_name};
-    blockToMesh_params.set<bool>("output") = _verbose;
-    blockToMesh_params.set<bool>("show_info") = _verbose;
-    const auto blockToMesh_mg_name = name() + "_lowerD_into_block";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "BlockToMeshConverterGenerator", blockToMesh_mg_name, blockToMesh_params);
-    _mg_names.push_back(blockToMesh_mg_name);
+    addMeshGenerator("BlockToMeshConverterGenerator", "lowerD_into_block", blockToMesh_params);
 
     // Create a boundary layer by extruding from the component surfaces
     // NOTE: this should become an option, a parameter we can turn on
@@ -187,13 +172,8 @@ CavityComponent::addMeshGenerators()
     ext_params.set<BoundaryName>("bottom_boundary") = name() + "_base_layer";
     ext_params.set<BoundaryName>("top_boundary") = name() + "_boundary_layers";
     ext_params.set<bool>("extrude_along_node_normals") = true;
-
-    ext_params.set<bool>("output") = _verbose;
-    ext_params.set<bool>("show_info") = _verbose;
-    const auto ext_mg_name = name() + "_boundary_layers";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AdvancedExtruderGenerator", ext_mg_name, ext_params);
-    _mg_names.push_back(ext_mg_name);
+    addMeshGenerator("AdvancedExtruderGenerator", "boundary_layers", ext_params);
+    const auto blayer_mg_name = _mg_names.back();
 
     if (_dimension == 3)
     {
@@ -203,18 +183,17 @@ CavityComponent::addMeshGenerators()
       tet_layer_params.set<MeshGeneratorName>("input") = _mg_names.back();
       tet_layer_params.set<std::vector<BoundaryName>>("boundary_names") = {name() +
                                                                            "_boundary_layers"};
-      tet_layer_params.set<bool>("output") = _verbose;
-      tet_layer_params.set<bool>("show_info") = _verbose;
-      const auto tet_mg_name = name() + "_tet_transition_layer";
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "BoundaryElementConversionGenerator", tet_mg_name, tet_layer_params);
-      _mg_names.push_back(tet_mg_name);
+      addMeshGenerator(
+          "BoundaryElementConversionGenerator", "tet_transition_layer", tet_layer_params);
     }
 
     // replace the holes and boundaries
-    // currently all the support we have is for a single component
+    // NOTE: we only support a single connected (by mesh generation) component at this time
     holes_mgs.clear();
-    holes_mgs.push_back(ext_mg_name);
+    // we are going to rely on BoundaryElementConversionGenerator and all_tri giving the same
+    // tetrahedralization of the boundary here... because all_tri can't handle pyramids at this time
+    // TODO: see https://github.com/libMesh/libmesh/issues/4495
+    holes_mgs.push_back(blayer_mg_name);
     holes_boundaries.clear();
     holes_boundaries.push_back(name() + "_boundary_layers");
     cavity_inner_boundaries.clear();
@@ -244,11 +223,7 @@ CavityComponent::addMeshGenerators()
       params.set<SubdomainName>("output_subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
-    params.set<bool>("output") = _verbose;
-    params.set<bool>("show_info") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "XYDelaunayGenerator", name() + "_triangulation", params);
-    _mg_names.push_back(name() + "_triangulation");
+    addMeshGenerator("XYDelaunayGenerator", "triangulation", params);
   }
   else
   {
@@ -269,32 +244,22 @@ CavityComponent::addMeshGenerators()
     // triangulating on only one exterior side
     params.set<MooseEnum>("conversion_method") = "SURFACE";
     params.set<bool>("convert_holes_for_stitching") = true;
-
-    params.set<bool>("output") = _verbose;
-    params.set<bool>("show_info") = _verbose;
-    const auto mg_name = name() + "_tetrahedralization";
-    _app.getMeshGeneratorSystem().addMeshGenerator("XYZDelaunayGenerator", mg_name, params);
-    _mg_names.push_back(mg_name);
+    addMeshGenerator("XYZDelaunayGenerator", "tetrahedralization", params);
 
     // Stitch the tetrahedralization to the boundary layer
     // The boundary layer should have a transition layer too
     if (getParam<unsigned int>("n_boundary_layers") > 0)
     {
       InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
-      stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = {
-          name() + "_tet_transition_layer", name() + "_tetrahedralization"};
+      stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = {*(_mg_names.rbegin() + 1),
+                                                                       _mg_names.back()};
       stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
           {holes_boundaries.back(), holes_boundaries.back()}};
       stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
       stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
       stitcher_params.set<bool>("verbose_remapping") = _verbose;
-      stitcher_params.set<bool>("output") = _verbose;
-      stitcher_params.set<bool>("show_info") = _verbose;
-      const auto stitch_bl_mg_name = name() + "_stitched_bl";
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "StitchMeshGenerator", stitch_bl_mg_name, stitcher_params);
-      _mg_names.push_back(stitch_bl_mg_name);
+      addMeshGenerator("StitchMeshGenerator", "stitched_bl", stitcher_params);
     }
   }
 
@@ -330,15 +295,12 @@ CavityComponent::addMeshGenerators()
     params.set<std::string>("combinatorial_geometry") = "x > -1e100";
     params.set<std::vector<BoundaryName>>("included_boundaries") = gathered_exerior_bdies;
     params.set<BoundaryName>("new_sideset_name") = fused_boundary;
-    params.set<bool>("output") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "ParsedGenerateSideset", final_mg + "_fused_exterior_surfaces", params);
-    _mg_names.push_back(final_mg + "_fused_exterior_surfaces");
+    addMeshGenerator("ParsedGenerateSideset", final_mg + "_fused_exterior_surfaces", params);
 
     // Form stitching pairs for each final mesh generator
     final_stitching_boundaries.push_back({fused_boundary, cavity_inner_boundaries[i_mg]});
     // These MGs with the fused surface serve as inputs to the stitcher
-    mgs_to_stitch_vec.insert(mgs_to_stitch_vec.begin(), final_mg + "_fused_exterior_surfaces");
+    mgs_to_stitch_vec.insert(mgs_to_stitch_vec.begin(), _mg_names.back());
   }
 
   // Stitch the (cavity + boundary) layers to the components
@@ -350,11 +312,7 @@ CavityComponent::addMeshGenerators()
   stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
   stitcher_params.set<bool>("verbose_stitching") = _verbose;
   stitcher_params.set<bool>("verbose_remapping") = _verbose;
-  stitcher_params.set<bool>("output") = _verbose;
-  stitcher_params.set<bool>("show_info") = _verbose;
-  _app.getMeshGeneratorSystem().addMeshGenerator(
-      "StitchMeshGenerator", name() + "_stitched", stitcher_params);
-  _mg_names.push_back(name() + "_stitched");
+  addMeshGenerator("StitchMeshGenerator", "stitched", stitcher_params);
 
   // The triangulation that goes around the component could be overlapping with other components
   // Delete the elements overlapping.
@@ -383,17 +341,14 @@ CavityComponent::addMeshGenerators()
       proxy_del_params.set<MeshGeneratorName>("proximity_mesh") =
           conn_comp->getOwnMeshMeshGeneratorName();
       proxy_del_params.set<Real>("distance") = 1e-10;
-      proxy_del_params.set<bool>("output") = _verbose;
-      proxy_del_params.set<bool>("show_info") = _verbose;
       const auto mg_name = name() + "_rm_overlap_" + conn_name;
       // Avoid deleting if connected component does not have a mesh
       // Avoid adding the same deletion next to the same connected component twice
       if (!conn_comp->getOwnMeshMeshGeneratorName().empty() &&
           std::find(_mg_names.begin(), _mg_names.end(), mg_name) == _mg_names.end())
       {
-        _app.getMeshGeneratorSystem().addMeshGenerator(
-            "DeleteElementsNearMeshGenerator", mg_name, proxy_del_params);
-        _mg_names.push_back(mg_name);
+        addMeshGenerator(
+            "DeleteElementsNearMeshGenerator", "rm_overlap_" + conn_name, proxy_del_params);
       }
     }
   }

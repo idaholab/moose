@@ -15,7 +15,7 @@
 #include "ComponentMaterialPropertyInterface.h"
 #include "ComponentInitialConditionInterface.h"
 #include "ComponentBoundaryConditionInterface.h"
-#include "ComponentMeshTransformHelper.h"
+#include "ComponentMeshGenerationHelper.h"
 
 /**
  * ActionComponent to connect two components. The connection options are based on the mesh
@@ -25,7 +25,8 @@ class ComponentJunction : public virtual ActionComponent,
                           public ComponentPhysicsInterface,
                           public ComponentMaterialPropertyInterface,
                           public ComponentInitialConditionInterface,
-                          public ComponentBoundaryConditionInterface
+                          public ComponentBoundaryConditionInterface,
+                          public ComponentMeshGenerationHelper
 {
 public:
   static InputParameters validParams();
