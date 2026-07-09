@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "ComponentJunction.h"
+#include "ComponentMeshTransformHelper.h"
 #include "MooseUtils.h"
 
 registerMooseAction("MooseApp", ComponentJunction, "add_mesh_generator");
@@ -28,6 +29,7 @@ ComponentJunction::validParams()
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
+  params += ComponentMeshGenerationHelper::validParams();
 
   params.addClassDescription("Component to join two other components.");
 
@@ -99,6 +101,7 @@ ComponentJunction::ComponentJunction(const InputParameters & params)
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
+    ComponentMeshGenerationHelper(params),
     _junction_method(getParam<MooseEnum>("junction_method")),
     _enforce_all_nodes_match_on_boundaries(getParam<bool>("enforce_all_nodes_match_on_boundaries"))
 {
@@ -163,10 +166,7 @@ ComponentJunction::addMeshGenerators()
         params.set<bool>("verbose_remapping") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") =
             _enforce_all_nodes_match_on_boundaries;
-        params.set<bool>("output") = _verbose;
-        _app.getMeshGeneratorSystem().addMeshGenerator(
-            "StitchMeshGenerator", name() + "_base", params);
-        _mg_names.push_back(name() + "_base");
+        addMeshGenerator("StitchMeshGenerator", "base", params);
       }
       else
       {
@@ -177,11 +177,7 @@ ComponentJunction::addMeshGenerators()
             first_component.getCurrentTopLevelMeshGeneratorName();
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
-        params.set<bool>("show_info") = _verbose;
-        params.set<bool>("output") = _verbose;
-        _app.getMeshGeneratorSystem().addMeshGenerator(
-            "StitchBoundaryMeshGenerator", name() + "_close", params);
-        _mg_names.push_back(name() + "_close");
+        addMeshGenerator("StitchBoundaryMeshGenerator", "close", params);
       }
     }
     else
@@ -244,13 +240,9 @@ ComponentJunction::addMeshGenerators()
         bspline_params.set<SubdomainName>("new_subdomain_name") = getParam<SubdomainName>("block");
       bspline_params.set<std::vector<BoundaryName>>("edge_nodesets") = {
           name() + "_bspline_start_node", name() + "_bspline_end_node"};
-      // final generator in 1D
-      bspline_params.set<bool>("output") = _verbose;
     }
-
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "BSplineCurveGenerator", name() + "_curve", bspline_params);
-    _mg_names.push_back(name() + "_curve");
+    addMeshGenerator("BSplineCurveGenerator", "curve", bspline_params);
+    const auto curve_mg_name = _mg_names.back();
 
     // Extrude boundary from first component
     if (dimension_first > 1)
@@ -263,23 +255,19 @@ ComponentJunction::addMeshGenerators()
           std::vector{getParam<BoundaryName>("first_boundary")};
       ld_source_params.set<SubdomainName>("new_block_name") =
           (SubdomainName)(name() + "_LowerDBlockSource");
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "LowerDBlockFromSidesetGenerator", name() + "_lowerDGenerationSource", ld_source_params);
-      _mg_names.push_back(name() + "_lowerDGenerationSource");
+      addMeshGenerator(
+          "LowerDBlockFromSidesetGenerator", "lowerDGenerationSource", ld_source_params);
 
-      InputParameters _bmc_source_params = _factory.getValidParams("BlockToMeshConverterGenerator");
-      _bmc_source_params.set<MeshGeneratorName>("input") = name() + "_lowerDGenerationSource";
-      _bmc_source_params.set<std::vector<SubdomainName>>("target_blocks") = {
+      InputParameters bmc_source_params = _factory.getValidParams("BlockToMeshConverterGenerator");
+      bmc_source_params.set<MeshGeneratorName>("input") = _mg_names.back();
+      bmc_source_params.set<std::vector<SubdomainName>>("target_blocks") = {
           (SubdomainName)(name() + "_LowerDBlockSource")};
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "BlockToMeshConverterGenerator", name() + "_blockToMeshSource", _bmc_source_params);
-      _mg_names.push_back(name() + "_blockToMeshSource");
+      addMeshGenerator("BlockToMeshConverterGenerator", "blockToMeshSource", bmc_source_params);
 
       // set up AdvancedExtruderGenerator
       InputParameters aeg_params = _factory.getValidParams("AdvancedExtruderGenerator");
-      aeg_params.set<MeshGeneratorName>("extrusion_curve") = (MeshGeneratorName)(name() + "_curve");
-      aeg_params.set<MeshGeneratorName>("input") =
-          (MeshGeneratorName)(name() + "_blockToMeshSource");
+      aeg_params.set<MeshGeneratorName>("extrusion_curve") = curve_mg_name;
+      aeg_params.set<MeshGeneratorName>("input") = _mg_names.back();
 
       const bool reverse_start = getParam<bool>("reverse_first_component_direction");
       const bool reverse_end = getParam<bool>("reverse_second_component_direction");
@@ -305,12 +293,7 @@ ComponentJunction::addMeshGenerators()
         swaps[0].push_back(getParam<SubdomainName>("block"));
         aeg_params.set<std::vector<std::vector<SubdomainName>>>("subdomain_swaps") = swaps;
       }
-      aeg_params.set<bool>("output") = _verbose;
-      aeg_params.set<bool>("show_info") = _verbose;
-
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "AdvancedExtruderGenerator", name() + "_aeg", aeg_params);
-      _mg_names.push_back(name() + "_aeg");
+      addMeshGenerator("AdvancedExtruderGenerator", "aeg", aeg_params);
     }
 
     // The curve mesh (in 1D) or the extrusion (in 2D)
@@ -340,13 +323,9 @@ ComponentJunction::addMeshGenerators()
 
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
       stitcher_params.set<bool>("verbose_remapping") = _verbose;
-      stitcher_params.set<bool>("output") = _verbose;
-      stitcher_params.set<bool>("show_info") = _verbose;
       stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
-      _mg_names.push_back(name() + "_stitcher");
+      addMeshGenerator("StitchMeshGenerator", "stitcher", stitcher_params);
     }
     else
     {
@@ -368,24 +347,18 @@ ComponentJunction::addMeshGenerators()
       mesh_stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
       mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "StitchMeshGenerator", name() + "_mesh_stitcher", mesh_stitcher_params);
-      _mg_names.push_back(name() + "_stitcher");
+      addMeshGenerator("StitchMeshGenerator", "mesh_stitcher", mesh_stitcher_params);
 
       InputParameters boundary_stitcher_params =
           _factory.getValidParams("StitchBoundaryMeshGenerator");
-      boundary_stitcher_params.set<MeshGeneratorName>("input") = name() + "_mesh_stitcher";
+      boundary_stitcher_params.set<MeshGeneratorName>("input") = _mg_names.back();
       if (dimension_first > 1)
         boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{name() + "_aeg_top_boundary", second_boundary}};
       else
         boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{name() + "_bspline_end_node", second_boundary}};
-      boundary_stitcher_params.set<bool>("show_info") = _verbose;
-      boundary_stitcher_params.set<bool>("output") = _verbose;
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);
-      _mg_names.push_back(name() + "_closed");
+      addMeshGenerator("StitchBoundaryMeshGenerator", "closed", boundary_stitcher_params);
     }
   }
   else

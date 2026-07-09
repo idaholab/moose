@@ -15,7 +15,7 @@
 InputParameters
 ComponentMeshTransformHelper::validParams()
 {
-  auto params = ActionComponent::validParams();
+  auto params = ComponentMeshGenerationHelper::validParams();
 
   // If your component is 0D, you should make these two parameters private!
   params.addParam<RealVectorValue>(
@@ -39,6 +39,7 @@ ComponentMeshTransformHelper::validParams()
 
 ComponentMeshTransformHelper::ComponentMeshTransformHelper(const InputParameters & params)
   : ActionComponent(params),
+    ComponentMeshGenerationHelper(params),
     _rotation(queryParam<RealVectorValue>("rotation")),
     _direction(queryParam<RealVectorValue>("direction")),
     _translation(getParam<Point>("position"))
@@ -70,9 +71,7 @@ ComponentMeshTransformHelper::addMeshGenerators()
           RotationMatrix::rodriguesRotationMatrix<false>(RealVectorValue(1, 0, 0), *_direction);
       params.set<RealTensorValue>("rotation_matrix") = rotation_matrix;
     }
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", name() + "_rotated", params);
-    _mg_names.push_back(name() + "_rotated");
+    addMeshGenerator("TransformGenerator", "rotated", params);
   }
 
   // Add a translation
@@ -81,10 +80,7 @@ ComponentMeshTransformHelper::addMeshGenerators()
     params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "TRANSLATE";
     params.set<RealVectorValue>("vector_value") = getParam<Point>("position");
-    params.set<bool>("output") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", name() + "_translated", params);
-    _mg_names.push_back(name() + "_translated");
+    addMeshGenerator("TransformGenerator", "translated", params);
   }
 
   setCurrentTopLevelMeshGeneratorName(_mg_names.back());
