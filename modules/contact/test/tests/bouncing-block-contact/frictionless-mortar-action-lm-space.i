@@ -112,7 +112,7 @@ offset = 1e-2
   exodus = false
   csv = true
   checkpoint = false
-  file_base = frictionless-mortar-action-lm-space-default
+  file_base = frictionless-mortar-action-lm-space-match-displacement
 []
 
 [Preconditioning]
