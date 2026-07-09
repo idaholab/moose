@@ -166,7 +166,7 @@ public:
   /**
    * Whether this a complex equation system
    */
-  virtual bool isComplex() const { return false; }
+  virtual bool IsComplex() const { return false; }
 
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();

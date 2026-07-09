@@ -42,7 +42,7 @@ LORInterface::GetPreconditionerLORInterface(LinearSolverBase & solver) const
 void
 LORInterface::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
 {
-  if (equation_system.isComplex())
+  if (equation_system.IsComplex())
     mooseError("LOR solve is not supported for complex equation systems.");
   if (equation_system.GetTestVarNames().size() > 1)
     mooseError("LOR solve is only supported for single-variable systems");
