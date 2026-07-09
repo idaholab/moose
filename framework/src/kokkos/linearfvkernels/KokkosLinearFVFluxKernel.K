@@ -15,6 +15,8 @@
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 
+#include <algorithm>
+
 namespace Moose::Kokkos
 {
 
@@ -33,7 +35,11 @@ LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & parameters)
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
-  : LinearFVKernel(object), _bc_data(object._bc_data), _bc_index(object._bc_index)
+  : LinearFVKernel(object),
+    _bc_data(object._bc_data),
+    _bc_index(object._bc_index),
+    _internal_face_ids(object._internal_face_ids),
+    _boundary_face_ids(object._boundary_face_ids)
 {
 }
 
@@ -107,8 +113,38 @@ LinearFVFluxKernel::initialSetup()
     }
   }
 
+  std::vector<FaceID> internal_face_ids;
+  std::vector<FaceID> boundary_face_ids;
+
+  const auto * const variable = _var.mooseVar();
+  for (const auto block : blockIDs())
+    for (const auto elem : mesh.getMesh().active_local_subdomain_elements_ptr_range(block))
+    {
+      const auto contiguous_elem = kokkos_mesh->getContiguousElementID(elem);
+
+      for (const auto side : make_range(elem->n_sides()))
+      {
+        const auto * const neighbor = elem->neighbor_ptr(side);
+
+        if (neighbor && neighbor != libMesh::remote_elem &&
+            variable->activeOnSubdomain(neighbor->subdomain_id()))
+          internal_face_ids.push_back({contiguous_elem, side});
+        else if (_bc_index(side, contiguous_elem) != -1)
+          boundary_face_ids.push_back({contiguous_elem, side});
+      }
+    }
+
+  std::sort(internal_face_ids.begin(), internal_face_ids.end());
+  std::sort(boundary_face_ids.begin(), boundary_face_ids.end());
+
+  _internal_face_ids = internal_face_ids;
+  _boundary_face_ids = boundary_face_ids;
+
   _bc_index.copyToDevice();
-  _bc_data = bc_data;
+  _bc_data.create(libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(bc_data.size()));
+  for (const auto i : index_range(bc_data))
+    _bc_data[i] = bc_data[i];
+  _bc_data.copyToDevice();
 
   // Non-Kokkos BCs are never called by Kokkos flux kernels; they would be silently
   // ignored, producing wrong results. Reject them early for this variable.
@@ -143,21 +179,40 @@ LinearFVFluxKernel::initialSetup()
 void
 LinearFVFluxKernel::computeRightHandSide()
 {
-  Policy policy(0, numKokkosBlockSides());
-  if (!_rhs_dispatcher)
-    _rhs_dispatcher = DispatcherRegistry::build<RightHandSideLoop>(this, type());
-  _rhs_dispatcher->parallelFor(policy);
+  if (hasInternalRightHandSideContribution() && _internal_face_ids.size())
+  {
+    Policy policy(0, _internal_face_ids.size());
+    if (!_internal_rhs_dispatcher)
+      _internal_rhs_dispatcher = DispatcherRegistry::build<InternalRightHandSideLoop>(this, type());
+    _internal_rhs_dispatcher->parallelFor(policy);
+  }
+
+  if (_boundary_face_ids.size())
+  {
+    Policy policy(0, _boundary_face_ids.size());
+    if (!_boundary_rhs_dispatcher)
+      _boundary_rhs_dispatcher = DispatcherRegistry::build<BoundaryRightHandSideLoop>(this, type());
+    _boundary_rhs_dispatcher->parallelFor(policy);
+  }
 }
 
 void
 LinearFVFluxKernel::computeMatrix()
 {
-  if (DispatcherRegistry::hasUserMethod<MatrixLoop>(type()))
+  if (DispatcherRegistry::hasUserMethod<InternalMatrixLoop>(type()) && _internal_face_ids.size())
   {
-    Policy policy(0, numKokkosBlockSides());
-    if (!_matrix_dispatcher)
-      _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
-    _matrix_dispatcher->parallelFor(policy);
+    Policy policy(0, _internal_face_ids.size());
+    if (!_internal_matrix_dispatcher)
+      _internal_matrix_dispatcher = DispatcherRegistry::build<InternalMatrixLoop>(this, type());
+    _internal_matrix_dispatcher->parallelFor(policy);
+  }
+
+  if (DispatcherRegistry::hasUserMethod<BoundaryMatrixLoop>(type()) && _boundary_face_ids.size())
+  {
+    Policy policy(0, _boundary_face_ids.size());
+    if (!_boundary_matrix_dispatcher)
+      _boundary_matrix_dispatcher = DispatcherRegistry::build<BoundaryMatrixLoop>(this, type());
+    _boundary_matrix_dispatcher->parallelFor(policy);
   }
 }
 

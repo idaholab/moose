@@ -37,27 +37,89 @@ public:
   virtual bool needsBoundaryValueData() const { return false; }
   /// Whether this kernel needs boundary normal gradient data from its boundary conditions
   virtual bool needsBoundaryNormalGradientData() const { return false; }
+  /// Whether this kernel has nonzero internal-face RHS contributions
+  virtual bool hasInternalRightHandSideContribution() const { return true; }
 
-  /**
-   * Right-hand side dispatch loop body; accumulates the face RHS contribution (interior faces from
-   * the kernel, boundary faces from the precomputed boundary face data)
-   * @param tid The thread ID of the current element side
-   * @param kernel The concrete kernel object
-   */
+  /// Tag dispatch type for internal-face right-hand side computation
+  struct InternalRightHandSideLoop
+  {
+  };
+  /// Tag dispatch type for boundary-face right-hand side computation
+  struct BoundaryRightHandSideLoop
+  {
+  };
+  /// Tag dispatch type for internal-face matrix computation
+  struct InternalMatrixLoop
+  {
+  };
+  /// Tag dispatch type for boundary-face matrix computation
+  struct BoundaryMatrixLoop
+  {
+  };
+
   template <typename Derived>
   KOKKOS_FUNCTION void
-  operator()(RightHandSideLoop, const ThreadID tid, const Derived & kernel) const;
+  operator()(InternalRightHandSideLoop, const ThreadID tid, const Derived & kernel) const;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(BoundaryRightHandSideLoop, const ThreadID tid, const Derived & kernel) const;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(InternalMatrixLoop, const ThreadID tid, const Derived & kernel) const;
+
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(BoundaryMatrixLoop, const ThreadID tid, const Derived & kernel) const;
 
   /**
-   * Matrix dispatch loop body; accumulates the face matrix contribution (interior faces from the
-   * kernel, boundary faces from the precomputed boundary face data)
-   * @param tid The thread ID of the current element side
-   * @param kernel The concrete kernel object
+   * Default methods to prevent compile errors when matrix/RHS contributions are not defined in the
+   * derived class.
    */
+  ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const;
+  KOKKOS_FUNCTION Real computeInternalMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeInternalRightHandSideContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum) const;
+  ///@}
+
+  /**
+   * Functions used to check if users have overriden the matrix hook methods, whose calculations can
+   * be skipped when not overriden.
+   * @returns The function pointer of the default hook method
+   */
+  ///@{
+  template <typename Derived>
+  static auto defaultInternalMatrixContribution()
+  {
+    return &LinearFVFluxKernel::computeInternalMatrixContribution<Derived>;
+  }
+
+  template <typename Derived>
+  static auto defaultInternalNeighborMatrixContribution()
+  {
+    return &LinearFVFluxKernel::computeInternalNeighborMatrixContribution<Derived>;
+  }
+
+  template <typename Derived>
+  static auto defaultBoundaryMatrixContribution()
+  {
+    return &LinearFVFluxKernel::computeBoundaryMatrixContribution<Derived>;
+  }
+  ///@}
 
 protected:
+  /// Directed element side operated on by this flux kernel
+  using FaceID = Pair<ContiguousElementID, unsigned int>;
+
+#ifndef NDEBUG
   /**
    * Whether this face has a mesh neighbor on a subdomain where this kernel's variable is active.
    * A mesh-internal face is treated as a boundary for a block-restricted variable when the adjacent
@@ -67,6 +129,7 @@ protected:
 
   /// Whether this boundary face has a boundary condition data provider
   KOKKOS_FUNCTION bool hasBoundaryData(const FVDatum & datum) const;
+#endif
 
   /// Boundary value relation for this boundary face
   KOKKOS_FUNCTION LinearFVBoundaryCondition::BoundaryRelation
@@ -80,8 +143,18 @@ protected:
   Array<LinearFVBoundaryCondition::BoundaryData> _bc_data;
   /// Map from (side, element) to compact boundary condition index
   Array2D<int> _bc_index;
+  /// Directed internal element sides with an active variable on the neighbor element
+  Array<FaceID> _internal_face_ids;
+  /// Directed boundary element sides with active Kokkos boundary data
+  Array<FaceID> _boundary_face_ids;
+
+  std::unique_ptr<DispatcherBase> _internal_rhs_dispatcher;
+  std::unique_ptr<DispatcherBase> _boundary_rhs_dispatcher;
+  std::unique_ptr<DispatcherBase> _internal_matrix_dispatcher;
+  std::unique_ptr<DispatcherBase> _boundary_matrix_dispatcher;
 };
 
+#ifndef NDEBUG
 KOKKOS_FUNCTION inline bool
 LinearFVFluxKernel::hasFaceNeighbor(const FVDatum & datum) const
 {
@@ -97,6 +170,7 @@ LinearFVFluxKernel::hasBoundaryData(const FVDatum & datum) const
 {
   return _bc_index.isAlloc() && _bc_index(datum.side(), datum.elemID()) >= 0;
 }
+#endif
 
 KOKKOS_FUNCTION inline LinearFVBoundaryCondition::BoundaryRelation
 LinearFVFluxKernel::boundaryValueRelation(const FVDatum & datum) const
@@ -121,42 +195,125 @@ LinearFVFluxKernel::boundaryNormalGradientRelation(const FVDatum & datum) const
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION void
-LinearFVFluxKernel::operator()(RightHandSideLoop, const ThreadID tid, const Derived & kernel) const
+KOKKOS_FUNCTION Real
+LinearFVFluxKernel::computeInternalMatrixContribution(const FVDatum &) const
 {
-  const auto [elem, side] = kokkosBlockElementSideID(tid);
-  FVDatum datum(elem, side, kokkosMesh());
-  if (!hasFaceNeighbor(datum) && !hasBoundaryData(datum))
-    return;
+  ::Kokkos::abort("Default computeInternalMatrixContribution() should never be called. Make sure "
+                  "you properly redefined this method in your class without typos.");
 
-  KOKKOS_ASSERT(_var.components() == 1);
-  const auto & sys = kokkosSystem(_var.sys());
-  kernel.accumulateTaggedVector(kernel.template computeRightHandSideContribution<Derived>(datum),
-                                sys.getElemLocalDofIndex(elem, 0, _var.var()));
+  return 0;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+LinearFVFluxKernel::computeInternalNeighborMatrixContribution(const FVDatum &) const
+{
+  ::Kokkos::abort("Default computeInternalNeighborMatrixContribution() should never be called. "
+                  "Make sure you properly redefined this method in your class without typos.");
+
+  return 0;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+LinearFVFluxKernel::computeBoundaryMatrixContribution(const FVDatum &) const
+{
+  ::Kokkos::abort("Default computeBoundaryMatrixContribution() should never be called. Make sure "
+                  "you properly redefined this method in your class without typos.");
+
+  return 0;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+LinearFVFluxKernel::computeInternalRightHandSideContribution(const FVDatum &) const
+{
+  ::Kokkos::abort("Default computeInternalRightHandSideContribution() should never be called. Make "
+                  "sure you properly redefined this method in your class without typos.");
+
+  return 0;
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+LinearFVFluxKernel::computeBoundaryRightHandSideContribution(const FVDatum &) const
+{
+  ::Kokkos::abort("Default computeBoundaryRightHandSideContribution() should never be called. Make "
+                  "sure you properly redefined this method in your class without typos.");
+
+  return 0;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-LinearFVFluxKernel::operator()(MatrixLoop, const ThreadID tid, const Derived & kernel) const
+LinearFVFluxKernel::operator()(InternalRightHandSideLoop,
+                               const ThreadID tid,
+                               const Derived & kernel) const
 {
-  const auto [elem, side] = kokkosBlockElementSideID(tid);
+  const auto [elem, side] = _internal_face_ids[tid];
   FVDatum datum(elem, side, kokkosMesh());
-  const auto has_face_neighbor = hasFaceNeighbor(datum);
-  if (!has_face_neighbor && !hasBoundaryData(datum))
-    return;
+  KOKKOS_ASSERT(hasFaceNeighbor(datum));
+
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
+  kernel.accumulateTaggedVector(
+      kernel.template computeInternalRightHandSideContribution<Derived>(datum),
+      sys.getElemLocalDofIndex(elem, 0, _var.var()));
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+LinearFVFluxKernel::operator()(BoundaryRightHandSideLoop,
+                               const ThreadID tid,
+                               const Derived & kernel) const
+{
+  const auto [elem, side] = _boundary_face_ids[tid];
+  FVDatum datum(elem, side, kokkosMesh());
+  KOKKOS_ASSERT(hasBoundaryData(datum));
+
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto & sys = kokkosSystem(_var.sys());
+  kernel.accumulateTaggedVector(
+      kernel.template computeBoundaryRightHandSideContribution<Derived>(datum),
+      sys.getElemLocalDofIndex(elem, 0, _var.var()));
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+LinearFVFluxKernel::operator()(InternalMatrixLoop, const ThreadID tid, const Derived & kernel) const
+{
+  const auto [elem, side] = _internal_face_ids[tid];
+  FVDatum datum(elem, side, kokkosMesh());
+  KOKKOS_ASSERT(hasFaceNeighbor(datum));
 
   KOKKOS_ASSERT(_var.components() == 1);
   const auto var_num = _var.var();
   const auto & sys = kokkosSystem(_var.sys());
   const auto row = sys.getElemLocalDofIndex(elem, 0, var_num);
-  kernel.accumulateTaggedMatrix(kernel.template computeMatrixContribution<Derived>(datum),
+  kernel.accumulateTaggedMatrix(kernel.template computeInternalMatrixContribution<Derived>(datum),
                                 row,
                                 sys.getElemGlobalDofIndex(elem, 0, var_num));
+  kernel.accumulateTaggedMatrix(
+      kernel.template computeInternalNeighborMatrixContribution<Derived>(datum),
+      row,
+      sys.getElemGlobalDofIndex(datum.neighborID(), 0, var_num));
+}
 
-  if (has_face_neighbor)
-    kernel.accumulateTaggedMatrix(kernel.template computeNeighborMatrixContribution<Derived>(datum),
-                                  row,
-                                  sys.getElemGlobalDofIndex(datum.neighborID(), 0, var_num));
+template <typename Derived>
+KOKKOS_FUNCTION void
+LinearFVFluxKernel::operator()(BoundaryMatrixLoop, const ThreadID tid, const Derived & kernel) const
+{
+  const auto [elem, side] = _boundary_face_ids[tid];
+  FVDatum datum(elem, side, kokkosMesh());
+  KOKKOS_ASSERT(hasBoundaryData(datum));
+
+  KOKKOS_ASSERT(_var.components() == 1);
+  const auto var_num = _var.var();
+  const auto & sys = kokkosSystem(_var.sys());
+  const auto row = sys.getElemLocalDofIndex(elem, 0, var_num);
+  kernel.accumulateTaggedMatrix(kernel.template computeBoundaryMatrixContribution<Derived>(datum),
+                                row,
+                                sys.getElemGlobalDofIndex(elem, 0, var_num));
 }
 
 } // namespace Moose::Kokkos

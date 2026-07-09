@@ -24,13 +24,16 @@ public:
   KokkosLinearFVAdvection(const InputParameters & parameters);
 
   virtual bool needsBoundaryValueData() const override { return true; }
+  virtual bool hasInternalRightHandSideContribution() const override { return false; }
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeInternalMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeNeighborMatrixContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum) const;
 
 private:
   /// Normal advective face flux
@@ -42,33 +45,31 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeMatrixContribution(const FVDatum & datum) const
+KokkosLinearFVAdvection::computeInternalMatrixContribution(const FVDatum & datum) const
 {
   const auto face_flux = normalFaceFlux(datum);
-
-  if (hasFaceNeighbor(datum))
-    return face_flux > 0 ? face_flux * datum.faceArea() : 0;
-
-  return face_flux * datum.faceArea() * boundaryValueRelation(datum).coefficient;
+  return face_flux > 0 ? face_flux * datum.faceArea() : 0;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeNeighborMatrixContribution(const FVDatum & datum) const
+KokkosLinearFVAdvection::computeInternalNeighborMatrixContribution(const FVDatum & datum) const
 {
-  KOKKOS_ASSERT(hasFaceNeighbor(datum));
-
   const auto face_flux = normalFaceFlux(datum);
   return face_flux < 0 ? face_flux * datum.faceArea() : 0;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeRightHandSideContribution(const FVDatum & datum) const
+KokkosLinearFVAdvection::computeBoundaryMatrixContribution(const FVDatum & datum) const
 {
-  if (hasFaceNeighbor(datum))
-    return 0;
+  return normalFaceFlux(datum) * datum.faceArea() * boundaryValueRelation(datum).coefficient;
+}
 
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosLinearFVAdvection::computeBoundaryRightHandSideContribution(const FVDatum & datum) const
+{
   return -normalFaceFlux(datum) * datum.faceArea() * boundaryValueRelation(datum).source;
 }
 

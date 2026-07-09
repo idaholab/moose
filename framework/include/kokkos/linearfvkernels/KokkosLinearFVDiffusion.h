@@ -24,13 +24,16 @@ public:
   KokkosLinearFVDiffusion(const InputParameters & parameters);
 
   virtual bool needsBoundaryNormalGradientData() const override { return true; }
+  virtual bool hasInternalRightHandSideContribution() const override { return false; }
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeInternalMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeNeighborMatrixContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum) const;
 
 private:
   /**
@@ -52,30 +55,30 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVDiffusion::computeMatrixContribution(const FVDatum & datum) const
+KokkosLinearFVDiffusion::computeInternalMatrixContribution(const FVDatum & datum) const
 {
-  if (hasFaceNeighbor(datum))
-    return faceConductance(datum);
+  return faceConductance(datum);
+}
 
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosLinearFVDiffusion::computeInternalNeighborMatrixContribution(const FVDatum & datum) const
+{
+  return -faceConductance(datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION Real
+KokkosLinearFVDiffusion::computeBoundaryMatrixContribution(const FVDatum & datum) const
+{
   return -faceDiffusionCoefficient(datum) * datum.faceArea() *
          boundaryNormalGradientRelation(datum).coefficient;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const FVDatum & datum) const
+KokkosLinearFVDiffusion::computeBoundaryRightHandSideContribution(const FVDatum & datum) const
 {
-  KOKKOS_ASSERT(hasFaceNeighbor(datum));
-  return -faceConductance(datum);
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosLinearFVDiffusion::computeRightHandSideContribution(const FVDatum & datum) const
-{
-  if (hasFaceNeighbor(datum))
-    return 0;
-
   return faceDiffusionCoefficient(datum) * datum.faceArea() *
          boundaryNormalGradientRelation(datum).source;
 }
