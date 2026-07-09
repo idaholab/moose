@@ -15,6 +15,7 @@
 #include "ComponentMaterialPropertyInterface.h"
 #include "ComponentInitialConditionInterface.h"
 #include "ComponentBoundaryConditionInterface.h"
+#include "ComponentMeshGenerationHelper.h"
 
 /**
  * Cavity mesh on which one can define a Physics. The volumetric mesh is automatically created using
@@ -25,7 +26,8 @@ class CavityComponent : public virtual ActionComponent,
                         public ComponentPhysicsInterface,
                         public ComponentMaterialPropertyInterface,
                         public ComponentInitialConditionInterface,
-                        public ComponentBoundaryConditionInterface
+                        public ComponentBoundaryConditionInterface,
+                        public ComponentMeshGenerationHelper
 {
 public:
   static InputParameters validParams();
