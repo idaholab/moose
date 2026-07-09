@@ -47,5 +47,14 @@
       exodiff = 'vector_3d_out.e'
       detail = 'with vector variables in 3D'
     []
+    [2D_resid_and_jac_together]
+      type = 'Exodiff'
+      input = '2d_point_source.i'
+      exodiff = '2d_out.e'
+      cli_args = 'Executioner/solve_type=NEWTON Executioner/residual_and_jacobian_together=true'
+      prereq = 'dim/2D'
+      issues = '#26938'
+      detail = 'in 2D when computing the residual and Jacobian together'
+    []
   []
 []
