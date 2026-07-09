@@ -20,6 +20,9 @@
 
 #include "libmesh/equation_systems.h"
 
+#include <set>
+#include <unordered_set>
+
 void
 LinearSystem::addKokkosKernel(const std::string & kernel_name,
                               const std::string & name,
@@ -66,18 +69,6 @@ LinearSystem::initialSetupKokkosLinearFV()
   for (auto * kernel : elemental_kernels)
     kernel->initialSetup();
 
-  std::vector<Moose::Kokkos::LinearFVFluxKernel *> flux_kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSysNum>(number())
-      .template condition<AttribSystem>("LinearFVFluxKernel")
-      .template condition<AttribKokkos>(true)
-      .template condition<AttribThread>(0)
-      .queryInto(flux_kernels);
-
-  for (auto * kernel : flux_kernels)
-    kernel->initialSetup();
-
   std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
       .query()
@@ -89,6 +80,18 @@ LinearSystem::initialSetupKokkosLinearFV()
 
   for (auto * bc : bcs)
     bc->initialSetup();
+
+  std::vector<Moose::Kokkos::LinearFVFluxKernel *> flux_kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(number())
+      .template condition<AttribSystem>("LinearFVFluxKernel")
+      .template condition<AttribKokkos>(true)
+      .template condition<AttribThread>(0)
+      .queryInto(flux_kernels);
+
+  for (auto * kernel : flux_kernels)
+    kernel->initialSetup();
 }
 
 void
@@ -137,25 +140,14 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
       .template condition<AttribMatrixTags>(matrix_tags)
       .queryInto(flux_for_matrix_tags);
 
-  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs_for_vector_tags;
+  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSysNum>(number())
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(true)
       .template condition<AttribThread>(0)
-      .template condition<AttribVectorTags>(vector_tags)
-      .queryInto(bcs_for_vector_tags);
-
-  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs_for_matrix_tags;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSysNum>(number())
-      .template condition<AttribSystem>("LinearFVBoundaryCondition")
-      .template condition<AttribKokkos>(true)
-      .template condition<AttribThread>(0)
-      .template condition<AttribMatrixTags>(matrix_tags)
-      .queryInto(bcs_for_matrix_tags);
+      .queryInto(bcs);
 
   std::vector<Moose::Kokkos::LinearFVElementalKernel *> elemental_kernels;
   MooseUtils::getUnion(elemental_for_vector_tags, elemental_for_matrix_tags, elemental_kernels);
@@ -163,10 +155,7 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   std::vector<Moose::Kokkos::LinearFVFluxKernel *> flux_kernels;
   MooseUtils::getUnion(flux_for_vector_tags, flux_for_matrix_tags, flux_kernels);
 
-  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs;
-  MooseUtils::getUnion(bcs_for_vector_tags, bcs_for_matrix_tags, bcs);
-
-  if (elemental_kernels.empty() && flux_kernels.empty() && bcs.empty())
+  if (elemental_kernels.empty() && flux_kernels.empty())
     return;
 
   auto & our_kokkos_system = _fe_problem.getKokkosSystem(number());
@@ -187,14 +176,30 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
 
   kokkos_systems.copyToDevice();
 
-  for (auto bc : bcs_for_matrix_tags)
-    bc->computeMatrix();
+  std::unordered_set<unsigned int> value_bc_vars;
+  std::unordered_set<unsigned int> normal_gradient_bc_vars;
+
+  for (const auto kernel : flux_kernels)
+  {
+    if (kernel->needsBoundaryValueData())
+      value_bc_vars.insert(kernel->variable().var());
+    if (kernel->needsBoundaryNormalGradientData())
+      normal_gradient_bc_vars.insert(kernel->variable().var());
+  }
+
+  for (auto bc : bcs)
+  {
+    const auto bc_var = bc->variable().var();
+    if (value_bc_vars.count(bc_var))
+      bc->computeBoundaryValueData();
+    if (normal_gradient_bc_vars.count(bc_var))
+      bc->computeBoundaryNormalGradientData();
+  }
+
   for (auto kernel : elemental_for_matrix_tags)
     kernel->computeMatrix();
   for (auto kernel : flux_for_matrix_tags)
     kernel->computeMatrix();
-  for (auto bc : bcs_for_vector_tags)
-    bc->computeRightHandSide();
   for (auto kernel : elemental_for_vector_tags)
     kernel->computeRightHandSide();
   for (auto kernel : flux_for_vector_tags)

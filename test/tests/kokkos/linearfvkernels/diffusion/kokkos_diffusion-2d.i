@@ -35,10 +35,9 @@
 
 [LinearFVBCs]
   [dir]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = u
     boundary = "left right top bottom"
-    diffusion_coeff = coeff_func_kokkos
     functor = analytic_solution_kokkos
   []
 []

@@ -1,8 +1,8 @@
 # 2D diffusion MMS test with mixed Dirichlet (left/right) and Neumann (top/bottom) BCs.
 # Exact solution:  u = (1.5 - x^2)(1.5 - y^2)
 # Diffusion coeff: D = 1 + 0.5*x*y
-# Neumann flux on bottom (n = -y): -D * du/dy|_{y=0} = 0  (du/dy = 0 at y=0)
-# Neumann flux on top   (n = +y):  D * du/dy|_{y=ymax}    (outward normal flux)
+# Neumann normal gradient on bottom (n = -y): -du/dy|_{y=0} = 0  (du/dy = 0 at y=0)
+# Neumann normal gradient on top   (n = +y):  du/dy|_{y=ymax}
 
 [Mesh]
   [gmg]
@@ -41,23 +41,22 @@
 
 [LinearFVBCs]
   [dirichlet_lr]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = u
     boundary = 'left right'
-    diffusion_coeff = coeff_func_kokkos
     functor = analytic_solution_kokkos
   []
   [neumann_bottom]
-    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    type = KokkosLinearFVFunctorNeumannBC
     variable = u
     boundary = 'bottom'
-    functor = neumann_bottom_flux
+    functor = neumann_bottom_gradient
   []
   [neumann_top]
-    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    type = KokkosLinearFVFunctorNeumannBC
     variable = u
     boundary = 'top'
-    functor = neumann_top_flux
+    functor = neumann_top_gradient
   []
 []
 
@@ -82,18 +81,16 @@
     type = ParsedFunction
     expression = '(1.5-x*x)*(1.5-y*y)'
   []
-  # Outward normal flux on bottom (n = -y): flux = -D * du/dy|_{y=0}
-  # du/dy = (1.5-x^2)*(-2y), at y=0: du/dy = 0, so flux = 0
-  [neumann_bottom_flux]
+  # Outward normal gradient on bottom (n = -y): -du/dy|_{y=0} = 0
+  [neumann_bottom_gradient]
     type = KokkosParsedFunction
     expression = 0.0
   []
-  # Outward normal flux on top (n = +y): flux = D * du/dy|_{y=ymax}
-  # D = 1+0.5*x*ymax, du/dy = (1.5-x^2)*(-2*ymax)
-  # flux = (1+0.5*x*ymax)*(1.5-x^2)*(-2*ymax)
-  [neumann_top_flux]
+  # Outward normal gradient on top (n = +y): du/dy|_{y=ymax}
+  # du/dy = (1.5-x^2)*(-2*ymax)
+  [neumann_top_gradient]
     type = KokkosParsedFunction
-    expression = '(1.0 + 0.5*x*0.5)*(1.5-x*x)*(-2.0*0.5)'
+    expression = '(1.5-x*x)*(-2.0*0.5)'
   []
 []
 

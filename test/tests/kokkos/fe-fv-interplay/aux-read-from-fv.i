@@ -43,17 +43,15 @@
 
 [LinearFVBCs]
   [left]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = u
     boundary = "left"
-    diffusion_coeff = 'unity'
     functor = 'zero'
   []
   [right]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = u
     boundary = "right"
-    diffusion_coeff = 'unity'
     functor = 'unity'
   []
 []

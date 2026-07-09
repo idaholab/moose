@@ -23,6 +23,8 @@ public:
 
   KokkosLinearFVDiffusion(const InputParameters & parameters);
 
+  virtual bool needsBoundaryNormalGradientData() const override { return true; }
+
   template <typename Derived>
   KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
@@ -33,14 +35,16 @@ public:
 private:
   /**
    * Method for evaluating the face diffusion coefficient times the face area divided by the
-   * distance between cell centers, or between the cell center and face center on a boundary. The
-   * name "conductance" is used here for this finite volume face coefficient because heat conduction
-   * problems provide a thermal conductivity as the diffusion coefficient, which has conductance
-   * units after multiplying by area over length. Similar "diffusive conductance" terminology is
-   * also used in mass transport contexts; see
+   * distance between cell centers. The name "conductance" is used here for this finite volume face
+   * coefficient because heat conduction problems provide a thermal conductivity as the diffusion
+   * coefficient, which has conductance units after multiplying by area over length. Similar
+   * "diffusive conductance" terminology is also used in mass transport contexts; see
    * https://www.goldsim.com/Courses/ContaminantTransport/Unit8/Lesson3/
    */
   KOKKOS_FUNCTION Real faceConductance(const FVDatum & datum) const;
+
+  /// Method for evaluating the face diffusion coefficient
+  KOKKOS_FUNCTION Real faceDiffusionCoefficient(const FVDatum & datum) const;
 
   /// Diffusion coefficient
   Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _diffusion_coeff;
@@ -50,8 +54,11 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeMatrixContribution(const FVDatum & datum) const
 {
-  return hasFaceNeighbor(datum) ? faceConductance(datum)
-                                : _bc_data.matrix_coeff(datum.side(), datum.elemID());
+  if (hasFaceNeighbor(datum))
+    return faceConductance(datum);
+
+  return -faceDiffusionCoefficient(datum) * datum.faceArea() *
+         boundaryNormalGradientRelation(datum).coefficient;
 }
 
 template <typename Derived>
@@ -66,13 +73,21 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosLinearFVDiffusion::computeRightHandSideContribution(const FVDatum & datum) const
 {
-  return hasFaceNeighbor(datum) ? 0 : _bc_data.rhs_coeff(datum.side(), datum.elemID());
+  if (hasFaceNeighbor(datum))
+    return 0;
+
+  return faceDiffusionCoefficient(datum) * datum.faceArea() *
+         boundaryNormalGradientRelation(datum).source;
 }
 
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::faceConductance(const FVDatum & datum) const
 {
-  const auto face_centroid = datum.faceCentroid();
-  const auto d_mag = hasFaceNeighbor(datum) ? datum.faceDCNMag() : datum.faceDCFMag();
-  return _diffusion_coeff->value(_t, face_centroid) * datum.faceArea() / d_mag;
+  return faceDiffusionCoefficient(datum) * datum.faceArea() / datum.faceDCNMag();
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVDiffusion::faceDiffusionCoefficient(const FVDatum & datum) const
+{
+  return _diffusion_coeff->value(_t, datum.faceCentroid());
 }

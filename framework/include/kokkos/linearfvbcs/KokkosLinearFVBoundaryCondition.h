@@ -9,25 +9,46 @@
 
 #pragma once
 
-#include "KokkosLinearSystemContributionObject.h"
+#include "KokkosDispatcher.h"
 #include "KokkosDatum.h"
+#include "KokkosMesh.h"
+#include "KokkosSystem.h"
+#include "KokkosVariable.h"
 
 #include "BoundaryRestrictableRequired.h"
-#include "GeometricSearchInterface.h"
+#include "FunctionInterface.h"
+#include "MeshChangedInterface.h"
+#include "MooseObject.h"
+#include "PostprocessorInterface.h"
+#include "Restartable.h"
+#include "SetupInterface.h"
+#include "TransientInterface.h"
+#include "UserObjectInterface.h"
+#include "VectorPostprocessorInterface.h"
 
-#include "KokkosLinearFVFluxKernel.h"
+class FEProblemBase;
+class InputParameters;
 
 namespace Moose::Kokkos
 {
 
 /**
- * Base class for Kokkos linear finite volume boundary conditions. It populates the
- * per-boundary-face matrix and right-hand side data that the linear FV flux kernels consume during
- * assembly.
+ * Base class for Kokkos linear finite volume boundary conditions. Boundary conditions provide
+ * boundary data relations for flux kernels; they do not assemble directly into tagged vectors or
+ * matrices.
  */
-class LinearFVBoundaryCondition : public LinearSystemContributionObject,
+class LinearFVBoundaryCondition : public MooseObject,
+                                  public SetupInterface,
+                                  public FunctionInterface,
+                                  public UserObjectInterface,
+                                  public TransientInterface,
+                                  public PostprocessorInterface,
+                                  public VectorPostprocessorInterface,
+                                  public Restartable,
+                                  public MeshChangedInterface,
                                   public BoundaryRestrictableRequired,
-                                  public GeometricSearchInterface
+                                  public MeshHolder,
+                                  public SystemHolder
 {
 public:
   static InputParameters validParams();
@@ -35,60 +56,169 @@ public:
   LinearFVBoundaryCondition(const InputParameters & parameters);
   LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object);
 
-  /**
-   * Compute the right-hand side contributions of this boundary condition
-   */
-  virtual void computeRightHandSide() override;
-  /**
-   * Compute the matrix contributions of this boundary condition
-   */
-  virtual void computeMatrix() override;
-  /**
-   * Bind this boundary condition to the owning flux kernel's boundary face data
-   * @param data The owning flux kernel's boundary face data to write into
-   */
-  void initBCData(const LinearFVFluxKernel::BoundaryFaceData & data);
+  /// Tag dispatch type for boundary value relation computation
+  struct BoundaryValueLoop
+  {
+  };
+  /// Tag dispatch type for boundary normal gradient relation computation
+  struct BoundaryNormalGradientLoop
+  {
+  };
 
   /**
-   * Right-hand side dispatch loop body; writes the per-face RHS contribution into the shared data
+   * Affine boundary relation used by Kokkos linear FV kernels:
+   *   boundary_quantity = coefficient * cell_unknown + source
+   */
+  struct BoundaryRelation
+  {
+    Real coefficient = 0;
+    Real source = 0;
+  };
+
+  /// Boundary relation arrays indexed by (side, element)
+  struct BoundaryData
+  {
+    Array2D<BoundaryRelation> value;
+    Array2D<BoundaryRelation> normal_gradient;
+  };
+
+  virtual void initialSetup() override;
+
+  /**
+   * Get the Kokkos variable this boundary condition supplies data for
+   * @returns The Kokkos variable
+   */
+  Variable variable() const { return _var; }
+
+  /**
+   * Get the boundary data relation arrays owned by this boundary condition
+   */
+  const BoundaryData & boundaryData() const { return _boundary_data; }
+
+  /// Whether this boundary condition overrides the boundary value relation hook
+  bool hasBoundaryValue() const;
+  /// Whether this boundary condition overrides the boundary normal gradient relation hook
+  bool hasBoundaryNormalGradient() const;
+
+  /// Dispatch boundary value relation computation
+  void computeBoundaryValueData();
+  /// Dispatch boundary normal gradient relation computation
+  void computeBoundaryNormalGradientData();
+
+  /**
+   * Default boundary value relation hook. Derived boundary conditions should override this when
+   * they can supply boundary values.
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION BoundaryRelation computeBoundaryValue(const FVDatum &) const
+  {
+    ::Kokkos::abort("Default computeBoundaryValue() should never be called. Make sure you "
+                    "properly redefined this method in your class without typos.");
+
+    return {};
+  }
+
+  /**
+   * Default boundary normal gradient relation hook. Derived boundary conditions should override
+   * this when they can supply boundary normal gradients.
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION BoundaryRelation computeBoundaryNormalGradient(const FVDatum &) const
+  {
+    ::Kokkos::abort("Default computeBoundaryNormalGradient() should never be called. Make sure "
+                    "you properly redefined this method in your class without typos.");
+
+    return {};
+  }
+
+  /**
+   * Functions used to check whether derived boundary conditions override the boundary data hooks.
+   */
+  ///@{
+  template <typename Derived>
+  static auto defaultBoundaryValue()
+  {
+    return &LinearFVBoundaryCondition::computeBoundaryValue<Derived>;
+  }
+
+  template <typename Derived>
+  static auto defaultBoundaryNormalGradient()
+  {
+    return &LinearFVBoundaryCondition::computeBoundaryNormalGradient<Derived>;
+  }
+  ///@}
+
+  /**
+   * Boundary value dispatch loop body; writes the per-face boundary value relation
    * @param tid The thread ID of the current boundary side
    * @param bc The concrete boundary condition object
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void operator()(RightHandSideLoop, const ThreadID tid, const Derived & bc) const;
+  KOKKOS_FUNCTION void operator()(BoundaryValueLoop, const ThreadID tid, const Derived & bc) const;
 
   /**
-   * Matrix dispatch loop body; writes the per-face matrix contribution into the shared data
+   * Boundary normal gradient dispatch loop body; writes the per-face boundary normal gradient
+   * relation
    * @param tid The thread ID of the current boundary side
    * @param bc The concrete boundary condition object
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const;
+  KOKKOS_FUNCTION void
+  operator()(BoundaryNormalGradientLoop, const ThreadID tid, const Derived & bc) const;
 
 protected:
-  /// Shallow copies of the owning flux kernel's BoundaryFaceData arrays, written by BC dispatches
-  Array2D<Real> _bc_data_matrix;
-  Array2D<Real> _bc_data_rhs;
+  /// Reference to the finite element problem
+  FEProblemBase & _fe_problem;
+
+  /// Kokkos variable
+  Variable _var;
+
+  /// Boundary relation arrays owned by this boundary condition
+  BoundaryData _boundary_data;
+
+  /// Dispatcher for boundary value computation
+  std::unique_ptr<DispatcherBase> _boundary_value_dispatcher;
+  /// Dispatcher for boundary normal gradient computation
+  std::unique_ptr<DispatcherBase> _boundary_normal_gradient_dispatcher;
+
+  /**
+   * TODO: Move to TransientInterface
+   */
+  ///@{
+  /// Current time
+  Scalar<Real> _t;
+  /// Old (previous time step) time
+  Scalar<const Real> _t_old;
+  /// Current time step number
+  Scalar<int> _t_step;
+  /// Current time step size
+  Scalar<Real> _dt;
+  /// Previous time step size
+  Scalar<Real> _dt_old;
+  ///@}
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-LinearFVBoundaryCondition::operator()(RightHandSideLoop,
+LinearFVBoundaryCondition::operator()(BoundaryValueLoop,
                                       const ThreadID tid,
                                       const Derived & bc) const
 {
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  _bc_data_rhs(side, elem) = bc.template computeRightHandSideContribution<Derived>(datum);
+  _boundary_data.value(side, elem) = bc.template computeBoundaryValue<Derived>(datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-LinearFVBoundaryCondition::operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const
+LinearFVBoundaryCondition::operator()(BoundaryNormalGradientLoop,
+                                      const ThreadID tid,
+                                      const Derived & bc) const
 {
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  _bc_data_matrix(side, elem) = bc.template computeMatrixContribution<Derived>(datum);
+  _boundary_data.normal_gradient(side, elem) =
+      bc.template computeBoundaryNormalGradient<Derived>(datum);
 }
 
 } // namespace Moose::Kokkos

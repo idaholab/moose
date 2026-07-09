@@ -13,6 +13,7 @@
 
 #include "Attributes.h"
 #include "FEProblemBase.h"
+#include "MooseMesh.h"
 
 namespace Moose::Kokkos
 {
@@ -32,7 +33,7 @@ LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & parameters)
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
-  : LinearFVKernel(object), _bc_data(object._bc_data)
+  : LinearFVKernel(object), _bc_data(object._bc_data), _bc_index(object._bc_index)
 {
 }
 
@@ -43,37 +44,88 @@ LinearFVFluxKernel::initialSetup()
       libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(kokkosMesh().getNumLocalElements());
   const auto max_sides =
       libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(_subproblem.mesh().getMaxSidesPerElem());
-  _bc_data.matrix_coeff.create(max_sides, n_elems);
-  _bc_data.rhs_coeff.create(max_sides, n_elems);
-  _bc_data.matrix_coeff = 0;
-  _bc_data.rhs_coeff = 0;
+  _bc_index.create(max_sides, n_elems);
+  _bc_index = -1;
+
+  // Build a compact list of Kokkos linear FV BC data and a face lookup into that list.
+  // Flux kernels use the lookup during face loops to fetch precomputed boundary
+  // relations only on boundary faces where the kernel's variable has an active BC.
+  const auto sys_num = _var.sys();
+  const auto var_num = _var.var();
+  const auto processor = processor_id();
+  const auto var_name = _var.mooseVar()->name();
 
   std::vector<LinearFVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSysNum>(_var.sys())
+      .template condition<AttribSysNum>(sys_num)
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(true)
       .template condition<AttribThread>(0)
       .queryInto(bcs);
 
+  std::vector<LinearFVBoundaryCondition::BoundaryData> bc_data;
+  // The face lookup is indexed by local Kokkos side/element IDs, so only populate
+  // entries owned by this processor. Semi-local boundary element IDs can include
+  // remote elements needed by other processors.
+  auto & mesh = _subproblem.mesh();
+  const auto * const kokkos_mesh = mesh.getKokkosMesh();
+
   for (auto * bc : bcs)
-    if (bc->variable().var() == _var.var())
-      bc->initBCData(_bc_data);
+  {
+    const auto & variable = bc->variable();
+
+    if (variable.var() == var_num)
+    {
+      const auto bc_index = libMesh::cast_int<int>(bc_data.size());
+      bc_data.push_back(bc->boundaryData());
+
+      for (const auto boundary : bc->boundaryIDs())
+        for (const auto elem_id : mesh.getBoundaryActiveSemiLocalElemIds(boundary))
+        {
+          const auto elem = mesh.elemPtr(elem_id);
+
+          if (elem->processor_id() == processor)
+          {
+            const auto contiguous_elem = kokkos_mesh->getContiguousElementID(elem);
+            const auto side = mesh.sideWithBoundaryID(elem, boundary);
+            auto & existing_index = _bc_index(side, contiguous_elem);
+
+            // Ambiguous boundary data would make flux kernels non-deterministic.
+            if (existing_index != -1)
+              mooseError("Kokkos linear FV flux kernel '",
+                         name(),
+                         "' found multiple Kokkos boundary conditions for variable '",
+                         var_name,
+                         "' on boundary ID ",
+                         boundary,
+                         ".");
+
+            existing_index = bc_index;
+          }
+        }
+    }
+  }
+
+  _bc_index.copyToDevice();
+  _bc_data = bc_data;
 
   // Non-Kokkos BCs are never called by Kokkos flux kernels; they would be silently
-  // ignored, producing wrong results (typically a zero RHS).
+  // ignored, producing wrong results. Reject them early for this variable.
   std::vector<::LinearFVBoundaryCondition *> non_kokkos_bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSysNum>(_var.sys())
+      .template condition<AttribSysNum>(sys_num)
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(false)
       .template condition<AttribThread>(0)
       .queryInto(non_kokkos_bcs);
 
   for (auto * bc : non_kokkos_bcs)
-    if (bc->variable().number() == _var.var())
+  {
+    const auto & variable = bc->variable();
+
+    if (variable.number() == var_num)
       mooseError("Kokkos linear FV flux kernel '",
                  name(),
                  "' found non-Kokkos boundary condition '",
@@ -81,10 +133,11 @@ LinearFVFluxKernel::initialSetup()
                  "' (type '",
                  bc->type(),
                  "') for variable '",
-                 bc->variable().name(),
+                 variable.name(),
                  "'. Non-Kokkos BCs are not called by Kokkos flux kernels and will produce "
                  "incorrect results. Use the Kokkos equivalent, e.g. "
-                 "'KokkosLinearFVAdvectionDiffusionFunctorDirichletBC'.");
+                 "'KokkosLinearFVFunctorDirichletBC'.");
+  }
 }
 
 void

@@ -1,4 +1,4 @@
-# 2D diffusion MMS test with Neumann BCs on internal block boundaries.
+# 2D diffusion MMS test with Neumann normal-gradient BCs on internal block boundaries.
 # Exact solution:  u = v = 1.5 - x^2
 # Diffusion coeff: D = 1 + 0.5*x*y
 
@@ -76,30 +76,28 @@
 
 [LinearFVBCs]
   [dirichlet_left]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = u
     boundary = left
-    diffusion_coeff = coeff_func_kokkos
     functor = analytic_solution_kokkos
   []
   [neumann_left_internal]
-    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    type = KokkosLinearFVFunctorNeumannBC
     variable = u
     boundary = left_internal
-    functor = left_internal_flux
+    functor = left_internal_gradient
   []
   [dirichlet_right]
-    type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
+    type = KokkosLinearFVFunctorDirichletBC
     variable = v
     boundary = right
-    diffusion_coeff = coeff_func_kokkos
     functor = analytic_solution_kokkos
   []
   [neumann_right_internal]
-    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    type = KokkosLinearFVFunctorNeumannBC
     variable = v
     boundary = right_internal
-    functor = right_internal_flux
+    functor = right_internal_gradient
   []
 []
 
@@ -124,13 +122,13 @@
     type = ParsedFunction
     expression = '1.5 - x*x'
   []
-  [left_internal_flux]
+  [left_internal_gradient]
     type = KokkosParsedFunction
-    expression = '-(1.0 + 0.25*y)'
+    expression = '-1.0'
   []
-  [right_internal_flux]
+  [right_internal_gradient]
     type = KokkosParsedFunction
-    expression = '1.0 + 0.25*y'
+    expression = '1.0'
   []
 []
 

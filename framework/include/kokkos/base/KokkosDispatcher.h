@@ -434,7 +434,7 @@ private:
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_linearfvkernel_##classname, __COUNTER__) =            \
+  static char combineNames(kokkos_dispatcher_linear_fv_kernel_##classname, __COUNTER__) =          \
       registerKokkosLinearFVKernel##classname()
 
 #define registerKokkosLinearFVKernel(app, classname)                                               \
@@ -446,18 +446,27 @@ private:
   callRegisterKokkosLinearFVKernelFunction(classname, alias)
 
 #define callRegisterKokkosLinearFVBoundaryConditionFunction(classname, objectname)                 \
-  static char registerKokkosLinearFVBC##classname()                                                \
+  static char registerKokkosLinearFVBoundaryCondition##classname()                                 \
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::addDispatcher<classname::RightHandSideLoop, classname>(objectname);        \
-    DispatcherRegistry::addDispatcher<classname::MatrixLoop, classname>(objectname);               \
+    DispatcherRegistry::addDispatcher<classname::BoundaryValueLoop, classname>(objectname);        \
+    DispatcherRegistry::addDispatcher<classname::BoundaryNormalGradientLoop, classname>(           \
+        objectname);                                                                               \
+    DispatcherRegistry::hasUserMethod<classname::BoundaryValueLoop>(                               \
+        objectname,                                                                                \
+        &classname::computeBoundaryValue<classname> !=                                             \
+            classname::defaultBoundaryValue<classname>());                                         \
+    DispatcherRegistry::hasUserMethod<classname::BoundaryNormalGradientLoop>(                      \
+        objectname,                                                                                \
+        &classname::computeBoundaryNormalGradient<classname> !=                                    \
+            classname::defaultBoundaryNormalGradient<classname>());                                \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_linearfvbc_##classname, __COUNTER__) =                \
-      registerKokkosLinearFVBC##classname()
+  static char combineNames(kokkos_dispatcher_linear_fv_boundary_condition_##classname,             \
+                           __COUNTER__) = registerKokkosLinearFVBoundaryCondition##classname()
 
 #define registerKokkosLinearFVBoundaryCondition(app, classname)                                    \
   registerMooseObject(app, classname);                                                             \
