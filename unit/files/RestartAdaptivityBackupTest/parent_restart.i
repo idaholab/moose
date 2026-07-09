@@ -36,6 +36,10 @@
   []
 []
 
+[Problem]
+  restart_file_base = unused
+[]
+
 [Executioner]
   type = Transient
   num_steps = 1
@@ -45,12 +49,8 @@
 [MultiApps]
   [sub]
     type = TransientMultiApp
-    app_type = MooseTestApp
+    app_type = MooseUnitApp
     input_files = sub.i
     execute_on = timestep_end
   []
-[]
-
-[Outputs]
-  checkpoint = true
 []

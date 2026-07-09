@@ -162,14 +162,14 @@ writeBackupMeshFile(const std::filesystem::path & path, const std::string & cont
 {
   std::error_code err;
   if (!std::filesystem::create_directories(path.parent_path(), err) && err)
-    mooseError("Unable to create temporary mesh restore directory ",
+    mooseError("Unable to create temporary mesh backup directory ",
                std::filesystem::absolute(path.parent_path()),
                ": ",
                err.message());
 
   std::ofstream file(path, std::ios::out | std::ios::binary);
   if (!file.is_open())
-    mooseError("Unable to open temporary mesh restore file ",
+    mooseError("Unable to open temporary mesh backup file ",
                std::filesystem::absolute(path),
                " for writing");
 
@@ -193,6 +193,8 @@ packMeshBackup(const MooseApp & app, Backup & backup)
     io.write(mesh_path.string());
   }
 
+  // CheckpointIO::write() is collective; wait until all ranks have finished writing split files
+  // before rank 0 starts packing the shared checkpoint tree into Backup.
   app.comm().barrier();
 
   for (const auto & entry : std::filesystem::recursive_directory_iterator(mesh_path))
@@ -203,6 +205,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
       backup.mesh_files.emplace_back(relative_path, readBackupMeshFile(entry.path()));
     }
 
+  // Keep the shared checkpoint tree alive until rank 0 has finished reading every file from it.
   app.comm().barrier();
 
   if (app.processor_id() == 0)
@@ -223,6 +226,7 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
     for (const auto & [relative_path, contents] : backup.mesh_files)
       writeBackupMeshFile(mesh_path / relative_path, contents);
 
+  // Rank 0 recreates the shared checkpoint tree, then all ranks collectively read their pieces.
   app.comm().barrier();
 
   auto & mesh_base = mesh.getMesh();
@@ -233,6 +237,9 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
     io.read(mesh_path.string());
   }
 
+  // This checkpoint is used only to restore mesh topology.  The restored equation-system data is
+  // loaded from the Backup stream after the mesh is prepared, so discard any DOF indices that
+  // CheckpointIO carried with the mesh and let the systems own the final numbering.
   for (auto & node : mesh_base.node_ptr_range())
     node->clear_dofs();
   for (auto & elem : mesh_base.element_ptr_range())
@@ -240,6 +247,7 @@ restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
 
   backup.mesh_files.clear();
 
+  // Keep the shared checkpoint tree alive until every rank has completed CheckpointIO::read().
   app.comm().barrier();
 
   if (app.processor_id() == 0)
