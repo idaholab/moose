@@ -114,7 +114,7 @@ LinearFVFluxKernel::initialSetup()
   }
 
   std::vector<FaceID> internal_face_ids;
-  std::vector<FaceID> boundary_face_ids;
+  std::vector<BoundaryFaceID> boundary_face_ids;
 
   const auto * const variable = _var.mooseVar();
   for (const auto block : blockIDs())
@@ -129,8 +129,13 @@ LinearFVFluxKernel::initialSetup()
         if (neighbor && neighbor != libMesh::remote_elem &&
             variable->activeOnSubdomain(neighbor->subdomain_id()))
           internal_face_ids.push_back({contiguous_elem, side});
-        else if (_bc_index(side, contiguous_elem) != -1)
-          boundary_face_ids.push_back({contiguous_elem, side});
+        else
+        {
+          const auto bc_index = _bc_index(side, contiguous_elem);
+
+          if (bc_index != -1)
+            boundary_face_ids.push_back({contiguous_elem, side, bc_index});
+        }
       }
     }
 

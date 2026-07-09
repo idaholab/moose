@@ -31,9 +31,11 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum,
+                                                         const int bc_index) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum) const;
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum,
+                                                                const int bc_index) const;
 
 private:
   /// Normal advective face flux
@@ -61,16 +63,18 @@ KokkosLinearFVAdvection::computeInternalNeighborMatrixContribution(const FVDatum
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeBoundaryMatrixContribution(const FVDatum & datum) const
+KokkosLinearFVAdvection::computeBoundaryMatrixContribution(const FVDatum & datum,
+                                                           const int bc_index) const
 {
-  return normalFaceFlux(datum) * datum.faceArea() * boundaryValueRelation(datum).coefficient;
+  return normalFaceFlux(datum) * datum.faceArea() * boundaryValueCoefficient(datum, bc_index);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeBoundaryRightHandSideContribution(const FVDatum & datum) const
+KokkosLinearFVAdvection::computeBoundaryRightHandSideContribution(const FVDatum & datum,
+                                                                  const int bc_index) const
 {
-  return -normalFaceFlux(datum) * datum.faceArea() * boundaryValueRelation(datum).source;
+  return -normalFaceFlux(datum) * datum.faceArea() * boundaryValueSource(datum, bc_index);
 }
 
 KOKKOS_FUNCTION inline Real

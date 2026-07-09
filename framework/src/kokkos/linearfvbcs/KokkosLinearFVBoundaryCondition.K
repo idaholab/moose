@@ -95,10 +95,14 @@ LinearFVBoundaryCondition::initialSetup()
   const auto max_sides = libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(
       getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getMaxSidesPerElem());
 
-  _boundary_data.value.create(max_sides, n_elems);
-  _boundary_data.normal_gradient.create(max_sides, n_elems);
-  _boundary_data.value = BoundaryRelation{};
-  _boundary_data.normal_gradient = BoundaryRelation{};
+  _boundary_data.value.coefficient.create(max_sides, n_elems);
+  _boundary_data.value.source.create(max_sides, n_elems);
+  _boundary_data.normal_gradient.coefficient.create(max_sides, n_elems);
+  _boundary_data.normal_gradient.source.create(max_sides, n_elems);
+  _boundary_data.value.coefficient = 0;
+  _boundary_data.value.source = 0;
+  _boundary_data.normal_gradient.coefficient = 0;
+  _boundary_data.normal_gradient.source = 0;
 }
 
 bool

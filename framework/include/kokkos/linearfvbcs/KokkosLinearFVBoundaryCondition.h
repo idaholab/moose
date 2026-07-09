@@ -75,11 +75,18 @@ public:
     Real source = 0;
   };
 
-  /// Boundary relation arrays indexed by (side, element)
+  /// Boundary relation coefficient/source arrays indexed by (side, element)
+  struct BoundaryRelationData
+  {
+    Array2D<Real, MOOSE_KOKKOS_INDEX_TYPE, LayoutType::RIGHT> coefficient;
+    Array2D<Real, MOOSE_KOKKOS_INDEX_TYPE, LayoutType::RIGHT> source;
+  };
+
+  /// Boundary relation data indexed by relation type, side, and element
   struct BoundaryData
   {
-    Array2D<BoundaryRelation> value;
-    Array2D<BoundaryRelation> normal_gradient;
+    BoundaryRelationData value;
+    BoundaryRelationData normal_gradient;
   };
 
   virtual void initialSetup() override;
@@ -206,7 +213,9 @@ LinearFVBoundaryCondition::operator()(BoundaryValueLoop,
 {
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  _boundary_data.value(side, elem) = bc.template computeBoundaryValue<Derived>(datum);
+  const auto relation = bc.template computeBoundaryValue<Derived>(datum);
+  _boundary_data.value.coefficient(side, elem) = relation.coefficient;
+  _boundary_data.value.source(side, elem) = relation.source;
 }
 
 template <typename Derived>
@@ -217,8 +226,9 @@ LinearFVBoundaryCondition::operator()(BoundaryNormalGradientLoop,
 {
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
-  _boundary_data.normal_gradient(side, elem) =
-      bc.template computeBoundaryNormalGradient<Derived>(datum);
+  const auto relation = bc.template computeBoundaryNormalGradient<Derived>(datum);
+  _boundary_data.normal_gradient.coefficient(side, elem) = relation.coefficient;
+  _boundary_data.normal_gradient.source(side, elem) = relation.source;
 }
 
 } // namespace Moose::Kokkos
