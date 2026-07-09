@@ -65,7 +65,7 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   FormEquationSystemOperator(dt);
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x, es->Nonlinear(), es->_linear_operator);
+  SolveWithOperator(*es, _true_rhs, _true_x, es->Nonlinear(), es->GetLinearOperator());
 
   X_new.MakeRef(_true_x, 0);
 }
