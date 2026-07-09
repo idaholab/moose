@@ -7,7 +7,3 @@ values of a source coefficient at the quadrature points of an
 declared coefficient may be used in place of the source coefficient wherever a scalar coefficient
 name is accepted, avoiding repeated evaluation of expensive source coefficients, and is
 re-projected from the source when required.
-
-!syntax list /QuadratureFunctions objects=True actions=False subsystems=False
-
-!syntax list /QuadratureFunctions objects=False actions=True subsystems=False

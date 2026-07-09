@@ -1,6 +1,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
+#include "CoefficientManager.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
