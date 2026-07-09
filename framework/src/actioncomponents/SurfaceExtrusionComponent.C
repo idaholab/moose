@@ -28,6 +28,7 @@ SurfaceExtrusionComponent::validParams()
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
+  params += ComponentMeshGenerationHelper::validParams();
   params.addClassDescription(
       "Component for the volume created by extruding from another component's boundary.");
   params.addParam<SubdomainName>("block", "Subdomain name for the component mesh");
@@ -77,6 +78,7 @@ SurfaceExtrusionComponent::SurfaceExtrusionComponent(const InputParameters & par
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
+    ComponentMeshGenerationHelper(params),
     _length(getParam<Real>("length"))
 {
   // The other component interfaces add their required task
@@ -118,22 +120,12 @@ SurfaceExtrusionComponent::addMeshGenerators()
     lowD_params.set<SubdomainName>("new_block_name") = lowD_block_name;
     lowD_params.set<std::vector<BoundaryName>>("sidesets") = {
         getParam<BoundaryName>("source_surface")};
-    lowD_params.set<bool>("output") = _verbose;
-    lowD_params.set<bool>("show_info") = _verbose;
-    const auto lowD_mg_name = name() + "_create_lowerD";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "LowerDBlockFromSidesetGenerator", lowD_mg_name, lowD_params);
-    _mg_names.push_back(lowD_mg_name);
+    addMeshGenerator("LowerDBlockFromSidesetGenerator", "create_lowerD", lowD_params);
 
     InputParameters blockToMesh_params = _factory.getValidParams("BlockToMeshConverterGenerator");
     blockToMesh_params.set<MeshGeneratorName>("input") = _mg_names.back();
     blockToMesh_params.set<std::vector<SubdomainName>>("target_blocks") = {lowD_block_name};
-    blockToMesh_params.set<bool>("output") = _verbose;
-    blockToMesh_params.set<bool>("show_info") = _verbose;
-    const auto blockToMesh_mg_name = name() + "_lowerD_into_block";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "BlockToMeshConverterGenerator", blockToMesh_mg_name, blockToMesh_params);
-    _mg_names.push_back(blockToMesh_mg_name);
+    addMeshGenerator("BlockToMeshConverterGenerator", "lowerD_into_block", blockToMesh_params);
 
     // Extrude the surface to form this component's mesh
     InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
@@ -158,12 +150,8 @@ SurfaceExtrusionComponent::addMeshGenerators()
                                            {"start_radial_growth_rate", "end_radial_growth_rate"});
     }
     ext_params.set<Point>("direction") = getParam<RealVectorValue>("direction");
-    ext_params.set<bool>("output") = _verbose;
-    ext_params.set<bool>("show_info") = _verbose;
-    const auto ext_mg_name = name() + "_extrusion";
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AdvancedExtruderGenerator", ext_mg_name, ext_params);
-    _mg_names.push_back(ext_mg_name);
+    addMeshGenerator("AdvancedExtruderGenerator", "extrusion", ext_params);
+    setOwnMeshMeshGeneratorName(_mg_names.back());
 
     // Stitch to the original component at the boundary we extruded from
     // NOTE: this could be optional
@@ -178,13 +166,7 @@ SurfaceExtrusionComponent::addMeshGenerators()
     stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
     stitcher_params.set<bool>("verbose_stitching") = _verbose;
     stitcher_params.set<bool>("verbose_remapping") = _verbose;
-    stitcher_params.set<bool>("output") = _verbose;
-    stitcher_params.set<bool>("show_info") = _verbose;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "StitchMeshGenerator", name() + "_stitched", stitcher_params);
-    _mg_names.push_back(name() + "_stitched");
-
-    setOwnMeshMeshGeneratorName(ext_mg_name);
+    addMeshGenerator("StitchMeshGenerator", "stitched", stitcher_params);
   }
   _top_mg_name = _mg_names.back();
 
