@@ -47,16 +47,6 @@ CylinderComponent::validParams()
                         "Whether the 'position' parameter gives the position of the bottom-center "
                         "of the cylinder. Only used in 3D");
 
-  // Radial expansion
-  params.addParam<Real>(
-      "end_radius",
-      "If specified, extrudes the cylinder into a frustum with different radii on both ends of the "
-      "cylinder. The 'direction' points to the 'end' of the cylinder.");
-  MooseEnum radial_growth_methods("linear cubic", "linear");
-  params.addParam<MooseEnum>("radial_growth_method",
-                             radial_growth_methods,
-                             "Functional form to change radius while extruding along curve.");
-
   // Discretization
   params.addRangeCheckedParam<std::vector<unsigned int>>(
       "n_radial",
@@ -82,7 +72,6 @@ CylinderComponent::validParams()
       1,
       "The number of radial boundary layers. Only active if boundary_layer_width is specified");
   params.addParamNamesToGroup("boundary_layer_width n_boundary_layers", "Radial boundary layer");
-  params.addParamNamesToGroup("end_radius radial_growth_method", "Radial expansion");
 
   return params;
 }
@@ -208,14 +197,6 @@ CylinderComponent::addMeshGenerators()
     ext_params.set<std::vector<Real>>("heights") = {_height};
     ext_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
     ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
-    if (isParamValid("end_radius"))
-    {
-      // avoid computing the radial extent from the mesh and suffering from polygonization
-      ext_params.set<Real>("start_radial_extent") = _radius;
-      ext_params.set<Real>("end_radial_extent") = getParam<Real>("end_radius");
-      ext_params.set<MooseEnum>("radial_growth_method") =
-          getParam<MooseEnum>("radial_growth_method");
-    }
 
     // the output is rotated
     const Point default_direction(1, 0, 0);
