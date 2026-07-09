@@ -9,6 +9,7 @@
     requirement = "The system shall be able to read a neural network from a parameter file and use "
                   "it to control a transient process."
     capabilities = 'libtorch'
+    recover = false # Addressed in #32802
   []
   [without-nn]
     type = CSVDiff
