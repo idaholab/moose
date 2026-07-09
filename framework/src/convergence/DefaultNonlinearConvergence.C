@@ -44,7 +44,10 @@ DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters &
     _div_threshold(std::numeric_limits<Real>::max()),
     _nl_forced_its(getSharedExecutionerParam<unsigned int>("nl_forced_its")),
     _nl_max_pingpong(getSharedExecutionerParam<unsigned int>("n_max_nonlinear_pingpong")),
-    _nl_current_pingpong(0)
+    _nl_current_pingpong(0),
+    _nl_max_its(getSharedExecutionerParam<unsigned int>("nl_max_its")),
+    _nl_abs_tol(getSharedExecutionerParam<Real>("nl_abs_tol")),
+    _nl_rel_tol(getSharedExecutionerParam<Real>("nl_rel_tol"))
 {
 }
 
@@ -84,14 +87,11 @@ DefaultNonlinearConvergence::setNonlinearSystemParameters()
   NonlinearSystemBase & nl_sys = _fe_problem.currentNonlinearSystem();
 
   auto & params = nl_sys.system().parameters;
-  params.set<unsigned int>("nonlinear solver maximum iterations") =
-      getSharedExecutionerParam<unsigned int>("nl_max_its");
+  params.set<unsigned int>("nonlinear solver maximum iterations") = _nl_max_its;
   params.set<unsigned int>("nonlinear solver maximum function evaluations") =
       getSharedExecutionerParam<unsigned int>("nl_max_funcs");
-  params.set<Real>("nonlinear solver absolute residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_abs_tol");
-  params.set<Real>("nonlinear solver relative residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_rel_tol");
+  params.set<Real>("nonlinear solver absolute residual tolerance") = _nl_abs_tol;
+  params.set<Real>("nonlinear solver relative residual tolerance") = _nl_rel_tol;
   params.set<Real>("nonlinear solver divergence tolerance") =
       getSharedExecutionerParam<Real>("nl_div_tol");
   params.set<Real>("nonlinear solver absolute step tolerance") =
@@ -276,4 +276,22 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   verboseOutput(oss);
 
   return status;
+}
+
+void
+DefaultNonlinearConvergence::modifyMaximumIterations(const unsigned int max_iter)
+{
+  _nl_max_its = max_iter;
+}
+
+void
+DefaultNonlinearConvergence::modifyAbsoluteTolerance(const Real abs_tol)
+{
+  _nl_abs_tol = abs_tol;
+}
+
+void
+DefaultNonlinearConvergence::modifyRelativeTolerance(const Real rel_tol)
+{
+  _nl_rel_tol = rel_tol;
 }

@@ -16,6 +16,7 @@
 #include "MooseApp.h"
 #include "MooseEigenSystem.h"
 #include "UserObject.h"
+#include "DefaultNonlinearConvergence.h"
 
 InputParameters
 EigenExecutionerBase::validParams()
@@ -127,6 +128,8 @@ EigenExecutionerBase::init()
 
   /* a time step check point */
   _problem.onTimestepEnd();
+
+  _eigen_sys_conv = getEigenSystemConvergence();
 }
 
 void
@@ -203,16 +206,19 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _problem.getDisplacedProblem()->saveOldSolutions();
 
   // save solver control parameters to be modified by the power iteration
-  Real tol1 = _problem.es().parameters.get<Real>("linear solver tolerance");
-  unsigned int num1 =
-      _problem.es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
-  Real tol2 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
+  auto & es_params = _problem.es().parameters;
+  auto & eigen_sys_params = _eigen_sys.system().parameters;
+  const Real l_tol_bak = es_params.get<Real>("linear solver tolerance");
+  const auto nl_max_its_bak =
+      eigen_sys_params.get<unsigned int>("nonlinear solver maximum iterations");
+  const auto nl_rel_tol_bak =
+      eigen_sys_params.get<Real>("nonlinear solver relative residual tolerance");
 
-  // every power iteration is a linear solve, so set nonlinear iteration number to one
-  _problem.es().parameters.set<Real>("linear solver tolerance") = l_rtol;
-  // disable nonlinear convergence check
-  _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = 1;
-  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = 1 - 1e-8;
+  // every power iteration is a linear solve, so set max nonlinear iterations to 1 and
+  // give a very loose nonlinear tolerance so that it always converges
+  es_params.set<Real>("linear solver tolerance") = l_rtol;
+  _eigen_sys_conv->modifyMaximumIterations(1);
+  _eigen_sys_conv->modifyRelativeTolerance(1.0 - 1e-8);
 
   if (echo)
   {
@@ -356,9 +362,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   }
 
   // restore parameters changed by the executioner
-  _problem.es().parameters.set<Real>("linear solver tolerance") = tol1;
-  _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = num1;
-  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol2;
+  es_params.set<Real>("linear solver tolerance") = l_tol_bak;
+  _eigen_sys_conv->modifyMaximumIterations(nl_max_its_bak);
+  _eigen_sys_conv->modifyRelativeTolerance(nl_rel_tol_bak);
 
   // FIXME: currently power iteration use old and older solutions, so restore them
   _problem.restoreOldSolutions();
@@ -574,14 +580,18 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
   // turn on nonlinear flag so that eigen kernels opterate on the current solutions
   _eigen_sys.eigenKernelOnCurrent();
 
-  // set nonlinear solver controls
-  Real tol1 = _problem.es().parameters.get<Real>("nonlinear solver absolute residual tolerance");
-  Real tol2 = _problem.es().parameters.get<Real>("linear solver tolerance");
-  Real tol3 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
+  // save nonlinear solve parameters for restoration after solve
+  auto & es_params = _problem.es().parameters;
+  auto & eigen_sys_params = _eigen_sys.system().parameters;
+  const Real l_tol_bak = es_params.get<Real>("linear solver tolerance");
+  const Real nl_abs_tol_bak =
+      eigen_sys_params.get<Real>("nonlinear solver absolute residual tolerance");
+  const Real nl_rel_tol_bak =
+      eigen_sys_params.get<Real>("nonlinear solver relative residual tolerance");
 
-  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = nl_atol;
-  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = nl_rtol;
-  _problem.es().parameters.set<Real>("linear solver tolerance") = l_rtol;
+  es_params.set<Real>("linear solver tolerance") = l_rtol;
+  _eigen_sys_conv->modifyAbsoluteTolerance(nl_atol);
+  _eigen_sys_conv->modifyRelativeTolerance(nl_rtol);
 
   // call nonlinear solve
   _problem.solve(_eigen_sys.number());
@@ -589,9 +599,22 @@ EigenExecutionerBase::nonlinearSolve(Real nl_rtol, Real nl_atol, Real l_rtol, Re
   k = _source_integral;
   _eigenvalue = k;
 
-  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = tol1;
-  _problem.es().parameters.set<Real>("linear solver tolerance") = tol2;
-  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol3;
+  // restore nonlinear solve parameters
+  es_params.set<Real>("linear solver tolerance") = l_tol_bak;
+  _eigen_sys_conv->modifyAbsoluteTolerance(nl_abs_tol_bak);
+  _eigen_sys_conv->modifyRelativeTolerance(nl_rel_tol_bak);
 
   return _problem.converged(_eigen_sys.number());
+}
+
+DefaultNonlinearConvergence *
+EigenExecutionerBase::getEigenSystemConvergence()
+{
+  auto & convergence = _eigen_sys.convergence();
+  auto * const nl_convergence = dynamic_cast<DefaultNonlinearConvergence *>(&convergence);
+  if (nl_convergence)
+    return nl_convergence;
+  else
+    mooseError("EigenExecutionerBase requires 'nonlinear_convergence' to be of type "
+               "DefaultNonlinearConvergence.");
 }
