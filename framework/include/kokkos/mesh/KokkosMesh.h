@@ -242,6 +242,17 @@ public:
     return _side_centroid(side, elem);
   }
   /**
+   * Get the outward unit normal of an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The side normal
+   */
+  KOKKOS_FUNCTION Real3 getSideNormal(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_normal(side, elem);
+  }
+  /**
    * Get the element-centroid to side-centroid vector for an element side
    * @param elem The contiguous element ID
    * @param side The side index
@@ -327,8 +338,8 @@ public:
   void initElementGeometry();
 
   /**
-   * Allocate and populate cached side geometry: side areas and centroids, element-centroid to
-   * side-centroid and element-centroid to neighbor-centroid vectors and their magnitudes, and
+   * Allocate and populate cached side geometry: side areas, centroids, normals, element-centroid
+   * to side-centroid and element-centroid to neighbor-centroid vectors and their magnitudes, and
    * boundary IDs
    */
   void initElementSideGeometry();
@@ -572,6 +583,8 @@ private:
   Array2D<Real> _side_area;
   /// Cached side centroids indexed by (side, contiguous element ID)
   Array2D<Real3> _side_centroid;
+  /// Cached side normals indexed by (side, contiguous element ID)
+  Array2D<Real3> _side_normal;
   /// Element-centroid to side-centroid vectors indexed by (side, contiguous element ID)
   Array2D<Real3> _elem_centroid_to_side_centroid;
   /// Element-centroid to side-centroid distances indexed by (side, contiguous element ID)

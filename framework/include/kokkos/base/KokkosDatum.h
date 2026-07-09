@@ -165,6 +165,9 @@ public:
   Real3 faceCentroid() const { return _mesh.getSideCentroid(_elem.id, _side); }
 
   KOKKOS_FUNCTION
+  Real3 faceNormal() const { return _mesh.getSideNormal(_elem.id, _side); }
+
+  KOKKOS_FUNCTION
   Real faceDCNMag() const
   {
     return _mesh.getElementCentroidToNeighborCentroidDistance(_elem.id, _side);

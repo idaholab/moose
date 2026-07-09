@@ -338,6 +338,7 @@ Mesh::initElementSideGeometry()
 
   _side_area.create(max_sides, num_elems);
   _side_centroid.create(max_sides, num_elems);
+  _side_normal.create(max_sides, num_elems);
   _elem_centroid_to_side_centroid.create(max_sides, num_elems);
   _elem_centroid_to_side_centroid_distance.create(max_sides, num_elems);
   _elem_centroid_to_neighbor_centroid.create(max_sides, num_elems);
@@ -346,6 +347,7 @@ Mesh::initElementSideGeometry()
 
   _side_area = 0;
   _side_centroid = Real3();
+  _side_normal = Real3();
   _elem_centroid_to_side_centroid = Real3();
   _elem_centroid_to_side_centroid_distance = 0;
   _elem_centroid_to_neighbor_centroid = Real3();
@@ -379,6 +381,7 @@ Mesh::initElementSideGeometry()
 
       _side_area(side, eid) = face.volume();
       _side_centroid(side, eid) = face_centroid;
+      _side_normal(side, eid) = elem->side_vertex_average_normal(side);
       _elem_centroid_to_side_centroid(side, eid) = elem_centroid_to_side_centroid;
       _elem_centroid_to_side_centroid_distance(side, eid) = elem_centroid_to_side_centroid.norm();
       _elem_centroid_to_neighbor_centroid(side, eid) = elem_centroid_to_neighbor_centroid;
@@ -404,6 +407,7 @@ Mesh::initElementSideGeometry()
   _elem_neighbor.moveToDevice();
   _side_area.moveToDevice();
   _side_centroid.moveToDevice();
+  _side_normal.moveToDevice();
   _elem_centroid_to_side_centroid.moveToDevice();
   _elem_centroid_to_side_centroid_distance.moveToDevice();
   _elem_centroid_to_neighbor_centroid.moveToDevice();

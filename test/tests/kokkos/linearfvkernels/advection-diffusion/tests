@@ -1,0 +1,13 @@
+[Tests]
+  design = 'KokkosLinearFVAdvection.md KokkosLinearFVDiffusion.md KokkosLinearFVFunctorDirichletBC.md KokkosLinearFVFunctorNeumannBC.md'
+  issues = '#30655'
+  [mms-kokkos-advection-diffusion-1d]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestKokkosLinearFVAdvectionDiffusion1D
+    requirement = 'The system shall be able to solve a one-dimensional advection-diffusion problem with a linear finite volume discretization using Kokkos boundary value and normal-gradient data.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+    max_threads = 1
+  []
+[]
