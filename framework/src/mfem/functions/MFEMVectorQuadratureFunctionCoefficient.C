@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorQuadratureFunctionCoefficient.h"
+#include "libmesh/int_range.h"
 
 MFEMVectorQuadratureFunctionCoefficient::MFEMVectorQuadratureFunctionCoefficient(
     mfem::VectorCoefficient & source,

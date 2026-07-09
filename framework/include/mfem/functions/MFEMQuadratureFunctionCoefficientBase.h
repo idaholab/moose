@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace mfem
 {
 class QuadratureFunction;

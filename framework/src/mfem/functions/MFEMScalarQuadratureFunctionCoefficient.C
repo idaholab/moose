@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMScalarQuadratureFunctionCoefficient.h"
+#include "libmesh/int_range.h"
 
 MFEMScalarQuadratureFunctionCoefficient::MFEMScalarQuadratureFunctionCoefficient(
     mfem::Coefficient & source,

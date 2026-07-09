@@ -13,6 +13,11 @@
 
 #include "MFEMQuadratureFunctionCoefficientBase.h"
 
+// The class derives from mfem::QuadratureFunctionCoefficient, so the complete type is required.
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
+
 /**
  * Scalar coefficient holding precomputed values of a source coefficient at the quadrature
  * points of a QuadratureFunction. The stored values are (re)projected lazily: evaluation
