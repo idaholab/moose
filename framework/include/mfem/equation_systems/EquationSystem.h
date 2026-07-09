@@ -25,7 +25,7 @@
 namespace Moose::MFEM
 {
 class CoefficientManager;
-class SolverBase;
+class LinearSolverBase;
 
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
@@ -105,12 +105,11 @@ public:
   bool Nonlinear() const { return _non_linear; }
 
   /**
-   * Provide the operator to the provided solver. For a nonlinear solver, the operator is \p this
-   * object. For a linear solver, the operator is the assembled linear operator. Note that for a
-   * linear solver, using a Low Order Refined methodology, this method first calls SetupLOR before
-   * setting the solver's general operator.
+   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
+   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
+   * operator
    */
-  void ProvideOperator(SolverBase & solver);
+  void PrepareLinearSolver(LinearSolverBase & solver);
 
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
