@@ -15,6 +15,7 @@
 #include "ComponentMaterialPropertyInterface.h"
 #include "ComponentInitialConditionInterface.h"
 #include "ComponentBoundaryConditionInterface.h"
+#include "ComponentMeshGenerationHelper.h"
 
 /**
  * Component living on a mesh that is extruded from a surface of the mesh of another component
@@ -23,7 +24,8 @@ class SurfaceExtrusionComponent : public virtual ActionComponent,
                                   public ComponentPhysicsInterface,
                                   public ComponentMaterialPropertyInterface,
                                   public ComponentInitialConditionInterface,
-                                  public ComponentBoundaryConditionInterface
+                                  public ComponentBoundaryConditionInterface,
+                                  public ComponentMeshGenerationHelper
 {
 public:
   static InputParameters validParams();
