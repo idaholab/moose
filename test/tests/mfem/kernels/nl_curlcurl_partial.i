@@ -125,6 +125,7 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+  assembly_level = partial
 []
 
 [Outputs]
