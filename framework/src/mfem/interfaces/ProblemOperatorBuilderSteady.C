@@ -23,13 +23,13 @@ namespace Moose::MFEM
 InputParameters
 Moose::MFEM::ProblemOperatorBuilderSteady::validParams()
 {
-  InputParameters params = ProblemOperatorBuilderInterface::validParams();
+  InputParameters params = ProblemOperatorBuilderBase::validParams();
   return params;
 };
 
 
 Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(const InputParameters & parameters)
- : ProblemOperatorBuilderInterface(parameters)
+ : ProblemOperatorBuilderBase(parameters)
 {
 };
 

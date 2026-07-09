@@ -17,7 +17,7 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include "ProblemOperatorBuilderInterface.h"
+#include "ProblemOperatorBuilderBase.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -263,7 +263,7 @@ public:
    * Method to get the first Problem Operator Builder object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderInterface> getProblemOperatorBuilder() { return probOpBuilder[0]; }
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder() { return probOpBuilder[0]; }
 
   /**
    * Checks whether problem Operator builder interface is empty.
@@ -391,7 +391,7 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderInterface>> probOpBuilder;
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
 };
 
 template <typename T>

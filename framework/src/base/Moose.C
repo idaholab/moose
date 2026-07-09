@@ -490,13 +490,14 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerMooseObjectTask("add_mfem_problem_operator", Moose::MFEM::ProblemOperatorBuilderInterface, true);
+  registerMooseObjectTask("add_mfem_problem_operator", Moose::MFEM::ProblemOperatorBuilderBase, false);
   addTaskDependency("add_mfem_problem_operator", "init_mesh");
   addTaskDependency("add_variable", "add_mfem_problem_operator");
   addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
   addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
   addTaskDependency("add_bc", "add_mfem_problem_operator");
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
+  addTaskDependency("setup_executioner", "add_mfem_problem_operator");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);

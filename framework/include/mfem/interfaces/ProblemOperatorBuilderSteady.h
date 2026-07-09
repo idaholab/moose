@@ -12,7 +12,7 @@
 #pragma once
 
 #include "ProblemOperatorBase.h"
-#include "ProblemOperatorBuilderInterface.h"
+#include "ProblemOperatorBuilderBase.h"
 
 namespace Moose::MFEM
 {
@@ -20,7 +20,7 @@ namespace Moose::MFEM
  * Standard builder required to build MFEM Problem Operators
  * used by the executioner
  */
-class ProblemOperatorBuilderSteady : public ProblemOperatorBuilderInterface
+class ProblemOperatorBuilderSteady : public ProblemOperatorBuilderBase
 {
 public:
   static InputParameters validParams();

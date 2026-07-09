@@ -19,14 +19,14 @@ namespace Moose::MFEM
  * Interface required to build MFEM Problem Operators
  * used by the executioner
  */
-class ProblemOperatorBuilderInterface : public MFEMObject
+class ProblemOperatorBuilderBase : public MFEMObject
 {
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderInterface(const InputParameters & parameters);
+  ProblemOperatorBuilderBase(const InputParameters & parameters);
 
-  virtual ~ProblemOperatorBuilderInterface() = default;
+  virtual ~ProblemOperatorBuilderBase() = default;
 
   /// Returns a pointer to the operator's equation system.
   virtual std::shared_ptr<Moose::MFEM::ProblemOperatorBase> createProblemOperator(MFEMProblem& ) { return nullptr;};
