@@ -82,15 +82,14 @@ public:
   virtual void ComputeNonlinearResidual(const mfem::Vector & u, mfem::Vector & residual) const;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
+  /// Get operator handle for linear component of system operator
+  mfem::OperatorHandle & GetLinearOperator() const { return _linear_operator; };
 
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
-  /// Set whether the nonlinear solver driving this equation system requires Jacobian information.
-  void SetSolverRequiresGradient(bool requires_gradient)
-  {
-    _solver_requires_gradient = requires_gradient;
-  }
+  /// Set whether an external object (such as a nonlinear solver) requires Jacobian information for this EquationSystem.
+  void SetGradientRequired(bool requires_gradient) { _gradient_required = requires_gradient; }
 
   /// Set the coefficient manager to notify when trial variables are updated, so that stored
   /// projections of solution-dependent coefficients are invalidated.
@@ -169,6 +168,9 @@ public:
    */
   virtual bool isComplex() const { return false; }
 
+  /// Build all forms comprising this EquationSystem
+  virtual void BuildEquationSystem();
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -204,8 +206,6 @@ protected:
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
 
   /// Form linear components of system based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
@@ -344,16 +344,13 @@ protected:
   mutable const mfem::Vector * _linearization_point = nullptr;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
-  // Whether a nonlinear solver exists and whether it requires Jacobian/gradient information.
-  bool _solver_requires_gradient = false;
+  // Whether an external object (e.g. solver) requires Jacobian/gradient information.
+  bool _gradient_required = false;
   // Coefficient manager notified when trial variables are updated, so that stored projections
   // of solution-dependent coefficients are invalidated.
   CoefficientManager * _coefficient_manager = nullptr;
 
 private:
-  friend class EquationSystemProblemOperator;
-  friend class ComplexEquationSystemProblemOperator;
-  friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };

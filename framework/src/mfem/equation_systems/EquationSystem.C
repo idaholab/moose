@@ -632,7 +632,7 @@ EquationSystem::ApplyDomainNLFIntegrators(
       for (auto & kernel : *kernels)
         if (auto * integ = kernel->createNLIntegrator())
         {
-          if (_solver_requires_gradient && (trial_var_name != test_var_name))
+          if (_gradient_required && (trial_var_name != test_var_name))
             mooseError("Support for off-diagonal MFEM nonlinear domain integrators in conjunction "
                        "with a nonlinear solver that requires a gradient is not currently "
                        "implemented. Kernel '",
@@ -690,7 +690,7 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
       for (auto & bc : *bcs)
         if (auto * integ = bc->createNLIntegrator())
         {
-          if (_solver_requires_gradient && (test_var_name != trial_var_name))
+          if (_gradient_required && (test_var_name != trial_var_name))
             mooseError(
                 "Support for Off-diagonal MFEM nonlinear boundary integrators in conjunction with "
                 "a nonlinear solver that requires a gradient is not currently "

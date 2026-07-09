@@ -55,7 +55,7 @@ ComplexEquationSystemProblemOperator::Solve()
   FormEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x, es->Nonlinear(), es->_linear_operator);
+  SolveWithOperator(*es, _true_rhs, _true_x, es->Nonlinear(), es->GetLinearOperator());
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }
