@@ -86,7 +86,7 @@
       input = 'frictionless-mortar-3d-action.i'
       cli_args = 'Contact/mortar/formulation=kinematic Contact/mortar/lm_space=LINEAR'
       expect_err = "The 'lm_space' option can only be used with the 'mortar' formulation"
-      detail = 'and by rejecting it for non-mortar contact formulations.'
+      detail = 'and by rejecting it for non-mortar contact formulations'
     []
     [mortar-penalty-error]
       type = 'RunException'

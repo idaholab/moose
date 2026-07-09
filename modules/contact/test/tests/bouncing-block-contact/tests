@@ -161,7 +161,7 @@
       csvdiff = 'frictionless-mortar-action-lm-space-match-displacement.csv'
       recover = false # Setup-only DOF-count test; no transient step is advanced
       restep = false # Setup-only DOF-count test; no transient step is advanced
-      detail = 'using displacement-matched generated mortar variables when requested.'
+      detail = 'using displacement-matched generated mortar variables when requested'
     []
     [linear]
       type = 'CSVDiff'
