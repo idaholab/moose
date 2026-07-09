@@ -25,6 +25,14 @@ class Elem;
 using libMesh::Elem;
 using libMesh::Real;
 
+enum class MortarSegmentTriangulationMode : unsigned char
+{
+  Delaunay,
+  Centroid,
+  EarClipping,
+  Vertex
+};
+
 /**
  * Holds xi^(1), xi^(2), and other data for a given mortar segment.
  */

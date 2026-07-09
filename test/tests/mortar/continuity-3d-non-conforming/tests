@@ -51,6 +51,59 @@
                'Constraints/mortar/debug_mesh=true Outputs/exodus=false'
     requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh when requested through a mortar constraint'
   []
+  [triangulation-modes]
+    issues = '#23802'
+    # Each child re-runs the HEX8 continuity problem with a different triangulation strategy for
+    # clipped 3D mortar polygons and Exodiffs the resulting solution against a gold file generated
+    # from that same mode. The tight tolerances (rel_err ~ 1e-8) catch genuine algorithmic
+    # regressions while tolerating the small numerical drift expected when, for example, libMesh's
+    # PSLG triangulation backend is updated.
+    requirement = 'The system shall produce the expected 3D mortar continuity solution on a HEX8 '
+                  'sphere mesh when clipped polygons are triangulated using'
+    [vertex]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_vertex_out.e'
+      cli_args = 'Constraints/mortar/triangulation=vertex '
+                 'Outputs/file_base=continuity_sphere_hex8_vertex_out'
+      detail = 'a vertex-fan from an existing polygon vertex,'
+      map = False
+      partial = True
+    []
+    [ear_clipping]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_ear_clipping_out.e'
+      cli_args = 'Constraints/mortar/triangulation=ear_clipping '
+                 'Outputs/file_base=continuity_sphere_hex8_ear_clipping_out'
+      detail = 'an ear-clipping algorithm,'
+      map = False
+      partial = True
+    []
+    [delaunay]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_delaunay_out.e'
+      cli_args = 'Constraints/mortar/triangulation=delaunay '
+                 'Outputs/file_base=continuity_sphere_hex8_delaunay_out'
+      detail = 'a libMesh constrained-Delaunay PSLG backend that preserves polygon boundary '
+               'edges, and'
+      map = False
+      partial = True
+    []
+    [centroid-with-retessellation]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_centroid_retess_out.e'
+      cli_args = 'Constraints/mortar/triangulation=centroid '
+                 'Constraints/mortar/triangulate_triangles=true '
+                 'Outputs/file_base=continuity_sphere_hex8_centroid_retess_out'
+      detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
+               'clipped polygons when triangulate_triangles is enabled.'
+      map = False
+      partial = True
+    []
+  []
   [continuity_tet4]
     type = 'Exodiff'
     input = 'continuity_tet.i'

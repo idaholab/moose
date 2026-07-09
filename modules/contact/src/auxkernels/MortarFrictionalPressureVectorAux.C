@@ -90,7 +90,7 @@ MortarFrictionalPressureVectorAux::MortarFrictionalPressureVectorAux(const Input
 
   _mortar_generation_object =
       libmesh_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id))
-          .get();
+          .amg.get();
 }
 
 Real

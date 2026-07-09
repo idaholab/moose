@@ -63,9 +63,9 @@ MortarSegmentMeshReporter::execute()
   _msm_min_volume.clear();
   _msm_median_volume.clear();
 
-  for (const auto & [key, amg_ptr] : _fe_problem.getMortarInterfaces(_on_displaced))
+  for (const auto & [key, config] : _fe_problem.getMortarInterfaces(_on_displaced))
   {
-    const auto stats = amg_ptr->computeMsmStatistics();
+    const auto stats = config.amg->computeMsmStatistics();
 
     for (const auto & s : stats)
     {
