@@ -7,6 +7,21 @@ The projection mapping may be cached at the first execution of the transfer for 
 !alert note
 This transfer has been re-implemented to be more flexible. Please consider using [MultiAppGeneralFieldNearestLocationTransfer.md]
 
+## Performance Considerations
+
+For repeated transfers between meshes that do not move, adapt, or otherwise change, set
+[!param](/Transfers/MultiAppNearestNodeTransfer/fixed_meshes) to `true`. This caches the
+nearest-node mapping after the first execution and can greatly reduce the cost of subsequent
+transfers. Do not use this option when either the source or target mesh changes, because the cached
+nearest-node mapping can become invalid.
+
+Restrict the transfer to the smallest correct search domain.
+[!param](/Transfers/MultiAppNearestNodeTransfer/source_boundary) and
+[!param](/Transfers/MultiAppNearestNodeTransfer/target_boundary) avoid searching and assigning
+unrelated nodes. The [!param](/Transfers/MultiAppNearestNodeTransfer/bbox_factor) parameter can be
+used when the source bounding boxes must be inflated for a valid nearest-node search, but
+unnecessarily large bounding boxes can increase the number of candidate source applications.
+
 ## Example Input File Syntax
 
 The following examples demonstrate the use the MultiAppNearestNodeTransfer for transferring data
