@@ -61,6 +61,7 @@ MFEMVectorQuadratureFunctionCoefficient::refresh()
   mfem::IsoparametricTransformation T;
   mfem::DenseMatrix values;
   mfem::Vector col;
+  _qf.HostWrite();
   for (const auto iel : libMesh::make_range(qspace.GetNE()))
   {
     _qf.GetValues(iel, values);

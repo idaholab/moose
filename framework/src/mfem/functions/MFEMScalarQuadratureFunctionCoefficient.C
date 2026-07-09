@@ -59,6 +59,7 @@ MFEMScalarQuadratureFunctionCoefficient::refresh()
   const mfem::Mesh & mesh = *qspace.GetMesh();
   mfem::IsoparametricTransformation T;
   mfem::Vector values;
+  _qf.HostWrite();
   for (const auto iel : libMesh::make_range(qspace.GetNE()))
   {
     _qf.GetValues(iel, values);
