@@ -351,6 +351,8 @@ protected:
   CoefficientManager * _coefficient_manager = nullptr;
 
 private:
+  friend class EquationSystemProblemOperator;
+  friend class ComplexEquationSystemProblemOperator;
   friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
