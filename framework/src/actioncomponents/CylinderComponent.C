@@ -34,8 +34,9 @@ CylinderComponent::validParams()
   params.addRequiredParam<MooseEnum>("dimension",
                                      dims,
                                      "Dimension of the cylinder. 0 for a point (not implemented), "
-                                     "1 for an (axial) 1D line, 2 for a 2D-RZ cylinder, and 3 for "
+                                     "1 for an (axial) 1D line, 2 for a 2D cylinder, and 3 for "
                                      "a 3D cylinder");
+  params.addParam<bool>("use_RZ_coordinates", false, "Whether to use RZ coordinates");
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
   // Geometry
@@ -123,7 +124,8 @@ CylinderComponent::addMeshGenerators()
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
-      params.set<Real>("ymin") = 0;
+      params.set<Real>("ymin") =
+          getParam<bool>("use_RZ_coordinates") ? 0 : -getParam<Real>("radius");
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = getParam<std::vector<unsigned int>>("n_radial")[0];
@@ -232,7 +234,7 @@ CylinderComponent::addMeshGenerators()
 void
 CylinderComponent::setupComponent()
 {
-  if (_dimension == 2)
+  if (_dimension == 2 && getParam<bool>("use_RZ_coordinates"))
   {
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
     if (_direction)
@@ -255,7 +257,7 @@ Point
 CylinderComponent::translation() const
 {
   // The 1D or 2D RZ cylinders are naturally centered
-  if (!_offset_position_to_center || _dimension <= 2)
+  if (!_offset_position_to_center || (_dimension <= 2 || getParam<bool>("use_RZ_coordinates")))
     return ComponentMeshTransformHelper::translation();
 
   auto input_translation = ComponentMeshTransformHelper::translation();
