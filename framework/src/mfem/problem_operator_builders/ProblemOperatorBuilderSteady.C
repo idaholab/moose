@@ -18,14 +18,14 @@
 namespace Moose::MFEM
 {
 registerMooseObject("MooseApp", ProblemOperatorBuilderSteady);
-};
+}
 
 InputParameters
 Moose::MFEM::ProblemOperatorBuilderSteady::validParams()
 {
   InputParameters params = ProblemOperatorBuilderBase::validParams();
   return params;
-};
+}
 
 Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(
     const InputParameters & parameters)
@@ -62,6 +62,6 @@ Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & m
                "Please set the Problem numeric type to either 'real' or 'complex'.");
   }
   return probOp;
-};
+}
 
 #endif

@@ -23,10 +23,10 @@ Moose::MFEM::ProblemOperatorBuilderBase::validParams()
   params.registerSystemAttributeName("Moose::MFEM::ProblemOperatorBuilderBase");
   params.addParam<VariableName>("variable", "Variable labelling the problem operator");
   return params;
-};
+}
 
 Moose::MFEM::ProblemOperatorBuilderBase::ProblemOperatorBuilderBase(
     const InputParameters & parameters)
-  : MFEMObject(parameters) {};
+  : MFEMObject(parameters) {}
 
 #endif
