@@ -17,7 +17,7 @@
 
 namespace Moose::MFEM
 {
-  registerMooseObject("MooseApp", ProblemOperatorBuilderTransient);
+registerMooseObject("MooseApp", ProblemOperatorBuilderTransient);
 };
 
 InputParameters
@@ -27,12 +27,9 @@ Moose::MFEM::ProblemOperatorBuilderTransient::validParams()
   return params;
 };
 
-
-Moose::MFEM::ProblemOperatorBuilderTransient::ProblemOperatorBuilderTransient(const InputParameters & parameters)
- : ProblemOperatorBuilderBase(parameters)
-{
-};
-
+Moose::MFEM::ProblemOperatorBuilderTransient::ProblemOperatorBuilderTransient(
+    const InputParameters & parameters)
+  : ProblemOperatorBuilderBase(parameters) {};
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem & mfemProb)
@@ -40,10 +37,8 @@ Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem 
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> probOp;
 
   // Construct the problem operator
-  mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>
-  (
-    mfemProb.getProblemData().time_derivative_map
-  );
+  mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
+      mfemProb.getProblemData().time_derivative_map);
   probOp = std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfemProb);
   return probOp;
 };

@@ -17,7 +17,7 @@
 
 namespace Moose::MFEM
 {
-  registerMooseObject("MooseApp", ProblemOperatorBuilderSteady);
+registerMooseObject("MooseApp", ProblemOperatorBuilderSteady);
 };
 
 InputParameters
@@ -27,12 +27,9 @@ Moose::MFEM::ProblemOperatorBuilderSteady::validParams()
   return params;
 };
 
-
-Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(const InputParameters & parameters)
- : ProblemOperatorBuilderBase(parameters)
-{
-};
-
+Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(
+    const InputParameters & parameters)
+  : ProblemOperatorBuilderBase(parameters) {};
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & mfemProb)
@@ -44,7 +41,8 @@ Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & m
   {
     if (dynamic_cast<MFEMEigenproblem *>(&mfemProb))
     {
-      mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
+      mfemProb.getProblemData().eqn_system =
+          std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
       probOp = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfemProb);
     }
     else

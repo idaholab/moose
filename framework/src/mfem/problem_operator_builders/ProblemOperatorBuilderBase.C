@@ -21,14 +21,12 @@ Moose::MFEM::ProblemOperatorBuilderBase::validParams()
   InputParameters params = MFEMObject::validParams();
   params.registerBase("Moose::MFEM::ProblemOperatorBuilderBase");
   params.registerSystemAttributeName("Moose::MFEM::ProblemOperatorBuilderBase");
-  params.addParam<VariableName>("variable","Variable labelling the problem operator");
+  params.addParam<VariableName>("variable", "Variable labelling the problem operator");
   return params;
 };
 
-
-Moose::MFEM::ProblemOperatorBuilderBase::ProblemOperatorBuilderBase(const InputParameters & parameters)
- : MFEMObject(parameters)
-{
-};
+Moose::MFEM::ProblemOperatorBuilderBase::ProblemOperatorBuilderBase(
+    const InputParameters & parameters)
+  : MFEMObject(parameters) {};
 
 #endif

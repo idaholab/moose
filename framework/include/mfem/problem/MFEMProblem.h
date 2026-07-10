@@ -258,17 +258,19 @@ public:
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
 
-
   /**
    * Method to get the first Problem Operator Builder object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder() { return probOpBuilder[0]; }
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder()
+  {
+    return probOpBuilder[0];
+  }
 
   /**
    * Checks whether problem Operator builder interface is empty.
    */
-   bool problemOperatorBuilderIsEmpty(){return probOpBuilder.size() == 0;};
+  bool problemOperatorBuilderIsEmpty() { return probOpBuilder.size() == 0; };
 
   /**
    * Return the current MFEM problem data in a const context.

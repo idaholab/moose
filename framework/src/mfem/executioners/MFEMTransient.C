@@ -32,7 +32,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_solve(*this, getProblemOperators())
 {
   // If no ProblemOperators have been added by the user, add a default
-  if( _mfem_problem.problemOperatorBuilderIsEmpty() )
+  if (_mfem_problem.problemOperatorBuilderIsEmpty())
   {
     std::string name_tmp = "default_transient";
     std::string type_tmp = "ProblemOperatorBuilderTransient";
@@ -40,10 +40,8 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem.addMFEMProblemOperator(type_tmp, name_tmp, params_tmp);
   }
 
-  addProblemOperator
-  (
-    _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem)
-  );
+  addProblemOperator(
+      _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem));
 }
 
 void
