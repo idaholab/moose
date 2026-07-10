@@ -194,7 +194,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
   }
 
   // CheckpointIO::write() is collective; wait until all ranks have finished writing split files
-  // before rank 0 starts packing the shared checkpoint tree into Backup.
+  // before each rank packs the shared checkpoint tree into its Backup.
   app.comm().barrier();
 
   for (const auto & entry : std::filesystem::recursive_directory_iterator(mesh_path))
@@ -205,7 +205,7 @@ packMeshBackup(const MooseApp & app, Backup & backup)
       backup.mesh_files.emplace_back(relative_path, readBackupMeshFile(entry.path()));
     }
 
-  // Keep the shared checkpoint tree alive until rank 0 has finished reading every file from it.
+  // Keep the shared checkpoint tree alive until all ranks have finished reading from it.
   app.comm().barrier();
 
   if (app.processor_id() == 0)
