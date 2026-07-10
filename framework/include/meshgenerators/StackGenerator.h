@@ -38,8 +38,5 @@ protected:
   /// Height (z) of the bottom of the final mesh
   const Real _bottom_height;
 
-  /// The meshes to be stitched together.
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
-
   Real computeWidth(const MeshBase & mesh, const int & dim);
 };

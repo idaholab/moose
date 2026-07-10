@@ -26,13 +26,13 @@ public:
 
 protected:
   /// Return the starting point of the spline
-  Point startPoint() const;
+  Point startPoint(const MeshBase * start_mesh) const;
   /// Return the ending point of the spline
-  Point endPoint() const;
+  Point endPoint(const MeshBase * end_mesh) const;
   /// Return the starting direction of the spline
-  RealVectorValue startDirection() const;
+  RealVectorValue startDirection(const MeshBase * start_mesh) const;
   /// Return the ending direction of the spline
-  RealVectorValue endDirection() const;
+  RealVectorValue endDirection(const MeshBase * end_mesh) const;
 
   /// Subdomain ID for the elements created
   const SubdomainID _new_subdomain_id;
@@ -54,8 +54,4 @@ protected:
   std::unique_ptr<MeshBase> & _start_mesh_input;
   /// If 'end_mesh' parameter is set, reference to input mesh providing the ending boundary
   std::unique_ptr<MeshBase> & _end_mesh_input;
-  /// If 'start_mesh' parameter is set, mesh providing the starting boundary
-  std::unique_ptr<MeshBase> _start_mesh;
-  /// If 'end_mesh' parameter is set, mesh providing the ending boundary
-  std::unique_ptr<MeshBase> _end_mesh;
 };

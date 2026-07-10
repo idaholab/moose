@@ -41,12 +41,6 @@ protected:
   /// The pattern, starting with the upper left corner
   const std::vector<std::vector<unsigned int>> & _pattern;
 
-  /// Holds the pointers to the input generated meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
-
-  /// Holds a mesh for each row, these will be stitched together in the end
-  std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
-
   /**
    * Merges the subdomain name maps between two meshes, throws an error
    * if input maps contain shared subdomain name with conflicting subdomain ids

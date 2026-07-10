@@ -74,7 +74,8 @@ std::unique_ptr<MeshBase>
 PatternedMeshGenerator::generate()
 {
   // Reserve spaces for all the meshes
-  _meshes.reserve(_input_names.size());
+  std::vector<std::unique_ptr<ReplicatedMesh>> meshes;
+  meshes.reserve(_input_names.size());
 
   // Getting the boundaries provided by the user
   const std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
@@ -103,7 +104,7 @@ PatternedMeshGenerator::generate()
   std::set<boundary_id_type> all_boundary_ids;
 
   // Read in all of the meshes
-  _meshes.resize(_input_names.size());
+  meshes.resize(_input_names.size());
   for (const auto i : index_range(_input_names))
   {
     std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
@@ -115,10 +116,10 @@ PatternedMeshGenerator::generate()
                  type(),
                  " only works with inputs that are replicated.\n\n",
                  "Try running without distributed mesh.");
-    _meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(mesh);
+    meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(mesh);
 
     // List of boundary ids corresponsind to left/right/top/bottom boundary names
-    const auto ids = MooseMeshUtils::getBoundaryIDs(*_meshes[i], boundary_names, false);
+    const auto ids = MooseMeshUtils::getBoundaryIDs(*meshes[i], boundary_names, false);
     mooseAssert(ids.size() == boundary_names.size(),
                 "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
 
@@ -175,8 +176,8 @@ PatternedMeshGenerator::generate()
 
     set_length = input_bids_unique.size();
 
-    // List of all boundary ids used in _meshes[i] so we don't reuse any existing boundary ids.
-    const auto all_ids = _meshes[i]->get_boundary_info().get_boundary_ids();
+    // List of all boundary ids used in meshes[i] so we don't reuse any existing boundary ids.
+    const auto all_ids = meshes[i]->get_boundary_info().get_boundary_ids();
 
     // Keep track of used IDs so we can later find IDs that are unused across all meshes
     all_boundary_ids.insert(all_ids.begin(), all_ids.end());
@@ -184,7 +185,7 @@ PatternedMeshGenerator::generate()
 
   // Check if the user has provided the x, y and z widths.
   // If not (their value is 0 by default), compute them
-  auto bbox = MeshTools::create_bounding_box(*_meshes[0]);
+  auto bbox = MeshTools::create_bounding_box(*meshes[0]);
   if (_x_width == 0)
     _x_width = bbox.max()(0) - bbox.min()(0);
   if (_y_width == 0)
@@ -212,14 +213,14 @@ PatternedMeshGenerator::generate()
       }
 
     // Make all inputs have common boundary ids
-    for (const auto i : index_range(_meshes))
+    for (const auto i : index_range(meshes))
       for (const auto side : index_range(stitch_bids))
         MeshTools::Modification::change_boundary_id(
-            *_meshes[i], input_bids_unique[i][side], stitch_bids[side]);
+            *meshes[i], input_bids_unique[i][side], stitch_bids[side]);
   }
 
   // Data structure that holds each row
-  _row_meshes.resize(_pattern.size());
+  std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes(_pattern.size());
 
   // Aliases
   const boundary_id_type &left_bid(stitch_bids[boundary_name_to_index_map["left_boundary"]]),
@@ -236,32 +237,32 @@ PatternedMeshGenerator::generate()
       // If this is the first cell of the row initialize the row mesh
       if (j == 0)
       {
-        auto clone = _meshes[_pattern[i][j]]->clone();
-        _row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
+        auto clone = meshes[_pattern[i][j]]->clone();
+        row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
 
-        MeshTools::Modification::translate(*_row_meshes[i], deltax, -deltay, 0);
+        MeshTools::Modification::translate(*row_meshes[i], deltax, -deltay, 0);
 
         continue;
       }
 
-      ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
+      ReplicatedMesh & cell_mesh = *meshes[_pattern[i][j]];
 
       // Move the mesh into the right spot.  -i because we are starting at the top
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
       // Subdomain map is aggregated on each row first. This retrieves a writable reference
-      auto & main_subdomain_map = _row_meshes[i]->set_subdomain_name_map();
+      auto & main_subdomain_map = row_meshes[i]->set_subdomain_name_map();
       // Retrieve subdomain name map from the mesh to be stitched and merge into the row's
       // subdomain map
       const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
       mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
-      _row_meshes[i]->stitch_meshes(cell_mesh,
-                                    right_bid,
-                                    left_bid,
-                                    TOLERANCE,
-                                    /*clear_stitched_boundary_ids=*/true,
-                                    /*verbose=*/false);
+      row_meshes[i]->stitch_meshes(cell_mesh,
+                                   right_bid,
+                                   left_bid,
+                                   TOLERANCE,
+                                   /*clear_stitched_boundary_ids=*/true,
+                                   /*verbose=*/false);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
@@ -273,28 +274,28 @@ PatternedMeshGenerator::generate()
   {
     // Get a writeable reference subdomain-name map for the main mesh to which the other rows are
     // stitched
-    auto & main_subdomain_map = _row_meshes[0]->set_subdomain_name_map();
+    auto & main_subdomain_map = row_meshes[0]->set_subdomain_name_map();
     // Retrieve subdomain name map from the mesh to be stitched and merge into the main
     // subdomain map
-    const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
+    const auto & increment_subdomain_map = row_meshes[i]->get_subdomain_name_map();
     mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
-    _row_meshes[0]->stitch_meshes(*_row_meshes[i],
-                                  bottom_bid,
-                                  top_bid,
-                                  TOLERANCE,
-                                  /*clear_stitched_boundary_ids=*/true,
-                                  /*verbose=*/false);
+    row_meshes[0]->stitch_meshes(*row_meshes[i],
+                                 bottom_bid,
+                                 top_bid,
+                                 TOLERANCE,
+                                 /*clear_stitched_boundary_ids=*/true,
+                                 /*verbose=*/false);
   }
 
   // Change boundary ids back to those of meshes[0] to not surprise user
   if (!have_common_ids)
     for (const auto side : index_range(stitch_bids))
       MeshTools::Modification::change_boundary_id(
-          *_row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
+          *row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
 
-  _row_meshes[0]->unset_is_prepared();
-  return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
+  row_meshes[0]->unset_is_prepared();
+  return dynamic_pointer_cast<MeshBase>(row_meshes[0]);
 }
 
 void
