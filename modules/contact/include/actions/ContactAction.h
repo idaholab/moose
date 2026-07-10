@@ -23,6 +23,7 @@ CreateMooseEnumClass(ContactFormulation,
                      MORTAR,
                      MORTAR_PENALTY);
 CreateMooseEnumClass(ProximityMethod, NODE, CENTROID);
+CreateMooseEnumClass(ContactLMSpace, MATCH_DISPLACEMENT, LINEAR);
 
 /**
  * Action class for creating constraints, kernels, and user objects necessary for mechanical
@@ -88,6 +89,9 @@ protected:
 
   /// Contact formulation
   const ContactFormulation _formulation;
+
+  /// Finite element space to use for action-generated mortar Lagrange multiplier variables
+  const ContactLMSpace _lm_space;
 
   /// Whether to use the dual Mortar approach
   bool _use_dual;

@@ -150,6 +150,31 @@
       custom_cmp = 'frictionless-penalty-weighted-gap-action.cmp'
     []
   []
+  [contact_action_lm_space]
+    requirement = 'The system shall allow the contact action to generate mortar variables with a '
+                  'selected finite element space'
+    issues = '#33284'
+    [match_displacement]
+      type = 'CSVDiff'
+      input = frictionless-mortar-action-lm-space.i
+      cli_args = 'Contact/contact_action/lm_space=MATCH_DISPLACEMENT'
+      csvdiff = 'frictionless-mortar-action-lm-space-match-displacement.csv'
+      recover = false # Setup-only DOF-count test; no transient step is advanced
+      restep = false # Setup-only DOF-count test; no transient step is advanced
+      detail = 'using displacement-matched generated mortar variables when requested'
+    []
+    [linear]
+      type = 'CSVDiff'
+      input = frictionless-mortar-action-lm-space.i
+      cli_args = 'Contact/contact_action/lm_space=LINEAR '
+                 'Outputs/file_base=frictionless-mortar-action-lm-space-linear'
+      csvdiff = 'frictionless-mortar-action-lm-space-linear.csv'
+      prereq = 'contact_action_lm_space/match_displacement'
+      recover = false # Setup-only DOF-count test; no transient step is advanced
+      restep = false # Setup-only DOF-count test; no transient step is advanced
+      detail = 'and using first-order LAGRANGE mortar variables when requested.'
+    []
+  []
   [very_parallel_penalty]
     requirement = 'The system shall be able to communicate semilocal weighted gaps back to any '
                   'process that contributed to computing said weighted gaps.'
