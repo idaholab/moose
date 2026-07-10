@@ -58,7 +58,7 @@ public:
 
     // Set the operator and solve the equation
     _problem_data.jacobian_solver->SetOperator(probOp);
-    _problem_data.jacobian_solver->GetSolver()->Mult(B,X);
+    _problem_data.jacobian_solver->GetSolver()->Mult(B, X);
 
     // Set the data in the grid function
     const std::string gFuncName = "var0";
