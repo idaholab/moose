@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "MooseEnum.h"
 #include <string>
 
 namespace mfem
