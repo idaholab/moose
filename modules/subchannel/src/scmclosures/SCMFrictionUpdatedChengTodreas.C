@@ -189,7 +189,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
                        303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
                       std::pow((wire_lead_length / pin_diameter), -0.541);
     const auto wd_l = 1.4 * wd_t;
-    const auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
+    const auto ws_t = -11.0 * std::log10(wire_lead_length / pin_diameter) + 19.0;
     const auto ws_l = ws_t;
     Real ar = 0.0;
     Real a_p = 0.0;
