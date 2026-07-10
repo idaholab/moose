@@ -58,12 +58,12 @@ public:
 
     // Set the operator and solve the equation
     _problem_data.jacobian_solver->SetOperator(probOp);
-    //   _problem_data.jacobian_solver->Mult(B,X);
+    _problem_data.jacobian_solver->GetSolver()->Mult(B,X);
 
     // Set the data in the grid function
     const std::string gFuncName = "var0";
     auto gfunc = _problem_data.gridfunctions.GetShared(gFuncName);
-    *gfunc = 0.00;
+    gfunc->SetFromTrueDofs(X);
   };
 
   // Get the dummy Variable
@@ -149,8 +149,6 @@ public:
   // The test constructor
   MFEMCustomProbOperatorTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
-    // Add a mesh
-
     // Add an FE-space
     InputParameters fe_params = _factory.getValidParams("MFEMScalarFESpace");
     fe_params.set<MooseEnum>("fec_type") = "H1";
@@ -249,6 +247,6 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
   const std::string gFuncName = "var0";
   auto gfunc = _mfem_problem->getProblemData().gridfunctions.GetShared(gFuncName);
   xFunc -= *gfunc;
-  EXPECT_NEAR(xFunc.Norml2(), 0, 1e-5);
+  EXPECT_NEAR(xFunc.Norml2(), 0, 1.0e-7);
 };
 #endif
