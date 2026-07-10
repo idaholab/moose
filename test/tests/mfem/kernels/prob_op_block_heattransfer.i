@@ -90,7 +90,7 @@
   []
 []
 
-[ProblemOperator]
+[ProblemOperatorBuilder]
   [default_transient]
     type = ProblemOperatorBuilderTransient
   []

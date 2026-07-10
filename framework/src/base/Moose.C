@@ -814,7 +814,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
-  registerSyntaxTask("AddMFEMProblemOperatorAction", "ProblemOperator/*", "add_mfem_problem_operator");
+  registerSyntaxTask("AddMFEMProblemOperatorAction", "ProblemOperatorBuilder/*", "add_mfem_problem_operator");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");
