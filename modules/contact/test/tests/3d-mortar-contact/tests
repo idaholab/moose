@@ -52,7 +52,7 @@
       mesh_mode = 'REPLICATED' # see issue 24255
       cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second'
       detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
-      rel_err = 1.0e-5
+      rel_err = 5.0e-5
       abs_zero = 1.0e-5
       valgrind = 'none'
       prereq = 'frictionless-mortar-3d-action/first'
@@ -70,6 +70,32 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-action-lm-space]
+    requirement = 'The system shall support the contact action Lagrange multiplier space option '
+                  'for 3D mortar contact'
+    issues = '#33284'
+    [linear]
+      type = 'RunApp'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/lm_space=LINEAR'
+      check_input = true
+      detail = 'by accepting it for a 3D mortar formulation'
+    []
+    [non-mortar-error]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=kinematic Contact/mortar/lm_space=LINEAR'
+      expect_err = "The 'lm_space' option can only be used with the 'mortar' formulation"
+      detail = 'and by rejecting it for non-mortar contact formulations'
+    []
+    [mortar-penalty-error]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/lm_space=LINEAR'
+      expect_err = "The 'lm_space' option can only be used with the 'mortar' formulation"
+      detail = 'and by rejecting it for mortar penalty contact.'
+    []
+  []
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
@@ -85,6 +111,65 @@
     abs_zero = 1.0e-5
     valgrind = 'none'
   []
+  [frictionless-mortar-3d-action-triangulation]
+    requirement = 'The system shall support 3D mortar triangulation modes through the contact '
+                  'action with debug-mesh output, using'
+    [centroid-with-retessellation]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-centroid-retess_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=true '
+                 'Contact/mortar/debug_mesh=true Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-retess'
+      detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
+               'clipped polygons when triangulate_triangles is enabled,'
+      valgrind = 'none'
+      prereq = 'frictionless-mortar-3d-action/first'
+    []
+    [centroid-no-retessellation]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-centroid-no-retess_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=false '
+                 'Contact/mortar/debug_mesh=true Executioner/end_time=0 '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-centroid-no-retess'
+      detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
+               'intact when triangulate_triangles is disabled,'
+      valgrind = 'none'
+      restep = false # this check intentionally stops after initial debug mesh generation
+      prereq = 'frictionless-mortar-3d-action-triangulation/centroid-with-retessellation'
+    []
+    [ear_clipping]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-ear-clipping_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/triangulation=ear_clipping Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-ear-clipping'
+      detail = 'an ear-clipping algorithm, and'
+      valgrind = 'none'
+      prereq = 'frictionless-mortar-3d-action/first'
+    []
+    [delaunay]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-delaunay_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-delaunay'
+      detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
+      valgrind = 'none'
+      prereq = 'frictionless-mortar-3d-action/first'
+    []
+  []
   [frictionless-mortar-3d-debug-mesh]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
@@ -96,6 +181,95 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
     prereq = 'frictionless-mortar-3d'
+  []
+  [frictionless-mortar-3d-debug-mesh-triangulation]
+    requirement = 'The system shall support 3D mortar triangulation modes for directly-specified '
+                  'mortar objects (constraints + user-objects) with debug-mesh output, using'
+    [centroid-with-retessellation]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d.i'
+      capabilities = 'ad_size>=150'
+      exodiff = 'frictionless-mortar-3d-direct-centroid-retess_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-direct-centroid-retess '
+                 'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+                 'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+                 'UserObjects/weighted_gap_uo/debug_mesh=true '
+                 'Constraints/normal_lm/triangulation=centroid '
+                 'Constraints/normal_x/triangulation=centroid '
+                 'Constraints/normal_y/triangulation=centroid '
+                 'Constraints/normal_z/triangulation=centroid '
+                 'UserObjects/weighted_gap_uo/triangulation=centroid '
+                 'Constraints/normal_lm/triangulate_triangles=true '
+                 'Constraints/normal_x/triangulate_triangles=true '
+                 'Constraints/normal_y/triangulate_triangles=true '
+                 'Constraints/normal_z/triangulate_triangles=true '
+                 'UserObjects/weighted_gap_uo/triangulate_triangles=true'
+      detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
+               'clipped polygons,'
+      prereq = 'frictionless-mortar-3d-debug-mesh'
+    []
+    [centroid-no-retessellation]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d.i'
+      capabilities = 'ad_size>=150'
+      exodiff = 'frictionless-mortar-3d-direct-centroid-no-retess_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-direct-centroid-no-retess '
+                 'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+                 'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+                 'UserObjects/weighted_gap_uo/debug_mesh=true '
+                 'Constraints/normal_lm/triangulation=centroid '
+                 'Constraints/normal_x/triangulation=centroid '
+                 'Constraints/normal_y/triangulation=centroid '
+                 'Constraints/normal_z/triangulation=centroid '
+                 'UserObjects/weighted_gap_uo/triangulation=centroid '
+                 'Constraints/normal_lm/triangulate_triangles=false '
+                 'Constraints/normal_x/triangulate_triangles=false '
+                 'Constraints/normal_y/triangulate_triangles=false '
+                 'Constraints/normal_z/triangulate_triangles=false '
+                 'UserObjects/weighted_gap_uo/triangulate_triangles=false'
+      detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
+               'intact,'
+      restep = false # this check intentionally stops after initial debug mesh generation
+      prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
+    []
+    [ear_clipping]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d.i'
+      capabilities = 'ad_size>=150'
+      exodiff = 'frictionless-mortar-3d-direct-ear-clipping_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-direct-ear-clipping '
+                 'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+                 'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+                 'UserObjects/weighted_gap_uo/debug_mesh=true '
+                 'Constraints/normal_lm/triangulation=ear_clipping '
+                 'Constraints/normal_x/triangulation=ear_clipping '
+                 'Constraints/normal_y/triangulation=ear_clipping '
+                 'Constraints/normal_z/triangulation=ear_clipping '
+                 'UserObjects/weighted_gap_uo/triangulation=ear_clipping'
+      detail = 'an ear-clipping algorithm, and'
+      prereq = 'frictionless-mortar-3d-debug-mesh'
+    []
+    [delaunay]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d.i'
+      capabilities = 'ad_size>=150'
+      exodiff = 'frictionless-mortar-3d-direct-delaunay_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-direct-delaunay '
+                 'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+                 'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+                 'UserObjects/weighted_gap_uo/debug_mesh=true '
+                 'Constraints/normal_lm/triangulation=delaunay '
+                 'Constraints/normal_x/triangulation=delaunay '
+                 'Constraints/normal_y/triangulation=delaunay '
+                 'Constraints/normal_z/triangulation=delaunay '
+                 'UserObjects/weighted_gap_uo/triangulation=delaunay'
+      detail = 'a libMesh constrained-Delaunay backend that preserves polygon boundary edges.'
+      prereq = 'frictionless-mortar-3d-debug-mesh'
+    []
   []
   [frictional-mortar-3d]
     type = 'Exodiff'

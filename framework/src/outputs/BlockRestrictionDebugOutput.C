@@ -17,16 +17,123 @@
 #include "NonlinearSystemBase.h"
 #include "MooseVariableBase.h"
 #include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 #include "KernelBase.h"
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
 #include "UserObject.h"
+#include "MooseObject.h"
+#include "InitialConditionBase.h"
+#include "FVInitialConditionBase.h"
+#include "Constraint.h"
 
 #include "libmesh/transient_system.h"
+
+#include <functional>
+#include <map>
 
 using namespace libMesh;
 
 registerMooseObject("MooseApp", BlockRestrictionDebugOutput);
+
+namespace
+{
+template <typename ID>
+using RestrictionGroups = std::map<std::set<ID>, std::set<std::string>>;
+
+template <typename ID>
+std::string
+formatRestrictionIDs(const std::set<ID> & ids,
+                     const std::set<ID> & all_ids,
+                     const std::string & all_text,
+                     const std::function<std::string(ID)> & id_to_string)
+{
+  if (ids.empty())
+    return "(none)";
+
+  if (ids == all_ids)
+    return all_text;
+
+  std::stringstream out;
+  unsigned int i = 0;
+  for (const auto id : ids)
+    out << id_to_string(id) << (++i < ids.size() ? ", " : "");
+
+  return out.str();
+}
+
+void
+printGroupNames(std::stringstream & out, const std::set<std::string> & names)
+{
+  std::streampos begin_string_pos = out.tellp();
+  std::streampos curr_string_pos = begin_string_pos;
+  unsigned int i = 0;
+  for (const auto & name : names)
+  {
+    out << Moose::stringify(name) << (++i < names.size() ? ", " : "");
+    curr_string_pos = out.tellp();
+    ConsoleUtils::insertNewline(out, begin_string_pos, curr_string_pos);
+  }
+  out << '\n';
+}
+
+std::string
+objectRestrictionName(const MooseObject & object)
+{
+  return object.type() + "/" + object.name();
+}
+
+void
+addBlockRestrictionObject(RestrictionGroups<SubdomainID> & groups, const MooseObject & object)
+{
+  if (!object.enabled())
+    return;
+
+  const auto * const block_restrictable = dynamic_cast<const BlockRestrictable *>(&object);
+  if (block_restrictable)
+    groups[block_restrictable->blockIDs()].insert(objectRestrictionName(object));
+}
+
+void
+addBoundaryRestrictionObject(RestrictionGroups<BoundaryID> & groups,
+                             const MooseObject & object,
+                             const bool include_unrestricted)
+{
+  if (!object.enabled())
+    return;
+
+  const auto * const boundary_restrictable = dynamic_cast<const BoundaryRestrictable *>(&object);
+  if (!boundary_restrictable)
+    return;
+
+  if (!include_unrestricted && !boundary_restrictable->boundaryRestricted())
+    return;
+
+  const auto & ids = boundary_restrictable->boundaryRestricted()
+                         ? boundary_restrictable->boundaryIDs()
+                         : boundary_restrictable->meshBoundaryIDs();
+  groups[ids].insert(objectRestrictionName(object));
+}
+
+template <typename T>
+void
+addWarehouseBlockRestrictionObjects(RestrictionGroups<SubdomainID> & groups,
+                                    const MooseObjectWarehouseBase<T> & warehouse)
+{
+  for (const auto & object : warehouse.getObjects(/*tid = */ 0))
+    addBlockRestrictionObject(groups, *object);
+}
+
+template <typename T>
+void
+addWarehouseBoundaryRestrictionObjects(RestrictionGroups<BoundaryID> & groups,
+                                       const MooseObjectWarehouseBase<T> & warehouse,
+                                       const bool include_unrestricted)
+{
+  for (const auto & object : warehouse.getObjects(/*tid = */ 0))
+    addBoundaryRestrictionObject(groups, *object, include_unrestricted);
+}
+}
 
 InputParameters
 BlockRestrictionDebugOutput::validParams()
@@ -40,9 +147,20 @@ BlockRestrictionDebugOutput::validParams()
 
   params.addParam<NonlinearSystemName>(
       "nl_sys", "nl0", "The nonlinear system that we should output information for.");
+  params.addParam<bool>(
+      "show_block_restriction_map",
+      true,
+      "Print active objects for each block. This is the default block-restriction debug output.");
+  params.addParam<bool>("show_block_restriction_groups",
+                        false,
+                        "Print groups of objects with identical block restrictions.");
+  params.addParam<bool>("show_boundary_restriction_groups",
+                        false,
+                        "Print groups of objects with identical boundary restrictions.");
 
   params.addClassDescription(
-      "Debug output object for displaying information regarding block-restriction of objects.");
+      "Debug output object for displaying information regarding block and boundary restrictions of "
+      "objects.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
@@ -59,14 +177,24 @@ BlockRestrictionDebugOutput::BlockRestrictionDebugOutput(const InputParameters &
     _scope(getParam<MultiMooseEnum>("scope")),
     _nl(_problem_ptr->getNonlinearSystemBase(
         _problem_ptr->nlSysNum(getParam<NonlinearSystemName>("nl_sys")))),
-    _sys(_nl.system())
+    _sys(_nl.system()),
+    _show_block_restriction_map(getParam<bool>("show_block_restriction_map")),
+    _show_block_restriction_groups(getParam<bool>("show_block_restriction_groups")),
+    _show_boundary_restriction_groups(getParam<bool>("show_boundary_restriction_groups"))
 {
 }
 
 void
 BlockRestrictionDebugOutput::output()
 {
-  printBlockRestrictionMap();
+  if (_show_block_restriction_map)
+    printBlockRestrictionMap();
+
+  if (_show_block_restriction_groups)
+    printBlockRestrictionGroups();
+
+  if (_show_boundary_restriction_groups)
+    printBoundaryRestrictionGroups();
 }
 
 void
@@ -305,5 +433,180 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
   // Write the stored string to the ConsoleUtils output objects
   _console << "\n[DBG] Block-Restrictions (" << mesh_subdomains.size()
            << " subdomains): showing active objects\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << out.str() << std::endl;
+}
+
+void
+BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
+{
+  MooseMesh & mesh = _problem_ptr->mesh();
+  const auto & mesh_subdomains = mesh.meshSubdomains();
+
+  RestrictionGroups<SubdomainID> groups;
+  std::vector<MooseObject *> objects;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribInterfaces>(Interfaces::BlockRestrictable)
+      .condition<AttribThread>(0)
+      .queryIntoUnsorted(objects);
+
+  for (const auto object : objects)
+    if (object->enabled())
+    {
+      const auto * const block_restrictable = dynamic_cast<const BlockRestrictable *>(object);
+      mooseAssert(block_restrictable, "Query returned an object without BlockRestrictable");
+      groups[block_restrictable->blockIDs()].insert(objectRestrictionName(*object));
+    }
+
+  // Variables and aux variables are stored in libMesh systems / VariableWarehouse, not in
+  // theWarehouse(), so add their block restrictions explicitly.
+  for (const auto var_num : make_range(_sys.n_vars()))
+  {
+    const auto & var_name = _sys.variable_name(var_num);
+    if (_problem_ptr->hasVariable(var_name))
+    {
+      const auto & var = _problem_ptr->getVariable(
+          /*tid = */ 0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+      groups[var.blockIDs()].insert("Variable/" + var_name);
+    }
+  }
+
+  const auto & aux_system = _problem_ptr->getAuxiliarySystem().system();
+  for (const auto vg : make_range(aux_system.n_variable_groups()))
+  {
+    const VariableGroup & vg_description(aux_system.variable_group(vg));
+    std::set<SubdomainID> blocks;
+    for (const auto subdomain_id : mesh_subdomains)
+      if (vg_description.active_on_subdomain(subdomain_id))
+        blocks.insert(subdomain_id);
+
+    for (const auto vn : make_range(vg_description.n_variables()))
+      groups[blocks].insert("AuxVariable/" + vg_description.name(vn));
+  }
+
+  // Custom warehouses below are not covered by theWarehouse() queries.
+  const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.mortarNodalAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalVectorAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalArrayAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemVectorAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.elemArrayAuxWarehouse());
+#ifdef MOOSE_KOKKOS_ENABLED
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosNodalAuxWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, aux_system_base.kokkosElemAuxWarehouse());
+#endif
+
+  addWarehouseBlockRestrictionObjects(groups, _problem_ptr->getInitialConditionWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, _problem_ptr->getFVInitialConditionWarehouse());
+  addWarehouseBlockRestrictionObjects(groups, _nl.getConstraintWarehouse());
+
+  // Materials use MaterialWarehouse, which also owns automatically-created face and neighbor
+  // materials; report the primary material objects from the aggregate material warehouse.
+  addWarehouseBlockRestrictionObjects(groups, _problem_ptr->getMaterialWarehouse());
+
+  std::stringstream out;
+  for (const auto & group : groups)
+  {
+    out << "\n";
+    out << "  Blocks "
+        << formatRestrictionIDs<SubdomainID>(group.first,
+                                             mesh_subdomains,
+                                             "all blocks",
+                                             [&mesh](const SubdomainID id)
+                                             {
+                                               const auto & name = mesh.getSubdomainName(id);
+                                               return name.empty() ? std::to_string(id)
+                                                                   : "'" + name + "' (id " +
+                                                                         std::to_string(id) + ")";
+                                             })
+        << " (" << group.second.size() << " " << (group.second.size() == 1 ? "item" : "items")
+        << "): ";
+    printGroupNames(out, group.second);
+  }
+
+  if (groups.empty())
+    out << "\n  (no objects found)\n";
+
+  out << std::flush;
+
+  _console << "\n[DBG] Block-Restriction Groups (" << groups.size()
+           << " groups): showing objects with matching block restrictions\n";
+  _console << std::setw(ConsoleUtils::console_field_width) << out.str() << std::endl;
+}
+
+void
+BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
+{
+  MooseMesh & mesh = _problem_ptr->mesh();
+  const auto & mesh_boundaries = mesh.getBoundaryIDs();
+
+  RestrictionGroups<BoundaryID> groups;
+  std::vector<MooseObject *> objects;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
+      .condition<AttribThread>(0)
+      .queryIntoUnsorted(objects);
+
+  for (const auto object : objects)
+    if (object->enabled())
+    {
+      const auto * const boundary_restrictable = dynamic_cast<const BoundaryRestrictable *>(object);
+      mooseAssert(boundary_restrictable, "Query returned an object without BoundaryRestrictable");
+      const auto & ids = boundary_restrictable->boundaryRestricted()
+                             ? boundary_restrictable->boundaryIDs()
+                             : boundary_restrictable->meshBoundaryIDs();
+      groups[ids].insert(objectRestrictionName(*object));
+    }
+
+  // Custom warehouses below are not covered by theWarehouse() queries. For these explicit passes,
+  // only boundary-restricted objects belong in boundary-restriction groups; block-only objects are
+  // already represented in the block groups.
+  const auto & aux_system = _problem_ptr->getAuxiliarySystem();
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.mortarNodalAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalVectorAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalArrayAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemVectorAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.elemArrayAuxWarehouse(), false);
+#ifdef MOOSE_KOKKOS_ENABLED
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosNodalAuxWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, aux_system.kokkosElemAuxWarehouse(), false);
+#endif
+
+  addWarehouseBoundaryRestrictionObjects(
+      groups, _problem_ptr->getInitialConditionWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, _nl.getConstraintWarehouse(), false);
+  addWarehouseBoundaryRestrictionObjects(groups, _problem_ptr->getMaterialWarehouse(), false);
+
+  std::stringstream out;
+  for (const auto & group : groups)
+  {
+    out << "\n";
+    out << "  Boundaries "
+        << formatRestrictionIDs<BoundaryID>(group.first,
+                                            mesh_boundaries,
+                                            "all boundaries",
+                                            [&mesh](const BoundaryID id)
+                                            {
+                                              const auto name = mesh.getBoundaryString(id);
+                                              return "'" + name + "' (id " + std::to_string(id) +
+                                                     ")";
+                                            })
+        << " (" << group.second.size() << " " << (group.second.size() == 1 ? "item" : "items")
+        << "): ";
+    printGroupNames(out, group.second);
+  }
+
+  if (groups.empty())
+    out << "\n  (no objects found)\n";
+
+  out << std::flush;
+
+  _console << "\n[DBG] Boundary-Restriction Groups (" << groups.size()
+           << " groups): showing objects with matching boundary restrictions\n";
   _console << std::setw(ConsoleUtils::console_field_width) << out.str() << std::endl;
 }

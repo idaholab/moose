@@ -1904,13 +1904,12 @@ MooseApp::run()
 }
 
 void
-MooseApp::requestCitations()
+MooseApp::collectCitations(std::map<std::string, std::string> & citations) const
 {
-  // Gather the citations that apply to this run: for every object type actually constructed, the
+  // Gather the citations that apply to this app: for every object type actually constructed, the
   // citations registered for its owning app/module. The framework paper is tied to "MooseApp", so
   // it is gathered whenever a MooseApp object is used; apps composed of MooseApp inherit it. The
-  // map is keyed by BibTeX key so a citation shared across apps is resolved only once.
-  std::map<std::string, std::string> citations;
+  // map is keyed by BibTeX key so a citation shared across apps is folded in only once.
   for (const auto & objname : _factory.getConstructedObjects())
   {
     mooseAssert(Registry::isRegisteredObj(objname),
@@ -1928,6 +1927,42 @@ MooseApp::requestCitations()
 #endif
   const auto & backend_citations = Registry::getCitations(backend);
   citations.insert(backend_citations.begin(), backend_citations.end());
+
+  // Recurse into the MultiApp subapps so that objects/modules used only inside subapps are still
+  // attributed. Each subapp is a separate MooseApp whose run() (and thus requestCitations()) is
+  // never called, so the master gathers their citations here. feProblem() asserts when there is no
+  // executioner, so only descend once one exists; nested MultiApps are handled by the recursion.
+  if (_executor || _executioner)
+    for (const auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      for (const auto i : make_range(multi_app->numLocalApps()))
+        multi_app->localApp(i)->collectCitations(citations);
+}
+
+void
+MooseApp::requestCitations()
+{
+  // Collect the de-duplicated citations across this app and, recursively, every MultiApp subapp.
+  std::map<std::string, std::string> citations;
+  collectCitations(citations);
+
+  // MultiApp subapps are distributed across the MPI ranks, so each rank has collected citations
+  // only for the subapps it owns. PETSc prints the citation list from rank 0 alone, so gather every
+  // rank's citations onto all ranks; otherwise a module used only by a subapp that lives off rank 0
+  // would be omitted.
+  std::vector<std::string> flattened;
+  flattened.reserve(citations.size() * 2);
+  for (const auto & [key, bibtex] : citations)
+  {
+    flattened.push_back(key);
+    flattened.push_back(bibtex);
+  }
+  _comm->allgather(flattened);
+  for (std::size_t i = 0; i + 1 < flattened.size(); i += 2)
+  {
+    [[maybe_unused]] const auto [it, inserted] = citations.emplace(flattened[i], flattened[i + 1]);
+    mooseAssert(inserted || it->second == flattened[i + 1],
+                "The same citation key was registered with different BibTeX entries");
+  }
 
   // Register the resolved BibTeX entries with PETSc and enable its -citations option. PETSc prints
   // them, together with the run-specific citations from any PETSc solvers/preconditioners actually
