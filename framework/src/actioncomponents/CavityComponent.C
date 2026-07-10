@@ -244,6 +244,9 @@ CavityComponent::addMeshGenerators()
     // triangulating on only one exterior side
     params.set<MooseEnum>("conversion_method") = "SURFACE";
     params.set<bool>("convert_holes_for_stitching") = true;
+    // we can stitch to the components directly when not using a boundary layer
+    if (getParam<unsigned int>("n_boundary_layers") == 0)
+      params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>(holes_mg.size(), true);
     addMeshGenerator("XYZDelaunayGenerator", "tetrahedralization", params);
 
     // Stitch the tetrahedralization to the boundary layer
@@ -263,56 +266,59 @@ CavityComponent::addMeshGenerators()
     }
   }
 
-  // Now stitch to these components' meshes. The components may already be part of one or
-  // more larger group(s) of components so we retrieve the mesh generators creating those
-  std::set<MeshGeneratorName> mgs_to_stitch;
-  for (const auto & comp_name : _components_to_enclose)
-    mgs_to_stitch.insert(
-        _awh.getAction<ActionComponent>(comp_name).getCurrentTopLevelMeshGeneratorName());
-
-  // Merge all the outer boundaries into a single external boundary.
-  std::vector<MeshGeneratorName> mgs_to_stitch_vec;
-  mgs_to_stitch_vec.push_back(_mg_names.back());
-  std::vector<std::vector<std::string>> final_stitching_boundaries;
-  for (const auto & i_mg : index_range(mgs_to_stitch))
+  if (getParam<unsigned int>("n_boundary_layers") > 0)
   {
-    const auto & final_mg = *std::next(mgs_to_stitch.begin(), i_mg);
-    const auto fused_boundary = final_mg + "_fused_outer_bdy";
-
-    // Gather outer boundaries for all
-    // components sharing the same top mesh generator
-    std::vector<BoundaryName> gathered_exerior_bdies;
+    // Now stitch to these components' meshes. The components may already be part of one or
+    // more larger group(s) of components so we retrieve the mesh generators creating those
+    std::set<MeshGeneratorName> mgs_to_stitch;
     for (const auto & comp_name : _components_to_enclose)
-      if (_awh.getAction<ActionComponent>(comp_name).getCurrentTopLevelMeshGeneratorName() ==
-          final_mg)
-        for (const auto & bdy_name :
-             _awh.getAction<ActionComponent>(comp_name).outerSurfaceBoundaries())
-          gathered_exerior_bdies.push_back(bdy_name);
+      mgs_to_stitch.insert(
+          _awh.getAction<ActionComponent>(comp_name).getCurrentTopLevelMeshGeneratorName());
 
-    // RenameBoundaryGenerator does not keep the old boundary
-    InputParameters params = _factory.getValidParams("ParsedGenerateSideset");
-    params.set<MeshGeneratorName>("input") = final_mg;
-    params.set<std::string>("combinatorial_geometry") = "x > -1e100";
-    params.set<std::vector<BoundaryName>>("included_boundaries") = gathered_exerior_bdies;
-    params.set<BoundaryName>("new_sideset_name") = fused_boundary;
-    addMeshGenerator("ParsedGenerateSideset", final_mg + "_fused_exterior_surfaces", params);
+    // Merge all the outer boundaries into a single external boundary.
+    std::vector<MeshGeneratorName> mgs_to_stitch_vec;
+    mgs_to_stitch_vec.push_back(_mg_names.back());
+    std::vector<std::vector<std::string>> final_stitching_boundaries;
+    for (const auto & i_mg : index_range(mgs_to_stitch))
+    {
+      const auto & final_mg = *std::next(mgs_to_stitch.begin(), i_mg);
+      const auto fused_boundary = final_mg + "_fused_outer_bdy";
 
-    // Form stitching pairs for each final mesh generator
-    final_stitching_boundaries.push_back({fused_boundary, cavity_inner_boundaries[i_mg]});
-    // These MGs with the fused surface serve as inputs to the stitcher
-    mgs_to_stitch_vec.insert(mgs_to_stitch_vec.begin(), _mg_names.back());
+      // Gather outer boundaries for all
+      // components sharing the same top mesh generator
+      std::vector<BoundaryName> gathered_exerior_bdies;
+      for (const auto & comp_name : _components_to_enclose)
+        if (_awh.getAction<ActionComponent>(comp_name).getCurrentTopLevelMeshGeneratorName() ==
+            final_mg)
+          for (const auto & bdy_name :
+               _awh.getAction<ActionComponent>(comp_name).outerSurfaceBoundaries())
+            gathered_exerior_bdies.push_back(bdy_name);
+
+      // RenameBoundaryGenerator does not keep the old boundary
+      InputParameters params = _factory.getValidParams("ParsedGenerateSideset");
+      params.set<MeshGeneratorName>("input") = final_mg;
+      params.set<std::string>("combinatorial_geometry") = "x > -1e100";
+      params.set<std::vector<BoundaryName>>("included_boundaries") = gathered_exerior_bdies;
+      params.set<BoundaryName>("new_sideset_name") = fused_boundary;
+      addMeshGenerator("ParsedGenerateSideset", final_mg + "_fused_exterior_surfaces", params);
+
+      // Form stitching pairs for each final mesh generator
+      final_stitching_boundaries.push_back({fused_boundary, cavity_inner_boundaries[i_mg]});
+      // These MGs with the fused surface serve as inputs to the stitcher
+      mgs_to_stitch_vec.insert(mgs_to_stitch_vec.begin(), _mg_names.back());
+    }
+
+    // Stitch the (cavity + boundary) layers to the components
+    InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+    stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = mgs_to_stitch_vec;
+    stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
+        final_stitching_boundaries;
+    stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = false;
+    stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
+    stitcher_params.set<bool>("verbose_stitching") = _verbose;
+    stitcher_params.set<bool>("verbose_remapping") = _verbose;
+    addMeshGenerator("StitchMeshGenerator", "stitched", stitcher_params);
   }
-
-  // Stitch the (cavity + boundary) layers to the components
-  InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
-  stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = mgs_to_stitch_vec;
-  stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
-      final_stitching_boundaries;
-  stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = false;
-  stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
-  stitcher_params.set<bool>("verbose_stitching") = _verbose;
-  stitcher_params.set<bool>("verbose_remapping") = _verbose;
-  addMeshGenerator("StitchMeshGenerator", "stitched", stitcher_params);
 
   // The triangulation that goes around the component could be overlapping with other components
   // Delete the elements overlapping.
