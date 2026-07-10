@@ -37,9 +37,9 @@ MOOSE application and input file
 
 | Path | What it changes | Use it when | Starting points |
 | :- | :- | :- | :- |
-| MOOSE/libMesh | MOOSE finite element and finite volume object systems using libMesh data structures | You want the broadest object coverage, module compatibility, examples, and application-development support | [Application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md), [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples) |
+| MOOSE/libMesh | MOOSE finite element and finite volume object systems using libMesh data structures | You want the broadest object coverage, module compatibility, examples, and application-development support | [Application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md optional=True), [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples optional=True) |
 | Kokkos-MOOSE | Device-portable implementations of selected MOOSE object systems using the libMesh finite element backend | You want supported kernels, boundary conditions, and materials to run through Kokkos while retaining MOOSE meshes, postprocessing, and output workflows | [Getting started with Kokkos-MOOSE](syntax/Kokkos/index.md), [Kokkos installation](getting_started/installation/install_kokkos.md) |
-| MFEM-MOOSE | MFEM-backed problem, mesh, variable, finite element space, kernel, solver, and output objects | You want to formulate the application using MFEM features such as high-order spaces, H(div)/H(curl) spaces, or partial assembly | [Getting started with MFEM-MOOSE](syntax/MFEM/index.md), [MFEM installation](getting_started/installation/install_mfem.md) |
+| MFEM-MOOSE | MFEM-backed problem, mesh, variable, finite element space, kernel, solver, and output objects | You want to formulate the application using MFEM features such as high-order spaces, H(div)/H(curl) spaces, or partial assembly | [Getting started with MFEM-MOOSE](syntax/MFEM/index.md), [MFEM installation](getting_started/installation/install_mfem.md optional=True) |
 
 ## MOOSE/libMesh path
 
@@ -48,8 +48,8 @@ objects derived from MOOSE object families, such as `Kernel`, `ADKernel`, `Integ
 `Material`, `UserObject`, `AuxKernel`, and related systems.
 
 For guidance on using the MOOSE/libMesh backend, see the
-[application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md)
-and the [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples).
+[application development tutorial](getting_started/examples_and_tutorials/tutorial01_app_development/index.md  optional=True)
+and the [framework examples](getting_started/examples_and_tutorials/examples_tutorials.md#framework-examples  optional=True).
 
 ## Kokkos-MOOSE
 
