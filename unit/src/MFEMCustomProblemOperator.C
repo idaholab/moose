@@ -164,7 +164,7 @@ public:
 
     // Add a solver
     InputParameters solver_params = _factory.getValidParams("MFEMMUMPS");
-    solver_params.set<mfem::real_t>("print_level") = 0;
+    solver_params.set<int>("print_level") = 0;
     _mfem_problem->addMFEMSolver("MFEMMUMPS","linearSolver0",solver_params);
 
     // Add the custom problem operator builder
@@ -197,10 +197,7 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
    * the standard MFEM route
    */
    // Set the Mesh
-   mfem::Mesh smesh("../test/tests/mfem/mesh/star.mesh");
-   mfem::ParMesh pmesh(MPI_COMM_WORLD, smesh);
-   smesh.Clear(); // the serial mesh is no longer needed
-   pmesh.UniformRefinement();
+   mfem::ParMesh& pmesh = _mfem_mesh_ptr->getMFEMParMesh();
 
    // Set FE-spaces
    mfem::H1_FECollection fec0(1, pmesh.Dimension());
@@ -240,13 +237,14 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
    * Examine test results
    */
   // Check whether the Solver ran with a dummy var
-//  EXPECT_EQ(10, 10);
+  auto probOp1 = std::static_pointer_cast<CustomDummyProblemOperator>(probOp);
+  EXPECT_EQ(probOp1->GetDumVar(), 10);
 
-  // Check number of DOFs in the mesh
-//  EXPECT_EQ(10, 10);
+  // Check number of Vertices in the mesh
+  EXPECT_EQ(pmesh.GetNV(), _mfem_mesh_ptr->getMFEMParMesh().GetNV() );
 
   // Check number of DOFs on the boundary
-//  EXPECT_EQ(10, 10);
+  EXPECT_EQ(pmesh.bdr_attributes.Size(), _mfem_mesh_ptr->getMFEMParMesh().bdr_attributes.Size() );
 
   // Check the error norm of the solution
   const std::string gFuncName="var0";
