@@ -28,6 +28,7 @@ using the bulk transition limits
 Re_L = 320 \, 10^{P/D - 1}, \qquad Re_T = 10^4 \, 10^{0.7(P/D - 1)} .
 
 These bulk $Re_L$ and $Re_T$ values are used for both the base turbulent mixing parameter and the peripheral sweep-flow parameter.
+The Cheng-Todreas mixing intermittency factor uses natural logarithms.
 
 Information about the use of $\beta$ can be found in [Turbulent crossflow](subchannel_theory.md#turbulent-crossflow).
 Additionally, the user may opt to provide the turbulent momentum mixing parameter `CT`. Information about the use of this parameter can be found in [Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer).
