@@ -297,7 +297,7 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
   }
   // Solution variables changed: stored projections of solution-dependent coefficients are stale.
   if (_coefficient_manager)
-    _coefficient_manager->invalidateQuadratureFunctions();
+    _coefficient_manager->markSolutionChanged();
 }
 
 }

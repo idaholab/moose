@@ -36,8 +36,8 @@ MFEMScalarQuadratureFunctionCoefficient::Eval(mfem::ElementTransformation & T,
                                               const mfem::IntegrationPoint & ip)
 {
   if (_dirty)
-    refresh();
-  checkIntegrationRule(_qf, T, ip);
+    Refresh();
+  CheckIntegrationRule(_qf, T, ip);
   return mfem::QuadratureFunctionCoefficient::Eval(T, ip);
 }
 
@@ -45,12 +45,12 @@ void
 MFEMScalarQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
 {
   if (_dirty)
-    refresh();
+    Refresh();
   mfem::QuadratureFunctionCoefficient::Project(qf);
 }
 
 void
-MFEMScalarQuadratureFunctionCoefficient::refresh()
+MFEMScalarQuadratureFunctionCoefficient::Refresh()
 {
   // Equivalent to _source.Project(_qf), except performed with a caller-owned element
   // transformation: the mesh-owned shared transformation used by mfem::Coefficient::Project

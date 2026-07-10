@@ -45,7 +45,7 @@ public:
 
 private:
   /// Project the source coefficient into the quadrature function if invalidated.
-  void refresh();
+  void Refresh();
 
   /// Source coefficient the stored values are projected from.
   mfem::Coefficient & _source;

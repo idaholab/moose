@@ -6,4 +6,4 @@ values of a source coefficient at the quadrature points of an
 [MFEM QuadratureFunction](https://docs.mfem.org/html/classmfem_1_1QuadratureFunction.html). The
 declared coefficient may be used in place of the source coefficient wherever a scalar coefficient
 name is accepted, avoiding repeated evaluation of expensive source coefficients, and is
-re-projected from the source when required.
+re-projected from the source upon a schedule set by the user.

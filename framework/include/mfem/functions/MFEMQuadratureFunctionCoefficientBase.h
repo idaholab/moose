@@ -55,7 +55,7 @@ public:
 
 protected:
   /// Mark the stored values as stale following a change of time. No-op if the policy is NONE.
-  void markTimeChanged()
+  void MarkTimeChanged()
   {
     if (_update_policy != UpdatePolicy::NONE)
       _dirty = true;
@@ -65,7 +65,7 @@ protected:
   /// same quadrature rule the values in @a qf are stored on. Errors, naming the quadrature order
   /// the coefficient should use, if the rules do not match. The stored values are indexed by
   /// quadrature point, so a mismatched rule would silently read values from the wrong points.
-  void checkIntegrationRule(const mfem::QuadratureFunction & qf,
+  void CheckIntegrationRule(const mfem::QuadratureFunction & qf,
                             mfem::ElementTransformation & T,
                             const mfem::IntegrationPoint & ip) const;
 

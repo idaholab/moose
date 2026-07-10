@@ -20,7 +20,7 @@ namespace
 {
 
 bool
-samePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b)
+SamePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b)
 {
   constexpr mfem::real_t tol = 1e-12;
   auto close = [](mfem::real_t x, mfem::real_t y) { return !(std::abs(x - y) > tol); };
@@ -29,7 +29,7 @@ samePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b)
 }
 
 void
-MFEMQuadratureFunctionCoefficientBase::checkIntegrationRule(const mfem::QuadratureFunction & qf,
+MFEMQuadratureFunctionCoefficientBase::CheckIntegrationRule(const mfem::QuadratureFunction & qf,
                                                             mfem::ElementTransformation & T,
                                                             const mfem::IntegrationPoint & ip) const
 {
@@ -43,7 +43,7 @@ MFEMQuadratureFunctionCoefficientBase::checkIntegrationRule(const mfem::Quadratu
   const mfem::IntegrationRule & stored_rule = qspace.GetIntRule(el_idx);
   // Fast path: the consuming integrator's point at this index coincides with the stored rule's,
   // so the rules match.
-  if (ip.index < stored_rule.Size() && samePoint(stored_rule.IntPoint(ip.index), ip))
+  if (ip.index < stored_rule.Size() && SamePoint(stored_rule.IntPoint(ip.index), ip))
     return;
 
   // Rules differ. Recover the quadrature order the coefficient should have used by finding the
@@ -55,7 +55,7 @@ MFEMQuadratureFunctionCoefficientBase::checkIntegrationRule(const mfem::Quadratu
   for (int order = 0; order <= 2 * stored_order + 64; ++order)
   {
     const mfem::IntegrationRule & candidate = mfem::IntRules.Get(geom, order);
-    if (ip.index < candidate.Size() && samePoint(candidate.IntPoint(ip.index), ip))
+    if (ip.index < candidate.Size() && SamePoint(candidate.IntPoint(ip.index), ip))
     {
       suggested_order = order;
       break;

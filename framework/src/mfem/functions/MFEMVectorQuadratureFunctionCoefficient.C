@@ -28,7 +28,7 @@ void
 MFEMVectorQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
 {
   mfem::VectorCoefficient::SetTime(t);
-  markTimeChanged();
+  MarkTimeChanged();
 }
 
 void
@@ -37,8 +37,8 @@ MFEMVectorQuadratureFunctionCoefficient::Eval(mfem::Vector & V,
                                               const mfem::IntegrationPoint & ip)
 {
   if (_dirty)
-    refresh();
-  checkIntegrationRule(_qf, T, ip);
+    Refresh();
+  CheckIntegrationRule(_qf, T, ip);
   mfem::VectorQuadratureFunctionCoefficient::Eval(V, T, ip);
 }
 
@@ -46,12 +46,12 @@ void
 MFEMVectorQuadratureFunctionCoefficient::Project(mfem::QuadratureFunction & qf)
 {
   if (_dirty)
-    refresh();
+    Refresh();
   mfem::VectorQuadratureFunctionCoefficient::Project(qf);
 }
 
 void
-MFEMVectorQuadratureFunctionCoefficient::refresh()
+MFEMVectorQuadratureFunctionCoefficient::Refresh()
 {
   // Equivalent to _source.Project(_qf), except performed with a caller-owned element
   // transformation: the mesh-owned shared transformation used by mfem::VectorCoefficient::Project

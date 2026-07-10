@@ -175,7 +175,7 @@ public:
   /// Notify quadrature function coefficients that solution variables have changed, marking the
   /// stored values of those with a SOLVE update policy as stale so their source coefficients
   /// are re-projected on next use.
-  void invalidateQuadratureFunctions();
+  void markSolutionChanged();
 
 private:
   ScalarMap _scalar_coeffs;
