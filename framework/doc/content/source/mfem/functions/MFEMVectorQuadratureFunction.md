@@ -4,30 +4,16 @@
 
 ## Overview
 
-`MFEMVectorQuadratureFunction` declares a named vector MFEM coefficient that holds precomputed
+`MFEMVectorQuadratureFunction` is the vector-valued counterpart of
+[MFEMScalarQuadratureFunction.md]: it declares a named vector MFEM coefficient holding precomputed
 values of a source vector coefficient at the quadrature points of an
-[MFEM QuadratureSpace](https://docs.mfem.org/html/classmfem_1_1QuadratureSpace.html) of the
-requested integration rule order. It is the vector-valued counterpart of
-[MFEMScalarQuadratureFunction.md]; the vector dimension of the stored values is taken from the
-source coefficient. The declared coefficient can be used wherever a vector coefficient name is
-accepted, in place of the source coefficient.
+[MFEM QuadratureSpace](https://docs.mfem.org/html/classmfem_1_1QuadratureSpace.html), and can be
+used wherever a vector coefficient name is accepted. The source is supplied through the
+`vector_coefficient` parameter, and the vector dimension of the stored values is taken from it.
 
-As for the scalar variant, values are projected from the source coefficient lazily, and the
-`updates` parameter controls when the stored values are invalidated and re-projected:
-
-- `none`: the source never changes after initialization; it is projected exactly once.
-- `time`: the source changes with time only; it is re-projected when the simulation time is set,
-  at most once per solve.
-- `solve` (default): the source may additionally depend on solution variables; it is also
-  re-projected whenever trial variables are updated, including between nonlinear iterations.
-
-!alert warning
-The integration rule used by objects consuming this coefficient must match the quadrature rule
-implied by the `order` parameter exactly. The underlying
-[VectorQuadratureFunctionCoefficient](https://docs.mfem.org/html/classmfem_1_1VectorQuadratureFunctionCoefficient.html)
-looks values up by quadrature point index, so evaluating it with a different integration rule
-silently returns values belonging to different points. For example,
-`mfem::VectorDomainLFIntegrator` uses a rule of order $2p$ by default for elements of order $p$.
+The lazy re-projection behaviour, the `updates` parameter, and the requirement that the consuming
+integration rule match the `order` parameter (with MOOSE erroring and suggesting a matching order
+otherwise) are all identical to the scalar case; see [MFEMScalarQuadratureFunction.md] for details.
 
 ## Example Input File Syntax
 

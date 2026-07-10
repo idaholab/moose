@@ -29,14 +29,14 @@ class IntegrationPoint;
 class MFEMQuadratureFunctionCoefficientBase
 {
 public:
-  /// Policy controlling when the stored values are re-projected from the source coefficient.
-  enum class UpdatePolicy
-  {
-    NONE, ///< the source never changes after initialization; project exactly once
-    TIME, ///< the source changes with time only; re-project when the time is set
-    SOLVE ///< the source may additionally depend on solution variables; also re-project
-          ///< whenever trial variables are updated (e.g. between nonlinear iterations)
-  };
+  /**
+   *  Policy controlling when the stored values are re-projected from the source coefficient.
+   *  NONE - the source never changes after initialization; project exactly once.
+   *  TIME - the source changes with time only; re-project when the time is set.
+   *  NONLINEAR - the source may additionally depend on solution variables; also re-project
+   *  whenever trial variables are updated (i.e. on each nonlinear iteration).
+   */
+  CreateMooseEnumClass(UpdatePolicy, NONE, TIME, NONLINEAR);
 
   MFEMQuadratureFunctionCoefficientBase(UpdatePolicy update_policy, const std::string & name)
     : _update_policy(update_policy), _name(name), _dirty(true)
@@ -46,15 +46,15 @@ public:
   virtual ~MFEMQuadratureFunctionCoefficientBase() = default;
 
   /// Mark the stored values as stale following a change of solution variables, forcing the
-  /// source to be re-projected on next use. No-op unless the update policy is SOLVE.
-  void invalidate()
+  /// source to be re-projected on next use.
+  void MarkSolutionChanged()
   {
-    if (_update_policy == UpdatePolicy::SOLVE)
+    if (_update_policy == UpdatePolicy::NONLINEAR)
       _dirty = true;
   }
 
 protected:
-  /// Mark the stored values as stale following a change of time. No-op if the policy is NONE.
+  /// Mark the stored values as stale following a change of time.
   void MarkTimeChanged()
   {
     if (_update_policy != UpdatePolicy::NONE)

@@ -23,13 +23,13 @@ MFEMQuadratureFunctionBase::validParams()
       "order>=0",
       "Order of the quadrature rule the projected values are stored on. This must match the "
       "integration rule used by the objects consuming this coefficient.");
-  MooseEnum updates("none time solve", "solve");
+  MooseEnum updates(MFEMQuadratureFunctionCoefficientBase::getUpdatePolicyOptions(), "NONLINEAR");
   params.addParam<MooseEnum>(
       "updates",
       updates,
       "When the stored values are re-projected from the source coefficient: 'none' projects "
-      "exactly once, 'time' re-projects when the simulation time changes, 'solve' additionally "
-      "re-projects whenever solution variables change (e.g. between nonlinear iterations).");
+      "exactly once, 'time' re-projects when the simulation time changes, 'nonlinear' additionally "
+      "re-projects whenever solution variables change (i.e. on each nonlinear iteration).");
   return params;
 }
 
@@ -42,12 +42,8 @@ MFEMQuadratureFunctionBase::MFEMQuadratureFunctionBase(const InputParameters & p
 MFEMQuadratureFunctionCoefficientBase::UpdatePolicy
 MFEMQuadratureFunctionBase::updatePolicy() const
 {
-  const auto & updates = getParam<MooseEnum>("updates");
-  if (updates == "none")
-    return MFEMQuadratureFunctionCoefficientBase::UpdatePolicy::NONE;
-  if (updates == "time")
-    return MFEMQuadratureFunctionCoefficientBase::UpdatePolicy::TIME;
-  return MFEMQuadratureFunctionCoefficientBase::UpdatePolicy::SOLVE;
+  return getParam<MooseEnum>("updates")
+      .getEnum<MFEMQuadratureFunctionCoefficientBase::UpdatePolicy>();
 }
 
 #endif

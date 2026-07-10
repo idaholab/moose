@@ -28,7 +28,7 @@ void
 MFEMScalarQuadratureFunctionCoefficient::SetTime(mfem::real_t t)
 {
   mfem::Coefficient::SetTime(t);
-  markTimeChanged();
+  MarkTimeChanged();
 }
 
 mfem::real_t

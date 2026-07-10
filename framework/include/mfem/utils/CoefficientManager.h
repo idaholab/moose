@@ -173,7 +173,7 @@ public:
   void setTime(const mfem::real_t time);
 
   /// Notify quadrature function coefficients that solution variables have changed, marking the
-  /// stored values of those with a SOLVE update policy as stale so their source coefficients
+  /// stored values of those with a NONLINEAR update policy as stale so their source coefficients
   /// are re-projected on next use.
   void markSolutionChanged();
 

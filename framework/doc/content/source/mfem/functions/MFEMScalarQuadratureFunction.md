@@ -12,23 +12,22 @@ including parsed functions and (grid)functions of problem variables. The declare
 be used wherever a scalar coefficient name is accepted, in place of the source coefficient.
 
 Values are projected from the source coefficient lazily, on the first evaluation of the declared
-coefficient after its stored values have been invalidated. The `updates` parameter controls when
-invalidation occurs:
+coefficient after its stored values have been marked as changed. The `updates` parameter controls when
+this occurs:
 
 - `none`: the source never changes after initialization; it is projected exactly once.
 - `time`: the source changes with time only; it is re-projected when the simulation time is set,
-  at most once per solve.
-- `solve` (default): the source may additionally depend on solution variables; it is also
-  re-projected whenever trial variables are updated, including between nonlinear iterations.
+  at most once per time step.
+- `nonlinear` (default): the source may additionally depend on solution variables; it is also
+  re-projected whenever trial variables are updated, i.e. on each nonlinear iteration.
 
 !alert warning
 The integration rule used by objects consuming this coefficient must match the quadrature rule
 implied by the `order` parameter exactly. The underlying
 [QuadratureFunctionCoefficient](https://docs.mfem.org/html/classmfem_1_1QuadratureFunctionCoefficient.html)
-looks values up by quadrature point index, so evaluating it with a different integration rule
-silently returns values belonging to different points. For example, `mfem::DomainLFIntegrator`
+looks values up by quadrature point index, so evaluating it with a different integration rule returns values belonging to different points. For example, `mfem::DomainLFIntegrator`
 uses a rule of order $2p$ by default for elements of order $p$, whereas
-`mfem::DiffusionIntegrator` uses order $2p + d - 1$ on tensor-product elements of dimension $d$.
+`mfem::DiffusionIntegrator` uses order $2p + d - 1$ on tensor-product elements of dimension $d$. MOOSE will error out if the integration rules between the `MFEMScalarQuadratureFunction` and the selected kernel are not compatible, and suggest an order which could make them match.
 
 ## Example Input File Syntax
 

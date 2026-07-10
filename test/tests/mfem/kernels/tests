@@ -236,15 +236,13 @@
     recover = false
   []
   [MFEMGravityQuadratureFunction]
-    type = XMLDiff
+    type = CSVDiff
     input = gravity_qf.i
-    xmldiff = 'OutputData/GravityQF/Run0/Run0.pvd
-                OutputData/GravityQF/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/GravityQF.csv'
     design = 'MFEMVectorQuadratureFunction.md'
     requirement = 'The system shall have the ability to precompute a vector coefficient at quadrature points and reuse the stored values in place of the original coefficient.'
-    capabilities = 'mfem & platform=linux'
-    compute_devices = 'cpu' # schemadiff with cuda
-    max_parallel = 1 # schemadiff with multiple ranks
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     recover = false
   []
   [MFEMIrrotational]

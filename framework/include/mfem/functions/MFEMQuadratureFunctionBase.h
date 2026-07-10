@@ -31,7 +31,8 @@ public:
   MFEMQuadratureFunctionBase(const InputParameters & parameters);
 
 protected:
-  /// Return the update policy selected by the 'updates' input parameter.
+  /// Return the update policy selected by the 'updates' input parameter, to hand to the
+  /// coefficient (which is the sole owner of the resulting stored value).
   MFEMQuadratureFunctionCoefficientBase::UpdatePolicy updatePolicy() const;
 
   /// Quadrature space defining the points at which the source coefficient values are stored.
