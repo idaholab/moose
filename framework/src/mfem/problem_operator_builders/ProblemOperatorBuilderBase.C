@@ -27,6 +27,8 @@ Moose::MFEM::ProblemOperatorBuilderBase::validParams()
 
 Moose::MFEM::ProblemOperatorBuilderBase::ProblemOperatorBuilderBase(
     const InputParameters & parameters)
-  : MFEMObject(parameters) {}
+  : MFEMObject(parameters)
+{
+}
 
 #endif
