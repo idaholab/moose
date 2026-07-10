@@ -140,7 +140,6 @@ registerMooseObject("MooseApp", ProblemOperatorBuilderCustomDummy);
  *****************************************************************/
 // The unit test
 // itself
-/*
 class MFEMCustomProbOperatorTest : public MFEMObjectUnitTest
 {
 public:
@@ -149,8 +148,10 @@ public:
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> probOp;
 
   // The test constructor
-  MFEMProbOperatorTest() : MFEMObjectUnitTest("MooseUnitApp")
+  MFEMCustomProbOperatorTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
+    // Add a mesh
+
     // Add an FE-space
     InputParameters fe_params = _factory.getValidParams("MFEMScalarFESpace");
     fe_params.set<MooseEnum>("fec_type") = "H1";
@@ -191,9 +192,66 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
   // Solver problem using the MOOSE-MFEM route
   probOp->Solve();
 
-  // Examine test results
-  EXPECT_EQ( probOp->GetDumVar(), 10);
-//  EXPECT_NEAR(u1.Norml2(), 0, 1e-5);
+  /**
+   * Solve the equation using
+   * the standard MFEM route
+   */
+   // Set the Mesh
+   mfem::Mesh smesh("../test/tests/mfem/mesh/star.mesh");
+   mfem::ParMesh pmesh(MPI_COMM_WORLD, smesh);
+   smesh.Clear(); // the serial mesh is no longer needed
+   pmesh.UniformRefinement();
+
+   // Set FE-spaces
+   mfem::H1_FECollection fec0(1, pmesh.Dimension());
+   mfem::ParFiniteElementSpace fespace0(&pmesh, &fec0);
+
+   // Dirchelet boundary condition
+   mfem::Array<int> boundary_dofs0;
+   fespace0.GetBoundaryTrueDofs(boundary_dofs0);
+   mfem::ParGridFunction xFunc(&fespace0);
+   xFunc = 0.0;
+
+   // Setup the linear forms
+   mfem::ConstantCoefficient One(1.0);
+   mfem::ParLinearForm bForm(&fespace0);
+   bForm.AddDomainIntegrator(new mfem::DomainLFIntegrator(One));
+   bForm.Assemble();
+
+   // Setup the bilinear forms
+   mfem::ParBilinearForm aForm(&fespace0);
+   aForm.AddDomainIntegrator(new mfem::DiffusionIntegrator);
+   aForm.Assemble();
+
+   // Form the linear system
+   mfem::HypreParMatrix Amat;
+   mfem::Vector Bvec, Xvec;
+   aForm.FormLinearSystem(boundary_dofs0, xFunc, bForm, Amat, Xvec, Bvec);
+
+   // Set the linear solver and solve
+   mfem::MUMPSSolver SolverDir(MPI_COMM_WORLD);
+   SolverDir.SetOperator(Amat);
+   SolverDir.SetPrintLevel(0);
+
+   // Recover solutions
+   aForm.RecoverFEMSolution(Xvec, bForm, xFunc);
+
+  /**
+   * Examine test results
+   */
+  // Check whether the Solver ran with a dummy var
+//  EXPECT_EQ(10, 10);
+
+  // Check number of DOFs in the mesh
+//  EXPECT_EQ(10, 10);
+
+  // Check number of DOFs on the boundary
+//  EXPECT_EQ(10, 10);
+
+  // Check the error norm of the solution
+  const std::string gFuncName="var0";
+  auto gfunc = _mfem_problem->getProblemData().gridfunctions.GetShared(gFuncName);
+  xFunc -= *gfunc;
+  EXPECT_NEAR(xFunc.Norml2(), 0, 1e-5);
 };
-*/
 #endif
