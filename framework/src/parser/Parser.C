@@ -427,8 +427,8 @@ Parser::parse()
       if (!node)
       {
         errors.emplace_back("Cannot remove parameter or block '" + path +
-                                 "' via --remove: no such path exists in the parsed input.",
-                             &getRoot());
+                                "' via --remove: no such path exists in the parsed input.",
+                            &getRoot());
         continue;
       }
       node->remove();
