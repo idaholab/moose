@@ -180,4 +180,14 @@ if __name__ == "__main__":
     parser.add_option("-f", "--force", action="store_true", dest="force", default=False)
 
     global_options, args = parser.parse_args()
-    fixupHeader()
+    if args:
+        # Process only the files passed on the command line (e.g. from a
+        # pre-commit hook); otherwise fall back to walking the tree.
+        for filename in args:
+            ext = os.path.splitext(filename)[1]
+            if ext in (".C", ".h") and not global_options.python_only:
+                checkAndUpdateCPlusPlus(os.path.abspath(filename))
+            elif ext == ".py" and not global_options.cxx_only:
+                checkAndUpdatePython(os.path.abspath(filename))
+    else:
+        fixupHeader()
