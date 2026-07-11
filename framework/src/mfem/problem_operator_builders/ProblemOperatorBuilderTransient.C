@@ -29,7 +29,9 @@ Moose::MFEM::ProblemOperatorBuilderTransient::validParams()
 
 Moose::MFEM::ProblemOperatorBuilderTransient::ProblemOperatorBuilderTransient(
     const InputParameters & parameters)
-  : ProblemOperatorBuilderBase(parameters) {};
+  : ProblemOperatorBuilderBase(parameters)
+{
+}
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
 Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem & mfemProb)
