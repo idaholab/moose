@@ -282,6 +282,13 @@ Parser::setCommandLineParams(const std::vector<std::string> & params)
   _command_line_params = params;
 }
 
+void
+Parser::setRemoveParams(const std::vector<std::string> & paths)
+{
+  mooseAssert(!_remove_params, "Already set");
+  _remove_params = paths;
+}
+
 const std::string &
 Parser::getLastInputFileName() const
 {
@@ -405,6 +412,28 @@ Parser::parse()
   }
 
   std::vector<hit::ErrorMessage> errors;
+
+  // Remove any parameters/blocks that were explicitly requested to be removed
+  // (currently only settable via the "--remove" command line option). This is
+  // done after merging in command line HIT arguments so that a parameter that
+  // was only set via the command line can also be removed, and so that a
+  // parameter set in the input file can be removed regardless of whether it
+  // was also overridden on the command line.
+  if (_remove_params)
+  {
+    for (const auto & path : *_remove_params)
+    {
+      auto node = getRoot().find(path);
+      if (!node)
+      {
+        errors.emplace_back("Cannot remove parameter or block '" + path +
+                                 "' via --remove: no such path exists in the parsed input.",
+                             &getRoot());
+        continue;
+      }
+      node->remove();
+    }
+  }
 
   // expand ${bla} parameter values and mark/include variables
   // used in expansion as "used" (obtained later by the Builder
