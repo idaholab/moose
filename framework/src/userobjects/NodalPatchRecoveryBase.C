@@ -47,7 +47,10 @@ NodalPatchRecoveryBase::validParams()
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::ALGEBRAIC,
                                 [](const InputParameters &, InputParameters & rm_params)
-                                { rm_params.set<unsigned short>("layers") = 2; });
+                                {
+                                  rm_params.set<bool>("use_point_neighbors") = true;
+                                  rm_params.set<unsigned short>("layers") = 1;
+                                });
 
   params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
