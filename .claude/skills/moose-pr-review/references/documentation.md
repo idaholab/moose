@@ -21,7 +21,7 @@ check both:
    - `framework/src/kernels/Diffusion.C` -> `framework/doc/content/source/kernels/Diffusion.md`
    - `modules/<mod>/src/.../Foo.C` -> `modules/<mod>/doc/content/source/.../Foo.md`
 
-   A minimal stub uses MooseDocs auto-generation markers so the content stays in sync with code:
+   A markdown page should use MooseDocs auto-generation markers so the content stays in sync with code:
 
    ```markdown
    # ClassName
