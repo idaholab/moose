@@ -59,11 +59,11 @@ sub-block; the details read as a continuation of the requirement sentence.
 
 - `RunApp` - the input runs to completion (smoke/execution test); can check expected console
   output with `expect_out`.
-- `Exodiff` - compares Exodus mesh/field output to a gold file (the workhorse for physics).
+- `Exodiff` - compares Exodus mesh/field output to a gold file.
 - `CSVDiff` - compares CSV postprocessor/reporter output to gold.
 - `JSONDiff` - compares JSON output to gold.
 - `RunException` - asserts the app errors as intended; pair with `expect_err = '...'`. **Every
-  user-facing error path (`mooseError`/`paramError`) should have one of these.**
+  user-facing error path (`mooseError`/`paramError`) should have one of these or a unit test.**
 - `PythonUnitTest` - runs a Python `unittest` (for Python contributions and tooling).
 
 ## What to verify in review

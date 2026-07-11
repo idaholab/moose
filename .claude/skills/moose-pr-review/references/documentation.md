@@ -16,7 +16,7 @@ check both:
    (`addRequiredParam`/`addParam`/`addRequiredCoupledVar`/...) should also pass a clear
    documentation string - these become the user-facing parameter help.
 
-2. **A markdown stub page** whose path mirrors the source path. The pattern is
+2. **A markdown page** whose path mirrors the source path. The pattern is
    `src/<area>/<ClassName>.C` -> `<app>/doc/content/source/<area>/<ClassName>.md`. Examples:
    - `framework/src/kernels/Diffusion.C` -> `framework/doc/content/source/kernels/Diffusion.md`
    - `modules/<mod>/src/.../Foo.C` -> `modules/<mod>/doc/content/source/.../Foo.md`
@@ -25,8 +25,6 @@ check both:
 
    ```markdown
    # ClassName
-
-   !syntax description /System/ClassName
 
    ## Overview
 
@@ -39,12 +37,11 @@ check both:
    !syntax children /System/ClassName
    ```
 
-   - `!syntax description` pulls the `addClassDescription` text.
    - `!syntax parameters` auto-generates the parameter table.
    - `!syntax inputs` / `!syntax children` list where the object is used and its sub-blocks.
 
    A page that is only the auto-markers with no `## Overview` prose is a reason to request more
-   - the description should clarify anything unusual or non-obvious, not just regenerate the
+   - the overview body should clarify anything unusual or non-obvious, not just regenerate the
    parameter table.
 
 ## Modified objects
@@ -54,7 +51,7 @@ check both:
 
 ## Inline (Doxygen) documentation
 
-- Not strictly required, but request it when code is unclear. In-source docs should be
+- Request it when the class/class-member use is non-obvious from the name alone. In-source docs should be
   Doxygen-formatted and aimed at the developer. When in doubt, ask for more.
 
 ## Newsletter (for notable changes)

@@ -23,7 +23,7 @@ Organized highest-value first.
 
 ## Naming and files
 - `ClassName` - CamelCase. The `.h` and `.C` filenames must match the class name exactly.
-- `methodName()` - camelCase, leading lowercase.
+- `methodName()` - camelCase, except when developing in the `Moose::MFEM` namespace in which case PascalCase should be used except for `validParams` and overridden methods from outside the `Moose::MFEM` namespace
 - `_member_variable` - leading underscore, all lowercase, underscores between words.
 - `local_variable` - lowercase, starts with a letter, underscores between words.
 - One class per `.h`/`.C` pair (helper/non-exposed classes are the exception).
@@ -32,9 +32,9 @@ Organized highest-value first.
 ## Prefer modern C++ over C constructs
 - `nullptr` (not `NULL`/`0`); `static_cast`/`const_cast`/`reinterpret_cast` (not C-style casts).
 - `constexpr`/`const` over `#define` for constants; `enum class` over plain `enum`.
-- `std::array`/`std::vector`/`std::span` over raw arrays + pointer arithmetic.
-- RAII (`std::unique_ptr`, `std::lock_guard`) over manual resource management.
-- `<algorithm>`/`<numeric>` over hand-written loops where it reads better.
+- `std::array`/`std::vector`/`std::span` over raw arrays + pointer arithmetic except when writing device code which the `std` does not yet support.
+- RAII (`std::unique_ptr`, `std::lock_guard`) over manual resource management except when writing device code which the `std` does not yet support.
+- `<algorithm>`/`<numeric>` over hand-written loops where it reads better except when writing device code which the `std` does not yet support.
 
 ## Header hygiene and includes
 - Forward-declare in headers where possible; include full definitions in the `.C`.
@@ -63,11 +63,11 @@ Organized highest-value first.
 - Return pointers for pointer-stored objects, references for reference-stored objects.
 - Every class with virtual methods has a `virtual` destructor.
 - Use `override` on overridden virtuals; do not also write `virtual` (redundant).
-- `std::make_shared<T>()` / `std::make_unique<T>()` for new shared/unique allocations.
+- `std::make_shared<T>()` / `std::make_unique<T>()` for new shared/unique allocations in host memory.
 - Use `std::move()` for efficiency where applicable.
 - All function definitions live in `.C` files (exceptions: inline-for-speed and templates).
 - Avoid global variables.
-- Never rely on `operator[]` accidental insertion into a `std::map` on the right-hand side
+- Only use `operator[]` for write purposes for a `std::map`. If the intention is reading, use `libmesh_map_find` instead
   unless it's proven it can't fail.
 
 ## Python (when `.py` files change)

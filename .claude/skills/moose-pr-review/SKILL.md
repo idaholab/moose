@@ -34,7 +34,7 @@ each instance:
 
 - C++ formatting: `git clang-format <base>` (uses `.clang-format`)
 - Python formatting: `black .` (uses `pyproject.toml`)
-- Trailing whitespace / tabs, and the "every commit references an issue" check
+- No trailing whitespace / tabs, and the "every commit references an issue" check
 
 Focus human/AI review on the semantic standards CI can't see: naming, const-correctness,
 access control, API design, C-vs-C++ construct choices, tests, and documentation.
@@ -110,7 +110,7 @@ changed:
 ## Step 3 - Review across the MOOSE dimensions
 
 Work top-down: assess the high-level design first (a sound design with rough edges is fixable;
-a wrong design is not), then the details. For each dimension, the highest-value checks are
+a wrong design may not be), then the details. For each dimension, the highest-value checks are
 summarized here; the reference files hold the full checklists - read the relevant one when the
 diff touches that area.
 
@@ -125,7 +125,8 @@ diff touches that area.
 **B. Reuse and duplication (CodeGraph-driven - vital)** -> read `references/codegraph.md`
 - For every new function, class, or method the PR introduces, ask CodeGraph whether MOOSE
   already provides it. Reinventing an existing utility, algorithm, or object is one of the most
-  common and most important things to catch - it bloats the codebase and diverges behavior.
+  common and most important things to catch - it bloats the codebase, diverges behavior, and
+  increases maintenance costs.
 - Workflow: extract the new symbols from the diff, then `codegraph_search` them by name and
   `codegraph_explore` the concept to surface existing equivalents. If a near-duplicate exists,
   flag it as required and point the author to reuse or extend it (a short extension/bugfix of
@@ -149,7 +150,7 @@ diff touches that area.
 **E. Documentation** -> read `references/documentation.md`
 - Each new MooseObject needs `addClassDescription(...)` in `validParams()` **and** a markdown
   stub page mirroring the source path (e.g. `src/kernels/Foo.C` ->
-  `framework/doc/content/source/kernels/Foo.md`). A missing stub page fails the docs build.
+  `doc/content/source/kernels/Foo.md`). A missing stub page fails the docs build.
 - Significant changes warrant a newsletter entry (current month, e.g.
   `modules/doc/content/newsletter/2026/2026_06.md`).
 
@@ -157,7 +158,7 @@ diff touches that area.
 - For logic bugs, edge cases, and efficiency, run the built-in `/code-review` (or recommend it).
 - For anything security-sensitive (parsing untrusted input, file/system access, memory safety),
   run or recommend `/security-review`. Memory-management-heavy code may warrant a valgrind
-  testing recipe; loose tolerances often break parallel testing - mention these when relevant.
+  testing recipe; loose solve tolerances often break parallel testing - mention these when relevant.
 
 ## Step 4 - Write the report
 
