@@ -41,27 +41,24 @@ access control, API design, C-vs-C++ construct choices, tests, and documentation
 
 ## Step 0 - Preflight: CodeGraph is required (do not skip)
 
-This review depends on CodeGraph to detect code that reinvents functionality MOOSE already has.
-That is the single most valuable thing this review catches against MOOSE's "use existing
-functionality, don't reimplement it" rule (AGENTS.md, Simplicity First), and it is something
-grep cannot do reliably across a 100k-symbol codebase. CodeGraph is therefore a hard
-prerequisite, not an optimization.
+This review depends on CodeGraph to detect code that reinvents functionality MOOSE already has -
+the single most valuable thing this review catches against MOOSE's "use existing functionality,
+don't reimplement it" rule (AGENTS.md, Simplicity First), and something grep cannot do reliably
+across a 100k-symbol codebase. For review, CodeGraph is a hard prerequisite, not an optimization.
 
 Before anything else, confirm the index exists: check for a `.codegraph/` directory at the
-repository root (or run `codegraph status`).
-
-If it is missing, **stop and surface it to the user - do not fall back to grep and proceed.**
-Tell them CodeGraph is required for a MOOSE review and how to set it up:
+repository root (or run `codegraph status`). If it is missing, **stop and surface it to the user -
+do not fall back to grep and proceed** - and tell them how to set it up:
 
 ```bash
 codegraph install   # one-time: register the CodeGraph MCP server with this agent
 codegraph init      # build the index for this repo (run from the repo root; takes a few minutes)
 ```
 
-Only continue once the index is present. Throughout the review, prefer the CodeGraph MCP tools
-(`codegraph_explore`, `codegraph_search`, `codegraph_node`, `codegraph_callers`) over grep/Read
-whenever the question is "does this already exist?", "what calls this?", or "what does changing
-this affect?" See `references/codegraph.md` for the exact query patterns.
+Only continue once the index is present. For how to use CodeGraph - the query patterns, the
+reuse-detection workflow, and blast-radius checks - use the `moose-codegraph` skill
+(`.claude/skills/moose-codegraph/SKILL.md`). This review layer adds the hard requirement above
+and the review-specific framing below rather than repeating those mechanics.
 
 ## Step 1 - Identify what you are reviewing
 
@@ -124,17 +121,14 @@ diff touches that area.
   expensive because users depend on them.
 - Will the code be understandable outside the PR context, from comments and docs alone?
 
-**B. Reuse and duplication (CodeGraph-driven - vital)** -> read `references/codegraph.md`
-- For every new function, class, or method the PR introduces, ask CodeGraph whether MOOSE
-  already provides it. Reinventing an existing utility, algorithm, or object is one of the most
-  common and most important things to catch - it bloats the codebase, diverges behavior, and
-  increases maintenance costs.
-- Workflow: extract the new symbols from the diff, then `codegraph_search` them by name and
-  `codegraph_explore` the concept to surface existing equivalents. If a near-duplicate exists,
-  flag it as required and point the author to reuse or extend it (a short extension/bugfix of
-  existing code is preferred over a long reimplementation).
-- Also use `codegraph_callers` / `impact` on changed existing symbols to judge blast radius
-  (this feeds the scope/scrutiny assessment in A) and to find call sites the PR should update.
+**B. Reuse and duplication (CodeGraph-driven - vital)** -> use the `moose-codegraph` skill
+- For every new function, class, or method the PR introduces, run the reuse-detection workflow
+  from the `moose-codegraph` skill to ask whether MOOSE already provides it. Reinventing an
+  existing utility, algorithm, or object is one of the most common and most important things a
+  review catches - it bloats the codebase, diverges behavior, and increases maintenance costs.
+  If a near-duplicate exists, flag it as **required** and point the author to reuse or extend it.
+- Also run `codegraph_callers` / `impact` on changed existing symbols to judge blast radius (this
+  feeds the scope/scrutiny assessment in A) and to find call sites the PR should update.
 
 **C. MOOSE Code Standard** -> read `references/code-standard.md`
 - Top semantic checks CI misses: strict **const-correctness** (logically-const-but-unmarked is
