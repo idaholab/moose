@@ -166,7 +166,7 @@ protected:
   // Other homogenization info
   MultiMooseEnum _constraint_types;
   std::vector<FunctionName> _targets;
-  // Use the off diagonal scalar jacobian for the homogenization system
+  /// Whether to use the off diagonal scalar jacobian for the homogenization system
   const bool _lk_h_off_jac;
 };
 

@@ -60,8 +60,8 @@
                "constraint_types='strain strain strain strain strain strain strain strain strain' "
                "targets='strain11 strain21 strain31 strain12 strain22 strain32 strain13 strain23 "
                "strain33'"
-    requirement = "Homogenization with strain constraints in 3D using large kinematics should work "
-                  "without off-diagonal Jacobians from the constraints"
+    requirement = "Homogenization with strain constraints in 3D using large kinematics should be able to solve "
+                  "without the off-diagonal contributions to the Jacobian from the constraints"
     capabilities = 'method!=dbg'
   []
   [3d-stress]
