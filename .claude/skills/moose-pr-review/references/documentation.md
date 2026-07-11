@@ -21,28 +21,12 @@ check both:
    - `framework/src/kernels/Diffusion.C` -> `framework/doc/content/source/kernels/Diffusion.md`
    - `modules/<mod>/src/.../Foo.C` -> `modules/<mod>/doc/content/source/.../Foo.md`
 
-   A markdown page should use MooseDocs auto-generation markers so the content stays in sync with code:
-
-   ```markdown
-   # ClassName
-
-   ## Overview
-
-   <prose: what it does, when to use it, the math/algorithm if relevant>
-
-   !syntax parameters /System/ClassName
-
-   !syntax inputs /System/ClassName
-
-   !syntax children /System/ClassName
-   ```
-
-   - `!syntax parameters` auto-generates the parameter table.
-   - `!syntax inputs` / `!syntax children` list where the object is used and its sub-blocks.
-
-   A page that is only the auto-markers with no `## Overview` prose is a reason to request more
-   - the overview body should clarify anything unusual or non-obvious, not just regenerate the
-   parameter table.
+   Check the page exists at that path and carries real prose - what the object does, when to use
+   it, the math/algorithm if relevant - not just the MooseDocs auto-generation markers
+   (`!syntax parameters` / `!syntax inputs` / `!syntax children`). A page that is only the markers
+   is a reason to request more: they regenerate the parameter table but explain nothing unusual or
+   non-obvious. How to write the page itself (the full marker set, listings, equations, linking
+   conventions) is an authoring concern, out of scope for review.
 
 ## Modified objects
 

@@ -49,7 +49,7 @@ sub-block; the details read as a continuation of the requirement sentence.
       type = 'JSONDiff'
       input = 'file_positions.i'
       jsondiff = 'file_positions_out.json'
-      detail = 'a text file,'
+      detail = 'or a text file.'
     []
   []
 []
@@ -57,8 +57,9 @@ sub-block; the details read as a continuation of the requirement sentence.
 
 ## Common test types (pick the right one for what's being verified)
 
-- `RunApp` - the input runs to completion (smoke/execution test); can check expected console
-  output with `expect_out`.
+- `RunApp` - the input runs to completion (smoke/execution test); can check console output with
+  `expect_out`. Discouraged beyond a pure "does it run" smoke check - if the output is what
+  matters, a diff test (`CSVDiff`/`Exodiff`/`JSONDiff`) or a C++ unit test is more robust.
 - `Exodiff` - compares Exodus mesh/field output to a gold file.
 - `CSVDiff` - compares CSV postprocessor/reporter output to gold.
 - `JSONDiff` - compares JSON output to gold.

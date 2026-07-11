@@ -22,7 +22,7 @@ Organized highest-value first.
 - Prefer composition over inheritance when behavior can be delegated.
 
 ## Naming and files
-- `ClassName` - CamelCase. The `.h` and `.C` filenames must match the class name exactly.
+- `ClassName` - PascalCase. The `.h` and `.C` filenames must match the class name exactly.
 - `methodName()` - camelCase, except when developing in the `Moose::MFEM` namespace in which case PascalCase should be used except for `validParams` and overridden methods from outside the `Moose::MFEM` namespace
 - `_member_variable` - leading underscore, all lowercase, underscores between words.
 - `local_variable` - lowercase, starts with a letter, underscores between words.
@@ -38,7 +38,6 @@ Organized highest-value first.
 
 ## Header hygiene and includes
 - Forward-declare in headers where possible; include full definitions in the `.C`.
-  (Exception: when forcing end users to include multiple files to complete child definitions.)
 - Only include what's necessary in headers.
 - Non-system includes use quotes with a single space: `#include "Foo.h"`; system includes use
   angle brackets: `#include <vector>`.
@@ -49,8 +48,11 @@ Organized highest-value first.
   cross-cutting). When unsure, default to free function or static member for namespacing.
 - TU-local helper free functions go in an anonymous namespace.
 - Lambdas: list captures explicitly rather than blanket `[=]`/`[&]` where practical.
-- Avoid signed/unsigned mismatch in index loops; use `make_range(n)`, `make_range(n1, n2)`, or
-  `index_range(v)` from `libmesh/int_range.h` instead of `for (auto i = 0; i < v.size(); ++i)`.
+- Avoid signed/unsigned mismatch in index loops; prefer `make_range(n)`, `make_range(n1, n2)`,
+  or `index_range(v)` from `libmesh/int_range.h` over a raw index loop. Where `make_range`/
+  `index_range` are unavailable (e.g. device code), match the container's index type -
+  `for (std::size_t i = 0; i < v.size(); ++i)` - rather than `int`, which trips the
+  signed/unsigned comparison.
 - Prefer structured bindings when unpacking tuples/pairs/aggregates, especially in loops.
 - Prefer `using` over `typedef` for aliases.
 
@@ -60,7 +62,9 @@ Organized highest-value first.
 
 ## The Code Commandments (frequent review catches)
 - Use references instead of pointers when the referent outlives the user.
-- Return pointers for pointer-stored objects, references for reference-stored objects.
+- When the object is guaranteed to exist at the call site, return a reference - assert the
+  underlying pointer is valid (`mooseAssert`) and dereference. Return a pointer only when
+  absence is a legitimate state the caller must check for.
 - Every class with virtual methods has a `virtual` destructor.
 - Use `override` on overridden virtuals; do not also write `virtual` (redundant).
 - `std::make_shared<T>()` / `std::make_unique<T>()` for new shared/unique allocations in host memory.

@@ -1,9 +1,9 @@
 # CodeGraph for MOOSE Review
 
-CodeGraph is a pre-built knowledge graph of every symbol, edge, and file in MOOSE (~118k nodes,
-~286k edges). It answers "does this already exist?" and "what does this touch?" in one
-sub-second call, which is exactly what a reviewer needs and what grep cannot do reliably at this
-scale. Using it well is the difference between catching a reinvented utility and merging it.
+CodeGraph is a pre-built knowledge graph of every symbol, edge, and file in MOOSE. It answers
+"does this already exist?" and "what does this touch?" in one sub-second call, which is exactly
+what a reviewer needs and what grep cannot do reliably at this scale. Using it well is the
+difference between catching a reinvented utility and merging it.
 
 Prefer the MCP tools. If they aren't loaded, the shell equivalents print the same output:
 `codegraph explore "..."`, `codegraph node <name>`, `codegraph query <name>`,

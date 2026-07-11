@@ -80,9 +80,11 @@ author's stated Reason / Design / Impact (the PR template fields).
 **A local branch** (the default when no PR is named):
 
 ```bash
-# Review the branch against the point it was cut from. <base> is the integration branch the
-# work branched from (its upstream tracking branch, e.g. origin/devel). Use three dots so the
-# diff shows only what this branch added, regardless of how far the integration branch moved.
+# Review the branch against the point it was cut from. <base> is the integration branch this
+# work will merge into - for MOOSE that is `next` (use `origin/next`). This is NOT the branch's
+# upstream tracking branch: `git rev-parse @{u}` resolves to this same branch's remote copy
+# (e.g. origin/<branch>), not the base. Use three dots so the diff shows only what this branch
+# added, regardless of how far the integration branch moved.
 git diff <base>...HEAD              # the changes under review
 git log <base>..HEAD --format='%h %s'   # the commits under review - read them for intent and scope
 ```
