@@ -74,6 +74,9 @@ sub-block; the details read as a continuation of the requirement sentence.
   coverage number; a reviewer may waive it for genuinely unreachable branches, but should say so.
 - **The three fields are present and good.** Missing `requirement`/`design`/`issues` is a
   required finding. Is the `requirement` actually unambiguous, or vague ("works correctly")?
+  Check the assembled `tests` file at the PR head, not just the added diff lines: `design` and
+  `issues` are usually set once at the `[Tests]` block top and inherited, so a diff-only read
+  raises false "missing field" findings on files the PR only appends new tests to.
 - **Gold files exist** for diff-based tests and were added in the PR (not stale/missing).
 - **Right test type** for what's being checked (e.g. don't use `RunApp` where the numeric
   result is the point - use `Exodiff`/`CSVDiff`).

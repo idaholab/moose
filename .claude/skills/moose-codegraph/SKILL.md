@@ -65,6 +65,11 @@ Common MOOSE reinvention hot-spots: math/tensor helpers (often already in `libMe
 `MetaPhysicL`, or `MathUtils`), string/parsing utilities (`MooseUtils`), mesh/geometry queries,
 and "generic" materials/functors that mirror an existing templated one.
 
+Note: the default `codegraph.json` excludes the `libmesh` and `contrib` trees (so `MetaPhysicL`
+too) to keep the index small and fast, so CodeGraph will not surface a helper reinvented from
+those. For the libMesh/MetaPhysicL hot-spots, fall back to grep or prior knowledge - or index
+those trees explicitly when the check matters for a given PR.
+
 ## Other uses
 
 - **Blast radius before you change a shared symbol.** `codegraph_callers` / `codegraph impact`

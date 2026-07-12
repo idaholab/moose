@@ -261,9 +261,12 @@ gh api repos/{owner}/{repo}/pulls/<num>/reviews --method POST --input review.jso
 
 Rules for `comments[]`:
 - `line` is the line on the NEW side (`side: "RIGHT"`) and must fall inside a changed hunk - for
-  entirely new files every added line qualifies. Get exact numbers from the PR head, **not** the
-  diff's own line numbers (e.g. `git fetch origin pull/<num>/head` then
-  `git show "FETCH_HEAD:<path>" | grep -n <pattern>`).
+  entirely new files every added line qualifies. For **modified** files, confirm the target line
+  was actually added or changed by the PR (a `+` line in the diff, or context inside a hunk); an
+  unchanged line - even one right next to the change - is rejected. Get exact numbers from the PR
+  head, **not** the diff's own line numbers (e.g. `git fetch origin pull/<num>/head` then
+  `git show "FETCH_HEAD:<path>" | grep -n <pattern>`), and verify hunk membership before posting -
+  the atomic POST fails entirely on one bad anchor.
 - For a multi-line range set `start_line` + `line`.
 - A **suggestion** block must reproduce the replacement for the commented line(s) verbatim -
   GitHub overwrites them with the block's contents, so match indentation exactly.
