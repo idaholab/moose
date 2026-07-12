@@ -346,3 +346,8 @@ binaryoutput
 # Nsight Systems profiling output
 *.nsys-rep
 *.sqlite
+
+# CodeGraph (see the moose-codegraph / moose-pr-review skills). The index is a
+# large, machine-local artifact; only the checked-in config is tracked.
+.codegraph/
+!codegraph.json
