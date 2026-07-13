@@ -139,7 +139,10 @@ SideSetsFromBoundingBoxGenerator::generate()
           const Point face_normal = face_normals[0];
 
           if (_check_neighbor_subdomains && elem->neighbor_ptr(side) == remote_elem)
+          {
+            libmesh_assert(elem->processor_id() != mesh->processor_id());
             queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
+          }
           else if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
             add_side(elem, side);
         }
