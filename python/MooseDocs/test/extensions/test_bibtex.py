@@ -97,11 +97,15 @@ class TestBibtexTitleMath(MooseDocsTestCase):
     def testTitleMathHTML(self):
         _, res = self.execute(self.TEXT)
         text = res.write()
-        self.assertIn("Behavior of UO", text)
-        self.assertIn("fuel at $5", text)
+        self.assertIn("Gr", text)
+        self.assertIn("\u00fc", text)
+        self.assertIn("&amp; UO", text)
+        self.assertIn("at $5", text)
         self.assertIn('katex.render("_2"', text)
+        self.assertIn('katex.render("k < 1"', text)
         self.assertIn("moose-katex-inline-equation", text)
         self.assertNotIn("$_2$", text)
+        self.assertNotIn("$k &lt; 1$", text)
         self.assertNotIn(r"\$5", text)
 
 

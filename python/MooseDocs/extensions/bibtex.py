@@ -15,7 +15,6 @@ from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
 from pybtex.errors import set_strict_mode
-from pybtex.style.template import field, sentence, tag
 from pylatexenc.latex2text import LatexNodes2Text
 
 import moosetree
@@ -111,49 +110,56 @@ def _contains_inline_math(entry, field_name):
     )
 
 
-def _strip_bibtex_protection_outside_math(text):
-    """Remove capitalization-protection braces without touching TeX inside math spans."""
-    parts = []
-    pos = 0
-    for match in INLINE_MATH_RE.finditer(text):
-        parts.append(text[pos : match.start()].replace("{", "").replace("}", ""))
-        parts.append(match.group(0))
-        pos = match.end()
-    parts.append(text[pos:].replace("{", "").replace("}", ""))
-    return "".join(parts)
+def _math_placeholder(index):
+    return "MOOSEBIBTEXMATH{}".format(index)
 
 
-def _style_with_raw_math_titles(style):
+def _replace_math_with_placeholders(text, replacements):
+    def replace(match):
+        placeholder = _math_placeholder(len(replacements))
+        replacements[placeholder] = match.group("tex")
+        return "{" + placeholder + "}"
+
+    return INLINE_MATH_RE.sub(replace, text)
+
+
+def _style_with_math_placeholders(style):
     """Preserve raw BibTeX title math so it can be rendered by MooseDocs KaTeX.
 
     Pybtex's default title formatting parses fields as LaTeX-rich text. That is
-    useful for accents and protected capitalization, but it leaves inline math
-    fragments as literal text in HTML bibliography output. For title fields that
-    contain inline math, keep the raw field text and let MooseDocs handle the
-    math rendering after pybtex has formatted the rest of the entry.
+    useful for accents, escaped symbols, and protected capitalization, but it
+    leaves inline math fragments as literal text in HTML bibliography output.
+    For title fields that contain inline math, temporarily replace those math
+    fragments with protected placeholders so pybtex can still parse the rest of
+    the title normally.
     """
 
     class MooseDocsBibtexStyle(style):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.math_placeholders = {}
+            self._original_fields = []
+
+        def _replaceFieldMath(self, entry, field_name):
+            original = entry.fields[field_name]
+            entry.fields[field_name] = _replace_math_with_placeholders(
+                original, self.math_placeholders
+            )
+            self._original_fields.append((entry, field_name, original))
+
+        def restoreFields(self):
+            for entry, field_name, original in self._original_fields:
+                entry.fields[field_name] = original
+            self._original_fields = []
+
         def format_title(self, e, which_field, as_sentence=True):
             if _contains_inline_math(e, which_field):
-                formatted_title = field(
-                    which_field,
-                    raw=True,
-                    apply_func=_strip_bibtex_protection_outside_math,
-                )
-                return sentence[formatted_title] if as_sentence else formatted_title
+                self._replaceFieldMath(e, which_field)
             return super().format_title(e, which_field, as_sentence)
 
         def format_btitle(self, e, which_field, as_sentence=True):
             if _contains_inline_math(e, which_field):
-                formatted_title = tag("em")[
-                    field(
-                        which_field,
-                        raw=True,
-                        apply_func=_strip_bibtex_protection_outside_math,
-                    )
-                ]
-                return sentence[formatted_title] if as_sentence else formatted_title
+                self._replaceFieldMath(e, which_field)
             return super().format_btitle(e, which_field, as_sentence)
 
     return MooseDocsBibtexStyle
@@ -498,15 +504,18 @@ class RenderBibtexBibliography(components.RenderComponent):
             "</span>"
         ).format(eq_id, content)
 
-    def _renderInlineMath(self, text, page):
-        if not INLINE_MATH_RE.search(text):
+    def _renderInlineMath(self, text, page, replacements):
+        if not replacements:
             return text.replace(r"\$", "$")
 
         self._addKatexAssets(page)
-        rendered = INLINE_MATH_RE.sub(
-            lambda match: self._inlineKatexHTML(match.group("tex")), text
-        )
-        return rendered.replace(r"\$", "$")
+        for placeholder, tex in replacements.items():
+            rendered = self._inlineKatexHTML(tex)
+            text = text.replace(
+                '<span class="bibtex-protected">{}</span>'.format(placeholder), rendered
+            )
+            text = text.replace(placeholder, rendered)
+        return text.replace(r"\$", "$")
 
     def createHTML(self, parent, token, page):
 
@@ -517,9 +526,11 @@ class RenderBibtexBibliography(components.RenderComponent):
             raise exceptions.MooseDocsException(msg, token["bib_style"])
 
         citations = self.getCitations(parent, token, page)
-        formatted_bibliography = _style_with_raw_math_titles(
-            style
-        )().format_bibliography(self.extension.database(), citations)
+        style = _style_with_math_placeholders(style)()
+        formatted_bibliography = style.format_bibliography(
+            self.extension.database(), citations
+        )
+        style.restoreFields()
 
         if formatted_bibliography.entries:
             html_backend = find_plugin("pybtex.backends", "html")
@@ -533,7 +544,7 @@ class RenderBibtexBibliography(components.RenderComponent):
                 entries.sort(key=lambda e: numbers.get(e.key, len(numbers) + 1))
             for entry in entries:
                 text = entry.text.render(backend)
-                text = self._renderInlineMath(text, page)
+                text = self._renderInlineMath(text, page, style.math_placeholders)
                 html.Tag(ol, "li", id_=entry.key, string=text)
 
             return ol
