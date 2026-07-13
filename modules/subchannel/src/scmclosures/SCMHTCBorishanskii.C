@@ -48,7 +48,7 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
                "Check Pitch-over-pin diameter ratio.");
   }
 
-  auto NuT = 24.15 * std::log(poly);
+  auto NuT = 24.15 * std::log10(poly);
   // Peclet number correction term
   const Real corr_prefactor = 0.0174 * (1.0 - std::exp(6.0 - 6.0 * pre.poD));
 
