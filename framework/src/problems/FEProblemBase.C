@@ -1249,7 +1249,7 @@ FEProblemBase::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering())
+  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh())
   {
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
@@ -8667,6 +8667,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
                            const bool clean_refinement_flags)
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
+
+  _app.markMeshChangedForBackup();
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
