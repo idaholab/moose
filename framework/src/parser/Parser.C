@@ -432,6 +432,13 @@ Parser::parse()
         continue;
       }
       node->remove();
+      // If this path was also (or only) supplied via the command line, remove it from the
+      // independent command line tree too. Builder::errorCheck() walks this tree separately
+      // to catch command line parameters that were never used/consumed; since we've just
+      // deliberately discarded this parameter, it should not be reported as unused.
+      if (queryCommandLineRoot())
+        if (auto cli_node = getCommandLineRoot().find(path))
+          cli_node->remove();
     }
   }
 

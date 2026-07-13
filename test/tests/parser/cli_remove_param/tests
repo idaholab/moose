@@ -26,7 +26,7 @@
   [../]
 
   [./remove_nonexistent_param]
-    type = RunApp
+    type = RunException
     input = 'cli_remove_param.i'
     cli_args = '--remove Mesh/square/does_not_exist'
     expect_err = "Cannot remove parameter or block 'Mesh/square/does_not_exist' via --remove: "
