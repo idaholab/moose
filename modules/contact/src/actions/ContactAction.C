@@ -18,6 +18,7 @@
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 #include "AugmentedLagrangianContactProblem.h"
+#include "MortarContactUtils.h"
 
 #include "NanoflannMeshAdaptor.h"
 #include "PointListAdaptor.h"
@@ -203,6 +204,19 @@ ContactAction::validParams()
       "parameter affects convergence behavior and, in general, should be larger for stiffer "
       "materials. It is recommended that the user tries out various orders of magnitude for this "
       "parameter if the default value generates poor contact convergence.");
+  params.addParam<MooseEnum>(
+      "normal_ncp_function",
+      Moose::Mortar::Contact::normalNCPFunctionOptions(),
+      "The nonlinear complementarity problem function used to enforce the normal weighted-gap "
+      "constraint for mortar contact.");
+  params.addRangeCheckedParam<Real>(
+      "normal_ncp_smoothing_width",
+      0.0,
+      "normal_ncp_smoothing_width >= 0",
+      "Width of the smooth transition for smooth normal NCP functions, in the same scale as the "
+      "normal Lagrange multiplier and the effective scaled weighted gap argument. This value is "
+      "not normalized internally; choose it as a small factor, typically 1e-8 to 1e-4, times a "
+      "representative normal Lagrange multiplier or representative effective scaled weighted gap.");
   params.addParam<Real>(
       "c_tangential", 1, "Numerical parameter for nonlinear mortar frictional constraints");
   params.addParam<bool>("ping_pong_protection",
@@ -323,8 +337,8 @@ ContactAction::validParams()
   params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
   // Mortar-specific parameters
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
-                              "lm_space "
-                              "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
+                              "lm_space normal_ncp_function normal_ncp_smoothing_width use_dual "
+                              "correct_edge_dropping normalize_c use_petrov_galerkin "
                               "generate_mortar_mesh segment_quadrature wear_depth debug_mesh",
                               "Mortar");
   // Mortar dynamics (Newmark-beta)
@@ -467,6 +481,14 @@ ContactAction::ContactAction(const InputParameters & params)
     else if (params.isParamSetByUser("c_normal"))
       paramError("c_normal",
                  "The 'c_normal' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("normal_ncp_function"))
+      paramError("normal_ncp_function",
+                 "The 'normal_ncp_function' option can only be used with the 'mortar' "
+                 "formulation");
+    else if (params.isParamSetByUser("normal_ncp_smoothing_width"))
+      paramError("normal_ncp_smoothing_width",
+                 "The 'normal_ncp_smoothing_width' option can only be used with the 'mortar' "
+                 "formulation");
     else if (params.isParamSetByUser("c_tangential"))
       paramError("c_tangential",
                  "The 'c_tangential' option can only be used with the 'mortar' formulation");
@@ -1210,6 +1232,8 @@ ContactAction::addMortarContact()
                                       "triangulation",
                                       "triangulate_triangles",
                                       "normalize_c",
+                                      "normal_ncp_function",
+                                      "normal_ncp_smoothing_width",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
                                       "debug_mesh"});
@@ -1270,6 +1294,8 @@ ContactAction::addMortarContact()
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",
+                                      "normal_ncp_function",
+                                      "normal_ncp_smoothing_width",
                                       "extra_vector_tags",
                                       "absolute_value_vector_tags",
                                       "debug_mesh"});

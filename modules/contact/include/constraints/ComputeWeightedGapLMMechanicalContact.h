@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "MortarContactUtils.h"
 
 #include <unordered_map>
 
@@ -90,6 +91,12 @@ protected:
 
   /// Whether to normalize weighted gap by weighting function norm
   const bool _normalize_c;
+
+  /// Function used for the normal complementarity residual
+  const Moose::Mortar::Contact::NormalNCPFunction _normal_ncp_function;
+
+  /// Smoothing width for smooth normal NCP functions
+  const Real _normal_ncp_smoothing_width;
 
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;

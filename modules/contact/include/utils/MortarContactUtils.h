@@ -13,6 +13,7 @@
 #include "ADReal.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
+#include "MooseEnum.h"
 
 #include "libmesh/dof_object.h"
 
@@ -27,6 +28,8 @@
 
 #include <utility>
 #include <array>
+#include <algorithm>
+#include <cmath>
 #include <unordered_map>
 #include <vector>
 
@@ -56,6 +59,73 @@ namespace Mortar
 {
 namespace Contact
 {
+
+CreateMooseEnumClass(
+    NormalNCPFunction, MIN, SMOOTH_MIN, FISCHER_BURMEISTER, SMOOTH_FISCHER_BURMEISTER);
+
+inline MooseEnum
+normalNCPFunctionOptions()
+{
+  MooseEnum options(getNormalNCPFunctionOptions(), "MIN");
+  options.addDocumentation("MIN",
+                           "Use the exact min function for the normal complementarity residual.");
+  options.addDocumentation(
+      "SMOOTH_MIN",
+      "Use a differentiable smooth-min approximation for the normal complementarity residual.");
+  options.addDocumentation("FISCHER_BURMEISTER",
+                           "Use the exact Fischer-Burmeister NCP function for the normal "
+                           "complementarity residual.");
+  options.addDocumentation("SMOOTH_FISCHER_BURMEISTER",
+                           "Use the smoothed Fischer-Burmeister NCP function for the normal "
+                           "complementarity residual.");
+  return options;
+}
+
+inline bool
+normalNCPSmoothingRequired(const NormalNCPFunction normal_ncp_function)
+{
+  return normal_ncp_function == NormalNCPFunction::SMOOTH_MIN ||
+         normal_ncp_function == NormalNCPFunction::SMOOTH_FISCHER_BURMEISTER;
+}
+
+template <typename T>
+inline T
+normalNCPResidual(const T & normal_lm,
+                  const T & scaled_gap,
+                  const NormalNCPFunction normal_ncp_function,
+                  const Real smoothing_width)
+{
+  using std::min;
+  using std::sqrt;
+
+  switch (normal_ncp_function)
+  {
+    case NormalNCPFunction::MIN:
+      return min(normal_lm, scaled_gap);
+    case NormalNCPFunction::SMOOTH_MIN:
+      mooseAssert(smoothing_width > 0, "The smooth normal NCP width must be positive.");
+      return 0.5 * (normal_lm + scaled_gap -
+                    sqrt((normal_lm - scaled_gap) * (normal_lm - scaled_gap) +
+                         smoothing_width * smoothing_width));
+    case NormalNCPFunction::FISCHER_BURMEISTER:
+    {
+      const auto norm_sq = normal_lm * normal_lm + scaled_gap * scaled_gap;
+      // The exact FB function is nonsmooth at the origin. Pick a finite generalized derivative
+      // there instead of differentiating sqrt(0), which produces invalid AD derivatives.
+      if (MetaPhysicL::raw_value(norm_sq) == 0)
+        return 0.5 * (normal_lm + scaled_gap);
+      return normal_lm + scaled_gap - sqrt(norm_sq);
+    }
+    case NormalNCPFunction::SMOOTH_FISCHER_BURMEISTER:
+      mooseAssert(smoothing_width > 0, "The smooth normal NCP width must be positive.");
+      return normal_lm + scaled_gap -
+             sqrt(normal_lm * normal_lm + scaled_gap * scaled_gap +
+                  smoothing_width * smoothing_width);
+  }
+
+  mooseError("Unhandled normal NCP function type.");
+  return normal_lm;
+}
 
 /**
  * This function is used to communicate velocities across processes
