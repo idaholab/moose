@@ -14,6 +14,8 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)
 
+[Available computational backends](framework_development/computational_backends.md)
+
 ## Utilities
 
 [Build System](/build_system.md) - How the hierarchical `make` system functions in MOOSE
