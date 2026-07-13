@@ -21,7 +21,6 @@ using the bulk transition limits
 Re_L = 320 \, 10^{P/D - 1}, \qquad Re_T = 10^4 \, 10^{0.7(P/D - 1)} .
 
 These bulk $Re_L$ and $Re_T$ values are used for both triangular and quadrilateral lattice friction factor calculations.
-The updated Cheng-Todreas friction correlation uses natural logarithms.
 
 !syntax parameters /SCMClosures/SCMFrictionUpdatedChengTodreas
 
