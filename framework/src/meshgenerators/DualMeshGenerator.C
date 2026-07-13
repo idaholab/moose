@@ -2293,12 +2293,12 @@ triangulateCentroidRingFace3D(const std::vector<Point> & side,
 
     for (const auto chord_i : make_range(chord_points.size() - 1))
     {
-      if (!valid_segment(chord_points[chord_i], chord_points[chord_i + 1]))
-        return false;
-
       std::vector<Point> triangle = {chord_points[chord_i], side[i], chord_points[chord_i + 1]};
 
       if (!hasNonzeroArea3D(triangle, area_tol))
+        return false;
+
+      if (!valid_segment(chord_points[chord_i], chord_points[chord_i + 1]))
         return false;
 
       side_triangles.push_back(std::move(triangle));
@@ -2357,20 +2357,25 @@ triangulateCentroidRingFace3D(const std::vector<Point> & side,
           return false;
         };
 
-        if ((offset > 1 && !valid_segment(face_points[anchor], face_points[point1])) ||
-            (offset + 1 < face_points.size() - 1 &&
-             !valid_segment(face_points[anchor], face_points[point2])) ||
-            (offset > 1 && segmentHasEmbeddedPoint(point1)) ||
+        std::vector<Point> triangle = {
+            face_points[anchor], face_points[point1], face_points[point2]};
+
+        if ((offset > 1 && segmentHasEmbeddedPoint(point1)) ||
             (offset + 1 < face_points.size() - 1 && segmentHasEmbeddedPoint(point2)))
         {
           valid_inner_fan = false;
           break;
         }
 
-        std::vector<Point> triangle = {
-            face_points[anchor], face_points[point1], face_points[point2]};
-
         if (!hasNonzeroArea3D(triangle, area_tol))
+        {
+          valid_inner_fan = false;
+          break;
+        }
+
+        if ((offset > 1 && !valid_segment(face_points[anchor], face_points[point1])) ||
+            (offset + 1 < face_points.size() - 1 &&
+             !valid_segment(face_points[anchor], face_points[point2])))
         {
           valid_inner_fan = false;
           break;
@@ -2528,9 +2533,6 @@ triangulateSurfaceFace3D(const std::vector<Point> & side,
       const std::size_t current_index = remaining_indices[position];
       const std::size_t next_index = remaining_indices[next_position];
 
-      if (!valid_segment(side[previous_index], side[next_index]))
-        continue;
-
       const Real corner_cross = cross2D(projected_points[previous_index],
                                         projected_points[current_index],
                                         projected_points[next_index]);
@@ -2562,6 +2564,9 @@ triangulateSurfaceFace3D(const std::vector<Point> & side,
       }
 
       if (contains_other_point)
+        continue;
+
+      if (!valid_segment(side[previous_index], side[next_index]))
         continue;
 
       side_triangles.push_back(std::move(triangle));
@@ -3832,6 +3837,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
   const auto addTetrahedralizedPolyhedron =
       [&](const std::vector<std::vector<Point>> & side_points,
           const SubdomainID output_subdomain_id,
+          const bool touches_preserved_primal_boundary,
           const std::vector<PrimalBoundarySide3D> & boundary_sides,
           std::string & failure_reason,
           std::vector<std::vector<Point>> & failed_surface_triangles) -> std::size_t
@@ -3856,7 +3862,10 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
     // Rejects surface diagonals (on nonplanar quads) that violate the primal boundary geometry
     const auto validSurfaceSegment = [&](const Point & point0, const Point & point1)
-    { return segmentInsidePrimalBoundary(output_subdomain_id, point0, point1); };
+    {
+      return !touches_preserved_primal_boundary ||
+             segmentInsidePrimalBoundary(output_subdomain_id, point0, point1);
+    };
 
     if (!surfaceTriangles3D(
             side_points, surface_triangles, validSurfaceSegment, length_tol, &dual_point_sources))
@@ -4000,17 +4009,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         if (std::abs(tetVolume6(tet_points[0], tet_points[1], tet_points[2], tet_points[3])) <=
             volume_tol)
           continue;
-
-        const Point tet_center =
-            (tet_points[0] + tet_points[1] + tet_points[2] + tet_points[3]) / 4.0;
-
-        if (!pointInsidePrimalBoundary(output_subdomain_id, tet_center))
-        {
-          std::ostringstream oss;
-          oss << "NetGen generated a tetrahedron outside the primal boundary; centroid = ";
-          appendDebugPoint3D(oss, tet_center);
-          return fail(oss.str());
-        }
 
         generated_tets.push_back(tet_points);
       }
@@ -4290,9 +4288,25 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       }
       else if (concave_treatment == "netgen")
       {
+        bool touches_preserved_primal_boundary = false;
+
+        for (const auto * const elem : primal_elems)
+        {
+          for (const auto side : elem->side_index_range())
+            if (preservedSide(*elem, side))
+            {
+              touches_preserved_primal_boundary = true;
+              break;
+            }
+
+          if (touches_preserved_primal_boundary)
+            break;
+        }
+
         const std::size_t netgen_elements =
             addTetrahedralizedPolyhedron(direct_netgen_side_points,
                                          output_subdomain_id,
+                                         touches_preserved_primal_boundary,
                                          boundary_sides,
                                          netgen_failure_reason,
                                          failed_netgen_surface_triangles);
