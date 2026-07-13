@@ -40,6 +40,9 @@ protected:
   /// Ordered treatments to attempt for concave 3D dual cells.
   MultiMooseEnum _concave_treatment;
 
+  /// Whether NetGen surface diagonals must remain inside the primal boundary.
+  const bool _preserve_diagonals;
+
   /// Angular tolerance, in radians, for determining colinearity of boundary sides when detecting primal boundary
   /// vertices. If the sides make an angle greater than this, their shared point is considered a vertex and is added to the dual mesh.
   Real _boundary_node_angular_tol;

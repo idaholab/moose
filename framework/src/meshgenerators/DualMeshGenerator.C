@@ -64,6 +64,12 @@ DualMeshGenerator::validParams()
       "candidate polyhedron by adding midpoint vertices, polycut attempts to split it into convex "
       "polyhedra using existing vertices, and netgen tetrahedralizes it, adding additional nodes "
       "when necessary.");
+  params.addParam<bool>(
+      "preserve_diagonals",
+      false,
+      "Whether candidate NetGen surface diagonals must remain inside the primal boundary, checked "
+      "at their quarter, midpoint, and three-quarter points. When false, surface triangulation "
+      "accepts the default highest-node-ID diagonal construction without boundary sampling.");
   params.addRangeCheckedParam<Real>(
       "boundary_node_angular_tol",
       1e-8,
@@ -98,6 +104,7 @@ DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _dual_mesh_type(getParam<MooseEnum>("dual_mesh_type")),
     _concave_treatment(getParam<MultiMooseEnum>("concave_treatment")),
+    _preserve_diagonals(getParam<bool>("preserve_diagonals")),
     _boundary_node_angular_tol(getParam<Real>("boundary_node_angular_tol")),
     _geometry_relative_tol(getParam<Real>("geometry_relative_tol")),
     _preserve_subdomain_interfaces(getParam<bool>("preserve_subdomain_interfaces")),
@@ -3225,21 +3232,24 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         if (normal * (elem_centroid - face_centroid) > 0.0)
           normal = -1.0 * normal;
 
-        auto & boundary_surface_triangles =
-            primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
-
-        for (auto triangle : sideFacePartTriangles3D(side_face_part, primal_boundary_length_tol))
+        if (_preserve_diagonals)
         {
-          const Point triangle_normal =
-              (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
+          auto & boundary_surface_triangles =
+              primal_boundary_surface_triangles[subdomainKey(elem->subdomain_id())];
 
-          if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
-            continue;
+          for (auto triangle : sideFacePartTriangles3D(side_face_part, primal_boundary_length_tol))
+          {
+            const Point triangle_normal =
+                (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]);
 
-          if (triangle_normal * normal < 0.0)
-            std::swap(triangle[1], triangle[2]);
+            if (triangle_normal.norm() <= primal_boundary_length_tol * primal_boundary_length_tol)
+              continue;
 
-          boundary_surface_triangles.push_back(triangle);
+            if (triangle_normal * normal < 0.0)
+              std::swap(triangle[1], triangle[2]);
+
+            boundary_surface_triangles.push_back(triangle);
+          }
         }
 
         for (const auto n : index_range(side_face_part.node_ids))
@@ -3863,7 +3873,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     // Rejects surface diagonals (on nonplanar quads) that violate the primal boundary geometry
     const auto validSurfaceSegment = [&](const Point & point0, const Point & point1)
     {
-      return !touches_preserved_primal_boundary ||
+      return !_preserve_diagonals || !touches_preserved_primal_boundary ||
              segmentInsidePrimalBoundary(output_subdomain_id, point0, point1);
     };
 
@@ -4290,17 +4300,20 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       {
         bool touches_preserved_primal_boundary = false;
 
-        for (const auto * const elem : primal_elems)
+        if (_preserve_diagonals)
         {
-          for (const auto side : elem->side_index_range())
-            if (preservedSide(*elem, side))
-            {
-              touches_preserved_primal_boundary = true;
-              break;
-            }
+          for (const auto * const elem : primal_elems)
+          {
+            for (const auto side : elem->side_index_range())
+              if (preservedSide(*elem, side))
+              {
+                touches_preserved_primal_boundary = true;
+                break;
+              }
 
-          if (touches_preserved_primal_boundary)
-            break;
+            if (touches_preserved_primal_boundary)
+              break;
+          }
         }
 
         const std::size_t netgen_elements =
