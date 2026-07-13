@@ -10,6 +10,12 @@
       csvdiff = 'fp_parent_out.csv'
       detail = 'a MultiApp fixed point iteration,'
     []
+    [multisystem_fixed_point]
+      type = Exodiff
+      input = 'multisystem_fp.i'
+      exodiff = 'multisystem_fp.e'
+      detail = 'a multi-system fixed point iteration,'
+    []
     [time_step]
       type = CSVDiff
       input = 'time_step.i'

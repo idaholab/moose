@@ -20,10 +20,13 @@ FunctorChangeFunctorMaterialTempl<is_ad>::validParams()
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
   params.addRequiredParam<MooseFunctorName>("functor", "Functor for which to compute the change");
-  MooseEnum change_over("time_step nonlinear fixed_point multiapp_fixed_point");
+  MooseEnum change_over(
+      "time_step nonlinear fixed_point multiapp_fixed_point multisystem_fixed_point");
   change_over.addDocumentation("time_step", "Over the time step");
   change_over.addDocumentation("nonlinear", "Over the nonlinear iteration");
   change_over.addDocumentation("multiapp_fixed_point", "Over the MultiApp fixed point iteration");
+  change_over.addDocumentation("multisystem_fixed_point",
+                               "Over the multi-system fixed point iteration");
   params.addRequiredParam<MooseEnum>(
       "change_over", change_over, "Interval over which to compute the change");
   params.addRequiredParam<bool>("take_absolute_value",
@@ -55,6 +58,14 @@ FunctorChangeFunctorMaterialTempl<is_ad>::FunctorChangeFunctorMaterialTempl(
       _fe_problem.needsPreviousMultiAppFixedPointIterationAuxiliary(true);
     if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
       _fe_problem.needsPreviousMultiAppFixedPointIterationSolution(
+          true, _fe_problem.getSystem(getParam<MooseFunctorName>("functor")).number());
+  }
+  else if (change_over == "multisystem_fixed_point")
+  {
+    if (_fe_problem.hasAuxiliaryVariable(getParam<MooseFunctorName>("functor")))
+      _fe_problem.needsPreviousMultiSystemFixedPointIterationAuxiliary(true);
+    if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
+      _fe_problem.needsPreviousMultiSystemFixedPointIterationSolution(
           true, _fe_problem.getSystem(getParam<MooseFunctorName>("functor")).number());
   }
 
@@ -98,6 +109,11 @@ FunctorChangeFunctorMaterialTempl<is_ad>::referenceState(const MooseEnum & chang
   {
     _fe_problem.needSolutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint);
     return Moose::previousMultiAppFixedPointState();
+  }
+  else if (change_over == "multisystem_fixed_point")
+  {
+    _fe_problem.needSolutionState(1, Moose::SolutionIterationType::MultiSystemFixedPoint);
+    return Moose::previousMultiSystemFixedPointState();
   }
   else
     mooseError("Invalid value");
