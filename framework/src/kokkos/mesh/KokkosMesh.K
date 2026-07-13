@@ -9,6 +9,7 @@
 
 #include "KokkosMesh.h"
 
+#include "Assembly.h"
 #include "MooseMesh.h"
 
 #include "libmesh/elem_side_builder.h"
@@ -298,11 +299,10 @@ Mesh::getContiguousNodeID(const Node * node) const
 void
 Mesh::initElementGeometry()
 {
-  const auto num_local_plus_one_neighbor_layer_elems =
-      getNumLocalAndPossiblyOneNeighborLayerGhostElements();
+  const auto num_local_elems = getNumLocalElements();
 
-  _elem_volume.create(num_local_plus_one_neighbor_layer_elems);
-  _elem_centroid.create(num_local_plus_one_neighbor_layer_elems);
+  _elem_volume.create(num_local_elems);
+  _elem_centroid.create(num_local_elems);
 
   _elem_volume = 0;
   _elem_centroid = Real3();
@@ -310,15 +310,12 @@ Mesh::initElementGeometry()
   for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
   {
     const auto eid = getContiguousElementID(elem);
+    const auto elem_centroid = elem->vertex_average();
+    Real coord_factor;
+    ::coordTransformFactor(_mesh, elem->subdomain_id(), elem_centroid, coord_factor);
 
-    _elem_volume[eid] = elem->volume();
-    _elem_centroid[eid] = elem->vertex_average();
-  }
-
-  for (auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
-  {
-    _elem_volume[ghost_eid] = ghost_elem->volume();
-    _elem_centroid[ghost_eid] = ghost_elem->vertex_average();
+    _elem_volume[eid] = elem->volume() * coord_factor;
+    _elem_centroid[eid] = elem_centroid;
   }
 
   _elem_volume.moveToDevice();
@@ -365,28 +362,39 @@ Mesh::initElementSideGeometry()
     {
       auto & face = side_builder(*elem, side);
       const auto face_centroid = face.vertex_average();
-      const auto neighbor = elem->neighbor_ptr(side);
+      const auto * const neighbor = elem->neighbor_ptr(side);
+      Real coord_factor;
+      mooseAssert(!neighbor || neighbor != libMesh::remote_elem,
+                  "First layer neighbors should be ghosted");
+      ::coordTransformFactor(_mesh,
+                             elem->subdomain_id(),
+                             face_centroid,
+                             coord_factor,
+                             neighbor ? neighbor->subdomain_id()
+                                      : libMesh::Elem::invalid_subdomain_id);
 
       ContiguousElementID neighbor_eid = libMesh::DofObject::invalid_id;
-      if (neighbor && neighbor != libMesh::remote_elem)
+      if (neighbor)
       {
         neighbor_eid = getContiguousElementID(neighbor);
+        mooseAssert(
+            neighbor_eid != libMesh::DofObject::invalid_id,
+            "We should have determined a contiguous element ID for our local element neighbors");
         _elem_neighbor(side, eid) = neighbor_eid;
       }
 
       const auto elem_centroid_to_side_centroid = face_centroid - elem_centroid;
-      const bool has_neighbor = neighbor_eid != libMesh::DofObject::invalid_id;
       const auto elem_centroid_to_neighbor_centroid =
-          has_neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
+          neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
 
-      _side_area(side, eid) = face.volume();
+      _side_area(side, eid) = face.volume() * coord_factor;
       _side_centroid(side, eid) = face_centroid;
       _side_normal(side, eid) = elem->side_vertex_average_normal(side);
       _elem_centroid_to_side_centroid(side, eid) = elem_centroid_to_side_centroid;
       _elem_centroid_to_side_centroid_distance(side, eid) = elem_centroid_to_side_centroid.norm();
       _elem_centroid_to_neighbor_centroid(side, eid) = elem_centroid_to_neighbor_centroid;
       _elem_centroid_to_neighbor_centroid_distance(side, eid) =
-          has_neighbor ? elem_centroid_to_neighbor_centroid.norm() : Real(0);
+          neighbor ? elem_centroid_to_neighbor_centroid.norm() : Real(0);
 
       const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
       if (boundary_ids.size() > 1)

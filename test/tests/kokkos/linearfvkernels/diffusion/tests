@@ -31,4 +31,32 @@
       max_threads = 1
     []
   []
+  [matches-host-linearfv]
+    type = Exodiff
+    input = 'match-non-kokkos.i'
+    exodiff = 'diffusion-1d-aux_out.e'
+    gold_dir = '../../../variables/linearfv/gold'
+    requirement = 'The system shall produce the same linear finite volume diffusion solution using Kokkos process-local parallel dispatch as the host implementation.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+    max_threads = 1
+  []
+  [rz]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestKokkosLinearFVDiffusion1DRZ
+    requirement = 'The system shall account for cylindrical coordinate factors in Kokkos linear finite volume element volumes and face areas.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+    max_threads = 1
+  []
+  [rspherical]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestKokkosLinearFVDiffusion1DRSpherical
+    requirement = 'The system shall account for spherical coordinate factors in Kokkos linear finite volume element volumes and face areas.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+    max_threads = 1
+  []
 []

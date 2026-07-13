@@ -37,11 +37,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     MeshHolder(*getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
     SystemHolder(getCheckedPointerParam<SystemBase *>("_sys")->feProblem().getKokkosSystems()),
     _fe_problem(*getParam<FEProblemBase *>("_fe_problem_base")),
-    _t(TransientInterface::_t),
-    _t_old(TransientInterface::_t_old),
-    _t_step(TransientInterface::_t_step),
-    _dt(TransientInterface::_dt),
-    _dt_old(TransientInterface::_dt_old)
+    _t(TransientInterface::_t)
 {
   const auto * const subproblem = getCheckedPointerParam<SubProblem *>("_subproblem");
   _var.init(subproblem->getVariable(0,
@@ -67,11 +63,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(
     SystemHolder(object),
     _fe_problem(object._fe_problem),
     _var(object._var),
-    _t(object._t),
-    _t_old(object._t_old),
-    _t_step(object._t_step),
-    _dt(object._dt),
-    _dt_old(object._dt_old)
+    _t(object._t)
 {
   // Tags may be added to the governing tag sets held by the TaggingInterface later than the time
   // that the primary constructor is run. So it's more robust to build our tag set, immediately

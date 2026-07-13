@@ -115,14 +115,6 @@ protected:
   ///@{
   /// Current time
   Scalar<Real> _t;
-  /// Old (previous time step) time
-  Scalar<const Real> _t_old;
-  /// Current time step number
-  Scalar<int> _t_step;
-  /// Current time step size
-  Scalar<Real> _dt;
-  /// Previous time step size
-  Scalar<Real> _dt_old;
   ///@}
 };
 

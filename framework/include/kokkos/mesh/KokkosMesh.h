@@ -220,10 +220,10 @@ public:
     return _elem_neighbor(side, elem);
   }
   /**
-   * Get the area of an element side
-   * @param elem The contiguous element ID
+   * Get the coordinate-weighted area of an element side
+   * @param elem The local contiguous element ID
    * @param side The side index
-   * @returns The side area
+   * @returns The side area including the coordinate transformation factor
    */
   KOKKOS_FUNCTION Real getSideArea(ContiguousElementID elem, unsigned int side) const
   {
@@ -312,28 +312,30 @@ public:
     return _side_boundary_id(side, elem);
   }
   /**
-   * Get the element volume
-   * @param elem The contiguous element ID
-   * @returns The element volume
+   * Get the coordinate-weighted volume of a local element
+   * @param elem The local contiguous element ID
+   * @returns The element volume including the coordinate transformation factor
    */
   KOKKOS_FUNCTION Real getElementVolume(ContiguousElementID elem) const
   {
     KOKKOS_ASSERT(_element_geometry_initialized);
+    KOKKOS_ASSERT(elem < _elem_volume.size());
     return _elem_volume[elem];
   }
   /**
-   * Get the element centroid
-   * @param elem The contiguous element ID
+   * Get the centroid of a local element
+   * @param elem The local contiguous element ID
    * @returns The element centroid
    */
   KOKKOS_FUNCTION Real3 getElementCentroid(ContiguousElementID elem) const
   {
     KOKKOS_ASSERT(_element_geometry_initialized);
+    KOKKOS_ASSERT(elem < _elem_centroid.size());
     return _elem_centroid[elem];
   }
 
   /**
-   * Allocate and populate cached element geometry: element volumes and centroids
+   * Allocate and populate local element centroids and coordinate-weighted volumes
    */
   void initElementGeometry();
 
@@ -575,11 +577,11 @@ private:
   bool _element_side_geometry_initialized = false;
   /// Whether initElementSideGeometry() should be called on the next update()
   bool _needs_element_side_geometry = false;
-  /// Cached element volumes indexed by contiguous element ID
+  /// Cached coordinate-weighted local element volumes indexed by contiguous element ID
   Array<Real> _elem_volume;
-  /// Cached element centroids indexed by contiguous element ID
+  /// Cached local element centroids indexed by contiguous element ID
   Array<Real3> _elem_centroid;
-  /// Cached side areas indexed by (side, contiguous element ID)
+  /// Cached coordinate-weighted side areas indexed by (side, local contiguous element ID)
   Array2D<Real> _side_area;
   /// Cached side centroids indexed by (side, contiguous element ID)
   Array2D<Real3> _side_centroid;

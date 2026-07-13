@@ -19,11 +19,17 @@ namespace Moose::Kokkos
 
 /**
  * Generic datum class containing geometric information related to the mesh. This is a base class
- * for derived datum classes for both finite volume and finite element system assembly
+ * for derived datum classes for both finite volume and finite element system assembly.
  */
 class MeshDatum
 {
 public:
+  /**
+   * Constructor
+   * @param elem The contiguous element ID
+   * @param side The element side index, or \p libMesh::invalid_uint for element-only data
+   * @param mesh The Kokkos mesh
+   */
   KOKKOS_FUNCTION
   MeshDatum(ContiguousElementID elem, const unsigned int side, const Mesh & mesh);
 
@@ -155,38 +161,75 @@ MeshDatum::neighborInfo(ContiguousElementID elem, const unsigned int side, const
   return neighbor == libMesh::DofObject::invalid_id ? ElementInfo{} : mesh.getElementInfo(neighbor);
 }
 
+/**
+ * Device-side geometric context for finite volume kernels and boundary conditions.
+ */
 class FVDatum : public MeshDatum
 {
 public:
+  /**
+   * Constructor
+   * @param elem The contiguous element ID
+   * @param side The element side index, or \p libMesh::invalid_uint for element-only data
+   * @param mesh The Kokkos mesh
+   */
   KOKKOS_FUNCTION
   FVDatum(ContiguousElementID elem, const unsigned int side, const Mesh & mesh);
 
-  KOKKOS_FUNCTION
-  Real3 faceCentroid() const { return _mesh.getSideCentroid(_elem.id, _side); }
+  /**
+   * Get the centroid of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side centroid
+   */
+  KOKKOS_FUNCTION Real3 faceCentroid() const { return _mesh.getSideCentroid(_elem.id, _side); }
 
-  KOKKOS_FUNCTION
-  Real3 faceNormal() const { return _mesh.getSideNormal(_elem.id, _side); }
+  /**
+   * Get the outward unit normal of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side normal
+   */
+  KOKKOS_FUNCTION Real3 faceNormal() const { return _mesh.getSideNormal(_elem.id, _side); }
 
-  KOKKOS_FUNCTION
-  Real faceDCNMag() const
+  /**
+   * Get the distance from the current element centroid to its neighbor centroid
+   * @pre This datum represents a side of a locally owned element with a neighbor.
+   * @returns The element-centroid to neighbor-centroid distance
+   */
+  KOKKOS_FUNCTION Real faceDCNMag() const
   {
     return _mesh.getElementCentroidToNeighborCentroidDistance(_elem.id, _side);
   }
 
-  KOKKOS_FUNCTION
-  Real faceDCFMag() const
+  /**
+   * Get the distance from the current element centroid to the current side centroid
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The element-centroid to side-centroid distance
+   */
+  KOKKOS_FUNCTION Real faceDCFMag() const
   {
     return _mesh.getElementCentroidToSideCentroidDistance(_elem.id, _side);
   }
 
-  KOKKOS_FUNCTION
-  Real faceArea() const { return _mesh.getSideArea(_elem.id, _side); }
+  /**
+   * Get the coordinate-weighted area of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side area including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real faceArea() const { return _mesh.getSideArea(_elem.id, _side); }
 
-  KOKKOS_FUNCTION
-  Real3 elementCentroid() const { return _mesh.getElementCentroid(_elem.id); }
+  /**
+   * Get the current element centroid
+   * @pre The current element is locally owned.
+   * @returns The element centroid
+   */
+  KOKKOS_FUNCTION Real3 elementCentroid() const { return _mesh.getElementCentroid(_elem.id); }
 
-  KOKKOS_FUNCTION
-  Real elementVolume() const { return _mesh.getElementVolume(_elem.id); }
+  /**
+   * Get the coordinate-weighted current element volume
+   * @pre The current element is locally owned.
+   * @returns The element volume including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real elementVolume() const { return _mesh.getElementVolume(_elem.id); }
 };
 
 KOKKOS_FUNCTION inline FVDatum::FVDatum(ContiguousElementID elem,
