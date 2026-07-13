@@ -50,6 +50,19 @@
     allow_warnings = true
   [../]
 
+  [./grain_forcesum_initial]
+    type = 'RunApp'
+    input = 'grain_forcesum.i'
+    cli_args = "UserObjects/grain_force_dns/execute_on='initial linear nonlinear' "
+               "UserObjects/grain_force_const/execute_on='initial linear nonlinear' "
+               "UserObjects/grain_force/execute_on='initial linear nonlinear' "
+               "VectorPostprocessors/forces_dns/execute_on=initial "
+               "VectorPostprocessors/forces_cosnt/execute_on=initial "
+               "VectorPostprocessors/forces_total/execute_on=initial"
+    allow_warnings = true
+    issues = '#24527'
+  [../]
+
   [./grain_forcemasked]
     type = 'Exodiff'
     input = 'grain_maskedforce.i'
