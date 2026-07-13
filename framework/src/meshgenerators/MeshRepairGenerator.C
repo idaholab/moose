@@ -252,6 +252,10 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
     mooseError("MeshRepairGenerator requires a serial mesh for this operation. "
                "The mesh should not be distributed.");
 
+  // We're not supporting boundary info updates here, but let's scream
+  // if that's a problem.
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
   for (auto elem : mesh->element_ptr_range())
   {
     // We are not splitting non-convex quads. Maybe later.
@@ -457,6 +461,11 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
       }
       // Element got fixed, can be deleted after (can't while using the range)
       elems_to_delete.push_back(elem);
+
+      for (auto s : make_range(elem->n_sides()))
+        if (boundary_info.n_boundary_ids(elem, s))
+          mooseError("MeshRepairGenerator does not yet support "
+                     "splitting polygons with side boundaries");
     }
   }
   // Delete the original element
