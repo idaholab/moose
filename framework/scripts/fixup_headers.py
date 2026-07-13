@@ -185,7 +185,7 @@ if __name__ == "__main__":
         # pre-commit hook); otherwise fall back to walking the tree.
         for filename in args:
             ext = os.path.splitext(filename)[1]
-            if ext in (".C", ".h") and not global_options.python_only:
+            if ext in (".C", ".K, ".h") and not global_options.python_only:
                 checkAndUpdateCPlusPlus(os.path.abspath(filename))
             elif ext == ".py" and not global_options.cxx_only:
                 checkAndUpdatePython(os.path.abspath(filename))

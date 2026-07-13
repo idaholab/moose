@@ -43,7 +43,7 @@ repos:
       - id: clang-format
         # types_or: [text] ensures .C files are included regardless of how the
         # identify library tags that ambiguous extension.
-        files: \.(C|h)$
+        files: \.(C|K|h)$
         types_or: [text]
 
   # ---- Python: Ruff (lint, autofix) then Black (format) ----
@@ -66,6 +66,6 @@ repos:
         name: check/insert MOOSE copyright headers
         entry: framework/scripts/fixup_headers.py -u
         language: script
-        files: \.(C|h|py)$
+        files: \.(C|K|h|py)$
         exclude: ^test/tests/test_harness/validation_badpython\.py$
         pass_filenames: true
