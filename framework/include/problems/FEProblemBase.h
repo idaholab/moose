@@ -2452,6 +2452,37 @@ public:
    */
   bool needsPreviousMultiAppFixedPointIterationAuxiliary() const;
 
+  /**
+   * Set a flag that indicates that user requires values for the previous multi-system fixed point
+   * iterate for the solver systems (not auxiliary)
+   * @param needed the value that should be set to the flag
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   */
+  void needsPreviousMultiSystemFixedPointIterationSolution(bool needed,
+                                                           const unsigned int solver_sys_num);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multi-system fixed
+   * point iteration for the solver systems (not auxiliary)
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   * @return true if the user required values of the previous multi-system fixed point iteration
+   */
+  bool needsPreviousMultiSystemFixedPointIterationSolution(const unsigned int solver_sys_num) const;
+
+  /**
+   * Set a flag that indicates that user requires values for the previous multi-system fixed point
+   * iterate for the auxiliary system
+   */
+  void needsPreviousMultiSystemFixedPointIterationAuxiliary(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multi-system fixed
+   * point iteration for the auxiliary system
+   * @return true if the user required values of the previous multi-system fixed point iteration
+   * from the auxiliary system
+   */
+  bool needsPreviousMultiSystemFixedPointIterationAuxiliary() const;
+
   ///@{
   /**
    * Convenience zeros
@@ -3317,6 +3348,10 @@ protected:
   std::vector<bool> _previous_multiapp_fp_nl_solution_required;
   /// Indicates we need to save the previous multiapp fixed-point iteration auxiliary variable values
   bool _previous_multiapp_fp_aux_solution_required;
+  /// Indicates we need to save the previous multi-system fixed-point iteration solver variable values
+  std::vector<bool> _previous_multisystem_fp_nl_solution_required;
+  /// Indicates we need to save the previous multi-system fixed-point iteration auxiliary variable values
+  bool _previous_multisystem_fp_aux_solution_required;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;

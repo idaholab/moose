@@ -76,8 +76,7 @@ public:
    */
   void setFixedPointRelaxationFactor(const Real relaxation_factor);
   void clearFixedPointRelaxation();
-  void saveOldSolutionForFixedPointRelaxation();
-  void applyFixedPointRelaxation();
+  void applyFixedPointRelaxation(const Moose::SolutionIterationType iteration_type);
 
   /**
    * Set the side on which the preconditioner is applied to.

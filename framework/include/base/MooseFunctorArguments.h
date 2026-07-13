@@ -176,6 +176,12 @@ previousMultiAppFixedPointState()
   return {(unsigned int)1, SolutionIterationType::MultiAppFixedPoint};
 }
 
+inline StateArg
+previousMultiSystemFixedPointState()
+{
+  return {(unsigned int)1, SolutionIterationType::MultiSystemFixedPoint};
+}
+
 /**
  * A structure defining a "face" evaluation calling argument for Moose functors
  */

@@ -1312,6 +1312,18 @@ SystemBase::copyPreviousMultiAppFixedPointSolutions()
           solutionState(i - 1, Moose::SolutionIterationType::MultiAppFixedPoint);
 }
 
+void
+SystemBase::copyPreviousMultiSystemFixedPointSolutions()
+{
+  const auto n_states = _solution_states[static_cast<unsigned short>(
+                                             Moose::SolutionIterationType::MultiSystemFixedPoint)]
+                            .size();
+  if (n_states > 1)
+    for (unsigned int i = n_states - 1; i > 0; --i)
+      solutionState(i, Moose::SolutionIterationType::MultiSystemFixedPoint) =
+          solutionState(i - 1, Moose::SolutionIterationType::MultiSystemFixedPoint);
+}
+
 /**
  * Restore current solutions (call after your solve failed)
  */
@@ -1396,6 +1408,8 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
     return Moose::PREVIOUS_NL_SOLUTION_TAG;
   else if (iteration_type == Moose::SolutionIterationType::MultiAppFixedPoint && state == 1)
     return Moose::PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
+  else if (iteration_type == Moose::SolutionIterationType::MultiSystemFixedPoint && state == 1)
+    return Moose::PREVIOUS_MULTISYSTEM_FP_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }
