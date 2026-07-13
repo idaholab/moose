@@ -475,6 +475,19 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
   for (auto & new_elem_ptr : elements_to_add_to_mesh)
     mesh->add_elem(std::move(new_elem_ptr));
 
+  // We may no longer be prepared
+  if (!elems_to_delete.empty())
+  {
+    // Cached data that might need to be recalculated later
+    mesh->unset_has_neighbor_ptrs();
+    mesh->unset_has_reinit_ghosting_functors();
+
+    // Cached data that might need to be recalculated later after we
+    // start supporting distributed meshes here
+    mesh->unset_has_synched_id_counts();
+    mesh->unset_has_removed_remote_elements();
+  }
+
   _console << "Number of non-convex polygons which got split into convex polygons: "
            << num_nonconvex << std::endl;
   if (num_triangulated)
