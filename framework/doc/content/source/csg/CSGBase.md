@@ -332,7 +332,6 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 Like surfaces and lattices, an engineering unit is defined by calling the specific constructor directly to create a unique pointer.
 This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const reference to that engineering unit.
 The `addEngUnit()` method is a templated method, meaning that the return type will be a reference to the specific unit type if requested.
-Otherwise, if a return type is not specified, a generic `CSGEngUnit` type will be returned.
 An example of creating an N-sided polygon unit is shown below.
 
 !listing CSGBaseTest.C start=define a 4-sided polygon end=addEngUnit include-end=true

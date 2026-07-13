@@ -60,9 +60,6 @@ Each type of engineering unit is defined by a set of intuitive and domain-specif
 The idea is that these attributes are much simpler for a user to define than all the necessary rudimentary CSG components, but comprehensive enough such that the unit can be automatically deconstructed into the standard [!ac](CSG) components if necessary.
 The "units" are then usable in place of a surface, cell, or universe, depending on its defined behavior.
 An example of this is defining an infinite regular [N-sided polygon](source/csg/CSGBase.md#n-sided-regular-polygon-unit) region.
-If defined using only CSG surface components, the user would need to determine the surface equations for all $N$ planes that define the region.
-However, an N-sided polygon unit would only require the user to define the number of sides $N$ and the apothem of the polygon.
-Internally, this unit is easily redefined automatically as the set of planes from the simple information provided by the user.
 
 ## How to Generate a CSG Model
 
