@@ -328,7 +328,7 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 
 ### Engineering Units
 
-[Engineering units](syntax/CSG/index.md#engineering-units) are simplified objects that are defined in user-friendly domain-specific terms that can be used in a "plug-and-play" manner as a surface, cell, or universe in a [!ac](CSG) definition.
+[Engineering units](syntax/CSG/index.md#engineering-units) are CSG classes that are defined in user-friendly domain-specific terms that can be used in a "plug-and-play" manner as a surface, cell, or universe in a [!ac](CSG) definition.
 Like surfaces and lattices, an engineering unit is defined by calling the specific constructor directly to create a unique pointer.
 This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const reference to that engineering unit.
 The `addEngUnit()` method is a templated method, meaning that the return type will be a reference to the specific unit type if requested.

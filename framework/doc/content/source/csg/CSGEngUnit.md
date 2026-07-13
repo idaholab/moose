@@ -53,7 +53,7 @@ It is recommended that this be done based on the class name using `MooseUtils::p
 
 ## CSGSurfaceEngUnit
 
-To define a surface-like engineering unit, define a class the derives from `CSGSurfaceEngUnit`.
+To define a surface-like engineering unit, define a class that derives from `CSGSurfaceEngUnit`.
 Functionally, these behave like a `CSGSurface` in that you can use them to define half-spaces when defining `CSGRegions` for a `CSGCell`.
 All methods that are available on `CSGSurface` objects are also available on `CSGSurfaceEngUnit` objects except `getCoeffs` (not applicable to engineering units).
 

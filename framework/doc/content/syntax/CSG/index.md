@@ -84,7 +84,7 @@ There are four main sections in the file:
 - [`cells`](#cells)
 - [`universes`](#universes)
 - [`lattices`](#lattices) (if any)
-- [`units`](#engineering-units) (if any)
+- [`engineering units`](#engineering-units) (if any)
 
 Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
@@ -168,13 +168,13 @@ Below is example output for a $2 \times 2$ Cartesian lattice filled with two dif
 
 !listing csg_lattice_cart_out_csg.json start="lattices" end="surfaces"
 
-### Units
+### Engineering Units
 
 If any engineering units are used, they will be located in the `units` section.
 Each unit includes the following information:
 
 - `unit_type`: the type of units as defined by the class name that was used to create the unit
-- `behavior`: what type of rudimentary component this unit behaves as, either `"SURFACE"`, `"CELL"`, or `"UNIVERSE"`.
+- `behavior`: what type of component this unit behaves as, either `"SURFACE"`, `"CELL"`, or `"UNIVERSE"`.
 - `attributes`: a map of a unit-specific attribute names to their values.
 
 If engineering units are included in a model, the name of those units may be present in other component definitions as if it were the type of object that it behaves like.
