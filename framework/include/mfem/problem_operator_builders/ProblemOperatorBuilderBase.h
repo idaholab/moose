@@ -29,7 +29,7 @@ public:
   virtual ~ProblemOperatorBuilderBase() = default;
 
   /// Returns a pointer to the operator's equation system.
-  virtual std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+  virtual std::shared_ptr<ProblemOperatorBase>
   createProblemOperator(MFEMProblem &) = 0;
 };
 }
