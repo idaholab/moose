@@ -81,7 +81,9 @@
 
 // C++ includes
 #include <numeric> // std::accumulate
+#include <atomic>
 #include <fstream>
+#include <iterator>
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstdlib> // for system()
@@ -90,6 +92,173 @@
 #include <filesystem>
 
 using namespace libMesh;
+
+namespace
+{
+/**
+ * Return a temporary checkpoint path used to move mesh topology through CheckpointIO.
+ *
+ * @param app App whose output file base, communicator, and processor id determine temporary path
+ *            ownership
+ * @param purpose Short label included in the directory name, e.g. "backup" or "restore"
+ * @param shared Whether all ranks in the app communicator should use one shared checkpoint
+ *               directory. Backup performs one collective checkpoint write, then captures each
+ *               checkpoint entry as a relative path and byte contents in the Backup object. Restore
+ *               recreates that checkpoint layout once before calling CheckpointIO::read().
+ */
+std::filesystem::path
+temporaryBackupMeshPath(const MooseApp & app, const std::string & purpose, const bool shared)
+{
+  static std::atomic<unsigned long> counter = 0;
+
+  std::string dirname;
+  if (!shared || app.processor_id() == 0)
+  {
+    const auto file_base = std::filesystem::path(app.getOutputFileBase()).filename().string();
+    const auto dirname_base = (file_base.empty() ? "moose" : file_base) + "_" + purpose + "_mesh";
+    const auto tmp_dir = std::filesystem::temp_directory_path();
+    std::error_code err;
+
+    do
+    {
+      dirname = dirname_base + "_" + std::to_string(counter++);
+      if (!shared)
+        dirname += "_" + std::to_string(app.processor_id());
+
+      err.clear();
+    } while (!std::filesystem::create_directory(tmp_dir / dirname, err) && !err);
+
+    if (err)
+      mooseError("Unable to create temporary mesh ",
+                 purpose,
+                 " directory ",
+                 std::filesystem::absolute(tmp_dir / dirname),
+                 ": ",
+                 err.message());
+  }
+
+  if (shared)
+    app.comm().broadcast(dirname);
+
+  const auto root = std::filesystem::temp_directory_path() / dirname;
+
+  return root / "mesh.cpr";
+}
+
+std::string
+readBackupMeshFile(const std::filesystem::path & path)
+{
+  std::ifstream file(path, std::ios::in | std::ios::binary);
+  if (!file.is_open())
+    mooseError("Unable to open temporary mesh backup file ",
+               std::filesystem::absolute(path),
+               " for reading");
+
+  return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+}
+
+void
+writeBackupMeshFile(const std::filesystem::path & path, const std::string & contents)
+{
+  std::error_code err;
+  if (!std::filesystem::create_directories(path.parent_path(), err) && err)
+    mooseError("Unable to create temporary mesh backup directory ",
+               std::filesystem::absolute(path.parent_path()),
+               ": ",
+               err.message());
+
+  std::ofstream file(path, std::ios::out | std::ios::binary);
+  if (!file.is_open())
+    mooseError("Unable to open temporary mesh backup file ",
+               std::filesystem::absolute(path),
+               " for writing");
+
+  file.write(contents.data(), contents.size());
+}
+
+void
+packMeshBackup(const MooseApp & app, Backup & backup)
+{
+  backup.mesh_files.clear();
+
+  if (!app.getExecutioner())
+    return;
+
+  if (!app.meshChangedForBackup())
+    return;
+
+  const auto mesh_path = temporaryBackupMeshPath(app, "backup", true);
+  {
+    CheckpointIO io(app.feProblem().mesh().getMesh(), false);
+    io.write(mesh_path.string());
+  }
+
+  // CheckpointIO::write() is collective; wait until all ranks have finished writing split files
+  // before each rank packs the shared checkpoint tree into its Backup.
+  app.comm().barrier();
+
+  for (const auto & entry : std::filesystem::recursive_directory_iterator(mesh_path))
+    if (entry.is_regular_file())
+    {
+      const auto relative_path =
+          std::filesystem::relative(entry.path(), mesh_path).generic_string();
+      backup.mesh_files.emplace_back(relative_path, readBackupMeshFile(entry.path()));
+    }
+
+  // Keep the shared checkpoint tree alive until all ranks have finished reading from it.
+  app.comm().barrier();
+
+  if (app.processor_id() == 0)
+  {
+    std::error_code err;
+    std::filesystem::remove_all(mesh_path.parent_path(), err);
+  }
+}
+
+bool
+restoreMeshBackup(const MooseApp & app, Backup & backup, MooseMesh & mesh)
+{
+  if (backup.mesh_files.empty())
+    return false;
+
+  const auto mesh_path = temporaryBackupMeshPath(app, "restore", true);
+  if (app.processor_id() == 0)
+    for (const auto & [relative_path, contents] : backup.mesh_files)
+      writeBackupMeshFile(mesh_path / relative_path, contents);
+
+  // Rank 0 recreates the shared checkpoint tree, then all ranks collectively read their pieces.
+  app.comm().barrier();
+
+  auto & mesh_base = mesh.getMesh();
+  mesh_base.clear();
+
+  {
+    CheckpointIO io(mesh_base, false);
+    io.read(mesh_path.string());
+  }
+
+  // This checkpoint is used only to restore mesh topology.  The restored equation-system data is
+  // loaded from the Backup stream after the mesh is prepared, so discard any DOF indices that
+  // CheckpointIO carried with the mesh and let the systems own the final numbering.
+  for (auto & node : mesh_base.node_ptr_range())
+    node->clear_dofs();
+  for (auto & elem : mesh_base.element_ptr_range())
+    elem->clear_dofs();
+
+  backup.mesh_files.clear();
+
+  // Keep the shared checkpoint tree alive until every rank has completed CheckpointIO::read().
+  app.comm().barrier();
+
+  if (app.processor_id() == 0)
+  {
+    std::error_code err;
+    std::filesystem::remove_all(mesh_path.parent_path(), err);
+  }
+
+  return true;
+}
+}
 
 void
 MooseApp::addAppParam(InputParameters & params)
@@ -1563,9 +1732,23 @@ MooseApp::backup()
   preBackup();
 
   auto backup = std::make_unique<Backup>();
+  packMeshBackup(*this, *backup);
   writer.write(*backup->header, *backup->data);
 
   return backup;
+}
+
+bool
+MooseApp::hasInitialBackupMesh() const
+{
+  return hasInitialBackup() && !(*_initial_backup)->mesh_files.empty();
+}
+
+void
+MooseApp::restoreMeshFromInitialBackup(MooseMesh & mesh)
+{
+  mooseAssert(hasInitialBackup(), "Missing initial backup");
+  _restored_initial_backup_mesh = restoreMeshBackup(*this, **_initial_backup, mesh);
 }
 
 void
@@ -1596,6 +1779,15 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 
   auto data = std::move(backup->data);
   mooseAssert(data, "Data not available");
+
+  if (restoreMeshBackup(*this, *backup, feProblem().mesh()))
+  {
+    _restored_initial_backup_mesh = true;
+    feProblem().mesh().prepare(/*mesh_to_clone=*/nullptr);
+    feProblem().meshChanged(/*intermediate_change=*/false,
+                            /*contract_mesh=*/false,
+                            /*clean_refinement_flags=*/false);
+  }
 
   _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
@@ -1637,6 +1829,7 @@ MooseApp::finalizeRestore()
     backup = std::make_unique<Backup>();
     backup->header = std::move(header_sstream);
     backup->data = std::move(data_sstream);
+    packMeshBackup(*this, *backup);
   }
 
   return backup;
