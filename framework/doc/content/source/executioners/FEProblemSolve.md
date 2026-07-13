@@ -9,7 +9,7 @@ The `FEProblemSolve` class has two main roles:
 The `FEProblemSolve` is a solve executioner nested inside most executioners,
 such as [Steady](executioners/Steady.md) and [Transient](executioners/Transient.md) but notably *not* in the [Eigenvalue](executioners/Eigenvalue.md) executioner.
 
-## Multi-system solve capabilities
+## Multi-system solve capabilities id=multi-system_solve
 
 If using multiple nonlinear systems, the default behavior of the `FEProblemSolve` will be to solve them one by one,
 in the order that they were specified, without iterating between systems.
