@@ -151,12 +151,12 @@ class SchemaDiff(RunApp):
                         x = float(level.t1)
                         y = float(level.t2)
 
-                        if x < self.abs_zero and y < self.abs_zero:
+                        if abs(x) < self.abs_zero and abs(y) < self.abs_zero:
                             return True
                         if self.rel_err == 0 or y == 0:
                             if abs(x - y) > self.rel_err:
                                 return False
-                        elif abs(x - y) / y > self.rel_err:
+                        elif abs(x - y) / abs(y) > self.rel_err:
                             return False
                     return True  # if the two items are the same, you can stop evaluating them.
 

@@ -85,6 +85,7 @@
     cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
+    abs_zero = 2e-10
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
@@ -100,6 +101,7 @@
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
+    abs_zero = 2e-10
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
