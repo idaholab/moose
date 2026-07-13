@@ -75,14 +75,14 @@ public:
     Real source = 0;
   };
 
-  /// Boundary relation coefficient/source arrays indexed by (side, element)
+  /// Boundary relation coefficient/source arrays indexed by BC-local boundary face
   struct BoundaryRelationData
   {
-    Array2D<Real, MOOSE_KOKKOS_INDEX_TYPE, LayoutType::RIGHT> coefficient;
-    Array2D<Real, MOOSE_KOKKOS_INDEX_TYPE, LayoutType::RIGHT> source;
+    Array<Real> coefficient;
+    Array<Real> source;
   };
 
-  /// Boundary relation data indexed by relation type, side, and element
+  /// Boundary relation data indexed by relation type and BC-local boundary face
   struct BoundaryData
   {
     BoundaryRelationData value;
@@ -101,6 +101,13 @@ public:
    * Get the boundary data relation arrays owned by this boundary condition
    */
   const BoundaryData & boundaryData() const { return _boundary_data; }
+
+  /// Number of faces in this boundary condition's existing worklist
+  MOOSE_KOKKOS_INDEX_TYPE numBoundaryFaces() const;
+
+  /// Face at a BC-local worklist index
+  Pair<ContiguousElementID, unsigned int>
+  boundaryFaceID(const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const;
 
   /// Whether this boundary condition overrides the boundary value relation hook
   bool hasBoundaryValue() const;
@@ -214,8 +221,8 @@ LinearFVBoundaryCondition::operator()(BoundaryValueLoop,
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
   const auto relation = bc.template computeBoundaryValue<Derived>(datum);
-  _boundary_data.value.coefficient(side, elem) = relation.coefficient;
-  _boundary_data.value.source(side, elem) = relation.source;
+  _boundary_data.value.coefficient[tid] = relation.coefficient;
+  _boundary_data.value.source[tid] = relation.source;
 }
 
 template <typename Derived>
@@ -227,8 +234,8 @@ LinearFVBoundaryCondition::operator()(BoundaryNormalGradientLoop,
   const auto [elem, side] = kokkosBoundaryElementSideID(tid);
   FVDatum datum(elem, side, kokkosMesh());
   const auto relation = bc.template computeBoundaryNormalGradient<Derived>(datum);
-  _boundary_data.normal_gradient.coefficient(side, elem) = relation.coefficient;
-  _boundary_data.normal_gradient.source(side, elem) = relation.source;
+  _boundary_data.normal_gradient.coefficient[tid] = relation.coefficient;
+  _boundary_data.normal_gradient.source[tid] = relation.source;
 }
 
 } // namespace Moose::Kokkos

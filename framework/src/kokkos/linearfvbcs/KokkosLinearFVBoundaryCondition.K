@@ -87,18 +87,27 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondi
 {
 }
 
+MOOSE_KOKKOS_INDEX_TYPE
+LinearFVBoundaryCondition::numBoundaryFaces() const
+{
+  return libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(numKokkosBoundarySides());
+}
+
+Pair<ContiguousElementID, unsigned int>
+LinearFVBoundaryCondition::boundaryFaceID(const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const
+{
+  return kokkosBoundaryElementSideID(bc_face_index);
+}
+
 void
 LinearFVBoundaryCondition::initialSetup()
 {
-  const auto n_elems =
-      libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(kokkosMesh().getNumLocalElements());
-  const auto max_sides = libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(
-      getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getMaxSidesPerElem());
+  const auto n_boundary_faces = numBoundaryFaces();
 
-  _boundary_data.value.coefficient.create(max_sides, n_elems);
-  _boundary_data.value.source.create(max_sides, n_elems);
-  _boundary_data.normal_gradient.coefficient.create(max_sides, n_elems);
-  _boundary_data.normal_gradient.source.create(max_sides, n_elems);
+  _boundary_data.value.coefficient.create(n_boundary_faces);
+  _boundary_data.value.source.create(n_boundary_faces);
+  _boundary_data.normal_gradient.coefficient.create(n_boundary_faces);
+  _boundary_data.normal_gradient.source.create(n_boundary_faces);
   _boundary_data.value.coefficient = 0;
   _boundary_data.value.source = 0;
   _boundary_data.normal_gradient.coefficient = 0;

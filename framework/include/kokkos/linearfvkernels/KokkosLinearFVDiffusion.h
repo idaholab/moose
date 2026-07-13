@@ -31,11 +31,11 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum,
-                                                         const int bc_index) const;
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(
+      const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum,
-                                                                const int bc_index) const;
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(
+      const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const;
 
 private:
   /**
@@ -71,20 +71,20 @@ KokkosLinearFVDiffusion::computeInternalNeighborMatrixContribution(const FVDatum
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVDiffusion::computeBoundaryMatrixContribution(const FVDatum & datum,
-                                                           const int bc_index) const
+KokkosLinearFVDiffusion::computeBoundaryMatrixContribution(
+    const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const
 {
   return -faceDiffusionCoefficient(datum) * datum.faceArea() *
-         boundaryNormalGradientCoefficient(datum, bc_index);
+         boundaryNormalGradientCoefficient(bc_index, bc_face_index);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVDiffusion::computeBoundaryRightHandSideContribution(const FVDatum & datum,
-                                                                  const int bc_index) const
+KokkosLinearFVDiffusion::computeBoundaryRightHandSideContribution(
+    const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const
 {
   return faceDiffusionCoefficient(datum) * datum.faceArea() *
-         boundaryNormalGradientSource(datum, bc_index);
+         boundaryNormalGradientSource(bc_index, bc_face_index);
 }
 
 KOKKOS_FUNCTION inline Real

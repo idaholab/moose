@@ -31,11 +31,11 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real computeInternalNeighborMatrixContribution(const FVDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(const FVDatum & datum,
-                                                         const int bc_index) const;
+  KOKKOS_FUNCTION Real computeBoundaryMatrixContribution(
+      const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(const FVDatum & datum,
-                                                                const int bc_index) const;
+  KOKKOS_FUNCTION Real computeBoundaryRightHandSideContribution(
+      const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const;
 
 private:
   /// Normal advective face flux
@@ -63,18 +63,19 @@ KokkosLinearFVAdvection::computeInternalNeighborMatrixContribution(const FVDatum
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeBoundaryMatrixContribution(const FVDatum & datum,
-                                                           const int bc_index) const
+KokkosLinearFVAdvection::computeBoundaryMatrixContribution(
+    const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const
 {
-  return normalFaceFlux(datum) * datum.faceArea() * boundaryValueCoefficient(datum, bc_index);
+  return normalFaceFlux(datum) * datum.faceArea() *
+         boundaryValueCoefficient(bc_index, bc_face_index);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosLinearFVAdvection::computeBoundaryRightHandSideContribution(const FVDatum & datum,
-                                                                  const int bc_index) const
+KokkosLinearFVAdvection::computeBoundaryRightHandSideContribution(
+    const FVDatum & datum, const int bc_index, const MOOSE_KOKKOS_INDEX_TYPE bc_face_index) const
 {
-  return -normalFaceFlux(datum) * datum.faceArea() * boundaryValueSource(datum, bc_index);
+  return -normalFaceFlux(datum) * datum.faceArea() * boundaryValueSource(bc_index, bc_face_index);
 }
 
 KOKKOS_FUNCTION inline Real

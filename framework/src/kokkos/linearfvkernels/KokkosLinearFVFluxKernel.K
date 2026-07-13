@@ -16,6 +16,7 @@
 #include "MooseMesh.h"
 
 #include <algorithm>
+#include <map>
 
 namespace Moose::Kokkos
 {
@@ -53,12 +54,10 @@ LinearFVFluxKernel::initialSetup()
   _bc_index.create(max_sides, n_elems);
   _bc_index = -1;
 
-  // Build a compact list of Kokkos linear FV BC data and a face lookup into that list.
-  // Flux kernels use the lookup during face loops to fetch precomputed boundary
-  // relations only on boundary faces where the kernel's variable has an active BC.
+  // Build a compact list of Kokkos linear FV BC data and attach each BC worklist's packed index to
+  // the boundary faces where this kernel's variable is active.
   const auto sys_num = _var.sys();
   const auto var_num = _var.var();
-  const auto processor = processor_id();
   const auto var_name = _var.mooseVar()->name();
 
   std::vector<LinearFVBoundaryCondition *> bcs;
@@ -71,9 +70,10 @@ LinearFVFluxKernel::initialSetup()
       .queryInto(bcs);
 
   std::vector<LinearFVBoundaryCondition::BoundaryData> bc_data;
-  // The face lookup is indexed by local Kokkos side/element IDs, so only populate
-  // entries owned by this processor. Semi-local boundary element IDs can include
-  // remote elements needed by other processors.
+#ifdef DEBUG
+  std::vector<LinearFVBoundaryCondition *> bc_objects;
+#endif
+  std::map<FaceID, BoundaryFaceID> bc_faces;
   auto & mesh = _subproblem.mesh();
   const auto * const kokkos_mesh = mesh.getKokkosMesh();
 
@@ -85,31 +85,39 @@ LinearFVFluxKernel::initialSetup()
     {
       const auto bc_index = libMesh::cast_int<int>(bc_data.size());
       bc_data.push_back(bc->boundaryData());
+#ifdef DEBUG
+      bc_objects.push_back(bc);
+#endif
 
-      for (const auto boundary : bc->boundaryIDs())
-        for (const auto elem_id : mesh.getBoundaryActiveSemiLocalElemIds(boundary))
-        {
-          const auto elem = mesh.elemPtr(elem_id);
+      for (const auto bc_face_index : make_range(bc->numBoundaryFaces()))
+      {
+        const auto [contiguous_elem, side] = bc->boundaryFaceID(bc_face_index);
+        const FaceID face{contiguous_elem, side};
 
-          if (elem->processor_id() == processor)
-          {
-            const auto contiguous_elem = kokkos_mesh->getContiguousElementID(elem);
-            const auto side = mesh.sideWithBoundaryID(elem, boundary);
-            auto & existing_index = _bc_index(side, contiguous_elem);
+#ifdef DEBUG
+        if (bc_face_index)
+          mooseAssert(
+              bc->boundaryFaceID(bc_face_index - 1) < face,
+              "Kokkos linear FV boundary face worklists must be ordered by (element, side)");
+#endif
 
-            // Ambiguous boundary data would make flux kernels non-deterministic.
-            if (existing_index != -1)
-              mooseError("Kokkos linear FV flux kernel '",
-                         name(),
-                         "' found multiple Kokkos boundary conditions for variable '",
-                         var_name,
-                         "' on boundary ID ",
-                         boundary,
-                         ".");
+        auto & existing_index = _bc_index(side, contiguous_elem);
 
-            existing_index = bc_index;
-          }
-        }
+        // Ambiguous boundary data would make flux kernels non-deterministic.
+        if (existing_index != -1)
+          mooseError("Kokkos linear FV flux kernel '",
+                     name(),
+                     "' found multiple Kokkos boundary conditions for variable '",
+                     var_name,
+                     "' on contiguous element ",
+                     contiguous_elem,
+                     ", side ",
+                     side,
+                     ".");
+
+        existing_index = bc_index;
+        bc_faces.emplace(face, BoundaryFaceID{contiguous_elem, side, bc_index, bc_face_index});
+      }
     }
   }
 
@@ -126,15 +134,16 @@ LinearFVFluxKernel::initialSetup()
       {
         const auto * const neighbor = elem->neighbor_ptr(side);
 
-        if (neighbor && neighbor != libMesh::remote_elem &&
-            variable->activeOnSubdomain(neighbor->subdomain_id()))
+        mooseAssert(!neighbor || neighbor != libMesh::remote_elem,
+                    "We should have properly ghosted side neighbors for FV");
+        if (neighbor && variable->activeOnSubdomain(neighbor->subdomain_id()))
           internal_face_ids.push_back({contiguous_elem, side});
         else
         {
-          const auto bc_index = _bc_index(side, contiguous_elem);
+          const auto bc_face = bc_faces.find({contiguous_elem, side});
 
-          if (bc_index != -1)
-            boundary_face_ids.push_back({contiguous_elem, side, bc_index});
+          if (bc_face != bc_faces.end())
+            boundary_face_ids.push_back(bc_face->second);
         }
       }
     }
@@ -142,10 +151,35 @@ LinearFVFluxKernel::initialSetup()
   std::sort(internal_face_ids.begin(), internal_face_ids.end());
   std::sort(boundary_face_ids.begin(), boundary_face_ids.end());
 
+#ifdef DEBUG
+  for (const auto i : index_range(boundary_face_ids))
+  {
+    const auto & face = boundary_face_ids[i];
+    mooseAssert(face.bc_index >= 0 &&
+                    libMesh::cast_int<std::size_t>(face.bc_index) < bc_objects.size(),
+                "Boundary face has an invalid compact boundary condition index");
+    mooseAssert(_bc_index(face.side, face.elem) == face.bc_index,
+                "Boundary face does not map to its expected compact boundary condition index");
+
+    const auto * const bc = bc_objects[face.bc_index];
+    mooseAssert(face.bc_face_index < bc->numBoundaryFaces(),
+                "Boundary face has an invalid BC-local packed index");
+    const auto expected_face = bc->boundaryFaceID(face.bc_face_index);
+    mooseAssert(expected_face.first == face.elem && expected_face.second == face.side,
+                "Boundary face does not map to its expected BC-local packed index");
+
+    if (i && boundary_face_ids[i - 1].bc_index == face.bc_index)
+      mooseAssert(boundary_face_ids[i - 1].bc_face_index < face.bc_face_index,
+                  "Boundary faces and their BC-local packed indices have inconsistent ordering");
+  }
+#endif
+
   _internal_face_ids = internal_face_ids;
   _boundary_face_ids = boundary_face_ids;
 
+#ifndef NDEBUG
   _bc_index.copyToDevice();
+#endif
   _bc_data.create(libMesh::cast_int<MOOSE_KOKKOS_INDEX_TYPE>(bc_data.size()));
   for (const auto i : index_range(bc_data))
     _bc_data[i] = bc_data[i];
