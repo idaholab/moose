@@ -36,7 +36,7 @@
     type = ElementExtremeFunctorValue
     functor = u_change
     value_type = max
-    execute_on = 'MULTISYSTEM_FIXED_POINT_CONVERGENCE'
+    execute_on = 'MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
   [ucopy_change_max]
     type = ElementExtremeFunctorValue

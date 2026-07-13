@@ -533,13 +533,14 @@ FEProblemSolve::solve()
           sys->clearFixedPointRelaxation();
       }
 
+      _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
+      _problem.outputStep(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
+
       // Assess convergence of the multi-system fixed point iteration
       if (!_using_multi_sys_fp_iterations)
         converged = true;
       else
       {
-        _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE);
-
         // checkConvergence expects the number of iterations performed, not the iteration index:
         const auto n_fp_iter = fp_iter + 1;
         const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
