@@ -16,6 +16,7 @@
 #include "Executioner.h"
 #include "ConvergenceIterationTypes.h"
 #include "MooseUtils.h"
+#include "AuxiliarySystem.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -390,6 +391,29 @@ FEProblemSolve::initialSetup()
     _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
     _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(0);
   }
+
+  // Solution and aux systems may require copying back states due to 2 reasons:
+  // 1. The need for an older state was indicated to the problem.
+  // 2. Fixed point relaxation is to be performed.
+  for (const auto i : make_range(_problem.numSolverSystems()))
+  {
+    if (_perform_multi_sys_fp_relaxation[i])
+      _problem.needsPreviousMultiSystemFixedPointIterationSolution(true, i);
+
+    if (_problem.needsPreviousMultiSystemFixedPointIterationSolution(i))
+    {
+      auto & sys = _problem.getSolverSystem(i);
+      sys.needSolutionState(
+          1, Moose::SolutionIterationType::MultiSystemFixedPoint, sys.solution().type());
+      _systems_to_copy_back_multi_sys_fp.insert(&sys);
+    }
+  }
+  if (_problem.needsPreviousMultiSystemFixedPointIterationAuxiliary())
+  {
+    _aux.needSolutionState(
+        1, Moose::SolutionIterationType::MultiSystemFixedPoint, _aux.solution().type());
+    _systems_to_copy_back_multi_sys_fp.insert(&_aux);
+  }
 }
 
 void
@@ -443,20 +467,20 @@ FEProblemSolve::solve()
                  << COLOR_DEFAULT << "\n"
                  << std::endl;
 
+      // Copy back systems as needed/requested
+      for (auto * sys : _systems_to_copy_back_multi_sys_fp)
+        sys->copyPreviousMultiSystemFixedPointSolutions();
+
       // Loop over each system
       for (const auto sys_i : index_range(_systems))
       {
         auto * const sys = _systems[sys_i];
         const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
-        const Real fp_relax =
-            _using_multi_sys_fp_iterations ? _multi_sys_fp_relax_factors[sys_i] : 1.0;
-        const bool apply_fp_relax =
-            _using_multi_sys_fp_iterations && !MooseUtils::absoluteFuzzyEqual(fp_relax, 1.0);
+
+        // set fixed point relaxation factor if needed
+        const bool apply_fp_relax = _perform_multi_sys_fp_relaxation[sys_i];
         if (apply_fp_relax)
-        {
-          sys->setFixedPointRelaxationFactor(fp_relax);
-          sys->saveOldSolutionForFixedPointRelaxation();
-        }
+          sys->setFixedPointRelaxationFactor(_multi_sys_fp_relax_factors[sys_i]);
 
         // Call solve on the problem for that system
         if (is_nonlinear)
@@ -476,7 +500,7 @@ FEProblemSolve::solve()
           if (_problem.converged(sys->number()))
           {
             if (apply_fp_relax)
-              sys->applyFixedPointRelaxation();
+              sys->applyFixedPointRelaxation(Moose::SolutionIterationType::MultiSystemFixedPoint);
             _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
                      << std::endl;
           }

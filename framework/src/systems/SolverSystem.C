@@ -88,43 +88,23 @@ SolverSystem::clearFixedPointRelaxation()
 }
 
 void
-SolverSystem::saveOldSolutionForFixedPointRelaxation()
+SolverSystem::applyFixedPointRelaxation(const Moose::SolutionIterationType iteration_type)
 {
   if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
     return;
 
-  if (!hasSolutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint))
-    needSolutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint, solution().type());
-
-  // Just in case checking if someone already allocated one which does not match
-  mooseAssert(solutionStateParallelType(1, Moose::SolutionIterationType::MultiAppFixedPoint) ==
-                  solution().type(),
-              "Fixed point relaxation requires the previous fixed point solution state to have "
-              "the same parallel type as the system solution.");
-
-  solutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint) = solution();
-}
-
-void
-SolverSystem::applyFixedPointRelaxation()
-{
-  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
-    return;
-
-  mooseAssert(hasSolutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint),
+  mooseAssert(hasSolutionState(1, iteration_type),
               "Fixed point relaxation was requested but the old fixed point solution was not "
               "saved.");
 
   // This might be paranoid but who knows, maybe someone requests nonghosted
-  mooseAssert(solutionStateParallelType(1, Moose::SolutionIterationType::MultiAppFixedPoint) ==
-                  solution().type(),
+  mooseAssert(solutionStateParallelType(1, iteration_type) == solution().type(),
               "Fixed point relaxation requires the previous fixed point solution state to have "
               "the same parallel type as the system solution.");
 
   auto & sol = solution();
   sol.scale(_fixed_point_relaxation_factor);
-  sol.add(1.0 - _fixed_point_relaxation_factor,
-          solutionState(1, Moose::SolutionIterationType::MultiAppFixedPoint));
+  sol.add(1.0 - _fixed_point_relaxation_factor, solutionState(1, iteration_type));
   sol.close();
   update();
 }

@@ -270,7 +270,8 @@ enum class SolutionIterationType : unsigned short
 {
   Time = 0,
   Nonlinear = 1,
-  MultiAppFixedPoint = 2
+  MultiAppFixedPoint = 2,
+  MultiSystemFixedPoint = 3
 };
 
 // These are used by MooseVariableData and MooseVariableDataFV
@@ -1303,6 +1304,7 @@ extern const TagName OLD_SOLUTION_TAG;
 extern const TagName OLDER_SOLUTION_TAG;
 extern const TagName PREVIOUS_NL_SOLUTION_TAG;
 extern const TagName PREVIOUS_MULTIAPP_FP_SOLUTION_TAG;
+extern const TagName PREVIOUS_MULTISYSTEM_FP_SOLUTION_TAG;
 extern const TagName SOLUTION_DOT_TAG;
 extern const TagName SOLUTION_DOTDOT_TAG;
 

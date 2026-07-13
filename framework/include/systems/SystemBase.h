@@ -186,6 +186,7 @@ public:
   virtual void copyOldSolutions();
   virtual void copyPreviousNonlinearSolutions();
   virtual void copyPreviousMultiAppFixedPointSolutions();
+  virtual void copyPreviousMultiSystemFixedPointSolutions();
   virtual void restoreSolutions();
 
   /**
