@@ -1,0 +1,10 @@
+[Tests]
+  [fv_sideset_heat_transfer]
+    type = Exodiff
+    input = fv_sideset_heat_transfer.i
+    exodiff = fv_sideset_heat_transfer_out.e
+    requirement = 'The system shall model finite volume heat transfer across an internal sideset using an interface conductance.'
+    design = 'FVSideSetHeatTransferKernel.md'
+    issues = '#31743'
+  []
+[]
