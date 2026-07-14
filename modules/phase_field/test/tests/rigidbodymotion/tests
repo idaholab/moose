@@ -60,6 +60,9 @@
                "VectorPostprocessors/forces_cosnt/execute_on=initial "
                "VectorPostprocessors/forces_total/execute_on=initial"
     allow_warnings = true
+    requirement = 'The system shall allow grain force and torque sums to execute initially before '
+                  'summed force data is available.'
+    design = 'GrainForceAndTorqueSum.md'
     issues = '#24527'
   [../]
 
