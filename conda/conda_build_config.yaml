@@ -93,7 +93,7 @@ krb5:
 libaec:
   - '1'
 libcap:
-  - '2.77'
+  - '2.78'
 libcurl:
   - 8
 libffi:
