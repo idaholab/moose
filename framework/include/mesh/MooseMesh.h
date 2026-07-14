@@ -440,7 +440,7 @@ public:
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */
-  libMesh::ConstElemRange * getActiveLocalElementRange();
+  const libMesh::ConstElemRange * getActiveLocalElementRange();
   libMesh::NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   libMesh::ConstNodeRange * getLocalNodeRange();

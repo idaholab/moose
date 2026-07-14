@@ -958,7 +958,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
   _semilocal_node_list.clear();
 
   // First add the nodes connected to local elems
-  ConstElemRange * active_local_elems = getActiveLocalElementRange();
+  const ConstElemRange * active_local_elems = getActiveLocalElementRange();
   for (const auto & elem : *active_local_elems)
   {
     for (unsigned int n = 0; n < elem->n_nodes(); ++n)
@@ -1235,7 +1235,7 @@ MooseMesh::nodeToElemMap()
   return internalNodeToElemMap();
 }
 
-ConstElemRange *
+const ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
   return &getMesh().active_local_element_stored_range();

@@ -187,7 +187,7 @@ void
 SystemBase::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_subproblem, {var_name});
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   Threads::parallel_reduce(elem_range, aldit);
 
   // Gather the dof indices across procs to get all the dof indices for var_name
@@ -209,7 +209,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
       mooseError("System needs to be registered in FEProblemBase for using zeroVariables.");
 
     AllLocalDofIndicesThread aldit(*problem, vars_to_be_zeroed, true);
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
     const auto & dof_indices_to_zero = aldit.getDofIndices();
