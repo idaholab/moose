@@ -8,6 +8,10 @@ The `DualMeshGenerator` object creates either a Voronoi or barycentric dual of a
 mesh. In the generated dual mesh, input nodes become dual elements and input elements provide the
 locations for dual nodes.
 
+Input sideset and nodeset names are retained. Sideset IDs are transferred to generated dual sides
+that lie on the corresponding primal sides, and nodeset IDs are retained for primal nodes that are
+present in the output mesh.
+
 For a barycentric dual, dual nodes are placed at the centroids of the primal elements. Primal
 boundary vertices and boundary edge midpoints are added where needed so the dual mesh preserves the
 primal boundary geometry.
