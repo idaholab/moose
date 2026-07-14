@@ -11,17 +11,17 @@
 # TODO: Update packages to production versions
 Bootstrap: docker
 {%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-clang:8.10-clang21.1.8-gcc15.2.1-mpich5.0.1-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-clang:pr30-8.10-clang21.1.8-gcc15.2.1-mpich5.0.1-20260714
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-cuda-gcc:8.10-cuda13.2.1-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-cuda-gcc:pr30-8.10-cuda13.3.0-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714
 {%- elif ALTERNATE_FROM == "gcc_min" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gccmin:8.10-gcc9.2.1-mpich5.0.1-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gccmin:pr30-8.10-gcc9.2.1-mpich5.0.1-20260714
 {%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-oneapi:8.10-gcc13.3.1-oneapi2026.0.0-mpich4.3.2-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-oneapi:pr30-8.10-gcc13.3.1-oneapi2026.1.0-mpich4.3.2-20260714
 {%- elif ALTERNATE_FROM == "rocky9" %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky9-gcc:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714
 {%- else %}
-From: ghcr.io/idaholab/moose-containers/moose-mpi-rocky8-gcc:8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260605
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714
 {%- endif %}
 
 %environment
