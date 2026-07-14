@@ -890,7 +890,6 @@ MooseMesh::meshChanged()
   update();
 
   // Delete all of the cached ranges
-  _active_local_elem_range.reset();
   _active_node_range.reset();
   _active_semilocal_node_range.reset();
   _local_node_range.reset();
@@ -1239,15 +1238,7 @@ MooseMesh::nodeToElemMap()
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
-  if (!_active_local_elem_range)
-  {
-    TIME_SECTION("getActiveLocalElementRange", 5);
-
-    _active_local_elem_range = std::make_unique<ConstElemRange>(
-        getMesh().active_local_elements_begin(), getMesh().active_local_elements_end());
-  }
-
-  return _active_local_elem_range.get();
+  return &getMesh().active_local_element_stored_range();
 }
 
 NodeRange *
