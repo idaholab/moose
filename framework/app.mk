@@ -399,17 +399,9 @@ $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
-else ifeq ($(KOKKOS_COMPILER),NVCC)
-
-$(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
-$(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
-$(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
-	@mkdir -p $(curr_dir)/lib
-	@echo "Linking Kokkos Library "$@"..."
-	@ar rcs $@ $(curr_objs)
-
 else
 
+# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
 $(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
@@ -462,17 +454,9 @@ $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
 		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
-else ifeq ($(KOKKOS_COMPILER),NVCC)
-
-$(app_KOKKOS_TEST_LIB): curr_dir  := $(APPLICATION_DIR)/test
-$(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
-$(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
-	@mkdir -p $(curr_dir)/lib
-	@echo "Linking Kokkos Test Library "$@"..."
-	@ar rcs $@ $(curr_objs)
-
 else
 
+# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
 $(app_KOKKOS_TEST_LIB): curr_dir  := $(APPLICATION_DIR)/test
 $(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
 $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
