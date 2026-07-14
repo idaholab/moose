@@ -386,6 +386,8 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
+  parallel_object_only();
+
   bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
@@ -416,6 +418,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   for (const auto & elem : getMesh().element_ptr_range())
     _mesh_subdomains.insert(elem->subdomain_id());
 
+  bool need_subdomain_name_map_sync = false;
   // add explicitly requested subdomains
   if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
@@ -434,6 +437,7 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // set name of the subdomain just added
       setSubdomainName(sub_id, sub_name);
     }
+    need_subdomain_name_map_sync = true;
   }
   else if (isParamValid("add_subdomain_names"))
   {
@@ -457,7 +461,10 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // set name of the subdomain just added
       setSubdomainName(sub_id, sub_name);
     }
+    need_subdomain_name_map_sync = true;
   }
+  if (need_subdomain_name_map_sync)
+    _mesh->sync_subdomain_name_map();
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();

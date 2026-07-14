@@ -1,0 +1,11 @@
+[Tests]
+  issues = "#33249"
+  design = "ElementIDAux.md"
+  [verify_point_sampling]
+    type = CSVDiff
+    input = element_id_aux.i
+    csvdiff = element_id_aux_out_sample_points_0001.csv
+    requirement = "The system shall be able to return mesh element IDs."
+    mesh_mode = "replicated"
+  []
+[]

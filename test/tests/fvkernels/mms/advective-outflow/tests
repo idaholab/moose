@@ -20,7 +20,7 @@
       type = MMSTest
       input = test.py
       test_case = TestOutflowMinMod
-        detail = 'a min-mod advection interpolation scheme.'
+      detail = 'a min-mod advection interpolation scheme.'
       min_parallel = 2 # Test geometric and algebraic ghosting
     []
   []

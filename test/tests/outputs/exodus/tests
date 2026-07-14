@@ -15,6 +15,7 @@
     command = './test_hdf5_file.py exodus_out.e false'
     required_python_packages = 'h5py'
     requirement = "The system ExodusII output shall not use HDF5 unless requested."
+    min_slots = 2 # Memory heavy
   []
 
   [input]
