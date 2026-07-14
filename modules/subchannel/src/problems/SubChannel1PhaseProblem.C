@@ -2277,9 +2277,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
-          auto chans = _subchannel_mesh.getGapChannels(i_gap);
-          unsigned int i_ch_loc = chans.first;
-          PetscInt row_vec = i_ch_loc + _n_channels * iz_ind;
+          PetscInt row_vec = i_gap + _n_gaps * iz_ind;
           PetscScalar loc_Wij_value;
           LibmeshPetscCall(VecGetValues(sol_holder_P, 1, &row_vec, &loc_Wij_value));
           sumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * loc_Wij_value;
