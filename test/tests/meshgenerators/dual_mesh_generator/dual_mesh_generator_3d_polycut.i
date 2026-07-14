@@ -15,7 +15,7 @@
     [cut]
         type = BlockDeletionGenerator
         input = myCCMG
-        block = '5 6'
+        block = '7 8'
     []
 
     [myDualGen]
