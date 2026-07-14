@@ -1,5 +1,5 @@
 [Tests]
-  issues = "#15538"
+  issues = "#15538 #24527"
   design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md "
            "PODSamplerSolutionTransfer.md PODResidualTransfer.md"
 
@@ -46,7 +46,6 @@
       allow_test_objects = true
       detail = 'and safely handling INITIAL execution before training data is available.'
       max_parallel = 3 # We need fewer processors than samples
-      issues = "#24527"
     []
   []
 []
