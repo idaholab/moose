@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "AddFunctionAction.h"
-#include "CommonChemicalCompositionAction.h"
+#include "Action.h"
+#include "ThermochimicaConfiguration.h"
 
 /**
  * The ChemicalCompositionAction sets up user objects, aux kernels, and aux variables
@@ -22,49 +22,14 @@ public:
   static InputParameters validParams();
   ChemicalCompositionAction(const InputParameters & params);
 
-  const std::vector<unsigned int> & elementIDs() const { return _element_ids; }
-
-  const std::vector<std::string> & phases() const { return _phases; }
-  const std::vector<std::string> & elementPotentials() const
-  {
-    return _tokenized_element_potentials;
-  }
-
-  const std::vector<std::pair<std::string, std::string>> & speciesPhasePairs() const
-  {
-    return _tokenized_species;
-  }
-
-  const std::vector<std::pair<std::string, std::string>> & vaporPhasePairs() const
-  {
-    return _tokenized_vapor_species;
-  }
-
-  const std::vector<std::pair<std::string, std::string>> & phaseElementPairs() const
-  {
-    return _tokenized_phase_elements;
-  }
-
-  virtual void act();
+  virtual void act() override;
 
 protected:
   void readCSV();
 
-  /// Element names
-  std::vector<std::string> _elements;
-
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
 
-  /// List of phases tracked by Thermochimica
-  std::vector<std::string> _phases;
-
-  /// Atomic numbers of the selected elements
-  std::vector<unsigned int> _element_ids;
-
-  /// Tokenized versions of the output variables to avoid redoing tokenization
-  std::vector<std::pair<std::string, std::string>> _tokenized_species;
-  std::vector<std::string> _tokenized_element_potentials;
-  std::vector<std::pair<std::string, std::string>> _tokenized_vapor_species;
-  std::vector<std::pair<std::string, std::string>> _tokenized_phase_elements;
+  /// Validated immutable configuration consumed by the runtime executor
+  std::shared_ptr<ThermochimicaConfiguration> _configuration;
 };
