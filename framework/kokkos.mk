@@ -69,42 +69,43 @@ ifeq ($(PETSC_HAVE_SYCL),1)
 endif
 
 ifneq ($(PETSC_HAVE_CUDA),)
-  KOKKOS_DEVICE             := CUDA
-  KOKKOS_ARCH               := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
-  KOKKOS_COMPILER           := NVCC
-  KOKKOS_CXX                 = $(CUDA_COMPILER)
-  KOKKOS_CXXFLAGS            = -arch=sm_$(CUDA_ARCH) --extended-lambda --relocatable-device-code=true --dlink-time-opt
-  KOKKOS_CXXFLAGS           += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
-  KOKKOS_CXXFLAGS           += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
-  KOKKOS_CPPFLAGS            = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
-  KOKKOS_LDFLAGS             = --forward-unknown-to-host-compiler --relocatable-device-code=true --dlink-time-opt -arch=sm_$(CUDA_ARCH)
-  KOKKOS_LIBS                = -lpetsckokkos
-  libmesh_PETSC_KOKKOS_LIBS := $(filter %petsckokkos %petsckokkosdlink,$(libmesh_LIBS))
-  libmesh_LIBS              := $(filter-out %petsckokkos %petsckokkosdlink,$(libmesh_LIBS))
+# CUDA link-time optimization (LTO) can improve the performance of relocatable device code (RDC).
+# Some testing showed that LTO can achieve almost equivalent performance with fully inlined code
+# even when linking across translation units through RDC. But it was causing some weird device
+# stack corruptions and crashes with CUDA 12.9 for a couple of tests. When it is resolved, turn
+# on --dlink-time-opt.
+  KOKKOS_DEVICE     := CUDA
+  KOKKOS_ARCH       := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
+  KOKKOS_COMPILER   := NVCC
+  KOKKOS_CXX         = $(CUDA_COMPILER)
+  KOKKOS_CXXFLAGS    = -arch=sm_$(CUDA_ARCH) --extended-lambda --relocatable-device-code=true
+  KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
+  KOKKOS_CXXFLAGS   += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
+  KOKKOS_CPPFLAGS    = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
+  KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler --relocatable-device-code=true -arch=sm_$(CUDA_ARCH)
 else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
-  KOKKOS_DEVICE             := HIP
-  KOKKOS_ARCH               :=
-  KOKKOS_COMPILER           := HIPCC
-  KOKKOS_CXX                 = $(HIP_COMPILER)
-  KOKKOS_CXXFLAGS            =
-  KOKKOS_CPPFLAGS            =
-  KOKKOS_LDFLAGS             =
+  KOKKOS_DEVICE     := HIP
+  KOKKOS_ARCH       :=
+  KOKKOS_COMPILER   := HIPCC
+  KOKKOS_CXX         = $(HIP_COMPILER)
+  KOKKOS_CXXFLAGS    =
+  KOKKOS_CPPFLAGS    =
+  KOKKOS_LDFLAGS     =
 else ifneq ($(PETSC_HAVE_SYCL),) # To be determined for SYCL
-  KOKKOS_DEVICE             := SYCL
-  KOKKOS_ARCH               :=
-  KOKKOS_COMPILER           := DPCPP
-  KOKKOS_CXX                 = $(SYCL_COMPILER)
-  KOKKOS_CXXFLAGS            = -fsycl
-  KOKKOS_CPPFLAGS            =
-  KOKKOS_LDFLAGS             =
+  KOKKOS_DEVICE     := SYCL
+  KOKKOS_ARCH       :=
+  KOKKOS_COMPILER   := DPCPP
+  KOKKOS_CXX         = $(SYCL_COMPILER)
+  KOKKOS_CXXFLAGS    = -fsycl
+  KOKKOS_CPPFLAGS    =
+  KOKKOS_LDFLAGS     =
 else
-  KOKKOS_COMPILER           := CPU
-  KOKKOS_CXX                 = $(libmesh_CXX)
-  KOKKOS_CXXFLAGS            = $(CXXFLAGS) $(libmesh_CXXFLAGS) -x c++
-  KOKKOS_CPPFLAGS            = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
-  KOKKOS_LDFLAGS             =
-  KOKKOS_LIBS                =
-  ENABLE_KOKKOS_GPU         := false
+  KOKKOS_COMPILER   := CPU
+  KOKKOS_CXX         = $(libmesh_CXX)
+  KOKKOS_CXXFLAGS    = $(CXXFLAGS) $(libmesh_CXXFLAGS) -x c++
+  KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
+  KOKKOS_LDFLAGS     =
+  ENABLE_KOKKOS_GPU := false
 endif
 
 ifeq ($(ENABLE_KOKKOS_GPU),false)
@@ -116,7 +117,6 @@ endif
 
 KOKKOS_CXXFLAGS += -DMOOSE_KOKKOS_SCOPE=1 -DMETAPHYSICL_KOKKOS_COMPILATION=1 -fPIC
 KOKKOS_LDFLAGS  += $(libmesh_LDFLAGS)
-KOKKOS_INCLUDE   = $(libmesh_INCLUDE)
 
 ifeq ($(METHOD),opt)
   KOKKOS_CXXFLAGS += -DNDEBUG
@@ -137,7 +137,7 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 else
 
@@ -145,6 +145,6 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
-	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 endif
