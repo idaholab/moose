@@ -560,7 +560,7 @@ FEProblemSolve::solve()
         _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE);
 
         const auto convergence_status =
-            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters);
+            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters + 1);
         converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
         if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
           break;

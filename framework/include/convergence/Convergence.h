@@ -60,7 +60,9 @@ public:
   /**
    * Returns convergence status.
    *
-   * @param[in] iter   Iteration index (first index in loop should be 0)
+   * @param[in] iter   Iteration index, corresponding to 1 for the check after the first
+   *                   iteration. Note that the nonlinear iteration loop checks convergence
+   *                   even before the first iteration, so iter = 0 there.
    */
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) = 0;
 

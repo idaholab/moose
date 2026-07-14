@@ -134,19 +134,19 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
   TIME_SECTION(_perfid_check_convergence);
 
   if (_fixed_point_custom_pp)
-    computeCustomConvergencePostprocessor(iter);
+    computeCustomConvergencePostprocessor(iter - 1);
 
   // compute TIMESTEP_END residual norm; this should be executed between TIMESTEP_END
   // and TIMESTEP_BEGIN
   if (_has_fixed_point_norm)
     if (_fe_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
     {
-      _fixed_point_timestep_end_norm[iter] = _fe_problem.computeResidualL2Norm();
+      _fixed_point_timestep_end_norm[iter - 1] = _fe_problem.computeResidualL2Norm();
 
       Real end_norm_old =
-          (iter > 0 ? _fixed_point_timestep_end_norm[iter - 1] : std::numeric_limits<Real>::max());
+          (iter > 1 ? _fixed_point_timestep_end_norm[iter - 2] : std::numeric_limits<Real>::max());
 
-      outputResidualNorm("TIMESTEP_END", end_norm_old, _fixed_point_timestep_end_norm[iter]);
+      outputResidualNorm("TIMESTEP_END", end_norm_old, _fixed_point_timestep_end_norm[iter - 1]);
     }
 
   // print residual norm history
@@ -155,10 +155,10 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
                                                 _fixed_point_timestep_begin_norm,
                                                 _fixed_point_timestep_end_norm);
 
-  if (iter + 2 > _min_fixed_point_its)
+  if (iter >= _min_fixed_point_its)
   {
-    Real max_norm =
-        std::max(_fixed_point_timestep_begin_norm[iter], _fixed_point_timestep_end_norm[iter]);
+    Real max_norm = std::max(_fixed_point_timestep_begin_norm[iter - 1],
+                             _fixed_point_timestep_end_norm[iter - 1]);
 
     Real max_relative_drop = max_norm / _fixed_point_initial_norm;
 
@@ -189,7 +189,7 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
     }
   }
 
-  if (iter + 1 == _max_fixed_point_its)
+  if (iter == _max_fixed_point_its)
   {
     if (_accept_max_it)
     {
