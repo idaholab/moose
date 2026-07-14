@@ -11,19 +11,19 @@
   elements = 'Mo Ru Pd'
   output_phases = 'BCCN HCPN'
   output_species = 'HCPN:Pd'
-  output_element_potentials = 'mu:Pd'
-  output_vapor_pressures = 'vp:gas_ideal:Pd'
-  output_element_phases = 'ep:BCCN:Pd'
+  output_element_potentials = 'Pd'
+  output_vapor_pressures = 'gas_ideal:Pd'
+  output_element_phases = 'BCCN:Pd'
 []
 
 [ChemicalComposition]
   [thermo]
-    thermofile = Kaye_NobleMetals.dat
-    tunit = K
-    punit = atm
-    munit = moles
+    thermodynamic_database = Kaye_NobleMetals.dat
+    temperature_unit = K
+    pressure_unit = atm
+    composition_unit = moles
     temperature = 2250
-    output_species_unit = mole_fraction
+    species_output_unit = mole_fraction
   []
 []
 

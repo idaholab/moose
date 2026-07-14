@@ -8,614 +8,713 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaData.h"
-#include "ChemicalCompositionAction.h"
 #include "ThermochimicaUtils.h"
-#include "ActionWarehouse.h"
-#include "libmesh/int_range.h"
+#include "MooseVariable.h"
+#include "MooseVariableField.h"
+#include "MooseMesh.h"
+#include "MooseUtils.h"
+#include "FEProblemBase.h"
+#include "AuxiliarySystem.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+#include "libmesh/threads.h"
 
-#include <sys/mman.h>   // for mmap
-#include <unistd.h>     // for fork
-#include <sys/socket.h> // for socketpair
-#include <csignal>      // for kill
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <cerrno>
+#include <chrono>
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstring>
+#include <new>
+#include <numeric>
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
 #include "checkUnits.h"
 #endif
 
-registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
-registerMooseObject("ChemicalReactionsApp", ThermochimicaElementData);
+registerMooseObject("ChemicalReactionsApp", ThermochimicaData);
 
-template <bool is_nodal>
-InputParameters
-ThermochimicaDataBase<is_nodal>::validParams()
+namespace
 {
-  InputParameters params = ThermochimicaDataBaseParent<is_nodal>::validParams();
+Threads::spin_mutex output_mutex;
 
-  if constexpr (is_nodal)
-    ThermochimicaUtils::addClassDescription(
-        params, "Provides access to Thermochimica-calculated data at nodes.");
-  else
-    ThermochimicaUtils::addClassDescription(
-        params, "Provides access to Thermochimica-calculated data at elements.");
+std::size_t
+alignedOffset(const std::size_t offset, const std::size_t alignment)
+{
+  return (offset + alignment - 1) & ~(alignment - 1);
+}
+}
 
-  params.addRequiredCoupledVar("elements", "Amounts of elements");
-  params.addRequiredCoupledVar("temperature", "Coupled temperature");
-  params.addCoupledVar("pressure", 1.0, "Pressure");
-
-  MooseEnum reinit_type("none time nodal", "nodal");
-  params.addParam<MooseEnum>(
-      "reinit_type", reinit_type, "Reinitialization scheme to use with Thermochimica");
-
-  params.addCoupledVar("output_element_potentials", "Chemical potentials of elements");
-  params.addCoupledVar("output_phases", "Amounts of phases to be output");
-  params.addCoupledVar("output_species", "Amounts of species to be output");
-  params.addCoupledVar("output_vapor_pressures", "Vapour pressures of species to be output");
-  params.addCoupledVar("output_element_phases",
-                       "Elements whose molar amounts in specific phases are requested");
-
-  MooseEnum mUnit_op("mole_fraction moles", "moles");
-  params.addParam<MooseEnum>(
-      "output_species_unit", mUnit_op, "Mass unit for output species: mole_fractions or moles");
-
-  if constexpr (is_nodal)
-    params.set<bool>("unique_node_execute") = true;
-
-  params.addPrivateParam<ChemicalCompositionAction *>("_chemical_composition_action");
-  params.addParam<FileName>("thermofile",
-                            "Thermodynamic file to be used for Thermochimica calculations");
+InputParameters
+ThermochimicaData::validParams()
+{
+  InputParameters params = ThreadedGeneralUserObject::validParams();
+  params += BlockRestrictable::validParams();
+  ThermochimicaUtils::addClassDescription(
+      params, "Internal exact batched Thermochimica equilibrium executor.");
+  params.addPrivateParam<ThermochimicaConfigurationPtr>("_configuration");
+  params.addCoupledVar("temperature", "Temperature input used to establish execution dependencies");
+  params.addCoupledVar("pressure", 1.0, "Pressure input used to establish execution dependencies");
+  params.addCoupledVar("elements", "Element inputs used to establish execution dependencies");
   return params;
 }
 
-void
-ThermochimicaDataBase_handler(int /*signum*/)
-{
-  exit(0);
-}
-
-template <bool is_nodal>
-ThermochimicaDataBase<is_nodal>::ThermochimicaDataBase(const InputParameters & parameters)
-  : ThermochimicaDataBaseParent<is_nodal>(parameters),
-    _pressure(coupledValue("pressure")),
-    _temperature(coupledValue("temperature")),
-    _n_phases(coupledComponents("output_phases")),
-    _n_species(coupledComponents("output_species")),
-    _n_elements(coupledComponents("elements")),
-    _n_vapor_species(coupledComponents("output_vapor_pressures")),
-    _n_phase_elements(coupledComponents("output_element_phases")),
-    _n_potentials(coupledComponents("output_element_potentials")),
-    _el(_n_elements),
-    _action(*parameters.getCheckedPointerParam<ChemicalCompositionAction *>(
-        "_chemical_composition_action")),
-    _el_ids(_action.elementIDs()),
-    _reinit(parameters.get<MooseEnum>("reinit_type").getEnum<ReinitializationType>()),
-    _ph_names(_action.phases()),
-    _element_potentials(_action.elementPotentials()),
-    _species_phase_pairs(_action.speciesPhasePairs()),
-    _vapor_phase_pairs(_action.vaporPhasePairs()),
-    _phase_element_pairs(_action.phaseElementPairs()),
-    _output_element_potentials(isCoupled("output_element_potentials")),
-    _output_vapor_pressures(isCoupled("output_vapor_pressures")),
-    _output_element_phases(isCoupled("output_element_phases")),
-    _ph(_n_phases),
-    _sp(_n_species),
-    _vp(_n_vapor_species),
-    _el_pot(_n_potentials),
-    _el_ph(_n_phase_elements),
-    _output_mass_unit(parameters.get<MooseEnum>("output_species_unit").getEnum<OutputMassUnit>())
+ThermochimicaData::ThermochimicaData(const InputParameters & parameters)
+  : ThreadedGeneralUserObject(parameters),
+    BlockRestrictable(this),
+    _configuration(parameters.get<ThermochimicaConfigurationPtr>("_configuration")),
+    _nodal(_configuration->location == ThermochimicaConfiguration::EvaluationLocation::NODAL),
+    _thread_count(libMesh::n_threads()),
+    _temperature(inputSource(_configuration->temperature)),
+    _pressure(inputSource(_configuration->pressure))
 {
   ThermochimicaUtils::checkLibraryAvailability(*this);
 
-  if (_el_ids.size() != _n_elements)
-    mooseError("Element IDs size does not match number of elements.");
-  for (const auto i : make_range(_n_elements))
-    _el[i] = &coupledValue("elements", i);
+  _elements.reserve(_configuration->element_variables.size());
+  for (const auto & name : _configuration->element_variables)
+    _elements.push_back(
+        &dynamic_cast<MooseVariableField<Real> &>(_subproblem.getActualFieldVariable(_tid, name)));
 
-  if (isParamValid("output_phases"))
-  {
-    if (_ph_names.size() != _n_phases)
-      mooseError("Phase names vector size does not match number of phases.");
+  _outputs.reserve(_configuration->output_variables.size());
+  for (const auto & name : _configuration->output_variables)
+    _outputs.push_back(
+        &dynamic_cast<MooseVariableField<Real> &>(_subproblem.getActualFieldVariable(_tid, name)));
 
-    for (const auto i : make_range(_n_phases))
-      _ph[i] = &writableVariable("output_phases", i);
-  }
-
-  if (isParamValid("output_species"))
-  {
-    if (_species_phase_pairs.size() != _n_species)
-      mooseError("Species name vector size does not match number of output species.");
-
-    for (const auto i : make_range(_n_species))
-      _sp[i] = &writableVariable("output_species", i);
-  }
-
-  if (isParamValid("output_vapor_pressures"))
-  {
-    if (_vapor_phase_pairs.size() != _n_vapor_species)
-      mooseError("Vapor species name vector size does not match number of output vapor species.");
-
-    for (const auto i : make_range(_n_vapor_species))
-      _vp[i] = &writableVariable("output_vapor_pressures", i);
-  }
-
-  if (isParamValid("output_element_phases"))
-  {
-    if (_phase_element_pairs.size() != _n_phase_elements)
-      mooseError("Element phase vector size does not match number of output elements in phases");
-
-    for (const auto i : make_range(_n_phase_elements))
-      _el_ph[i] = &writableVariable("output_element_phases", i);
-  }
-
-  if (isParamValid("output_element_potentials"))
-  {
-    if (_element_potentials.size() != _n_potentials)
-      mooseError("Element potentials vector size does not match number of element potentials "
-                 "specified for output.");
-
-    for (const auto i : make_range(_n_potentials))
-      _el_pot[i] = &writableVariable("output_element_potentials", i);
-  }
-  // buffer size
-  const auto dofid_size = std::max(/* send */ 1, /* receive */ 0);
-  const auto real_size =
-      std::max(/* send */ 2 + _n_elements,
-               /* receive */ _n_phases + _n_species + _element_potentials.size() +
-                   _n_vapor_species + _n_phase_elements);
-
-  // set up shared memory for communication with child process
-  auto shared_mem =
-      static_cast<std::byte *>(mmap(nullptr,
-                                    dofid_size * sizeof(dof_id_type) + real_size * sizeof(Real),
-                                    PROT_READ | PROT_WRITE,
-                                    MAP_ANONYMOUS | MAP_SHARED,
-                                    -1 /* fd */,
-                                    0 /* offset */));
-  if (shared_mem == MAP_FAILED)
-    mooseError("Failed to allocate shared memory for thermochimica IPC.");
-
-  // set up buffer partitions
-  _shared_dofid_mem = reinterpret_cast<dof_id_type *>(shared_mem);
-  _shared_real_mem = reinterpret_cast<Real *>(shared_mem + dofid_size * sizeof(dof_id_type));
-
-  // set up a bidirectional communication socket
-  int sockets[2];
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
-    mooseError("Failed to create socketpair for thermochimica IPC.");
-
-  // fork child process that will manage thermochimica calls
-  _pid = fork();
-  if (_pid < 0)
-    mooseError("Fork failed for thermochimica library.");
-  if (_pid == 0)
-  {
-    // here we are in the child process
-    _socket = sockets[0];
-    // clean exit upon SIGTERM (mainly for Civet code coverage)
-    signal(SIGTERM, ThermochimicaDataBase_handler);
-
-#ifdef THERMOCHIMICA_ENABLED
-    // Initialize database in Thermochimica
-    if (isParamValid("thermofile"))
-    {
-      const auto thermo_file = this->template getParam<FileName>("thermofile");
-
-      if (thermo_file.length() > 1024)
-        this->paramError("thermofile",
-                         "Path exceeds Thermochimica's maximal permissible length of 1024 with ",
-                         thermo_file.length(),
-                         " characters: ",
-                         thermo_file);
-
-      Thermochimica::setThermoFilename(thermo_file);
-
-      // Read in thermodynamics model, only once
-      Thermochimica::parseThermoFile();
-
-      const auto idbg = Thermochimica::checkInfoThermo();
-      if (idbg != 0)
-        this->paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
-    }
-#endif
-
-    while (true)
-      server();
-  }
-
-  // parent process continues here
-  _socket = sockets[1];
+  createWorker();
 }
 
-template <bool is_nodal>
-ThermochimicaDataBase<is_nodal>::~ThermochimicaDataBase()
-{
-  if (_pid)
-    kill(_pid, SIGTERM);
-}
+ThermochimicaData::~ThermochimicaData() { destroyWorker(); }
 
-template <bool is_nodal>
 void
-ThermochimicaDataBase<is_nodal>::initialize()
+ThermochimicaData::initialize()
 {
+  _evaluated_states = 0;
+  _batches = 0;
+  _warm_starts = 0;
+  _solve_seconds = 0;
+  _packing_seconds = 0;
+  _ipc_seconds = 0;
 }
 
-template <bool is_nodal>
-template <typename T>
-void
-ThermochimicaDataBase<is_nodal>::expect(T expect_msg)
+ThermochimicaData::InputSource
+ThermochimicaData::inputSource(const std::string & value)
 {
-  T msg;
-  while (read(_socket, &msg, sizeof(T)) == 0)
-  {
-    if (errno == EAGAIN)
-      continue;
-    mooseError("Read error waiting for '", expect_msg, "' ", errno, ' ', strerror(errno));
-  }
-  if (msg != expect_msg)
-    mooseError("Expected '", expect_msg, "' but received '", msg, "'");
-}
-
-template <bool is_nodal>
-template <typename T>
-void
-ThermochimicaDataBase<is_nodal>::notify(T send_msg)
-{
-  if (write(_socket, &send_msg, sizeof(T)) != sizeof(T))
-    mooseError("Failed to notify thermochimica library child process.");
-}
-
-template <bool is_nodal>
-void
-ThermochimicaDataBase<is_nodal>::execute()
-{
-  // either one DOF at a node or (currently) one DOF for constant monomial FV!
-  // This is enforced automatically by the ChemicalComposition action, which creates the correct
-  // variables.
-  const unsigned int qp = 0;
-
-  // store current dofID
-  if constexpr (is_nodal)
-    _shared_dofid_mem[0] = this->_current_node->id();
+  InputSource source;
+  if (_subproblem.hasVariable(value))
+    source.variable =
+        &dynamic_cast<MooseVariableField<Real> &>(_subproblem.getActualFieldVariable(_tid, value));
   else
-    _shared_dofid_mem[0] = this->_current_elem->id();
-
-  // store all required data in shared memory
-  _shared_real_mem[0] = _temperature[qp];
-  _shared_real_mem[1] = _pressure[qp];
-  for (const auto i : make_range(_n_elements))
-    _shared_real_mem[2 + i] = (*_el[i])[qp];
-
-  // message child process to trigger calculation
-  notify('A');
-
-  // and wait for the child process to signal end of calculation
-  expect('B');
-
-  // unpack data from shared memory
-  std::size_t idx = 0;
-
-  for (const auto i : make_range(_n_phases))
-    _ph[i]->setDofValue(_shared_real_mem[idx++], qp);
-
-  for (const auto i : make_range(_n_species))
-    _sp[i]->setDofValue(_shared_real_mem[idx++], qp);
-
-  if (_output_element_potentials)
-    for (const auto i : index_range(_element_potentials))
-      _el_pot[i]->setDofValue(_shared_real_mem[idx++], qp);
-
-  if (_output_vapor_pressures)
-    for (const auto i : make_range(_n_vapor_species))
-      _vp[i]->setDofValue(_shared_real_mem[idx++], qp);
-
-  if (_output_element_phases)
-    for (const auto i : make_range(_n_phase_elements))
-      _el_ph[i]->setDofValue(_shared_real_mem[idx++], qp);
+  {
+    try
+    {
+      source.constant = MooseUtils::convert<Real>(value);
+    }
+    catch (...)
+    {
+      mooseError("Thermochimica input '", value, "' is neither a field variable nor a number.");
+    }
+  }
+  return source;
 }
 
-template <bool is_nodal>
-void
-ThermochimicaDataBase<is_nodal>::server()
+Real
+ThermochimicaData::inputValue(const InputSource & source, const bool nodal) const
 {
-  // wait for message from parent process
-  expect('A');
-
-#ifdef THERMOCHIMICA_ENABLED
-  // fetch data from shared memory
-  _current_id = _shared_dofid_mem[0];
-
-  auto temperature = _shared_real_mem[0];
-  auto pressure = _shared_real_mem[1];
-
-  // Set temperature and pressure for thermochemistry solver
-  Thermochimica::setTemperaturePressure(temperature, pressure);
-
-  // Reset all element masses to 0
-  Thermochimica::setElementMass(0, 0.0);
-
-  // Set element masses
-  for (const auto i : make_range(_n_elements))
-    Thermochimica::setElementMass(_el_ids[i], _shared_real_mem[2 + i]);
-
-  // Optionally ask for a re-initialization (if reinit_requested == true)
-  reinitDataMooseToTc();
-
-  // Calculate thermochemical equilibrium
-  Thermochimica::thermochimica();
-
-  // Check for error status
-  auto idbg = Thermochimica::checkInfoThermo();
-  if (idbg != 0)
-    // error out for now, but we should send a code to the parent process
-    mooseError("Thermochimica error ", idbg);
-
-  // Save data for future reinits
-  reinitDataMooseFromTc();
-
-  // Get requested phase indices if phase concentration output was requested
-  // i.e. if output_phases is coupled
-  auto moles_phase = Thermochimica::getMolesPhase();
-
-  std::size_t idx = 0;
-
-  for (const auto i : make_range(_n_phases))
+  if (!source.variable)
+    return source.constant;
+  if (nodal)
   {
-    // Is this maybe constant? No it isn't for now
-    auto [index, idbg] = Thermochimica::getPhaseIndex(_ph_names[i]);
-    if (idbg != 0)
-      mooseError("Failed to get index of phase '", _ph_names[i], "'");
-    // Convert from 1-based (fortran) to 0-based (c++) indexing
-    if (index - 1 < 0)
-      _shared_real_mem[idx] = 0.0;
-    else
-      _shared_real_mem[idx] = moles_phase[index - 1];
-    idx++;
+    const auto * variable = dynamic_cast<const MooseVariable *>(source.variable);
+    if (!variable)
+      mooseError("Nodal Thermochimica inputs must be nodal finite-element variables.");
+    return variable->nodalValue();
   }
+  return source.variable->sln()[0];
+}
 
-  auto db_phases = Thermochimica::getPhaseNamesSystem();
-  auto getSpeciesMoles =
-      [this, moles_phase, db_phases](const std::string phase,
-                                     const std::string species) -> std::pair<double, int>
+bool
+ThermochimicaData::ownsEntity(const dof_id_type id) const
+{
+  return id % _thread_count == _tid;
+}
+
+bool
+ThermochimicaData::includesElement(const libMesh::Elem & elem) const
+{
+  return hasBlocks(elem.subdomain_id());
+}
+
+bool
+ThermochimicaData::includesNode(const libMesh::Node & node) const
+{
+  const auto & node_blocks = _fe_problem.mesh().getNodeBlockIds(node);
+  return std::any_of(
+      node_blocks.begin(), node_blocks.end(), [this](const auto id) { return hasBlocks(id); });
+}
+
+void
+ThermochimicaData::execute()
+{
+  unsigned int row = 0;
+  auto store_inputs = [&](const auto & entity)
   {
-    Real value = 0.0;
-    int code = 0;
+    const auto packing_start = std::chrono::steady_clock::now();
+    const auto id = entity.id();
+    _entity_ids[row] = id;
+    auto * input = _inputs + row * _configuration->inputWidth();
+    input[0] = inputValue(_temperature, _nodal);
+    input[1] = inputValue(_pressure, _nodal);
+    for (const auto i : index_range(_elements))
+      input[2 + i] = inputValue({_elements[i], 0}, _nodal);
+    _packing_seconds +=
+        std::chrono::duration<Real>(std::chrono::steady_clock::now() - packing_start).count();
 
-    auto [index, idbg] = Thermochimica::getPhaseIndex(phase);
-
-    if (Thermochimica::isPhaseMQM(
-            std::distance(db_phases.begin(), std::find(db_phases.begin(), db_phases.end(), phase))))
+    ++row;
+    if (row == _configuration->batch_size)
     {
-      auto [fraction, idbg] = Thermochimica::getMqmqaPairMolFraction(phase, species);
-
-      switch (_output_mass_unit)
-      {
-        case OutputMassUnit::FRACTION:
-        {
-          value = fraction;
-          code = idbg;
-          break;
-        }
-        case OutputMassUnit::MOLES:
-        {
-          auto [molesPair, idbgPair] = Thermochimica::getMqmqaMolesPairs(phase);
-          value = molesPair * fraction;
-          code = idbg + idbgPair;
-          break;
-        }
-        default:
-          break;
-      }
+      flushBatch(row);
+      row = 0;
     }
-    else
-    {
-      auto [fraction, idbg] = Thermochimica::getOutputMolSpeciesPhase(phase, species);
-      switch (_output_mass_unit)
-      {
-        case OutputMassUnit::FRACTION:
-        {
-          value = fraction;
-          code = idbg;
-          break;
-        }
-        case OutputMassUnit::MOLES:
-        {
-          value = index >= 1 ? moles_phase[index - 1] * fraction : 0.0;
-          code = idbg;
-          break;
-        }
-        default:
-          break;
-      }
-    }
-    return {value, code};
   };
 
-  for (const auto i : make_range(_n_species))
+  if (_nodal)
   {
-    auto [fraction, idbg] = getSpeciesMoles(
-        _species_phase_pairs[i].first,
-        _species_phase_pairs[i].second); // can we somehow use IDs instead of strings here?
-
-    if (idbg == 0)
-      _shared_real_mem[idx] = fraction;
-    else if (idbg == 1)
-      _shared_real_mem[idx] = 0.0;
-#ifndef NDEBUG
-    else
-      mooseError("Failed to get phase speciation for phase '",
-                 _species_phase_pairs[i].first,
-                 "' and species '",
-                 _species_phase_pairs[i].second,
-                 "'. Thermochimica returned ",
-                 idbg);
-#endif
-    idx++;
+    auto & mesh = _fe_problem.mesh().getMesh();
+    for (auto it = mesh.local_nodes_begin(); it != mesh.local_nodes_end(); ++it)
+    {
+      const auto & node = **it;
+      if (!ownsEntity(node.id()) || !includesNode(node))
+        continue;
+      _fe_problem.reinitNode(&node, _tid);
+      store_inputs(node);
+    }
+  }
+  else
+  {
+    auto & mesh = _fe_problem.mesh().getMesh();
+    for (auto it = mesh.active_local_elements_begin(); it != mesh.active_local_elements_end(); ++it)
+    {
+      const auto & elem = **it;
+      if (!ownsEntity(elem.id()) || !includesElement(elem))
+        continue;
+      _fe_problem.reinitElem(&elem, _tid);
+      store_inputs(elem);
+    }
   }
 
-  if (_output_element_potentials)
-    for (const auto i : index_range(_element_potentials))
-    {
-      auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
-      if (idbg == 0)
-        _shared_real_mem[idx] = potential;
-      else if (idbg == 1)
-        // element not present, just leave this at 0 for now
-        _shared_real_mem[idx] = 0.0;
-#ifndef NDEBUG
-      else if (idbg == -1)
-        mooseError("Failed to get element potential for element '",
-                   _element_potentials[i],
-                   "'. Thermochimica returned ",
-                   idbg);
-#endif
-      idx++;
-    }
-
-  if (_output_vapor_pressures)
-    for (const auto i : make_range(_n_vapor_species))
-    {
-      auto [fraction, moles, idbg] =
-          Thermochimica::getOutputMolSpecies(_vapor_phase_pairs[i].second);
-      libmesh_ignore(moles);
-
-      if (idbg == 0)
-        _shared_real_mem[idx] = fraction * pressure;
-      else if (idbg == 1)
-        _shared_real_mem[idx] = 0.0;
-#ifndef NDEBUG
-      else
-        mooseError("Failed to get vapor pressure for phase '",
-                   _vapor_phase_pairs[i].first,
-                   "' and species '",
-                   _vapor_phase_pairs[i].second,
-                   "'. Thermochimica returned ",
-                   idbg);
-#endif
-      idx++;
-    }
-
-  if (_output_element_phases)
-    for (const auto i : make_range(_n_phase_elements))
-    {
-      auto [moles, idbg] = Thermochimica::getElementMolesInPhase(_phase_element_pairs[i].second,
-                                                                 _phase_element_pairs[i].first);
-
-      if (idbg == 0)
-        _shared_real_mem[idx] = moles;
-      else if (idbg == 1)
-        _shared_real_mem[idx] = 0.0;
-#ifndef NDEBUG
-      else
-        mooseError("Failed to get moles of element '",
-                   _phase_element_pairs[i].second,
-                   "' in phase '",
-                   _phase_element_pairs[i].first,
-                   "'. Thermochimica returned ",
-                   idbg);
-#endif
-      idx++;
-    }
-#endif
-  // Send message back to parent process
-  notify('B');
+  if (row)
+    flushBatch(row);
 }
 
-template <bool is_nodal>
 void
-ThermochimicaDataBase<is_nodal>::reinitDataMooseFromTc()
+ThermochimicaData::threadJoin(const UserObject & other)
+{
+  const auto & data = static_cast<const ThermochimicaData &>(other);
+  _evaluated_states += data._evaluated_states;
+  _batches += data._batches;
+  _warm_starts += data._warm_starts;
+  _solve_seconds += data._solve_seconds;
+  _packing_seconds += data._packing_seconds;
+  _ipc_seconds += data._ipc_seconds;
+}
+
+void
+ThermochimicaData::finalize()
+{
+  if (!_outputs.empty())
+  {
+    auto & auxiliary = _fe_problem.getAuxiliarySystem();
+    auxiliary.solution().close();
+    auxiliary.update();
+  }
+  if (_configuration->report_performance)
+    _console << "ThermochimicaData '" << name() << "': states=" << _evaluated_states
+             << ", batches=" << _batches << ", exact_solves=" << _evaluated_states
+             << ", warm_starts=" << _warm_starts << ", worker_solve_time=" << _solve_seconds
+             << " s, packing_time=" << _packing_seconds << " s, ipc_time=" << _ipc_seconds << " s"
+             << std::endl;
+}
+
+void
+ThermochimicaData::createWorker()
+{
+  std::size_t offset = sizeof(SharedHeader);
+  offset = alignedOffset(offset, alignof(dof_id_type));
+  const auto ids_offset = offset;
+  offset += _configuration->batch_size * sizeof(dof_id_type);
+  offset = alignedOffset(offset, alignof(int));
+  const auto status_offset = offset;
+  offset += _configuration->batch_size * sizeof(int);
+  offset = alignedOffset(offset, alignof(Real));
+  const auto inputs_offset = offset;
+  offset += _configuration->batch_size * _configuration->inputWidth() * sizeof(Real);
+  const auto results_offset = offset;
+  offset += _configuration->batch_size * _configuration->outputWidth() * sizeof(Real);
+  _shared_memory_size = offset;
+
+  _shared_memory =
+      mmap(nullptr, _shared_memory_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+  if (_shared_memory == MAP_FAILED)
+    mooseError("Failed to allocate shared memory for the Thermochimica worker: ", strerror(errno));
+
+  auto * bytes = static_cast<std::byte *>(_shared_memory);
+  _header = reinterpret_cast<SharedHeader *>(bytes);
+  new (_header) SharedHeader();
+  _entity_ids = reinterpret_cast<dof_id_type *>(bytes + ids_offset);
+  _row_status = reinterpret_cast<int *>(bytes + status_offset);
+  _inputs = reinterpret_cast<Real *>(bytes + inputs_offset);
+  _results = reinterpret_cast<Real *>(bytes + results_offset);
+
+  int sockets[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
+  {
+    const auto socket_errno = errno;
+    munmap(_shared_memory, _shared_memory_size);
+    _shared_memory = nullptr;
+    errno = socket_errno;
+    mooseError("Failed to create a socket for the Thermochimica worker: ", strerror(errno));
+  }
+
+  _worker_pid = fork();
+  if (_worker_pid < 0)
+  {
+    const auto fork_errno = errno;
+    close(sockets[0]);
+    close(sockets[1]);
+    munmap(_shared_memory, _shared_memory_size);
+    _shared_memory = nullptr;
+    errno = fork_errno;
+    mooseError("Failed to fork the Thermochimica worker: ", strerror(errno));
+  }
+  if (_worker_pid == 0)
+  {
+    close(sockets[1]);
+    _socket = sockets[0];
+    workerLoop();
+  }
+
+  close(sockets[0]);
+  _socket = sockets[1];
+  try
+  {
+    if (readMessage() != 'I')
+      mooseError("Thermochimica worker failed during initialization.");
+    if (_header->worker_status)
+      mooseError(
+          "Thermochimica worker initialization failed with status ", _header->worker_status, ".");
+  }
+  catch (...)
+  {
+    destroyWorker();
+    throw;
+  }
+}
+
+void
+ThermochimicaData::destroyWorker()
+{
+  if (_worker_pid > 0)
+  {
+    _header->command = static_cast<unsigned int>(Command::STOP);
+    try
+    {
+      writeMessage('Q');
+      readMessage();
+    }
+    catch (...)
+    {
+    }
+    if (_socket >= 0)
+    {
+      close(_socket);
+      _socket = -1;
+    }
+    int status = 0;
+    while (waitpid(_worker_pid, &status, 0) < 0 && errno == EINTR)
+      ;
+    _worker_pid = -1;
+  }
+  if (_socket >= 0)
+  {
+    close(_socket);
+    _socket = -1;
+  }
+  if (_shared_memory && _shared_memory != MAP_FAILED)
+  {
+    munmap(_shared_memory, _shared_memory_size);
+    _shared_memory = nullptr;
+  }
+}
+
+void
+ThermochimicaData::writeMessage(const char message)
+{
+  ssize_t written;
+  do
+    written = send(_socket, &message, sizeof(message), MSG_NOSIGNAL);
+  while (written < 0 && errno == EINTR);
+  if (written != sizeof(message))
+    mooseError("Thermochimica worker communication failed while writing: ", strerror(errno));
+}
+
+char
+ThermochimicaData::readMessage()
+{
+  char message = 0;
+  ssize_t received;
+  do
+    received = recv(_socket, &message, sizeof(message), 0);
+  while (received < 0 && errno == EINTR);
+  if (received == 0)
+    mooseError("Thermochimica worker exited unexpectedly.");
+  if (received != sizeof(message))
+    mooseError("Thermochimica worker communication failed while reading: ", strerror(errno));
+  return message;
+}
+
+void
+ThermochimicaData::flushBatch(const unsigned int count)
+{
+  _header->command = static_cast<unsigned int>(Command::SOLVE);
+  _header->count = count;
+  _header->worker_status = 0;
+  _header->warm_starts = 0;
+  _header->solve_seconds = 0;
+  const auto ipc_start = std::chrono::steady_clock::now();
+  writeMessage('Q');
+  if (readMessage() != 'R')
+    mooseError("Thermochimica worker returned an invalid response.");
+  const auto round_trip_seconds =
+      std::chrono::duration<Real>(std::chrono::steady_clock::now() - ipc_start).count();
+  if (_header->worker_status)
+    mooseError("Thermochimica worker failed with status ", _header->worker_status, ".");
+
+  for (const auto row : make_range(count))
+  {
+    if (_row_status[row])
+      mooseError("Thermochimica failed for entity ",
+                 _entity_ids[row],
+                 " with status ",
+                 _row_status[row],
+                 ".");
+    publishRow(row);
+  }
+
+  _evaluated_states += count;
+  ++_batches;
+  _warm_starts += _header->warm_starts;
+  _solve_seconds += _header->solve_seconds;
+  _ipc_seconds += std::max<Real>(0.0, round_trip_seconds - _header->solve_seconds);
+}
+
+void
+ThermochimicaData::publishRow(const unsigned int row)
+{
+  if (_outputs.empty())
+    return;
+
+  const libMesh::DofObject * entity =
+      _nodal ? static_cast<const libMesh::DofObject *>(
+                   _fe_problem.mesh().getMesh().node_ptr(_entity_ids[row]))
+             : static_cast<const libMesh::DofObject *>(
+                   _fe_problem.mesh().getMesh().elem_ptr(_entity_ids[row]));
+  if (!entity)
+    mooseError("Unable to find Thermochimica output entity ", _entity_ids[row], ".");
+
+  Threads::spin_mutex::scoped_lock lock(output_mutex);
+  auto & solution = _fe_problem.getAuxiliarySystem().solution();
+  const auto * result = _results + row * _configuration->outputWidth();
+  for (const auto output : index_range(_outputs))
+  {
+    const auto dof =
+        entity->dof_number(_outputs[output]->sys().number(), _outputs[output]->number(), 0);
+    solution.set(dof, result[output]);
+  }
+}
+
+void
+ThermochimicaData::initializeThermochimica()
 {
 #ifdef THERMOCHIMICA_ENABLED
-  auto & d = _data[_current_id];
+  Thermochimica::setThermoFilename(_configuration->database);
+  Thermochimica::parseThermoFile();
+  if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+  {
+    _header->worker_status = info;
+    return;
+  }
+  Thermochimica::checkTemperature(_configuration->temperature_unit);
+  Thermochimica::setUnitTemperature(_configuration->temperature_unit);
+  if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+  {
+    _header->worker_status = info;
+    return;
+  }
+  Thermochimica::checkPressure(_configuration->pressure_unit);
+  Thermochimica::setUnitPressure(_configuration->pressure_unit);
+  if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+  {
+    _header->worker_status = info;
+    return;
+  }
+  Thermochimica::checkMass(_configuration->composition_unit);
+  Thermochimica::setUnitMass(_configuration->composition_unit);
+  if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+    _header->worker_status = info;
+#endif
+}
 
-  if (_reinit != ReinitializationType::NONE)
+[[noreturn]] void
+ThermochimicaData::workerLoop()
+{
+  initializeThermochimica();
+  writeMessage('I');
+  if (_header->worker_status)
+    _exit(1);
+  while (true)
+  {
+    readMessage();
+    if (_header->command == static_cast<unsigned int>(Command::STOP))
+    {
+      writeMessage('R');
+      _exit(0);
+    }
+    if (_header->command != static_cast<unsigned int>(Command::SOLVE))
+    {
+      _header->worker_status = EINVAL;
+      writeMessage('R');
+      continue;
+    }
+
+    const auto start = std::chrono::steady_clock::now();
+    for (const auto row : make_range(_header->count))
+      _row_status[row] = solveRow(row);
+    _header->solve_seconds =
+        std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
+    writeMessage('R');
+  }
+}
+
+int
+ThermochimicaData::solveRow(const unsigned int row)
+{
+#ifdef THERMOCHIMICA_ENABLED
+  const auto * input = _inputs + row * _configuration->inputWidth();
+  auto * result = _results + row * _configuration->outputWidth();
+  std::fill(result, result + _configuration->outputWidth(), 0.0);
+  _current_entity = _entity_ids[row];
+
+  Thermochimica::setTemperaturePressure(input[0], input[1]);
+  Thermochimica::setElementMass(0, 0.0);
+  for (const auto i : index_range(_configuration->element_ids))
+    Thermochimica::setElementMass(_configuration->element_ids[i], input[2 + i]);
+
+  const auto warm_start = _configuration->warm_start;
+  if (warm_start == ThermochimicaConfiguration::WarmStart::PREVIOUS_TIMESTEP)
+  {
+    Thermochimica::resetReinit();
+    if (loadPreviousState(_current_entity))
+    {
+      Thermochimica::setReinitRequested(true);
+      ++_header->warm_starts;
+    }
+    else
+      Thermochimica::setReinitRequested(false);
+  }
+  else
+  {
+    Thermochimica::setReinitRequested(warm_start ==
+                                      ThermochimicaConfiguration::WarmStart::PREVIOUS_SOLVE);
+    if (warm_start == ThermochimicaConfiguration::WarmStart::PREVIOUS_SOLVE &&
+        _worker_has_previous_solve)
+      ++_header->warm_starts;
+  }
+
+  Thermochimica::thermochimica();
+  if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+    return info;
+
+  if (warm_start != ThermochimicaConfiguration::WarmStart::NONE)
   {
     Thermochimica::saveReinitData();
-    auto data = Thermochimica::getReinitData();
+    if (warm_start == ThermochimicaConfiguration::WarmStart::PREVIOUS_TIMESTEP)
+      storePreviousState(_current_entity);
+    else if (warm_start == ThermochimicaConfiguration::WarmStart::PREVIOUS_SOLVE)
+      _worker_has_previous_solve = true;
+  }
 
-    if (_reinit == ReinitializationType::TIME)
+  const auto total_input =
+      std::accumulate(input + 2, input + _configuration->inputWidth(), Real(0));
+  const bool use_indexed_outputs = std::all_of(input + 2,
+                                               input + _configuration->inputWidth(),
+                                               [total_input](const Real value)
+                                               { return value > std::abs(total_input) * 1e-10; });
+  const auto moles_phase =
+      use_indexed_outputs ? std::vector<double>() : Thermochimica::getMolesPhase();
+  std::size_t output = 0;
+  for (const auto i : index_range(_configuration->phases))
+  {
+    if (use_indexed_outputs)
     {
-      d._assemblage = std::move(data.assemblage);
-      d._moles_phase = std::move(data.molesPhase);
-      d._element_potential = std::move(data.elementPotential);
-      d._chemical_potential = std::move(data.chemicalPotential);
-      d._mol_fraction = std::move(data.moleFraction);
-      d._elements_used = std::move(data.elementsUsed);
-      d._reinit_available = data.reinitAvailable;
+      const auto [moles, info] = Thermochimica::getPhaseMoles(_configuration->phase_indices[i]);
+      if (info != 0)
+        return info;
+      result[output++] = moles;
     }
-  }
-#endif
-}
-
-template <bool is_nodal>
-void
-ThermochimicaDataBase<is_nodal>::reinitDataMooseToTc()
-{
-#ifdef THERMOCHIMICA_ENABLED
-  // Tell Thermochimica whether a re-initialization is requested for this calculation
-  switch (_reinit)
-  {
-    case ReinitializationType::NONE:
-      Thermochimica::setReinitRequested(false);
-      break;
-    default:
-      Thermochimica::setReinitRequested(true);
-  }
-  // If we have re-initialization data and want a re-initialization, then
-  // load data into Thermochimica
-  auto it = _data.find(_current_id);
-
-  if (it != _data.end() &&
-      _reinit == ReinitializationType::TIME) // If doing previous timestep reinit
-  {
-    auto & d = it->second;
-    if (d._reinit_available)
-    {
-      Thermochimica::resetReinit();
-      Thermochimica::ReinitializationData data;
-      data.assemblage = d._assemblage;
-      data.molesPhase = d._moles_phase;
-      data.elementPotential = d._element_potential;
-      data.chemicalPotential = d._chemical_potential;
-      data.moleFraction = d._mol_fraction;
-      data.elementsUsed = d._elements_used;
-      Thermochimica::setReinitData(data);
-    }
-  }
-#endif
-}
-
-template <bool is_nodal>
-const typename ThermochimicaDataBase<is_nodal>::Data &
-ThermochimicaDataBase<is_nodal>::getNodalData(dof_id_type node_id) const
-{
-  if constexpr (!is_nodal)
-    mooseError("Requesting nodal data from an element object.");
-  return this->getData(node_id);
-}
-
-template <bool is_nodal>
-const typename ThermochimicaDataBase<is_nodal>::Data &
-ThermochimicaDataBase<is_nodal>::getElementData(dof_id_type element_id) const
-{
-  if constexpr (is_nodal)
-    mooseError("Requesting per element data from a nodal object.");
-  return this->getData(element_id);
-}
-
-template <bool is_nodal>
-const typename ThermochimicaDataBase<is_nodal>::Data &
-ThermochimicaDataBase<is_nodal>::getData(dof_id_type id) const
-{
-  const auto it = _data.find(id);
-  if (it == _data.end())
-  {
-    if constexpr (is_nodal)
-      mooseError("Unable to look up data for node ", id);
     else
-      mooseError("Unable to look up data for element ", id);
+    {
+      const auto [index, info] = Thermochimica::getPhaseIndex(_configuration->phases[i]);
+      if (info != 0)
+        return info;
+      result[output++] = index > 0 ? moles_phase[index - 1] : 0.0;
+    }
   }
-  return it->second;
+
+  for (const auto & species : _configuration->species)
+  {
+    Real value = 0;
+    int info = 0;
+    if (species.is_mqm)
+    {
+      const auto pair = Thermochimica::getMqmqaPairMolFraction(species.phase, species.species);
+      value = std::get<0>(pair);
+      info = std::get<1>(pair);
+      if (_configuration->species_unit == ThermochimicaConfiguration::SpeciesUnit::MOLES &&
+          info == 0)
+      {
+        const auto pairs = Thermochimica::getMqmqaMolesPairs(species.phase);
+        value *= std::get<0>(pairs);
+        info += std::get<1>(pairs);
+      }
+    }
+    else
+    {
+      const auto species_value =
+          use_indexed_outputs
+              ? Thermochimica::getOutputMolSpeciesPhase(species.phase_index, species.species_index)
+              : Thermochimica::getOutputMolSpeciesPhase(species.phase, species.species);
+      value = std::get<0>(species_value);
+      info = std::get<1>(species_value);
+      if (_configuration->species_unit == ThermochimicaConfiguration::SpeciesUnit::MOLES)
+      {
+        if (use_indexed_outputs)
+        {
+          const auto phase = Thermochimica::getPhaseMoles(species.phase_index);
+          value *= phase.first;
+          if (phase.second != 0)
+            return phase.second;
+        }
+        else
+        {
+          const auto [phase_index, phase_info] = Thermochimica::getPhaseIndex(species.phase);
+          if (phase_info != 0)
+            return phase_info;
+          value = phase_index > 0 ? value * moles_phase[phase_index - 1] : 0.0;
+        }
+      }
+    }
+    if (info != 0 && info != 1)
+      return info;
+    result[output++] = info == 1 ? 0.0 : value;
+  }
+
+  for (const auto i : index_range(_configuration->element_potentials))
+  {
+    const auto [value, info] =
+        use_indexed_outputs
+            ? Thermochimica::getElementPotential(_configuration->element_potential_indices[i])
+            : Thermochimica::getOutputChemPot(_configuration->element_potentials[i]);
+    if (info != 0 && info != 1)
+      return info;
+    result[output++] = info == 1 ? 0.0 : value;
+  }
+
+  for (const auto & species : _configuration->vapor_species)
+  {
+    const auto [fraction, info] =
+        use_indexed_outputs
+            ? Thermochimica::getOutputMolSpeciesPhase(species.phase_index, species.species_index)
+            : Thermochimica::getOutputMolSpeciesPhase(species.phase, species.species);
+    if (info != 0 && info != 1)
+      return info;
+    result[output++] = info == 1 ? 0.0 : fraction * input[1];
+  }
+
+  for (const auto & item : _configuration->phase_elements)
+  {
+    const auto [value, info] =
+        use_indexed_outputs
+            ? Thermochimica::getElementMolesInPhase(item.element_index, item.phase_index)
+            : Thermochimica::getElementMolesInPhase(item.element, item.phase);
+    if (info != 0 && info != 1 && info != 2)
+      return info;
+    result[output++] = info == 0 ? value : 0.0;
+  }
+  return 0;
+#else
+  return ENOSYS;
+#endif
 }
 
-template class ThermochimicaDataBase<true>;
-template class ThermochimicaDataBase<false>;
+#ifdef THERMOCHIMICA_ENABLED
+bool
+ThermochimicaData::loadPreviousState(const dof_id_type id)
+{
+  const auto slot_it = _previous_state_slots.find(id);
+  if (slot_it == _previous_state_slots.end() || !_previous_state_available[slot_it->second])
+    return false;
+
+  const auto slot = slot_it->second;
+  const auto integer_width = _reinit_elements + 169;
+  const auto real_width = 2 * _reinit_elements + 2 * _reinit_species;
+  auto * integers = _previous_state_integers.data() + slot * integer_width;
+  auto * reals = _previous_state_reals.data() + slot * real_width;
+
+  Thermochimica::setReinitData({integers,
+                                reals,
+                                reals + _reinit_elements,
+                                reals + 2 * _reinit_elements,
+                                reals + 2 * _reinit_elements + _reinit_species,
+                                integers + _reinit_elements});
+  return true;
+}
+
+void
+ThermochimicaData::storePreviousState(const dof_id_type id)
+{
+  if (!_reinit_elements)
+  {
+    const auto sizes = Thermochimica::getReinitDataSizes();
+    _reinit_elements = sizes.first;
+    _reinit_species = sizes.second;
+  }
+
+  auto [slot_it, inserted] = _previous_state_slots.emplace(id, _previous_state_slots.size());
+  const auto slot = slot_it->second;
+  const auto integer_width = _reinit_elements + 169;
+  const auto real_width = 2 * _reinit_elements + 2 * _reinit_species;
+  if (inserted)
+  {
+    _previous_state_integers.resize((slot + 1) * integer_width);
+    _previous_state_reals.resize((slot + 1) * real_width);
+    _previous_state_available.resize(slot + 1);
+  }
+
+  auto * integers = _previous_state_integers.data() + slot * integer_width;
+  auto * reals = _previous_state_reals.data() + slot * real_width;
+  const auto [available, iterations] =
+      Thermochimica::getReinitData({integers,
+                                    reals,
+                                    reals + _reinit_elements,
+                                    reals + 2 * _reinit_elements,
+                                    reals + 2 * _reinit_elements + _reinit_species,
+                                    integers + _reinit_elements});
+  (void)iterations;
+  _previous_state_available[slot] = available;
+}
+#endif
