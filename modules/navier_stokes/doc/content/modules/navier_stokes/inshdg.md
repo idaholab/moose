@@ -29,3 +29,10 @@ converges with optimal order whereas for other methods, the velocity
 gradient convergence is suboptimal. Additionally, with postprocessing
 the velocity converges with an additional order, e.g. it is superconvergent. Additional
 information may be found at the [core HDG kernel page](NavierStokesLHDGKernel.md).
+
+## Flow-transport compatibility
+
+Because mass conservation is exact with the HDG discretizations presented here,
+users may freely choose a space for scalar transport, e.g. the flow-transport discretizations
+should be compatible as discussed in [compatible flow and scalar transport](dgfe.md#compatible-flow-and-scalar-transport).
+

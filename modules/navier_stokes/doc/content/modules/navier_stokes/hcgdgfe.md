@@ -14,6 +14,17 @@ Additionally, because the velocity is discretized with a DG scheme, the momentum
 advection flux can be naturally upwinded without a complex upwinding scheme like
 as Streamline-Upwind Petrov-Galerkin (SUPG) (see [cgfe.md]).
 
+Coupling this flow discretization to scalar transport adds a space-selection
+requirement in which the scalar space must match the pressure space $W_h = Q_h$. This is
+because mass conservation is not exact for two reasons:
+
+1. the space of the divergence of the velocity, which is not continuous, does not match
+   the pressure space, which is continuous
+2. the normal component of the velocity is not continuous across the face.
+
+See [compatible flow and scalar transport](dgfe.md#compatible-flow-and-scalar-transport)
+for a couple of references on the topic.
+
 In the following we run through an example of a hybrid CG-DG input, in which we
 are using the scheme to solve a lid driven cavity problem with a Reynolds number
 of 200.
