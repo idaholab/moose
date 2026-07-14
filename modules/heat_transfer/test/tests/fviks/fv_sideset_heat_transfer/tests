@@ -7,4 +7,12 @@
     design = 'FVSideSetHeatTransferKernel.md'
     issues = '#31743'
   []
+  [fv_sideset_heat_transfer_reversed]
+    type = Exodiff
+    input = fv_sideset_heat_transfer_reversed.i
+    exodiff = fv_sideset_heat_transfer_reversed_out.e
+    requirement = 'The system shall model finite volume heat transfer across an internal sideset independent of the chosen subdomain and variable ordering.'
+    design = 'FVSideSetHeatTransferKernel.md'
+    issues = '#31743'
+  []
 []
