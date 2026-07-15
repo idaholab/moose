@@ -15,4 +15,22 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a channel using a interior penalty hybridizable discontinuous Galerkin scheme and produce third order convergence for velocity variables and second order convergence for the pressure variable when using second and first order polynomials respectively.'
     min_parallel = 4
   []
+  [open_boundary_mass_flux_penalty]
+    issues = '#31399'
+    design = 'MassFluxPenaltyIPHDG.md MassFluxPenaltyBC.md'
+    requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization shall solve a channel problem with an open boundary when mass flux jump penalization is'
+    [without_penalty]
+      type = CSVDiff
+      input = mms-channel.i
+      cli_args = 'Outputs/file_base=mms-channel-unpenalized'
+      csvdiff = mms-channel-unpenalized.csv
+      detail = 'omitted, and when it is'
+    []
+    [with_penalty]
+      type = CSVDiff
+      input = mms-channel-mass-flux-penalty.i
+      csvdiff = mms-channel-mass-flux-penalty_out.csv
+      detail = 'applied on internal, Dirichlet, and open boundaries.'
+    []
+  []
 []
