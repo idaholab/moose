@@ -27,9 +27,22 @@ public:
 protected:
   void readCSV();
 
+#ifdef THERMOCHIMICA_ENABLED
+  /** Translate the legacy flat output parameters into typed output descriptors. */
+  void buildLegacyOutputDescriptors(const std::vector<std::string> & database_phases,
+                                    const std::vector<std::vector<std::string>> & database_species);
+
+  /** Validate and append an output descriptor produced by any input syntax. */
+  void addOutputDescriptor(ThermochimicaConfiguration::OutputDescriptor output,
+                           const std::string & origin);
+#endif
+
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
 
   /// Validated immutable configuration consumed by the runtime executor
   std::shared_ptr<ThermochimicaConfiguration> _configuration;
+
+  /// Input parameter or block that generated each configured variable
+  std::map<VariableName, std::string> _variable_origins;
 };
