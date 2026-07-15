@@ -95,13 +95,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export METHOD=oprof
 {%- endif %}
 
-%post
-    umask 022
+%post -c /bin/bash
+    set -uexo pipefail
 
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+    source /.singularity.d/os_functions.sh
+    update_system_packages
 
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
@@ -156,7 +154,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
                 export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
             fi
             if mpiexec --version | grep -q hwloc; then
-                dnf install -y hwloc-gui
+                if is_rocky; then
+                    dnf install -y hwloc-gui
+                elif is_ubuntu; then
+                    apt-get install -y --no-install-recommends hwloc-nox
+                fi
             fi
         )
     fi
@@ -177,11 +179,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         CODE_SERVER_DIR={{ CODE_SERVER_DIR }}
 
-        # Install code-server rpm
-        CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
-        curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
-        rpm -i ${CODE_SERVER_FILE}
-        rm ${CODE_SERVER_FILE}
+        # Install code-server
+        if is_rocky; then
+            CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
+            curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
+            rpm -i ${CODE_SERVER_FILE}
+            rm ${CODE_SERVER_FILE}
+        elif is_ubuntu; then
+            CODE_SERVER_FILE=code-server_${CODE_SERVER_VERSION}_amd64.deb
+            curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
+            apt install ./${CODE_SERVER_FILE}
+            rm ${CODE_SERVER_FILE}
+        fi
 
         # Setup directory for code-server extensions. The extensions folder can be
         # filled by other applications as they wish to have extensions auto installed
@@ -216,6 +225,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         mkdir -p ${WASP_LOGS}
         WASP_SRC_DIR=${WASP_SRC_DIR} \
             ${ROOT_BUILD_DIR}/{{ WASP_BUILD_SCRIPT }} \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 -DCMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} 2>&1 | tee ${WASP_LOGS}/build.log
 
         # Cleanup
@@ -610,10 +620,15 @@ EOF
 {%- endif %}
 
     # Install node.js. Requested by dschwen for bison
-    dnf install -y nodejs npm
+    INSTALLS=("nodejs" "npm")
+    if is_rocky; then
+        dnf install -y "${INSTALLS[@]}"
+    elif is_ubuntu; then
+        apt-get install -y --no-install-recommends "${INSTALLS[@]}"
+    fi
 
     # Clean up
-    dnf clean all
+    clean_system_packages
     rm -rf ${ROOT_BUILD_DIR}
 
 %files
