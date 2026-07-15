@@ -44,7 +44,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %post -c /bin/bash
     set -uexo pipefail
 
-    source /.singularity.d/os_functions.sh
+    source /.singularity.d/build_utils.sh
     update_system_packages
 
     # Set the MPI environment
@@ -76,7 +76,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Optimization flags
 {%- if OPTFLAGS is not defined %}
-    OPTFLAGS=("-O2" "-march=x86-64-v3" "-mtune=generic")
+    OPTFLAGS=("-O2" "-march=$(default_march)" "-mtune=generic")
 {%- else %}
     IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
 {%- endif %}

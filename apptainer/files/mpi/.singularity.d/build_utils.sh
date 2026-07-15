@@ -44,3 +44,26 @@ clean_system_packages() {
         rm -rf /var/lib/apt/lists/*
     fi
 }
+
+default_march() {
+    if ! command -v mpicxx >/dev/null 2>&1; then
+        echo "mpicxx not found" >&2
+        return 1
+    fi
+
+    COMPILER="$(mpicxx -show | awk '{print $1}')"
+
+    if "$COMPILER" --version | grep -qi clang; then
+        echo "x86-64-v3"
+    elif "$COMPILER" --version | grep -qi "gcc\|g++"; then
+        GCC_MAJOR=$("$COMPILER" -dumpfullversion -dumpversion | cut -d. -f1)
+        if [ "$GCC_MAJOR" -ge 10 ]; then
+            echo "x86-64-v3"
+        else
+            echo "haswell"
+        fi
+    else
+        echo "unknown compiler" >&2
+        return 1
+    fi
+}

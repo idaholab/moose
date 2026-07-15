@@ -36,7 +36,7 @@ From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc
 %post -c /bin/bash
     set -uexo pipefail
 
-    source /.singularity.d/os_functions.sh
+    source /.singularity.d/build_utils.sh
     update_system_packages
 
     # Remove apptainer if it's installed
@@ -93,4 +93,4 @@ From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc
 %files
     {{ FILES_DIR }}/.singularity.d/env/02-fix-actions.sh /.singularity.d/env/02-fix-actions.sh
     {{ FILES_DIR }}/.singularity.d/moose_bashrc /.singularity.d/moose_bashrc
-    {{ FILES_DIR }}/.singularity.d/os_functions.sh /.singularity.d/os_functions.sh
+    {{ FILES_DIR }}/.singularity.d/build_utils.sh /.singularity.d/build_utils.sh
