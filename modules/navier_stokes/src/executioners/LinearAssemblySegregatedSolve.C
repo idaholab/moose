@@ -482,6 +482,14 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   auto its_res_pair = solver.solve(mmat, mmat, solution, rhs);
   system.update();
 
+  if (_solid_energy_field_relaxation != 1.0)
+  {
+    auto & old_local_solution = *(_solid_energy_system->solutionPreviousNewton());
+    NS::FV::relaxSolutionUpdate(
+        current_local_solution, old_local_solution, _solid_energy_field_relaxation);
+    old_local_solution = current_local_solution;
+  }
+
   if (_print_fields)
   {
     _console << " rhs when we solve solid energy " << std::endl;
@@ -519,8 +527,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // Solve the pressure corrector
   const auto residuals = solvePressureCorrector();
 
-  // Compute the face velocity which is used in the advection terms. In certain
-  // segregated solver algorithms (like PISO) this is only done on the last iteration.
+  // Update face fluxes using the pressure-correction solution (before pressure relaxation)
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 
@@ -538,8 +545,15 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // We recompute the updated pressure gradient
   _pressure_system.computeGradients();
 
+  // Recompute corrected gradients after relaxation so velocity correction uses the
+  // current pressure field (important for porous/baffle cases).
+  _rc_uo->recomputeCorrectedPressureGradient();
+
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
+
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
 
   return residuals;
 }
@@ -713,7 +727,8 @@ LinearAssemblySegregatedSolve::solve()
                                                          *_energy_system,
                                                          _energy_equation_relaxation,
                                                          _energy_linear_control,
-                                                         _energy_l_abs_tol);
+                                                         _energy_l_abs_tol,
+                                                         _energy_field_relaxation);
 
         if (_has_pm_radiation_systems && _should_solve_pm_radiation)
         {
@@ -859,11 +874,11 @@ LinearAssemblySegregatedSolve::setupResidualStorage() const
   // Residual store: position in this vector defines the ordering used by NS::FV::converged()
   // Each entry holds (linear its, normalized residual) for one system
   if (_should_solve_momentum)
-    for ([[maybe_unused]] const auto system_i : index_range(_momentum_systems))
+    for (const auto system_i : index_range(_momentum_systems))
     {
       storage.momentum_indices.push_back(storage.ns_residuals.size());
       storage.ns_residuals.push_back(std::make_pair(0, 1.0));
-      storage.ns_abs_tols.push_back(_momentum_absolute_tolerance);
+      storage.ns_abs_tols.push_back(_momentum_absolute_tolerance[system_i]);
     }
 
   if (_should_solve_pressure)

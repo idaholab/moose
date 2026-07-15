@@ -129,6 +129,9 @@ protected:
   /// The user-defined relaxation parameter for the energy equation
   const Real _energy_equation_relaxation;
 
+  /// The user-defined relaxation parameter for the energy field update
+  const Real _energy_field_relaxation;
+
   /// Options which hold the petsc settings for the fluid energy equation
   Moose::PetscSupport::PetscOptions _energy_petsc_options;
 
@@ -143,6 +146,9 @@ protected:
 
   /// Boolean for easy check if a solid energy system shall be solved or not
   const bool _has_solid_energy_system;
+
+  /// The user-defined relaxation parameter for the solid energy field update
+  const Real _solid_energy_field_relaxation;
 
   /// Options which hold the petsc settings for the fluid energy equation
   Moose::PetscSupport::PetscOptions _solid_energy_petsc_options;
@@ -234,8 +240,8 @@ protected:
 
   // ************************ Iteration control **************************** //
 
-  /// The user-defined absolute tolerance for determining the convergence in momentum
-  const Real _momentum_absolute_tolerance;
+  /// The user-defined absolute tolerance for determining the convergence of each momentum component
+  std::vector<Real> _momentum_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in pressure
   const Real _pressure_absolute_tolerance;
