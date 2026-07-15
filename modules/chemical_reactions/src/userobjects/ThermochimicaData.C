@@ -80,10 +80,15 @@ ThermochimicaData::ThermochimicaData(const InputParameters & parameters)
     _elements.push_back(
         &dynamic_cast<MooseVariableField<Real> &>(_subproblem.getActualFieldVariable(_tid, name)));
 
-  _outputs.reserve(_configuration->output_variables.size());
-  for (const auto & name : _configuration->output_variables)
-    _outputs.push_back(
-        &dynamic_cast<MooseVariableField<Real> &>(_subproblem.getActualFieldVariable(_tid, name)));
+  _outputs.reserve(_configuration->outputs.size());
+  for (const auto & output : _configuration->outputs)
+    std::visit(
+        [&](const auto & descriptor)
+        {
+          _outputs.push_back(&dynamic_cast<MooseVariableField<Real> &>(
+              _subproblem.getActualFieldVariable(_tid, descriptor.variable)));
+        },
+        output);
 
   createWorker();
 }
@@ -556,104 +561,14 @@ ThermochimicaData::solveRow(const unsigned int row)
                                                { return value > std::abs(total_input) * 1e-10; });
   const auto moles_phase =
       use_indexed_outputs ? std::vector<double>() : Thermochimica::getMolesPhase();
-  std::size_t output = 0;
-  for (const auto i : index_range(_configuration->phases))
+  const OutputEvaluationContext context{use_indexed_outputs, moles_phase, input[1]};
+  for (const auto output : index_range(_configuration->outputs))
   {
-    if (use_indexed_outputs)
-    {
-      const auto [moles, info] = Thermochimica::getPhaseMoles(_configuration->phase_indices[i]);
-      if (info != 0)
-        return info;
-      result[output++] = moles;
-    }
-    else
-    {
-      const auto [index, info] = Thermochimica::getPhaseIndex(_configuration->phases[i]);
-      if (info != 0)
-        return info;
-      result[output++] = index > 0 ? moles_phase[index - 1] : 0.0;
-    }
-  }
-
-  for (const auto & species : _configuration->species)
-  {
-    Real value = 0;
-    int info = 0;
-    if (species.is_mqm)
-    {
-      const auto pair = Thermochimica::getMqmqaPairMolFraction(species.phase, species.species);
-      value = std::get<0>(pair);
-      info = std::get<1>(pair);
-      if (_configuration->species_unit == ThermochimicaConfiguration::SpeciesUnit::MOLES &&
-          info == 0)
-      {
-        const auto pairs = Thermochimica::getMqmqaMolesPairs(species.phase);
-        value *= std::get<0>(pairs);
-        info += std::get<1>(pairs);
-      }
-    }
-    else
-    {
-      const auto species_value =
-          use_indexed_outputs
-              ? Thermochimica::getOutputMolSpeciesPhase(species.phase_index, species.species_index)
-              : Thermochimica::getOutputMolSpeciesPhase(species.phase, species.species);
-      value = std::get<0>(species_value);
-      info = std::get<1>(species_value);
-      if (_configuration->species_unit == ThermochimicaConfiguration::SpeciesUnit::MOLES)
-      {
-        if (use_indexed_outputs)
-        {
-          const auto phase = Thermochimica::getPhaseMoles(species.phase_index);
-          value *= phase.first;
-          if (phase.second != 0)
-            return phase.second;
-        }
-        else
-        {
-          const auto [phase_index, phase_info] = Thermochimica::getPhaseIndex(species.phase);
-          if (phase_info != 0)
-            return phase_info;
-          value = phase_index > 0 ? value * moles_phase[phase_index - 1] : 0.0;
-        }
-      }
-    }
-    if (info != 0 && info != 1)
+    const auto info = std::visit([&](const auto & descriptor)
+                                 { return evaluateOutput(descriptor, context, result[output]); },
+                                 _configuration->outputs[output]);
+    if (info != 0)
       return info;
-    result[output++] = info == 1 ? 0.0 : value;
-  }
-
-  for (const auto i : index_range(_configuration->element_potentials))
-  {
-    const auto [value, info] =
-        use_indexed_outputs
-            ? Thermochimica::getElementPotential(_configuration->element_potential_indices[i])
-            : Thermochimica::getOutputChemPot(_configuration->element_potentials[i]);
-    if (info != 0 && info != 1)
-      return info;
-    result[output++] = info == 1 ? 0.0 : value;
-  }
-
-  for (const auto & species : _configuration->vapor_species)
-  {
-    const auto [fraction, info] =
-        use_indexed_outputs
-            ? Thermochimica::getOutputMolSpeciesPhase(species.phase_index, species.species_index)
-            : Thermochimica::getOutputMolSpeciesPhase(species.phase, species.species);
-    if (info != 0 && info != 1)
-      return info;
-    result[output++] = info == 1 ? 0.0 : fraction * input[1];
-  }
-
-  for (const auto & item : _configuration->phase_elements)
-  {
-    const auto [value, info] =
-        use_indexed_outputs
-            ? Thermochimica::getElementMolesInPhase(item.element_index, item.phase_index)
-            : Thermochimica::getElementMolesInPhase(item.element, item.phase);
-    if (info != 0 && info != 1 && info != 2)
-      return info;
-    result[output++] = info == 0 ? value : 0.0;
   }
   return 0;
 #else
@@ -662,6 +577,121 @@ ThermochimicaData::solveRow(const unsigned int row)
 }
 
 #ifdef THERMOCHIMICA_ENABLED
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::PhaseAmountOutput & output,
+                                  const OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  if (context.use_indexed_outputs)
+  {
+    const auto [moles, info] = Thermochimica::getPhaseMoles(output.phase_index);
+    value = moles;
+    return info;
+  }
+
+  const auto [index, info] = Thermochimica::getPhaseIndex(output.phase);
+  value = info == 0 && index > 0 ? context.moles_phase[index - 1] : 0.0;
+  return info;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::SpeciesAmountOutput & output,
+                                  const OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  int info = 0;
+  if (output.is_mqm)
+  {
+    const auto pair = Thermochimica::getMqmqaPairMolFraction(output.phase, output.species);
+    value = std::get<0>(pair);
+    info = std::get<1>(pair);
+    if (output.unit == ThermochimicaConfiguration::SpeciesUnit::MOLES && info == 0)
+    {
+      const auto pairs = Thermochimica::getMqmqaMolesPairs(output.phase);
+      value *= std::get<0>(pairs);
+      info += std::get<1>(pairs);
+    }
+  }
+  else
+  {
+    const auto species_value =
+        context.use_indexed_outputs
+            ? Thermochimica::getOutputMolSpeciesPhase(output.phase_index, output.species_index)
+            : Thermochimica::getOutputMolSpeciesPhase(output.phase, output.species);
+    value = std::get<0>(species_value);
+    info = std::get<1>(species_value);
+    if (output.unit == ThermochimicaConfiguration::SpeciesUnit::MOLES)
+    {
+      if (context.use_indexed_outputs)
+      {
+        const auto phase = Thermochimica::getPhaseMoles(output.phase_index);
+        value *= phase.first;
+        if (phase.second != 0)
+          return phase.second;
+      }
+      else
+      {
+        const auto [phase_index, phase_info] = Thermochimica::getPhaseIndex(output.phase);
+        if (phase_info != 0)
+          return phase_info;
+        value = phase_index > 0 ? value * context.moles_phase[phase_index - 1] : 0.0;
+      }
+    }
+  }
+
+  if (info != 0 && info != 1)
+    return info;
+  if (info == 1)
+    value = 0.0;
+  return 0;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::ElementPotentialOutput & output,
+                                  const OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  const auto result = context.use_indexed_outputs
+                          ? Thermochimica::getElementPotential(output.element_index)
+                          : Thermochimica::getOutputChemPot(output.element);
+  value = result.first;
+  if (result.second != 0 && result.second != 1)
+    return result.second;
+  if (result.second == 1)
+    value = 0.0;
+  return 0;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::VaporPressureOutput & output,
+                                  const OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  const auto result =
+      context.use_indexed_outputs
+          ? Thermochimica::getOutputMolSpeciesPhase(output.phase_index, output.species_index)
+          : Thermochimica::getOutputMolSpeciesPhase(output.phase, output.species);
+  value = result.first * context.pressure;
+  if (result.second != 0 && result.second != 1)
+    return result.second;
+  if (result.second == 1)
+    value = 0.0;
+  return 0;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::ElementInPhaseOutput & output,
+                                  const OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  const auto result =
+      context.use_indexed_outputs
+          ? Thermochimica::getElementMolesInPhase(output.element_index, output.phase_index)
+          : Thermochimica::getElementMolesInPhase(output.element, output.phase);
+  value = result.second == 0 ? result.first : 0.0;
+  return result.second == 0 || result.second == 1 || result.second == 2 ? 0 : result.second;
+}
+
 bool
 ThermochimicaData::loadPreviousState(const dof_id_type id)
 {

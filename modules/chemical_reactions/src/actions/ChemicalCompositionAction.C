@@ -155,11 +155,11 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     config.warm_start = ThermochimicaConfiguration::WarmStart::PREVIOUS_TIMESTEP;
   else
     config.warm_start = ThermochimicaConfiguration::WarmStart::NONE;
-  config.species_unit = getParam<MooseEnum>("species_output_unit") == "moles"
-                            ? ThermochimicaConfiguration::SpeciesUnit::MOLES
-                            : ThermochimicaConfiguration::SpeciesUnit::MOLE_FRACTION;
-
 #ifdef THERMOCHIMICA_ENABLED
+  const auto species_unit = getParam<MooseEnum>("species_output_unit") == "moles"
+                                ? ThermochimicaConfiguration::SpeciesUnit::MOLES
+                                : ThermochimicaConfiguration::SpeciesUnit::MOLE_FRACTION;
+
   if (config.database.length() > 1024)
     paramError("thermodynamic_database",
                "Path exceeds Thermochimica's maximum length of 1024 characters: ",
@@ -230,11 +230,15 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   for (const auto & name : config.element_variables)
     if (!variable_names.insert(name).second)
       paramError("elements", "Duplicate generated variable name '", name, "'.");
-  auto addOutput = [&](const std::string & name, const std::string & parameter)
+  auto addOutput =
+      [&](ThermochimicaConfiguration::OutputDescriptor output, const std::string & parameter)
   {
+    const auto & name = std::visit([](const auto & descriptor) -> const VariableName &
+                                   { return descriptor.variable; },
+                                   output);
     if (!variable_names.insert(name).second)
       paramError(parameter, "Duplicate generated variable name '", name, "'.");
-    config.output_variables.push_back(name);
+    config.outputs.push_back(std::move(output));
   };
 
   auto phases = getParam<std::vector<std::string>>("output_phases");
@@ -248,9 +252,10 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   }
   for (const auto & phase : phases)
   {
-    config.phases.push_back(phase);
-    config.phase_indices.push_back(phaseSystemIndex(phase, "output_phases"));
-    addOutput(phase, "output_phases");
+    addOutput(
+        ThermochimicaConfiguration::PhaseAmountOutput{
+            phase, phase, phaseSystemIndex(phase, "output_phases")},
+        "output_phases");
   }
 
   auto species = getParam<std::vector<std::string>>("output_species");
@@ -280,12 +285,16 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       paramError(
           "output_species", "Species '", split[1], "' was not found in phase '", split[0], "'.");
     const bool is_mqm = Thermochimica::isPhaseMQM(phase_index);
-    config.species.push_back({split[0],
-                              split[1],
-                              phase_index,
-                              is_mqm ? -1 : speciesPhaseIndex(phase_index, split[1]),
-                              is_mqm});
-    addOutput(value, "output_species");
+    addOutput(
+        ThermochimicaConfiguration::SpeciesAmountOutput{
+            value,
+            split[0],
+            split[1],
+            phase_index,
+            is_mqm ? -1 : speciesPhaseIndex(phase_index, split[1]),
+            is_mqm,
+            species_unit},
+        "output_species");
   }
 
   auto potentials = getParam<std::vector<std::string>>("output_element_potentials");
@@ -295,7 +304,6 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   {
     if (std::find(config.elements.begin(), config.elements.end(), element) == config.elements.end())
       paramError("output_element_potentials", "Element '", element, "' is not configured.");
-    config.element_potentials.push_back(element);
     const auto [element_index, info] =
         Thermochimica::getElementIndex(Thermochimica::atomicNumber(element));
     if (info != 0)
@@ -303,8 +311,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  "Element '",
                  element,
                  "' could not be resolved in the configured system.");
-    config.element_potential_indices.push_back(element_index);
-    addOutput("mu:" + element, "output_element_potentials");
+    addOutput(
+        ThermochimicaConfiguration::ElementPotentialOutput{"mu:" + element, element, element_index},
+        "output_element_potentials");
   }
 
   auto vapors = getParam<std::vector<std::string>>("output_vapor_pressures");
@@ -333,9 +342,13 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  "' was not found in gas phase '",
                  split[0],
                  "'.");
-    config.vapor_species.push_back(
-        {split[0], split[1], phase_index, speciesPhaseIndex(phase_index, split[1]), false});
-    addOutput("vp:" + value, "output_vapor_pressures");
+    addOutput(
+        ThermochimicaConfiguration::VaporPressureOutput{"vp:" + value,
+                                                        split[0],
+                                                        split[1],
+                                                        phase_index,
+                                                        speciesPhaseIndex(phase_index, split[1])},
+        "output_vapor_pressures");
   }
 
   auto phase_elements = getParam<std::vector<std::string>>("output_element_phases");
@@ -367,8 +380,10 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
                  "Element '",
                  split[1],
                  "' could not be resolved in the configured system.");
-    config.phase_elements.push_back({split[0], split[1], phase_index, element_index});
-    addOutput("ep:" + value, "output_element_phases");
+    addOutput(
+        ThermochimicaConfiguration::ElementInPhaseOutput{
+            "ep:" + value, split[0], split[1], phase_index, element_index},
+        "output_element_phases");
   }
 
   Thermochimica::resetThermoAll();
@@ -394,8 +409,10 @@ ChemicalCompositionAction::act()
     params.applySpecificParameters(parameters(), {"block"});
     for (const auto & name : _configuration->element_variables)
       _problem->addAuxVariable(aux_var_type, name, params);
-    for (const auto & name : _configuration->output_variables)
-      _problem->addAuxVariable(aux_var_type, name, params);
+    for (const auto & output : _configuration->outputs)
+      std::visit([&](const auto & descriptor)
+                 { _problem->addAuxVariable(aux_var_type, descriptor.variable, params); },
+                 output);
   }
 
   if (_current_task == "add_ic" && isParamValid("initial_composition_file"))
