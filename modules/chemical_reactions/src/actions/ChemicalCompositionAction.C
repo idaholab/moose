@@ -27,6 +27,9 @@
 #endif
 
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_variable");
+registerMooseAction("ChemicalReactionsApp",
+                    ChemicalCompositionAction,
+                    "setup_chemical_composition");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_ic");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_user_object");
@@ -108,8 +111,16 @@ ChemicalCompositionAction::validParams()
 }
 
 ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & parameters)
-  : Action(parameters), _configuration(std::make_shared<ThermochimicaConfiguration>())
+  : Action(parameters)
 {
+}
+
+void
+ChemicalCompositionAction::initializeConfiguration()
+{
+  mooseAssert(!_configuration, "Chemical composition configuration was initialized twice");
+  _configuration = std::make_shared<ThermochimicaConfiguration>();
+
   const auto & warehouse_params = _app.getInputParameterWarehouse().getInputParameters();
   InputParameters & pars(*(warehouse_params.find(uniqueActionName())->second.get()));
 
@@ -414,6 +425,16 @@ void
 ChemicalCompositionAction::act()
 {
 #ifdef THERMOCHIMICA_ENABLED
+  if (_current_task == "setup_chemical_composition")
+  {
+    initializeConfiguration();
+    return;
+  }
+
+  if (!_configuration)
+    mooseError("Chemical composition configuration has not been initialized before task '",
+               _current_task,
+               ".");
   const auto elemental =
       _configuration->location == ThermochimicaConfiguration::EvaluationLocation::ELEMENTAL;
 
