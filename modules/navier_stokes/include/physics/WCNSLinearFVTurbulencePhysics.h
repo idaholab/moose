@@ -30,6 +30,7 @@ protected:
 
 private:
   virtual void addSolverVariables() override;
+  virtual void addFVInterpolationMethods() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
   virtual void addFunctorMaterials() override;

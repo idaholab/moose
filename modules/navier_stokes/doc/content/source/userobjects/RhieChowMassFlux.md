@@ -31,6 +31,12 @@ such as those with high Reynolds numbers, complex geometries, viscous flows in n
 multiphase flows, problems with rapidly varying thermophysical properties, and,
 in general, when using high-resolution grids.
 
+The [!param](/UserObjects/RhieChowMassFlux/pressure_diffusion_interpolation) parameter selects
+whether `average` or `harmonic` interpolation is used when computing the face values of `Ainv`,
+the $A^{-1}$ diffusion tensor in the pressure correction diffusion term. When using
+[WCNSLinearFVFlowPhysics.md], select this through the `pressure_diffusion_interpolation` parameter
+in the Physics block.
+
 !syntax parameters /UserObjects/RhieChowMassFlux
 
 !syntax inputs /UserObjects/RhieChowMassFlux

@@ -9,6 +9,17 @@ a vector of diffusion coefficients, where every entry describes the diffusion co
 a principal direction. This is equivalent to supplying a diagonal tensor in the
 fully anisotropic diffusion case.
 
+The diagonal tensor may be interpolated from adjacent cell values with the
+[!param](/LinearFVKernels/LinearFVAnisotropicDiffusion/coeff_interp_method) parameter and an
+interpolation method in the `[FVInterpolationMethods]` block described in [FVInterpolationMethod.md].
+If no interpolation method is supplied, the tensor functor is evaluated directly on the face.
+Common choices are [FVGeometricAverage.md] for arithmetic averaging and [FVHarmonicAverage.md] for
+harmonic averaging:
+
+!listing test/tests/linearfvkernels/anisotropic-diffusion/anisotropic-diffusion-2d.i block=FVInterpolationMethods
+
+!listing test/tests/linearfvkernels/anisotropic-diffusion/anisotropic-diffusion-2d-harmonic.i
+
 The implementation in this kernel is based on the derivation in [!cite](liu2015finite). The
 contributions of the system matrix and right hand side can be derived using the divergence
 theorem on a volumetric integral over cell $C$:

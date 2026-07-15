@@ -9,7 +9,6 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
-#include "NSFVUtils.h"
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
@@ -42,18 +41,22 @@ LinearWCNSFVMomentumFlux::validParams()
   params.addParam<bool>(
       "use_deviatoric_terms", false, "If deviatoric terms in the stress terms need to be used.");
 
-  params += Moose::FV::advectedInterpolationParameter();
+  params.addRequiredParam<InterpolationMethodName>(
+      "advected_interp_method_name",
+      "Name of the FVInterpolationMethod to use for the advected velocity.");
   return params;
 }
 
 LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _dim(_subproblem.mesh().dimension()),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _adv_interp_method(getFVAdvectedInterpolationMethod(
+        getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),
@@ -68,7 +71,8 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   if (_use_nonorthogonal_correction || _use_deviatoric_terms)
     _var.computeCellGradients();
 
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+  if (_adv_interp_method.needsGradients())
+    _var.computeCellGradients(_adv_interp_method.gradientLimiter());
 
   auto get_velocity_var = [&](const std::string & param_name)
   {
@@ -122,13 +126,17 @@ LinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 Real
 LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  return computeInternalStressRHSContribution() * _current_face_area;
+  return (computeInternalStressRHSContribution() +
+          _adv_interp_result.rhs_face_value * _face_mass_flux) *
+         _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  return -computeInternalStressRHSContribution() * _current_face_area;
+  return -(computeInternalStressRHSContribution() +
+           _adv_interp_result.rhs_face_value * _face_mass_flux) *
+         _current_face_area;
 }
 
 Real
@@ -155,13 +163,13 @@ LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryC
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _face_mass_flux;
+  return _adv_interp_result.weights_matrix.first * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _face_mass_flux;
+  return _adv_interp_result.weights_matrix.second * _face_mass_flux;
 }
 
 Real
@@ -403,10 +411,29 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
   // right hand side contributions
   _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
-  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
-  // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    const auto state = determineState();
+    const auto & elem_info = *_current_face_info->elemInfo();
+    const auto & neighbor_info = *_current_face_info->neighborInfo();
+
+    const Real elem_value = _var.getElemValue(elem_info, state);
+    const Real neighbor_value = _var.getElemValue(neighbor_info, state);
+
+    if (_adv_interp_method.needsGradients())
+    {
+      const auto limiter_type = _adv_interp_method.gradientLimiter();
+      _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
+      _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
+    }
+
+    _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
+                                                                elem_value,
+                                                                neighbor_value,
+                                                                &_elem_grad_storage,
+                                                                &_neighbor_grad_storage,
+                                                                _face_mass_flux);
+  }
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.

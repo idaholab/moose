@@ -18,6 +18,7 @@
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVPressureCorrectionDiffusion.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -41,8 +42,9 @@ RhieChowMassFlux::validParams()
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
-  params.addRequiredParam<std::string>("p_diffusion_kernel",
-                                       "The diffusion kernel acting on the pressure.");
+  params.addRequiredParam<std::string>(
+      "p_diffusion_kernel",
+      "The LinearFVPressureCorrectionDiffusion kernel acting on the pressure.");
   params.addParam<std::vector<std::vector<std::string>>>(
       "body_force_kernel_names",
       {},
@@ -63,6 +65,10 @@ RhieChowMassFlux::validParams()
                              MooseEnum("standard consistent", "standard"),
                              "The method to use in the pressure projection for Ainv - "
                              "standard (SIMPLE) or consistent (SIMPLEC)");
+  params.addParam<MooseEnum>(
+      "pressure_diffusion_interpolation",
+      MooseEnum("average harmonic", "average"),
+      "The face interpolation method for Ainv in the pressure correction diffusion term.");
   return params;
 }
 
@@ -83,7 +89,11 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _body_force_kernel_names(
         getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
-    _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method"))
+    _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
+    _pressure_diffusion_interp_method(getParam<MooseEnum>("pressure_diffusion_interpolation") ==
+                                              "harmonic"
+                                          ? Moose::FV::InterpMethod::HarmonicAverage
+                                          : Moose::FV::InterpMethod::Average)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -160,10 +170,11 @@ RhieChowMassFlux::initialSetup()
     paramError(
         "p_diffusion_kernel",
         "The kernel with the given name could not be found or multiple instances were identified.");
-  _p_diffusion_kernel = dynamic_cast<LinearFVAnisotropicDiffusion *>(flux_kernel[0]);
+  _p_diffusion_kernel = dynamic_cast<LinearFVPressureCorrectionDiffusion *>(flux_kernel[0]);
   if (!_p_diffusion_kernel)
     paramError("p_diffusion_kernel",
-               "The provided diffusion kernel should of type LinearFVAnisotropicDiffusion!");
+               "The provided diffusion kernel should be of type "
+               "LinearFVPressureCorrectionDiffusion.");
 
   // We fetch the body forces kernel to ensure that the face flux correction
   // is accurate.
@@ -441,7 +452,7 @@ RhieChowMassFlux::populateCouplingFunctors(
   for (const auto dim_i : index_range(raw_Ainv))
     ainv_reader.emplace_back(*raw_Ainv[dim_i]);
 
-  // We loop through the faces and populate the coupling fields (face H/A and 1/H)
+  // We loop through the faces and populate the coupling fields (face H/A and 1/A)
   for (auto & fi : _flow_face_info)
   {
     Real face_rho = 0;
@@ -474,7 +485,7 @@ RhieChowMassFlux::populateCouplingFunctors(
                     hbya_reader[dim_i](neighbor_dof),
                     *fi,
                     true);
-        interpolate(InterpMethod::Average,
+        interpolate(_pressure_diffusion_interp_method,
                     Ainv(dim_i),
                     elem_rho * ainv_reader[dim_i](elem_dof),
                     neighbor_rho * ainv_reader[dim_i](neighbor_dof),

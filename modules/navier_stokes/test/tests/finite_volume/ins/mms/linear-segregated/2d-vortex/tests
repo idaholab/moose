@@ -1,21 +1,94 @@
 [Tests]
-  issues = '#27280'
+  issues = '#27280 #31965'
   design = 'SIMPLE.md'
-  [vortex-orthogonal]
+  [vortex-average]
     type = MMSTest
     input = test.py
     test_case = TestVortexOrthogonal
     min_parallel = 2
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
   []
-  [vortex-nonorthogonal]
+  [vortex-vanleer]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexVanLeer
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and pressure with Van Leer momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-upwind]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexUpwind
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain first order spatial convergence for velocity with upwind momentum advection interpolation in a more advective MMS case.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-minmod]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexMinMod
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and pressure with MinMod momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-venkatakrishnan]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexVenkatakrishnan
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and pressure with Venkatakrishnan momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-nonorthogonal-average]
     type = MMSTest
     input = test.py
     test_case = TestVortexNonorthogonal
     min_parallel = 4
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
-    # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-nonorthogonal-vanleer]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexNonorthogonalVanLeer
+    min_parallel = 4
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid with Van Leer momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-nonorthogonal-upwind]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexNonorthogonalUpwind
+    min_parallel = 4
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain first order spatial convergence for velocity on a nonorthogonal grid with upwind momentum advection interpolation in a more advective MMS case.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-nonorthogonal-minmod]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexNonorthogonalMinMod
+    min_parallel = 4
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid with MinMod momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [vortex-nonorthogonal-venkatakrishnan]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexNonorthogonalVenkatakrishnan
+    min_parallel = 4
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid with Venkatakrishnan momentum advection interpolation.'
+    max_threads = 1 # see libmesh issue #3808
+    heavy = true
   []
 []

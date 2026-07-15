@@ -15,6 +15,9 @@
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics);
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVTwoPhaseMixturePhysics,
+                    "add_interpolation_method_physics");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "check_integrity");
 

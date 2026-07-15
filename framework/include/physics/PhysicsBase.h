@@ -294,6 +294,7 @@ private:
   virtual void addInitialConditions() {}
   virtual void addFEKernels() {}
   virtual void addFVKernels() {}
+  virtual void addFVInterpolationMethods() {}
   virtual void addNodalKernels() {}
   virtual void addDiracKernels() {}
   virtual void addDGKernels() {}
