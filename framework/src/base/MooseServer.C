@@ -372,7 +372,8 @@ MooseServer::gatherDocumentCompletionItems(wasp::DataArray & completionItems,
   auto & root = *root_ptr;
 
   // lambdas that will be used for checking completion request context type
-  auto is_request_in_open_block = [](wasp::HITNodeView request_context) {
+  auto is_request_in_open_block = [](wasp::HITNodeView request_context)
+  {
     return request_context.type() == wasp::OBJECT || request_context.type() == wasp::DOCUMENT_ROOT;
   };
   auto is_request_on_param_decl = [](wasp::HITNodeView request_context)
