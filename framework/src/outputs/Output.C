@@ -239,9 +239,13 @@ Output::outputStep(const ExecFlagType & type)
   // Return if the current output is not on the desired interval and there is
   // no signal to process
   const bool on_interval_or_exec_final = (onInterval() || (type == EXEC_FINAL));
-  // Sync across processes and only output one time per signal received.
-  comm().max(Moose::interrupt_signal_number);
-  const bool signal_received = Moose::interrupt_signal_number;
+  // Reduce a copy so MPI cannot overwrite a signal received during the collective.
+  int signal_number = Moose::interrupt_signal_number;
+  comm().max(signal_number);
+  // Do not write back zero because the handler may have set the latch after the copy.
+  if (signal_number)
+    Moose::interrupt_signal_number = signal_number;
+  const bool signal_received = signal_number;
   if (!(on_interval_or_exec_final || signal_received))
     return;
 
