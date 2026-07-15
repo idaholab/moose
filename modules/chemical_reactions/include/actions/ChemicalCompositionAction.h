@@ -11,6 +11,7 @@
 
 #include "Action.h"
 #include "ThermochimicaConfiguration.h"
+#include "ThermochimicaOutputAction.h"
 
 /**
  * The ChemicalCompositionAction sets up user objects, aux kernels, and aux variables
@@ -35,9 +36,53 @@ protected:
   void buildLegacyOutputDescriptors(const std::vector<std::string> & database_phases,
                                     const std::vector<std::vector<std::string>> & database_species);
 
+  /** Resolve typed child output Actions into indexed output descriptors. */
+  void buildTypedOutputDescriptors(const std::vector<std::string> & database_phases,
+                                   const std::vector<std::vector<std::string>> & database_species);
+
+  int phaseSystemIndex(const std::string & phase,
+                       const InputParameters & source,
+                       const std::string & parameter,
+                       const std::vector<std::string> & database_phases) const;
+  int speciesPhaseIndex(int phase_index,
+                        const std::string & species,
+                        const std::vector<std::vector<std::string>> & database_species) const;
+
+  void addOutputRequest(const ThermochimicaPhaseAmountRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::vector<std::string> & database_phases);
+  void addOutputRequest(const ThermochimicaSpeciesAmountRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::string & species_parameter,
+                        const std::vector<std::string> & database_phases,
+                        const std::vector<std::vector<std::string>> & database_species);
+  void addOutputRequest(const ThermochimicaElementPotentialRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & element_parameter);
+  void addOutputRequest(const ThermochimicaVaporPressureRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::string & species_parameter,
+                        const std::vector<std::string> & database_phases,
+                        const std::vector<std::vector<std::string>> & database_species);
+  void addOutputRequest(const ThermochimicaElementInPhaseRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::string & element_parameter,
+                        const std::vector<std::string> & database_phases);
+
   /** Validate and append an output descriptor produced by any input syntax. */
   void addOutputDescriptor(ThermochimicaConfiguration::OutputDescriptor output,
-                           const std::string & origin);
+                           const InputParameters & source,
+                           const std::string & origin,
+                           const std::string & variable_parameter);
 #endif
 
   /// Initial conditions for each element: [element name] => initial condition value

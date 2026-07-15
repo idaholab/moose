@@ -9,8 +9,10 @@ modules/chemical_reactions/contrib/thermochimica`.
 ## Description
 
 The `ChemicalComposition` action system creates the element and thermochemical output variables
-and configures equilibrium calculations at nodes or elements. See [ChemicalCompositionAction.md]
-for the available outputs, generated variable names, and execution options.
+and configures equilibrium calculations at nodes or elements. Thermochemical quantities are
+selected with named blocks under `[Outputs]`; the leaf-block names become the scalar auxiliary
+variable names. See [ChemicalCompositionAction.md] for the available output families and execution
+options.
 
 ## Example Input File Syntax
 
@@ -32,6 +34,13 @@ A subblock may override those defaults. Multiple subblocks can use different dat
 evaluation locations when their [!param](/ChemicalComposition/block) restrictions do not overlap.
 
 !listing modules/chemical_reactions/test/tests/thermochimica/MoRu_subblock.i block=ChemicalComposition
+
+## Thermochemical Output Blocks
+
+The following example uses each typed output family. The `variable` parameter may override a
+leaf-block variable name, as shown for `bcc_mo_element_amount`.
+
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
 
 !syntax parameters /ChemicalComposition
 

@@ -379,4 +379,67 @@
     requirement = 'The batched Thermochimica executor shall report solve, batch, and warm-start counters'
     capabilities = 'thermochimica'
   []
+
+  [typed_outputs]
+    type = CSVDiff
+    input = typed_outputs.i
+    csvdiff = typed_outputs_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall select all supported output families using safe variable names'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_invalid_phase]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/SpeciesAmounts/bcc_mo_fraction/phase=invalid'
+    expect_err = "phase: Phase 'invalid' was not found in the configured system."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall report invalid selections against the originating parameter'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_duplicate]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/SpeciesAmounts/bcc_mo_fraction/variable=bcc_amount'
+    expect_err = "Duplicate generated variable name 'bcc_amount'."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed ChemicalComposition output blocks shall reject duplicate variable names'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_output_non_gas_phase]
+    type = RunException
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/VaporPressures/mo_vapor_pressure/phase=BCCN'
+    expect_err = "phase: Phase 'BCCN' is not a gas phase."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed vapor-pressure output blocks shall reject non-gas phases'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_mqm_species]
+    type = RunApp
+    input = typed_mqm.i
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed species output blocks shall support modified quasichemical model species'
+    capabilities = 'thermochimica'
+  []
+
+  [mixed_output_syntax]
+    type = RunApp
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/output_phases=HCPN Outputs/csv=false'
+    expect_out = 'flat ChemicalComposition output parameters are deprecated'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Legacy and typed ChemicalComposition outputs shall support incremental migration with a deprecation warning'
+    capabilities = 'thermochimica'
+  []
 []
