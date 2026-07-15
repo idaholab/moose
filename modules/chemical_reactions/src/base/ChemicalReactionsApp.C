@@ -49,6 +49,13 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
+  registerTask("setup_chemical_composition", false);
+  addTaskDependency("setup_chemical_composition", "meta_action");
+  addTaskDependency("add_variable", "setup_chemical_composition");
+  addTaskDependency("add_aux_variable", "setup_chemical_composition");
+  addTaskDependency("add_ic", "setup_chemical_composition");
+  addTaskDependency("add_user_object", "setup_chemical_composition");
+  addTaskDependency("add_aux_kernel", "setup_chemical_composition");
 
   // Physics syntax
   registerSyntax("AqueousReactionsEquilibriumPhysics", "Physics/AqueousReactionsEquilibrium/*");

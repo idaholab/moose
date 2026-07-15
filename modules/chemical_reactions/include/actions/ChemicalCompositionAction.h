@@ -25,6 +25,9 @@ public:
   virtual void act() override;
 
 protected:
+  /// Build and validate the immutable configuration after all input Actions have been parsed.
+  void initializeConfiguration();
+
   void readCSV();
 
 #ifdef THERMOCHIMICA_ENABLED
