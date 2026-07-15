@@ -24,18 +24,18 @@ Navier-Stokes discretization is exactly mass conserving, which requires two prop
    and $Q_h$ is the space of pressure functions,
 
 then the space of the transport functions is not tied to the space of the pressure
-functions in order to be compatible. (We note that the discretization in [inshdg.md]
-is exactly mass conserving.) However, for non-free flow such as Darcy,
-then the transport function space must match the pressure function space. The
-tying of the transport and pressure function spaces is also required, at least in
-our experience, in order to have a compatible discretization for free flow when
-mass conservation is not exact. Intuitively this makes sense as the discretization
+functions in order to be compatible. (The IP-HDG discretization in [inshdg.md]
+is exactly mass conserving; the L-HDG qualification is discussed there.) However,
+for non-free flow such as Darcy, the transport test space must be contained in the
+pressure test space, $W_h \subseteq Q_h$. The same inclusion is also required, at
+least in our experience, for a compatible free-flow discretization when mass
+conservation is not exact. Intuitively this makes sense because the discretization
 no longer satisfies the strong form of the mass conservation equation, but instead
-only does so weakly with integration against the pressure test functions. Consequently,
-choosing the transported scalar from the same space as pressure allows its discrete balance to use the same mass
-conservation statement. In the example below, pressure and temperature both
-use a constant `MONOMIAL` space and therefore satisfy this compatibility
-condition.
+only does so weakly against pressure test functions. Every transport test function
+must therefore also be an admissible pressure test function for its discrete balance
+to use the same mass conservation statement. Equal transport and pressure spaces are
+sufficient but not necessary. In the example below, pressure and temperature both
+use a constant `MONOMIAL` space and therefore satisfy this inclusion.
 
 ## Variables
 

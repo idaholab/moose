@@ -29,6 +29,6 @@
     type = CSVDiff
     input = l-hdg.i
     csvdiff = l-hdg_out.csv
-    requirement = 'The system shall demonstrate compatible flow and scalar transport using an L-HDG flow discretization and an L-HDG scalar discretization with different pressure and temperature spaces and hybrid-velocity scalar fluxes.'
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using an L-HDG flow discretization and an L-HDG scalar discretization with matching first-order pressure and temperature spaces and hybrid-velocity scalar fluxes.'
   []
 []

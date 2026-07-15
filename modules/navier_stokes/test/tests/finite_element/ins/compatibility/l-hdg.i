@@ -55,15 +55,15 @@
   []
   [temperature]
     family = MONOMIAL
-    order = CONSTANT
+    order = FIRST
   []
   [grad_temperature]
     family = MONOMIAL_VEC
-    order = CONSTANT
+    order = FIRST
   []
   [face_temperature]
     family = SIDE_HIERARCHIC
-    order = CONSTANT
+    order = FIRST
   []
 []
 
