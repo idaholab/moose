@@ -65,18 +65,16 @@ public:
   void setSolution(const NumericVector<Number> & soln);
 
   /**
-   * Enable solution under/over-relaxation for fixed point iterations.
-   *
-   * Intended for segregated multi-system fixed point iterations where the system is solved
-   * repeatedly with coefficients that depend on other systems/loops (e.g. deferred correction).
-   * A value of 1 disables relaxation.
+   * Apply solution under/over-relaxation for fixed point iterations.
    *
    * The relaxed update is:
    *   u <- relaxation_factor * u_new + (1 - relaxation_factor) * u_old
+   *
+   * @param[in] relaxation_factor  The factor applied to the new solution
+   * @param[in] iteration_type  Type of iteration; which "previous" value to use
    */
-  void setFixedPointRelaxationFactor(const Real relaxation_factor);
-  void clearFixedPointRelaxation();
-  void applyFixedPointRelaxation(const Moose::SolutionIterationType iteration_type);
+  void applyFixedPointRelaxation(const Real relaxation_factor,
+                                 const Moose::SolutionIterationType iteration_type);
 
   /**
    * Set the side on which the preconditioner is applied to.
@@ -125,9 +123,6 @@ protected:
 
   /// Boolean to see if solution is invalid
   bool _solution_is_invalid;
-
-  /// Used for relaxing entire system solution during fixed point (multi-)system iterations
-  Real _fixed_point_relaxation_factor = 1.0;
 };
 
 inline const NumericVector<Number> * const &

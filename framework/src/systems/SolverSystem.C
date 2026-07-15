@@ -76,21 +76,10 @@ SolverSystem::setSolution(const NumericVector<Number> & soln)
 }
 
 void
-SolverSystem::setFixedPointRelaxationFactor(const Real relaxation_factor)
+SolverSystem::applyFixedPointRelaxation(const Real relaxation_factor,
+                                        const Moose::SolutionIterationType iteration_type)
 {
-  _fixed_point_relaxation_factor = relaxation_factor;
-}
-
-void
-SolverSystem::clearFixedPointRelaxation()
-{
-  _fixed_point_relaxation_factor = 1.0;
-}
-
-void
-SolverSystem::applyFixedPointRelaxation(const Moose::SolutionIterationType iteration_type)
-{
-  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
+  if (MooseUtils::absoluteFuzzyEqual(relaxation_factor, 1.0))
     return;
 
   mooseAssert(hasSolutionState(1, iteration_type),
@@ -103,8 +92,8 @@ SolverSystem::applyFixedPointRelaxation(const Moose::SolutionIterationType itera
               "the same parallel type as the system solution.");
 
   auto & sol = solution();
-  sol.scale(_fixed_point_relaxation_factor);
-  sol.add(1.0 - _fixed_point_relaxation_factor, solutionState(1, iteration_type));
+  sol.scale(relaxation_factor);
+  sol.add(1.0 - relaxation_factor, solutionState(1, iteration_type));
   sol.close();
   update();
 }
