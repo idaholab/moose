@@ -15,6 +15,7 @@
 {#- MFEM_GIT_REMOTE: The git remote to use to get MFEM                                        -#}
 {#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
+{#- OPTFLAGS: Optimization flags to set when building                                         -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- PYTORCH_GIT_SHA: The git SHA to use for pytorch                                           -#}
 {#- PYTORCH_GIT_REMOTE: The git remote to use to get pytorch                                  -#}
@@ -125,6 +126,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     GPERFTOOLS_VERSION=2.18.1
     GO_VERSION=1.26.1
     PPROF_SHA=a0b0bb1d4134f37be44de6c328680339b0fc13ad
+{%- endif %}
+
+    # Optimization flags
+{%- if OPTFLAGS is not defined %}
+    OPTFLAGS=("-march=x86-64-v3" "-mtune=generic")
+{%- else %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
 {%- endif %}
 
     # Special setup for OpenMPI
@@ -414,8 +422,8 @@ EOF
             "$PYTORCH_SRC_DIR" \
             "$LIBTORCH_BUILD_DIR" \
             "$LIBTORCH_DIR" \
-            -DCMAKE_C_FLAGS="-w" \
-            -DCMAKE_CXX_FLAGS="-w" \
+            -DCMAKE_C_FLAGS="-w ${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="-w ${OPTFLAGS[*]}" \
             "${LIBTORCH_FLAGS[@]}" 2>&1 | tee ${LIBTORCH_LOGS}/cmake.log
         build_libtorch "$LIBTORCH_BUILD_DIR" "$MOOSE_JOBS" 2>&1 | tee ${LIBTORCH_LOGS}/build.log
         install_libtorch "$LIBTORCH_BUILD_DIR" "$LIBTORCH_DIR" 2>&1 | tee ${LIBTORCH_LOGS}/install.log
@@ -514,7 +522,9 @@ EOF
         LIBTORCH_DIR={{ LIBTORCH_DIR }} \
         WASP_DIR={{ WASP_DIR }} \
             ${NEML2_BUILD_SCRIPT} \
-                --skip-submodule-update 2>&1 | tee ${NEML2_LOGS}/build.log
+                --skip-submodule-update \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${NEML2_LOGS}/build.log
 
         # Cleanup
         rm -rf ${NEML2_SRC_DIR} ${NEML2_BUILD_SCRIPT}
@@ -545,6 +555,8 @@ EOF
         CONDUIT_DIR=${CONDUIT_DIR} \
         CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} \
             ${CONDUIT_BUILD_SCRIPT} \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 "${CONDUIT_OPTIONS[@]}" 2>&1 | tee ${CONDUIT_LOGS}/build.log
 
         # Cleanup
@@ -588,6 +600,8 @@ EOF
         MFEM_SRC_DIR=${MFEM_SRC_DIR} \
         CONDUIT_DIR={{ CONDUIT_DIR }} \
             ${MFEM_BUILD_SCRIPT} \
+                -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+                -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
                 "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_LOGS}/build.log
 
         # Cleanup
