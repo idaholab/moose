@@ -35,8 +35,38 @@ meaningful composition before Thermochimica is evaluated.
 
 ## Thermochemical Outputs
 
-The output parameters use database phase, species, and element names as selectors. The action
-creates one scalar auxiliary variable for every selector:
+Typed output blocks select database phases, species, and elements without encoding those
+selections into the auxiliary variable name. Each named leaf block creates one scalar auxiliary
+variable. The leaf-block name is used as the variable name unless the `variable` parameter is
+provided.
+
+!table id=chemical-composition-typed-outputs caption=Typed thermochemical output blocks.
+| Block under `[Outputs]` | Required parameters | Quantity |
+| :- | :- | :- |
+| `[PhaseAmounts]` | `phase` | Equilibrium phase amount |
+| `[SpeciesAmounts]` | `phase`, `species` | Species moles or mole fraction |
+| `[ElementPotentials]` | `element` | Element chemical potential |
+| `[VaporPressures]` | `phase`, `species` | Species partial pressure in a gas phase |
+| `[ElementsInPhases]` | `phase`, `element` | Element amount in a phase |
+
+The `unit` parameter in a `[SpeciesAmounts]` leaf block selects `moles` or `mole_fraction` for that
+output. This permits different species outputs to use different units.
+
+The following example creates output variables named `bcc_amount`, `bcc_mo_fraction`,
+`bcc_mo_moles`, `mo_chemical_potential`, `mo_vapor_pressure`, and
+`bcc_mo_element_amount`:
+
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
+
+!alert note
+Element and output variable names must be unique and must not also be declared in `[Variables]` or
+`[AuxVariables]`.
+
+## Deprecated Output Parameters
+
+The flat output parameters remain available for compatibility and support `ALL` expansion. They
+are deprecated in favor of typed output blocks. Their selectors generate the following legacy
+variable names:
 
 !table id=chemical-composition-output-names caption=Selectors and generated auxiliary variable names.
 | Parameter | Selector format | Generated variable |
@@ -51,10 +81,6 @@ The [!param](/ChemicalComposition/species_output_unit) selects whether species q
 reported as `moles` or `mole_fraction`. Each output selector also accepts `ALL`. For a large
 database, `ALL` may create many auxiliary variables and substantially increase memory use and
 output-file size.
-
-!alert note
-Generated element and output variable names must be unique and must not also be declared in the
-`[Variables]` or `[AuxVariables]` blocks.
 
 ## Batching and Warm Starts
 
@@ -71,9 +97,9 @@ The [!param](/ChemicalComposition/warm_start) controls the initial guess for eac
 ## Example Input Syntax
 
 The following example requests phase amounts, species concentrations, element potentials, vapor
-pressures, and element amounts in phases:
+pressures, and element amounts in phases with typed output blocks:
 
-!listing modules/chemical_reactions/test/tests/thermochimica/MoRu.i block=GlobalParams ChemicalComposition
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
 
 Common parameters can be specified on the parent `[ChemicalComposition]` block and overridden in
 named subblocks. See the [ChemicalComposition syntax](syntax/ChemicalComposition/index.md) for an
