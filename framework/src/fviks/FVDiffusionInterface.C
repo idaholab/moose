@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVDiffusionInterface.h"
-#include "MathFVUtils.h"
 
 registerMooseObject("MooseApp", FVDiffusionInterface);
 
@@ -45,27 +44,16 @@ FVDiffusionInterface::FVDiffusionInterface(const InputParameters & params)
 ADReal
 FVDiffusionInterface::computeQpResidual()
 {
-  const auto & coef_elem = elemIsOne() ? _coeff1 : _coeff2;
-  const auto & coef_neighbor = elemIsOne() ? _coeff2 : _coeff1;
-
   // Form a finite difference gradient across the interface
-  Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
+  Point one_over_gradient_support = centroid1() - centroid2();
   one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
   const auto state = determineState();
-  const auto gradient = elemIsOne() ? (var1().getElemValue(&_face_info->elem(), state) -
-                                       var2().getElemValue(_face_info->neighborPtr(), state)) *
-                                          one_over_gradient_support
-                                    : (var1().getElemValue(_face_info->neighborPtr(), state) -
-                                       var2().getElemValue(&_face_info->elem(), state)) *
-                                          -one_over_gradient_support;
+  const auto gradient =
+      (var1().getElemValue(&elem1(), state) - var2().getElemValue(&elem2(), state)) *
+      one_over_gradient_support;
 
-  ADReal diffusivity;
-  interpolate(_coeff_interp_method,
-              diffusivity,
-              coef_elem(elemArg(), determineState()),
-              coef_neighbor(neighborArg(), determineState()),
-              *_face_info,
-              true);
+  const auto diffusivity = interpolateValue(
+      _coeff_interp_method, _coeff1(elemArg1(), state), _coeff2(elemArg2(), state));
 
-  return -diffusivity * _normal * gradient;
+  return -diffusivity * normal() * gradient;
 }
