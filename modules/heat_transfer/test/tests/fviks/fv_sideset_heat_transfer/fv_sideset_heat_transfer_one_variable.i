@@ -25,30 +25,23 @@
 []
 
 [Variables]
-  [T_left]
+  [T]
     type = MooseVariableFVReal
-    initial_condition = 1
-    block = 0
-  []
-
-  [T_right]
-    type = MooseVariableFVReal
-    initial_condition = 0
-    block = 1
+    initial_condition = 0.5
   []
 []
 
 [FVKernels]
   [diff_left]
     type = FVDiffusion
-    variable = T_left
+    variable = T
     block = 0
     coeff = 2
   []
 
   [diff_right]
     type = FVDiffusion
-    variable = T_right
+    variable = T
     block = 1
     coeff = 4
   []
@@ -58,11 +51,10 @@
   [interface_heat_transfer]
     type = FVSideSetHeatTransferKernel
     boundary = interface
-    subdomain1 = 1
-    subdomain2 = 0
-    variable1 = T_right
-    variable2 = T_left
-    conductance = interface_conductance
+    subdomain1 = 0
+    subdomain2 = 1
+    variable1 = T
+    conductance = constant_conductance
   []
 []
 
@@ -70,23 +62,29 @@
   [left]
     type = FVDirichletBC
     boundary = left
-    variable = T_left
+    variable = T
     value = 1
   []
 
   [right]
     type = FVDirichletBC
     boundary = right
-    variable = T_right
+    variable = T
     value = 0
   []
 []
 
 [FunctorMaterials]
-  [interface_conductance]
+  [constant_conductance]
     type = ADGenericFunctorMaterial
-    prop_names = 'interface_conductance'
+    prop_names = 'constant_conductance'
     prop_values = '1'
+  []
+  [piecewise_conductance]
+    type = ADPiecewiseByBlockFunctorMaterial
+    prop_name = 'piecewise_conductance'
+    subdomain_to_prop_value = '0 1
+                               1 100'
   []
 []
 

@@ -9,9 +9,34 @@
   []
   [fv_sideset_heat_transfer_reversed]
     type = Exodiff
-    input = fv_sideset_heat_transfer_reversed.i
-    exodiff = fv_sideset_heat_transfer_reversed_out.e
+    input = fv_sideset_heat_transfer.i
+    exodiff = fv_sideset_heat_transfer_out.e
+    prereq = fv_sideset_heat_transfer
+    cli_args = "FVInterfaceKernels/interface_heat_transfer/subdomain1='1' "
+               "FVInterfaceKernels/interface_heat_transfer/subdomain2='0' "
+               "FVInterfaceKernels/interface_heat_transfer/variable1='T_right' "
+               "FVInterfaceKernels/interface_heat_transfer/variable2='T_left' "
+               "Outputs/file_base='fv_sideset_heat_transfer_out'"
     requirement = 'The system shall model finite volume heat transfer across an internal sideset independent of the chosen subdomain and variable ordering.'
+    design = 'FVSideSetHeatTransferKernel.md'
+    issues = '#31743'
+  []
+  [fv_sideset_heat_transfer_one_variable]
+    type = Exodiff
+    input = fv_sideset_heat_transfer_one_variable.i
+    exodiff = fv_sideset_heat_transfer_one_variable_out.e
+    requirement = 'The system shall model finite volume heat transfer across an internal sideset when one variable is defined on both subdomains.'
+    design = 'FVSideSetHeatTransferKernel.md'
+    issues = '#31743'
+  []
+  [fv_sideset_heat_transfer_one_variable_piecewise_conductance]
+    type = Exodiff
+    input = fv_sideset_heat_transfer_one_variable.i
+    exodiff = fv_sideset_heat_transfer_one_variable_out.e
+    prereq = fv_sideset_heat_transfer_one_variable
+    cli_args = "FVInterfaceKernels/interface_heat_transfer/conductance='piecewise_conductance' "
+               "Outputs/file_base='fv_sideset_heat_transfer_one_variable_out'"
+    requirement = 'The system shall evaluate a finite volume interface conductance on subdomain1 when the same variable and conductance functor are defined on both subdomains.'
     design = 'FVSideSetHeatTransferKernel.md'
     issues = '#31743'
   []
