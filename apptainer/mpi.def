@@ -17,7 +17,7 @@ From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.
 {%- elif ALTERNATE_FROM == "rocky9_gcc" %}
 From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714
 {%- elif ALTERNATE_FROM == "ubuntu24_clang" %}
-From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-clang:pr30-24.04-clang22.1.8-gcc13.3.0-mpich5.0.1-openmpi5.0.10-20260714
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-clang:pr30-24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714
 {%- elif ALTERNATE_FROM == "ubuntu24_cuda_gcc" %}
 From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-cuda-gcc:pr30-24.04-cuda13.3.0-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714
 {%- elif ALTERNATE_FROM == "ubuntu24_gccmin" %}
