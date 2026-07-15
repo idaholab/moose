@@ -1,68 +1,84 @@
 # ChemicalComposition Action
 
 !alert note title=For Use with Thermochimica
-This action is designed for use with the thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submodule by running `git submodule update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
+This action requires the Thermochimica submodule and the `thermochimica` capability.
 
 ## Description
 
-The `ChemicalComposition` action is used to initiate the framework for thermochemical calculations using the thermodynamics solver [*Thermochimica*](https://github.com/ORNL-CEES/thermochimica). The action creates variables needed for the analysis, reads the thermodynamic model for material system, and sets the units for temperature, pressure, and elemental amounts. It can optionally initiate the amounts of elements used in the model.
+The `ChemicalComposition` action configures equilibrium calculations using the
+[Thermochimica](https://github.com/ORNL-CEES/thermochimica) thermochemistry library. It creates
+scalar auxiliary variables for the selected elements and thermochemical outputs, validates the
+requested quantities against the [!param](/ChemicalComposition/thermodynamic_database), and
+evaluates Thermochimica at each selected node or element.
 
-The `ChemicalComposition` action is also used to specify lists of chemical phases and chemical species for which concentrations should be output at each timestep. The phase and species names must match those in the data file specified. The `ChemicalComposition` action creates all AuxVariables needed for output of phase concentration data, chemical potentials, vapor pressures, etc. The list of phases is specified in the `output_phases` variable, and the list of species is specified in `output_species`. The species must be specified in the convention `phase_name:species_name` so that the desired species in the desired phase is uniquely identified. Alternatively, users can specify `ALL` to output all species present in the specified thermodynamic database. Other desired outputs such as element potentials, vapor pressures of species in gas phase and moles of elements in specified phases can be specified using `output_element_potentials`, `output_vapor_pressures`, and `output_element_phases` respectively. The `ChemicalComposition` action creates a UserObject derived from [`ThermochimicaNodalData`](/userobjects/ThermochimicaNodalData.md) or [`ThermochimicaElementData`](/userobjects/ThermochimicaElementData.md) which runs Thermochimica at each node and stores the output in the created aux variables.
+The [!param](/ChemicalComposition/temperature) is required and may be supplied by a variable or a
+constant. The [!param](/ChemicalComposition/pressure) may also be a variable or a constant and
+defaults to 1. The units of these values and the elemental compositions are specified with
+[!param](/ChemicalComposition/temperature_unit), [!param](/ChemicalComposition/pressure_unit), and
+[!param](/ChemicalComposition/composition_unit), respectively.
 
-In this UserObject, the masses of elements included in the vector variable [!param](/UserObjects/ThermochimicaElementData/elements) are input
-to the Fortran 90 module Thermochimica, along with the temperature and pressure. Optionally, the
-user may disable Thermochimica calculation re-initialization by setting [!param](/UserObjects/ThermochimicaElementData/reinit_type) to `none`.
-This may reduce memory use in the calculation, but will likely greatly increase the length of each
-call to Thermochimica.
+The [!param](/ChemicalComposition/evaluation_location) determines where equilibrium is evaluated.
+The default, `nodal`, creates Lagrange auxiliary variables. The `elemental` option creates
+elemental monomial auxiliary variables and is suitable for finite-volume calculations.
 
-!alert note
-The `ALL` option circumvents the need for users to explicitly state each input element and the output variables. When used for specifying the input [!param](/ChemicalComposition/elements), all the chemical elements present in the thermodynamic database are parsed and used to create the required MOOSE variables. The users must however be careful to specify the proper values of these elements either directly in the input file (for example, as done using ICs in `MoRu.i`) or using CSV inputs (such as in `csv.i`). When the `ALL` option is used to specify outputs, all phases / species / element potentials / etc. that are present in the thermodynamic database and which can exist with the given combination of input elements will be outputted. The users must be aware that, depending on the size of the thermodynamic database, this can lead to a large number of such variables being written to the output files leading to slowdown of both the simulations as well as higher memory use.
+## Element Variables and Initialization
 
-## Variables for Chemical Elements
+The [!param](/ChemicalComposition/elements) parameter lists the chemical elements used in the
+equilibrium calculation. The action creates an auxiliary variable with the same name as each
+element. These variables may be initialized with standard MOOSE initial conditions or with the
+[!param](/ChemicalComposition/initial_composition_file). The CSV file must contain a header followed
+by one `element,value` pair per line.
 
-Chemical element variables to be used and initiated in the model using in `ChemicalComposition` action are specified using the block `[GlobalParams]`, and vector `elements` as in [chemact:globpar]:
+Specifying `ALL` for [!param](/ChemicalComposition/elements) creates variables for every element in
+the thermodynamic database. Every created element variable must be initialized with a physically
+meaningful composition before Thermochimica is evaluated.
 
-!listing id=chemact:globpar caption=Chemical elements to be used in the model
-[GlobalParams]
-  elements = 'Mo Ru'
-[]
+## Thermochemical Outputs
 
-The vector [!param](/ChemicalComposition/elements) will be passed to the `ChemicalComposition` action and used to generate scalar variables, (e.g. `Mo`, and `Ru`) of the chemical elements contained in the vector.
+The output parameters use database phase, species, and element names as selectors. The action
+creates one scalar auxiliary variable for every selector:
 
-!alert note
-The names of scalar variables listed in `elements` vector and created using `ChemicalComposition` action should not be used for other variables in the model, e.g. the model should not define variables `Mo`, or `Ru` in the `[Variables]` or `[AuxVariables]` blocks.
+!table id=chemical-composition-output-names caption=Selectors and generated auxiliary variable names.
+| Parameter | Selector format | Generated variable |
+| :- | :- | :- |
+| [!param](/ChemicalComposition/output_phases) | `phase` | `phase` |
+| [!param](/ChemicalComposition/output_species) | `phase:species` | `phase:species` |
+| [!param](/ChemicalComposition/output_element_potentials) | `element` | `mu:element` |
+| [!param](/ChemicalComposition/output_vapor_pressures) | `gas_phase:species` | `vp:gas_phase:species` |
+| [!param](/ChemicalComposition/output_element_phases) | `phase:element` | `ep:phase:element` |
 
-The element composition scalar variables can be initialized in `ChemicalComposition` action, or using `[Functions]` block combined with other MOOSE capabilities.
-
-## Variables for Chemical Phases, Species, and Element Chemical Potentials
-
-Chemical phase and species variables, as well as chemical potentials of elements, to be used and initiated in the model using in `ChemicalComposition` action are specified using the block `[GlobalParams]`, and vector [!param](/ChemicalComposition/output_phases) as in [phaseact:globpar]:
-
-!listing modules/chemical_reactions/test/tests/thermochimica/MoRu.i id=phaseact:globpar start=GlobalParams end=[] include-end=True caption=Chemical phases species to be used in the model, and list of desired output variables.
-
-The vectors [!param](/ChemicalComposition/output_phases), [!param](/ChemicalComposition/output_species), [!param](/ChemicalComposition/output_element_potentials), [!param](/ChemicalComposition/output_vapor_pressures), and [!param](/ChemicalComposition/output_element_phases) will be passed to the `ChemicalComposition` action and used to generate scalar variables, (e.g. `BCCN` and `BCCN:Mo`) for the chemical phases and species contained in the vectors. The action will set up either a [ThermochimicaNodalData](ThermochimicaNodalData.md) or a [ThermochimicaElementData](ThermochimicaElementData.md) userobject, depending on whether the  [!param](/ChemicalComposition/is_fv) parameter is set to `false` or `true` respectively.
-
-!alert note
-The names of scalar variables listed in `phases` vector and created using `ChemicalComposition` action should not be used for other variables in the model, e.g. the model should not define variable `BCCN` in the `[Variables]` or `[AuxVariables]` blocks.
-
-!alert note
-The format for entries in `output_species` must be `phase_name:species_name` or `ALL`, and both must match the specified thermodynamic database.
-
-!alert note
-The format for entries in `output_element_potentials` must be `mu:element_name`  or `ALL`.
-
-!alert note
-The format for entries in `output_vapor_pressures` must be `vp:gas_phase_name:species_name`  or `ALL`. The phase name must correspond to the gas phase in the thermodynamic database.
+The [!param](/ChemicalComposition/species_output_unit) selects whether species quantities are
+reported as `moles` or `mole_fraction`. Each output selector also accepts `ALL`. For a large
+database, `ALL` may create many auxiliary variables and substantially increase memory use and
+output-file size.
 
 !alert note
-The format for entries in `output_element_phases` must be `ep:phase_name:element_name`  or `ALL`.
+Generated element and output variable names must be unique and must not also be declared in the
+`[Variables]` or `[AuxVariables]` blocks.
 
-The variables created by this action will be used by the UserObject `ThermochimicaNodalData` (or, more likely, a derived class specific to the application) to generate arrays in which to store the indices of the requested phases in Thermochimica calculation results, and to store the corresponding concentration values.
+## Batching and Warm Starts
 
-The elemental composition is used in `Thermochimica` calculations, e.g `ThermochimicaNodalData` or `ThermochimicaElementData` UserObject, that expect an `elements` vector.
+The action performs an exact Thermochimica equilibrium solve for every selected node or element.
+The [!param](/ChemicalComposition/batch_size) controls how many states are sent in each request and
+defaults to 32. Setting it to 1 is useful for debugging and performance comparisons.
 
-This `ChemicalComposition` action syntax is shown on the
-[ChemicalComposition action](/ChemicalComposition/index.md) action
-system page.
+The [!param](/ChemicalComposition/warm_start) controls the initial guess for each exact solve:
+
+- `previous_solve` is the default and reuses the preceding result from the same worker.
+- `previous_timestep` stores a result for each node or element and generally uses more memory.
+- `none` disables warm starts and does not allocate per-entity reinitialization storage.
+
+## Example Input Syntax
+
+The following example requests phase amounts, species concentrations, element potentials, vapor
+pressures, and element amounts in phases:
+
+!listing modules/chemical_reactions/test/tests/thermochimica/MoRu.i block=GlobalParams ChemicalComposition
+
+Common parameters can be specified on the parent `[ChemicalComposition]` block and overridden in
+named subblocks. See the [ChemicalComposition syntax](syntax/ChemicalComposition/index.md) for an
+example using different databases on disjoint mesh blocks.
+
+!syntax parameters /ChemicalComposition
 
 !bibtex bibliography
