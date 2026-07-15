@@ -37,13 +37,9 @@ FVSideSetHeatTransferKernel::computeQpResidual()
 {
   const auto state = determineState();
 
-  const auto T1 = elemIsOne() ? var1().getElemValue(&_face_info->elem(), state)
-                              : var1().getElemValue(_face_info->neighborPtr(), state);
-
-  const auto T2 = elemIsOne() ? var2().getElemValue(_face_info->neighborPtr(), state)
-                              : var2().getElemValue(&_face_info->elem(), state);
-
-  const auto conductance = _conductance(singleSidedFaceArg(var1()), state);
+  const auto T1 = var1().getElemValue(&elem1(), state);
+  const auto T2 = var2().getElemValue(&elem2(), state);
+  const auto conductance = _conductance(faceArg1(), state);
 
   return conductance * (T1 - T2);
 }
