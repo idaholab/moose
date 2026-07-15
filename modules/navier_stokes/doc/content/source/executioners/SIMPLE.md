@@ -81,6 +81,12 @@ the $A^{-1}H$ and $A^{-1}$ fields are interpolated to the faces in a discretized
 This correction applies the continuity constraint in an iterative manner, while ensuring the lack of
 numerical pressure checker-boarding phenomena.
 
+The cell pressure gradient used in the next momentum predictor should come from a pressure-field
+gradient method such as Green-Gauss. Conservative Rhie-Chow face fluxes are useful for velocity and
+flux reconstruction, but they are not a reliable pointwise pressure-gradient observable on
+nonorthogonal meshes. The reconstructed pressure-gradient method therefore uses an Aguerre-style
+cell-velocity reconstruction from the total conservative face flux.
+
 The next guess for the velocity, however, does not necessarily respect the momentum equation. Therefore,
 the momentum prediction and pressure correction steps need to be repeated until both the momentum and
 continuity equations are satisfied.

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "GradientLimiterType.h"
 
 #include "libmesh/utility.h"
 
@@ -21,6 +20,9 @@
 #include <vector>
 
 class SystemBase;
+class ElemInfo;
+class FaceInfo;
+class FVGradientMethod;
 
 namespace libMesh
 {
@@ -29,135 +31,145 @@ class NumericVector;
 }
 
 /**
- * Shared storage and allocation logic for linear finite-volume cell gradients for
- * variables in the system attribute of this class
+ * Read-only view of one variable's cell-centered linear finite-volume gradient values.
+ */
+class LinearFVGradientReader
+{
+public:
+  /// One vector per spatial component of the cell-centered gradient.
+  using GradientContainer = std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>;
+
+  /**
+   * @param sys System that owns the variables and gradient values.
+   * @param components Component vectors that store the gradient values.
+   * @param method Gradient method that produces the values read by this object.
+   * @param variable_number Variable number whose gradient this object reads.
+   */
+  LinearFVGradientReader(const SystemBase & sys,
+                         const GradientContainer & components,
+                         const FVGradientMethod & method,
+                         unsigned int variable_number);
+
+  /// Access the underlying component vectors keyed by spatial direction.
+  const GradientContainer & components() const { return _components; }
+
+  /// System whose DOF map indexes the stored values.
+  const SystemBase & system() const { return _sys; }
+
+  /// Method object that produces the stored values.
+  const FVGradientMethod & method() const { return _method; }
+
+  /**
+   * Read one gradient component at an element.
+   * @param elem_info Element whose cell-centered gradient should be read.
+   * @param component Spatial component of the gradient.
+   */
+  Real component(const ElemInfo & elem_info, unsigned int component) const;
+
+  /**
+   * Read the full gradient at an element.
+   * @param elem_info Element whose cell-centered gradient should be read.
+   */
+  RealVectorValue gradient(const ElemInfo & elem_info) const;
+
+  /**
+   * Read the full gradient interpolated to a face.
+   * @param fi Face whose interpolated gradient should be read.
+   */
+  RealVectorValue gradient(const FaceInfo & fi) const;
+
+private:
+  /// System whose dof map indexes the stored values.
+  const SystemBase & _sys;
+
+  /// System number cached for hot DOF lookups.
+  const unsigned int _system_number;
+
+  /// Component vectors keyed by spatial direction.
+  const GradientContainer & _components;
+
+  /// Method object that produces the stored values.
+  const FVGradientMethod & _method;
+
+  /// Variable number whose gradients are read by this object.
+  const unsigned int _variable_number;
+};
+
+/**
+ * Shared registration, update, and allocation logic for system-owned linear finite-volume cell
+ * gradients.
  */
 class LinearFVGradientInterface
 {
 public:
+  /**
+   * @param sys System that owns registered linear finite-volume gradient fields.
+   */
   LinearFVGradientInterface(SystemBase & sys) : _sys(sys) {}
 
   /**
-   * Access the stored raw cell-centered gradient components.
-   * @return Raw cell-centered gradient vectors keyed by spatial direction.
+   * Register a variable for system-owned linear FV gradient values produced by a method object.
+   * @param variable_number Variable number whose gradient should be stored.
+   * @param method Gradient method that computes the field values.
    */
-  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-  linearFVGradientContainer() const
-  {
-    return _raw_grad_container;
-  }
-
-  /**
-   * Request storage and assembly of limiter-specific cell gradients.
-   * @param limiter_type The limiter whose gradient storage should be made available.
-   * @param variable_number The libMesh variable number requesting the limited gradients.
-   */
-  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type,
-                                       unsigned int variable_number);
-
-  /**
-   * Access the stored raw or limited cell-centered gradient components.
-   * @param limiter_type The limiter type whose gradient container is being requested.
-   * @return The requested raw or limited gradient vectors ordered by spatial direction.
-   */
-  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Access the limiter types requested for this system.
-   * @return The set of limiter types whose limited gradients should be assembled.
-   * They are only assembled for the variable(s) for which they were requested not all of them
-   */
-  const std::unordered_set<Moose::FV::GradientLimiterType> &
-  requestedLinearFVLimitedGradientTypes() const
-  {
-    return _requested_limited_gradient_types;
-  }
+  LinearFVGradientReader registerFVGradient(unsigned int variable_number,
+                                            const FVGradientMethod & method);
 
 protected:
-  /**
-   * Compute and store raw and requested limited Green-Gauss gradients for linear FV variables.
-   */
+  /// One vector per spatial component of a cell-centered gradient field.
+  using GradientContainer = LinearFVGradientReader::GradientContainer;
+
+  /// Update all registered linear FV gradient fields.
   void computeGradients();
 
   /**
-   * Rebuild persistent raw and temporary gradient storage after mesh/DOF changes.
+   * Update a registered gradient reader explicitly.
+   * @param reader Gradient reader to update.
+   */
+  void updateFVGradient(const LinearFVGradientReader & reader);
+
+  /**
+   * Rebuild cached gradient values and reusable scratch storage after mesh/DOF changes.
    */
   void rebuildLinearFVGradientStorage();
 
-  /**
-   * Return temporary storage for gradients during gradient assembly.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final gradient container before gradient assembly returns.
-   */
-  std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-  temporaryLinearFVGradientContainer()
-  {
-    return _temporary_gradient;
-  }
+  /// Whether any linear finite-volume gradient fields have been registered on this system.
+  bool hasLinearFVGradients() const;
 
   /**
-   * Return temporary storage for limited gradients during gradient assembly.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final limited-gradient container before gradient assembly returns.
-   * @param limiter_type The limiter type whose temporary storage is being accessed.
+   * Allocate one zeroed vector per spatial component for gradient storage.
+   * @param container Component-vector container to rebuild.
    */
-  std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-  temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
+  void initializeContainer(GradientContainer & container) const;
+
+  /// Gradient values for all variables using the same gradient method.
+  struct LinearFVGradientContainer
   {
-    return _temporary_limited_gradient[limiter_type];
-  }
+    /// Variable numbers whose gradients are stored in values.
+    std::unordered_set<unsigned int> variable_numbers;
+
+    /// Persistent gradient values read by consumers.
+    GradientContainer values;
+  };
 
   /**
-   * Access the persisted limited-gradient storage for a specific limiter.
-   * @param limiter_type The limiter type whose persisted storage is being accessed.
-   * @return The persisted limited-gradient vectors keyed by spatial direction.
+   * Recompute the field values for a registered gradient method.
+   * @param method Gradient method used to update the container.
+   * @param container Method container whose values should be updated.
    */
-  std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-  rawLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
-  {
-    return _raw_limited_grad_containers[limiter_type];
-  }
-
-  /**
-   * Access the variable numbers that requested limited gradients for a specific limiter.
-   * @param limiter_type The limiter type whose request set is being accessed.
-   * @return The set of variable numbers that requested the limiter.
-   */
-  const std::unordered_set<unsigned int> &
-  requestedLinearFVLimitedGradientVariables(const Moose::FV::GradientLimiterType limiter_type) const
-  {
-    return libmesh_map_find(_requested_limited_gradient_variables, limiter_type);
-  }
-
-  bool needsLinearFVGradientStorage() const;
-
-  void initializeContainer(
-      std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & container) const;
+  void updateLinearFVGradientContainer(const FVGradientMethod & method,
+                                       LinearFVGradientContainer & container);
 
   /// Reference to the system object
   SystemBase & _sys;
 
-  /// Scratch storage for raw gradients assembled during the current compute pass.
-  std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> _temporary_gradient;
+  /// Reusable scratch space where a method writes replacement values before they are published.
+  GradientContainer _linear_fv_gradient_output_scratch;
 
-  /// Persisted raw cell-centered gradient components keyed by spatial direction.
-  std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> _raw_grad_container;
+  /// Reusable scratch space available to the method while computing replacement values.
+  GradientContainer _linear_fv_gradient_method_scratch;
 
-  /// Set of requested limiter types for which limited gradients should be computed.
-  std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
-
-  /// Variable numbers requesting limited gradients, keyed by limiter type.
-  std::unordered_map<Moose::FV::GradientLimiterType, std::unordered_set<unsigned int>>
-      _requested_limited_gradient_variables;
-
-  /// Persisted limited gradient components keyed by limiter type.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>>
-      _raw_limited_grad_containers;
-
-  /// Scratch storage for limited gradients assembled during the current compute pass.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>>>
-      _temporary_limited_gradient;
+  /// Gradient containers keyed by the method object that produces them.
+  std::unordered_map<const FVGradientMethod *, LinearFVGradientContainer>
+      _linear_fv_gradient_container_by_method;
 };

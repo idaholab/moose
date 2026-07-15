@@ -17,12 +17,20 @@
 #include "SIMPLE.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
+#include "LinearFVGradientInterface.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVMomentumPressure.h"
+#include "LinearFVPressureFluxBC.h"
+#include "FVReconstructedPressureGradient.h"
+#include "FVUtils.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
+#include "libmesh/elem.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
 
 using namespace libMesh;
 
@@ -43,11 +51,6 @@ RhieChowMassFlux::validParams()
   params.addParam<VariableName>("w", "The z-component of velocity");
   params.addRequiredParam<std::string>("p_diffusion_kernel",
                                        "The diffusion kernel acting on the pressure.");
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "body_force_kernel_names",
-      {},
-      "The body force kernel names."
-      "this double vector would have size index_x_dim: 'f1x f2x; f1y f2y; f1z f2z'");
 
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
@@ -63,6 +66,27 @@ RhieChowMassFlux::validParams()
                              MooseEnum("standard consistent", "standard"),
                              "The method to use in the pressure projection for Ainv - "
                              "standard (SIMPLE) or consistent (SIMPLEC)");
+  params.addParam<std::string>(
+      "momentum_pressure_kernel",
+      "",
+      "Momentum pressure kernel whose registered pressure gradient field should also be used by "
+      "Rhie-Chow when constructing H/A.");
+  params.addRangeCheckedParam<Real>(
+      "reconstructed_pressure_gradient_feedback_relaxation",
+      0.1,
+      "0.0<reconstructed_pressure_gradient_feedback_relaxation<=1.0",
+      "Relaxation factor applied when feeding reconstructed pressure gradients back into the "
+      "momentum predictor.");
+  params.addParam<MooseEnum>(
+      "reconstructed_pressure_gradient_velocity_update",
+      MooseEnum("reconstructed pressure_gradient", "reconstructed"),
+      "How the velocity is updated when using FVReconstructedPressureGradient. 'reconstructed' "
+      "writes the reconstructed velocity directly. 'pressure_gradient' updates the velocity from "
+      "the published pressure gradient.");
+  params.addParam<MooseEnum>(
+      "reconstructed_pressure_gradient_boundary_cells",
+      MooseEnum("reconstructed base_gradient", "reconstructed"),
+      "Which pressure gradient is fed back on cells touching a boundary face.");
   return params;
 }
 
@@ -80,10 +104,19 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
-    _body_force_kernel_names(
-        getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
+    _momentum_pressure_kernel_name(getParam<std::string>("momentum_pressure_kernel")),
+    _reconstructed_pressure_gradient_ready(false),
     _rho(getFunctor<Real>(NS::density)),
-    _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method"))
+    _pressure_system(nullptr),
+    _pressure_gradient_field(nullptr),
+    _global_pressure_system_number(0),
+    _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method")),
+    _reconstructed_pressure_gradient_feedback_relaxation(
+        getParam<Real>("reconstructed_pressure_gradient_feedback_relaxation")),
+    _reconstructed_pressure_gradient_velocity_update(
+        getParam<MooseEnum>("reconstructed_pressure_gradient_velocity_update")),
+    _reconstructed_pressure_gradient_boundary_cells(
+        getParam<MooseEnum>("reconstructed_pressure_gradient_boundary_cells"))
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a MooseLinearVariableFVReal.");
@@ -116,7 +149,7 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
 void
 RhieChowMassFlux::linkMomentumPressureSystems(
     const std::vector<LinearSystem *> & momentum_systems,
-    const LinearSystem & pressure_system,
+    LinearSystem & pressure_system,
     const std::vector<unsigned int> & momentum_system_numbers)
 {
   _momentum_systems = momentum_systems;
@@ -124,11 +157,62 @@ RhieChowMassFlux::linkMomentumPressureSystems(
   _pressure_system = &pressure_system;
   _global_pressure_system_number = _pressure_system->number();
 
+  auto * const pressure_var =
+      dynamic_cast<MooseLinearVariableFVReal *>(&_pressure_system->getVariable(0, _p->number()));
+  if (!pressure_var)
+    mooseError("The pressure variable in system '",
+               _pressure_system->name(),
+               "' must be a MooseLinearVariableFVReal.");
+
+  if (_momentum_pressure_kernel_name.empty())
+    _pressure_gradient_field = &pressure_var->computeCellGradients();
+  else
+  {
+    std::vector<LinearFVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribName>(_momentum_pressure_kernel_name)
+        .queryInto(kernels);
+
+    if (kernels.size() != 1)
+      paramError("momentum_pressure_kernel",
+                 "The kernel with the given name could not be found or multiple instances were "
+                 "identified.");
+
+    const auto * const pressure_kernel = dynamic_cast<const LinearFVMomentumPressure *>(kernels[0]);
+    if (!pressure_kernel)
+      paramError("momentum_pressure_kernel",
+                 "The provided kernel should be of type LinearFVMomentumPressure.");
+
+    if (dynamic_cast<const FVReconstructedPressureGradient *>(
+            &pressure_kernel->pressureGradientField().method()) &&
+        pressure_kernel->pressureVariableNumber() != _p->number())
+      paramError("momentum_pressure_kernel",
+                 "FVReconstructedPressureGradient can only be used for the pressure variable "
+                 "registered on RhieChowMassFlux '",
+                 name(),
+                 "'.");
+
+    _pressure_gradient_field = &pressure_kernel->pressureGradientField();
+  }
+
   _momentum_implicit_systems.clear();
   for (auto & system : _momentum_systems)
   {
     _global_momentum_system_numbers.push_back(system->number());
     _momentum_implicit_systems.push_back(dynamic_cast<LinearImplicitSystem *>(&system->system()));
+  }
+
+  if (usingReconstructedPressureGradientMethod())
+  {
+    checkReconstructedPressureGradientCompatibility();
+    if (_p_diffusion_kernel && _p_diffusion_kernel->useNonorthogonalCorrection() &&
+        _pressure_projection_method != "consistent")
+      paramError("pressure_projection_method",
+                 "FVReconstructedPressureGradient with nonorthogonal pressure diffusion requires "
+                 "the consistent pressure projection.");
   }
 
   setupMeshInformation();
@@ -140,6 +224,10 @@ RhieChowMassFlux::meshChanged()
   _HbyA_flux.clear();
   _Ainv.clear();
   _face_mass_flux.clear();
+  _reconstructed_pressure_gradient.clear();
+  _reconstruction_velocity_gradient.clear();
+  _boundary_cell_ids.clear();
+  _reconstructed_pressure_gradient_ready = false;
   setupMeshInformation();
 }
 
@@ -164,38 +252,6 @@ RhieChowMassFlux::initialSetup()
   if (!_p_diffusion_kernel)
     paramError("p_diffusion_kernel",
                "The provided diffusion kernel should of type LinearFVAnisotropicDiffusion!");
-
-  // We fetch the body forces kernel to ensure that the face flux correction
-  // is accurate.
-
-  // Check if components match the dimension.
-
-  if (!_body_force_kernel_names.empty())
-  {
-    if (_body_force_kernel_names.size() != _dim)
-      paramError("body_force_kernel_names",
-                 "The dimension of the body force vector does not match the problem dimension.");
-
-    _body_force_kernels.resize(_dim);
-
-    for (const auto dim_i : make_range(_dim))
-      for (const auto & force_name : _body_force_kernel_names[dim_i])
-      {
-        std::vector<LinearFVElementalKernel *> temp_storage;
-        auto base_query_force = _fe_problem.theWarehouse()
-                                    .query()
-                                    .template condition<AttribThread>(_tid)
-                                    .template condition<AttribSysNum>(_vel[dim_i]->sys().number())
-                                    .template condition<AttribSystem>("LinearFVElementalKernel")
-                                    .template condition<AttribName>(force_name)
-                                    .queryInto(temp_storage);
-        if (temp_storage.size() != 1)
-          paramError("body_force_kernel_names",
-                     "The kernel with the given name: " + force_name +
-                         " could not be found or multiple instances were identified.");
-        _body_force_kernels[dim_i].push_back(temp_storage[0]);
-      }
-  }
 }
 
 void
@@ -216,10 +272,267 @@ RhieChowMassFlux::setupMeshInformation()
   _cell_volumes->close();
 
   _flow_face_info.clear();
+  _boundary_cell_ids.clear();
   for (auto & fi : _fe_problem.mesh().faceInfo())
     if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
         (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
+    {
       _flow_face_info.push_back(fi);
+      if (!fi->boundaryIDs().empty())
+      {
+        if (fi->elemPtr() && hasBlocks(fi->elemPtr()->subdomain_id()))
+          _boundary_cell_ids.insert(fi->elemPtr()->id());
+        if (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id()))
+          _boundary_cell_ids.insert(fi->neighborPtr()->id());
+      }
+    }
+}
+
+void
+RhieChowMassFlux::updateReconstructionVelocityGradient()
+{
+  if (_reconstruction_velocity_gradient.empty())
+  {
+    _reconstruction_velocity_gradient.resize(_dim);
+    for (const auto component : make_range(_dim))
+    {
+      _reconstruction_velocity_gradient[component].resize(_dim);
+      for (const auto direction : make_range(_dim))
+        _reconstruction_velocity_gradient[component][direction] =
+            _momentum_implicit_systems[component]->current_local_solution->zero_clone();
+    }
+  }
+
+  for (auto & component_gradients : _reconstruction_velocity_gradient)
+    for (auto & gradient : component_gradients)
+      gradient->zero();
+
+  const auto & mesh = _fe_problem.mesh();
+  const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+  const auto time_arg = Moose::currentState();
+
+  for (const auto & elem_info : mesh.elemInfoVector())
+  {
+    if (!hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const Elem & elem = *elem_info->elem();
+    std::vector<RealVectorValue> surface_sum(_dim, RealVectorValue());
+
+    auto act = [&](const Elem &,
+                   const Elem * const,
+                   const FaceInfo * const fi,
+                   const Point & surface_vector,
+                   const Real,
+                   const bool elem_has_info)
+    {
+      const ElemInfo * const neighbor_info = elem_has_info ? fi->neighborInfo() : fi->elemInfo();
+      const bool neighbor_active = neighbor_info && hasBlocks(neighbor_info->subdomain_id());
+
+      for (const auto component : make_range(_dim))
+      {
+        const Real elem_value = _vel[component]->getElemValue(*elem_info, time_arg);
+        Real face_value = elem_value;
+
+        if (neighbor_active)
+        {
+          const Real neighbor_value = _vel[component]->getElemValue(*neighbor_info, time_arg);
+          Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                                 face_value,
+                                 elem_value,
+                                 neighbor_value,
+                                 *fi,
+                                 elem_has_info);
+        }
+
+        surface_sum[component] += surface_vector * face_value;
+      }
+    };
+
+    Moose::FV::loopOverElemFaceInfo(
+        elem, _moose_mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+    const Real volume = elem_info->volume() * elem_info->coordFactor();
+    if (volume == 0.0)
+      continue;
+
+    for (const auto component : make_range(_dim))
+    {
+      const auto dof =
+          elem_info
+              ->dofIndices()[_global_momentum_system_numbers[component]][_vel[component]->number()];
+      for (const auto direction : make_range(_dim))
+        _reconstruction_velocity_gradient[component][direction]->set(
+            dof, surface_sum[component](direction) / volume);
+    }
+  }
+
+  // Aguerre's Taylor correction needs an accurate velocity gradient on skewed cells. Keep the
+  // Green-Gauss-style result above as a fallback, and overwrite it with a cell-neighbor
+  // least-squares gradient when the Cartesian stencil is usable.
+  for (const auto & elem_info : mesh.elemInfoVector())
+  {
+    if (!hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    if (mesh.getCoordSystem(elem_info->subdomain_id()) != Moose::CoordinateSystemType::COORD_XYZ)
+      continue;
+
+    DenseMatrix<Real> least_squares_matrix(_dim, _dim);
+    std::vector<DenseVector<Real>> least_squares_rhs(_dim, DenseVector<Real>(_dim));
+    least_squares_matrix.zero();
+
+    std::vector<Real> elem_values(_dim);
+    for (const auto component : make_range(_dim))
+      elem_values[component] = _vel[component]->getElemValue(*elem_info, time_arg);
+
+    unsigned int neighbor_count = 0;
+    const Elem & elem = *elem_info->elem();
+    auto act = [&](const Elem &,
+                   const Elem * const,
+                   const FaceInfo * const fi,
+                   const Point &,
+                   const Real,
+                   const bool elem_has_info)
+    {
+      const ElemInfo * const neighbor_info = elem_has_info ? fi->neighborInfo() : fi->elemInfo();
+      if (!neighbor_info || !hasBlocks(neighbor_info->subdomain_id()))
+        return;
+
+      const Point d_cn = neighbor_info->centroid() - elem_info->centroid();
+      if (d_cn.norm() == 0.0)
+        return;
+
+      neighbor_count++;
+      for (const auto i : make_range(_dim))
+      {
+        for (const auto j : make_range(_dim))
+          least_squares_matrix(i, j) += d_cn(i) * d_cn(j);
+
+        for (const auto component : make_range(_dim))
+          least_squares_rhs[component](i) +=
+              (_vel[component]->getElemValue(*neighbor_info, time_arg) - elem_values[component]) *
+              d_cn(i);
+      }
+    };
+
+    Moose::FV::loopOverElemFaceInfo(
+        elem, _moose_mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+    if (neighbor_count < _dim)
+      continue;
+
+    for (const auto component : make_range(_dim))
+    {
+      DenseVector<Real> gradient(_dim);
+      DenseMatrix<Real> solve_matrix(least_squares_matrix);
+      solve_matrix.svd_solve(least_squares_rhs[component], gradient);
+
+      const auto dof =
+          elem_info
+              ->dofIndices()[_global_momentum_system_numbers[component]][_vel[component]->number()];
+      for (const auto direction : make_range(_dim))
+        _reconstruction_velocity_gradient[component][direction]->set(dof, gradient(direction));
+    }
+  }
+
+  for (auto & component_gradients : _reconstruction_velocity_gradient)
+    for (auto & gradient : component_gradients)
+      gradient->close();
+}
+
+RealVectorValue
+RhieChowMassFlux::reconstructionVelocityGradient(const ElemInfo & elem_info,
+                                                 const FaceInfo & fi,
+                                                 const bool elem_has_info,
+                                                 const unsigned int velocity_component) const
+{
+  RealVectorValue elem_gradient;
+  for (const auto direction : make_range(_dim))
+    elem_gradient(direction) = (*_reconstruction_velocity_gradient[velocity_component][direction])(
+        elem_info.dofIndices()[_global_momentum_system_numbers[velocity_component]]
+                              [_vel[velocity_component]->number()]);
+
+  const ElemInfo * const neighbor_info = elem_has_info ? fi.neighborInfo() : fi.elemInfo();
+  if (!neighbor_info || !hasBlocks(neighbor_info->subdomain_id()))
+    return elem_gradient;
+
+  RealVectorValue neighbor_gradient;
+  for (const auto direction : make_range(_dim))
+    neighbor_gradient(direction) =
+        (*_reconstruction_velocity_gradient[velocity_component][direction])(
+            neighbor_info->dofIndices()[_global_momentum_system_numbers[velocity_component]]
+                                       [_vel[velocity_component]->number()]);
+
+  RealVectorValue face_gradient;
+  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                         face_gradient,
+                         elem_gradient,
+                         neighbor_gradient,
+                         fi,
+                         elem_has_info);
+
+  return face_gradient;
+}
+
+void
+RhieChowMassFlux::computeCellVelocityFromPressureGradient()
+{
+  const auto & pressure_gradient = pressureGradientComponents();
+
+  // u_C = -(H/A)_C - (1/A)_C * grad(p)_C.
+  for (const auto system_i : index_range(_momentum_implicit_systems))
+  {
+    auto working_vector = _Ainv_raw[system_i]->clone();
+    working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
+    working_vector->add(*_HbyA_raw[system_i]);
+    working_vector->scale(-1.0);
+    (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
+    _momentum_implicit_systems[system_i]->update();
+    _momentum_systems[system_i]->setSolution(
+        *_momentum_implicit_systems[system_i]->current_local_solution);
+  }
+}
+
+Real
+RhieChowMassFlux::faceNormalValueFromFlux(const FaceInfo & fi,
+                                          const Point & face_normal,
+                                          const Real face_flux) const
+{
+  const auto time_arg = Moose::currentState();
+  Real face_rho = 0.0;
+
+  if (_vel[0]->isInternalFace(fi))
+  {
+    const Real elem_rho = _rho(makeElemArg(fi.elemPtr()), time_arg);
+    const Real neighbor_rho = _rho(makeElemArg(fi.neighborPtr()), time_arg);
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, fi, true);
+  }
+  else
+  {
+    const bool elem_is_fluid = hasBlocks(fi.elemPtr()->subdomain_id());
+    const Elem * const boundary_elem = elem_is_fluid ? fi.elemPtr() : fi.neighborPtr();
+    const Moose::FaceArg boundary_face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+    face_rho = _rho(boundary_face, time_arg);
+  }
+
+  if (face_rho == 0.0)
+    return 0.0;
+
+  const Real normal_speed = face_flux / face_rho;
+  const bool elem_is_fluid = hasBlocks(fi.elemPtr()->subdomain_id());
+  const Point normal = elem_is_fluid ? fi.normal() : Point(-fi.normal());
+
+  return normal_speed * (normal * face_normal);
+}
+
+Real
+RhieChowMassFlux::faceNormalVelocityFromMassFlux(const FaceInfo & fi,
+                                                 const Point & face_normal) const
+{
+  return faceNormalValueFromFlux(fi, face_normal, libmesh_map_find(_face_mass_flux, fi.id()));
 }
 
 void
@@ -290,6 +603,18 @@ RhieChowMassFlux::getMassFlux(const FaceInfo & fi) const
 }
 
 Real
+RhieChowMassFlux::getHbyAFlux(const FaceInfo & fi) const
+{
+  return _HbyA_flux.evaluate(&fi);
+}
+
+RealVectorValue
+RhieChowMassFlux::getFaceAinv(const FaceInfo & fi) const
+{
+  return _Ainv.evaluate(&fi);
+}
+
+Real
 RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
 {
   const Moose::FaceArg face_arg{&fi,
@@ -300,6 +625,58 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
+}
+
+const LinearFVGradientReader &
+RhieChowMassFlux::pressureGradientField() const
+{
+  if (!_pressure_gradient_field)
+    mooseError(
+        "The pressure gradient field has not been registered for RhieChowMassFlux '", name(), "'.");
+
+  return *_pressure_gradient_field;
+}
+
+void
+RhieChowMassFlux::preparePressureGradientUpdate()
+{
+  _reconstructed_pressure_gradient_ready = false;
+}
+
+bool
+RhieChowMassFlux::hasReconstructedPressureGradient() const
+{
+  return _reconstructed_pressure_gradient_ready && !_reconstructed_pressure_gradient.empty();
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::reconstructedPressureGradientComponents() const
+{
+  mooseAssert(hasReconstructedPressureGradient(), "Reconstructed pressure gradient is not ready.");
+
+  return _reconstructed_pressure_gradient;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::HbyAComponents() const
+{
+  mooseAssert(!_HbyA_raw.empty(), "HbyA data is not ready.");
+
+  return _HbyA_raw;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::AinvComponents() const
+{
+  mooseAssert(!_Ainv_raw.empty(), "Ainv data is not ready.");
+
+  return _Ainv_raw;
+}
+
+unsigned int
+RhieChowMassFlux::pressureVariableNumber() const
+{
+  return _p->number();
 }
 
 Real
@@ -392,21 +769,145 @@ RhieChowMassFlux::computeFaceMassFlux()
 void
 RhieChowMassFlux::computeCellVelocity()
 {
-  auto & pressure_gradient = _pressure_system->linearFVGradientContainer();
-
-  // We set the dof value in the solution vector the same logic applies:
-  // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
-  for (const auto system_i : index_range(_momentum_implicit_systems))
+  if (usingReconstructedPressureGradientMethod())
   {
-    auto working_vector = _Ainv_raw[system_i]->clone();
-    working_vector->pointwise_mult(*working_vector, *pressure_gradient[system_i]);
-    working_vector->add(*_HbyA_raw[system_i]);
-    working_vector->scale(-1.0);
-    (*_momentum_implicit_systems[system_i]->solution) = *working_vector;
-    _momentum_implicit_systems[system_i]->update();
-    _momentum_systems[system_i]->setSolution(
-        *_momentum_implicit_systems[system_i]->current_local_solution);
+    const bool update_velocity_from_reconstruction =
+        _reconstructed_pressure_gradient_velocity_update == "reconstructed";
+    const bool use_base_gradient_on_boundary =
+        _reconstructed_pressure_gradient_boundary_cells == "base_gradient";
+    const auto & pressure_gradient = pressureGradientComponents();
+
+    updateReconstructionVelocityGradient();
+
+    if (_reconstructed_pressure_gradient.empty())
+    {
+      _reconstructed_pressure_gradient.resize(_dim);
+      for (const auto component : make_range(_dim))
+        _reconstructed_pressure_gradient[component] =
+            _pressure_system->currentSolution()->zero_clone();
+    }
+
+    for (auto & pressure_gradient_vec : _reconstructed_pressure_gradient)
+      pressure_gradient_vec->zero();
+
+    const auto & mesh = _fe_problem.mesh();
+    const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+
+    for (const auto & elem_info : mesh.elemInfoVector())
+    {
+      if (!hasBlocks(elem_info->subdomain_id()))
+        continue;
+
+      const bool boundary_cell = _boundary_cell_ids.count(elem_info->elem()->id());
+      DenseMatrix<Real> matrix(_dim, _dim);
+      DenseVector<Real> projection_rhs(_dim);
+      matrix.zero();
+      projection_rhs.zero();
+
+      const Elem & elem = *elem_info->elem();
+      auto act = [&](const Elem &,
+                     const Elem * const,
+                     const FaceInfo * const fi,
+                     const Point & surface_vector,
+                     const Real,
+                     const bool elem_has_info)
+      {
+        const Real surface_area = surface_vector.norm();
+        if (surface_area == 0.0)
+          return;
+
+        const auto face_normal = surface_vector / surface_area;
+
+        // Aguerre's formulation reconstructs the cell velocity from the total conservative face
+        // flux after removing the Taylor face-flux contribution from the previous velocity
+        // gradient.
+        Real face_normal_reconstructed_quantity = faceNormalVelocityFromMassFlux(*fi, face_normal);
+
+        const Point d_pf = fi->faceCentroid() - elem_info->centroid();
+        Real gradient_flux_correction = 0.0;
+        for (const auto component : make_range(_dim))
+          gradient_flux_correction +=
+              (reconstructionVelocityGradient(*elem_info, *fi, elem_has_info, component) * d_pf) *
+              surface_vector(component);
+
+        face_normal_reconstructed_quantity -= gradient_flux_correction / surface_area;
+
+        for (const auto i : make_range(_dim))
+        {
+          projection_rhs(i) += face_normal_reconstructed_quantity * surface_vector(i);
+          for (const auto j : make_range(_dim))
+            matrix(i, j) += surface_vector(i) * surface_vector(j) / surface_area;
+        }
+      };
+
+      Moose::FV::loopOverElemFaceInfo(
+          elem, _moose_mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
+
+      auto solve_projection = [&](const DenseVector<Real> & rhs, DenseVector<Real> & solution)
+      {
+        if (_dim == 1)
+        {
+          const Real denom = matrix(0, 0);
+          solution(0) = denom != 0.0 ? rhs(0) / denom : 0.0;
+        }
+        else
+        {
+          DenseMatrix<Real> solve_matrix(matrix);
+          solve_matrix.cholesky_solve(rhs, solution);
+        }
+      };
+
+      DenseVector<Real> reconstructed_quantity(_dim);
+      solve_projection(projection_rhs, reconstructed_quantity);
+
+      // Always build the reconstructed pressure-gradient candidate. The velocity update can either
+      // use the direct reconstructed value or the pressure-gradient field published below.
+      for (const auto component : make_range(_dim))
+      {
+        const auto momentum_dof =
+            elem_info->dofIndices()[_global_momentum_system_numbers[component]][0];
+        const auto pressure_dof =
+            elem_info->dofIndices()[_global_pressure_system_number][_p->number()];
+
+        const Real HbyA = (*_HbyA_raw[component])(momentum_dof);
+        const Real Ainv = (*_Ainv_raw[component])(momentum_dof);
+        const Real base_gradient = (*pressure_gradient[component])(pressure_dof);
+        const Real reconstructed_gradient =
+            Ainv != 0.0 ? (-reconstructed_quantity(component) - HbyA) / Ainv : base_gradient;
+        const Real direct_velocity = reconstructed_quantity(component);
+        const Real stored_gradient =
+            use_base_gradient_on_boundary && boundary_cell ? base_gradient : reconstructed_gradient;
+
+        if (update_velocity_from_reconstruction)
+          _momentum_implicit_systems[component]->solution->set(momentum_dof, direct_velocity);
+        _reconstructed_pressure_gradient[component]->set(pressure_dof, stored_gradient);
+      }
+    }
+
+    if (update_velocity_from_reconstruction)
+    {
+      for (const auto system_i : index_range(_momentum_implicit_systems))
+      {
+        _momentum_implicit_systems[system_i]->solution->close();
+        _momentum_implicit_systems[system_i]->update();
+        _momentum_systems[system_i]->setSolution(
+            *_momentum_implicit_systems[system_i]->current_local_solution);
+      }
+    }
+
+    for (auto & pressure_gradient_vec : _reconstructed_pressure_gradient)
+      pressure_gradient_vec->close();
+
+    _reconstructed_pressure_gradient_ready = true;
+    _pressure_system->updateFVGradient(pressureGradientField());
+
+    if (!update_velocity_from_reconstruction)
+      computeCellVelocityFromPressureGradient();
+
+    return;
   }
+
+  computeCellVelocityFromPressureGradient();
 }
 
 void
@@ -492,9 +993,15 @@ RhieChowMassFlux::populateCouplingFunctors(
       const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
-      // is consistent
-      if (_vel[0]->isDirichletBoundaryFace(*fi))
+      mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+      const auto * pressure_bc = _p->getBoundaryCondition(*fi->boundaryIDs().begin());
+
+      // For the legacy Dirichlet-velocity plus extrapolated-pressure path, we still need a
+      // special boundary HbyA reconstruction to keep the face flux consistent. When the pressure
+      // BC itself is a LinearFVPressureFluxBC, that object already enforces the prescribed
+      // boundary mass flux, so we use the standard one-term boundary expansion instead.
+      if (_vel[0]->isDirichletBoundaryFace(*fi) &&
+          !dynamic_cast<const LinearFVPressureFluxBC *>(pressure_bc))
       {
         const Moose::FaceArg boundary_face{
             fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
@@ -505,15 +1012,6 @@ RhieChowMassFlux::populateCouplingFunctors(
 
           face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-
-          if (!_body_force_kernel_names.empty())
-            for (const auto & force_kernel : _body_force_kernels[dim_i])
-            {
-              force_kernel->setCurrentElemInfo(&elem_info);
-              face_hbya(dim_i) -=
-                  force_kernel->computeRightHandSideContribution() * ainv_reader[dim_i](elem_dof) /
-                  (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
-            }
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
       }
@@ -725,9 +1223,55 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
   if (updated_pressure)
   {
     _grad_p_current.clear();
-    for (const auto & component : _pressure_system->linearFVGradientContainer())
+    for (const auto & component : pressureGradientComponents())
       _grad_p_current.push_back(component->clone());
   }
 
+  if (_grad_p_current.empty())
+    for (const auto & component : pressureGradientComponents())
+      _grad_p_current.push_back(component->clone());
+
   return _grad_p_current;
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+RhieChowMassFlux::pressureGradientComponents() const
+{
+  return pressureGradientField().components();
+}
+
+bool
+RhieChowMassFlux::usingReconstructedPressureGradientMethod() const
+{
+  return dynamic_cast<const FVReconstructedPressureGradient *>(&pressureGradientField().method());
+}
+
+void
+RhieChowMassFlux::checkReconstructedPressureGradientCompatibility() const
+{
+  mooseAssert(_pressure_system,
+              "The pressure system should be linked before compatibility checks.");
+
+  if (_pressure_system->nVariables() != 1)
+    mooseError(
+        "FVReconstructedPressureGradient assumes the pressure and momentum systems each have "
+        "exactly one variable so their DOF indices can be used in vector operations. Pressure "
+        "system '",
+        _pressure_system->name(),
+        "' has variables: ",
+        Moose::stringify(_pressure_system->getVariableNames()));
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    const auto * const momentum_system = _momentum_systems[system_i];
+    mooseAssert(momentum_system, "Momentum system pointer should not be null.");
+
+    if (momentum_system->nVariables() != 1)
+      mooseError("FVReconstructedPressureGradient assumes the pressure and momentum systems each "
+                 "have exactly one variable so their DOF indices can be used in vector operations. "
+                 "Momentum system '",
+                 momentum_system->name(),
+                 "' has variables: ",
+                 Moose::stringify(momentum_system->getVariableNames()));
+  }
 }

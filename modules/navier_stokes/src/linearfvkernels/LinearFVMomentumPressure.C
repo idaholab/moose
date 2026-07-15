@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
+#include "LinearFVGradientInterface.h"
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 
@@ -23,6 +24,10 @@ LinearFVMomentumPressure::validParams()
                              "equations, added to the right hand side.");
   params.addParam<VariableName>(NS::pressure,
                                 "The pressure variable whose gradient should be used.");
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "Gradient method to use for the pressure gradient in this kernel. If omitted, the pressure "
+      "variable's default gradient method is used.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -34,9 +39,9 @@ LinearFVMomentumPressure::validParams()
 LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
-    _pressure_var(getPressureVariable(NS::pressure))
+    _pressure_var(getPressureVariable(NS::pressure)),
+    _pressure_gradient_field(registerPressureGradientField())
 {
-  _pressure_var.computeCellGradients();
 }
 
 MooseLinearVariableFV<Real> &
@@ -51,6 +56,15 @@ LinearFVMomentumPressure::getPressureVariable(const std::string & vname)
   return *ptr;
 }
 
+const LinearFVGradientReader &
+LinearFVMomentumPressure::registerPressureGradientField()
+{
+  if (!isParamValid("gradient_method"))
+    return _pressure_var.computeCellGradients();
+
+  return _pressure_var.computeCellGradients(getParam<GradientMethodName>("gradient_method"));
+}
+
 Real
 LinearFVMomentumPressure::computeMatrixContribution()
 {
@@ -60,5 +74,6 @@ LinearFVMomentumPressure::computeMatrixContribution()
 Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
-  return -_pressure_var.gradSlnComponent(*_current_elem_info, _index) * _current_elem_volume;
+  const Real pressure_gradient = _pressure_gradient_field.component(*_current_elem_info, _index);
+  return -pressure_gradient * _current_elem_volume;
 }

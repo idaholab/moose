@@ -10,6 +10,61 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [momentum-pressure-gradient-method]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    exodiff = 2d-velocity-pressure-gradient-method_out.e
+    cli_args = 'pressure_gradient_method=gg Outputs/file_base=2d-velocity-pressure-gradient-method_out'
+    requirement = "The system shall allow the pressure variable in a linear finite volume SIMPLE "
+                  "solve to use a named Green-Gauss gradient method used by Rhie-Chow and "
+                  "momentum pressure-gradient consumers."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [momentum-pressure-reconstructed-gradient]
+    type = 'Exodiff'
+    input = 2d-velocity-pressure.i
+    exodiff = 2d-velocity-pressure-reconstructed-gradient_out.e
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 Outputs/file_base=2d-velocity-pressure-reconstructed-gradient_out'
+    requirement = "The system shall be able to solve the steady-state Navier-Stokes problem in a 2D "
+                  "channel using the SIMPLE algorithm with reconstructed pressure gradients in "
+                  "the linear finite volume momentum predictor."
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-wrong-variable]
+    type = 'RunException'
+    input = reconstructed-gradient-wrong-variable.i
+    cli_args = 'pressure_gradient_method=reconstructed LinearFVKernels/u_pressure/pressure=wrong_pressure'
+    expect_err = "can only be used for the pressure variable registered on RhieChowMassFlux"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is registered for a variable other than the pressure variable owned by the "
+                  "Rhie-Chow user object."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-multi-variable-pressure-system]
+    type = 'RunException'
+    input = reconstructed-gradient-multi-variable-pressure-system.i
+    cli_args = 'pressure_gradient_method=reconstructed'
+    expect_err = "Pressure system 'pressure_system' has variables"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is used with a pressure system that has more than one variable."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
+  [reconstructed-gradient-multi-variable-momentum-system]
+    type = 'RunException'
+    input = reconstructed-gradient-multi-variable-momentum-system.i
+    cli_args = 'pressure_gradient_method=reconstructed'
+    expect_err = "Momentum system 'u_system' has variables"
+    requirement = "The system shall report an error when a reconstructed pressure gradient method "
+                  "is used with a momentum system that has more than one variable."
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+  []
   [energy_boussinesq]
     type = 'Exodiff'
     input = 2d-boussinesq.i

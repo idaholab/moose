@@ -14,6 +14,8 @@
 #include "SIMPLESolveBase.h"
 #include "CHTHandler.h"
 
+class LinearFVGradientReader;
+
 /**
  * Common base class for segregated solvers for the Navier-Stokes
  * equations with linear FV assembly routines. Once the nonlinear
@@ -105,6 +107,9 @@ protected:
 
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
+
+  /// Explicitly update the registered pressure gradient field.
+  void updatePressureGradient();
 
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;

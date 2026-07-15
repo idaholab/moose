@@ -14,7 +14,6 @@
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "LinearFVAnisotropicDiffusion.h"
-#include "LinearFVElementalKernel.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -24,6 +23,8 @@
 class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
+class ElemInfo;
+class LinearFVGradientReader;
 namespace libMesh
 {
 class Elem;
@@ -43,8 +44,42 @@ public:
   /// Get the face velocity times density (used in advection terms)
   Real getMassFlux(const FaceInfo & fi) const;
 
+  /// Get the H/A face flux.
+  Real getHbyAFlux(const FaceInfo & fi) const;
+
+  /// Get the face-centered A inverse.
+  RealVectorValue getFaceAinv(const FaceInfo & fi) const;
+
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+
+  /// Get the registered pressure gradient field used by compatible momentum pressure kernels.
+  const LinearFVGradientReader & pressureGradientField() const;
+
+  /// Mark the registered pressure gradient field update as a base-gradient update.
+  void preparePressureGradientUpdate();
+
+  /// Whether reconstructed pressure gradients are ready for the gradient method to consume.
+  bool hasReconstructedPressureGradient() const;
+
+  /// Get the pressure-layout reconstructed pressure-gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  reconstructedPressureGradientComponents() const;
+
+  /// Get the momentum-layout H/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & HbyAComponents() const;
+
+  /// Get the momentum-layout 1/A component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & AinvComponents() const;
+
+  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve.
+  Real reconstructedPressureGradientFeedbackRelaxation() const
+  {
+    return _reconstructed_pressure_gradient_feedback_relaxation;
+  }
+
+  /// Variable number of the pressure variable reconstructed by this object.
+  unsigned int pressureVariableNumber() const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -75,7 +110,7 @@ public:
    * @param momentum_system_numbers The numbers of these systems
    */
   void linkMomentumPressureSystems(const std::vector<LinearSystem *> & momentum_systems,
-                                   const LinearSystem & pressure_system,
+                                   LinearSystem & pressure_system,
                                    const std::vector<unsigned int> & momentum_system_numbers);
 
   /**
@@ -89,8 +124,36 @@ protected:
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
 
+  /// Get the registered pressure gradient component vectors.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & pressureGradientComponents() const;
+
+  /// Whether the registered pressure gradient field is produced by the reconstructed method.
+  bool usingReconstructedPressureGradientMethod() const;
+
+  /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
+  void checkReconstructedPressureGradientCompatibility() const;
+
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
+
+  /// Update the cell velocity gradients used by the Aguerre flux reconstruction.
+  void updateReconstructionVelocityGradient();
+
+  /// Interpolate one velocity component gradient from the current cell to the face.
+  RealVectorValue reconstructionVelocityGradient(const ElemInfo & elem_info,
+                                                 const FaceInfo & fi,
+                                                 bool elem_has_info,
+                                                 unsigned int velocity_component) const;
+
+  /// Update the cell velocity from the currently published pressure gradient.
+  void computeCellVelocityFromPressureGradient();
+
+  /// Recover a face-normal value from a conservative face flux.
+  Real
+  faceNormalValueFromFlux(const FaceInfo & fi, const Point & face_normal, Real face_flux) const;
+
+  /// Recover the face-normal velocity from the conservative mass flux.
+  Real faceNormalVelocityFromMassFlux(const FaceInfo & fi, const Point & face_normal) const;
 
   /// Populate the face values of the H/A and 1/A fields
   void
@@ -118,7 +181,7 @@ protected:
   const MooseLinearVariableFVReal * const _p;
 
   /// The thread 0 copy of the x-velocity variable
-  std::vector<const MooseLinearVariableFVReal *> _vel;
+  std::vector<MooseLinearVariableFVReal *> _vel;
 
   /// Pointer to the pressure diffusion term in the pressure Poisson equation
   LinearFVAnisotropicDiffusion * _p_diffusion_kernel;
@@ -156,16 +219,24 @@ protected:
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _face_mass_flux;
 
-  /// Pointer to the body force terms
-  std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;
-  /// Vector of body force term names
-  std::vector<std::vector<std::string>> _body_force_kernel_names;
+  /// Optional momentum pressure kernel whose registered pressure gradient field should be reused.
+  const std::string _momentum_pressure_kernel_name;
 
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
    * Should not be used in other conditions.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
+
+  /// Cell pressure gradient reconstructed from the pressure part of the face fluxes.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _reconstructed_pressure_gradient;
+
+  /// Cell velocity gradients used by the Aguerre face-flux reconstruction.
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _reconstruction_velocity_gradient;
+
+  /// Whether _reconstructed_pressure_gradient should be exposed through FVReconstructedPressureGradient.
+  bool _reconstructed_pressure_gradient_ready;
 
   /**
    * Functor describing the density of the fluid
@@ -185,7 +256,10 @@ protected:
   std::vector<libMesh::LinearImplicitSystem *> _momentum_implicit_systems;
 
   /// Pointer to the pressure system
-  const LinearSystem * _pressure_system;
+  LinearSystem * _pressure_system;
+
+  /// Registered pressure gradient field used by Rhie-Chow and compatible momentum pressure kernels.
+  const LinearFVGradientReader * _pressure_gradient_field;
 
   /// Global number of the pressure system
   unsigned int _global_pressure_system_number;
@@ -196,10 +270,22 @@ protected:
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;
 
+  /// Relaxation factor used when feeding reconstructed pressure gradients back into the solve
+  const Real _reconstructed_pressure_gradient_feedback_relaxation;
+
+  /// How reconstructed-pressure-gradient mode updates the cell velocity after pressure correction
+  const MooseEnum _reconstructed_pressure_gradient_velocity_update;
+
+  /// Which pressure gradient is fed back on boundary-adjacent cells
+  const MooseEnum _reconstructed_pressure_gradient_boundary_cells;
+
 private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;
+
+  /// Element ids of cells touching a boundary face on the flow blocks.
+  std::unordered_set<dof_id_type> _boundary_cell_ids;
 };
 
 template <typename VarType>

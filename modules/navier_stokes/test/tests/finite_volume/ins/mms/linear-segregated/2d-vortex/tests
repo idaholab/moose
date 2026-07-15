@@ -1,6 +1,6 @@
 [Tests]
   issues = '#27280'
-  design = 'SIMPLE.md'
+  design = 'SIMPLE.md RhieChowMassFlux.md LinearFVMomentumPressure.md'
   [vortex-orthogonal]
     type = MMSTest
     input = test.py
@@ -17,5 +17,23 @@
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     max_threads = 1 # see libmesh issue #3808
+    max_time = 1000
+  []
+  [vortex-orthogonal-reconstructed]
+    type = MMSTest
+    input = test.py
+    test_case = TestVortexOrthogonalReconstructed
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm with reconstructed pressure gradients in the momentum predictor and obtain second order spatial convergence for velocity and first order spatial convergence for pressure on an orthogonal grid.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [vortex-nonorthogonal-reconstructed]
+    type = CSVDiff
+    input = 2d-vortex.i
+    csvdiff = 2d-vortex-nonorthogonal-reconstructed.csv
+    cli_args = 'pressure_gradient_method=reconstructed Mesh/gmg/elem_type=TRI3 Mesh/gmg/nx=16 Mesh/gmg/ny=16 LinearFVKernels/u_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/v_advection_stress/use_nonorthogonal_correction=true LinearFVKernels/p_diffusion/use_nonorthogonal_correction=false LinearFVKernels/p_diffusion/use_nonorthogonal_correction_on_boundary=false UserObjects/rc/pressure_projection_method=consistent Outputs/file_base=2d-vortex-nonorthogonal-reconstructed Outputs/exodus=false'
+    requirement = 'The system shall preserve the nonorthogonal TRI3 reconstructed pressure-gradient errors for a fixed mesh refinement.'
+    max_threads = 1 # see libmesh issue #3808
+    max_time = 1000
   []
 []
