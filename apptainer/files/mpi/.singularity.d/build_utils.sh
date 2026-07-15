@@ -64,17 +64,12 @@ default_march() {
 
     COMPILER="$(mpicxx -show | awk '{print $1}')"
 
-    if "$COMPILER" --version | grep -qi clang; then
-        echo "x86-64-v3"
-    elif "$COMPILER" --version | grep -qi "gcc\|g++"; then
+    if "$COMPILER" --version | grep -qi "gcc\|g++"; then
         GCC_MAJOR=$("$COMPILER" -dumpfullversion -dumpversion | cut -d. -f1)
-        if [ "$GCC_MAJOR" -ge 10 ]; then
-            echo "x86-64-v3"
-        else
+        if [ "$GCC_MAJOR" -lt 10 ]; then
             echo "haswell"
+            return 0
         fi
-    else
-        echo "unknown compiler" >&2
-        return 1
     fi
+    echo "x86-64-v3"
 }
