@@ -472,18 +472,18 @@ FEProblemSolve::solve()
 {
   // Outer loop for multi-grid convergence
   bool converged = false;
-  unsigned int num_fp_multisys_iters = 0;
+  unsigned int fp_iter = 0;
 
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
-    num_fp_multisys_iters = 0;
+    fp_iter = 0;
     converged = false;
     while (!converged)
     {
       if (_using_multi_sys_fp_iterations)
-        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
-                 << ":" << COLOR_DEFAULT << "\n"
+        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << fp_iter << ":"
+                 << COLOR_DEFAULT << "\n"
                  << std::endl;
 
       // Loop over each system
@@ -559,13 +559,14 @@ FEProblemSolve::solve()
       {
         _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE);
 
-        const auto convergence_status =
-            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters + 1);
+        // checkConvergence expects the number of iterations performed, not the iteration index:
+        const auto n_fp_iter = fp_iter + 1;
+        const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
         converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
         if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
           break;
       }
-      num_fp_multisys_iters++;
+      fp_iter++;
     }
 
     if (grid_step != _num_grid_steps)

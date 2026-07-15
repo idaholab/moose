@@ -435,7 +435,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
 }
 
 bool
-ReferenceResidualConvergence::checkResidualConvergence(const unsigned int it,
+ReferenceResidualConvergence::checkResidualConvergence(const unsigned int n_iter,
                                                        const Real fnorm,
                                                        const Real ref_norm,
                                                        const Real rel_tol,
@@ -445,14 +445,14 @@ ReferenceResidualConvergence::checkResidualConvergence(const unsigned int it,
   // If no refernce_vector is provided, just revert to DefaultNonlinearConvergence behavior
   if (!_reference_vector)
     return DefaultNonlinearConvergence::checkResidualConvergence(
-        it, fnorm, ref_norm, rel_tol, abs_tol, oss);
+        n_iter, fnorm, ref_norm, rel_tol, abs_tol, oss);
 
   if (checkConvergenceIndividVars(fnorm, abs_tol, rel_tol, ref_norm))
   {
     oss << "Converged normally";
     return true;
   }
-  else if (it >= _accept_iters &&
+  else if (n_iter >= _accept_iters &&
            checkConvergenceIndividVars(
                fnorm, abs_tol * _accept_mult, rel_tol * _accept_mult, ref_norm))
   {

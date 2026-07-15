@@ -22,7 +22,7 @@ public:
   PostprocessorConvergence(const InputParameters & parameters);
 
 protected:
-  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int n_iter) override;
 
   /// Post-processor to use for convergence criteria
   const PostprocessorValue & _postprocessor;

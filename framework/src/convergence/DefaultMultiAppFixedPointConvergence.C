@@ -129,24 +129,28 @@ DefaultMultiAppFixedPointConvergence::preExecute()
 }
 
 Convergence::MooseConvergenceStatus
-DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
+DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int n_iter)
 {
   TIME_SECTION(_perfid_check_convergence);
 
+  // index of the iteration, starting at 0; n_iter is number of iterations performed.
+  const auto iter = n_iter - 1;
+
   if (_fixed_point_custom_pp)
-    computeCustomConvergencePostprocessor(iter - 1);
+    computeCustomConvergencePostprocessor(iter);
 
   // compute TIMESTEP_END residual norm; this should be executed between TIMESTEP_END
   // and TIMESTEP_BEGIN
   if (_has_fixed_point_norm)
     if (_fe_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
     {
-      _fixed_point_timestep_end_norm[iter - 1] = _fe_problem.computeResidualL2Norm();
+      auto & end_norm = _fixed_point_timestep_end_norm[iter];
+      end_norm = _fe_problem.computeResidualL2Norm();
 
       Real end_norm_old =
-          (iter > 1 ? _fixed_point_timestep_end_norm[iter - 2] : std::numeric_limits<Real>::max());
+          (iter > 0 ? _fixed_point_timestep_end_norm[iter - 1] : std::numeric_limits<Real>::max());
 
-      outputResidualNorm("TIMESTEP_END", end_norm_old, _fixed_point_timestep_end_norm[iter - 1]);
+      outputResidualNorm("TIMESTEP_END", end_norm_old, end_norm);
     }
 
   // print residual norm history
@@ -155,10 +159,10 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
                                                 _fixed_point_timestep_begin_norm,
                                                 _fixed_point_timestep_end_norm);
 
-  if (iter >= _min_fixed_point_its)
+  if (n_iter >= _min_fixed_point_its)
   {
-    Real max_norm = std::max(_fixed_point_timestep_begin_norm[iter - 1],
-                             _fixed_point_timestep_end_norm[iter - 1]);
+    Real max_norm =
+        std::max(_fixed_point_timestep_begin_norm[iter], _fixed_point_timestep_end_norm[iter]);
 
     Real max_relative_drop = max_norm / _fixed_point_initial_norm;
 
@@ -189,7 +193,7 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
     }
   }
 
-  if (iter == _max_fixed_point_its)
+  if (n_iter == _max_fixed_point_its)
   {
     if (_accept_max_it)
     {

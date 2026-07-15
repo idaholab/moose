@@ -47,7 +47,7 @@ public:
 protected:
   virtual void nonlinearConvergenceSetup() override;
 
-  virtual bool checkResidualConvergence(const unsigned int it,
+  virtual bool checkResidualConvergence(const unsigned int n_iter,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,

@@ -26,12 +26,12 @@ public:
 
   virtual void checkIterationType(IterationType it_type) const override;
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
 protected:
   /**
    * Check the absolute and relative convergence of the nonlinear solution
-   * @param iter       Iteration number
+   * @param n_iter     Number of iterations performed
    * @param fnorm      Norm of the residual vector
    * @param ref_norm   Norm to use for reference value
    * @param rel_tol    Relative tolerance
@@ -39,7 +39,7 @@ protected:
    * @param oss        Output streamstring
    * @return           Bool signifying convergence
    */
-  virtual bool checkResidualConvergence(const unsigned int iter,
+  virtual bool checkResidualConvergence(const unsigned int n_iter,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
