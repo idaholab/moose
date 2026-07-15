@@ -9,8 +9,10 @@ mesh. In the generated dual mesh, input nodes become dual elements and input ele
 locations for dual nodes.
 
 Input sideset and nodeset names are retained. Sideset IDs are transferred to generated dual sides
-that lie on the corresponding primal sides, and nodeset IDs are retained for primal nodes that are
-present in the output mesh.
+that lie on the corresponding primal sides, including dual sides spanning multiple contributing
+primal sides with the same ID. Nodes on those dual sides inherit the matching nodeset IDs of the
+primal node represented by the dual element. Nodeset IDs are also retained for primal nodes that
+are present in the output mesh.
 
 For a barycentric dual, dual nodes are placed at the centroids of the primal elements. Primal
 boundary vertices and boundary edge midpoints are added where needed so the dual mesh preserves the
