@@ -12,45 +12,78 @@
 #include "MooseTypes.h"
 
 #include <memory>
+#include <variant>
 
 /** Immutable setup data shared by the ChemicalComposition action and its runtime executor. */
 struct ThermochimicaConfiguration
 {
-  enum class EvaluationLocation : unsigned char
+  enum class EvaluationLocation
   {
     NODAL,
     ELEMENTAL
   };
 
-  enum class WarmStart : unsigned char
+  enum class WarmStart
   {
     PREVIOUS_SOLVE,
     PREVIOUS_TIMESTEP,
     NONE
   };
 
-  enum class SpeciesUnit : unsigned char
+  enum class SpeciesUnit
   {
     MOLES,
     MOLE_FRACTION
   };
 
-  struct SpeciesOutput
+  struct PhaseAmountOutput
   {
+    VariableName variable;
+    std::string phase;
+    int phase_index = -1;
+  };
+
+  struct SpeciesAmountOutput
+  {
+    VariableName variable;
     std::string phase;
     std::string species;
     int phase_index = -1;
     int species_index = -1;
     bool is_mqm = false;
+    SpeciesUnit unit = SpeciesUnit::MOLES;
   };
 
-  struct ElementPhaseOutput
+  struct ElementPotentialOutput
   {
+    VariableName variable;
+    std::string element;
+    int element_index = -1;
+  };
+
+  struct VaporPressureOutput
+  {
+    VariableName variable;
+    std::string phase;
+    std::string species;
+    int phase_index = -1;
+    int species_index = -1;
+  };
+
+  struct ElementInPhaseOutput
+  {
+    VariableName variable;
     std::string phase;
     std::string element;
     int phase_index = -1;
     int element_index = -1;
   };
+
+  using OutputDescriptor = std::variant<PhaseAmountOutput,
+                                        SpeciesAmountOutput,
+                                        ElementPotentialOutput,
+                                        VaporPressureOutput,
+                                        ElementInPhaseOutput>;
 
   FileName database;
   std::string temperature_unit;
@@ -60,25 +93,17 @@ struct ThermochimicaConfiguration
   std::string pressure;
   EvaluationLocation location = EvaluationLocation::NODAL;
   WarmStart warm_start = WarmStart::PREVIOUS_SOLVE;
-  SpeciesUnit species_unit = SpeciesUnit::MOLES;
   unsigned int batch_size = 32;
   bool report_performance = false;
 
   std::vector<std::string> elements;
   std::vector<unsigned int> element_ids;
-  std::vector<std::string> phases;
-  std::vector<int> phase_indices;
-  std::vector<SpeciesOutput> species;
-  std::vector<std::string> element_potentials;
-  std::vector<int> element_potential_indices;
-  std::vector<SpeciesOutput> vapor_species;
-  std::vector<ElementPhaseOutput> phase_elements;
+  std::vector<OutputDescriptor> outputs;
 
   std::vector<VariableName> element_variables;
-  std::vector<VariableName> output_variables;
 
   std::size_t inputWidth() const { return 2 + elements.size(); }
-  std::size_t outputWidth() const { return output_variables.size(); }
+  std::size_t outputWidth() const { return outputs.size(); }
 };
 
 using ThermochimicaConfigurationPtr = std::shared_ptr<const ThermochimicaConfiguration>;

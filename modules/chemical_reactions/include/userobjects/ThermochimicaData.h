@@ -75,6 +75,28 @@ protected:
   void initializeThermochimica();
   int solveRow(unsigned int row);
 #ifdef THERMOCHIMICA_ENABLED
+  struct OutputEvaluationContext
+  {
+    bool use_indexed_outputs;
+    const std::vector<double> & moles_phase;
+    Real pressure;
+  };
+
+  int evaluateOutput(const ThermochimicaConfiguration::PhaseAmountOutput & output,
+                     const OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::SpeciesAmountOutput & output,
+                     const OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::ElementPotentialOutput & output,
+                     const OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::VaporPressureOutput & output,
+                     const OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::ElementInPhaseOutput & output,
+                     const OutputEvaluationContext & context,
+                     Real & value) const;
   bool loadPreviousState(dof_id_type id);
   void storePreviousState(dof_id_type id);
 #endif
