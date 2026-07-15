@@ -12,6 +12,7 @@
 {#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
 {#- METHODS: Methods to build (defaults to all methods)                                       -#}
+{#- OPTFLAGS: Optimization flags to set when building                                         -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 
 {#- The within-container build directory to use                                               -#}
@@ -53,6 +54,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
     fi
 
+    # Optimization flags
+{%- if OPTFLAGS is not defined %}
+    OPTFLAGS=("-march=x86-64-v3" "-mtune=generic")
+{%- else %}
+    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
+{%- endif %}
+
     # Build VTK
     (
         cd ${ROOT_BUILD_DIR}
@@ -92,7 +100,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
             -DVTK_GROUP_ENABLE_Qt::STRING=NO \
             -DVTK_GROUP_ENABLE_Views:STRING=NO \
-            -DVTK_GROUP_ENABLE_Web:STRING=NO 2>&1 | tee ${VTK_LOGS}/cmake.log
+            -DVTK_GROUP_ENABLE_Web:STRING=NO \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${VTK_LOGS}/cmake.log
         cmake --build . --parallel ${MOOSE_JOBS} 2>&1 | tee ${VTK_LOGS}/build.log
         cmake --install . 2>&1 | tee ${VTK_LOGS}/install.log
 
@@ -140,7 +150,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         METHODS=${METHODS} \
             ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
                 "${LIBMESH_ARR_OPTIONS[@]}" \
-                --skip-submodule-update 2>&1 | tee ${LIBMESH_LOGS}/build.log
+                --skip-submodule-update \
+                CFLAGS="${OPTFLAGS[*]}" \
+                CXXFLAGS="${OPTFLAGS[*]}" \
+                FCFLAGS="${OPTFLAGS[*]}" \
+                libmesh_CFLAGS="${OPTFLAGS[*]}" \
+                libmesh_CXXFLAGS="${OPTFLAGS[*]}" \
+                libmesh_FCFLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${LIBMESH_LOGS}/build.log
         cp ${LIBMESH_SRC_DIR}/build/config.log ${LIBMESH_LOGS}/
 
         # Cleanup
