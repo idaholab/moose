@@ -26,7 +26,7 @@ public:
 
   virtual void checkIterationType(IterationType it_type) const override;
   virtual void initialize() override;
-  virtual void preExecute() override;
+  virtual void preSolve() override;
 
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 

@@ -24,11 +24,22 @@ public:
 
   DefaultNonlinearConvergence(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void checkIterationType(IterationType it_type) const override;
-
+  virtual void preSolve() override;
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
+  /// Modifies the maximum nonlinear iterations
+  void modifyMaximumIterations(const unsigned int max_iter);
+  /// Modifies the absolute nonlinear tolerance
+  void modifyAbsoluteTolerance(const Real abs_tol);
+  /// Modifies the relative nonlinear tolerance
+  void modifyRelativeTolerance(const Real rel_tol);
+
 protected:
+  /// Sets the nonlinear system parameters, such as tolerances
+  void setNonlinearSystemParameters();
+
   /**
    * Check the absolute and relative convergence of the nonlinear solution
    * @param iter       Iteration number
@@ -50,9 +61,9 @@ protected:
   virtual void nonlinearConvergenceSetup() {}
 
   FEProblemBase & _fe_problem;
-  /// Nonlinear absolute tolerance
+  /// Nonlinear absolute tolerance retrieved from SNES
   PetscReal _abs_tol;
-  /// Nonlinear relative tolerance
+  /// Nonlinear relative tolerance retrieved from SNES
   PetscReal _rel_tol;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
@@ -66,4 +77,12 @@ protected:
   const unsigned int _nl_max_pingpong;
   /// Current number of nonlinear ping-pong iterations for the current solve
   unsigned int _nl_current_pingpong;
+
+private:
+  /// Nonlinear maximum nonlinear iterations (modifiable by modifyMaximumIterations)
+  unsigned int _nl_max_its;
+  /// Nonlinear absolute tolerance (modifiable by modifyAbsoluteTolerance)
+  Real _nl_abs_tol;
+  /// Nonlinear relative tolerance (modifiable by modifyRelativeTolerance)
+  Real _nl_rel_tol;
 };

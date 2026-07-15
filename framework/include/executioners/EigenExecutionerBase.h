@@ -13,6 +13,7 @@
 
 class MooseEigenSystem;
 class FEProblemBase;
+class DefaultNonlinearConvergence;
 
 /**
  * This class provides reusable routines for eigenvalue executioners.
@@ -122,9 +123,15 @@ protected:
    */
   virtual void printEigenvalue();
 
+  /// Gets the Convergence object for \c _eigen_sys and checks it's the right type
+  DefaultNonlinearConvergence * getEigenSystemConvergence();
+
   // the fe problem
   FEProblemBase & _problem;
   MooseEigenSystem & _eigen_sys;
+
+  /// Convergence object corresponding to \c _eigen_sys
+  DefaultNonlinearConvergence * _eigen_sys_conv;
 
   /// dummy solve object for properly setting PETSc options
   FEProblemSolve _feproblem_solve;

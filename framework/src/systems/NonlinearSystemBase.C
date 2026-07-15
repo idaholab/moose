@@ -80,6 +80,7 @@
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
 #include "AutomaticMortarGeneration.h"
+#include "Convergence.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -4281,6 +4282,8 @@ NonlinearSystemBase::preSolve()
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
 
+  convergence().preSolve();
+
   return true;
 }
 
@@ -4298,4 +4301,10 @@ NonlinearSystemBase::getFieldSplitPreconditioner()
     mooseError("No field split preconditioner is present for this system");
 
   return *_fsp;
+}
+
+Convergence &
+NonlinearSystemBase::convergence()
+{
+  return _fe_problem.getConvergence(_convergence_name);
 }
