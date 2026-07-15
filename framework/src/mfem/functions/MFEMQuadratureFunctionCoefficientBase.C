@@ -52,6 +52,10 @@ MFEMQuadratureFunctionCoefficientBase::CheckIntegrationRule(const mfem::Quadratu
   const int stored_order = qspace.GetOrder();
   const mfem::Geometry::Type geom = qspace.GetGeometry(el_idx);
   int suggested_order = -1;
+  // The consuming integrator's order is not known here, but is realistically bounded. The upper
+  // limit is just a generous finite cap so this error-path search always terminates: a multiple
+  // of the stored order, plus a constant so low-order stored rules still search far enough. If the
+  // true order somehow exceeds the cap, suggested_order stays -1 and a generic message is emitted.
   for (int order = 0; order <= 2 * stored_order + 64; ++order)
   {
     const mfem::IntegrationRule & candidate = mfem::IntRules.Get(geom, order);
