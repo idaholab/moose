@@ -10,18 +10,20 @@
 
 # TODO: Update packages to production versions
 Bootstrap: docker
-{%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-clang:pr30-8.10-clang21.1.8-gcc15.2.1-mpich5.0.1-20260714
-{%- elif ALTERNATE_FROM == "cuda" %}
-From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-cuda-gcc:pr30-8.10-cuda13.3.0-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714
-{%- elif ALTERNATE_FROM == "gcc_min" %}
-From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gccmin:pr30-8.10-gcc9.2.1-mpich5.0.1-20260714
-{%- elif ALTERNATE_FROM == "intel" %}
+{%- if ALTERNATE_FROM == "intel" %}
 From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-oneapi:pr30-8.10-gcc13.3.1-oneapi2026.1.0-mpich4.3.2-20260714
-{%- elif ALTERNATE_FROM == "rocky9" %}
-From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714
-{%- else %}
+{%- elif ALTERNATE_FROM == "rocky8_gcc" %}
 From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714
+{%- elif ALTERNATE_FROM == "rocky9_gcc" %}
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714
+{%- elif ALTERNATE_FROM == "ubuntu24_clang" %}
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-clang:pr30-24.04-clang22.1.8-gcc13.3.0-mpich5.0.1-openmpi5.0.10-20260714
+{%- elif ALTERNATE_FROM == "ubuntu24_cuda_gcc" %}
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-cuda-gcc:pr30-24.04-cuda13.3.0-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714
+{%- elif ALTERNATE_FROM == "ubuntu24_gccmin" %}
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gccmin:pr30-24.04-gcc9.5.0-mpich5.0.1-20260714
+{%- else %}
+From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714
 {%- endif %}
 
 %environment
@@ -31,40 +33,53 @@ From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.
     # Environment from underyling docker image
     test -f /moose_env.sh && . /moose_env.sh
 
-%post
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
 
-    # Determine rocky version
-    grep -q "Rocky" /etc/os-release && IS_ROCKY=1
-    if [ -n "${IS_ROCKY:-}" ]; then
-        grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
-        grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
-    fi
+    source /.singularity.d/os_functions.sh
+    update_system_packages
 
     # Remove apptainer if it's installed
-    if dnf list installed apptainer &> /dev/null; then
+    if is_rocky && dnf list installed apptainer &> /dev/null; then
         dnf remove -y apptainer
     fi
 
-    # Enable additional repos
-    dnf install -y dnf-plugins-core
-    if [ -n "${IS_ROCKY_8:-}" ]; then
-        dnf config-manager --set-enabled powertools
-        dnf install -y redhat-lsb-core.x86_64
-    elif [ -n "${IS_ROCKY_9:-}" ]; then
-        dnf config-manager --set-enabled crb
+    # Enable additional rocky repos
+    if is_rocky; then
+        dnf install -y dnf-plugins-core
+        if is_rocky8; then
+            dnf config-manager --set-enabled powertools
+            dnf install -y redhat-lsb-core.x86_64
+        elif is_rocky9; then
+            dnf config-manager --set-enabled crb
+        fi
+        dnf install -y epel-release
     fi
-    dnf install -y epel-release
 
     # Additional installs
-    dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
-        perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
-        libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov bash-completion ninja-build
+    INSTALLS=(
+        "autoconf" "automake" "bash-completion" "bison" "cmake" "diffutils"
+        "doxygen" "emacs" "flex" "lcov" "libtool" "ninja-build" "patch" "patchelf"
+        "patchutils" "valgrind"
+    )
+    ROCKY_INSTALLS=(
+        "cppunit" "cppunit-devel" "fftw-devel" "glpk-devel" "gsl-devel" "libpng"
+        "libpng-devel" "libtirpc" "libtirpc-devel" "perl-IO-Compress" "perl-JSON"
+        "perl-JSON-PP" "zlib-devel"
+    )
+    UBUNTU_INSTALLS=(
+        "libcppunit-dev" "libfftw3-dev" "libglpk-dev" "libgsl-dev" "libio-compress-perl"
+        "libjson-perl" "libjson-pp-perl" "libpng-dev" "libtirpc3" "libtirpc-dev"
+        "zlib1g-dev"
+    )
+    if is_rocky; then
+        dnf install -y "${INSTALLS[@]}" "${ROCKY_INSTALLS[@]}"
+    elif is_ubuntu; then
+        apt-get install -y --no-install-recommends "${INSTALLS[@]}" "${UBUNTU_INSTALLS[@]}"
+    fi
 
     # Clean after install
-    dnf clean all
+    clean_system_packages
 
 %test
     if [ -n "$MOOSE_MPICH_DIR" ]; then
@@ -78,3 +93,4 @@ From: ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.
 %files
     {{ FILES_DIR }}/.singularity.d/env/02-fix-actions.sh /.singularity.d/env/02-fix-actions.sh
     {{ FILES_DIR }}/.singularity.d/moose_bashrc /.singularity.d/moose_bashrc
+    {{ FILES_DIR }}/.singularity.d/os_functions.sh /.singularity.d/os_functions.sh

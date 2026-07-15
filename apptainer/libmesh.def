@@ -40,11 +40,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     export VTKLIB_DIR={{ VTK_DIR }}/lib
 
-%post
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
 
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     export MOOSE_JOBS={{ MOOSE_JOBS }}
@@ -167,7 +164,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Cleanup
     rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
 
 %files
     {{ MOOSE_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/scripts/{{ LIBMESH_BUILD_SCRIPT }}

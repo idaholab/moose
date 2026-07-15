@@ -41,11 +41,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     export PETSC_DIR={{ PETSC_DIR }}
 
-%post
-    # So that piping things to tee fails
-    set -o pipefail
-    # Be careful about unknown variables
-    set -u
+%post -c /bin/bash
+    set -uexo pipefail
+
+    source /.singularity.d/os_functions.sh
+    update_system_packages
 
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
@@ -67,7 +67,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Additional installs needed for petsc with cuda
     if [ -n "${CUDA_DIR:-}" ]; then
-        dnf install -y libX11-devel
+        if is_rocky; then
+            dnf install -y libX11-devel
+        else
+            apt-get install -y --no-install-recommends libx11-dev
+        fi
     fi
 
     # Optimization flags
@@ -152,7 +156,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
+    clean_system_packages
 
 %files
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
