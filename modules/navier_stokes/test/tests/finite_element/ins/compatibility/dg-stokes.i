@@ -1,6 +1,5 @@
 mu = 1
 rho = 1
-vin = 1
 sigma = 10
 
 [Mesh]
@@ -11,9 +10,9 @@ sigma = 10
     xmax = 10
     ymin = -1
     ymax = 1
-    nx = 50
-    ny = 10
-    elem_type = tri3
+    nx = 10
+    ny = 2
+    elem_type = TRI6
   []
 []
 
@@ -40,7 +39,7 @@ sigma = 10
   [momentum_x_diffusion]
     type = MatDiffusion
     variable = u
-    diffusivity = 'mu'
+    diffusivity = mu
   []
   [momentum_x_pressure]
     type = PressureGradient
@@ -52,7 +51,7 @@ sigma = 10
   [momentum_y_diffusion]
     type = MatDiffusion
     variable = v
-    diffusivity = 'mu'
+    diffusivity = mu
   []
   [momentum_y_pressure]
     type = PressureGradient
@@ -80,14 +79,14 @@ sigma = 10
     variable = u
     sigma = ${sigma}
     epsilon = -1
-    diff = 'mu'
+    diff = mu
   []
   [momentum_y_diffusion]
     type = DGDiffusion
     variable = v
     sigma = ${sigma}
     epsilon = -1
-    diff = 'mu'
+    diff = mu
   []
   [momentum_x_pressure]
     type = INSPressureGradientDGKernel
@@ -101,50 +100,54 @@ sigma = 10
     pressure = pressure
     component = 1
   []
-  [temperature_diffusion]
-    type = DGDiffusion
-    epsilon = -1
-    sigma = ${sigma}
-    variable = temperature
-  []
   [mass_convection]
     type = ADDGAdvection
     variable = pressure
-    velocity = 'velocity'
-    advected_quantity = '-1'
+    velocity = velocity
+    advected_quantity = -1
+  []
+  [temperature_diffusion]
+    type = DGDiffusion
+    variable = temperature
+    epsilon = -1
+    sigma = ${sigma}
   []
 []
 
 [Functions]
+  [u_inlet]
+    type = ParsedFunction
+    expression = '1.5*(1-y*y)'
+  []
   [v_inlet]
     type = ParsedVectorFunction
-    expression_x = '${vin}'
+    expression_x = '1.5*(1-y*y)'
   []
 []
 
 [BCs]
   [diffusion_momentum_x_in]
     type = DGFunctionDiffusionDirichletBC
-    boundary = 'left'
+    boundary = left
     variable = u
     sigma = ${sigma}
     epsilon = -1
-    function = '${vin}'
-    diff = 'mu'
+    function = u_inlet
+    diff = mu
   []
   [diffusion_momentum_y_in]
     type = DGFunctionDiffusionDirichletBC
-    boundary = 'left'
+    boundary = left
     variable = v
     sigma = ${sigma}
     epsilon = -1
-    function = '0'
-    diff = 'mu'
+    function = 0
+    diff = mu
   []
   [diffusion_temperature_in]
     type = DGFunctionDiffusionDirichletBC
-    boundary = 'left'
-    function = '1'
+    boundary = left
+    function = 1
     epsilon = -1
     sigma = ${sigma}
     variable = temperature
@@ -155,8 +158,8 @@ sigma = 10
     variable = u
     sigma = ${sigma}
     epsilon = -1
-    function = '0'
-    diff = 'mu'
+    function = 0
+    diff = mu
   []
   [diffusion_momentum_y_walls]
     type = DGFunctionDiffusionDirichletBC
@@ -164,27 +167,26 @@ sigma = 10
     variable = v
     sigma = ${sigma}
     epsilon = -1
-    function = '0'
-    diff = 'mu'
+    function = 0
+    diff = mu
   []
   [advection_mass_in]
     type = ADConservativeAdvectionBC
-    boundary = 'left'
+    boundary = left
     variable = pressure
     velocity_function = v_inlet
     advected_quantity = -1
   []
   [advection_mass_out]
     type = ADConservativeAdvectionBC
-    boundary = 'right'
+    boundary = right
     variable = pressure
-    velocity_mat_prop = 'velocity'
+    velocity_mat_prop = velocity
     advected_quantity = -1
   []
-  [implicit_pressure_x_in_and_walls]
+  [implicit_pressure_x_in]
     type = INSPressureGradientBC
-    # boundary = 'left top bottom'
-    boundary = 'left'
+    boundary = left
     component = 0
     pressure = pressure
     variable = u
@@ -201,61 +203,57 @@ sigma = 10
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'rho'
-    prop_values = '${rho}'
+    prop_names = rho
+    prop_values = ${rho}
   []
   [const_reg]
     type = GenericConstantMaterial
-    prop_names = 'mu'
-    prop_values = '${mu}'
+    prop_names = mu
+    prop_values = ${mu}
   []
   [vel]
     type = ADVectorFromComponentVariablesMaterial
-    vector_prop_name = 'velocity'
+    vector_prop_name = velocity
     u = u
     v = v
   []
   [rhou]
     type = ADParsedMaterial
-    property_name = 'rhou'
-    coupled_variables = 'u'
-    material_property_names = 'rho'
+    property_name = rhou
+    coupled_variables = u
+    material_property_names = rho
     expression = 'rho*u'
   []
   [rhov]
     type = ADParsedMaterial
-    property_name = 'rhov'
-    coupled_variables = 'v'
-    material_property_names = 'rho'
+    property_name = rhov
+    coupled_variables = v
+    material_property_names = rho
     expression = 'rho*v'
   []
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu       NONZERO               mumps'
   nl_rel_tol = 1e-12
 []
 
-[Outputs]
-  csv = true
-[]
-
 [Postprocessors]
-  inactive = 'symmetry' # expensive except for low dof count
-  [symmetry]
-    type = MatrixSymmetryCheck
-  []
-  [side_average]
+  [outlet_velocity]
     type = SideAverageValue
-    boundary = 'right'
+    boundary = right
     variable = u
   []
-  [side_average_temperature]
+  [outlet_temperature]
     type = SideAverageValue
-    boundary = 'right'
+    boundary = right
     variable = temperature
   []
+[]
+
+[Outputs]
+  csv = true
 []

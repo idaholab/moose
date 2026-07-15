@@ -11,31 +11,24 @@
 
 #include "HybridizedDGBC.h"
 
-class IPHDGAssemblyHelper;
+class AdvectionLHDGAssemblyHelper;
 
 /**
- * Implements a prescribed flux for an IP-HDG discretization
+ * Weakly imposes prescribed scalar and velocity data for an L-HDG advection discretization.
  */
-class IPHDGBC : public HybridizedDGBC
+class AdvectionLHDGDirichletBC : public HybridizedDGBC
 {
 public:
   static InputParameters validParams();
-
-  IPHDGBC(const InputParameters & parameters);
+  AdvectionLHDGDirichletBC(const InputParameters & parameters);
 
 protected:
-  /**
-   * compute the AD residuals
-   */
-  virtual void compute() override = 0;
-
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
+  virtual void compute() override;
   virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
-};
 
-inline const IPHDGAssemblyHelper &
-IPHDGBC::iphdgHelper() const
-{
-  return const_cast<IPHDGBC *>(this)->iphdgHelper();
-}
+  /// Assembly helper implementing the L-HDG advective boundary flux.
+  std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;
+
+  /// Prescribed scalar value.
+  const Moose::Functor<Real> & _dirichlet_value;
+};

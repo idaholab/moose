@@ -11,31 +11,24 @@
 
 #include "HybridizedDGBC.h"
 
-class IPHDGAssemblyHelper;
+class AdvectionLHDGAssemblyHelper;
 
 /**
- * Implements a prescribed flux for an IP-HDG discretization
+ * Implements an advective outflow boundary condition using the L-HDG hybrid velocity.
  */
-class IPHDGBC : public HybridizedDGBC
+class AdvectionLHDGOutflowBC : public HybridizedDGBC
 {
 public:
   static InputParameters validParams();
-
-  IPHDGBC(const InputParameters & parameters);
+  AdvectionLHDGOutflowBC(const InputParameters & parameters);
 
 protected:
-  /**
-   * compute the AD residuals
-   */
-  virtual void compute() override = 0;
-
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
+  virtual void compute() override;
   virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
-};
 
-inline const IPHDGAssemblyHelper &
-IPHDGBC::iphdgHelper() const
-{
-  return const_cast<IPHDGBC *>(this)->iphdgHelper();
-}
+  /// Assembly helper implementing the L-HDG advective boundary flux.
+  std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;
+
+  /// Whether this object supplies the facet scalar equation.
+  const bool _constrain_lm;
+};

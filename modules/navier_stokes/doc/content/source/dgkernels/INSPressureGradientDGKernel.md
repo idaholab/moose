@@ -39,7 +39,7 @@ direction: `0` for $x$, `1` for $y$, and `2` for $z$.
 The following blocks add the volume and interior-face pressure terms to the $x$-momentum
 equation:
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=Kernels/momentum_x_pressure DGKernels/momentum_x_pressure
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=Kernels/momentum_x_pressure DGKernels/momentum_x_pressure
 
 !syntax parameters /DGKernels/INSPressureGradientDGKernel
 

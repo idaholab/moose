@@ -1,0 +1,48 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "AdvectionLHDGAssemblyHelper.h"
+#include "AdvectionLHDGDirichletBC.h"
+
+registerMooseObject("NavierStokesApp", AdvectionLHDGDirichletBC);
+
+InputParameters
+AdvectionLHDGDirichletBC::validParams()
+{
+  auto params = HybridizedDGBC::validParams();
+  params += AdvectionLHDGAssemblyHelper::validParams();
+  params.addRequiredParam<MooseFunctorName>("functor", "The prescribed scalar value");
+  params.addClassDescription("Weakly imposes prescribed scalar and velocity data for an L-HDG "
+                             "advection discretization.");
+  return params;
+}
+
+AdvectionLHDGDirichletBC::AdvectionLHDGDirichletBC(const InputParameters & parameters)
+  : HybridizedDGBC(parameters),
+    _lhdg_helper(std::make_unique<AdvectionLHDGAssemblyHelper>(
+        this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
+    _dirichlet_value(getFunctor<Real>("functor"))
+{
+}
+
+void
+AdvectionLHDGDirichletBC::compute()
+{
+  auto & helper = *_lhdg_helper;
+  helper.resizeResiduals();
+  helper.scalarDirichlet(_dirichlet_value);
+  // L-HDG Dirichlet traces are unused and conventionally constrained to zero.
+  helper.lmDirichletZero();
+}
+
+HybridizedDGAssemblyHelper &
+AdvectionLHDGDirichletBC::hybridizedDGHelper()
+{
+  return *_lhdg_helper;
+}

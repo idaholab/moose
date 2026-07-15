@@ -13,64 +13,13 @@
 InputParameters
 IPHDGBC::validParams()
 {
-  return ADIntegratedBC::validParams();
+  return HybridizedDGBC::validParams();
 }
 
-IPHDGBC::IPHDGBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters), _cached_elem(nullptr), _cached_side(libMesh::invalid_uint)
-{
-}
+IPHDGBC::IPHDGBC(const InputParameters & parameters) : HybridizedDGBC(parameters) {}
 
-void
-IPHDGBC::computeResidual()
+HybridizedDGAssemblyHelper &
+IPHDGBC::hybridizedDGHelper()
 {
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResiduals(_assembly, residual_packet);
-}
-
-void
-IPHDGBC::computeJacobian()
-{
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGBC::computeResidualAndJacobian()
-{
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResidualsAndJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGBC::jacobianSetup()
-{
-  _cached_elem = nullptr;
-  _cached_side = libMesh::invalid_uint;
-}
-
-void
-IPHDGBC::computeOffDiagJacobian(const unsigned int)
-{
-  if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
-  {
-    computeJacobian();
-    _cached_elem = _current_elem;
-    _cached_side = _current_side;
-  }
-}
-
-const std::unordered_set<unsigned int> &
-IPHDGBC::getMatPropDependencies() const
-{
-  return iphdgHelper().getMatPropDependencies();
-}
-
-bool
-IPHDGBC::getMaterialPropertyCalled() const
-{
-  return iphdgHelper().getMaterialPropertyCalled();
+  return iphdgHelper();
 }

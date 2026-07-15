@@ -11,26 +11,20 @@
 
 #include "HybridizedDGKernel.h"
 
-class IPHDGAssemblyHelper;
+class AdvectionLHDGAssemblyHelper;
 
 /**
- * Base kernel for implementing an interior penalty hybridized discretization
+ * Advection term using a cell velocity in the volume and a hybrid velocity in face fluxes.
  */
-class IPHDGKernel : public HybridizedDGKernel
+class AdvectionLHDGKernel : public HybridizedDGKernel
 {
 public:
   static InputParameters validParams();
-
-  IPHDGKernel(const InputParameters & params);
+  AdvectionLHDGKernel(const InputParameters & params);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
   virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
-};
 
-inline const IPHDGAssemblyHelper &
-IPHDGKernel::iphdgHelper() const
-{
-  return const_cast<IPHDGKernel *>(this)->iphdgHelper();
-}
+  /// Assembly helper implementing the L-HDG advection weak form.
+  std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;
+};

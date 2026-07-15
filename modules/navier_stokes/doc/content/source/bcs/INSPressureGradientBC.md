@@ -30,7 +30,7 @@ $x$, `1` for $y$, and `2` for $z$.
 The following block applies the pressure contribution to the $y$-momentum equation on the inlet
 and wall boundaries:
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=BCs/implicit_pressure_y_in_and_walls
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=BCs/implicit_pressure_y_in_and_walls
 
 !syntax parameters /BCs/INSPressureGradientBC
 

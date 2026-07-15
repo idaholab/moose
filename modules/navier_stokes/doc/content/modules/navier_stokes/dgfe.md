@@ -6,7 +6,7 @@ discretization using discontinuous finite element spaces. Unlike the
 so its momentum contribution requires numerical flux terms on element faces.
 
 This page describes the tested channel-flow demonstration in
-`mass-energy-conservation.i`. It uses first-order discontinuous velocity,
+`dg.i`. It uses first-order discontinuous velocity,
 piecewise-constant pressure, and piecewise-constant temperature on triangular
 elements.
 
@@ -43,7 +43,7 @@ The velocity components `u` and `v` use first-order `MONOMIAL` bases.
 Pressure and temperature use constant `MONOMIAL` bases, so all four solution
 fields are discontinuous across element faces.
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=Variables
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=Variables
 
 ## Volume and interior-face terms
 
@@ -56,14 +56,14 @@ supply the interior-face term. Mass continuity is assembled with
 [ADConservativeAdvection](ConservativeAdvection.md) and [ADDGAdvection.md] by
 advecting the constant quantity `-1` with the computed velocity.
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=Kernels DGKernels
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=Kernels DGKernels
 
 The including input adds the nonlinear momentum and temperature advection
 terms. [ADConservativeAdvection](ConservativeAdvection.md) supplies the
 element-volume terms, and [ADDGAdvection.md] supplies upwind numerical fluxes
 on interior faces.
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation.i block=Kernels/momentum_x_convection Kernels/momentum_y_convection Kernels/temperature_convection DGKernels/momentum_x_convection DGKernels/momentum_y_convection DGKernels/temperature_convection
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg.i block=Kernels/momentum_x_convection Kernels/momentum_y_convection Kernels/temperature_convection DGKernels/momentum_x_convection DGKernels/momentum_y_convection DGKernels/temperature_convection
 
 ## Boundary terms
 
@@ -73,23 +73,24 @@ weakly imposes the velocity and temperature diffusion conditions,
 outlet advective fluxes, and [INSPressureGradientBC.md] supplies the pressure
 term on the inlet and wall boundaries.
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=BCs
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=BCs
 
 The including input adds the inlet and outlet momentum and temperature
 advection conditions:
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation.i block=BCs/advection_momentum_x_in BCs/advection_momentum_y_in BCs/advection_temperature_in BCs/advection_momentum_x_out BCs/advection_momentum_y_out BCs/advection_temperature_out
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg.i block=BCs/advection_momentum_x_in BCs/advection_momentum_y_in BCs/advection_temperature_in BCs/advection_momentum_x_out BCs/advection_momentum_y_out BCs/advection_temperature_out
 
 ## Conservation demonstration
 
-The demonstration uses a triangular channel mesh with unit density, unit inlet
-x-velocity, and unit inlet temperature. Materials construct the velocity and
-momentum properties used by the conservative kernels, and a steady Newton solve
-computes the coupled flow and temperature fields.
+The demonstration uses a 10-by-2 triangular channel mesh with unit density, a
+unit-mean parabolic inlet x-velocity, and unit inlet temperature. Materials
+construct the velocity and momentum properties used by the conservative
+kernels, and a steady Newton solve computes the coupled flow and temperature
+fields.
 
-The `tri_mass_energy_conservation` test compares the outlet side averages
+The `dg` test compares the outlet side averages
 against CSV gold values. Both the outlet x-velocity and outlet temperature are
 one, matching their inlet values and demonstrating mass and energy conservation
 for this configuration.
 
-!listing modules/navier_stokes/test/tests/finite_element/ins/dg/channel-flow/mass-energy-conservation-stokes.i block=Postprocessors
+!listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=Postprocessors

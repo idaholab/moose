@@ -10,114 +10,16 @@
 #include "IPHDGAssemblyHelper.h"
 #include "IPHDGKernel.h"
 
-using namespace libMesh;
-
 InputParameters
 IPHDGKernel::validParams()
 {
-  auto params = HDGKernel::validParams();
-  return params;
+  return HybridizedDGKernel::validParams();
 }
 
-IPHDGKernel::IPHDGKernel(const InputParameters & params) : HDGKernel(params), _cached_elem(nullptr)
-{
-}
+IPHDGKernel::IPHDGKernel(const InputParameters & params) : HybridizedDGKernel(params) {}
 
-void
-IPHDGKernel::compute()
+HybridizedDGAssemblyHelper &
+IPHDGKernel::hybridizedDGHelper()
 {
-  auto & iphdg_helper = iphdgHelper();
-  iphdg_helper.resizeResiduals();
-  iphdg_helper.scalarVolume();
-}
-
-void
-IPHDGKernel::computeOnSide()
-{
-  auto & iphdg_helper = iphdgHelper();
-  iphdg_helper.resizeResiduals();
-  iphdg_helper.scalarFace();
-  iphdg_helper.lmFace();
-}
-
-void
-IPHDGKernel::computeResidual()
-{
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResiduals(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::computeJacobian()
-{
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::computeResidualAndJacobian()
-{
-  compute();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResidualsAndJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::computeResidualOnSide()
-{
-  computeOnSide();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResiduals(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::computeJacobianOnSide()
-{
-  computeOnSide();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::computeResidualAndJacobianOnSide()
-{
-  computeOnSide();
-  for (const auto & residual_packet : iphdgHelper().taggingData())
-    addResidualsAndJacobian(_assembly, residual_packet);
-}
-
-void
-IPHDGKernel::jacobianSetup()
-{
-  _cached_elem = nullptr;
-}
-
-void
-IPHDGKernel::computeOffDiagJacobian(const unsigned int)
-{
-  if (_cached_elem != _current_elem)
-  {
-    computeJacobian();
-    _cached_elem = _current_elem;
-  }
-}
-
-std::set<std::string>
-IPHDGKernel::additionalROVariables()
-{
-  return iphdgHelper().additionalROVariables();
-}
-
-const std::unordered_set<unsigned int> &
-IPHDGKernel::getMatPropDependencies() const
-{
-  return iphdgHelper().getMatPropDependencies();
-}
-
-bool
-IPHDGKernel::getMaterialPropertyCalled() const
-{
-  return iphdgHelper().getMaterialPropertyCalled();
+  return iphdgHelper();
 }

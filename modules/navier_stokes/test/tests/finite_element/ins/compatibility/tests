@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#33174'
+  design = 'modules/navier_stokes/dgfe.md modules/navier_stokes/inshdg.md'
+  [cg]
+    type = CSVDiff
+    input = cg.i
+    csvdiff = cg_out.csv
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using continuous P2 velocity and continuous P1 pressure and temperature.'
+  []
+  [dg]
+    type = CSVDiff
+    input = dg.i
+    csvdiff = dg_out.csv
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using discontinuous P1 velocity and discontinuous P0 pressure and temperature.'
+  []
+  [hybrid_cg_dg]
+    type = CSVDiff
+    input = hybrid-cg-dg.i
+    csvdiff = hybrid-cg-dg_out.csv
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using discontinuous P1 velocity with continuous P1 pressure and temperature.'
+  []
+  [ip_hdg]
+    type = CSVDiff
+    input = ip-hdg.i
+    csvdiff = ip-hdg_out.csv
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using an IP-HDG flow discretization and an IP-HDG scalar discretization with different pressure and temperature spaces.'
+  []
+  [l_hdg]
+    type = CSVDiff
+    input = l-hdg.i
+    csvdiff = l-hdg_out.csv
+    requirement = 'The system shall demonstrate compatible flow and scalar transport using an L-HDG flow discretization and an L-HDG scalar discretization with different pressure and temperature spaces and hybrid-velocity scalar fluxes.'
+  []
+[]
