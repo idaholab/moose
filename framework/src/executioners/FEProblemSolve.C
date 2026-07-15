@@ -527,11 +527,6 @@ FEProblemSolve::solve()
         auto * const sys = _systems[sys_i];
         const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
 
-        // set fixed point relaxation factor if needed
-        const bool apply_fp_relax = _perform_multi_sys_fp_relaxation[sys_i];
-        if (apply_fp_relax)
-          sys->setFixedPointRelaxationFactor(_multi_sys_fp_relax_factors[sys_i]);
-
         // Call solve on the problem for that system
         if (is_nonlinear)
           _problem.solve(sys->number());
@@ -549,8 +544,9 @@ FEProblemSolve::solve()
         {
           if (_problem.converged(sys->number()))
           {
-            if (apply_fp_relax)
-              sys->applyFixedPointRelaxation(Moose::SolutionIterationType::MultiSystemFixedPoint);
+            if (_perform_multi_sys_fp_relaxation[sys_i])
+              sys->applyFixedPointRelaxation(_multi_sys_fp_relax_factors[sys_i],
+                                             Moose::SolutionIterationType::MultiSystemFixedPoint);
             _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
                      << std::endl;
           }
@@ -558,8 +554,6 @@ FEProblemSolve::solve()
           {
             _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT << "\n"
                      << std::endl;
-            if (apply_fp_relax)
-              sys->clearFixedPointRelaxation();
             return false;
           }
         }
@@ -578,9 +572,6 @@ FEProblemSolve::solve()
           // needs this, just skip it
           linear_sys.computeGradients();
         }
-
-        if (apply_fp_relax)
-          sys->clearFixedPointRelaxation();
       }
 
       _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
