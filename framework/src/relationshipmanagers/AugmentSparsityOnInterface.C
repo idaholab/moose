@@ -292,17 +292,17 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
                             : nullptr;
 
   // If we're on a dynamic mesh or we have not yet constructed the mortar mesh, we need to ghost the
-  // entire interface because we don't know a priori what elements will project onto what. We *do
-  // not* add the whole interface if we are a coupling functor because it is very expensive. This is
-  // because when building the sparsity pattern, we call through to the ghosting functors with one
-  // element at a time (and then below we do a loop over all the mesh's active elements). It's
-  // perhaps faster in this case to deal with mallocs coming out of MatSetValues, especially if the
-  // mesh displacements are relatively small
+  // primary interface because we don't know a priori what elements will project onto what. We *do
+  // not* add the whole primary interface if we are a coupling functor because it is very expensive.
+  // This is because when building the sparsity pattern, we call through to the ghosting functors
+  // with one element at a time (and then below we do a loop over all the mesh's active elements).
+  // It's perhaps faster in this case to deal with mallocs coming out of MatSetValues, especially if
+  // the mesh displacements are relatively small
   if ((!amg || _use_displaced_mesh) && !_is_coupling_functor)
   {
-    for (const Elem * const elem : _mesh->active_element_ptr_range())
+    if (generating_mesh)
     {
-      if (generating_mesh)
+      for (const Elem * const elem : _mesh->active_element_ptr_range())
       {
         // We are still generating the mesh, so it's possible we don't even have the right boundary
         // ids created yet! So we actually ghost all boundary elements and all lower dimensional
@@ -315,49 +315,68 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
             coupled_elements.insert(std::make_pair(elem, _null_mat));
         }
       }
-      else
+
+      return;
+    }
+
+    // We've finished generating our mesh so we can be selective and only ghost the primary
+    // interface to ranks that own part of the secondary interface.
+
+    mooseAssert(primary_boundary_id != Moose::INVALID_BOUNDARY_ID,
+                "Primary boundary id should exist by now.");
+    mooseAssert(secondary_boundary_id != Moose::INVALID_BOUNDARY_ID,
+                "Secondary boundary id should exist by now.");
+    mooseAssert(primary_subdomain_id != Moose::INVALID_BLOCK_ID,
+                "Primary subdomain id should exist by now.");
+    mooseAssert(secondary_subdomain_id != Moose::INVALID_BLOCK_ID,
+                "Secondary subdomain id should exist by now.");
+
+    const BoundaryInfo & binfo = _mesh->get_boundary_info();
+    const auto has_boundary_id = [&binfo](const Elem * const elem, const BoundaryID boundary_id)
+    {
+      for (const auto side : elem->side_index_range())
+        if (binfo.has_boundary_id(elem, side, boundary_id))
+          return true;
+
+      return false;
+    };
+
+    bool has_secondary_interface = false;
+    for (const Elem * const elem : as_range(range_begin, range_end))
+      if (elem->subdomain_id() == secondary_subdomain_id ||
+          has_boundary_id(elem, secondary_boundary_id))
       {
-        // We've finished generating our mesh so we can be selective and only ghost elements lying
-        // in our lower-dimensional subdomains and their interior parents
+        has_secondary_interface = true;
+        break;
+      }
 
-        mooseAssert(primary_boundary_id != Moose::INVALID_BOUNDARY_ID,
-                    "Primary boundary id should exist by now.");
-        mooseAssert(secondary_boundary_id != Moose::INVALID_BOUNDARY_ID,
-                    "Secondary boundary id should exist by now.");
-        mooseAssert(primary_subdomain_id != Moose::INVALID_BLOCK_ID,
-                    "Primary subdomain id should exist by now.");
-        mooseAssert(secondary_subdomain_id != Moose::INVALID_BLOCK_ID,
-                    "Secondary subdomain id should exist by now.");
+    if (!has_secondary_interface)
+      return;
 
-        // Higher-dimensional boundary elements
-        const BoundaryInfo & binfo = _mesh->get_boundary_info();
+    for (const Elem * const elem : _mesh->active_element_ptr_range())
+    {
+      if (elem->processor_id() == p)
+        continue;
 
-        for (auto side : elem->side_index_range())
-          if ((elem->processor_id() != p) &&
-              (binfo.has_boundary_id(elem, side, primary_boundary_id) ||
-               binfo.has_boundary_id(elem, side, secondary_boundary_id)))
-            coupled_elements.insert(std::make_pair(elem, _null_mat));
+      if (has_boundary_id(elem, primary_boundary_id))
+        coupled_elements.insert(std::make_pair(elem, _null_mat));
 
-        // Lower dimensional subdomain elements
-        if ((elem->processor_id() != p) && (elem->subdomain_id() == primary_subdomain_id ||
-                                            elem->subdomain_id() == secondary_subdomain_id))
-        {
-          coupled_elements.insert(std::make_pair(elem, _null_mat));
+      // Lower dimensional primary subdomain elements
+      if (elem->subdomain_id() == primary_subdomain_id)
+      {
+        coupled_elements.insert(std::make_pair(elem, _null_mat));
 
 #ifndef NDEBUG
-          // let's do some safety checks
-          const Elem * const ip = elem->interior_parent();
-          mooseAssert(ip,
-                      "We should have set interior parents for all of our lower-dimensional mortar "
-                      "subdomains");
-          auto side = ip->which_side_am_i(elem);
-          auto bnd_id = elem->subdomain_id() == primary_subdomain_id ? primary_boundary_id
-                                                                     : secondary_boundary_id;
-          mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, bnd_id),
-                      "The interior parent for the lower-dimensional element does not lie on the "
-                      "boundary");
+        // let's do some safety checks
+        const Elem * const ip = elem->interior_parent();
+        mooseAssert(ip,
+                    "We should have set interior parents for all of our lower-dimensional mortar "
+                    "subdomains");
+        auto side = ip->which_side_am_i(elem);
+        mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, primary_boundary_id),
+                    "The interior parent for the lower-dimensional element does not lie on the "
+                    "primary boundary");
 #endif
-        }
       }
     }
   }
