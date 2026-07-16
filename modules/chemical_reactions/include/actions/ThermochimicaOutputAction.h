@@ -76,6 +76,12 @@ struct ThermochimicaSystemGibbsEnergyRequest
   VariableName variable;
 };
 
+struct ThermochimicaSystemPropertyRequest
+{
+  VariableName variable;
+  ThermochimicaConfiguration::SystemPropertyKind property;
+};
+
 using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
                                                 ThermochimicaSpeciesRequest,
                                                 ThermochimicaElementPotentialRequest,
@@ -84,7 +90,8 @@ using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
                                                 ThermochimicaChemicalPotentialRequest,
                                                 ThermochimicaPhaseGibbsEnergyRequest,
                                                 ThermochimicaPhaseDrivingForceRequest,
-                                                ThermochimicaSystemGibbsEnergyRequest>;
+                                                ThermochimicaSystemGibbsEnergyRequest,
+                                                ThermochimicaSystemPropertyRequest>;
 
 /** Base class for typed Thermochimica output selection Actions. */
 class ThermochimicaOutputAction : public Action
@@ -185,6 +192,15 @@ class ThermochimicaSystemGibbsEnergyOutputAction : public ThermochimicaOutputAct
 public:
   static InputParameters validParams();
   ThermochimicaSystemGibbsEnergyOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaSystemPropertyOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaSystemPropertyOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };

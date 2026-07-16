@@ -100,6 +100,9 @@ protected:
   void addOutputRequest(const ThermochimicaSystemGibbsEnergyRequest & request,
                         const InputParameters & source,
                         const std::string & origin);
+  void addOutputRequest(const ThermochimicaSystemPropertyRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin);
 
   /** Validate and append an output descriptor produced by any input syntax. */
   void addOutputDescriptor(ThermochimicaConfiguration::OutputDescriptor output,

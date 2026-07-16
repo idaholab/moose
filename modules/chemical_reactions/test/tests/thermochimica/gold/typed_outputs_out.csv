@@ -1,3 +1,3 @@
-time,bcc_driving_force,bcc_phase_fraction,hcp_amount,hcp_driving_force,hcp_gibbs_energy,hcp_mo_element_amount,hcp_mo_fraction,hcp_mo_moles,hcp_mo_species_potential,hcp_molar_gibbs_energy,hcp_phase_fraction,mo_chemical_potential,mo_in_bcc_fraction,mo_in_hcp_fraction,mo_vapor_pressure,system_gibbs_energy
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-1,425.23049868717,0,3.5272023219659,-6.4853339822656e-08,-523343.72142705,1.7584894435837,0.4985507728413,1.7584894435837,-144892.28892115,-148373.60424943,0.71983720856447,-144892.28240005,0,0.68960370336616,0,-726287.10838831
+time,bcc_driving_force,bcc_phase_fraction,hcp_amount,hcp_driving_force,hcp_gibbs_energy,hcp_mo_element_amount,hcp_mo_fraction,hcp_mo_moles,hcp_mo_species_potential,hcp_molar_gibbs_energy,hcp_phase_fraction,mo_chemical_potential,mo_in_bcc_fraction,mo_in_hcp_fraction,mo_vapor_pressure,system_enthalpy,system_entropy,system_gibbs_energy,system_heat_capacity
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,425.23049868975,0,3.5272023446359,-6.4152634893705e-08,-523343.7247779,1.7584894567258,0.49855077336294,1.7584894567258,-144892.28888648,-148373.60424581,0.71983721319099,-144892.28240006,0,0.68960370851992,0,351758.93966529,479.13157691271,-726287.10838832,1741.3843050599

@@ -96,6 +96,17 @@
         [system_gibbs_energy]
         []
       []
+      [SystemProperties]
+        [system_enthalpy]
+          property = enthalpy
+        []
+        [system_entropy]
+          property = entropy
+        []
+        [system_heat_capacity]
+          property = heat_capacity
+        []
+      []
     []
   []
 []
@@ -200,6 +211,21 @@
   [system_gibbs_energy]
     type = NodalVariableValue
     variable = system_gibbs_energy
+    nodeid = 1
+  []
+  [system_enthalpy]
+    type = NodalVariableValue
+    variable = system_enthalpy
+    nodeid = 1
+  []
+  [system_entropy]
+    type = NodalVariableValue
+    variable = system_entropy
+    nodeid = 1
+  []
+  [system_heat_capacity]
+    type = NodalVariableValue
+    variable = system_heat_capacity
     nodeid = 1
   []
 []
