@@ -21,8 +21,7 @@
                 1 0 0
                 0 -1 0
                 0 1 0
-            '
-              '    0 0 -1
+                0 0 -1
                 0 0 1'
     fixed_normal = true
     new_boundary = 'left right bottom top back front'

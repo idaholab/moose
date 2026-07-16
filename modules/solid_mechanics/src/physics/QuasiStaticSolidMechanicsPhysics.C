@@ -114,6 +114,10 @@ QuasiStaticSolidMechanicsPhysics::validParams()
       "column-major order, and there must be 9 entries in total.");
   params.addParam<std::vector<FunctionName>>(
       "targets", {}, "Functions giving the targets to hit for constraint types that are not none.");
+  params.addParam<bool>(
+      "homogenized_off_diagonal_jacobian",
+      true,
+      "Whether to include the off-diagonal scalar contributions to the homogenized jacobian");
 
   params.addParamNamesToGroup("scaling", "Variables");
   params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");
@@ -152,7 +156,8 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
     _lk_locking(getParam<bool>("volumetric_locking_correction")),
     _lk_homogenization(false),
     _constraint_types(getParam<MultiMooseEnum>("constraint_types")),
-    _targets(getParam<std::vector<FunctionName>>("targets"))
+    _targets(getParam<std::vector<FunctionName>>("targets")),
+    _lk_h_off_jac(getParam<bool>("homogenized_off_diagonal_jacobian"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -1142,6 +1147,8 @@ QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
         (_lk_large_kinematics && (_lk_formulation == LKFormulation::Updated));
     params.set<bool>("large_kinematics") = _lk_large_kinematics;
     params.set<bool>("stabilize_strain") = _lk_locking;
+    if (_lk_homogenization)
+      params.set<bool>("off_diagonal_jacobian") = _lk_h_off_jac;
   }
   else
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
