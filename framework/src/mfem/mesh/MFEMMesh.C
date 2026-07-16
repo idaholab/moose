@@ -20,6 +20,7 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
+  params += MFEMTopology::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -47,6 +48,7 @@ MFEMMesh::validParams()
                                      "Vector specifying translation in y direction.");
   params.addParam<std::vector<Real>>("translation_z",
                                      "Vector specifying translation in z direction.");
+  params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
   return params;
 }
