@@ -55,14 +55,18 @@ WaitForSignal::execute()
   {
     // Sync the latched signal across processes, matching Output::outputStep so
     // that the checkpoint sees a consistent value at the end of the step.
-    comm().max(Moose::interrupt_signal_number);
+    int signal_number = Moose::interrupt_signal_number;
+    comm().max(signal_number);
+    // Do not write back zero because the handler may have set the latch after the copy.
+    if (signal_number)
+      Moose::interrupt_signal_number = signal_number;
 
     const std::chrono::duration<Real> elapsed = std::chrono::steady_clock::now() - start;
     timed_out = elapsed.count() >= _timeout;
 
     // Decide collectively whether to release, so all ranks break on the same
     // iteration and none is left in a collective call by itself.
-    int done = (Moose::interrupt_signal_number != 0 || timed_out) ? 1 : 0;
+    int done = (signal_number != 0 || timed_out) ? 1 : 0;
     comm().max(done);
     if (done)
       break;

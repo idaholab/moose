@@ -916,7 +916,7 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 bool _throw_on_warning = false;
-int interrupt_signal_number = 0;
+volatile std::sig_atomic_t interrupt_signal_number = 0;
 bool show_multiple = false;
 
 } // namespace Moose
