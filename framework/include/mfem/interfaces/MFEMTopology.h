@@ -72,10 +72,10 @@ public:
   //   rotated_coord[1] =-coord_in[0] * sin(rotation_angle) + coord_in[1] * cos(rotation_angle);
   //   rotated_coord[2] = coord_in[2];
   // }
+protected:
+  bool _periodic{false};
 
 private:
-  typedef std::function<void(const mfem::Vector coord_in, mfem::Vector coord_out)>
-      SymmetryTransform;
   std::vector<mfem::real_t> _translation_x;
   const mfem::Vector _translation_x_vec;
   std::vector<mfem::real_t> _translation_y;
