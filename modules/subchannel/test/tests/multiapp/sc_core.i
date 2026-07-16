@@ -122,7 +122,6 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
   P_out = ${P_out}
   P_tol = 1.0e-2
   T_tol = 1.0e-2
