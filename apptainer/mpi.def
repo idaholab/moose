@@ -13,13 +13,15 @@
 
 {#- Image from definitions                            -#}
 {%- set ALTERNATE_FROM = ALTERNATE_FROM | default("") -%}
-{%- set DEFAULT_IMAGE = "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714" -%}
+{%- set DEFAULT_IMAGE = "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714" -%}
 {%- set FROM_IMAGES = {
   "intel":             "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-oneapi:pr30-8.10-gcc13.3.1-oneapi2026.1.0-mpich4.3.2-20260714",
   "rocky8_gcc":        "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky8-gcc:pr30-8.10-gcc13.3.1-mpich5.0.1-openmpi5.0.10-20260714",
+  "rocky9":            "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714",
   "rocky9_gcc":        "ghcr.io/idaholab/moose-containers/pr-moose-mpi-rocky9-gcc:pr30-9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10-20260714",
   "ubuntu24_clang":    "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-clang:pr30-24.04-clang22.1.8-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
   "ubuntu24_cuda_gcc": "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-cuda-gcc:pr30-24.04-cuda13.3.0-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
+  "ubuntu24_gcc":      "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gcc:pr30-24.04-gcc14.2.0-mpich5.0.1-openmpi5.0.10-20260714",
   "ubuntu24_gccmin":   "ghcr.io/idaholab/moose-containers/pr-moose-mpi-ubuntu24-gccmin:pr30-24.04-gcc9.5.0-mpich5.0.1-20260714",
 } -%}
 
