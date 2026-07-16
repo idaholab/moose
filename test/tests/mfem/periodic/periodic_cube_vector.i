@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/cube_hex10.e
-  dim = 3
+  file = ../mesh/cube_hex8.e
 []
 
 [MFEMPeriodic]

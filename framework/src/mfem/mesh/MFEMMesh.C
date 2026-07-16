@@ -19,6 +19,7 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
+  params += MFEMTopology::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -38,15 +39,6 @@ MFEMMesh::validParams()
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
-  params.addParam<bool>(
-      "periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
-  params.addParam<std::vector<Real>>("translation_x",
-                                     "Vector specifying translation in x direction.");
-  params.addParam<std::vector<Real>>("translation_y",
-                                     "Vector specifying translation in y direction.");
-  params.addParam<std::vector<Real>>("translation_z",
-                                     "Vector specifying translation in z direction.");
-
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
   return params;
