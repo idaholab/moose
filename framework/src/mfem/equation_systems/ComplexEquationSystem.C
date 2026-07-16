@@ -1,6 +1,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
+#include "CoefficientManager.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -294,6 +295,9 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
     trueX.GetBlock(i).SyncMemory(trueX);
     _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
+  // Solution variables changed: stored projections of solution-dependent coefficients are stale.
+  if (_coefficient_manager)
+    _coefficient_manager->markSolutionChanged();
 }
 
 }

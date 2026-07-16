@@ -661,6 +661,15 @@ MFEMProblem::addSubMesh(const std::string & var_type,
 }
 
 void
+MFEMProblem::addQuadratureFunction(const std::string & type,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  // The object declares its coefficient with the CoefficientManager on construction.
+  addObject<MFEMObject>(type, name, parameters);
+}
+
+void
 MFEMProblem::addTransfer(const std::string & transfer_name,
                          const std::string & name,
                          InputParameters & parameters)

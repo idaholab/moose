@@ -262,6 +262,16 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMGravityQuadratureFunction]
+    type = CSVDiff
+    input = gravity_qf.i
+    csvdiff = 'OutputData/GravityQF.csv'
+    design = 'MFEMVectorQuadratureFunction.md'
+    requirement = 'The system shall have the ability to precompute a vector coefficient at quadrature points and reuse the stored values in place of the original coefficient.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [MFEMIrrotational]
     type = CSVDiff
     input = irrotational.i
