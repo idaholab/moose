@@ -7,5 +7,6 @@
     issues = '#20191'
     design = 'syntax/Variables/index.md'
     requirement = 'The system shall initialize SIDE_HIERARCHIC variables as instructed'
+    skip = 'libmesh/libmesh#4494 adding nodal output'
   [../]
 []

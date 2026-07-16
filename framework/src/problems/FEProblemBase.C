@@ -1249,7 +1249,7 @@ FEProblemBase::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering())
+  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh())
   {
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
@@ -5471,8 +5471,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
         {
           // go over mortar interfaces and construct functors
           const auto & mortar_interfaces = getMortarInterfaces(displaced);
-          for (const auto & [primary_secondary_boundary_pair, mortar_generation_ptr] :
-               mortar_interfaces)
+          for (const auto & [primary_secondary_boundary_pair, interface_config] : mortar_interfaces)
           {
             auto mortar_uos_to_execute =
                 getMortarUserObjects(primary_secondary_boundary_pair.first,
@@ -5484,7 +5483,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
                                           ? static_cast<SubProblem *>(_displaced_problem.get())
                                           : static_cast<SubProblem *>(this);
             MortarUserObjectThread muot(mortar_uos_to_execute,
-                                        *mortar_generation_ptr,
+                                        *interface_config.amg,
                                         *subproblem,
                                         *this,
                                         displaced,
@@ -8394,7 +8393,9 @@ FEProblemBase::createMortarInterface(
     bool periodic,
     const bool debug,
     const bool correct_edge_dropping,
-    const Real minimum_projection_angle)
+    const Real minimum_projection_angle,
+    const MooseEnum & triangulation,
+    const bool triangulate_triangles)
 {
   _has_mortar = true;
 
@@ -8406,7 +8407,9 @@ FEProblemBase::createMortarInterface(
                                                periodic,
                                                debug,
                                                correct_edge_dropping,
-                                               minimum_projection_angle);
+                                               minimum_projection_angle,
+                                               triangulation,
+                                               triangulate_triangles);
   else
     return _mortar_data->createMortarInterface(primary_secondary_boundary_pair,
                                                primary_secondary_subdomain_pair,
@@ -8415,7 +8418,9 @@ FEProblemBase::createMortarInterface(
                                                periodic,
                                                debug,
                                                correct_edge_dropping,
-                                               minimum_projection_angle);
+                                               minimum_projection_angle,
+                                               triangulation,
+                                               triangulate_triangles);
 }
 
 const AutomaticMortarGeneration &
@@ -8662,6 +8667,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
                            const bool clean_refinement_flags)
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
+
+  _app.markMeshChangedForBackup();
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
@@ -10052,8 +10059,7 @@ FEProblemBase::checkNonlocalCouplingRequirement() const
   return _requires_nonlocal_coupling;
 }
 
-const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                         std::unique_ptr<AutomaticMortarGeneration>> &
+const std::unordered_map<std::pair<BoundaryID, BoundaryID>, MortarInterfaceConfig> &
 FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {
   return _mortar_data->getMortarInterfaces(on_displaced);

@@ -40,6 +40,14 @@ public:
   static InputParameters validParams();
 
   /**
+   * @return An InputParameters object containing just the parameters that control 3D mortar
+   * polygon triangulation (\p triangulation, \p triangulate_triangles). Provided so that
+   * downstream actions / objects which need to expose the same controls (e.g. ContactAction)
+   * can pull these definitions in via \p params += rather than duplicating them.
+   */
+  static InputParameters triangulationParams();
+
+  /**
    * @return The primary lower dimensional subdomain id
    */
   SubdomainID primarySubdomain() const { return _primary_subdomain_id; }

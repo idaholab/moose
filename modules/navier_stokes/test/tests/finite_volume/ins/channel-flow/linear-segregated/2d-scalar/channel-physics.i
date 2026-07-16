@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'upwind'
+scalar_advected_interp_method = ${advected_interp_method}
 k1 = 0.1
 k2 = 0.2
 
@@ -60,7 +61,7 @@ k2 = 0.2
       passive_scalar_inlet_types = 'fixed-value fixed-value'
       passive_scalar_inlet_functors = '1; 2'
 
-      passive_scalar_advection_interpolation = ${advected_interp_method}
+      passive_scalar_advection_interpolation = ${scalar_advected_interp_method}
       passive_scalar_two_term_bc_expansion = false
       use_nonorthogonal_correction = false
     []

@@ -16,6 +16,17 @@ constant advecting velocity that can be supplied through the
 The face value of the variable $u_f$ is computed using the user-selected interpolation
 technique that can be supplied through the [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name) parameter.
 
+### Selecting the interpolation method
+
+The [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name) parameter is the
+name of an interpolation method in the `[FVInterpolationMethods]` block. For example, to use
+upwind interpolation, add an [FVAdvectedUpwind.md] method and set
+[!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name) to that method name:
+
+!listing test/tests/linearfvkernels/advection/advection-1d.i block=FVInterpolationMethods
+
+!listing test/tests/linearfvkernels/advection/advection-1d.i block=LinearFVKernels/advection
+
 In the simplest case, using a linear interpolation method and an internal face
 for the integration, we get the following matrix contribution to the degree of freedom corresponding
 to the variable on $V_C$:

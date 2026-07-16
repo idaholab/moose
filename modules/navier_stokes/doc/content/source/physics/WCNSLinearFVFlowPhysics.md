@@ -31,9 +31,31 @@ The kernels created for the momentum equation for free flow:
 
 The kernels created for free flow for the pressure correction equation:
 
-- [LinearFVAnisotropicDiffusion.md] for the pressure diffusion term
+- [LinearFVPressureCorrectionDiffusion.md] for the pressure diffusion term
 - [LinearFVDivergence.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
 
+## Selecting interpolation methods
+
+The linear finite volume Physics syntax provides shortcut parameters for the interpolation methods
+used by the kernels it creates. The
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/momentum_advection_interpolation)
+parameter selects the momentum advection interpolation used by [LinearWCNSFVMomentumFlux.md].
+The supported choices are `average`, `upwind`, `vanLeer`, `min_mod`, and `venkatakrishnan`.
+
+The
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_diffusion_interpolation)
+parameter selects the interpolation used to compute the face values of `Ainv`, the $A^{-1}$
+diffusion tensor in the pressure correction diffusion term. The supported choices are `average`
+and `harmonic`.
+
+Use these shortcut parameters directly in the Physics block. For direct linear finite volume
+advection kernel syntax, add the interpolation methods in `[FVInterpolationMethods]` and pass
+their names to the kernels. For direct pressure correction syntax, set
+`pressure_diffusion_interpolation` on [RhieChowMassFlux.md].
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/linear-segregated/lid-driven-segregated-physics.i line=pressure_diffusion_ainv_interp_method
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/linear-segregated/lid-driven-segregated-physics.i start=momentum_advection_interpolation end=pressure_diffusion_interpolation include-end=true
 
 ## Automatically defined variables
 

@@ -76,6 +76,12 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
 
   [u_advection_stress]
@@ -84,7 +90,7 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'x'
     use_nonorthogonal_correction = false
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
     u = vel_x
     v = vel_y
@@ -102,7 +108,7 @@ advected_interp_method = 'upwind'
     mu = 'mu'
     momentum_component = 'y'
     use_nonorthogonal_correction = false
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
     u = vel_x
     v = vel_y
@@ -115,7 +121,7 @@ advected_interp_method = 'upwind'
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false

@@ -1,0 +1,18 @@
+{
+  "exclude": [
+    "**/contrib",
+    "libmesh",
+    "petsc",
+    "apptainer",
+    "docker_ci",
+    "examples",
+    "gui",
+    "large_media",
+    "m4",
+    "scripts",
+    "stork",
+    "test",
+    "tutorials",
+    "unit"
+  ]
+}

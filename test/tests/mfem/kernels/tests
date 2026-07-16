@@ -36,6 +36,22 @@
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
+  [MFEMDiffusion1D]
+    type = CSVDiff
+    input = diffusion.i
+    csvdiff = 'OutputData/Diffusion1D.csv'
+    cli_args = 'Mesh/file=../mesh/ref-segment.mesh '
+               'Mesh/uniform_refine=5 '
+               'BCs/bottom/boundary=1 '
+               'BCs/top/boundary=2 '
+               'Outputs/active=csv Outputs/csv=true '
+               'Outputs/file_base=OutputData/Diffusion1D'
+    requirement = 'The system shall have the ability to solve a 1D diffusion problem using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*1.*Spatial Dimension.*1.*Elems.*32.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+  []
   [MFEMDiffusionAMR]
     design = 'MFEMRefinementMarker.md MFEMIndicator.md MFEML2ZienkiewiczZhuIndicator.md'
     issues = '#30943'
@@ -69,6 +85,7 @@
     cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
+    abs_zero = 8e-10
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
@@ -84,6 +101,7 @@
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
+    abs_zero = 2e-10
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
@@ -200,6 +218,15 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
+  []
+  [MFEMTransientScheme]
+    type = RunException
+    input = heattransfer.i
+    cli_args = 'Executioner/scheme=bdf2'
+    expect_err = 'Time Integration scheme "BDF2" is not supported by MFEMTransient Executioner.'
+    requirement = 'The system shall report an error if the user specifies an unsupported time integration scheme.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
   []
   [MFEMMixedHeatTransfer]
     type = XMLDiff

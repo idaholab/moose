@@ -1,6 +1,6 @@
 [Tests]
   design = 'Constraints/index.md EqualValueConstraint.md PenaltyEqualValueConstraint.md'
-  issues = '#13080 #21329'
+  issues = '#13080 #21329 #33277'
   [continuity_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'
@@ -44,12 +44,79 @@
   []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
-    capabilities = 'ad_size>=200'
     input = 'continuity_sphere_hex.i'
-    exodiff = 'continuity_sphere_hex_2_1_undisplaced_mortar_segment_mesh.e'
+    exodiff = 'continuity_sphere_hex27_debug_2_1_undisplaced_mortar_segment_mesh.e'
     cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND '
-               'Constraints/mortar/debug_mesh=true Outputs/exodus=false'
-    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh when requested through a mortar constraint'
+               'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+               'Outputs/file_base=continuity_sphere_hex27_debug'
+    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
+                  'for a curved HEX27 mortar interface.'
+    recover = false
+  []
+  [continuity_sphere_hex20-debug-mesh]
+    type = 'Exodiff'
+    prereq = 'continuity_sphere_hex27-debug-mesh'
+    input = 'continuity_sphere_hex.i'
+    exodiff = 'continuity_sphere_hex20_debug_2_1_undisplaced_mortar_segment_mesh.e'
+    cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
+               'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+               'Outputs/file_base=continuity_sphere_hex20_debug'
+    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
+                  'for a curved HEX20 mortar interface.'
+    recover = false
+  []
+  [triangulation-modes]
+    issues = '#23802'
+    # Each child re-runs the HEX8 continuity problem with a different triangulation strategy for
+    # clipped 3D mortar polygons and Exodiffs the resulting solution against a gold file generated
+    # from that same mode. The tight tolerances (rel_err ~ 1e-8) catch genuine algorithmic
+    # regressions while tolerating the small numerical drift expected when, for example, libMesh's
+    # PSLG triangulation backend is updated.
+    requirement = 'The system shall produce the expected 3D mortar continuity solution on a HEX8 '
+                  'sphere mesh when clipped polygons are triangulated using'
+    [vertex]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_vertex_out.e'
+      cli_args = 'Constraints/mortar/triangulation=vertex '
+                 'Outputs/file_base=continuity_sphere_hex8_vertex_out'
+      detail = 'a vertex-fan from an existing polygon vertex,'
+      map = False
+      partial = True
+    []
+    [ear_clipping]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_ear_clipping_out.e'
+      cli_args = 'Constraints/mortar/triangulation=ear_clipping '
+                 'Outputs/file_base=continuity_sphere_hex8_ear_clipping_out'
+      detail = 'an ear-clipping algorithm,'
+      map = False
+      partial = True
+    []
+    [delaunay]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_delaunay_out.e'
+      cli_args = 'Constraints/mortar/triangulation=delaunay '
+                 'Outputs/file_base=continuity_sphere_hex8_delaunay_out'
+      detail = 'a libMesh constrained-Delaunay PSLG backend that preserves polygon boundary '
+               'edges, and'
+      map = False
+      partial = True
+    []
+    [centroid-with-retessellation]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_centroid_retess_out.e'
+      cli_args = 'Constraints/mortar/triangulation=centroid '
+                 'Constraints/mortar/triangulate_triangles=true '
+                 'Outputs/file_base=continuity_sphere_hex8_centroid_retess_out'
+      detail = 'centroid-based triangulation that explicitly subdivides already-triangular '
+               'clipped polygons when triangulate_triangles is enabled.'
+      map = False
+      partial = True
+    []
   []
   [continuity_tet4]
     type = 'Exodiff'
@@ -89,6 +156,30 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+  []
+  [continuity_tet10-debug-mesh]
+    type = 'Exodiff'
+    prereq = 'continuity_sphere_hex20-debug-mesh'
+    input = 'continuity_tet.i'
+    exodiff = 'continuity_tet10_debug_107_2_undisplaced_mortar_segment_mesh.e'
+    cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 '
+               'Variables/T/order=SECOND Variables/lambda/family=LAGRANGE Variables/lambda/order=SECOND '
+               'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet10_debug'
+    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
+                  'for a TET10 mortar interface.'
+    recover = false
+  []
+  [continuity_tet14-debug-mesh]
+    type = 'Exodiff'
+    prereq = 'continuity_tet10-debug-mesh'
+    input = 'continuity_tet.i'
+    exodiff = 'continuity_tet14_debug_107_2_undisplaced_mortar_segment_mesh.e'
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+               'Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD '
+               'Constraints/mortar/debug_mesh=true Outputs/exodus=false Outputs/file_base=continuity_tet14_debug'
+    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
+                  'for a TET14 mortar interface.'
+    recover = false
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'

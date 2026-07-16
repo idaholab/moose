@@ -11,15 +11,33 @@
 
 #include "MooseTypes.h"
 #include "MooseHashing.h"
+#include "MortarSegmentInfo.h"
 
 #include "libmesh/parallel_object.h"
 
+#include <memory>
 #include <unordered_map>
 #include <set>
+#include <string>
 
 class SubProblem;
 class MortarExecutorInterface;
 class AutomaticMortarGeneration;
+class MooseEnum;
+
+/**
+ * Per-mortar-interface configuration. Owns the AutomaticMortarGeneration object together with
+ * the user-supplied flags that must remain consistent across all constraints sharing a primary-
+ * secondary surface pair (periodic, debug, triangulation mode, triangulate-triangles).
+ */
+struct MortarInterfaceConfig
+{
+  std::unique_ptr<AutomaticMortarGeneration> amg;
+  bool periodic;
+  bool debug;
+  MortarSegmentTriangulationMode triangulation;
+  bool triangulate_triangles;
+};
 
 class MortarInterfaceWarehouse : public libMesh::ParallelObject
 {
@@ -39,6 +57,9 @@ public:
    * @param correct_edge_dropping edge dropping treatment selection
    * @param minimum_projection_angle minimum projection angle allowed for building mortar segment
    * mesh
+   * @param triangulation triangulation strategy used for clipped 3D mortar polygons
+   * @param triangulate_triangles whether a clipped polygon that is already a triangle should still
+   * be subdivided
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
@@ -47,7 +68,9 @@ public:
                              bool periodic,
                              const bool debug,
                              const bool correct_edge_dropping,
-                             const Real minimum_projection_angle);
+                             const Real minimum_projection_angle,
+                             const MooseEnum & triangulation,
+                             const bool triangulate_triangles);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
@@ -68,10 +91,11 @@ public:
                      bool on_displaced);
 
   /**
-   * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
+   * Return the per-interface configuration map (AutomaticMortarGeneration object plus the
+   * associated user flags) for either the displaced or undisplaced mesh. Iterating callers
+   * should reach the AMG via the value's \p amg member.
    */
-  const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                           std::unique_ptr<AutomaticMortarGeneration>> &
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, MortarInterfaceConfig> &
   getMortarInterfaces(bool on_displaced) const
   {
     if (on_displaced)
@@ -142,14 +166,13 @@ private:
 
   typedef std::pair<BoundaryID, BoundaryID> MortarKey;
 
-  /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
-  /// undisplaced AutomaticMortarGeneration object
-  std::unordered_map<MortarKey, std::unique_ptr<AutomaticMortarGeneration>> _mortar_interfaces;
+  /// Map from primary-secondary (in that order) boundary ID pair to the configuration of the
+  /// undisplaced mortar interface (AMG object + per-interface flags).
+  std::unordered_map<MortarKey, MortarInterfaceConfig> _mortar_interfaces;
 
-  /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
-  /// displaced AutomaticMortarGeneration object
-  std::unordered_map<MortarKey, std::unique_ptr<AutomaticMortarGeneration>>
-      _displaced_mortar_interfaces;
+  /// Map from primary-secondary (in that order) boundary ID pair to the configuration of the
+  /// displaced mortar interface (AMG object + per-interface flags).
+  std::unordered_map<MortarKey, MortarInterfaceConfig> _displaced_mortar_interfaces;
 
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarInterfaceWarehouse
   /// object
@@ -158,18 +181,6 @@ private:
   /// A set containing the boundary ids covered by all the mortar interfaces in this MortarInterfaceWarehouse
   /// object
   std::set<BoundaryID> _mortar_boundary_coverage;
-
-  /// Map from undisplaced AMG key to whether the undisplaced AMG object is enforcing periodic constraints
-  std::unordered_map<MortarKey, bool> _periodic_map;
-
-  /// Map from displaced AMG key to whether the displaced AMG object is enforcing periodic constraints
-  std::unordered_map<MortarKey, bool> _displaced_periodic_map;
-
-  /// Map from undisplaced AMG key to whether the undisplaced AMG object is to output mortar segment mesh
-  std::unordered_map<MortarKey, bool> _debug_flag_map;
-
-  /// Map from displaced AMG key to whether the displaced AMG object is to output mortar segment mesh
-  std::unordered_map<MortarKey, bool> _displaced_debug_flag_map;
 
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
   /// (e.g. the ids of the interior parents)

@@ -81,6 +81,7 @@
 
     requirement = "The system shall support outputting side-discontinuous edge element data with the "
                   "ExodusII format."
+    skip = 'libmesh/libmesh#4494 adding nodal output'
   []
 
   [side_discontinuous]
@@ -90,6 +91,7 @@
 
     requirement = "The system shall support outputting side-discontinuous quad element data with the "
                   "ExodusII format."
+    skip = 'libmesh/libmesh#4494 adding nodal output'
   []
 
   [output_elem_id]

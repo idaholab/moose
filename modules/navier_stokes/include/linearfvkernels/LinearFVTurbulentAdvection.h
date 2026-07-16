@@ -12,12 +12,14 @@
 #include "LinearFVFluxKernel.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "FVAdvectedInterpolationMethod.h"
+#include "FVInterpolationMethodInterface.h"
 
 /**
  * An advection kernel that implements the advection term for the turbulent variables
  * limited for the first cells near the wall.
  */
-class LinearFVTurbulentAdvection : public LinearFVFluxKernel
+class LinearFVTurbulentAdvection : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();
@@ -48,16 +50,19 @@ protected:
   const RhieChowMassFlux & _mass_flux_provider;
 
 private:
-  /// Container for the current advected interpolation coefficients on the face to make sure
-  /// we don't compute it multiple times for different terms.
-  std::pair<Real, Real> _advected_interp_coeffs;
+  /// The interpolation method to use for the advected quantity
+  const FVAdvectedInterpolationMethod & _adv_interp_method;
+
+  /// Cached weights/correction for the current face (refreshed in setupFaceData)
+  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
+
+  /// Reusable gradient storage used when advected interpolation requires gradients.
+  VectorValue<Real> _elem_grad_storage;
+  VectorValue<Real> _neighbor_grad_storage;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _mass_face_flux;
-
-  /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _advected_interp_method;
 
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;

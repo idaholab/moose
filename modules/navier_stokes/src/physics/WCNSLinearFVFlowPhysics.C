@@ -14,9 +14,11 @@
 #include "RhieChowMassFlux.h"
 #include "INSFVTimeKernel.h"
 #include "MapConversionUtils.h"
+#include "NSFVUtils.h"
 #include "NS.h"
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_interpolation_method_physics");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_functor_material");
@@ -28,10 +30,20 @@ WCNSLinearFVFlowPhysics::validParams()
   params.addClassDescription(
       "Define the Navier Stokes weakly-compressible equations with the linear "
       "solver implementation of the SIMPLE scheme");
+  params.set<MooseEnum>("momentum_advection_interpolation") = NS::fvAdvectedInterpolationMethods();
+  params.addParam<InterpolationMethodName>(
+      "momentum_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for momentum advection. When "
+      "provided, this overrides 'momentum_advection_interpolation'.");
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
   params.renameParam("orthogonality_correction", "use_nonorthogonal_correction", "");
+  params.addParam<MooseEnum>(
+      "pressure_diffusion_interpolation",
+      NS::fvFaceInterpolationMethods(),
+      "The face interpolation method for Ainv in the pressure correction diffusion term.");
+  params.addParamNamesToGroup("pressure_diffusion_interpolation", "Numerical scheme");
   params.set<unsigned short>("ghost_layers") = 1;
 
   // This will be adapted based on the dimension
@@ -60,6 +72,7 @@ WCNSLinearFVFlowPhysics::validParams()
 
   // Rhie-Chow
   params.transferParam<MooseEnum>(RhieChowMassFlux::validParams(), "pressure_projection_method");
+  params.addParamNamesToGroup("momentum_advection_interpolation_method_name", "Numerical scheme");
 
   return params;
 }
@@ -68,6 +81,8 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
   : WCNSFVFlowPhysicsBase(parameters),
     _non_orthogonal_correction(getParam<bool>("orthogonality_correction"))
 {
+  addRequiredPhysicsTask("add_interpolation_method_physics");
+
   if (_porous_medium_treatment)
     paramError("porous_medium_treatment", "Porous media unsupported");
   if (!_has_flow_equations)
@@ -80,6 +95,15 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
     paramError("pin_pressure",
                "Pressure pinning is implemented in the executioner for the linear finite volume "
                "segregated solves");
+}
+
+void
+WCNSLinearFVFlowPhysics::addFVInterpolationMethods()
+{
+  if (!_has_flow_equations || isParamValid("momentum_advection_interpolation_method_name"))
+    return;
+
+  addFVAdvectedInterpolationMethod(getParam<MooseEnum>("momentum_advection_interpolation"));
 }
 
 void
@@ -197,7 +221,7 @@ void
 WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
 {
   {
-    std::string kernel_type = "LinearFVAnisotropicDiffusion";
+    std::string kernel_type = "LinearFVPressureCorrectionDiffusion";
     std::string kernel_name = prefix() + "p_diffusion";
 
     InputParameters params = getFactory().getValidParams(kernel_type);
@@ -243,6 +267,12 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
 void
 WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 {
+  const auto momentum_advection_method_name =
+      isParamValid("momentum_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("momentum_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("momentum_advection_interpolation")));
+
   const std::string u_names[3] = {"u", "v", "w"};
   std::string kernel_type = "LinearWCNSFVMomentumFlux";
   std::string kernel_name = prefix() + "ins_momentum_flux_";
@@ -255,7 +285,8 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
     params.set<MooseFunctorName>(NS::mu) = NS::mu_eff;
 
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
+  params.set<InterpolationMethodName>("advected_interp_method_name") =
+      momentum_advection_method_name;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
   params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
 
@@ -661,6 +692,8 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseEnum>("pressure_projection_method") =
       getParam<MooseEnum>("pressure_projection_method");
+  params.set<MooseEnum>("pressure_diffusion_interpolation") =
+      getParam<MooseEnum>("pressure_diffusion_interpolation");
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }

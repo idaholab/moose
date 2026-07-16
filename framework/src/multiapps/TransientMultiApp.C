@@ -672,6 +672,15 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we b
     libmesh_aux_system.add_vector("transfer", false);
   }
 
+  if (app->hasInitialBackupMesh())
+  {
+    app->restoreMeshFromInitialBackup(problem.mesh());
+    problem.mesh().prepare(/*mesh_to_clone=*/nullptr);
+    problem.meshChanged(/*intermediate_change=*/false,
+                        /*contract_mesh=*/false,
+                        /*clean_refinement_flags=*/false);
+  }
+
   // Call initialization method of Executioner (Note, this performs the output of the initial time
   // step, if desired)
   ex->init();

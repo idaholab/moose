@@ -25,8 +25,26 @@ advection term over a cell can be expressed as:
 \int\limits_{V_C} \nabla \cdot \left(\rho\vec{u} \otimes \vec{u}\right) dV \approx \sum\limits_f (\rho \vec{u}\cdot \vec{n})_{RC} \vec{u}_f |S_f| \,
 \end{equation}
 
-where `\vec{u}_f` is a face velocity. This face velocity acts as the advected quantity and a linear average or upwind scheme can be used to compute it. This kernel adds the
+where `\vec{u}_f` is a face velocity. This face velocity acts as the advected quantity and an
+interpolation method can be used to compute it. This kernel adds the
 face contribution for each face $f$ to the right hand side and matrix.
+
+### Selecting the interpolation method
+
+The [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/advected_interp_method_name) parameter is
+the name of an interpolation method in the `[FVInterpolationMethods]` block. For example, to use
+Van Leer interpolation, add an [FVAdvectedVanLeerWeightBased.md] method and set
+[!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/advected_interp_method_name) to that method
+name:
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d-scalar/channel.i block=FVInterpolationMethods
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d-scalar/channel.i block=LinearFVKernels/u_advection_stress
+
+When using [WCNSLinearFVFlowPhysics.md], the
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/momentum_advection_interpolation)
+shortcut can be set directly, for example `momentum_advection_interpolation = vanLeer`. No
+`[FVInterpolationMethods]` block is needed for the Physics shortcut.
 
 # Viscous stress term
 

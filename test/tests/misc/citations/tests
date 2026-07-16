@@ -25,6 +25,28 @@
     requirement = "The system shall not report citations when the --citations command-line option "
                   "is not provided."
   []
+  [multiapp]
+    type = RunApp
+    input = multiapp.i
+    cli_args = '--citations'
+    expect_out = 'harbour2025moose'
+    recover = false
+    requirement = "The system shall report citations for the modules and objects used inside "
+                  "MultiApp subapps, not just those constructed in the master app, when the "
+                  "--citations command-line option is provided."
+  []
+  [multiapp_subapp_backend]
+    type = RunApp
+    input = multiapp.i
+    cli_args = "MultiApps/sub/input_files=../../mfem/kernels/diffusion.i sub0:Outputs/active='' "
+               "--citations"
+    expect_out = 'mfem-2024'
+    capabilities = 'mfem'
+    recover = false
+    requirement = "The system shall report the finite element backend citation for a backend used "
+                  "only inside a MultiApp subapp, which the master app itself does not use, when "
+                  "the --citations command-line option is provided."
+  []
   [key_sync]
     type = RunCommand
     command = 'python3 check_citation_keys.py'

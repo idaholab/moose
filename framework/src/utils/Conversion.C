@@ -346,6 +346,31 @@ stringify(const RelationshipManagerType & t)
   mooseError("Unknown RelationshipManagerType");
 }
 
+// Definition in MooseTypes.h
+std::string
+stringify(const TimeIntegratorType & t)
+{
+  switch (t)
+  {
+    case TimeIntegratorType::TI_IMPLICIT_EULER:
+      return "IMPLICIT_EULER";
+    case TimeIntegratorType::TI_EXPLICIT_EULER:
+      return "EXPLICIT_EULER";
+    case TimeIntegratorType::TI_CRANK_NICOLSON:
+      return "CRANK_NICOLSON";
+    case TimeIntegratorType::TI_BDF2:
+      return "BDF2";
+    case TimeIntegratorType::TI_EXPLICIT_MIDPOINT:
+      return "EXPLICIT_MIDPOINT";
+    case TimeIntegratorType::TI_LSTABLE_DIRK2:
+      return "LSTABLE_DIRK2";
+    case TimeIntegratorType::TI_EXPLICIT_TVD_RK_2:
+      return "EXPLICIT_TVDRK2";
+    default:
+      mooseError("Unknown TimeIntegratorType");
+  }
+}
+
 std::string
 stringify(libMesh::FEFamily f)
 {

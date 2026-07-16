@@ -1,6 +1,7 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'upwind'
+scalar_advected_interp_method = ${advected_interp_method}
 k1 = 0.1
 k2 = 0.2
 
@@ -60,11 +61,20 @@ k2 = 0.2
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -75,7 +85,7 @@ k2 = 0.2
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -97,7 +107,7 @@ k2 = 0.2
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -112,7 +122,7 @@ k2 = 0.2
   [s1_advection]
     type = LinearFVScalarAdvection
     variable = scalar1
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${scalar_advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [s1_diffusion]
@@ -124,7 +134,7 @@ k2 = 0.2
   [s2_diffusion]
     type = LinearFVScalarAdvection
     variable = scalar2
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${scalar_advected_interp_method}
     rhie_chow_user_object = 'rc'
   []
   [s2_conduction]
