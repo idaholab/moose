@@ -1,3 +1,7 @@
 time,DP_SubchannelDelta,T_Planar_Mean
 0,0,0
+<<<<<<< HEAD
 1,9284.1207828922,707.44072559334
+=======
+1,9544.4962859809,707.43829966873
+>>>>>>> 19460dd6113 (Use bulk Reynolds number for Cheng-Todreas transition)
