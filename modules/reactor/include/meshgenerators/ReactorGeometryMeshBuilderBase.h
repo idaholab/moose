@@ -282,25 +282,6 @@ protected:
                       const bool extrude);
 
   /**
-   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch and centered
-   * around (0, 0, 0)
-   * @param radial_index Radial index of hex / square region, for surface naming
-   * @param halfpitch Halfpitch of square or hexagon
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
-   * @return vector of surfaces that correspond to hexagonal or square region
-   */
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> getOuterRadialSurfacesForUnitCell(
-      unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
-
-  /**
-   * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
-   * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
-   */
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
-
-  /**
    * Create CSG lattice for assembly and core lattices. This method does not set the outer universe
    * of the lattice
    * @param pitch lattice pitch

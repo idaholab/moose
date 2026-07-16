@@ -17,6 +17,7 @@
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGUtils.h"
+#include "RGMBEngUnitUtils.h"
 
 registerMooseObject("ReactorApp", AssemblyMeshGenerator);
 
@@ -692,7 +693,8 @@ AssemblyMeshGenerator::generateCSG()
   const auto extruded_assembly = _mesh_dimensions == 3;
   if (extruded_assembly)
   {
-    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    surfaces_by_axial_region = RGMBEngUnitUtils::getAxialPlaneSurfaces(
+        *csg_obj, getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes));
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     axial_extent = +lowest_axial_surf & -highest_axial_surf;
@@ -718,8 +720,8 @@ AssemblyMeshGenerator::generateCSG()
       std::string lat_cell_name = name() + "_lattice_cell";
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces =
-            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
+        const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
+            i, _geom_type, name(), duct_boundaries[i], *csg_obj);
         inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
       }
       if (_geom_type == "Hex")
@@ -736,8 +738,8 @@ AssemblyMeshGenerator::generateCSG()
       CSG::CSGRegion radial_region = ~inner_region;
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces =
-            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
+        const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
+            i, _geom_type, name(), duct_boundaries[i], *csg_obj);
         inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
         radial_region &= inner_region;
       }
@@ -766,8 +768,8 @@ AssemblyMeshGenerator::generateCSG()
 
   // Create new cell to bound universe based on assembly outer boundaries, and add this cell
   // to the root universe
-  const auto & duct_surfaces = getOuterRadialSurfacesForUnitCell(
-      duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
+  const auto & duct_surfaces = RGMBEngUnitUtils::getOuterRadialSurfacesForUnitCell(
+      duct_boundaries.size() - 1, _geom_type, name(), duct_boundaries.back(), *csg_obj);
   auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
   if (extruded_assembly)
     assembly_region &= axial_extent;
