@@ -1,15 +1,9 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/cube_hex8.e
-[]
-
-[MFEMPeriodic]
-  [left-right]
-    type = MFEMPeriodicByVector
-    translation_x = "1. 0. 0."
-    translation_y = "0. 0. 0."
-    translation_z = "0. 0. 0."
-  []
+  translation_x = "1. 0. 0."
+  translation_y = "0. 0. 0."
+  translation_z = "0. 0. 0."  
 []
 
 [Problem]
