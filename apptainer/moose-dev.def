@@ -19,19 +19,21 @@
    - MFEM_OPTIONS: Options to pass to mfem build
    - MOOSE_JOBS: Number of jobs to pass to the builds
    - OPTFLAGS: Optimization flags to set when building
-   - PROFILING: Set to anything to build for profiling (add gperftools)
+   - PROFILING: Whether or not to build with gperftools (truthy, default: false)
    - PYTORCH_GIT_SHA: The git SHA to use for pytorch
    - PYTORCH_GIT_REMOTE: The git remote to use to get pytorch
-   - SKIP_FINGERPRINTS: Set to skip fingerprint verification
+   - SKIP_FINGERPRINTS: Set to skip fingerprint verification (truthy, default: false)
    - WITH_MFEM: Whether or not to build mfem (truthy, default: true)
    - WITH_FMU: Whether or not to install python fmu utilities (truthy, default: false)
    - WITHOUT_PYTORCH: Whether to not build pytorch and neml2 (truthy, default: false)
 -#}
 
 {#- Set defaults for any variables not provided                                               -#}
-{%- set WITH_MFEM       = WITH_MFEM | default(true) %}
-{%- set WITH_FMU        = WITH_FMU | default(false) %}
-{%- set WITHOUT_PYTORCH = WITHOUT_PYTORCH | default(false) %}
+{%- set PROFILING         = PROFILING | default(false) %}
+{%- set SKIP_FINGERPRINTS = SKIP_FINGERPRINTS | default(false) %}
+{%- set WITH_MFEM         = WITH_MFEM | default(true) %}
+{%- set WITH_FMU          = WITH_FMU | default(false) %}
+{%- set WITHOUT_PYTORCH   = WITHOUT_PYTORCH | default(false) %}
 
 {#- Installation locations and build scripts for third-party dependencies                     -#}
 {%- set CODE_SERVER_DIR      = '/opt/code-server' -%}
@@ -53,7 +55,7 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
-{%- if SKIP_FINGERPRINTS is not defined %}
+{%- if not SKIP_FINGERPRINTS | to_bool %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
@@ -65,17 +67,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
 
-{%- if WITH_MFEM %}
+{%- if WITH_MFEM | to_bool %}
     test -d {{ CONDUIT_DIR }} && export CONDUIT_DIR={{ CONDUIT_DIR }}
     test -d {{ MFEM_DIR }} && export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
 
-{% if not (WITHOUT_PYTORCH | to_bool) %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     test -d {{ LIBTORCH_DIR }} && export LIBTORCH_DIR={{ LIBTORCH_DIR }}
     test -d {{ NEML2_DIR }} && export NEML2_DIR={{ NEML2_DIR }}
 {%- endif %}
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # For profiling
     export GPERF_DIR={{ GPERF_DIR }}
     export PATH={{ PPROF_DIR }}/bin:$PATH
@@ -106,7 +108,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # PythonFMU python package
     PYTHONFMU_VERSION=0.7.0
 {%- endif %}
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # pprof and its dependencies
     GPERFTOOLS_VERSION=2.18.1
     GO_VERSION=1.26.1
@@ -261,7 +263,7 @@ EOF
         ${PYTHON_DIR}/bin/pip install -r /root/requirements.txt && rm /root/requirements.txt
     )
 
-{% if WITH_FMU %}
+{% if WITH_FMU | to_bool %}
     # Install fmi-library dependency for pyfmi
     FMI_LIBRARY_DIR=/opt/fmi-library
     (
@@ -375,7 +377,7 @@ EOF
     )
 {%- endif %}
 
-{% if not (WITHOUT_PYTORCH | to_bool) %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # Build libtorch
     (
         cd ${ROOT_BUILD_DIR}
@@ -431,7 +433,7 @@ EOF
     )
 {%- endif %}
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
     # Install gperftools
     (
         cd ${ROOT_BUILD_DIR}
@@ -487,7 +489,7 @@ EOF
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH:-}
     fi
 
-{% if not (WITHOUT_PYTORCH | to_bool) %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # Build neml2
     (
         cd ${ROOT_BUILD_DIR}
@@ -503,7 +505,7 @@ EOF
         git checkout {{ NEML2_GIT_SHA }}
         git submodule update --init --recursive --depth 1
 
-{% if PROFILING is defined %}
+{% if PROFILING | to_bool %}
         METHODS="oprof"
 {%- else %}
         METHODS="opt devel dbg"
@@ -630,7 +632,7 @@ EOF
     # mfem
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
-{% if not (WITHOUT_PYTORCH | to_bool) %}
+{% if not WITHOUT_PYTORCH | to_bool %}
     # libtorch
     {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
     # neml2
