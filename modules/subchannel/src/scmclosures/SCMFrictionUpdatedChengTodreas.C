@@ -95,7 +95,8 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
 
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto bulk_Re = _scm_problem.getBulkReynoldsNumber();
+  const auto psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
@@ -239,19 +240,19 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   auto fL = cL * std::pow(Re, bL);
   auto fT = cT * std::pow(Re, bT);
 
-  if (Re < ReL)
+  if (bulk_Re < ReL)
   {
     // laminar flow
     return fL;
   }
-  else if (Re > ReT)
+  else if (bulk_Re > ReT)
   {
     // turbulent flow
     return fT;
   }
   else
   {
-    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    // Transition regime is selected by bulk Reynolds number, same for all channels.
     return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
            fT * std::pow(psi, 1.0 / 3.0);
   }
@@ -276,7 +277,8 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
   const auto w_over_d = w / pin_diameter;
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto bulk_Re = _scm_problem.getBulkReynoldsNumber();
+  const auto psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
   const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
 
   // Find the coefficients of bare Pin bundle friction factor
@@ -363,19 +365,19 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
   auto fL = cL * std::pow(Re, bL);
   auto fT = cT * std::pow(Re, bT);
 
-  if (Re < ReL)
+  if (bulk_Re < ReL)
   {
     // laminar flow
     return fL;
   }
-  else if (Re > ReT)
+  else if (bulk_Re > ReT)
   {
     // turbulent flow
     return fT;
   }
   else
   {
-    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    // Transition regime is selected by bulk Reynolds number, same for all channels.
     return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
            fT * std::pow(psi, 1.0 / 3.0);
   }
