@@ -230,7 +230,7 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
 \end{equation}
 
 Let $\ell$ denote the current flow-linearization iteration and let $\vec{b}_{m,\mathrm{in}}$
-contain the known block-inlet mass flow in the first row for each channel and zero in the remaining
+contain the known inlet mass flow in the first row for each channel and zero in the remaining
 rows. Also define $D_V=\operatorname{diag}(V_{i,k}/\Delta t)$. In the monolithic flow solve,
 neither crossflow nor new-time density is lagged, so the mass equation is
 
@@ -379,7 +379,7 @@ where the matrix $\boldsymbol{M_{hh}}$ is calculated using the lagged values of 
 
 !! Intentional comment to provide extra spacing
 
-A hybrid numerical method of solving the subchannel equations was developed. Hybrid in this context means that the user has the option of solving each portion of the problem at a time, by dividing the domain into blocks. Each block is solved sequentially from inlet to outlet. The mass flow at the outlet of the previous block and the pressure at the inlet of the next block provide the needed boundary conditions. The essence of the algorithm hinges on the construction of a combined residual function based on the lateral momentum equation. To solve this equation a Jacobian Free Newton-Krylov type Method (JFNKM) was used. The workhorse of the code is the non linear equation solvers (SNES) found in the Portable, Extensible Toolkit for Scientific Computation [PETSc](https://petsc.org/release/).
+The essence of the algorithm hinges on the construction of a combined residual function based on the lateral momentum equation. To solve this equation a Jacobian Free Newton-Krylov type Method (JFNKM) was used. The workhorse of the code is the non linear equation solvers (SNES) found in the Portable, Extensible Toolkit for Scientific Computation [PETSc](https://petsc.org/release/).
 
 \begin{equation}
 \label{lateral1}
@@ -395,7 +395,7 @@ The main unknown variable in this non linear residual is the crossflow $w_{ij}$.
     caption=SCM solver iteration scheme
 
 For each outer pressure iteration, blocks are visited sequentially from the assembly inlet to the
-outlet. Within a block, SCM first refreshes the flow solution and then solves the enthalpy equation,
+outlet. Within a solve, SCM first refreshes the flow solution and then solves the enthalpy equation,
 recovers temperature from pressure and enthalpy, and updates density and viscosity. The
 `enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are
 performed before the next flow solve. Its default value of one preserves the original
@@ -433,7 +433,7 @@ use the relative field change
 whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
 blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
 independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the
-pressure field has not converged, the block sweep starts again at the inlet; pressure information
+pressure field has not converged, the sweep starts again at the inlet; pressure information
 therefore requires multiple outer iterations to propagate upstream when several blocks are used.
 `P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
 the solver's automatic outer-iteration limit.
@@ -446,13 +446,13 @@ There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm 
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
+This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from inlet to outlet except for pressure which is updated from outlet to inlet.
 
 #### Implicit-Segregated
 
 !! Intentional comment to provide extra spacing
 
-In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
+In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole assembly. Otherwise, the solution algorithm is the same as in the default explicit method.
 
 #### Monolithic
 
@@ -486,8 +486,7 @@ The first block row is [mass-dis-monolithic], with $\boldsymbol{M_{mp}}$ defined
 [mass-pressure-block] and $\vec{b}_m$ defined by [mass-rhs]. Since the enthalpy governing equations
 are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to
 the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
-The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
-block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
+The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
 FGMRES and a field-split preconditioner. SCM checks the PETSc convergence reason for both the
 coupled flow and enthalpy linear solves and reports the reason, iteration count, and residual norm
 instead of accepting a diverged solution.
