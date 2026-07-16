@@ -220,6 +220,13 @@ ChemicalCompositionAction::initializeConfiguration()
 
   const auto database_phases = Thermochimica::getPhaseNamesSystem();
   const auto database_species = Thermochimica::getSpeciesSystem();
+  std::set<std::string> unique_phases;
+  for (const auto phase_index : index_range(database_phases))
+    if (unique_phases.insert(database_phases[phase_index]).second)
+    {
+      config.phase_names.push_back(database_phases[phase_index]);
+      config.phase_indices.push_back(static_cast<int>(phase_index));
+    }
 
   for (const auto & name : config.element_variables)
     if (!_variable_origins.emplace(name, "elements").second)
@@ -276,25 +283,28 @@ ChemicalCompositionAction::speciesPhaseIndex(
 }
 
 void
-ChemicalCompositionAction::addOutputRequest(const ThermochimicaPhaseAmountRequest & request,
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaPhaseRequest & request,
                                             const InputParameters & source,
                                             const std::string & origin,
                                             const std::string & phase_parameter,
                                             const std::vector<std::string> & database_phases)
 {
   addOutputDescriptor(
-      ThermochimicaConfiguration::PhaseAmountOutput{
+      ThermochimicaConfiguration::PhaseOutput{
           request.variable,
           request.phase,
-          phaseSystemIndex(request.phase, source, phase_parameter, database_phases)},
+          phaseSystemIndex(request.phase, source, phase_parameter, database_phases),
+          request.unit},
       source,
       origin,
       origin == phase_parameter ? origin : "variable");
+  if (request.unit == ThermochimicaConfiguration::AmountUnit::MOLE_FRACTION)
+    _configuration->needs_phase_total = true;
 }
 
 void
 ChemicalCompositionAction::addOutputRequest(
-    const ThermochimicaSpeciesAmountRequest & request,
+    const ThermochimicaSpeciesRequest & request,
     const InputParameters & source,
     const std::string & origin,
     const std::string & phase_parameter,
@@ -318,7 +328,7 @@ ChemicalCompositionAction::addOutputRequest(
                       "'.");
   const bool is_mqm = Thermochimica::isPhaseMQM(phase_index);
   addOutputDescriptor(
-      ThermochimicaConfiguration::SpeciesAmountOutput{
+      ThermochimicaConfiguration::SpeciesOutput{
           request.variable,
           request.phase,
           request.species,
@@ -392,7 +402,7 @@ ChemicalCompositionAction::addOutputRequest(
 }
 
 void
-ChemicalCompositionAction::addOutputRequest(const ThermochimicaElementInPhaseRequest & request,
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaElementDistributionRequest & request,
                                             const InputParameters & source,
                                             const std::string & origin,
                                             const std::string & phase_parameter,
@@ -412,12 +422,15 @@ ChemicalCompositionAction::addOutputRequest(const ThermochimicaElementInPhaseReq
                       "Element '",
                       request.element,
                       "' could not be resolved in the configured system.");
-  addOutputDescriptor(
-      ThermochimicaConfiguration::ElementInPhaseOutput{
-          request.variable, request.phase, request.element, phase_index, element_index},
-      source,
-      origin,
-      origin == element_parameter ? origin : "variable");
+  addOutputDescriptor(ThermochimicaConfiguration::ElementDistributionOutput{request.variable,
+                                                                            request.phase,
+                                                                            request.element,
+                                                                            phase_index,
+                                                                            element_index,
+                                                                            request.unit},
+                      source,
+                      origin,
+                      origin == element_parameter ? origin : "variable");
 }
 
 void
@@ -427,8 +440,8 @@ ChemicalCompositionAction::buildLegacyOutputDescriptors(
 {
   auto & config = *_configuration;
   const auto species_unit = getParam<MooseEnum>("species_output_unit") == "moles"
-                                ? ThermochimicaConfiguration::SpeciesUnit::MOLES
-                                : ThermochimicaConfiguration::SpeciesUnit::MOLE_FRACTION;
+                                ? ThermochimicaConfiguration::AmountUnit::MOLES
+                                : ThermochimicaConfiguration::AmountUnit::MOLE_FRACTION;
 
   const std::array legacy_parameters{"output_phases",
                                      "output_species",
@@ -451,11 +464,12 @@ ChemicalCompositionAction::buildLegacyOutputDescriptors(
         phases.push_back(phase);
   }
   for (const auto & phase : phases)
-    addOutputRequest(ThermochimicaPhaseAmountRequest{phase, phase},
-                     parameters(),
-                     "output_phases",
-                     "output_phases",
-                     database_phases);
+    addOutputRequest(
+        ThermochimicaPhaseRequest{phase, phase, ThermochimicaConfiguration::AmountUnit::MOLES},
+        parameters(),
+        "output_phases",
+        "output_phases",
+        database_phases);
 
   auto species = getParam<std::vector<std::string>>("output_species");
   if (species.size() == 1 && species[0] == "ALL")
@@ -475,7 +489,7 @@ ChemicalCompositionAction::buildLegacyOutputDescriptors(
     const auto split = tokens(value);
     if (split.size() != 2)
       paramError("output_species", "Expected 'phase:species', received '", value, "'.");
-    addOutputRequest(ThermochimicaSpeciesAmountRequest{value, split[0], split[1], species_unit},
+    addOutputRequest(ThermochimicaSpeciesRequest{value, split[0], split[1], species_unit},
                      parameters(),
                      "output_species",
                      "output_species",
@@ -534,12 +548,14 @@ ChemicalCompositionAction::buildLegacyOutputDescriptors(
     const auto split = tokens(value);
     if (split.size() != 2)
       paramError("output_element_phases", "Expected 'phase:element', received '", value, "'.");
-    addOutputRequest(ThermochimicaElementInPhaseRequest{"ep:" + value, split[0], split[1]},
-                     parameters(),
-                     "output_element_phases",
-                     "output_element_phases",
-                     "output_element_phases",
-                     database_phases);
+    addOutputRequest(
+        ThermochimicaElementDistributionRequest{
+            "ep:" + value, split[0], split[1], ThermochimicaConfiguration::DistributionUnit::MOLES},
+        parameters(),
+        "output_element_phases",
+        "output_element_phases",
+        "output_element_phases",
+        database_phases);
   }
 }
 
@@ -563,10 +579,10 @@ ChemicalCompositionAction::buildTypedOutputDescriptors(
         [&](const auto & request)
         {
           using Request = std::decay_t<decltype(request)>;
-          if constexpr (std::is_same_v<Request, ThermochimicaPhaseAmountRequest>)
+          if constexpr (std::is_same_v<Request, ThermochimicaPhaseRequest>)
             addOutputRequest(
                 request, action->parameters(), action->origin(), "phase", database_phases);
-          else if constexpr (std::is_same_v<Request, ThermochimicaSpeciesAmountRequest>)
+          else if constexpr (std::is_same_v<Request, ThermochimicaSpeciesRequest>)
             addOutputRequest(request,
                              action->parameters(),
                              action->origin(),
@@ -584,7 +600,7 @@ ChemicalCompositionAction::buildTypedOutputDescriptors(
                              "species",
                              database_phases,
                              database_species);
-          else if constexpr (std::is_same_v<Request, ThermochimicaElementInPhaseRequest>)
+          else if constexpr (std::is_same_v<Request, ThermochimicaElementDistributionRequest>)
             addOutputRequest(request,
                              action->parameters(),
                              action->origin(),

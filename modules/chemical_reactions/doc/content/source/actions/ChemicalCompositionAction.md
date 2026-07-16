@@ -43,18 +43,23 @@ provided.
 !table id=chemical-composition-typed-outputs caption=Typed thermochemical output blocks.
 | Block under `[Outputs]` | Required parameters | Quantity |
 | :- | :- | :- |
-| `[PhaseAmounts]` | `phase` | Equilibrium phase amount |
-| `[SpeciesAmounts]` | `phase`, `species` | Species moles or mole fraction |
+| `[Phases]` | `phase` | Phase moles or system mole fraction |
+| `[Species]` | `phase`, `species` | Species moles or mole fraction within its phase |
 | `[ElementPotentials]` | `element` | Element chemical potential |
 | `[VaporPressures]` | `phase`, `species` | Species partial pressure in a gas phase |
-| `[ElementsInPhases]` | `phase`, `element` | Element amount in a phase |
+| `[ElementDistribution]` | `phase`, `element` | Element moles or fraction distributed to a phase |
 
-The `unit` parameter in a `[SpeciesAmounts]` leaf block selects `moles` or `mole_fraction` for that
-output. This permits different species outputs to use different units.
+The `unit` parameter in `[Phases]` and `[Species]` selects `moles` or `mole_fraction`. A phase mole
+fraction is the phase moles divided by the total moles in all phases. A species mole fraction is the
+species mole fraction within its selected phase.
 
-The following example creates output variables named `bcc_amount`, `bcc_mo_fraction`,
-`bcc_mo_moles`, `mo_chemical_potential`, `mo_vapor_pressure`, and
-`bcc_mo_element_amount`:
+For `[ElementDistribution]`, `unit = moles` reports the moles of the selected element in the phase,
+while `unit = fraction` reports the fraction of that element distributed to the phase. The latter is
+the element moles in the selected phase divided by the element moles summed over all phases.
+
+The following example creates output variables including `hcp_amount`, `bcc_phase_fraction`,
+`hcp_phase_fraction`, `hcp_mo_fraction`, `hcp_mo_moles`, `mo_chemical_potential`,
+`mo_vapor_pressure`, `hcp_mo_element_amount`, and element distribution fractions:
 
 !listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
 

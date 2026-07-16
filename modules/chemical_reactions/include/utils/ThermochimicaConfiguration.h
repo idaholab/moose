@@ -30,20 +30,27 @@ struct ThermochimicaConfiguration
     NONE
   };
 
-  enum class SpeciesUnit
+  enum class AmountUnit
   {
     MOLES,
     MOLE_FRACTION
   };
 
-  struct PhaseAmountOutput
+  enum class DistributionUnit
+  {
+    MOLES,
+    FRACTION
+  };
+
+  struct PhaseOutput
   {
     VariableName variable;
     std::string phase;
     int phase_index = -1;
+    AmountUnit unit = AmountUnit::MOLES;
   };
 
-  struct SpeciesAmountOutput
+  struct SpeciesOutput
   {
     VariableName variable;
     std::string phase;
@@ -51,7 +58,7 @@ struct ThermochimicaConfiguration
     int phase_index = -1;
     int species_index = -1;
     bool is_mqm = false;
-    SpeciesUnit unit = SpeciesUnit::MOLES;
+    AmountUnit unit = AmountUnit::MOLES;
   };
 
   struct ElementPotentialOutput
@@ -70,20 +77,21 @@ struct ThermochimicaConfiguration
     int species_index = -1;
   };
 
-  struct ElementInPhaseOutput
+  struct ElementDistributionOutput
   {
     VariableName variable;
     std::string phase;
     std::string element;
     int phase_index = -1;
     int element_index = -1;
+    DistributionUnit unit = DistributionUnit::MOLES;
   };
 
-  using OutputDescriptor = std::variant<PhaseAmountOutput,
-                                        SpeciesAmountOutput,
+  using OutputDescriptor = std::variant<PhaseOutput,
+                                        SpeciesOutput,
                                         ElementPotentialOutput,
                                         VaporPressureOutput,
-                                        ElementInPhaseOutput>;
+                                        ElementDistributionOutput>;
 
   FileName database;
   std::string temperature_unit;
@@ -98,6 +106,9 @@ struct ThermochimicaConfiguration
 
   std::vector<std::string> elements;
   std::vector<unsigned int> element_ids;
+  std::vector<std::string> phase_names;
+  std::vector<int> phase_indices;
+  bool needs_phase_total = false;
   std::vector<OutputDescriptor> outputs;
 
   std::vector<VariableName> element_variables;

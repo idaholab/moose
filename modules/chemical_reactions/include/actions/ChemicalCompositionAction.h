@@ -48,12 +48,12 @@ protected:
                         const std::string & species,
                         const std::vector<std::vector<std::string>> & database_species) const;
 
-  void addOutputRequest(const ThermochimicaPhaseAmountRequest & request,
+  void addOutputRequest(const ThermochimicaPhaseRequest & request,
                         const InputParameters & source,
                         const std::string & origin,
                         const std::string & phase_parameter,
                         const std::vector<std::string> & database_phases);
-  void addOutputRequest(const ThermochimicaSpeciesAmountRequest & request,
+  void addOutputRequest(const ThermochimicaSpeciesRequest & request,
                         const InputParameters & source,
                         const std::string & origin,
                         const std::string & phase_parameter,
@@ -71,7 +71,7 @@ protected:
                         const std::string & species_parameter,
                         const std::vector<std::string> & database_phases,
                         const std::vector<std::vector<std::string>> & database_species);
-  void addOutputRequest(const ThermochimicaElementInPhaseRequest & request,
+  void addOutputRequest(const ThermochimicaElementDistributionRequest & request,
                         const InputParameters & source,
                         const std::string & origin,
                         const std::string & phase_parameter,

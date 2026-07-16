@@ -16,7 +16,7 @@
     temperature = 1600
 
     [Outputs]
-      [SpeciesAmounts]
+      [Species]
         [slag_fe2o3]
           phase = SlagBsoln
           species = Fe2O3

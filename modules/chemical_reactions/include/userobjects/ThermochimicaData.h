@@ -79,23 +79,25 @@ protected:
   {
     bool use_indexed_outputs;
     const std::vector<double> & moles_phase;
+    Real phase_total;
     Real pressure;
+    std::unordered_map<int, std::pair<Real, int>> element_totals;
   };
 
-  int evaluateOutput(const ThermochimicaConfiguration::PhaseAmountOutput & output,
-                     const OutputEvaluationContext & context,
+  int evaluateOutput(const ThermochimicaConfiguration::PhaseOutput & output,
+                     OutputEvaluationContext & context,
                      Real & value) const;
-  int evaluateOutput(const ThermochimicaConfiguration::SpeciesAmountOutput & output,
-                     const OutputEvaluationContext & context,
+  int evaluateOutput(const ThermochimicaConfiguration::SpeciesOutput & output,
+                     OutputEvaluationContext & context,
                      Real & value) const;
   int evaluateOutput(const ThermochimicaConfiguration::ElementPotentialOutput & output,
-                     const OutputEvaluationContext & context,
+                     OutputEvaluationContext & context,
                      Real & value) const;
   int evaluateOutput(const ThermochimicaConfiguration::VaporPressureOutput & output,
-                     const OutputEvaluationContext & context,
+                     OutputEvaluationContext & context,
                      Real & value) const;
-  int evaluateOutput(const ThermochimicaConfiguration::ElementInPhaseOutput & output,
-                     const OutputEvaluationContext & context,
+  int evaluateOutput(const ThermochimicaConfiguration::ElementDistributionOutput & output,
+                     OutputEvaluationContext & context,
                      Real & value) const;
   bool loadPreviousState(dof_id_type id);
   void storePreviousState(dof_id_type id);
