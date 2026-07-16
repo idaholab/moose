@@ -14,7 +14,7 @@
 
 /**
  * Executioner that reuses the stock PIMPLE executioner API, but swaps in a
- * custom PIMPLE solve object with reduced-pressure / sharp-interface hooks.
+ * custom PIMPLE solve object with reduced-pressure / diffuse-interface hooks.
  *
  * Deriving from PIMPLE is deliberate: RhieChowMassFlux validates that the
  * executioner is a PIMPLE or SIMPLE executioner in its constructor.

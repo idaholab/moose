@@ -7,28 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSLinearFVConservativeSharpInterfaceVOFPhysics.h"
+#include "WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics.h"
 
 #include "NS.h"
 #include "WCNSFVFlowPhysicsBase.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp",
-                                     WCNSLinearFVConservativeSharpInterfaceVOFPhysics);
+                                     WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp",
-                                       WCNSLinearFVConservativeSharpInterfaceVOFPhysics);
+                                       WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics);
 registerMooseAction("NavierStokesApp",
-                    WCNSLinearFVConservativeSharpInterfaceVOFPhysics,
+                    WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics,
                     "add_material");
 registerMooseAction("NavierStokesApp",
-                    WCNSLinearFVConservativeSharpInterfaceVOFPhysics,
+                    WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics,
                     "add_user_object");
 
 InputParameters
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::validParams()
 {
   InputParameters params = WCNSLinearFVScalarTransportPhysics::validParams();
   params.addClassDescription(
-      "Create a linear-FV sharp-interface volume-fraction transport equation with an explicit "
+      "Create a linear-FV diffuse-interface volume-fraction transport equation with an explicit "
       "compression term and optional mixture-property functors.");
 
   params.set<std::vector<SolverSystemName>>("system_names") = {"alpha_system"};
@@ -50,7 +50,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   params.addParam<MooseEnum>(
       "volume_fraction_outlet_type",
       volume_fraction_outlet_type,
-      "Outlet treatment for the transported volume fraction. The supported sharp-interface path "
+      "Outlet treatment for the transported volume fraction. The supported diffuse-interface path "
       "imposes a backflow value on inflow and zero-gradient / extrapolation on outflow.");
   params.addParam<MooseFunctorName>(
       "volume_fraction_outlet_backflow_functor",
@@ -154,13 +154,13 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::validParams()
   return params;
 }
 
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::WCNSLinearFVConservativeSharpInterfaceVOFPhysics(
-    const InputParameters & parameters)
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::
+    WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics(const InputParameters & parameters)
   : WCNSLinearFVScalarTransportPhysics(parameters)
 {
   if (_passive_scalar_names.size() != 1)
     paramError("passive_scalar_names",
-               "The sharp-interface VOF physics supports exactly one transported volume-fraction "
+               "The diffuse-interface VOF physics supports exactly one transported volume-fraction "
                "variable.");
 
   if (_passive_scalar_names[0] == getParam<MooseFunctorName>("complementary_volume_fraction_name"))
@@ -170,18 +170,18 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::WCNSLinearFVConservativeSharpI
 
   if (getParam<MooseEnum>("passive_scalar_advection_interpolation") != "upwind")
     paramError("passive_scalar_advection_interpolation",
-               "The sharp-interface VOF physics uses a bounded-base-plus-limited-correction "
+               "The diffuse-interface VOF physics uses a bounded-base-plus-limited-correction "
                "structure, so the matrix transport must remain on donor/upwind transport.");
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addInitialConditions()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addInitialConditions()
 {
   if (!_define_variables && parameters().isParamSetByUser("initial_scalar_variables"))
     paramError(
         "initial_scalar_variables",
         "Volume-fraction variable is defined externally of "
-        "WCNSLinearFVConservativeSharpInterfaceVOFPhysics, so should its initial condition.");
+        "WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics, so should its initial condition.");
 
   if (getParam<bool>("initialize_variables_from_mesh_file"))
     return;
@@ -202,7 +202,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addInitialConditions()
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMaterials()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addMaterials()
 {
   const auto gas_fraction_name = getParam<MooseFunctorName>("complementary_volume_fraction_name");
   if (!getProblem().hasFunctor(gas_fraction_name, /*tid=*/0))
@@ -231,7 +231,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMaterials()
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMixtureFunctorMaterial(
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addMixtureFunctorMaterial(
     const std::string & object_suffix,
     const MooseFunctorName & property_name,
     const MooseFunctorName & phase_1_name,
@@ -249,9 +249,9 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addMixtureFunctorMaterial(
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addUserObjects()
 {
-  const std::string object_type = "ConservativeSharpInterfaceVOFMULESCorrector";
+  const std::string object_type = "ConservativeDiffuseInterfaceVOFMULESCorrector";
   const std::string object_name = prefix() + "vof_mules";
   auto params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
@@ -317,7 +317,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addUserObjects()
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addScalarAdvectionKernels()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addScalarAdvectionKernels()
 {
   addLinearFVScalarAdvectionKernel(
       _passive_scalar_names[0],
@@ -330,7 +330,7 @@ WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addScalarAdvectionKernels()
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceVOFPhysics::addScalarOutletBC()
+WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics::addScalarOutletBC()
 {
   const auto & outlet_boundaries = _flow_equations_physics->getOutletBoundaries();
   if (outlet_boundaries.empty())

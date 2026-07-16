@@ -13,17 +13,17 @@
 #include "NS.h"
 
 /**
- * Linear-FV segregated sharp-interface flow physics for velocity-component momentum unknowns.
+ * Linear-FV segregated diffuse-interface flow physics for velocity-component momentum unknowns.
  *
- * This class reuses the common segregated Linear FV flow setup and overrides the sharp-interface
+ * This class reuses the common segregated Linear FV flow setup and overrides the diffuse-interface
  * pieces needed for large-density-ratio conservative coupling.
  */
-class WCNSLinearFVConservativeSharpInterfaceFlowPhysics final : public WCNSLinearFVFlowPhysics
+class WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics final : public WCNSLinearFVFlowPhysics
 {
 public:
   static InputParameters validParams();
 
-  WCNSLinearFVConservativeSharpInterfaceFlowPhysics(const InputParameters & parameters);
+  WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics(const InputParameters & parameters);
 
 private:
   void addFunctorMaterials() override;
@@ -53,7 +53,7 @@ private:
   bool shouldAddWallPressureTwoTermExpansion() const override;
   std::string rhieChowUserObjectType() const override
   {
-    return "ConservativeSharpInterfaceRhieChowMassFlux";
+    return "ConservativeDiffuseInterfaceRhieChowMassFlux";
   }
   bool rhieChowUserObjectAppliesToBlocks(const RhieChowMassFlux & rc_obj) const override;
   bool isCompatibleRhieChowUserObject(const UserObject & obj) const override;

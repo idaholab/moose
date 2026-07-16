@@ -35,11 +35,11 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.addParam<bool>("energy_mass_heat_capacity_face_flux_is_integrated",
                         true,
                         "Whether energy_mass_heat_capacity_face_flux already includes face area.");
-  params.addParam<bool>(
-      "use_vof_consistent_energy_advection",
-      false,
-      "Whether conserved thermal energy advection is handled by the sharp-interface VOF corrector "
-      "instead of a standalone energy advection kernel.");
+  params.addParam<bool>("use_vof_consistent_energy_advection",
+                        false,
+                        "Whether conserved thermal energy advection is handled by the "
+                        "diffuse-interface VOF corrector "
+                        "instead of a standalone energy advection kernel.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
   // We could split between discretization and solver here.

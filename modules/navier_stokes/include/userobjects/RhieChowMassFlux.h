@@ -199,7 +199,7 @@ protected:
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
-  /// Build the face predictor state shared by stock and sharp-interface pressure coupling.
+  /// Build the face predictor state shared by stock and diffuse-interface pressure coupling.
   FaceMomentumPredictorState
   buildMomentumPredictorFaceState(const FaceInfo * fi,
                                   const std::vector<PetscVectorReader> & hbya_reader,
@@ -279,7 +279,7 @@ protected:
   /**
    * Predictor-side face flux in the same native pressure-correction space consumed by the
    * pressure equation and pressure boundary-condition updates. For stock RC this is a normal
-   * flux density; sharp/conservative paths publish an area-integrated phi. It is
+   * flux density; diffuse/conservative paths publish an area-integrated phi. It is
    * still a pressure-correction-space predictor quantity, not the accepted transport phi.
    */
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_predictor_flux;
@@ -303,7 +303,7 @@ protected:
 
   /**
    * Face diffusion tensor in the native pressure-correction space. For stock RC this matches the
-   * density-weighted face Ainv, while sharp/conservative paths may publish raw face rAUf here.
+   * density-weighted face Ainv, while diffuse/conservative paths may publish raw face rAUf here.
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
       _pressure_Ainv;

@@ -11,13 +11,13 @@
 
 #include "WCNSLinearFVScalarTransportPhysics.h"
 
-class WCNSLinearFVConservativeSharpInterfaceVOFPhysics final
+class WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics final
   : public WCNSLinearFVScalarTransportPhysics
 {
 public:
   static InputParameters validParams();
 
-  WCNSLinearFVConservativeSharpInterfaceVOFPhysics(const InputParameters & parameters);
+  WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics(const InputParameters & parameters);
 
 protected:
   void addInitialConditions() override;

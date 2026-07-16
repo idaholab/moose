@@ -10,8 +10,8 @@
 #include "ReducedPressurePIMPLESolve.h"
 
 #include "LinearSystem.h"
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
-#include "ConservativeSharpInterfaceVOFMULESCorrector.h"
+#include "ConservativeDiffuseInterfaceRhieChowMassFlux.h"
+#include "ConservativeDiffuseInterfaceVOFMULESCorrector.h"
 #include "FEProblemBase.h"
 #include "TheWarehouse.h"
 
@@ -53,10 +53,10 @@ private:
   bool _restored = false;
 };
 
-class SharpInterfaceStartupProjectionGuard
+class DiffuseInterfaceStartupProjectionGuard
 {
 public:
-  explicit SharpInterfaceStartupProjectionGuard(ConservativeSharpInterfaceRhieChowMassFlux * rc)
+  explicit DiffuseInterfaceStartupProjectionGuard(ConservativeDiffuseInterfaceRhieChowMassFlux * rc)
     : _rc(rc),
       _saved_explicit_hydrostatic(rc ? rc->suppressExplicitHydrostaticPressureFlux() : false),
       _saved_startup_sources(rc ? rc->suppressStartupPressurePredictorFluxSources() : false)
@@ -69,7 +69,7 @@ public:
     }
   }
 
-  ~SharpInterfaceStartupProjectionGuard()
+  ~DiffuseInterfaceStartupProjectionGuard()
   {
     if (_rc)
     {
@@ -79,7 +79,7 @@ public:
   }
 
 private:
-  ConservativeSharpInterfaceRhieChowMassFlux * const _rc;
+  ConservativeDiffuseInterfaceRhieChowMassFlux * const _rc;
   const bool _saved_explicit_hydrostatic;
   const bool _saved_startup_sources;
 };
@@ -147,7 +147,7 @@ private:
 };
 }
 
-// Correctness invariants for this reduced-pressure sharp-interface solve:
+// Correctness invariants for this reduced-pressure diffuse-interface solve:
 //
 // 1. The volume-fraction equation is solved inside each outer PIMPLE correction, before
 //    momentum-pressure coupling, so rho, mu, rhoPhi, and VOF transport fluxes correspond to the
@@ -169,7 +169,8 @@ ReducedPressurePIMPLESolve::validParams()
   params.set<unsigned int>("num_iterations") = 1;
   params.setDocString(
       "num_iterations",
-      "The number of outer PIMPLE corrections. For the transient reduced-pressure sharp-interface "
+      "The number of outer PIMPLE corrections. For the transient reduced-pressure "
+      "diffuse-interface "
       "path this should remain a small outer-correction count, not a large SIMPLE-style "
       "momentum-pressure convergence loop. The reduced-pressure executioner performs this many "
       "outer corrections explicitly unless a future outer-state convergence metric is added.");
@@ -180,11 +181,11 @@ ReducedPressurePIMPLESolve::validParams()
                       "additional stages explicitly; early exit only occurs when explicit PISO "
                       "termination tolerances are provided.");
   params.addClassDescription(
-      "PIMPLE solve object with explicit hooks for reduced-pressure sharp-interface face-flux "
+      "PIMPLE solve object with explicit hooks for reduced-pressure diffuse-interface face-flux "
       "predictors.");
   params.setDocString(
       "active_scalar_systems",
-      "The solver system for each sharp-interface volume-fraction transport equation.");
+      "The solver system for each diffuse-interface volume-fraction transport equation.");
   params.setDocString("should_solve_active_scalars",
                       "Whether to solve the volume-fraction transport equation(s).");
   params.setDocString("active_scalar_equation_relaxation",
@@ -259,8 +260,8 @@ ReducedPressurePIMPLESolve::solvesVolumeFraction() const
   return _has_active_scalar_systems && _should_solve_active_scalars;
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector *
-ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const
+ConservativeDiffuseInterfaceVOFMULESCorrector *
+ReducedPressurePIMPLESolve::diffuseInterfaceVOFCorrector(const SolverSystemName & system_name) const
 {
   std::vector<UserObject *> objs;
   _problem.theWarehouse()
@@ -269,17 +270,17 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
       .condition<AttribThread>(0)
       .queryInto(objs);
 
-  ConservativeSharpInterfaceVOFMULESCorrector * corrector_match = nullptr;
+  ConservativeDiffuseInterfaceVOFMULESCorrector * corrector_match = nullptr;
   for (const auto & obj : objs)
-    if (auto * corrector = dynamic_cast<ConservativeSharpInterfaceVOFMULESCorrector *>(obj);
+    if (auto * corrector = dynamic_cast<ConservativeDiffuseInterfaceVOFMULESCorrector *>(obj);
         corrector && corrector->systemName() == system_name)
     {
       if (corrector_match)
-        mooseError(
-            "ReducedPressurePIMPLESolve found multiple ConservativeSharpInterfaceVOFMULESCorrector "
-            "objects for system '",
-            system_name,
-            "'.");
+        mooseError("ReducedPressurePIMPLESolve found multiple "
+                   "ConservativeDiffuseInterfaceVOFMULESCorrector "
+                   "objects for system '",
+                   system_name,
+                   "'.");
       corrector_match = corrector;
     }
 
@@ -289,8 +290,8 @@ ReducedPressurePIMPLESolve::sharpInterfaceVOFCorrector(const SolverSystemName & 
 void
 ReducedPressurePIMPLESolve::preSolveSetup(const SolverParams & /* solver_params */)
 {
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
+  if (auto * diffuse_rc = diffuseInterfaceRC())
+    diffuse_rc->setSuppressExplicitHydrostaticPressureFlux(false);
 }
 
 void
@@ -322,8 +323,8 @@ void
 ReducedPressurePIMPLESolve::resetVOFTransportStateForNewSolve() const
 {
   if (solvesVolumeFraction())
-    if (auto * sharp_rc = sharpInterfaceRC())
-      sharp_rc->clearVOFTransportState();
+    if (auto * diffuse_rc = diffuseInterfaceRC())
+      diffuse_rc->clearVOFTransportState();
 }
 
 void
@@ -342,8 +343,8 @@ void
 ReducedPressurePIMPLESolve::commitAcceptedVOFTransportHistoryIfNeeded() const
 {
   if (solvesVolumeFraction())
-    if (auto * sharp_rc = sharpInterfaceRC())
-      sharp_rc->commitAcceptedTimestepTransportHistory();
+    if (auto * diffuse_rc = diffuseInterfaceRC())
+      diffuse_rc->commitAcceptedTimestepTransportHistory();
 }
 
 void
@@ -388,18 +389,18 @@ ReducedPressurePIMPLESolve::prepareVOFTransportStateForOuterIteration() const
   const bool use_previous_timestep_transport_flux =
       _problem.timeStep() == 1 && _current_outer_iteration == 1;
 
-  if (auto * sharp_rc = sharpInterfaceRC())
+  if (auto * diffuse_rc = diffuseInterfaceRC())
   {
-    sharp_rc->clearVOFTransportState();
-    sharp_rc->freezeVOFTransportState(use_previous_timestep_transport_flux);
+    diffuse_rc->clearVOFTransportState();
+    diffuse_rc->freezeVOFTransportState(use_previous_timestep_transport_flux);
   }
 }
 
 void
 ReducedPressurePIMPLESolve::adoptPublishedVOFTransportState() const
 {
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->adoptPublishedVOFTransportState();
+  if (auto * diffuse_rc = diffuseInterfaceRC())
+    diffuse_rc->adoptPublishedVOFTransportState();
 }
 
 void
@@ -426,29 +427,30 @@ ReducedPressurePIMPLESolve::shouldSolveActiveScalarsAfterFlowLoop() const
 void
 ReducedPressurePIMPLESolve::finalizeSolve(const bool /* converged */)
 {
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
+  if (auto * diffuse_rc = diffuseInterfaceRC())
+    diffuse_rc->setSuppressExplicitHydrostaticPressureFlux(false);
 }
 
 void
 ReducedPressurePIMPLESolve::addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                                                 NumericVector<Number> & rhs)
 {
-  if (auto * sharp_rc = sharpInterfaceRC(); sharp_rc && sharp_rc->splitMomentumPredictorOperator())
-    sharp_rc->addMomentumPredictorExplicitForcing(system_i, rhs);
+  if (auto * diffuse_rc = diffuseInterfaceRC();
+      diffuse_rc && diffuse_rc->splitMomentumPredictorOperator())
+    diffuse_rc->addMomentumPredictorExplicitForcing(system_i, rhs);
 }
 
-ConservativeSharpInterfaceRhieChowMassFlux *
-ReducedPressurePIMPLESolve::sharpInterfaceRC() const
+ConservativeDiffuseInterfaceRhieChowMassFlux *
+ReducedPressurePIMPLESolve::diffuseInterfaceRC() const
 {
-  return dynamic_cast<ConservativeSharpInterfaceRhieChowMassFlux *>(_rc_uo);
+  return dynamic_cast<ConservativeDiffuseInterfaceRhieChowMassFlux *>(_rc_uo);
 }
 
 void
 ReducedPressurePIMPLESolve::commitAcceptedTimestepTransportHistory() const
 {
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->commitAcceptedTimestepTransportHistory();
+  if (auto * diffuse_rc = diffuseInterfaceRC())
+    diffuse_rc->commitAcceptedTimestepTransportHistory();
 }
 
 void
@@ -538,8 +540,8 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
 void
 ReducedPressurePIMPLESolve::postPreparePressureCorrectorState(const bool subtract_updated_pressure)
 {
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
+  if (auto * diffuse_rc = diffuseInterfaceRC())
+    diffuse_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
 
   // Refresh the patch velocity / target-flux state from the latest momentum
   // predictor before assembling the constrained pressure boundary gradient.
@@ -553,9 +555,9 @@ ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
 {
   unsigned int subcycles = _volume_fraction_subcycles;
 
-  if (const auto * sharp_rc = sharpInterfaceRC())
+  if (const auto * diffuse_rc = diffuseInterfaceRC())
   {
-    const Real alpha_courant = sharp_rc->maxCourant(_problem.dt());
+    const Real alpha_courant = diffuse_rc->maxCourant(_problem.dt());
     if (std::isfinite(alpha_courant) && alpha_courant > _volume_fraction_max_courant)
     {
       const auto required_subcycles =
@@ -624,12 +626,12 @@ ReducedPressurePIMPLESolve::solveOneVolumeFractionSystem(const unsigned int i,
   // nonlinear solution-state stack advanced at outer-loop entry.
   setPreviousNewtonToCurrent(*system);
 
-  auto * corrector = sharpInterfaceVOFCorrector(_active_scalar_system_names[i]);
+  auto * corrector = diffuseInterfaceVOFCorrector(_active_scalar_system_names[i]);
   if (corrector)
     corrector->resetSubcycleFluxes();
   else
     mooseError("ReducedPressurePIMPLESolve requires a "
-               "ConservativeSharpInterfaceVOFMULESCorrector for volume-fraction system '",
+               "ConservativeDiffuseInterfaceVOFMULESCorrector for volume-fraction system '",
                _active_scalar_system_names[i],
                "'.");
 
@@ -648,7 +650,7 @@ std::pair<unsigned int, Real>
 ReducedPressurePIMPLESolve::runOneVolumeFractionSubcycle(
     const unsigned int i,
     LinearSystem & system,
-    ConservativeSharpInterfaceVOFMULESCorrector & corrector,
+    ConservativeDiffuseInterfaceVOFMULESCorrector & corrector,
     const unsigned int subcycle,
     const Real subcycle_dt,
     const Real global_dt,
@@ -684,7 +686,7 @@ ReducedPressurePIMPLESolve::finalizeVolumeFractionTransportState()
     system->computeGradients();
 
   for (const auto & system_name : _active_scalar_system_names)
-    if (auto * corrector = sharpInterfaceVOFCorrector(system_name))
+    if (auto * corrector = diffuseInterfaceVOFCorrector(system_name))
       corrector->refreshPublishedRhoPhi();
 }
 
@@ -692,7 +694,7 @@ std::pair<unsigned int, Real>
 ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const SolverParams & solver_params)
 {
   PressureStateGuard pressure_state(_pressure_system);
-  SharpInterfaceStartupProjectionGuard projection_scope(sharpInterfaceRC());
+  DiffuseInterfaceStartupProjectionGuard projection_scope(diffuseInterfaceRC());
 
   preparePressureCorrectorState(true);
 

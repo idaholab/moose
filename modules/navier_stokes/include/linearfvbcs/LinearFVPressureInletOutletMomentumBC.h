@@ -16,7 +16,7 @@
 class ElemInfo;
 
 /**
- * Pressure-controlled inlet/outlet velocity boundary condition for the sharp-interface path.
+ * Pressure-controlled inlet/outlet velocity boundary condition for the diffuse-interface path.
  *
  * The historical class name is retained, but the solved variable and returned boundary values are
  * velocity components, not rho*u.

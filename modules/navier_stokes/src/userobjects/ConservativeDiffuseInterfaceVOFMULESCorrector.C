@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ConservativeSharpInterfaceVOFMULESCorrector.h"
+#include "ConservativeDiffuseInterfaceVOFMULESCorrector.h"
 
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
@@ -33,7 +33,7 @@
 #include <unordered_map>
 #include <vector>
 
-registerMooseObject("NavierStokesApp", ConservativeSharpInterfaceVOFMULESCorrector);
+registerMooseObject("NavierStokesApp", ConservativeDiffuseInterfaceVOFMULESCorrector);
 
 namespace
 {
@@ -43,7 +43,7 @@ constexpr Real later_correction_relaxation = 0.5;
 }
 
 InputParameters
-ConservativeSharpInterfaceVOFMULESCorrector::validParams()
+ConservativeDiffuseInterfaceVOFMULESCorrector::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += NonADFunctorInterface::validParams();
@@ -94,10 +94,10 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
       "confined_scalar_backflow_concentration",
       "0",
       "Concentration imposed for confined scalar backflow on open volume-fraction boundaries.");
-  params.addParam<MooseFunctorName>(
-      "thermal_energy_backflow_temperature",
-      "0",
-      "Temperature imposed for mixture thermal energy backflow on open volume-fraction boundaries.");
+  params.addParam<MooseFunctorName>("thermal_energy_backflow_temperature",
+                                    "0",
+                                    "Temperature imposed for mixture thermal energy backflow on "
+                                    "open volume-fraction boundaries.");
   params.addParam<MooseFunctorName>(
       "conserved_enthalpy_backflow_temperature",
       "0",
@@ -130,7 +130,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::validParams()
   return params;
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESCorrector(
+ConservativeDiffuseInterfaceVOFMULESCorrector::ConservativeDiffuseInterfaceVOFMULESCorrector(
     const InputParameters & params)
   : GeneralUserObject(params),
     NonADFunctorInterface(this),
@@ -187,8 +187,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
                "The confined scalar concentration maximum must be greater than or equal to the "
                "minimum.");
 
-  const bool has_conserved_enthalpy = isParamValid("conserved_enthalpy_variable") ||
-                                      isParamValid("thermal_energy_variable");
+  const bool has_conserved_enthalpy =
+      isParamValid("conserved_enthalpy_variable") || isParamValid("thermal_energy_variable");
   if (has_conserved_enthalpy && (!_liquid_specific_heat || !_gas_specific_heat))
     paramError("conserved_enthalpy_variable",
                "Liquid and gas specific heat functors must be supplied for VOF-consistent "
@@ -209,21 +209,21 @@ ConservativeSharpInterfaceVOFMULESCorrector::ConservativeSharpInterfaceVOFMULESC
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::initialSetup()
+ConservativeDiffuseInterfaceVOFMULESCorrector::initialSetup()
 {
   cacheSystemData();
   initializeFluxStorage();
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::meshChanged()
+ConservativeDiffuseInterfaceVOFMULESCorrector::meshChanged()
 {
   cacheSystemData();
   initializeFluxStorage();
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
+ConservativeDiffuseInterfaceVOFMULESCorrector::cacheSystemData()
 {
   _system = &_fe_problem.getLinearSystem(_fe_problem.linearSysNum(_system_name));
   _alpha_var = dynamic_cast<MooseLinearVariableFVReal *>(
@@ -281,7 +281,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
     _thermal_energy_sys_num = _thermal_energy_var->sys().number();
     _thermal_energy_var_num = _thermal_energy_var->number();
 
-    if (isParamValid("conserved_enthalpy_temperature") || isParamValid("thermal_energy_temperature"))
+    if (isParamValid("conserved_enthalpy_temperature") ||
+        isParamValid("thermal_energy_temperature"))
     {
       const auto & temperature_name =
           isParamValid("conserved_enthalpy_temperature")
@@ -304,7 +305,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::cacheSystemData()
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::initializeFluxStorage()
+ConservativeDiffuseInterfaceVOFMULESCorrector::initializeFluxStorage()
 {
   for (const auto * fi : _fe_problem.mesh().faceInfo())
   {
@@ -316,25 +317,25 @@ ConservativeSharpInterfaceVOFMULESCorrector::initializeFluxStorage()
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::cellVolume(const ElemInfo & elem_info) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::cellVolume(const ElemInfo & elem_info) const
 {
   return elem_info.volume() * elem_info.coordFactor();
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::faceMeasure(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::faceMeasure(const FaceInfo & fi) const
 {
   return fi.faceArea() * fi.faceCoord();
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::cellAlpha(const ElemInfo & elem_info) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::cellAlpha(const ElemInfo & elem_info) const
 {
   return _alpha_var->getElemValue(elem_info, Moose::currentState());
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::oldCellAlpha(const ElemInfo & elem_info) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::oldCellAlpha(const ElemInfo & elem_info) const
 {
   const auto dof = elem_info.dofIndices()[_sys_num][_var_num];
   if (dof == DofObject::invalid_id)
@@ -351,14 +352,14 @@ ConservativeSharpInterfaceVOFMULESCorrector::oldCellAlpha(const ElemInfo & elem_
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::boundedAlpha(const Real value) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::boundedAlpha(const Real value) const
 {
   return std::min(alpha_max, std::max(alpha_min, value));
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::cellRhoCp(const ElemInfo & elem_info,
-                                                       const Real alpha) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::cellRhoCp(const ElemInfo & elem_info,
+                                                         const Real alpha) const
 {
   mooseAssert(_liquid_specific_heat && _gas_specific_heat,
               "Specific heat functors must be supplied before computing rho cp.");
@@ -376,7 +377,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::cellRhoCp(const ElemInfo & elem_inf
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::thermalEnergyTemperature(
+ConservativeDiffuseInterfaceVOFMULESCorrector::thermalEnergyTemperature(
     const ElemInfo & elem_info) const
 {
   const auto dof = elem_info.dofIndices()[_thermal_energy_sys_num][_thermal_energy_var_num];
@@ -398,7 +399,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::thermalEnergyTemperature(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
+ConservativeDiffuseInterfaceVOFMULESCorrector::resetSubcycleFluxes()
 {
   for (auto & pair : _alpha_phi_limited)
     pair.second = 0.0;
@@ -410,7 +411,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::cachePreSubcycleAlpha()
+ConservativeDiffuseInterfaceVOFMULESCorrector::cachePreSubcycleAlpha()
 {
   _pre_subcycle_alpha_by_dof.clear();
   _pre_subcycle_temperature_by_dof.clear();
@@ -452,7 +453,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::cachePreSubcycleAlpha()
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
+ConservativeDiffuseInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
 {
   if (!_system || !_alpha_var)
     return;
@@ -471,7 +472,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::refreshPublishedRhoPhi()
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(
+ConservativeDiffuseInterfaceVOFMULESCorrector::boundaryValue(
     const FaceInfo & fi, const FaceTransportData & face_data) const
 {
   if (auto * bc = face_data.boundary_condition)
@@ -484,7 +485,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::boundaryValue(
 }
 
 FaceInfo::VarFaceNeighbors
-ConservativeSharpInterfaceVOFMULESCorrector::transportFaceType(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::transportFaceType(const FaceInfo & fi) const
 {
   const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
   if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
@@ -496,8 +497,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::transportFaceType(const FaceInfo & 
              : FaceInfo::VarFaceNeighbors::NEITHER;
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector::FaceTransportData
-ConservativeSharpInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::FaceTransportData
+ConservativeDiffuseInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & fi) const
 {
   FaceTransportData data;
   data.face_type = transportFaceType(fi);
@@ -514,8 +515,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::faceTransportData(const FaceInfo & 
 }
 
 bool
-ConservativeSharpInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
-                                                         const bool fi_elem_side) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
+                                                           const bool fi_elem_side) const
 {
   const auto face_type = fi.faceType(std::make_pair(_var_num, _sys_num));
   if (fi_elem_side)
@@ -527,9 +528,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::hasFaceSide(const FaceInfo & fi,
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
-                                                       const FaceTransportData & face_data,
-                                                       const Real elem_alpha) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
+                                                         const FaceTransportData & face_data,
+                                                         const Real elem_alpha) const
 {
   Real donor_alpha = elem_alpha;
   if (face_data.boundary_kind == BoundaryFaceKind::Internal)
@@ -548,9 +549,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::donorFlux(const FaceInfo & fi,
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo & fi,
-                                                                const FaceTransportData & face_data,
-                                                                const Real elem_alpha) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::highOrderFaceValue(
+    const FaceInfo & fi, const FaceTransportData & face_data, const Real elem_alpha) const
 {
   Real high_order_alpha = 0.0;
   if (face_data.boundary_kind == BoundaryFaceKind::Internal)
@@ -576,8 +576,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::highOrderFaceValue(const FaceInfo &
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::sharedVanLeerFaceValue(const FaceInfo & fi,
-                                                                    const bool upwind_is_elem) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::sharedVanLeerFaceValue(
+    const FaceInfo & fi, const bool upwind_is_elem) const
 {
   mooseAssert(fi.neighborPtr(), "Van Leer correction requires an internal face with a neighbor.");
 
@@ -586,8 +586,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::sharedVanLeerFaceValue(const FaceIn
   return boundedAlpha(MetaPhysicL::raw_value((*_alpha_var)(face_arg, state)));
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector::BoundaryFaceKind
-ConservativeSharpInterfaceVOFMULESCorrector::classifyBoundaryFace(
+ConservativeDiffuseInterfaceVOFMULESCorrector::BoundaryFaceKind
+ConservativeDiffuseInterfaceVOFMULESCorrector::classifyBoundaryFace(
     const FaceInfo & fi,
     const FaceInfo::VarFaceNeighbors face_type,
     const Real volumetric_flux,
@@ -617,8 +617,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::classifyBoundaryFace(
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::rhoPhi(const FaceInfo & fi,
-                                                    const Real limited_alpha_flux) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::rhoPhi(const FaceInfo & fi,
+                                                      const Real limited_alpha_flux) const
 {
   const auto state = Moose::currentState();
   const Real gas_density =
@@ -632,8 +632,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::rhoPhi(const FaceInfo & fi,
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::rhoCpPhi(const FaceInfo & fi,
-                                                      const Real limited_alpha_flux) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::rhoCpPhi(const FaceInfo & fi,
+                                                        const Real limited_alpha_flux) const
 {
   mooseAssert(_liquid_specific_heat && _gas_specific_heat,
               "Specific heat functors must be supplied before computing rhoCpPhi.");
@@ -654,8 +654,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::rhoCpPhi(const FaceInfo & fi,
              limited_alpha_flux;
 }
 
-ConservativeSharpInterfaceVOFMULESCorrector::FaceCorrectionData
-ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::FaceCorrectionData
+ConservativeDiffuseInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceInfo & fi) const
 {
   FaceCorrectionData data;
   const auto face_data = faceTransportData(fi);
@@ -725,8 +725,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceI
   return data;
 }
 
-std::vector<ConservativeSharpInterfaceVOFMULESCorrector::FaceCorrectionData>
-ConservativeSharpInterfaceVOFMULESCorrector::collectFaceCorrectionData() const
+std::vector<ConservativeDiffuseInterfaceVOFMULESCorrector::FaceCorrectionData>
+ConservativeDiffuseInterfaceVOFMULESCorrector::collectFaceCorrectionData() const
 {
   std::vector<FaceCorrectionData> face_corrections;
   face_corrections.reserve(_fe_problem.mesh().faceInfo().size());
@@ -742,7 +742,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::collectFaceCorrectionData() const
 }
 
 Real
-ConservativeSharpInterfaceVOFMULESCorrector::confinedScalarConcentration(
+ConservativeDiffuseInterfaceVOFMULESCorrector::confinedScalarConcentration(
     const ConfinedScalarData & scalar, const ElemInfo & elem_info) const
 {
   const auto dof = elem_info.dofIndices()[scalar.sys_num][scalar.var_num];
@@ -759,7 +759,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::confinedScalarConcentration(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::applyConfinedScalarTransport(
+ConservativeDiffuseInterfaceVOFMULESCorrector::applyConfinedScalarTransport(
     const std::vector<FaceCorrectionData> & face_corrections,
     const std::vector<Real> & limited_alpha_fluxes,
     const Real dt)
@@ -928,7 +928,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyConfinedScalarTransport(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
+ConservativeDiffuseInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
     const std::vector<FaceCorrectionData> & face_corrections,
     const std::vector<Real> & limited_alpha_fluxes,
     const Real dt)
@@ -981,7 +981,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
     cache_cell(*data.face->elemInfo());
     const auto neighbor_dof =
         data.has_neighbor ? data.face->neighborInfo()
-                                  ->dofIndices()[_thermal_energy_sys_num][_thermal_energy_var_num]
+                                ->dofIndices()[_thermal_energy_sys_num][_thermal_energy_var_num]
                           : DofObject::invalid_id;
     if (data.has_neighbor && neighbor_dof != DofObject::invalid_id)
       cache_cell(*data.face->neighborInfo());
@@ -1002,10 +1002,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
 
     // This is rho_phi * h_face, with h_face = (rho_cp_phi / rho_phi) * T.
     // The fallback preserves the same VOF-consistent heat-capacity flux if rho_phi is tiny.
-    const Real enthalpy_flux =
-        std::abs(rho_flux) > libMesh::TOLERANCE
-            ? rho_flux * (rho_cp_flux / rho_flux) * donor_temperature
-            : rho_cp_flux * donor_temperature;
+    const Real enthalpy_flux = std::abs(rho_flux) > libMesh::TOLERANCE
+                                   ? rho_flux * (rho_cp_flux / rho_flux) * donor_temperature
+                                   : rho_cp_flux * donor_temperature;
     if (std::abs(enthalpy_flux) <= libMesh::TOLERANCE)
       continue;
 
@@ -1048,10 +1047,9 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
       continue;
 
     const auto alpha_dof = elem_info.dofIndices()[_sys_num][_var_num];
-    const Real accepted_alpha =
-        alpha_dof == DofObject::invalid_id
-            ? cellAlpha(elem_info)
-            : (*_system->system().current_local_solution)(alpha_dof);
+    const Real accepted_alpha = alpha_dof == DofObject::invalid_id
+                                    ? cellAlpha(elem_info)
+                                    : (*_system->system().current_local_solution)(alpha_dof);
     const Real accepted_capacity = cellRhoCp(elem_info, accepted_alpha);
     const Real transported_temperature = current_local_solution(dof) / transported_capacity;
     current_local_solution.set(dof, accepted_capacity * transported_temperature);
@@ -1074,15 +1072,15 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
 
       const auto energy_dof =
           elem_info->dofIndices()[_thermal_energy_sys_num][_thermal_energy_var_num];
-      const auto temperature_dof = elem_info->dofIndices()[_temperature_sys_num][_temperature_var_num];
+      const auto temperature_dof =
+          elem_info->dofIndices()[_temperature_sys_num][_temperature_var_num];
       if (energy_dof == DofObject::invalid_id || temperature_dof == DofObject::invalid_id)
         continue;
 
       const auto alpha_dof = elem_info->dofIndices()[_sys_num][_var_num];
-      const Real accepted_alpha =
-          alpha_dof == DofObject::invalid_id
-              ? cellAlpha(*elem_info)
-              : (*_system->system().current_local_solution)(alpha_dof);
+      const Real accepted_alpha = alpha_dof == DofObject::invalid_id
+                                      ? cellAlpha(*elem_info)
+                                      : (*_system->system().current_local_solution)(alpha_dof);
       const Real rho_cp = cellRhoCp(*elem_info, accepted_alpha);
       if (rho_cp > libMesh::TOLERANCE)
       {
@@ -1110,7 +1108,7 @@ ConservativeSharpInterfaceVOFMULESCorrector::applyThermalEnergyTransport(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
+ConservativeDiffuseInterfaceVOFMULESCorrector::publishFaceFluxes(
     const std::vector<FaceCorrectionData> & face_corrections,
     const std::vector<Real> & accumulated_alpha_fluxes,
     const Real subcycle_fraction)
@@ -1133,20 +1131,20 @@ ConservativeSharpInterfaceVOFMULESCorrector::publishFaceFluxes(
 }
 
 bool
-ConservativeSharpInterfaceVOFMULESCorrector::partitionFace(const FaceCorrectionData & data) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::partitionFace(const FaceCorrectionData & data) const
 {
   return data.has_neighbor && data.face->elemInfo()->elem()->processor_id() !=
                                   data.face->neighborInfo()->elem()->processor_id();
 }
 
 bool
-ConservativeSharpInterfaceVOFMULESCorrector::locallyOwnedCell(const ElemInfo & elem_info) const
+ConservativeDiffuseInterfaceVOFMULESCorrector::locallyOwnedCell(const ElemInfo & elem_info) const
 {
   return elem_info.elem()->processor_id() == processor_id();
 }
 
 bool
-ConservativeSharpInterfaceVOFMULESCorrector::synchronizePartitionFaceLimiters(
+ConservativeDiffuseInterfaceVOFMULESCorrector::synchronizePartitionFaceLimiters(
     const std::vector<FaceCorrectionData> & face_corrections,
     std::vector<Real> & accepted_lambda) const
 {
@@ -1198,8 +1196,8 @@ ConservativeSharpInterfaceVOFMULESCorrector::synchronizePartitionFaceLimiters(
 }
 
 void
-ConservativeSharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
-                                                             const Real subcycle_fraction)
+ConservativeDiffuseInterfaceVOFMULESCorrector::applyCorrection(const Real dt,
+                                                               const Real subcycle_fraction)
 {
   if (!_system || !_alpha_var || dt <= 0.0)
     return;

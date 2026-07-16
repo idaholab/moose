@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
+#include "ConservativeDiffuseInterfaceRhieChowMassFluxBase.h"
 
 #include "LinearFVAdvectionDiffusionBC.h"
 #include "LinearFVPressureInletOutletMomentumBC.h"
@@ -144,18 +144,18 @@ reconstructCellVectorFromFaceNormalScalars(const MooseMesh & moose_mesh,
 }
 
 InputParameters
-ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::validParams()
 {
   InputParameters params = RhieChowMassFlux::validParams();
 
   params.addClassDescription(
       "Rhie-Chow face-flux provider with additional reduced-pressure predictor functors for "
-      "large-density-ratio sharp-interface coupling.");
+      "large-density-ratio diffuse-interface coupling.");
 
   params.addParam<MooseFunctorName>(
       "vof_rho_phi_functor",
       "rho_phi",
-      "Optional alpha-consistent density flux published by the sharp-interface VOF transport. "
+      "Optional alpha-consistent density flux published by the diffuse-interface VOF transport. "
       "When present, downstream advection queries use this face mass flux instead of the raw "
       "Rhie-Chow density interpolation.");
   params.addParam<RealVectorValue>(
@@ -170,7 +170,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
       "surface_tension_coefficient",
       "",
       "Optional surface-tension coefficient functor. When supplied together with "
-      "surface_tension_volume_fraction_functor, the sharp-interface pressure coupling includes "
+      "surface_tension_volume_fraction_functor, the diffuse-interface pressure coupling includes "
       "the least-squares CSF capillary force sigma*kappa*grad(alpha).");
   params.addParam<MooseFunctorName>("surface_tension_volume_fraction_functor",
                                     "",
@@ -182,7 +182,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::validParams()
   return params;
 }
 
-ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieChowMassFluxBase(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::ConservativeDiffuseInterfaceRhieChowMassFluxBase(
     const InputParameters & params)
   : RhieChowMassFlux(params),
     _corrected_face_phi(_moose_mesh, blockIDs(), "corrected_face_phi"),
@@ -219,14 +219,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::ConservativeSharpInterfaceRhieCh
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::getMassFlux(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::getMassFlux(const FaceInfo & fi) const
 {
   const Real face_measure = faceMeasure(fi);
   return face_measure > 0.0 ? vofRhoPhiIntegrated(fi) / face_measure : 0.0;
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::commitAcceptedTimestepTransportHistory()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::commitAcceptedTimestepTransportHistory()
 {
   if (!_corrected_face_phi_seeded)
     cacheCurrentCorrectedVolumetricFlux();
@@ -237,13 +237,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::commitAcceptedTimestepTransportH
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::vofRhoPhiIntegrated(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::vofRhoPhiIntegrated(const FaceInfo & fi) const
 {
   return evaluateFaceScalarFunctor(_vof_rho_phi, &fi, Moose::currentState(), nullptr);
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictorForceDensity(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictorForceDensity(
     const ElemInfo & elem_info, const Moose::StateArg & time_arg) const
 {
   if (!hasBlocks(elem_info.subdomain_id()))
@@ -272,7 +272,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reducedPressureMomentumPredictor
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::predictorVelocityComponent(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::predictorVelocityComponent(
     const ElemInfo & elem_info, const unsigned int component) const
 {
   mooseAssert(component < _dim, "Momentum component index out of range.");
@@ -282,21 +282,22 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::predictorVelocityComponent(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(const FaceInfo & fi) const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(const FaceInfo & fi) const
 {
   return libmesh_map_find(_corrected_face_phi, fi.id());
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(
     const Moose::FV::InterpMethod m,
     const FaceInfo & fi,
     const Moose::StateArg & time,
     const THREAD_ID /*tid*/,
     bool libmesh_dbg_var(subtract_mesh_velocity)) const
 {
-  mooseAssert(!subtract_mesh_velocity,
-              "ConservativeSharpInterfaceRhieChowMassFluxBase does not support moving meshes yet!");
+  mooseAssert(
+      !subtract_mesh_velocity,
+      "ConservativeDiffuseInterfaceRhieChowMassFluxBase does not support moving meshes yet!");
 
   if (m != Moose::FV::InterpMethod::RhieChow)
     mooseError("Interpolation methods other than Rhie-Chow are not supported!");
@@ -307,7 +308,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::getVolumetricFaceFlux(
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::initializeAdditionalPressureFluxStorage(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::initializeAdditionalPressureFluxStorage(
     const bool preserve_corrected_face_phi)
 {
   for (const auto * fi : _fe_problem.mesh().faceInfo())
@@ -326,7 +327,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initializeAdditionalPressureFlux
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityToMomentumSolution(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityToMomentumSolution(
     const Moose::StateArg & time_arg)
 {
   std::vector<std::unique_ptr<NumericVector<Number>>> pressure_corrected_solution;
@@ -337,7 +338,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityTo
     auto * momentum_system = _momentum_implicit_systems[system_i];
     mooseAssert(momentum_system && momentum_system->current_local_solution,
                 "The requested momentum component is not linked to "
-                "ConservativeSharpInterfaceRhieChowMassFluxBase.");
+                "ConservativeDiffuseInterfaceRhieChowMassFluxBase.");
     pressure_corrected_solution.push_back(momentum_system->current_local_solution->zero_clone());
   }
 
@@ -372,7 +373,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::writePressureCorrectedVelocityTo
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::transportMassFluxDensityFromVolumetricPhi(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::transportMassFluxDensityFromVolumetricPhi(
     const FaceInfo * fi, const Real volumetric_phi, const Moose::StateArg & time_arg) const
 {
   const Real face_rho = interpolateFaceDensity(fi, time_arg);
@@ -380,7 +381,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::transportMassFluxDensityFromVolu
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi)
@@ -390,7 +391,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryTargetFlux(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(
     const FaceInfo * fi) const
 {
   if (!fi)
@@ -404,7 +405,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureBoundaryNormalAinv(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureFaceNormalAinv(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::pressureFaceNormalAinv(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi)
@@ -422,8 +423,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureFaceNormalAinv(
   return computeFaceNormalAinv(pressure_face_rau, fi->normal());
 }
 
-ConservativeSharpInterfaceRhieChowMassFluxBase::PressureVelocityFaceState
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::PressureVelocityFaceState
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
     const FaceInfo * fi,
     const Moose::StateArg & time_arg,
     const Real degenerate_normal_pressure_ainv_tol) const
@@ -439,7 +440,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
     auto integratedToVolumetricPhi = [face_measure](const Real integrated_phi)
     { return face_measure > libMesh::TOLERANCE ? integrated_phi / face_measure : 0.0; };
 
-    // The sharp pressure equation stores area-integrated phi. Convert back to the
+    // The diffuse pressure equation stores area-integrated phi. Convert back to the
     // normal-flux-density transport convention only at the publication/writeback boundary.
     state.predictor_transport_phi =
         integratedToVolumetricPhi(-libmesh_map_find(_phiHbyA_flux, fi->id()));
@@ -471,7 +472,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::pressureVelocityFaceState(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::maxPressureFaceNormalAinv(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::maxPressureFaceNormalAinv(
     const Moose::StateArg & time_arg) const
 {
   Real max_abs_normal_pressure_ainv = 0.0;
@@ -487,14 +488,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::maxPressureFaceNormalAinv(
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricFlux(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricFlux(
     const Real degenerate_normal_pressure_ainv_tol)
 {
   const auto time_arg = Moose::currentState();
   for (const auto * fi : flowFaceInfo())
   {
     const auto state = pressureVelocityFaceState(fi, time_arg, degenerate_normal_pressure_ainv_tol);
-    // Sharp-interface pressure-correction contract: the corrected transport flux is the
+    // Diffuse-interface pressure-correction contract: the corrected transport flux is the
     // predictor flux plus the pressure-equation flux. This face flux is authoritative for
     // continuity/transport. The reconstructed cell velocity below is only the cell-centered
     // velocity writeback branch and is not projected back to overwrite this face flux.
@@ -505,7 +506,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cacheCurrentCorrectedVolumetricF
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::freezeVOFTransportState(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::freezeVOFTransportState(
     const bool use_previous_timestep_flux)
 {
   if (!_corrected_face_phi_seeded)
@@ -521,14 +522,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::freezeVOFTransportState(
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::adoptPublishedVOFTransportState()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::adoptPublishedVOFTransportState()
 {
   if (!_vof_transport_phi_valid)
     freezeVOFTransportState(false);
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::clearVOFTransportState()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::clearVOFTransportState()
 {
   for (auto & pair : _vof_transport_phi)
     pair.second = 0.0;
@@ -537,14 +538,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::clearVOFTransportState()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::meshChanged()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::meshChanged()
 {
   RhieChowMassFlux::meshChanged();
   initializeAdditionalPressureFluxStorage();
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::initialSetup()
 {
   const_cast<MooseLinearVariableFVReal *>(_p)->computeCellGradients();
   RhieChowMassFlux::initialSetup();
@@ -555,7 +556,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
 
   if (!_vof_rho_phi)
     paramError("vof_rho_phi_functor",
-               "The conservative sharp-interface path requires the VOF-owned rhoPhi functor.");
+               "The conservative diffuse-interface path requires the VOF-owned rhoPhi functor.");
 
   const bool any_surface_tension_param =
       !_surface_tension_coefficient_name.empty() || !_surface_tension_volume_fraction_name.empty();
@@ -574,7 +575,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialSetup()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::initialize()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::initialize()
 {
   RhieChowMassFlux::initialize();
 
@@ -588,7 +589,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::initialize()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::cachePressureEquationFlux()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::cachePressureEquationFlux()
 {
   const_cast<MooseLinearVariableFVReal *>(_p)->computeCellGradients();
 
@@ -607,7 +608,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::cachePressureEquationFlux()
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
 {
   if (!_pressure_predictor_face_state_valid)
     updatePressurePredictorFaceState();
@@ -628,7 +629,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceMassFlux()
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (_vel[0]->isInternalFace(*fi))
@@ -643,10 +644,10 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceDensity(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::predictorFaceDensity(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::predictorFaceDensity(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
-  // In the sharp-interface VOF path, rhoPhi is assembled from the primary volumetric
+  // In the diffuse-interface VOF path, rhoPhi is assembled from the primary volumetric
   // flux plus the limited alpha transport flux. It is therefore not generally equal
   // to rho_f * phi, and recovering a predictor "face density" from rhoPhi / phi
   // injects a non-physical variable-density mismatch into the pressure predictor and
@@ -655,7 +656,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::predictorFaceDensity(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
     const FaceInfo * fi, const unsigned int component, const Moose::StateArg & time_arg) const
 {
   mooseAssert(fi, "FaceInfo should not be null when evaluating a face velocity component.");
@@ -675,7 +676,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::facePhysicalVelocityComponent(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolatedPhysicalFaceFlux(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::interpolatedPhysicalFaceFlux(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi)
@@ -689,16 +690,16 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::interpolatedPhysicalFaceFlux(
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(const FaceInfo * fi) const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::interpolateFaceRawAinv(const FaceInfo * fi) const
 {
   std::vector<std::unique_ptr<NumericVector<Number>>> owned_raw_ainv;
   std::vector<PetscVectorReader> raw_ainv_readers;
-  buildSharpFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
+  buildDiffuseFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
   return interpolateMomentumVectorReadersToFace(fi, raw_ainv_readers);
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::buildDiffuseFaceRawAinvReaders(
     std::vector<std::unique_ptr<NumericVector<Number>>> & owned_raw_ainv,
     std::vector<PetscVectorReader> & raw_ainv_readers) const
 {
@@ -734,7 +735,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
   {
     auto * momentum_system = _momentum_implicit_systems[dim_i];
     mooseAssert(momentum_system,
-                "Momentum system must be linked before building startup sharp face operators.");
+                "Momentum system must be linked before building startup diffuse face operators.");
 
     NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
     owned_raw_ainv.push_back(current_local_solution.zero_clone());
@@ -744,7 +745,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
     auto working_vector = current_local_solution.zero_clone();
     auto * working_vector_petsc = dynamic_cast<PetscVector<Number> *>(working_vector.get());
     mooseAssert(working_vector_petsc,
-                "The sharp startup face operator requires PETSc-backed momentum vectors.");
+                "The diffuse startup face operator requires PETSc-backed momentum vectors.");
     *working_vector_petsc = 1.0;
 
     raw_ainv.pointwise_divide(*working_vector_petsc, raw_ainv);
@@ -755,7 +756,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceRawAinvReaders(
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::buildSelectedPressureGradientReaders(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::buildSelectedPressureGradientReaders(
     const bool with_updated_pressure, std::vector<PetscVectorReader> & pressure_gradient_readers)
 {
   pressure_gradient_readers.clear();
@@ -765,14 +766,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSelectedPressureGradientRea
     pressure_gradient_readers.emplace_back(*component);
 }
 
-ConservativeSharpInterfaceRhieChowMassFluxBase::SharpFaceOperatorState
-ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceOperatorState(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::DiffuseFaceOperatorState
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::buildDiffuseFaceOperatorState(
     const FaceInfo * fi,
     const Moose::StateArg & time_arg,
     const std::vector<PetscVectorReader> & raw_ainv_readers,
     const std::vector<PetscVectorReader> * pressure_gradient_readers) const
 {
-  SharpFaceOperatorState state;
+  DiffuseFaceOperatorState state;
   state.face_normal = fi->normal();
   state.face_rho = interpolateFaceDensity(fi, time_arg);
   state.face_raw_ainv = interpolateMomentumVectorReadersToFace(fi, raw_ainv_readers);
@@ -792,7 +793,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::buildSharpFaceOperatorState(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
     const Moose::Functor<Real> * functor,
     const FaceInfo * fi,
     const Moose::StateArg & time_arg,
@@ -806,8 +807,8 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::evaluateFaceScalarFunctor(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectionVolumetricFlux(
-    const FaceInfo * fi, const Moose::StateArg & time_arg, const SharpFaceOperatorState & state)
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectionVolumetricFlux(
+    const FaceInfo * fi, const Moose::StateArg & time_arg, const DiffuseFaceOperatorState & state)
 {
   if (!fi || time_arg.state != Moose::currentState().state)
     return 0.0;
@@ -832,7 +833,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeDefaultTransientProjectio
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNormalFlux(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNormalFlux(
     const FaceInfo * fi, const Real mass_flux_density) const
 {
   if (!fi)
@@ -855,20 +856,21 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::massFluxDensityToVolumetricNorma
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::pressureDiffusionFaceArea(const FaceInfo * fi) const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::pressureDiffusionFaceArea(
+    const FaceInfo * fi) const
 {
   return fi ? faceMeasure(*fi) : 0.0;
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeFaceNormalDensityGradient(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   return computeFaceNormalScalarGradient(_rho, fi, time_arg);
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalScalarGradient(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeFaceNormalScalarGradient(
     const Moose::Functor<Real> & functor,
     const FaceInfo * fi,
     const Moose::StateArg & time_arg) const
@@ -910,7 +912,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalScalarGradient(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradient(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradient(
     const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
   if (!fi)
@@ -953,7 +955,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradien
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradient(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradient(
     const FaceInfo * fi, const std::vector<PetscVectorReader> & pressure_gradient_readers) const
 {
   if (!fi)
@@ -987,14 +989,14 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeFaceNormalPressureGradien
 }
 
 bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::useExplicitHydrostaticPredictorForce() const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::useExplicitHydrostaticPredictorForce() const
 {
   return !_suppress_startup_pressure_predictor_flux_sources &&
          !_suppress_explicit_hydrostatic_pressure_flux;
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::
     computeDiscreteHydrostaticPredictorFaceNormalForceDensity(
         const FaceInfo * fi, const Moose::StateArg & time_arg) const
 {
@@ -1006,13 +1008,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::
 }
 
 bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::surfaceTensionEnabled() const
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::surfaceTensionEnabled() const
 {
   return _surface_tension_coefficient && _surface_tension_volume_fraction;
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresFaceScalarValue(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeLeastSquaresFaceScalarValue(
     const Moose::Functor<Real> & functor,
     const FaceInfo * fi,
     const Elem * elem,
@@ -1035,7 +1037,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresFaceScalarVal
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellGradient(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeLeastSquaresCellGradient(
     const Moose::Functor<Real> & functor,
     const ElemInfo & elem_info,
     const Moose::StateArg & time_arg) const
@@ -1089,7 +1091,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellGradient(
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellInterfaceCurvature(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeLeastSquaresCellInterfaceCurvature(
     const ElemInfo & elem_info, const Moose::StateArg & time_arg) const
 {
   if (!surfaceTensionEnabled())
@@ -1140,7 +1142,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellInterface
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellSurfaceTensionForceDensity(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeLeastSquaresCellSurfaceTensionForceDensity(
     const ElemInfo & elem_info, const Moose::StateArg & time_arg) const
 {
   if (!surfaceTensionEnabled() || _suppress_startup_pressure_predictor_flux_sources)
@@ -1162,7 +1164,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computeLeastSquaresCellSurfaceTe
 }
 
 Real
-ConservativeSharpInterfaceRhieChowMassFluxBase::
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::
     computeLeastSquaresSurfaceTensionFaceNormalForceDensity(const FaceInfo * fi,
                                                             const Moose::StateArg & time_arg) const
 {
@@ -1187,7 +1189,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunctors(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunctors(
     const bool with_updated_pressure, const bool /*verbose*/)
 {
   _pressure_coupled_velocity_correction_valid = false;
@@ -1197,7 +1199,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
 
   std::vector<std::unique_ptr<NumericVector<Number>>> owned_raw_ainv;
   std::vector<PetscVectorReader> raw_ainv_readers;
-  buildSharpFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
+  buildDiffuseFaceRawAinvReaders(owned_raw_ainv, raw_ainv_readers);
   std::vector<PetscVectorReader> pressure_gradient_readers;
   buildSelectedPressureGradientReaders(with_updated_pressure, pressure_gradient_readers);
 
@@ -1219,7 +1221,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
     const Real face_measure = faceMeasure(*fi);
     const Real predictor_operator_volumetric_flux = predictor_state.face_hbya * fi->normal();
     const auto state =
-        buildSharpFaceOperatorState(fi, time_arg, raw_ainv_readers, &pressure_gradient_readers);
+        buildDiffuseFaceOperatorState(fi, time_arg, raw_ainv_readers, &pressure_gradient_readers);
     const RealVectorValue pressure_face_raw_ainv = state.face_raw_ainv;
     const Real normal_pressure_ainv =
         computeFaceNormalAinv(pressure_face_raw_ainv, state.face_normal);
@@ -1259,7 +1261,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updateAdditionalPressureFluxFunc
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCorrectionFaceField(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCorrectionFaceField(
     const Moose::StateArg & time_arg)
 {
   if (!_pressure_equation_flux_valid)
@@ -1281,7 +1283,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::updatePressureCoupledVelocityCor
 }
 
 bool
-ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorState(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorState(
     const FaceInfo * fi) const
 {
   if (!fi || _vel[0]->isInternalFace(*fi))
@@ -1311,13 +1313,13 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::useConstrainedBoundaryPredictorS
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::postUpdateVelocityBoundaryState()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::postUpdateVelocityBoundaryState()
 {
   cacheCurrentCorrectedVolumetricFlux();
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCellVector(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCellVector(
     const ElemInfo * elem_info,
     const Moose::StateArg & time_arg,
     const FaceScalarField & scalar_field) const
@@ -1334,7 +1336,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructFaceNormalScalarToCel
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructBasePressureCoupledCellVelocityDelta(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::reconstructBasePressureCoupledCellVelocityDelta(
     const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
   if (!elem_info || !_pressure_coupled_velocity_correction_valid)
@@ -1358,7 +1360,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructBasePressureCoupledCe
 }
 
 RealVectorValue
-ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVelocityDelta(
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVelocityDelta(
     const ElemInfo * elem_info, const Moose::StateArg & time_arg) const
 {
   if (!elem_info || !_pressure_coupled_velocity_correction_valid)
@@ -1368,7 +1370,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::reconstructPressureCoupledCellVe
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::computePressureCorrectedCellVelocity()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computePressureCorrectedCellVelocity()
 {
   const auto time_arg = Moose::currentState();
   updatePressureCoupledVelocityCorrectionFaceField(time_arg);
@@ -1377,7 +1379,7 @@ ConservativeSharpInterfaceRhieChowMassFluxBase::computePressureCorrectedCellVelo
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFluxBase::computeCellVelocity()
+ConservativeDiffuseInterfaceRhieChowMassFluxBase::computeCellVelocity()
 {
   computePressureCorrectedCellVelocity();
 }

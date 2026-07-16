@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
+#include "ConservativeDiffuseInterfaceRhieChowMassFlux.h"
 
-registerMooseObject("NavierStokesApp", ConservativeSharpInterfaceRhieChowMassFlux);
+registerMooseObject("NavierStokesApp", ConservativeDiffuseInterfaceRhieChowMassFlux);
 
 InputParameters
-ConservativeSharpInterfaceRhieChowMassFlux::validParams()
+ConservativeDiffuseInterfaceRhieChowMassFlux::validParams()
 {
-  InputParameters params = ConservativeSharpInterfaceRhieChowMassFluxBase::validParams();
+  InputParameters params = ConservativeDiffuseInterfaceRhieChowMassFluxBase::validParams();
   params.addClassDescription(
-      "Sharp-interface Rhie-Chow face-flux provider for velocity-component momentum. The primary "
+      "Diffuse-interface Rhie-Chow face-flux provider for velocity-component momentum. The primary "
       "unknowns are U components; density weighting enters through the "
       "momentum operator and mass-flux functors.");
   return params;
 }
 
-ConservativeSharpInterfaceRhieChowMassFlux::ConservativeSharpInterfaceRhieChowMassFlux(
+ConservativeDiffuseInterfaceRhieChowMassFlux::ConservativeDiffuseInterfaceRhieChowMassFlux(
     const InputParameters & params)
-  : ConservativeSharpInterfaceRhieChowMassFluxBase(params)
+  : ConservativeDiffuseInterfaceRhieChowMassFluxBase(params)
 {
 }
 
 void
-ConservativeSharpInterfaceRhieChowMassFlux::addMomentumPredictorExplicitForcing(
+ConservativeDiffuseInterfaceRhieChowMassFlux::addMomentumPredictorExplicitForcing(
     const unsigned int system_i, NumericVector<Number> & rhs) const
 {
   mooseAssert(system_i < _momentum_implicit_systems.size(),

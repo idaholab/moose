@@ -12,7 +12,7 @@
 #include "FunctorMaterial.h"
 
 /**
- * Functor material that prepares face-aware sharp-interface geometry quantities
+ * Functor material that prepares face-aware diffuse-interface geometry quantities
  * for reduced-pressure linear-FV coupling.
  *
  * This object is intentionally focused on the *consumer-facing* quantities that
@@ -21,12 +21,12 @@
  * - clipped / near-interface alpha indicators
  * - face unit normals from grad(alpha)
  */
-class ConservativeSharpInterfaceGeometryFunctorMaterial final : public FunctorMaterial
+class ConservativeDiffuseInterfaceGeometryFunctorMaterial final : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  ConservativeSharpInterfaceGeometryFunctorMaterial(const InputParameters & parameters);
+  ConservativeDiffuseInterfaceGeometryFunctorMaterial(const InputParameters & parameters);
 
 private:
   template <typename SpaceArg>

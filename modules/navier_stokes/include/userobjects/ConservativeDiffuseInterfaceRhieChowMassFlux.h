@@ -9,22 +9,22 @@
 
 #pragma once
 
-#include "ConservativeSharpInterfaceRhieChowMassFluxBase.h"
+#include "ConservativeDiffuseInterfaceRhieChowMassFluxBase.h"
 
 /**
- * Sharp-interface Rhie-Chow implementation for the velocity-component momentum path.
+ * Diffuse-interface Rhie-Chow implementation for the velocity-component momentum path.
  *
  * The momentum unknowns are velocity components U_i. Conservative behavior is supplied by the
  * density-weighted matrix coefficients and face fluxes for the reduced-pressure
  * ddt(rho, U) + div(rhoPhi, U) form without storing rho*U as a primary unknown.
  */
-class ConservativeSharpInterfaceRhieChowMassFlux
-  : public ConservativeSharpInterfaceRhieChowMassFluxBase
+class ConservativeDiffuseInterfaceRhieChowMassFlux
+  : public ConservativeDiffuseInterfaceRhieChowMassFluxBase
 {
 public:
   static InputParameters validParams();
 
-  ConservativeSharpInterfaceRhieChowMassFlux(const InputParameters & params);
+  ConservativeDiffuseInterfaceRhieChowMassFlux(const InputParameters & params);
 
   void addMomentumPredictorExplicitForcing(const unsigned int system_i,
                                            NumericVector<Number> & rhs) const override;

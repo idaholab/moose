@@ -26,17 +26,17 @@ class LinearFVBoundaryCondition;
 
 /**
  * Applies an explicit bounded correction to a donor/upwind alpha solve, following the same
- * bounded-flux-plus-limited-correction structure used by the sharp-interface VOF path.
+ * bounded-flux-plus-limited-correction structure used by the diffuse-interface VOF path.
  */
-class ConservativeSharpInterfaceVOFMULESCorrector : public GeneralUserObject,
-                                                    public NonADFunctorInterface,
-                                                    public BlockRestrictable,
-                                                    public FaceArgProducerInterface
+class ConservativeDiffuseInterfaceVOFMULESCorrector : public GeneralUserObject,
+                                                      public NonADFunctorInterface,
+                                                      public BlockRestrictable,
+                                                      public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
 
-  ConservativeSharpInterfaceVOFMULESCorrector(const InputParameters & params);
+  ConservativeDiffuseInterfaceVOFMULESCorrector(const InputParameters & params);
 
   void initialSetup() override;
   void meshChanged() override;

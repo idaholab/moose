@@ -7,46 +7,47 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WCNSLinearFVConservativeSharpInterfaceFlowPhysics.h"
+#include "WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics.h"
 
 #include "MooseUtils.h"
 #include "NS.h"
-#include "ConservativeSharpInterfaceRhieChowMassFlux.h"
+#include "ConservativeDiffuseInterfaceRhieChowMassFlux.h"
 
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp",
-                                   WCNSLinearFVConservativeSharpInterfaceFlowPhysics);
+                                   WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics);
 registerMooseAction("NavierStokesApp",
-                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics,
                     "add_linear_fv_kernel");
 registerMooseAction("NavierStokesApp",
-                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics,
                     "add_linear_fv_bc");
 registerMooseAction("NavierStokesApp",
-                    WCNSLinearFVConservativeSharpInterfaceFlowPhysics,
+                    WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics,
                     "add_functor_material");
 
 InputParameters
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::validParams()
 {
   InputParameters params = WCNSLinearFVFlowPhysics::validParams();
 
-  params.addClassDescription("Define a linear-FV segregated sharp-interface flow solve using "
+  params.addClassDescription("Define a linear-FV segregated diffuse-interface flow solve using "
                              "velocity components as the primary momentum unknowns.");
   params.set<std::vector<std::string>>("velocity_variable") =
       std::vector<std::string>(NS::velocity_vector, NS::velocity_vector + 3);
 
-  // Large-density-ratio sharp-interface work should default to a reduced / dynamic pressure solve.
+  // Large-density-ratio diffuse-interface work should default to a reduced / dynamic pressure
+  // solve.
   params.set<bool>("solve_for_dynamic_pressure") = true;
   params.transferParam<bool>(RhieChowMassFlux::validParams(),
                              "use_cached_momentum_predictor_operator");
   params.set<bool>("use_cached_momentum_predictor_operator") = true;
 
-  params.transferParam<MooseFunctorName>(ConservativeSharpInterfaceRhieChowMassFlux::validParams(),
-                                         "vof_rho_phi_functor");
+  params.transferParam<MooseFunctorName>(
+      ConservativeDiffuseInterfaceRhieChowMassFlux::validParams(), "vof_rho_phi_functor");
   params.addParam<MooseFunctorName>(
       "volume_fraction_functor",
       "",
-      "Volume-fraction functor used to generate sharp-interface geometry functors.");
+      "Volume-fraction functor used to generate diffuse-interface geometry functors.");
   params.addParam<Real>(
       "near_interface_lower", 0.01, "Lower threshold used for the near-interface indicator.");
   params.addParam<Real>(
@@ -54,7 +55,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
   params.addParam<bool>(
       "create_geometry_functors",
       true,
-      "Whether to automatically add the sharp-interface geometry functor material that produces "
+      "Whether to automatically add the diffuse-interface geometry functor material that produces "
       "face normals and capillary / hydrostatic face accelerations.");
   params.addParam<Real>(
       "geometry_delta_n",
@@ -77,31 +78,31 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::validParams()
       "clip_volume_fraction_for_geometry "
       "geometry_alpha_lower_bound geometry_alpha_upper_bound near_interface_lower "
       "near_interface_upper surface_tension_coefficient",
-      "Sharp Interface Geometry");
+      "Diffuse Interface Geometry");
 
   return params;
 }
 
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::
-    WCNSLinearFVConservativeSharpInterfaceFlowPhysics(const InputParameters & parameters)
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::
+    WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics(const InputParameters & parameters)
   : WCNSLinearFVFlowPhysics(parameters),
     _create_geometry_functors(getParam<bool>("create_geometry_functors"))
 {
   if (!_solve_for_dynamic_pressure)
     paramError("solve_for_dynamic_pressure",
-               "Conservative sharp-interface flow physics requires solve_for_dynamic_pressure = "
+               "Conservative diffuse-interface flow physics requires solve_for_dynamic_pressure = "
                "true.");
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumTimeKernelParams(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::setMomentumTimeKernelParams(
     InputParameters & params) const
 {
   params.set<bool>("use_old_state_factor_for_rhs") = true;
 }
 
 std::string
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::momentumOutletBCType(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::momentumOutletBCType(
     const BoundaryName & boundary, const MooseEnum & momentum_outlet_type) const
 {
   const bool use_pressure_inlet_outlet_velocity =
@@ -114,7 +115,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::momentumOutletBCType(
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumOutletBCParams(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::setMomentumOutletBCParams(
     InputParameters & params,
     const BoundaryName & /* boundary */,
     const MooseEnum & momentum_outlet_type,
@@ -133,14 +134,14 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setMomentumOutletBCParams(
 }
 
 std::string
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::pressureOutletBCType(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::pressureOutletBCType(
     const BoundaryName & /* boundary */, const MooseEnum & /* momentum_outlet_type */) const
 {
   return "LinearFVPrghTotalPressureBC";
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setPressureOutletBCParams(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::setPressureOutletBCParams(
     InputParameters & params,
     const BoundaryName & /* boundary */,
     const MooseEnum & /* momentum_outlet_type */) const
@@ -153,7 +154,7 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setPressureOutletBCParams(
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallPressureBC(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::addWallPressureBC(
     const BoundaryName & boundary, const MooseEnum & momentum_wall_type)
 {
   if (momentum_wall_type != "noslip")
@@ -172,11 +173,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addWallPressureBC(
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddWallPressureTwoTermExpansion() const
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::shouldAddWallPressureTwoTermExpansion() const
 {
   if (getParam<bool>("pressure_two_term_bc_expansion"))
     paramWarning("pressure_two_term_bc_expansion",
-                 "Ignoring pressure_two_term_bc_expansion on sharp-interface wall boundaries "
+                 "Ignoring pressure_two_term_bc_expansion on diffuse-interface wall boundaries "
                  "because the reduced-pressure path now applies an explicit zero-normal-flux "
                  "pressure boundary condition.");
 
@@ -184,20 +185,20 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddWallPressureTwoTermE
 }
 
 MooseFunctorName
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::generatedGeometryFunctorName(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::generatedGeometryFunctorName(
     const std::string & base_name) const
 {
   return prefix() + base_name;
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldAddMomentumPressureKernels() const
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::shouldAddMomentumPressureKernels() const
 {
   return false;
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::rhieChowUserObjectAppliesToBlocks(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::rhieChowUserObjectAppliesToBlocks(
     const RhieChowMassFlux & rc_obj) const
 {
   const auto this_block_ids =
@@ -210,28 +211,28 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::rhieChowUserObjectAppliesToBl
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::isCompatibleRhieChowUserObject(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::isCompatibleRhieChowUserObject(
     const UserObject & obj) const
 {
-  return dynamic_cast<const ConservativeSharpInterfaceRhieChowMassFlux *>(&obj);
+  return dynamic_cast<const ConservativeDiffuseInterfaceRhieChowMassFlux *>(&obj);
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::checkIncompatibleRhieChowUserObject(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::checkIncompatibleRhieChowUserObject(
     const RhieChowMassFlux & rc_obj) const
 {
-  mooseError("Sharp-interface flow physics '",
+  mooseError("Diffuse-interface flow physics '",
              name(),
-             "' requires a ConservativeSharpInterfaceRhieChowMassFlux on blocks ",
+             "' requires a ConservativeDiffuseInterfaceRhieChowMassFlux on blocks ",
              Moose::stringify(_blocks),
              ", but found existing RhieChowMassFlux '",
              rc_obj.name(),
              "' on overlapping blocks. Remove the stock Rhie-Chow object or use the "
-             "sharp-interface flow physics as the owner of the segregated flow coupling.");
+             "diffuse-interface flow physics as the owner of the segregated flow coupling.");
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setRhieChowUserObjectParams(
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::setRhieChowUserObjectParams(
     InputParameters & params) const
 {
   WCNSLinearFVFlowPhysics::setRhieChowUserObjectParams(params);
@@ -262,14 +263,14 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::setRhieChowUserObjectParams(
 }
 
 bool
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::shouldCreateGeometryFunctorMaterial() const
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::shouldCreateGeometryFunctorMaterial() const
 {
   return _create_geometry_functors &&
          !getParam<MooseFunctorName>("volume_fraction_functor").empty();
 }
 
 void
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::addFunctorMaterials()
 {
   WCNSLinearFVFlowPhysics::addFunctorMaterials();
 
@@ -277,12 +278,12 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
   {
     if (_create_geometry_functors)
       paramWarning("volume_fraction_functor",
-                   "No 'volume_fraction_functor' was supplied, so the sharp-interface geometry "
+                   "No 'volume_fraction_functor' was supplied, so the diffuse-interface geometry "
                    "functor material will not be created automatically.");
     return;
   }
 
-  const std::string class_name = "ConservativeSharpInterfaceGeometryFunctorMaterial";
+  const std::string class_name = "ConservativeDiffuseInterfaceGeometryFunctorMaterial";
   auto params = getFactory().getValidParams(class_name);
   assignBlocks(params, _blocks);
 
@@ -304,11 +305,11 @@ WCNSLinearFVConservativeSharpInterfaceFlowPhysics::addFunctorMaterials()
       generatedGeometryFunctorName("alpha_gradient");
   params.set<MooseFunctorName>("interface_unit_normal_name") =
       generatedGeometryFunctorName("interface_unit_normal_face");
-  getProblem().addFunctorMaterial(class_name, prefix() + "sharp_interface_geometry", params);
+  getProblem().addFunctorMaterial(class_name, prefix() + "diffuse_interface_geometry", params);
 }
 
 unsigned short
-WCNSLinearFVConservativeSharpInterfaceFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
+WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics::getNumberAlgebraicGhostingLayersNeeded() const
 {
   return 2;
 }

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ConservativeSharpInterfaceGeometryFunctorMaterial.h"
+#include "ConservativeDiffuseInterfaceGeometryFunctorMaterial.h"
 
 #include "MooseFunctorArguments.h"
 #include "SubProblem.h"
@@ -17,7 +17,7 @@
 #include <cmath>
 #include <type_traits>
 
-registerMooseObject("NavierStokesApp", ConservativeSharpInterfaceGeometryFunctorMaterial);
+registerMooseObject("NavierStokesApp", ConservativeDiffuseInterfaceGeometryFunctorMaterial);
 
 namespace
 {
@@ -37,13 +37,13 @@ geometrySafeMagnitude(const RealVectorValue & v)
 }
 
 InputParameters
-ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
+ConservativeDiffuseInterfaceGeometryFunctorMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
   params.addClassDescription(
-      "Create face-aware sharp-interface geometry functors for reduced-pressure linear-FV "
+      "Create face-aware diffuse-interface geometry functors for reduced-pressure linear-FV "
       "multiphase coupling.");
 
   params.addRequiredParam<MooseFunctorName>(
@@ -76,8 +76,8 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::validParams()
   return params;
 }
 
-ConservativeSharpInterfaceGeometryFunctorMaterial::
-    ConservativeSharpInterfaceGeometryFunctorMaterial(const InputParameters & parameters)
+ConservativeDiffuseInterfaceGeometryFunctorMaterial::
+    ConservativeDiffuseInterfaceGeometryFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _volume_fraction(getFunctor<Real>("volume_fraction_functor")),
     _clip_volume_fraction(getParam<bool>("clip_volume_fraction_for_geometry")),
@@ -137,15 +137,15 @@ ConservativeSharpInterfaceGeometryFunctorMaterial::
 
 template <typename SpaceArg>
 RealVectorValue
-ConservativeSharpInterfaceGeometryFunctorMaterial::alphaGradient(const SpaceArg & r,
-                                                                 const Moose::StateArg & t) const
+ConservativeDiffuseInterfaceGeometryFunctorMaterial::alphaGradient(const SpaceArg & r,
+                                                                   const Moose::StateArg & t) const
 {
   return MetaPhysicL::raw_value(_volume_fraction.gradient(r, t));
 }
 
 RealVectorValue
-ConservativeSharpInterfaceGeometryFunctorMaterial::alphaGradient(const Moose::FaceArg & r,
-                                                                 const Moose::StateArg & t) const
+ConservativeDiffuseInterfaceGeometryFunctorMaterial::alphaGradient(const Moose::FaceArg & r,
+                                                                   const Moose::StateArg & t) const
 {
   const FaceInfo * const fi = r.fi;
   if (!fi || !fi->neighborPtr() || !_volume_fraction.hasBlocks(fi->elemSubdomainID()) ||

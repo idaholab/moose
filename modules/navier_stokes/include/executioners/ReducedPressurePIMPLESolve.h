@@ -17,12 +17,12 @@
 #include <string>
 #include <vector>
 
-class ConservativeSharpInterfaceRhieChowMassFlux;
-class ConservativeSharpInterfaceVOFMULESCorrector;
+class ConservativeDiffuseInterfaceRhieChowMassFlux;
+class ConservativeDiffuseInterfaceVOFMULESCorrector;
 
 /**
  * PIMPLE solve object with explicit hooks for additional reduced-pressure /
- * sharp-interface face-flux predictors.
+ * diffuse-interface face-flux predictors.
  */
 class ReducedPressurePIMPLESolve : public PIMPLESolve
 {
@@ -79,18 +79,18 @@ private:
   std::pair<unsigned int, Real>
   runOneVolumeFractionSubcycle(const unsigned int i,
                                LinearSystem & system,
-                               ConservativeSharpInterfaceVOFMULESCorrector & corrector,
+                               ConservativeDiffuseInterfaceVOFMULESCorrector & corrector,
                                const unsigned int subcycle,
                                const Real subcycle_dt,
                                const Real global_dt,
                                const Real global_time_old);
   void finalizeVolumeFractionTransportState();
-  ConservativeSharpInterfaceVOFMULESCorrector *
-  sharpInterfaceVOFCorrector(const SolverSystemName & system_name) const;
+  ConservativeDiffuseInterfaceVOFMULESCorrector *
+  diffuseInterfaceVOFCorrector(const SolverSystemName & system_name) const;
 
   std::pair<unsigned int, Real> correctStartupContinuityOnce(const SolverParams & solver_params);
 
-  ConservativeSharpInterfaceRhieChowMassFlux * sharpInterfaceRC() const;
+  ConservativeDiffuseInterfaceRhieChowMassFlux * diffuseInterfaceRC() const;
 
   const unsigned int _volume_fraction_subcycles;
   const Real _volume_fraction_max_courant;

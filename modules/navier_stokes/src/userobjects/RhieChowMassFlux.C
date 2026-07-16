@@ -1281,7 +1281,7 @@ RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_pressur
     _pressure_predictor_flux_adjustment[fi->id()] = 0.0;
     // Rebuild the live predictor source in the native pressure-correction
     // space so constrained pressure BCs see the same total phiHbyA contract
-    // that the interior pressure equation sees. The sharp-interface path stores
+    // that the interior pressure equation sees. The diffuse-interface path stores
     // _pressure_predictor_base_flux with the internal sign, while _phig_flux is
     // the explicit body-force contribution, so internal phiHbyA is base - phig.
     _pressure_predictor_flux[fi->id()] =

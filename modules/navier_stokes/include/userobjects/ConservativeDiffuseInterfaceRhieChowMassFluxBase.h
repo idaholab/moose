@@ -17,7 +17,7 @@ class LinearSystem;
 
 /**
  * Rhie-Chow face-flux provider extended with additional reduced-pressure source
- * fluxes for large-density-ratio sharp-interface coupling.
+ * fluxes for large-density-ratio diffuse-interface coupling.
  *
  * Sign convention:
  * - The face functors published here are PRESSURE-EQUATION SOURCE FLUXES in the
@@ -26,10 +26,10 @@ class LinearSystem;
  *   published source functor. This mirrors the stock MOOSE relation
  *     face_mass_flux = -HbyA + pressure_diffusion_flux.
  */
-class ConservativeSharpInterfaceRhieChowMassFluxBase : public RhieChowMassFlux
+class ConservativeDiffuseInterfaceRhieChowMassFluxBase : public RhieChowMassFlux
 {
 public:
-  struct SharpFaceOperatorState
+  struct DiffuseFaceOperatorState
   {
     Real face_rho = 0.0;
     Real negative_sn_grad_p = 0.0;
@@ -52,7 +52,7 @@ public:
 
   static InputParameters validParams();
 
-  ConservativeSharpInterfaceRhieChowMassFluxBase(const InputParameters & params);
+  ConservativeDiffuseInterfaceRhieChowMassFluxBase(const InputParameters & params);
 
   void meshChanged() override;
   void initialSetup() override;
@@ -133,13 +133,13 @@ protected:
   Real interpolatedPhysicalFaceFlux(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
-  void
-  buildSharpFaceRawAinvReaders(std::vector<std::unique_ptr<NumericVector<Number>>> & owned_raw_ainv,
-                               std::vector<PetscVectorReader> & raw_ainv_readers) const;
+  void buildDiffuseFaceRawAinvReaders(
+      std::vector<std::unique_ptr<NumericVector<Number>>> & owned_raw_ainv,
+      std::vector<PetscVectorReader> & raw_ainv_readers) const;
   void
   buildSelectedPressureGradientReaders(const bool with_updated_pressure,
                                        std::vector<PetscVectorReader> & pressure_gradient_readers);
-  SharpFaceOperatorState buildSharpFaceOperatorState(
+  DiffuseFaceOperatorState buildDiffuseFaceOperatorState(
       const FaceInfo * fi,
       const Moose::StateArg & time_arg,
       const std::vector<PetscVectorReader> & raw_ainv_readers,
@@ -152,7 +152,7 @@ protected:
 
   Real computeDefaultTransientProjectionVolumetricFlux(const FaceInfo * fi,
                                                        const Moose::StateArg & time_arg,
-                                                       const SharpFaceOperatorState & state);
+                                                       const DiffuseFaceOperatorState & state);
   Real massFluxDensityToVolumetricNormalFlux(const FaceInfo * fi,
                                              const Real mass_flux_density) const;
   Real computeFaceNormalDensityGradient(const FaceInfo * fi,

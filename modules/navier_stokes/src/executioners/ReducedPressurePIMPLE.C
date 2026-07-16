@@ -20,7 +20,7 @@ ReducedPressurePIMPLE::validParams()
   params += ReducedPressurePIMPLESolve::validParams();
   params.addClassDescription(
       "Solves the transient Navier-Stokes equations using a reduced-pressure PIMPLE algorithm with "
-      "sharp-interface face-flux hooks and linear finite volume variables.");
+      "diffuse-interface face-flux hooks and linear finite volume variables.");
   return params;
 }
 
