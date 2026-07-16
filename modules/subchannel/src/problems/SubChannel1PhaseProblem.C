@@ -206,6 +206,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
+    _bulk_Re(1.0),
     _P_tol(getParam<Real>("P_tol")),
     _P_maxit(getParam<int>("P_maxit")),
     _T_tol(getParam<Real>("T_tol")),
@@ -411,6 +412,27 @@ SubChannel1PhaseProblem::initialSetup()
     _duct_HTC_closure =
         &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("duct_HTC_closure"));
   }
+}
+
+void
+SubChannel1PhaseProblem::computeBulkReynoldsNumber()
+{
+  if (processor_id() != 0)
+    return;
+
+  Real viscosity_in = 0.0;
+  Real mass_flow_in = 0.0;
+  for (const auto i_ch : make_range(_n_channels))
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    const Real mdot_in = (*_mdot_soln)(node_in);
+    viscosity_in += mdot_in * (*_mu_soln)(node_in);
+    mass_flow_in += mdot_in;
+  }
+
+  const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+  const Real inlet_mu = viscosity_in / mass_flow_in;
+  _bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * _subchannel_mesh.getAssemblyFlowArea());
 }
 
 void
@@ -2728,6 +2750,7 @@ SubChannel1PhaseProblem::externalSolve()
   }
 
   initializeSolution();
+  computeBulkReynoldsNumber();
   // Small helper functions to reduce repetition
   // Verbose print helper (no-op unless _verbose_subchannel is true)
   auto V = [&](const std::string & s)
@@ -3008,7 +3031,6 @@ SubChannel1PhaseProblem::externalSolve()
     return;
   Real power_in = 0.0;
   Real power_out = 0.0;
-  Real viscosity_in = 0.0;
   Real mass_flow_in = 0.0;
   Real mass_flow_out = 0.0;
   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -3018,16 +3040,14 @@ SubChannel1PhaseProblem::externalSolve()
     const Real mdot_in = (*_mdot_soln)(node_in);
     power_in += mdot_in * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
-    viscosity_in += mdot_in * (*_mu_soln)(node_in);
     mass_flow_in += mdot_in;
     mass_flow_out += (*_mdot_soln)(node_out);
   }
   auto h_bulk_out = power_out / mass_flow_out;
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
-  Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
-  Real inlet_mu = viscosity_in / mass_flow_in;
-  Real bulk_Re = mass_flow_in * bulk_Dh / (inlet_mu * _subchannel_mesh.getAssemblyFlowArea());
+  const Real bulk_Dh = _subchannel_mesh.getAssemblyHydraulicDiameter();
+  computeBulkReynoldsNumber();
   if (_verbose_subchannel)
   {
     _console << " ======================================= " << std::endl;
@@ -3036,7 +3056,7 @@ SubChannel1PhaseProblem::externalSolve()
     _console << "Total flow area :" << _subchannel_mesh.getAssemblyFlowArea() << " m^2"
              << std::endl;
     _console << "Assembly hydraulic diameter :" << bulk_Dh << " m" << std::endl;
-    _console << "Assembly Re number :" << bulk_Re << " [-]" << std::endl;
+    _console << "Assembly Re number :" << _bulk_Re << " [-]" << std::endl;
     _console << "Bulk coolant temperature at outlet :" << T_bulk_out << " K" << std::endl;
     _console << "Power added to coolant is : " << power_out - power_in << " Watt" << std::endl;
     _console << "Mass flow rate in is : " << mass_flow_in << " kg/sec" << std::endl;
