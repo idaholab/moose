@@ -448,6 +448,13 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       }
     }
   }
+
+  // get_mesh_subdomains() pulls from a cache, and can scream at us
+  // if the Mesh thinks the element caches have been invalidated by
+  // Modification.
+  if (!mesh_2d.preparation().has_cached_elem_data)
+    mesh_2d.cache_elem_data();
+
   // Give the old subdomain to all elements
   const auto common_id = mesh_2d.get_mesh_subdomains().begin();
   for (auto & elem : mesh->active_element_ptr_range())
