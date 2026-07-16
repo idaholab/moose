@@ -27,6 +27,12 @@
 #* GenericActiveLearner, ActiveLearningGaussianProcess, or
 #* MultiAppSamplerControl, so treat this as a best-effort first draft --
 #* please send me the exact error if something doesn't match your build.
+#*
+#* CONFIRMED from a real run: MultiAppSamplerControl passes each sampled
+#* value to the sub-app as a plain CLI_ARGS override (e.g. "x_input=2.5"),
+#* using param_names exactly as written -- it is NOT a control-tag lookup.
+#* param_names must therefore be the sub-app's full parameter path, e.g.
+#* 'Postprocessors/x_input/value', not just the block name 'x_input'.
 
 [StochasticTools]
 []
@@ -82,7 +88,7 @@
     type = MultiAppSamplerControl
     multi_app = sub
     sampler = sample
-    param_names = 'x_input'
+    param_names = 'Postprocessors/x_input/value'
   []
 []
 
