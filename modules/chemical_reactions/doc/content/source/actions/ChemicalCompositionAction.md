@@ -43,6 +43,29 @@ The phase-selection list is fixed for a `ChemicalComposition` subblock throughou
 Thermochemical outputs can be coupled to phase-field equations, but the selected phase set cannot
 currently be changed independently at each node or element by a phase-field variable.
 
+## Phase-Field Coupling Example
+
+The following combined-modules example restricts Thermochimica to the HCP phase and couples the
+resulting integral Gibbs energy, $G_{\mathrm{HCP}}$, into an Allen-Cahn free energy,
+
+\begin{equation}
+f(\eta) = W \eta^2 (1 - \eta)^2 + s G_{\mathrm{HCP}} \eta^2 (3 - 2\eta),
+\end{equation}
+
+where $\eta$ is the phase-field order parameter, $W$ is a barrier height, and $s$ is an energy
+scaling factor.
+
+!listing modules/combined/examples/thermochimica_phase_field/constrained_gibbs.i
+         block=ChemicalComposition Materials Kernels
+         id=thermochimica-constrained-gibbs-phase-field
+         caption=Coupling a constrained Thermochimica Gibbs energy into an Allen-Cahn free energy.
+
+!alert warning title=Energy Normalization
+Thermochimica reports the integral system Gibbs energy in J for the composition supplied at each
+evaluation location. The `gibbs_scale` in this small example is illustrative. A physical
+phase-field model must convert the result to a free-energy density using a consistent amount or
+molar-volume normalization and must supply free energies for every competing phase.
+
 ## Element Variables and Initialization
 
 The [!param](/ChemicalComposition/elements) parameter lists the chemical elements used in the
