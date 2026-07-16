@@ -109,6 +109,7 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
   // Calculation of flow regime
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
   const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1.0));
+  const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
   // This beta is used by the global turbulent crossflow relation:
   // w'_ij = beta * S_ij * G_bar. Peripheral sweep flow is handled separately by
@@ -148,11 +149,11 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
     const Real CmT = CmT_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
     const Real CmL = CmL_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
 
-    if (Re < ReL)
+    if (bulk_Re < ReL)
     {
       Cm = CmL;
     }
-    else if (Re > ReT)
+    else if (bulk_Re > ReT)
     {
       Cm = CmT;
     }
@@ -160,7 +161,7 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
     {
       // Simplified intermittency factor; see SCMMixingChengTodreas.md.
       // Cheng and Todreas (1986) use a more detailed expression for psi.
-      const Real psi = std::log(Re / ReL) / std::log(ReT / ReL);
+      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
       const Real gamma = 2.0 / 3.0;
       Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
     }
@@ -226,6 +227,7 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
   // Calculation of flow regime
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
   const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1.0));
+  const Real bulk_Re = _scm_problem.getBulkReynoldsNumber();
 
   if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
       (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
@@ -266,11 +268,11 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     const Real CsL = CsL_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
     const Real CsT = CsT_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
 
-    if (Re < ReL)
+    if (bulk_Re < ReL)
     {
       Cs = CsL;
     }
-    else if (Re > ReT)
+    else if (bulk_Re > ReT)
     {
       Cs = CsT;
     }
@@ -278,7 +280,7 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
     {
       // Simplified intermittency factor; see SCMMixingChengTodreas.md.
       // Cheng and Todreas (1986) use a more detailed expression for psi.
-      const Real psi = std::log(Re / ReL) / std::log(ReT / ReL);
+      const Real psi = std::log(bulk_Re / ReL) / std::log(ReT / ReL);
       const Real gamma = 2.0 / 3.0;
       Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
     }
