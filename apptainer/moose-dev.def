@@ -1,76 +1,55 @@
-{#- Required jinja arguments                                                                  -#}
-{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
-{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
-{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
-{#- NEML2_GIT_SHA: The git SHA to use for neml2                                               -#}
-{#- NEML2_GIT_REMOTE: The git remote to use to get neml2                                      -#}
-{#- WASP_GIT_SHA: The git SHA to use for WASP                                                 -#}
-{#- WASP_GIT_REMOTE: The git remote to use to get WASP                                        -#}
+{#-
+   Required jinja arguments:
 
-{#- Optional jinja arguments                                                                  -#}
-{#- CONDUIT_GIT_SHA: The git SHA to use for conduit                                           -#}
-{#- CONDUIT_GIT_REMOTE: The git remote to use to get conduit                                  -#}
-{#- CONDUIT_OPTIONS: Options to pass to conduit build                                         -#}
-{#- MFEM_GIT_SHA: The git SHA to use for MFEM                                                 -#}
-{#- MFEM_GIT_REMOTE: The git remote to use to get MFEM                                        -#}
-{#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
-{#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
-{#- OPTFLAGS: Optimization flags to set when building                                         -#}
-{#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
-{#- PYTORCH_GIT_SHA: The git SHA to use for pytorch                                           -#}
-{#- PYTORCH_GIT_REMOTE: The git remote to use to get pytorch                                  -#}
-{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
-{#- WITH_MFEM: Whether or not to build mfem (truthy, default: true)                           -#}
-{#- WITH_FMU: Whether or not to install python fmu utilities (truthy, default: false)         -#}
-{#- WITHOUT_PYTORCH: Whether to not build pytorch and neml2 (truthy, default: false)          -#}
+   - APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)
+   - APPTAINER_FROM: The From to use (path to an image or an oras URI)
+   - MOOSE_DIR: Path on the host to the MOOSE repository
+   - NEML2_GIT_SHA: The git SHA to use for neml2
+   - NEML2_GIT_REMOTE: The git remote to use to get neml2
+   - WASP_GIT_SHA: The git SHA to use for WASP
+   - WASP_GIT_REMOTE: The git remote to use to get WASP
 
-{#- Set WITH_MFEM default if not set                                                          -#}
-{%- if WITH_MFEM is not defined %}
-{%- set WITH_MFEM = True %}
-{%- endif %}
-{#- Set WITH_FMU default if not set                                                           -#}
-{%- if WITH_FMU is not defined %}
-{%- set WITH_FMU = False %}
-{%- endif %}
-{#- Set WITHOUT_PYTORCH default if not set                                                    -#}
-{%- if WITHOUT_PYTORCH is not defined %}
-{%- set WITHOUT_PYTORCH = False %}
-{%- endif %}
+   Optional jinja arguments:
 
-{#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
+   - CONDUIT_GIT_SHA: The git SHA to use for conduit
+   - CONDUIT_GIT_REMOTE: The git remote to use to get conduit
+   - CONDUIT_OPTIONS: Options to pass to conduit build
+   - MFEM_GIT_SHA: The git SHA to use for MFEM
+   - MFEM_GIT_REMOTE: The git remote to use to get MFEM
+   - MFEM_OPTIONS: Options to pass to mfem build
+   - MOOSE_JOBS: Number of jobs to pass to the builds
+   - OPTFLAGS: Optimization flags to set when building
+   - PROFILING: Set to anything to build for profiling (add gperftools)
+   - PYTORCH_GIT_SHA: The git SHA to use for pytorch
+   - PYTORCH_GIT_REMOTE: The git remote to use to get pytorch
+   - SKIP_FINGERPRINTS: Set to skip fingerprint verification
+   - WITH_MFEM: Whether or not to build mfem (truthy, default: true)
+   - WITH_FMU: Whether or not to install python fmu utilities (truthy, default: false)
+   - WITHOUT_PYTORCH: Whether to not build pytorch and neml2 (truthy, default: false)
+-#}
 
-{#- The installation location for gperftools                                                  -#}
-{%- set GPERF_DIR = '/opt/gperftools' -%}
-{#- The installation location for pprof                                                       -#}
-{%- set PPROF_DIR = '/opt/pprof' -%}
-{#- The installation location for libtorch                                                    -#}
-{%- set LIBTORCH_DIR = '/opt/libtorch' -%}
-{#- The script used to install conduit                                                        -#}
+{#- Set defaults for any variables not provided                                               -#}
+{%- set WITH_MFEM       = WITH_MFEM | default(true) %}
+{%- set WITH_FMU        = WITH_FMU | default(false) %}
+{%- set WITHOUT_PYTORCH = WITHOUT_PYTORCH | default(false) %}
+
+{#- Installation locations and build scripts for third-party dependencies                     -#}
+{%- set CODE_SERVER_DIR      = '/opt/code-server' -%}
 {%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
-{#- The installation location for conduit                                                     -#}
-{%- set CONDUIT_DIR = '/opt/conduit' -%}
-{#- The script used to install mfem                                                           -#}
-{%- set MFEM_BUILD_SCRIPT = 'update_and_rebuild_mfem.sh' -%}
-{#- The installation location for mfem                                                        -#}
-{%- set MFEM_DIR = '/opt/mfem' -%}
-{#- The script used to install wasp                                                           -#}
-{%- set WASP_BUILD_SCRIPT = 'update_and_rebuild_wasp.sh' -%}
-{#- The installation location for wasp                                                        -#}
-{%- set WASP_DIR = '/opt/wasp' -%}
-{#- The script used to install neml2                                                          -#}
-{%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
-{#- The installation location for neml2                                                       -#}
-{%- set NEML2_DIR = '/opt/neml2' -%}
-{#- The installation location for uv                                                          -#}
-{%- set UV_DIR = '/opt/uv' -%}
-{#- The installation location for python                                                      -#}
-{%- set PYTHON_DIR = '/opt/python' -%}
-{#- The installation location for code-server                                                 -#}
-{%- set CODE_SERVER_DIR = '/opt/code-server' -%}
-
-{#- The files directory for this definition                                                   -#}
-{%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
+{%- set CONDUIT_DIR          = '/opt/conduit' -%}
+{%- set FILES_DIR            = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
+{%- set GPERF_DIR            = '/opt/gperftools' -%}
+{%- set LIBTORCH_DIR         = '/opt/libtorch' -%}
+{%- set MFEM_BUILD_SCRIPT    = 'update_and_rebuild_mfem.sh' -%}
+{%- set MFEM_DIR             = '/opt/mfem' -%}
+{%- set NEML2_BUILD_SCRIPT   = 'update_and_rebuild_neml2.sh' -%}
+{%- set NEML2_DIR            = '/opt/neml2' -%}
+{%- set PPROF_DIR            = '/opt/pprof' -%}
+{%- set PYTHON_DIR           = '/opt/python' -%}
+{%- set ROOT_BUILD_DIR       = '/root/build' -%}
+{%- set UV_DIR               = '/opt/uv' -%}
+{%- set WASP_BUILD_SCRIPT    = 'update_and_rebuild_wasp.sh' -%}
+{%- set WASP_DIR             = '/opt/wasp' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
