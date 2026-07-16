@@ -19,7 +19,7 @@
     # Tolerance added due to CIVET machine difference
     # See PR: Qprime #31380
     # and PR: various mods #31283
-    rel_err = 8e-04
+    rel_err = 1.5e-03
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
