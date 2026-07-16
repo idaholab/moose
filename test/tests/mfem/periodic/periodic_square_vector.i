@@ -1,8 +1,8 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.e
-  translation_x = "1. 0."
-  translation_y = "0. 0."
+  lattice_vectors = '1.0 0.0;
+                     0.0 0.0'
 []
 
 [Problem]
