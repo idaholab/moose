@@ -465,4 +465,85 @@
     requirement = 'Legacy and typed ChemicalComposition outputs shall support incremental migration with a deprecation warning'
     capabilities = 'thermochimica'
   []
+
+  [phase_exclusion]
+    type = CSVDiff
+    input = phase_exclusion.i
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall omit configured phases from every equilibrium calculation.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_inclusion]
+    type = CSVDiff
+    input = phase_exclusion.i
+    cli_args = "ChemicalComposition/thermo/excluded_phases='' ChemicalComposition/thermo/included_phases=BCCN"
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    prereq = phase_exclusion
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall support retaining only named thermodynamic phases.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_exclusion_batch_one]
+    type = CSVDiff
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = phase_exclusion_out.csv
+    rel_err = 1e-8
+    prereq = phase_inclusion
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Phase-selected equilibrium results shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_mutually_exclusive]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/included_phases=BCCN'
+    expect_err = 'excluded_phases and included_phases are mutually exclusive.'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject simultaneous phase inclusion and exclusion lists.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_invalid]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/excluded_phases=invalid'
+    expect_err = "Phase 'invalid' was not found in the database."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall validate phase-selection names against the database.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_duplicate]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = "ChemicalComposition/thermo/excluded_phases='HCPN HCPN'"
+    expect_err = "Phase 'HCPN' is listed more than once."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject duplicate phase selections.'
+    capabilities = 'thermochimica'
+  []
+
+  [phase_selection_excluded_output]
+    type = RunException
+    input = phase_exclusion.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/Phases/bcc_amount/phase=HCPN'
+    expect_err = "Phase 'HCPN' was not found in the configured system."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The ChemicalComposition action shall reject output requests for excluded phases.'
+    capabilities = 'thermochimica'
+  []
 []

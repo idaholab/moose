@@ -30,6 +30,13 @@ struct ThermochimicaConfiguration
     NONE
   };
 
+  enum class PhaseSelection
+  {
+    NONE,
+    EXCLUDE,
+    INCLUDE
+  };
+
   enum class AmountUnit
   {
     MOLES,
@@ -150,6 +157,8 @@ struct ThermochimicaConfiguration
   WarmStart warm_start = WarmStart::PREVIOUS_SOLVE;
   unsigned int batch_size = 32;
   bool report_performance = false;
+  PhaseSelection phase_selection = PhaseSelection::NONE;
+  std::vector<std::string> selected_phases;
 
   std::vector<std::string> elements;
   std::vector<unsigned int> element_ids;
