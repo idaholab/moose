@@ -584,6 +584,19 @@ ChemicalCompositionAction::addOutputRequest(const ThermochimicaSystemGibbsEnergy
 }
 
 void
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaSystemPropertyRequest & request,
+                                            const InputParameters & source,
+                                            const std::string & origin)
+{
+  addOutputDescriptor(
+      ThermochimicaConfiguration::SystemPropertyOutput{request.variable, request.property},
+      source,
+      origin,
+      "variable");
+  _configuration->needs_system_properties = true;
+}
+
+void
 ChemicalCompositionAction::buildLegacyOutputDescriptors(
     const std::vector<std::string> & database_phases,
     const std::vector<std::vector<std::string>> & database_species)
@@ -773,6 +786,8 @@ ChemicalCompositionAction::buildTypedOutputDescriptors(
             addOutputRequest(
                 request, action->parameters(), action->origin(), "phase", database_phases);
           else if constexpr (std::is_same_v<Request, ThermochimicaSystemGibbsEnergyRequest>)
+            addOutputRequest(request, action->parameters(), action->origin());
+          else if constexpr (std::is_same_v<Request, ThermochimicaSystemPropertyRequest>)
             addOutputRequest(request, action->parameters(), action->origin());
         },
         action->request());

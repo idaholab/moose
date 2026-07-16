@@ -504,7 +504,12 @@ ThermochimicaData::initializeThermochimica()
   else
     selection_info = Thermochimica::setExcludedPhases(_configuration->selected_phases);
   if (selection_info != 0)
+  {
     _header->worker_status = selection_info;
+    return;
+  }
+  Thermochimica::setHeatCapacityEnthalpyEntropyRequested(
+      _configuration->needs_system_properties);
 #endif
 }
 
@@ -864,6 +869,21 @@ ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::SystemGibbsE
   const auto result = Thermochimica::getSystemGibbsEnergy();
   value = result.first;
   return result.second;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::SystemPropertyOutput & output,
+                                  OutputEvaluationContext &,
+                                  Real & value) const
+{
+  const auto properties = Thermochimica::getHeatCapacityEnthalpyEntropy();
+  if (output.property == ThermochimicaConfiguration::SystemPropertyKind::ENTHALPY)
+    value = std::get<1>(properties);
+  else if (output.property == ThermochimicaConfiguration::SystemPropertyKind::ENTROPY)
+    value = std::get<2>(properties);
+  else
+    value = std::get<0>(properties);
+  return 0;
 }
 
 bool

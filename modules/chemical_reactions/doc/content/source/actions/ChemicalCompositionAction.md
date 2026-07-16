@@ -74,6 +74,7 @@ provided.
 | `[PhaseGibbsEnergies]` | `phase` | Phase Gibbs energy in J or J/mol |
 | `[PhaseDrivingForces]` | `phase` | Phase driving force in J/mol-atoms |
 | `[SystemGibbsEnergies]` | None | Integral system Gibbs energy in J |
+| `[SystemProperties]` | `property` | Integral enthalpy, entropy, or equilibrium heat capacity |
 
 The `unit` parameter in `[Phases]` and `[Species]` selects `moles` or `mole_fraction`. A phase mole
 fraction is the phase moles divided by the total moles in all phases. A species mole fraction is the
@@ -95,6 +96,16 @@ energy is reported only for a stable phase; an absent phase has a value of zero.
 formation of the phase is favorable, while a stable phase has a value close to zero. Each leaf in
 `[SystemGibbsEnergies]` reports the integral Gibbs energy of the complete system in joules and does
 not require an additional selector.
+
+Each `[SystemProperties]` leaf selects `enthalpy`, `entropy`, or `heat_capacity` with the `property`
+parameter. Enthalpy is reported in J, while entropy and heat capacity are reported in J/K. These
+are integral properties of the complete configured system.
+
+!alert warning title=Heat-Capacity Cost
+Requesting any `[SystemProperties]` output enables Thermochimica's equilibrium heat-capacity
+calculation, which perturbs temperature and performs additional equilibrium solves. The reported
+heat capacity follows the equilibrium phase assemblage and is not a frozen-composition heat
+capacity.
 
 The following example creates output variables including `hcp_amount`, `bcc_phase_fraction`,
 `hcp_phase_fraction`, `hcp_mo_fraction`, `hcp_mo_moles`, `mo_chemical_potential`,

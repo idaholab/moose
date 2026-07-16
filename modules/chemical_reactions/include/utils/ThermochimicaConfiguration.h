@@ -62,6 +62,13 @@ struct ThermochimicaConfiguration
     JOULES_PER_MOLE
   };
 
+  enum class SystemPropertyKind
+  {
+    ENTHALPY,
+    ENTROPY,
+    HEAT_CAPACITY
+  };
+
   struct PhaseOutput
   {
     VariableName variable;
@@ -137,6 +144,12 @@ struct ThermochimicaConfiguration
     VariableName variable;
   };
 
+  struct SystemPropertyOutput
+  {
+    VariableName variable;
+    SystemPropertyKind property;
+  };
+
   using OutputDescriptor = std::variant<PhaseOutput,
                                         SpeciesOutput,
                                         ElementPotentialOutput,
@@ -145,7 +158,8 @@ struct ThermochimicaConfiguration
                                         ChemicalPotentialOutput,
                                         PhaseGibbsEnergyOutput,
                                         PhaseDrivingForceOutput,
-                                        SystemGibbsEnergyOutput>;
+                                        SystemGibbsEnergyOutput,
+                                        SystemPropertyOutput>;
 
   FileName database;
   std::string temperature_unit;
@@ -165,6 +179,7 @@ struct ThermochimicaConfiguration
   std::vector<std::string> phase_names;
   std::vector<int> phase_indices;
   bool needs_phase_total = false;
+  bool needs_system_properties = false;
   std::vector<OutputDescriptor> outputs;
 
   std::vector<VariableName> element_variables;

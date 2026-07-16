@@ -35,6 +35,9 @@ registerMooseAction("ChemicalReactionsApp",
 registerMooseAction("ChemicalReactionsApp",
                     ThermochimicaSystemGibbsEnergyOutputAction,
                     "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaSystemPropertyOutputAction,
+                    "setup_chemical_composition");
 
 InputParameters
 ThermochimicaOutputAction::validParams()
@@ -299,4 +302,34 @@ ThermochimicaOutputRequest
 ThermochimicaSystemGibbsEnergyOutputAction::request() const
 {
   return ThermochimicaSystemGibbsEnergyRequest{_variable};
+}
+
+InputParameters
+ThermochimicaSystemPropertyOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription("Selects an integral system enthalpy, entropy, or heat capacity.");
+  params.addRequiredParam<MooseEnum>(
+      "property", MooseEnum("enthalpy entropy heat_capacity"), "System property to output");
+  return params;
+}
+
+ThermochimicaSystemPropertyOutputAction::ThermochimicaSystemPropertyOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaSystemPropertyOutputAction::request() const
+{
+  const auto property = getParam<MooseEnum>("property");
+  ThermochimicaConfiguration::SystemPropertyKind kind;
+  if (property == "enthalpy")
+    kind = ThermochimicaConfiguration::SystemPropertyKind::ENTHALPY;
+  else if (property == "entropy")
+    kind = ThermochimicaConfiguration::SystemPropertyKind::ENTROPY;
+  else
+    kind = ThermochimicaConfiguration::SystemPropertyKind::HEAT_CAPACITY;
+  return ThermochimicaSystemPropertyRequest{_variable, kind};
 }

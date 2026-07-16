@@ -390,6 +390,19 @@
     capabilities = 'thermochimica'
   []
 
+  [typed_outputs_batch_one]
+    type = CSVDiff
+    input = typed_outputs.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = typed_outputs_out.csv
+    rel_err = 1e-8
+    prereq = typed_outputs
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed thermodynamic property outputs shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
   [typed_output_invalid_phase]
     type = RunException
     input = typed_outputs.i
