@@ -31,6 +31,11 @@ public:
   dofToWeightedVelocities() const;
 
   /**
+   * Get the degree of freedom to physical tangential velocities information
+   */
+  const std::unordered_map<const DofObject *, std::array<ADReal, 2>> & dofToRealVelocities() const;
+
+  /**
    * @return The contact force at quadrature points on the mortar segment
    */
   virtual const ADVariableValue & contactTangentialPressureDirOne() const = 0;
@@ -107,4 +112,10 @@ inline const std::unordered_map<const DofObject *, std::array<ADReal, 2>> &
 WeightedVelocitiesUserObject::dofToWeightedVelocities() const
 {
   return _dof_to_weighted_tangential_velocity;
+}
+
+inline const std::unordered_map<const DofObject *, std::array<ADReal, 2>> &
+WeightedVelocitiesUserObject::dofToRealVelocities() const
+{
+  return _dof_to_real_tangential_velocity;
 }

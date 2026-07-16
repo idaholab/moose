@@ -226,6 +226,108 @@
       custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
   []
+  [coulomb_friction_regularization_lm_mortar]
+    requirement = 'The contact action shall support Coulomb friction regularization options for '
+                  'mortar Lagrange multiplier contact'
+    issues = '#33356'
+    design = 'actions/ContactAction.md constraints/ComputeFrictionalForceLMMechanicalContact.md'
+
+    [accept]
+      type = 'RunApp'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
+      check_input = true
+      cli_args = 'Contact/frictional/friction_elastic_slip=1e-4 '
+                 'Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP '
+                 'Contact/frictional/friction_reference_slip=1e-3'
+      detail = 'by accepting Lagrange multiplier mortar friction regularization options'
+    []
+    [missing_reference_slip_error]
+      type = 'RunException'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
+      cli_args = 'Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP'
+      expect_err = 'A positive friction_reference_slip is required when '
+                   'friction_coefficient_regularization is not NONE'
+      detail = 'and by requiring a positive reference slip when the friction coefficient is '
+               'regularized'
+    []
+    [bad_epsilon_error]
+      type = 'RunException'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
+      cli_args = 'Constraints/frictional_normal_lm/epsilon=0'
+      expect_err = "Range check failed for parameter Constraints/frictional_normal_lm/epsilon; "
+                   "expression = 'epsilon > 0', value = 0"
+      detail = 'and by rejecting a nonpositive friction enforcement epsilon'
+    []
+    [nonpositive_reference_slip_error]
+      type = 'RunException'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
+      cli_args = 'Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP '
+                 'Constraints/frictional_normal_lm/friction_reference_slip=0'
+      expect_err = 'A positive friction_reference_slip is required when '
+                   'friction_coefficient_regularization is not NONE'
+      detail = 'and by rejecting nonpositive reference slip for regularized friction'
+    []
+    [negative_reference_slip_error]
+      type = 'RunException'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
+      cli_args = 'Contact/frictional/friction_reference_slip=-1'
+      expect_err = "Contact/frictional/friction_reference_slip: Range check failed; expression = "
+                   "'friction_reference_slip >= 0', value = -1"
+      detail = 'and by rejecting negative reference slip even without coefficient regularization'
+    []
+    [run]
+      type = 'RunApp'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
+      cli_args = "Postprocessors/active='' Executioner/end_time=60 "
+                 "Outputs/exodus=false "
+                 "Contact/frictional/friction_elastic_slip=1e-4 "
+                 "Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Contact/frictional/friction_reference_slip=1e-3"
+      detail = 'and by solving a short regularized mortar Lagrange multiplier contact problem.'
+    []
+  []
+  [coulomb_friction_regularization_action_errors]
+    requirement = 'The contact action shall reject friction regularization options for unsupported '
+                  'contact models and formulations'
+    issues = '#33356'
+    design = 'actions/ContactAction.md'
+
+    [non_coulomb_regularization_error]
+      type = 'RunException'
+      input = bouncing-block-ranfs.i
+      cli_args = 'Contact/top_bottom/friction_elastic_slip=1e-4'
+      expect_err = "The friction regularization options can only be used with the 'coulomb' model"
+      detail = 'by rejecting friction regularization for non-Coulomb contact'
+    []
+    [ranfs_regularization_error]
+      type = 'RunException'
+      input = bouncing-block-ranfs.i
+      cli_args = 'Contact/top_bottom/model=coulomb Contact/top_bottom/friction_coefficient=0.1 '
+                 'Contact/top_bottom/friction_elastic_slip=1e-4'
+      expect_err = "The friction regularization options are only supported with the 'mortar' "
+                   "formulation"
+      detail = 'and by rejecting friction regularization for RANFS contact'
+    []
+    [node_face_penalty_regularization_error]
+      type = 'RunException'
+      input = bouncing-block-ranfs.i
+      cli_args = 'Contact/top_bottom/model=coulomb Contact/top_bottom/formulation=penalty '
+                 'Contact/top_bottom/friction_coefficient=0.1 '
+                 'Contact/top_bottom/friction_elastic_slip=1e-4'
+      expect_err = "The friction regularization options are only supported with the 'mortar' "
+                   "formulation"
+      detail = 'and by rejecting friction regularization for node-face penalty contact'
+    []
+    [mortar_penalty_regularization_error]
+      type = 'RunException'
+      input = frictionless-penalty-weighted-gap-action.i
+      cli_args = 'Contact/weighted_gap/model=coulomb Contact/weighted_gap/friction_coefficient=0.1 '
+                 'Contact/weighted_gap/friction_elastic_slip=1e-4'
+      expect_err = "The friction regularization options are only supported with the 'mortar' "
+                   "formulation"
+      detail = 'and by rejecting friction regularization for mortar-penalty contact.'
+    []
+  []
   [split_secondary]
     type = 'Exodiff'
     input = 'variational-frictional.i'

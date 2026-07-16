@@ -22,6 +22,16 @@ interpolations for quadratic-element mortar contact and show that corner-node/li
 pressure fields can avoid inconsistencies that arise with quadratic contact pressure interpolations
 while retaining good convergence [!cite](puso2008segment).
 
+For Coulomb friction, [!param](/Contact/ContactAction/friction_elastic_slip) introduces a small
+tangential compliance before the full Coulomb limit is reached. A value of zero recovers the
+unregularized stick branch. The [!param](/Contact/ContactAction/friction_coefficient_regularization)
+option can also reduce the effective friction coefficient for very small slip increments. With
+`ARCTAN_SLIP`, [!param](/Contact/ContactAction/friction_reference_slip) is compared against the
+current step slip increment; a useful starting value is about \(10^{-3}\) to \(10^{-2}\) of the
+local contact segment size, and users should check timestep or load-step sensitivity. These
+regularizations are available only for Coulomb Lagrange-multiplier mortar contact
+(`formulation = mortar`).
+
 For node-to-segment mechanical contact, the action offers the possibility to automatically set up
 mechanical contact pairs given a maximum distance between contacting boundary centroids.
 To use that option, the user must set `automatic_pairing_method = CENTROID`.

@@ -11,6 +11,7 @@
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
 #include "Function.h"
+#include "ContactFrictionUtils.h"
 
 class WeightedVelocitiesUserObject;
 
@@ -68,12 +69,6 @@ protected:
                               const ADReal & tangential_vel,
                               const ADReal & tangential_vel_dir);
 
-  /// A map from node to two weighted tangential velocities
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
-
-  /// A map from node to two interpolated, physical tangential velocities
-  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_real_tangential_velocity;
-
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
 
@@ -121,6 +116,15 @@ protected:
 
   /// Friction coefficient
   const Real _mu;
+
+  /// Regularization method for the effective friction coefficient
+  const Moose::Contact::FrictionCoefficientRegularization _friction_coefficient_regularization;
+
+  /// Slip distance used to regularize the effective friction coefficient
+  const Real _friction_reference_slip;
+
+  /// Tangential elastic slip distance before reaching the Coulomb bound
+  const Real _friction_elastic_slip;
 
   /// input function
   const Function * const _function_friction;

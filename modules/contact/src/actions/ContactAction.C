@@ -18,6 +18,7 @@
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 #include "AugmentedLagrangianContactProblem.h"
+#include "ContactFrictionUtils.h"
 
 #include "NanoflannMeshAdaptor.h"
 #include "PointListAdaptor.h"
@@ -54,6 +55,15 @@ static unsigned int contact_userobject_counter = 0;
 
 // Counter for distinct contact action objects
 static unsigned int contact_action_counter = 0;
+
+namespace
+{
+bool
+supportsFrictionRegularization(const ContactFormulation formulation)
+{
+  return formulation == ContactFormulation::MORTAR;
+}
+}
 
 // For mortar subdomains
 registerMooseAction("ContactApp", ContactAction, "append_mesh_generator");
@@ -131,6 +141,19 @@ ContactAction::validParams()
       "iterations for penalizing relative slip distance if the node is under stick conditions.(a "
       "value larger than one, e.g., 10, tends to speed up convergence.)");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
+  params.addParam<MooseEnum>("friction_coefficient_regularization",
+                             Moose::Contact::frictionCoefficientRegularizationOptions(),
+                             "The regularization applied to the Coulomb friction coefficient.");
+  params.addRangeCheckedParam<Real>(
+      "friction_reference_slip",
+      0.0,
+      "friction_reference_slip >= 0",
+      "Reference slip increment used by friction coefficient regularization.");
+  params.addRangeCheckedParam<Real>(
+      "friction_elastic_slip",
+      0.0,
+      "friction_elastic_slip >= 0",
+      "Tangential elastic slip distance over which the Coulomb friction bound is reached.");
   params.addParam<Real>("tension_release",
                         0.0,
                         "Tension release threshold.  A node in contact "
@@ -320,7 +343,10 @@ ContactAction::validParams()
       "adaptivity_penalty_normal adaptivity_penalty_friction",
       "Augmented Lagrange");
   // Friction
-  params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
+  params.addParamNamesToGroup(
+      "friction_coefficient friction_coefficient_regularization friction_reference_slip "
+      "friction_elastic_slip tension_release",
+      "Friction");
   // Mortar-specific parameters
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
@@ -394,6 +420,31 @@ ContactAction::ContactAction(const InputParameters & params)
   if (_formulation == ContactFormulation::TANGENTIAL_PENALTY && _model != ContactModel::COULOMB)
     paramError("formulation",
                "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+
+  const auto friction_coefficient_regularization =
+      getParam<MooseEnum>("friction_coefficient_regularization")
+          .getEnum<Moose::Contact::FrictionCoefficientRegularization>();
+  const bool has_friction_regularization =
+      params.isParamSetByUser("friction_elastic_slip") ||
+      params.isParamSetByUser("friction_coefficient_regularization") ||
+      params.isParamSetByUser("friction_reference_slip");
+
+  if (_model != ContactModel::COULOMB && has_friction_regularization)
+    paramError("model",
+               "The friction regularization options can only be used with the 'coulomb' model.");
+
+  if (_model == ContactModel::COULOMB && has_friction_regularization &&
+      !supportsFrictionRegularization(_formulation))
+    paramError("formulation",
+               "The friction regularization options are only supported with the 'mortar' "
+               "formulation.");
+
+  if (friction_coefficient_regularization !=
+          Moose::Contact::FrictionCoefficientRegularization::NONE &&
+      getParam<Real>("friction_reference_slip") <= 0.0)
+    paramError("friction_reference_slip",
+               "A positive friction_reference_slip is required when "
+               "friction_coefficient_regularization is not NONE.");
 
   if (_formulation == ContactFormulation::MORTAR_PENALTY)
   {
@@ -1267,6 +1318,10 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
+      params.set<MooseEnum>("friction_coefficient_regularization") =
+          getParam<MooseEnum>("friction_coefficient_regularization");
+      params.set<Real>("friction_reference_slip") = getParam<Real>("friction_reference_slip");
+      params.set<Real>("friction_elastic_slip") = getParam<Real>("friction_elastic_slip");
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",
