@@ -99,6 +99,18 @@ protected:
   int evaluateOutput(const ThermochimicaConfiguration::ElementDistributionOutput & output,
                      OutputEvaluationContext & context,
                      Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::ChemicalPotentialOutput & output,
+                     OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::PhaseGibbsEnergyOutput & output,
+                     OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::PhaseDrivingForceOutput & output,
+                     OutputEvaluationContext & context,
+                     Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::SystemGibbsEnergyOutput & output,
+                     OutputEvaluationContext & context,
+                     Real & value) const;
   bool loadPreviousState(dof_id_type id);
   void storePreviousState(dof_id_type id);
 #endif

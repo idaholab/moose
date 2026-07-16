@@ -220,6 +220,10 @@ ChemicalCompositionAction::initializeConfiguration()
 
   const auto database_phases = Thermochimica::getPhaseNamesSystem();
   const auto database_species = Thermochimica::getSpeciesSystem();
+  std::vector<std::vector<std::string>> database_thermodynamic_species(database_species.size());
+  for (const auto phase_index : index_range(database_thermodynamic_species))
+    database_thermodynamic_species[phase_index] =
+        Thermochimica::getThermodynamicSpeciesInPhase(phase_index);
   std::set<std::string> unique_phases;
   for (const auto phase_index : index_range(database_phases))
     if (unique_phases.insert(database_phases[phase_index]).second)
@@ -233,7 +237,7 @@ ChemicalCompositionAction::initializeConfiguration()
       paramError("elements", "Duplicate generated variable name '", name, "'.");
 
   buildLegacyOutputDescriptors(database_phases, database_species);
-  buildTypedOutputDescriptors(database_phases, database_species);
+  buildTypedOutputDescriptors(database_phases, database_species, database_thermodynamic_species);
 
   Thermochimica::resetThermoAll();
 #endif
@@ -434,6 +438,106 @@ ChemicalCompositionAction::addOutputRequest(const ThermochimicaElementDistributi
 }
 
 void
+ChemicalCompositionAction::addOutputRequest(
+    const ThermochimicaChemicalPotentialRequest & request,
+    const InputParameters & source,
+    const std::string & origin,
+    const std::string & phase_parameter,
+    const std::vector<std::string> & database_phases,
+    const std::vector<std::vector<std::string>> & database_species,
+    const std::vector<std::vector<std::string>> & database_thermodynamic_species)
+{
+  const auto phase_index =
+      phaseSystemIndex(request.phase, source, phase_parameter, database_phases);
+  if (phase_index >= static_cast<int>(database_species.size()))
+    source.paramError(
+        phase_parameter, "Phase '", request.phase, "' does not contain solution species.");
+
+  const bool is_mqm = Thermochimica::isPhaseMQM(phase_index);
+  if (request.kind == ThermochimicaConfiguration::ChemicalPotentialKind::SPECIES && is_mqm)
+    source.paramError(request.component_parameter,
+                      "Use 'quadruplet', 'endmember', or 'pair' for MQM phase '",
+                      request.phase,
+                      "'.");
+  if (request.kind != ThermochimicaConfiguration::ChemicalPotentialKind::SPECIES && !is_mqm)
+    source.paramError(request.component_parameter,
+                      "The '",
+                      request.component_parameter,
+                      "' selector is only valid for an MQM phase.");
+
+  const auto & components =
+      request.kind == ThermochimicaConfiguration::ChemicalPotentialKind::ENDMEMBER
+          ? database_species[phase_index]
+          : database_thermodynamic_species[phase_index];
+  const auto component = std::find(components.begin(), components.end(), request.component);
+  if (component == components.end())
+    source.paramError(request.component_parameter,
+                      "Component '",
+                      request.component,
+                      "' was not found in phase '",
+                      request.phase,
+                      "'.");
+
+  addOutputDescriptor(
+      ThermochimicaConfiguration::ChemicalPotentialOutput{
+          request.variable,
+          request.phase,
+          request.component,
+          phase_index,
+          static_cast<int>(std::distance(components.begin(), component)),
+          request.kind},
+      source,
+      origin,
+      "variable");
+}
+
+void
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaPhaseGibbsEnergyRequest & request,
+                                            const InputParameters & source,
+                                            const std::string & origin,
+                                            const std::string & phase_parameter,
+                                            const std::vector<std::string> & database_phases)
+{
+  addOutputDescriptor(
+      ThermochimicaConfiguration::PhaseGibbsEnergyOutput{
+          request.variable,
+          request.phase,
+          phaseSystemIndex(request.phase, source, phase_parameter, database_phases),
+          request.unit},
+      source,
+      origin,
+      "variable");
+}
+
+void
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaPhaseDrivingForceRequest & request,
+                                            const InputParameters & source,
+                                            const std::string & origin,
+                                            const std::string & phase_parameter,
+                                            const std::vector<std::string> & database_phases)
+{
+  addOutputDescriptor(
+      ThermochimicaConfiguration::PhaseDrivingForceOutput{
+          request.variable,
+          request.phase,
+          phaseSystemIndex(request.phase, source, phase_parameter, database_phases)},
+      source,
+      origin,
+      "variable");
+}
+
+void
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaSystemGibbsEnergyRequest & request,
+                                            const InputParameters & source,
+                                            const std::string & origin)
+{
+  addOutputDescriptor(ThermochimicaConfiguration::SystemGibbsEnergyOutput{request.variable},
+                      source,
+                      origin,
+                      "variable");
+}
+
+void
 ChemicalCompositionAction::buildLegacyOutputDescriptors(
     const std::vector<std::string> & database_phases,
     const std::vector<std::vector<std::string>> & database_species)
@@ -562,7 +666,8 @@ ChemicalCompositionAction::buildLegacyOutputDescriptors(
 void
 ChemicalCompositionAction::buildTypedOutputDescriptors(
     const std::vector<std::string> & database_phases,
-    const std::vector<std::vector<std::string>> & database_species)
+    const std::vector<std::vector<std::string>> & database_species,
+    const std::vector<std::vector<std::string>> & database_thermodynamic_species)
 {
   std::vector<const ThermochimicaOutputAction *> output_actions;
   for (const auto & action : _awh.allActionBlocks())
@@ -607,6 +712,22 @@ ChemicalCompositionAction::buildTypedOutputDescriptors(
                              "phase",
                              "element",
                              database_phases);
+          else if constexpr (std::is_same_v<Request, ThermochimicaChemicalPotentialRequest>)
+            addOutputRequest(request,
+                             action->parameters(),
+                             action->origin(),
+                             "phase",
+                             database_phases,
+                             database_species,
+                             database_thermodynamic_species);
+          else if constexpr (std::is_same_v<Request, ThermochimicaPhaseGibbsEnergyRequest>)
+            addOutputRequest(
+                request, action->parameters(), action->origin(), "phase", database_phases);
+          else if constexpr (std::is_same_v<Request, ThermochimicaPhaseDrivingForceRequest>)
+            addOutputRequest(
+                request, action->parameters(), action->origin(), "phase", database_phases);
+          else if constexpr (std::is_same_v<Request, ThermochimicaSystemGibbsEnergyRequest>)
+            addOutputRequest(request, action->parameters(), action->origin());
         },
         action->request());
 }

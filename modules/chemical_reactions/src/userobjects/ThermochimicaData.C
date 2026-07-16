@@ -48,6 +48,29 @@ alignedOffset(const std::size_t offset, const std::size_t alignment)
 {
   return (offset + alignment - 1) & ~(alignment - 1);
 }
+
+#ifdef THERMOCHIMICA_ENABLED
+int
+currentPhaseIndex(const std::string & phase)
+{
+  const auto phases = Thermochimica::getPhaseNamesSystem();
+  const auto found = std::find(phases.begin(), phases.end(), phase);
+  return found == phases.end() ? -1 : static_cast<int>(std::distance(phases.begin(), found));
+}
+
+int
+currentComponentIndex(const int phase_index,
+                      const std::string & component,
+                      const ThermochimicaConfiguration::ChemicalPotentialKind kind)
+{
+  const auto components = kind == ThermochimicaConfiguration::ChemicalPotentialKind::ENDMEMBER
+                              ? Thermochimica::getSpeciesInPhase(phase_index)
+                              : Thermochimica::getThermodynamicSpeciesInPhase(phase_index);
+  const auto found = std::find(components.begin(), components.end(), component);
+  return found == components.end() ? -1
+                                   : static_cast<int>(std::distance(components.begin(), found));
+}
+#endif
 }
 
 InputParameters
@@ -559,14 +582,30 @@ ThermochimicaData::solveRow(const unsigned int row)
                                                input + _configuration->inputWidth(),
                                                [total_input](const Real value)
                                                { return value > std::abs(total_input) * 1e-10; });
-  const auto moles_phase = use_indexed_outputs && !_configuration->needs_phase_total
-                               ? std::vector<double>()
-                               : Thermochimica::getMolesPhase();
+  const auto moles_phase =
+      use_indexed_outputs ? std::vector<double>() : Thermochimica::getMolesPhase();
   Real phase_total = 0.0;
   if (_configuration->needs_phase_total)
-    for (const auto phase_index : _configuration->phase_indices)
-      if (moles_phase[phase_index] > 0.0)
-        phase_total += moles_phase[phase_index];
+  {
+    for (const auto phase : index_range(_configuration->phase_indices))
+      if (use_indexed_outputs)
+      {
+        const auto result = Thermochimica::getPhaseMoles(_configuration->phase_indices[phase]);
+        if (result.second != 0)
+          return result.second;
+        if (result.first > 0.0)
+          phase_total += result.first;
+      }
+      else
+      {
+        const auto [phase_index, phase_info] =
+            Thermochimica::getPhaseIndex(_configuration->phase_names[phase]);
+        if (phase_info != 0)
+          return phase_info;
+        if (phase_index > 0 && moles_phase[phase_index - 1] > 0.0)
+          phase_total += moles_phase[phase_index - 1];
+      }
+  }
   OutputEvaluationContext context{use_indexed_outputs, moles_phase, phase_total, input[1], {}};
   for (const auto output : index_range(_configuration->outputs))
   {
@@ -732,6 +771,88 @@ ThermochimicaData::evaluateOutput(
   else if (output.unit == ThermochimicaConfiguration::DistributionUnit::FRACTION)
     value = 0.0;
   return 0;
+}
+
+int
+ThermochimicaData::evaluateOutput(
+    const ThermochimicaConfiguration::ChemicalPotentialOutput & output,
+    OutputEvaluationContext & context,
+    Real & value) const
+{
+  const auto phase_index =
+      context.use_indexed_outputs ? output.phase_index : currentPhaseIndex(output.phase);
+  if (phase_index < 0)
+  {
+    value = 0.0;
+    return 0;
+  }
+  const auto component_index =
+      context.use_indexed_outputs
+          ? output.component_index
+          : currentComponentIndex(phase_index, output.component, output.kind);
+  if (component_index < 0)
+  {
+    value = 0.0;
+    return 0;
+  }
+
+  const auto result =
+      output.kind == ThermochimicaConfiguration::ChemicalPotentialKind::ENDMEMBER
+          ? Thermochimica::getMqmqaEndmemberStoichiometricPotential(phase_index, component_index)
+          : Thermochimica::getSpeciesChemicalPotential(phase_index, component_index);
+  value = result.second == 0 ? result.first : 0.0;
+  return result.second == 1 ? 0 : result.second;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::PhaseGibbsEnergyOutput & output,
+                                  OutputEvaluationContext & context,
+                                  Real & value) const
+{
+  const auto phase_index =
+      context.use_indexed_outputs ? output.phase_index : currentPhaseIndex(output.phase);
+  if (phase_index < 0)
+  {
+    value = 0.0;
+    return 0;
+  }
+  const auto result = Thermochimica::getPhaseGibbsEnergy(phase_index);
+  value = output.unit == ThermochimicaConfiguration::GibbsEnergyUnit::JOULES ? result.total
+                                                                             : result.molar;
+  if (result.status == 1)
+  {
+    value = 0.0;
+    return 0;
+  }
+  return result.status;
+}
+
+int
+ThermochimicaData::evaluateOutput(
+    const ThermochimicaConfiguration::PhaseDrivingForceOutput & output,
+    OutputEvaluationContext & context,
+    Real & value) const
+{
+  const auto phase_index =
+      context.use_indexed_outputs ? output.phase_index : currentPhaseIndex(output.phase);
+  if (phase_index < 0)
+  {
+    value = 0.0;
+    return 0;
+  }
+  const auto result = Thermochimica::getPhaseDrivingForce(phase_index);
+  value = result.second == 0 ? result.first : 0.0;
+  return result.second == 1 ? 0 : result.second;
+}
+
+int
+ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::SystemGibbsEnergyOutput &,
+                                  OutputEvaluationContext &,
+                                  Real & value) const
+{
+  const auto result = Thermochimica::getSystemGibbsEnergy();
+  value = result.first;
+  return result.second;
 }
 
 bool

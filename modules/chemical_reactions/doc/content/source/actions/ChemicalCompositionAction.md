@@ -48,6 +48,10 @@ provided.
 | `[ElementPotentials]` | `element` | Element chemical potential |
 | `[VaporPressures]` | `phase`, `species` | Species partial pressure in a gas phase |
 | `[ElementDistribution]` | `phase`, `element` | Element moles or fraction distributed to a phase |
+| `[ChemicalPotentials]` | `phase` and one component selector | Species, quadruplet, or MQM pair endmember potential in J/mol |
+| `[PhaseGibbsEnergies]` | `phase` | Phase Gibbs energy in J or J/mol |
+| `[PhaseDrivingForces]` | `phase` | Phase driving force in J/mol-atoms |
+| `[SystemGibbsEnergies]` | None | Integral system Gibbs energy in J |
 
 The `unit` parameter in `[Phases]` and `[Species]` selects `moles` or `mole_fraction`. A phase mole
 fraction is the phase moles divided by the total moles in all phases. A species mole fraction is the
@@ -57,11 +61,30 @@ For `[ElementDistribution]`, `unit = moles` reports the moles of the selected el
 while `unit = fraction` reports the fraction of that element distributed to the phase. The latter is
 the element moles in the selected phase divided by the element moles summed over all phases.
 
+Each `[ChemicalPotentials]` leaf requires exactly one of `species`, `quadruplet`, `endmember`, or
+`pair`. Use `species` for a conventional solution phase and `quadruplet` for an MQM phase. The
+`endmember` and `pair` selectors are equivalent for an MQM phase and report the stoichiometric
+potential obtained from the system element potentials. This is not an independently minimized
+partial chemical potential for the pair. All chemical potentials are reported in J/mol.
+
+The `unit` parameter in `[PhaseGibbsEnergies]` selects `joules` or `joules_per_mole`. Phase Gibbs
+energy is reported only for a stable phase; an absent phase has a value of zero. A
+`[PhaseDrivingForces]` output is reported in J/mol-atoms. A negative driving force indicates that
+formation of the phase is favorable, while a stable phase has a value close to zero. Each leaf in
+`[SystemGibbsEnergies]` reports the integral Gibbs energy of the complete system in joules and does
+not require an additional selector.
+
 The following example creates output variables including `hcp_amount`, `bcc_phase_fraction`,
 `hcp_phase_fraction`, `hcp_mo_fraction`, `hcp_mo_moles`, `mo_chemical_potential`,
-`mo_vapor_pressure`, `hcp_mo_element_amount`, and element distribution fractions:
+`mo_vapor_pressure`, `hcp_mo_element_amount`, chemical potentials, phase and system Gibbs
+energies, phase driving forces, and element distribution fractions:
 
 !listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
+
+The following example selects an MQM quadruplet chemical potential and the stoichiometric
+potential of the `Fe2O3` pair endmember:
+
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_mqm.i block=ChemicalComposition/thermo/Outputs/ChemicalPotentials
 
 !alert note
 Element and output variable names must be unique and must not also be declared in `[Variables]` or
@@ -101,8 +124,9 @@ The [!param](/ChemicalComposition/warm_start) controls the initial guess for eac
 
 ## Example Input Syntax
 
-The following example requests phase amounts, species concentrations, element potentials, vapor
-pressures, and element amounts in phases with typed output blocks:
+The following example requests phase amounts, species concentrations, element and species
+potentials, vapor pressures, phase and system Gibbs energies, phase driving forces, and element
+amounts in phases with typed output blocks:
 
 !listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
 

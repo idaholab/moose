@@ -23,6 +23,18 @@ registerMooseAction("ChemicalReactionsApp",
 registerMooseAction("ChemicalReactionsApp",
                     ThermochimicaElementDistributionOutputAction,
                     "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaChemicalPotentialOutputAction,
+                    "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaPhaseGibbsEnergyOutputAction,
+                    "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaPhaseDrivingForceOutputAction,
+                    "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaSystemGibbsEnergyOutputAction,
+                    "setup_chemical_composition");
 
 InputParameters
 ThermochimicaOutputAction::validParams()
@@ -175,4 +187,116 @@ ThermochimicaElementDistributionOutputAction::request() const
                         : ThermochimicaConfiguration::DistributionUnit::FRACTION;
   return ThermochimicaElementDistributionRequest{
       _variable, getParam<std::string>("phase"), getParam<std::string>("element"), unit};
+}
+
+InputParameters
+ThermochimicaChemicalPotentialOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription(
+      "Selects the chemical potential of a species or MQM thermodynamic component.");
+  params.addRequiredParam<std::string>("phase", "Phase containing the selected component");
+  params.addParam<std::string>("species", "Conventional solution species");
+  params.addParam<std::string>("quadruplet", "MQM quadruplet");
+  params.addParam<std::string>("endmember", "MQM pair endmember");
+  params.addParam<std::string>("pair", "MQM pair, treated as its stoichiometric endmember");
+  params.addParamNamesToGroup("species quadruplet endmember pair", "Component selection");
+  return params;
+}
+
+ThermochimicaChemicalPotentialOutputAction::ThermochimicaChemicalPotentialOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaChemicalPotentialOutputAction::request() const
+{
+  std::vector<std::string> selections;
+  for (const auto parameter : {"species", "quadruplet", "endmember", "pair"})
+    if (isParamValid(parameter))
+      selections.emplace_back(parameter);
+  if (selections.size() != 1)
+    paramError("phase",
+               "Exactly one of species, quadruplet, endmember, or pair must be specified.");
+
+  const auto & parameter = selections.front();
+  ThermochimicaConfiguration::ChemicalPotentialKind kind;
+  if (parameter == "species")
+    kind = ThermochimicaConfiguration::ChemicalPotentialKind::SPECIES;
+  else if (parameter == "quadruplet")
+    kind = ThermochimicaConfiguration::ChemicalPotentialKind::QUADRUPLET;
+  else
+    kind = ThermochimicaConfiguration::ChemicalPotentialKind::ENDMEMBER;
+  return ThermochimicaChemicalPotentialRequest{
+      _variable, getParam<std::string>("phase"), getParam<std::string>(parameter), parameter, kind};
+}
+
+InputParameters
+ThermochimicaPhaseGibbsEnergyOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription("Selects the total or molar Gibbs energy of a phase.");
+  params.addRequiredParam<std::string>("phase", "Phase whose Gibbs energy is output");
+  params.addParam<MooseEnum>("unit",
+                             MooseEnum("joules joules_per_mole", "joules"),
+                             "Unit used for this phase Gibbs energy output");
+  return params;
+}
+
+ThermochimicaPhaseGibbsEnergyOutputAction::ThermochimicaPhaseGibbsEnergyOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaPhaseGibbsEnergyOutputAction::request() const
+{
+  const auto unit = getParam<MooseEnum>("unit") == "joules"
+                        ? ThermochimicaConfiguration::GibbsEnergyUnit::JOULES
+                        : ThermochimicaConfiguration::GibbsEnergyUnit::JOULES_PER_MOLE;
+  return ThermochimicaPhaseGibbsEnergyRequest{_variable, getParam<std::string>("phase"), unit};
+}
+
+InputParameters
+ThermochimicaPhaseDrivingForceOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription("Selects a phase driving force in J/mol-atoms.");
+  params.addRequiredParam<std::string>("phase", "Phase whose driving force is output");
+  return params;
+}
+
+ThermochimicaPhaseDrivingForceOutputAction::ThermochimicaPhaseDrivingForceOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaPhaseDrivingForceOutputAction::request() const
+{
+  return ThermochimicaPhaseDrivingForceRequest{_variable, getParam<std::string>("phase")};
+}
+
+InputParameters
+ThermochimicaSystemGibbsEnergyOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription("Selects the integral system Gibbs energy in joules.");
+  return params;
+}
+
+ThermochimicaSystemGibbsEnergyOutputAction::ThermochimicaSystemGibbsEnergyOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaSystemGibbsEnergyOutputAction::request() const
+{
+  return ThermochimicaSystemGibbsEnergyRequest{_variable};
 }

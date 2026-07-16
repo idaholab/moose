@@ -49,11 +49,42 @@ struct ThermochimicaElementDistributionRequest
   ThermochimicaConfiguration::DistributionUnit unit;
 };
 
+struct ThermochimicaChemicalPotentialRequest
+{
+  VariableName variable;
+  std::string phase;
+  std::string component;
+  std::string component_parameter;
+  ThermochimicaConfiguration::ChemicalPotentialKind kind;
+};
+
+struct ThermochimicaPhaseGibbsEnergyRequest
+{
+  VariableName variable;
+  std::string phase;
+  ThermochimicaConfiguration::GibbsEnergyUnit unit;
+};
+
+struct ThermochimicaPhaseDrivingForceRequest
+{
+  VariableName variable;
+  std::string phase;
+};
+
+struct ThermochimicaSystemGibbsEnergyRequest
+{
+  VariableName variable;
+};
+
 using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
                                                 ThermochimicaSpeciesRequest,
                                                 ThermochimicaElementPotentialRequest,
                                                 ThermochimicaVaporPressureRequest,
-                                                ThermochimicaElementDistributionRequest>;
+                                                ThermochimicaElementDistributionRequest,
+                                                ThermochimicaChemicalPotentialRequest,
+                                                ThermochimicaPhaseGibbsEnergyRequest,
+                                                ThermochimicaPhaseDrivingForceRequest,
+                                                ThermochimicaSystemGibbsEnergyRequest>;
 
 /** Base class for typed Thermochimica output selection Actions. */
 class ThermochimicaOutputAction : public Action
@@ -118,6 +149,42 @@ class ThermochimicaElementDistributionOutputAction : public ThermochimicaOutputA
 public:
   static InputParameters validParams();
   ThermochimicaElementDistributionOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaChemicalPotentialOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaChemicalPotentialOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaPhaseGibbsEnergyOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaPhaseGibbsEnergyOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaPhaseDrivingForceOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaPhaseDrivingForceOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaSystemGibbsEnergyOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaSystemGibbsEnergyOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };

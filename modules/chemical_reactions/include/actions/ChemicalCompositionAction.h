@@ -37,8 +37,10 @@ protected:
                                     const std::vector<std::vector<std::string>> & database_species);
 
   /** Resolve typed child output Actions into indexed output descriptors. */
-  void buildTypedOutputDescriptors(const std::vector<std::string> & database_phases,
-                                   const std::vector<std::vector<std::string>> & database_species);
+  void buildTypedOutputDescriptors(
+      const std::vector<std::string> & database_phases,
+      const std::vector<std::vector<std::string>> & database_species,
+      const std::vector<std::vector<std::string>> & database_thermodynamic_species);
 
   int phaseSystemIndex(const std::string & phase,
                        const InputParameters & source,
@@ -77,6 +79,27 @@ protected:
                         const std::string & phase_parameter,
                         const std::string & element_parameter,
                         const std::vector<std::string> & database_phases);
+  void
+  addOutputRequest(const ThermochimicaChemicalPotentialRequest & request,
+                   const InputParameters & source,
+                   const std::string & origin,
+                   const std::string & phase_parameter,
+                   const std::vector<std::string> & database_phases,
+                   const std::vector<std::vector<std::string>> & database_species,
+                   const std::vector<std::vector<std::string>> & database_thermodynamic_species);
+  void addOutputRequest(const ThermochimicaPhaseGibbsEnergyRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::vector<std::string> & database_phases);
+  void addOutputRequest(const ThermochimicaPhaseDrivingForceRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::vector<std::string> & database_phases);
+  void addOutputRequest(const ThermochimicaSystemGibbsEnergyRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin);
 
   /** Validate and append an output descriptor produced by any input syntax. */
   void addOutputDescriptor(ThermochimicaConfiguration::OutputDescriptor output,
