@@ -28,30 +28,30 @@
    - WITHOUT_PYTORCH: Whether to not build pytorch and neml2 (truthy, default: false)
 -#}
 
-{#- Set defaults for any variables not provided                                               -#}
-{%- set PROFILING         = PROFILING | default(false) %}
+{#- Set defaults for any variables not provided                #}
+{%- set PROFILING         = PROFILING | default(false)         %}
 {%- set SKIP_FINGERPRINTS = SKIP_FINGERPRINTS | default(false) %}
-{%- set WITH_MFEM         = WITH_MFEM | default(true) %}
-{%- set WITH_FMU          = WITH_FMU | default(false) %}
-{%- set WITHOUT_PYTORCH   = WITHOUT_PYTORCH | default(false) %}
+{%- set WITH_MFEM         = WITH_MFEM | default(true)          %}
+{%- set WITH_FMU          = WITH_FMU | default(false)          %}
+{%- set WITHOUT_PYTORCH   = WITHOUT_PYTORCH | default(false)   %}
 
-{#- Installation locations and build scripts for third-party dependencies                     -#}
-{%- set CODE_SERVER_DIR      = '/opt/code-server' -%}
-{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
-{%- set CONDUIT_DIR          = '/opt/conduit' -%}
-{%- set FILES_DIR            = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
-{%- set GPERF_DIR            = '/opt/gperftools' -%}
-{%- set LIBTORCH_DIR         = '/opt/libtorch' -%}
-{%- set MFEM_BUILD_SCRIPT    = 'update_and_rebuild_mfem.sh' -%}
-{%- set MFEM_DIR             = '/opt/mfem' -%}
-{%- set NEML2_BUILD_SCRIPT   = 'update_and_rebuild_neml2.sh' -%}
-{%- set NEML2_DIR            = '/opt/neml2' -%}
-{%- set PPROF_DIR            = '/opt/pprof' -%}
-{%- set PYTHON_DIR           = '/opt/python' -%}
-{%- set ROOT_BUILD_DIR       = '/root/build' -%}
-{%- set UV_DIR               = '/opt/uv' -%}
-{%- set WASP_BUILD_SCRIPT    = 'update_and_rebuild_wasp.sh' -%}
-{%- set WASP_DIR             = '/opt/wasp' -%}
+{#- Installation locations and build scripts for third-party dependencies -#}
+{%- set CODE_SERVER_DIR      = '/opt/code-server'                         -%}
+{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh'            -%}
+{%- set CONDUIT_DIR          = '/opt/conduit'                             -%}
+{%- set FILES_DIR            = MOOSE_DIR + '/apptainer/files/moose-dev'   -%}
+{%- set GPERF_DIR            = '/opt/gperftools'                          -%}
+{%- set LIBTORCH_DIR         = '/opt/libtorch'                            -%}
+{%- set MFEM_BUILD_SCRIPT    = 'update_and_rebuild_mfem.sh'               -%}
+{%- set MFEM_DIR             = '/opt/mfem'                                -%}
+{%- set NEML2_BUILD_SCRIPT   = 'update_and_rebuild_neml2.sh'              -%}
+{%- set NEML2_DIR            = '/opt/neml2'                               -%}
+{%- set PPROF_DIR            = '/opt/pprof'                               -%}
+{%- set PYTHON_DIR           = '/opt/python'                              -%}
+{%- set ROOT_BUILD_DIR       = '/root/build'                              -%}
+{%- set UV_DIR               = '/opt/uv'                                  -%}
+{%- set WASP_BUILD_SCRIPT    = 'update_and_rebuild_wasp.sh'               -%}
+{%- set WASP_DIR             = '/opt/wasp'                                -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
