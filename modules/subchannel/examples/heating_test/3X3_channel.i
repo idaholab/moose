@@ -33,7 +33,6 @@ n_cells = 20
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
   P_tol = 1e-6
   T_tol = 1e-6
   full_output = true

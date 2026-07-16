@@ -133,7 +133,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   solve = false
 
   # Solver parameters
-  n_blocks = 10
   implicit = false
   segregated = true
   staggered_pressure = false
