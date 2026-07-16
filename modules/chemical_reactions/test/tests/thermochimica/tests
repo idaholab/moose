@@ -442,7 +442,53 @@
     csvdiff = typed_mqm_out.csv
     design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#22711'
-    requirement = 'Typed output blocks shall support modified quasichemical model species, quadruplet chemical potentials, and pair endmember stoichiometric potentials'
+    requirement = 'Typed output blocks shall support modified quasichemical model species, thermodynamic component potentials, and constituent fractions for MQM and sublattice phases.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_batch_one]
+    type = CSVDiff
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/batch_size=1'
+    csvdiff = typed_mqm_out.csv
+    rel_err = 1e-8
+    prereq = typed_mqm_species
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction outputs shall be independent of the configured batch size.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_invalid_sublattice]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/sublattice=3'
+    expect_err = "sublattice: Phase 'SlagBsoln' has 2 constituent sublattice(s)."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject an invalid phase sublattice.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_invalid_name]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/constituent=invalid'
+    expect_err = "constituent: Constituent 'invalid' was not found on sublattice 1 of phase 'SlagBsoln'."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject constituents absent from the selected sublattice.'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_constituent_unsupported_phase]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/phase=gas_ideal'
+    expect_err = "phase: Phase 'gas_ideal' does not provide constituent sublattice data."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed constituent-fraction output blocks shall reject phase models without constituent sublattices.'
     capabilities = 'thermochimica'
   []
 

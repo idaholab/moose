@@ -886,6 +886,45 @@ ThermochimicaData::evaluateOutput(const ThermochimicaConfiguration::SystemProper
   return 0;
 }
 
+int
+ThermochimicaData::evaluateOutput(
+    const ThermochimicaConfiguration::ConstituentFractionOutput & output,
+    OutputEvaluationContext & context,
+    Real & value) const
+{
+  auto phase_index = output.phase_index;
+  auto constituent_index = output.constituent_index;
+  if (!context.use_indexed_outputs)
+  {
+    phase_index = currentPhaseIndex(output.phase);
+    if (phase_index < 0)
+    {
+      value = 0.0;
+      return 0;
+    }
+
+    const auto constituents = Thermochimica::getConstituentsInPhase(phase_index);
+    if (output.sublattice_index >= static_cast<int>(constituents.size()))
+    {
+      value = 0.0;
+      return 0;
+    }
+    const auto & sublattice = constituents[output.sublattice_index];
+    const auto constituent = std::find(sublattice.begin(), sublattice.end(), output.constituent);
+    if (constituent == sublattice.end())
+    {
+      value = 0.0;
+      return 0;
+    }
+    constituent_index = static_cast<int>(std::distance(sublattice.begin(), constituent));
+  }
+
+  const auto result = Thermochimica::getConstituentFraction(
+      phase_index, output.sublattice_index, constituent_index);
+  value = result.second == 0 ? result.first : 0.0;
+  return result.second == 1 ? 0 : result.second;
+}
+
 bool
 ThermochimicaData::loadPreviousState(const dof_id_type id)
 {

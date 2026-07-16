@@ -597,6 +597,59 @@ ChemicalCompositionAction::addOutputRequest(const ThermochimicaSystemPropertyReq
 }
 
 void
+ChemicalCompositionAction::addOutputRequest(
+    const ThermochimicaConstituentFractionRequest & request,
+    const InputParameters & source,
+    const std::string & origin,
+    const std::string & phase_parameter,
+    const std::string & sublattice_parameter,
+    const std::string & constituent_parameter,
+    const std::vector<std::string> & database_phases)
+{
+  const auto phase_index =
+      phaseSystemIndex(request.phase, source, phase_parameter, database_phases);
+  const auto constituents = Thermochimica::getConstituentsInPhase(phase_index);
+  if (constituents.empty())
+    source.paramError(phase_parameter,
+                      "Phase '",
+                      request.phase,
+                      "' does not provide constituent sublattice data.");
+
+  const auto sublattice_index = request.sublattice - 1;
+  if (sublattice_index >= constituents.size())
+    source.paramError(sublattice_parameter,
+                      "Phase '",
+                      request.phase,
+                      "' has ",
+                      constituents.size(),
+                      " constituent sublattice(s).");
+
+  const auto & sublattice = constituents[sublattice_index];
+  const auto constituent = std::find(sublattice.begin(), sublattice.end(), request.constituent);
+  if (constituent == sublattice.end())
+    source.paramError(constituent_parameter,
+                      "Constituent '",
+                      request.constituent,
+                      "' was not found on sublattice ",
+                      request.sublattice,
+                      " of phase '",
+                      request.phase,
+                      "'.");
+
+  addOutputDescriptor(
+      ThermochimicaConfiguration::ConstituentFractionOutput{
+          request.variable,
+          request.phase,
+          request.constituent,
+          phase_index,
+          static_cast<int>(sublattice_index),
+          static_cast<int>(std::distance(sublattice.begin(), constituent))},
+      source,
+      origin,
+      "variable");
+}
+
+void
 ChemicalCompositionAction::buildLegacyOutputDescriptors(
     const std::vector<std::string> & database_phases,
     const std::vector<std::vector<std::string>> & database_species)
@@ -789,6 +842,14 @@ ChemicalCompositionAction::buildTypedOutputDescriptors(
             addOutputRequest(request, action->parameters(), action->origin());
           else if constexpr (std::is_same_v<Request, ThermochimicaSystemPropertyRequest>)
             addOutputRequest(request, action->parameters(), action->origin());
+          else if constexpr (std::is_same_v<Request, ThermochimicaConstituentFractionRequest>)
+            addOutputRequest(request,
+                             action->parameters(),
+                             action->origin(),
+                             "phase",
+                             "sublattice",
+                             "constituent",
+                             database_phases);
         },
         action->request());
 }

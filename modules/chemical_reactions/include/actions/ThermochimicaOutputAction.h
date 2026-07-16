@@ -82,6 +82,14 @@ struct ThermochimicaSystemPropertyRequest
   ThermochimicaConfiguration::SystemPropertyKind property;
 };
 
+struct ThermochimicaConstituentFractionRequest
+{
+  VariableName variable;
+  std::string phase;
+  unsigned int sublattice;
+  std::string constituent;
+};
+
 using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
                                                 ThermochimicaSpeciesRequest,
                                                 ThermochimicaElementPotentialRequest,
@@ -91,7 +99,8 @@ using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
                                                 ThermochimicaPhaseGibbsEnergyRequest,
                                                 ThermochimicaPhaseDrivingForceRequest,
                                                 ThermochimicaSystemGibbsEnergyRequest,
-                                                ThermochimicaSystemPropertyRequest>;
+                                                ThermochimicaSystemPropertyRequest,
+                                                ThermochimicaConstituentFractionRequest>;
 
 /** Base class for typed Thermochimica output selection Actions. */
 class ThermochimicaOutputAction : public Action
@@ -201,6 +210,15 @@ class ThermochimicaSystemPropertyOutputAction : public ThermochimicaOutputAction
 public:
   static InputParameters validParams();
   ThermochimicaSystemPropertyOutputAction(const InputParameters & parameters);
+
+  virtual ThermochimicaOutputRequest request() const override;
+};
+
+class ThermochimicaConstituentFractionOutputAction : public ThermochimicaOutputAction
+{
+public:
+  static InputParameters validParams();
+  ThermochimicaConstituentFractionOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };
