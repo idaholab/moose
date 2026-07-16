@@ -463,7 +463,7 @@
     type = RunException
     input = typed_mqm.i
     cli_args = 'ChemicalComposition/thermo/Outputs/ConstituentFractions/slag_fe3_fraction/sublattice=3'
-    expect_err = "sublattice: Phase 'SlagBsoln' has 2 constituent sublattice(s)."
+    expect_err = "sublattice: Phase 'SlagBsoln' has 2 constituent sublattice\(s\)\."
     design = ChemicalCompositionAction.md
     issues = '#22711'
     requirement = 'Typed constituent-fraction output blocks shall reject an invalid phase sublattice.'
