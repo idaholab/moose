@@ -12,9 +12,7 @@
 #pragma once
 
 #include "MooseMesh.h"
-
-// forward declare
-class MFEMPeriodicByVector;
+#include "MFEMTopology.h"
 
 /**
  * Abstract MooseMesh base for all MFEM-backed mesh types (MFEMFileMesh,
@@ -23,7 +21,7 @@ class MFEMPeriodicByVector;
  * Subclasses implement buildSerialMFEMMesh() to supply the serial mesh;
  * buildMesh() applies the common operations using the template-method pattern.
  */
-class MFEMMesh : public MooseMesh
+class MFEMMesh : public MooseMesh, public MFEMTopology
 {
 public:
   static InputParameters validParams();
@@ -47,10 +45,6 @@ public:
   void init() override;
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
-
-  void registerPeriodicBCs(MFEMPeriodicByVector &);
-
-  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh &);
 
   /**
    * Returns true if mesh displacement is required.
@@ -106,9 +100,6 @@ protected:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
-
-  bool _periodic = false;
-  std::vector<mfem::Vector> _translations;
 };
 
 inline const mfem::ParMesh &

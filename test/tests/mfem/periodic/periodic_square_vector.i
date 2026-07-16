@@ -1,15 +1,8 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.e
-  dim = 2
-[]
-
-[MFEMPeriodic]
-  [left-right]
-    type = MFEMPeriodicByVector
-    translation_x = "1. 0."
-    translation_y = "0. 0."
-  []
+  translation_x = "1. 0."
+  translation_y = "0. 0."
 []
 
 [Problem]
