@@ -424,11 +424,34 @@
   []
 
   [typed_mqm_species]
-    type = RunApp
+    type = CSVDiff
     input = typed_mqm.i
+    csvdiff = typed_mqm_out.csv
     design = 'ChemicalCompositionAction.md ThermochimicaData.md'
     issues = '#22711'
-    requirement = 'Typed species output blocks shall support modified quasichemical model species'
+    requirement = 'Typed output blocks shall support modified quasichemical model species, quadruplet chemical potentials, and pair endmember stoichiometric potentials'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_chemical_potential_multiple_components]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ChemicalPotentials/slag_endmember_potential/species=Fe2O3'
+    expect_err = 'Exactly one of species, quadruplet, endmember, or pair must be specified.'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed chemical-potential output blocks shall require exactly one thermodynamic component selector'
+    capabilities = 'thermochimica'
+  []
+
+  [typed_chemical_potential_wrong_phase_model]
+    type = RunException
+    input = typed_mqm.i
+    cli_args = 'ChemicalComposition/thermo/Outputs/ChemicalPotentials/slag_quadruplet_potential/phase=gas_ideal'
+    expect_err = "quadruplet: The 'quadruplet' selector is only valid for an MQM phase."
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'Typed chemical-potential output blocks shall reject MQM component selectors on conventional solution phases'
     capabilities = 'thermochimica'
   []
 

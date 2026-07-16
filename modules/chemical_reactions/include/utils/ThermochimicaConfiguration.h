@@ -42,6 +42,19 @@ struct ThermochimicaConfiguration
     FRACTION
   };
 
+  enum class ChemicalPotentialKind
+  {
+    SPECIES,
+    QUADRUPLET,
+    ENDMEMBER
+  };
+
+  enum class GibbsEnergyUnit
+  {
+    JOULES,
+    JOULES_PER_MOLE
+  };
+
   struct PhaseOutput
   {
     VariableName variable;
@@ -87,11 +100,45 @@ struct ThermochimicaConfiguration
     DistributionUnit unit = DistributionUnit::MOLES;
   };
 
+  struct ChemicalPotentialOutput
+  {
+    VariableName variable;
+    std::string phase;
+    std::string component;
+    int phase_index = -1;
+    int component_index = -1;
+    ChemicalPotentialKind kind = ChemicalPotentialKind::SPECIES;
+  };
+
+  struct PhaseGibbsEnergyOutput
+  {
+    VariableName variable;
+    std::string phase;
+    int phase_index = -1;
+    GibbsEnergyUnit unit = GibbsEnergyUnit::JOULES;
+  };
+
+  struct PhaseDrivingForceOutput
+  {
+    VariableName variable;
+    std::string phase;
+    int phase_index = -1;
+  };
+
+  struct SystemGibbsEnergyOutput
+  {
+    VariableName variable;
+  };
+
   using OutputDescriptor = std::variant<PhaseOutput,
                                         SpeciesOutput,
                                         ElementPotentialOutput,
                                         VaporPressureOutput,
-                                        ElementDistributionOutput>;
+                                        ElementDistributionOutput,
+                                        ChemicalPotentialOutput,
+                                        PhaseGibbsEnergyOutput,
+                                        PhaseDrivingForceOutput,
+                                        SystemGibbsEnergyOutput>;
 
   FileName database;
   std::string temperature_unit;

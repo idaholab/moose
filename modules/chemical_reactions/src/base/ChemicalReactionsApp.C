@@ -57,6 +57,14 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
                  "ChemicalComposition/*/Outputs/VaporPressures/*");
   registerSyntax("ThermochimicaElementDistributionOutputAction",
                  "ChemicalComposition/*/Outputs/ElementDistribution/*");
+  registerSyntax("ThermochimicaChemicalPotentialOutputAction",
+                 "ChemicalComposition/*/Outputs/ChemicalPotentials/*");
+  registerSyntax("ThermochimicaPhaseGibbsEnergyOutputAction",
+                 "ChemicalComposition/*/Outputs/PhaseGibbsEnergies/*");
+  registerSyntax("ThermochimicaPhaseDrivingForceOutputAction",
+                 "ChemicalComposition/*/Outputs/PhaseDrivingForces/*");
+  registerSyntax("ThermochimicaSystemGibbsEnergyOutputAction",
+                 "ChemicalComposition/*/Outputs/SystemGibbsEnergies/*");
   registerTask("setup_chemical_composition", false);
   addTaskDependency("setup_chemical_composition", "meta_action");
   addTaskDependency("add_variable", "setup_chemical_composition");

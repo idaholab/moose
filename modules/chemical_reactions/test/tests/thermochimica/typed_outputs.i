@@ -69,6 +69,33 @@
           unit = fraction
         []
       []
+      [ChemicalPotentials]
+        [hcp_mo_species_potential]
+          phase = HCPN
+          species = Mo
+        []
+      []
+      [PhaseGibbsEnergies]
+        [hcp_gibbs_energy]
+          phase = HCPN
+        []
+        [hcp_molar_gibbs_energy]
+          phase = HCPN
+          unit = joules_per_mole
+        []
+      []
+      [PhaseDrivingForces]
+        [bcc_driving_force]
+          phase = BCCN
+        []
+        [hcp_driving_force]
+          phase = HCPN
+        []
+      []
+      [SystemGibbsEnergies]
+        [system_gibbs_energy]
+        []
+      []
     []
   []
 []
@@ -143,6 +170,36 @@
   [mo_in_hcp_fraction]
     type = NodalVariableValue
     variable = mo_in_hcp_fraction
+    nodeid = 1
+  []
+  [hcp_mo_species_potential]
+    type = NodalVariableValue
+    variable = hcp_mo_species_potential
+    nodeid = 1
+  []
+  [hcp_gibbs_energy]
+    type = NodalVariableValue
+    variable = hcp_gibbs_energy
+    nodeid = 1
+  []
+  [hcp_molar_gibbs_energy]
+    type = NodalVariableValue
+    variable = hcp_molar_gibbs_energy
+    nodeid = 1
+  []
+  [bcc_driving_force]
+    type = NodalVariableValue
+    variable = bcc_driving_force
+    nodeid = 1
+  []
+  [hcp_driving_force]
+    type = NodalVariableValue
+    variable = hcp_driving_force
+    nodeid = 1
+  []
+  [system_gibbs_energy]
+    type = NodalVariableValue
+    variable = system_gibbs_energy
     nodeid = 1
   []
 []
