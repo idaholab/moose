@@ -21,6 +21,28 @@ The [!param](/ChemicalComposition/evaluation_location) determines where equilibr
 The default, `nodal`, creates Lagrange auxiliary variables. The `elemental` option creates
 elemental monomial auxiliary variables and is suitable for finite-volume calculations.
 
+## Phase Selection
+
+The [!param](/ChemicalComposition/excluded_phases) parameter removes named phases from every
+equilibrium calculation performed by the action. Alternatively,
+[!param](/ChemicalComposition/included_phases) retains only the named phases and removes every
+other phase. The two parameters are mutually exclusive, and every phase name is validated against
+the thermodynamic database during setup.
+
+Phase selection is useful for evaluating constrained or metastable systems. For example, retaining
+one phase and requesting its phase or system Gibbs energy provides a free-energy quantity that can
+be consumed by a phase-field model:
+
+!listing modules/chemical_reactions/test/tests/thermochimica/phase_exclusion.i block=ChemicalComposition
+
+Outputs may only select phases that remain in the configured system. An output request for an
+excluded phase is rejected during setup.
+
+!alert note title=Fixed Phase Selection
+The phase-selection list is fixed for a `ChemicalComposition` subblock throughout the simulation.
+Thermochemical outputs can be coupled to phase-field equations, but the selected phase set cannot
+currently be changed independently at each node or element by a phase-field variable.
+
 ## Element Variables and Initialization
 
 The [!param](/ChemicalComposition/elements) parameter lists the chemical elements used in the

@@ -493,7 +493,18 @@ ThermochimicaData::initializeThermochimica()
   Thermochimica::checkMass(_configuration->composition_unit);
   Thermochimica::setUnitMass(_configuration->composition_unit);
   if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+  {
     _header->worker_status = info;
+    return;
+  }
+
+  int selection_info = 0;
+  if (_configuration->phase_selection == ThermochimicaConfiguration::PhaseSelection::INCLUDE)
+    selection_info = Thermochimica::setIncludedPhases(_configuration->selected_phases);
+  else
+    selection_info = Thermochimica::setExcludedPhases(_configuration->selected_phases);
+  if (selection_info != 0)
+    _header->worker_status = selection_info;
 #endif
 }
 

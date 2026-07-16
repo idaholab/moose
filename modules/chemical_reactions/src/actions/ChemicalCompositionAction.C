@@ -93,6 +93,10 @@ ChemicalCompositionAction::validParams()
   params.addParam<bool>(
       "report_performance", false, "Report state, batch, warm-start, and worker solve counters");
   params.addParam<FileName>("initial_composition_file", "CSV file containing constant element ICs");
+  params.addParam<std::vector<std::string>>(
+      "excluded_phases", {}, "Thermodynamic phases omitted from every equilibrium calculation");
+  params.addParam<std::vector<std::string>>(
+      "included_phases", {}, "Thermodynamic phases retained while all other phases are omitted");
 
   ExecFlagEnum execute_on = MooseUtils::getDefaultExecFlagEnum();
   execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -216,7 +220,49 @@ ChemicalCompositionAction::initializeConfiguration()
   Thermochimica::setElementMass(0, 0.0);
   for (const auto element_id : config.element_ids)
     Thermochimica::setElementMass(element_id, 1.0);
+  Thermochimica::setExcludedPhases({});
   Thermochimica::setup();
+
+  const auto all_database_phases = Thermochimica::getPhaseNamesSystem();
+  const auto & excluded_phases = getParam<std::vector<std::string>>("excluded_phases");
+  const auto & included_phases = getParam<std::vector<std::string>>("included_phases");
+  if (!excluded_phases.empty() && !included_phases.empty())
+    paramError("excluded_phases", "excluded_phases and included_phases are mutually exclusive.");
+
+  const auto & selected_phases = excluded_phases.empty() ? included_phases : excluded_phases;
+  const std::string selection_parameter = excluded_phases.empty() ? "included_phases"
+                                                                  : "excluded_phases";
+  std::set<std::string> unique_selected_phases;
+  for (const auto & phase : selected_phases)
+  {
+    if (!unique_selected_phases.insert(phase).second)
+      paramError(selection_parameter, "Phase '", phase, "' is listed more than once.");
+    if (std::find(all_database_phases.begin(), all_database_phases.end(), phase) ==
+        all_database_phases.end())
+      paramError(selection_parameter, "Phase '", phase, "' was not found in the database.");
+  }
+
+  if (!selected_phases.empty())
+  {
+    config.selected_phases = selected_phases;
+    config.phase_selection = excluded_phases.empty()
+                                 ? ThermochimicaConfiguration::PhaseSelection::INCLUDE
+                                 : ThermochimicaConfiguration::PhaseSelection::EXCLUDE;
+    Thermochimica::resetThermo();
+    const auto selection_info =
+        excluded_phases.empty() ? Thermochimica::setIncludedPhases(selected_phases)
+                                : Thermochimica::setExcludedPhases(selected_phases);
+    if (selection_info != 0)
+      paramError(selection_parameter,
+                 "Thermochimica rejected the phase selection with status ",
+                 selection_info,
+                 ".");
+    Thermochimica::setup();
+    if (const auto info = Thermochimica::checkInfoThermo(); info != 0)
+      paramError(selection_parameter,
+                 "Thermochimica could not construct the selected phase system. ",
+                 info);
+  }
 
   const auto database_phases = Thermochimica::getPhaseNamesSystem();
   const auto database_species = Thermochimica::getSpeciesSystem();
