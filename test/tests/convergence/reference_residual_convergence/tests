@@ -146,6 +146,24 @@
     expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
     requirement = 'The system shall be able to use the reference residual technique to converge two different nonlinear systems with separate reference residuals for each system.'
   []
+  [split_multi_system_fixed_point_forward]
+    type = Exodiff
+    input = 'split.i'
+    exodiff = 'split_multi_system_fixed_point_forward.e'
+    cli_args = "Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=combined "
+               "Executioner/system_names='first second' Outputs/file_base=split_multi_system_fixed_point_forward"
+    expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
+    requirement = 'The system shall be able to use reference residual convergence objects from a parsed multi-system fixed-point convergence object with solver systems in problem order.'
+  []
+  [split_multi_system_fixed_point_reverse]
+    type = Exodiff
+    input = 'split.i'
+    exodiff = 'split_multi_system_fixed_point_reverse.e'
+    cli_args = "Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=combined "
+               "Executioner/system_names='second first' Outputs/file_base=split_multi_system_fixed_point_reverse"
+    expect_out = 'conv_one: global_L2 Reference Residual check.*(a, b, variable_f).*(c, d).*g.*conv_one: Converged normally.*conv_two: local_L2 Reference Residual check.*verylongvariable_e.*res.*local res/ref.*g.*res.*local res/ref.*conv_two: Converged normally'
+    requirement = 'The system shall be able to use reference residual convergence objects from a parsed multi-system fixed-point convergence object with solver systems in reverse order.'
+  []
   [unscale]
     type = RunApp
     input = 'formatting.i'
