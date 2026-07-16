@@ -25,7 +25,6 @@
 
 struct Ctx
 {
-  int iblock;
   SubChannel1PhaseProblem * schp;
 };
 
@@ -47,8 +46,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 
   LibmeshPetscCallQ(VecRestoreArrayRead(x, &xx));
 
-  libMesh::DenseVector<Real> Wij_residual_vector =
-      cc->schp->residualFunction(cc->iblock, solution_seed);
+  libMesh::DenseVector<Real> Wij_residual_vector = cc->schp->residualFunction(solution_seed);
 
   LibmeshPetscCallQ(VecGetArray(f, &ff));
   for (int i = 0; i < size; i++)
@@ -69,7 +67,6 @@ SubChannel1PhaseProblem::validParams()
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
-  params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addRangeCheckedParam<int>(
       "P_maxit",
@@ -195,7 +192,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _P_out(getPostprocessorValue("P_out")),
     _fp(nullptr),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
-    _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _Wij_old(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij_old")),
     _g_grav(9.81),
@@ -267,7 +263,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _n_channels = _subchannel_mesh.getNumOfChannels();
   // NOTE: The four quantities above are 0 for processor_id != 0
   _z_grid = _subchannel_mesh.getZGrid();
-  _block_size = _n_cells / _n_blocks;
   // Pressure drop (lives on subchannel nodes)
   _DP.resize(_n_channels, _n_cells + 1);
   _DP.zero();
@@ -282,83 +277,83 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
 
   _WijPrime.resize(_n_gaps, _n_cells + 1);
   _WijPrime.zero();
-  _Wij_residual_matrix.resize(_n_gaps, _block_size);
+  _Wij_residual_matrix.resize(_n_gaps, _n_cells);
   _Wij_residual_matrix.zero();
   _converged = true;
 
   // Mass conservation components
-  LibmeshPetscCall(
-      createPetscMatrix(_mc_sumWij_mat, _block_size * _n_channels, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_Wij_vec, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_prod, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_prodp, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _mc_axial_convection_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_mc_axial_convection_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _mc_density_pressure_mat, _block_size * _n_channels, _block_size * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(_mc_sumWij_mat, _n_cells * _n_channels, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_Wij_vec, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_prod, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_prodp, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(_mc_sumWij_mat, _n_channels, _n_gaps));
+  LibmeshPetscCall(createPetscVector(_Wij_vec, _n_gaps));
+  LibmeshPetscCall(createPetscVector(_prod, _n_channels));
+  LibmeshPetscCall(createPetscVector(_prodp, _n_channels));
+  LibmeshPetscCall(createPetscMatrix(_mc_axial_convection_mat, _n_channels, _n_channels));
+  LibmeshPetscCall(createPetscVector(_mc_axial_convection_rhs, _n_channels));
+  LibmeshPetscCall(createPetscMatrix(_mc_density_pressure_mat, _n_channels, _n_channels));
 
   // Axial momentum conservation components
   LibmeshPetscCall(createPetscMatrix(
-      _amc_turbulent_cross_flows_mat, _block_size * _n_gaps, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_turbulent_cross_flows_rhs, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscMatrix(
-      _amc_time_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_time_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _amc_advective_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_advective_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _amc_cross_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_cross_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _amc_friction_force_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_friction_force_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_gravity_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _amc_pressure_force_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_pressure_force_rhs, _block_size * _n_channels));
+      _amc_turbulent_cross_flows_mat, _n_cells * _n_gaps, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_turbulent_cross_flows_rhs, _n_cells * _n_gaps));
   LibmeshPetscCall(
-      createPetscMatrix(_amc_sys_mdot_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_amc_sys_mdot_rhs, _block_size * _n_channels));
+      createPetscMatrix(_amc_time_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_time_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(
+      _amc_advective_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_advective_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_amc_cross_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_cross_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_amc_friction_force_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_friction_force_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_gravity_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_amc_pressure_force_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_pressure_force_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_amc_sys_mdot_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_amc_sys_mdot_rhs, _n_cells * _n_channels));
 
   // Lateral momentum conservation components
   LibmeshPetscCall(
-      createPetscMatrix(_cmc_time_derivative_mat, _block_size * _n_gaps, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_time_derivative_rhs, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscMatrix(
-      _cmc_advective_derivative_mat, _block_size * _n_gaps, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_advective_derivative_rhs, _block_size * _n_gaps));
+      createPetscMatrix(_cmc_time_derivative_mat, _n_cells * _n_gaps, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_cmc_time_derivative_rhs, _n_cells * _n_gaps));
   LibmeshPetscCall(
-      createPetscMatrix(_cmc_friction_force_mat, _block_size * _n_gaps, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_friction_force_rhs, _block_size * _n_gaps));
+      createPetscMatrix(_cmc_advective_derivative_mat, _n_cells * _n_gaps, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_cmc_advective_derivative_rhs, _n_cells * _n_gaps));
   LibmeshPetscCall(
-      createPetscMatrix(_cmc_pressure_force_mat, _block_size * _n_gaps, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_cmc_pressure_force_rhs, _block_size * _n_gaps));
+      createPetscMatrix(_cmc_friction_force_mat, _n_cells * _n_gaps, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_cmc_friction_force_rhs, _n_cells * _n_gaps));
   LibmeshPetscCall(
-      createPetscMatrix(_cmc_sys_Wij_mat, _block_size * _n_gaps, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_sys_Wij_rhs, _block_size * _n_gaps));
+      createPetscMatrix(_cmc_pressure_force_mat, _n_cells * _n_gaps, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_cmc_pressure_force_rhs, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscMatrix(_cmc_sys_Wij_mat, _n_cells * _n_gaps, _n_cells * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_cmc_sys_Wij_rhs, _n_cells * _n_gaps));
 
   // Energy conservation components
-  LibmeshPetscCall(createPetscMatrix(
-      _hc_time_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_time_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _hc_advective_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_advective_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(
-      _hc_cross_derivative_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_cross_derivative_rhs, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_added_heat_rhs, _block_size * _n_channels));
   LibmeshPetscCall(
-      createPetscMatrix(_hc_sys_h_mat, _block_size * _n_channels, _block_size * _n_channels));
-  LibmeshPetscCall(createPetscVector(_hc_sys_h_rhs, _block_size * _n_channels));
+      createPetscMatrix(_hc_time_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_time_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscMatrix(
+      _hc_advective_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_advective_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_hc_cross_derivative_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_cross_derivative_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_added_heat_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_hc_sys_h_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_hc_sys_h_rhs, _n_cells * _n_channels));
 
-  if ((_n_blocks == _n_cells) && _implicit_bool)
+  if ((_n_cells == 1) && _implicit_bool)
   {
     mooseError(name(),
-               ": When implicit number of blocks can't be equal to number of cells. This will "
-               "cause problems with the subchannel interpolation scheme.");
+               ": When implicit, the mesh must have more than one axial cell. A one-cell mesh "
+               "causes problems with the subchannel interpolation scheme.");
   }
 }
 
@@ -547,12 +542,12 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
 }
 
 void
-SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
+SubChannel1PhaseProblem::computeWijFromSolve()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
-  // Initial guess, port crossflow of block (iblock) into a vector that will act as my initial guess
-  libMesh::DenseVector<Real> solution_seed(_n_gaps * _block_size, 0.0);
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
+  // Initial guess: port crossflow into a vector that will act as my initial guess.
+  libMesh::DenseVector<Real> solution_seed(_n_gaps * _n_cells, 0.0);
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
@@ -564,8 +559,8 @@ SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
 
   // Solving the combined lateral momentum equation for Wij using a PETSc solver and update vector
   // root
-  libMesh::DenseVector<Real> root(_n_gaps * _block_size, 0.0);
-  LibmeshPetscCall(petscSnesSolver(iblock, solution_seed, root));
+  libMesh::DenseVector<Real> root(_n_gaps * _n_cells, 0.0);
+  LibmeshPetscCall(petscSnesSolver(solution_seed, root));
 
   // Assign the solution to the cross-flow matrix
   int i = 0;
@@ -580,10 +575,10 @@ SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeSumWij(int iblock)
+SubChannel1PhaseProblem::computeSumWij()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   // Add to solution vector if explicit
   if (!_implicit_bool)
   {
@@ -646,10 +641,10 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeMdot(int iblock)
+SubChannel1PhaseProblem::computeMdot()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   if (!_implicit_bool)
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -789,10 +784,10 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeDP(int iblock)
+SubChannel1PhaseProblem::computeDP()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   if (!_implicit_bool)
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -1275,10 +1270,10 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeP(int iblock)
+SubChannel1PhaseProblem::computeP()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   if (!_implicit_bool)
   {
     if (!_staggered_pressure_bool)
@@ -1470,8 +1465,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
       LibmeshPetscCall(MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
       LibmeshPetscCall(MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
       if (_verbose_subchannel)
-        _console << "Block: " << iblock << " - Axial momentum pressure force matrix assembled"
-                 << std::endl;
+        _console << "Axial momentum pressure force matrix assembled" << std::endl;
 
       if (_segregated_bool)
       {
@@ -1508,12 +1502,12 @@ SubChannel1PhaseProblem::computeP(int iblock)
 }
 
 Real
-SubChannel1PhaseProblem::computeT(int iblock)
+SubChannel1PhaseProblem::computeT()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   std::vector<Real> residual;
-  residual.reserve(_block_size * _n_channels);
+  residual.reserve(_n_channels);
   Real residual_norm_sq = 0.0;
   Real temperature_norm_sq = 0.0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -1543,17 +1537,14 @@ SubChannel1PhaseProblem::computeT(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeRho(int iblock)
+SubChannel1PhaseProblem::computeRho()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
-  if (iblock == 0)
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      _rho_soln->set(node, _fp->rho_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
-    }
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
+    _rho_soln->set(node, _fp->rho_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
   }
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -1566,17 +1557,14 @@ SubChannel1PhaseProblem::computeRho(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeMu(int iblock)
+SubChannel1PhaseProblem::computeMu()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
-  if (iblock == 0)
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
-      _mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
-    }
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
+    _mu_soln->set(node, _fp->mu_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node)));
   }
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
@@ -1589,10 +1577,10 @@ SubChannel1PhaseProblem::computeMu(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeWijResidual(int iblock)
+SubChannel1PhaseProblem::computeWijResidual()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   // Cross flow residual
   if (!_implicit_bool)
   {
@@ -1638,7 +1626,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto time_term =
             _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
 
-        _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) =
+        _Wij_residual_matrix(i_gap, iz - 1) =
             time_term + friction_term + inertia_term - pressure_term;
       }
     }
@@ -1879,9 +1867,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
     {
       // Assembly the matrix system
       Vec sol_holder_P;
-      LibmeshPetscCall(createPetscVector(sol_holder_P, _block_size * _n_gaps));
+      LibmeshPetscCall(createPetscVector(sol_holder_P, _n_cells * _n_gaps));
       Vec sol_holder_W;
-      LibmeshPetscCall(createPetscVector(sol_holder_W, _block_size * _n_gaps));
+      LibmeshPetscCall(createPetscVector(sol_holder_W, _n_cells * _n_gaps));
       LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
           _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
       LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
@@ -1898,7 +1886,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto iz_ind = iz - first_node;
         for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
         {
-          _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps + i_gap];
+          _Wij_residual_matrix(i_gap, iz - 1) = xx[iz_ind * _n_gaps + i_gap];
         }
       }
       LibmeshPetscCall(VecDestroy(&sol_holder_P));
@@ -1908,10 +1896,10 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 }
 
 void
-SubChannel1PhaseProblem::computeWijPrime(int iblock)
+SubChannel1PhaseProblem::computeWijPrime()
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     auto dz = _z_grid[iz] - _z_grid[iz - 1];
@@ -2038,11 +2026,11 @@ SubChannel1PhaseProblem::computeSweepFlowMixingParameter(unsigned int i_gap, uns
 }
 
 libMesh::DenseVector<Real>
-SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
+SubChannel1PhaseProblem::residualFunction(libMesh::DenseVector<Real> solution)
 {
-  const unsigned int last_node = (iblock + 1) * _block_size;
-  const unsigned int first_node = iblock * _block_size + 1;
-  libMesh::DenseVector<Real> Wij_residual_vector(_n_gaps * _block_size, 0.0);
+  const unsigned int last_node = _n_cells;
+  const unsigned int first_node = 1;
+  libMesh::DenseVector<Real> Wij_residual_vector(_n_gaps * _n_cells, 0.0);
   // Assign the solution to the cross-flow matrix
   int i = 0;
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -2055,20 +2043,20 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
   }
 
   // Calculating sum of crossflows
-  computeSumWij(iblock);
+  computeSumWij();
   // Solving axial flux
-  computeMdot(iblock);
+  computeMdot();
   // Calculation of turbulent Crossflow
-  computeWijPrime(iblock);
+  computeWijPrime();
   // Solving for Pressure Drop
-  computeDP(iblock);
+  computeDP();
   // Solving for pressure
-  computeP(iblock);
+  computeP();
   // Populating lateral crossflow residual matrix
-  computeWijResidual(iblock);
+  computeWijResidual();
 
   // Turn the residual matrix into a residual vector
-  for (unsigned int iz = 0; iz < _block_size; iz++)
+  for (unsigned int iz = 0; iz < _n_cells; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
@@ -2080,8 +2068,7 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
 }
 
 PetscErrorCode
-SubChannel1PhaseProblem::petscSnesSolver(int iblock,
-                                         const libMesh::DenseVector<Real> & solution,
+SubChannel1PhaseProblem::petscSnesSolver(const libMesh::DenseVector<Real> & solution,
                                          libMesh::DenseVector<Real> & root)
 {
   SNES snes;
@@ -2093,7 +2080,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   PetscFunctionBegin;
   LibmeshPetscCall(SNESCreate(PETSC_COMM_SELF, &snes));
   LibmeshPetscCall(VecCreate(PETSC_COMM_SELF, &x));
-  LibmeshPetscCall(VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps));
+  LibmeshPetscCall(VecSetSizes(x, PETSC_DECIDE, _n_cells * _n_gaps));
   LibmeshPetscCall(VecSetFromOptions(x));
   LibmeshPetscCall(VecDuplicate(x, &r));
 
@@ -2103,7 +2090,6 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(SNESSetUseMatrixFree(snes, PETSC_FALSE, PETSC_TRUE));
 #endif
   Ctx ctx;
-  ctx.iblock = iblock;
   ctx.schp = this;
   LibmeshPetscCall(SNESSetFunction(snes, r, formFunction, &ctx));
   LibmeshPetscCall(SNESGetKSP(snes, &ksp));
@@ -2112,7 +2098,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
   LibmeshPetscCall(SNESSetFromOptions(snes));
   LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
+  for (unsigned int i = 0; i < _n_cells * _n_gaps; i++)
   {
     xx[i] = solution(i);
   }
@@ -2120,7 +2106,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
   LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
+  for (unsigned int i = 0; i < _n_cells * _n_gaps; i++)
     root(i) = xx[i];
 
   LibmeshPetscCall(VecRestoreArray(x, &xx));
@@ -2230,7 +2216,7 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
 }
 
 PetscErrorCode
-SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
+SubChannel1PhaseProblem::implicitPetscSolve()
 {
   PetscFunctionBegin;
   // ---------- helper functions -----------------------------
@@ -2327,16 +2313,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   };
 
   // indices
-  const unsigned int first_node = iblock * _block_size + 1;
-  const unsigned int last_node = (iblock + 1) * _block_size;
+  const unsigned int first_node = 1;
+  const unsigned int last_node = _n_cells;
 
   // ---------- assemble per-block operators -----------------
-  computeSumWij(iblock);
-  computeMdot(iblock);
-  computeWijPrime(iblock);
-  computeDP(iblock);
-  computeP(iblock);
-  computeWijResidual(iblock);
+  computeSumWij();
+  computeMdot();
+  computeWijPrime();
+  computeDP();
+  computeP();
+  computeWijResidual();
 
   V("Starting nested system.");
 
@@ -2375,23 +2361,23 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         _prod, *_mdot_soln, first_node, last_node, _n_channels));
 
     Vec mdot_estimate;
-    LibmeshPetscCall(createPetscVector(mdot_estimate, _block_size * _n_channels));
+    LibmeshPetscCall(createPetscVector(mdot_estimate, _n_cells * _n_channels));
     Vec pmat_diag;
-    LibmeshPetscCall(createPetscVector(pmat_diag, _block_size * _n_channels));
+    LibmeshPetscCall(createPetscVector(pmat_diag, _n_cells * _n_channels));
     Vec p_estimate;
-    LibmeshPetscCall(createPetscVector(p_estimate, _block_size * _n_channels));
+    LibmeshPetscCall(createPetscVector(p_estimate, _n_cells * _n_channels));
     Vec unity_vec;
-    LibmeshPetscCall(createPetscVector(unity_vec, _block_size * _n_channels));
+    LibmeshPetscCall(createPetscVector(unity_vec, _n_cells * _n_channels));
     LibmeshPetscCall(VecSet(unity_vec, 1.0));
     Vec sol_holder_P;
-    LibmeshPetscCall(createPetscVector(sol_holder_P, _block_size * _n_gaps));
+    LibmeshPetscCall(createPetscVector(sol_holder_P, _n_cells * _n_gaps));
     Vec unity_vec_Wij;
-    LibmeshPetscCall(createPetscVector(unity_vec_Wij, _block_size * _n_gaps));
+    LibmeshPetscCall(createPetscVector(unity_vec_Wij, _n_cells * _n_gaps));
     LibmeshPetscCall(VecSet(unity_vec_Wij, 1.0));
     Vec _Wij_loc_vec;
-    LibmeshPetscCall(createPetscVector(_Wij_loc_vec, _block_size * _n_gaps));
+    LibmeshPetscCall(createPetscVector(_Wij_loc_vec, _n_cells * _n_gaps));
     Vec _Wij_old_loc_vec;
-    LibmeshPetscCall(createPetscVector(_Wij_old_loc_vec, _block_size * _n_gaps));
+    LibmeshPetscCall(createPetscVector(_Wij_old_loc_vec, _n_cells * _n_gaps));
 
     // ---- scale estimates ----
     // mdot_estimate = A(1,0) * mdot
@@ -2408,7 +2394,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
     // sumWij_loc from sol_holder_P (accumulate)
     Vec sumWij_loc;
-    LibmeshPetscCall(createPetscVector(sumWij_loc, _block_size * _n_channels));
+    LibmeshPetscCall(createPetscVector(sumWij_loc, _n_cells * _n_channels));
     for (unsigned int iz = first_node; iz <= last_node; ++iz)
     {
       const auto iz_ind = iz - first_node;
@@ -2458,7 +2444,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecMean(_Wij_loc_vec, &relax_factor));
 #else
     VecSum(_Wij_loc_vec, &relax_factor);
-    relax_factor /= _block_size * _n_gaps;
+    relax_factor /= _n_cells * _n_gaps;
 #endif
     relax_factor = relax_factor / _max_sumWij + 0.5;
     V("Relax base value: " + std::to_string(relax_factor));
@@ -2774,12 +2760,9 @@ SubChannel1PhaseProblem::externalSolve()
   bool temperature_converged = true;
 
   if (_segregated_bool)
-    P_it_max = 20 * _n_blocks;
+    P_it_max = 5;
   else
     P_it_max = 100;
-
-  if ((_n_blocks == 1) && (_segregated_bool))
-    P_it_max = 5;
 
   if (_P_maxit > 0)
     P_it_max = _P_maxit;
@@ -2791,82 +2774,78 @@ SubChannel1PhaseProblem::externalSolve()
     _pressure_fixed_point_error = 0.0;
     _console << "Solving Outer Iteration : " << P_it << std::endl;
     const auto P_old = saveValues(*_P_soln, 0, _n_cells);
-    for (unsigned int iblock = 0; iblock < _n_blocks; iblock++)
+    const int last_level = _n_cells;
+    const int first_level = 1;
+    Real T_error = 1.0;
+    auto T_it = 0;
+    _console << " From first level: " << first_level << " to last level: " << last_level
+             << std::endl;
+
+    while (T_block_error > _T_tol && T_it < _T_maxit)
     {
-      int last_level = (iblock + 1) * _block_size;
-      int first_level = iblock * _block_size + 1;
-      Real T_block_error = 1.0;
-      auto T_it = 0;
-      _console << "Solving Block: " << iblock << " From first level: " << first_level
-               << " to last level: " << last_level << std::endl;
-
-      while (T_block_error > _T_tol && T_it < _T_maxit)
+      if (processor_id() == 0)
       {
-        if (processor_id() == 0)
+        if (_segregated_bool)
+          computeWijFromSolve();
+        else
         {
-          if (_segregated_bool)
-            computeWijFromSolve(iblock);
-          else
-          {
-            LibmeshPetscCall(implicitPetscSolve(iblock));
-            computeWijPrime(iblock);
-            V("Done with main solve.");
-          }
-        }
-
-        // A value of one preserves the original ordering by refreshing the flow solution before
-        // every thermal update. Larger values opt into lagging flow during thermal subcycles.
-        for (const auto enthalpy_subcycle : make_range(_enthalpy_subcycles))
-        {
-          if (T_block_error <= _T_tol || T_it >= _T_maxit)
-            break;
-
-          V("Enthalpy subcycle: " + std::to_string(enthalpy_subcycle + 1));
-          T_it += 1;
-          const auto T_old = saveValues(*_T_soln, first_level, last_level);
-          // We are only computing quantities on rank 0
-          if (processor_id() > 0)
-          {
-            // Rank zero supplies the error through the maximum reduction below.
-            T_block_error = 0.0;
-            goto aux_close;
-          }
-
-          if (_compute_power)
-          {
-            computeh(iblock);
-            T_block_error = computeT(iblock);
-            V("Done with thermal solve.");
-          }
-
-          V("Start updating thermophysical properties.");
-          if (_compute_density)
-            computeRho(iblock);
-          if (_compute_viscosity)
-            computeMu(iblock);
-          V("Done updating thermophysical properties.");
-
-          // We must do a global assembly to make sure data is parallel consistent before we do
-          // things like compute L2 norms
-        aux_close:
-          _aux->solution().close();
-
-          if (!_compute_power)
-            T_block_error =
-                relativeChange(*_T_soln, T_old, first_level, last_level, /*reference_offset=*/0.0);
-          _console << "T_block_error: " << T_block_error << std::endl;
-
-          // All processes must have the same iteration count
-          comm().max(T_block_error);
+          LibmeshPetscCall(implicitPetscSolve());
+          computeWijPrime();
+          V("Done with main solve.");
         }
       }
-      const bool block_converged = T_block_error <= _T_tol;
-      temperature_converged &= block_converged;
-      if (!block_converged)
+
+      // A value of one preserves the original ordering by refreshing the flow solution before
+      // every thermal update. Larger values opt into lagging flow during thermal subcycles.
+      for (const auto enthalpy_subcycle : make_range(_enthalpy_subcycles))
       {
-        _console << "Reached maximum number of temperature iterations for block: " << iblock
-                 << std::endl;
+        if (T_block_error <= _T_tol || T_it >= _T_maxit)
+          break;
+
+        V("Enthalpy subcycle: " + std::to_string(enthalpy_subcycle + 1));
+        T_it += 1;
+        const auto T_old = saveValues(*_T_soln, first_level, last_level);
+        // We are only computing quantities on rank 0
+        if (processor_id() > 0)
+        {
+          // Rank zero supplies the error through the maximum reduction below.
+          T_block_error = 0.0;
+          goto aux_close;
+        }
+
+        if (_compute_power)
+        {
+          computeh();
+          T_block_error = computeT();
+          V("Done with thermal solve.");
+        }
+
+        V("Start updating thermophysical properties.");
+        if (_compute_density)
+          computeRho();
+        if (_compute_viscosity)
+          computeMu();
+        V("Done updating thermophysical properties.");
+
+        // We must do a global assembly to make sure data is parallel consistent before we do
+        // things like compute L2 norms
+      aux_close:
+        _aux->solution().close();
+
+        if (!_compute_power)
+          T_block_error =
+              relativeChange(*_T_soln, T_old, first_level, last_level, /*reference_offset=*/0.0);
+        _console << "T_block_error: " << T_block_error << std::endl;
+
+        // All processes must have the same iteration count
+        comm().max(T_block_error);
       }
+    }
+    const bool block_converged = T_block_error <= _T_tol;
+    temperature_converged &= block_converged;
+    if (!block_converged)
+    {
+      _console << "Reached maximum number of temperature iterations " << std::endl;
     }
     P_error = _segregated_bool ? relativeChange(*_P_soln, P_old, 0, _n_cells, _P_out)
                                : _pressure_fixed_point_error;

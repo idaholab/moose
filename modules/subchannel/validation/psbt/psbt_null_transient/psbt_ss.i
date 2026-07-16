@@ -30,7 +30,6 @@ P_out = 4.923e6 # Pa
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true

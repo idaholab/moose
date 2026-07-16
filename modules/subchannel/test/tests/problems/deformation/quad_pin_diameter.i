@@ -24,7 +24,6 @@ mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
   compute_density = true
   compute_viscosity = true
   compute_power = false

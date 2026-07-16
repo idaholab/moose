@@ -73,7 +73,6 @@ unheated_length_exit = 0.855 #m
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
   P_out = ${P_out}
   compute_density = true
   compute_viscosity = true
