@@ -11,41 +11,31 @@
 
 #include "MFEMTopology.h"
 
+std::vector<mfem::Vector>
+ConvertVectorOfVectorsToMFEM(std::vector<std::vector<mfem::real_t>> vector_of_vectors)
+{
+  std::vector<mfem::Vector> mfem_vectors;
+  for (auto & vector : vector_of_vectors)
+    mfem_vectors.push_back(mfem::Vector(vector.data(), vector.size()));
+  return mfem_vectors;
+}
+
 InputParameters
 MFEMTopology::validParams()
 {
-  // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
-  // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-  // MFEM uses the boundary -1 to signify every sideset
-  params.addParam<bool>(
-      "periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
-  params.addParam<std::vector<mfem::real_t>>(
-      "translation_x", {0., 0., 0.}, "Vector specifying translation in x direction.");
-  params.addParam<std::vector<mfem::real_t>>(
-      "translation_y", {0., 0., 0.}, "Vector specifying translation in y direction.");
-  params.addParam<std::vector<mfem::real_t>>(
-      "translation_z", {0., 0., 0.}, "Vector specifying translation in z direction.");
-
+  params.addParam<std::vector<std::vector<mfem::real_t>>>(
+      "lattice_vectors", {}, "Translation vectors matching pairs of equivalent vertices.");
   return params;
 }
 
 MFEMTopology::MFEMTopology(const InputParameters & parameters)
-  : _translation_x(parameters.get<std::vector<mfem::real_t>>("translation_x")),
-    _translation_x_vec(_translation_x.data(), _translation_x.size()),
-    _translation_y(parameters.get<std::vector<mfem::real_t>>("translation_y")),
-    _translation_y_vec(_translation_y.data(), _translation_y.size()),
-    _translation_z(parameters.get<std::vector<mfem::real_t>>("translation_z")),
-    _translation_z_vec(_translation_z.data(), _translation_z.size())
+  : _input_lattice_vectors(
+        parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors")),
+    _lattice_vectors(ConvertVectorOfVectorsToMFEM(_input_lattice_vectors))
 {
-  DeclareTranslationalSymmetry(_translation_x_vec);
-  DeclareTranslationalSymmetry(_translation_y_vec);
-  DeclareTranslationalSymmetry(_translation_z_vec);
-
-  // mooseAssert(((int)_translations.size() == input.SpaceDimension()),
-  //             "Number of translation vectors doesn't match the space dimension");
-  // mooseAssert((input.SpaceDimension() == _translations[0].Size()),
-  //             "Size of translation vector doesn't match the space dimension");
+  for (const auto & lattice_vector : _lattice_vectors)
+    DeclareTranslationalSymmetry(lattice_vector);
 }
 
 void
