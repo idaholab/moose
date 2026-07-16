@@ -12,15 +12,13 @@
 #pragma once
 
 #include "FileMesh.h"
-
-// forward declare
-class MFEMPeriodicByVector;
+#include "MFEMTopology.h"
 
 /**
  * MFEMMesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
  */
-class MFEMMesh : public FileMesh
+class MFEMMesh : public FileMesh, public MFEMTopology
 {
 public:
   static InputParameters validParams();
@@ -49,10 +47,6 @@ public:
   void buildMesh() override;
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
-
-  void registerPeriodicBCs(MFEMPeriodicByVector &);
-
-  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh &);
 
   /**
    * Clones the mesh.
@@ -106,9 +100,6 @@ private:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
-
-  bool _periodic = false;
-  std::vector<mfem::Vector> _translations;
 };
 
 inline const mfem::ParMesh &
