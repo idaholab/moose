@@ -53,7 +53,7 @@ DefaultSteadyStateConvergence::checkIterationType(IterationType it_type) const
 }
 
 Convergence::MooseConvergenceStatus
-DefaultSteadyStateConvergence::checkConvergence(unsigned int /*iter*/)
+DefaultSteadyStateConvergence::checkConvergence(unsigned int /*n_iter*/)
 {
   TIME_SECTION(_perfid_check_convergence);
 

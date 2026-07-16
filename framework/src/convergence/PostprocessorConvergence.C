@@ -33,7 +33,7 @@ PostprocessorConvergence::PostprocessorConvergence(const InputParameters & param
 }
 
 Convergence::MooseConvergenceStatus
-PostprocessorConvergence::checkConvergenceInner(unsigned int /*iter*/)
+PostprocessorConvergence::checkConvergenceInner(unsigned int /*n_iter*/)
 {
   if (std::abs(_postprocessor) <= _tol)
   {

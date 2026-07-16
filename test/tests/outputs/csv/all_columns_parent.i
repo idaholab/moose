@@ -90,7 +90,7 @@ T_ambient = 300.0
 [Convergence]
   [fp_conv]
     type = IterationCountConvergence
-    max_iterations = 3
+    max_iterations = 4
     converge_at_max_iterations = true
   []
 []
