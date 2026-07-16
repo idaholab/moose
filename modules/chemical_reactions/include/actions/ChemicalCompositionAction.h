@@ -103,6 +103,13 @@ protected:
   void addOutputRequest(const ThermochimicaSystemPropertyRequest & request,
                         const InputParameters & source,
                         const std::string & origin);
+  void addOutputRequest(const ThermochimicaConstituentFractionRequest & request,
+                        const InputParameters & source,
+                        const std::string & origin,
+                        const std::string & phase_parameter,
+                        const std::string & sublattice_parameter,
+                        const std::string & constituent_parameter,
+                        const std::vector<std::string> & database_phases);
 
   /** Validate and append an output descriptor produced by any input syntax. */
   void addOutputDescriptor(ThermochimicaConfiguration::OutputDescriptor output,

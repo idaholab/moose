@@ -38,6 +38,9 @@ registerMooseAction("ChemicalReactionsApp",
 registerMooseAction("ChemicalReactionsApp",
                     ThermochimicaSystemPropertyOutputAction,
                     "setup_chemical_composition");
+registerMooseAction("ChemicalReactionsApp",
+                    ThermochimicaConstituentFractionOutputAction,
+                    "setup_chemical_composition");
 
 InputParameters
 ThermochimicaOutputAction::validParams()
@@ -332,4 +335,31 @@ ThermochimicaSystemPropertyOutputAction::request() const
   else
     kind = ThermochimicaConfiguration::SystemPropertyKind::HEAT_CAPACITY;
   return ThermochimicaSystemPropertyRequest{_variable, kind};
+}
+
+InputParameters
+ThermochimicaConstituentFractionOutputAction::validParams()
+{
+  InputParameters params = ThermochimicaOutputAction::validParams();
+  params.addClassDescription("Selects a constituent fraction on a phase sublattice.");
+  params.addRequiredParam<std::string>("phase", "Phase containing the constituent");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "sublattice", "sublattice > 0", "One-based sublattice containing the constituent");
+  params.addRequiredParam<std::string>("constituent", "Constituent whose fraction is output");
+  return params;
+}
+
+ThermochimicaConstituentFractionOutputAction::ThermochimicaConstituentFractionOutputAction(
+    const InputParameters & parameters)
+  : ThermochimicaOutputAction(parameters)
+{
+}
+
+ThermochimicaOutputRequest
+ThermochimicaConstituentFractionOutputAction::request() const
+{
+  return ThermochimicaConstituentFractionRequest{_variable,
+                                                  getParam<std::string>("phase"),
+                                                  getParam<unsigned int>("sublattice"),
+                                                  getParam<std::string>("constituent")};
 }

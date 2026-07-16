@@ -75,6 +75,7 @@ provided.
 | `[PhaseDrivingForces]` | `phase` | Phase driving force in J/mol-atoms |
 | `[SystemGibbsEnergies]` | None | Integral system Gibbs energy in J |
 | `[SystemProperties]` | `property` | Integral enthalpy, entropy, or equilibrium heat capacity |
+| `[ConstituentFractions]` | `phase`, `sublattice`, `constituent` | Constituent fraction on a phase sublattice |
 
 The `unit` parameter in `[Phases]` and `[Species]` selects `moles` or `mole_fraction`. A phase mole
 fraction is the phase moles divided by the total moles in all phases. A species mole fraction is the
@@ -101,6 +102,11 @@ Each `[SystemProperties]` leaf selects `enthalpy`, `entropy`, or `heat_capacity`
 parameter. Enthalpy is reported in J, while entropy and heat capacity are reported in J/K. These
 are integral properties of the complete configured system.
 
+Each `[ConstituentFractions]` leaf selects a constituent on a numbered phase sublattice. The
+`sublattice` parameter is one-based, consistent with thermodynamic database notation. The output
+is the constituent or site fraction reported by the phase model and is dimensionless. This output
+works for both conventional sublattice models and MQM phases; an absent phase has a value of zero.
+
 !alert warning title=Heat-Capacity Cost
 Requesting any `[SystemProperties]` output enables Thermochimica's equilibrium heat-capacity
 calculation, which perturbs temperature and performs additional equilibrium solves. The reported
@@ -115,9 +121,10 @@ energies, phase driving forces, and element distribution fractions:
 !listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs.i block=ChemicalComposition
 
 The following example selects an MQM quadruplet chemical potential and the stoichiometric
-potential of the `Fe2O3` pair endmember:
+potential of the `Fe2O3` pair endmember. It also selects constituent fractions from an MQM phase
+and a conventional sublattice phase:
 
-!listing modules/chemical_reactions/test/tests/thermochimica/typed_mqm.i block=ChemicalComposition/thermo/Outputs/ChemicalPotentials
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_mqm.i block=ChemicalComposition/thermo/Outputs
 
 !alert note
 Element and output variable names must be unique and must not also be declared in `[Variables]` or

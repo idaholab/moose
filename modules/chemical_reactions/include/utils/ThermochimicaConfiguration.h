@@ -150,6 +150,16 @@ struct ThermochimicaConfiguration
     SystemPropertyKind property;
   };
 
+  struct ConstituentFractionOutput
+  {
+    VariableName variable;
+    std::string phase;
+    std::string constituent;
+    int phase_index = -1;
+    int sublattice_index = -1;
+    int constituent_index = -1;
+  };
+
   using OutputDescriptor = std::variant<PhaseOutput,
                                         SpeciesOutput,
                                         ElementPotentialOutput,
@@ -159,7 +169,8 @@ struct ThermochimicaConfiguration
                                         PhaseGibbsEnergyOutput,
                                         PhaseDrivingForceOutput,
                                         SystemGibbsEnergyOutput,
-                                        SystemPropertyOutput>;
+                                        SystemPropertyOutput,
+                                        ConstituentFractionOutput>;
 
   FileName database;
   std::string temperature_unit;

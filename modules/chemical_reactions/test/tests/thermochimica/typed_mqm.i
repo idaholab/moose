@@ -37,6 +37,23 @@
           pair = Fe2O3
         []
       []
+      [ConstituentFractions]
+        [slag_fe3_fraction]
+          phase = SlagBsoln
+          sublattice = 1
+          constituent = 'Fe[3+]'
+        []
+        [slag_oxygen_fraction]
+          phase = SlagBsoln
+          sublattice = 2
+          constituent = O
+        []
+        [rutile_vacancy_fraction]
+          phase = Rutilesoln
+          sublattice = 2
+          constituent = Va
+        []
+      []
     []
   []
 []
@@ -73,6 +90,21 @@
 []
 
 [Postprocessors]
+  [slag_fe3_fraction]
+    type = NodalVariableValue
+    variable = slag_fe3_fraction
+    nodeid = 1
+  []
+  [slag_oxygen_fraction]
+    type = NodalVariableValue
+    variable = slag_oxygen_fraction
+    nodeid = 1
+  []
+  [rutile_vacancy_fraction]
+    type = NodalVariableValue
+    variable = rutile_vacancy_fraction
+    nodeid = 1
+  []
   [slag_quadruplet_potential]
     type = NodalVariableValue
     variable = slag_quadruplet_potential

@@ -114,6 +114,9 @@ protected:
   int evaluateOutput(const ThermochimicaConfiguration::SystemPropertyOutput & output,
                      OutputEvaluationContext & context,
                      Real & value) const;
+  int evaluateOutput(const ThermochimicaConfiguration::ConstituentFractionOutput & output,
+                     OutputEvaluationContext & context,
+                     Real & value) const;
   bool loadPreviousState(dof_id_type id);
   void storePreviousState(dof_id_type id);
 #endif
