@@ -161,6 +161,130 @@ The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = tru
 
 !listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
 
+## Class 1: Aquifer (Robin) boundary condition
+
+[`PorousFlowAquiferBC`](PorousFlowAquiferBC.md) applies a Robin boundary condition that
+couples the model boundary to a far-field aquifer.  The mass flux leaving the domain is
+\begin{equation}
+  \label{eq:aquifer_bc}
+  s = C \left( P_{\mathrm{model}} - P_{\mathrm{aq}}(z) \right) ,
+\end{equation}
+where $C$ is the conductance (kg.m$^{-2}$.Pa$^{-1}$.s$^{-1}$) and $P_{\mathrm{aq}}(z)$ is
+the far-field aquifer pressure at elevation $z$.  The elevation $z$ is evaluated at every
+quadrature point, so [eq:aquifer_bc] is correct on boundaries of any orientation.
+
+For finite-volume models, [`FVPorousFlowAquiferBC`](FVPorousFlowAquiferBC.md) provides the
+same boundary condition, with $z$ evaluated at the boundary-cell centroid.
+
+### Hydrostatic pressure on a non-horizontal boundary
+
+The key advantage of `PorousFlowAquiferBC` over
+[`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md) is how it handles the
+aquifer reference pressure.  In porous-media hydrology the aquifer has a hydraulic head
+$h_{\mathrm{aq}}$ (water-table elevation) and a corresponding hydrostatic pressure profile:
+\begin{equation}
+  \label{eq:p_aq_head}
+  P_{\mathrm{aq}}(z) = \rho \, |\mathbf{g}| \, \left( h_{\mathrm{aq}} - z \right) ,
+\end{equation}
+where $z$ is the elevation and $\rho$ is the fluid density.
+
+On a horizontal boundary at a single elevation $z_0$, $P_{\mathrm{aq}}$ is constant and a
+`PorousFlowPiecewiseLinearSink` with `PT_shift` $= \rho_0 |\mathbf{g}|(h_{\mathrm{aq}}-z_0)$
+is equivalent.  On a vertical or inclined boundary, however, $P_{\mathrm{aq}}$ varies with
+elevation.  A scalar `PT_shift` can only match the aquifer pressure at one height, and gives
+the wrong flux everywhere else.
+
+`PorousFlowAquiferBC` computes $z$ from the quadrature-point coordinate at every integration
+point, so [eq:p_aq_head] is applied correctly across the entire boundary regardless of its
+orientation.  In particular, if the model is at hydrostatic equilibrium with the aquifer
+(i.e., $P_{\mathrm{model}}(z) = \rho g (h_{\mathrm{aq}} - z)$ everywhere on the boundary),
+the flux is identically zero at every quadrature point and the pressure field is undisturbed.
+A `PorousFlowPiecewiseLinearSink` would produce spurious fluxes on a vertical boundary in
+this situation.
+
+The fluid density $\rho_{\mathrm{nodal}}$ used in the hydrostatic correction is taken from
+PorousFlow's own nodal material property, making the aquifer pressure self-consistent with
+the model's equation of state.  This avoids the small but nonzero error that arises when a
+fixed reference density is baked into a scalar `PT_shift`.
+
+### Two reference-pressure formulations
+
+Exactly one of the following two parameters must be supplied.
+
+**Hydraulic head** (`aquifer_head`): The far-field head $h_{\mathrm{aq}}$ (m) is specified
+directly.  The aquifer pressure is computed from [eq:p_aq_head] at each quadrature point.
+The conductance $C$ must also be supplied via `aquifer_conductance`.
+
+**Pressure at datum** (`aquifer_pressure_at_datum`): The aquifer pressure at a reference
+elevation $z_{\mathrm{datum}}$ is specified, and the pressure at other elevations follows
+from the hydrostatic gradient:
+\begin{equation}
+  P_{\mathrm{aq}}(z) = P_{\mathrm{datum}} + \rho_{\mathrm{nodal}} \, |\mathbf{g}| \,
+  (z_{\mathrm{datum}} - z) .
+\end{equation}
+This form is convenient when field data give the aquifer pressure at a known depth.  The
+conductance is computed automatically from the permeability and viscosity material properties
+and the user-supplied `aquifer_distance` $L$ (m):
+\begin{equation}
+  \label{eq:conductance}
+  C = \frac{\rho_{\mathrm{nodal}} \, k_{nn}}{\mu \, L} ,
+\end{equation}
+where $k_{nn} = (\mathbf{K}\mathbf{n})\cdot\mathbf{n}$ is the boundary permeability projected
+onto the outward boundary normal and $\mu$ is the nodal fluid viscosity.  If the material
+between the boundary and the far-field aquifer differs from the boundary material, the
+optional `aquifer_permeability` parameter (m$^2$) can be supplied to use in place of the
+boundary $k_{nn}$.
+
+### Effect of aquifer distance $L$
+
+The distance $L$ controls the tightness of the hydraulic coupling between the model and the
+aquifer.  Physically, $L$ is the thickness of the aquitard (or leaky layer) separating the
+model boundary from the far-field aquifer.
+
+- **Small $L$** (nearby, well-connected aquifer): $C \to \infty$.  Any nonzero pressure
+  difference drives a large flux, rapidly driving $P_{\mathrm{model}} \to P_{\mathrm{aq}}$.
+  In the limit $L\to 0$ the boundary approaches a Dirichlet condition pinned to the aquifer
+  pressure.
+
+- **Large $L$** (distant, poorly-connected aquifer): $C \to 0$.  The boundary flux is nearly
+  zero regardless of the pressure difference, and $P_{\mathrm{model}}$ responds only slowly.
+  In the limit $L\to\infty$ the boundary approaches an impermeable Neumann condition.
+
+The characteristic equilibration time constant for a compressible 1D domain is approximately
+$\tau \approx \phi \mu L_{\mathrm{domain}} L / (k K_f)$, so $L$ can be chosen to match a
+desired hydraulic response timescale.
+
+For the head formulation an equivalent $L$ can be recovered from the supplied conductance
+as $L = \rho k / (\mu C)$.  An appropriate starting estimate is the distance to the nearest
+hydraulically connected aquifer body.
+
+### Comparison with PorousFlowPiecewiseLinearSink
+
+On a horizontal boundary with a nearly incompressible fluid, `PorousFlowAquiferBC` and
+`PorousFlowPiecewiseLinearSink` are equivalent:
+
+| Feature | PorousFlowAquiferBC | PorousFlowPiecewiseLinearSink |
+| :--- | :--- | :--- |
+| Reference pressure | $\rho_{\mathrm{nodal}} g (h-z)$ per QP | scalar `PT_shift` |
+| Non-horizontal boundaries | Correct at every QP | Wrong except at one elevation |
+| Density in hydrostatic correction | Local nodal $\rho$ from EOS | Fixed $\rho_0$ baked into `PT_shift` |
+| Conductance (pressure form) | Computed from $k$, $\mu$, $L$ | Must be supplied manually |
+| Jacobian | Includes $\partial\rho/\partial P$ terms | Simpler, omits density coupling |
+
+For simple cases — horizontal boundary, incompressible fluid, known aquifer pressure — either
+BC works.  `PorousFlowAquiferBC` is preferred whenever the boundary has vertical extent,
+whenever the fluid is compressible enough that the hydrostatic equilibrium pressure deviates
+noticeably from the incompressible value, or whenever it is more natural to specify the
+aquifer head than to pre-compute a scalar pressure shift.
+
+An example input using the head formulation:
+
+!listing modules/porous_flow/test/tests/sinks/aquiferBC04.i start=[BCs] end=[Postprocessors]
+
+An example using the pressure-at-datum formulation with computed conductance:
+
+!listing modules/porous_flow/test/tests/sinks/aquiferBC02.i start=[BCs] end=[Postprocessors]
+
 ## Class 1: Injection of fluid at a fixed temperature
 
 A boundary condition corresponding to injection of fluid at a fixed temperature
