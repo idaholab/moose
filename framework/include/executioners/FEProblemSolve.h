@@ -70,6 +70,11 @@ protected:
   /// Per-system relaxation factors for multi-system fixed point iterations (expanded to
   /// match the number/order of systems being solved)
   std::vector<Real> _multi_sys_fp_relax_factors;
+  /// Whether to perform relaxation for each solve system, indexed over solve system
+  std::vector<bool> _perform_multi_sys_fp_relaxation;
+
+  /// Systems that should save their previous multi-system fixed point solutions
+  std::set<SystemBase *> _systems_to_copy_back_multi_sys_fp;
 
 private:
   /// Performs setup related to Convergence objects

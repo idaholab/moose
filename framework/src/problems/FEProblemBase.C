@@ -480,6 +480,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _previous_multiapp_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
     _previous_multiapp_fp_aux_solution_required(false),
+    _previous_multisystem_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
+    _previous_multisystem_fp_aux_solution_required(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
@@ -9430,6 +9432,32 @@ bool
 FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary() const
 {
   return _previous_multiapp_fp_aux_solution_required;
+}
+
+void
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationSolution(
+    bool needed, const unsigned int solver_sys_num)
+{
+  _previous_multisystem_fp_nl_solution_required[solver_sys_num] = needed;
+}
+
+bool
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationSolution(
+    const unsigned int solver_sys_num) const
+{
+  return _previous_multisystem_fp_nl_solution_required[solver_sys_num];
+}
+
+void
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationAuxiliary(bool state)
+{
+  _previous_multisystem_fp_aux_solution_required = state;
+}
+
+bool
+FEProblemBase::needsPreviousMultiSystemFixedPointIterationAuxiliary() const
+{
+  return _previous_multisystem_fp_aux_solution_required;
 }
 
 bool
