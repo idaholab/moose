@@ -41,11 +41,17 @@ MFEMTopology::MFEMTopology(const InputParameters & parameters)
   DeclareTranslationalSymmetry(_translation_x_vec);
   DeclareTranslationalSymmetry(_translation_y_vec);
   DeclareTranslationalSymmetry(_translation_z_vec);
+
+  // mooseAssert(((int)_translations.size() == input.SpaceDimension()),
+  //             "Number of translation vectors doesn't match the space dimension");
+  // mooseAssert((input.SpaceDimension() == _translations[0].Size()),
+  //             "Size of translation vector doesn't match the space dimension");
 }
 
 void
 MFEMTopology::DeclareTranslationalSymmetry(const mfem::Vector & translation)
 {
+  _periodic = true;
   auto translational_symmetry = std::make_shared<TranslationalSymmetry>(translation);
   _symmetry_transforms.push_back(translational_symmetry);
 }

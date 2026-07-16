@@ -12,7 +12,6 @@
 #include "MFEMMesh.h"
 #include "MooseApp.h"
 #include "libmesh/mesh_generation.h"
-#include "MFEMPeriodicBCs.h"
 
 #include <fstream>
 
@@ -53,7 +52,7 @@ MFEMMesh::validParams()
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters),
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters), MFEMTopology(parameters),
   _periodic(getParam<bool>("periodic"))
 {
   if (_periodic) {
@@ -63,7 +62,6 @@ MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters),
     if (isParamSetByUser("translation_z"))
       _translation_z = getParam<std::vector<Real>>("translation_z");
   }
-}
 
 MFEMMesh::~MFEMMesh() {}
 
@@ -102,9 +100,8 @@ MFEMMesh::buildMesh()
   mfem::Mesh mfem_ser_mesh = buildSerialMFEMMesh();
 
   if (_periodic)
-  {
-    mfem_ser_mesh = applyPeriodicBoundaryByTranslation(mfem_ser_mesh);
-  }
+    mfem_ser_mesh = mfem::Mesh::MakePeriodic(mfem_ser_mesh,
+                                             CreateTopologicallyEquivalentVertexMap(mfem_ser_mesh));
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError("serial_refine",
@@ -164,24 +161,6 @@ MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
   This function is very ugly - its intention is to read all the vertices
   on the boundaries you wanna pin together and create the v2v mapping manually
 */
-void
-MFEMMesh::registerPeriodicBCs(MFEMPeriodicByVector & bc)
-{
-  _periodic = true;
-  _translations = bc.GetPeriodicBCs();
-}
-
-mfem::Mesh
-MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh & input)
-{
-  mooseAssert(((int)_translations.size() == input.SpaceDimension()),
-              "Number of translation vectors doesn't match the space dimension");
-  mooseAssert((input.SpaceDimension() == _translations[0].Size()),
-              "Size of translation vector doesn't match the space dimension");
-
-  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(_translations));
-}
-
 void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
 {
