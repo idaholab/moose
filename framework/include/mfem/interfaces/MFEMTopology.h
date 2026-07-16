@@ -35,6 +35,8 @@ public:
 
   virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override
   {
+    mooseAssert((coord_in.Size() == _lattice_vector.Size()),
+                "Size of lattice vector doesn't match the space dimension");
     add(coord_in, _lattice_vector, coord_out);
   };
 
@@ -55,12 +57,12 @@ public:
 
   /// Return the map between pairs of topologically equivalent vertices in the mesh,
   /// each replicated vertex @a i is paired with a primary vertex @a vertex_map[i].
+  /// Largely replicates mfem::Mesh::CreatePeriodicVertexMapping but supports a broader class of
+  /// symmetry maps between equivalent vertices.
   std::vector<int> CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mfem_mesh) const;
 
   // Make `r` and all of `r`'s replicas be replicas of `p`. Delete `r` from the
   // list of primary vertices.
-  // void ApplySymmetryTransform(const mfem::Vector & coord_in,
-  //                                   mfem::Vector & coord_out);
   void DeclareTranslationalSymmetry(const mfem::Vector & translation);
 
   // void DeclareRotationalSymmetry(const mfem::Vector & coord_in,
@@ -76,12 +78,8 @@ protected:
   bool _periodic{false};
 
 private:
-  std::vector<mfem::real_t> _translation_x;
-  const mfem::Vector _translation_x_vec;
-  std::vector<mfem::real_t> _translation_y;
-  const mfem::Vector _translation_y_vec;
-  std::vector<mfem::real_t> _translation_z;
-  const mfem::Vector _translation_z_vec;
+  std::vector<std::vector<mfem::real_t>> _input_lattice_vectors;
+  std::vector<mfem::Vector> _lattice_vectors;
   std::vector<std::shared_ptr<DiscreteSymmetry>> _symmetry_transforms;
 };
 

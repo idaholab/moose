@@ -1,9 +1,8 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/cube_hex8.e
-  translation_x = "1. 0. 0."
-  translation_y = "0. 0. 0."
-  translation_z = "0. 0. 0."  
+  lattice_vectors = '1.0 0.0 0.0;
+                     0.0 0.0 0.0'  
 []
 
 [Problem]
