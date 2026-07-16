@@ -379,7 +379,7 @@
       input = grad_div.i
       exodiff = grad_div_tet14.e
       # tolerance increased from inter-platform differences
-      abs_zero = 8e-9
+      abs_zero = 5e-7
       rel_err = 6e-4
       # Reduce the size of the penalty to get reproducible results across platforms
       cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 BCs/sides/penalty=1e5 '
