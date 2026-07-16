@@ -13,7 +13,6 @@
 {#- MOOSE_SKIP_DOCS: Set to anything to skip the docs build                                   -#}
 {#- MOOSE_DOCS_FLAGS: Doc options to pass during the make install                             -#}
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
-{#- OPTFLAGS: Optimization flags to set when building                                         -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 {#- WITH_LIBTORCH: Set to enable libtorch                                                     -#}
@@ -124,14 +123,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     TEMP_LOC={{ ROOT_BUILD_DIR }}
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
-
-    # Optimization flags
-{%- if OPTFLAGS is not defined %}
-    OPTFLAGS=("-march=$(default_march)" "-mtune=generic")
-{%- else %}
-    IFS=' ' read -r -a OPTFLAGS <<< "{{ OPTFLAGS }}"
-{%- endif %}
-    export ADDITIONAL_CPPFLAGS="${OPTFLAGS[*]}"
 
     # Load WITH_XXX variables
     if_true() {
