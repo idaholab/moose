@@ -3,9 +3,9 @@
 ## Description
 
 The `[Outputs]` block within a named `[ChemicalComposition]` system contains typed selections for
-phase amounts, species amounts, element potentials, vapor pressures, and element amounts in
-phases. Each leaf block creates one scalar auxiliary variable using the leaf-block name, unless its
-`variable` parameter supplies another name.
+phases, species, element potentials, vapor pressures, and element distributions among phases. Each
+leaf block creates one scalar auxiliary variable using the leaf-block name, unless its `variable`
+parameter supplies another name.
 
 See [ChemicalCompositionAction.md] for the parameters required by each output family and the
 deprecated flat output parameters.

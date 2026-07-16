@@ -9,10 +9,10 @@
 #include "ThermochimicaOutputAction.h"
 
 registerMooseAction("ChemicalReactionsApp",
-                    ThermochimicaPhaseAmountOutputAction,
+                    ThermochimicaPhaseOutputAction,
                     "setup_chemical_composition");
 registerMooseAction("ChemicalReactionsApp",
-                    ThermochimicaSpeciesAmountOutputAction,
+                    ThermochimicaSpeciesOutputAction,
                     "setup_chemical_composition");
 registerMooseAction("ChemicalReactionsApp",
                     ThermochimicaElementPotentialOutputAction,
@@ -21,7 +21,7 @@ registerMooseAction("ChemicalReactionsApp",
                     ThermochimicaVaporPressureOutputAction,
                     "setup_chemical_composition");
 registerMooseAction("ChemicalReactionsApp",
-                    ThermochimicaElementInPhaseOutputAction,
+                    ThermochimicaElementDistributionOutputAction,
                     "setup_chemical_composition");
 
 InputParameters
@@ -50,28 +50,32 @@ ThermochimicaOutputAction::ThermochimicaOutputAction(const InputParameters & par
 }
 
 InputParameters
-ThermochimicaPhaseAmountOutputAction::validParams()
+ThermochimicaPhaseOutputAction::validParams()
 {
   InputParameters params = ThermochimicaOutputAction::validParams();
-  params.addClassDescription("Selects a phase amount from a Thermochimica equilibrium result.");
-  params.addRequiredParam<std::string>("phase", "Phase whose equilibrium amount is output");
+  params.addClassDescription("Selects a phase quantity from a Thermochimica equilibrium result.");
+  params.addRequiredParam<std::string>("phase", "Phase whose equilibrium quantity is output");
+  params.addParam<MooseEnum>(
+      "unit", MooseEnum("moles mole_fraction", "moles"), "Unit used for this phase output");
   return params;
 }
 
-ThermochimicaPhaseAmountOutputAction::ThermochimicaPhaseAmountOutputAction(
-    const InputParameters & parameters)
+ThermochimicaPhaseOutputAction::ThermochimicaPhaseOutputAction(const InputParameters & parameters)
   : ThermochimicaOutputAction(parameters)
 {
 }
 
 ThermochimicaOutputRequest
-ThermochimicaPhaseAmountOutputAction::request() const
+ThermochimicaPhaseOutputAction::request() const
 {
-  return ThermochimicaPhaseAmountRequest{_variable, getParam<std::string>("phase")};
+  const auto unit = getParam<MooseEnum>("unit") == "moles"
+                        ? ThermochimicaConfiguration::AmountUnit::MOLES
+                        : ThermochimicaConfiguration::AmountUnit::MOLE_FRACTION;
+  return ThermochimicaPhaseRequest{_variable, getParam<std::string>("phase"), unit};
 }
 
 InputParameters
-ThermochimicaSpeciesAmountOutputAction::validParams()
+ThermochimicaSpeciesOutputAction::validParams()
 {
   InputParameters params = ThermochimicaOutputAction::validParams();
   params.addClassDescription("Selects a species amount from a Thermochimica equilibrium result.");
@@ -82,19 +86,19 @@ ThermochimicaSpeciesAmountOutputAction::validParams()
   return params;
 }
 
-ThermochimicaSpeciesAmountOutputAction::ThermochimicaSpeciesAmountOutputAction(
+ThermochimicaSpeciesOutputAction::ThermochimicaSpeciesOutputAction(
     const InputParameters & parameters)
   : ThermochimicaOutputAction(parameters)
 {
 }
 
 ThermochimicaOutputRequest
-ThermochimicaSpeciesAmountOutputAction::request() const
+ThermochimicaSpeciesOutputAction::request() const
 {
   const auto unit = getParam<MooseEnum>("unit") == "moles"
-                        ? ThermochimicaConfiguration::SpeciesUnit::MOLES
-                        : ThermochimicaConfiguration::SpeciesUnit::MOLE_FRACTION;
-  return ThermochimicaSpeciesAmountRequest{
+                        ? ThermochimicaConfiguration::AmountUnit::MOLES
+                        : ThermochimicaConfiguration::AmountUnit::MOLE_FRACTION;
+  return ThermochimicaSpeciesRequest{
       _variable, getParam<std::string>("phase"), getParam<std::string>("species"), unit};
 }
 
@@ -145,25 +149,30 @@ ThermochimicaVaporPressureOutputAction::request() const
 }
 
 InputParameters
-ThermochimicaElementInPhaseOutputAction::validParams()
+ThermochimicaElementDistributionOutputAction::validParams()
 {
   InputParameters params = ThermochimicaOutputAction::validParams();
   params.addClassDescription(
-      "Selects an element amount in a phase from a Thermochimica equilibrium result.");
+      "Selects the amount or distribution fraction of an element in a phase.");
   params.addRequiredParam<std::string>("phase", "Phase containing the element");
-  params.addRequiredParam<std::string>("element", "Element whose amount in the phase is output");
+  params.addRequiredParam<std::string>("element", "Element whose distribution is output");
+  params.addParam<MooseEnum>(
+      "unit", MooseEnum("moles fraction", "moles"), "Unit used for this element distribution");
   return params;
 }
 
-ThermochimicaElementInPhaseOutputAction::ThermochimicaElementInPhaseOutputAction(
+ThermochimicaElementDistributionOutputAction::ThermochimicaElementDistributionOutputAction(
     const InputParameters & parameters)
   : ThermochimicaOutputAction(parameters)
 {
 }
 
 ThermochimicaOutputRequest
-ThermochimicaElementInPhaseOutputAction::request() const
+ThermochimicaElementDistributionOutputAction::request() const
 {
-  return ThermochimicaElementInPhaseRequest{
-      _variable, getParam<std::string>("phase"), getParam<std::string>("element")};
+  const auto unit = getParam<MooseEnum>("unit") == "moles"
+                        ? ThermochimicaConfiguration::DistributionUnit::MOLES
+                        : ThermochimicaConfiguration::DistributionUnit::FRACTION;
+  return ThermochimicaElementDistributionRequest{
+      _variable, getParam<std::string>("phase"), getParam<std::string>("element"), unit};
 }

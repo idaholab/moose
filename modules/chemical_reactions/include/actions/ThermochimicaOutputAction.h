@@ -13,18 +13,19 @@
 
 #include <variant>
 
-struct ThermochimicaPhaseAmountRequest
+struct ThermochimicaPhaseRequest
 {
   VariableName variable;
   std::string phase;
+  ThermochimicaConfiguration::AmountUnit unit;
 };
 
-struct ThermochimicaSpeciesAmountRequest
+struct ThermochimicaSpeciesRequest
 {
   VariableName variable;
   std::string phase;
   std::string species;
-  ThermochimicaConfiguration::SpeciesUnit unit;
+  ThermochimicaConfiguration::AmountUnit unit;
 };
 
 struct ThermochimicaElementPotentialRequest
@@ -40,18 +41,19 @@ struct ThermochimicaVaporPressureRequest
   std::string species;
 };
 
-struct ThermochimicaElementInPhaseRequest
+struct ThermochimicaElementDistributionRequest
 {
   VariableName variable;
   std::string phase;
   std::string element;
+  ThermochimicaConfiguration::DistributionUnit unit;
 };
 
-using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseAmountRequest,
-                                                ThermochimicaSpeciesAmountRequest,
+using ThermochimicaOutputRequest = std::variant<ThermochimicaPhaseRequest,
+                                                ThermochimicaSpeciesRequest,
                                                 ThermochimicaElementPotentialRequest,
                                                 ThermochimicaVaporPressureRequest,
-                                                ThermochimicaElementInPhaseRequest>;
+                                                ThermochimicaElementDistributionRequest>;
 
 /** Base class for typed Thermochimica output selection Actions. */
 class ThermochimicaOutputAction : public Action
@@ -75,20 +77,20 @@ private:
   const std::string _parent_path;
 };
 
-class ThermochimicaPhaseAmountOutputAction : public ThermochimicaOutputAction
+class ThermochimicaPhaseOutputAction : public ThermochimicaOutputAction
 {
 public:
   static InputParameters validParams();
-  ThermochimicaPhaseAmountOutputAction(const InputParameters & parameters);
+  ThermochimicaPhaseOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };
 
-class ThermochimicaSpeciesAmountOutputAction : public ThermochimicaOutputAction
+class ThermochimicaSpeciesOutputAction : public ThermochimicaOutputAction
 {
 public:
   static InputParameters validParams();
-  ThermochimicaSpeciesAmountOutputAction(const InputParameters & parameters);
+  ThermochimicaSpeciesOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };
@@ -111,11 +113,11 @@ public:
   virtual ThermochimicaOutputRequest request() const override;
 };
 
-class ThermochimicaElementInPhaseOutputAction : public ThermochimicaOutputAction
+class ThermochimicaElementDistributionOutputAction : public ThermochimicaOutputAction
 {
 public:
   static InputParameters validParams();
-  ThermochimicaElementInPhaseOutputAction(const InputParameters & parameters);
+  ThermochimicaElementDistributionOutputAction(const InputParameters & parameters);
 
   virtual ThermochimicaOutputRequest request() const override;
 };

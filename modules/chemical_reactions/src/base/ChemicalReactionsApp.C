@@ -49,16 +49,14 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
-  registerSyntax("ThermochimicaPhaseAmountOutputAction",
-                 "ChemicalComposition/*/Outputs/PhaseAmounts/*");
-  registerSyntax("ThermochimicaSpeciesAmountOutputAction",
-                 "ChemicalComposition/*/Outputs/SpeciesAmounts/*");
+  registerSyntax("ThermochimicaPhaseOutputAction", "ChemicalComposition/*/Outputs/Phases/*");
+  registerSyntax("ThermochimicaSpeciesOutputAction", "ChemicalComposition/*/Outputs/Species/*");
   registerSyntax("ThermochimicaElementPotentialOutputAction",
                  "ChemicalComposition/*/Outputs/ElementPotentials/*");
   registerSyntax("ThermochimicaVaporPressureOutputAction",
                  "ChemicalComposition/*/Outputs/VaporPressures/*");
-  registerSyntax("ThermochimicaElementInPhaseOutputAction",
-                 "ChemicalComposition/*/Outputs/ElementsInPhases/*");
+  registerSyntax("ThermochimicaElementDistributionOutputAction",
+                 "ChemicalComposition/*/Outputs/ElementDistribution/*");
   registerTask("setup_chemical_composition", false);
   addTaskDependency("setup_chemical_composition", "meta_action");
   addTaskDependency("add_variable", "setup_chemical_composition");

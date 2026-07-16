@@ -393,7 +393,7 @@
   [typed_output_invalid_phase]
     type = RunException
     input = typed_outputs.i
-    cli_args = 'ChemicalComposition/thermo/Outputs/SpeciesAmounts/bcc_mo_fraction/phase=invalid'
+    cli_args = 'ChemicalComposition/thermo/Outputs/Species/hcp_mo_fraction/phase=invalid'
     expect_err = "phase: Phase 'invalid' was not found in the configured system."
     design = ChemicalCompositionAction.md
     issues = '#22711'
@@ -404,8 +404,8 @@
   [typed_output_duplicate]
     type = RunException
     input = typed_outputs.i
-    cli_args = 'ChemicalComposition/thermo/Outputs/SpeciesAmounts/bcc_mo_fraction/variable=bcc_amount'
-    expect_err = "Duplicate generated variable name 'bcc_amount'."
+    cli_args = 'ChemicalComposition/thermo/Outputs/Species/hcp_mo_fraction/variable=hcp_amount'
+    expect_err = "Duplicate generated variable name 'hcp_amount'."
     design = ChemicalCompositionAction.md
     issues = '#22711'
     requirement = 'Typed ChemicalComposition output blocks shall reject duplicate variable names'
