@@ -1,5 +1,5 @@
 # Purpose: Verify pre-debond out-of-plane mode-III CZM outputs in a 3D single-element geometry.
-# Assertion: z-shear produces local_tangential_jump_2 and cohesive_traction_tangential_2 matching the CSV gold curve while normal and first tangential traction remain negligible.
+# Assertion: z-shear produces local_tangential_jump_2, local_tangential_jump_effective, and cohesive_traction_tangential_2 matching the CSV gold curve while normal and first tangential traction remain negligible.
 # Why this exists: Protects the second local tangential component output before full debond, where post-debond jump output is unstable.
 
 [Mesh]
@@ -118,6 +118,8 @@
   []
   [local_tangential_jump_2]
   []
+  [local_tangential_jump_effective]
+  []
 []
 
 [AuxKernels]
@@ -168,6 +170,12 @@
     variable = local_tangential_jump_2
     user_object = czm_uo
     cohesive_zone_quantity = local_tangential_jump_2
+  []
+  [local_tangential_jump_effective]
+    type = CohesiveZoneMortarUserObjectAux
+    variable = local_tangential_jump_effective
+    user_object = czm_uo
+    cohesive_zone_quantity = local_tangential_jump_effective
   []
 []
 
@@ -379,6 +387,11 @@
   [jump_t]
     type = ElementAverageValue
     variable = local_tangential_jump_2
+    block = secondary_lower
+  []
+  [jump_t_eff]
+    type = ElementAverageValue
+    variable = local_tangential_jump_effective
     block = secondary_lower
   []
 []
