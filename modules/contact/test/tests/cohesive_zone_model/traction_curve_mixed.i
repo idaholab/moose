@@ -1,4 +1,4 @@
-# Purpose: Verify mixed-mode traction-separation response for POWER_LAW and BK mixed-mode criteria.
+# Purpose: Verify mixed-mode traction-separation response for POWER_LAW and CLI-overridden BK criteria.
 # Assertion: Mixed-mode jump-traction curves for both criteria match their CSV gold baselines within tolerance.
 # Why this exists: Confirms criterion-specific mixed-mode damage behavior remains stable across constitutive options.
 
