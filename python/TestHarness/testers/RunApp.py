@@ -196,10 +196,7 @@ class RunApp(Tester):
             if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
 
-        self._delete_output_after_running = (
-            params.isParamSetByUser("delete_output_before_running")
-            and not params["delete_output_before_running"]
-        )
+        self._delete_output_after_running = not params["delete_output_before_running"]
 
         # The capabilities file that we need to set with
         # --testharness-capabilities, if any. This should

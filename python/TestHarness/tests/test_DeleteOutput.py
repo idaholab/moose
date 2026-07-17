@@ -85,6 +85,23 @@ class TestHarnessTester(TestHarnessTestCase):
             post_run=post_run,
         )
 
+    def testDefaultedFalseDeletesOutputAfterRun(self):
+        """
+        Test that defaulted disabling of pre-run deletion deletes outputs after running.
+        """
+
+        with tempfile.TemporaryDirectory() as test_dir:
+            output = os.path.join(test_dir, "cleanup.txt")
+            open(output, "w").close()
+
+            params = _make_check_files_params(test_dir)
+            params["delete_output_before_running"] = False
+            tester = CheckFiles("defaulted_false_deletes_output", params)
+
+            self.assertTrue(tester._delete_output_after_running)
+            tester.postRun(None)
+            self.assertFalse(os.path.exists(output))
+
     def testGeneratedRecoverPartsKeepOutputAfterRun(self):
         """
         Test that harness-generated recover tests can keep outputs from inherited cleanup settings.
