@@ -240,7 +240,7 @@ BSplineCurveGenerator::generate()
 }
 
 Point
-BSplineCurveGenerator::startPoint(const MeshBase * start_mesh) const
+BSplineCurveGenerator::startPoint(MeshBase * start_mesh) const
 {
   if (isParamValid("start_point"))
     return getParam<Point>("start_point");
@@ -250,7 +250,7 @@ BSplineCurveGenerator::startPoint(const MeshBase * start_mesh) const
 }
 
 Point
-BSplineCurveGenerator::endPoint(const MeshBase * end_mesh) const
+BSplineCurveGenerator::endPoint(MeshBase * end_mesh) const
 {
   if (isParamValid("end_point"))
     return getParam<Point>("end_point");
@@ -260,7 +260,7 @@ BSplineCurveGenerator::endPoint(const MeshBase * end_mesh) const
 }
 
 RealVectorValue
-BSplineCurveGenerator::startDirection(const MeshBase * start_mesh) const
+BSplineCurveGenerator::startDirection(MeshBase * start_mesh) const
 {
   if (isParamValid("start_direction"))
     return getParam<RealVectorValue>("start_direction");
@@ -270,7 +270,7 @@ BSplineCurveGenerator::startDirection(const MeshBase * start_mesh) const
 }
 
 RealVectorValue
-BSplineCurveGenerator::endDirection(const MeshBase * end_mesh) const
+BSplineCurveGenerator::endDirection(MeshBase * end_mesh) const
 {
   if (isParamValid("end_direction"))
     return getParam<RealVectorValue>("end_direction");
