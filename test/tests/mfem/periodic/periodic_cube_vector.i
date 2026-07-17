@@ -2,7 +2,7 @@
   type = MFEMMesh
   file = ../mesh/cube_hex8.e
   lattice_vectors = '1.0 0.0 0.0;
-                     0.0 0.0 0.0'  
+                     0.0 0.0 0.0'
 []
 
 [Problem]
@@ -10,11 +10,9 @@
 []
 
 [Functions]
-  [HeatSourceFcn]
-    type = ParsedVectorFunction
-    expression_x = if(x>=0.75,1.0,0.0)
-    expression_y = if(y>=0.15,1.0,0.0)
-    expression_z = if(z>=0.15,1.0,0.0)
+  [SourceFunction]
+    type = ParsedFunction
+    expression = if(x>=0.75,2.0,1.0)
   []
 []
 
@@ -22,11 +20,6 @@
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
-    fec_order = FIRST
-  []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
     fec_order = FIRST
   []
 []
@@ -38,33 +31,11 @@
   []
 []
 
-[AuxVariables]
-  [concentration_gradient]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []
-[]
-
-[AuxKernels]
-  [grad]
-    type = MFEMGradAux
-    variable = concentration_gradient
-    source = concentration
-    execute_on = TIMESTEP_END
-  []
-[]
-
 [BCs]
-  [top]
+  [walls]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 'bottom'
-    coefficient = 0.0
-  []
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = 'top'
+    boundary = 'top bottom'
     coefficient = 0.0
   []
 []
@@ -77,21 +48,13 @@
   [source]
     type = MFEMDomainLFKernel
     variable = concentration
-    coefficient = 1.0
-  []
-  [HeatSource]
-    type = MFEMVectorDomainLFKernel
-    variable = concentration
-    vector_coefficient = HeatSourceFcn
+    coefficient = SourceFunction
   []
 []
 
 [Preconditioner]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-  []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
   []
 []
 
@@ -109,7 +72,16 @@
   device = cpu
 []
 
+[Postprocessors]
+  [solution_l2_norm]
+    type = MFEML2Error
+    variable = concentration
+    function = 0
+  []
+[]
+
 [Outputs]
+  csv = true
   active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
