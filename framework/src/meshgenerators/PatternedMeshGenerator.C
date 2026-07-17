@@ -73,8 +73,16 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 PatternedMeshGenerator::generate()
 {
+  return generate(nullptr);
+}
+
+std::unique_ptr<MeshBase>
+PatternedMeshGenerator::generate(std::vector<std::unique_ptr<ReplicatedMesh>> * input_meshes)
+{
   // Reserve spaces for all the meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> meshes;
+  std::vector<std::unique_ptr<ReplicatedMesh>> local_meshes;
+  auto & meshes = input_meshes ? *input_meshes : local_meshes;
+  meshes.clear();
   meshes.reserve(_input_names.size());
 
   // Getting the boundaries provided by the user

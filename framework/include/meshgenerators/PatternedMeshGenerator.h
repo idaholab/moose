@@ -32,6 +32,13 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /**
+   * Generate the patterned mesh.
+   *
+   * @param input_meshes If non-null, the input meshes used to generate the output mesh.
+   */
+  std::unique_ptr<MeshBase> generate(std::vector<std::unique_ptr<ReplicatedMesh>> * input_meshes);
+
   /// The mesh generators to read
   const std::vector<MeshGeneratorName> & _input_names;
 
