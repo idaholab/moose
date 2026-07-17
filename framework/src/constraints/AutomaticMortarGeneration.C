@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
+#include "MortarUtils.h"
 #include "FormattedTable.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -396,7 +397,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
     const MortarSegmentTriangulationMode triangulation_mode,
-    const bool triangulate_triangles)
+    const bool triangulate_triangles,
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -410,7 +412,12 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _correct_edge_dropping(correct_edge_dropping),
     _minimum_projection_angle(minimum_projection_angle),
     _triangulation_mode(triangulation_mode),
-    _triangulate_triangles(triangulate_triangles)
+    _triangulate_triangles(triangulate_triangles),
+    _mortar_3d_qp_mapping(mortar_3d_qp_mapping),
+    _msm_elem_to_reference_points(
+        mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::ReferenceInterpolation
+            ? std::make_unique<std::unordered_map<const Elem *, MortarSegmentReferencePoints>>()
+            : nullptr)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -460,6 +467,8 @@ AutomaticMortarGeneration::initOutput()
 void
 AutomaticMortarGeneration::clear()
 {
+  if (_msm_elem_to_reference_points)
+    _msm_elem_to_reference_points->clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();
   _nodes_to_primary_elem_map.clear();
@@ -476,6 +485,23 @@ AutomaticMortarGeneration::clear()
   _primary_ip_sub_ids.clear();
   _projected_secondary_nodes.clear();
   _failed_secondary_node_projections.clear();
+}
+
+const MortarSegmentReferencePoints &
+AutomaticMortarGeneration::mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const
+{
+  if (!_msm_elem_to_reference_points)
+    mooseError("Mortar segment reference points were requested for mortar segment element ",
+               mortar_segment_elem.id(),
+               ", but the reference-interpolation mapping mode is not enabled.");
+
+  const auto reference_points_it = _msm_elem_to_reference_points->find(&mortar_segment_elem);
+  if (reference_points_it == _msm_elem_to_reference_points->end())
+    mooseError("No reference-point sidecar record was found for mortar segment element ",
+               mortar_segment_elem.id(),
+               ". The mortar segment info and reference-point maps are not aligned.");
+
+  return reference_points_it->second;
 }
 
 void
@@ -1137,6 +1163,9 @@ AutomaticMortarGeneration::outputMortarMesh()
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 {
+  const bool use_reference_interpolation =
+      _mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::ReferenceInterpolation;
+
   // Add an integer flag to mortar segment mesh to keep track of which subelem
   // of second order primal elements mortar segments correspond to
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
@@ -1186,69 +1215,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
-    // Define expression for getting sub-elements nodes (for sub-dividing secondary and primary
-    // elements)
-    auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::vector<unsigned int>
-    {
-      switch (type)
-      {
-        case TRI3:
-          return {{0, 1, 2}};
-        case QUAD4:
-          return {{0, 1, 2, 3}};
-        case TRI6:
-        case TRI7:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 3, 5}};
-            case 1:
-              return {{3, 4, 5}};
-            case 2:
-              return {{3, 1, 4}};
-            case 3:
-              return {{5, 4, 2}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        case QUAD8:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 4, 7}};
-            case 1:
-              return {{4, 1, 5}};
-            case 2:
-              return {{5, 2, 6}};
-            case 3:
-              return {{7, 6, 3}};
-            case 4:
-              return {{4, 5, 6, 7}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        case QUAD9:
-          switch (sub_elem)
-          {
-            case 0:
-              return {{0, 4, 8, 7}};
-            case 1:
-              return {{4, 1, 5, 8}};
-            case 2:
-              return {{8, 5, 2, 6}};
-            case 3:
-              return {{7, 8, 6, 3}};
-            default:
-              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-          }
-        default:
-          mooseError("get_sub_elem_inds: Face element type: ",
-                     libMesh::Utility::enum_to_string<ElemType>(type),
-                     " invalid for 3D mortar");
-      }
-    };
-
     /**
      *  Step 1: Build mortar segments for all secondary elements
      */
@@ -1288,7 +1254,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
         // Get indices of sub-element nodes in element
-        auto sub_elem_nodes = get_sub_elem_nodes(secondary_side_elem->type(), sel);
+        const auto sub_elem_nodes =
+            Moose::Mortar::getMortarSubElementNodeIndices(*secondary_side_elem, sel);
 
         // Secondary sub-element center, normal, and nodes
         Point center;
@@ -1306,9 +1273,21 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         center /= sub_elem_nodes.size();
         normal = normal.unit();
 
-        // Build and store linearized sub-elements for later use
-        mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
-            nodes, center, normal, _triangulation_mode, _triangulate_triangles);
+        std::vector<Point> sub_elem_reference_points;
+        if (use_reference_interpolation)
+        {
+          sub_elem_reference_points.reserve(sub_elem_nodes.size());
+          for (const auto node_index : sub_elem_nodes)
+            sub_elem_reference_points.push_back(secondary_side_elem->master_point(node_index));
+        }
+
+        mortar_segment_helper[sel] =
+            std::make_unique<MortarSegmentHelper>(std::move(nodes),
+                                                  std::move(sub_elem_reference_points),
+                                                  center,
+                                                  normal,
+                                                  _triangulation_mode,
+                                                  _triangulate_triangles);
       }
 
       /**
@@ -1406,6 +1385,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
         // Initialize list of secondary and primary sub-elements that formed each mortar segment
         std::vector<std::pair<unsigned int, unsigned int>> sub_elem_map;
+        std::vector<std::array<Point, 3>> elem_to_secondary_reference_points;
+        std::vector<std::array<Point, 3>> elem_to_primary_reference_points;
 
         /**
          * Step 1.3.2: Sub-divide primary element candidate, then project onto secondary
@@ -1414,7 +1395,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         for (auto p_el : make_range(primary_elem_candidate->n_sub_elem()))
         {
           // Get nodes of primary sub-elements
-          auto sub_elem_nodes = get_sub_elem_nodes(primary_elem_candidate->type(), p_el);
+          const auto sub_elem_nodes =
+              Moose::Mortar::getMortarSubElementNodeIndices(*primary_elem_candidate, p_el);
 
           // Get list of primary sub-element vertex nodes
           std::vector<Point> primary_sub_elem(sub_elem_nodes.size());
@@ -1422,6 +1404,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           {
             const auto n = sub_elem_nodes[iv];
             primary_sub_elem[iv] = primary_elem_candidate->point(n);
+          }
+
+          std::vector<Point> sub_elem_reference_points;
+          if (use_reference_interpolation)
+          {
+            sub_elem_reference_points.reserve(sub_elem_nodes.size());
+            for (const auto node_index : sub_elem_nodes)
+              sub_elem_reference_points.push_back(primary_elem_candidate->master_point(node_index));
           }
 
           // Loop through secondary sub-elements
@@ -1434,11 +1424,21 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             //
             // Mortar segment helpers append a list of mortar segment nodes and connectivities that
             // can be directly used to build mortar segments
-            mortar_segment_helper[s_el]->getMortarSegments(
-                primary_sub_elem, nodal_points, elem_to_node_map);
+            const auto segments_before_helper = elem_to_node_map.size();
+            if (use_reference_interpolation)
+              mortar_segment_helper[s_el]->getMortarSegments(primary_sub_elem,
+                                                             sub_elem_reference_points,
+                                                             nodal_points,
+                                                             elem_to_node_map,
+                                                             elem_to_secondary_reference_points,
+                                                             elem_to_primary_reference_points,
+                                                             TOLERANCE * secondary_volume);
+            else
+              mortar_segment_helper[s_el]->getMortarSegments(
+                  primary_sub_elem, nodal_points, elem_to_node_map);
 
             // Keep track of which secondary and primary sub-elements created segment
-            for (auto i = sub_elem_map.size(); i < elem_to_node_map.size(); ++i)
+            for (auto i = segments_before_helper; i < elem_to_node_map.size(); ++i)
               sub_elem_map.push_back(std::make_pair(s_el, p_el));
           }
         }
@@ -1450,6 +1450,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         // If overlap of polygons was non-trivial (created mortar segment elements)
         if (!elem_to_node_map.empty())
         {
+          mooseAssert(sub_elem_map.size() == elem_to_node_map.size(),
+                      "Mortar segment sub-element and connectivity maps must remain aligned.");
+          mooseAssert(!use_reference_interpolation ||
+                          (elem_to_secondary_reference_points.size() == elem_to_node_map.size() &&
+                           elem_to_primary_reference_points.size() == elem_to_node_map.size()),
+                      "Mortar segment reference and connectivity maps must remain aligned.");
+
           // If this is the first element with non-trivial overlap, set flag
           // Candidates will now be neighbors of elements that had non-trivial overlap
           // (i.e. we'll do a breadth first search now)
@@ -1519,6 +1526,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Associate this MSM elem with the MortarSegmentInfo.
             _msm_elem_to_info.emplace(msm_new_elem, msinfo);
 
+            // Store reference data only for retained segments.
+            if (use_reference_interpolation)
+            {
+              mooseAssert(_msm_elem_to_reference_points,
+                          "Reference-interpolation storage should have been allocated.");
+              MortarSegmentReferencePoints reference_points{elem_to_secondary_reference_points[el],
+                                                            elem_to_primary_reference_points[el]};
+              _msm_elem_to_reference_points->emplace(msm_new_elem, reference_points);
+            }
+
             // Add this mortar segment to the secondary elem to mortar segment map
             secondary_to_msm_element_set.insert(msm_new_elem);
 
@@ -1546,6 +1563,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         _secondary_elems_to_mortar_segments.erase(secondary_elem_to_msm_map_it);
     } // End loop through secondary elements
   } // End loop through mortar constraint pairs
+
+  mooseAssert(!use_reference_interpolation ||
+                  (_msm_elem_to_reference_points &&
+                   _msm_elem_to_reference_points->size() == _msm_elem_to_info.size()),
+              "Mortar segment info and reference-point maps must remain aligned.");
 
   _mortar_segment_mesh->cache_elem_data();
 

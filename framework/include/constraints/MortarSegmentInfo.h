@@ -33,6 +33,12 @@ enum class MortarSegmentTriangulationMode : unsigned char
   Vertex
 };
 
+enum class Mortar3DQuadraturePointMapping : unsigned char
+{
+  NormalProjection = 0,
+  ReferenceInterpolation = 1
+};
+
 /**
  * Holds xi^(1), xi^(2), and other data for a given mortar segment.
  */

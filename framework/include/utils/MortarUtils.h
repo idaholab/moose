@@ -24,6 +24,12 @@ namespace Moose
 namespace Mortar
 {
 /**
+ * Return the node indices for a first-order sub-element of a parent face.
+ */
+std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_elem,
+                                                         unsigned int sub_elem);
+
+/**
  * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
  * @param msm_elem The mortar segment element that we will be mapping quadrature points from
  * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)
@@ -43,6 +49,19 @@ void projectQPoints3d(const Elem * msm_elem,
                       unsigned int sub_elem_index,
                       const QBase & qrule_msm,
                       std::vector<Point> & q_pts);
+
+/**
+ * 3D mapping operator that interpolates stored parent reference points on each triangular mortar
+ * segment.
+ * @param reference_points Parent-face reference points stored in the AMG sidecar
+ * @param qrule_msm The rule that governs quadrature on the mortar segment element
+ * @param secondary_q_pts Reference-space quadrature points on the secondary face
+ * @param primary_q_pts Reference-space quadrature points on the primary face
+ */
+void mapQPoints3dFromReference(const MortarSegmentReferencePoints & reference_points,
+                               const QBase & qrule_msm,
+                               std::vector<Point> & secondary_q_pts,
+                               std::vector<Point> & primary_q_pts);
 
 /**
  * This method will loop over pairs of secondary elements and their corresponding mortar segments,
@@ -164,14 +183,22 @@ loopOverMortarSegments(
       }
       else
       {
-        // Now that has_primary logic gone, could combine these to make more efficient
-        projectQPoints3d(msm_elem,
-                         msinfo.secondary_elem,
-                         secondary_sub_elem_index,
-                         *qrule_msm,
-                         secondary_xi_pts);
-        projectQPoints3d(
-            msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule_msm, primary_xi_pts);
+        if (amg.mortar3DQpMapping() == Mortar3DQuadraturePointMapping::ReferenceInterpolation)
+          mapQPoints3dFromReference(amg.mortarSegmentReferencePoints(*msm_elem),
+                                    *qrule_msm,
+                                    secondary_xi_pts,
+                                    primary_xi_pts);
+        else
+        {
+          // Map independently because the parent-face linearizations differ.
+          projectQPoints3d(msm_elem,
+                           msinfo.secondary_elem,
+                           secondary_sub_elem_index,
+                           *qrule_msm,
+                           secondary_xi_pts);
+          projectQPoints3d(
+              msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule_msm, primary_xi_pts);
+        }
       }
 
       // If edge dropping case we need JxW on the msm to compute dual shape functions

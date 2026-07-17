@@ -93,6 +93,22 @@ MortarConsumerInterface::validParams()
       "intended for mortar mesh debugging purposes in two dimensions.");
   params += MortarConsumerInterface::triangulationParams();
 
+  MooseEnum mortar_3d_qp_mapping("normal_projection=0 reference_interpolation=1",
+                                 "normal_projection");
+  mortar_3d_qp_mapping.addDocumentation(
+      "normal_projection",
+      "Project each mortar-segment quadrature point onto the linearized primary and secondary "
+      "sub-elements along the mortar-segment normal.");
+  mortar_3d_qp_mapping.addDocumentation(
+      "reference_interpolation",
+      "Interpolate stored primary and secondary parent-face reference coordinates over each "
+      "triangular mortar segment.");
+  params.addParam<MooseEnum>(
+      "mortar_3d_qp_mapping",
+      mortar_3d_qp_mapping,
+      "Method used to map quadrature points on 3D mortar segments to primary and secondary "
+      "parent-face reference coordinates. This parameter has no effect for 2D mortar.");
+
   params.addParam<bool>(
       "ghost_higher_d_neighbors",
       false,
@@ -186,7 +202,9 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<bool>("correct_edge_dropping"),
       moose_object->getParam<Real>("minimum_projection_angle"),
       moose_object->getParam<MooseEnum>("triangulation"),
-      moose_object->getParam<bool>("triangulate_triangles"));
+      moose_object->getParam<bool>("triangulate_triangles"),
+      moose_object->getParam<MooseEnum>("mortar_3d_qp_mapping")
+          .getEnum<Mortar3DQuadraturePointMapping>());
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),

@@ -8395,7 +8395,8 @@ FEProblemBase::createMortarInterface(
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
     const MooseEnum & triangulation,
-    const bool triangulate_triangles)
+    const bool triangulate_triangles,
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
 {
   _has_mortar = true;
 
@@ -8409,7 +8410,8 @@ FEProblemBase::createMortarInterface(
                                                correct_edge_dropping,
                                                minimum_projection_angle,
                                                triangulation,
-                                               triangulate_triangles);
+                                               triangulate_triangles,
+                                               mortar_3d_qp_mapping);
   else
     return _mortar_data->createMortarInterface(primary_secondary_boundary_pair,
                                                primary_secondary_subdomain_pair,
@@ -8420,7 +8422,8 @@ FEProblemBase::createMortarInterface(
                                                correct_edge_dropping,
                                                minimum_projection_angle,
                                                triangulation,
-                                               triangulate_triangles);
+                                               triangulate_triangles,
+                                               mortar_3d_qp_mapping);
 }
 
 const AutomaticMortarGeneration &
