@@ -132,6 +132,7 @@
     type = 'CSVDiff'
     input = 'block-dynamics-friction-action.i'
     csvdiff = 'block-dynamics-friction-regularization-action_mechanical_tangential_lm_0006.csv'
+    ignore_columns = 'id'
     capabilities = 'ad_size>=50'
     cli_args = "Executioner/dt=0.05 Executioner/end_time=0.3 Outputs/exodus=false "
                "Outputs/csv=true Outputs/file_base=block-dynamics-friction-regularization-action "
