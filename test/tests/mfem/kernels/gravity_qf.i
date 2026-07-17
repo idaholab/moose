@@ -104,7 +104,7 @@
     type = MFEMHyprePCG
     preconditioner = boomeramg
     l_max_its = 100
-    l_tol = 1e-4
+    l_tol = 1e-10
     l_abs_tol = 0.0
     print_level = 2
   []
