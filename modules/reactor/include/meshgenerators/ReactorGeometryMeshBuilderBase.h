@@ -65,6 +65,10 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 
+// Name of a boolean metadata that controls whether CSG components or engineering units are used in
+// --csg-only mode
+static const std::string expand_units = "expand_units";
+
 // Default values for setting block IDs and region IDs of RGMB regions
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
 const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;

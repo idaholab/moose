@@ -721,7 +721,10 @@ PinMeshGenerator::generateCSG()
   // Define pin engineering unit and add it to CSGBase
   std::unique_ptr<CSG::PinEngineeringUnit> pin_ptr = std::make_unique<CSG::PinEngineeringUnit>(
       name(), _mesh_geometry, _ring_radii, duct_apothems, region_ids, axial_boundaries);
-  csg_obj->addEngUnit(std::move(pin_ptr));
+  auto & pin_unit = csg_obj->addEngUnit(std::move(pin_ptr));
+
+  if (getReactorParam<bool>(RGMB::expand_units))
+    csg_obj->expandEngUnit(pin_unit);
 
   return csg_obj;
 }

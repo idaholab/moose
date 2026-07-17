@@ -53,6 +53,8 @@ ReactorMeshParams::validParams()
       "num_sectors_at_flexible_boundary>2",
       "Number of sectors to use at assembly boundary interface when flexible patterning is used "
       "(Defaults to 6)");
+  params.addParam<bool>(
+      "expand_units", true, "Whether to expand engineering units into CSG components");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
 
@@ -133,6 +135,10 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   if (isParamValid("top_boundary_id") && isParamValid("bottom_boundary_id") &&
       (_bottom_boundary == _top_boundary))
     mooseError("top_boundary_id and bottom_boundary_id must be unique values");
+
+  if (isParamSetByUser("expand_units") && !_app.getMeshGeneratorSystem().getCSGOnly())
+    paramWarning("expand_units", "This parameter is only active in --csg-only mode");
+  this->declareMeshProperty(RGMB::expand_units, getParam<bool>(RGMB::expand_units));
 }
 
 std::unique_ptr<MeshBase>

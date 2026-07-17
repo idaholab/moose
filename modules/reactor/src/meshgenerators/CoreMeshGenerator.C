@@ -893,6 +893,11 @@ CoreMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 CoreMeshGenerator::generateCSG()
 {
+  // Note: this check can be removed once engineering units are supported for CoreMeshGenerator
+  if (!getReactorParam<bool>(RGMB::expand_units))
+    mooseError("CoreMeshGenerator does not currently support engineering unit representation in "
+               "--csg-only");
+
   // Must be called to free the ReactorMeshParams CSGBase object
   freeReactorParamsCSG();
 
