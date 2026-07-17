@@ -101,9 +101,10 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
     flat_inputs.insert(flat_inputs.end(), input.begin(), input.end());
   }
 
-  _training_params =
-      LibtorchUtils::vectorToTensorCopy(flat_inputs, {long(outputs.size()), long(input_size)});
-  _training_data = LibtorchUtils::vectorToTensorCopy(outputs, {long(outputs.size()), 1});
+  _training_params = LibtorchUtils::vectorToTensorCopy(
+      flat_inputs, {cast_int<int64_t>(outputs.size()), cast_int<int64_t>(input_size)});
+  _training_data =
+      LibtorchUtils::vectorToTensorCopy(outputs, {cast_int<int64_t>(outputs.size()), 1});
 
   LibtorchUtils::moveToLibtorchDevice(_training_params, _app.getLibtorchDevice());
   LibtorchUtils::moveToLibtorchDevice(_training_data, _app.getLibtorchDevice());

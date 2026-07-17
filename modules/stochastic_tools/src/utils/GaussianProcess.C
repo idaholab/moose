@@ -183,9 +183,6 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
 
   // Compute the Cholesky decomposition and inverse action of the covariance matrix.
   setupStoredMatrices(flattened_tensor);
-
-  _hyperparam_map.clear();
-  _covariance_function->buildHyperParamMap(_hyperparam_map);
 }
 
 void
@@ -252,10 +249,6 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
 {
   const auto options = doubleOptionsLike(training_params);
   std::vector<Real> theta_values(_num_tunable, 0.0);
-  _hyperparam_map.clear();
-  _covariance_function->buildHyperParamMap(_hyperparam_map);
-  moveHyperParameters(_hyperparam_map, options);
-  _covariance_function->loadHyperParamMap(_hyperparam_map);
 
   mapToVec(_tuning_data, _hyperparam_map, theta_values);
 

@@ -52,6 +52,8 @@ assignRequiredHyperParameter(InputParameters & params,
       mooseError("Expected vector hyperparameter for ", param_name, ".");
     params.set<std::vector<Real>>(param_name) = exportHyperParameter(tensor);
   }
+  else
+    mooseError("Unsupported hyperparameter type for ", param_name, ".");
 }
 
 void
