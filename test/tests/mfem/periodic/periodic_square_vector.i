@@ -10,10 +10,9 @@
 []
 
 [Functions]
-  [HeatSourceFcn]
-    type = ParsedVectorFunction
-    expression_x = if(x>=0.75,10.0,0.0)
-    expression_y = if(y>=0.75,1.0,0.0)
+  [SourceFunction]
+    type = ParsedFunction
+    expression = if(x>=0.75,2.0,1.0)
   []
 []
 
@@ -21,11 +20,6 @@
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
-    fec_order = FIRST
-  []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
     fec_order = FIRST
   []
 []
@@ -37,33 +31,11 @@
   []
 []
 
-[AuxVariables]
-  [concentration_gradient]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []
-[]
-
-[AuxKernels]
-  [grad]
-    type = MFEMGradAux
-    variable = concentration_gradient
-    source = concentration
-    execute_on = TIMESTEP_END
-  []
-[]
-
 [BCs]
-  [top]
+  [walls]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 'top'
-    coefficient = 0.0
-  []
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = 'bottom'
+    boundary = 'top bottom'
     coefficient = 0.0
   []
 []
@@ -76,21 +48,13 @@
   [source]
     type = MFEMDomainLFKernel
     variable = concentration
-    coefficient = 1.0
-  []
-  [HeatSource]
-    type = MFEMVectorDomainLFKernel
-    variable = concentration
-    vector_coefficient = HeatSourceFcn
+    coefficient = SourceFunction
   []
 []
 
 [Preconditioner]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-  []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
   []
 []
 
@@ -108,7 +72,16 @@
   device = cpu
 []
 
+[Postprocessors]
+  [solution_l2_norm]
+    type = MFEML2Error
+    variable = concentration
+    function = 0
+  []
+[]
+
 [Outputs]
+  csv = true
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/periodic_square_vector

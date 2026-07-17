@@ -13,33 +13,12 @@
     fec_type = H1
     fec_order = FIRST
   []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
 []
 
 [Variables]
   [concentration]
     type = MFEMVariable
     fespace = H1FESpace
-  []
-[]
-
-[AuxVariables]
-  [concentration_gradient]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []
-[]
-
-[AuxKernels]
-  [grad]
-    type = MFEMGradAux
-    variable = concentration_gradient
-    source = concentration
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -57,7 +36,7 @@
     type = MFEMDiffusionKernel
     variable = concentration
   []
-  [gravity]
+  [source]
     type = MFEMDomainLFKernel
     variable = concentration
     coefficient = 1.0
@@ -84,7 +63,16 @@
   device = cpu
 []
 
+[Postprocessors]
+  [solution_l2_norm]
+    type = MFEML2Error
+    variable = concentration
+    function = 0
+  []
+[]
+
 [Outputs]
+  csv = true
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/PeriodicGmsh
