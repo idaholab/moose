@@ -26,16 +26,25 @@ MFEMTopology::validParams()
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::vector<mfem::real_t>>>(
       "lattice_vectors", {}, "Translation vectors matching pairs of equivalent vertices.");
+  params.addParam<unsigned int>(
+      "rotational_symmetry_order",
+      1,
+      "Order of rotational symmetry around z axis. Number of whole copies of mesh in 2 pi rotation "
+      "about axis of rotational symmetry.");
   return params;
 }
 
 MFEMTopology::MFEMTopology(const InputParameters & parameters)
   : _input_lattice_vectors(
         parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors")),
-    _lattice_vectors(ConvertVectorOfVectorsToMFEM(_input_lattice_vectors))
+    _lattice_vectors(ConvertVectorOfVectorsToMFEM(_input_lattice_vectors)),
+    _rotational_symmetry_order(parameters.get<unsigned int>("rotational_symmetry_order"))
 {
   for (const auto & lattice_vector : _lattice_vectors)
     DeclareTranslationalSymmetry(lattice_vector);
+
+  if (_rotational_symmetry_order > 1)
+    DeclareRotationalSymmetry(_rotational_symmetry_order);
 }
 
 void
@@ -44,6 +53,14 @@ MFEMTopology::DeclareTranslationalSymmetry(const mfem::Vector & translation)
   _periodic = true;
   auto translational_symmetry = std::make_shared<TranslationalSymmetry>(translation);
   _symmetry_transforms.push_back(translational_symmetry);
+}
+
+void
+MFEMTopology::DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order)
+{
+  _periodic = true;
+  auto rotational_symmetry = std::make_shared<RotationalSymmetry>(rotational_symmetry_order);
+  _symmetry_transforms.push_back(rotational_symmetry);
 }
 
 std::vector<int>
@@ -121,9 +138,8 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
   auto make_replica = [&replica2primary, &primary2replicas](int r, int p)
   {
     if (r == p)
-    {
       return;
-    }
+
     primary2replicas[p].insert(r);
     replica2primary[r] = p;
     for (const int s : primary2replicas[r])
@@ -140,17 +156,13 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
     for (int vi : bdr_v)
     {
       coord = mesh.GetVertex(vi);
-      // apply_rotation_transform(coord, z_rotation_angle * pi / 180., at);
-      // add(coord, translations[i], at);
       symmetry_transform->ApplyTransform(coord, at);
       const int vj = kdtree->FindClosestPoint(at.GetData());
       coord = mesh.GetVertex(vj);
       add(at, -1.0, coord, dx);
       mfem::real_t tol = 1e-8;
       if (dx.Norml2() > dia * tol)
-      {
         continue;
-      }
 
       // The two vertices vi and vj are coincident.
       // Are vertices `vi` and `vj` already primary?
@@ -188,17 +200,13 @@ MFEMTopology::CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mesh) co
       }
     }
   }
-  // end angle
 
   std::vector<int> v2v(mesh.GetNV());
   for (size_t i = 0; i < v2v.size(); i++)
-  {
     v2v[i] = static_cast<int>(i);
-  }
   for (const auto & r2p : replica2primary)
-  {
     v2v[r2p.first] = r2p.second;
-  }
+
   return v2v;
 }
 

@@ -44,6 +44,29 @@ private:
   const mfem::Vector & _lattice_vector;
 };
 
+class RotationalSymmetry : public DiscreteSymmetry
+{
+public:
+  RotationalSymmetry(const unsigned int rotational_symmetry_order)
+    : DiscreteSymmetry(),
+      _rotational_symmetry_order(rotational_symmetry_order),
+      _rotation_angle(2 * pi / rotational_symmetry_order){};
+
+  virtual void ApplyTransform(const mfem::Vector & coord_in, mfem::Vector & coord_out) override
+  {
+    // x' =  x cos phi + y sin phi
+    // y' = -x sin phi + y cos phi
+    // z' = z
+    coord_out[0] = coord_in[0] * cos(_rotation_angle) + coord_in[1] * sin(_rotation_angle);
+    coord_out[1] = -coord_in[0] * sin(_rotation_angle) + coord_in[1] * cos(_rotation_angle);
+    coord_out[2] = coord_in[2];
+  };
+
+private:
+  const unsigned int _rotational_symmetry_order;
+  const mfem::real_t _rotation_angle; // radians
+};
+
 /**
  Interface for MFEM mesh objects providing methods querying topological information about an
  mfem::ParMesh
@@ -65,21 +88,15 @@ public:
   // list of primary vertices.
   void DeclareTranslationalSymmetry(const mfem::Vector & translation);
 
-  // void DeclareRotationalSymmetry(const mfem::Vector & coord_in,
-  //                                   mfem::Vector & coord_out)
-  // {
-  //   x' =  x cos phi + y sin phi
-  //   y' = -x sin phi + y cos phi
-  //   rotated_coord[0] = coord_in[0] * cos(rotation_angle) + coord_in[1] * sin(rotation_angle);
-  //   rotated_coord[1] =-coord_in[0] * sin(rotation_angle) + coord_in[1] * cos(rotation_angle);
-  //   rotated_coord[2] = coord_in[2];
-  // }
+  void DeclareRotationalSymmetry(const unsigned int rotational_symmetry_order);
+
 protected:
   bool _periodic{false};
 
 private:
   std::vector<std::vector<mfem::real_t>> _input_lattice_vectors;
   std::vector<mfem::Vector> _lattice_vectors;
+  const unsigned int _rotational_symmetry_order;
   std::vector<std::shared_ptr<DiscreteSymmetry>> _symmetry_transforms;
 };
 
