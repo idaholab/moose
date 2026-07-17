@@ -43,7 +43,7 @@ protected:
 private:
   const unsigned int _v_var;
   const GenericVariableValue<is_ad> & _v;
-  const VariableValue & _coef_var;
+  const GenericVariableValue<is_ad> & _coef_var;
 };
 
 typedef PorousFlowHeatMassTransferTempl<false> PorousFlowHeatMassTransfer;

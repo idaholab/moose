@@ -228,8 +228,8 @@ PorousFlowDarcyBaseTempl<is_ad>::adComputeJacobian()
 
     const unsigned int num_nodes = _test.size();
     std::vector<ADReal> darcy_residuals(num_nodes, 0.0);
-    for (unsigned int n = 0; n < num_nodes; ++n)
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
+    for (const auto n : make_range(num_nodes))
+      for (const auto ph : make_range(_num_phases))
         darcy_residuals[n] += _proto_flux[ph][n];
 
     this->addJacobianWithoutConstraints(
@@ -266,8 +266,11 @@ PorousFlowDarcyBaseTempl<is_ad>::computeProtoFluxWithoutMobility()
   {
     _proto_flux[ph].assign(num_nodes, 0.0);
     for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
+    {
+      const Real jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
       for (_i = 0; _i < num_nodes; ++_i)
-        _proto_flux[ph][_i] += this->_JxW[_qp] * this->_coord[_qp] * darcyQp(ph);
+        _proto_flux[ph][_i] += jxw_coord * darcyQp(ph);
+    }
   }
 }
 

@@ -40,7 +40,7 @@ PorousFlowFullySaturatedMassTimeDerivativeTempl<is_ad>::validParams()
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addClassDescription(
       "Fully-saturated version of the single-component, single-phase fluid mass derivative wrt "
-      "time.  Templated on is_ad: the AD version requires no hand-coded Jacobian.");
+      "time.");
   return params;
 }
 

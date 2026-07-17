@@ -45,6 +45,7 @@ protected:
   /// If true the kernel is d(fluid mass)/dt, otherwise d(fluid volume)/dt
   const bool _multiply_by_density;
 
+  /// Determines whether mechanical and/or thermal contributions should be added to the residual
   enum class CouplingTypeEnum
   {
     Hydro,
@@ -54,7 +55,10 @@ protected:
   };
   const CouplingTypeEnum _coupling_type;
 
+  /// Whether thermal contributions should be added to the residual
   const bool _includes_thermal;
+
+  /// Whether mechanical contributions should be added to the residual
   const bool _includes_mechanical;
 
   /// Biot coefficient

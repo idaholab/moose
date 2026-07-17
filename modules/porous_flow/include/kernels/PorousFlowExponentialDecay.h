@@ -30,10 +30,10 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// The decay rate
-  const VariableValue & _rate;
+  const GenericVariableValue<is_ad> & _rate;
 
   /// The reference
-  const VariableValue & _reference;
+  const GenericVariableValue<is_ad> & _reference;
 
   usingGenericKernelMembers;
 };

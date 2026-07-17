@@ -30,8 +30,8 @@ template <bool is_ad>
 PorousFlowExponentialDecayTempl<is_ad>::PorousFlowExponentialDecayTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _rate(this->coupledValue("rate")),
-    _reference(this->coupledValue("reference"))
+    _rate(this->template coupledGenericValue<is_ad>("rate")),
+    _reference(this->template coupledGenericValue<is_ad>("reference"))
 {
 }
 
@@ -46,9 +46,9 @@ template <bool is_ad>
 Real
 PorousFlowExponentialDecayTempl<is_ad>::computeQpJacobian()
 {
-  // Never called for the AD instantiation, which assembles the Jacobian from the AD residual.
-  mooseAssert(!is_ad, "computeQpJacobian should not be called for the AD instantiation");
-  return _test[_i][_qp] * _rate[_qp] * _phi[_j][_qp];
+  if constexpr (!is_ad)
+    return _test[_i][_qp] * _rate[_qp] * _phi[_j][_qp];
+  return 0.0;
 }
 
 template class PorousFlowExponentialDecayTempl<false>;

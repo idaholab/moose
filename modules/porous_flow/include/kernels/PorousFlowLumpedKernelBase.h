@@ -24,7 +24,6 @@ template <bool is_ad>
 class PorousFlowLumpedKernelBaseTempl : public GenericKernel<is_ad>
 {
 public:
-  static InputParameters validParams();
   PorousFlowLumpedKernelBaseTempl(const InputParameters & parameters);
 
 protected:

@@ -257,17 +257,15 @@ PorousFlowDispersiveFluxTempl<is_ad>::computeQpJac(unsigned int jvar) const
       }
 
       dflux += _phi[_j][_qp] * (*_dfluid_density_qp_dvar)[_qp][ph][pvar] *
-               (diffusion * RankTwoTensor(RankTwoTensor::initIdentity) + dispersion) *
+               (diffusion * _identity_tensor + dispersion) *
                _grad_mass_frac[_qp][ph][_fluid_component];
-      dflux += _fluid_density_qp[_qp][ph] *
-               (ddiffusion * RankTwoTensor(RankTwoTensor::initIdentity) + ddispersion) *
+      dflux += _fluid_density_qp[_qp][ph] * (ddiffusion * _identity_tensor + ddispersion) *
                _grad_mass_frac[_qp][ph][_fluid_component];
 
       // NOTE: Here we assume that d(grad_mass_frac)/d(var) = d(mass_frac)/d(var) * grad_phi
       //       This is true for most PorousFlow scenarios, but not for chemical reactions
       //       where mass_frac is a nonlinear function of the primary MOOSE Variables
-      dflux += _fluid_density_qp[_qp][ph] *
-               (diffusion * RankTwoTensor(RankTwoTensor::initIdentity) + dispersion) *
+      dflux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) *
                (*_dmass_frac_dvar)[_qp][ph][_fluid_component][pvar] * _grad_phi[_j][_qp];
     }
 

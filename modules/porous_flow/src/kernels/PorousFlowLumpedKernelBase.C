@@ -10,13 +10,6 @@
 #include "PorousFlowLumpedKernelBase.h"
 
 template <bool is_ad>
-InputParameters
-PorousFlowLumpedKernelBaseTempl<is_ad>::validParams()
-{
-  return GenericKernel<is_ad>::validParams();
-}
-
-template <bool is_ad>
 PorousFlowLumpedKernelBaseTempl<is_ad>::PorousFlowLumpedKernelBaseTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters)
@@ -63,9 +56,13 @@ PorousFlowLumpedKernelBaseTempl<is_ad>::computeJacobian()
     GenericKernel<is_ad>::computeJacobian();
   else
   {
-    this->computeResidualsForJacobian();
-    this->addJacobianWithoutConstraints(
-        this->_assembly, this->_residuals, this->dofIndices(), this->_var.scalingFactor());
+    if (_my_elem_lma != this->_current_elem)
+    {
+      this->computeResidualsForJacobian();
+      this->addJacobianWithoutConstraints(
+          this->_assembly, this->_residuals, this->dofIndices(), this->_var.scalingFactor());
+      _my_elem_lma = this->_current_elem;
+    }
   }
 }
 

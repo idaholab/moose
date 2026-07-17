@@ -21,8 +21,7 @@ PorousFlowFullySaturatedDarcyFlowTempl<is_ad>::validParams()
       "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
   params.addClassDescription(
       "Darcy flux suitable for models involving a fully-saturated single phase, multi-component "
-      "fluid.  No upwinding is used.  Templated on is_ad: the AD version requires no hand-coded "
-      "Jacobian.");
+      "fluid.  No upwinding is used.");
   return params;
 }
 

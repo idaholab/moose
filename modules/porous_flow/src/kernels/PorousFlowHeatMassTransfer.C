@@ -38,7 +38,7 @@ PorousFlowHeatMassTransferTempl<is_ad>::PorousFlowHeatMassTransferTempl(
   : GenericKernel<is_ad>(parameters),
     _v_var(coupled("v")),
     _v(this->template coupledGenericValue<is_ad>("v")),
-    _coef_var(this->coupledValue("transfer_coefficient"))
+    _coef_var(this->template coupledGenericValue<is_ad>("transfer_coefficient"))
 {
 }
 
@@ -67,12 +67,16 @@ template <bool is_ad>
 Real
 PorousFlowHeatMassTransferTempl<is_ad>::jac(unsigned int jvar) const
 {
-  // Never called for the AD instantiation, which assembles the Jacobian from the AD residual.
-  mooseAssert(!is_ad, "jac should not be called for the AD instantiation");
-  if (jvar == _var.number())
-    return _coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
-  else if (jvar == _v_var)
-    return -_coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  if constexpr (!is_ad)
+  {
+    if (jvar == _var.number())
+      return _coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    else if (jvar == _v_var)
+      return -_coef_var[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return 0.0;
+  }
+  else
+    libmesh_ignore(jvar);
   return 0.0;
 }
 

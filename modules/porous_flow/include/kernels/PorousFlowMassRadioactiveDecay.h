@@ -55,7 +55,8 @@ protected:
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
-  /// Porosity at the nodes (AD or non-AD depending on is_ad)
+  /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at
+  /// the qps (AD or non-AD depending on is_ad)
   const GenericMaterialProperty<Real, is_ad> & _porosity;
 
   /// d(porosity)/d(PorousFlow variable) at nodes -- null for AD path
