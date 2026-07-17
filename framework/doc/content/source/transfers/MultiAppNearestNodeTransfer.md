@@ -15,12 +15,13 @@ nearest-node mapping after the first execution and can greatly reduce the cost o
 transfers. Do not use this option when either the source or target mesh changes, because the cached
 nearest-node mapping can become invalid.
 
-Restrict the transfer to the smallest correct search domain.
-[!param](/Transfers/MultiAppNearestNodeTransfer/source_boundary) and
-[!param](/Transfers/MultiAppNearestNodeTransfer/target_boundary) avoid searching and assigning
-unrelated nodes. The [!param](/Transfers/MultiAppNearestNodeTransfer/bbox_factor) parameter can be
-used when the source bounding boxes must be inflated for a valid nearest-node search, but
-unnecessarily large bounding boxes can increase the number of candidate source applications.
+Restrict the source search domain when possible.
+[!param](/Transfers/MultiAppNearestNodeTransfer/source_boundary) avoids searching unrelated source
+nodes. The [!param](/Transfers/MultiAppNearestNodeTransfer/bbox_factor) parameter can be used when
+the source bounding boxes must be inflated for a valid nearest-node search, but unnecessarily large
+bounding boxes can increase the number of candidate source applications.
+Separately, [!param](/Transfers/MultiAppNearestNodeTransfer/target_boundary) avoids assigning values
+to unrelated target nodes.
 
 ## Example Input File Syntax
 
