@@ -148,7 +148,6 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
       B += B_tmp;
     }
 
-    // MathUtils::kron(dKdhp, B, dKdhp_sub);
     dKdhp = torch::kron(B, dKdhp_sub);
 
     return true;

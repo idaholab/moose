@@ -23,15 +23,17 @@ TEST(StochasticTools, getMean)
   const auto mean = standardizer.getMean();
   const auto stddev = standardizer.getStdDev();
 
+  ASSERT_EQ(mean.dim(), 1);
+  ASSERT_EQ(stddev.dim(), 1);
   ASSERT_EQ(static_cast<std::size_t>(mean.size(0)), mean_gold.size());
   ASSERT_EQ(static_cast<std::size_t>(stddev.size(0)), stddev_gold.size());
 
-  const auto mean_accessor = mean.accessor<Real, 2>();
-  const auto stddev_accessor = stddev.accessor<Real, 2>();
+  const auto mean_accessor = mean.accessor<Real, 1>();
+  const auto stddev_accessor = stddev.accessor<Real, 1>();
   for (std::size_t i = 0; i < mean_gold.size(); ++i)
-    EXPECT_EQ(mean_accessor[i][0], mean_gold[i]);
+    EXPECT_EQ(mean_accessor[i], mean_gold[i]);
   for (std::size_t i = 0; i < stddev_gold.size(); ++i)
-    EXPECT_EQ(stddev_accessor[i][0], stddev_gold[i]);
+    EXPECT_EQ(stddev_accessor[i], stddev_gold[i]);
 }
 
 TEST(StochasticTools, getStandardized)
