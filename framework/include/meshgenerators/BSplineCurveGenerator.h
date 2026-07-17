@@ -26,13 +26,13 @@ public:
 
 protected:
   /// Return the starting point of the spline
-  Point startPoint(MeshBase * start_mesh) const;
+  Point startPoint(MeshBase & start_mesh) const;
   /// Return the ending point of the spline
-  Point endPoint(MeshBase * end_mesh) const;
+  Point endPoint(MeshBase & end_mesh) const;
   /// Return the starting direction of the spline
-  RealVectorValue startDirection(MeshBase * start_mesh) const;
+  RealVectorValue startDirection(MeshBase & start_mesh) const;
   /// Return the ending direction of the spline
-  RealVectorValue endDirection(MeshBase * end_mesh) const;
+  RealVectorValue endDirection(MeshBase & end_mesh) const;
 
   /// Subdomain ID for the elements created
   const SubdomainID _new_subdomain_id;
