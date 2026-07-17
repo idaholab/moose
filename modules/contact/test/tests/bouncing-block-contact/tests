@@ -284,6 +284,9 @@
                  "Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP "
                  "Contact/frictional/friction_reference_slip=1e-3"
       detail = 'and by solving a short regularized mortar Lagrange multiplier contact problem.'
+      # This short regression shares its input's default checkpoint base with an existing recover test.
+      recover = false
+      restep = false
     []
   []
   [coulomb_friction_regularization_action_errors]
