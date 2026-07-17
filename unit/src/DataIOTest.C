@@ -115,3 +115,47 @@ TEST(DataIOTest, uniquePtrNumericVector)
   for (const auto i : index_range(data))
     ASSERT_EQ((*new_vec)(i), data[i]);
 }
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+
+TEST(DataIOTest, torchTensor)
+{
+  auto tensor = torch::arange(6, at::kDouble).reshape({2, 3}).transpose(0, 1);
+  ASSERT_FALSE(tensor.is_contiguous());
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.scalar_type(), at::kDouble);
+  EXPECT_TRUE(loaded_tensor.device().is_cpu());
+  EXPECT_TRUE(loaded_tensor.is_contiguous());
+  EXPECT_EQ(loaded_tensor.dim(), 2);
+  EXPECT_EQ(loaded_tensor.size(0), 3);
+  EXPECT_EQ(loaded_tensor.size(1), 2);
+  EXPECT_TRUE(torch::equal(loaded_tensor, tensor));
+}
+
+TEST(DataIOTest, emptyTorchTensor)
+{
+  auto tensor = torch::empty({2, 0, 3}, at::kDouble);
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.scalar_type(), at::kDouble);
+  EXPECT_EQ(loaded_tensor.dim(), 3);
+  EXPECT_EQ(loaded_tensor.size(0), 2);
+  EXPECT_EQ(loaded_tensor.size(1), 0);
+  EXPECT_EQ(loaded_tensor.size(2), 3);
+  EXPECT_EQ(loaded_tensor.numel(), 0);
+}
+
+#endif
