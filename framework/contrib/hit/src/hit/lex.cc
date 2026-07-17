@@ -13,7 +13,6 @@ const std::string digits = "0123456789";
 const std::string alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const std::string space = " \t";
 const std::string allspace = " \t\n\r";
-const std::string newline = "\n\r";
 const std::string alphanumeric = digits + alpha;
 const std::string identchars = alphanumeric + "_./:<>-+*!";
 
