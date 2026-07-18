@@ -118,7 +118,9 @@
     input = diagonal-step-2d.i
     csvdiff = 'average_diag_sample_0001.csv'
     requirement = 'The system shall support linear finite volume advection using linear (average) interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
-    cli_args = "Outputs/file_base=average LinearFVKernels/advection/advected_interp_method_name=average"
+    cli_args = "Mesh/gmg/nx=31 Mesh/gmg/ny=31
+                Outputs/file_base=average
+                LinearFVKernels/advection/advected_interp_method_name=average"
     max_threads = 1 # see libmesh issue #3808
   []
   [diagonal-step-2d-venkat-deferred]
@@ -198,7 +200,11 @@
     input = diagonal-step-2d.i
     csvdiff = 'average_neg_diag_sample_0001.csv'
     requirement = 'The system shall support linear finite volume linear (average) advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
-    cli_args = "Outputs/file_base=average_neg LinearFVKernels/advection/advected_interp_method_name=average LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
+    cli_args = "Mesh/gmg/nx=31 Mesh/gmg/ny=31
+                Outputs/file_base=average_neg
+                LinearFVKernels/advection/advected_interp_method_name=average
+                LinearFVKernels/advection/velocity='-1 -1 0'
+                LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
     max_threads = 1 # see libmesh issue #3808
   []
   [diagonal-step-2d-neg-venkat-deferred]
