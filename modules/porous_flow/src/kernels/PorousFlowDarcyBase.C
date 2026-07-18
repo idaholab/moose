@@ -16,10 +16,11 @@
 
 #include "libmesh/quadrature.h"
 
+template <bool is_ad>
 InputParameters
-PorousFlowDarcyBase::validParams()
+PorousFlowDarcyBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
   params.addRequiredParam<UserObjectName>(
@@ -41,40 +42,68 @@ PorousFlowDarcyBase::validParams()
   return params;
 }
 
-PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters)
-  : Kernel(parameters),
-    _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_dvar(
-        getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
-    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>(
-        "dPorousFlow_permeability_qp_dgradvar")),
-    _fluid_density_node(
-        getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
-    _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_fluid_phase_density_nodal_dvar")),
-    _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
-    _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_fluid_phase_density_qp_dvar")),
-    _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_nodal")),
+template <bool is_ad>
+PorousFlowDarcyBaseTempl<is_ad>::PorousFlowDarcyBaseTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _permeability(this->template getGenericMaterialProperty<RealTensorValue, is_ad>(
+        "PorousFlow_permeability_qp")),
+    _dpermeability_dvar(is_ad ? nullptr
+                              : &this->template getMaterialProperty<std::vector<RealTensorValue>>(
+                                    "dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_dgradvar(
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<RealTensorValue>>>(
+                    "dPorousFlow_permeability_qp_dgradvar")),
+    _fluid_density_node(this->template getGenericMaterialProperty<std::vector<Real>, is_ad>(
+        "PorousFlow_fluid_phase_density_nodal")),
+    _dfluid_density_node_dvar(
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                    "dPorousFlow_fluid_phase_density_nodal_dvar")),
+    _fluid_density_qp(this->template getGenericMaterialProperty<std::vector<Real>, is_ad>(
+        "PorousFlow_fluid_phase_density_qp")),
+    _dfluid_density_qp_dvar(
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                    "dPorousFlow_fluid_phase_density_qp_dvar")),
+    _fluid_viscosity(this->template getGenericMaterialProperty<std::vector<Real>, is_ad>(
+        "PorousFlow_viscosity_nodal")),
     _dfluid_viscosity_dvar(
-        getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_nodal_dvar")),
-    _pp(getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal")),
-    _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
-    _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_grad_porepressure_qp_dgradvar")),
-    _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
-        "dPorousFlow_grad_porepressure_qp_dvar")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                    "dPorousFlow_viscosity_nodal_dvar")),
+    _pp(this->template getGenericMaterialProperty<std::vector<Real>, is_ad>(
+        "PorousFlow_porepressure_nodal")),
+    _grad_p(this->template getGenericMaterialProperty<std::vector<RealGradient>, is_ad>(
+        "PorousFlow_grad_porepressure_qp")),
+    _dgrad_p_dgrad_var(is_ad ? nullptr
+                             : &this->template getMaterialProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_grad_porepressure_qp_dgradvar")),
+    _dgrad_p_dvar(is_ad
+                      ? nullptr
+                      : &this->template getMaterialProperty<std::vector<std::vector<RealGradient>>>(
+                            "dPorousFlow_grad_porepressure_qp_dvar")),
+    _dictator(this->template getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
-    _gravity(getParam<RealVectorValue>("gravity")),
+    _gravity(this->template getParam<RealVectorValue>("gravity")),
     _perm_derivs(_dictator.usePermDerivs()),
-    _full_upwind_threshold(getParam<unsigned>("full_upwind_threshold")),
-    _fallback_scheme(getParam<MooseEnum>("fallback_scheme").getEnum<FallbackEnum>()),
+    _full_upwind_threshold(this->template getParam<unsigned>("full_upwind_threshold")),
+    _fallback_scheme(
+        this->template getParam<MooseEnum>("fallback_scheme").template getEnum<FallbackEnum>()),
     _proto_flux(_num_phases),
     _jacobian(_num_phases),
     _num_upwinds(),
     _num_downwinds()
 {
+  // The full-upwinding scheme identifies each element test function with a mesh node, which is
+  // only valid for nodal (Lagrange) variables.
+  if (!_var.isNodal())
+    mooseError("The variable '",
+               _var.name(),
+               "' is not a nodal (Lagrange) variable.  This kernel uses full upwinding, which "
+               "requires a nodal variable.  For non-nodal variables use the non-upwinded "
+               "PorousFlowFullySaturated* kernels or Kuzmin-Turek (KT) stabilisation instead.");
+
 #ifdef LIBMESH_HAVE_TBB_API
   if (libMesh::n_threads() > 1)
     mooseWarning("PorousFlowDarcyBase: num_upwinds and num_downwinds may not be computed "
@@ -82,106 +111,182 @@ PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters)
 #endif
 }
 
+template <bool is_ad>
 void
-PorousFlowDarcyBase::timestepSetup()
+PorousFlowDarcyBaseTempl<is_ad>::timestepSetup()
 {
-  Kernel::timestepSetup();
+  GenericKernel<is_ad>::timestepSetup();
   _num_upwinds = std::unordered_map<unsigned, std::vector<std::vector<unsigned>>>();
   _num_downwinds = std::unordered_map<unsigned, std::vector<std::vector<unsigned>>>();
 }
 
-Real
-PorousFlowDarcyBase::darcyQp(unsigned int ph) const
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::jacobianSetup()
+{
+  GenericKernel<is_ad>::jacobianSetup();
+  _my_elem_darcy = nullptr;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowDarcyBaseTempl<is_ad>::darcyQp(unsigned int ph) const
 {
   return _grad_test[_i][_qp] *
          (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity));
 }
 
+template <bool is_ad>
 Real
-PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
+PorousFlowDarcyBaseTempl<is_ad>::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
 {
-  if (_dictator.notPorousFlowVariable(jvar))
-    return 0.0;
-
-  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
-
-  RealVectorValue deriv =
-      _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
-                            _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
-
-  deriv += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
-
-  if (_perm_derivs)
+  if constexpr (!is_ad)
   {
-    deriv += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
-             (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-    for (const auto i : make_range(Moose::dim))
-      deriv += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
-               (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-  }
+    if (_dictator.notPorousFlowVariable(jvar))
+      return 0.0;
 
-  return _grad_test[_i][_qp] * deriv;
+    const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
+
+    RealVectorValue deriv =
+        _permeability[_qp] * (_grad_phi[_j][_qp] * (*_dgrad_p_dgrad_var)[_qp][ph][pvar] -
+                              _phi[_j][_qp] * (*_dfluid_density_qp_dvar)[_qp][ph][pvar] * _gravity);
+
+    deriv += _permeability[_qp] * ((*_dgrad_p_dvar)[_qp][ph][pvar] * _phi[_j][_qp]);
+
+    if (_perm_derivs)
+    {
+      deriv += (*_dpermeability_dvar)[_qp][pvar] * _phi[_j][_qp] *
+               (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+      for (const auto i : make_range(Moose::dim))
+        deriv += (*_dpermeability_dgradvar)[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
+                 (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+    }
+
+    return _grad_test[_i][_qp] * deriv;
+  }
+  else
+    libmesh_ignore(jvar, ph);
+  return 0.0;
 }
 
-Real
-PorousFlowDarcyBase::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowDarcyBaseTempl<is_ad>::computeQpResidual()
 {
   mooseError("PorousFlowDarcyBase: computeQpResidual called");
   return 0.0;
 }
 
+template <bool is_ad>
 void
-PorousFlowDarcyBase::computeResidual()
+PorousFlowDarcyBaseTempl<is_ad>::computeResidual()
 {
-  computeResidualAndJacobian(JacRes::CALCULATE_RESIDUAL, 0.0);
-}
-
-void
-PorousFlowDarcyBase::computeJacobian()
-{
-  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
-}
-
-void
-PorousFlowDarcyBase::computeOffDiagJacobian(const unsigned int jvar)
-{
-  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
-}
-
-void
-PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar)
-{
-  if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) && _dictator.notPorousFlowVariable(jvar))
-    return;
-
-  // The PorousFlow variable index corresponding to the variable number jvar
-  const unsigned int pvar =
-      ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _dictator.porousFlowVariableNum(jvar) : 0);
-
-  prepareMatrixTag(_assembly, _var.number(), jvar);
-  if ((_local_ke.n() == 0) && (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem
-                                                                          // encountered in the
-                                                                          // initial timestep when
-                                                                          // use_displaced_mesh=true
-    return;
-
-  // The number of nodes in the element
-  const unsigned int num_nodes = _test.size();
-
-  // Compute the residual and jacobian without the mobility terms. Even if we are computing the
-  // Jacobian we still need this in order to see which nodes are upwind and which are downwind.
-  for (unsigned ph = 0; ph < _num_phases; ++ph)
+  if constexpr (!is_ad)
+    computeResidualAndJacobian(JacRes::CALCULATE_RESIDUAL, 0);
+  else
   {
-    _proto_flux[ph].assign(num_nodes, 0);
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    adComputeProtoFlux(false);
+    // Assemble the real-valued residual from the value parts of the ADReal proto fluxes
+    assembleProtoFluxResidual();
+  }
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::assembleProtoFluxResidual()
+{
+  this->prepareVectorTag(this->_assembly, _var.number());
+  for (_i = 0; _i < _test.size(); _i++)
+    for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      this->_local_re(_i) += MetaPhysicL::raw_value(_proto_flux[ph][_i]);
+  this->accumulateTaggedLocalResidual();
+
+  if (this->_has_save_in)
+    for (unsigned int i = 0; i < this->_save_in.size(); i++)
+      this->_save_in[i]->sys().solution().add_vector(this->_local_re,
+                                                     this->_save_in[i]->dofIndices());
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::computeJacobian()
+{
+  if constexpr (!is_ad)
+    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
+  else
+    // Block-diagonal (e.g. PJFNK) assembly path: this is the only Jacobian call we get.
+    adComputeJacobian();
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::adComputeJacobian()
+{
+  if constexpr (is_ad)
+  {
+    // Compute ADReal proto fluxes with upwind counting, then extract the Jacobian.
+    // Every block (diagonal and off-diagonal) is encoded in the ADReal derivatives, so a
+    // single call to addJacobianWithoutConstraints captures all variable sensitivities.
+    //
+    // See PorousFlowLumpedKernelBase.C::computeJacobian for the detailed rationale of why
+    // addJacobianWithoutConstraints (rather than the default ADKernel addJacobian) is required:
+    // each residual row's column set must be read from its own derivatives instead of being shared
+    // from row 0. There it is forced by mass-lumped nodal materials; here it is forced by the
+    // upwinding scheme, which makes each node's proto flux depend on a different set of nodal DOFs.
+    adComputeProtoFlux(true);
+
+    const unsigned int num_nodes = _test.size();
+    std::vector<ADReal> darcy_residuals(num_nodes, 0.0);
+    for (const auto n : make_range(num_nodes))
+      for (const auto ph : make_range(_num_phases))
+        darcy_residuals[n] += _proto_flux[ph][n];
+
+    this->addJacobianWithoutConstraints(
+        this->_assembly, darcy_residuals, this->dofIndices(), _var.scalingFactor());
+  }
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::computeOffDiagJacobian(const unsigned int jvar)
+{
+  if constexpr (!is_ad)
+    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
+  else
+  {
+    libmesh_ignore(jvar);
+    // Full (SMP) assembly calls this once per coupled variable; the first call performs the
+    // single AD pass that fills every block, and the guard makes the rest no-ops. This mirrors
+    // ADKernel::computeOffDiagJacobian and avoids the ADD-semantics double-counting.
+    if (_my_elem_darcy != this->_current_elem)
     {
-      for (_i = 0; _i < num_nodes; ++_i)
-        _proto_flux[ph][_i] += _JxW[_qp] * _coord[_qp] * darcyQp(ph);
+      adComputeJacobian();
+      _my_elem_darcy = this->_current_elem;
     }
   }
+}
 
-  // for this element, record whether each node is "upwind" or "downwind" (or neither)
-  const unsigned elem = _current_elem->id();
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::computeProtoFluxWithoutMobility()
+{
+  const unsigned int num_nodes = _test.size();
+  for (unsigned ph = 0; ph < _num_phases; ++ph)
+  {
+    _proto_flux[ph].assign(num_nodes, 0.0);
+    for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
+    {
+      const Real jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      for (_i = 0; _i < num_nodes; ++_i)
+        _proto_flux[ph][_i] += jxw_coord * darcyQp(ph);
+    }
+  }
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::initializeUpwindTracking(unsigned elem, unsigned int num_nodes)
+{
   if (_num_upwinds.find(elem) == _num_upwinds.end())
   {
     _num_upwinds[elem] = std::vector<std::vector<unsigned>>(_num_phases);
@@ -192,51 +297,41 @@ PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int 
       _num_downwinds[elem][ph].assign(num_nodes, 0);
     }
   }
-  // record the information once per nonlinear iteration
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN && jvar == _var.number())
-  {
-    for (unsigned ph = 0; ph < _num_phases; ++ph)
-    {
-      for (unsigned nod = 0; nod < num_nodes; ++nod)
-      {
-        if (_proto_flux[ph][nod] > 0)
-          _num_upwinds[elem][ph][nod]++;
-        else if (_proto_flux[ph][nod] < 0)
-          _num_downwinds[elem][ph][nod]++;
-      }
-    }
-  }
+}
 
-  // based on _num_upwinds and _num_downwinds, calculate the maximum number
-  // of upwind-downwind swaps that have been encountered in this timestep
-  // for this element
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::updateUpwindCounts(unsigned elem, unsigned int num_nodes)
+{
+  for (unsigned ph = 0; ph < _num_phases; ++ph)
+    for (unsigned nod = 0; nod < num_nodes; ++nod)
+    {
+      if (_proto_flux[ph][nod] > 0)
+        _num_upwinds[elem][ph][nod]++;
+      else if (_proto_flux[ph][nod] < 0)
+        _num_downwinds[elem][ph][nod]++;
+    }
+}
+
+template <bool is_ad>
+std::vector<unsigned>
+PorousFlowDarcyBaseTempl<is_ad>::computeMaxSwaps(unsigned elem, unsigned int num_nodes) const
+{
   std::vector<unsigned> max_swaps(_num_phases, 0);
   for (unsigned ph = 0; ph < _num_phases; ++ph)
-  {
     for (unsigned nod = 0; nod < num_nodes; ++nod)
-      max_swaps[ph] = std::max(
-          max_swaps[ph], std::min(_num_upwinds[elem][ph][nod], _num_downwinds[elem][ph][nod]));
-  }
+      max_swaps[ph] =
+          std::max(max_swaps[ph],
+                   std::min(_num_upwinds.at(elem)[ph][nod], _num_downwinds.at(elem)[ph][nod]));
+  return max_swaps;
+}
 
-  // size the _jacobian correctly and calculate it for the case residual = _proto_flux
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-  {
-    for (unsigned ph = 0; ph < _num_phases; ++ph)
-    {
-      _jacobian[ph].resize(_local_ke.m());
-      for (_i = 0; _i < _test.size(); _i++)
-      {
-        _jacobian[ph][_i].assign(_local_ke.n(), 0.0);
-        for (_j = 0; _j < _phi.size(); _j++)
-          for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            _jacobian[ph][_i][_j] += _JxW[_qp] * _coord[_qp] * darcyQpJacobian(jvar, ph);
-      }
-    }
-  }
-
-  // Loop over all the phases, computing the mass flux, which
-  // gets placed into _proto_flux, and the derivative of this
-  // which gets placed into _jacobian
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::applyUpwinding(const std::vector<unsigned> & max_swaps,
+                                                JacRes res_or_jac,
+                                                unsigned int pvar)
+{
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     if (max_swaps[ph] < _full_upwind_threshold)
@@ -254,46 +349,124 @@ PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int 
       }
     }
   }
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::adComputeProtoFlux(bool do_counting)
+{
+  const unsigned int num_nodes = _test.size();
+  computeProtoFluxWithoutMobility();
+
+  // Initialise upwind-tracking maps for this element on first encounter
+  const unsigned elem = this->_current_elem->id();
+  initializeUpwindTracking(elem, num_nodes);
+
+  if (do_counting)
+    updateUpwindCounts(elem, num_nodes);
+
+  // Determine how many upwind-downwind swaps have occurred this timestep
+  const std::vector<unsigned> max_swaps = computeMaxSwaps(elem, num_nodes);
+
+  // Apply mobility via the chosen upwinding scheme (always in residual mode for AD)
+  applyUpwinding(max_swaps, JacRes::CALCULATE_RESIDUAL, 0);
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar)
+{
+  if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) && _dictator.notPorousFlowVariable(jvar))
+    return;
+
+  // The PorousFlow variable index corresponding to the variable number jvar
+  const unsigned int pvar =
+      ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _dictator.porousFlowVariableNum(jvar) : 0);
+
+  this->prepareMatrixTag(this->_assembly, _var.number(), jvar);
+  if ((this->_local_ke.n() == 0) &&
+      (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem
+                                                  // encountered in the
+                                                  // initial timestep when
+                                                  // use_displaced_mesh=true
+    return;
+
+  // The number of nodes in the element
+  const unsigned int num_nodes = _test.size();
+
+  // Compute the residual and jacobian without the mobility terms. Even if we are computing the
+  // Jacobian we still need this in order to see which nodes are upwind and which are downwind.
+  computeProtoFluxWithoutMobility();
+
+  // for this element, record whether each node is "upwind" or "downwind" (or neither)
+  const unsigned elem = this->_current_elem->id();
+  initializeUpwindTracking(elem, num_nodes);
+  // record the information once per nonlinear iteration
+  if (res_or_jac == JacRes::CALCULATE_JACOBIAN && jvar == _var.number())
+    updateUpwindCounts(elem, num_nodes);
+
+  // based on _num_upwinds and _num_downwinds, calculate the maximum number
+  // of upwind-downwind swaps that have been encountered in this timestep
+  // for this element
+  const std::vector<unsigned> max_swaps = computeMaxSwaps(elem, num_nodes);
+
+  // size the _jacobian correctly and calculate it for the case residual = _proto_flux
+  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+  {
+    for (unsigned ph = 0; ph < _num_phases; ++ph)
+    {
+      _jacobian[ph].resize(this->_local_ke.m());
+      for (_i = 0; _i < _test.size(); _i++)
+      {
+        _jacobian[ph][_i].assign(this->_local_ke.n(), 0.0);
+        for (_j = 0; _j < _phi.size(); _j++)
+          for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
+            _jacobian[ph][_i][_j] +=
+                this->_JxW[_qp] * this->_coord[_qp] * darcyQpJacobian(jvar, ph);
+      }
+    }
+  }
+
+  // Loop over all the phases, computing the mass flux, which
+  // gets placed into _proto_flux, and the derivative of this
+  // which gets placed into _jacobian
+  applyUpwinding(max_swaps, res_or_jac, pvar);
 
   // Add results to the Residual or Jacobian
   if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
-  {
-    prepareVectorTag(_assembly, _var.number());
-    for (_i = 0; _i < _test.size(); _i++)
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
-        _local_re(_i) += _proto_flux[ph][_i];
-    accumulateTaggedLocalResidual();
-
-    if (_has_save_in)
-      for (unsigned int i = 0; i < _save_in.size(); i++)
-        _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-  }
+    assembleProtoFluxResidual();
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (unsigned int ph = 0; ph < _num_phases; ++ph)
-          _local_ke(_i, _j) += _jacobian[ph][_i][_j];
+          this->_local_ke(_i, _j) += _jacobian[ph][_i][_j];
 
-    accumulateTaggedLocalMatrix();
+    this->accumulateTaggedLocalMatrix();
 
-    if (_has_diag_save_in && jvar == _var.number())
+    if (this->_has_diag_save_in && jvar == _var.number())
     {
-      unsigned int rows = _local_ke.m();
+      unsigned int rows = this->_local_ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i, i);
+        diag(i) = this->_local_ke(i, i);
 
-      for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-        _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+      for (unsigned int i = 0; i < this->_diag_save_in.size(); i++)
+        this->_diag_save_in[i]->sys().solution().add_vector(diag,
+                                                            this->_diag_save_in[i]->dofIndices());
     }
   }
 }
 
+template <bool is_ad>
 void
-PorousFlowDarcyBase::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
+PorousFlowDarcyBaseTempl<is_ad>::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
 {
+  // res_or_jac and pvar drive the hand-coded non-AD Jacobian only; the AD path ignores them
+  if constexpr (is_ad)
+    libmesh_ignore(res_or_jac, pvar);
+
   /**
    * Perform the full upwinding by multiplying the residuals at the upstream nodes by their
    * mobilities.
@@ -326,20 +499,20 @@ PorousFlowDarcyBase::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned in
   // The number of nodes in the element
   const unsigned int num_nodes = _test.size();
 
-  Real mob;
-  Real dmob;
+  GenericReal<is_ad> mob;
   // Define variables used to ensure mass conservation
-  Real total_mass_out = 0.0;
-  Real total_in = 0.0;
+  GenericReal<is_ad> total_mass_out = 0.0;
+  GenericReal<is_ad> total_in = 0.0;
 
-  // The following holds derivatives of these
+  // The following holds derivatives of these (non-AD path only)
   std::vector<Real> dtotal_mass_out;
   std::vector<Real> dtotal_in;
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-  {
-    dtotal_mass_out.assign(num_nodes, 0.0);
-    dtotal_in.assign(num_nodes, 0.0);
-  }
+  if constexpr (!is_ad)
+    if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+    {
+      dtotal_mass_out.assign(num_nodes, 0.0);
+      dtotal_in.assign(num_nodes, 0.0);
+    }
 
   // Perform the upwinding using the mobility
   std::vector<bool> upwind_node(num_nodes);
@@ -350,10 +523,86 @@ PorousFlowDarcyBase::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned in
       upwind_node[n] = true;
       // The mobility at the upstream node
       mob = mobility(n, ph);
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+        {
+          // The derivative of the mobility wrt the PorousFlow variable
+          const Real dmob = dmobility(n, ph, pvar);
+
+          for (_j = 0; _j < _phi.size(); _j++)
+            _jacobian[ph][n][_j] *= mob;
+
+          if (_test.size() == _phi.size())
+            /* mobility at node=n depends only on the variables at node=n, by construction.  For
+             * linear-lagrange variables, this means that Jacobian entries involving the derivative
+             * of mobility will only be nonzero for derivatives wrt variables at node=n.  Hence the
+             * [n][n] in the line below.  However, for other variable types (eg constant monomials)
+             * I cannot tell what variable number contributes to the derivative.  However, in all
+             * cases I can possibly imagine, the derivative is zero anyway, since in the full
+             * upwinding scheme, mobility shouldn't depend on these other sorts of variables.
+             */
+            _jacobian[ph][n][n] += dmob * MetaPhysicL::raw_value(_proto_flux[ph][n]);
+
+          for (_j = 0; _j < _phi.size(); _j++)
+            dtotal_mass_out[_j] += _jacobian[ph][n][_j];
+        }
+      _proto_flux[ph][n] *= mob;
+      total_mass_out += _proto_flux[ph][n];
+    }
+    else
+    {
+      upwind_node[n] = false;
+      total_in -= _proto_flux[ph][n]; /// note the -= means the result is positive
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+          for (_j = 0; _j < _phi.size(); _j++)
+            dtotal_in[_j] -= _jacobian[ph][n][_j];
+    }
+  }
+
+  // Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes,
+  // weighted by their proto_flux values
+  for (unsigned int n = 0; n < num_nodes; ++n)
+  {
+    if (!upwind_node[n]) // downstream node
+    {
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+          for (_j = 0; _j < _phi.size(); _j++)
+          {
+            _jacobian[ph][n][_j] *= MetaPhysicL::raw_value(total_mass_out / total_in);
+            _jacobian[ph][n][_j] +=
+                MetaPhysicL::raw_value(_proto_flux[ph][n]) *
+                (dtotal_mass_out[_j] / MetaPhysicL::raw_value(total_in) -
+                 dtotal_in[_j] * MetaPhysicL::raw_value(total_mass_out) /
+                     MetaPhysicL::raw_value(total_in) / MetaPhysicL::raw_value(total_in));
+          }
+      _proto_flux[ph][n] *= total_mass_out / total_in;
+    }
+  }
+}
+
+template <bool is_ad>
+void
+PorousFlowDarcyBaseTempl<is_ad>::quickUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
+{
+  // res_or_jac and pvar drive the hand-coded non-AD Jacobian only; the AD path ignores them
+  if constexpr (is_ad)
+    libmesh_ignore(res_or_jac, pvar);
+
+  // The number of nodes in the element
+  const unsigned int num_nodes = _test.size();
+
+  // Use the raw nodal mobility
+  for (unsigned int n = 0; n < num_nodes; ++n)
+  {
+    // The mobility at the node
+    const GenericReal<is_ad> mob = mobility(n, ph);
+    if constexpr (!is_ad)
       if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
       {
         // The derivative of the mobility wrt the PorousFlow variable
-        dmob = dmobility(n, ph, pvar);
+        const Real dmob = dmobility(n, ph, pvar);
 
         for (_j = 0; _j < _phi.size(); _j++)
           _jacobian[ph][n][_j] *= mob;
@@ -367,96 +616,31 @@ PorousFlowDarcyBase::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned in
            * cases I can possibly imagine, the derivative is zero anyway, since in the full
            * upwinding scheme, mobility shouldn't depend on these other sorts of variables.
            */
-          _jacobian[ph][n][n] += dmob * _proto_flux[ph][n];
-
-        for (_j = 0; _j < _phi.size(); _j++)
-          dtotal_mass_out[_j] += _jacobian[ph][n][_j];
+          _jacobian[ph][n][n] += dmob * MetaPhysicL::raw_value(_proto_flux[ph][n]);
       }
-      _proto_flux[ph][n] *= mob;
-      total_mass_out += _proto_flux[ph][n];
-    }
-    else
-    {
-      upwind_node[n] = false;
-      total_in -= _proto_flux[ph][n]; /// note the -= means the result is positive
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-        for (_j = 0; _j < _phi.size(); _j++)
-          dtotal_in[_j] -= _jacobian[ph][n][_j];
-    }
-  }
-
-  // Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes,
-  // weighted by their proto_flux values
-  for (unsigned int n = 0; n < num_nodes; ++n)
-  {
-    if (!upwind_node[n]) // downstream node
-    {
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-        for (_j = 0; _j < _phi.size(); _j++)
-        {
-          _jacobian[ph][n][_j] *= total_mass_out / total_in;
-          _jacobian[ph][n][_j] +=
-              _proto_flux[ph][n] * (dtotal_mass_out[_j] / total_in -
-                                    dtotal_in[_j] * total_mass_out / total_in / total_in);
-        }
-      _proto_flux[ph][n] *= total_mass_out / total_in;
-    }
-  }
-}
-
-void
-PorousFlowDarcyBase::quickUpwind(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
-{
-  // The number of nodes in the element
-  const unsigned int num_nodes = _test.size();
-
-  Real mob;
-  Real dmob;
-
-  // Use the raw nodal mobility
-  for (unsigned int n = 0; n < num_nodes; ++n)
-  {
-    // The mobility at the node
-    mob = mobility(n, ph);
-    if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-    {
-      // The derivative of the mobility wrt the PorousFlow variable
-      dmob = dmobility(n, ph, pvar);
-
-      for (_j = 0; _j < _phi.size(); _j++)
-        _jacobian[ph][n][_j] *= mob;
-
-      if (_test.size() == _phi.size())
-        /* mobility at node=n depends only on the variables at node=n, by construction.  For
-         * linear-lagrange variables, this means that Jacobian entries involving the derivative
-         * of mobility will only be nonzero for derivatives wrt variables at node=n.  Hence the
-         * [n][n] in the line below.  However, for other variable types (eg constant monomials)
-         * I cannot tell what variable number contributes to the derivative.  However, in all
-         * cases I can possibly imagine, the derivative is zero anyway, since in the full
-         * upwinding scheme, mobility shouldn't depend on these other sorts of variables.
-         */
-        _jacobian[ph][n][n] += dmob * _proto_flux[ph][n];
-    }
     _proto_flux[ph][n] *= mob;
   }
 }
 
+template <bool is_ad>
 void
-PorousFlowDarcyBase::harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
+PorousFlowDarcyBaseTempl<is_ad>::harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar)
 {
+  // res_or_jac and pvar drive the hand-coded non-AD Jacobian only; the AD path ignores them
+  if constexpr (is_ad)
+    libmesh_ignore(res_or_jac, pvar);
+
   // The number of nodes in the element
   const unsigned int num_nodes = _test.size();
 
-  std::vector<Real> mob(num_nodes);
+  std::vector<GenericReal<is_ad>> mob(num_nodes);
   unsigned num_zero = 0;
-  unsigned zero_mobility_node = std::numeric_limits<unsigned>::max();
-  Real harmonic_mob = 0;
+  GenericReal<is_ad> harmonic_mob = 0;
   for (unsigned n = 0; n < num_nodes; ++n)
   {
     mob[n] = mobility(n, ph);
-    if (mob[n] == 0.0)
+    if (MetaPhysicL::raw_value(mob[n]) == 0.0)
     {
-      zero_mobility_node = n;
       num_zero++;
     }
     else
@@ -467,45 +651,62 @@ PorousFlowDarcyBase::harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned i
   else
     harmonic_mob = (1.0 * num_nodes) / harmonic_mob;
 
-  // d(harmonic_mob)/d(PorousFlow variable at node n)
+  // d(harmonic_mob)/d(PorousFlow variable at node n) -- non-AD path only
   std::vector<Real> dharmonic_mob(num_nodes, 0.0);
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-  {
-    const Real harm2 = std::pow(harmonic_mob, 2) / (1.0 * num_nodes);
-    if (num_zero == 0)
+  if constexpr (!is_ad)
+    if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+    {
+      const Real harm2 = std::pow(MetaPhysicL::raw_value(harmonic_mob), 2) / (1.0 * num_nodes);
+      if (num_zero == 0)
+        for (unsigned n = 0; n < num_nodes; ++n)
+          dharmonic_mob[n] =
+              dmobility(n, ph, pvar) * harm2 / std::pow(MetaPhysicL::raw_value(mob[n]), 2);
+      else if (num_zero == 1)
+        for (unsigned n = 0; n < num_nodes; ++n)
+          if (MetaPhysicL::raw_value(mob[n]) == 0.0)
+          {
+            dharmonic_mob[n] = num_nodes * dmobility(n, ph, pvar); // other derivs are zero
+            break;
+          }
+      // if num_zero > 1 then all dharmonic_mob = 0.0
+    }
+
+  if constexpr (!is_ad)
+    if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
       for (unsigned n = 0; n < num_nodes; ++n)
-        dharmonic_mob[n] = dmobility(n, ph, pvar) * harm2 / std::pow(mob[n], 2);
-    else if (num_zero == 1)
-      dharmonic_mob[zero_mobility_node] =
-          num_nodes * dmobility(zero_mobility_node, ph, pvar); // other derivs are zero
-    // if num_zero > 1 then all dharmonic_mob = 0.0
-  }
+        for (_j = 0; _j < _phi.size(); _j++)
+        {
+          _jacobian[ph][n][_j] *= MetaPhysicL::raw_value(harmonic_mob);
+          if (_test.size() == _phi.size())
+            _jacobian[ph][n][_j] += dharmonic_mob[_j] * MetaPhysicL::raw_value(_proto_flux[ph][n]);
+        }
 
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-    for (unsigned n = 0; n < num_nodes; ++n)
-      for (_j = 0; _j < _phi.size(); _j++)
-      {
-        _jacobian[ph][n][_j] *= harmonic_mob;
-        if (_test.size() == _phi.size())
-          _jacobian[ph][n][_j] += dharmonic_mob[_j] * _proto_flux[ph][n];
-      }
-
-  if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
-    for (unsigned n = 0; n < num_nodes; ++n)
-      _proto_flux[ph][n] *= harmonic_mob;
+  for (unsigned n = 0; n < num_nodes; ++n)
+    _proto_flux[ph][n] *= harmonic_mob;
 }
 
-Real
-PorousFlowDarcyBase::mobility(unsigned nodenum, unsigned phase) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowDarcyBaseTempl<is_ad>::mobility(unsigned nodenum, unsigned phase) const
 {
   return _fluid_density_node[nodenum][phase] / _fluid_viscosity[nodenum][phase];
 }
 
+template <bool is_ad>
 Real
-PorousFlowDarcyBase::dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const
+PorousFlowDarcyBaseTempl<is_ad>::dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const
 {
-  Real dm = _dfluid_density_node_dvar[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
-  dm -= _fluid_density_node[nodenum][phase] * _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-        std::pow(_fluid_viscosity[nodenum][phase], 2);
-  return dm;
+  if constexpr (!is_ad)
+  {
+    Real dm = (*_dfluid_density_node_dvar)[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
+    dm -= _fluid_density_node[nodenum][phase] * (*_dfluid_viscosity_dvar)[nodenum][phase][pvar] /
+          std::pow(_fluid_viscosity[nodenum][phase], 2);
+    return dm;
+  }
+  else
+    libmesh_ignore(nodenum, phase, pvar);
+  return 0.0;
 }
+
+template class PorousFlowDarcyBaseTempl<false>;
+template class PorousFlowDarcyBaseTempl<true>;

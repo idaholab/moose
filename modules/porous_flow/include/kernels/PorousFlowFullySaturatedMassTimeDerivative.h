@@ -9,45 +9,51 @@
 
 #pragma once
 
-#include "TimeKernel.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
- * Time derivative of fluid mass suitable for fully-saturated,
- * single-phase, single-component simulations.
- * No mass-lumping is used
+ * Time derivative of fluid mass for fully-saturated, single-phase,
+ * single-component simulations.  No mass-lumping is used.
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties
+ * and requires no hand-coded Jacobian.
  */
-class PorousFlowFullySaturatedMassTimeDerivative : public TimeKernel
+template <bool is_ad>
+class PorousFlowFullySaturatedMassTimeDerivativeTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFullySaturatedMassTimeDerivative(const InputParameters & parameters);
+  PorousFlowFullySaturatedMassTimeDerivativeTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Jacobian contribution for the PorousFlow variable pvar
+  /// Jacobian contribution for PorousFlow variable pvar (non-AD path only)
   Real computeQpJac(unsigned int pvar);
 
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// Whether the Variable for this Kernel is a PorousFlow variable
+  /// Whether the kernel variable is a PorousFlow variable
   const bool _var_is_porflow_var;
 
-  /// If true then the Kernel is the time derivative of the fluid mass, otherwise it is the derivative of the fluid volume
+  /// If true the kernel is d(fluid mass)/dt, otherwise d(fluid volume)/dt
   const bool _multiply_by_density;
 
   /// Determines whether mechanical and/or thermal contributions should be added to the residual
-  const enum class CouplingTypeEnum {
+  enum class CouplingTypeEnum
+  {
     Hydro,
     ThermoHydro,
     HydroMechanical,
     ThermoHydroMechanical
-  } _coupling_type;
+  };
+  const CouplingTypeEnum _coupling_type;
 
   /// Whether thermal contributions should be added to the residual
   const bool _includes_thermal;
@@ -55,42 +61,50 @@ protected:
   /// Whether mechanical contributions should be added to the residual
   const bool _includes_mechanical;
 
-  /// Biot coefficient (used in simulations involving Mechanical deformations)
+  /// Biot coefficient
   const Real _biot_coefficient;
 
-  /// Constant Biot modulus
+  /// Constant Biot modulus (not a function of primary variables)
   const MaterialProperty<Real> & _biot_modulus;
 
   /// Constant volumetric thermal expansion coefficient
   const MaterialProperty<Real> * const _thermal_coeff;
 
-  /// Quadpoint fluid density for each phase
-  const MaterialProperty<std::vector<Real>> * const _fluid_density;
+  /// Quadpoint fluid density (AD or non-AD depending on is_ad)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_density;
 
-  /// derivative of fluid density for each phase with respect to the PorousFlow variables
+  /// d(fluid density)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
-  /// Quadpoint pore pressure in each phase
-  const MaterialProperty<std::vector<Real>> & _pp;
+  /// Quadpoint pore pressure
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _pp;
 
-  /// Old value of quadpoint pore pressure in each phase
+  /// Old quadpoint pore pressure (always non-AD)
   const MaterialProperty<std::vector<Real>> & _pp_old;
 
-  /// Derivative of porepressure in each phase wrt the PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dpp_dvar;
+  /// d(pore pressure)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dpp_dvar;
 
-  /// Quadpoint temperature
-  const MaterialProperty<Real> * const _temperature;
+  /// Quadpoint temperature (only when _includes_thermal)
+  const GenericMaterialProperty<Real, is_ad> * const _temperature;
 
-  /// Old value of quadpoint temperature
+  /// Old quadpoint temperature (always non-AD)
   const MaterialProperty<Real> * const _temperature_old;
 
-  /// Derivative of temperature wrt the PorousFlow variables
+  /// d(temperature)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
-  /// Strain rate
+  /// Volumetric strain rate (only when _includes_mechanical; always non-AD)
   const MaterialProperty<Real> * const _strain_rate;
 
-  /// Derivative of strain rate wrt the PorousFlow variables
+  /// d(strain rate)/d(PorousFlow variable) -- null for AD path
   const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_dvar;
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowFullySaturatedMassTimeDerivativeTempl<false>
+    PorousFlowFullySaturatedMassTimeDerivative;
+typedef PorousFlowFullySaturatedMassTimeDerivativeTempl<true>
+    ADPorousFlowFullySaturatedMassTimeDerivative;
