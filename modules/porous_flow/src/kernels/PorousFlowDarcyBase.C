@@ -95,6 +95,15 @@ PorousFlowDarcyBaseTempl<is_ad>::PorousFlowDarcyBaseTempl(const InputParameters 
     _num_upwinds(),
     _num_downwinds()
 {
+  // The full-upwinding scheme identifies each element test function with a mesh node, which is
+  // only valid for nodal (Lagrange) variables.
+  if (!_var.isNodal())
+    mooseError("The variable '",
+               _var.name(),
+               "' is not a nodal (Lagrange) variable.  This kernel uses full upwinding, which "
+               "requires a nodal variable.  For non-nodal variables use the non-upwinded "
+               "PorousFlowFullySaturated* kernels or Kuzmin-Turek (KT) stabilisation instead.");
+
 #ifdef LIBMESH_HAVE_TBB_API
   if (libMesh::n_threads() > 1)
     mooseWarning("PorousFlowDarcyBase: num_upwinds and num_downwinds may not be computed "

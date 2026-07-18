@@ -14,6 +14,15 @@ PorousFlowLumpedKernelBaseTempl<is_ad>::PorousFlowLumpedKernelBaseTempl(
     const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters)
 {
+  // Mass lumping evaluates each residual row using the nodal material property at that node, which
+  // identifies each element test function with a mesh node.  This is only valid for nodal
+  // (Lagrange) variables.
+  if (!_var.isNodal())
+    mooseError("The variable '",
+               _var.name(),
+               "' is not a nodal (Lagrange) variable.  This kernel uses mass lumping, which "
+               "requires a nodal variable.  For non-nodal variables use the non-lumped "
+               "PorousFlowFullySaturated* kernels instead.");
 }
 
 template <bool is_ad>
