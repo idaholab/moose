@@ -45,6 +45,17 @@
     max_threads = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an implicit algorithm.'
   []
+  [psbt_pressure_iteration_exhaustion]
+    type = RunException
+    input = psbt_monolithic.i
+    cli_args = 'SubChannel/P_maxit=1 Outputs/file_base=psbt_monolithic_p_maxit'
+    expect_err = 'Reached maximum number of pressure iterations.*Solve Did NOT Converge!'
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    max_threads = 1
+    requirement = 'The system shall report nonconvergence when the pressure iteration limit is reached.'
+  []
   [psbt_regression_test_monolithic]
     type = CSVDiff
     input = psbt_monolithic.i
