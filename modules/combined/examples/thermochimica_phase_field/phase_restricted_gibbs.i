@@ -24,7 +24,7 @@
 
     [Outputs]
       [SystemGibbsEnergies]
-        [hcp_constrained_gibbs]
+        [hcp_restricted_gibbs]
         []
       []
     []
@@ -58,7 +58,7 @@
     type = AllenCahn
     variable = eta
     f_name = free_energy
-    coupled_variables = hcp_constrained_gibbs
+    coupled_variables = hcp_restricted_gibbs
   []
   [interface]
     type = ACInterface
@@ -75,12 +75,12 @@
   [thermochemical_free_energy]
     type = DerivativeParsedMaterial
     property_name = free_energy
-    coupled_variables = 'eta hcp_constrained_gibbs'
-    # eta = 0 is the reference phase and eta = 1 is constrained HCP.
+    coupled_variables = 'eta hcp_restricted_gibbs'
+    # eta = 0 is the reference phase and eta = 1 is the HCP-only state.
     # This scale is illustrative; physical models require consistent energy-density units.
     constant_names = 'barrier gibbs_scale'
     constant_expressions = '1 1e-6'
-    expression = 'barrier*eta^2*(1-eta)^2 + gibbs_scale*hcp_constrained_gibbs*eta^2*(3-2*eta)'
+    expression = 'barrier*eta^2*(1-eta)^2 + gibbs_scale*hcp_restricted_gibbs*eta^2*(3-2*eta)'
     derivative_order = 2
   []
 []
@@ -97,9 +97,9 @@
     type = ElementAverageValue
     variable = eta
   []
-  [hcp_constrained_gibbs]
+  [hcp_restricted_gibbs]
     type = NodalVariableValue
-    variable = hcp_constrained_gibbs
+    variable = hcp_restricted_gibbs
     nodeid = 2
   []
 []

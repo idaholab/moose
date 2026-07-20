@@ -1,4 +1,4 @@
-time,average_eta,hcp_constrained_gibbs
+time,average_eta,hcp_restricted_gibbs
 0,0,0
 0.01,0.50219068067669,-144587.72825102
 0.02,0.50440335856132,-144587.72825285

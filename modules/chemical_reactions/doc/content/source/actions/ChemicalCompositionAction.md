@@ -29,9 +29,9 @@ equilibrium calculation performed by the action. Alternatively,
 other phase. The two parameters are mutually exclusive, and every phase name is validated against
 the thermodynamic database during setup.
 
-Phase selection is useful for evaluating constrained or metastable systems. For example, retaining
-one phase and requesting its phase or system Gibbs energy provides a free-energy quantity that can
-be consumed by a phase-field model:
+Phase selection is useful for evaluating phase-restricted or metastable systems. For example,
+retaining one phase and requesting its phase or system Gibbs energy provides a free-energy quantity
+that can be consumed by a phase-field model:
 
 !listing modules/chemical_reactions/test/tests/thermochimica/phase_exclusion.i block=ChemicalComposition
 
@@ -43,10 +43,10 @@ The phase-selection list is fixed for a `ChemicalComposition` subblock throughou
 Thermochemical outputs can be coupled to phase-field equations, but the selected phase set cannot
 currently be changed independently at each node or element by a phase-field variable.
 
-## Phase-Field Coupling Example
+## Phase-Restricted Gibbs Coupling Example
 
-The following combined-modules example restricts Thermochimica to the HCP phase and couples the
-resulting integral Gibbs energy, $G_{\mathrm{HCP}}$, into an Allen-Cahn free energy,
+The following combined-modules example suppresses every phase except HCP and couples the resulting
+HCP-only integral Gibbs energy, $G_{\mathrm{HCP}}$, into an Allen-Cahn free energy,
 
 \begin{equation}
 f(\eta) = W \eta^2 (1 - \eta)^2 + s G_{\mathrm{HCP}} \eta^2 (3 - 2\eta),
@@ -55,10 +55,14 @@ f(\eta) = W \eta^2 (1 - \eta)^2 + s G_{\mathrm{HCP}} \eta^2 (3 - 2\eta),
 where $\eta$ is the phase-field order parameter, $W$ is a barrier height, and $s$ is an energy
 scaling factor.
 
-!listing modules/combined/examples/thermochimica_phase_field/constrained_gibbs.i
+!listing modules/combined/examples/thermochimica_phase_field/phase_restricted_gibbs.i
          block=ChemicalComposition Materials Kernels
-         id=thermochimica-constrained-gibbs-phase-field
-         caption=Coupling a constrained Thermochimica Gibbs energy into an Allen-Cahn free energy.
+         id=thermochimica-phase-restricted-gibbs-phase-field
+         caption=Coupling an HCP-only Thermochimica Gibbs energy into an Allen-Cahn free energy.
+
+This phase restriction does not impose a phase-fraction constraint in Thermochimica. The order
+parameter interpolates the HCP-only result within the MOOSE free-energy expression and is not an
+input to the Thermochimica equilibrium calculation.
 
 !alert warning title=Energy Normalization
 Thermochimica reports the integral system Gibbs energy in J for the composition supplied at each
