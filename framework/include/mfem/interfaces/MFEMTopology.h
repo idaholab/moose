@@ -80,7 +80,7 @@ public:
 
   /// Return the map between pairs of topologically equivalent vertices in the mesh,
   /// each replicated vertex @a i is paired with a primary vertex @a vertex_map[i].
-  /// Largely replicates mfem::Mesh::CreatePeriodicVertexMapping but supports a broader class of
+  /// Largely copies mfem::Mesh::CreatePeriodicVertexMapping but supports a broader class of
   /// symmetry maps between equivalent vertices.
   std::vector<int> CreateTopologicallyEquivalentVertexMap(const mfem::Mesh & mfem_mesh) const;
 
@@ -94,7 +94,6 @@ protected:
   bool _periodic{false};
 
 private:
-  std::vector<std::vector<mfem::real_t>> _input_lattice_vectors;
   std::vector<mfem::Vector> _lattice_vectors;
   const unsigned int _rotational_symmetry_order;
   std::vector<std::shared_ptr<DiscreteSymmetry>> _symmetry_transforms;
