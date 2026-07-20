@@ -454,7 +454,8 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_residual_object_##classname, __COUNTER__) =           \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_residual_object_##classname,         \
+                                            __COUNTER__) =                                         \
       registerKokkosResidualObject##classname()
 
 #define registerKokkosResidualObject(app, classname)                                               \
@@ -477,7 +478,8 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_ad_residual_object_##classname, __COUNTER__) =        \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_ad_residual_object_##classname,      \
+                                            __COUNTER__) =                                         \
       registerKokkosADResidualObject##classname()
 
 #define registerKokkosADResidualObject(app, classname)                                             \
@@ -569,7 +571,7 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_material_##classname, __COUNTER__) =                  \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_material_##classname, __COUNTER__) = \
       registerKokkosMaterial##classname()
 
 #define registerKokkosMaterial(app, classname)                                                     \
@@ -593,8 +595,8 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_auxkernel_##classname, __COUNTER__) =                 \
-      registerKokkosAuxKernel##classname()
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_auxkernel_##classname,               \
+                                            __COUNTER__) = registerKokkosAuxKernel##classname()
 
 #define registerKokkosAuxKernel(app, classname)                                                    \
   registerMooseObject(app, classname);                                                             \
@@ -621,8 +623,8 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_userobject_##classname, __COUNTER__) =                \
-      registerKokkosUserObject##classname()
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_userobject_##classname,              \
+                                            __COUNTER__) = registerKokkosUserObject##classname()
 
 #define registerKokkosUserObject(app, classname)                                                   \
   registerMooseObject(app, classname);                                                             \
@@ -644,5 +646,5 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_##classname##_##operation, __COUNTER__) =                        \
+  [[maybe_unused]] static char combineNames(kokkos_##classname##_##operation, __COUNTER__) =       \
       registerKokkos##classname##operation()

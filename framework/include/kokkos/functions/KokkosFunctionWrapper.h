@@ -30,21 +30,21 @@ public:
   /**
    * Virtual destructor
    */
-  KOKKOS_FUNCTION virtual ~FunctionWrapperDeviceBase() {}
+  KOKKOS_VIRTUAL_FUNCTION ~FunctionWrapperDeviceBase() {}
 
   /**
    * Virtual shims that calls the corresponding methods of the actual stored function
    */
   ///@{
-  KOKKOS_FUNCTION virtual Real value(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real3 vectorValue(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real3 gradient(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real3 curl(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real div(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real timeDerivative(Real t, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real timeIntegral(Real t1, Real t2, Real3 p) const = 0;
-  KOKKOS_FUNCTION virtual Real integral() const = 0;
-  KOKKOS_FUNCTION virtual Real average() const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real value(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real3 vectorValue(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real3 gradient(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real3 curl(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real div(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real timeDerivative(Real t, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 p) const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real integral() const = 0;
+  KOKKOS_VIRTUAL_FUNCTION Real average() const = 0;
   ///@}
 };
 

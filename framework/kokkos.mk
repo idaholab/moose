@@ -18,6 +18,16 @@ KOKKOS_CUDA_ARCH_90  := Hopper CC 9.0
 KOKKOS_CUDA_ARCH_100 := Blackwell CC 10.0
 KOKKOS_CUDA_ARCH_120 := Blackwell CC 12.0
 
+# SYCL architecture strings
+KOKKOS_SYCL_ARCH_        := SPIR-V
+KOKKOS_SYCL_ARCH_gen9-   := Gen9+
+KOKKOS_SYCL_ARCH_gen9    := Gen9
+KOKKOS_SYCL_ARCH_gen11   := Gen11
+KOKKOS_SYCL_ARCH_gen12lp := Gen12LP
+KOKKOS_SYCL_ARCH_dg1     := DG1
+KOKKOS_SYCL_ARCH_12.50.4 := Xe-HP
+KOKKOS_SYCL_ARCH_12.60.7 := Xe-HPC
+
 CUDA_COMPILER ?= nvcc
 HIP_COMPILER  ?= hipcc
 SYCL_COMPILER ?= icpx
@@ -47,6 +57,7 @@ ifeq ($(PETSC_HAVE_KOKKOS),1)
     endif
   endif
   ifeq ($(PETSC_HAVE_SYCL),1)
+    SYCL_ARCH := $(shell sed -n 's/\#define PETSC_SYCL_DEVICE //p' $(PETSC_CONF))
   endif
 else
   $(error PETSc was not configured with Kokkos support)
@@ -86,14 +97,17 @@ else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
   KOKKOS_CXXFLAGS    =
   KOKKOS_CPPFLAGS    =
   KOKKOS_LDFLAGS     =
-else ifneq ($(PETSC_HAVE_SYCL),) # To be determined for SYCL
+else ifneq ($(PETSC_HAVE_SYCL),)
   KOKKOS_DEVICE     := SYCL
-  KOKKOS_ARCH       :=
-  KOKKOS_COMPILER   := DPCPP
+  KOKKOS_ARCH       := $(KOKKOS_SYCL_ARCH_$(SYCL_ARCH))
+  KOKKOS_COMPILER   := ICPX
   KOKKOS_CXX         = $(SYCL_COMPILER)
-  KOKKOS_CXXFLAGS    = -fsycl
-  KOKKOS_CPPFLAGS    =
-  KOKKOS_LDFLAGS     =
+  KOKKOS_CXXFLAGS    = -fsycl -fsycl-targets=spir64_gen -x c++ $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
+  KOKKOS_LDFLAGS     = -fsycl
+  ifneq ($(SYCL_ARCH),)
+    KOKKOS_LDFLAGS  += -Xsycl-target-backend "-device $(SYCL_ARCH)"
+  endif
 else
   KOKKOS_COMPILER   := CPU
   KOKKOS_CXX         = $(libmesh_CXX)
