@@ -240,8 +240,13 @@ SetupMeshAction::useCheckpointRestartMesh(const std::string & restart_file_base)
   _type = "MeshGeneratorMesh";
   _moose_object_pars = _factory.getValidParams(_type);
   _moose_object_pars.applyParameters(original_params);
+}
 
+void
+SetupMeshAction::addCheckpointRestartMeshGenerator(const std::string & restart_file_base)
+{
   auto file_mesh_generator_params = _factory.getValidParams("FileMeshGenerator");
+  file_mesh_generator_params.set<MooseMesh *>("_moose_mesh") = _mesh.get();
   file_mesh_generator_params.set<MeshFileName>("file") =
       restart_file_base + MooseApp::checkpointSuffix();
   file_mesh_generator_params.set<bool>("skip_partitioning") = true;
@@ -351,6 +356,8 @@ SetupMeshAction::act()
         _type = modifyParamsForUseSplit(_moose_object_pars);
 
       _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
+      if (!restart_file_base.empty())
+        addCheckpointRestartMeshGenerator(restart_file_base);
     }
   }
 
