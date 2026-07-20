@@ -230,8 +230,8 @@ ChemicalCompositionAction::initializeConfiguration()
     paramError("excluded_phases", "excluded_phases and included_phases are mutually exclusive.");
 
   const auto & selected_phases = excluded_phases.empty() ? included_phases : excluded_phases;
-  const std::string selection_parameter = excluded_phases.empty() ? "included_phases"
-                                                                  : "excluded_phases";
+  const std::string selection_parameter =
+      excluded_phases.empty() ? "included_phases" : "excluded_phases";
   std::set<std::string> unique_selected_phases;
   for (const auto & phase : selected_phases)
   {
@@ -249,9 +249,9 @@ ChemicalCompositionAction::initializeConfiguration()
                                  ? ThermochimicaConfiguration::PhaseSelection::INCLUDE
                                  : ThermochimicaConfiguration::PhaseSelection::EXCLUDE;
     Thermochimica::resetThermo();
-    const auto selection_info =
-        excluded_phases.empty() ? Thermochimica::setIncludedPhases(selected_phases)
-                                : Thermochimica::setExcludedPhases(selected_phases);
+    const auto selection_info = excluded_phases.empty()
+                                    ? Thermochimica::setIncludedPhases(selected_phases)
+                                    : Thermochimica::setExcludedPhases(selected_phases);
     if (selection_info != 0)
       paramError(selection_parameter,
                  "Thermochimica rejected the phase selection with status ",
@@ -597,14 +597,13 @@ ChemicalCompositionAction::addOutputRequest(const ThermochimicaSystemPropertyReq
 }
 
 void
-ChemicalCompositionAction::addOutputRequest(
-    const ThermochimicaConstituentFractionRequest & request,
-    const InputParameters & source,
-    const std::string & origin,
-    const std::string & phase_parameter,
-    const std::string & sublattice_parameter,
-    const std::string & constituent_parameter,
-    const std::vector<std::string> & database_phases)
+ChemicalCompositionAction::addOutputRequest(const ThermochimicaConstituentFractionRequest & request,
+                                            const InputParameters & source,
+                                            const std::string & origin,
+                                            const std::string & phase_parameter,
+                                            const std::string & sublattice_parameter,
+                                            const std::string & constituent_parameter,
+                                            const std::vector<std::string> & database_phases)
 {
   const auto phase_index =
       phaseSystemIndex(request.phase, source, phase_parameter, database_phases);

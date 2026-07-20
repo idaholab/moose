@@ -359,7 +359,7 @@ ThermochimicaOutputRequest
 ThermochimicaConstituentFractionOutputAction::request() const
 {
   return ThermochimicaConstituentFractionRequest{_variable,
-                                                  getParam<std::string>("phase"),
-                                                  getParam<unsigned int>("sublattice"),
-                                                  getParam<std::string>("constituent")};
+                                                 getParam<std::string>("phase"),
+                                                 getParam<unsigned int>("sublattice"),
+                                                 getParam<std::string>("constituent")};
 }

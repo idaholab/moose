@@ -390,6 +390,16 @@
     capabilities = 'thermochimica'
   []
 
+  [typed_outputs_subblocks]
+    type = CSVDiff
+    input = typed_outputs_subblocks.i
+    csvdiff = typed_outputs_subblocks_out.csv
+    design = 'ChemicalCompositionAction.md ThermochimicaData.md'
+    issues = '#22711'
+    requirement = 'Named ChemicalComposition subblocks shall define independent typed output sets on different mesh blocks.'
+    capabilities = 'thermochimica'
+  []
+
   [typed_outputs_batch_one]
     type = CSVDiff
     input = typed_outputs.i
