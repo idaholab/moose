@@ -267,6 +267,10 @@ XFEM::update(Real time,
   if (_moose_mesh->isDistributedMesh())
     mooseError("Use of XFEM with distributed mesh is not yet supported");
 
+  for (const auto & elem : _mesh->active_element_ptr_range())
+    if (elem->level() > 0)
+      mooseError("XFEM does not currently support mesh adaptivity or adaptively refined meshes");
+
   bool mesh_changed = false;
 
   buildEFAMesh();

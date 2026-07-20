@@ -17,6 +17,12 @@ to specify parameters related to XFEM. Including this block in the input file se
   - Optional: Setup of near tip enrichment parameters.
   - Optional: Allow users to control the amount of debugging information printed during a simulation.
 
+## Current Limitations
+
+XFEM does not currently support libMesh h-adaptivity or adaptively refined mesh hierarchies. Users
+who need additional local resolution should use a sufficiently refined generated mesh rather than
+MOOSE `[Adaptivity]` until XFEM adaptivity support is added.
+
 ## Constructed Objects
 
 Three of the above user-settable parameters pass parameters to the XFEM object for use in setting up
@@ -72,7 +78,7 @@ propagating crack's tip ends within an element:
 
 Any use of the XFEM action can output varying levels of problem solution detail by changing the
 value of the `debug_output_level` variable. By default it is set to 1, but XFEM output can be
-either turned off (`debug_output_level=0`) or greater detail can be added to the output by 
+either turned off (`debug_output_level=0`) or greater detail can be added to the output by
 setting the variable to 2 or 3.
 
 !syntax parameters /XFEM/XFEMAction
