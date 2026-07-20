@@ -10,6 +10,7 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 #include "InputParameters.h"
+#include "Moose.h"
 #include "MooseApp.h"
 #include "Parser.h"
 #include "MooseMain.h"
@@ -71,6 +72,7 @@ AppFactory::create(const std::string & app_type,
   auto command_line = std::make_unique<CommandLine>(std::vector<std::string>{"unused"});
   command_line->addArguments(cli_args);
   command_line->parse();
+  Moose::_suppress_info = command_line->hasArgument("--suppress-info");
 
   return AppFactory::create(std::move(parser), std::move(command_line));
 }
@@ -116,6 +118,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
 
   auto command_line = std::make_unique<CommandLine>(argc, argv);
   command_line->parse();
+  Moose::_suppress_info = command_line->hasArgument("--suppress-info");
 
   auto parser = std::make_unique<Parser>(input_filenames);
   parser->setCommandLineParams(command_line->buildHitParams());
