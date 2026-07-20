@@ -16,7 +16,10 @@ ConvertVectorOfVectorsToMFEM(std::vector<std::vector<mfem::real_t>> vector_of_ve
 {
   std::vector<mfem::Vector> mfem_vectors;
   for (auto & vector : vector_of_vectors)
-    mfem_vectors.push_back(mfem::Vector(vector.data(), vector.size()));
+  {
+    const mfem::Vector mfem_vector(&vector[0], vector.size());
+    mfem_vectors.push_back(mfem_vector);
+  }
   return mfem_vectors;
 }
 
@@ -35,9 +38,8 @@ MFEMTopology::validParams()
 }
 
 MFEMTopology::MFEMTopology(const InputParameters & parameters)
-  : _input_lattice_vectors(
-        parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors")),
-    _lattice_vectors(ConvertVectorOfVectorsToMFEM(_input_lattice_vectors)),
+  : _lattice_vectors(ConvertVectorOfVectorsToMFEM(
+        parameters.get<std::vector<std::vector<mfem::real_t>>>("lattice_vectors"))),
     _rotational_symmetry_order(parameters.get<unsigned int>("rotational_symmetry_order"))
 {
   for (const auto & lattice_vector : _lattice_vectors)
