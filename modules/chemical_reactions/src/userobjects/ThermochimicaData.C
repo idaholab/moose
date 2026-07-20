@@ -508,8 +508,7 @@ ThermochimicaData::initializeThermochimica()
     _header->worker_status = selection_info;
     return;
   }
-  Thermochimica::setHeatCapacityEnthalpyEntropyRequested(
-      _configuration->needs_system_properties);
+  Thermochimica::setHeatCapacityEnthalpyEntropyRequested(_configuration->needs_system_properties);
 #endif
 }
 

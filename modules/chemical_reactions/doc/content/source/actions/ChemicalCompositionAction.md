@@ -154,8 +154,17 @@ and a conventional sublattice phase:
 !listing modules/chemical_reactions/test/tests/thermochimica/typed_mqm.i block=ChemicalComposition/thermo/Outputs
 
 !alert note
-Element and output variable names must be unique and must not also be declared in `[Variables]` or
-`[AuxVariables]`.
+Output variable names must be unique and must not also be declared in `[Variables]` or
+`[AuxVariables]`. Element variables are normally created by the action. They may instead be
+declared explicitly with a compatible finite-element type when multiple block-restricted
+thermodynamic systems share the same elemental composition variables.
+
+The following Fe-Ti-V-O example defines two block-restricted thermodynamic systems. The first
+selects typed phase, species, and constituent outputs, while the second selects element-potential,
+vapor-pressure, and integral system-property outputs:
+
+!listing modules/chemical_reactions/test/tests/thermochimica/typed_outputs_subblocks.i
+         block=AuxVariables ChemicalComposition
 
 ## Deprecated Output Parameters
 
