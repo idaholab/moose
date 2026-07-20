@@ -10,13 +10,18 @@
       csvdiff = 'gaussian_process_uniform_1D_out_cart_avg_0002.csv'
       allow_test_objects = true
       detail = "using fixed hyperparameters, "
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [tuned]
       type = CSVDiff
       input = gaussian_process_uniform_1D_tuned.i
       csvdiff = 'gaussian_process_uniform_1D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
-      capabilities = 'petsc>=3.10.0'
+      capabilities = 'petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
       detail = "and tuned hyperparameters."
     []
   []
@@ -27,7 +32,9 @@
       input = gaussian_process_uniform_2D.i
       csvdiff = 'gaussian_process_uniform_2D_out_cart_avg_0002.csv'
       allow_test_objects = true
-      capabilities = 'method=opt'
+      capabilities = 'method=opt & libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 4 # Reserve extra CI memory for libtorch runtime with --n-threads=2
       detail = "using fixed hyperparameters, "
     []
     [tuned]
@@ -35,7 +42,9 @@
       input = gaussian_process_uniform_2D_tuned.i
       csvdiff = 'gaussian_process_uniform_2D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
-      capabilities = 'method=opt & petsc>=3.10.0'
+      capabilities = 'method=opt & petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for duplicated libtorch/GP state under MPI
       detail = "and tuned hyperparameters."
     []
   []
@@ -47,7 +56,9 @@
       check_files = 'GP_training_normal_GP_avg.rd/data'
       heavy = true
       allow_test_objects = true
-      capabilities = 'method=opt & petsc>=3.10.0'
+      capabilities = 'method=opt & petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
       detail = "by first training a GP surrogate "
     []
     [test]
@@ -57,7 +68,9 @@
       heavy = true
       min_parallel = 4
       allow_test_objects = true
-      capabilities = 'method=opt'
+      capabilities = 'method=opt & libtorch'
+      compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
       prereq = 4D_HC_avg/train
       detail = "then evaluating the surrogate."
     []

@@ -3,9 +3,6 @@
         "cv_scores": {
             "type": "CrossValidationScores",
             "values": {
-                "gp_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                },
                 "np_surr": {
                     "type": "std::vector<std::vector<double>>"
                 },
@@ -21,13 +18,6 @@
     "time_steps": [
         {
             "cv_scores": {
-                "gp_surr": [
-                    [
-                        2.9008254067550547,
-                        3.3214224765207,
-                        4.872343047673496
-                    ]
-                ],
                 "np_surr": [
                     [
                         7.354381697450355,

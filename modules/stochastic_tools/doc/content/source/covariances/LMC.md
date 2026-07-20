@@ -1,5 +1,6 @@
 # LMC
 
+!if function=hasCapability('libtorch')
 !syntax description /Covariance/LMC
 
 The linear model of co-regionalization (LMC) distinctly models the covariances
@@ -35,8 +36,14 @@ If $Q=1$, the LMC reduces to the intrinsic co-regionalization model (ICM).
 
 !listing test/tests/surrogates/multioutput_gp/mogp_lmc.i block=Covariance
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Covariance/LMC
 
 !syntax inputs /Covariance/LMC
 
 !syntax children /Covariance/LMC
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

@@ -1,5 +1,7 @@
 # ActiveLearningGPDecision
 
+!if! function=hasCapability('libtorch')
+
 !syntax description /Reporters/ActiveLearningGPDecision
 
 ## Description
@@ -89,3 +91,8 @@ The following samplers are also supported with the `ActiveLearningGPDecision` re
 !syntax inputs /Reporters/ActiveLearningGPDecision
 
 !syntax children /Reporters/ActiveLearningGPDecision
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

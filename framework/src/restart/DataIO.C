@@ -219,6 +219,33 @@ dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
   stream.write(s_str.c_str(), sizeof(char) * (s_str.size()));
 }
 
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void
+dataStore(std::ostream & stream, torch::Tensor & t, void * context)
+{
+  const auto tensor = LibtorchUtils::toCPUContiguous(t);
+  mooseAssert(tensor.scalar_type() == at::kDouble,
+              "Restart storage currently supports only double tensors.");
+
+  auto rank = cast_int<unsigned int>(tensor.dim());
+  dataStore(stream, rank, nullptr);
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    auto size = cast_int<unsigned int>(tensor.sizes()[dim]);
+    dataStore(stream, size, nullptr);
+  }
+
+  const auto flattened = tensor.reshape({tensor.numel()});
+  const auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = t_accessor[i];
+    dataStore(stream, r, context);
+  }
+}
+#endif
+
 template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
@@ -554,6 +581,34 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   s.str(std::string());
   s.write(s_s.get(), s_size);
 }
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void
+dataLoad(std::istream & stream, torch::Tensor & t, void * context)
+{
+  unsigned int rank = 0;
+  dataLoad(stream, rank, nullptr);
+
+  std::vector<int64_t> sizes(rank);
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    unsigned int size = 0;
+    dataLoad(stream, size, nullptr);
+    sizes[dim] = size;
+  }
+
+  t = torch::empty(sizes, at::kDouble);
+  auto flattened = t.reshape({t.numel()});
+  auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = 0;
+    dataLoad(stream, r, context);
+    t_accessor[i] = r;
+  }
+}
+#endif
 
 template <typename T>
 void

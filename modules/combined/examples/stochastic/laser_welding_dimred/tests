@@ -20,6 +20,8 @@
     min_parallel = 8
     max_parallel = 8
     allow_test_objects = true
+    capabilities = 'libtorch'
+    compute_devices = 'cpu cuda'
   []
   [test]
     type = JSONDiff
@@ -35,6 +37,8 @@
     min_parallel = 8
     max_parallel = 8
     allow_test_objects = true
+    capabilities = 'libtorch'
+    compute_devices = 'cpu cuda'
     prereq = train
   []
 []
