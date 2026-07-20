@@ -29,7 +29,7 @@
  * the sample data to objects. The sampler is designed to handle any number of random number
  * generators.
  *
- * The main methods in this object is the getSampleRow/getLocalSamples methods which
+ * The main methods in this object are the getSampleRow/getLocalSamples methods which
  * return the distribution samples. These methods will return the same results for each call
  * regardless of the number of calls.
  *

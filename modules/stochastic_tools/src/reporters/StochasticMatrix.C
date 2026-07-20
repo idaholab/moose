@@ -61,7 +61,7 @@ StochasticMatrix::execute()
   for (dof_id_type i = 0, global_i = _sampler.getLocalRowBegin();
        i < _sampler.getNumberOfLocalRows();
        ++i, ++global_i)
-    for (std::size_t j = 0; j < _sampler.getNumberOfCols(); ++j)
+    for (const auto j : make_range(_sampler.getNumberOfCols()))
       (*_sample_vectors[j])[i] = _sampler.getSample(global_i, j);
 }
 

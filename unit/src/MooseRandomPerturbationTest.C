@@ -128,7 +128,7 @@ TEST(MooseRandomPerturbation, serialize)
 
   mt_state state;
   mts_seed32new(&state, seed);
-  for (unsigned int trial = 0; trial < num_trials; ++trial)
+  for ([[maybe_unused]] const auto trial : make_range(num_trials))
   {
     auto generator_seed = static_cast<unsigned long>(mts_lrand(&state));
     unsigned int n = rds_iuniform(&state, 1, max_vector_length);
@@ -140,7 +140,7 @@ TEST(MooseRandomPerturbation, serialize)
     std::unique_ptr<MooseRandomPerturbation> restored;
     dataLoad(ss, restored, nullptr);
 
-    for (unsigned int x = 0; x < n; ++x)
+    for (const auto x : make_range(n))
       EXPECT_EQ(generator->permute(x), restored->permute(x));
   }
 }
