@@ -51,7 +51,8 @@ MFEMGeometricMultigridSolver::validParams()
   InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription(
       "Geometric (p-)multigrid preconditioner backed by mfem::GeometricMultigrid. "
-      "Requires an MFEMFESpaceHierarchy and per-level smoother objects.");
+      "Requires a linear equation system, an MFEMFESpaceHierarchy, and per-level smoother "
+      "objects.");
 
   params.addRequiredParam<std::string>("variable",
                                        "Name of the trial variable this preconditioner acts on.");
@@ -102,7 +103,6 @@ MFEMGeometricMultigridSolver::ConstructSolver()
   _mg.reset();
   _level_ops.clear();
   _level_blfs.clear();
-  _level_nlfs.clear();
 
   auto proxy = std::make_unique<MGProxy>(*this);
   _mg_proxy = proxy.get();
@@ -147,6 +147,11 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
                name(),
                "': requires a standard (non-complex, non-time-dependent) EquationSystem.");
 
+  if (eq_sys->Nonlinear())
+    mooseError("GeometricMultigridSolver '",
+               name(),
+               "': nonlinear equation systems are not currently supported.");
+
   if (eq_sys->HasMixedBilinearForms(_var_name))
     paramError("variable",
                "mixed bilinear form contributions are not supported for variable '",
@@ -189,34 +194,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
                finest_size,
                ".");
 
-  std::vector<mfem::Vector> level_linearization_points;
-  if (eq_sys->Nonlinear())
-  {
-    const auto & fine_point = eq_sys->GetLinearizationPoint();
-    if (fine_point.Size() != finest_size)
-      mooseError("GeometricMultigridSolver '",
-                 name(),
-                 "': EquationSystem linearization point has size ",
-                 fine_point.Size(),
-                 ", but the finest hierarchy space has true size ",
-                 finest_size,
-                 ".");
-
-    level_linearization_points.resize(N);
-    const mfem::Vector * fine_level_point = &fine_point;
-    for (const auto offset : make_range(N - 1))
-    {
-      const int level = N - 2 - offset;
-      auto * prolongation = _hierarchy->GetProlongationAtLevel(level);
-      level_linearization_points[level].SetSize(prolongation->Width());
-      prolongation->MultTranspose(*fine_level_point, level_linearization_points[level]);
-      fine_level_point = &level_linearization_points[level];
-    }
-  }
-
   // Build new levels' forms; accumulate before touching _mg / _level_*.
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> new_blfs;
-  std::vector<std::shared_ptr<mfem::ParNonlinearForm>> new_nlfs;
   std::vector<std::unique_ptr<mfem::OperatorHandle>> new_level_ops;
   new_level_ops.reserve(N - 1);
 
@@ -240,16 +219,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     {
       level_op = const_cast<mfem::Operator *>(&op);
       own_op = false;
-    }
-    else if (eq_sys->Nonlinear())
-    {
-      auto nlf =
-          eq_sys->BuildNonlinearFormForFESpace(_var_name, level_fespace, _assembly_levels[level]);
-      nlf->SetEssentialTrueDofs(level_tdofs);
-      level_op = &nlf->GetGradient(level_linearization_points[level]);
-      // The Jacobian is owned by the nonlinear form; own_op = false.
-      own_op = false;
-      new_nlfs.push_back(std::move(nlf));
     }
     else
     {
@@ -279,7 +248,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   _mg = std::move(mg);
   _level_ops = std::move(new_level_ops);
   _level_blfs = std::move(new_blfs);
-  _level_nlfs = std::move(new_nlfs);
   _mg_proxy->setMG(*_mg);
 }
 #endif

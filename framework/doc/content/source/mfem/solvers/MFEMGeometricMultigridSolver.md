@@ -13,8 +13,8 @@ The finest-level operator is supplied by the outer solver. Coarser level
 operators are rediscretized from the equation system on each hierarchy level
 using the requested [!param](/Solvers/MFEMGeometricMultigridSolver/assembly_levels).
 
-This solver is intended for single-variable equation systems. Mixed bilinear form
-contributions are not supported.
+This solver is intended for linear, single-variable equation systems. Nonlinear
+equation systems and mixed bilinear form contributions are not supported.
 
 !syntax parameters /Solvers/MFEMGeometricMultigridSolver
 

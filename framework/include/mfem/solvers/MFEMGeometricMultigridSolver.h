@@ -23,15 +23,11 @@
  *
  * The hierarchy is provided by an MFEMFESpaceHierarchy object. The
  * finest-level operator is the constrained operator passed to SetOperator().
- * Coarser levels are rediscretized from the equation system's bilinear or
- * nonlinear integrators.
+ * Coarser levels are rediscretized from the equation system's bilinear integrators.
  *
  * Current implementation:
  *  - Only single-variable equation systems are supported.
- *  - For nonlinear equation systems, coarse-level operators are rediscretized at
- *    linearization points obtained by restricting the state vector used for the most recent
- *    fine-level EquationSystem::GetGradient() call, rather than by applying a Galerkin projection
- *    to the fine-level Jacobian.
+ *  - Only linear equation systems are supported.
  *
  * Example input:
  * @code
@@ -126,9 +122,6 @@ private:
 
   /// Rediscretized bilinear forms kept alive for the active linear coarse-level operators.
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> _level_blfs;
-
-  /// Rediscretized nonlinear forms kept alive for the active nonlinear coarse-level operators.
-  std::vector<std::shared_ptr<mfem::ParNonlinearForm>> _level_nlfs;
 
   /// Constrained linear coarse-level operators; destroyed before the forms that own their data.
   std::vector<std::unique_ptr<mfem::OperatorHandle>> _level_ops;
