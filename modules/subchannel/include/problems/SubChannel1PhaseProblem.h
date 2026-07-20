@@ -227,10 +227,10 @@ protected:
   Real _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
-  /// Maximum number of pressure iterations; zero selects the solver's existing automatic limit
-  const int & _P_maxit;
   /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
+  /// Maximum number of pressure iterations; zero selects the solver's existing automatic limit
+  const int & _P_maxit;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
   /// Relaxation factor for temperature updates in the inner thermal-hydraulic iteration

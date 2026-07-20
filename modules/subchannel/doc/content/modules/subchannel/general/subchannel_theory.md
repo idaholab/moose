@@ -394,13 +394,9 @@ The main unknown variable in this non linear residual is the crossflow $w_{ij}$.
     id=scm-solver-flowchart
     caption=SCM solver iteration scheme
 
-For each outer pressure iteration, blocks are visited sequentially from the assembly inlet to the
-outlet. Within a solve, SCM first refreshes the flow solution and then solves the enthalpy equation,
+For each outer pressure iteration the solution is repeated. Within a solve, SCM first refreshes the flow solution and then solves the enthalpy equation,
 recovers temperature from pressure and enthalpy, and updates density and viscosity. The
-`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are
-performed before the next flow solve. Its default value of one preserves the original
-flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow
-field.
+`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are performed before the next flow solve. Its default value of one preserves the original flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow field.
 
 The temperature recovered from the equation of state can be relaxed independently:
 
@@ -421,7 +417,7 @@ uses the unrelaxed equation-of-state update,
 
 so changing `T_relaxation` does not redefine `T_tol`.
 
-After all blocks have been processed, SCM checks pressure convergence. The segregated algorithms
+After temperature converges, SCM checks pressure convergence. The segregated algorithms
 use the relative field change
 
 \begin{equation}
@@ -430,13 +426,8 @@ use the relative field change
 {\left\|\vec{P}^{\,\ell}+P_{\mathrm{out}}\mathbf{1}\right\|_2+10^{-14}},
 \end{equation}
 
-whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
-blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
-independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the
-pressure field has not converged, the sweep starts again at the inlet; pressure information
-therefore requires multiple outer iterations to propagate upstream when several blocks are used.
-`P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
-the solver's automatic outer-iteration limit.
+whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
+independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the pressure field has not converged, the algorithm continues solving with updated pressure field.
 
 ### Algorithm variations
 

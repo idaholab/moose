@@ -166,7 +166,6 @@ SubChannel1PhaseProblem::validParams()
       true,
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
       "Use closure system instead.");
-
   params.addParamNamesToGroup(
       "P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
@@ -203,8 +202,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _P_tol(getParam<Real>("P_tol")),
-    _P_maxit(getParam<int>("P_maxit")),
     _T_tol(getParam<Real>("T_tol")),
+    _P_maxit(getParam<int>("P_maxit")),
     _T_maxit(getParam<int>("T_maxit")),
     _T_relaxation(getParam<Real>("T_relaxation")),
     _enthalpy_subcycles(getParam<unsigned int>("enthalpy_subcycles")),
@@ -286,13 +285,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   LibmeshPetscCall(createPetscVector(_Wij_vec, _n_cells * _n_gaps));
   LibmeshPetscCall(createPetscVector(_prod, _n_cells * _n_channels));
   LibmeshPetscCall(createPetscVector(_prodp, _n_cells * _n_channels));
-  LibmeshPetscCall(createPetscMatrix(_mc_sumWij_mat, _n_channels, _n_gaps));
-  LibmeshPetscCall(createPetscVector(_Wij_vec, _n_gaps));
-  LibmeshPetscCall(createPetscVector(_prod, _n_channels));
-  LibmeshPetscCall(createPetscVector(_prodp, _n_channels));
-  LibmeshPetscCall(createPetscMatrix(_mc_axial_convection_mat, _n_channels, _n_channels));
-  LibmeshPetscCall(createPetscVector(_mc_axial_convection_rhs, _n_channels));
-  LibmeshPetscCall(createPetscMatrix(_mc_density_pressure_mat, _n_channels, _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_mc_axial_convection_mat, _n_cells * _n_channels, _n_cells * _n_channels));
+  LibmeshPetscCall(createPetscVector(_mc_axial_convection_rhs, _n_cells * _n_channels));
+  LibmeshPetscCall(
+      createPetscMatrix(_mc_density_pressure_mat, _n_cells * _n_channels, _n_cells * _n_channels));
 
   // Axial momentum conservation components
   LibmeshPetscCall(createPetscMatrix(
@@ -2781,7 +2778,7 @@ SubChannel1PhaseProblem::externalSolve()
     _console << " From first level: " << first_level << " to last level: " << last_level
              << std::endl;
 
-    while (T_block_error > _T_tol && T_it < _T_maxit)
+    while (T_error > _T_tol && T_it < _T_maxit)
     {
       if (processor_id() == 0)
       {
@@ -2799,7 +2796,7 @@ SubChannel1PhaseProblem::externalSolve()
       // every thermal update. Larger values opt into lagging flow during thermal subcycles.
       for (const auto enthalpy_subcycle : make_range(_enthalpy_subcycles))
       {
-        if (T_block_error <= _T_tol || T_it >= _T_maxit)
+        if (T_error <= _T_tol || T_it >= _T_maxit)
           break;
 
         V("Enthalpy subcycle: " + std::to_string(enthalpy_subcycle + 1));
@@ -2809,14 +2806,14 @@ SubChannel1PhaseProblem::externalSolve()
         if (processor_id() > 0)
         {
           // Rank zero supplies the error through the maximum reduction below.
-          T_block_error = 0.0;
+          T_error = 0.0;
           goto aux_close;
         }
 
         if (_compute_power)
         {
           computeh();
-          T_block_error = computeT();
+          T_error = computeT();
           V("Done with thermal solve.");
         }
 
@@ -2833,15 +2830,15 @@ SubChannel1PhaseProblem::externalSolve()
         _aux->solution().close();
 
         if (!_compute_power)
-          T_block_error =
+          T_error =
               relativeChange(*_T_soln, T_old, first_level, last_level, /*reference_offset=*/0.0);
-        _console << "T_block_error: " << T_block_error << std::endl;
+        _console << "T_error: " << T_error << std::endl;
 
         // All processes must have the same iteration count
-        comm().max(T_block_error);
+        comm().max(T_error);
       }
     }
-    const bool block_converged = T_block_error <= _T_tol;
+    const bool block_converged = T_error <= _T_tol;
     temperature_converged &= block_converged;
     if (!block_converged)
     {
@@ -2852,7 +2849,12 @@ SubChannel1PhaseProblem::externalSolve()
     comm().max(P_error);
     _console << "P_error :" << P_error << std::endl;
     V("Iteration:  " + std::to_string(P_it));
-    V("Maximum iterations: " + std::to_string(P_it_max));
+    V("Maximum iterations: " + std::to_string(_P_maxit));
+  }
+  if (P_error > _P_tol)
+  {
+    _console << "Reached maximum number of pressure iterations" << std::endl;
+    _converged = false;
   }
   // Cache only the final iteration status. Earlier outer iterations may fail their thermal
   // tolerance and subsequently recover.
