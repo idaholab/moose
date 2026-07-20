@@ -11,6 +11,7 @@
 
 #include "MFEMVariable.h"
 #include "MFEMProblem.h"
+#include "MFEMFESpace.h"
 #include "MFEMFESpaceHierarchy.h"
 #include "MooseVariableBase.h"
 #include "MFEMVectorMagnitudeCoefficient.h"
@@ -59,10 +60,10 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
 
   if (has_fespace)
   {
-    _fespace_ptr = &getMFEMProblem().getMFEMObject<MFEMFESpace>(
+    const auto & fespace = getMFEMProblem().getMFEMObject<MFEMFESpace>(
         "MFEMFESpace", getParam<MFEMFESpaceName>("fespace"));
-    _par_fespace = _fespace_ptr->getFESpace();
-    _is_scalar = _fespace_ptr->isScalar();
+    _par_fespace = fespace.getFESpace();
+    _is_scalar = fespace.isScalar();
   }
   else
   {

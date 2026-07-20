@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMFESpace.h"
 #include "MFEMObject.h"
 
 /**
@@ -27,14 +26,6 @@ public:
   /// Returns a shared pointer to the constructed gridfunction.
   std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
 
-  /// Returns a reference to the fespace used by the gridfunction. Only valid when constructed via
-  /// `fespace`; asserts if the variable was constructed via `fespace_hierarchy`.
-  const MFEMFESpace & getFESpace() const
-  {
-    mooseAssert(_fespace_ptr, "getFESpace() called on a hierarchy-backed variable");
-    return *_fespace_ptr;
-  }
-
   /// Returns the variable name corresponding to the time derivative of the MFEMVariable.
   const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
 
@@ -42,8 +33,6 @@ public:
   void declareCoefficients();
 
 protected:
-  /// Non-owning pointer to the MOOSE FESpace; null when using fespace_hierarchy.
-  const MFEMFESpace * _fespace_ptr = nullptr;
   /// The underlying MFEM FESpace - always populated regardless of which parameter was used.
   std::shared_ptr<mfem::ParFiniteElementSpace> _par_fespace;
   bool _is_scalar = false;
