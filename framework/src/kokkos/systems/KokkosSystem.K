@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosSystem.h"
-#include "KokkosNodalBCBase.h"
 
 #include "MooseMesh.h"
 #include "Assembly.h"
@@ -36,10 +35,7 @@ System::System(SystemBase & system)
   setupDofs();
 
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
-  {
     setupSparsity();
-    setupNodalBCDofs();
-  }
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
@@ -270,58 +266,6 @@ System::setupSparsity()
   _sparsity.col_idx = col_idx;
   _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
-}
-
-void
-System::setupNodalBCDofs()
-{
-  auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
-
-  _nbc_matrix_tag_dof.create(MAX_TAG);
-
-  for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
-  {
-    auto nbc = static_cast<NodalBCBase *>(bc.get());
-
-    auto matrix_tags = nbc->getMatrixTags({});
-
-    for (auto tag : matrix_tags)
-      getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
-  }
-
-  _nbc_matrix_tag_dof.copyToDeviceNested();
-}
-
-void
-System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
-{
-  auto var = nbc->variable().number();
-
-  if (!dofs.isAlloc())
-  {
-    dofs.create(_num_local_dofs + _num_ghost_dofs);
-    dofs = false;
-  }
-
-  for (auto node : nbc->getContiguousNodes())
-    dofs[_local_node_dof_index[var][node]] = true;
-
-  // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
-
-  auto num_procs = _comm.size();
-
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (auto dof : _local_comm_list[proc])
-      send[proc].push_back(dofs[dof]);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
 }
 
 void

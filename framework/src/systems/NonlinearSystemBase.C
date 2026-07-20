@@ -330,6 +330,10 @@ NonlinearSystemBase::initialSetup()
 
   if (_preconditioner)
     _preconditioner->initialSetup();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  setupKokkos();
+#endif
 }
 
 void
@@ -2177,6 +2181,11 @@ NonlinearSystemBase::computeNodalBCsResidual(const std::set<TagID> & tags)
 void
 NonlinearSystemBase::computeNodalBCsJacobian(const std::set<TagID> & tags)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosNodalBCsJacobian(tags);
+#endif
+
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
   // on boundary nodes
   if (_has_diag_save_in)
@@ -2301,7 +2310,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian(
 {
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
-    computeKokkosNodalBCsResidual(vector_tags);
+    computeKokkosNodalBCsResidualAndJacobian(vector_tags, matrix_tags);
 #endif
 
   // Return early if there is no nodal kernel

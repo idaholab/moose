@@ -167,16 +167,6 @@ public:
    */
   KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
   /**
-   * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
-   * @param dof The local DOF index
-   * @param tag The extra matrix tag
-   * @returns Whether the local DOF index is covered by a nodal BC
-   */
-  KOKKOS_FUNCTION bool hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
-  {
-    return _nbc_matrix_tag_dof[tag].isAlloc() && _nbc_matrix_tag_dof[tag][dof];
-  }
-  /**
    * Get the FE type ID of a variable
    * @param var The variable number
    * @returns The FE type ID
@@ -474,16 +464,6 @@ private:
    * Setup sparsity data
    */
   void setupSparsity();
-  /**
-   * Mark the DOFs covered by nodal BCs
-   */
-  void setupNodalBCDofs();
-  /**
-   * Get the list of DOFs covered by a nodal BC
-   * @param nbc The Kokkos nodal BC object
-   * @param dofs The flag whether each DOF is covered by the nodal BC
-   */
-  void getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs);
 
   /**
    * Kokkos thread object
@@ -579,10 +559,6 @@ private:
   Array<bool> _residual_tag_active;
   Array<bool> _matrix_tag_active;
   ///@}
-  /**
-   * Flag whether each DOF is covered by a nodal BC for each matrix tag
-   */
-  Array<Array<bool>> _nbc_matrix_tag_dof;
   /**
    * List of DOFs to send and receive
    */

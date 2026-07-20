@@ -82,7 +82,6 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
 #endif
 
     VectorTagsKey() {}
@@ -102,7 +101,6 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
 #endif
 
     MatrixTagsKey() {}
