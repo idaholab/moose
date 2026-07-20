@@ -298,7 +298,9 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // with one element at a time (and then below we do a loop over all the mesh's active elements).
   // It's perhaps faster in this case to deal with mallocs coming out of MatSetValues, especially if
   // the mesh displacements are relatively small
-  if ((!amg || _use_displaced_mesh) && !_is_coupling_functor)
+  const bool ghost_whole_primary_interface =
+      (!amg || _use_displaced_mesh) && !_is_coupling_functor;
+  if (ghost_whole_primary_interface)
   {
     if (generating_mesh)
     {
@@ -350,50 +352,52 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         break;
       }
 
-    if (!has_secondary_interface)
-      return;
-
-    for (const Elem * const elem : _mesh->active_element_ptr_range())
-    {
-      if (elem->processor_id() == p)
-        continue;
-
-      if (has_boundary_id(elem, primary_boundary_id))
-        coupled_elements.insert(std::make_pair(elem, _null_mat));
-
-      // Lower dimensional primary subdomain elements
-      if (elem->subdomain_id() == primary_subdomain_id)
+    if (has_secondary_interface)
+      for (const Elem * const elem : _mesh->active_element_ptr_range())
       {
-        coupled_elements.insert(std::make_pair(elem, _null_mat));
+        if (elem->processor_id() == p)
+          continue;
+
+        if (has_boundary_id(elem, primary_boundary_id))
+          coupled_elements.insert(std::make_pair(elem, _null_mat));
+
+        // Lower dimensional primary subdomain elements
+        if (elem->subdomain_id() == primary_subdomain_id)
+        {
+          coupled_elements.insert(std::make_pair(elem, _null_mat));
 
 #ifndef NDEBUG
-        // let's do some safety checks
-        const Elem * const ip = elem->interior_parent();
-        mooseAssert(ip,
-                    "We should have set interior parents for all of our lower-dimensional mortar "
-                    "subdomains");
-        auto side = ip->which_side_am_i(elem);
-        mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, primary_boundary_id),
-                    "The interior parent for the lower-dimensional element does not lie on the "
-                    "primary boundary");
+          // let's do some safety checks
+          const Elem * const ip = elem->interior_parent();
+          mooseAssert(ip,
+                      "We should have set interior parents for all of our lower-dimensional mortar "
+                      "subdomains");
+          auto side = ip->which_side_am_i(elem);
+          mooseAssert(_mesh->get_boundary_info().has_boundary_id(ip, side, primary_boundary_id),
+                      "The interior parent for the lower-dimensional element does not lie on the "
+                      "primary boundary");
 #endif
+        }
       }
-    }
   }
-  // For a static mesh (or for determining a sparsity pattern approximation on a displaced mesh) we
-  // can just ghost the coupled elements determined during mortar mesh generation
-  else if (amg)
+  // Once the mortar mesh exists, also ghost the coupled elements determined during mortar mesh
+  // generation. For a dynamic mesh, this keeps the current reverse couplings on primary-owning
+  // ranks in addition to the whole primary interface ghosting above.
+  if (amg)
   {
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
       ghostMortarInterfaceCouplings(p, elem, coupled_elements, *amg);
 
-      if (_ghost_point_neighbors)
-        ghostLowerDSecondaryElemPointNeighbors(
-            p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
-      if (_ghost_higher_d_neighbors)
-        ghostHigherDNeighbors(
-            p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
+      if (!ghost_whole_primary_interface)
+      {
+        if (_ghost_point_neighbors)
+          ghostLowerDSecondaryElemPointNeighbors(
+              p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
+        if (_ghost_higher_d_neighbors)
+          ghostHigherDNeighbors(
+              p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
+      }
     } // end for loop over input range
   }   // end if amg
 }
