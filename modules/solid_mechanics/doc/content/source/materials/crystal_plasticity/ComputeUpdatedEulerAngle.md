@@ -24,7 +24,7 @@ Below are the inverse pole figures for the three cases. It can be seen that the 
     caption=Inverse pole figure of a singe crystal undergone uniaxial tension. Three cases with different initial orientations are demonstrated. The initial orientations are $[111]$, $[112]$, and $[123]$ from the left to the right.
     style=display:block;margin-left:auto;margin-right:auto;width:90%
 
-The inverse pole figures are plotted using MATLAB tool box [MTEX](https://github.com/mtex-toolbox/mtex). The above results can be reproduced  by running [this test](modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_euler_angle.i) with end_time = 50 (seconds).
+The inverse pole figures are plotted using MATLAB tool box [MTEX](https://github.com/mtex-toolbox/mtex). The above results can be reproduced  by running [!file text=this test](modules/solid_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_euler_angle.i) with end_time = 50 (seconds).
 
 The MOOSE developer would like to acknowledge contributions from Dr. Alankar Alankar and Ritam Chatterjee ([IMaGen](https://www.me.iitb.ac.in/~alankar/), Indian Institute of Technology, Bombay, India) to this verification case.
 

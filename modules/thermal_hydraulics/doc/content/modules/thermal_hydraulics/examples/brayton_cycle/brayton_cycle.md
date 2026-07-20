@@ -133,7 +133,7 @@ with the following function:
 ### Closed Brayton Cycle
 
 The model discussed in this section can be found in the following input file:
-[closed_brayton_cycle.i](test/tests/problems/brayton_cycle/closed_brayton_cycle.i).
+[!file text=closed_brayton_cycle.i](test/tests/problems/brayton_cycle/closed_brayton_cycle.i).
 
 In the closed cycle, a strong convection source term is applied to bring the
 working fluid back to near the ambient temperature:
@@ -145,7 +145,7 @@ working fluid back to near the ambient temperature:
 ### Open Brayton Cycle
 
 The model discussed in this section can be found in the following input file:
-[open_brayton_cycle.i](test/tests/problems/brayton_cycle/open_brayton_cycle.i).
+[!file text=open_brayton_cycle.i](test/tests/problems/brayton_cycle/open_brayton_cycle.i).
 
 In the open cycle, instead of a heat sink, there is an *inlet* connected
 to the compressor inlet piping, and an *outlet* connected to the turbine outlet

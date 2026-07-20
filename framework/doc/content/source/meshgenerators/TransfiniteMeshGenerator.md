@@ -11,7 +11,7 @@ The `TransfiniteMeshGenerator` produces two-dimensional meshes from a set of 4 c
 
 &nbsp;
 
-Given a set of 4 corners the TransfiniteMeshGenerator constructs by default the straight edges that connect the vertices and fills up the interior with straight lines. The test, [quadrilater_generator.i](test/tests/meshgenerators/transfinite_generator/quadrilater_generator.i),
+Given a set of 4 corners the TransfiniteMeshGenerator constructs by default the straight edges that connect the vertices and fills up the interior with straight lines. The test, [!file text=quadrilater_generator.i](test/tests/meshgenerators/transfinite_generator/quadrilater_generator.i),
 illustrates the use of the `TransfiniteMeshGenerator` object to construct general quadrilaterals as in Fig. 2. By default the distribution of points along edges is considered equidistant, unless specified otherwise by the user using the parameters `bias_x` or `bias_y`. The core of the algorithm interpolates/fills up the inner domain for any edge type, curved, parametrized, discrete. The current implementation considers all these cases with special attention given to arcs of a circle which are widely encountered in scientific computing applications. 
 
 The convention for the corners numbering should follow Fig. 1, prescribed in the order +(0,0) - (0,1) - (1,1) - (1,0)+. The direction along edges, important if the user provides them using the DISCRETE option, should follow the direction of the arrows as in Fig. 1.
@@ -50,9 +50,9 @@ Admissible types are:
     block=Mesh/transf
 
 
-  - `DISCRETE` - constructs a line along a set of points, provided by the user in a required edge parameter.  Coordinates for each point are separated by whitespace, and points are separated by newlines.  Points are connected in the order represented by arrows in Fig. 1.  A test is available in [discrete_generator.i](test/tests/meshgenerators/transfinite_generator/discrete_generator.i) and illustrated in Fig. 4. This option is the only one that does not support a different point redistribution via the options `bias_x` and `bias_y`; these will have no effect, since it is assumed the user desires their edge points exactly as specified. 
+  - `DISCRETE` - constructs a line along a set of points, provided by the user in a required edge parameter.  Coordinates for each point are separated by whitespace, and points are separated by newlines.  Points are connected in the order represented by arrows in Fig. 1.  A test is available in [!file text=discrete_generator.i](test/tests/meshgenerators/transfinite_generator/discrete_generator.i) and illustrated in Fig. 4. This option is the only one that does not support a different point redistribution via the options `bias_x` and `bias_y`; these will have no effect, since it is assumed the user desires their edge points exactly as specified.
 
-  - `PARSED` - constructs a curvilinear edge, as provided by a parametric function specified in the corresponding edge parameter.  In this parameter, the function to be parsed should be a map from the unit interval `r=[0,1]`, with the output `x` and `y` components separated by a semicolon.  The test [parsed_generator.i](test/tests/meshgenerators/transfinite_generator/parsed_generator.i) illustrates this by constructing a stenotic pipe mesh using parsed top and bottom edges.
+  - `PARSED` - constructs a curvilinear edge, as provided by a parametric function specified in the corresponding edge parameter.  In this parameter, the function to be parsed should be a map from the unit interval `r=[0,1]`, with the output `x` and `y` components separated by a semicolon.  The test [!file text=parsed_generator.i](test/tests/meshgenerators/transfinite_generator/parsed_generator.i) illustrates this by constructing a stenotic pipe mesh using parsed top and bottom edges.
 
 
 !media large_media/framework/meshgenerators/transfinite_parsed_bias_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 5: A stenotic pipe generated using parametrized edges using  `PARSED` and different point distributions (`bias_x`, `bias_y`).

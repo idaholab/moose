@@ -50,7 +50,7 @@ where
 !equation
 (\delta\mathbf{x_i})_{j,d} = (\mathbf{x_i})_{j+1,d} - (\mathbf{x_i})_{j,d},\quad  (\delta\vec{y_i})_{j,d} = (\vec{y_i})_{j+1,d} - (\vec{y_i})_{j,d},\quad j,d=1,...,D
 
-Taking the first trajectory in [this sampling](test/tests/samplers/morris/gold/morris_out_data_0000.csv):
+Taking the first trajectory in [!file text=this sampling](test/tests/samplers/morris/gold/morris_out_data_0000.csv):
 
 !equation
 \mathbf{x_1} = \begin{bmatrix}

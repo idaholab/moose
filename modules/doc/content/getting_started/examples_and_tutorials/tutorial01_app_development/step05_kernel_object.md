@@ -20,7 +20,7 @@ In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one
 !alert note title=Automatic Differentiation
 "AD" (often used as a prefix for class names) stands for "Automatic Differentiation," which is a feature available to MOOSE application developers that drastically simplifies the implementation of a new `MooseObject`.
 
-Now, one might inspect the files that provide the base class, i.e., [`ADKernel.h`](framework/include/kernels/ADKernel.h) and [`ADKernel.C`](framework/src/kernels/ADKernel.C), to see what tools are available and decide how to properly implement a new object of this type. Variable members that `ADKernel` objects have access to include, but are not limited to, the following:
+Now, one might inspect the files that provide the base class, i.e., [!file text=`ADKernel.h`](framework/include/kernels/ADKernel.h) and [!file text=`ADKernel.C`](framework/src/kernels/ADKernel.C), to see what tools are available and decide how to properly implement a new object of this type. Variable members that `ADKernel` objects have access to include, but are not limited to, the following:
 
 - `_u`, `_grad_u`\\
   Value and gradient of the variable being operated on.
@@ -46,7 +46,7 @@ There are several methods that `ADKernel` (and `Kernel`) objects may override. T
 | KernelValue\\ +ADKernelValue+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the test function (do not use `_test` in the override, it is applied automatically) |
 | KernelGrad\\ +ADKernelGrad+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the gradient of the test function (do not use `_grad_test` in the override, it is applied automatically) |
 
-For this step, the method to be aware of is `precomputeQpResidual()`; the same one used by [`ADDiffusion`](framework/src/kernels/ADDiffusion.C). The "`Qp`" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the weak form of a [!ac](PDE) is numerically integrated. Finite elements usually contain multiple quadrature points at specific, symmetrically placed locations and the Gauss quadrature formula is a summation over all of these points that yields an exact value for the integral of a polynomial over $\Omega$.
+For this step, the method to be aware of is `precomputeQpResidual()`; the same one used by [!file text=`ADDiffusion`](framework/src/kernels/ADDiffusion.C). The "`Qp`" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the weak form of a [!ac](PDE) is numerically integrated. Finite elements usually contain multiple quadrature points at specific, symmetrically placed locations and the Gauss quadrature formula is a summation over all of these points that yields an exact value for the integral of a polynomial over $\Omega$.
 
 ## Demonstration id=demo
 

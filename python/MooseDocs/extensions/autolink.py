@@ -68,6 +68,7 @@ class FileLinkCommand(command.CommandComponent):
             None,
             "The language used for source file syntax highlighting.",
         )
+        settings["text"] = (None, "The text to display for the source file link.")
         settings["title"] = (None, "The title to use for the source file modal.")
         return settings
 
@@ -84,6 +85,10 @@ class FileLinkCommand(command.CommandComponent):
             title=settings["title"],
             recursive=False,
         )
+        if settings["text"] is not None:
+            self.reader.tokenize(
+                token, str(settings["text"]), page, "inline", line=info.line
+            )
         return token
 
 
@@ -104,10 +109,6 @@ def createTokenHelper(key, parent, info, page, settings):
             optional=settings["optional"],
             exact=settings["exact"],
             alternative=settings["alternative"],
-        )
-    elif common.project_find(info[key]):
-        return modal.ModalSourceLink(
-            parent, src=common.check_filenames(info[key]), language=settings["language"]
         )
     return None
 
@@ -130,10 +131,6 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
             "Toggle the link as optional when the file doesn't exist.",
         )
         settings["exact"] = (False, "Enable/disable exact match for the markdown file.")
-        settings["language"] = (
-            None,
-            "The language used for source file syntax highlighting.",
-        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -161,10 +158,6 @@ class PageLinkComponent(core.LinkInline):
             "Toggle the link as optional when the file doesn't exist.",
         )
         settings["exact"] = (False, "Enable/disable exact match for the markdown file.")
-        settings["language"] = (
-            None,
-            "The language used for source file syntax highlighting.",
-        )
         return settings
 
     def createToken(self, parent, info, page, settings):

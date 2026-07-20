@@ -84,14 +84,14 @@ Here is a result using periodic BCs from running `periodic_bc.i`:
 
 ## Complete source files
 
-- [examples/ex04_bcs/dirichlet_bc.i]
-- [examples/ex04_bcs/include/bcs/CoupledDirichletBC.h]
-- [examples/ex04_bcs/src/bcs/CoupledDirichletBC.C]
-- [examples/ex04_bcs/neumann_bc.i]
-- [examples/ex04_bcs/include/bcs/CoupledNeumannBC.h]
-- [examples/ex04_bcs/src/bcs/CoupledNeumannBC.C]
-- [examples/ex04_bcs/src/base/ExampleApp.C]
-- [examples/ex04_bcs/periodic_bc.i]
+- [!file](examples/ex04_bcs/dirichlet_bc.i)
+- [!file](examples/ex04_bcs/include/bcs/CoupledDirichletBC.h)
+- [!file](examples/ex04_bcs/src/bcs/CoupledDirichletBC.C)
+- [!file](examples/ex04_bcs/neumann_bc.i)
+- [!file](examples/ex04_bcs/include/bcs/CoupledNeumannBC.h)
+- [!file](examples/ex04_bcs/src/bcs/CoupledNeumannBC.C)
+- [!file](examples/ex04_bcs/src/base/ExampleApp.C)
+- [!file](examples/ex04_bcs/periodic_bc.i)
 
 !content pagination use_title=True
                     previous=examples/ex03_coupling.md
