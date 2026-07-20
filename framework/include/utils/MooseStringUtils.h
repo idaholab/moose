@@ -207,4 +207,30 @@ stringJoin(const std::vector<std::string> & values, const std::string & separato
     combined = combined.substr(0, combined.size() - separator.size());
   return combined;
 }
+
+/**
+ * This function will split the passed in string on a set of delimiters appending the substrings to
+ * the passed in vector, which is cleared beforehand. The delimiters default to whitespace, but may
+ * be supplied as well. In addition, if min_len is provided, all tokens whose length is below
+ * min_len will be discarded. T should be std::string or a MOOSE derived string class.
+ */
+template <typename T>
+void
+stringSplit(const std::string & str,
+            std::vector<T> & elements,
+            unsigned int min_len = 1,
+            const std::string & delims = " \t\n\v\f\r")
+{
+  elements.clear();
+
+  std::string::size_type last_pos = 0, curr_pos = 0;
+
+  do
+  {
+    curr_pos = str.find_first_of(delims, last_pos);
+    if (auto token = str.substr(last_pos, curr_pos - last_pos); token.length() >= min_len)
+      elements.push_back(std::move(token));
+    last_pos = curr_pos + 1;
+  } while (curr_pos != std::string::npos);
+}
 }
