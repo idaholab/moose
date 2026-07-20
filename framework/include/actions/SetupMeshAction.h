@@ -31,9 +31,14 @@ private:
   std::string checkpointRestartFileBase() const;
 
   /**
-   * Switches the mesh object and mesh generator tree to load the checkpoint restart mesh.
+   * Switches restart state and mesh type to load the checkpoint restart mesh.
    */
   void useCheckpointRestartMesh(const std::string & restart_file_base);
+
+  /**
+   * Adds the mesh generator that loads the checkpoint restart mesh.
+   */
+  void addCheckpointRestartMeshGenerator(const std::string & restart_file_base);
 
   /**
    * Modifies the MooseObject's parameters to build the right type of Mesh when using splits.
