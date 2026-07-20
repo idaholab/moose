@@ -20,11 +20,16 @@ namespace
 {
 
 bool
-SamePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b)
+SamePoint(const mfem::IntegrationPoint & a, const mfem::IntegrationPoint & b, const int dim)
 {
   constexpr mfem::real_t tol = 1e-12;
-  auto close = [](mfem::real_t x, mfem::real_t y) { return !(std::abs(x - y) > tol); };
-  return close(a.x, b.x) && close(a.y, b.y) && close(a.z, b.z) && close(a.weight, b.weight);
+  mfem::real_t pa[3], pb[3];
+  a.Get(pa, dim);
+  b.Get(pb, dim);
+  for (int d = 0; d < dim; ++d)
+    if (std::abs(pa[d] - pb[d]) > tol)
+      return false;
+  return std::abs(a.weight - b.weight) < tol;
 }
 }
 
@@ -35,22 +40,22 @@ MFEMQuadratureFunctionCoefficientBase::CheckIntegrationRule(const mfem::Quadratu
 {
   const mfem::QuadratureSpaceBase & qspace = *qf.GetSpace();
   const int el_idx = qspace.GetEntityIndex(T);
-  // Entity not in this space (e.g. a boundary evaluation); mfem's Eval returns zero, nothing to
-  // check.
+  // Entity not in this space (e.g. a boundary evaluation)
   if (el_idx < 0)
     return;
 
+  const mfem::Geometry::Type geom = qspace.GetGeometry(el_idx);
+  const int dim = mfem::Geometry::Dimension[geom];
   const mfem::IntegrationRule & stored_rule = qspace.GetIntRule(el_idx);
   // Fast path: the consuming integrator's point at this index coincides with the stored rule's,
   // so the rules match.
-  if (ip.index < stored_rule.Size() && SamePoint(stored_rule.IntPoint(ip.index), ip))
+  if (ip.index < stored_rule.Size() && SamePoint(stored_rule.IntPoint(ip.index), ip, dim))
     return;
 
   // Rules differ. Recover the quadrature order the coefficient should have used by finding the
   // lowest order whose rule for this geometry reproduces the consuming integrator's point at
   // ip.index. This runs only on the error path.
   const int stored_order = qspace.GetOrder();
-  const mfem::Geometry::Type geom = qspace.GetGeometry(el_idx);
   int suggested_order = -1;
   // The consuming integrator's order is not known here, but is realistically bounded. The upper
   // limit is just a generous finite cap so this error-path search always terminates: a multiple
@@ -59,7 +64,7 @@ MFEMQuadratureFunctionCoefficientBase::CheckIntegrationRule(const mfem::Quadratu
   for (int order = 0; order <= 2 * stored_order + 64; ++order)
   {
     const mfem::IntegrationRule & candidate = mfem::IntRules.Get(geom, order);
-    if (ip.index < candidate.Size() && SamePoint(candidate.IntPoint(ip.index), ip))
+    if (ip.index < candidate.Size() && SamePoint(candidate.IntPoint(ip.index), ip, dim))
     {
       suggested_order = order;
       break;
