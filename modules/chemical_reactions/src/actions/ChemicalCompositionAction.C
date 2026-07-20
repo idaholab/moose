@@ -257,7 +257,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       {
         _tokenized_species.resize(species.size());
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(species[i], tokens, 1, ":");
+        MooseUtils::stringSplit(species[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_species", "No ':' separator found in variable '", species[i], "'");
 
@@ -297,7 +297,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       for (const auto i : index_range(element_potentials))
       {
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(element_potentials[i], tokens, 1, ":");
+        MooseUtils::stringSplit(element_potentials[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_element_potentials",
                      "No ':' separator found in variable '",
@@ -340,7 +340,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       for (const auto i : index_range(vapor_pressures))
       {
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(vapor_pressures[i], tokens, 1, ":");
+        MooseUtils::stringSplit(vapor_pressures[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_vapor_pressures",
                      "No ':' separator found in variable '",
@@ -389,7 +389,7 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
       for (const auto i : index_range(element_phases))
       {
         std::vector<std::string> tokens;
-        MooseUtils::tokenize(element_phases[i], tokens, 1, ":");
+        MooseUtils::stringSplit(element_phases[i], tokens, 1, ":");
         if (tokens.size() == 1)
           paramError("output_element_phases",
                      "No ':' separator found in variable '",
@@ -579,7 +579,7 @@ ChemicalCompositionAction::readCSV()
   std::getline(file, line);
   while (std::getline(file, line))
   {
-    MooseUtils::tokenize(line, items, 1, ",");
+    MooseUtils::stringSplit(line, items, 1, ",");
     if (items.empty())
       continue;
     if (items.size() != 2)

@@ -457,7 +457,7 @@ InputParameters::declareControllable(const std::string & input_names,
                                      std::set<ExecFlagType> execute_flags)
 {
   std::vector<std::string> names;
-  MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
+  MooseUtils::stringSplit(input_names, names);
   for (auto & name_in : names)
   {
     const auto name = checkForRename(name_in);
@@ -530,7 +530,7 @@ void
 InputParameters::registerBuildableTypes(const std::string & names)
 {
   _buildable_types.clear();
-  MooseUtils::tokenize(names, _buildable_types, 1, " \t\n\v\f\r"); // tokenize on whitespace
+  MooseUtils::stringSplit(names, _buildable_types); // split on whitespace
 }
 
 void
@@ -1028,7 +1028,7 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
                                       const std::string group_name)
 {
   std::vector<std::string> elements;
-  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r"); // tokenize on whitespace
+  MooseUtils::stringSplit(space_delim_names, elements); // split on whitespace
 
   // Since we don't require types (templates) for this method, we need
   // to get a raw list of parameter names to compare against.

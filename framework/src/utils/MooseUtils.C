@@ -450,7 +450,7 @@ makedirs(const std::string & dir_name, bool throw_on_failure)
 {
   // split path into directories with delimiter '/'
   std::vector<std::string> split_dir_names;
-  MooseUtils::tokenize(dir_name, split_dir_names);
+  MooseUtils::stringSplit(dir_name, split_dir_names, 1, "/");
 
   auto n = split_dir_names.size();
 
@@ -506,7 +506,7 @@ removedirs(const std::string & dir_name, bool throw_on_failure)
 {
   // split path into directories with delimiter '/'
   std::vector<std::string> split_dir_names;
-  MooseUtils::tokenize(dir_name, split_dir_names);
+  MooseUtils::stringSplit(dir_name, split_dir_names, 1, "/");
 
   auto n = split_dir_names.size();
 
@@ -904,7 +904,7 @@ wildCardMatch(std::string name, std::string search_string)
 
   // wildcard
   std::vector<std::string> tokens;
-  MooseUtils::tokenize(search_string, tokens, 1, "*");
+  MooseUtils::stringSplit(search_string, tokens, 1, "*");
 
   size_t pos = 0;
   for (unsigned int i = 0; i < tokens.size() && pos != std::string::npos; ++i)

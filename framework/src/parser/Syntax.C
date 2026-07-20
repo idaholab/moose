@@ -69,12 +69,12 @@ void
 Syntax::addDependencySets(const std::string & action_sets)
 {
   std::vector<std::string> sets, prev_names, tasks;
-  MooseUtils::tokenize(action_sets, sets, 1, "()");
+  MooseUtils::stringSplit(action_sets, sets, 1, "()");
 
   for (unsigned int i = 0; i < sets.size(); ++i)
   {
     tasks.clear();
-    MooseUtils::tokenize(sets[i], tasks, 0, ", ");
+    MooseUtils::stringSplit(sets[i], tasks, 1, ", ");
     for (unsigned int j = 0; j < tasks.size(); ++j)
     {
       // Each line should depend on each item in the previous line
@@ -278,7 +278,7 @@ Syntax::isAssociated(const std::string & real_id,
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
 
-  MooseUtils::tokenize(real_id, real_elements);
+  MooseUtils::stringSplit(real_id, real_elements, 1, "/");
 
   *is_parent = false;
   for (auto it = syntax_to_traverse.rbegin(); it != syntax_to_traverse.rend(); ++it)
@@ -290,7 +290,7 @@ Syntax::isAssociated(const std::string & real_id,
       return reg_id;
     }
     reg_elements.clear();
-    MooseUtils::tokenize(reg_id, reg_elements);
+    MooseUtils::stringSplit(reg_id, reg_elements, 1, "/");
     if (real_elements.size() <= reg_elements.size())
     {
       bool keep_going = true;

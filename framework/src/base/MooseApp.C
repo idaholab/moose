@@ -2185,7 +2185,7 @@ MooseApp::showInputs() const
     {
       mooseAssert(!show_inputs_syntax.empty(), "show_inputs sytnax should not be empty");
 
-      MooseUtils::tokenize(installable_inputs, dirs, 1, " ");
+      MooseUtils::stringSplit(installable_inputs, dirs);
       Moose::out << "The following directories are installable into a user-writeable directory:\n\n"
                  << installable_inputs << '\n'
                  << "\nTo install one or more directories of inputs, execute the binary with the \""
@@ -2844,7 +2844,7 @@ MooseApp::getLibrarySearchPaths(const std::string & library_path) const
   if (!library_path.empty())
   {
     std::vector<std::string> tmp_paths;
-    MooseUtils::tokenize(library_path, tmp_paths, 1, ":");
+    MooseUtils::stringSplit(library_path, tmp_paths, 1, ":");
 
     paths.insert(tmp_paths.begin(), tmp_paths.end());
   }
@@ -2854,7 +2854,7 @@ MooseApp::getLibrarySearchPaths(const std::string & library_path) const
   {
     std::string moose_lib_path(moose_lib_path_env);
     std::vector<std::string> tmp_paths;
-    MooseUtils::tokenize(moose_lib_path, tmp_paths, 1, ":");
+    MooseUtils::stringSplit(moose_lib_path, tmp_paths, 1, ":");
 
     paths.insert(tmp_paths.begin(), tmp_paths.end());
   }

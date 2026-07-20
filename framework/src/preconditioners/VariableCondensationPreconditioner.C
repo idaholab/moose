@@ -167,7 +167,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
          getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
     {
       std::vector<NonlinearVariableName> vars;
-      MooseUtils::tokenize<NonlinearVariableName>(coupled_group, vars, 1, ",");
+      MooseUtils::stringSplit<NonlinearVariableName>(coupled_group, vars, 1, ",");
       for (unsigned int j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {

@@ -69,7 +69,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
     for (const auto & group : getParam<std::vector<NonlinearVariableName>>("coupled_groups"))
     {
       std::vector<VariableName> vars;
-      MooseUtils::tokenize(group, vars, 1, ",");
+      MooseUtils::stringSplit(group, vars, 1, ",");
       try
       {
         MooseUtils::expandAllMatches(all_vars, vars);

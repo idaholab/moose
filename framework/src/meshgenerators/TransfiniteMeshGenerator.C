@@ -303,7 +303,7 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
   Real x_coord, y_coord;
 
   std::vector<std::string> param_coords;
-  MooseUtils::tokenize(parameter, param_coords, 1, ";");
+  MooseUtils::stringSplit(parameter, param_coords, 1, ";");
 
   auto it = 0;
   for (auto rx : param_vec)
@@ -324,7 +324,7 @@ TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int np, const std::stri
 {
   std::vector<Point> edge(np);
   std::vector<std::string> string_points;
-  MooseUtils::tokenize(parameter, string_points, 1, "\n");
+  MooseUtils::stringSplit(parameter, string_points, 1, "\n");
   if (string_points.size() != np)
     mooseError("DISCRETE: the number of discrete points does not match the number of points on the"
                "opposite edge.");

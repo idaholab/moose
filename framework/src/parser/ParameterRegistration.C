@@ -200,7 +200,7 @@ static auto realeigenmatrix = registry.add<RealEigenMatrix>(
     {
       value.resize(0, 0);
       std::vector<std::string> tokens;
-      MooseUtils::tokenize(field.param<std::string>(), tokens, 1, ";");
+      MooseUtils::stringSplit(field.param<std::string>(), tokens, 1, ";");
 
       for (const auto i : index_range(tokens))
       {
@@ -314,7 +314,7 @@ static auto vector_multimooseenum = registry.add<std::vector<MultiMooseEnum>>(
       for (const auto i : index_range(tokens))
       {
         std::vector<std::string> strvals;
-        MooseUtils::tokenize<std::string>(tokens[i], strvals, 1, " ");
+        MooseUtils::stringSplit(tokens[i], strvals);
         value[i] = strvals;
       }
     });
@@ -380,7 +380,7 @@ const auto set_double_vector_component_value = [](auto & value, const hit::Field
 
   // Split vector at delim ";" (substrings are not of type T yet)
   std::vector<std::string> tokens;
-  MooseUtils::tokenize(strval, tokens, 1, ";");
+  MooseUtils::stringSplit(strval, tokens, 1, ";");
   value.resize(tokens.size());
 
   // Split each token at spaces

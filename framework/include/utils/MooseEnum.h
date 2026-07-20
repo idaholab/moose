@@ -25,7 +25,7 @@
     std::string s = #__VA_ARGS__;                                                                  \
     /* 2) normalize to the format MooseEnum expects: "A B C=3 D ..."                  */           \
     std::vector<std::string> elements;                                                             \
-    MooseUtils::tokenize(s, elements, 1, ",");                                                     \
+    MooseUtils::stringSplit(s, elements, 1, ",");                                                  \
     for (auto & elem : elements)                                                                   \
       elem.erase(std::remove_if(elem.begin(), elem.end(), isspace), elem.end());                   \
     return MooseUtils::join(elements, " ");                                                        \

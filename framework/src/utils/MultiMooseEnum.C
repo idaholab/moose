@@ -121,7 +121,7 @@ MultiMooseEnum &
 MultiMooseEnum::operator=(const std::string & names)
 {
   std::vector<std::string> names_vector;
-  MooseUtils::tokenize(names, names_vector, 1, " ");
+  MooseUtils::stringSplit(names, names_vector);
   return assignValues(names_vector.begin(), names_vector.end(), false);
 }
 
@@ -141,7 +141,7 @@ void
 MultiMooseEnum::eraseSetValue(const std::string & names)
 {
   std::vector<std::string> names_vector;
-  MooseUtils::tokenize(names, names_vector, 1, " ");
+  MooseUtils::stringSplit(names, names_vector);
   removeSetValues(names_vector.begin(), names_vector.end());
 }
 
@@ -182,7 +182,7 @@ void
 MultiMooseEnum::setAdditionalValue(const std::string & names)
 {
   std::vector<std::string> names_vector;
-  MooseUtils::tokenize(names, names_vector, 1, " ");
+  MooseUtils::stringSplit(names, names_vector);
   assignValues(names_vector.begin(), names_vector.end(), true);
 }
 

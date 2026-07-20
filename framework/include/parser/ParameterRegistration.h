@@ -211,7 +211,7 @@ setTripleVectorValue(std::vector<std::vector<std::vector<T>>> & value, const hit
 
   // split vector at delim | to get a series of 2D subvectors
   std::vector<std::string> outer_tokens;
-  MooseUtils::tokenize(buffer, outer_tokens, 1, "|");
+  MooseUtils::stringSplit(buffer, outer_tokens, 1, "|");
   value.resize(outer_tokens.size());
   for (const auto i : index_range(outer_tokens))
   {
@@ -228,7 +228,7 @@ setTripleVectorValue(std::vector<std::vector<std::vector<T>>> & value, const hit
     // split each 2D subvector at delim ; to get 1D sub-subvectors
     // NOTE: the 1D sub-subvectors are _not_ of type T yet
     std::vector<std::string> inner_tokenized;
-    MooseUtils::tokenize(inner_token, inner_tokenized, 1, ";");
+    MooseUtils::stringSplit(inner_token, inner_tokenized, 1, ";");
     inner_value.resize(inner_tokenized.size());
     for (const auto j : index_range(inner_tokenized))
     {

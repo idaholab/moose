@@ -44,7 +44,7 @@ AddComponentAction::act()
       _moose_object_pars.set<THMProblem *>("_thm_problem") = thm_problem;
 
       std::vector<std::string> parts;
-      MooseUtils::tokenize<std::string>(_moose_object_pars.blockFullpath(), parts);
+      MooseUtils::stringSplit(_moose_object_pars.blockFullpath(), parts, 1, "/");
 
       std::stringstream res;
       std::copy(++parts.begin(), parts.end(), std::ostream_iterator<std::string>(res, "/"));

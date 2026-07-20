@@ -347,7 +347,7 @@ CommandLine::setCommandLineParam(std::list<CommandLine::Entry>::iterator entry_i
       if constexpr (std::is_same_v<T, std::vector<std::string>>)
       {
         std::vector<std::string> split_values;
-        MooseUtils::tokenize(*entry.value, split_values, 1, " ");
+        MooseUtils::stringSplit(*entry.value, split_values);
         value.resize(split_values.size());
         for (const auto i : index_range(split_values))
           set_value(split_values[i], value[i]);

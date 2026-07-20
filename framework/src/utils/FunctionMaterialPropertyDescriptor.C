@@ -157,7 +157,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
       {
         // rest of argument list 0 is the function and 1,.. are the variable to take the derivative
         // w.r.t.
-        MooseUtils::tokenize(arguments, _derivative_symbols, 0, ",");
+        MooseUtils::stringSplit(arguments, _derivative_symbols, 0, ",");
 
         // check for empty [] brackets
         if (_derivative_symbols.size() > 0)
@@ -175,7 +175,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & e
       else
       {
         parseDependentSymbols(arguments.substr(0, close2 + 1));
-        MooseUtils::tokenize(arguments.substr(close2 + 2), _derivative_symbols, 0, ",");
+        MooseUtils::stringSplit(arguments.substr(close2 + 2), _derivative_symbols, 0, ",");
         updatePropertyName();
         return;
       }
@@ -203,7 +203,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::parseDependentSymbols(const std::stri
     _base_name = expression.substr(0, open);
 
     // parse argument list
-    MooseUtils::tokenize(expression.substr(open + 1, close - open - 1), _dependent_symbols, 0, ",");
+    MooseUtils::stringSplit(
+        expression.substr(open + 1, close - open - 1), _dependent_symbols, 0, ",");
 
     // remove duplicates from dependent variable list
     std::sort(_dependent_symbols.begin(), _dependent_symbols.end());

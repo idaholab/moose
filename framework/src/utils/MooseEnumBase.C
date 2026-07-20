@@ -64,7 +64,7 @@ void
 MooseEnumBase::addEnumerationNames(const std::string & names)
 {
   std::vector<std::string> elements;
-  MooseUtils::tokenize(names, elements, 1, " ");
+  MooseUtils::stringSplit(names, elements);
   for (const std::string & raw_name : elements)
     addEnumerationName(raw_name);
 }
@@ -78,7 +78,7 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
 
   // Split on equals sign
   std::vector<std::string> name_value;
-  MooseUtils::tokenize(MooseUtils::trim(raw_name), name_value, 1, "=");
+  MooseUtils::stringSplit(MooseUtils::trim(raw_name), name_value, 1, "=");
 
   // There should be one or two items in the name_value
   if (name_value.size() < 1 || name_value.size() > 2)

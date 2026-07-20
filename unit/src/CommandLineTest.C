@@ -761,7 +761,7 @@ TEST(CommandLineTest, mergeArgsForParam)
       cl.populateCommandLineParams(params);
 
       std::vector<std::string> split_argument;
-      MooseUtils::tokenize(argument, split_argument, 1, " \t\n\v\f\r");
+      MooseUtils::stringSplit(argument, split_argument);
       ASSERT_EQ(params.get<std::vector<std::string>>("value"), split_argument);
     }
 

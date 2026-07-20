@@ -32,7 +32,7 @@ void
 AddMFEMComplexBCComponentAction::act()
 {
   std::vector<std::string> elements;
-  MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
+  MooseUtils::stringSplit(_pars.blockFullpath(), elements, 1, "/");
 
   if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "RealComponent")
     static_cast<MFEMProblem &>(*_problem).addRealComponentToBC(

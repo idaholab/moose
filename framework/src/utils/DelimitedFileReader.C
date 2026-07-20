@@ -240,7 +240,7 @@ DelimitedFileReaderTempl<T>::readColumnData(std::ifstream & stream_data, std::ve
     // Read header, if the header exists and the column names do not exist.
     if (_names.empty() && header(line))
     {
-      MooseUtils::tokenize(line, _names, 1, delimiter(line));
+      MooseUtils::stringSplit(line, _names, 1, delimiter(line));
       for (std::string & str : _names)
         str = MooseUtils::trim(str);
       continue;

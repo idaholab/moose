@@ -35,7 +35,7 @@ void
 AddAuxKernelAction::act()
 {
   std::vector<std::string> elements;
-  MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
+  MooseUtils::stringSplit(_pars.blockFullpath(), elements, 1, "/");
 
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size() - 2];

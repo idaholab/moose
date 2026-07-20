@@ -1886,7 +1886,7 @@ InputParameters::addCommandLineParamHelper(const std::string & name,
 
   // Split up the syntax by whitespace
   std::vector<std::string> syntax_split;
-  MooseUtils::tokenize(syntax, syntax_split, 1, " \t\n\v\f\r");
+  MooseUtils::stringSplit(syntax, syntax_split);
 
   // Set the single syntax string as the combined syntax with removed whitespace
   cl_data->syntax = MooseUtils::stringJoin(syntax_split);
