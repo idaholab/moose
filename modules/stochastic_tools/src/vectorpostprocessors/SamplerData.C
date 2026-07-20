@@ -85,7 +85,7 @@ SamplerData::execute()
   else if (_sampler_method == "get_next_local_row")
   {
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
-      for (std::size_t j = 0; j < _sampler.getNumberOfCols(); ++j)
+      for (const auto j : make_range(_sampler.getNumberOfCols()))
         (*_sample_vectors[j])[i - _sampler.getLocalRowBegin()] = _sampler.getSample(i, j);
   }
 }
