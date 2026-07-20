@@ -228,6 +228,8 @@ protected:
   const Real & _P_tol;
   /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
+  /// Maximum iterations for the outer pressure loop
+  const int & _P_maxit;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
   /// The relative convergence tolerance, (relative decrease) for the ksp linear solver

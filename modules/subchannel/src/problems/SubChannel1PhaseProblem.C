@@ -69,6 +69,7 @@ SubChannel1PhaseProblem::validParams()
   params.addClassDescription("Base class of the subchannel solvers");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
+  params.addParam<int>("P_maxit", 100, "Maximum number of iterations for outer pressure loop");
   params.addParam<int>("T_maxit", 100, "Maximum number of iterations for inner temperature loop");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
@@ -121,7 +122,7 @@ SubChannel1PhaseProblem::validParams()
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
       "Use closure system instead.");
 
-  params.addParamNamesToGroup("P_tol T_tol T_maxit rtol atol dtol maxit",
+  params.addParamNamesToGroup("P_tol T_tol P_maxit T_maxit rtol atol dtol maxit",
                               "Solver tolerances and iterations");
   params.addParamNamesToGroup("implicit segregated staggered_pressure interpolation_scheme",
                               "Solution method");
@@ -154,6 +155,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
+    _P_maxit(getParam<int>("P_maxit")),
     _T_maxit(getParam<int>("T_maxit")),
     _rtol(getParam<PetscReal>("rtol")),
     _atol(getParam<PetscReal>("atol")),
@@ -2526,10 +2528,9 @@ SubChannel1PhaseProblem::externalSolve()
   };
   V("Solution initialized");
   Real P_error = 1.0;
-  unsigned int P_it = 0;
-  const unsigned int P_it_max = _segregated_bool ? 5 : 100;
+  int P_it = 0;
 
-  while ((P_error > _P_tol && P_it < P_it_max))
+  while ((P_error > _P_tol && P_it < _P_maxit))
   {
     P_it += 1;
     _console << "Solving Outer Iteration : " << P_it << std::endl;
@@ -2601,7 +2602,12 @@ SubChannel1PhaseProblem::externalSolve()
         std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
     _console << "P_error :" << P_error << std::endl;
     V("Iteration:  " + std::to_string(P_it));
-    V("Maximum iterations: " + std::to_string(P_it_max));
+    V("Maximum iterations: " + std::to_string(_P_maxit));
+  }
+  if (P_error > _P_tol)
+  {
+    _console << "Reached maximum number of pressure iterations" << std::endl;
+    _converged = false;
   }
   // update old crossflow matrix
   _Wij_old = _Wij;
