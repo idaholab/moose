@@ -45,10 +45,11 @@ trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r")
 }
 
 /**
- * This function will split the passed in string on a set of delimiters appending the substrings
- * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In
- * addition if min_len is supplied, the minimum token length will be >= than the supplied
- * value. T should be std::string or a MOOSE derived string class.
+ * This function will split the passed in string on a set of delimiters appending the substrings to
+ * the passed in vector, which is cleared beforehand. The delimiters default to "/", but may be
+ * supplied as well. In addition, if min_len is provided, the minimum token length will be >= than
+ * the supplied value *even if the token includes delimiters*. You should probably be using the much
+ * more sane stringSplit alternative below. T should be std::string or a MOOSE derived string class.
  */
 template <typename T>
 void
