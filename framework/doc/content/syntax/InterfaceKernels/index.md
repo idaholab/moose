@@ -8,11 +8,11 @@ Interface kernels are meant to assist in coupling different physics across sub-d
 
 where $D_i$ is the diffusion coefficient of specie $i$ in subdomain $i$, and $c_i$ is the concentration of specie $i$ in subdomain $i$. An example of this condition is shown in the MOOSE test directory; see files below:
 
-[2d_interface/coupled_value_coupled_flux.i]
+[!file](2d_interface/coupled_value_coupled_flux.i)
 
-[/InterfaceDiffusion.C]
+[!file](/InterfaceDiffusion.C)
 
-[/InterfaceDiffusion.h]
+[!file](/InterfaceDiffusion.h)
 
 Interface kernels can be used to provide any general flux condition at an interface, and even more generally can be used to impose any interfacial condition that requires access to values of different variables and gradients of different variables on either side of an interface. In an input file, the user will specify at a minimum the following parameters:
 

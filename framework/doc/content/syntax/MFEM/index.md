@@ -19,7 +19,7 @@ Installation instructions for MFEM-MOOSE can be found in [this page](getting_sta
 ## Solving a problem with MFEM-MOOSE
 
 Much of the syntax of the usual MOOSE input file is preserved when creating input files for MFEM-MOOSE. For each input file block, the user can browse the syntax [page](syntax/index.md) for classes prefixed with `MFEM` or, alternatively, browse the MFEM section of the source [page](source/index.md exact=True). A selection of thermal, mechanical, electromagnetic and fluid example problems is described in a supporting [page](syntax/MFEM/examples_index.md).
-Here, we lay out the step-by-step process of writing a MFEM-MOOSE input file to solve a simple steady state diffusion problem. The full input file may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the input file into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
+Here, we lay out the step-by-step process of writing a MFEM-MOOSE input file to solve a simple steady state diffusion problem. The full input file may be found [!file text=here](/test/tests/mfem/kernels/diffusion.i). We roughly split the input file into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
 
 ### Problem
 

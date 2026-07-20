@@ -1,6 +1,6 @@
 # Step 5: Secondary Side
 
-+Complete input file for this step:+  [05_secondary_side.i](thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i)
++Complete input file for this step:+  [!file text=05_secondary_side.i](thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i)
 
 !media thermal_hydraulics/tutorials/single_phase_flow/step-05.png
        style=width:35%;float:right;margin-left:40px

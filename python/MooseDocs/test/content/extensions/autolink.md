@@ -18,13 +18,13 @@
 
 ## Source Filename
 
-[controls/RealFunctionControl.C]
+[!file](controls/RealFunctionControl.C)
 
-[Some Code](controls/RealFunctionControl.C)
+[!file title=RealFunctionControl.C](controls/RealFunctionControl.C)
 
 ### Source with language
 
-[/test/run_tests language=python]
+[!file language=python title=run_tests](/test/run_tests)
 
 ## Optional Links
 

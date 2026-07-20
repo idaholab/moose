@@ -55,9 +55,9 @@ And here is the final solution after all refinement steps are complete:
 
 ## Complete Source Files
 
-- [examples/ex05_amr/ex05.i]
-- [examples/ex05_amr/include/kernels/ExampleCoefDiffusion.h]
-- [examples/ex05_amr/src/kernels/ExampleCoefDiffusion.C]
+- [!file](examples/ex05_amr/ex05.i)
+- [!file](examples/ex05_amr/include/kernels/ExampleCoefDiffusion.h)
+- [!file](examples/ex05_amr/src/kernels/ExampleCoefDiffusion.C)
 
 !content pagination use_title=True
                     previous=examples/ex04_bcs.md

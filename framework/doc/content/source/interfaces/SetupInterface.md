@@ -72,7 +72,7 @@ can be found in their `validParams()` method. Some examples are as follows:
 
 When creating objects that inherit from `SetupInterface` it is possible to set, add, or remove
 available execute flags by retrieving and then modifying the `ExecFlagEnum` parameter. For example,
-consider the snippet below (see [Output.C](/framework/src/outputs/Output.C)).
+consider the snippet below (see [!file text=Output.C](/framework/src/outputs/Output.C)).
 
 !listing framework/src/outputs/Output.C start=ExecFlagEnum end=setDocString include-end=True
 

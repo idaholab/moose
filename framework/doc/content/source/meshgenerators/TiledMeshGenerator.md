@@ -5,7 +5,7 @@
 ## Example
 
 As the name suggests, the `TiledMeshGenerator` object may be utilized to repeat
-a mesh multiple times. The test, [tiled_mesh_generator.i](test/tests/meshgenerators/tiled_mesh_generator/tiled_mesh_generator.i),
+a mesh multiple times. The test, [!file text=tiled_mesh_generator.i](test/tests/meshgenerators/tiled_mesh_generator/tiled_mesh_generator.i),
 will be used to illustrate the use of the `TiledMeshGenerator` object. This test
 file is shown at the bottom of this section for reference.
 

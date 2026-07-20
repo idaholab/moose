@@ -4,7 +4,7 @@
 
 ## Example
 
-As the name suggests, the `TiledMesh` object may be utilized to repeat a mesh multiple times. The test, [tiled_mesh_test.i](test/tests/mesh/tiled_mesh/tiled_mesh_test.i), will be used to illustrate the use of
+As the name suggests, the `TiledMesh` object may be utilized to repeat a mesh multiple times. The test, [!file text=tiled_mesh_test.i](test/tests/mesh/tiled_mesh/tiled_mesh_test.i), will be used to illustrate the use of
 the `TiledMesh` object. This test file is shown at the bottom of this section for reference. To execute the test the
 moose test application must be compiled:
 

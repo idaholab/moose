@@ -30,8 +30,8 @@ In general, adding a new object to MOOSE requires creating a C++ object that inh
 appropriate MOOSE object, in this case a `Kernel`. The following files in this example demonstrate
 this:
 
-- [examples/ex02_kernel/include/kernels/ExampleConvection.h]
-- [examples/ex02_kernel/src/kernels/ExampleConvection.C]
+- [!file](examples/ex02_kernel/include/kernels/ExampleConvection.h)
+- [!file](examples/ex02_kernel/src/kernels/ExampleConvection.C)
 
 In addition to creating the new C++ class, newly created object classes must be "registered" in
 their `.C` files.  C++ comments inside the ExampleConvection header and implementation files
@@ -81,11 +81,11 @@ Peacock or an external application that supports the Exodus format (e.g., Paravi
 
 ## Complete Source Files
 
-- [examples/ex02_kernel/ex02.i]
-- [examples/ex02_kernel/include/kernels/ExampleConvection.h]
-- [examples/ex02_kernel/src/kernels/ExampleConvection.C]
-- [examples/ex02_kernel/src/base/ExampleApp.C]
-- [examples/ex02_kernel/ex02_oversample.i]
+- [!file](examples/ex02_kernel/ex02.i)
+- [!file](examples/ex02_kernel/include/kernels/ExampleConvection.h)
+- [!file](examples/ex02_kernel/src/kernels/ExampleConvection.C)
+- [!file](examples/ex02_kernel/src/base/ExampleApp.C)
+- [!file](examples/ex02_kernel/ex02_oversample.i)
 
 !content pagination use_title=True
                     previous=examples/ex01_inputfile.md
