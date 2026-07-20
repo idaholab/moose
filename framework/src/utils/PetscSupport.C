@@ -139,6 +139,86 @@ petscOptionsHasName(::PetscOptions options,
   return found;
 }
 
+#define checkPrefix(prefix)                                                                        \
+  mooseAssert(prefix[0] == '-',                                                                    \
+              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
+  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
+              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
+  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
+
+bool
+hasJFNKSolveType(const FEProblemBase & problem)
+{
+  for (const auto sys_index : make_range(problem.numSolverSystems()))
+    if (problem.solverParams(sys_index)._type == Moose::ST_JFNK)
+      return true;
+
+  return false;
+}
+
+bool
+prefixTargetsJFNKSolver(const FEProblemBase & problem, const std::string & prefix)
+{
+  checkPrefix(prefix);
+
+  if (prefix == "-")
+    return hasJFNKSolveType(problem);
+
+  const auto solver_prefix = prefix.substr(1);
+  for (const auto sys_index : make_range(problem.numSolverSystems()))
+    if (problem.solverParams(sys_index)._type == Moose::ST_JFNK)
+    {
+      const auto & solver_system = problem.getSolverSystem(sys_index);
+      if (solver_system.prefix() == solver_prefix || solver_system.name() + "_" == solver_prefix)
+        return true;
+    }
+
+  return false;
+}
+
+std::string
+prefixedPCTypeOption(const std::string & prefix)
+{
+  checkPrefix(prefix);
+  return prefix == "-" ? "-pc_type" : prefix + "pc_type";
+}
+
+void
+errorOnJFNKPCTypeOption(const FEProblemBase & problem,
+                        const std::string & prefix,
+                        const ParallelParamObject * const param_object = nullptr)
+{
+  if (!prefixTargetsJFNKSolver(problem, prefix))
+    return;
+
+  const auto option = prefixedPCTypeOption(prefix);
+  const std::string message =
+      "Setting PETSc option '" + option + "' is incompatible with a JFNK 'solve_type'";
+
+  if (param_object)
+    param_object->mooseError(message);
+  else
+    mooseError(message);
+}
+
+void
+errorOnJFNKPCTypeOption(::PetscOptions options, FEProblemBase & problem)
+{
+  if (petscOptionsHasName(options, "-pc_type"))
+    errorOnJFNKPCTypeOption(problem, "-");
+
+  for (const auto sys_index : make_range(problem.numSolverSystems()))
+  {
+    if (problem.solverParams(sys_index)._type != Moose::ST_JFNK)
+      continue;
+
+    const auto & solver_system = problem.getSolverSystem(sys_index);
+    const std::string solver_prefix = solver_system.name() + "_";
+    if (petscOptionsHasName(options, "-pc_type", solver_prefix))
+      errorOnJFNKPCTypeOption(problem, "-" + solver_prefix);
+  }
+}
+
 bool
 hasMatrixFreeSolveType(const FEProblemBase & problem)
 {
@@ -330,6 +410,7 @@ addPetscOptionsFromCommandline(FEProblemBase * const problem)
     return;
   }
 
+  errorOnJFNKPCTypeOption(command_line_options, *problem);
   errorOnUnprefixedMatTypeOption(command_line_options, *problem);
 
   // Some vector/matrix-type options may have been consumed before the PETSc database rebuild.
@@ -666,13 +747,6 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
   setMFFDTypeFromParams(fe_problem, params);
 }
 
-#define checkPrefix(prefix)                                                                        \
-  mooseAssert(prefix[0] == '-',                                                                    \
-              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
-  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
-              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
-  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
-
 void
 storePetscOptions(FEProblemBase & fe_problem,
                   const std::string & prefix,
@@ -695,7 +769,7 @@ storePetscOptions(FEProblemBase & fe_problem,
 
   // Then process the option-value pairs
   addPetscPairsToPetscOptions(
-      petsc_pair_options, fe_problem.mesh().dimension(), prefix, param_object, po);
+      petsc_pair_options, fe_problem.mesh().dimension(), prefix, param_object, po, &fe_problem);
 }
 
 void
@@ -833,7 +907,8 @@ addPetscPairsToPetscOptions(
     const unsigned int mesh_dimension,
     std::string prefix,
     const ParallelParamObject & param_object,
-    PetscOptions & po)
+    PetscOptions & po,
+    const FEProblemBase * const problem)
 {
   prefix.insert(prefix.begin(), '-');
   checkPrefix(prefix);
@@ -858,6 +933,8 @@ addPetscPairsToPetscOptions(
   for (const auto & [option_name, option_value] : petsc_pair_options)
   {
     checkUserProvidedPetscOption(option_name, param_object);
+    if (problem && option_name == "-pc_type")
+      errorOnJFNKPCTypeOption(*problem, prefix, &param_object);
 
     new_options.clear();
     const std::string prefixed_option_name =

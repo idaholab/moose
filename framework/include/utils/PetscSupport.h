@@ -199,7 +199,8 @@ void addPetscPairsToPetscOptions(
     const unsigned int mesh_dimension,
     std::string prefix,
     const ParallelParamObject & param_object,
-    PetscOptions & petsc_options);
+    PetscOptions & petsc_options,
+    const FEProblemBase * problem = nullptr);
 
 /**
  * Returns the valid petsc line search options as a set of strings
