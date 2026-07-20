@@ -117,6 +117,14 @@ Standardizer::getScaled(torch::Tensor & input) const
 void
 Standardizer::storeHelper(std::ostream & stream, void * context) const
 {
+  mooseAssert(_mean.defined() == _stdev.defined(),
+              "Standardizer has inconsistent restart state: one of _mean and _stdev is "
+              "defined while the other is undefined.");
+  const bool defined = _mean.defined();
+  dataStore(stream, defined, nullptr);
+  if (!defined)
+    return;
+
   const auto mean = LibtorchUtils::toCPUContiguous(_mean);
   const auto stdev = LibtorchUtils::toCPUContiguous(_stdev);
   auto mean_accessor = mean.accessor<Real, 1>();
@@ -142,6 +150,11 @@ template <>
 void
 dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, void * context)
 {
+  bool defined = false;
+  dataLoad(stream, defined, nullptr);
+  if (!defined)
+    return;
+
   unsigned int n;
   dataLoad(stream, n, context);
   std::vector<Real> mean(n);
