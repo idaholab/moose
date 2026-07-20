@@ -8,22 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosSystem.h"
-#include "KokkosNodalBCBase.h"
 
 #include "MooseMesh.h"
-#include "Assembly.h"
-#include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/system.h"
 
 namespace Moose::Kokkos
 {
-
 System::System(SystemBase & system)
   : PerfGraphInterface(system.feProblem().getMooseApp().perfGraph(), "KokkosSystem"),
     MeshHolder(*system.mesh().getKokkosMesh()),
-    AssemblyHolder(system.feProblem().kokkosAssembly()),
     _system(system),
     _mesh(system.mesh()),
     _dof_map(system.dofMap()),
@@ -35,14 +31,8 @@ System::System(SystemBase & system)
   setupVariables();
   setupDofs();
 
-  if (dynamic_cast<NonlinearSystemBase *>(&_system))
-  {
+  if (!dynamic_cast<AuxiliarySystem *>(&_system))
     setupSparsity();
-    setupNodalBCDofs();
-  }
-
-  _qp_solutions.create(MAX_TAG);
-  _qp_solutions_grad.create(MAX_TAG);
 }
 
 void
@@ -50,42 +40,14 @@ System::setupVariables()
 {
   auto & sys = _system.system();
 
-  _var_fe_types.create(_num_vars);
   _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
-  {
-    _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
-
     for (auto subdomain : _mesh.meshSubdomains())
       _var_subdomain_active(var, kokkosMesh().getContiguousSubdomainID(subdomain)) =
           sys.variable(var).active_on_subdomain(subdomain);
-  }
 
-  _var_fe_types.copyToDevice();
   _var_subdomain_active.copyToDevice();
-
-  // Set coupling
-
-  auto nl_system = dynamic_cast<NonlinearSystemBase *>(&_system);
-
-  if (nl_system)
-  {
-    _coupling.create(_num_vars);
-
-    std::map<unsigned int, std::vector<unsigned int>> coupling;
-
-    auto & ce = _system.feProblem().couplingEntries(0, nl_system->number());
-
-    for (const auto & [ivar, jvar] : ce)
-      if (ivar->number() != jvar->number())
-        coupling[ivar->number()].push_back(jvar->number());
-
-    for (unsigned int var = 0; var < _num_vars; ++var)
-      _coupling[var] = coupling[var];
-
-    _coupling.copyToDevice();
-  }
 }
 
 void
@@ -93,8 +55,7 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  auto num_elems = kokkosMesh().getNumLocalElements();
-  auto num_nodes = kokkosMesh().getNumLocalNodes();
+  const auto num_total_elems = kokkosMesh().getNumLocalAndPossiblyOneNeighborLayerGhostElements();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -106,7 +67,6 @@ System::setupDofs()
   _matrices.create(MAX_TAG);
 
   _local_elem_dof_index.create(_num_vars);
-  _local_node_dof_index.create(_num_vars);
   _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
 
   _max_dofs_per_elem.create(_num_vars);
@@ -130,11 +90,8 @@ System::setupDofs()
           std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
     }
 
-    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_elems);
+    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
     _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
-
-    _local_node_dof_index[var].create(num_nodes);
-    _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
@@ -149,27 +106,21 @@ System::setupDofs()
       }
     }
 
-    for (const auto node : kokkosMesh().getLocalNodes())
-      if (node->processor_id() == _comm.rank())
+    for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+    {
+      if (!_dof_map.is_evaluable(*ghost_elem, var))
+        continue;
+      _dof_map.dof_indices(ghost_elem, dof_indices, var);
+      for (const auto dof : index_range(dof_indices))
       {
-        const auto id = kokkosMesh().getContiguousNodeID(node);
-
-        _dof_map.dof_indices(node, dof_indices, var);
-
-        if (dof_indices.size())
-        {
-          for (unsigned int i = 1; i < dof_indices.size(); ++i)
-            if (dof_indices[i] != dof_indices[i - 1] + 1)
-              mooseError("Kokkos system error: a variable has multiple DOFs on a node, but the DOF "
-                         "indices are discontiguous. This is not supported.");
-
-          _local_node_dof_index[var][id] = solution->map_global_to_local_index(dof_indices[0]);
-        }
+        const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+        _local_to_global_dof_index[local_idx] = dof_indices[dof];
       }
+    }
   }
 
   _local_elem_dof_index.copyToDeviceNested();
-  _local_node_dof_index.copyToDeviceNested();
   _local_to_global_dof_index.copyToDevice();
 
   _max_dofs_per_elem.copyToDevice();
@@ -209,9 +160,17 @@ System::setupDofs()
 void
 System::setupSparsity()
 {
-  auto pattern = _dof_map.get_sparsity_pattern();
+  auto * const pattern = _dof_map.get_sparsity_pattern();
+  bool have_pattern = pattern;
 
-  if (!pattern)
+  // Make sure to check whether the sparsity pattern graph returned by
+  // pattern->get_sparsity_pattern() is non-empty
+  getComm().verify(have_pattern);
+  if (!have_pattern)
+    return;
+  have_pattern = !pattern->get_sparsity_pattern().empty();
+  getComm().max(have_pattern);
+  if (!have_pattern)
     return;
 
   std::vector<PetscInt> col_idx;
@@ -270,58 +229,6 @@ System::setupSparsity()
   _sparsity.col_idx = col_idx;
   _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
-}
-
-void
-System::setupNodalBCDofs()
-{
-  auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
-
-  _nbc_matrix_tag_dof.create(MAX_TAG);
-
-  for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
-  {
-    auto nbc = static_cast<NodalBCBase *>(bc.get());
-
-    auto matrix_tags = nbc->getMatrixTags({});
-
-    for (auto tag : matrix_tags)
-      getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
-  }
-
-  _nbc_matrix_tag_dof.copyToDeviceNested();
-}
-
-void
-System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
-{
-  auto var = nbc->variable().number();
-
-  if (!dofs.isAlloc())
-  {
-    dofs.create(_num_local_dofs + _num_ghost_dofs);
-    dofs = false;
-  }
-
-  for (auto node : nbc->getContiguousNodes())
-    dofs[_local_node_dof_index[var][node]] = true;
-
-  // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
-
-  auto num_procs = _comm.size();
-
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (auto dof : _local_comm_list[proc])
-      send[proc].push_back(dofs[dof]);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
-
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
 }
 
 void
@@ -478,93 +385,10 @@ System::setActiveMatrixTags(const std::set<TagID> & tags)
   _matrix_tag_active.copyToDevice();
 }
 
-void
-System::reinit()
+const libMesh::DofMap &
+System::getDofMap() const
 {
-  for (auto tag : _active_solution_tags)
-  {
-    if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
-
-    if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
-
-    for (auto subdomain : _mesh.meshSubdomains())
-    {
-      auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
-
-      for (auto var : _active_variables)
-      {
-        if (!_var_subdomain_active(var, sid))
-          continue;
-
-        if (!_qp_solutions[tag](sid, var).isAlloc())
-          _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
-
-        if (!_qp_solutions_grad[tag](sid, var).isAlloc())
-          _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
-      }
-    }
-
-    _qp_solutions[tag].copyToDevice();
-    _qp_solutions_grad[tag].copyToDevice();
-  }
-
-  _qp_solutions.copyToDevice();
-  _qp_solutions_grad.copyToDevice();
-
-  dof_id_type num_elems = kokkosMesh().getNumLocalElements();
-
-  _thread.resize(kokkosAssembly().getMaxQpsPerElem(),
-                 num_elems,
-                 _active_variables.size(),
-                 _active_solution_tags.size());
-
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
-  ::Kokkos::parallel_for(policy, *this);
-  ::Kokkos::fence();
-}
-
-KOKKOS_FUNCTION void
-System::operator()(const ThreadID tid) const
-{
-  auto qp = _thread(tid, 0);
-  auto elem = _thread(tid, 1);
-  auto var = _active_variables(_thread(tid, 2));
-  auto tag = _active_solution_tags(_thread(tid, 3));
-
-  auto info = kokkosMesh().getElementInfo(elem);
-  auto sid = info.subdomain;
-  auto elem_type = info.type;
-
-  if (!_var_subdomain_active(var, sid))
-    return;
-
-  auto fe_type = _var_fe_types[var];
-  auto num_dofs = kokkosAssembly().getNumDofs(elem_type, fe_type);
-  auto num_qps = kokkosAssembly().getNumQps(info);
-  auto qp_offset = kokkosAssembly().getQpOffset(info);
-
-  if (qp >= num_qps)
-    return;
-
-  auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
-  auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
-  auto jacobian = kokkosAssembly().getJacobian(info, qp);
-
-  Real value = 0;
-  Real3 grad = 0;
-
-  for (unsigned int i = 0; i < num_dofs; ++i)
-  {
-    auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
-
-    value += vector * phi(i, qp);
-    grad += vector * (jacobian * grad_phi(i, qp));
-  }
-
-  getVectorQpValue(info, qp_offset + qp, var, tag) = value;
-  getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
+  return _system.dofMap();
 }
 
 } // namespace Moose::Kokkos

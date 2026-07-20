@@ -12,6 +12,7 @@
 #include "KokkosHeader.h"
 #include "KokkosDatum.h"
 #include "KokkosDispatcher.h"
+#include "KokkosFESystem.h"
 
 #include "MooseObject.h"
 
@@ -20,7 +21,7 @@ class FEProblemBase;
 namespace Moose::Kokkos
 {
 
-class ReducerBase : public MeshHolder, public AssemblyHolder, public SystemHolder
+class ReducerBase : public MeshHolder, public AssemblyHolder, public FESystemHolder
 {
 public:
   ReducerBase(const MooseObject * object);

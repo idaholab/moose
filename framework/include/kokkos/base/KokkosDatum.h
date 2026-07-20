@@ -11,16 +11,238 @@
 
 #include "KokkosTypes.h"
 #include "KokkosAssembly.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 #include "KokkosVariable.h"
 
 namespace Moose::Kokkos
 {
 
 /**
+ * Generic datum class containing geometric information related to the mesh. This is a base class
+ * for derived datum classes for both finite volume and finite element system assembly.
+ */
+class MeshDatum
+{
+public:
+  /**
+   * Constructor
+   * @param elem The contiguous element ID
+   * @param side The element side index, or \p libMesh::invalid_uint for element-only data
+   * @param mesh The Kokkos mesh
+   */
+  KOKKOS_FUNCTION
+  MeshDatum(ContiguousElementID elem, const unsigned int side, const Mesh & mesh);
+
+  /**
+   * Get the Kokkos mesh
+   * @returns The Kokkos mesh
+   */
+  KOKKOS_FUNCTION const Mesh & mesh() const { return _mesh; }
+
+  /**
+   * Get the element information object
+   * @returns The element information object
+   */
+  KOKKOS_FUNCTION const ElementInfo & elem() const { return _elem; }
+
+  /**
+   * Get the contiguous element ID
+   * @returns The contiguous element ID
+   */
+  KOKKOS_FUNCTION ContiguousElementID elemID() const { return _elem.id; }
+
+  /**
+   * Get whether the current side has a neighbor
+   * @returns Whether the current side has a neighbor
+   */
+  KOKKOS_FUNCTION bool hasNeighbor() const;
+
+  /**
+   * Get the neighbor element information object
+   * @returns The neighbor element information object. If there is no neighbor or if this datum is
+   * not meant to represent face data, then this will point to a default constructed \p ElementInfo
+   * whose data members represent invalid state (e.g. hold \p invalid_uint, \p invalid_id like
+   * values)
+   */
+  KOKKOS_FUNCTION const ElementInfo & neighbor() const { return _neighbor; }
+
+  /**
+   * Get the contiguous neighbor element ID
+   * @returns The contiguous neighbor element ID or \p libMesh::DofObject::invalid_id
+   */
+  KOKKOS_FUNCTION ContiguousElementID neighborID() const { return _neighbor.id; }
+
+  /**
+   * Get the side index
+   * @returns The side index
+   */
+  KOKKOS_FUNCTION unsigned int side() const { return _side; }
+
+  /**
+   * Get whether the current datum is on a side
+   * @returns Whether the current datum is on a side
+   */
+  KOKKOS_FUNCTION bool isSide() const { return _side != libMesh::invalid_uint; }
+
+  /**
+   * Get the contiguous subdomain ID
+   * @returns The contiguous subdomain ID
+   */
+  KOKKOS_FUNCTION ContiguousSubdomainID subdomain() const { return _elem.subdomain; }
+
+  /**
+   * Get the contiguous neighbor subdomain ID
+   * @returns The contiguous neighbor subdomain ID
+   */
+  KOKKOS_FUNCTION ContiguousSubdomainID neighborSubdomain() const { return _neighbor.subdomain; }
+
+protected:
+  /**
+   * Get the neighbor element information object for an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @param mesh The Kokkos mesh
+   * @returns The neighbor element information object, or a default \p ElementInfo (a default
+   *          constructed \p ElementInfo's data members all represent invalid state) when \p elem is
+   *          \p libMesh::DofObject::invalid_id, \p side is \p libMesh::invalid_uint, or the Kokkos
+   *          mesh has no contiguous neighbor ID for the side. The latter includes exterior
+   *          boundary sides with no libMesh neighbor and sides whose libMesh neighbor is
+   *          \p libMesh::remote_elem. Off-process neighbors present as ghost elements have
+   *          contiguous IDs and return their \p ElementInfo.
+   */
+  static KOKKOS_FUNCTION ElementInfo neighborInfo(ContiguousElementID elem,
+                                                  const unsigned int side,
+                                                  const Mesh & mesh);
+
+  /**
+   * Reference to the Kokkos mesh
+   */
+  const Mesh & _mesh;
+
+  /**
+   * Current element information object
+   */
+  const ElementInfo _elem;
+
+  /**
+   * Current side index
+   */
+  const unsigned int _side = libMesh::invalid_uint;
+
+  /**
+   * Current neighbor element information object
+   */
+  const ElementInfo _neighbor;
+};
+
+KOKKOS_FUNCTION inline MeshDatum::MeshDatum(ContiguousElementID elem,
+                                            const unsigned int side,
+                                            const Mesh & mesh)
+  : _mesh(mesh),
+    _elem(elem != libMesh::DofObject::invalid_id ? _mesh.getElementInfo(elem) : ElementInfo{}),
+    _side(side),
+    _neighbor(neighborInfo(_elem.id, _side, _mesh))
+{
+}
+
+KOKKOS_FUNCTION inline bool
+MeshDatum::hasNeighbor() const
+{
+  return _neighbor.id != libMesh::DofObject::invalid_id;
+}
+
+KOKKOS_FUNCTION inline ElementInfo
+MeshDatum::neighborInfo(ContiguousElementID elem, const unsigned int side, const Mesh & mesh)
+{
+  if (elem == libMesh::DofObject::invalid_id || side == libMesh::invalid_uint)
+    return {};
+
+  const auto neighbor = mesh.getNeighbor(elem, side);
+  return neighbor == libMesh::DofObject::invalid_id ? ElementInfo{} : mesh.getElementInfo(neighbor);
+}
+
+/**
+ * Device-side geometric context for finite volume kernels and boundary conditions.
+ */
+class FVDatum : public MeshDatum
+{
+public:
+  /**
+   * Constructor
+   * @param elem The contiguous element ID
+   * @param side The element side index, or \p libMesh::invalid_uint for element-only data
+   * @param mesh The Kokkos mesh
+   */
+  KOKKOS_FUNCTION
+  FVDatum(ContiguousElementID elem, const unsigned int side, const Mesh & mesh);
+
+  /**
+   * Get the centroid of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side centroid
+   */
+  KOKKOS_FUNCTION Real3 faceCentroid() const { return _mesh.getSideCentroid(_elem.id, _side); }
+
+  /**
+   * Get the outward unit normal of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side normal
+   */
+  KOKKOS_FUNCTION Real3 faceNormal() const { return _mesh.getSideNormal(_elem.id, _side); }
+
+  /**
+   * Get the distance from the current element centroid to its neighbor centroid
+   * @pre This datum represents a side of a locally owned element with a neighbor.
+   * @returns The element-centroid to neighbor-centroid distance
+   */
+  KOKKOS_FUNCTION Real faceDCNMag() const
+  {
+    return _mesh.getElementCentroidToNeighborCentroidDistance(_elem.id, _side);
+  }
+
+  /**
+   * Get the distance from the current element centroid to the current side centroid
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The element-centroid to side-centroid distance
+   */
+  KOKKOS_FUNCTION Real faceDCFMag() const
+  {
+    return _mesh.getElementCentroidToSideCentroidDistance(_elem.id, _side);
+  }
+
+  /**
+   * Get the coordinate-weighted area of the current element side
+   * @pre This datum represents a valid side of a locally owned element.
+   * @returns The side area including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real faceArea() const { return _mesh.getSideArea(_elem.id, _side); }
+
+  /**
+   * Get the current element centroid
+   * @pre The current element is locally owned.
+   * @returns The element centroid
+   */
+  KOKKOS_FUNCTION Real3 elementCentroid() const { return _mesh.getElementCentroid(_elem.id); }
+
+  /**
+   * Get the coordinate-weighted current element volume
+   * @pre The current element is locally owned.
+   * @returns The element volume including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real elementVolume() const { return _mesh.getElementVolume(_elem.id); }
+};
+
+KOKKOS_FUNCTION inline FVDatum::FVDatum(ContiguousElementID elem,
+                                        const unsigned int side,
+                                        const Mesh & mesh)
+  : MeshDatum(elem, side, mesh)
+{
+}
+
+/**
  * The Kokkos object that holds thread-private data in the parallel operations of any Kokkos object
  */
-class Datum
+class Datum : public MeshDatum
 {
 public:
   /**
@@ -34,20 +256,8 @@ public:
   Datum(const ContiguousElementID elem,
         const unsigned int side,
         const Assembly & assembly,
-        const Array<System> & systems)
-    : _assembly(assembly),
-      _systems(systems),
-      _mesh(assembly.kokkosMesh()),
-      _elem(_mesh.getElementInfo(elem)),
-      _side(side),
-      _neighbor(!isSide() ? libMesh::DofObject::invalid_id : _mesh.getNeighbor(_elem.id, side)),
-      _n_qps(!isSide() ? assembly.getNumQps(_elem) : assembly.getNumFaceQps(_elem, side)),
-      _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
-      _elem_property_idx(!isSide()
-                             ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
-                             : assembly.getElemFacePropertyIndex(_elem, _side))
-  {
-  }
+        const Array<FESystem> & systems);
+
   /**
    * Constructor for node data
    * @param node The contiguous node ID of the current thread
@@ -55,38 +265,21 @@ public:
    * @param systems The Kokkos systems
    */
   KOKKOS_FUNCTION
-  Datum(const ContiguousNodeID node, const Assembly & assembly, const Array<System> & systems)
-    : _assembly(assembly), _systems(systems), _mesh(assembly.kokkosMesh()), _node(node)
-  {
-  }
+  Datum(const ContiguousNodeID node, const Assembly & assembly, const Array<FESystem> & systems);
 
   /**
    * Get the Kokkos assembly
    * @returns The Kokkos assembly
    */
   KOKKOS_FUNCTION const Assembly & assembly() const { return _assembly; }
+
   /**
    * Get the Kokkos system
    * @param sys The system number
    * @returns The Kokkos system
    */
-  KOKKOS_FUNCTION const System & system(unsigned int sys) const { return _systems[sys]; }
-  /**
-   * Get the Kokkos mesh
-   * @returns The Kokkos mesh
-   */
-  KOKKOS_FUNCTION const Mesh & mesh() const { return _mesh; }
+  KOKKOS_FUNCTION const FESystem & system(unsigned int sys) const { return _systems[sys]; }
 
-  /**
-   * Get the element information object
-   * @returns The element information object
-   */
-  KOKKOS_FUNCTION const ElementInfo & elem() const { return _elem; }
-  /**
-   * Get the contiguous element ID
-   * @returns The contiguous element ID
-   */
-  KOKKOS_FUNCTION ContiguousElementID elemID() const { return _elem.id; }
   /**
    * Get the extra element ID
    * @param index The extra element ID index
@@ -96,31 +289,25 @@ public:
   {
     return isNodal() ? libMesh::DofObject::invalid_id : _mesh.getExtraElementID(_elem.id, index);
   }
-  /**
-   * Get the contiguous subdomain ID
-   * @returns The contiguous subdomain ID
-   */
-  KOKKOS_FUNCTION ContiguousSubdomainID subdomain() const { return _elem.subdomain; }
-  /**
-   * Get the side index
-   * @returns The side index
-   */
-  KOKKOS_FUNCTION unsigned int side() const { return _side; }
+
   /**
    * Get the contiguous node ID
    * @returns The contiguous node ID
    */
   KOKKOS_FUNCTION ContiguousNodeID node() const { return _node; }
+
   /**
    * Get the number of local quadrature points
    * @returns The number of local quadrature points
    */
   KOKKOS_FUNCTION unsigned int n_qps() const { return _n_qps; }
+
   /**
    * Get the starting offset into the global quadrature point index
    * @returns The starting offset
    */
   KOKKOS_FUNCTION dof_id_type qpOffset() const { return _qp_offset; }
+
   /**
    * Get the index into the property data storage
    * @param constant_option The property constant option
@@ -129,21 +316,13 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type propertyIdx(const PropertyConstantOption constant_option,
                                           const unsigned int qp) const;
-  /**
-   * Get whether the current side has a neighbor
-   * @returns Whether the current side has a neighbor
-   */
-  KOKKOS_FUNCTION bool hasNeighbor() const { return _neighbor != libMesh::DofObject::invalid_id; }
-  /**
-   * Get whether the current datum is on a side
-   * @returns Whether the current datum is on a side
-   */
-  KOKKOS_FUNCTION bool isSide() const { return _side != libMesh::invalid_uint; }
+
   /**
    * Get whether the current datum is on a node
    * @returns Whether the current datum is on a node
    */
   KOKKOS_FUNCTION bool isNodal() const { return _node != libMesh::DofObject::invalid_id; }
+
   /**
    * Get whether the a variable is defined on the current node
    * @param var The variable
@@ -160,18 +339,21 @@ public:
    * @returns The Jacobian matrix
    */
   KOKKOS_FUNCTION const Real33 & J(const unsigned int qp);
+
   /**
    * Get the transformed Jacobian weight
    * @param qp The local quadrature point index
    * @returns The transformed Jacobian weights
    */
   KOKKOS_FUNCTION Real JxW(const unsigned int qp);
+
   /**
    * Get the physical quadrature point coordinate
    * @param qp The local quadrature point index
    * @returns The physical quadrature point coordinate
    */
   KOKKOS_FUNCTION Real3 q_point(const unsigned int qp);
+
   /**
    * Get the normal vector on surface
    * @param qp The local quadrature point index
@@ -206,38 +388,27 @@ protected:
    * Reference of the Kokkos assembly
    */
   const Assembly & _assembly;
+
   /**
    * Reference of the Kokkos systems
    */
-  const Array<System> & _systems;
-  /**
-   * Reference of the Kokkos mesh
-   */
-  const Mesh & _mesh;
-  /**
-   * Current element information object
-   */
-  const ElementInfo _elem;
-  /**
-   * Current side index
-   */
-  const unsigned int _side = libMesh::invalid_uint;
+  const Array<FESystem> & _systems;
+
   /**
    * Current contiguous node ID
    */
   const ContiguousNodeID _node = libMesh::DofObject::invalid_id;
-  /**
-   * Current contiguous element ID of neighbor
-   */
-  const ContiguousElementID _neighbor = libMesh::DofObject::invalid_id;
+
   /**
    * Number of local quadrature points
    */
   const unsigned int _n_qps = 1;
+
   /**
    * Starting offset into the global quadrature point index
    */
   const dof_id_type _qp_offset = libMesh::DofObject::invalid_id;
+
   /**
    * Index for element-constant material properties
    */
@@ -273,6 +444,30 @@ private:
    */
   unsigned int _num_local_threads = 1;
 };
+
+KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
+                                    const unsigned int side,
+                                    const Assembly & assembly,
+                                    const Array<FESystem> & systems)
+  : MeshDatum(elem, side, assembly.kokkosMesh()),
+    _assembly(assembly),
+    _systems(systems),
+    _n_qps(!isSide() ? assembly.getNumQps(_elem) : assembly.getNumFaceQps(_elem, side)),
+    _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
+    _elem_property_idx(!isSide() ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
+                                 : assembly.getElemFacePropertyIndex(_elem, _side))
+{
+}
+
+KOKKOS_FUNCTION inline Datum::Datum(const ContiguousNodeID node,
+                                    const Assembly & assembly,
+                                    const Array<FESystem> & systems)
+  : MeshDatum(libMesh::DofObject::invalid_id, libMesh::invalid_uint, assembly.kokkosMesh()),
+    _assembly(assembly),
+    _systems(systems),
+    _node(node)
+{
+}
 
 KOKKOS_FUNCTION inline dof_id_type
 Datum::propertyIdx(const PropertyConstantOption constant_option, const unsigned int qp) const
@@ -378,7 +573,7 @@ public:
   AssemblyDatum(const ContiguousElementID elem,
                 const unsigned int side,
                 const Assembly & assembly,
-                const Array<System> & systems,
+                const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
                 const unsigned int comp = 0)
@@ -405,7 +600,7 @@ public:
   KOKKOS_FUNCTION
   AssemblyDatum(const ContiguousNodeID node,
                 const Assembly & assembly,
-                const Array<System> & systems,
+                const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
                 const unsigned int comp = 0)
@@ -511,3 +706,4 @@ protected:
 
 using Datum = Moose::Kokkos::Datum;
 using AssemblyDatum = Moose::Kokkos::AssemblyDatum;
+using FVDatum = Moose::Kokkos::FVDatum;

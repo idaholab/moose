@@ -138,6 +138,14 @@ MooseVariableDataLinearFV<OutputType>::computeValues()
 
 template <typename OutputType>
 void
+MooseVariableDataLinearFV<OutputType>::prepareIC()
+{
+  initDofIndices();
+  _vector_tags_dof_u[_solution_tag].resize(_dof_indices.size());
+}
+
+template <typename OutputType>
+void
 MooseVariableDataLinearFV<OutputType>::setDofValue(const DofValue & value, unsigned int index)
 {
   mooseAssert(index == 0, "We only ever have one dof value locally");

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "FVQpTimeKernel.h"
 
-class PCNSFVDensityTimeDerivative : public FVTimeKernel
+class PCNSFVDensityTimeDerivative : public FVQpTimeKernel
 {
 public:
   static InputParameters validParams();
@@ -19,9 +19,6 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
-
-  /// The time derivative of the primary variable
-  const ADVariableValue & _u_dot;
 
   /// The porosity
   const MaterialProperty<Real> & _eps;

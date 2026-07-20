@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", PCNSFVDensityTimeDerivative);
 InputParameters
 PCNSFVDensityTimeDerivative::validParams()
 {
-  InputParameters params = FVTimeKernel::validParams();
+  InputParameters params = FVQpTimeKernel::validParams();
   params.addClassDescription("A time derivative kernel for which the form is eps * ddt(rho*var).");
   params.addParam<MaterialPropertyName>(NS::porosity, NS::porosity, "The porosity");
   params.addRequiredCoupledVar(NS::density, "The density variable.");
@@ -23,8 +23,7 @@ PCNSFVDensityTimeDerivative::validParams()
 }
 
 PCNSFVDensityTimeDerivative::PCNSFVDensityTimeDerivative(const InputParameters & parameters)
-  : FVTimeKernel(parameters),
-    _u_dot(_var.adUDot()),
+  : FVQpTimeKernel(parameters),
     _eps(getMaterialProperty<Real>(NS::porosity)),
     _rho_dot(adCoupledDot(NS::density)),
     _rho(adCoupledValue(NS::density))

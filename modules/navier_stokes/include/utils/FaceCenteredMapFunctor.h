@@ -121,6 +121,12 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) cons
   mooseError("not implemented");
 }
 
+extern template class FaceCenteredMapFunctor<ADRealVectorValue,
+                                             std::unordered_map<dof_id_type, ADRealVectorValue>>;
+extern template class FaceCenteredMapFunctor<RealVectorValue,
+                                             std::unordered_map<dof_id_type, RealVectorValue>>;
+extern template class FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>;
+
 template <typename T, typename Map>
 inline void
 dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)

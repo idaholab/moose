@@ -126,6 +126,18 @@ public:
   virtual bool hasDoFsOnNodes() const { mooseError("Base class cannot determine this"); };
 
   /**
+   * Whether this variable supports QP-indexed loops. Returns true for FE variables and nonlinear
+   * FV variables. Returns false for linear FV variables by default and for scalar variables.
+   */
+  virtual bool supportsQpBasedLoops() const;
+
+  /**
+   * Whether this variable supports geometric-info-based loops, such as ElemInfo/FaceInfo loops.
+   * Static, per-class property - never toggled by requireQpComputations().
+   */
+  virtual bool supportsGeometricInfoBasedLoops() const;
+
+  /**
    * Return the continuity of this variable
    */
   virtual libMesh::FEContinuity getContinuity() const

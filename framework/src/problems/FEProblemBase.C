@@ -6699,13 +6699,13 @@ FEProblemBase::areCoupled(const unsigned int ivar,
   return (*_cm[nl_sys])(ivar, jvar);
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
 FEProblemBase::couplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
   return _assembly[tid][nl_sys]->couplingEntries();
 }
 
-std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
 FEProblemBase::nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
   return _assembly[tid][nl_sys]->nonlocalCouplingEntries();

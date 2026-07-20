@@ -12,6 +12,7 @@
 #include "KokkosDatum.h"
 
 #include "MooseVariableFieldBase.h"
+#include "SystemBase.h"
 
 namespace Moose::Kokkos
 {

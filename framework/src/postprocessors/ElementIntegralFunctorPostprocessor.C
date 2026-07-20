@@ -22,6 +22,9 @@ ElementIntegralFunctorPostprocessorTempl<is_ad>::validParams()
   params.addParam<MooseFunctorName>(
       "prefactor", 1, "The name of a pre-factor inside the integrand");
   params.addClassDescription("Computes a volume integral of the specified functor");
+  MooseEnum evaluation_type(getFunctorEvaluationTypeOptions(), "QUADRATURE_POINT");
+  params.addParam<MooseEnum>(
+      "evaluation_type", evaluation_type, "How the functor should be evaluated.");
   return params;
 }
 
@@ -30,8 +33,25 @@ ElementIntegralFunctorPostprocessorTempl<is_ad>::ElementIntegralFunctorPostproce
     const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _functor(getFunctor<GenericReal<is_ad>>("functor")),
-    _prefactor(getFunctor<GenericReal<is_ad>>("prefactor"))
+    _prefactor(getFunctor<GenericReal<is_ad>>("prefactor")),
+    _evaluation_type(
+        getParam<MooseEnum>("evaluation_type").template getEnum<FunctorEvaluationType>())
 {
+}
+
+template <bool is_ad>
+Real
+ElementIntegralFunctorPostprocessorTempl<is_ad>::computeIntegral()
+{
+  switch (_evaluation_type)
+  {
+    case FunctorEvaluationType::QUADRATURE_POINT:
+      return ElementIntegralPostprocessor::computeIntegral();
+    case FunctorEvaluationType::CELL_AVERAGE:
+      return _current_elem_volume * cellAverage();
+    default:
+      mooseError("Unhandled enumerator type");
+  }
 }
 
 template <bool is_ad>
@@ -40,7 +60,16 @@ ElementIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
 {
   Moose::ElemQpArg elem_qp = {_current_elem, _qp, _qrule, _q_point[_qp]};
   return MetaPhysicL::raw_value(_prefactor(elem_qp, determineState()) *
-                                _functor(elem_qp, determineState()));
+                                MetaPhysicL::raw_value(_functor(elem_qp, determineState())));
+}
+
+template <bool is_ad>
+Real
+ElementIntegralFunctorPostprocessorTempl<is_ad>::cellAverage()
+{
+  const Moose::ElemArg elem_arg = makeElemArg(_current_elem);
+  return MetaPhysicL::raw_value(_prefactor(elem_arg, determineState()) *
+                                MetaPhysicL::raw_value(_functor(elem_arg, determineState())));
 }
 
 template class ElementIntegralFunctorPostprocessorTempl<false>;

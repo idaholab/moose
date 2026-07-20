@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDispatcher.h"
+#include "KokkosFESystem.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 
@@ -25,7 +26,7 @@ namespace Moose::Kokkos
 class ResidualObject : public ::ResidualObject,
                        public MeshHolder,
                        public AssemblyHolder,
-                       public SystemHolder
+                       public FESystemHolder
 {
 public:
   static InputParameters validParams();
