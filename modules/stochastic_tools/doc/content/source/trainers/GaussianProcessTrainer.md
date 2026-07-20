@@ -238,6 +238,85 @@ with $M$ outputs, each training iteration of Adam has a cost of $\mathcal{O}
 (M^3N^3)$. Adam permits using $n < N$ random training points during each iteration
 (mini-batches) which has a cost of $\mathcal{O}(M^3n^3)<<\mathcal{O}(M^3N^3)$.
 
+## Inequality Constraints
+
+Three complementary mechanisms are available to enforce inequality constraints on
+GP predictions. They can be combined freely.
+
+### Link Functions (Output Warping)
+
+A link function $g$ maps physical outputs to an unconstrained latent space.
+The GP trains in latent space and predictions are inverted back to physical space,
+guaranteeing constraint satisfaction by construction.
+
+| `link_function` | Constraint | Required parameters |
+| - | - | - |
+| `identity` (default) | none | — |
+| `log` | $y > \ell$ | `link_lower_bound` |
+| `logit` | $\ell < y < u$ | `link_lower_bound`, `link_upper_bound` |
+
+See [GPLinkFunction.md] for the mathematical details.
+
++Example — positivity constraint:+
+
+!listing stochastic_tools/test/tests/surrogates/gaussian_process/GP_log_link.i
+         block=Trainers
+
+### Derivative Observations (Monotonicity Constraints)
+
+Virtual derivative observations augment the covariance matrix with cross-covariance
+blocks between function values and directional derivatives at specified points.
+This enforces monotonicity (or zero-derivative) constraints structurally via
+the GP prior.
+
+The augmented covariance matrix takes the block form:
+
+!equation
+\mathbf{K}_{\text{aug}} = \begin{bmatrix}
+\mathbf{K}_{ff} + \sigma_n^2 \mathbf{I} & \mathbf{K}_{fd} \\
+\mathbf{K}_{df}                          & \mathbf{K}_{dd} + \sigma_d^2 \mathbf{I}
+\end{bmatrix}
+
+where $\mathbf{K}_{fd}$ and $\mathbf{K}_{dd}$ contain cross-covariances between
+function values and partial derivatives. Only the
+[SquaredExponentialCovariance.md] kernel supports derivative covariances. Only
+single-output GPs are supported.
+
+The virtual observations are placed at user-specified locations
+(`monotone_constraint_points`) and target either zero derivative, positive
+derivative (`increasing`), or negative derivative (`decreasing`) at those points.
+
++Example — increasing in second parameter:+
+
+!listing stochastic_tools/test/tests/surrogates/gaussian_process/GP_derivative_obs.i
+         block=Trainers
+
+### Penalty Constraints (Soft Bounds During Tuning)
+
+Penalty terms are added to the negative log-marginal likelihood (NLML) and its
+gradient during Adam hyperparameter optimization. This steers hyperparameter
+selection toward configurations that respect lower/upper bounds on predicted means
+at specified evaluation points.
+
+The augmented loss is:
+
+!equation
+\mathcal{L}_{\text{aug}} = \mathcal{L}_{\text{NLML}} + \lambda \sum_c \left[
+  \max(0,\, \ell_c - \hat{y}_c)^2 + \max(0,\, \hat{y}_c - u_c)^2
+\right]
+
+where $\hat{y}_c$ is the predicted mean at constraint point $c$, and $\lambda$
+is `penalty_weight`.
+
+The bounds are specified in physical space and are internally transformed through
+the link function and data standardizer. Penalty constraints require the
+`tune_parameters` option to be active.
+
++Example — lower-bound penalty at two points:+
+
+!listing stochastic_tools/test/tests/surrogates/gaussian_process/GP_penalty_constraint.i
+         block=Trainers
+
 !syntax parameters /Trainers/GaussianProcessTrainer
 
 !syntax inputs /Trainers/GaussianProcessTrainer

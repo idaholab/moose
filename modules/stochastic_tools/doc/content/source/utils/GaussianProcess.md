@@ -52,3 +52,33 @@ Or by simply calling the optimizer with Adam (stochastic algorithm):
 
 !listing stochastic_tools/src/utils/GaussianProcess.C start=tuneHyperParamsAdam(training_params end=);
 
+### Applying a link function
+
+Before setting up the covariance matrix, training data can be transformed through
+a [GPLinkFunction.md] to enforce inequality constraints. The link type and bounds
+are configured through [GaussianProcessTrainer.md]:
+
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C
+         start=// ---- Link function ----
+         end=// Apply link function to training data
+
+The transformed values are standardized and the GP trains entirely in latent space.
+At prediction time the inverse link is applied to recover physical outputs.
+
+### Derivative observations
+
+Monotonicity constraints are encoded via virtual derivative observations appended
+to the training set. The `GaussianProcess` object stores the virtual parameter
+locations and their associated derivative dimensions, and assembles an augmented
+covariance matrix at setup time:
+
+!listing stochastic_tools/src/trainers/GaussianProcessTrainer.C
+         start=// ---- Derivative constraint (virtual observations) ----
+         end=// ---- Penalty constraints ----
+
+### Penalty constraints
+
+Soft bounds on predicted means at specified evaluation points are enforced by
+adding a penalty term to the NLML loss and gradient during Adam optimization.
+The penalty is computed inside `getLoss` and `getGradient` in `GaussianProcess.C`.
+

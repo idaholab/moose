@@ -17,6 +17,7 @@
 #include "libmesh/petsc_matrix.h"
 
 #include <cmath>
+#include <limits>
 
 #include "MooseRandom.h"
 #include "Shuffle.h"
@@ -43,7 +44,114 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nt
 {
 }
 
-GaussianProcess::GaussianProcess() {}
+GaussianProcess::GaussianProcess() : _virtual_params(0, 0), _penalty_points_std(0, 0) {}
+
+// ---- Link function -------------------------------------------------------
+
+void
+GaussianProcess::setLinkFunction(GPLinkFunctionType type, Real lb, Real ub)
+{
+  _link_type = type;
+  _link_lb = lb;
+  _link_ub = ub;
+}
+
+void
+GaussianProcess::applyLinkTransform(RealEigenMatrix & data) const
+{
+  if (_link_type == GPLinkFunctionType::Identity)
+    return;
+
+  auto link = GPLinkFunction::build(_link_type, _link_lb, _link_ub);
+  for (int ii = 0; ii < data.rows(); ++ii)
+    for (int jj = 0; jj < data.cols(); ++jj)
+    {
+      const Real y = data(ii, jj);
+      if (y <= link->lowerBound())
+        mooseError("Training data value ",
+                   y,
+                   " is at or below the link function lower bound ",
+                   link->lowerBound(),
+                   ". Adjust the link lower bound or check training data.");
+      if (y >= link->upperBound())
+        mooseError("Training data value ",
+                   y,
+                   " is at or above the link function upper bound ",
+                   link->upperBound(),
+                   ". Adjust the link upper bound or check training data.");
+      data(ii, jj) = link->forward(y);
+    }
+}
+
+Real
+GaussianProcess::applyLink(Real y) const
+{
+  if (_link_type == GPLinkFunctionType::Identity)
+    return y;
+  return GPLinkFunction::build(_link_type, _link_lb, _link_ub)->forward(y);
+}
+
+Real
+GaussianProcess::applyInvLink(Real z) const
+{
+  if (_link_type == GPLinkFunctionType::Identity)
+    return z;
+  return GPLinkFunction::build(_link_type, _link_lb, _link_ub)->inverse(z);
+}
+
+Real
+GaussianProcess::invLinkDeriv(Real z) const
+{
+  if (_link_type == GPLinkFunctionType::Identity)
+    return 1.0;
+  return GPLinkFunction::build(_link_type, _link_lb, _link_ub)->inverseDeriv(z);
+}
+
+Real
+GaussianProcess::logLinkJacobian(Real y) const
+{
+  if (_link_type == GPLinkFunctionType::Identity)
+    return 0.0;
+  return GPLinkFunction::build(_link_type, _link_lb, _link_ub)->logJacobian(y);
+}
+
+// ---- Constraint setters --------------------------------------------------
+
+void
+GaussianProcess::setDerivativeConstraints(const RealEigenMatrix & virtual_params,
+                                          const std::vector<unsigned int> & deriv_dims,
+                                          Real target_value,
+                                          Real noise_variance)
+{
+  if ((unsigned)virtual_params.rows() != deriv_dims.size())
+    mooseError("virtual_params rows (",
+               virtual_params.rows(),
+               ") must match deriv_dims size (",
+               deriv_dims.size(),
+               ").");
+  if (noise_variance <= 0.0)
+    mooseError("derivative_noise_variance must be > 0 to keep the augmented covariance matrix "
+               "positive-definite.");
+  _virtual_params = virtual_params;
+  _virtual_deriv_dims = deriv_dims;
+  _virtual_target = target_value;
+  _virtual_noise = noise_variance;
+}
+
+void
+GaussianProcess::setPenaltyConstraints(const RealEigenMatrix & penalty_points_std,
+                                       const std::vector<Real> & lower_bounds_std,
+                                       const std::vector<Real> & upper_bounds_std,
+                                       Real weight)
+{
+  if ((unsigned)penalty_points_std.rows() != lower_bounds_std.size() ||
+      (unsigned)penalty_points_std.rows() != upper_bounds_std.size())
+    mooseError("penalty_constraint_points rows must match the number of lower/upper bounds.");
+  _penalty_points_std = penalty_points_std;
+  _penalty_lower_std = lower_bounds_std;
+  _penalty_upper_std = upper_bounds_std;
+  _penalty_weight = weight;
+}
 
 void
 GaussianProcess::initialize(CovarianceFunctionBase * covariance_function,
@@ -71,6 +179,10 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
                                        const RealEigenMatrix & training_data,
                                        const GPOptimizerOptions & opts)
 {
+  if (_virtual_params.rows() > 0 && _num_outputs > 1)
+    mooseError("Derivative observations (monotonicity constraints) are not supported for "
+               "multi-output GPs. Use a single-output covariance function.");
+
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= training_params.rows());
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
@@ -78,15 +190,64 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K.resize(training_params.rows() * training_data.cols(),
-            training_params.rows() * training_data.cols());
-  _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
+  const unsigned int n_train = training_params.rows();
+  const unsigned int n_outputs = training_data.cols();
+  const unsigned int n_virt = _virtual_params.rows();
 
-  RealEigenMatrix flattened_data =
-      training_data.reshaped(training_params.rows() * training_data.cols(), 1);
+  if (n_virt == 0)
+  {
+    _K.resize(n_train * n_outputs, n_train * n_outputs);
+    _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
+    RealEigenMatrix flattened_data = training_data.reshaped(n_train * n_outputs, 1);
+    setupStoredMatrices(flattened_data);
+  }
+  else
+  {
+    // Augmented covariance matrix incorporating virtual derivative observations.
+    // K_aug = [ K_ff + sigma_n^2*I   K_fd             ]
+    //         [ K_df                 K_dd + sigma_d^2*I ]
+    const unsigned int n_total = n_train + n_virt;
+    _K.resize(n_total, n_total);
+    _K.setZero();
 
-  // Compute the Cholesky decomposition and inverse action of the covariance matrix
-  setupStoredMatrices(flattened_data);
+    // Top-left: K(X_train, X_train) + sigma_n^2*I (noise added by is_self_covariance=true)
+    RealEigenMatrix K_ff(n_train, n_train);
+    _covariance_function->computeCovarianceMatrix(K_ff, training_params, training_params, true);
+    _K.topLeftCorner(n_train, n_train) = K_ff;
+
+    // Off-diagonal: K_fd and its transpose K_df
+    for (unsigned int j = 0; j < n_virt; ++j)
+    {
+      RealEigenMatrix xd_j = _virtual_params.row(j);
+      RealEigenMatrix K_fd_j(n_train, 1);
+      _covariance_function->computeCovarianceFD(
+          K_fd_j, training_params, xd_j, _virtual_deriv_dims[j]);
+      _K.block(0, n_train + j, n_train, 1) = K_fd_j;
+      _K.block(n_train + j, 0, 1, n_train) = K_fd_j.transpose();
+    }
+
+    // Bottom-right: K_dd + sigma_d^2*I
+    for (unsigned int i = 0; i < n_virt; ++i)
+    {
+      RealEigenMatrix xd_i = _virtual_params.row(i);
+      for (unsigned int j = 0; j < n_virt; ++j)
+      {
+        RealEigenMatrix xd_j = _virtual_params.row(j);
+        RealEigenMatrix K_dd_ij(1, 1);
+        _covariance_function->computeCovarianceDD(
+            K_dd_ij, xd_i, xd_j, _virtual_deriv_dims[i], _virtual_deriv_dims[j]);
+        _K(n_train + i, n_train + j) = K_dd_ij(0, 0);
+      }
+      _K(n_train + i, n_train + i) += _virtual_noise;
+    }
+
+    // Augmented RHS: [y_train; v_virtual_target * ones]
+    RealEigenMatrix augmented_data(n_total, 1);
+    augmented_data.topRows(n_train) = training_data.reshaped(n_train, 1);
+    augmented_data.bottomRows(n_virt).setConstant(_virtual_target);
+
+    setupStoredMatrices(augmented_data);
+  }
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
@@ -255,6 +416,27 @@ GaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
   log_likelihood += -std::log(_K.determinant());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
+
+  // Add penalty constraint terms (evaluated at constraint points using current batch model)
+  const unsigned int n_penalty = _penalty_points_std.rows();
+  if (n_penalty > 0 && _penalty_weight > 0.0)
+  {
+    for (unsigned int c = 0; c < n_penalty; ++c)
+    {
+      RealEigenMatrix xc = _penalty_points_std.row(c);
+      RealEigenMatrix K_star(_batch_size, 1);
+      _covariance_function->computeCovarianceMatrix(K_star, inputs, xc, false);
+      const Real mu_c = (K_star.transpose() * _K_results_solve)(0, 0);
+
+      const Real lb = _penalty_lower_std[c];
+      const Real ub = _penalty_upper_std[c];
+      if (lb > -std::numeric_limits<Real>::max() && mu_c < lb)
+        log_likelihood += _penalty_weight * std::pow(lb - mu_c, 2);
+      if (ub < std::numeric_limits<Real>::max() && mu_c > ub)
+        log_likelihood += _penalty_weight * std::pow(mu_c - ub, 2);
+    }
+  }
+
   return log_likelihood;
 }
 
@@ -263,8 +445,9 @@ GaussianProcess::getGradient(RealEigenMatrix & inputs) const
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
-  std::vector<Real> grad_vec;
-  grad_vec.resize(_num_tunable);
+  std::vector<Real> grad_vec(_num_tunable, 0.0);
+
+  // NLML gradient (existing computation)
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
     std::string hyper_param_name = iter->first;
@@ -278,6 +461,57 @@ GaussianProcess::getGradient(RealEigenMatrix & inputs) const
       grad_vec[global_index] = -tmp.trace() / 2.0;
     }
   }
+
+  // Penalty gradient contribution (approximate: only the dK_star/dtheta term)
+  // d(penalty)/d(theta_i) ≈ sum_c [violation_c * (-d(mu_c)/d(theta_i))]
+  // where d(mu_c)/d(theta_i) ≈ (dK_star/d(theta_i))^T * alpha_solve
+  const unsigned int n_penalty = _penalty_points_std.rows();
+  if (n_penalty > 0 && _penalty_weight > 0.0)
+  {
+    RealEigenMatrix dK_star_dhp(_batch_size, 1);
+    for (unsigned int c = 0; c < n_penalty; ++c)
+    {
+      RealEigenMatrix xc = _penalty_points_std.row(c);
+      RealEigenMatrix K_star(_batch_size, 1);
+      _covariance_function->computeCovarianceMatrix(K_star, inputs, xc, false);
+      const Real mu_c = (K_star.transpose() * _K_results_solve)(0, 0);
+
+      const Real lb = _penalty_lower_std[c];
+      const Real ub = _penalty_upper_std[c];
+
+      Real slack = 0.0;
+      int sign = 0;
+      if (lb > -std::numeric_limits<Real>::max() && mu_c < lb)
+      {
+        slack = lb - mu_c;
+        sign = -1; // penalty increases when mu_c decreases → gradient pushes mu_c up
+      }
+      else if (ub < std::numeric_limits<Real>::max() && mu_c > ub)
+      {
+        slack = mu_c - ub;
+        sign = 1; // penalty increases when mu_c increases → gradient pushes mu_c down
+      }
+
+      if (sign == 0)
+        continue;
+
+      for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
+      {
+        const auto & hp_name = iter->first;
+        const auto first_index = std::get<0>(iter->second);
+        const auto num_entries = std::get<1>(iter->second);
+        for (unsigned int ii = 0; ii < num_entries; ++ii)
+        {
+          const auto global_index = first_index + ii;
+          _covariance_function->computedKdhyper_cross(dK_star_dhp, inputs, xc, hp_name, ii);
+          const Real d_mu_c = (dK_star_dhp.transpose() * _K_results_solve)(0, 0);
+          // d(penalty)/d(theta_i) = 2*lambda*slack * sign * d(mu_c)/d(theta_i)
+          grad_vec[global_index] += 2.0 * _penalty_weight * slack * sign * d_mu_c;
+        }
+      }
+    }
+  }
+
   return grad_vec;
 }
 
@@ -361,6 +595,16 @@ dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, vo
   dataStore(stream, gp_utils.KCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
+  // Link function
+  int link_type_int = static_cast<int>(gp_utils.linkType());
+  dataStore(stream, link_type_int, context);
+  dataStore(stream, gp_utils.linkLb(), context);
+  dataStore(stream, gp_utils.linkUb(), context);
+  // Virtual derivative observations
+  dataStore(stream, gp_utils.virtualParams(), context);
+  dataStore(stream, gp_utils.virtualDerivDims(), context);
+  dataStore(stream, gp_utils.virtualNoise(), context);
+  dataStore(stream, gp_utils.virtualTarget(), context);
 }
 
 template <>
@@ -379,4 +623,15 @@ dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, voi
   dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
+  // Link function
+  int link_type_int;
+  dataLoad(stream, link_type_int, context);
+  gp_utils.linkType() = static_cast<StochasticTools::GPLinkFunctionType>(link_type_int);
+  dataLoad(stream, gp_utils.linkLb(), context);
+  dataLoad(stream, gp_utils.linkUb(), context);
+  // Virtual derivative observations
+  dataLoad(stream, gp_utils.virtualParams(), context);
+  dataLoad(stream, gp_utils.virtualDerivDims(), context);
+  dataLoad(stream, gp_utils.virtualNoise(), context);
+  dataLoad(stream, gp_utils.virtualTarget(), context);
 }
