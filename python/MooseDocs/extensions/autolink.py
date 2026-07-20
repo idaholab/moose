@@ -12,9 +12,9 @@ import logging
 
 import MooseDocs
 from .. import common
-from ..base import components, Extension
+from ..base import components
 from ..tree import tokens, latex, html
-from . import core, floats, heading, modal
+from . import command, core, floats, heading, modal
 
 
 def make_extension(**kwargs):
@@ -32,7 +32,7 @@ AutoLink = tokens.newToken(
 )
 
 
-class AutoLinkExtension(Extension):
+class AutoLinkExtension(command.CommandExtension):
     """
     Extension that replaces the default Link and LinkShortcut behavior and handles linking to
     other files. This includes the ability to extract the content from the linked page (i.e.,
@@ -41,19 +41,50 @@ class AutoLinkExtension(Extension):
 
     @staticmethod
     def defaultConfig():
-        config = Extension.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
         """Replace default core link components on reader and provide auto link rendering."""
 
         self.requires(core, heading, modal)
+        self.addCommand(reader, FileLinkCommand())
 
         reader.addInline(PageLinkComponent(), location="=LinkInline")
         reader.addInline(PageShortcutLinkComponent(), location="=ShortcutLinkInline")
 
         renderer.add("LocalLink", RenderLocalLink())
         renderer.add("AutoLink", RenderAutoLink())
+
+
+class FileLinkCommand(command.CommandComponent):
+    COMMAND = "file"
+    SUBCOMMAND = None
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings["language"] = (
+            None,
+            "The language used for source file syntax highlighting.",
+        )
+        settings["title"] = (None, "The title to use for the source file modal.")
+        return settings
+
+    def createToken(self, parent, info, page, settings):
+        if "inline" not in info:
+            raise common.exceptions.MooseDocsException(
+                "The file command requires a source file path."
+            )
+        filename = common.check_filenames(info["inline"])
+        token = modal.ModalSourceLink(
+            parent,
+            src=filename,
+            language=settings["language"],
+            title=settings["title"],
+            recursive=False,
+        )
+        return token
 
 
 def createTokenHelper(key, parent, info, page, settings):
