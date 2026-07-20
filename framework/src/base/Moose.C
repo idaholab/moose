@@ -914,6 +914,7 @@ hitMessagePrefix(const hit::Node & node)
 
 bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
+bool _suppress_info = false;
 bool _throw_on_error = false;
 bool _throw_on_warning = false;
 volatile std::sig_atomic_t interrupt_signal_number = 0;

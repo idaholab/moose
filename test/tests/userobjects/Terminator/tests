@@ -73,6 +73,29 @@
                   "with the regular simulation when that criterion is not met."
     recover = false # changes the time steps
   []
+  [terminator_info]
+    type = 'RunApp'
+    input = 'terminator_soft.i'
+    expect_out = '\*\*\* Info \*\*\*\s+Suppress info test'
+    issues = '#31883'
+    cli_args = "UserObjects/arnold/fail_mode=NONE
+                UserObjects/arnold/error_level=INFO
+                UserObjects/arnold/message='Suppress info test'
+                Outputs/csv=false"
+    requirement = "The system shall output informational messages by default."
+  []
+  [suppress_info]
+    type = 'RunApp'
+    input = 'terminator_soft.i'
+    absent_out = '\*\*\* Info \*\*\*\s+Suppress info test'
+    issues = '#31883'
+    cli_args = "--suppress-info
+                UserObjects/arnold/fail_mode=NONE
+                UserObjects/arnold/error_level=INFO
+                UserObjects/arnold/message='Suppress info test'
+                Outputs/csv=false"
+    requirement = "The system shall suppress informational messages when requested by command-line."
+  []
 
   [check_execution]
     type = RunException
