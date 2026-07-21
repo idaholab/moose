@@ -21,9 +21,14 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/vector_value.h"
+
+#include "metaphysicl/raw_type.h"
 
 // C++ includes
 #include <array>
+#include <cmath>
+#include <functional>
 #include <optional>
 #include <set>
 #include <memory>
@@ -48,9 +53,45 @@ using libMesh::Node;
 using libMesh::Point;
 using libMesh::Real;
 using libMesh::subdomain_id_type;
+using libMesh::VectorValue;
 
 typedef boundary_id_type BoundaryID;
 typedef subdomain_id_type SubdomainID;
+
+namespace Moose
+{
+namespace Mortar
+{
+/**
+ * Construct the two tangent vectors used by mortar from a unit normal. The template keeps the
+ * Real-valued and AD contact geometry on the same Householder chart and therefore gives them
+ * identical values.
+ * See Lopes, Silva, and Ambrosio, Computer-Aided Design 45(3), 2013, pp. 683-694.
+ */
+template <typename Vector>
+std::array<Vector, 2>
+householderTangents(const Vector & normal)
+{
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(normal.norm()), 1),
+              "The input nodal normal should have unity norm");
+
+  const Vector h_vector(normal(0) + 1.0, normal(1), normal(2));
+
+  // This chart is singular at (-1, 0, 0), where a constant orthonormal basis is used.
+  if (std::abs(MetaPhysicL::raw_value(h_vector(0))) < TOLERANCE)
+    return {{Vector(0, 1, 0), Vector(0, 0, -1)}};
+
+  const auto h = h_vector.norm();
+  const auto h2 = h * h;
+  return {{Vector(-2.0 * h_vector(0) * h_vector(1) / h2,
+                  1.0 - 2.0 * h_vector(1) * h_vector(1) / h2,
+                  -2.0 * h_vector(1) * h_vector(2) / h2),
+           Vector(-2.0 * h_vector(0) * h_vector(2) / h2,
+                  -2.0 * h_vector(1) * h_vector(2) / h2,
+                  1.0 - 2.0 * h_vector(2) * h_vector(2) / h2)}};
+}
+}
+}
 
 /**
  * Parent-face reference coordinates associated with the vertices of one triangular mortar segment.
@@ -232,6 +273,16 @@ public:
    */
   std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
   getNodalTangents(const Elem & secondary_elem) const;
+
+  /**
+   * Build the normalized JxW-weighted secondary nodal normals from AD nodal coordinates.
+   *
+   * The coordinate functor supplies the current coordinate and, when requested by its caller,
+   * displacement derivatives for every node in the secondary face one-ring.
+   */
+  void
+  computeADNodalNormals(const std::function<ADPoint(const Node &)> & coordinate,
+                        std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const;
 
   /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
@@ -535,12 +586,6 @@ private:
    */
   void projectPrimaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
                                      SubdomainID lower_dimensional_secondary_subdomain_id);
-
-  /**
-   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
-   */
-  void
-  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
   /**
    * Process aligned nodes

@@ -48,6 +48,17 @@ public:
    */
   virtual Real getNormalGap(const Node * const /*node*/) const;
 
+  /// Whether this user object includes derivatives of the secondary nodal normals
+  bool usesNodalNormalDerivatives() const;
+
+  /**
+   * Return the cached contact normal for the supplied lower-dimensional secondary element node.
+   * The stored value is the existing mechanical-contact nodal normal. Coordinate derivatives are
+   * included while this object's formulation and the current assembly mode require them.
+   */
+  const ADRealVectorValue & contactNormal(const Elem & lower_secondary_elem,
+                                          unsigned int nodal_index) const;
+
   /**
    * Compute physical gap from integration gap quantity
    */
@@ -127,6 +138,16 @@ protected:
     return it->second;
   }
 
+  /**
+   * Return the contact normal for the current quadrature point/test index.
+   */
+  const ADRealVectorValue & contactNormal(unsigned int nodal_index) const;
+
+  /**
+   * Return a current nodal coordinate seeded with displacement derivatives when required.
+   */
+  ADPoint nodalCoordinate(const Node & node) const;
+
   /// The base finite element problem
   FEProblemBase & _fe_problem;
 
@@ -183,6 +204,12 @@ protected:
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
   const VariableTestValue * _test = nullptr;
+
+  /// AD nodal normals computed from the secondary face one-ring
+  mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;
+
+  /// Whether this formulation uses nodal normal derivatives while preserving stored normal values
+  bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
   /// Lagrange multiplier). We have this member so that we don't do virtual calls during inner

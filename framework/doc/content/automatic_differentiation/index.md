@@ -191,6 +191,13 @@ i.e. the "sparse size" (stored as a `_dynamic_N` data member) of its
 data containers will never exceed what is required for the run-time problem,
 e.g. 18 for the 2D second-order solid mechanics example.
 
+When a batch of AD residual rows is constrained and cached, different rows may
+depend on different sparse sets of degrees of freedom. MOOSE first forms the
+union of those derivative indices so that every row uses one local matrix
+column layout. Missing row entries are zero while libMesh applies constraints;
+only the resulting nonzero entries are then cached. Residual batches with
+identical derivative supports retain the direct common-layout path.
+
 ## AD in MOOSE
 
 As mentioned in above, MetaPhysicL is a forward-mode [!ac](AD)

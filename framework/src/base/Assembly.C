@@ -20,6 +20,7 @@
 #include "XFEMInterface.h"
 #include "DisplacedSystem.h"
 #include "MooseMeshUtils.h"
+#include "ADUtils.h"
 
 // libMesh
 #include "libmesh/coupling_matrix.h"
@@ -1451,8 +1452,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_normals[p] =
-            (VectorValue<ADReal>(_ad_dxyzdxi_map[p](1), -_ad_dxyzdxi_map[p](0), 0.)).unit();
+        _ad_normals[p] = Moose::faceAreaVector(_ad_dxyzdxi_map[p]).unit();
         const auto the_jac = _ad_dxyzdxi_map[p].norm();
         _ad_JxW_face[p] = the_jac * qw[p];
         if (_calculate_curvatures)
@@ -1526,7 +1526,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_normals[p] = _ad_dxyzdxi_map[p].cross(_ad_dxyzdeta_map[p]).unit();
+        _ad_normals[p] = Moose::faceAreaVector(_ad_dxyzdxi_map[p], _ad_dxyzdeta_map[p]).unit();
 
         const auto &dxdxi = _ad_dxyzdxi_map[p](0), &dxdeta = _ad_dxyzdeta_map[p](0),
                    &dydxi = _ad_dxyzdxi_map[p](1), &dydeta = _ad_dxyzdeta_map[p](1),

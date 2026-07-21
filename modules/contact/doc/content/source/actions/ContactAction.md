@@ -28,6 +28,12 @@ interpolations for quadratic-element mortar contact and show that corner-node/li
 pressure fields can avoid inconsistencies that arise with quadratic contact pressure interpolations
 while retaining good convergence [!cite](puso2008segment).
 
+For quasistatic `mortar` and non-augmented `mortar_penalty` contact, Jacobian evaluations include
+displacement derivatives of the secondary nodal normal and tangent directions. This applies to the
+`frictionless` and `coulomb` models, without changing residual values. The
+[weighted-gap constraint documentation](/ComputeWeightedGapLMMechanicalContact.md) describes the
+included derivatives, supported formulations, frozen geometric terms, and AD storage considerations.
+
 For node-to-segment mechanical contact, the action offers the possibility to automatically set up
 mechanical contact pairs given a maximum distance between contacting boundary centroids.
 To use that option, the user must set `automatic_pairing_method = CENTROID`.
