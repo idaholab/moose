@@ -120,10 +120,46 @@ Serial solver-work diagnostics were:
 The two analyst workloads begin from or traverse an open contact state. Their feature paths include
 the corrected positive-separation gap sign, so their off-solution problems are not physically
 equivalent to the benchmark and their counts are excluded from the solver-work acceptance
-comparison. This exclusion does not establish that the sign change caused the HSW increases: the
-feature also changes HSW row normalization and PETSc right scaling, and no ablation separated those
-effects. The physically equivalent unit-scale controlled case does not exceed the benchmark
+comparison. The physically equivalent unit-scale controlled case does not exceed the benchmark
 solver-work budget.
+
+#### HSW iteration-count ablation
+
+A commit-boundary bisect and a five-factor ablation were run after the initial comparison. The
+commit immediately before `bea3df39c01` (`4cd59426986`) exactly reproduced the benchmark counts for
+both analyst workloads. Therefore none of the earlier physical-constant commits caused the
+iteration changes; all relevant behavior entered in `bea3df39c01`. Because that commit combined
+interacting changes, a diagnostic branch at `b65765f1bfd` exposed each behavior independently:
+
+- corrected versus legacy augmented-normal-pressure gap sign;
+- exact zero-degeneracy handling versus the legacy `contact_pressure < epsilon` cutoff;
+- normalized versus raw degree-two HSW rows;
+- PETSc right scaling versus no right scaling; and
+- refactored versus direct user-constant arithmetic.
+
+The direct MUMPS candidate commands were run with `OMP_NUM_THREADS=1`. A five-bit configuration
+selected the preceding factors in order, with zero meaning feature behavior and one meaning legacy
+behavior. The `00000` endpoint reproduced the feature counts, while `11111` reproduced the
+benchmark counts exactly. Each row below shows the result when only that feature is introduced onto
+the legacy endpoint and when only that feature is restored to legacy behavior from the feature
+endpoint. Values are nonlinear iterations / residual evaluations / diagnostic linear iterations.
+
+| Factor | Bouncing block: feature alone | 3-D: feature alone | Bouncing block: restored from feature | 3-D: restored from feature |
+| - | - | - | - | - |
+| Corrected gap sign | 219 / 275 / 1372 | 29 / 30 / 35 | 306 / 362 / 1900 | 26 / 27 / 35 |
+| Exact open-state handling | 300 / 356 / 1870 | 27 / 28 / 36 | 174 / 247 / 1392 | 25 / 26 / 31 |
+| HSW row normalization | 201 / 337 / 1969 | 21 / 22 / 27 | 259 / 321 / 1885 | 26 / 27 / 35 |
+| PETSc right scaling | 214 / 270 / 1331 | 21 / 22 / 27 | 222 / 278 / 1640 | 25 / 26 / 34 |
+| Refactored user-scale arithmetic | 212 / 268 / 1312 | 21 / 22 / 27 | 275 / 337 / 1996 | 25 / 26 / 34 |
+
+The legacy cutoff removal is the dominant isolated regression and is sufficient to account for the
+final bouncing-block increase: restoring only that cutoff improves all three work metrics below
+the benchmark. Right scaling adds bouncing-block work in the complete feature interaction even
+though it improves that case in isolation. The corrected sign and exact open-state handling each
+increase 3-D work in isolation, while row normalization and refactored arithmetic are not final
+regression causes because restoring either legacy behavior makes the complete feature case worse.
+Consequently the result is interaction-dependent: an ordered commit bisect of these behaviors can
+identify a different first bad commit depending on their order and is not a unique causal ranking.
 
 PerfGraph shows that the local HSW wall-time signal follows additional solve work rather than one
 new per-call hotspot. In the bouncing block, Jacobian assemblies increased from 224 to 256 and
