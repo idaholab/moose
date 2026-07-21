@@ -20,6 +20,23 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.set<bool>("ghost_point_neighbors") = true;
+  params.suppressParameter<bool>("ghost_point_neighbors");
+  // Penalty contact has no LM constraint to contribute the nodal-normal one-ring to the matrix
+  // graph, so its weighted-gap object supplies the coupling relationship manager directly.
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  MortarConsumerInterface::setRMParams(obj_params, rm_params);
+                                  // penetration_tolerance is required exactly for
+                                  // augmented-Lagrange contact, which retains the existing
+                                  // frozen-normal geometry.
+                                  rm_params.set<bool>("ghost_point_neighbors") =
+                                      obj_params.get<bool>("ghost_point_neighbors") &&
+                                      !obj_params.isParamValid("penetration_tolerance");
+                                });
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -85,6 +102,10 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _adaptivity_normal(
         getParam<MooseEnum>("adaptivity_penalty_normal").getEnum<AdaptivityNormalPenalty>())
 {
+  // Disable nodal-normal derivatives for augmented-Lagrangian contact.
+  if (_augmented_lagrange_problem)
+    _use_nodal_normal_derivatives = false;
+
   auto check_type = [this](const auto & var, const auto & var_name)
   {
     if (!var.isNodal())

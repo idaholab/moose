@@ -29,6 +29,9 @@ stiffness of the materials coming into contact. Also, to ensure solution stabili
 (i.e. `use_dual = true`) are employed by default to interpolate the contact traction
 when using the contact action.
 
+The anti-ping-pong limiter treats its scalar traction-rescaling coefficient as fixed in the
+Jacobian. Nodal-normal and tangent derivatives still enter through the slip vector.
+
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance can be the normal gap distance (distance to exact enforcement if in contact) or
 the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem,
