@@ -30,15 +30,11 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <exception>
-#include <iomanip>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <memory>
-#include <ostream>
 #include <set>
-#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -943,221 +939,6 @@ sameSegment3D(const Point & point0,
 {
   return (samePoint3D(point0, other_point0, tol) && samePoint3D(point1, other_point1, tol)) ||
          (samePoint3D(point0, other_point1, tol) && samePoint3D(point1, other_point0, tol));
-}
-
-static void
-appendDebugPoint3D(std::ostream & os, const Point & point)
-{
-  os << "(" << std::setprecision(17) << point(0) << ", " << point(1) << ", " << point(2) << ")";
-}
-
-static void
-appendDebugDualPolyhedronPython3D(std::ostream & os,
-                                  const std::vector<std::vector<Point>> & side_points,
-                                  const Real tol)
-{
-  std::vector<Point> dual_nodes;
-  std::vector<std::vector<std::size_t>> dual_faces;
-  dual_faces.reserve(side_points.size());
-
-  const auto nodeIndex = [&](const Point & point)
-  {
-    for (const auto i : index_range(dual_nodes))
-      if (samePoint3D(dual_nodes[i], point, tol))
-        return i;
-
-    dual_nodes.push_back(point);
-    return dual_nodes.size() - 1;
-  };
-
-  for (const auto & side : side_points)
-  {
-    std::vector<std::size_t> face;
-    face.reserve(side.size());
-
-    for (const auto & point : side)
-      face.push_back(nodeIndex(point));
-
-    dual_faces.push_back(std::move(face));
-  }
-
-  os << "dual_nodes = [\n";
-
-  for (const auto & point : dual_nodes)
-  {
-    os << "    ";
-    appendDebugPoint3D(os, point);
-    os << ",\n";
-  }
-
-  os << "]\n\n";
-  os << "dual_faces = [\n";
-
-  for (const auto & face : dual_faces)
-  {
-    os << "    [";
-
-    for (const auto i : index_range(face))
-    {
-      if (i)
-        os << ", ";
-
-      os << face[i];
-    }
-
-    os << "],\n";
-  }
-
-  os << "]\n\n";
-  os << "dual_face_points = [[dual_nodes[i] for i in face] for face in dual_faces]\n";
-}
-
-static void
-appendDebugPrimalElementsPython3D(std::ostream & os, const std::vector<const Elem *> & elems)
-{
-  std::vector<Point> primal_nodes;
-  std::vector<std::vector<std::size_t>> primal_elements;
-  std::vector<std::vector<std::size_t>> primal_faces;
-  std::vector<dof_id_type> primal_element_ids;
-  std::vector<SubdomainID> primal_element_subdomains;
-  std::vector<std::size_t> primal_face_elements;
-  std::map<dof_id_type, std::size_t> primal_node_indices;
-
-  primal_elements.reserve(elems.size());
-  primal_element_ids.reserve(elems.size());
-  primal_element_subdomains.reserve(elems.size());
-
-  const auto nodeIndex = [&](const Elem & elem, const unsigned int node_index)
-  {
-    const dof_id_type node_id = elem.node_id(node_index);
-    const auto inserted = primal_node_indices.emplace(node_id, primal_node_indices.size());
-
-    if (inserted.second)
-      primal_nodes.push_back(elem.point(node_index));
-
-    return inserted.first->second;
-  };
-
-  for (const auto * const elem : elems)
-  {
-    if (!elem)
-      continue;
-
-    const std::size_t primal_element_index = primal_elements.size();
-    std::vector<std::size_t> primal_element;
-    primal_element.reserve(elem->n_vertices());
-
-    for (const auto node_index : make_range(elem->n_vertices()))
-      primal_element.push_back(nodeIndex(*elem, node_index));
-
-    for (const auto side : elem->side_index_range())
-    {
-      auto side_elem = elem->build_side_ptr(side);
-      std::vector<std::size_t> primal_face;
-      primal_face.reserve(side_elem->n_vertices());
-
-      for (const auto node_index : make_range(side_elem->n_vertices()))
-      {
-        const auto primal_node_it = primal_node_indices.find(side_elem->node_id(node_index));
-
-        if (primal_node_it != primal_node_indices.end())
-          primal_face.push_back(primal_node_it->second);
-      }
-
-      if (primal_face.size() >= 3)
-      {
-        primal_faces.push_back(std::move(primal_face));
-        primal_face_elements.push_back(primal_element_index);
-      }
-    }
-
-    primal_elements.push_back(std::move(primal_element));
-    primal_element_ids.push_back(elem->id());
-    primal_element_subdomains.push_back(elem->subdomain_id());
-  }
-
-  os << "\nprimal_nodes = [\n";
-
-  for (const auto & point : primal_nodes)
-  {
-    os << "    ";
-    appendDebugPoint3D(os, point);
-    os << ",\n";
-  }
-
-  os << "]\n\n";
-  os << "primal_elements = [\n";
-
-  for (const auto & elem : primal_elements)
-  {
-    os << "    [";
-
-    for (const auto i : index_range(elem))
-    {
-      if (i)
-        os << ", ";
-
-      os << elem[i];
-    }
-
-    os << "],\n";
-  }
-
-  os << "]\n\n";
-  os << "primal_faces = [\n";
-
-  for (const auto & face : primal_faces)
-  {
-    os << "    [";
-
-    for (const auto i : index_range(face))
-    {
-      if (i)
-        os << ", ";
-
-      os << face[i];
-    }
-
-    os << "],\n";
-  }
-
-  os << "]\n\n";
-  os << "primal_element_ids = [";
-
-  for (const auto i : index_range(primal_element_ids))
-  {
-    if (i)
-      os << ", ";
-
-    os << primal_element_ids[i];
-  }
-
-  os << "]\n\n";
-  os << "primal_element_subdomains = [";
-
-  for (const auto i : index_range(primal_element_subdomains))
-  {
-    if (i)
-      os << ", ";
-
-    os << primal_element_subdomains[i];
-  }
-
-  os << "]\n\n";
-  os << "primal_face_elements = [";
-
-  for (const auto i : index_range(primal_face_elements))
-  {
-    if (i)
-      os << ", ";
-
-    os << primal_face_elements[i];
-  }
-
-  os << "]\n\n";
-  os << "primal_element_points = [[primal_nodes[i] for i in elem] for elem in "
-        "primal_elements]\n";
-  os << "primal_face_points = [[primal_nodes[i] for i in face] for face in primal_faces]\n";
 }
 
 static bool
@@ -2926,20 +2707,8 @@ orientSurfaceTriangles3D(std::vector<std::vector<Point>> & surface_triangles,
 // handling.
 static bool
 surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_triangles,
-                                const Real tol = 1e-12,
-                                std::string * const failure_reason = nullptr)
+                                const Real tol = 1e-12)
 {
-  if (failure_reason)
-    failure_reason->clear();
-
-  const auto fail = [&](const std::string & reason)
-  {
-    if (failure_reason)
-      *failure_reason = reason;
-
-    return false;
-  };
-
   const auto triangleContainsPoint = [&](const std::vector<Point> & triangle, const Point & point)
   {
     for (const auto & triangle_point : triangle)
@@ -3099,40 +2868,25 @@ surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_
     return strictlyStraddles(cross000, cross001) && strictlyStraddles(cross100, cross101);
   };
 
-  for (const auto triangle_i : index_range(surface_triangles))
+  for (const auto & triangle : surface_triangles)
   {
-    const auto & triangle = surface_triangles[triangle_i];
-
     if (triangle.size() != 3 || !hasNonzeroArea3D(triangle, tol * tol))
-    {
-      std::ostringstream oss;
-      oss << "surface triangle " << triangle_i << " is degenerate";
-      return fail(oss.str());
-    }
+      return false;
 
     for (const auto edge_i : make_range(std::size_t(3)))
     {
       const Point & edge_point0 = triangle[edge_i];
       const Point & edge_point1 = triangle[(edge_i + 1) % triangle.size()];
 
-      for (const auto other_triangle_i : index_range(surface_triangles))
+      for (const auto & other_triangle : surface_triangles)
       {
-        const auto & other_triangle = surface_triangles[other_triangle_i];
-
-        for (const auto point_i : make_range(std::size_t(3)))
+        for (const auto & point : other_triangle)
         {
-          const Point & point = other_triangle[point_i];
-
           if (samePoint3D(point, edge_point0, tol) || samePoint3D(point, edge_point1, tol))
             continue;
 
           if (pointOnSegment3D(point, edge_point0, edge_point1, tol))
-          {
-            std::ostringstream oss;
-            oss << "surface triangle " << other_triangle_i << " point " << point_i
-                << " lies inside surface triangle " << triangle_i << " edge " << edge_i;
-            return fail(oss.str());
-          }
+            return false;
         }
       }
     }
@@ -3146,32 +2900,18 @@ surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_
       const auto shared_points = sharedPoints(triangle0, triangle1);
       const bool triangles_are_coplanar = trianglesAreCoplanar(triangle0, triangle1);
 
-      for (const auto point_i : make_range(std::size_t(3)))
+      for (const auto & point : triangle0)
       {
-        const Point & point = triangle0[point_i];
-
         if (!triangleContainsPoint(triangle1, point) &&
             pointOnTriangle3D(point, triangle1[0], triangle1[1], triangle1[2], tol))
-        {
-          std::ostringstream oss;
-          oss << "surface triangle " << triangle0_i << " point " << point_i
-              << " lies on surface triangle " << triangle1_i;
-          return fail(oss.str());
-        }
+          return false;
       }
 
-      for (const auto point_i : make_range(std::size_t(3)))
+      for (const auto & point : triangle1)
       {
-        const Point & point = triangle1[point_i];
-
         if (!triangleContainsPoint(triangle0, point) &&
             pointOnTriangle3D(point, triangle0[0], triangle0[1], triangle0[2], tol))
-        {
-          std::ostringstream oss;
-          oss << "surface triangle " << triangle1_i << " point " << point_i
-              << " lies on surface triangle " << triangle0_i;
-          return fail(oss.str());
-        }
+          return false;
       }
 
       for (const auto edge_i : make_range(std::size_t(3)))
@@ -3183,13 +2923,7 @@ surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_
                                       triangle1,
                                       intersection) &&
             !intersectionIsOnSharedFeature(intersection, shared_points))
-        {
-          std::ostringstream oss;
-          oss << "surface triangle " << triangle0_i << " edge " << edge_i
-              << " intersects surface triangle " << triangle1_i << " at ";
-          appendDebugPoint3D(oss, intersection);
-          return fail(oss.str());
-        }
+          return false;
 
         if (triangles_are_coplanar)
           for (const auto other_edge_i : make_range(std::size_t(3)))
@@ -3207,13 +2941,7 @@ surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_
 
             if (coplanarEdgesCross(
                     edge0_point0, edge0_point1, edge1_point0, edge1_point1, plane_normal))
-            {
-              std::ostringstream oss;
-              oss << "surface triangle " << triangle0_i << " edge " << edge_i
-                  << " crosses coplanar surface triangle " << triangle1_i << " edge "
-                  << other_edge_i;
-              return fail(oss.str());
-            }
+              return false;
           }
 
         if (segmentIntersectsTriangle(triangle1[edge_i],
@@ -3221,13 +2949,7 @@ surfaceTrianglesAreConforming3D(const std::vector<std::vector<Point>> & surface_
                                       triangle0,
                                       intersection) &&
             !intersectionIsOnSharedFeature(intersection, shared_points))
-        {
-          std::ostringstream oss;
-          oss << "surface triangle " << triangle1_i << " edge " << edge_i
-              << " intersects surface triangle " << triangle0_i << " at ";
-          appendDebugPoint3D(oss, intersection);
-          return fail(oss.str());
-        }
+          return false;
       }
     }
 
@@ -4090,15 +3812,10 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                       const std::vector<std::vector<Point>> & side_points,
                                       const bool use_dual_point_sources = true,
                                       const bool require_convex_surface = true,
-                                      std::string * const failure_reason = nullptr,
                                       const bool use_pre_netgen_triangulation = false) -> bool
   {
     if (side_points.size() < 4)
-    {
-      if (failure_reason)
-        *failure_reason = "fewer than four sides";
       return false;
-    }
 
     const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
     const Real polyhedron_scale = polyhedronScale3D(side_points);
@@ -4111,18 +3828,10 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                          c0_side_points,
                                          length_tol,
                                          use_dual_point_sources ? &dual_point_sources : nullptr)))
-    {
-      if (failure_reason)
-        *failure_reason = "C0 side preparation failed";
       return false;
-    }
 
     if (require_convex_surface && !polyhedronSurfaceCanBePassedToC0(c0_side_points, length_tol))
-    {
-      if (failure_reason)
-        *failure_reason = "C0 surface validity check failed";
       return false;
-    }
 
     std::vector<Node *> local_nodes;
     std::vector<std::shared_ptr<libMesh::Polygon>> sides;
@@ -4156,18 +3865,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     std::unique_ptr<libMesh::C0Polyhedron> dual_elem;
 
     libmesh_try { dual_elem = std::make_unique<libMesh::C0Polyhedron>(sides, mid_elem_node); }
-    libmesh_catch(const libMesh::NotImplemented &)
-    {
-      if (failure_reason)
-        *failure_reason = "C0Polyhedron constructor is not implemented for this surface";
-      return false;
-    }
-    libmesh_catch(const libMesh::LogicError &)
-    {
-      if (failure_reason)
-        *failure_reason = "C0Polyhedron constructor rejected this surface";
-      return false;
-    }
+    libmesh_catch(const libMesh::NotImplemented &) { return false; }
+    libmesh_catch(const libMesh::LogicError &) { return false; }
 
     if (mid_elem_node)
       mesh.add_node(std::move(mid_elem_node));
@@ -4238,21 +3937,10 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       [&](const std::vector<std::vector<Point>> & side_points,
           const SubdomainID output_subdomain_id,
           const bool touches_preserved_primal_boundary,
-          const PrimalBoundaryInfo3D & boundary_info,
-          std::string & failure_reason,
-          std::vector<std::vector<Point>> & failed_surface_triangles) -> std::size_t
+          const PrimalBoundaryInfo3D & boundary_info) -> std::size_t
   {
-    failure_reason.clear();
-    failed_surface_triangles.clear();
-
-    const auto fail = [&](const std::string & reason)
-    {
-      failure_reason = reason;
-      return std::size_t(0);
-    };
-
     if (side_points.size() < 4)
-      return fail("fewer than four surface sides were provided");
+      return 0;
 
     const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
     const Real polyhedron_scale = polyhedronScale3D(side_points);
@@ -4269,19 +3957,13 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
     if (!surfaceTriangles3D(
             side_points, surface_triangles, validSurfaceSegment, length_tol, &dual_point_sources))
-      return fail("could not triangulate the surface sides");
-
-    failed_surface_triangles = surface_triangles;
+      return 0;
 
     if (!orientSurfaceTriangles3D(surface_triangles, length_tol))
-      return fail("could not orient the surface triangles");
+      return 0;
 
-    failed_surface_triangles = surface_triangles;
-
-    std::string conformity_failure_reason;
-
-    if (!surfaceTrianglesAreConforming3D(surface_triangles, length_tol, &conformity_failure_reason))
-      return fail("surface triangles are not conforming: " + conformity_failure_reason);
+    if (!surfaceTrianglesAreConforming3D(surface_triangles, length_tol))
+      return 0;
 
     const auto addNetgenTetrahedralizedSurface = [&]()
     {
@@ -4381,14 +4063,9 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       {
         netgen.triangulate();
       }
-      catch (const std::exception & error)
-      {
-        return fail(std::string("NetGen threw while tetrahedralizing the surface: ") +
-                    error.what());
-      }
       catch (...)
       {
-        return fail("NetGen threw while tetrahedralizing the surface");
+        return std::size_t(0);
       }
 #else
       netgen.triangulate();
@@ -4414,7 +4091,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       }
 
       if (generated_tets.empty())
-        return fail("NetGen generated no nondegenerate tetrahedra");
+        return std::size_t(0);
 
       for (const auto & tet_points : generated_tets)
       {
@@ -4464,7 +4141,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
       return generated_tets.size();
 #else
-      return fail("NetGen support is not available in libMesh");
+      return std::size_t(0);
 #endif
     };
 
@@ -4487,9 +4164,9 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       auto validation_mesh = buildReplicatedMesh(3);
 
       if (!canBuildPolyhedron(
-              *validation_mesh, polycut_candidate.child0_side_points, false, true, nullptr, true) ||
+              *validation_mesh, polycut_candidate.child0_side_points, false, true, true) ||
           !canBuildPolyhedron(
-              *validation_mesh, polycut_candidate.child1_side_points, false, true, nullptr, true))
+              *validation_mesh, polycut_candidate.child1_side_points, false, true, true))
         continue;
 
       if (!addPolyhedron(polycut_candidate.child0_side_points,
@@ -4546,8 +4223,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
       auto validation_mesh = buildReplicatedMesh(3);
 
-      if (!canBuildPolyhedron(*validation_mesh, child0_side_points, false, true, nullptr, true) ||
-          !canBuildPolyhedron(*validation_mesh, child1_side_points, false, true, nullptr, true))
+      if (!canBuildPolyhedron(*validation_mesh, child0_side_points, false, true, true) ||
+          !canBuildPolyhedron(*validation_mesh, child1_side_points, false, true, true))
         return false;
 
       if (!addPolyhedron(child0_side_points, output_subdomain_id, boundary_info, false, true) ||
@@ -4596,8 +4273,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
       auto validation_mesh = buildReplicatedMesh(3);
 
-      if (!canBuildPolyhedron(*validation_mesh, child0_side_points, false, true, nullptr, true) ||
-          !canBuildPolyhedron(*validation_mesh, child1_side_points, false, true, nullptr, true))
+      if (!canBuildPolyhedron(*validation_mesh, child0_side_points, false, true, true) ||
+          !canBuildPolyhedron(*validation_mesh, child1_side_points, false, true, true))
         continue;
 
       split_plan = split_candidate;
@@ -4607,53 +4284,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     }
 
     return false;
-  };
-
-  const auto rejectedNonConvexPolyhedronMessage =
-      [&](const std::vector<std::vector<Point>> & rejected_side_points,
-          const std::vector<const Elem *> & primal_elems,
-          const std::string & netgen_failure_reason,
-          const std::vector<std::vector<Point>> & failed_netgen_surface_triangles)
-  {
-    const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
-    const Real polyhedron_scale = polyhedronScale3D(rejected_side_points);
-    const Real length_tol = tol * polyhedron_scale;
-    std::vector<std::vector<Point>> c0_side_points;
-    std::ostringstream oss;
-    oss << "Could not resolve rejected non-convex 3D dual polyhedron.\n\n";
-    oss << "# Paste into test.py\n";
-
-    if (!netgen_failure_reason.empty())
-    {
-      std::string one_line_failure_reason = netgen_failure_reason;
-
-      for (auto & character : one_line_failure_reason)
-        if (character == '\n' || character == '\r')
-          character = ' ';
-
-      oss << "# netgen_failure_reason = \"" << one_line_failure_reason << "\"\n";
-    }
-
-    if (!failed_netgen_surface_triangles.empty())
-    {
-      oss << "# dual_faces are the oriented surface triangles checked before NetGen\n";
-      appendDebugDualPolyhedronPython3D(oss, failed_netgen_surface_triangles, length_tol);
-    }
-    else if (c0PolyhedronSidePoints3D(
-                 rejected_side_points, c0_side_points, length_tol, &dual_point_sources))
-    {
-      oss << "# dual_faces are C0-prepared triangles\n";
-      appendDebugDualPolyhedronPython3D(oss, c0_side_points, length_tol);
-    }
-    else
-    {
-      oss << "# dual_faces are raw rejected sides; C0 side preparation failed\n";
-      appendDebugDualPolyhedronPython3D(oss, rejected_side_points, length_tol);
-    }
-
-    appendDebugPrimalElementsPython3D(oss, primal_elems);
-
-    return oss.str();
   };
 
   // Determines what concave_treatment based on results
@@ -4670,9 +4300,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     const bool concave_edge_search_failed =
         searched_concave_edge && !has_concave_edge && !split_plan;
     const auto boundary_info = primalBoundaryInfo(primal_elems, source_node_id);
-    const std::vector<std::vector<Point>> * rejected_side_points = &polycut_side_points;
-    std::string netgen_failure_reason;
-    std::vector<std::vector<Point>> failed_netgen_surface_triangles;
 
     // First try the candidate directly before applying a configured concave treatment.
     if (!force_tetrahedralize && !has_concave_edge && !split_plan)
@@ -4728,20 +4355,13 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             addTetrahedralizedPolyhedron(polycut_side_points,
                                          output_subdomain_id,
                                          touches_preserved_primal_boundary,
-                                         boundary_info,
-                                         netgen_failure_reason,
-                                         failed_netgen_surface_triangles);
+                                         boundary_info);
 
         if (netgen_elements)
           return;
-
-        rejected_side_points = &netgen_side_points;
       }
 
-    mooseError(rejectedNonConvexPolyhedronMessage(*rejected_side_points,
-                                                  primal_elems,
-                                                  netgen_failure_reason,
-                                                  failed_netgen_surface_triangles));
+    mooseError("Could not resolve rejected non-convex 3D dual polyhedron.");
   };
 
   // Build one dual cell around each primal node. Concave cells are handled according to the
@@ -5422,319 +5042,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             *validation_mesh, dual_cell.polycut_side_points, true, false, false);
       };
 
-      struct BoundaryChordFace3D
-      {
-        Point body_point0;
-        Point body_point1;
-        Point diagonal_midpoint;
-        Point boundary_midpoint;
-        std::vector<EdgeSubdomainKey> edge_keys;
-      };
-
-      using BoundaryChordSideReplacements3D =
-          std::map<std::size_t, std::vector<std::vector<Point>>>;
-      std::set<std::size_t> boundary_chord_modified_cells;
-
-      const auto bodyElement = [&](const SplitDualCellSidePoints3D & dual_cell,
-                                   const Point & body_point,
-                                   const Real length_tol) -> const Elem *
-      {
-        const Elem * body_elem = nullptr;
-
-        for (const auto * const elem : dual_cell.primal_elems)
-          if (samePoint3D(elem->true_centroid(), body_point, length_tol))
-          {
-            if (body_elem)
-              return nullptr;
-
-            body_elem = elem;
-          }
-
-        return body_elem;
-      };
-
-      const auto boundaryChordFace = [&](const SplitDualCellSidePoints3D & dual_cell,
-                                         const PrimalEdgeSide3D & central_edge_side,
-                                         const Point & body_point0,
-                                         const Point & body_point1,
-                                         const Real length_tol,
-                                         BoundaryChordFace3D & chord_face)
-      {
-        const Elem * const elem0 = bodyElement(dual_cell, body_point0, length_tol);
-        const Elem * const elem1 = bodyElement(dual_cell, body_point1, length_tol);
-
-        if (!elem0 || !elem1)
-          return false;
-
-        unsigned int shared_side = elem0->n_sides();
-
-        for (const auto side : elem0->side_index_range())
-          if (elem0->neighbor_ptr(side) == elem1)
-          {
-            if (shared_side != elem0->n_sides())
-              return false;
-
-            shared_side = side;
-          }
-
-        if (shared_side == elem0->n_sides() || preservedSide(*elem0, shared_side))
-          return false;
-
-        auto side_elem = elem0->build_side_ptr(shared_side);
-
-        if (side_elem->n_vertices() != 4)
-          return false;
-
-        std::vector<dof_id_type> side_node_ids;
-        std::vector<Point> side_points;
-        side_node_ids.reserve(side_elem->n_vertices());
-        side_points.reserve(side_elem->n_vertices());
-
-        for (const auto n : make_range(side_elem->n_vertices()))
-        {
-          side_node_ids.push_back(side_elem->node_id(n));
-          side_points.push_back(side_elem->point(n));
-        }
-
-        const dof_id_type source_node_id = dual_cell.source_node_id;
-        const auto & central_edge = central_edge_side.edge_key.first;
-        const dof_id_type other_node_id =
-            central_edge.first == source_node_id ? central_edge.second : central_edge.first;
-        std::size_t source_index = side_node_ids.size();
-
-        for (const auto i : index_range(side_node_ids))
-          if (side_node_ids[i] == source_node_id)
-          {
-            source_index = i;
-            break;
-          }
-
-        if (source_index == side_node_ids.size())
-          return false;
-
-        const dof_id_type previous_node_id =
-            side_node_ids[(source_index + side_node_ids.size() - 1) % side_node_ids.size()];
-        const dof_id_type next_node_id = side_node_ids[(source_index + 1) % side_node_ids.size()];
-        dof_id_type lateral_node_id = libMesh::DofObject::invalid_id;
-
-        if (previous_node_id == other_node_id)
-          lateral_node_id = next_node_id;
-        else if (next_node_id == other_node_id)
-          lateral_node_id = previous_node_id;
-        else
-          return false;
-
-        std::pair<dof_id_type, dof_id_type> selected_diagonal;
-
-        if (!quad4PrimalSplitDiagonal3D(side_node_ids, selected_diagonal))
-          return false;
-
-        const auto side_face_parts = sideFaceParts3D(
-            side_node_ids, side_points, primal_boundary_length_tol, &selected_diagonal);
-
-        if (side_face_parts.size() != 1 || !side_face_parts[0].has_selected_diagonal)
-          return false;
-
-        const auto lateral_edge_key = EdgeSubdomainKey{edgeKey(source_node_id, lateral_node_id),
-                                                       dual_cell.output_subdomain_id};
-        const Point * const boundary_midpoint = boundaryEdgeMidpoint(lateral_edge_key);
-
-        if (!boundary_midpoint)
-          return false;
-
-        chord_face = {};
-        chord_face.body_point0 = body_point0;
-        chord_face.body_point1 = body_point1;
-        chord_face.diagonal_midpoint = sideFacePartDualPoint3D(side_face_parts[0]);
-        chord_face.boundary_midpoint = *boundary_midpoint;
-
-        for (const auto i : index_range(side_node_ids))
-          chord_face.edge_keys.push_back(
-              {edgeKey(side_node_ids[i], side_node_ids[(i + 1) % side_node_ids.size()]),
-               dual_cell.output_subdomain_id});
-
-        return true;
-      };
-
-      const auto edgeHasChordFace =
-          [](const EdgeSubdomainKey & edge_key, const BoundaryChordFace3D & chord_face)
-      {
-        return std::find(chord_face.edge_keys.begin(), chord_face.edge_keys.end(), edge_key) !=
-               chord_face.edge_keys.end();
-      };
-
-      const auto replacementSideTriangles =
-          [&](const std::vector<Point> & side,
-              const Point & edge_midpoint,
-              const std::vector<const BoundaryChordFace3D *> & chord_faces,
-              const Real length_tol,
-              std::vector<std::vector<Point>> & replacement_triangles)
-      {
-        std::vector<Point> expanded_side;
-        std::vector<unsigned int> chord_matches(chord_faces.size(), 0);
-        expanded_side.reserve(side.size() + chord_faces.size());
-
-        for (const auto i : index_range(side))
-        {
-          expanded_side.push_back(side[i]);
-
-          for (const auto chord_face_index : index_range(chord_faces))
-            if (sameSegment3D(side[i],
-                              side[(i + 1) % side.size()],
-                              chord_faces[chord_face_index]->body_point0,
-                              chord_faces[chord_face_index]->body_point1,
-                              length_tol))
-            {
-              expanded_side.push_back(chord_faces[chord_face_index]->diagonal_midpoint);
-              ++chord_matches[chord_face_index];
-            }
-        }
-
-        for (const auto matches : chord_matches)
-          if (matches != 1)
-            return false;
-
-        const Real area_tol = length_tol * length_tol;
-        std::size_t midpoint_index = expanded_side.size();
-
-        for (const auto i : index_range(expanded_side))
-          if (samePoint3D(expanded_side[i], edge_midpoint, length_tol))
-          {
-            midpoint_index = i;
-            break;
-          }
-
-        const Point reference_normal = faceNormal3D(side, area_tol);
-        replacement_triangles.clear();
-
-        const auto addTriangle = [&](std::vector<Point> triangle)
-        {
-          if (!hasNonzeroArea3D(triangle, area_tol))
-            return false;
-
-          const Point normal = faceNormal3D(triangle, area_tol);
-
-          if (reference_normal.norm() > area_tol && normal.norm() > area_tol &&
-              reference_normal * normal < 0.0)
-            std::swap(triangle[1], triangle[2]);
-
-          replacement_triangles.push_back(std::move(triangle));
-          return true;
-        };
-
-        if (midpoint_index != expanded_side.size())
-        {
-          for (const auto offset : make_range(std::size_t(1), expanded_side.size() - 1))
-            if (!addTriangle({edge_midpoint,
-                              expanded_side[(midpoint_index + offset) % expanded_side.size()],
-                              expanded_side[(midpoint_index + offset + 1) % expanded_side.size()]}))
-              return false;
-
-          return replacement_triangles.size() == expanded_side.size() - 2;
-        }
-
-        for (const auto i : index_range(expanded_side))
-          if (!addTriangle(
-                  {edge_midpoint, expanded_side[i], expanded_side[(i + 1) % expanded_side.size()]}))
-            return false;
-
-        return replacement_triangles.size() == expanded_side.size();
-      };
-
-      const auto sameTriangleSets = [&](const std::vector<std::vector<Point>> & triangles0,
-                                        const std::vector<std::vector<Point>> & triangles1,
-                                        const Real length_tol)
-      {
-        if (triangles0.size() != triangles1.size())
-          return false;
-
-        std::vector<bool> matched(triangles1.size(), false);
-
-        for (const auto & triangle0 : triangles0)
-        {
-          bool found_match = false;
-
-          for (const auto triangle1_index : index_range(triangles1))
-          {
-            if (matched[triangle1_index])
-              continue;
-
-            bool same_points = true;
-
-            for (const auto & point0 : triangle0)
-              if (!faceContainsPoint3D(triangles1[triangle1_index], point0, length_tol))
-              {
-                same_points = false;
-                break;
-              }
-
-            if (same_points)
-            {
-              matched[triangle1_index] = true;
-              found_match = true;
-              break;
-            }
-          }
-
-          if (!found_match)
-            return false;
-        }
-
-        return true;
-      };
-
-      const auto replacedCellSidePoints = [](const SplitDualCellSidePoints3D & dual_cell,
-                                             const BoundaryChordSideReplacements3D & replacements)
-      {
-        std::vector<std::vector<Point>> replaced_side_points;
-
-        for (const auto side_index : index_range(dual_cell.polycut_side_points))
-        {
-          const auto replacement_it = replacements.find(side_index);
-
-          if (replacement_it == replacements.end())
-            replaced_side_points.push_back(dual_cell.polycut_side_points[side_index]);
-          else
-            replaced_side_points.insert(replaced_side_points.end(),
-                                        replacement_it->second.begin(),
-                                        replacement_it->second.end());
-        }
-
-        return replaced_side_points;
-      };
-
-      const auto commitCellSideReplacements =
-          [&](SplitDualCellSidePoints3D & dual_cell,
-              const BoundaryChordSideReplacements3D & replacements,
-              std::vector<std::vector<Point>> && replaced_side_points)
-      {
-        std::vector<std::size_t> replacement_start_indices(dual_cell.polycut_side_points.size());
-        std::size_t next_side_index = 0;
-
-        for (const auto side_index : index_range(dual_cell.polycut_side_points))
-        {
-          replacement_start_indices[side_index] = next_side_index;
-          const auto replacement_it = replacements.find(side_index);
-          next_side_index +=
-              replacement_it == replacements.end() ? 1 : replacement_it->second.size();
-        }
-
-        for (auto & primal_edge_side : dual_cell.primal_edge_sides)
-        {
-          const std::size_t old_side_index = primal_edge_side.side_index;
-
-          if (old_side_index >= replacement_start_indices.size())
-            continue;
-
-          primal_edge_side.side_index = replacement_start_indices[old_side_index];
-
-          if (replacements.count(old_side_index))
-            primal_edge_side.replaced = true;
-        }
-
-        dual_cell.polycut_side_points = std::move(replaced_side_points);
-      };
-
       const auto repairBoundaryChord = [&](const std::size_t target_cell_index)
       {
         auto & target_cell = split_dual_cell_side_points[target_cell_index];
@@ -5750,6 +5057,71 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
         const Real polyhedron_scale = polyhedronScale3D(target_cell.polycut_side_points);
         const Real length_tol = tol * polyhedron_scale;
         const Point source_point = *input_mesh->node_ptr(target_cell.source_node_id);
+        std::vector<std::vector<Point>> parent_surface_triangles;
+
+        if (!orientedSurfaceTriangles(target_cell.polycut_side_points,
+                                      target_cell.output_subdomain_id,
+                                      target_cell.primal_elems,
+                                      parent_surface_triangles))
+          return false;
+
+        const auto chordTriangles = [&](const std::vector<Point> & body_ring,
+                                        const Point & chord_point0,
+                                        const Point & chord_point1,
+                                        Point & midpoint,
+                                        std::array<std::size_t, 2> & triangle_indices)
+        {
+          unsigned int incident_triangles = 0;
+          triangle_indices.fill(parent_surface_triangles.size());
+
+          for (const auto triangle_index : index_range(parent_surface_triangles))
+          {
+            const auto & triangle = parent_surface_triangles[triangle_index];
+
+            if (!faceContainsEdge3D(triangle, chord_point0, chord_point1, length_tol))
+              continue;
+
+            ++incident_triangles;
+            const Point * third_point = nullptr;
+
+            for (const auto & point : triangle)
+              if (!samePoint3D(point, chord_point0, length_tol) &&
+                  !samePoint3D(point, chord_point1, length_tol))
+              {
+                if (third_point)
+                  return false;
+
+                third_point = &point;
+              }
+
+            if (!third_point)
+              return false;
+
+            if (faceContainsPoint3D(body_ring, *third_point, length_tol))
+            {
+              if (triangle_indices[0] != parent_surface_triangles.size())
+                return false;
+
+              triangle_indices[0] = triangle_index;
+              continue;
+            }
+
+            const auto * const point_sources =
+                findDualPointSources3D(dual_point_sources, *third_point);
+
+            if (!point_sources ||
+                !point_sources->count(DualPointSource3D::boundary_edge_midpoint) ||
+                triangle_indices[1] != parent_surface_triangles.size())
+              return false;
+
+            midpoint = *third_point;
+            triangle_indices[1] = triangle_index;
+          }
+
+          return incident_triangles == 2 &&
+                 triangle_indices[0] != parent_surface_triangles.size() &&
+                 triangle_indices[1] != parent_surface_triangles.size();
+        };
 
         for (const auto & central_edge_side : target_cell.primal_edge_sides)
         {
@@ -5762,219 +5134,84 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           if (body_ring.size() != 4 || !isBodyCentroidRing(body_ring))
             continue;
 
-          for (const auto bad_chord_index : index_range(body_ring))
+          std::vector<Point> unique_body_points;
+
+          for (const auto & body_point : body_ring)
+            addUniquePoint(unique_body_points, body_point, length_tol);
+
+          if (unique_body_points.size() != body_ring.size())
+            continue;
+
+          // Match the offending triangles exactly below. Sampled segment containment can miss
+          // thin boundary excursions and must not exclude this repair.
+          // A four-point ring has only two distinct pairs of opposite edges.
+          for (const auto bad_chord_index : make_range(std::size_t(2)))
           {
-            const auto opposite_chord_index = (bad_chord_index + 2) % body_ring.size();
-            const Point & bad_point0 = body_ring[bad_chord_index];
-            const Point & bad_point1 = body_ring[(bad_chord_index + 1) % body_ring.size()];
+            const Point & body_b = body_ring[bad_chord_index];
+            const Point & body_c = body_ring[(bad_chord_index + 1) % body_ring.size()];
+            const Point & body_d = body_ring[(bad_chord_index + 2) % body_ring.size()];
+            const Point & body_a = body_ring[(bad_chord_index + 3) % body_ring.size()];
+            std::array<Point, 2> boundary_midpoints;
+            std::array<std::array<std::size_t, 2>, 2> chord_triangle_indices;
 
-            std::array<BoundaryChordFace3D, 2> chord_faces;
-
-            if (!boundaryChordFace(target_cell,
-                                   central_edge_side,
-                                   bad_point0,
-                                   bad_point1,
-                                   length_tol,
-                                   chord_faces[0]) ||
-                !boundaryChordFace(target_cell,
-                                   central_edge_side,
-                                   body_ring[opposite_chord_index],
-                                   body_ring[(opposite_chord_index + 1) % body_ring.size()],
-                                   length_tol,
-                                   chord_faces[1]))
+            if (!chordTriangles(
+                    body_ring, body_b, body_c, boundary_midpoints[0], chord_triangle_indices[0]) ||
+                !chordTriangles(
+                    body_ring, body_d, body_a, boundary_midpoints[1], chord_triangle_indices[1]))
               continue;
 
-            std::set<EdgeSubdomainKey> affected_edge_keys;
+            const Point & boundary_midpoint0 = boundary_midpoints[0];
+            const Point & boundary_midpoint1 = boundary_midpoints[1];
+            bool distinct_split_points =
+                !samePoint3D(source_point, boundary_midpoint0, length_tol) &&
+                !samePoint3D(source_point, boundary_midpoint1, length_tol) &&
+                !samePoint3D(boundary_midpoint0, boundary_midpoint1, length_tol);
 
-            for (const auto & chord_face : chord_faces)
-              affected_edge_keys.insert(chord_face.edge_keys.begin(), chord_face.edge_keys.end());
+            for (const auto & body_point : body_ring)
+              if (samePoint3D(source_point, body_point, length_tol) ||
+                  samePoint3D(boundary_midpoint0, body_point, length_tol) ||
+                  samePoint3D(boundary_midpoint1, body_point, length_tol))
+              {
+                distinct_split_points = false;
+                break;
+              }
 
-            // The two opposite primal QUAD faces share only the central primal edge.
-            if (affected_edge_keys.size() != 7)
+            if (!distinct_split_points)
               continue;
 
-            // Replacing one body-centroid chord changes both edge-dual sides at every vertex of
-            // its primal QUAD. Build all seven shared-interface replacements before mutating any
-            // buffered cell.
-            std::map<std::size_t, BoundaryChordSideReplacements3D> cell_replacements;
-            bool valid_transaction = true;
+            // Remove the actual body-side and boundary-side triangle incident on each chord. This
+            // is independent of the body ring direction and the quad's selected diagonal.
+            const std::vector<std::size_t> removed_triangle_indices = {
+                chord_triangle_indices[0][0],
+                chord_triangle_indices[0][1],
+                chord_triangle_indices[1][0],
+                chord_triangle_indices[1][1]};
+            bool found_removed_triangles = true;
 
-            for (const auto & edge_key : affected_edge_keys)
+            for (const auto i : index_range(removed_triangle_indices))
+              for (const auto j : make_range(i + 1, removed_triangle_indices.size()))
+                if (removed_triangle_indices[i] == removed_triangle_indices[j])
+                  found_removed_triangles = false;
+
+            if (!found_removed_triangles)
+              continue;
+
+            std::vector<std::vector<Point>> remaining_triangles;
+            remaining_triangles.reserve(parent_surface_triangles.size() -
+                                        removed_triangle_indices.size());
+
+            for (const auto triangle_index : index_range(parent_surface_triangles))
+              if (std::find(removed_triangle_indices.begin(),
+                            removed_triangle_indices.end(),
+                            triangle_index) == removed_triangle_indices.end())
+                remaining_triangles.push_back(parent_surface_triangles[triangle_index]);
+
+            const auto isSeamEdge = [&](const Point & point0, const Point & point1)
             {
-              const auto locations_it = edge_side_locations.find(edge_key);
-
-              if (locations_it == edge_side_locations.end() || locations_it->second.size() != 2)
-              {
-                valid_transaction = false;
-                break;
-              }
-
-              std::vector<const BoundaryChordFace3D *> edge_chord_faces;
-
-              for (const auto & chord_face : chord_faces)
-                if (edgeHasChordFace(edge_key, chord_face))
-                  edge_chord_faces.push_back(&chord_face);
-
-              if (edge_chord_faces.empty())
-              {
-                valid_transaction = false;
-                break;
-              }
-
-              std::vector<std::vector<Point>> reference_replacement;
-
-              for (const auto & location : locations_it->second)
-              {
-                const auto & affected_cell = split_dual_cell_side_points[location.first];
-                const auto & affected_edge_side = affected_cell.primal_edge_sides[location.second];
-
-                if (affected_cell.has_boundary_chord_split_plan || affected_edge_side.replaced ||
-                    affected_edge_side.side_index >= affected_cell.polycut_side_points.size() ||
-                    cell_replacements[location.first].count(affected_edge_side.side_index))
-                {
-                  valid_transaction = false;
-                  break;
-                }
-
-                std::vector<std::vector<Point>> replacement_triangles;
-
-                if (!replacementSideTriangles(
-                        affected_cell.polycut_side_points[affected_edge_side.side_index],
-                        affected_edge_side.midpoint,
-                        edge_chord_faces,
-                        length_tol,
-                        replacement_triangles))
-                {
-                  valid_transaction = false;
-                  break;
-                }
-
-                if (reference_replacement.empty())
-                  reference_replacement = replacement_triangles;
-                else if (!sameTriangleSets(
-                             reference_replacement, replacement_triangles, length_tol))
-                {
-                  valid_transaction = false;
-                  break;
-                }
-
-                cell_replacements[location.first][affected_edge_side.side_index] =
-                    std::move(replacement_triangles);
-              }
-
-              if (!valid_transaction)
-                break;
-            }
-
-            if (!valid_transaction || !cell_replacements.count(target_cell_index))
-              continue;
-
-            std::map<std::size_t, std::vector<std::vector<Point>>> candidate_cell_side_points;
-            std::vector<std::vector<Point>> parent_surface_triangles;
-
-            for (const auto & cell_replacement : cell_replacements)
-            {
-              const auto affected_cell_index = cell_replacement.first;
-              const auto & affected_cell = split_dual_cell_side_points[affected_cell_index];
-              auto candidate_side_points =
-                  replacedCellSidePoints(affected_cell, cell_replacement.second);
-              const Real candidate_length_tol = tol * polyhedronScale3D(candidate_side_points);
-              std::vector<std::vector<Point>> candidate_surface_triangles;
-
-              if (!orientedSurfaceTriangles(candidate_side_points,
-                                            affected_cell.output_subdomain_id,
-                                            affected_cell.primal_elems,
-                                            candidate_surface_triangles) ||
-                  !surfaceTrianglesAreConforming3D(candidate_surface_triangles,
-                                                   candidate_length_tol))
-              {
-                valid_transaction = false;
-                break;
-              }
-
-              if (affected_cell_index == target_cell_index)
-                parent_surface_triangles = candidate_surface_triangles;
-
-              candidate_cell_side_points.emplace(affected_cell_index,
-                                                 std::move(candidate_side_points));
-            }
-
-            if (!valid_transaction || parent_surface_triangles.empty())
-              continue;
-
-            const Point & central_midpoint = central_edge_side.midpoint;
-            const std::vector<Point> cut_loop = {central_midpoint,
-                                                 chord_faces[0].diagonal_midpoint,
-                                                 chord_faces[0].boundary_midpoint,
-                                                 source_point,
-                                                 chord_faces[1].boundary_midpoint,
-                                                 chord_faces[1].diagonal_midpoint};
-            const auto isCutEdge = [&](const Point & point0, const Point & point1)
-            {
-              for (const auto i : index_range(cut_loop))
-                if (sameSegment3D(point0,
-                                  point1,
-                                  cut_loop[i],
-                                  cut_loop[(i + 1) % cut_loop.size()],
-                                  length_tol))
-                  return true;
-
-              return false;
+              return sameSegment3D(point0, point1, boundary_midpoint0, source_point, length_tol) ||
+                     sameSegment3D(point0, point1, source_point, boundary_midpoint1, length_tol);
             };
-            const auto surfaceHasEdge =
-                [&](const std::vector<std::vector<Point>> & surface_triangles,
-                    const Point & point0,
-                    const Point & point1)
-            {
-              for (const auto & triangle : surface_triangles)
-                if (faceContainsEdge3D(triangle, point0, point1, length_tol))
-                  return true;
-
-              return false;
-            };
-            bool cut_is_on_parent_surface = true;
-
-            for (const auto i : index_range(cut_loop))
-              if (!surfaceHasEdge(
-                      parent_surface_triangles, cut_loop[i], cut_loop[(i + 1) % cut_loop.size()]))
-              {
-                cut_is_on_parent_surface = false;
-                break;
-              }
-
-            if (!cut_is_on_parent_surface)
-              continue;
-
-            std::vector<std::vector<Point>> cut_triangles = {
-                {source_point, chord_faces[0].boundary_midpoint, chord_faces[0].diagonal_midpoint},
-                {source_point, chord_faces[0].diagonal_midpoint, central_midpoint},
-                {source_point, central_midpoint, chord_faces[1].diagonal_midpoint},
-                {source_point, chord_faces[1].diagonal_midpoint, chord_faces[1].boundary_midpoint}};
-            bool valid_cut = true;
-
-            for (const auto & cut_triangle : cut_triangles)
-              if (!hasNonzeroArea3D(cut_triangle, length_tol * length_tol) ||
-                  !pointInsideTriangulatedSurface3D(
-                      centroid3D(cut_triangle), parent_surface_triangles, length_tol))
-              {
-                valid_cut = false;
-                break;
-              }
-
-            if (!valid_cut)
-              continue;
-
-            auto parent_and_cut_triangles = parent_surface_triangles;
-            parent_and_cut_triangles.insert(
-                parent_and_cut_triangles.end(), cut_triangles.begin(), cut_triangles.end());
-
-            if (!surfaceTrianglesAreConforming3D(parent_and_cut_triangles, length_tol))
-              continue;
-
-            // Cutting adjacency along this loop partitions the repaired parent surface into the
-            // two requested volumes without assigning intersecting parent triangles to separate
-            // children.
-            const auto trianglesShareNonCutEdge =
+            const auto trianglesShareNonSeamEdge =
                 [&](const std::vector<Point> & triangle0, const std::vector<Point> & triangle1)
             {
               for (const auto edge0 : make_range(std::size_t(3)))
@@ -5983,17 +5220,18 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                     triangle0[(edge0 + 1) % triangle0.size()],
                                     triangle1[edge1],
                                     triangle1[(edge1 + 1) % triangle1.size()],
-                                    length_tol))
-                    return !isCutEdge(triangle0[edge0], triangle0[(edge0 + 1) % triangle0.size()]);
+                                    length_tol) &&
+                      !isSeamEdge(triangle0[edge0], triangle0[(edge0 + 1) % triangle0.size()]))
+                    return true;
 
               return false;
             };
 
-            std::vector<unsigned int> triangle_components(parent_surface_triangles.size(),
+            std::vector<unsigned int> triangle_components(remaining_triangles.size(),
                                                           std::numeric_limits<unsigned int>::max());
             unsigned int component_count = 0;
 
-            for (const auto start_triangle : index_range(parent_surface_triangles))
+            for (const auto start_triangle : index_range(remaining_triangles))
             {
               if (triangle_components[start_triangle] != std::numeric_limits<unsigned int>::max())
                 continue;
@@ -6006,11 +5244,11 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                 const std::size_t triangle_index = pending.back();
                 pending.pop_back();
 
-                for (const auto candidate_triangle : index_range(parent_surface_triangles))
+                for (const auto candidate_triangle : index_range(remaining_triangles))
                   if (triangle_components[candidate_triangle] ==
                           std::numeric_limits<unsigned int>::max() &&
-                      trianglesShareNonCutEdge(parent_surface_triangles[triangle_index],
-                                               parent_surface_triangles[candidate_triangle]))
+                      trianglesShareNonSeamEdge(remaining_triangles[triangle_index],
+                                                remaining_triangles[candidate_triangle]))
                   {
                     triangle_components[candidate_triangle] = component_count;
                     pending.push_back(candidate_triangle);
@@ -6023,17 +5261,72 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             if (component_count != 2)
               continue;
 
+            std::array<std::vector<std::vector<Point>>, 2> components;
+
+            for (const auto triangle_index : index_range(remaining_triangles))
+              components[triangle_components[triangle_index]].push_back(
+                  remaining_triangles[triangle_index]);
+
+            const auto surfaceEdgeCount =
+                [&](const std::vector<std::vector<Point>> & surface_triangles,
+                    const Point & point0,
+                    const Point & point1)
+            {
+              unsigned int count = 0;
+
+              for (const auto & triangle : surface_triangles)
+                if (faceContainsEdge3D(triangle, point0, point1, length_tol))
+                  ++count;
+
+              return count;
+            };
+            const auto hasBoundaryPath = [&](const std::vector<std::vector<Point>> & component,
+                                             const Point & midpoint_body_point,
+                                             const Point & other_body_point)
+            {
+              return surfaceEdgeCount(component, boundary_midpoint0, source_point) == 1 &&
+                     surfaceEdgeCount(component, source_point, boundary_midpoint1) == 1 &&
+                     surfaceEdgeCount(component, boundary_midpoint0, midpoint_body_point) == 1 &&
+                     surfaceEdgeCount(component, midpoint_body_point, other_body_point) == 1 &&
+                     surfaceEdgeCount(component, other_body_point, boundary_midpoint1) == 1;
+            };
+
+            if (hasBoundaryPath(components[1], body_b, body_a) &&
+                hasBoundaryPath(components[0], body_c, body_d))
+              std::swap(components[0], components[1]);
+            else if (!(hasBoundaryPath(components[0], body_b, body_a) &&
+                       hasBoundaryPath(components[1], body_c, body_d)))
+              continue;
+
+            // Close the components on midpoint0-source-midpoint1-A-B and
+            // midpoint0-source-midpoint1-D-C.
+            std::vector<std::vector<Point>> child0_cap = {
+                {source_point, boundary_midpoint0, body_b},
+                {source_point, body_b, body_a},
+                {source_point, body_a, boundary_midpoint1}};
+            std::vector<std::vector<Point>> child1_cap = {
+                {source_point, boundary_midpoint1, body_d},
+                {source_point, body_d, body_c},
+                {source_point, body_c, boundary_midpoint0}};
+            const auto validCap = [&](const std::vector<std::vector<Point>> & cap)
+            {
+              for (const auto & triangle : cap)
+                if (!hasNonzeroArea3D(triangle, length_tol * length_tol))
+                  return false;
+
+              return true;
+            };
+
+            if (!validCap(child0_cap) || !validCap(child1_cap))
+              continue;
+
             SplitCutFaceCandidate3D split_plan;
-
-            for (const auto triangle_index : index_range(parent_surface_triangles))
-              (triangle_components[triangle_index] == 0 ? split_plan.child0_side_points
-                                                        : split_plan.child1_side_points)
-                  .push_back(parent_surface_triangles[triangle_index]);
-
+            split_plan.child0_side_points = std::move(components[0]);
+            split_plan.child1_side_points = std::move(components[1]);
             split_plan.child0_side_points.insert(
-                split_plan.child0_side_points.end(), cut_triangles.begin(), cut_triangles.end());
+                split_plan.child0_side_points.end(), child0_cap.begin(), child0_cap.end());
             split_plan.child1_side_points.insert(
-                split_plan.child1_side_points.end(), cut_triangles.begin(), cut_triangles.end());
+                split_plan.child1_side_points.end(), child1_cap.begin(), child1_cap.end());
 
             if (!orientSurfaceTriangles3D(split_plan.child0_side_points, length_tol) ||
                 !orientSurfaceTriangles3D(split_plan.child1_side_points, length_tol) ||
@@ -6041,44 +5334,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                 !surfaceTrianglesAreConforming3D(split_plan.child1_side_points, length_tol))
               continue;
 
-            const Point volume_reference = polyhedronCentroid3D(parent_surface_triangles);
-            const auto surfaceVolume6 = [&](const std::vector<std::vector<Point>> & triangles)
-            {
-              Real volume6 = 0.0;
-
-              for (const auto & triangle : triangles)
-                volume6 += tetVolume6(volume_reference, triangle[0], triangle[1], triangle[2]);
-
-              return std::abs(volume6);
-            };
-            const Real parent_volume6 = surfaceVolume6(parent_surface_triangles);
-            const Real child_volume6 = surfaceVolume6(split_plan.child0_side_points) +
-                                       surfaceVolume6(split_plan.child1_side_points);
-            const Real volume_tol = std::max(length_tol * length_tol * length_tol,
-                                             tol * std::max(parent_volume6, child_volume6));
-
-            if (parent_volume6 <= volume_tol ||
-                std::abs(parent_volume6 - child_volume6) > volume_tol)
-              continue;
-
-            addDualPointSource3D(dual_point_sources,
-                                 chord_faces[0].diagonal_midpoint,
-                                 DualPointSource3D::face_diagonal_midpoint);
-            addDualPointSource3D(dual_point_sources,
-                                 chord_faces[1].diagonal_midpoint,
-                                 DualPointSource3D::face_diagonal_midpoint);
-
-            for (auto & cell_replacement : cell_replacements)
-            {
-              const auto affected_cell_index = cell_replacement.first;
-              commitCellSideReplacements(
-                  split_dual_cell_side_points[affected_cell_index],
-                  cell_replacement.second,
-                  std::move(candidate_cell_side_points[affected_cell_index]));
-              boundary_chord_modified_cells.insert(affected_cell_index);
-            }
-
-            repaired_primal_edges.insert(affected_edge_keys.begin(), affected_edge_keys.end());
             target_cell.has_boundary_chord_split_plan = true;
             target_cell.boundary_chord_split_plan = std::move(split_plan);
             return true;
@@ -6092,15 +5347,16 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       {
         auto & dual_cell = split_dual_cell_side_points[cell_index];
 
-        // Preserve every existing successful path. This repair is only for the exact surface
-        // conformance failure that would otherwise reach NetGen and reject the cell.
+        // Apply the exact boundary-chord repair before another treatment accepts the uncut cell.
         if (surfaceConformance(dual_cell.polycut_side_points,
                                dual_cell.output_subdomain_id,
-                               dual_cell.primal_elems) != SurfaceConformance3D::nonconforming ||
-            directTreatmentCanBuild(dual_cell) || nonNetgenTreatmentCanBuild(dual_cell))
+                               dual_cell.primal_elems) != SurfaceConformance3D::nonconforming)
           continue;
 
         if (repairBoundaryChord(cell_index))
+          continue;
+
+        if (directTreatmentCanBuild(dual_cell) || nonNetgenTreatmentCanBuild(dual_cell))
           continue;
 
         for (const auto primal_edge_side_index : index_range(dual_cell.primal_edge_sides))
@@ -6130,7 +5386,9 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
           for (const auto & location : locations_it->second)
           {
-            if (boundary_chord_modified_cells.count(location.first) ||
+            const auto & affected_cell = split_dual_cell_side_points[location.first];
+
+            if (affected_cell.has_boundary_chord_split_plan ||
                 std::find(affected_cell_indices.begin(),
                           affected_cell_indices.end(),
                           location.first) != affected_cell_indices.end())
@@ -6139,7 +5397,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
               break;
             }
 
-            const auto & affected_cell = split_dual_cell_side_points[location.first];
             const auto & affected_edge_side = affected_cell.primal_edge_sides[location.second];
             auto candidate_side_points = affected_cell.polycut_side_points;
 
@@ -6255,26 +5512,29 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       {
         const auto boundary_info = primalBoundaryInfo(split_dual_cell_side_point.primal_elems,
                                                       split_dual_cell_side_point.source_node_id);
-        std::string failure_reason;
-        std::vector<std::vector<Point>> failed_surface_triangles;
-
-        const auto addBoundaryChordSplitChild =
-            [&](const std::vector<std::vector<Point>> & child_side_points)
+        const auto addBoundaryChordChild = [&](const std::vector<std::vector<Point>> & side_points)
         {
-          return addTetrahedralizedPolyhedron(child_side_points,
-                                              split_dual_cell_side_point.output_subdomain_id,
-                                              true,
-                                              boundary_info,
-                                              failure_reason,
-                                              failed_surface_triangles);
+          auto validation_mesh = buildReplicatedMesh(3);
+
+          // The shared surface is already final. A late split or cut could introduce exterior
+          // points that were not propagated to neighboring cells.
+          if (canBuildPolyhedron(*validation_mesh, side_points, false, true, true) &&
+              addPolyhedron(side_points,
+                            split_dual_cell_side_point.output_subdomain_id,
+                            boundary_info,
+                            false,
+                            true))
+            return;
+
+          if (!addTetrahedralizedPolyhedron(
+                  side_points, split_dual_cell_side_point.output_subdomain_id, true, boundary_info))
+            mooseError("Could not tetrahedralize a boundary-chord split 3D dual polyhedron child.");
         };
 
-        if (!addBoundaryChordSplitChild(
-                split_dual_cell_side_point.boundary_chord_split_plan.child0_side_points) ||
-            !addBoundaryChordSplitChild(
-                split_dual_cell_side_point.boundary_chord_split_plan.child1_side_points))
-          mooseError("Could not tetrahedralize a boundary-chord split 3D dual polyhedron child: ",
-                     failure_reason);
+        addBoundaryChordChild(
+            split_dual_cell_side_point.boundary_chord_split_plan.child0_side_points);
+        addBoundaryChordChild(
+            split_dual_cell_side_point.boundary_chord_split_plan.child1_side_points);
 
         continue;
       }
