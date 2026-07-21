@@ -18,7 +18,21 @@ elements.
 
 ## 2D
 
-Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630). In short, a nodal-normal projection is used to map points from the primary interface to the secondary interface; secondary interface elements are then split by the projected nodes to form mortar segment mesh elements.
+Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630) and follows the
+nodal-normal projection construction of [!cite](yang2005two). Yang et al. define a continuous
+secondary normal field by cross-weighting the normals of the adjacent edges. Specifically, their
+unnormalized normal at node $A$ is $\hat{\boldsymbol{n}}_A =
+l_2\boldsymbol{n}_{A1} + l_1\boldsymbol{n}_{A2}$: the normal of each edge is weighted by the
+length of the other edge. They use this field both to project secondary nodes onto the primary
+interface and to project primary nodes onto the secondary interface. The secondary interface
+elements are split at the projected primary nodes to form the mortar segment mesh elements.
+
+MOOSE deviates from the nodal-normal weighting in [!cite](yang2005two): rather than explicitly
+cross-weighting adjacent normals, MOOSE weights each normal by the nodal `JxW` contribution from
+that same edge, obtained with a `QNodal` quadrature rule. For straight first-order edges this `JxW`
+is proportional to the length of the same edge, so the two definitions differ when adjacent edge
+lengths differ. For curved or higher-order edges the MOOSE weight is additionally a local nodal
+quadrature/Jacobian contribution rather than a complete-edge length.
 
 ## 3D
 
