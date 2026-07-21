@@ -35,6 +35,7 @@
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/threads.h"
 
 // C++ includes
 #include <algorithm>
@@ -49,14 +50,25 @@
 #endif
 
 MultiApp::ScopedAppInfoSuppression::ScopedAppInfoSuppression(const MooseApp & app)
-  : _original_suppress_info(Moose::_suppress_info)
+  : _original_suppress_info(Moose::_suppress_info),
+    _changed_suppress_info(Moose::_suppress_info != app.suppressInfo())
 {
-  Moose::_suppress_info = app.suppressInfo();
+  if (_changed_suppress_info)
+  {
+    mooseAssert(!libMesh::Threads::in_threads,
+                "Cannot modify informational message suppression in threads");
+    Moose::_suppress_info = app.suppressInfo();
+  }
 }
 
 MultiApp::ScopedAppInfoSuppression::~ScopedAppInfoSuppression()
 {
-  Moose::_suppress_info = _original_suppress_info;
+  if (_changed_suppress_info)
+  {
+    mooseAssert(!libMesh::Threads::in_threads,
+                "Cannot modify informational message suppression in threads");
+    Moose::_suppress_info = _original_suppress_info;
+  }
 }
 
 InputParameters
