@@ -1218,16 +1218,17 @@ public:
 
   /**
    * Cache a local Jacobian block with the provided rows (\p idof_indices) and columns (\p
-   * jdof_indices) for eventual accumulation into the global matrix specified by \p tag. The \p
-   * scaling_factor will be applied before caching. Only blessed framework classes may call this API
-   * by creating the requisiste \p LocalDataKey class
+   * jdof_indices) for eventual accumulation into the global matrices specified by \p tags. The \p
+   * scaling_factor will be applied before caching. The input block is left unchanged; any
+   * constraints and scaling are applied to Assembly's work matrix. Only blessed framework classes
+   * may call this API by creating the requisite \p LocalDataKey class.
    */
-  void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+  void cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                           const std::vector<dof_id_type> & idof_indices,
                           const std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           LocalDataKey,
-                          TagID tag);
+                          const std::set<TagID> & tags);
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
