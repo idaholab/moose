@@ -52,7 +52,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  BuildEquationSystemOperator();
+  FormEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
   SolveWithOperator(*es, _true_rhs, _true_x);

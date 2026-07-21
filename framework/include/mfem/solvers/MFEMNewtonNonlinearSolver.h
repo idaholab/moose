@@ -25,9 +25,7 @@ public:
 
   void ConstructSolver() override;
 
-  void SetOperator(const mfem::Operator & op) override;
   void SetLinearSolver(mfem::Solver & solver) override;
-  void Mult(const mfem::Vector & rhs, mfem::Vector & x) override;
   bool RequiresGradient() const override { return true; }
   bool RequiresExternalLinearSolver() const override { return true; }
 };

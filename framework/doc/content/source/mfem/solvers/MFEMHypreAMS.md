@@ -19,7 +19,7 @@ order systems.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/curlcurl.i block=FESpace Preconditioner Solvers
+!listing test/tests/mfem/kernels/curlcurl.i block=FESpace Solvers
 
 !syntax parameters /Solvers/MFEMHypreAMS
 

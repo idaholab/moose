@@ -299,7 +299,6 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
   if (_coefficient_manager)
     _coefficient_manager->markSolutionChanged();
 }
-
 }
 
 #endif

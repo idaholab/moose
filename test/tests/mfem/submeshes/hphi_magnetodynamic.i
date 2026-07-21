@@ -114,14 +114,12 @@ vacuum_permeability = 1.0
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = CoilHCurlFESpace
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = ams

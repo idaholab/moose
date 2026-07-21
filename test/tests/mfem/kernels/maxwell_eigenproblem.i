@@ -38,16 +38,13 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
     print_level = 0
     singular = true
   []
-[]
-
-[Solvers]
   [AME]
     type = MFEMHypreAME
     preconditioner = ams

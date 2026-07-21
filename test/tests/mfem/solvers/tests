@@ -1,0 +1,25 @@
+[Tests]
+  design = 'MFEMGeometricMultigridSolver.md MFEMFESpaceHierarchy.md'
+  issues = '#32771'
+  [MFEMPMGDiffusion]
+    type = CSVDiff
+    input = pmg_diffusion.i
+    csvdiff = 'OutputData/PMGDiffusion.csv'
+    requirement = 'The system shall have the ability to solve a diffusion problem using a '
+                  'p-multigrid (geometric multigrid) preconditioner with MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    abs_zero = 1e-6
+  []
+  [MFEMPMGRejectsNonlinear]
+    type = RunException
+    input = pmg_nonlinear_error.i
+    expect_err = "GeometricMultigridSolver 'pmg': nonlinear equation systems are not currently supported."
+    requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
+                  'nonlinear equation system.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+[]

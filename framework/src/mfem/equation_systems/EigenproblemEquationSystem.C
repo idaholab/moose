@@ -78,8 +78,8 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX)
 void
 EigenproblemEquationSystem::PrepareEigensolver(EigensolverBase & solver)
 {
-  solver.SetMassMatrix(_mass_rhs);
-  solver.SetOperator(_jacobian);
+  solver.SetMassMatrix(*_mass_rhs);
+  solver.SetOperator(*_jacobian);
 }
 
 } // namespace Moose::MFEM

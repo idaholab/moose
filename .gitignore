@@ -315,6 +315,9 @@ share/
 *.code-workspace
 .cache
 
+# Ignore Claude Code project context
+.claude/
+
 # test harness --sep-files output
 *.runner_run_out.txt
 *.runner_out.txt

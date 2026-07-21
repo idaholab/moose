@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMFESpace.h"
 #include "MFEMObject.h"
 
 /**
@@ -25,26 +24,25 @@ public:
   MFEMVariable(const InputParameters & parameters);
 
   /// Returns a shared pointer to the constructed gridfunction.
-  inline std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
-
-  /// Returns a reference to the fespace used by the gridfunction.
-  inline const MFEMFESpace & getFESpace() const { return _fespace; }
+  std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
 
   /// Returns the variable name corresponding to the time derivative of the MFEMVariable.
-  inline const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
+  const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
 
   /// Declare default coefficients associated with this gridfunction
   void declareCoefficients();
 
 protected:
-  const MFEMFESpace & _fespace;
+  /// The underlying MFEM FESpace - always populated regardless of which parameter was used.
+  std::shared_ptr<mfem::ParFiniteElementSpace> _par_fespace;
+  bool _is_scalar = false;
 
 private:
   /// Constructs the gridfunction.
   const std::shared_ptr<mfem::ParGridFunction> buildGridFunction();
 
   /// Stores the constructed gridfunction.
-  const std::shared_ptr<mfem::ParGridFunction> _gridfunction{nullptr};
+  std::shared_ptr<mfem::ParGridFunction> _gridfunction = nullptr;
 
   /// Optional name of the time derivative to associate with this variable in transient problems.
   const VariableName _time_derivative_name;

@@ -82,6 +82,7 @@
     required_python_packages = 'pandas matplotlib'
     capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-upwind-tris]
     type = MMSTest

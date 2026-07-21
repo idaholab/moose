@@ -12,22 +12,28 @@
 #pragma once
 
 #include "MooseObjectAction.h"
+#include "MFEMProblem.h"
 
 /**
- * This class allows us to have a section of the input file like the following
- * specifying the preconditioner to use and its options.
+ * Action for the [FESpaceHierarchies] input block. Each sub-block adds a
+ * MFEMFESpaceHierarchy object to the problem.
  *
- * [Preconditioner]
+ * [FESpaceHierarchies]
+ *   [my_hierarchy]
+ *     type = MFEMFESpaceHierarchy
+ *     fespace = H1FESpace
+ *     refinements = 'h 2 4'
+ *   []
  * []
  */
-class AddMFEMPreconditionerAction : public MooseObjectAction
+class AddMFEMFESpaceHierarchyAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMFEMPreconditionerAction(const InputParameters & parameters);
+  AddMFEMFESpaceHierarchyAction(const InputParameters & parameters);
 
-  void act() override;
+  virtual void act() override;
 };
 
 #endif

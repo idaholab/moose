@@ -21,12 +21,7 @@ public:
   MFEMEigenproblem(const InputParameters & params);
   virtual ~MFEMEigenproblem() {}
 
-  /**
-   * Method called in AddMFEMSolverAction which will create the solver.
-   */
-  virtual void addMFEMSolver(const std::string & user_object_name,
-                             const std::string & name,
-                             InputParameters & parameters) override;
+  virtual void resolveMFEMSolvers() override;
 
   /**
    * Override of MFEMProblem::addVariable. Sets a

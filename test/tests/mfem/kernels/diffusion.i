@@ -64,16 +64,15 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
+  inactive = 'jacobi'
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
   [jacobi]
     type = MFEMOperatorJacobiSmoother
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

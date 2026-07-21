@@ -89,7 +89,7 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
     fespace = H1FESpace
@@ -97,9 +97,6 @@
     l_tol = 1e-5
     print_level = 2
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = boomeramg
