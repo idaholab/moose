@@ -603,7 +603,7 @@ PhysicsBase::addPetscPairsToPetscOptions(
         _problem->getSolverSystem(solver_sys_num).prefix(),
         *this,
         po,
-        _problem);
+        _problem.get());
 }
 
 bool
