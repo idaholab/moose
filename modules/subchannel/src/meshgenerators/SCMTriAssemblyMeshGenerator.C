@@ -159,7 +159,6 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
 
   //  compute the hex mesh variables
   // -------------------------------------------
-
   // x coordinate for the first position
   Real x0 = 0.0;
   // y coordinate for the first position
@@ -335,11 +334,9 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
       kgap = kgap + 1;
       _subch_type[k] = EChannelType::CENTER;
       k = k + 1;
-
     } // for j
 
     // find the closest Pin at front ring
-
     for (unsigned int j = 0; j < _pins_in_rings[i].size(); j++)
     {
       if (j == _pins_in_rings[i].size() - 1)
@@ -436,8 +433,18 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
     }
   }
 
-  // find the _gap_to_chan_map and _chan_to_gap_map using the gap_to_rod and subchannel_to_rod_maps
-
+  /**
+   * Build channel-gap connectivity from the channel-pin and gap-pin maps.
+   *
+   * Center channels are bounded by three center gaps connecting their three pin pairs. Edge
+   * channels are bounded by one center gap between their two pins and two perimeter gaps along the
+   * duct. Corner channels are bounded by the two perimeter gaps that meet at the corner pin.
+   *
+   * For a two-ring assembly every outer-ring pin is a corner pin. Consequently an edge channel can
+   * find a corner channel at both of its endpoint pins. The edge still owns only three local gap
+   * entries, matching _sign_id_crossflow_map and the reverse _gap_to_chan_map construction below,
+   * so the second corner lookup is skipped once those three entries are already present.
+   */
   for (unsigned int i = 0; i < _n_channels; i++)
   {
     if (_subch_type[i] == EChannelType::CENTER)
@@ -500,14 +507,17 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
         } // if
       } // for
 
-      for (unsigned int k = 0; k < _n_channels; k++)
+      if (_chan_to_gap_map[i].size() < 3)
       {
-        if (_subch_type[k] == EChannelType::CORNER &&
-            _chan_to_pin_map[i][0] == _chan_to_pin_map[k][0])
+        for (unsigned int k = 0; k < _n_channels; k++)
         {
-          _chan_to_gap_map[i].push_back(_chan_to_gap_map[k][1] + 1);
-          icorner = 1;
-          break;
+          if (_subch_type[k] == EChannelType::CORNER &&
+              _chan_to_pin_map[i][0] == _chan_to_pin_map[k][0])
+          {
+            _chan_to_gap_map[i].push_back(_chan_to_gap_map[k][1] + 1);
+            icorner = 1;
+            break;
+          }
         }
       }
 
@@ -519,7 +529,6 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
   }
 
   // find gap_to_chan_map pair
-
   for (unsigned int j = 0; j < _n_gaps; j++)
   {
     for (unsigned int i = 0; i < _n_channels; i++)

@@ -247,7 +247,17 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
         _subch_type[i_ch] = EChannelType::CENTER;
     }
 
-  // Index the east-west gaps.
+  /**
+   * Build channel-gap connectivity directly from the rectilinear channel grid.
+   *
+   * Each gap separates exactly two neighboring channels. The east-west pass connects channels that
+   * share a vertical face, and the north-south pass connects channels that share a horizontal face.
+   * As each gap is created, both the reverse map (_gap_to_chan_map) and the forward channel maps
+   * (_chan_to_gap_map) are filled, and opposite crossflow signs are assigned to the two channels.
+   *
+   * Boundary gaps use a half pin-to-pin spacing plus the duct side gap, while interior gaps use the
+   * full pin-to-pin gap width.
+   */
   unsigned int i_gap = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx - 1; ix++)

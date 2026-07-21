@@ -1,0 +1,12 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md SCMTriAssemblyMeshGenerator.md'
+  issues = '#33388'
+  [case1_scm]
+    type = RunApp
+    input = case1_scm.i
+    cli_args = '--error --error-override --compute-device=cpu'
+    allow_warnings = true
+    recover = false
+    requirement = 'The system shall solve a 7-pin triangular subchannel assembly without invalid gap connectivity.'
+  []
+[]
