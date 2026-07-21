@@ -16,6 +16,7 @@
 #include "Console.h"
 #include "Executioner.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "OutputWarehouse.h"
@@ -46,6 +47,17 @@
 #ifdef LIBMESH_HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
+
+MultiApp::ScopedAppInfoSuppression::ScopedAppInfoSuppression(const MooseApp & app)
+  : _original_suppress_info(Moose::_suppress_info)
+{
+  Moose::_suppress_info = app.suppressInfo();
+}
+
+MultiApp::ScopedAppInfoSuppression::~ScopedAppInfoSuppression()
+{
+  Moose::_suppress_info = _original_suppress_info;
+}
 
 InputParameters
 MultiApp::validParams()
@@ -1252,8 +1264,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
     paramError("run_in_position",
                "Sub-apps are already displaced, so they are already output in position");
 
-  // Update the MultiApp level for the app that was just created
-  app->setupOptions();
+  {
+    ScopedAppInfoSuppression scoped_info(*app);
+    // Update the MultiApp level for the app that was just created
+    app->setupOptions();
+  }
   // if multiapp does not have file base in Outputs input block, output file base will
   // be empty here since setupOptions() does not set the default file base with the multiapp
   // input file name. Parent app will create the default file base for multiapp by taking the
@@ -1278,7 +1293,10 @@ MultiApp::createApp(unsigned int i, Real start_time)
   _apps[i]->fixedPointConfig().sub_transformed_pps =
       getParam<std::vector<PostprocessorName>>("transformed_postprocessors");
 
-  app->runInputFile();
+  {
+    ScopedAppInfoSuppression scoped_info(*app);
+    app->runInputFile();
+  }
   auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
   if (fixed_point_solve)
     fixed_point_solve->allocateStorage(false);

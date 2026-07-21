@@ -96,6 +96,14 @@
                 Outputs/csv=false"
     requirement = "The system shall suppress informational messages when requested by command-line."
   []
+  [suppress_info_multiapp_scope]
+    type = 'RunApp'
+    input = 'terminator_info_multiapp.i'
+    expect_out = '\*\*\* Info \*\*\*\s+Parent info test'
+    issues = '#31883'
+    requirement = "The system shall keep informational message suppression scoped to the "
+                  "sub-application that requested it."
+  []
 
   [check_execution]
     type = RunException
