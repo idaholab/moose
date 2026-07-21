@@ -197,10 +197,6 @@ FEProblemBase::hasKokkosFunction(const std::string & name) const
 Moose::Kokkos::Function
 FEProblemBase::getKokkosFunction(const std::string & name)
 {
-#ifdef MOOSE_ENABLE_KOKKOS_GPU
-  mooseError("Retrieving a Kokkos function as abstract type is currently not supported for GPU.");
-#endif
-
   const auto & function = getKokkosFunction<Moose::FunctionBase>(name);
 
   std::shared_ptr<Moose::Kokkos::FunctionWrapperHostBase> wrapper =

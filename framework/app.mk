@@ -396,19 +396,18 @@ $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 else
 
 # libtool ignores nvcc and just uses mpicxx to link, so cannot be used
-
 $(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Linking Kokkos Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS)
 
 endif
 
@@ -452,19 +451,18 @@ $(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
 $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
 	@echo "Linking Kokkos Test Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 else
 
 # libtool ignores nvcc and just uses mpicxx to link, so cannot be used
-
 $(app_KOKKOS_TEST_LIB): curr_dir  := $(APPLICATION_DIR)/test
 $(app_KOKKOS_TEST_LIB): curr_objs := $(app_KOKKOS_TEST_OBJECTS)
 $(app_KOKKOS_TEST_LIB): $(app_KOKKOS_TEST_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Linking Kokkos Test Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(libmesh_LIBS)
 
 endif
 
@@ -480,7 +478,7 @@ $(KOKKOS_DEVICE_LINK_OBJECT): curr_dir := $(APPLICATION_DIR)
 $(KOKKOS_DEVICE_LINK_OBJECT): $(KOKKOS_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Device Linking Kokkos Objects..."
-	@$(KOKKOS_CXX) -dlink -o $@ $(KOKKOS_LDFLAGS) $(KOKKOS_OBJECTS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) -dlink -o $@ $(KOKKOS_LDFLAGS) $(KOKKOS_OBJECTS) $(libmesh_LIBS)
 
 endif
 

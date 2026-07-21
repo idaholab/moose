@@ -520,7 +520,7 @@ ifeq ($(KOKKOS_COMPILER),CPU)
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
+		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(MOOSE_KOKKOS_LIB) $(FRAMEWORK_DIR)
 
 else
@@ -528,7 +528,7 @@ else
 # libtool ignores nvcc and just uses mpicxx to link, so cannot be used
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(libmesh_LIBS)
 
 endif
 
@@ -806,7 +806,7 @@ ifeq ($(ENABLE_KOKKOS),true)
 # Kokkos sources
 	$(file >> .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(KOKKOS_CXX))
-	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES))
+	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES))
 	$(file >> .compile_commands.json,$(compile_commands_all_kokkos_srcfiles))
 endif
 else
@@ -819,7 +819,7 @@ ifeq ($(ENABLE_KOKKOS),true)
 # Kokkos sources
 	@echo $(CURDIR) >> .compile_commands.json
 	@echo $(KOKKOS_CXX) >> .compile_commands.json
-	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
+	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(libmesh_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
 	@echo $(compile_commands_all_kokkos_srcfiles) >> .compile_commands.json
 endif
 endif
