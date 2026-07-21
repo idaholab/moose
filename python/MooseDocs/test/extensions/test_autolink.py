@@ -174,6 +174,24 @@ class TestFileCommand(MooseDocsTestCase):
 
     def testMaterialize(self):
         _, res = self.execute(
+            "[!file title=Makefile](framework/Makefile)",
+            renderer=base.MaterializeRenderer(),
+        )
+
+        self.assertSize(res, 2)
+        uid = res(1)["id"]
+        self.assertHTMLTag(
+            res(0, 0),
+            "a",
+            size=1,
+            href="#{}".format(uid),
+            string="(framework/Makefile)",
+            class_="moose-source-filename tooltipped modal-trigger",
+        )
+        self.assertHTMLTag(res(1), "div", size=2, class_="moose-modal modal", id_=uid)
+        self.assertHTMLTag(res(1, 0, 0), "h4", size=1, string="Makefile")
+
+        _, res = self.execute(
             "[!file text=make title=Makefile](framework/Makefile)",
             renderer=base.MaterializeRenderer(),
         )

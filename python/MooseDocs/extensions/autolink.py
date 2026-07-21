@@ -115,8 +115,8 @@ def createTokenHelper(key, parent, info, page, settings):
 
 class PageShortcutLinkComponent(core.ShortcutLinkInline):
     """
-    Creates correct Shortcutlink when *.md files is provide, modal links when a source files is
-    given, otherwise a core.ShortcutLink token.
+    Creates correct ShortcutLink tokens when *.md files are provided, otherwise creates
+    core.ShortcutLink tokens.
     """
 
     @staticmethod
@@ -142,8 +142,7 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
 
 class PageLinkComponent(core.LinkInline):
     """
-    Creates correct link when *.md files is provide, modal links when a source files is given,
-    otherwise a core.Link token.
+    Creates correct link tokens when *.md files are provided, otherwise creates core.Link tokens.
     """
 
     @staticmethod
