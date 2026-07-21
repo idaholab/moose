@@ -124,6 +124,17 @@ public:
    */
   void resetCellFill();
 
+  /**
+   * @brief Whether this cell is an engineering unit.
+   *
+   * Returns false for a plain CSGCell; overridden to return true by the
+   * engineering unit types. Used to avoid a dynamic_cast on the common
+   * plain-cell comparison path (see operator==).
+   *
+   * @return true if this object is a CSGEngUnit, otherwise false
+   */
+  virtual bool isEngUnit() const { return false; }
+
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
 

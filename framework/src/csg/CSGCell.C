@@ -125,12 +125,13 @@ CSGCell::updateCellRegionSurfaces(
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {
-  // If both objects are engineering units, delegate to CSGEngUnit::operator==
-  if (const auto * this_eng = dynamic_cast<const CSGEngUnit *>(this))
+  // If both objects are engineering units, delegate to CSGEngUnit::operator==. The
+  // isEngUnit() check keeps the common plain-cell path free of any dynamic_cast;
+  // the casts below only run once we know the objects are engineering units.
+  if (isEngUnit())
   {
-    const auto * other_eng = dynamic_cast<const CSGEngUnit *>(&other);
-    if (other_eng)
-      return *this_eng == *other_eng;
+    if (other.isEngUnit())
+      return *dynamic_cast<const CSGEngUnit *>(this) == *dynamic_cast<const CSGEngUnit *>(&other);
     return false; // an engineering unit cannot equal a plain cell
   }
 

@@ -46,12 +46,13 @@ bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
   // If both objects are engineering units, delegate to CSGEngUnit::operator== to avoid
-  // calling getCoeffs(), which is not supported on engineering unit types.
-  if (const auto * this_eng = dynamic_cast<const CSGEngUnit *>(this))
+  // calling getCoeffs(), which is not supported on engineering unit types. The isEngUnit()
+  // check keeps the common plain-surface path free of any dynamic_cast; the casts below
+  // only run once we know the objects are engineering units.
+  if (isEngUnit())
   {
-    const auto * other_eng = dynamic_cast<const CSGEngUnit *>(&other);
-    if (other_eng)
-      return *this_eng == *other_eng;
+    if (other.isEngUnit())
+      return *dynamic_cast<const CSGEngUnit *>(this) == *dynamic_cast<const CSGEngUnit *>(&other);
     return false; // an engineering unit cannot equal a plain surface
   }
 

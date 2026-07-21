@@ -41,6 +41,9 @@ public:
   /// Satisfy CSGEngUnit::getName() (resolved via CSGCell::getName())
   const std::string & getName() const override { return CSGCell::getName(); }
 
+  /// Engineering units report true so comparisons can skip the dynamic_cast fast path
+  bool isEngUnit() const override { return true; }
+
   /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
   bool operator==(const CSGCellEngUnit & other) const { return CSGEngUnit::operator==(other); }
   bool operator!=(const CSGCellEngUnit & other) const { return CSGEngUnit::operator!=(other); }

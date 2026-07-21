@@ -94,6 +94,17 @@ public:
    */
   const std::string & getName() const { return _name; }
 
+  /**
+   * @brief Whether this surface is an engineering unit.
+   *
+   * Returns false for a plain CSGSurface; overridden to return true by the
+   * engineering unit types. Used to avoid a dynamic_cast on the common
+   * plain-surface comparison path (see operator==).
+   *
+   * @return true if this object is a CSGEngUnit, otherwise false
+   */
+  virtual bool isEngUnit() const { return false; }
+
   /// Operator overload for checking if two CSGSurface objects are equal
   bool operator==(const CSGSurface & other) const;
 
