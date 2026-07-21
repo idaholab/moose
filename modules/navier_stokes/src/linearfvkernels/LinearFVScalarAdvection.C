@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVScalarAdvection.h"
+#include "LinearFVGradientInterface.h"
 #include "MooseLinearVariableFV.h"
 #include "NS.h"
 
@@ -37,14 +38,15 @@ LinearFVScalarAdvection::LinearFVScalarAdvection(const InputParameters & params)
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
+    _gradient_field(_adv_interp_method.needsGradients()
+                        ? &_var.computeCellGradients(_adv_interp_method.gradientMethodName())
+                        : nullptr),
     _volumetric_face_flux(0.0),
     _u_slip(isParamValid("u_slip") ? &getFunctor<ADReal>("u_slip") : nullptr),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
     _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr),
     _add_slip_model(isParamValid("u_slip") ? true : false)
 {
-  if (_adv_interp_method.needsGradients())
-    _var.computeCellGradients(_adv_interp_method.gradientLimiter());
 }
 
 Real
@@ -146,9 +148,9 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
   const Real neighbor_value = _var.getElemValue(neighbor_info, state);
   if (_adv_interp_method.needsGradients())
   {
-    const auto limiter_type = _adv_interp_method.gradientLimiter();
-    _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
-    _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    _elem_grad_storage = _gradient_field->gradient(elem_info);
+    _neighbor_grad_storage = _gradient_field->gradient(neighbor_info);
   }
 
   _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
