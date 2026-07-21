@@ -170,7 +170,7 @@ offset = -0.19
 # for the application of the generalized force
 [UserObjects]
   [weighted_vel_uo]
-    type = LMWeightedVelocitiesUserObject
+    type = DynamicLMWeightedVelocitiesUserObject
     primary_boundary = 20
     secondary_boundary = 10
     primary_subdomain = 4

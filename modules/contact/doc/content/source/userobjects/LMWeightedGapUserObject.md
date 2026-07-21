@@ -13,6 +13,10 @@ partially covered (edge-dropping) mortar interfaces; see
 [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for details and
 current limitations.
 
+Direct dynamic-contact inputs should use
+[DynamicLMWeightedGapUserObject](/DynamicLMWeightedGapUserObject.md), which retains frozen nodal
+geometry.
+
 !syntax parameters /UserObjects/LMWeightedGapUserObject
 
 !syntax inputs /UserObjects/LMWeightedGapUserObject

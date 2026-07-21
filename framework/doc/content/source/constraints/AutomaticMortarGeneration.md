@@ -16,6 +16,25 @@ that have support from the shape function associated with a given node. In the f
 ghosting functors to the mortar segment mesh, which would allow us to delete unnecessary non-local
 elements.
 
+## Nodal normal derivatives
+
+`AutomaticMortarGeneration` constructs a unit normal at each secondary mortar node from the
+oriented area vectors of the incident secondary faces,
+
+!equation
+\boldsymbol{a}_A = \sum_{e \in \operatorname{star}(A)}
+  w_{eA}\boldsymbol{A}_{eA}, \qquad
+\boldsymbol{n}_A = \frac{\boldsymbol{a}_A}{\lVert\boldsymbol{a}_A\rVert}.
+
+For supported mechanical-contact Jacobian evaluations, the face tangents are formed from AD nodal
+coordinates. AD then differentiates the edge rotation or face cross product, nodal-quadrature
+weighting, summation over the secondary face star, and final normalization. The stored nodal-normal
+value is retained, so residual and Jacobian evaluations use the same contact direction.
+
+The incident-face set and orientation signs are fixed during an evaluation. Mortar segment
+topology, projections, integration measures, moving overlap boundaries, and active-set changes are
+not differentiated.
+
 ## 2D
 
 Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630) and follows the

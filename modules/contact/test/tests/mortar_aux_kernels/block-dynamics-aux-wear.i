@@ -164,7 +164,7 @@ offset = -0.05
 
 [UserObjects]
   [weighted_gap_uo]
-    type = LMWeightedGapUserObject
+    type = DynamicLMWeightedGapUserObject
     primary_boundary = 20
     secondary_boundary = 10
     primary_subdomain = 4

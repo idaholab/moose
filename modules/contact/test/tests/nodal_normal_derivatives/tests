@@ -1,0 +1,74 @@
+[Tests]
+  issues = '#33378'
+
+  [interpolated_normals_rejected]
+    type = RunException
+    input = ../3d-mortar-contact/frictionless-mortar-3d.i
+    cli_args = 'UserObjects/weighted_gap_uo/interpolate_normals=true'
+    expect_err = 'cannot be combined with quadrature-point normal interpolation'
+    max_parallel = 1
+    design = 'LMWeightedGapUserObject.md'
+    requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
+  []
+
+  [curved_3d_parallel]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic'
+    run_sim = true
+    ratio_tol = 4e-6
+    difference_tol = 4e-5
+    capabilities = 'ad_size>=100'
+    min_parallel = 2
+    max_parallel = 2
+    mesh_mode = DISTRIBUTED
+    design = 'ContactAction.md PenaltyFrictionUserObject.md AutomaticMortarGeneration.md'
+    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble nodal-normal and both tangent-basis derivatives across a partitioned QUAD4 node star without introducing unallocated Jacobian entries.'
+  []
+
+  [mortar_penalty_friction_jacobian]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true -snes_test_err 1e-7'
+    run_sim = true
+    ratio_tol = 3.5e-6
+    difference_tol = 3.5e-5
+    capabilities = 'ad_size>=100'
+    max_parallel = 1
+    design = 'ContactAction.md PenaltyFrictionUserObject.md'
+    requirement = 'Three-dimensional mortar-penalty friction shall include secondary nodal-normal and tangent-basis derivatives in its contact Jacobian.'
+  []
+
+  [mortar_contact_pjfnk]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=false Executioner/solve_type=PJFNK'
+    expect_out = 'Solve Converged!'
+    max_parallel = 1
+    design = 'ContactAction.md LMWeightedGapUserObject.md'
+    requirement = 'Three-dimensional mortar contact shall support residual-only PJFNK evaluations and explicit preconditioning Jacobians with nodal-normal derivatives.'
+  []
+
+  [tri6_normal_derivatives]
+    type = RunApp
+    input = curved_3d_action.i
+    cli_args = 'Mesh/top/nx=1 Mesh/top/ny=1 Mesh/bottom/nx=1 Mesh/bottom/ny=1 Mesh/top/elem_type=TET10 Mesh/bottom/elem_type=TET10 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=false Executioner/end_time=0.05 Executioner/dt=0.05 Executioner/line_search=basic'
+    expect_out = 'Solve Converged!'
+    capabilities = 'ad_size>=200'
+    max_parallel = 1
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Active TET10 contact with TRI6 mortar faces shall support the secondary face-star normal construction.'
+  []
+
+  [hex27_quad9]
+    type = RunApp
+    input = ../3d-mortar-contact/frictionless-mortar-3d-action.i
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 Mesh/top_block/elem_type=HEX27 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 Mesh/bottom_block/elem_type=HEX27 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND Executioner/solve_type=NEWTON Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
+    capabilities = 'ad_size>=200'
+    expect_out = 'The number of nodes in contact is [1-9][0-9]*'
+    max_parallel = 1
+    mesh_mode = REPLICATED
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'Active HEX27 contact with QUAD9 mortar faces shall support the secondary face-star normal construction when sufficient AD storage is available.'
+  []
+[]

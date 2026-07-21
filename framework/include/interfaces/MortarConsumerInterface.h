@@ -39,6 +39,9 @@ public:
 
   static InputParameters validParams();
 
+  /// Copy the common mortar interface parameters into a relationship manager.
+  static void setRMParams(const InputParameters & obj_params, InputParameters & rm_params);
+
   /**
    * @return An InputParameters object containing just the parameters that control 3D mortar
    * polygon triangulation (\p triangulation, \p triangulate_triangles). Provided so that
