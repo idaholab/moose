@@ -147,22 +147,9 @@ petscOptionsHasName(::PetscOptions options,
   mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
 
 bool
-hasJFNKSolveType(const FEProblemBase & problem)
-{
-  for (const auto sys_index : make_range(problem.numSolverSystems()))
-    if (problem.solverParams(sys_index)._type == Moose::ST_JFNK)
-      return true;
-
-  return false;
-}
-
-bool
 prefixTargetsJFNKSolver(const FEProblemBase & problem, const std::string & prefix)
 {
   checkPrefix(prefix);
-
-  if (prefix == "-")
-    return hasJFNKSolveType(problem);
 
   const auto solver_prefix = prefix.substr(1);
   for (const auto sys_index : make_range(problem.numSolverSystems()))
@@ -213,8 +200,8 @@ errorOnJFNKPCTypeOption(::PetscOptions options, FEProblemBase & problem)
       continue;
 
     const auto & solver_system = problem.getSolverSystem(sys_index);
-    const std::string solver_prefix = solver_system.name() + "_";
-    if (petscOptionsHasName(options, "-pc_type", solver_prefix))
+    const auto solver_prefix = solver_system.prefix();
+    if (!solver_prefix.empty() && petscOptionsHasName(options, "-pc_type", solver_prefix))
       errorOnJFNKPCTypeOption(problem, "-" + solver_prefix);
   }
 }
