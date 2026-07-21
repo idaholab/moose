@@ -21,6 +21,9 @@
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/linear_solver.h"
 
+#include <unordered_map>
+#include <unordered_set>
+
 // Forward declarations
 class FEProblemBase;
 class MoosePreconditioner;
@@ -87,6 +90,21 @@ public:
   virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() = 0;
 
   virtual SNES getSNES() = 0;
+
+  /** Request the parallel per-DOF vector used for PETSc KSP right diagonal scaling. */
+  void requestKSPRightDiagonalScale();
+
+  /** Reset the requested KSP right diagonal scale to one and attach it to the PETSc KSP. */
+  void resetKSPRightDiagonalScale();
+
+  /** Set an owned entry of the KSP right diagonal scale, checking repeated writes. */
+  void setKSPRightDiagonalScale(dof_id_type dof, Real value);
+
+  /** Collectively close the KSP right diagonal scale if any rank set one or more entries. */
+  void closeKSPRightDiagonalScale();
+
+  /** Return whether a KSP right diagonal scale has been requested. */
+  bool hasKSPRightDiagonalScale() const { return _has_ksp_right_diagonal_scale; }
 
   virtual unsigned int getCurrentNonlinearIterationNumber() = 0;
 
@@ -901,6 +919,18 @@ protected:
 
   /// Copy of the residual vector, or nullptr if a copy is not needed
   std::unique_ptr<NumericVector<Number>> _residual_copy;
+
+  /// Whether an object has requested solver-side per-DOF right scaling
+  bool _has_ksp_right_diagonal_scale = false;
+
+  /// Whether this rank has unclosed right scaling vector writes
+  bool _ksp_right_diagonal_scale_dirty = false;
+
+  /// Last installed values, used to avoid changing an unchanged scale vector
+  std::unordered_map<dof_id_type, Real> _ksp_right_diagonal_scale_values;
+
+  /// Entries written during the current mortar assembly, used to detect conflicting contributors
+  std::unordered_set<dof_id_type> _ksp_right_diagonal_scale_written_dofs;
 
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
