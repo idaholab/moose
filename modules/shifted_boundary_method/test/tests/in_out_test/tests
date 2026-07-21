@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#31938'
+  design = 'index.md'
+  [sbm_test]
+    requirement = 'The system shall be capable of performing point-in-polyhedron in-out testing to '
+                  'reclassify elements inside/outside a closed surface for different lambda cut '
+                  'fractions'
+    [2D_lambda_1]
+      type = 'Exodiff'
+      input = '2D_lambda1.i'
+      exodiff = '2D_lambda1_out.e'
+      mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = false
+      detail = 'in 2D with lambda = 1.'
+    []
+    [2D_lambda_0p5]
+      type = 'Exodiff'
+      input = '2D_lambda0p5.i'
+      exodiff = '2D_lambda0p5_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 2D with lambda = 0.5.'
+    []
+    [2D_lambda_0]
+      type = 'Exodiff'
+      input = '2D_lambda0.i'
+      exodiff = '2D_lambda0_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 2D with lambda = 0.'
+    []
+    [3D_lambda_1]
+      type = 'Exodiff'
+      input = '3D_lambda1.i'
+      exodiff = '3D_lambda1_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 1.'
+    []
+    [3D_lambda_0p5]
+      type = 'Exodiff'
+      input = '3D_lambda0p5.i'
+      exodiff = '3D_lambda0p5_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 0.5.'
+    []
+    [3D_lambda_0]
+      type = 'Exodiff'
+      input = '3D_lambda0.i'
+      exodiff = '3D_lambda0_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 0.'
+    []
+  []
+[]

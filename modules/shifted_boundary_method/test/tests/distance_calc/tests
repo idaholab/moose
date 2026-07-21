@@ -41,6 +41,15 @@
       detail = 'the distance field in 3D when signed level-set and mesh-based surfaces are combined.'
     []
 
+    [2D_signed_distance]
+      type = 'Exodiff'
+      input = '2D_signed_distance.i'
+      exodiff = '2D_signed_distance_out.e'
+      mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = false
+      detail = 'a signed distance field in 2D using a point-in-polyhedron in-out test to set the sign.'
+    []
+
   []
 
   [error_test]
@@ -61,11 +70,12 @@
       input = '2D_distance_refine.i'
       cli_args = 'Functions/const_fun/type=ConstantFunction Functions/const_fun/value=1.0 '
                  'UserObjects/distance_to_surface/surfaces=const_fun'
-      expect_err = 'SBM distance helpers only support ParsedFunction or UnsignedDistanceToSurfaceMesh'
+      expect_err = 'SBM distance helpers only support ParsedFunction, UnsignedDistanceToSurfaceMesh, '
+                   'or SignedDistanceToSurfaceMesh'
       mesh_mode = REPLICATED
       recover = false
-      detail = 'if ShortestDistanceToSurface receives a function whose type is not ParsedFunction '
-               'or UnsignedDistanceToSurfaceMesh.'
+      detail = 'if ShortestDistanceToSurface receives a function whose type is not ParsedFunction, '
+               'UnsignedDistanceToSurfaceMesh, or SignedDistanceToSurfaceMesh.'
     []
 
     [dim_mismatch]
