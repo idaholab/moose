@@ -4,9 +4,7 @@ offset = 0.00
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
-  # scaling=1/E so physical c constants (scaled by scalingFactor ~ 1/E) are
-  # far smaller than the defaults (c_normal=1e6, c_tangential=1), making the
-  # convergence gap between physical and default clearly observable.
+  # Physical contact compensates LM equation scaling to this displacement equation scaling.
   scaling = 1e-4
 []
 
@@ -204,6 +202,24 @@ offset = 0.00
   []
 []
 
+[ICs]
+  [normal_lm]
+    type = ConstantIC
+    variable = mortar_normal_lm
+    value = 0
+  []
+  [tangential_lm]
+    type = ConstantIC
+    variable = mortar_tangential_lm
+    value = 0
+  []
+  [tangential_3d_lm]
+    type = ConstantIC
+    variable = mortar_tangential_3d_lm
+    value = 0
+  []
+[]
+
 [Executioner]
   type = Transient
   end_time = .025
@@ -216,18 +232,39 @@ offset = 0.00
   nl_max_its = 100
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-10
-  line_search = 'basic'
+  line_search = 'bt'
 []
 
 [Preconditioning]
+  active = 'smp'
   [smp]
     type = SMP
     full = true
   []
+  [fsp]
+    type = FSP
+    topsplit = 'contact_interior'
+    [contact_interior]
+      splitting = 'interior contact'
+      splitting_type = schur
+      schur_pre = 'S'
+      petsc_options = '-snes_ksp_ew'
+      petsc_options_iname = '-ksp_gmres_restart -pc_fieldsplit_schur_fact_type'
+      petsc_options_value = '200                full'
+    []
+    [interior]
+      vars = 'disp_x disp_y disp_z'
+      petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_type'
+      petsc_options_value = 'preonly   lu       superlu_dist'
+    []
+    [contact]
+      vars = 'mortar_normal_lm mortar_tangential_lm mortar_tangential_3d_lm'
+    []
+  []
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
+  active = 'num_nl cumulative contact normal_pressure tangential_pressure top_displacement'
   [num_nl]
     type = NumNonlinearIterations
   []
@@ -240,6 +277,21 @@ offset = 0.00
     variable = mortar_normal_lm
     subdomain = 'mortar_secondary_subdomain'
     execute_on = 'nonlinear timestep_end'
+  []
+  [normal_pressure]
+    type = ElementAverageValue
+    variable = mortar_normal_lm
+    block = mortar_secondary_subdomain
+  []
+  [tangential_pressure]
+    type = ElementAverageValue
+    variable = mortar_tangential_lm
+    block = mortar_secondary_subdomain
+  []
+  [top_displacement]
+    type = ElementAverageValue
+    variable = disp_z
+    block = top_block
   []
 []
 

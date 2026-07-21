@@ -4,8 +4,7 @@ offset = 0.00
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
-  # scaling=1/E so physical c_normal (= scalingFactor * C_nn_harmonic ~ 1)
-  # is far smaller than the default c_normal=1e6, making the gap visible.
+  # Physical contact compensates LM equation scaling to this displacement equation scaling.
   scaling = 1e-4
 []
 
@@ -224,7 +223,7 @@ offset = 0.00
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
+  active = 'num_nl cumulative contact normal_pressure top_displacement'
   [num_nl]
     type = NumNonlinearIterations
   []
@@ -237,6 +236,16 @@ offset = 0.00
     variable = mortar_normal_lm
     subdomain = 'mortar_secondary_subdomain'
     execute_on = 'nonlinear timestep_end'
+  []
+  [normal_pressure]
+    type = ElementAverageValue
+    variable = mortar_normal_lm
+    block = mortar_secondary_subdomain
+  []
+  [top_displacement]
+    type = ElementAverageValue
+    variable = disp_z
+    block = top_block
   []
 []
 
