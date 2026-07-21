@@ -64,11 +64,7 @@ MultiApp::ScopedAppInfoSuppression::ScopedAppInfoSuppression(const MooseApp & ap
 MultiApp::ScopedAppInfoSuppression::~ScopedAppInfoSuppression()
 {
   if (_changed_suppress_info)
-  {
-    mooseAssert(!libMesh::Threads::in_threads,
-                "Cannot modify informational message suppression in threads");
     Moose::_suppress_info = _original_suppress_info;
-  }
 }
 
 InputParameters

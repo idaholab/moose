@@ -61,12 +61,7 @@
     type = TransientMultiApp
     execute_on = TIMESTEP_BEGIN
     input_files = terminator_soft.i
-    cli_args = "--suppress-info
-                Executioner/num_steps=1
-                UserObjects/arnold/fail_mode=NONE
-                UserObjects/arnold/error_level=INFO
-                UserObjects/arnold/message='Subapp info test'
-                Outputs/csv=false"
+    cli_args = "--suppress-info;Executioner/num_steps=1;UserObjects/arnold/fail_mode=NONE;UserObjects/arnold/error_level=INFO;UserObjects/arnold/message='Subapp info test';Outputs/csv=false"
   []
 []
 
