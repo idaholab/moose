@@ -141,16 +141,17 @@ TEST(PhysicalMortarConstants, FrictionalRowScalingInvariant)
   {
     const std::string formulation_arg =
         std::string("Contact/mortar/friction_ncp_formulation=") + formulation;
-    const auto reference = runContact("frictional_physical.i",
-                                      {"Contact/mortar/c_normal_strategy=physical",
-                                       "Contact/mortar/c_tangential_strategy=physical",
-                                       formulation_arg});
-    const auto row_scaled = runContact("frictional_physical.i",
-                                       {"Contact/mortar/c_normal_strategy=physical",
-                                        "Contact/mortar/c_tangential_strategy=physical",
-                                        "Contact/mortar/normal_lm_scaling=1e-6",
-                                        "Contact/mortar/tangential_lm_scaling=1e-5",
-                                        formulation_arg});
+    const std::vector<std::string> common = {"Contact/mortar/c_normal_strategy=physical",
+                                             "Contact/mortar/c_tangential_strategy=physical",
+                                             "Executioner/abort_on_solve_fail=true",
+                                             "Executioner/nl_abs_tol=1e-12",
+                                             "Executioner/nl_rel_tol=1e-12",
+                                             formulation_arg};
+    const auto reference = runContact("frictional_physical.i", common);
+    auto row_scaled_args = common;
+    row_scaled_args.push_back("Contact/mortar/normal_lm_scaling=1e-6");
+    row_scaled_args.push_back("Contact/mortar/tangential_lm_scaling=1e-5");
+    const auto row_scaled = runContact("frictional_physical.i", row_scaled_args);
     EXPECT_GT(reference.contact_dofs, 0)
         << "no contact DOFs active - test is not exercising contact";
     EXPECT_NEAR(reference.normal_pressure,

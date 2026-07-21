@@ -7,12 +7,12 @@
   [hsw]
     type = RunApp
     input = frictional-mortar-3d.i
-    cli_args = "Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_hsw"
+    cli_args = "Constraints/friction/friction_ncp_formulation=hueber_stadler_wohlmuth Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_hsw"
   []
   [ac]
     type = RunApp
     input = frictional-mortar-3d.i
-    cli_args = "Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_ac"
+    cli_args = "Constraints/friction/friction_ncp_formulation=alart_curnier Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_ac"
   []
   [function_hsw]
     type = RunApp

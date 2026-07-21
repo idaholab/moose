@@ -7,7 +7,7 @@
   [hsw]
     type = RunApp
     input = controlled.i
-    cli_args = 'name=performance_controlled_hsw'
+    cli_args = 'Contact/mortar/friction_ncp_formulation=hueber_stadler_wohlmuth name=performance_controlled_hsw'
     allow_test_objects = true
     validation_test = performance_validation.py
     validation_csv = performance_controlled_hsw.csv
@@ -21,7 +21,7 @@
     type = RunApp
     input = controlled.i
     prereq = hsw
-    cli_args = 'name=performance_controlled_ac'
+    cli_args = 'Contact/mortar/friction_ncp_formulation=alart_curnier name=performance_controlled_ac'
     allow_test_objects = true
     validation_test = performance_validation.py
     validation_csv = performance_controlled_ac.csv

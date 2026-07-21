@@ -111,9 +111,8 @@ tangential_lm_guess = 0
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.5
-    normalize_c = true
-    c_normal = 1
-    c_tangential = 1
+    c_normal_strategy = physical
+    c_tangential_strategy = physical
   []
 []
 
