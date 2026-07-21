@@ -23,7 +23,7 @@
 namespace Moose::MFEM
 {
 class ProblemOperatorBuilderBase;
-};
+}
 
 class MFEMProblem : public ExternalProblem
 {
