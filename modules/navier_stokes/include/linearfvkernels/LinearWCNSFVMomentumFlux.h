@@ -109,6 +109,9 @@ protected:
   /// The interpolation method to use for the advected quantity
   const FVAdvectedInterpolationMethod & _adv_interp_method;
 
+  /// Gradient field used by advected interpolations that require gradients.
+  const LinearFVGradientReader * const _advected_gradient_field;
+
   /// Current advected interpolation contribution on the face
   FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
 
