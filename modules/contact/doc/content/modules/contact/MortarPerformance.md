@@ -2,6 +2,142 @@
 
 Results of performance studies on the mortar-based contact approach are shown here.
 
+## Friction formulation regression gate id=friction-formulation-regression-gate
+
+The performance gate for issue `#32856` was constructed on the local
+`contact-performance-benchmarks` branch from `up/next` commit
+`7b332444532bd42dee0e095a07e0999fca53a136`. The final benchmark commit is
+`27f5bc1e64655442a7724b16a2c6e560e948238e`. The
+`automate-mortar-constants-32856` branch, originally at
+`2edd1b1eb4b2de78e7ed32c257fd9adb17d002d0`, was rebased directly onto that commit. The tested
+feature specialization is `56dad900eec5bece9256b6d9ad98e73ea77746a7`.
+
+The suite contains three workloads and six `RunApp` candidates:
+
+- `test/tests/mortar_performance.{hsw,ac}` is a controlled small-strain problem with 800
+  alternating load cycles and 1600 fixed steps. Its geometry and material properties give the
+  physical strategies \(C_n=C_t=1\). It exercises repeated slip reversal under a sustained normal
+  preload and validates completion, fixed time steps, finite values, KKT and displacement
+  equilibrium errors, solver work, and AC/HSW physical agreement from repository-local CSV data.
+- `test/tests/pdass_problems.{hsw,ac}` extends the existing finite-strain frictional bouncing block
+  to time 14, preserving its \(c=c_t=10\), tolerances, time step, and PJFNK configuration. MUMPS
+  replaces only the LU factor package so that the workload is stable with MPI and threads.
+- `test/tests/3d-mortar-contact.{hsw,ac}` preserves the existing three-dimensional finite-strain
+  problem, \(c=c_t=10^4\), tolerances, time step, and PJFNK configuration. It also uses MUMPS for
+  thread-stable LU factorization.
+
+On the benchmark branch both candidate names execute the legacy degree-two friction residual with
+distinct output bases. On the feature branch the names and workloads are unchanged, the analyst
+cases retain their user constants, and each candidate selects
+`hueber_stadler_wohlmuth` or `alart_curnier` explicitly. There are no duplicated test entries for
+MPI, threads, or distributed meshes.
+
+The existing finite-strain input in `mortar_tm/2d/ad_frictional` was rejected as a performance
+workload because both labels reached the nonlinear iteration limit with two MPI ranks. The existing
+frictional field-split input was rejected after both labels diverged at four ranks with a distributed
+mesh. Refined variational candidates were also rejected for orientation failures. These failures
+were not converted into allowed caveats: a workload that was brittle under an execution shape was
+removed from the performance suite.
+
+### Local execution and deterministic checks
+
+All local runs used the `mpich-mpicc` conda environment and the following base command:
+
+```bash
+./run_tests -i performance --capture-perf-graph --sep-files
+```
+
+Characterization used separate output directories and result files for these launch shapes:
+
+```bash
+OMP_NUM_THREADS=1 ./run_tests -j1 -p1 --n-threads 1 ...
+OMP_NUM_THREADS=1 ./run_tests -j2 -p2 --n-threads 1 ...
+OMP_NUM_THREADS=1 ./run_tests -j4 -p4 --n-threads 1 --distributed-mesh ...
+OMP_NUM_THREADS=2 ./run_tests -j2 -p1 --n-threads 2 ...
+OMP_NUM_THREADS=2 ./run_tests -j4 -p2 --n-threads 2 --distributed-mesh ...
+```
+
+Here `-j` is the TestHarness total slot limit. It must be at least processes times threads; using
+`-j1` with a multi-process or multi-thread launch skips rather than runs the test. The explicit
+`OMP_NUM_THREADS` setting is required because an external factor package such as MUMPS does not use
+the libMesh thread count as its OpenMP control.
+
+Each final feature configuration was repeated three times. All 15 TestHarness invocations and all
+90 candidate runs passed with no skips. The recorded environment has `OMP_NUM_THREADS=2` in every
+threaded candidate. Every result contains a positive `runner_run` value and readable
+`PerfGraphReporter` metadata. The final benchmark serial suite passed 6/6; each selected benchmark
+workload also passed all five launch shapes during selection. The controlled threaded case was
+repeated after setting its solver-work interval.
+
+The controlled-case values observed over the final feature matrix were:
+
+| Metric | Observed interval or limit |
+| - | - |
+| Cumulative nonlinear iterations | 7997--7998; committed upper budget 8000 |
+| Residual evaluations | 9597--9598; committed upper budget 9600 |
+| Diagnostic linear iterations | 7997--7999; committed upper budget 8001 |
+| Maximum KKT error | \(5.53\times10^{-17}\) |
+| Maximum displacement-equilibrium error | \(4.39\times10^{-13}\) |
+| AC/HSW final pressure difference | at most \(10^{-15}\) |
+
+The upper budgets include an earlier characterized two-thread observation of 8000 nonlinear,
+9600 residual, and 8001 linear iterations. Only upper bounds are enforced so a future solver
+robustness improvement is accepted. Solve failure, cutback, non-finite CSV data, KKT or equilibrium
+error above \(10^{-10}\), or AC/HSW pressure difference above \(10^{-8}\) fails validation.
+
+The rebuilt contact unit executable ran 30/30 tests successfully. This includes projection roots
+and homogeneity, the corrected separation sign, two- and three-dimensional stick and slip,
+separation and reclosure, reversal, multiple increments, initial-guess variation, user/physical
+scale equivalence, row-scaling invariance, and the existing refinement and field-split checks. The
+row-scaling invariant comparison uses \(10^{-12}\) nonlinear tolerances and
+`abort_on_solve_fail=true`; this prevents the attenuated HSW residual from terminating before the
+unchanged \(10^{-8}\) physical-pressure comparison is satisfied.
+
+### Local timing and solver-work findings
+
+The table compares one benchmark serial `runner_run` value with the range from four feature serial
+runs. Local wall time is diagnostic only; the remote performance process is authoritative.
+
+| Workload | Formulation | Benchmark (s) | Feature range (s) | Feature/base ratio |
+| - | - | - | - | - |
+| Bouncing block | HSW | 17.090 | 19.643--22.540 | 1.149--1.319 |
+| Bouncing block | AC | 17.100 | 17.832--19.425 | 1.043--1.136 |
+| 3-D mortar | HSW | 7.798 | 9.153--9.669 | 1.174--1.240 |
+| 3-D mortar | AC | 7.708 | 4.478--4.811 | 0.581--0.624 |
+| Controlled | HSW | 17.118 | 16.174--17.782 | 0.945--1.039 |
+| Controlled | AC | 17.228 | 17.404--18.457 | 1.010--1.071 |
+
+Serial solver-work diagnostics were:
+
+| Workload | Candidate | Benchmark nonlinear / residual / linear | Feature nonlinear / residual / linear |
+| - | - | - | - |
+| Bouncing block | HSW | 224 / 280 / 1404 | 256 / 312 / 1719 |
+| Bouncing block | AC | 224 / 280 / 1404 | 216 / 278 / 1575 |
+| 3-D mortar | HSW | 21 / 22 / 27 | 25 / 26 / 34 |
+| 3-D mortar | AC | 21 / 22 / 27 | 10 / 11 / 21 |
+| Controlled | HSW and AC | 7997 / 9597 / 7997 | 7997 / 9597 / 7997 in serial |
+
+The two analyst workloads begin from or traverse an open contact state. Their feature paths include
+the corrected positive-separation gap sign, so their off-solution problems are not physically
+equivalent to the benchmark and their counts are excluded from the solver-work acceptance
+comparison. This exclusion does not establish that the sign change caused the HSW increases: the
+feature also changes HSW row normalization and PETSc right scaling, and no ablation separated those
+effects. The physically equivalent unit-scale controlled case does not exceed the benchmark
+solver-work budget.
+
+PerfGraph shows that the local HSW wall-time signal follows additional solve work rather than one
+new per-call hotspot. In the bouncing block, Jacobian assemblies increased from 224 to 256 and
+residual-kernel calls from 1908 to 2287. In the 3-D workload, Jacobian assemblies increased from 21
+to 25 and residual assemblies from 49 to 60. These findings make the local HSW signal worth checking
+remotely even though it is not an equivalent-problem solver-work failure.
+
+### Remote acceptance
+
+The existing remote CI performance process must run the same `performance` suite for the
+noise-aware wall-time decision. No `CIVET_BASE_SHA` override or external CIVET recipe change is
+used. If remote CI reports a regression, rerun it once. A confirmed regression must be investigated
+with the captured PerfGraph data and revised or reverted before merge.
+
 ### Frictionless contact algorithm comparison id=frictionless_table
 
 | Constraint | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
