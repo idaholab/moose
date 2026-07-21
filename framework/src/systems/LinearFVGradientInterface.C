@@ -99,8 +99,8 @@ LinearFVGradientInterface::registerFVGradient(const unsigned int variable_number
   if (container.values.empty() && _sys.currentSolution())
     initializeContainer(container.values);
 
-  if (_linear_fv_gradient_output_scratch.empty() && _sys.currentSolution())
-    initializeContainer(_linear_fv_gradient_output_scratch);
+  if (container.next_values.empty() && _sys.currentSolution())
+    initializeContainer(container.next_values);
 
   if (_linear_fv_gradient_method_scratch.empty() && _sys.currentSolution())
     initializeContainer(_linear_fv_gradient_method_scratch);
@@ -122,8 +122,13 @@ LinearFVGradientInterface::computeGradients()
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
   PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
+  // Keep current values unchanged until every replacement has been computed so boundary
+  // conditions consistently use gradients from the previous update.
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
-    updateLinearFVGradientContainer(*method_container_pair.first, method_container_pair.second);
+    computeLinearFVGradientContainer(*method_container_pair.first, method_container_pair.second);
+
+  for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
+    finalizeLinearFVGradientContainer(method_container_pair.second);
 }
 
 void
@@ -146,7 +151,8 @@ LinearFVGradientInterface::updateFVGradient(const LinearFVGradientReader & reade
     mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");
     PerfGuard time_guard(perf_graph_interface->perfGraph(), perf_id);
 
-    updateLinearFVGradientContainer(reader.method(), method_container_pair->second);
+    computeLinearFVGradientContainer(reader.method(), method_container_pair->second);
+    finalizeLinearFVGradientContainer(method_container_pair->second);
     return;
   }
 
@@ -172,46 +178,57 @@ LinearFVGradientInterface::initializeContainer(GradientContainer & container) co
 }
 
 void
-LinearFVGradientInterface::updateLinearFVGradientContainer(const FVGradientMethod & method,
-                                                           LinearFVGradientContainer & container)
+LinearFVGradientInterface::computeLinearFVGradientContainer(const FVGradientMethod & method,
+                                                            LinearFVGradientContainer & container)
 {
   if (container.values.empty())
     initializeContainer(container.values);
 
-  if (_linear_fv_gradient_output_scratch.empty())
-    initializeContainer(_linear_fv_gradient_output_scratch);
+  if (container.next_values.empty())
+    initializeContainer(container.next_values);
 
   if (_linear_fv_gradient_method_scratch.empty())
     initializeContainer(_linear_fv_gradient_method_scratch);
 
-  mooseAssert(_linear_fv_gradient_output_scratch.size() == container.values.size(),
-              "Output scratch and value gradient containers must have the same size.");
+  mooseAssert(container.next_values.size() == container.values.size(),
+              "Next and current gradient containers must have the same size.");
   mooseAssert(_linear_fv_gradient_method_scratch.size() == container.values.size(),
               "Method scratch and value gradient containers must have the same size.");
 
   method.computeGradient(_sys,
-                         _linear_fv_gradient_output_scratch,
+                         container.next_values,
                          _linear_fv_gradient_method_scratch,
                          container.variable_numbers);
+}
 
-  container.values.swap(_linear_fv_gradient_output_scratch);
+void
+LinearFVGradientInterface::finalizeLinearFVGradientContainer(
+    LinearFVGradientContainer & container)
+{
+  mooseAssert(container.next_values.size() == container.values.size(),
+              "Next and current gradient containers must have the same size.");
+  container.values.swap(container.next_values);
 }
 
 void
 LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 {
-  _linear_fv_gradient_output_scratch.clear();
   _linear_fv_gradient_method_scratch.clear();
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
+  {
     method_container_pair.second.values.clear();
+    method_container_pair.second.next_values.clear();
+  }
 
   if (!hasLinearFVGradients())
     return;
 
-  initializeContainer(_linear_fv_gradient_output_scratch);
   initializeContainer(_linear_fv_gradient_method_scratch);
 
   for (auto & method_container_pair : _linear_fv_gradient_container_by_method)
+  {
     initializeContainer(method_container_pair.second.values);
+    initializeContainer(method_container_pair.second.next_values);
+  }
 }

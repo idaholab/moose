@@ -119,7 +119,7 @@ protected:
   /// One vector per spatial component of a cell-centered gradient field.
   using GradientContainer = LinearFVGradientReader::GradientContainer;
 
-  /// Update all registered linear FV gradient fields.
+  /// Compute and finalize all registered linear FV gradient fields.
   void computeGradients();
 
   /**
@@ -145,26 +145,32 @@ protected:
   /// Gradient values for all variables using the same gradient method.
   struct LinearFVGradientContainer
   {
-    /// Variable numbers whose gradients are stored in values.
+    /// Variable numbers whose gradients are stored in the gradient containers.
     std::unordered_set<unsigned int> variable_numbers;
 
-    /// Persistent gradient values read by consumers.
+    /// Current gradient values read by consumers.
     GradientContainer values;
+
+    /// Replacement gradient values computed before publication.
+    GradientContainer next_values;
   };
 
   /**
-   * Recompute the field values for a registered gradient method.
-   * @param method Gradient method used to update the container.
-   * @param container Method container whose values should be updated.
+   * Compute replacement field values for a registered gradient method.
+   * @param method Gradient method used to compute the replacement values.
+   * @param container Method container whose next values should be computed.
    */
-  void updateLinearFVGradientContainer(const FVGradientMethod & method,
-                                       LinearFVGradientContainer & container);
+  void computeLinearFVGradientContainer(const FVGradientMethod & method,
+                                        LinearFVGradientContainer & container);
+
+  /**
+   * Replace the current field values with previously computed values.
+   * @param container Method container whose gradient values should be finalized.
+   */
+  void finalizeLinearFVGradientContainer(LinearFVGradientContainer & container);
 
   /// Reference to the system object
   SystemBase & _sys;
-
-  /// Reusable scratch space where a method writes replacement values before they are published.
-  GradientContainer _linear_fv_gradient_output_scratch;
 
   /// Reusable scratch space available to the method while computing replacement values.
   GradientContainer _linear_fv_gradient_method_scratch;
