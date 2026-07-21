@@ -1525,6 +1525,12 @@ MooseApp::setupOptions()
   Moose::out << std::flush;
 }
 
+bool
+MooseApp::suppressInfo() const
+{
+  return getParam<bool>("suppress_info");
+}
+
 const std::vector<std::string> &
 MooseApp::getInputFileNames() const
 {
