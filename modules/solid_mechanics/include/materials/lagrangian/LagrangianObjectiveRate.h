@@ -9,98 +9,63 @@
 
 #pragma once
 
-#include "MooseTypes.h"
-#include "RankTwoTensorForward.h"
-#include "RankFourTensorForward.h"
-#include <memory>
-#include <tuple>
+// Inputs/Outputs hold RankTwoTensor / RankFourTensor by value, so the full definitions are needed.
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
-class ComputeLagrangianObjectiveStress;
 class MooseEnum;
 
-/// Abstract base class for the objective-stress-rate strategy.
+/// Objective-stress-rate updates as stateless free functions.
 ///
-/// The host material `ComputeLagrangianObjectiveStress` owns a unique_ptr to
-/// one concrete subclass, selected by the `objective_rate` enum. Each subclass
-/// reads kinematic / constitutive material-property handles off the host and
-/// writes `_cauchy_stress`, `_cauchy_jacobian`, and
-/// `_dcauchy_stress_d_eigenstrain` at the host's current `_qp`.
-class LagrangianObjectiveRate
+/// Each rate integrates the constitutive small-stress increment into the cumulative Cauchy stress
+/// using its objective-rate advection and, when requested, returns the consistent tangent
+/// d(sigma_cauchy)/d(dL) plus the eigenstrain sensitivity. The rates are pure functions of an
+/// explicit `Inputs` bundle -- no coupling to the material that gathers them -- so they can be unit
+/// tested in isolation and dispatched by a `switch` (composition, not a class hierarchy).
+namespace LagrangianObjectiveRates
 {
-public:
-  virtual ~LagrangianObjectiveRate() = default;
-
-  /// Perform the objective stress update at the host's current quadrature point.
-  /// `dS` is the constitutive small-stress increment (`_small_stress -
-  /// _small_stress_old`). When `need_jacobian` is false the rate computes
-  /// `_cauchy_stress` only and skips the RankFourTensor algebra feeding
-  /// `_cauchy_jacobian` / `_dcauchy_stress_d_eigenstrain` -- both are read only on
-  /// Jacobian sweeps.
-  virtual void update(ComputeLagrangianObjectiveStress & host,
-                      const RankTwoTensor & dS,
-                      bool need_jacobian) const = 0;
+/// Per-qp quantities a rate reads. The host material gathers these once per qp from the strain
+/// calculator's published properties and its own constitutive small stress. The Green-Naghdi-only
+/// fields are default-constructed for the other rates -- only `greenNaghdi` reads them.
+struct Inputs
+{
+  /// Constitutive small-stress increment (`_small_stress - _small_stress_old`).
+  RankTwoTensor dS;
+  /// Cumulative Cauchy stress at step n.
+  RankTwoTensor cauchy_stress_old;
+  /// Small-strain algorithmic tangent.
+  RankFourTensor small_jacobian;
+  /// Spatial velocity gradient increment dL and its vorticity (skew) part dW.
+  RankTwoTensor dL, dW;
+  /// d(dL)/dF and d(dW)/dF from the strain calculator.
+  RankFourTensor d_dL_d_F, d_dW_d_F;
+  /// Green-Naghdi only: polar-decomposition rotation R (n+1 and n), the inverse incremental
+  /// deformation gradient, and F^{-1}.
+  RankTwoTensor rotation, rotation_old, inv_df, inv_def_grad;
+  /// Green-Naghdi only: dR/dF.
+  RankFourTensor d_rotation_d_F;
 };
 
-/// Intermediate base for rates that fit the linear template
-/// `sigma_{n+1} = J(dQ)^{-1} (sigma_n + Deltasigma)`. Provides the shared advection helpers.
-class LagrangianLinearObjectiveRate : public LagrangianObjectiveRate
+/// Per-qp outputs a rate produces. `cauchy_jacobian` and `dcauchy_stress_d_eigenstrain` are filled
+/// only when `need_jacobian` is true (they are read only on Jacobian sweeps).
+struct Outputs
 {
-protected:
-  /// Apply the linear advection to a stress, returning `(advected_stress, Jinv)`.
-  static std::tuple<RankTwoTensor, RankFourTensor> advectStress(const RankTwoTensor & S0,
-                                                                const RankTwoTensor & dQ);
-
-  /// Build the J tensor that defines the linear advection.
-  static RankFourTensor updateTensor(const RankTwoTensor & dQ);
-
-  /// Derivative of the linear advection action with respect to the kinematic tensor.
-  static RankFourTensor stressAdvectionDerivative(const RankTwoTensor & S);
-
-  /// Consistent tangent for the linear template.
-  static RankFourTensor cauchyJacobian(const RankFourTensor & Jinv,
-                                       const RankFourTensor & small_jacobian,
-                                       const RankFourTensor & U);
+  RankTwoTensor cauchy_stress;
+  RankFourTensor cauchy_jacobian;
+  RankFourTensor dcauchy_stress_d_eigenstrain;
 };
 
-class LagrangianTruesdellRate : public LagrangianLinearObjectiveRate
-{
-public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS,
-              bool need_jacobian) const override;
-};
+/// sigma_{n+1} = J(dL)^{-1} (sigma_n + Deltasigma). Truesdell rate.
+Outputs truesdell(const Inputs & in, bool need_jacobian);
+/// sigma_{n+1} = J(dW)^{-1} (sigma_n + Deltasigma). Jaumann rate.
+Outputs jaumann(const Inputs & in, bool need_jacobian);
+/// sigma_{n+1} = J(dO)^{-1} (sigma_n + Deltasigma), with dO built from the polar rotation increment.
+Outputs greenNaghdi(const Inputs & in, bool need_jacobian);
+/// sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T, r_hat = exp(Deltaw). See
+/// `rashid_project/plan_outline.pdf` Sec.3.2.
+Outputs rashid(const Inputs & in, bool need_jacobian);
 
-class LagrangianJaumannRate : public LagrangianLinearObjectiveRate
-{
-public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS,
-              bool need_jacobian) const override;
-};
-
-class LagrangianGreenNaghdiRate : public LagrangianLinearObjectiveRate
-{
-public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS,
-              bool need_jacobian) const override;
-};
-
-/// Rashid rate: sigma_{n+1} = r_hat (sigma_n + Deltasigma) r_hat^T  with r_hat = exp(Deltaw).
-/// See `rashid_project/plan_outline.pdf` Sec.3.2.
-class LagrangianRashidRate : public LagrangianObjectiveRate
-{
-public:
-  void update(ComputeLagrangianObjectiveStress & host,
-              const RankTwoTensor & dS,
-              bool need_jacobian) const override;
-
-private:
-  /// Rodrigues exponential of a skew 3x3 tensor W. When `dR_dW` is non-null it is filled
-  /// with the unconstrained chain-rule derivative; otherwise the R4 algebra is skipped.
-  /// The upstream `_d_vorticity_increment_d_F` projects out non-skew perturbations.
-  static RankTwoTensor rotationFromVorticity(const RankTwoTensor & W, RankFourTensor * dR_dW);
-};
-
-/// Build the concrete rate strategy that matches the user's enum choice.
-std::unique_ptr<LagrangianObjectiveRate> createObjectiveRate(const MooseEnum & rate_enum);
+/// Dispatch to the rate selected by the `objective_rate` enum
+/// (truesdell / jaumann / green_naghdi / rashid). Errors on an unknown value.
+Outputs compute(const MooseEnum & rate, const Inputs & in, bool need_jacobian);
+}

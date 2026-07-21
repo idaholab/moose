@@ -12,8 +12,6 @@
 #include "ComputeLagrangianStressCauchy.h"
 #include "LagrangianObjectiveRate.h"
 
-#include <memory>
-
 /// Provide the Cauchy stress via an objective integration of a small stress
 ///
 /// This class provides the Cauchy stress and associated Jacobian through
@@ -23,24 +21,16 @@
 /// which must provide the _small_stress and _small_jacobian
 /// properties.
 ///
-/// The objective integration itself is delegated to a `LagrangianObjectiveRate`
-/// strategy object that is selected by the `objective_rate` input parameter
-/// (truesdell / jaumann / green_naghdi / rashid). Each strategy reads kinematic
-/// quantities published by the strain calculator and writes back the Cauchy
-/// stress, the consistent Jacobian, and the eigenstrain off-diagonal Jacobian.
+/// The objective integration itself is delegated to a stateless free function selected by the
+/// `objective_rate` input parameter (truesdell / jaumann / green_naghdi / rashid). This material
+/// gathers the kinematic / constitutive quantities into a `LagrangianObjectiveRates::Inputs`, calls
+/// `LagrangianObjectiveRates::compute`, and scatters the returned Cauchy stress, consistent
+/// Jacobian, and eigenstrain off-diagonal Jacobian back into its properties.
 class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy
 {
 public:
   static InputParameters validParams();
   ComputeLagrangianObjectiveStress(const InputParameters & parameters);
-
-  // Rate-strategy helpers reach into the material's protected property handles
-  // and write the three output properties (cauchy stress, cauchy jacobian,
-  // eigenstrain jacobian). Keep the host's interface unchanged for callers.
-  friend class LagrangianTruesdellRate;
-  friend class LagrangianJaumannRate;
-  friend class LagrangianGreenNaghdiRate;
-  friend class LagrangianRashidRate;
 
 protected:
   /// Initialize the new (small) stress
@@ -104,10 +94,11 @@ protected:
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad_old;
 
-  /// Strategy that implements the chosen objective rate.
-  std::unique_ptr<LagrangianObjectiveRate> _rate_strategy;
+  /// Which objective rate to use (truesdell / jaumann / green_naghdi / rashid). Dispatched by
+  /// `LagrangianObjectiveRates::compute` at each qp.
+  const MooseEnum & _objective_rate;
 
-  /// If true, the rate's `update()` runs in passthrough mode -- it skips its own outer
+  /// If true, the rate runs in passthrough mode -- the host discards the rate's own outer
   /// rotation and sets `_cauchy_stress = _small_stress` directly. Used in tandem with the
   /// strain calculator's `publish_rotation_increment = true` to delegate the rotation of
   /// the stress state to the wrapped material's `_perform_finite_strain_rotations = true`

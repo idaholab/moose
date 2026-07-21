@@ -53,13 +53,13 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
         _base_name + "d_vorticity_increment_d_deformation_gradient")),
     _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _def_grad_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _rate_strategy(createObjectiveRate(getParam<MooseEnum>("objective_rate"))),
+    _objective_rate(getParam<MooseEnum>("objective_rate")),
     _rotate_old_stress(getParam<bool>("rotate_old_stress"))
 {
   // Only the Green-Naghdi rate consumes the polar-decomposition rotation. Fetch these
   // (which marks `rotation` active and triggers the strain calc's polar decomposition) only
   // for that rate -- Truesdell/Jaumann/Rashid leave them null and skip the eigensolve.
-  if (getParam<MooseEnum>("objective_rate") == "green_naghdi")
+  if (_objective_rate == "green_naghdi")
   {
     _rotation = &getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation");
     _rotation_old = &getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation");
@@ -101,7 +101,36 @@ ComputeLagrangianObjectiveStress::computeQpCauchyStress()
   else
   {
     const RankTwoTensor dS = _small_stress[_qp] - _small_stress_old[_qp];
-    _rate_strategy->update(*this, dS, need_jacobian);
+
+    // Gather the per-qp quantities the rate needs, dispatch to the selected objective rate, and
+    // scatter the outputs back into our properties.
+    LagrangianObjectiveRates::Inputs in;
+    in.dS = dS;
+    in.cauchy_stress_old = _cauchy_stress_old[_qp];
+    in.small_jacobian = _small_jacobian[_qp];
+    in.dL = _deformation_gradient_increment[_qp];
+    in.dW = _vorticity_increment[_qp];
+    in.d_dL_d_F = _d_deformation_gradient_increment_d_F[_qp];
+    in.d_dW_d_F = _d_vorticity_increment_d_F[_qp];
+    // Green-Naghdi only: the rotation properties (and inv_df / F^{-1}) are fetched only for that
+    // rate, so `_rotation` is non-null exactly when `greenNaghdi` will read them.
+    if (_rotation)
+    {
+      in.rotation = (*_rotation)[_qp];
+      in.rotation_old = (*_rotation_old)[_qp];
+      in.d_rotation_d_F = (*_d_rotation_d_F)[_qp];
+      in.inv_df = _inv_df[_qp];
+      in.inv_def_grad = _inv_def_grad[_qp];
+    }
+
+    const auto out = LagrangianObjectiveRates::compute(_objective_rate, in, need_jacobian);
+    _cauchy_stress[_qp] = out.cauchy_stress;
+    if (need_jacobian)
+    {
+      _cauchy_jacobian[_qp] = out.cauchy_jacobian;
+      _dcauchy_stress_d_eigenstrain[_qp] = out.dcauchy_stress_d_eigenstrain;
+    }
+
     if (_rotate_old_stress)
     {
       // Passthrough mode: the wrapped stress material (e.g. `ComputeMultiPlasticityStress`
