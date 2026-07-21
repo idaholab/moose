@@ -27,8 +27,12 @@ struct SolutionState;
 }
 =======
 class ProblemOperatorBuilderBase;
+<<<<<<< HEAD
 };
 >>>>>>> dd515131cb (Adding forward declarations of classes and adding necessary headers that are needed in non-unity files)
+=======
+}
+>>>>>>> b234291b95 (removing a ;)
 
 class MFEMProblem : public ExternalProblem
 {
