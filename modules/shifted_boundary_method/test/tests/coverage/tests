@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#31937'
+  design = 'SBMSurfaceMeshBuilder.md ShortestDistanceToSurface.md UnsignedDistanceToSurfaceMesh.md'
+
+  [coverage]
+    requirement = 'The system shall '
+
+    [omnibus]
+      type = 'Exodiff'
+      input = 'coverage_omnibus.i'
+      exodiff = 'coverage_omnibus_out.e'
+      allow_test_objects = true
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'report the closest distance vector and surface normal at element centroids when '
+               'parsed-function and mesh-based surfaces are combined in a single query.'
+    []
+
+    [build_kd_tree_false]
+      type = 'RunApp'
+      input = 'build_kd_tree_false.i'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'build boundary element representations from an SBM surface mesh without a KDTree '
+               'when KDTree construction is disabled.'
+    []
+
+    [non_watertight]
+      type = 'RunApp'
+      input = 'non_watertight.i'
+      expect_out = 'not watertight'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'report when an SBM surface mesh is not watertight.'
+    []
+
+    [gradient_on_surface]
+      type = 'Exodiff'
+      input = 'gradient_on_surface.i'
+      exodiff = 'gradient_on_surface_out.e'
+      allow_test_objects = true
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'return zero distance when the query point lies on the surface mesh.'
+    []
+
+  []
+[]
