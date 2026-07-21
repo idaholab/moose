@@ -95,6 +95,20 @@ AugmentSparsityOnInterface::getInfo() const
 }
 
 void
+AugmentSparsityOnInterface::addElement(const processor_id_type p,
+                                       const Elem * const elem,
+                                       map_type & coupled_elements) const
+{
+  if (!elem || elem == remote_elem)
+    return;
+
+  // libMesh supplies invalid_processor_id while building sparsity, which includes every element,
+  // and a real processor id while building send lists, which includes only remote elements.
+  if (elem->processor_id() != p)
+    coupled_elements.emplace(elem, _null_mat);
+}
+
+void
 AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
     const processor_id_type p,
     const Elem * const elem,
@@ -115,8 +129,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
     mooseAssert(coupled_elem,
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-    if (coupled_elem->processor_id() != p)
-      coupled_elements.emplace(coupled_elem, _null_mat);
+    addElement(p, coupled_elem, coupled_elements);
   }
 }
 
@@ -131,74 +144,120 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
 {
   // I hypothesize that node processor ids are tied to higher dimensional element processor
   // ids over lower dimensional element processor ids based on debugging experience.
-  // Consequently we need to be checking for higher dimensional elements and whether they are
-  // along our secondary boundary. From there we will query the AMG object's
-  // mortar-interface-coupling container to get the secondary lower-dimensional element, and
-  // then we will ghost it's point neighbors and their mortar interface couples
+  // Consequently we need to check higher dimensional elements along the secondary boundary as
+  // well as lower-dimensional secondary elements when constructing the face one-ring.
 
-  // It's possible that one higher-dimensional element could have multiple lower-dimensional
-  // elements from multiple sides. Morever, even if there is only one lower-d element per
-  // higher-d element, the unordered_multimap that holds the coupling information can have
-  // duplicate key-value pairs if there are multiple mortar segments per secondary face. So to
-  // prevent attempting to insert into the coupled elements map multiple times with the same
-  // element, we'll keep track of the elements we've handled. We're going to use a tree-based
-  // set here since the number of lower-d elements handled should never exceed the number of
-  // element sides (which is small)
-  std::set<dof_id_type> secondary_lower_elems_handled;
   const BoundaryInfo & binfo = _mesh->get_boundary_info();
-  for (auto side : query_elem->side_index_range())
+  const auto is_secondary_lower = [&](const Elem * const elem)
   {
-    if (!binfo.has_boundary_id(query_elem, side, secondary_boundary_id))
-      // We're not a higher-dimensional element along the secondary face, or at least this
-      // side isn't
-      continue;
+    if (!elem || elem == remote_elem || !elem->active() ||
+        elem->subdomain_id() != secondary_subdomain_id)
+      return false;
 
-    const auto & mic = amg.mortarInterfaceCoupling();
-    auto find_it = mic.find(query_elem->id());
-    if (find_it == mic.end())
-      continue;
+    const Elem * const interior_parent = elem->interior_parent();
+    if (!interior_parent)
+      return false;
 
-    const auto & coupled_set = find_it->second;
-    for (const auto coupled_elem_id : coupled_set)
+    const auto side = interior_parent->which_side_am_i(elem);
+    return binfo.has_boundary_id(interior_parent, side, secondary_boundary_id);
+  };
+
+  const auto & nodes_to_secondary_faces = amg.nodesToSecondaryElem();
+  const auto add_secondary_faces_at_nodes =
+      [&](const Elem * const elem, std::set<const Elem *> & secondary_faces)
+  {
+    if (!elem || elem == remote_elem)
+      return;
+
+    // AMG builds this map from the ghosted secondary interface, so it directly provides every
+    // lower-dimensional secondary face contributing to the normals at this face's nodes.
+    for (const auto & node : elem->node_ref_range())
+      if (const auto node_it = nodes_to_secondary_faces.find(node.id());
+          node_it != nodes_to_secondary_faces.end())
+        for (const Elem * const candidate : node_it->second)
+        {
+          const Elem * const candidate_on_rm_mesh = _mesh->elem_ptr(candidate->id());
+          if (is_secondary_lower(candidate_on_rm_mesh))
+            secondary_faces.insert(candidate_on_rm_mesh);
+        }
+  };
+
+  const auto add_secondary_parent_faces =
+      [&](const Elem * const elem, std::set<const Elem *> & secondary_faces)
+  {
+    if (!elem || elem == remote_elem)
+      return;
+
+    bool is_secondary_parent = false;
+    for (const auto side : elem->side_index_range())
+      if (binfo.has_boundary_id(elem, side, secondary_boundary_id))
+      {
+        is_secondary_parent = true;
+        break;
+      }
+
+    if (!is_secondary_parent)
+      return;
+
+    // A secondary parent can own more than one mortar side. Recover them from the same map used by
+    // AutomaticMortarGeneration rather than assuming a particular side or coupling-map ordering.
+    for (const auto & node : elem->node_ref_range())
+      if (const auto node_it = nodes_to_secondary_faces.find(node.id());
+          node_it != nodes_to_secondary_faces.end())
+        for (const Elem * const candidate : node_it->second)
+        {
+          // AMG may own the displaced mesh while this coupling functor is attached to the
+          // undisplaced DofMap. Resolve by id before querying topology or inserting pointers into
+          // this relationship manager's coupling map.
+          const Elem * const candidate_on_rm_mesh = _mesh->elem_ptr(candidate->id());
+          if (is_secondary_lower(candidate_on_rm_mesh) &&
+              candidate_on_rm_mesh->interior_parent() == elem)
+            secondary_faces.insert(candidate_on_rm_mesh);
+        }
+  };
+
+  // The mortar coupling map is keyed for each secondary lower element, its interior parent, and
+  // every paired primary parent. Use that inexpensive lookup before any point-neighbor search so
+  // ordinary volume elements do not pay for interface topology discovery.
+  std::set<const Elem *> secondary_lower_elems;
+  if (is_secondary_lower(query_elem))
+    secondary_lower_elems.insert(query_elem);
+
+  // A secondary parent can belong to the derivative stencil of an overlapping neighboring face
+  // even when its own face has no mortar segment and is therefore absent from the coupling map.
+  // Recover all of its secondary lower-dimensional sides through the node-to-face map. This also
+  // supports the uncommon case where more than one mortar side belongs to the same parent.
+  add_secondary_parent_faces(query_elem, secondary_lower_elems);
+
+  const auto & mic = amg.mortarInterfaceCoupling();
+  if (const auto coupling_it = mic.find(query_elem->id()); coupling_it != mic.end())
+    for (const auto coupled_elem_id : coupling_it->second)
     {
-      auto * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+      const Elem * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+      mooseAssert(coupled_elem,
+                  "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+      if (is_secondary_lower(coupled_elem))
+        secondary_lower_elems.insert(coupled_elem);
+      else
+        add_secondary_parent_faces(coupled_elem, secondary_lower_elems);
+    }
 
-      if (coupled_elem->subdomain_id() != secondary_subdomain_id)
-      {
-        // We support higher-d-secondary to higher-d-primary coupling now, e.g.
-        // if we get here, coupled_elem is not actually a secondary lower elem; it's a
-        // primary higher-d elem
-        mooseAssert(coupled_elem->dim() == query_elem->dim(), "These should be matching dim");
-        continue;
-      }
-
-      auto insert_pr = secondary_lower_elems_handled.insert(coupled_elem_id);
-
-      // If insertion didn't happen, then we've already handled this element
-      if (!insert_pr.second)
-        continue;
-
-      // We've already ghosted the secondary lower-d element itself if it needed to be
-      // outside of the _ghost_point_neighbors logic. But now we must make sure to ghost the
-      // point neighbors of the secondary lower-d element and their mortar interface
-      // couplings
-      std::set<const Elem *> secondary_lower_elem_point_neighbors;
-      coupled_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
-
-      for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
-      {
-        if (neigh->processor_id() != p)
-          coupled_elements.emplace(neigh, _null_mat);
-
-        ghostMortarInterfaceCouplings(p, neigh, coupled_elements, amg);
-      }
-    } // end iteration over mortar interface couplings
-
-    // We actually should have added all the lower-dimensional elements associated with the
-    // higher-dimensional element, so we can stop iterating over sides
+  if (secondary_lower_elems.empty())
     return;
 
-  } // end for side_index_range
+  // Add every secondary face sharing a node, its interior parent, and the primary elements coupled
+  // through mortar. This remains local to secondary faces associated with query_elem; it does not
+  // ghost the whole mortar interface.
+  std::set<const Elem *> one_ring_lower_elems = secondary_lower_elems;
+  for (const Elem * const secondary_lower_elem : secondary_lower_elems)
+    add_secondary_faces_at_nodes(secondary_lower_elem, one_ring_lower_elems);
+
+  for (const Elem * const neighbor : one_ring_lower_elems)
+  {
+    addElement(p, neighbor, coupled_elements);
+    addElement(p, neighbor->interior_parent(), coupled_elements);
+    ghostMortarInterfaceCouplings(p, neighbor, coupled_elements, amg);
+  }
 }
 
 void

@@ -34,6 +34,10 @@ NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParamete
     _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
         getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
 {
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
 }
 
 ADReal
@@ -53,8 +57,12 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // Get the _dof_to_weighted_gap map
       {
         const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
+        const auto normal =
+            _weighted_gap_uo.usesNodalNormalDerivatives()
+                ? _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)
+                : ADRealVectorValue(_normals[normal_index]);
         return _test_secondary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
-               _normals[normal_index](_component);
+               normal(_component);
       }
 
     case Moose::MortarType::Primary:
@@ -62,8 +70,12 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // negative sign here
       {
         const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+        const auto normal =
+            _weighted_gap_uo.usesNodalNormalDerivatives()
+                ? _weighted_gap_uo.contactNormal(*_lower_secondary_elem, normal_index)
+                : ADRealVectorValue(_normals[normal_index]);
         return -_test_primary[_i][_qp] * _weighted_gap_uo.contactPressure()[_qp] *
-               _normals[normal_index](_component);
+               normal(_component);
       }
     default:
       return 0;

@@ -22,6 +22,33 @@ class Elem;
 namespace Moose
 {
 /**
+ * Return the oriented area vector for a mapped edge.
+ *
+ * The vector magnitude is the edge mapping Jacobian and its unit vector is the face normal used by
+ * Assembly::computeFaceMap().
+ */
+template <typename T>
+libMesh::VectorValue<T>
+faceAreaVector(const libMesh::VectorValue<T> & tangent)
+{
+  return libMesh::VectorValue<T>(tangent(1), -tangent(0), 0);
+}
+
+/**
+ * Return the oriented area vector for a mapped surface.
+ *
+ * The vector magnitude is the surface mapping Jacobian and its unit vector is the face normal used
+ * by Assembly::computeFaceMap().
+ */
+template <typename T>
+libMesh::VectorValue<T>
+faceAreaVector(const libMesh::VectorValue<T> & tangent_xi,
+               const libMesh::VectorValue<T> & tangent_eta)
+{
+  return tangent_xi.cross(tangent_eta);
+}
+
+/**
  * Whether we are using global AD indexing
  */
 inline bool
