@@ -73,7 +73,7 @@ ComputeLagrangianStressCustomPK2::computeQpCauchyStress()
   // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through PK2(F_stab(dL))
   // (F_ust is constant w.r.t. dL since dL is computed from F_stab via the kinematic helper).
   //   dPK2/d(dL) = dPK2/d(F_stab) * d(F_stab)/d(dL) = _dpk2_dF *
-  //   (_d_spatial_velocity_increment_d_F)^{-1}
-  const RankFourTensor dPK2_d_dL = _dpk2_dF[_qp] * _d_spatial_velocity_increment_d_F[_qp].inverse();
+  //   (_d_deformation_gradient_increment_d_F)^{-1}
+  const RankFourTensor dPK2_d_dL = _dpk2_dF[_qp] * _d_deformation_gradient_increment_d_F[_qp].inverse();
   _cauchy_jacobian[_qp] = dPK2_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
 }

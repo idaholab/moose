@@ -75,7 +75,7 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
     RankFourTensor dsigma_dF =
         (_pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
     dsigma_dF += dsigma_dF_geom;
-    _cauchy_jacobian[_qp] = dsigma_dF * _d_spatial_velocity_increment_d_F[_qp].inverse();
+    _cauchy_jacobian[_qp] = dsigma_dF * _d_deformation_gradient_increment_d_F[_qp].inverse();
 
     // Bypass-F-bar variant: sigma chain without the `_d_F_stab_d_F_ust` factor. Same
     // geometric pieces; constitutive PK1 jacobian used directly.

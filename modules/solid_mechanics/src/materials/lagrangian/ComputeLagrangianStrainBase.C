@@ -98,8 +98,8 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _rotated_mechanical_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotated_mechanical_strain")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _spatial_velocity_increment(
-        declareProperty<RankTwoTensor>(_base_name + "spatial_velocity_increment")),
+    _deformation_gradient_increment(
+        declareProperty<RankTwoTensor>(_base_name + "spatial_deformation_gradient_increment")),
     _vorticity_increment(declareProperty<RankTwoTensor>(_base_name + "vorticity_increment")),
     _F_ust(declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _F_ust_old(
@@ -110,8 +110,8 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _F_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _f_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_incremental_deformation_gradient")),
-    _d_spatial_velocity_increment_d_F(declareProperty<RankFourTensor>(
-        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_deformation_gradient_increment_d_F(declareProperty<RankFourTensor>(
+        _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_vorticity_increment_d_F(declareProperty<RankFourTensor>(
         _base_name + "d_vorticity_increment_d_deformation_gradient")),
     _d_F_d_grad_u(
@@ -196,7 +196,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
 
   // Skip the Jacobian-only RankFourTensor derivative chain when no downstream consumer
   // will read it (i.e. we're in a residual-only sweep). All of `_d_F_d_grad_u`,
-  // `_d_spatial_velocity_increment_d_F`, `_d_vorticity_increment_d_F`, and the
+  // `_d_deformation_gradient_increment_d_F`, `_d_vorticity_increment_d_F`, and the
   // `_d_rotation_d_F` slot of the polar decomposition feed only `*_jacobian` material
   // properties, which the kernel consumes only during Jacobian or
   // residual-and-Jacobian-together assembly.
@@ -239,7 +239,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
       // Common chain rule: d(f^{-1})_{pq}/dF_{mn} = -f^{-1}_{pm} * F^{-1}_{nq}.
       usingTensorIndices(p_, q_, m_, n_);
       const RankFourTensor d_f_inv_d_F = -_f_inv[_qp].template times<p_, m_, n_, q_>(_F_inv[_qp]);
-      _d_spatial_velocity_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
+      _d_deformation_gradient_increment_d_F[_qp] = d_dL_d_f_inv * d_f_inv_d_F;
       _d_vorticity_increment_d_F[_qp] = d_dw_d_f_inv * d_f_inv_d_F;
     }
 
@@ -256,7 +256,7 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     if (need_jacobian)
     {
       // d(dL)/dF = I^{(4)} when dL = F - F_old. d(dW)/dF = the skew projector.
-      _d_spatial_velocity_increment_d_F[_qp] = RankFourTensor::IdentityFour();
+      _d_deformation_gradient_increment_d_F[_qp] = RankFourTensor::IdentityFour();
       usingTensorIndices(i_, j_, k_, l_);
       const auto I2 = RankTwoTensor::Identity();
       _d_vorticity_increment_d_F[_qp] =
@@ -341,7 +341,7 @@ ComputeLagrangianStrainBase<G>::setQpIncrementalStrains(const RankTwoTensor & dd
   _vorticity_increment[_qp] = dw;
   // Full kinematic spatial velocity gradient increment, before any eigenstrain subtraction.
   // The objective-rate advection in ComputeLagrangianObjectiveStress consumes this.
-  _spatial_velocity_increment[_qp] = dd + dw;
+  _deformation_gradient_increment[_qp] = dd + dw;
 
   // Increment the total strain
   _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];

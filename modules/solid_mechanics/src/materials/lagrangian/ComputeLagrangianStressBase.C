@@ -36,8 +36,8 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
         _base_name + "d_deformation_gradient_d_grad_displacement")),
     _F_ust(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
-    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
-        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_F_stab_d_F_ust(
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized"))
 {

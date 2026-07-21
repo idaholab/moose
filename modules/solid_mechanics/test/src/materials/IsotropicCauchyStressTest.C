@@ -16,7 +16,7 @@ IsotropicCauchyStressTest::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Test-only hypoelastic isotropic Cauchy stress with analytic "
-                             "dsigma/d(spatial_velocity_increment), used to exercise "
+                             "dsigma/d(spatial_deformation_gradient_increment), used to exercise "
                              "ComputeLagrangianCauchyCustomStress with the Jacobian tester.");
   params.addRequiredParam<Real>("lambda", "First Lame parameter.");
   params.addRequiredParam<Real>("mu", "Shear modulus.");
@@ -24,9 +24,9 @@ IsotropicCauchyStressTest::validParams()
       "sigma_name", "test_cauchy", "Name to publish the Cauchy stress as.");
   params.addParam<MaterialPropertyName>("dsigma_d_dL_name",
                                         "test_dcauchy_d_dL",
-                                        "Name to publish dsigma/d(spatial_velocity_increment) as.");
-  params.addParam<MaterialPropertyName>("spatial_velocity_increment",
-                                        "spatial_velocity_increment",
+                                        "Name to publish dsigma/d(spatial_deformation_gradient_increment) as.");
+  params.addParam<MaterialPropertyName>("spatial_deformation_gradient_increment",
+                                        "spatial_deformation_gradient_increment",
                                         "Strain-calc's spatial velocity gradient increment.");
   return params;
 }
@@ -35,7 +35,7 @@ IsotropicCauchyStressTest::IsotropicCauchyStressTest(const InputParameters & par
   : Material(parameters),
     _lambda(getParam<Real>("lambda")),
     _mu(getParam<Real>("mu")),
-    _dL(getMaterialProperty<RankTwoTensor>("spatial_velocity_increment")),
+    _dL(getMaterialProperty<RankTwoTensor>("spatial_deformation_gradient_increment")),
     _sigma(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("sigma_name"))),
     _sigma_old(getMaterialPropertyOld<RankTwoTensor>(getParam<MaterialPropertyName>("sigma_name"))),
     _dsigma_d_dL(

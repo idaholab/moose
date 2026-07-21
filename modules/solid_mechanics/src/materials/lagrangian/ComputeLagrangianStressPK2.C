@@ -53,7 +53,7 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
     const auto I2 = RankTwoTensor::Identity();
     const RankFourTensor dE_dFstab = 0.5 * (I2.template times<i_, l_, j_, k_>(_F[_qp].transpose()) +
                                             _F[_qp].transpose().template times<i_, k_, j_, l_>(I2));
-    const RankFourTensor dE_d_dL = dE_dFstab * _d_spatial_velocity_increment_d_F[_qp].inverse();
+    const RankFourTensor dE_d_dL = dE_dFstab * _d_deformation_gradient_increment_d_F[_qp].inverse();
     const RankFourTensor dS_d_dL = _C[_qp] * dE_d_dL;
     _cauchy_jacobian[_qp] = dS_d_dL.singleProductI(_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
   }

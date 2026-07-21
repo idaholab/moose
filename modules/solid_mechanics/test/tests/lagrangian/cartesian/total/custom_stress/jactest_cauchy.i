@@ -2,7 +2,7 @@
 # Jacobian. The published cauchy stress and dsigma/d(dL) come from a test-only
 # hypoelastic isotropic material (IsotropicCauchyStressTest), so the Jacobian tester
 # sees the same numerical sensitivities the approx-kinematics NEML2 wrap would produce
-# (NEML2 derivative: state/internal/full_cauchy_stress / forces/spatial_velocity_increment).
+# (NEML2 derivative: state/internal/full_cauchy_stress / forces/spatial_deformation_gradient_increment).
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'

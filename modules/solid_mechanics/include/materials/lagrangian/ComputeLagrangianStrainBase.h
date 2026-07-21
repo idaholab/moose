@@ -201,7 +201,7 @@ protected:
 
   /// Derivative of the spatial velocity gradient increment with respect to F_{n+1}.
   /// Stored so downstream consumers do not bake in the linear-approximation assumption.
-  MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+  MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// Derivative of the vorticity increment Deltaw with respect to F_{n+1}. Consumed by the
   /// Jaumann objective rate so it can produce a consistent Jacobian regardless of which

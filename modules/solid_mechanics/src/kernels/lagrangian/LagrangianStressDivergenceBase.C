@@ -71,8 +71,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _F_actual(getMaterialPropertyByName<RankTwoTensor>(_base_name + "actual_deformation_gradient")),
-    _d_spatial_velocity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
-        _base_name + "d_spatial_velocity_increment_d_deformation_gradient")),
+    _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_deformation_gradient_d_grad_displacement")),
     _d_F_stab_d_F_ust(
@@ -178,7 +178,7 @@ LagrangianStressDivergenceBase::prepareFBarCaches()
     // The R4 middle-pair contraction matches the chain-rule semantics we need (the
     // strain-calc helpers and the kernel already rely on this convention elsewhere).
     _D_nl_cache[qp] =
-        _cauchy_jacobian[qp] * _d_spatial_velocity_increment_d_F[qp] * _d_F_stab_d_F_avg[qp];
+        _cauchy_jacobian[qp] * _d_deformation_gradient_increment_d_F[qp] * _d_F_stab_d_F_avg[qp];
 
     if (_large_kinematics)
     {

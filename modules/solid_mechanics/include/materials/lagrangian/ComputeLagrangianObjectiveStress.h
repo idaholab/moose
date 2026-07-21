@@ -82,10 +82,10 @@ protected:
   const MaterialProperty<RankTwoTensor> & _vorticity_increment;
 
   /// The spatial velocity gradient increment (dL)
-  const MaterialProperty<RankTwoTensor> & _spatial_velocity_increment;
+  const MaterialProperty<RankTwoTensor> & _deformation_gradient_increment;
 
   /// d(dL)/dF, stored by the strain calculator
-  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+  const MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// d(dW)/dF from the strain calculator, consumed by Jaumann and Rashid
   const MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;

@@ -34,7 +34,7 @@
     cli_args = 'GlobalParams/stabilize_strain=false'
     requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
                   'ComputeLagrangianCauchyCustomStress wrap path without F-bar stabilization, '
-                  'exercising the dsigma/d(spatial_velocity_increment) chain.'
+                  'exercising the dsigma/d(spatial_deformation_gradient_increment) chain.'
   []
   [jacobian_custom_cauchy_with_stab]
     type = PetscJacobianTester

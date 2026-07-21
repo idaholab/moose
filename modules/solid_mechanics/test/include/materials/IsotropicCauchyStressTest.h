@@ -18,7 +18,7 @@
 ///   dsigma/d(dL) = C_sym                     (symmetric isotropic elasticity tangent)
 /// with dL the spatial-velocity-gradient increment. Used to exercise
 /// `ComputeLagrangianCauchyCustomStress` with the Jacobian tester, mirroring the contract
-/// the approx-kinematics NEML2 model satisfies (dsigma/d(spatial_velocity_increment)).
+/// the approx-kinematics NEML2 model satisfies (dsigma/d(spatial_deformation_gradient_increment)).
 class IsotropicCauchyStressTest : public Material
 {
 public:
@@ -32,7 +32,7 @@ protected:
   const Real _lambda;
   const Real _mu;
 
-  /// Strain calc's `_spatial_velocity_increment` (= sym + skew of dL).
+  /// Strain calc's `_deformation_gradient_increment` (= sym + skew of dL).
   const MaterialProperty<RankTwoTensor> & _dL;
 
   MaterialProperty<RankTwoTensor> & _sigma;

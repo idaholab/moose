@@ -68,7 +68,7 @@ ComputeHypoelasticStVenantKirchhoffStress::computeQpSmallStress()
   {
     // dF/d(dL) as the inverse of the stored d(dL)/dF, instead of hard-coding the
     // linear-approximation factorization f.times<i, k, l, j>(F).
-    const RankFourTensor dFddL = _d_spatial_velocity_increment_d_F[_qp].inverse();
+    const RankFourTensor dFddL = _d_deformation_gradient_increment_d_F[_qp].inverse();
     _small_jacobian[_qp] =
         C +
         (dFddL.singleProductJ((C0.tripleProductJkl(F, F, F) * dL).transpose()) +

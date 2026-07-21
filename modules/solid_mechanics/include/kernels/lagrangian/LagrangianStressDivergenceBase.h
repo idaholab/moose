@@ -79,7 +79,7 @@ protected:
   /// Non-local F-bar contribution to deltaPK1 at the current `_qp`, given the perturbation
   /// `delta_F_avg` of the element-average F. Implements the shared chain
   ///   deltaF_stab_NL = _d_F_stab_d_F_avg * deltaF_avg
-  ///   deltadL_NL    = _d_spatial_velocity_increment_d_F * deltaF_stab_NL
+  ///   deltadL_NL    = _d_deformation_gradient_increment_d_F * deltaF_stab_NL
   ///   deltasigma_NL     = _cauchy_jacobian * deltadL_NL
   ///   deltaPK1_NL   = det(F_ust) * deltasigma_NL * F_ust^{-T}    (large kinematics)
   ///             = deltasigma_NL                               (small kinematics, PK1 == sigma)
@@ -174,7 +174,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _F_actual;
 
   /// Derivative of the spatial velocity gradient increment w.r.t. F_{n+1}
-  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+  const MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// Derivative of F_{n+1} w.r.t. the displacement gradient
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
@@ -191,7 +191,7 @@ protected:
 
   /// Cauchy-stress Jacobian dsigma/d(dL), published by `ComputeLagrangianStressBase` as
   /// `cauchy_jacobian`. Used by the TL kernel to assemble the non-local F-bar Jacobian
-  /// contribution (chain: cauchy_jacobian * _d_spatial_velocity_increment_d_F *
+  /// contribution (chain: cauchy_jacobian * _d_deformation_gradient_increment_d_F *
   /// _d_F_stab_d_F_avg * deltaF_avg -> deltasigma_NL -> PK1 wrap via F_ust).
   const MaterialProperty<RankFourTensor> & _cauchy_jacobian;
 
@@ -225,7 +225,7 @@ protected:
 
   /// Composed non-local F-bar operator per qp:
   ///   _D_nl_cache[qp] = _cauchy_jacobian[qp]
-  ///                   * _d_spatial_velocity_increment_d_F[qp]
+  ///                   * _d_deformation_gradient_increment_d_F[qp]
   ///                   * _d_F_stab_d_F_avg[qp]
   /// so that `deltaPK1NonLocalFBar(deltaF_avg)` collapses to one R4*R2 contraction
   /// instead of three. Populated only when `_stabilize_strain`.

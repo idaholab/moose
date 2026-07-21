@@ -107,7 +107,7 @@ protected:
 
   /// d(spatial velocity gradient increment)/d(F_stab). Used in the sigma-via-dL chain to
   /// build pk1_jacobian / cauchy_jacobian.
-  const MaterialProperty<RankFourTensor> & _d_spatial_velocity_increment_d_F;
+  const MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// d(F_stab)/d(F_ust). Multiplied into the sigma chain so pk1_jacobian = dPK1/d(F_ust)
   /// (and cauchy_jacobian = dsigma/d(dL)) gets the local F-bar contribution. Equals

@@ -62,7 +62,7 @@ LagrangianTruesdellRate::update(ComputeLagrangianObjectiveStress & host,
                                 bool need_jacobian) const
 {
   const unsigned int qp = host._qp;
-  const RankTwoTensor & dL = host._spatial_velocity_increment[qp];
+  const RankTwoTensor & dL = host._deformation_gradient_increment[qp];
 
   auto [S, Jinv] = advectStress(host._cauchy_stress_old[qp] + dS, dL);
   host._cauchy_stress[qp] = S;
@@ -95,7 +95,7 @@ LagrangianJaumannRate::update(ComputeLagrangianObjectiveStress & host,
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor d_dW_d_dL =
-      host._d_vorticity_increment_d_F[qp] * host._d_spatial_velocity_increment_d_F[qp].inverse();
+      host._d_vorticity_increment_d_F[qp] * host._d_deformation_gradient_increment_d_F[qp].inverse();
   const RankFourTensor U = stressAdvectionDerivative(S) * d_dW_d_dL;
   host._cauchy_jacobian[qp] = cauchyJacobian(Jinv, host._small_jacobian[qp], U);
 }
@@ -124,7 +124,7 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
   const RankFourTensor & d_R_d_F = host._d_rotation_d_F[qp];
-  const RankFourTensor d_F_d_dL = host._d_spatial_velocity_increment_d_F[qp].inverse();
+  const RankFourTensor d_F_d_dL = host._d_deformation_gradient_increment_d_F[qp].inverse();
   const RankTwoTensor T = host._rotation_old[qp].transpose() * host._inv_df[qp];
 
   const RankFourTensor d_invdf_d_F = -host._inv_df[qp].times<i, k, l, j>(host._inv_def_grad[qp]);
@@ -228,10 +228,10 @@ LagrangianRashidRate::update(ComputeLagrangianObjectiveStress & host,
   host._dcauchy_stress_d_eigenstrain[qp] = -(J_inv * host._small_jacobian[qp]);
 
   // Chain rule pieces for dsigma/d(dL):
-  //   d(Deltaw)/d(dL) = _d_vorticity_increment_d_F * inverse(_d_spatial_velocity_increment_d_F)
+  //   d(Deltaw)/d(dL) = _d_vorticity_increment_d_F * inverse(_d_deformation_gradient_increment_d_F)
   //   d(Deltad)/d(dL) = I^(4) - d(Deltaw)/d(dL)   (Deltad + Deltaw = dL by construction).
   //   d(r_hat)/d(dL)  = d(r_hat)/d(Deltaw) * d(Deltaw)/d(dL).
-  const RankFourTensor d_F_d_dL = host._d_spatial_velocity_increment_d_F[qp].inverse();
+  const RankFourTensor d_F_d_dL = host._d_deformation_gradient_increment_d_F[qp].inverse();
   const RankFourTensor d_dW_d_dL = host._d_vorticity_increment_d_F[qp] * d_F_d_dL;
   const RankFourTensor d_dD_d_dL = RankFourTensor::IdentityFour() - d_dW_d_dL;
   const RankFourTensor d_rhat_d_dL = d_rhat_d_dW * d_dW_d_dL;

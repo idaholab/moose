@@ -143,7 +143,7 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned
   const RankTwoTensor delta_F_stab =
       _d_F_stab_d_F_ust[_qp] * delta_F_ust_local + _d_F_stab_d_F_avg[_qp] * delta_F_avg;
 
-  const RankTwoTensor delta_dL = _d_spatial_velocity_increment_d_F[_qp] * delta_F_stab;
+  const RankTwoTensor delta_dL = _d_deformation_gradient_increment_d_F[_qp] * delta_F_stab;
 
   // The material jacobian
   Real J = grad_test.doubleContraction(_material_jacobian[_qp] * delta_dL);
