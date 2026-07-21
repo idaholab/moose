@@ -1,451 +1,217 @@
-# Automated Mortar Contact Scaling Parameters Design
-
-**Issue:** #32856
-**Branch:** `automate-mortar-constants-32856`
-
-## Motivation
-
-The mortar-based frictional contact implementation in MOOSE requires two numerical scaling
-parameters, `c_normal` and `c_tangential`, that must currently be set by trial and error. These
-parameters appear in the primal-dual active set strategy (PDASS) complementarity constraints that
-enforce normal and tangential contact conditions.
-
-In `ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof`:
-```cpp
-const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
-```
+# Physics-Balanced Mortar Contact Scaling
 
-In `ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof{3d}`:
-```cpp
-const auto lambda_plus_cg    = contact_pressure + c   * weighted_gap;
-lambda_t_plus_ctu[i]         = friction_lm_values[i]  + c_t * *tangential_vel[i] * _dt;
-```
-
-The intent of this design is to add an optional, fully automatic mode that computes both
-parameters from the elasticity tensors of the contacting bodies — zero additional user input
-required. The feature must be strictly opt-in and must not affect any existing simulation.
-
----
-
-## Background: Physical Meaning of c_normal and c_tangential
-
-**`c_normal`** (units: Pa/m = stiffness per unit volume) appears in `contact_pressure + c *
-weighted_gap`. The weighted gap is area-integrated: `normalization_i` (the weighting function
-norm stored alongside the gap) converts it back to a physical gap in meters. With
-`normalize_c = true` the effective scaling becomes:
-
-```
-c_effective = c / normalization_i   [Pa/m]
-```
-
-For PDASS to be well-conditioned, `c_effective * gap_typical` must be comparable in magnitude
-to `contact_pressure_typical`. Contact pressure scales as `E * gap / h` (Hertz-like), so:
-
-```
-c_effective ~ E / h   →   c = E   (when normalize_c handles the 1/h factor)
-```
-
-This is the standard result from mortar/penalty contact literature. The existing `normalize_c`
-mechanism already provides the `1/h` factor; `c_normal` just needs to be on the order of the
-material's Young's modulus.
-
-**`c_tangential`** (same units) appears in `friction_lm + c_t * weighted_velocity * dt`. For
-problems with steady sliding the same stiffness argument applies: `c_t = c_normal` is a
-natural default. For problems where the sliding velocity varies widely, a per-node dynamic
-adaptation (see §3) can improve convergence.
-
----
-
-## Key Architectural Observation
-
-`WeightedGapUserObject` is the base class for both LM-based contact UOs
-(`LMWeightedGapUserObject`, `LMWeightedVelocitiesUserObject`) and penalty/cohesive-zone UOs
-(`PenaltyWeightedGapUserObject`, `PenaltyFrictionUserObject`, `CohesiveZoneModelBase`). The
-`c_normal` parameter only exists in LM-based mortar contact, so the new feature belongs in
-`LMWeightedGapUserObject`, not the base class.
-
-`WeightedGapUserObject` already inherits `TwoMaterialPropertyInterface`
-(`WeightedGapUserObject.C:26`: `params += TwoMaterialPropertyInterface::validParams()`), so
-`LMWeightedGapUserObject` can call `getMaterialProperty<RankFourTensor>("elasticity_tensor")`
-for the secondary side and `getNeighborMaterialProperty<RankFourTensor>("elasticity_tensor")`
-for the primary side — with no new infrastructure.
-
-The contact normal `_normals[_i]` is already available in `computeQpIProperties()` — it is
-used there to project the gap vector onto the surface normal. This is the right place to
-accumulate the normal-direction stiffness: the acoustic tensor contraction
-`n_i n_j C_ijkl n_k n_l` uses the same per-node normal and the same test-function weight
-`(*_test)[_i][_qp] * _qp_factor` that already accumulates the gap normalization, keeping
-the two quantities on a consistent basis. The result is reduced across processors in
-`finalize()` alongside the existing gap communication.
-
----
-
-## Proposed Changes
-
-### 1. New `ContactAction` Parameters
-
-Add one new parameter to `ContactAction::validParams()` alongside the existing `c_normal`
-and `c_tangential` declarations (currently lines 192–201):
-
-| Parameter | Type | Default | Purpose |
-|-----------|------|---------|---------|
-| `c_normal_strategy` | `MooseEnum` | `"user"` | `user` (current behavior) or `physical` (fully automatic) |
-| `c_tangential_strategy` | `MooseEnum` | `"user"` | `user` (current behavior) or `physical` (velocity-scaled, linked to `c_normal_eff`) |
-| `secondary_elasticity_tensor_base_name` | `std::string` | `""` | Base name prefix of the elasticity tensor property on the secondary body; only used when `c_normal_strategy = physical` |
-| `primary_elasticity_tensor_base_name` | `std::string` | `""` | Base name prefix of the elasticity tensor property on the primary body; only used when `c_normal_strategy = physical` |
-| `use_automatic_differentiation` | `bool` | `false` | Set to true if the elasticity tensor material property was declared as AD; only used when `c_normal_strategy = physical` |
-
-When `c_normal_strategy = physical`:
-- `ContactAction` emits a `paramError` if `c_normal` was explicitly set by the user
-  (`isParamSetByUser("c_normal")`). The two options are mutually exclusive: `physical` means
-  the value is derived from the material system and no manual override is meaningful.
-- `ContactAction` sets `derive_c_from_elasticity = true` on the weighted gap UserObject it
-  already creates (passing through `params.set<bool>`).
-- `ContactAction` forces `normalize_c = true` on the downstream constraint objects.
-
-When `c_tangential_strategy = physical`:
-- Only valid for Coulomb friction mortar; `paramError` otherwise.
-- `c_t` is derived per-node from `c_normal_eff` with dynamic velocity scaling: `c_t = c_normal_eff / (vt_mag * dt)` during sliding, falling back to `c_normal_eff` during stick (see §3).
-- `ContactAction` sets `dynamic_c_t = true` on the frictional constraint.
-
-All new parameters are mortar-only, consistent with the existing validation for `c_normal`
-(lines 387–392).
-
-### 2. Automatic Effective Modulus in `LMWeightedGapUserObject`
-
-**New parameters** (added to `LMWeightedGapUserObject::validParams()`):
-```cpp
-params.addParam<bool>("derive_c_from_elasticity", false,
-    "Compute an effective elastic modulus from contact surface material properties "
-    "for use as the c_normal constraint parameter.");
-params.addParam<std::string>("secondary_base_name", "",
-    "Base name prefix of the elasticity_tensor material property on the secondary body. "
-    "Must match the base_name used on the secondary material block that computes the "
-    "elasticity tensor.");
-params.addParam<std::string>("primary_base_name", "",
-    "Base name prefix of the elasticity_tensor material property on the primary body. "
-    "Must match the base_name used on the primary material block that computes the "
-    "elasticity tensor.");
-params.addParam<bool>("use_automatic_differentiation", false,
-    "Whether the elasticity tensor material property was declared as an AD property. "
-    "Set to true if the material block uses an AD elasticity tensor.");
-```
-
-**Implementation note — `base_name` and property lookup:**
-`ComputeElasticityTensorBase` (the base class for standard MOOSE elasticity tensor materials)
-declares its property as `_base_name + "elasticity_tensor"`, where `_base_name` is either
-empty or `"<prefix>_"`. The UO must construct the same name:
-```cpp
-const std::string sec_base = getParam<std::string>("secondary_base_name");
-const std::string pri_base = getParam<std::string>("primary_base_name");
-const std::string sec_name = sec_base.empty() ? "elasticity_tensor" : sec_base + "_elasticity_tensor";
-const std::string pri_name = pri_base.empty() ? "elasticity_tensor" : pri_base + "_elasticity_tensor";
-// dispatches to the template helper described under "New members" below
-if (_use_automatic_differentiation)
-  fetchElasticityTensorProperties<true>(sec_name, pri_name);
-else
-  fetchElasticityTensorProperties<false>(sec_name, pri_name);
-```
-
-`ContactAction` does not currently have a `base_name` parameter. Three new optional
-parameters, `secondary_elasticity_tensor_base_name`, `primary_elasticity_tensor_base_name`,
-and `use_automatic_differentiation`, should be added to `ContactAction` and forwarded to the UO
-when `derive_c_from_elasticity = true`. The secondary and primary bodies may have different
-`base_name` prefixes on their respective elasticity tensor materials, so a single shared name
-is insufficient. This keeps the user from having to set these directly on the UO, which is
-an implementation detail they should not need to know about.
-
-**New members** (added to `LMWeightedGapUserObject.h`):
-```cpp
-const bool _derive_c_from_elasticity;
-const bool _use_automatic_differentiation;
-// Exactly one pointer per side is non-null depending on _use_automatic_differentiation
-const MaterialProperty<RankFourTensor>   * _elasticity_tensor_secondary    = nullptr;
-const MaterialProperty<RankFourTensor>   * _elasticity_tensor_primary      = nullptr;
-const ADMaterialProperty<RankFourTensor> * _elasticity_tensor_secondary_ad = nullptr;
-const ADMaterialProperty<RankFourTensor> * _elasticity_tensor_primary_ad   = nullptr;
-// Per-node derived c values; pair is {accumulated C_nn * weight, accumulated weight}
-// mirrors the layout of _dof_to_weighted_gap
-std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_derived_c;
-```
-
-Mirroring `_dof_to_weighted_gap`, accumulation is per-node so each entry carries its own
-AD derivative information. A private template helper is the only place that calls
-`getGenericMaterialProperty` / `getGenericNeighborMaterialProperty`:
-```cpp
-template <bool is_ad>
-void fetchElasticityTensorProperties(const std::string & sec_name,
-                                     const std::string & pri_name)
-{
-  if constexpr (is_ad)
-  {
-    _elasticity_tensor_secondary_ad = &getGenericMaterialProperty<RankFourTensor, true>(sec_name);
-    _elasticity_tensor_primary_ad   = &getGenericNeighborMaterialProperty<RankFourTensor, true>(pri_name);
-  }
-  else
-  {
-    _elasticity_tensor_secondary = &getGenericMaterialProperty<RankFourTensor, false>(sec_name);
-    _elasticity_tensor_primary   = &getGenericNeighborMaterialProperty<RankFourTensor, false>(pri_name);
-  }
-}
-```
-
-Called in the constructor as:
-```cpp
-if (_use_automatic_differentiation)
-  fetchElasticityTensorProperties<true>(sec_name, pri_name);
-else
-  fetchElasticityTensorProperties<false>(sec_name, pri_name);
-```
-
-In `computeQpIProperties`, dispatch to a second template helper so each instantiation
-has a single consistent type and `auto` deduces correctly within it:
-```cpp
-// Called from computeQpIProperties:
-if (_use_automatic_differentiation)
-  accumulateDerivedC<true>();
-else
-  accumulateDerivedC<false>();
-```
-
-```cpp
-template <bool is_ad>
-void LMWeightedGapUserObject::accumulateDerivedC()
-{
-  const auto & sec_prop = [&]() -> const auto &
-  {
-    if constexpr (is_ad) return *_elasticity_tensor_secondary_ad;
-    else                 return *_elasticity_tensor_secondary;
-  }();
-  const auto & pri_prop = [&]() -> const auto &
-  {
-    if constexpr (is_ad) return *_elasticity_tensor_primary_ad;
-    else                 return *_elasticity_tensor_primary;
-  }();
-
-  const RealVectorValue & n = _normals[_i];
-  auto C_nn_sec = decltype(sec_prop[_qp](0,0,0,0)){0};
-  auto C_nn_pri = decltype(pri_prop[_qp](0,0,0,0)){0};
-  for (const auto a : make_range(3))
-    for (const auto b : make_range(3))
-      for (const auto c : make_range(3))
-        for (const auto d : make_range(3))
-        {
-          const auto w = n(a) * n(b) * n(c) * n(d);
-          C_nn_sec += w * sec_prop[_qp](a, b, c, d);
-          C_nn_pri += w * pri_prop[_qp](a, b, c, d);
-        }
-  const auto C_nn_harm = 2.0 * C_nn_sec * C_nn_pri / (C_nn_sec + C_nn_pri);
-  const auto test_weight = (*_test)[_i][_qp] * _qp_factor;
-  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
-  auto & [c_num, c_denom] = _dof_to_derived_c[dof];
-  c_num   += C_nn_harm * test_weight;
-  c_denom += test_weight;
-}
-```
-
-In `finalize()`, after communicating gaps, divide `c_num` by `c_denom` for each node
-(and perform the parallel reduction analogous to `communicateGaps`), then expose via:
-```cpp
-const std::unordered_map<const DofObject *, std::pair<ADReal, Real>> & dofToDerivedC() const;
-```
-
-After `finalize()`, `c_num / c_denom` is the test-function-weighted average of `C_nn` over
-the mortar segments touching that node — a representative elastic stiffness at that node in
-units of Pa. This normalization is internal to the UO and is purely about averaging the
-material property across quadrature points; it has nothing to do with element size.
-
-The constraint then reads `c_nn` (the first pair element, already averaged) and optionally
-applies `normalize_c`, which is a separate and independent operation:
-```cpp
-const auto & [c_nn, _] = libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof_object);
-const ADReal c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
-```
-
-`normalize_c` divides by `*_normalization_ptr`, the weighting function norm for that node
-(units of area). This accounts for the fact that the weighted gap is area-integrated: without
-it, `c` would have an implicit element-size dependence. The two normalizations are therefore
-independent: the UO's `c_denom` converts accumulated C_nn integrals into a material stiffness
-value; `normalize_c` in the constraint converts that stiffness value into the correct scale
-relative to the area-integrated gap.
-
-No `raw_value` is needed anywhere: AD derivatives propagate from the elasticity tensor
-through the acoustic tensor contraction into the constraint residual and Jacobian.
-
-The material properties are only retrieved in the constructor when `_derive_c_from_elasticity`
-is true, so there is zero overhead for the default path.
-
-The acoustic tensor contraction `n_i n_j C_ijkl n_k n_l` gives the normal-direction stiffness
-for any elasticity tensor — isotropic, orthotropic, or fully anisotropic — without requiring
-extraction of scalar moduli. For isotropic materials it equals λ+2μ regardless of the contact
-normal direction.
-
-**In `LMWeightedGapUserObject::initialize()`**: clear `_dof_to_derived_c`.
-
-**In `LMWeightedGapUserObject::finalize()`** (after calling `WeightedGapUserObject::finalize()`):
-communicate the per-node map across processors (analogous to `communicateGaps`), then
-normalize each entry:
-```cpp
-for (auto & [dof, c_pr] : _dof_to_derived_c)
-  c_pr.first /= c_pr.second;
-```
-
-### 3. Constraint Changes
-
-#### Normal constraint (`ComputeWeightedGapLMMechanicalContact`)
-
-The constraint already holds a reference to `_weighted_gap_uo`. In physical mode the
-per-node `c` is read directly from `dofToDerivedC()` during `enforceConstraintOnDof` rather
-than from the scalar `_c` member, so `_c` is bypassed entirely for this code path.
-
-**In `ContactAction::act()`** (inside the mortar setup block, near line 1072):
-```cpp
-if (getParam<MooseEnum>("c_normal_strategy") == "physical")
-{
-  if (isParamSetByUser("c_normal"))
-    paramError("c_normal",
-               "Cannot set 'c_normal' when 'c_normal_strategy = physical'; "
-               "the value is derived from the material elasticity tensor.");
-  params.set<bool>("normalize_c") = true;
-  params.set<bool>("use_derived_c_normal") = true;
-}
-else
-  params.set<Real>("c") = getParam<Real>("c_normal");
-```
-
-Add a `use_derived_c_normal` bool to `ComputeWeightedGapLMMechanicalContact`. When set,
-`enforceConstraintOnDof` looks up `c_nn` from `_weighted_gap_uo.dofToDerivedC()` instead
-of using `_c`, as shown in the constraint snippet in §2 above.
-
-#### Tangential constraint (`ComputeFrictionalForceLMMechanicalContact`)
-
-**Tightening UO member types in the constraint classes**
-
-The existing `_weighted_gap_uo` and `_weighted_velocities_uo` members in
-`ComputeWeightedGapLMMechanicalContact` and `ComputeFrictionalForceLMMechanicalContact` are
-currently typed as the base classes `WeightedGapUserObject` and `WeightedVelocitiesUserObject`.
-Inspection of the full test suite shows that every test using `ComputeFrictionalForceLMMechanicalContact`
-pairs it exclusively with `LMWeightedVelocitiesUserObject`; no test uses a non-LM UO
-(e.g. `PenaltyFrictionUserObject`) with this constraint. The broad base-class typing is
-therefore over-generalization with no demonstrated need.
-
-As part of this change, retype both members to their LM-specific derived classes:
-
-- `ComputeWeightedGapLMMechanicalContact`: `_weighted_gap_uo` → `const LMWeightedGapUserObject &`
-- `ComputeFrictionalForceLMMechanicalContact`: `_weighted_velocities_uo` → `const LMWeightedVelocitiesUserObject &`
-
-With `_weighted_gap_uo` already typed as `LMWeightedGapUserObject`, `dofToDerivedC()` is
-directly accessible with no downcast needed. In `enforceConstraintOnDof`, `c` is resolved
-per-node as:
-```cpp
-ADReal c;
-if (_use_derived_c_normal)
-{
-  const auto & [c_nn, _] = libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof_object);
-  c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
-}
-else
-  c = _normalize_c ? _c / *_normalization_ptr : _c;
-```
-
-The existing `Real _c` member is used unchanged in the `user` strategy path.
-
-**`physical` c_t computation**
-
-The `physical` strategy requires per-node `c_t` in `enforceConstraintOnDof{,3d}`.
-Add:
-
-```cpp
-const bool _dynamic_c_t;
-const Real _vel_floor;  // fallback threshold: below this velocity magnitude, use c_normal_eff
-```
-
-`c_t` is `ADReal` throughout so that derivatives from the normal stiffness (in physical mode)
-and from the tangential velocity (already `ADReal`) propagate into the Jacobian. The normal
-reference stiffness is resolved by the same two-path logic used in the normal constraint:
-```cpp
-// Resolve normal reference stiffness (physical or user mode)
-ADReal c_normal_eff;
-if (_use_derived_c_normal)
-{
-  const auto & [c_nn, _] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof_object);
-  c_normal_eff = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
-}
-else
-  c_normal_eff = _normalize_c ? _c / *_normalization_ptr : _c;
-
-ADReal c_t;
-if (_dynamic_c_t)
-{
-  // In 3D use the full tangential velocity magnitude to avoid directional bias
-  const auto vt_sq = *_tangential_vel_ptr[0] * *_tangential_vel_ptr[0] + 1e-48;
-  const auto vt_mag = std::sqrt(vt_sq);  // 3D variant adds vt_1^2 + vt_2^2
-  if (MetaPhysicL::raw_value(vt_mag) < _vel_floor)
-    c_t = c_normal_eff;  // sticking: fall back to normal stiffness
-  else
-    c_t = c_normal_eff / (vt_mag * _dt);
-}
-else
-  c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
-```
-
-`c_normal_eff` serves as the reference stiffness so that `c_t * v_t * dt ~ c * gap` when
-`v_t * dt ~ gap` — keeping both constraint terms on the same scale. During stick
-(`vt_mag < _vel_floor`), `c_t` falls back to `c_normal_eff` rather than blowing up.
-
-`ContactAction` sets `dynamic_c_t = true` on the frictional constraint when
-`c_tangential_strategy == physical`.
-
-### 4. Files to Create or Modify
-
-| File | Change |
-|------|--------|
-| `modules/contact/src/actions/ContactAction.C` | New enum params; physical-mode logic; pass `derive_c_from_elasticity` / `use_derived_c_normal` / `dynamic_c_t` flags |
-| `modules/contact/include/userobjects/LMWeightedGapUserObject.h` | New members + `derivedCNormal()` accessor |
-| `modules/contact/src/userobjects/LMWeightedGapUserObject.C` | Elasticity tensor reads in `computeQpIProperties`; accumulation + reduction in `initialize`/`finalize` |
-| `modules/contact/include/constraints/ComputeWeightedGapLMMechanicalContact.h` | `_use_derived_c_normal` bool; retype `_weighted_gap_uo` from `WeightedGapUserObject` to `LMWeightedGapUserObject` |
-| `modules/contact/src/constraints/ComputeWeightedGapLMMechanicalContact.C` | `enforceConstraintOnDof` reads per-node `c_nn` from `_weighted_gap_uo.dofToDerivedC()` when `_use_derived_c_normal` is set |
-| `modules/contact/include/constraints/ComputeFrictionalForceLMMechanicalContact.h` | `_dynamic_c_t`, `_vel_floor` members; retype `_weighted_velocities_uo` from `WeightedVelocitiesUserObject` to `LMWeightedVelocitiesUserObject` |
-| `modules/contact/src/constraints/ComputeFrictionalForceLMMechanicalContact.C` | Dynamic `ADReal c_t` in `enforceConstraintOnDof` and `enforceConstraintOnDof3d`; call `_weighted_velocities_uo.dofToDerivedC()` for physical-mode `_c` |
-| `modules/contact/test/tests/physical_mortar_constants/` | New test directory (see §5) |
-
-No new files outside `contact/` are required.
-
----
-
-## Backward Compatibility
-
-- Both enums default to `"user"`, so all existing input files are unaffected.
-- `c_normal` and `c_tangential` parameters remain in `validParams()` with their existing
-  defaults (1e6 and 1). They are used unchanged when the corresponding strategy is `"user"`.
-- `derive_c_from_elasticity` defaults to `false` on `LMWeightedGapUserObject`, so the material
-  property reads and accumulation code are never reached for existing problems.
-
----
-
-## Testing Plan
-
-### New Tests
-
-1. **`physical_mortar_constants/frictionless_physical.i`**
-   Single-material Hertz contact geometry. Set `c_normal_strategy = physical`. Verify
-   convergence and that the resulting contact pressure matches a reference run that uses the
-   manually-computed equivalent `c_normal` (i.e., `E_material` with `normalize_c = true`).
-
-2. **`physical_mortar_constants/bimaterial_physical.i`**
-   Two-body contact with different moduli (e.g., steel on softer polymer). Confirm the harmonic
-   mean is used and that the simulation converges without user-tuned parameters.
-
-3. **`physical_mortar_constants/frictional_physical.i`**
-   Sliding block with nonzero sliding velocity. Set `c_tangential_strategy = physical`.
-   Verify convergence and check that nonlinear iteration count is equal to or lower than a
-   reference run with fixed `c_t`.
-
-4. **Parameter validation tests**
-   - `c_tangential_strategy = physical` on a frictionless contact pair → `paramError`
-   - `c_normal_strategy = physical` with `c_normal` explicitly set by the user → `paramError`
-
-### Existing Test Suite
-
-Run the full `modules/contact` test suite. All existing tests use fixed `c_normal`/`c_tangential`
-values (strategy = `"user"`) and must produce identical results.
+## Purpose
+
+Mortar contact Lagrange multipliers remain physical normal and tangential pressures in the
+solution, restart data, outputs, and all multiphysics consumers. The `user` and `physical`
+strategies select only the source of the positive nodal pressure scales. Both strategies use the
+same NCP residual, multiplier-row compensation, and solver-side right scaling, without changing
+the physical zero set or multiplier value semantics.
+
+For a physical Jacobian \(J\), PETSc solves
+
+\[
+(J D)y=b, \qquad x=D y.
+\]
+
+MOOSE supplies \(D=C\) on contact multiplier degrees of freedom and \(D=1\) elsewhere. Contact
+also compensates the multiplier equation rows for MOOSE variable scaling. The effective active
+normal-contact operator is therefore approximately
+
+\[
+S J D \approx
+\begin{bmatrix}
+s_u K & s_u B^T C\\
+s_u C B & 0
+\end{bmatrix}.
+\]
+
+Near-symmetry applies to this effective \(SJD\) operator. The physical Jacobian stored by MOOSE is
+not permanently column-scaled.
+
+## Three Independent Scales
+
+The implementation keeps three concepts separate:
+
+- \(C\) is a positive right/column scale with units of stiffness per normal length. It
+  converts a solver correction into a physical pressure correction. It is also used in the NCP
+  augmentation terms. The physical strategy derives \(C=Q\); the user strategy supplies it.
+- \(M_i\) is the accumulated mortar surface weight for one multiplier degree of freedom. It only
+  normalizes integrated gaps and slips, for example \(\bar g_i=G_i/M_i\). It does not enter the
+  physical traction. For user constants, \(C=c\) with normalized gaps and slips, and \(C=cM_i\)
+  otherwise.
+- \(s_u/s_\lambda\) compensates the multiplier equation row for MOOSE variable scaling. After
+  MOOSE applies the multiplier row scale, the effective row scale is \(s_u\).
+
+## Physical Stiffness
+
+At each mortar quadrature point, the stiffness scale is the inverse series compliance of the two
+adjacent volume elements in the reference mesh:
+
+\[
+Q_n = \left(\frac{h_s}{C_{nn,s}}+\frac{h_p}{C_{nn,p}}\right)^{-1},
+\qquad
+h=\frac{\text{interior-parent volume}}{\text{mortar-face measure}},
+\]
+
+where
+
+\[
+C_{nn}=(n\otimes n):C:(n\otimes n).
+\]
+
+There is no factor of two. The quadrature values are accumulated with the existing mortar test
+function and integration weight, communicated to the owner of each multiplier degree of freedom,
+and divided by their accumulated weight. Stiffnesses, lengths, weights, and final scales must be
+finite and positive.
+
+\(Q\) is an algorithmic `Real`, not an AD constitutive value. It is refreshed during initial
+execution, at timestep start, and after a mesh change, and remains frozen through the associated
+nonlinear solve. This implementation uses \(Q_t=Q_n\) in both tangential directions.
+
+## Normal Contact
+
+Physical normal pressure \(p_n\) continues to produce the displacement traction. For a multiplier
+degree of freedom \(i\), contact sets \(D_i=C_{n,i}\) and assembles
+
+\[
+r_{n,i}=\frac{s_u}{s_n}
+\min\left(p_{n,i},C_{n,i}\bar g_i\right).
+\]
+
+The implementation stores the raw weighted gap, so its gap coefficient is \(C_{n,i}/M_i\).
+All installed scales and mortar weights must be positive and finite. The displacement components
+must have a common positive row scaling.
+
+## Coulomb Friction
+
+Each tangential multiplier degree of freedom receives \(D_i=C_{t,i}\). With the convention that
+the normalized gap \(\bar g_i\) is positive in separation, define
+
+\[
+a_i=p_{n,i}-C_{n,i}\bar g_i, \qquad
+R_i=\mu\max(0,a_i), \qquad
+q_{t,i}=p_{t,i}+C_{t,i}\bar d_i.
+\]
+
+The minus sign in \(a_i\) is essential: opening decreases the augmented normal pressure. The
+selectable degree-one Alart--Curnier residual is
+
+\[
+F_{\mathrm{AC},i}=p_{t,i}-
+\operatorname{Proj}_{\|\cdot\|\le R_i}(q_{t,i}),
+\]
+
+and the degree-two Hueber--Stadler--Wohlmuth residual is
+
+\[
+F_{\mathrm{HSW},i}=\max(R_i,\|q_{t,i}\|)p_{t,i}-R_iq_{t,i}.
+\]
+
+For \(w_i=\max(R_i,\|q_{t,i}\|)>0\),
+\(F_{\mathrm{HSW},i}=w_iF_{\mathrm{AC},i}\), so the formulations have the same roots. At
+\(w_i=0\), the unguarded degree-two expression loses the condition \(p_{t,i}=0\); the
+implementation explicitly returns \(p_{t,i}\) in that exact separated state. The degree-one row is
+homogeneous in pressure, while the degree-two row is homogeneous of degree two and is divided by
+the tangential pressure scale before assembly.
+
+Friction functions, contact-state checks, Coulomb limits, wear, traction, and outputs continue to
+use physical pressure. Physical tangential scaling requires physical normal scaling. The selectable
+formulations apply only to quasistatic Coulomb mortar contact; `mortar_dynamics` is unchanged.
+
+## Literature
+
+The degree-one map follows P. Alart and A. Curnier, "A mixed formulation for frictional contact
+problems prone to Newton like solution methods," *Computer Methods in Applied Mechanics and
+Engineering* 92(3), 353--375 (1991),
+[doi:10.1016/0045-7825(91)90022-X](https://doi.org/10.1016/0045-7825(91)90022-X).
+The degree-two map and mortar active-set setting follow S. Hueber, G. Stadler, and B. I. Wohlmuth,
+"A primal-dual active set algorithm for three-dimensional contact problems with Coulomb friction,"
+*SIAM Journal on Scientific Computing* 30(2), 572--596 (2008),
+[doi:10.1137/060671061](https://doi.org/10.1137/060671061), and M. Gitterle et al.,
+"Finite deformation frictional mortar contact using a semi-smooth Newton method with consistent
+linearization," *International Journal for Numerical Methods in Engineering* 84(5), 543--571
+(2010), [doi:10.1002/nme.2907](https://doi.org/10.1002/nme.2907).
+
+## Unit-Scale Comparison
+
+The two-dimensional benchmark uses two four-unit-wide, two-unit-deep elastic blocks, four unit
+mortar segments, \(E=4\), \(\nu=0\), and unit variable scaling. Reference-configuration element
+depths give \(Q=1\); interior nodal mortar weights are \(M=1\), so the PETSc multiplier scale is
+\(D=I\). Direct LU, fixed time steps, and identical \(10^{-12}\) nonlinear tolerances were used.
+A formulation-independent natural-map postprocessor checked
+
+\[
+\max_i\left(
+\left|\min(p_{n,i},C_{n,i}\bar g_i)\right|,
+\left\|p_{t,i}-\operatorname{Proj}_{B_{R_i}}(q_{t,i})\right\|
+\right),
+\]
+
+alongside unscaled displacement-equilibrium residual norms. Both formulations produced the same
+pressures, slip, and displacements within \(10^{-8}\), with common KKT and equilibrium errors below
+\(10^{-10}\), for cold activation, stick, slip, separation, the fixed close--stick--slide--reverse--
+open--reclose history, and one-, two-, and four-increment loading. Zero, plausible, and deliberately
+poor multiplier guesses all solved. A three-dimensional \(Q=1\) confirmation exercised both
+tangential multipliers, diagonal stick and slip, and a change in slip direction.
+
+Selected direct-LU counts were:
+
+| Case | Alart--Curnier | Hueber--Stadler--Wohlmuth |
+| - | - | - |
+| 2-D sliding | 13 nonlinear / 14 residual | 12 nonlinear / 13 residual |
+| 2-D sticking | 6 nonlinear / 7 residual | 7 nonlinear / 8 residual |
+| Existing 3-D physical-scale case | 6 nonlinear | 8 nonlinear |
+| Robustness sweep aggregate | 109 residual, all solved | 117 residual, all solved |
+
+Separate PETSc SVD diagnostics gave initial/active condition numbers of approximately \(76/47\)
+for Alart--Curnier and \(42/160\) for HSW. These are global Jacobian condition numbers, so
+physics-balanced scaling does not imply a condition number near one. The HSW row normalization by
+\(C_t\) removes the extra common pressure-scale factor, but the local factor \(w/C_t\) remains.
+In the diagnostic SVD solve, that factor also allowed the raw HSW residual to satisfy the nonlinear
+tolerance while the common natural-map error was still about \(10^{-1}\); the direct-LU canonical
+HSW runs did satisfy the common criterion.
+
+Alart--Curnier is the default. It solved every robustness case, reduced the aggregate residual
+evaluations from 117 to 109, was better in the sticking and existing 3-D cases, had the better
+active-state condition number, and does not attenuate the physical natural-map residual by a small
+solution-dependent weight. HSW remains selectable for comparison and compatibility. The one
+observed regression for Alart--Curnier was one additional nonlinear iteration and residual
+evaluation in the 2-D sliding case.
+
+## PETSc KSP Behavior
+
+`KSPSetRightDiagonalScale()` retains a reference to a runtime vector. `NULL` clears it, and
+`KSPGetRightDiagonalScale()` returns the borrowed vector. Each entry must be finite and nonzero.
+An entry may be refreshed between mortar assemblies, as required by an unnormalized user scale
+\(C=cM_i\); multiple contributors within one assembly must agree. Reinstalling an unchanged value
+does not change the vector object state.
+The reciprocal is cached until the vector object state changes.
+
+For `KSPSolve()`, pre-solve callbacks see physical matrices, right-hand side, and initial guess.
+PETSc then temporarily right-scales both the operator and preconditioning matrix, avoiding a
+duplicate operation when they alias. Nonzero physical guesses are mapped by \(D^{-1}\). Existing
+KSP and PC types operate on \(AD\) and \(PD\), including direct factorization, AMG, field split,
+and matrix-free operators that support managed shell scaling. `PCPostSolve()` runs in scaled
+coordinates. PETSc maps the solution by \(D\), restores both matrices and their physical object
+states, and then runs KSP guess updates, post-solve callbacks, final views, and final-residual
+reporting.
+
+Unchanged matrix and scale object states preserve preconditioner reuse; changing either forces a
+rebuild. Matrix restoration is attempted on both normal and error exits. Transpose and multiple
+right-hand-side solves currently reject an active right scale.
+
+Attached right and near nullspaces must be invariant under \(D\). Mechanical contact satisfies
+this condition because displacement entries have \(D=1\), while mechanical nullspace vectors have
+zero multiplier components.
+
+## Compatibility and Symmetry Limits
+
+No multiplier is renamed or converted. Existing pressure outputs, samplers, restarts, checkpoint
+data, field splits, heat transfer, wear, and other pressure consumers keep their physical
+semantics. Switching between `user` and `physical` strategies across a restart is valid because
+both store pressure.
+
+Active normal contact and sticking friction can be nearly symmetric in the effective operator.
+Sliding friction, Petrov-Galerkin mortar, geometric terms, and nonsymmetric material tangents can
+remain nonsymmetric.
