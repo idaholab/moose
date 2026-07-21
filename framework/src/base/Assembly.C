@@ -34,6 +34,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/fe.h"
 
+#include <algorithm>
+
 using namespace libMesh;
 
 template <typename P, typename C>
@@ -3657,6 +3659,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
     }
   }
 
+  // The argument can alias several different reusable Assembly Jacobian blocks, so clear the
+  // selected block after caching its entries.
   jac_block.zero();
 }
 
@@ -3716,42 +3720,45 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
     }
   }
 
+  // The argument can alias several different reusable Assembly Jacobian blocks, so clear the
+  // selected block after caching its entries.
   jac_block.zero();
 }
 
 void
-Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                              const std::vector<dof_id_type> & idof_indices,
                              const std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
                              LocalDataKey,
-                             TagID tag)
+                             const std::set<TagID> & tags)
 {
-  // Only cache data when the matrix exists
+  const auto has_matrix =
+      std::any_of(tags.begin(), tags.end(), [this](const auto tag) { return _sys.hasMatrix(tag); });
+
+  // Work on a reusable Assembly-owned copy so callers retain their local matrix. This also lets us
+  // apply constraints and scaling once before caching the same block to every requested matrix tag.
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m() &&
-      _sys.hasMatrix(tag))
+      has_matrix)
   {
-    std::vector<dof_id_type> di(idof_indices);
-    std::vector<dof_id_type> dj(jdof_indices);
+    _row_indices.assign(idof_indices.begin(), idof_indices.end());
+    _column_indices.assign(jdof_indices.begin(), jdof_indices.end());
+    _element_matrix = jac_block;
 
     // If we're computing the jacobian for automatically scaling variables we do not want to
     // constrain the element matrix because it introduces 1s on the diagonal for the constrained
     // dofs
     if (!_sys.computingScalingJacobian())
-      _dof_map.constrain_element_matrix(jac_block, di, dj, false);
+      _dof_map.constrain_element_matrix(_element_matrix, _row_indices, _column_indices, false);
 
     if (scaling_factor != 1.0)
-      jac_block *= scaling_factor;
+      _element_matrix *= scaling_factor;
 
-    for (MooseIndex(di) i = 0; i < di.size(); i++)
-      for (MooseIndex(dj) j = 0; j < dj.size(); j++)
-      {
-        _cached_jacobian_values[tag].push_back(jac_block(i, j));
-        _cached_jacobian_rows[tag].push_back(di[i]);
-        _cached_jacobian_cols[tag].push_back(dj[j]);
-      }
+    for (const auto i : index_range(_row_indices))
+      for (const auto j : index_range(_column_indices))
+        cacheJacobian(
+            _row_indices[i], _column_indices[j], _element_matrix(i, j), LocalDataKey{}, tags);
   }
-  jac_block.zero();
 }
 
 Real
