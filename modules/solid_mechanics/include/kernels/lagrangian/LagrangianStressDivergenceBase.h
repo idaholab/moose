@@ -49,15 +49,6 @@ protected:
   // stabilization
   virtual RankTwoTensor gradTrial(unsigned int component) = 0;
 
-  /// Invalidate the F-bar caches at the start of every Jacobian assembly sweep. The
-  /// caches key on `_current_elem`, so when a rank owns only a single element the cache
-  /// would otherwise persist (and go stale) across Newton iterations: the second iteration
-  /// would see `_current_elem == _fbar_cache_elem` and skip the refresh even though the
-  /// underlying `_cauchy_jacobian` / `_d_F_stab_d_F_avg` material properties have moved.
-  /// Resetting the cache key here forces the next `prepareFBarCaches()` call to refresh
-  /// against the iteration's fresh material state.
-  virtual void jacobianSetup() override;
-
   virtual void precalculateJacobian() override;
   virtual void precalculateOffDiagJacobian(unsigned int jvar) override;
 
@@ -87,16 +78,10 @@ protected:
   /// Jacobian, the WPS off-diag Jacobian, and the homogenization scalar<->disp Jacobian
   /// -- anywhere the disp perturbation chains through F-bar's non-local route.
   ///
-  /// Consumes per-qp caches populated by `prepareFBarCaches()` so the inner (test, trial)
-  /// loop pays only one R4*R2 (and, in the large-kinematics branch, one R2*R2*R2 PK1 wrap)
-  /// per call instead of three R4*R2 chains plus a per-call 3x3 inverse and determinant.
+  /// Consumes the strain/stress material's per-qp `_d_nl_fbar` operator so the inner
+  /// (test, trial) loop pays only one R4*R2 (and, in the large-kinematics branch, one
+  /// R2*R2*R2 PK1 wrap) per call instead of three R4*R2 chains plus a per-call 3x3 inverse.
   RankTwoTensor deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const;
-
-  /// Refresh `_F_ust_det_cache`, `_F_ust_inv_T_cache`, and `_D_nl_cache` for the current
-  /// element if they aren't already current. No-op when F-bar is off. Idempotent across
-  /// the multiple `precalculate{,OffDiag}Jacobian` calls a single element receives during
-  /// one Jacobian assembly pass.
-  void prepareFBarCaches();
 
 protected:
   /// If true use large deformation kinematics
@@ -165,6 +150,14 @@ protected:
   /// The inverse deformation gradient
   const MaterialProperty<RankTwoTensor> & _F_inv;
 
+  /// F_ust^{-1} and det(F_ust) from the strain calculator, consumed by the F-bar spatial
+  /// push-forward (grad_x = F_ust^{-T} grad_X, J_ust = det F_ust) on both the residual and
+  /// Jacobian sweeps. Fetched only when `_stabilize_strain` (nullptr otherwise). The strain
+  /// material computes them once per qp (shared by all displacement kernels), replacing the
+  /// former per-kernel F_ust-inverse/det cache and the per-test/trial recomputation.
+  const MaterialProperty<RankTwoTensor> * _F_ust_inv = nullptr;
+  const MaterialProperty<Real> * _F_ust_det = nullptr;
+
   /// The actual (stabilized) deformation gradient. With the generalized midpoint rule this is the
   /// alpha-weighted F, NOT the literal F at n+1.
   const MaterialProperty<RankTwoTensor> & _F;
@@ -189,11 +182,6 @@ protected:
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
 
-  /// Cauchy-stress Jacobian dsigma/d(dL), published by `ComputeLagrangianStressBase` as
-  /// `cauchy_jacobian`. Used by the TL kernel to assemble the non-local F-bar Jacobian
-  /// contribution (chain: cauchy_jacobian * _d_deformation_gradient_increment_d_F *
-  /// _d_F_stab_d_F_avg * deltaF_avg -> deltasigma_NL -> PK1 wrap via F_ust).
-  const MaterialProperty<RankFourTensor> & _cauchy_jacobian;
 
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;
@@ -211,23 +199,9 @@ protected:
   /// it must guard accordingly.
   const MaterialProperty<RankFourTensor> * _dcauchy_stress_d_eigenstrain = nullptr;
 
-  /// Element pointer for which the F-bar caches below are valid; nullptr means the cache
-  /// is stale and must be refreshed by `prepareFBarCaches()`.
-  const libMesh::Elem * _fbar_cache_elem = nullptr;
-
-  /// `det(F_ust)` per qp on the current element. Populated only when
-  /// `_stabilize_strain && _large_kinematics`.
-  std::vector<Real> _F_ust_det_cache;
-
-  /// `F_ust^{-T}` per qp on the current element. Populated only when
-  /// `_stabilize_strain && _large_kinematics`.
-  std::vector<RankTwoTensor> _F_ust_inv_T_cache;
-
-  /// Composed non-local F-bar operator per qp:
-  ///   _D_nl_cache[qp] = _cauchy_jacobian[qp]
-  ///                   * _d_deformation_gradient_increment_d_F[qp]
-  ///                   * _d_F_stab_d_F_avg[qp]
-  /// so that `deltaPK1NonLocalFBar(deltaF_avg)` collapses to one R4*R2 contraction
-  /// instead of three. Populated only when `_stabilize_strain`.
-  std::vector<RankFourTensor> _D_nl_cache;
+  /// Composed non-local F-bar operator D_nl = cauchy_jac : d(dL)/dF : d(F_stab)/d(F_avg),
+  /// published per qp by the stress material (once per element, shared by all displacement
+  /// kernels). `deltaPK1NonLocalFBar(deltaF_avg)` collapses to one R4*R2 contraction against
+  /// it. Fetched only when `_stabilize_strain` (nullptr otherwise).
+  const MaterialProperty<RankFourTensor> * _d_nl_fbar = nullptr;
 };

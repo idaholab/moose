@@ -79,7 +79,6 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
     _d_F_stab_d_F_avg(
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
-    _cauchy_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
     _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
     _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
                                                           : nullptr)
@@ -112,15 +111,18 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
   if (!getParam<std::vector<MaterialPropertyName>>("eigenstrain_names").empty())
     _dcauchy_stress_d_eigenstrain =
         &getMaterialPropertyByName<RankFourTensor>(_base_name + "dcauchy_stress_d_eigenstrain");
-}
 
-void
-LagrangianStressDivergenceBase::jacobianSetup()
-{
-  JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>::jacobianSetup();
-  // Force every Jacobian sweep to refresh the F-bar caches. See header comment for the
-  // single-element-per-rank staleness scenario this guards against.
-  _fbar_cache_elem = nullptr;
+  // The F-bar spatial push-forward consumes F_ust^{-1}/det(F_ust) published by the strain calc.
+  // Fetch them (and thereby mark them active for the strain material's isPropertyActive gate)
+  // only when stabilization is on -- the only mode where the push-forward runs.
+  if (_stabilize_strain)
+  {
+    _F_ust_inv = &getMaterialPropertyByName<RankTwoTensor>(
+        _base_name + "inverse_unstabilized_deformation_gradient");
+    _F_ust_det =
+        &getMaterialPropertyByName<Real>(_base_name + "det_unstabilized_deformation_gradient");
+    _d_nl_fbar = &getMaterialPropertyByName<RankFourTensor>(_base_name + "d_nl_fbar_operator");
+  }
 }
 
 void
@@ -134,7 +136,6 @@ LagrangianStressDivergenceBase::precalculateJacobian()
   _fe_problem.prepareShapes(_var.number(), _tid);
   _avg_grad_trial[_alpha].resize(_phi.size());
   precalculateJacobianDisplacement(_alpha);
-  prepareFBarCaches();
 }
 
 void
@@ -151,43 +152,7 @@ LagrangianStressDivergenceBase::precalculateOffDiagJacobian(unsigned int jvar)
       _fe_problem.prepareShapes(jvar, _tid);
       _avg_grad_trial[beta].resize(_phi.size());
       precalculateJacobianDisplacement(beta);
-      prepareFBarCaches();
     }
-}
-
-void
-LagrangianStressDivergenceBase::prepareFBarCaches()
-{
-  // Cache is element-keyed; skip the work if we've already refreshed it for this element
-  // during the current Jacobian assembly pass. The element pointer is stable across the
-  // per-column precalculate calls a single element receives.
-  if (_fbar_cache_elem == _current_elem)
-    return;
-
-  const unsigned int n_qp = _qrule->n_points();
-  _D_nl_cache.resize(n_qp);
-  if (_large_kinematics)
-  {
-    _F_ust_det_cache.resize(n_qp);
-    _F_ust_inv_T_cache.resize(n_qp);
-  }
-
-  for (unsigned int qp = 0; qp < n_qp; ++qp)
-  {
-    // Compose `D_nl_ijkl = cauchy_jacobian_ijab * d_dL_dF_abcd * d_F_stab_d_F_avg_cdkl`.
-    // The R4 middle-pair contraction matches the chain-rule semantics we need (the
-    // strain-calc helpers and the kernel already rely on this convention elsewhere).
-    _D_nl_cache[qp] =
-        _cauchy_jacobian[qp] * _d_deformation_gradient_increment_d_F[qp] * _d_F_stab_d_F_avg[qp];
-
-    if (_large_kinematics)
-    {
-      _F_ust_det_cache[qp] = _F_ust[qp].det();
-      _F_ust_inv_T_cache[qp] = _F_ust[qp].inverse().transpose();
-    }
-  }
-
-  _fbar_cache_elem = _current_elem;
 }
 
 Real
@@ -201,13 +166,11 @@ LagrangianStressDivergenceBase::deltaPK1NonLocalFBar(const RankTwoTensor & delta
 {
   if (!_stabilize_strain)
     return RankTwoTensor();
-  // Composed operator + cached per-qp scalars/tensors live in `_*_cache`, refreshed once
-  // per element by `prepareFBarCaches()`. Caller responsibility: `prepareFBarCaches()` has
-  // run for the current element (precalculate{,OffDiag}Jacobian both invoke it when
-  // `_stabilize_strain == true`).
-  const RankTwoTensor delta_sigma_nl = _D_nl_cache[_qp] * delta_F_avg;
+  // `_d_nl_fbar` (the composed non-local operator) and F_ust^{-1}/det come from the stress and
+  // strain materials as per-qp properties -- no kernel-side cache to refresh.
+  const RankTwoTensor delta_sigma_nl = (*_d_nl_fbar)[_qp] * delta_F_avg;
   if (_large_kinematics)
-    return _F_ust_det_cache[_qp] * delta_sigma_nl * _F_ust_inv_T_cache[_qp];
+    return (*_F_ust_det)[_qp] * delta_sigma_nl * (*_F_ust_inv)[_qp].transpose();
   return delta_sigma_nl;
 }
 

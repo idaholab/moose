@@ -110,6 +110,9 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _F_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _F_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _f_inv(declareProperty<RankTwoTensor>(_base_name + "inverse_incremental_deformation_gradient")),
+    _F_ust_inv(
+        declareProperty<RankTwoTensor>(_base_name + "inverse_unstabilized_deformation_gradient")),
+    _F_ust_det(declareProperty<Real>(_base_name + "det_unstabilized_deformation_gradient")),
     _d_deformation_gradient_increment_d_F(declareProperty<RankFourTensor>(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_vorticity_increment_d_F(declareProperty<RankFourTensor>(
@@ -117,7 +120,6 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
     _d_F_d_grad_u(
         declareProperty<RankFourTensor>(_base_name + "d_deformation_gradient_d_grad_displacement")),
     _rotation(declareProperty<RankTwoTensor>(_base_name + "rotation")),
-    _rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "rotation")),
     _stretch(declareProperty<RankTwoTensor>(_base_name + "stretch")),
     _d_rotation_d_F(
         declareProperty<RankFourTensor>(_base_name + "d_rotation_d_deformation_gradient")),
@@ -194,6 +196,17 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _F_ust[_qp] += (*contribution)[_qp];
   }
 
+  // Publish F_ust^{-1} and det(F_ust) for the F-bar Lagrangian kernels' spatial push-forward
+  // (grad_x = F_ust^{-T} grad_X, J_ust = det F_ust). Computed once per qp here -- shared by all
+  // displacement kernels via the material system -- instead of recomputed per test/trial in the
+  // kernel. `isPropertyActive`-gated: only the F-bar kernels mark these active, so non-stabilized
+  // runs (and any consumer that doesn't need them) pay nothing.
+  if (isPropertyActive(_F_ust_inv.id()))
+  {
+    _F_ust_inv[_qp] = _F_ust[_qp].inverse();
+    _F_ust_det[_qp] = _F_ust[_qp].det();
+  }
+
   // Skip the Jacobian-only RankFourTensor derivative chain when no downstream consumer
   // will read it (i.e. we're in a residual-only sweep). All of `_d_F_d_grad_u`,
   // `_d_deformation_gradient_increment_d_F`, `_d_vorticity_increment_d_F`, and the
@@ -244,7 +257,14 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     }
 
     setQpIncrementalStrains(dd, dw);
-    computeQpPolarDecomposition(need_jacobian);
+    // The polar decomposition (a tensor eigensolve + sqrt per qp, on every residual and Jacobian
+    // eval) feeds only the Green-Naghdi objective rate's `_rotation` / `_d_rotation_d_F` (and its
+    // internal `_stretch`). Skip it entirely when no active consumer needs it -- Truesdell uses
+    // the deformation-gradient increment, Jaumann the vorticity increment, Rashid the Rodrigues
+    // `_rotation_increment`. The active-property set self-corrects for future consumers with no
+    // coupling flag.
+    if (isPropertyActive(_rotation.id()) || isPropertyActive(_stretch.id()))
+      computeQpPolarDecomposition(need_jacobian);
   }
   // For small deformations we just provide the identity (and always linear)
   else
@@ -282,8 +302,10 @@ ComputeLagrangianStrainBase<G>::computeQpPolarDecomposition(bool need_jacobian)
   // GN rate exactly (it read _def_grad, which is _F via ComputeLagrangianStressCauchy).
   const RankTwoTensor & F = _F[_qp];
   FactorizedRankTwoTensor C(F.transpose() * F);
-  _stretch[_qp] = MathUtils::sqrt(C).get();
-  const RankTwoTensor U_inv = MathUtils::sqrt(C).inverse().get();
+  // Reuse the sqrt factorization (a tensor eigensolve) for both U and U^{-1}.
+  const auto sqrt_C = MathUtils::sqrt(C);
+  _stretch[_qp] = sqrt_C.get();
+  const RankTwoTensor U_inv = sqrt_C.inverse().get();
   _rotation[_qp] = F * U_inv;
 
   if (!need_jacobian)
@@ -603,8 +625,10 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
 
   // ---- polar decomposition of f^{-1} ----
   FactorizedRankTwoTensor cprime(f_inv.transpose() * f_inv);
-  const RankTwoTensor u = MathUtils::sqrt(cprime).get();
-  const RankTwoTensor u_inv = MathUtils::sqrt(cprime).inverse().get();
+  // Reuse the sqrt factorization (a tensor eigensolve) for both u and u^{-1}.
+  const auto sqrt_cprime = MathUtils::sqrt(cprime);
+  const RankTwoTensor u = sqrt_cprime.get();
+  const RankTwoTensor u_inv = sqrt_cprime.inverse().get();
   const RankTwoTensor r = f_inv * u_inv;
 
   // ---- intermediate Deltad_spatial = -log u' = R * log U * R^T (n+1 frame) ----

@@ -51,15 +51,21 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_vorticity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_vorticity_increment_d_deformation_gradient")),
-    _rotation(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation")),
-    _rotation_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation")),
-    _d_rotation_d_F(getMaterialPropertyByName<RankFourTensor>(_base_name +
-                                                              "d_rotation_d_deformation_gradient")),
     _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _def_grad_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "deformation_gradient")),
     _rate_strategy(createObjectiveRate(getParam<MooseEnum>("objective_rate"))),
     _rotate_old_stress(getParam<bool>("rotate_old_stress"))
 {
+  // Only the Green-Naghdi rate consumes the polar-decomposition rotation. Fetch these
+  // (which marks `rotation` active and triggers the strain calc's polar decomposition) only
+  // for that rate -- Truesdell/Jaumann/Rashid leave them null and skip the eigensolve.
+  if (getParam<MooseEnum>("objective_rate") == "green_naghdi")
+  {
+    _rotation = &getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation");
+    _rotation_old = &getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation");
+    _d_rotation_d_F =
+        &getMaterialPropertyByName<RankFourTensor>(_base_name + "d_rotation_d_deformation_gradient");
+  }
 }
 
 void

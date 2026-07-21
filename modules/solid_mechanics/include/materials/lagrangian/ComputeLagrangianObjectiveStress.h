@@ -90,11 +90,13 @@ protected:
   /// d(dW)/dF from the strain calculator, consumed by Jaumann and Rashid
   const MaterialProperty<RankFourTensor> & _d_vorticity_increment_d_F;
 
-  /// Polar-decomposition rotation R of F (and its old value and derivative),
-  /// published by the strain calculator. Consumed by the Green-Naghdi rate.
-  const MaterialProperty<RankTwoTensor> & _rotation;
-  const MaterialProperty<RankTwoTensor> & _rotation_old;
-  const MaterialProperty<RankFourTensor> & _d_rotation_d_F;
+  /// Polar-decomposition rotation R of F (and its old value and derivative), published by the
+  /// strain calculator and consumed only by the Green-Naghdi rate. Fetched (and thereby marked
+  /// active, which is what triggers the strain calc's polar decomposition) only when
+  /// `objective_rate = green_naghdi`; nullptr for the other rates.
+  const MaterialProperty<RankTwoTensor> * _rotation = nullptr;
+  const MaterialProperty<RankTwoTensor> * _rotation_old = nullptr;
+  const MaterialProperty<RankFourTensor> * _d_rotation_d_F = nullptr;
 
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _def_grad;

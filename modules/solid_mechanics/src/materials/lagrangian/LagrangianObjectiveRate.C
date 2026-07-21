@@ -113,7 +113,8 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
   const unsigned int qp = host._qp;
 
   const RankTwoTensor I = RankTwoTensor::Identity();
-  const RankTwoTensor dR = host._rotation[qp] * host._rotation_old[qp].transpose() - I;
+  // _rotation / _rotation_old / _d_rotation_d_F are fetched by the host only for this rate.
+  const RankTwoTensor dR = (*host._rotation)[qp] * (*host._rotation_old)[qp].transpose() - I;
   const RankTwoTensor dO = dR * host._inv_df[qp];
 
   auto [S, Jinv] = advectStress(host._cauchy_stress_old[qp] + dS, dO);
@@ -123,9 +124,9 @@ LagrangianGreenNaghdiRate::update(ComputeLagrangianObjectiveStress & host,
 
   host._dcauchy_stress_d_eigenstrain[qp] = -Jinv * host._small_jacobian[qp];
 
-  const RankFourTensor & d_R_d_F = host._d_rotation_d_F[qp];
+  const RankFourTensor & d_R_d_F = (*host._d_rotation_d_F)[qp];
   const RankFourTensor d_F_d_dL = host._d_deformation_gradient_increment_d_F[qp].inverse();
-  const RankTwoTensor T = host._rotation_old[qp].transpose() * host._inv_df[qp];
+  const RankTwoTensor T = (*host._rotation_old)[qp].transpose() * host._inv_df[qp];
 
   const RankFourTensor d_invdf_d_F = -host._inv_df[qp].times<i, k, l, j>(host._inv_def_grad[qp]);
   const RankFourTensor d_invdf_d_dL = d_invdf_d_F * d_F_d_dL;

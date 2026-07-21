@@ -199,6 +199,14 @@ protected:
   /// Inverse incremental deformation gradient
   MaterialProperty<RankTwoTensor> & _f_inv;
 
+  /// Inverse and determinant of the unstabilized deformation gradient F_ust. Published for the
+  /// F-bar Lagrangian kernels' spatial push-forward (grad_x = F_ust^{-T} grad_X, J_ust = det F_ust)
+  /// so the kernel reads a per-qp material property (computed once, shared by all displacement
+  /// kernels) instead of recomputing the 3x3 inverse per test/trial. Filled only when a consumer
+  /// marks them active (see `isPropertyActive` gate in computeQpProperties).
+  MaterialProperty<RankTwoTensor> & _F_ust_inv;
+  MaterialProperty<Real> & _F_ust_det;
+
   /// Derivative of the spatial velocity gradient increment with respect to F_{n+1}.
   /// Stored so downstream consumers do not bake in the linear-approximation assumption.
   MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
@@ -214,8 +222,9 @@ protected:
 
   /// Polar decomposition R of the (alpha-weighted, F-bar-stabilized) deformation gradient
   /// F at this qp. Stateful so the Green-Naghdi rate can read R_n via getMaterialPropertyOld.
+  /// Computed only when a consumer (the Green-Naghdi objective rate) marks it active -- see the
+  /// `isPropertyActive` gate on `computeQpPolarDecomposition` in computeQpProperties.
   MaterialProperty<RankTwoTensor> & _rotation;
-  const MaterialProperty<RankTwoTensor> & _rotation_old;
   /// Stretch U from the same polar decomposition.
   MaterialProperty<RankTwoTensor> & _stretch;
   /// Derivative of R with respect to F.

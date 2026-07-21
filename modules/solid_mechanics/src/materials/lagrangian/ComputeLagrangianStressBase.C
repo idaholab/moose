@@ -39,7 +39,9 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_F_stab_d_F_ust(
-        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized"))
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
+    _d_F_stab_d_F_avg(getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
+    _d_nl_fbar(declareProperty<RankFourTensor>(_base_name + "d_nl_fbar_operator"))
 {
 }
 
@@ -55,10 +57,18 @@ ComputeLagrangianStressBase::computeQpProperties()
   computeQpStressUpdate();
   // Chain the kinematic policy into the PK1 Jacobian so the TL kernel consumes a single
   // d(PK1)/d(grad u) property and doesn't need to know about the generalized-alpha weighting.
-  // For alpha = 1 (default) this is _pk1_jacobian itself. The kernel reads
-  // `_dpk1_d_grad_u` only during Jacobian assembly, so skip the R4*R4 multiply on
-  // residual-only sweeps.
+  // For alpha = 1 (default) this is _pk1_jacobian itself. These are read only during Jacobian
+  // assembly, so skip the R4*R4 work on residual-only sweeps.
   if (_fe_problem.currentlyComputingJacobian() ||
       _fe_problem.currentlyComputingResidualAndJacobian())
+  {
     _dpk1_d_grad_u[_qp] = _pk1_jacobian[_qp] * _d_F_d_grad_u[_qp];
+
+    // Non-local F-bar operator, composed once per qp here (shared by all displacement kernels)
+    // instead of per-kernel in the assembly precalculate. `isPropertyActive`-gated so only the
+    // F-bar (stabilized) kernels pay for the R4*R4*R4 chain.
+    if (isPropertyActive(_d_nl_fbar.id()))
+      _d_nl_fbar[_qp] = _cauchy_jacobian[_qp] * _d_deformation_gradient_increment_d_F[_qp] *
+                        _d_F_stab_d_F_avg[_qp];
+  }
 }

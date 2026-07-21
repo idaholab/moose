@@ -59,30 +59,6 @@ TotalLagrangianStressDivergenceBase<G>::gradTrialUnstabilized(unsigned int compo
 }
 
 template <class G>
-RankTwoTensor
-TotalLagrangianStressDivergenceBase<G>::gradTrialStabilized(unsigned int component)
-{
-  // The base unstabilized trial function gradient
-  const auto Gb = G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
-  // The average trial function gradient
-  const auto Ga = _avg_grad_trial[component][_j];
-
-  // The F-bar stabilization depends on kinematics
-  if (_large_kinematics)
-  {
-    // Horrible thing, see the documentation for how we get here
-    const Real dratio = std::pow(_F_avg[_qp].det() / _F_ust[_qp].det(), 1.0 / 3.0);
-    const Real fact = (_F_avg[_qp].inverse().transpose().doubleContraction(Ga) -
-                       _F_ust[_qp].inverse().transpose().doubleContraction(Gb)) /
-                      3.0;
-    return dratio * (Gb + fact * _F_ust[_qp]);
-  }
-
-  // The small kinematics modification is linear
-  return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();
-}
-
-template <class G>
 void
 TotalLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigned int component)
 {
@@ -176,17 +152,16 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
       if (_stabilize_strain)
       {
         // Compose the full non-local F-bar PK1 perturbation:
-        //   deltasigma_NL = _D_nl_cache[qp] * (_d_F_d_grad_u[qp] * _avg_grad_trial[beta][j])
+        //   deltasigma_NL = D_nl[qp] * (_d_F_d_grad_u[qp] * _avg_grad_trial[beta][j])
         //   deltaPK1_NL = det(F_ust) * deltasigma_NL * F_ust^{-T}   (large kinematics)
         //           = deltasigma_NL                              (small kinematics)
-        // `_D_nl_cache` / `_F_ust_det_cache` / `_F_ust_inv_T_cache` are refreshed in
-        // `prepareFBarCaches()` which runs in `LagrangianStressDivergenceBase::precalculate*`
-        // before this method is called.
+        // D_nl (`_d_nl_fbar`), det(F_ust), and F_ust^{-1} are all per-qp material properties
+        // from the stress/strain materials -- no kernel-side cache.
         const RankTwoTensor delta_F_avg = dFdGU * _avg_grad_trial[beta][j];
-        const RankTwoTensor delta_sigma_nl = _D_nl_cache[qp] * delta_F_avg;
+        const RankTwoTensor delta_sigma_nl = (*_d_nl_fbar)[qp] * delta_F_avg;
         if (_large_kinematics)
           _delta_PK1_NL_cache[qp][j] =
-              _F_ust_det_cache[qp] * delta_sigma_nl * _F_ust_inv_T_cache[qp];
+              (*_F_ust_det)[qp] * delta_sigma_nl * (*_F_ust_inv)[qp].transpose();
         else
           _delta_PK1_NL_cache[qp][j] = delta_sigma_nl;
       }
@@ -199,10 +174,11 @@ Real
 TotalLagrangianStressDivergenceBase<G>::gradXTestComponent(unsigned int component) const
 {
   // (grad_x test_i)_component = (grad_X test_i)_j (F_ust^{-1})_{j, component}
-  // Push-forward via F_ust (= F_actual at alpha=1) matches the PK1 wrap.
+  // Push-forward via F_ust (= F_actual at alpha=1) matches the PK1 wrap. F_ust^{-1} is a
+  // material property (computed once per qp by the strain calc), not recomputed here.
   if (!_large_kinematics)
     return _grad_test[_i][_qp](component);
-  const RankTwoTensor F_inv = _F_ust[_qp].inverse();
+  const RankTwoTensor & F_inv = (*_F_ust_inv)[_qp];
   Real out = 0.0;
   for (unsigned int j = 0; j < 3; ++j)
     out += _grad_test[_i][_qp](j) * F_inv(j, component);
@@ -215,7 +191,7 @@ TotalLagrangianStressDivergenceBase<G>::gradXPhiComponent(unsigned int component
 {
   if (!_large_kinematics)
     return _grad_phi[_j][_qp](component);
-  const RankTwoTensor F_inv = _F_ust[_qp].inverse();
+  const RankTwoTensor & F_inv = (*_F_ust_inv)[_qp];
   Real out = 0.0;
   for (unsigned int j = 0; j < 3; ++j)
     out += _grad_phi[_j][_qp](j) * F_inv(j, component);
@@ -234,11 +210,11 @@ TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialTest()
   Real V_x = 0.0;
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
   {
-    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
     const RankTwoTensor F_inv =
-        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int i = 0; i < _test.size(); ++i)
     {
       Real g_x = 0.0;
@@ -261,11 +237,11 @@ TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialPhi(unsigne
   Real V_x = 0.0;
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
   {
-    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
     const RankTwoTensor F_inv =
-        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int j = 0; j < _phi.size(); ++j)
     {
       Real g_x = 0.0;
@@ -306,11 +282,11 @@ TotalLagrangianStressDivergenceBase<G>::computeAvgTestPhiCross(unsigned int beta
   std::vector<std::vector<Real>> gx_phi(bs.size(), std::vector<Real>(n_phi, 0.0));
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
   {
-    const Real J = _large_kinematics ? _F_ust[qp].det() : 1.0;
+    const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
     const RankTwoTensor F_inv =
-        _large_kinematics ? _F_ust[qp].inverse() : RankTwoTensor::Identity();
+        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int bi = 0; bi < bs.size(); ++bi)
     {
       const unsigned int b = bs[bi];

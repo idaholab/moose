@@ -113,4 +113,14 @@ protected:
   /// (and cauchy_jacobian = dsigma/d(dL)) gets the local F-bar contribution. Equals
   /// IdentityFour when F-bar is off.
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
+
+  /// d(F_stab)/d(F_avg), the non-local F-bar partial. Read to compose `_d_nl_fbar`.
+  const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
+
+  /// Non-local F-bar operator D_nl = cauchy_jacobian : d(dL)/dF : d(F_stab)/d(F_avg), published
+  /// so the Lagrangian kernels' non-local F-bar Jacobian term reads a per-qp material property
+  /// (computed once here, shared by all displacement kernels) instead of rebuilding this R4*R4*R4
+  /// chain per-kernel. Jacobian-only and `isPropertyActive`-gated (only F-bar kernels mark it
+  /// active); left untouched on residual-only sweeps and non-stabilized runs.
+  MaterialProperty<RankFourTensor> & _d_nl_fbar;
 };
