@@ -30,8 +30,8 @@ public:
 
 protected:
   int _fe_order;
-  mfem::ConstantCoefficient _dcoef;
-  mfem::ConstantCoefficient _bcoef;
+  mfem::Coefficient & _dcoef;
+  mfem::Coefficient & _bcoef;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
 };

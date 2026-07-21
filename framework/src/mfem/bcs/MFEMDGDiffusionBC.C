@@ -19,10 +19,10 @@ MFEMDGDiffusionBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Boundary condition for DG Diffusion kernel");
-  params.addParam<mfem::real_t>(
-      "diffusion_coefficient", 1.0, "Name of property for diffusion coefficient k");
-  params.addParam<mfem::real_t>(
-      "boundary_coefficient", 0.0, "Name of property for dirichlet coefficient");
+  params.addParam<MFEMScalarCoefficientName>(
+      "diffusion_coefficient", "1.0", "Name of property for diffusion coefficient k");
+  params.addParam<MFEMScalarCoefficientName>(
+      "boundary_coefficient", "0.0", "Name of property for dirichlet coefficient");
   params.addParam<mfem::real_t>("sigma", -1.0, "Symmetry parameter. Typically +/- 1.0");
   params.addParam<mfem::real_t>(
       "kappa", "Penalty parameter. Should be non-negative. Will default to (order+1)^2");
@@ -32,8 +32,8 @@ MFEMDGDiffusionBC::validParams()
 MFEMDGDiffusionBC::MFEMDGDiffusionBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _fe_order(getMFEMProblem().getGridFunction(_test_var_name)->ParFESpace()->FEColl()->GetOrder()),
-    _dcoef(getParam<mfem::real_t>("diffusion_coefficient")),
-    _bcoef(getParam<mfem::real_t>("boundary_coefficient")),
+    _dcoef(getScalarCoefficient("diffusion_coefficient")),
+    _bcoef(getScalarCoefficient("boundary_coefficient")),
     _sigma(getParam<mfem::real_t>("sigma")),
     _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
                                        : (_fe_order + 1) * (_fe_order + 1))
