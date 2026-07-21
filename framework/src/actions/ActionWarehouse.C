@@ -11,6 +11,7 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 #include "MooseObjectAction.h"
+#include "PhysicsBase.h"
 #include "InputFileFormatter.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
@@ -22,7 +23,88 @@
 #include "MemoryUtils.h"
 #include "InputParameterWarehouse.h"
 
+#include "DependencyResolver.h"
+
 #include "libmesh/simple_range.h"
+
+std::vector<UserObjectName>
+ActionWarehouse::getUserObjectParamDependencies(const InputParameters & params) const
+{
+  std::vector<UserObjectName> dependencies;
+  for (const auto & [_, param] : params)
+  {
+    if (const auto dependency =
+            dynamic_cast<const libMesh::Parameters::Parameter<UserObjectName> *>(param.get()))
+    {
+      const auto & uo_name = dependency->get();
+      if (!uo_name.empty())
+        dependencies.push_back(uo_name);
+    }
+    else if (const auto vector_dependency =
+                 dynamic_cast<const libMesh::Parameters::Parameter<std::vector<UserObjectName>> *>(
+                     param.get()))
+      for (const auto & uo_name : vector_dependency->get())
+        if (!uo_name.empty())
+          dependencies.push_back(uo_name);
+  }
+  return dependencies;
+}
+
+void
+ActionWarehouse::sortUserObjectActions(std::list<Action *> & actions) const
+{
+  // We key on act->name() because for a MooseObjectAction the action name is exactly the name the
+  // UserObject is constructed under (see AddUserObjectAction), so a UserObjectName parameter value
+  // matches the action that builds the referenced object.
+  std::map<std::string, Action *> action_for_uo_name;
+  for (const auto act : actions)
+    if (dynamic_cast<MooseObjectAction *>(act))
+      action_for_uo_name.emplace(act->name(), act);
+    // A Physics does not build its UserObjects under its own action name, so it declares the names
+    // it supplies through getSuppliedUserObjects(). Key those to the Physics action so an object
+    // referencing a Physics-supplied UserObject is constructed after the Physics adds it.
+    else if (const auto physics = dynamic_cast<const PhysicsBase *>(act))
+      for (const auto & uo_name : physics->getSuppliedUserObjects())
+        action_for_uo_name.emplace(uo_name, act);
+
+  // Seed the resolver in the current (input-file) order so that independent UserObjects keep their
+  // input order (DependencyResolver resolves in insertion order modulo dependencies).
+  DependencyResolver<Action *> resolver;
+  for (const auto act : actions)
+    resolver.addItem(act);
+
+  for (const auto act : actions)
+  {
+    // A MooseObjectAction carries its dependencies in the parameters of the object it builds. Any
+    // other action that consumes a UserObject (e.g. a Physics that programmatically adds one) names
+    // it in the action's own parameters, so the dependency is ordered against just the same.
+    const auto moose_object_action = dynamic_cast<MooseObjectAction *>(act);
+    const auto & relevant_params =
+        moose_object_action ? moose_object_action->getObjectParams() : act->parameters();
+    for (const auto & dep_name : getUserObjectParamDependencies(relevant_params))
+    {
+      const auto it = action_for_uo_name.find(dep_name);
+      if (it != action_for_uo_name.end() && it->second != act)
+        // act references the UserObject built by it->second, which must be constructed first
+        resolver.addEdge(it->second, act);
+    }
+  }
+
+  // A UserObjectName parameter does not necessarily denote a construction-time dependency: many
+  // UserObjects only resolve a referenced UserObject during initialSetup() or execution. Mutually
+  // referencing UserObjects therefore form a cycle here even though they construct fine in input
+  // order. So a cycle is not an error - fall back to the original input order, which is the
+  // behavior prior to this sorting. A genuine construction-time cycle still surfaces as the usual
+  // "UserObject not found" error when the object is constructed.
+  try
+  {
+    const auto & sorted = resolver.getSortedValues();
+    actions.assign(sorted.begin(), sorted.end());
+  }
+  catch (const CyclicDependencyException<Action *> &)
+  {
+  }
+}
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory)
   : ConsoleStreamInterface(app),
@@ -371,6 +453,12 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
 {
   // Set the current task name
   _current_task = task;
+
+  // UserObjects may reference other UserObjects in their constructors (e.g. through a
+  // UserObjectName parameter). Construct them in dependency order so the input file does not have
+  // to declare a referenced UserObject before the UserObject that uses it.
+  if (task == "add_user_object")
+    sortUserObjectActions(_action_blocks[task]);
 
   for (auto it = actionBlocksWithActionBegin(task); it != actionBlocksWithActionEnd(task); ++it)
   {

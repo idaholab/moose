@@ -1210,7 +1210,13 @@ WCNSFVFlowPhysics::addRhieChowUserObjects()
   }
 
   params.applySpecificParameters(parameters(), INSFVRhieChowInterpolator::listOfCommonParams());
-  getProblem().addUserObject(object_type, _rc_uo_name, params);
+  addUserObject(object_type, _rc_uo_name, params);
+}
+
+std::vector<UserObjectName>
+WCNSFVFlowPhysics::getSuppliedUserObjects() const
+{
+  return {rhieChowUOName()};
 }
 
 void

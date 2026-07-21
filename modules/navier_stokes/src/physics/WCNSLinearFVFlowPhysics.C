@@ -695,7 +695,13 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<MooseEnum>("pressure_diffusion_interpolation") =
       getParam<MooseEnum>("pressure_diffusion_interpolation");
 
-  getProblem().addUserObject(object_type, rhieChowUOName(), params);
+  addUserObject(object_type, rhieChowUOName(), params);
+}
+
+std::vector<UserObjectName>
+WCNSLinearFVFlowPhysics::getSuppliedUserObjects() const
+{
+  return {rhieChowUOName()};
 }
 
 void
