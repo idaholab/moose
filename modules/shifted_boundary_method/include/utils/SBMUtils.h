@@ -51,4 +51,9 @@ RealVectorValue closestDistanceVector(const std::vector<const Function *> & func
 RealVectorValue closestTrueNormalVector(const std::vector<const Function *> & funcs,
                                         const libMesh::Point & pt,
                                         Real t);
+
+/// Computes the union signed distance by taking the minimum of all
+/// signed distance functions. This definition is valid for overlapping
+/// geometries and preserves the correct union boundary.
+Real unionSignedDistance(const std::vector<const Function *> & funcs, Real t, const Point & p);
 }

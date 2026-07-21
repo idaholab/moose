@@ -12,6 +12,7 @@
 #include "FunctionInterface.h"
 #include "MooseParsedFunction.h"
 #include "UnsignedDistanceToSurfaceMesh.h"
+#include "SignedDistanceToSurfaceMesh.h"
 
 #include <limits>
 
@@ -40,10 +41,12 @@ buildDistanceFunctions(const std::vector<FunctionName> & function_names,
   {
     const Function * func = &function_provider.getFunctionByName(name);
     if (!dynamic_cast<const MooseParsedFunction *>(func) &&
-        !dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func))
+        !dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func) &&
+        !dynamic_cast<const SignedDistanceToSurfaceMesh *>(func))
     {
-      mooseError("SBM distance helpers only support ParsedFunction or "
-                 "UnsignedDistanceToSurfaceMesh types. Offending function: ",
+      mooseError("SBM distance helpers only support ParsedFunction, "
+                 "UnsignedDistanceToSurfaceMesh, or SignedDistanceToSurfaceMesh types. Offending "
+                 "function: ",
                  name);
     }
     funcs.emplace_back(func);
@@ -56,10 +59,11 @@ RealVectorValue
 distanceVectorFromFunction(const Function * func, const libMesh::Point & pt, Real t)
 {
   mooseAssert(dynamic_cast<const MooseParsedFunction *>(func) ||
-                  dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func),
+                  dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func) ||
+                  dynamic_cast<const SignedDistanceToSurfaceMesh *>(func),
               "Function was not a valid distance strategy, the only "
-              "supported types are ParsedFunction and "
-              "UnsignedDistanceToSurfaceMesh.");
+              "supported types are ParsedFunction, UnsignedDistanceToSurfaceMesh, or "
+              "SignedDistanceToSurfaceMesh.");
 
   const Real phi = func->value(t, pt);
   const RealVectorValue grad_phi = func->gradient(t, pt);
@@ -86,6 +90,9 @@ trueNormalFromFunction(const Function * func, const libMesh::Point & pt, Real t)
   else
   {
     const auto * mesh_func = dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func);
+    if (!mesh_func)
+      mesh_func = dynamic_cast<const SignedDistanceToSurfaceMesh *>(func);
+
     mooseAssert(mesh_func, "Function was not a valid distance strategy");
     return mesh_func->surfaceNormal(pt);
   }
@@ -133,6 +140,32 @@ closestTrueNormalVector(const std::vector<const Function *> & funcs,
   }
 
   return closest_normal_vec;
+}
+
+Real
+unionSignedDistance(const std::vector<const Function *> & funcs, Real t, const Point & p)
+{
+  // Ensure all distance functions are valid signed distance strategies
+  for (const auto * func : funcs)
+  {
+    if (!dynamic_cast<const MooseParsedFunction *>(func) &&
+        !dynamic_cast<const SignedDistanceToSurfaceMesh *>(func))
+      mooseError("Signed distance requested but function was not a valid signed distance strategy. "
+                 "Valid types are MooseParsedFunction or SignedDistanceToSurfaceMesh. "
+                 "Offending function: ",
+                 func->name());
+  }
+
+  // Union signed distance: min of all signed distances
+  Real min_value = funcs[0]->value(t, p);
+  for (std::size_t i = 1; i < funcs.size(); ++i)
+  {
+    const Real val = funcs[i]->value(t, p);
+    if (val < min_value)
+      min_value = val;
+  }
+
+  return min_value;
 }
 
 } // namespace SBMUtils
