@@ -63,16 +63,18 @@ vector.copyToDevice();
 
 If the data type is not default-constructible or if you do not want to initialize array using the default constructor, you can set an optional template argument to `false` when calling `create()` or `createHost()`.
 It will only allocate a raw chunk of uninitialized memory using `malloc()` instead of `new`.
-Then, it becomes your responsibility to loop over the array and properly construct each entry using placement new.
+Then, each entry should be manually constructed by calling `emplace()` and passing in constructor arguments.
+The array keeps track of entries emplaced, so sparse construction is allowed.
 For example:
 
 ```cpp
 Array<NotDefaultConstructable> data;
 
-data.create<false>(n);
+data.create<false>(n1, n2);
 
-for (auto & datum : data)
-  new (&datum) NotDefaultConstructable(...);
+for (unsigned int i = 0; i < n1; ++i)
+  for (unsigned int j = 0; j < n2; ++j)
+    data.emplace({i, j}, ...);
 ```
 
 !alert note
