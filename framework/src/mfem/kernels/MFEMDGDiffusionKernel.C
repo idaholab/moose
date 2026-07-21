@@ -22,7 +22,8 @@ MFEMDGDiffusionKernel::validParams()
                              "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
-  params.addParam<mfem::real_t>("coef", 1.0, "Name of property for diffusion coefficient k");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coef", "1.0", "Name of property for diffusion coefficient k");
   params.addParam<mfem::real_t>("sigma", -1.0, "Symmetry parameter. Typically +/- 1.0");
   params.addParam<mfem::real_t>(
       "kappa", "Penalty parameter. Should be non-negative. Will default to (order+1)^2");
@@ -32,7 +33,7 @@ MFEMDGDiffusionKernel::validParams()
 MFEMDGDiffusionKernel::MFEMDGDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _fe_order(getMFEMProblem().getGridFunction(_test_var_name)->ParFESpace()->FEColl()->GetOrder()),
-    _coef(getScalarCoefficient("coefficient")),
+    _coef(getScalarCoefficient("coef")),
     _sigma(getParam<mfem::real_t>("sigma")),
     _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
                                        : (_fe_order + 1) * (_fe_order + 1))
