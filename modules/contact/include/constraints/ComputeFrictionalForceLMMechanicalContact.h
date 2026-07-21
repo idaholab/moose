@@ -67,6 +67,9 @@ protected:
                               const ADReal & tangential_vel,
                               const ADReal & tangential_vel_dir);
 
+  /// Return the positive nodal tangential pressure scale for \p dof.
+  Real tangentialContactScale(const DofObject * dof) const;
+
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
@@ -94,11 +97,8 @@ protected:
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 
-  /// When true, c_t is derived per-node from c_normal_eff and the tangential velocity magnitude
+  /// When true, use the physical normal stiffness as the tangential right/column scale
   const bool _dynamic_c_t;
-
-  /// Tangential velocity magnitude below which c_t falls back to c_normal_eff (stick regime)
-  const Real _vel_floor;
 
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;
@@ -120,9 +120,6 @@ protected:
 
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
-
-  /// Small contact pressure value to trigger computation of frictional forces
-  const Real _epsilon;
 
   /// Friction coefficient
   const Real _mu;

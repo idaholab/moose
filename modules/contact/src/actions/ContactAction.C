@@ -209,8 +209,8 @@ ContactAction::validParams()
   c_normal_strategy.addDocumentation("user", "Use the value supplied via 'c_normal' (default).");
   c_normal_strategy.addDocumentation(
       "physical",
-      "Derive c_normal automatically from the harmonic mean of the acoustic tensor normal "
-      "stiffness on the two contacting bodies. Requires 'normalize_c = true'.");
+      "Derive a per-node physical stiffness per normal length from the two contacting bodies and "
+      "use it for solver-side contact pressure scaling. Requires 'normalize_c = true'.");
   params.addParam<MooseEnum>(
       "c_normal_strategy", c_normal_strategy, "Strategy for setting the normal contact scaling.");
   MooseEnum c_tangential_strategy("user physical", "user");
@@ -218,8 +218,8 @@ ContactAction::validParams()
                                          "Use the value supplied via 'c_tangential' (default).");
   c_tangential_strategy.addDocumentation(
       "physical",
-      "Derive c_tangential per-node from c_normal_eff / (vt_mag * dt). Only valid for Coulomb "
-      "friction mortar contact.");
+      "Use the physical normal stiffness as the per-node scale in both tangential directions. "
+      "Only valid for Coulomb friction mortar contact with physical normal scaling.");
   params.addParam<MooseEnum>("c_tangential_strategy",
                              c_tangential_strategy,
                              "Strategy for setting the tangential contact scaling.");
@@ -355,7 +355,8 @@ ContactAction::validParams()
   // Friction
   params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
   // Mortar-specific parameters
-  params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
+  params.addParamNamesToGroup("c_normal c_tangential c_normal_strategy c_tangential_strategy "
+                              "normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
                               "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
                               "generate_mortar_mesh segment_quadrature wear_depth debug_mesh",
@@ -487,6 +488,18 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("c_tangential_strategy",
                  "'c_tangential_strategy = physical' is only valid for Coulomb friction mortar "
                  "contact.");
+
+    if (getParam<MooseEnum>("c_tangential_strategy") == "physical" &&
+        getParam<MooseEnum>("c_normal_strategy") != "physical")
+      paramError("c_tangential_strategy",
+                 "'c_tangential_strategy = physical' requires 'c_normal_strategy = physical'.");
+
+    if (getParam<bool>("mortar_dynamics") &&
+        (getParam<MooseEnum>("c_normal_strategy") == "physical" ||
+         getParam<MooseEnum>("c_tangential_strategy") == "physical"))
+      paramError("mortar_dynamics",
+                 "Physical mortar contact scaling is not supported with 'mortar_dynamics'.");
+
   }
   else
   {

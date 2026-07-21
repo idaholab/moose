@@ -11,6 +11,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
+#include "NonlinearSystemBase.h"
 
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
@@ -43,20 +44,14 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
   params.addParam<Real>(
       "epsilon",
       1.0e-7,
-      "Minimum value of contact pressure that will trigger frictional enforcement");
+      "Legacy separation threshold retained for input compatibility; quasistatic friction uses "
+      "the exact projection degeneracy guard.");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   params.addRequiredParam<UserObjectName>("weighted_velocities_uo",
                                           "The weighted tangential velocities user object.");
-  params.addParam<bool>("dynamic_c_t",
-                        false,
-                        "Derive c_t per-node from c_normal_eff / (vt_mag * dt). "
-                        "During stick (vt_mag < vel_floor) falls back to c_normal_eff.");
-  params.addParam<Real>("vel_floor",
-                        1e-10,
-                        "Tangential velocity magnitude below which dynamic c_t falls back to "
-                        "c_normal_eff (stick regime guard).");
-
+  params.addParam<bool>(
+      "dynamic_c_t", false, "Use the physical normal stiffness as the per-node tangential scale.");
   return params;
 }
 
@@ -67,14 +62,12 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
         getUserObject<LMWeightedVelocitiesUserObject>("weighted_velocities_uo")),
     _c_t(getParam<Real>("c_t")),
     _dynamic_c_t(getParam<bool>("dynamic_c_t")),
-    _vel_floor(getParam<Real>("vel_floor")),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
-    _epsilon(getParam<Real>("epsilon")),
     _mu(isParamValid("function_friction") ? std::numeric_limits<double>::quiet_NaN()
                                           : getParam<Real>("mu")),
     _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
@@ -110,6 +103,14 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
       paramError(
           "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
+
+  if (_dynamic_c_t && !_use_derived_c_normal)
+    paramError("dynamic_c_t",
+               "Physical tangential scaling requires physical normal contact scaling.");
+
+  if (!_dynamic_c_t && (!std::isfinite(_c_t) || _c_t <= 0.0))
+    paramError("c_t",
+               "The user-supplied tangential contact pressure scale must be positive and finite.");
 }
 
 void
@@ -157,6 +158,8 @@ ComputeFrictionalForceLMMechanicalContact::post()
     else
       enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -187,13 +190,13 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     else
       enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
 ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObject * const dof)
 {
-  using std::max, std::sqrt;
-
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
 
   // Get normal LM
@@ -215,84 +218,53 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
 
-  // Resolve normal reference stiffness (physical or user mode)
-  ADReal c;
-  if (_use_derived_c_normal)
-  {
-    const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
-    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
-  }
-  else
-    c = _normalize_c ? _c / *_normalization_ptr : _c;
-
-  // Resolve tangential scaling
-  ADReal c_t;
-  if (_dynamic_c_t)
-    // c_t = c_normal_eff: the tangential penalty matches the normal-constraint
-    // scaling.  Tangential contact stiffness (shear modulus ~ E/2) is the same
-    // order as normal (Young's modulus), so this is physically motivated and
-    // dimensionally correct.
-    c_t = c;
-  else
-    c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const Real normalization = contactNormalization();
+  const Real normal_scale = normalContactScale(dof);
+  const Real tangential_scale = tangentialContactScale(dof);
+  const Real c = normal_scale / normalization;
+  const Real c_t = tangential_scale / normalization;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad = computeFrictionValue(contact_pressure,
                                       _dof_to_real_tangential_velocity[dof][0],
                                       _dof_to_real_tangential_velocity[dof][1]);
 
-  ADReal dof_residual;
-  ADReal dof_residual_dir;
+  const Real equation_scaling = _friction_vars[0]->scalingFactor();
+  const Real equation_scaling_dir = _friction_vars[1]->scalingFactor();
 
-  // Primal-dual active set strategy (PDASS)
-  if (contact_pressure < _epsilon)
-  {
-    dof_residual = friction_lm_values[0];
-    dof_residual_dir = friction_lm_values[1];
-  }
-  else
-  {
-    // Espilon to avoid automatic differentiation singularity
-    const Real epsilon_sqrt = 1.0e-48;
+  auto & nonlinear_system = _fe_problem.getNonlinearSystemBase(_sys.number());
+  for (const auto i : make_range(num_tangents))
+    nonlinear_system.setKSPRightDiagonalScale(friction_dof_indices[i], tangential_scale);
 
-    const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
-    std::array<ADReal, 2> lambda_t_plus_ctu;
-    lambda_t_plus_ctu[0] = friction_lm_values[0] + c_t * *tangential_vel[0] * _dt;
-    lambda_t_plus_ctu[1] = friction_lm_values[1] + c_t * *tangential_vel[1] * _dt;
+  const ADReal augmented_normal_pressure =
+      Moose::Mortar::Contact::augmentedNormalPressure(contact_pressure, c * weighted_gap);
+  const ADReal friction_limit =
+      Moose::Mortar::Contact::coulombFrictionRadius(mu_ad, augmented_normal_pressure);
+  const std::array<ADReal, 2> augmented_tangential_pressure = {
+      friction_lm_values[0] + c_t * *tangential_vel[0] * _dt,
+      friction_lm_values[1] + c_t * *tangential_vel[1] * _dt};
+  const auto friction_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+      friction_lm_values, augmented_tangential_pressure, friction_limit);
+  const Real formulation_row_scale = 1.0 / tangential_scale;
 
-    const auto term_1_x = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[0];
-
-    const auto term_1_y = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[1];
-
-    const auto term_2_x = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
-
-    const auto term_2_y = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
-
-    dof_residual = term_1_x - term_2_x;
-    dof_residual_dir = term_1_y - term_2_y;
-  }
+  const ADReal dof_residual =
+      equationCompensation(*_friction_vars[0]) * formulation_row_scale * friction_residual[0];
+  const ADReal dof_residual_dir =
+      equationCompensation(*_friction_vars[1]) * formulation_row_scale * friction_residual[1];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
                           std::array<dof_id_type, 1>{{friction_dof_indices[0]}},
-                          _friction_vars[0]->scalingFactor());
+                          equation_scaling);
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual_dir}},
                           std::array<dof_id_type, 1>{{friction_dof_indices[1]}},
-                          _friction_vars[1]->scalingFactor());
+                          equation_scaling_dir);
 }
 
 void
 ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
-  using std::abs, std::max;
-
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
 
   // Get friction LM
@@ -307,47 +279,47 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
 
-  // Resolve normal reference stiffness (physical or user mode)
-  ADReal c;
-  if (_use_derived_c_normal)
-  {
-    const auto & [c_nn, ignored] = libmesh_map_find(_weighted_velocities_uo.dofToDerivedC(), dof);
-    c = _normalize_c ? c_nn / *_normalization_ptr : c_nn;
-  }
-  else
-    c = _normalize_c ? _c / *_normalization_ptr : _c;
-
-  // Resolve tangential scaling
-  ADReal c_t;
-  if (_dynamic_c_t)
-    // c_t = c_normal_eff: see 3D path above for explanation.
-    c_t = c;
-  else
-    c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const Real normalization = contactNormalization();
+  const Real normal_scale = normalContactScale(dof);
+  const Real tangential_scale = tangentialContactScale(dof);
+  const Real c = normal_scale / normalization;
+  const Real c_t = tangential_scale / normalization;
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad =
       computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
 
-  ADReal dof_residual;
-  // Primal-dual active set strategy (PDASS)
-  if (contact_pressure < _epsilon)
-    dof_residual = friction_lm_value;
-  else
-  {
-    const auto term_1 = max(mu_ad * (contact_pressure + c * weighted_gap),
-                            abs(friction_lm_value + c_t * tangential_vel * _dt)) *
-                        friction_lm_value;
-    const auto term_2 = mu_ad * max(0.0, contact_pressure + c * weighted_gap) *
-                        (friction_lm_value + c_t * tangential_vel * _dt);
+  const Real equation_scaling = _friction_vars[0]->scalingFactor();
+  _fe_problem.getNonlinearSystemBase(_sys.number())
+      .setKSPRightDiagonalScale(friction_dof_index, tangential_scale);
 
-    dof_residual = term_1 - term_2;
-  }
+  const ADReal augmented_normal_pressure =
+      Moose::Mortar::Contact::augmentedNormalPressure(contact_pressure, c * weighted_gap);
+  const ADReal friction_limit =
+      Moose::Mortar::Contact::coulombFrictionRadius(mu_ad, augmented_normal_pressure);
+  const std::array<ADReal, 1> tangential_pressure = {friction_lm_value};
+  const std::array<ADReal, 1> augmented_tangential_pressure = {friction_lm_value +
+                                                               c_t * tangential_vel * _dt};
+  const auto friction_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+      tangential_pressure, augmented_tangential_pressure, friction_limit);
+  const Real formulation_row_scale = 1.0 / tangential_scale;
+  const ADReal dof_residual =
+      equationCompensation(*_friction_vars[0]) * formulation_row_scale * friction_residual[0];
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
                           std::array<dof_id_type, 1>{{friction_dof_index}},
-                          _friction_vars[0]->scalingFactor());
+                          equation_scaling);
+}
+
+Real
+ComputeFrictionalForceLMMechanicalContact::tangentialContactScale(const DofObject * const dof) const
+{
+  const Real scale =
+      _dynamic_c_t ? normalContactScale(dof) : _c_t * (_normalize_c ? 1.0 : contactNormalization());
+  if (!std::isfinite(scale) || scale <= 0.0)
+    mooseError("Mortar contact requires positive, finite nodal tangential pressure scales.");
+  return scale;
 }
 
 ADReal
