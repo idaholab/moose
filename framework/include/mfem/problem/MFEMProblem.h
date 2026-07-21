@@ -22,8 +22,13 @@
 
 namespace Moose::MFEM
 {
+<<<<<<< HEAD
 struct SolutionState;
 }
+=======
+class ProblemOperatorBuilderBase;
+};
+>>>>>>> dd515131cb (Adding forward declarations of classes and adding necessary headers that are needed in non-unity files)
 
 class MFEMProblem : public ExternalProblem
 {
