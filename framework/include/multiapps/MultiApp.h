@@ -430,6 +430,7 @@ protected:
 
   private:
     const bool _original_suppress_info;
+    const bool _changed_suppress_info;
   };
 
   /// function that provides cli_args to subapps
