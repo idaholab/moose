@@ -2169,9 +2169,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
     }
   }
 
-  // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
-  // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for cases
-  // where the face can be curved
   for (const auto & pr : node_to_normals_map)
   {
     // Compute normal vector
