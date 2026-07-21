@@ -1,0 +1,74 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "ElementSubdomainModifier.h"
+#include "Function.h"
+#include "libmesh/quadrature_gauss.h"
+#include "PointInPolyhedronCheckUO.h"
+
+enum class DistanceType
+{
+  NONE = -1,
+  SIGN_DISTANCE = 0,
+  GEOMETRY = 1
+};
+
+class InterceptedElementModifier : public ElementSubdomainModifier /*, public UserObjectInterface*/
+{
+public:
+  static InputParameters validParams();
+  InterceptedElementModifier(const InputParameters & parameters);
+
+protected:
+  virtual SubdomainID computeSubdomainID() override;
+  virtual void initialSetup() override;
+
+  /// Store the parsed function
+  const Function * _parsed_function;
+
+private:
+  /// IDs for subdomain classification (inside)
+  SubdomainID _subdomain_id_inside;
+  /// IDs for subdomain classification (outside)
+  SubdomainID _subdomain_id_outside;
+
+  /// ID for intercepted elements (optional)
+  const bool _mark_intercepted;
+  /// IDs for subdomain classification (intercepted)
+  SubdomainID _subdomain_id_intercepted;
+
+  /// Threshold value for classification
+  Real _threshold;
+
+  /// Lambda parameter for false intersection classification
+  Real _lambda;
+
+  /// Outer boundary handling flag
+  bool _outer_boundary;
+
+  /// Shift vector for geometry translation
+  Point _shift_geometry;
+
+  /// quadrature rule order to doing lambda-based classification to determine whether the Intercepted element belong to TrueIntercepted or FalseIntercepted
+  int _qrule_order;
+
+  /// user object for in-out test
+  const PointInPolyhedronCheckUO * _in_out_test_base;
+
+private:
+  /// How to classify the element to be inside or outside
+  /// 1. SIGN_DISTANCE: use the signed distance function to classify the element
+  /// 2. GEOMETRY: use the geometry to classify the element
+  DistanceType _in_out_test_type = DistanceType::NONE;
+
+  /// Convert integer to Order
+  Order intToOrder(int value);
+};
