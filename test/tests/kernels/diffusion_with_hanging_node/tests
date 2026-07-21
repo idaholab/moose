@@ -50,4 +50,12 @@
     requirement = 'The system shall compute a perfect Jacobian via automatic differentiation for a hanging-node problem and simultaneously handle automatic differentiation objects that do not actually have nonlinear variable dependence.'
     issues = 'libmesh#1985 #15732'
   []
+  [test_ad_row_dependent_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_row_dependent_jacobian.i'
+    run_sim = true
+    requirement = 'The system shall constrain and cache AD Jacobian batches whose residual rows have different derivative supports.'
+    design = 'automatic_differentiation/index.md'
+    issues = '#33378'
+  []
 []

@@ -40,6 +40,7 @@ AugmentSparsityOnInterface::validParams()
       "Whether we should ghost point neighbors of secondary lower-dimensional elements and "
       "also their mortar interface couples for applications such as mortar nodal auxiliary "
       "kernels.");
+  params.addPrivateParam<bool>("include_secondary_face_one_ring", false);
   params.addParam<bool>(
       "ghost_higher_d_neighbors",
       false,
@@ -65,6 +66,7 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
     _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain")),
     _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING)),
     _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors")),
+    _include_secondary_face_one_ring(getParam<bool>("include_secondary_face_one_ring")),
     _ghost_higher_d_neighbors(getParam<bool>("ghost_higher_d_neighbors"))
 {
 }
@@ -77,6 +79,7 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnIn
     _secondary_subdomain_name(other._secondary_subdomain_name),
     _is_coupling_functor(other._is_coupling_functor),
     _ghost_point_neighbors(other._ghost_point_neighbors),
+    _include_secondary_face_one_ring(other._include_secondary_face_one_ring),
     _ghost_higher_d_neighbors(other._ghost_higher_d_neighbors)
 {
 }
@@ -92,6 +95,20 @@ AugmentSparsityOnInterface::getInfo() const
   std::ostringstream oss;
   oss << "AugmentSparsityOnInterface";
   return oss.str();
+}
+
+void
+AugmentSparsityOnInterface::addElement(const processor_id_type p,
+                                       const Elem * const elem,
+                                       map_type & coupled_elements) const
+{
+  if (!elem || elem == remote_elem)
+    return;
+
+  // libMesh supplies invalid_processor_id while building sparsity, which includes every element,
+  // and a real processor id while building send lists, which includes only remote elements.
+  if (elem->processor_id() != p)
+    coupled_elements.emplace(elem, _null_mat);
 }
 
 void
@@ -115,8 +132,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
     mooseAssert(coupled_elem,
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-    if (coupled_elem->processor_id() != p)
-      coupled_elements.emplace(coupled_elem, _null_mat);
+    addElement(p, coupled_elem, coupled_elements);
   }
 }
 
@@ -199,6 +215,125 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
     return;
 
   } // end for side_index_range
+}
+
+void
+AugmentSparsityOnInterface::addSecondaryFaceOneRing(const processor_id_type p,
+                                                    const Elem * const query_elem,
+                                                    map_type & coupled_elements,
+                                                    const BoundaryID secondary_boundary_id,
+                                                    const SubdomainID secondary_subdomain_id,
+                                                    const AutomaticMortarGeneration & amg) const
+{
+  const BoundaryInfo & binfo = _mesh->get_boundary_info();
+  const auto is_secondary_lower = [&](const Elem * const elem)
+  {
+    if (!elem || elem == remote_elem || !elem->active() ||
+        elem->subdomain_id() != secondary_subdomain_id)
+      return false;
+
+    const Elem * const interior_parent = elem->interior_parent();
+    if (!interior_parent)
+      return false;
+
+    const auto side = interior_parent->which_side_am_i(elem);
+    return binfo.has_boundary_id(interior_parent, side, secondary_boundary_id);
+  };
+
+  const auto add_secondary_faces_at_nodes =
+      [&](const Elem * const elem, std::set<const Elem *> & secondary_faces)
+  {
+    if (!elem || elem == remote_elem)
+      return;
+
+    // Use libMesh's point-neighbor query rather than MooseMesh::nodeToElemMap(). The query
+    // traverses the interface elements made available by the companion ghosting relationship
+    // managers, whereas the MooseMesh map is not guaranteed to contain that complete distributed
+    // topology.
+    std::set<const Elem *> point_neighbors;
+    elem->find_point_neighbors(point_neighbors);
+    for (const Elem * const candidate : point_neighbors)
+      if (is_secondary_lower(candidate))
+        secondary_faces.insert(candidate);
+  };
+
+  const auto add_secondary_parent_faces =
+      [&](const Elem * const elem, std::set<const Elem *> & secondary_faces)
+  {
+    if (!elem || elem == remote_elem)
+      return;
+
+    bool is_secondary_parent = false;
+    for (const auto side : elem->side_index_range())
+      if (binfo.has_boundary_id(elem, side, secondary_boundary_id))
+      {
+        is_secondary_parent = true;
+        break;
+      }
+
+    if (!is_secondary_parent)
+      return;
+
+    // A secondary parent can own more than one mortar side. Recover them from the same map used by
+    // AutomaticMortarGeneration rather than assuming a particular side or coupling-map ordering.
+    const auto & nodes_to_secondary_faces = amg.nodesToSecondaryElem();
+    for (const auto & node : elem->node_ref_range())
+      if (const auto node_it = nodes_to_secondary_faces.find(node.id());
+          node_it != nodes_to_secondary_faces.end())
+        for (const Elem * const candidate : node_it->second)
+        {
+          // AMG may own the displaced mesh while this coupling functor is attached to the
+          // undisplaced DofMap. Resolve by id before querying topology or inserting pointers into
+          // this relationship manager's coupling map.
+          const Elem * const candidate_on_rm_mesh = _mesh->elem_ptr(candidate->id());
+          if (is_secondary_lower(candidate_on_rm_mesh) &&
+              candidate_on_rm_mesh->interior_parent() == elem)
+            secondary_faces.insert(candidate_on_rm_mesh);
+        }
+  };
+
+  // The mortar coupling map is keyed for each secondary lower element, its interior parent, and
+  // every paired primary parent. Use that inexpensive lookup before any point-neighbor search so
+  // ordinary volume elements do not pay for interface topology discovery.
+  std::set<const Elem *> secondary_lower_elems;
+  if (is_secondary_lower(query_elem))
+    secondary_lower_elems.insert(query_elem);
+
+  // A secondary parent can belong to the derivative stencil of an overlapping neighboring face
+  // even when its own face has no mortar segment and is therefore absent from the coupling map.
+  // Recover all of its secondary lower-dimensional sides through the node-to-face map. This also
+  // supports the uncommon case where more than one mortar side belongs to the same parent.
+  add_secondary_parent_faces(query_elem, secondary_lower_elems);
+
+  const auto & mic = amg.mortarInterfaceCoupling();
+  if (const auto coupling_it = mic.find(query_elem->id()); coupling_it != mic.end())
+    for (const auto coupled_elem_id : coupling_it->second)
+    {
+      const Elem * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+      mooseAssert(coupled_elem,
+                  "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+      if (is_secondary_lower(coupled_elem))
+        secondary_lower_elems.insert(coupled_elem);
+      else
+        add_secondary_parent_faces(coupled_elem, secondary_lower_elems);
+    }
+
+  if (secondary_lower_elems.empty())
+    return;
+
+  // Add every secondary face sharing a node, its interior parent, and the primary elements coupled
+  // through mortar. This remains local to secondary faces associated with query_elem; it does not
+  // ghost the whole mortar interface.
+  std::set<const Elem *> one_ring_lower_elems = secondary_lower_elems;
+  for (const Elem * const secondary_lower_elem : secondary_lower_elems)
+    add_secondary_faces_at_nodes(secondary_lower_elem, one_ring_lower_elems);
+
+  for (const Elem * const neighbor : one_ring_lower_elems)
+  {
+    addElement(p, neighbor, coupled_elements);
+    addElement(p, neighbor->interior_parent(), coupled_elements);
+    ghostMortarInterfaceCouplings(p, neighbor, coupled_elements, amg);
+  }
 }
 
 void
@@ -372,6 +507,9 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
       if (_ghost_point_neighbors)
         ghostLowerDSecondaryElemPointNeighbors(
             p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
+      if (_include_secondary_face_one_ring)
+        addSecondaryFaceOneRing(
+            p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
       if (_ghost_higher_d_neighbors)
         ghostHigherDNeighbors(
             p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
@@ -389,6 +527,7 @@ AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
         _secondary_subdomain_name == asoi->_secondary_subdomain_name &&
         _ghost_point_neighbors >= asoi->_ghost_point_neighbors &&
+        _include_secondary_face_one_ring >= asoi->_include_secondary_face_one_ring &&
         _ghost_higher_d_neighbors >= asoi->_ghost_higher_d_neighbors && baseGreaterEqual(*asoi))
       return true;
   }

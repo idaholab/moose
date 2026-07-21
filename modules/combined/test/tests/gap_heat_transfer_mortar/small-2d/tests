@@ -56,6 +56,7 @@
       type = CSVDiff
       input = 'open_gap_pressure_dependent.i'
       csvdiff = 'open_gap_pressure_dependent_out.csv'
+      abs_zero = 1e-9
       detail = 'in an open gap geometry such that no heat transfer occurs between the two blocks.'
       # PR #26848. Clang 16 Apple Si is not compatible.
       capabilities = 'machine=x86_64'

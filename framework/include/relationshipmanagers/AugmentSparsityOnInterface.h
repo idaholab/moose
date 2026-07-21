@@ -62,6 +62,14 @@ protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
   /**
+   * Add an element to the coupling map. Coupling functors pass an invalid processor id and include
+   * local and remote elements; ghosting functors pass a real processor id and include only remote
+   * elements.
+   */
+  void
+  addElement(const processor_id_type p, const Elem * const elem, map_type & coupled_elements) const;
+
+  /**
    * Ghost the mortar interface couplings of the provided element
    */
   void ghostMortarInterfaceCouplings(const processor_id_type p,
@@ -82,6 +90,17 @@ protected:
                                               SubdomainID secondary_subdomain_id,
                                               const AutomaticMortarGeneration & amg) const;
 
+  /**
+   * Add active secondary faces sharing a node with a secondary face associated with the query
+   * element, together with their interior parents and mortar-coupled primary elements.
+   */
+  void addSecondaryFaceOneRing(const processor_id_type p,
+                               const Elem * const query_elem,
+                               map_type & coupled_elements,
+                               BoundaryID secondary_boundary_id,
+                               SubdomainID secondary_subdomain_id,
+                               const AutomaticMortarGeneration & amg) const;
+
   void ghostHigherDNeighbors(const processor_id_type p,
                              const Elem * const query_elem,
                              map_type & coupled_elements,
@@ -101,6 +120,9 @@ protected:
   /// Whether to ghost point neighbors of secondary lower subdomain elements and their
   /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
   const bool _ghost_point_neighbors;
+
+  /// Whether to include the available secondary face one-ring in ghosting and sparsity couplings.
+  const bool _include_secondary_face_one_ring;
 
   /// Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing
   /// second order mortar with finite volume primal variables, because in order for the method to be

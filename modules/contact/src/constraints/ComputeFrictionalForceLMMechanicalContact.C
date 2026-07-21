@@ -73,6 +73,11 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  // Direct input syntax permits separate weighted-gap and weighted-velocity user objects. Enable
+  // the derivative-aware geometry on both so the tangential contact equations use the same
+  // quasistatic normal and tangent linearization as the normal equations.
+  _weighted_velocities_uo.enableNodalNormalDerivatives();
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",

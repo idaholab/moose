@@ -22,6 +22,19 @@ interpolations for quadratic-element mortar contact and show that corner-node/li
 pressure fields can avoid inconsistencies that arise with quadratic contact pressure interpolations
 while retaining good convergence [!cite](puso2008segment).
 
+For supported quasistatic local-basis mechanical contact, the `mortar` and non-augmented
+`mortar_penalty` values of [!param](/Contact/ContactAction/formulation) include displacement
+derivatives of the secondary nodal normal and tangent directions in Jacobian-bearing evaluations by
+default. This applies to the `frictionless` and `coulomb` values of
+[!param](/Contact/ContactAction/model). Residual values remain unchanged, and residual-only mode
+does not construct the AD nodal-geometry cache. Dynamic mortar, augmented-Lagrangian penalty,
+Cartesian-LM, cohesive-zone, and nonmortar paths remain unchanged; quadrature-point normal
+interpolation is not a supported local-basis path, and the mortar formulations already exclude the
+`glued` model. The
+[weighted-gap constraint documentation](/ComputeWeightedGapLMMechanicalContact.md) describes the
+included derivatives, frozen geometric terms, supported secondary element types, and AD storage
+considerations.
+
 For node-to-segment mechanical contact, the action offers the possibility to automatically set up
 mechanical contact pairs given a maximum distance between contacting boundary centroids.
 To use that option, the user must set `automatic_pairing_method = CENTROID`.

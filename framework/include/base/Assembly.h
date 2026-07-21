@@ -24,6 +24,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem_side_builder.h"
 
+#include <algorithm>
 #include <unordered_map>
 
 // libMesh forward declarations
@@ -3131,23 +3132,40 @@ Assembly::cacheJacobian(const Residuals & residuals,
     return;
   }
 
-  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
-#ifndef NDEBUG
-  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
+  const auto & first_dofs = residuals[0].derivatives().nude_indices();
+  bool supports_match = true;
   for (const auto i : make_range(decltype(residuals.size())(1), residuals.size()))
   {
-    const auto & residual = residuals[i];
-    auto current_dofs_set = std::set<dof_id_type>(residual.derivatives().nude_indices().begin(),
-                                                  residual.derivatives().nude_indices().end());
-    mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
-                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
-                "same for every residual passed to this method otherwise constrain_element_matrix "
-                "will not work.");
+    const auto & current_dofs = residuals[i].derivatives().nude_indices();
+    if (current_dofs.size() != first_dofs.size() ||
+        !std::equal(first_dofs.begin(), first_dofs.end(), current_dofs.begin()))
+    {
+      supports_match = false;
+      break;
+    }
   }
-#endif
-  _column_indices.assign(compare_dofs.begin(), compare_dofs.end());
+
+  if (supports_match)
+    _column_indices.assign(first_dofs.begin(), first_dofs.end());
+  else
+  {
+    // Constraining the local matrix requires one column layout shared by every residual row.
+    // Gather the union of the sparse AD supports, then leave entries absent from a row as zero.
+    std::size_t combined_support_size = 0;
+    for (const auto i : index_range(residuals))
+      combined_support_size += residuals[i].derivatives().nude_indices().size();
+
+    _column_indices.clear();
+    _column_indices.reserve(combined_support_size);
+    for (const auto i : index_range(residuals))
+    {
+      const auto & current_dofs = residuals[i].derivatives().nude_indices();
+      _column_indices.insert(_column_indices.end(), current_dofs.begin(), current_dofs.end());
+    }
+    std::sort(_column_indices.begin(), _column_indices.end());
+    _column_indices.erase(std::unique(_column_indices.begin(), _column_indices.end()),
+                          _column_indices.end());
+  }
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
@@ -3170,7 +3188,11 @@ Assembly::cacheJacobian(const Residuals & residuals,
 
   for (const auto i : index_range(_row_indices))
     for (const auto j : index_range(_column_indices))
-      cacheJacobian(_row_indices[i], _column_indices[j], _element_matrix(i, j), {}, matrix_tags);
+      // Constraints may turn entries that were absent from an original AD row into nonzero
+      // contributions. Cache those entries while avoiding structural zeros introduced by the
+      // union above.
+      if (supports_match || _element_matrix(i, j) != 0.0)
+        cacheJacobian(_row_indices[i], _column_indices[j], _element_matrix(i, j), {}, matrix_tags);
 }
 
 template <typename Residuals, typename Indices>

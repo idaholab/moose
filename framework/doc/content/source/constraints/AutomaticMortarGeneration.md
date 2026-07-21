@@ -16,6 +16,47 @@ that have support from the shape function associated with a given node. In the f
 ghosting functors to the mortar segment mesh, which would allow us to delete unnecessary non-local
 elements.
 
+## Nodal normal coordinate sensitivities
+
+`AutomaticMortarGeneration` constructs one unit normal at each secondary mortar node by normalizing
+the sum of the oriented, nodal-quadrature area vectors from all incident secondary faces. For
+the supported quasistatic local-basis `mortar` and non-augmented `mortar_penalty`
+mechanical-contact formulations, Jacobian-bearing evaluations also construct a sparse
+coordinate-sensitivity stencil
+
+!equation
+\delta \boldsymbol{n}_A =
+\frac{\boldsymbol{I} - \boldsymbol{n}_A \otimes \boldsymbol{n}_A}
+     {\lVert \boldsymbol{a}_A \rVert}
+\delta \boldsymbol{a}_A,
+
+where \(\boldsymbol{a}_A\) is the unnormalized sum of the oriented edge or face area vectors at
+node \(A\). In two dimensions, differentiating an area vector is equivalent to differentiating and
+rotating the edge tangent. In three dimensions, each face contribution uses
+
+!equation
+\delta(\boldsymbol{x}_{,\xi} \times \boldsymbol{x}_{,\eta}) =
+\delta\boldsymbol{x}_{,\xi} \times \boldsymbol{x}_{,\eta} +
+\boldsymbol{x}_{,\xi} \times \delta\boldsymbol{x}_{,\eta}.
+
+The stencil includes coordinates from every secondary face incident to the normal node. It is built
+on demand for Jacobian-bearing evaluations. Residual-only evaluations continue to use the same stored
+nodal-normal values without populating the AD geometry cache. The degenerate-edge check scales the edge tangent
+magnitude by the element characteristic length, while the degenerate-face check scales the face
+area-vector magnitude by the squared characteristic length. The cancellation check compares the
+summed area-vector magnitude with the sum of the incident area-vector magnitudes. These relative
+checks are independent of the mesh coordinate units.
+Matching nodal-quadrature locations to secondary nodes uses the local element size when setting its
+geometric tolerance.
+
+The linearization treats the set of incident faces and each face-orientation sign as fixed during a
+Newton solve. Changes to interface connectivity, face-star membership, or orientation are discrete
+geometry updates and are not part of this coordinate-sensitivity stencil.
+
+Coordinate sensitivities are implemented for `EDGE2`, `EDGE3`, `TRI3`, `TRI6`, `TRI7`, `QUAD4`,
+`QUAD8`, and `QUAD9` secondary mortar elements. A supported Jacobian evaluation on any other
+secondary element type reports an error rather than silently omitting derivatives.
+
 ## 2D
 
 Generation of the 2D mortar segment mesh is outlined in [!cite](osti_1468630). In short, a nodal-normal projection is used to map points from the primary interface to the secondary interface; secondary interface elements are then split by the projected nodes to form mortar segment mesh elements.

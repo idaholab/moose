@@ -27,6 +27,16 @@ stiffness of the materials into contact. Also, to ensure solution stability, dua
 (i.e. `use_dual = true`) are employed by default to interpolate the contact traction
 when using the contact action.
 
+For the supported quasistatic local-basis, non-augmented `mortar_penalty` path, Jacobian-bearing evaluations
+include secondary nodal-normal displacement derivatives in the weighted gap, penalty pressure, and
+normal traction Jacobian by default. Normal, weighted-gap, pressure, and residual values remain
+unchanged, and residual-only mode stores no AD derivatives. See
+[ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for the
+supported contact paths, element types, one-ring sparsity and AD storage considerations, and
+geometric terms whose derivatives remain frozen.
+
+Augmented-Lagrangian penalty contact retains its existing frozen-normal Jacobian.
+
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance parameter is the normal gap distance (distance to exact enforcement if in contact)
 for normal contact. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,

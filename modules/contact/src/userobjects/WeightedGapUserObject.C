@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
 #include "AutomaticMortarGeneration.h"
+#include "ADUtils.h"
 
 #include "libmesh/quadrature.h"
 
@@ -30,6 +31,7 @@ WeightedGapUserObject::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
+  params.addPrivateParam<bool>("use_nodal_normal_derivatives", false);
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
@@ -49,11 +51,49 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _primary_disp_y(_disp_y_var->adSlnNeighbor()),
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
-    _coord(_assembly.mortarCoordTransformation())
+    _coord(_assembly.mortarCoordTransformation()),
+    _use_nodal_normal_derivatives(false)
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
+
+  if (getParam<bool>("use_nodal_normal_derivatives"))
+    enableNodalNormalDerivatives();
+}
+
+void
+WeightedGapUserObject::enableNodalNormalDerivatives() const
+{
+  if (_use_nodal_normal_derivatives)
+    return;
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
+
+  const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
+      {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
+  for (const auto & [variable, parameter_name] : displacement_variables)
+    if (variable)
+    {
+      if (!variable->isNodal())
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require a nodal displacement variable.");
+      if (&variable->sys() != &_sys)
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require displacement variables in the nonlinear "
+                   "system assembled by this contact object.");
+    }
+
+  _use_nodal_normal_derivatives = true;
+}
+
+bool
+WeightedGapUserObject::usesNodalNormalDerivatives() const
+{
+  return _use_nodal_normal_derivatives && Moose::doDerivatives(_subproblem, _sys);
 }
 
 void
@@ -121,23 +161,50 @@ WeightedGapUserObject::computeQpProperties()
 void
 WeightedGapUserObject::computeQpIProperties()
 {
-  mooseAssert(_normals.size() == _lower_secondary_elem->n_nodes(),
-              "Making sure that _normals is the expected size");
+  if (usesNodalNormalDerivatives())
+    mooseAssert(_lower_secondary_elem->n_nodes() > _i,
+                "Making sure that the nodal normal index is valid");
+  else
+    mooseAssert(_normals.size() > _i, "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
 
-  weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  if (usesNodalNormalDerivatives())
+    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * contactNormal(_i);
+  else
+    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+
   normalization += (*_test)[_i][_qp] * _qp_factor;
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
 }
 
+const ADRealVectorValue &
+WeightedGapUserObject::contactNormal(const Elem & lower_secondary_elem,
+                                     const unsigned int nodal_index) const
+{
+  return _nodal_normal_derivative_cache.normal(amg(),
+                                               lower_secondary_elem,
+                                               nodal_index,
+                                               _disp_x_var,
+                                               _disp_y_var,
+                                               _disp_z_var,
+                                               usesNodalNormalDerivatives());
+}
+
+const ADRealVectorValue &
+WeightedGapUserObject::contactNormal(const unsigned int nodal_index) const
+{
+  return contactNormal(*_lower_secondary_elem, nodal_index);
+}
+
 void
 WeightedGapUserObject::initialize()
 {
+  _nodal_normal_derivative_cache.clear();
   _dof_to_weighted_gap.clear();
   _dof_to_weighted_displacements.clear();
 }

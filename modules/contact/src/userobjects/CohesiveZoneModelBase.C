@@ -44,6 +44,8 @@ CohesiveZoneModelBase::validParams()
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
   params.setParameters("penalty", 0.0);
+  params.set<bool>("use_nodal_normal_derivatives") = false;
+  params.set<bool>("include_secondary_face_one_ring") = false;
   return params;
 }
 
