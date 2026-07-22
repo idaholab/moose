@@ -31,7 +31,7 @@
     cli_args = 'Materials/compute_stress/large_kinematics=false'
     expect_err = "disagrees with the ComputeLagrangianStrain calculator"
     issues = '#33006'
-    design = 'source/materials/lagrangian/ComputeLagrangianStressBase.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
     requirement = "The Lagrangian stress calculator shall error if its deprecated large_kinematics "
                   "parameter disagrees with the value derived from the strain calculator's guarantee."
   []

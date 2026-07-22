@@ -81,7 +81,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_approximate]
     issues = '#33005'
@@ -90,7 +90,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_eigen]
     issues = '#33005'
@@ -99,7 +99,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_with_stab_quadratic]
     issues = '#33005'
@@ -109,7 +109,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_approximate]
     issues = '#33005'
@@ -119,7 +119,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_eigen]
     issues = '#33005'
@@ -128,7 +128,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_no_stab_alpha05_quadratic]
     issues = '#33005'
@@ -140,7 +140,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
   [jacobian_large_no_stab_alpha05_rashid_approximate]
     issues = '#33005'
@@ -152,7 +152,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_no_stab_alpha05_rashid_eigen]
     issues = '#33005'
@@ -164,7 +164,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_with_stab_alpha05_quadratic]
     issues = '#33005'
@@ -177,7 +177,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
   [jacobian_large_with_stab_alpha05_rashid_approximate]
     issues = '#33005'
@@ -190,7 +190,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_with_stab_alpha05_rashid_eigen]
     issues = '#33005'
@@ -202,6 +202,6 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
-                  'formulation, using the generalized midpoint rule (alpha=0.5)'
+                  'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []
 []

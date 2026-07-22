@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'new_system_manual.i'
     csvdiff = 'TaylorExpansion_no_stabilization.csv'
-    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization (TaylorExpansion / rashid_approximate decomposition)"
     capabilities = 'method!=dbg'
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_approximate Outputs/compare/file_base=TaylorExpansion_no_stabilization"
   []
@@ -13,7 +13,7 @@
     type = CSVDiff
     input = 'new_system_manual.i'
     csvdiff = 'EigenSolution_no_stabilization.csv'
-    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization"
+    requirement = "Large deformation kinematics give equivalent results for the same kinematics, no stabilization (EigenSolution / rashid_eigen decomposition)"
     capabilities = 'method!=dbg'
     cli_args = "Materials/compute_stress/objective_rate=rashid Materials/compute_strain/kinematic_approximation=rashid_eigen Outputs/compare/file_base=EigenSolution_no_stabilization"
   []

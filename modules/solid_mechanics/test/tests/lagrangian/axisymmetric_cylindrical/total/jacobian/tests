@@ -129,7 +129,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [dirichlet_large_unstabilized_rashid_approximate]
     issues = '#33005'
@@ -139,7 +139,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [dirichlet_large_unstabilized_rashid_eigen]
     issues = '#33005'
@@ -149,7 +149,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [dirichlet_large_stabilized_quadratic]
     issues = '#33005'
@@ -159,7 +159,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [dirichlet_large_stabilized_rashid_approximate]
     issues = '#33005'
@@ -169,7 +169,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [dirichlet_large_stabilized_rashid_eigen]
     issues = '#33005'
@@ -179,7 +179,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Dirichlet BCs in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [neumann_large_unstabilized_quadratic]
     issues = '#33005'
@@ -189,7 +189,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [neumann_large_unstabilized_rashid_approximate]
     issues = '#33005'
@@ -199,7 +199,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [neumann_large_unstabilized_rashid_eigen]
     issues = '#33005'
@@ -209,7 +209,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
-                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'without stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [neumann_large_stabilized_quadratic]
     issues = '#33005'
@@ -219,7 +219,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [neumann_large_stabilized_rashid_approximate]
     issues = '#33005'
@@ -229,7 +229,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [neumann_large_stabilized_rashid_eigen]
     issues = '#33005'
@@ -239,7 +239,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with '
-                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates'
+                  'stabilization, and Neumann BCs in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [dirichlet_large_unstabilized_alpha05_quadratic]
     issues = '#33005'
@@ -251,7 +251,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [dirichlet_large_unstabilized_alpha05_rashid_approximate]
     issues = '#33005'
@@ -263,7 +263,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [dirichlet_large_unstabilized_alpha05_rashid_eigen]
     issues = '#33005'
@@ -275,7 +275,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [dirichlet_large_stabilized_alpha05_quadratic]
     issues = '#33005'
@@ -287,7 +287,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [dirichlet_large_stabilized_alpha05_rashid_approximate]
     issues = '#33005'
@@ -299,7 +299,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [dirichlet_large_stabilized_alpha05_rashid_eigen]
     issues = '#33005'
@@ -311,7 +311,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Dirichlet BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [neumann_large_unstabilized_alpha05_quadratic]
     issues = '#33005'
@@ -323,7 +323,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [neumann_large_unstabilized_alpha05_rashid_approximate]
     issues = '#33005'
@@ -335,7 +335,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [neumann_large_unstabilized_alpha05_rashid_eigen]
     issues = '#33005'
@@ -347,7 +347,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'without stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
   [neumann_large_stabilized_alpha05_quadratic]
     issues = '#33005'
@@ -359,7 +359,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the quadratic kinematic approximation'
   []
   [neumann_large_stabilized_alpha05_rashid_approximate]
     issues = '#33005'
@@ -371,7 +371,7 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_approximate kinematic approximation'
   []
   [neumann_large_stabilized_alpha05_rashid_eigen]
     issues = '#33005'
@@ -383,6 +383,6 @@
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, '
                   'with stabilization, Neumann BCs, and the generalized midpoint rule '
-                  '(alpha=0.5) in 2D axisymmetric RZ coordinates'
+                  '(alpha=0.5) in 2D axisymmetric RZ coordinates, using the rashid_eigen kinematic approximation'
   []
 []
