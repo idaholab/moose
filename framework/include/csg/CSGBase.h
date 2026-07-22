@@ -1270,6 +1270,7 @@ private:
   FRIEND_TEST(CSGBaseTest, testCheckRegionSurfaces);
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
+  FRIEND_TEST(CSGBaseTest, testEngUnitLinking);
   FRIEND_TEST(CSGBaseTest, testCellEngUnitAddErrors);
   FRIEND_TEST(CSGBaseTest, testUnivEngUnitAddErrors);
   ///@}

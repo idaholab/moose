@@ -2941,9 +2941,8 @@ TEST(CSGBaseTest, testUniverseLinking)
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ2 is not linked to root universe.");
 
-  // set the outer to a universe unit, universe should also not be linked
-  std::unique_ptr<TestUnivEngUnit> uptr = std::make_unique<TestUnivEngUnit>("univ_out");
-  const auto & univ_out = csg_obj->addEngUnit<TestUnivEngUnit>(std::move(uptr));
+  // set the outer to a universe, universe should also not be linked
+  auto & univ_out = csg_obj->createUniverse("univ_out");
   csg_obj->setLatticeOuter(lat, univ_out);
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ_out is not linked to root universe.");
@@ -2965,6 +2964,36 @@ TEST(CSGBaseTest, testUniverseLinking)
 
   // link this cell to another universe, now the cell should no longer be orphaned
   csg_obj->addCellToUniverse(univ1, cell1);
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+}
+
+/// test that CSGBase::checkUniverseLinking correctly identifies universe and cell engineering units
+/// as linked (or not) to the root universe, just like plain universes and cells
+TEST(CSGBaseTest, testEngUnitLinking)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // surface used for cell regions throughout the test
+  const auto & s1 = csg_obj->addSurface(std::make_unique<CSG::CSGSphere>("surf1", 1.0));
+
+  // Universe engineering unit - to be used as a cell fill eventually
+  const auto & univ_unit = csg_obj->addEngUnit(std::make_unique<TestUnivEngUnit>("univ_unit"));
+  // not used anywhere yet, so it is not linked to root
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Universe with name univ_unit is not linked to root universe.");
+  // use it as the fill of a cell in root: ROOT_UNIVERSE -> c1 -> univ_unit
+  csg_obj->createCell("c1", univ_unit, +s1);
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+
+  // Cell engineering unit: like a plain cell, it is linked once it belongs to a linked universe
+  const auto & cell_unit = csg_obj->addEngUnit(std::make_unique<TestCellEngUnit>("cell_unit"));
+  // added to the root universe by default, so it is linked
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+  // orphan it by removing it from root; it should now be flagged as not linked
+  csg_obj->removeCellFromUniverse(csg_obj->getRootUniverse(), cell_unit);
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Cell with name cell_unit is not linked to root universe.");
+  // re-link it by adding it back to the root universe
+  csg_obj->addCellToUniverse(csg_obj->getRootUniverse(), cell_unit);
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }
 
