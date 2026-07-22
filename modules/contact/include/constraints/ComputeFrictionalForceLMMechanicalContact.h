@@ -10,9 +10,8 @@
 #pragma once
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
+#include "LMWeightedVelocitiesUserObject.h"
 #include "Function.h"
-
-class WeightedVelocitiesUserObject;
 
 namespace Moose
 {
@@ -101,7 +100,7 @@ protected:
   ADRealVectorValue _qp_real_tangential_velocity_nodal;
 
   /// The weighted gap user object
-  WeightedVelocitiesUserObject & _weighted_velocities_uo;
+  LMWeightedVelocitiesUserObject & _weighted_velocities_uo;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
@@ -110,6 +109,12 @@ protected:
   /// MortarContactUtils.h): ONE selects Alart-Curnier, TWO (the default) selects
   /// Hueber-Stadler-Wohlmuth.
   const Moose::Mortar::Contact::FrictionProjectionDegree _friction_projection_degree;
+
+  /// When true, c_t is derived per-node from c_normal_eff and the tangential velocity magnitude
+  const bool _dynamic_c_t;
+
+  /// Tangential velocity magnitude below which c_t falls back to c_normal_eff (stick regime)
+  const Real _vel_floor;
 
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;

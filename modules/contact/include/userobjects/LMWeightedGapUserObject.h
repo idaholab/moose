@@ -10,6 +10,10 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
+#include "RankFourTensor.h"
+#include "MaterialProperty.h"
+
+#include <array>
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature_gauss.h"
@@ -57,10 +61,20 @@ public:
                               : covered_normalization;
   }
 
+  virtual void timestepSetup() override;
+  virtual void meshChanged() override;
+
+  /**
+   * Per-node physical normal stiffness scale and its accumulated mortar weight.
+   * Only populated when derive_c_from_elasticity = true; after finalize() the scale has already
+   * been divided by the accumulated weight.
+   */
+  const std::unordered_map<const DofObject *, std::array<Real, 2>> & dofToDerivedC() const;
+
 protected:
+  virtual void computeQpIProperties() override;
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return true; }
-  virtual void computeQpIProperties() override;
 
   /// The node-based scaling steps, kept out of initialize()/finalize()/computeQpIProperties() so
   /// that a class inheriting this one through more than one path can run them without invoking the
@@ -87,6 +101,23 @@ protected:
    * Verify that the provided variables have degrees of freedom at nodes
    */
   void verifyLagrange(const MooseVariable & var, const std::string & var_name) const;
+
+  // Non-virtual helpers so diamond-derived classes can call them without re-entering the base chain
+  void clearDerivedC();
+  void finalizeDerivedC();
+  void accumulateDerivedCIfNeeded();
+
+  /// Whether to derive the physical normal stiffness from elasticity tensor material properties
+  const bool _derive_c_from_elasticity;
+
+  /// Whether the elasticity tensor material property was declared as an AD property
+  const bool _use_automatic_differentiation;
+
+  /// Per-node accumulated (physical stiffness scale * weight, weight)
+  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_derived_c;
+
+  /// Whether the physical stiffness scale must be refreshed at the next mortar execution
+  bool _derived_c_needs_update = true;
 
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;
@@ -131,4 +162,26 @@ protected:
   /// Finite element and quadrature rule used to evaluate fullNodalIntegrals()
   std::unique_ptr<libMesh::FEBase> _nodal_scaling_fe;
   std::unique_ptr<libMesh::QGauss> _nodal_scaling_qrule;
+
+private:
+  template <bool is_ad>
+  void fetchElasticityTensorProperties(const std::string & sec_name, const std::string & pri_name);
+
+  template <bool is_ad>
+  void accumulateDerivedC();
+
+  /// Non-AD elasticity tensor on secondary side (non-null when !_use_automatic_differentiation)
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_secondary = nullptr;
+  /// Non-AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_primary = nullptr;
+  /// AD elasticity tensor on secondary side (non-null when _use_automatic_differentiation)
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_secondary_ad = nullptr;
+  /// AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_primary_ad = nullptr;
 };
+
+inline const std::unordered_map<const DofObject *, std::array<Real, 2>> &
+LMWeightedGapUserObject::dofToDerivedC() const
+{
+  return _dof_to_derived_c;
+}

@@ -58,6 +58,7 @@ LMWeightedVelocitiesUserObject::initialize()
   // Takes care of WeightedGapUserObject::initialize() as well
   WeightedVelocitiesUserObject::initialize();
   initializeNodalScaling();
+  clearDerivedC();
 }
 
 void
@@ -65,6 +66,8 @@ LMWeightedVelocitiesUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
   finalizeNodalScaling();
+  if (_derive_c_from_elasticity && _derived_c_needs_update)
+    finalizeDerivedC();
 }
 
 void
@@ -72,6 +75,7 @@ LMWeightedVelocitiesUserObject::computeQpIProperties()
 {
   WeightedVelocitiesUserObject::computeQpIProperties();
   computeQpINodalScaling();
+  accumulateDerivedCIfNeeded();
 }
 
 const ADVariableValue &
