@@ -103,6 +103,11 @@ private:
   /// `precalculateOffDiagJacobian(jvar)` (with the matched beta).
   void populateLocalPK1Cache(unsigned int beta);
 
+  /// Cache `pk1 : F_ust` per qp (the `J * tr(sigma)` factor of the B-bar volumetric correction).
+  /// Column-independent, so it is hoisted out of the per-(_i) residual loop and the
+  /// per-(_i, _j, component) Jacobian loop. Gated on `F_bar_mode = incremental`.
+  void cachePK1ContractionFUst();
+
   /// `_dpk1_d_grad_u[qp] * gradTrial(beta)` per (qp, j) for the current Jacobian column's beta.
   /// Used by the main local PK1 chain and (in `F_bar_mode = incremental`) the B-bar
   /// Jacobian's local PK1 derivative -- `gradTrial == gradTrialUnstabilized` in TL so a
@@ -120,4 +125,13 @@ private:
   /// kinematics. Populated only when `_stabilize_strain == true`; replaces the per-call
   /// `deltaPK1NonLocalFBar(...)` invocation in TL's displacement Jacobian.
   std::vector<std::vector<RankTwoTensor>> _delta_PK1_NL_cache;
+
+  /// `pk1 : F_ust` per qp for the B-bar volumetric correction (see `cachePK1ContractionFUst`).
+  /// Populated only when `F_bar_mode = incremental`.
+  std::vector<Real> _pk1_ddot_F_ust;
+
+  /// `d(pk1 : F_ust)/dU` per (qp, j) for the current column -- the B-bar Jacobian's `dA/dU` term.
+  /// Depends on (qp, j) and the column beta, so it is hoisted out of the per-(_i, _j) loop into
+  /// `populateLocalPK1Cache`. Populated only when `F_bar_mode = incremental`.
+  std::vector<std::vector<Real>> _dA_dU_cache;
 };

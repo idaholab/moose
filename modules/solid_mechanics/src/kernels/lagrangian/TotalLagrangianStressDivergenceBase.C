@@ -88,7 +88,20 @@ TotalLagrangianStressDivergenceBase<G>::precalculateResidual()
 {
   LagrangianStressDivergenceBase::precalculateResidual();
   if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+  {
     computeAverageGradientSpatialTest();
+    cachePK1ContractionFUst();
+  }
+}
+
+template <class G>
+void
+TotalLagrangianStressDivergenceBase<G>::cachePK1ContractionFUst()
+{
+  const unsigned int n_qp = _qrule->n_points();
+  _pk1_ddot_F_ust.assign(n_qp, 0.0);
+  for (const auto qp : make_range(n_qp))
+    _pk1_ddot_F_ust[qp] = _pk1[qp].doubleContraction(_F_ust[qp]);
 }
 
 template <class G>
@@ -139,6 +152,16 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
   if (_stabilize_strain)
     _delta_PK1_NL_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
 
+  // B-bar volumetric correction (incremental mode only): cache the column-independent
+  // `pk1 : F_ust` per qp and the per-(qp, j) `dA/dU` term so the Jacobian inner loop reads
+  // scalars instead of recomputing three double contractions per (_i, _j, component).
+  const bool bbar = _stabilize_strain && _F_bar_mode == FBarMode::Incremental;
+  if (bbar)
+  {
+    cachePK1ContractionFUst();
+    _dA_dU_cache.assign(n_qp, std::vector<Real>(n_phi));
+  }
+
   for (unsigned int qp = 0; qp < n_qp; ++qp)
   {
     const RankFourTensor & dpk1 = _dpk1_d_grad_u[qp];
@@ -165,6 +188,13 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
         else
           _delta_PK1_NL_cache[qp][j] = delta_sigma_nl;
       }
+      // dA/dU = [ (dPK1_local + dPK1_NL) : F_ust + pk1 : dF_ust ] / 3, all per (qp, j).
+      if (bbar)
+        _dA_dU_cache[qp][j] =
+            ((_dpk1_grad_trial_cache[qp][j] + _delta_PK1_NL_cache[qp][j])
+                 .doubleContraction(_F_ust[qp]) +
+             _pk1[qp].doubleContraction(_grad_trial_cache[qp][j])) /
+            3.0;
     }
   }
 }
@@ -348,7 +378,7 @@ TotalLagrangianStressDivergenceBase<G>::computeQpResidual()
   // a separate behavior change).
   if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
   {
-    const Real PK1_F_over_3 = _pk1[_qp].doubleContraction(_F_ust[_qp]) / 3.0;
+    const Real PK1_F_over_3 = _pk1_ddot_F_ust[_qp] / 3.0;
     result += PK1_F_over_3 * (_avg_grad_spatial_test[_i] - gradXTestComponent(_alpha));
   }
   return result;
@@ -394,17 +424,14 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
   //     avgCross(b1, b2) = _avg_test_phi_cross[b1][b2][i][j]         (precomputed)
   if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
   {
-    const Real A_qp = _pk1[_qp].doubleContraction(_F_ust[_qp]) / 3.0;
+    // A_qp (= pk1:F_ust/3, per qp) and dA_dU (per qp, j) are precomputed in
+    // `cachePK1ContractionFUst` / `populateLocalPK1Cache` -- no double contractions here.
+    const Real A_qp = _pk1_ddot_F_ust[_qp] / 3.0;
     const Real avg_T = _avg_grad_spatial_test[_i];
     const Real T_alpha = gradXTestComponent(alpha);
     const Real B = avg_T - T_alpha;
 
-    // dA/dU at this qp: combine local + non-local PK1 deriv, plus PK1 : dF_ust local.
-    const RankTwoTensor & d_PK1_local = _dpk1_grad_trial_cache[_qp][_j];
-    const RankTwoTensor & d_F_ust = _grad_trial_cache[_qp][_j];
-    const Real dA_dU = ((d_PK1_local + d_PK1_NL).doubleContraction(_F_ust[_qp]) +
-                        _pk1[_qp].doubleContraction(d_F_ust)) /
-                       3.0;
+    const Real dA_dU = _dA_dU_cache[_qp][_j];
 
     // dB/dU: -dT_alpha/dU + d(avg_T)/dU
     // dT_alpha/dU = -(grad_x test_i)_beta * (grad_x phi_j)_alpha  (local cross at _qp)
