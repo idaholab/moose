@@ -1,21 +1,23 @@
-nx = 32
+nx = 16
 lambda = 0.5
+# Immersed circle geometry: off-grid center so the arc cuts through elements at
+# generic fractions and no node/quadrature point lands exactly on the surface.
+R = 1.3
+cx = 2.03
+cy = 1.97
+n_seg = 48
 [Problem]
   solve = false
 []
 
 [Mesh]
-  [boundary_mesh]
-    type = FileMeshGenerator
-    file = '../distance_calc/square_boundary.msh'
-  []
-
   [shift_boundary_mesh]
-    type = TransformGenerator
-    transform = TRANSLATE
-    # Off-grid translation so the boundary cuts through elements, exercising lambda
-    vector_value = '2.05 2.05 0.0'
-    input = boundary_mesh
+    type = ParsedCurveGenerator
+    x_formula = '${cx} + ${R} * cos(t)'
+    y_formula = '${cy} + ${R} * sin(t)'
+    section_bounding_t_values = '0 ${fparse 2*pi}'
+    nums_segments = '${n_seg}'
+    is_closed_loop = true
     save_with_name = 'shift_boundary_mesh'
   []
 

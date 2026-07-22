@@ -1,21 +1,38 @@
 nx = 16
 lambda = 0
+# Immersed sphere geometry: off-grid center so the surface cuts through elements
+# at generic fractions and no node/quadrature point lands exactly on it.
+R = 1.3
+cx = 2.03
+cy = 1.97
+cz = 2.05
 [Problem]
   solve = false
 []
 
 [Mesh]
-  [boundary_mesh]
-    type = FileMeshGenerator
-    file = '../distance_calc/cube_surface.msh'
+  [ball]
+    type = SphereMeshGenerator
+    radius = ${R}
+    nr = 1
+    elem_type = TET4
   []
-
+  [shell]
+    type = LowerDBlockFromSidesetGenerator
+    input = ball
+    sidesets = '0'
+    new_block_id = 100
+  []
+  [extract]
+    type = BlockToMeshConverterGenerator
+    input = shell
+    target_blocks = '100'
+  []
   [shift_boundary_mesh]
     type = TransformGenerator
     transform = TRANSLATE
-    # Off-grid translation so the boundary cuts through elements, exercising lambda
-    vector_value = '2.05 2.05 2.05'
-    input = boundary_mesh
+    vector_value = '${cx} ${cy} ${cz}'
+    input = extract
     save_with_name = 'shift_boundary_mesh'
   []
 

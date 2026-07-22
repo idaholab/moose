@@ -1,19 +1,22 @@
-nx = 32
+nx = 16
+# Immersed circle geometry: off-grid center so no element centroid lands exactly
+# on the surface, keeping the in-out sign reproducible across platforms.
+R = 1.3
+cx = 2.03
+cy = 1.97
+n_seg = 48
 [Problem]
   solve = false
 []
 
 [Mesh]
-  [boundary_mesh]
-    type = FileMeshGenerator
-    file = 'square_boundary.msh'
-  []
-
   [shift_boundary_mesh]
-    type = TransformGenerator
-    transform = TRANSLATE
-    vector_value = '2.0 2.0 0.0' # translation in x, y, z directions
-    input = boundary_mesh
+    type = ParsedCurveGenerator
+    x_formula = '${cx} + ${R} * cos(t)'
+    y_formula = '${cy} + ${R} * sin(t)'
+    section_bounding_t_values = '0 ${fparse 2*pi}'
+    nums_segments = '${n_seg}'
+    is_closed_loop = true
     save_with_name = 'shift_boundary_mesh'
   []
 
@@ -49,6 +52,9 @@ nx = 32
   [InOutTest]
     type = PointInPolyhedronCheckUO
     builder = TreeBuilder
+    # Fixed axis-aligned ray avoids the PCA/SVD direction ambiguity of an
+    # isotropic shape (circle), which is not reproducible across platforms.
+    ray_direction = '1 0 0'
   []
 []
 

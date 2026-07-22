@@ -70,6 +70,11 @@ SBMSurfaceMeshBuilder::initialSetup()
 
   _mesh = mesh_generator_system.getSavedMesh(_bnd_mesh_name);
 
+  // A saved mesh produced by a MeshGenerator (as opposed to a file) may be unprepared,
+  // leaving mesh_dimension() stale and element neighbor links unset. Prepare it so both
+  // the dimension check below and the neighbor-based watertightness test are reliable.
+  _mesh->prepare_for_use();
+
   const auto expected_dim_embedding_mesh = _mesh->mesh_dimension() + 1;
 
   if (!_mesh->is_replicated())

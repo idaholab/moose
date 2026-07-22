@@ -28,6 +28,7 @@ public:
   void initialSetup() override;
 
   /// Return signed distance value
+  using UnsignedDistanceToSurfaceMesh::value;
   Real value(Real t, const Point & p) const override;
 
 private:
