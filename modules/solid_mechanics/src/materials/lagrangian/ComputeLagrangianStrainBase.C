@@ -239,13 +239,13 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
       _f_inv[_qp] = _F_old[_qp] * _F_inv[_qp];
 
     // Dispatch to the active kinematic-approximation helper. Each helper returns
-    // dd (= Deltad), dw (= Deltaw), and the f^{-1}-derivatives of dL = dd + dw and of dw
-    // alone. The (dd, dw) outputs are needed every iteration; the derivatives are only
-    // needed when assembling the Jacobian, but the helpers compute them inline with
-    // (dd, dw) so we accept that work and only gate the downstream R4*R4 chain below.
+    // dd (= Deltad), dw (= Deltaw), and -- only when `need_jacobian` -- the
+    // f^{-1}-derivatives of dL = dd + dw and of dw alone. The (dd, dw) outputs are needed
+    // every iteration; the RankFour derivatives feed only the Jacobian chain below, so on
+    // residual-only sweeps the helper skips them entirely.
     RankTwoTensor dd, dw;
     RankFourTensor d_dL_d_f_inv, d_dw_d_f_inv;
-    computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
+    computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
 
     if (need_jacobian)
     {
@@ -327,21 +327,22 @@ ComputeLagrangianStrainBase<G>::computeQpLargeKinematicIncrement(const RankTwoTe
                                                                  RankTwoTensor & dd,
                                                                  RankTwoTensor & dw,
                                                                  RankFourTensor & d_dL_d_f_inv,
-                                                                 RankFourTensor & d_dw_d_f_inv)
+                                                                 RankFourTensor & d_dw_d_f_inv,
+                                                                 bool need_jacobian)
 {
   switch (_kinematic_approximation)
   {
     case KinematicApproximation::Linear:
-      computeLinearIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
+      computeLinearIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
       break;
     case KinematicApproximation::Quadratic:
-      computeQuadraticIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
+      computeQuadraticIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
       break;
     case KinematicApproximation::RashidApproximate:
-      computeRashidApproximateIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
+      computeRashidApproximateIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
       break;
     case KinematicApproximation::RashidEigen:
-      computeRashidEigenIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv);
+      computeRashidEigenIncrement(f_inv, dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
       break;
   }
 }
@@ -430,12 +431,16 @@ ComputeLagrangianStrainBase<G>::computeLinearIncrement(const RankTwoTensor & f_i
                                                        RankTwoTensor & dd,
                                                        RankTwoTensor & dw,
                                                        RankFourTensor & d_dL_d_f_inv,
-                                                       RankFourTensor & d_dw_d_f_inv) const
+                                                       RankFourTensor & d_dw_d_f_inv,
+                                                       bool need_jacobian) const
 {
   // Deltal = I - f^{-1}, so Deltad = sym(Deltal), Deltaw = skew(Deltal).
   const RankTwoTensor dL = RankTwoTensor::Identity() - f_inv;
   dd = 0.5 * (dL + dL.transpose());
   dw = 0.5 * (dL - dL.transpose());
+
+  if (!need_jacobian)
+    return;
   // d(Deltal)/d(f^{-1}) = -I^{(4)}.
   d_dL_d_f_inv = -RankFourTensor::IdentityFour();
   // d(Deltaw)/d(f^{-1}) = - skew projector on f^{-1} = -(1/2)(I^{ikjl} - I^{iljk}).
@@ -450,7 +455,8 @@ ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & 
                                                           RankTwoTensor & dd,
                                                           RankTwoTensor & dw,
                                                           RankFourTensor & d_dL_d_f_inv,
-                                                          RankFourTensor & d_dw_d_f_inv) const
+                                                          RankFourTensor & d_dw_d_f_inv,
+                                                          bool need_jacobian) const
 {
   // Deltal = X + (1/2) X^2 with X = I - f^{-1} (one more Taylor term of -log f^{-1}).
   const RankTwoTensor X = RankTwoTensor::Identity() - f_inv;
@@ -458,6 +464,8 @@ ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & 
   dd = 0.5 * (dL + dL.transpose());
   dw = 0.5 * (dL - dL.transpose());
 
+  if (!need_jacobian)
+    return;
   // dX/d(f^{-1}) = -I^{(4)}, and d(X^2)_{ij}/dX_{mn} = delta_{im} X_{nj} + X_{im} delta_{jn}.
   // So d(Deltal)/d(f^{-1}) = -I^{(4)} - (1/2) (delta_{im} X_{nj} + X_{im} delta_{jn}).
   usingTensorIndices(i_, j_, m_, n_);
@@ -476,7 +484,8 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
     RankTwoTensor & dd,
     RankTwoTensor & dw,
     RankFourTensor & d_dL_d_f_inv,
-    RankFourTensor & d_dw_d_f_inv) const
+    RankFourTensor & d_dw_d_f_inv,
+    bool need_jacobian) const
 {
   // See plan_outline.pdf Sec.2.3 (eq 10-15, with the corrected vorticity).
   // X = I - f^{-1}.  Symmetric part: A = X X^T - X - X^T,  Deltad = -A/2 + A^2/4.
@@ -492,22 +501,6 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
   const RankTwoTensor Xt = X.transpose();
   const RankTwoTensor A = X * Xt - X - Xt;
   dd = -0.5 * A + 0.25 * A * A;
-
-  // dX/d(f^{-1}) = -I^{(4)}.
-  // d(X X^T)_{ij}/dX_{mn} = delta_{im} X_{jn} + X_{in} delta_{jm}  (from (X X^T)_{ij} = X_{ik}
-  // X_{jk}). d(X^T)_{ij}/dX_{mn} = delta_{jm} delta_{in}.
-  // -> d(A)/d(f^{-1}) = -[d(X X^T)/dX] + I^{(4)} + (transposed I^{(4)}).
-  const RankFourTensor d_XXt_dX =
-      I2.template times<i_, m_, j_, n_>(X) + X.template times<i_, n_, j_, m_>(I2);
-  const RankFourTensor d_Xt_dX = I2.template times<j_, m_, i_, n_>(I2);
-  const RankFourTensor dA_dfinv = -d_XXt_dX + I4 + d_Xt_dX;
-
-  // d(A^2)_{ij}/dA_{mn} = delta_{im} A_{nj} + A_{im} delta_{jn}.
-  const RankFourTensor d_AA_dA =
-      I2.template times<i_, m_, n_, j_>(A) + A.template times<i_, m_, j_, n_>(I2);
-  const RankFourTensor d_AA_dfinv = d_AA_dA * dA_dfinv;
-
-  RankFourTensor d_dd_dfinv = -0.5 * dA_dfinv + 0.25 * d_AA_dfinv;
 
   // ---- skew part ----
   // alpha_i = eps_ijk (f^{-1})_jk  (axial vector of f^{-1}'s skew part, doubled).
@@ -545,7 +538,8 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
         dw(i, j) = -0.5 * v;
       }
     // d(Deltaw)/d(f^{-1}) = -(1/2)(delta_{im} delta_{jn} - delta_{jm} delta_{in})
-    d_dw_d_f_inv = -0.5 * (I4 - I2.template times<j_, m_, i_, n_>(I2));
+    if (need_jacobian)
+      d_dw_d_f_inv = -0.5 * (I4 - I2.template times<j_, m_, i_, n_>(I2));
   }
   else
   {
@@ -577,29 +571,51 @@ ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
     //
     // Final:
     //   d(Deltaw)_{ij}/d(f^{-1})_{mn} = (dc/d(f^{-1})_{mn}) * E_ij + c * dE_ij/d(f^{-1})_{mn}.
-    const Real dc_pref =
-        (theta * cos_theta - sin_theta) / (8.0 * sin_theta * sin_theta * sin_theta * cos_theta);
-    for (unsigned int i = 0; i < 3; ++i)
-      for (unsigned int j = 0; j < 3; ++j)
-      {
-        Real E_ij = 0.0;
-        for (unsigned int k = 0; k < 3; ++k)
-          E_ij += PermutationTensor::eps(i, j, k) * alpha(k);
-        for (unsigned int m = 0; m < 3; ++m)
-          for (unsigned int n = 0; n < 3; ++n)
-          {
-            Real eps_alpha = 0.0;
-            for (unsigned int k = 0; k < 3; ++k)
-              eps_alpha += PermutationTensor::eps(k, m, n) * alpha(k);
-            const Real dc_dfinv = dc_pref * eps_alpha;
-            Real dE_dfinv = 0.0;
-            for (unsigned int k = 0; k < 3; ++k)
-              dE_dfinv += PermutationTensor::eps(i, j, k) * PermutationTensor::eps(k, m, n);
-            d_dw_d_f_inv(i, j, m, n) = dc_dfinv * E_ij + coeff * dE_dfinv;
-          }
-      }
+    if (need_jacobian)
+    {
+      const Real dc_pref =
+          (theta * cos_theta - sin_theta) / (8.0 * sin_theta * sin_theta * sin_theta * cos_theta);
+      for (unsigned int i = 0; i < 3; ++i)
+        for (unsigned int j = 0; j < 3; ++j)
+        {
+          Real E_ij = 0.0;
+          for (unsigned int k = 0; k < 3; ++k)
+            E_ij += PermutationTensor::eps(i, j, k) * alpha(k);
+          for (unsigned int m = 0; m < 3; ++m)
+            for (unsigned int n = 0; n < 3; ++n)
+            {
+              Real eps_alpha = 0.0;
+              for (unsigned int k = 0; k < 3; ++k)
+                eps_alpha += PermutationTensor::eps(k, m, n) * alpha(k);
+              const Real dc_dfinv = dc_pref * eps_alpha;
+              Real dE_dfinv = 0.0;
+              for (unsigned int k = 0; k < 3; ++k)
+                dE_dfinv += PermutationTensor::eps(i, j, k) * PermutationTensor::eps(k, m, n);
+              d_dw_d_f_inv(i, j, m, n) = dc_dfinv * E_ij + coeff * dE_dfinv;
+            }
+        }
+    }
   }
 
+  if (!need_jacobian)
+    return;
+
+  // ---- symmetric-part derivative + assemble d(Deltal)/d(f^{-1}) (Jacobian only) ----
+  // dX/d(f^{-1}) = -I^{(4)}.
+  // d(X X^T)_{ij}/dX_{mn} = delta_{im} X_{jn} + X_{in} delta_{jm}  (from (X X^T)_{ij} = X_{ik}
+  // X_{jk}). d(X^T)_{ij}/dX_{mn} = delta_{jm} delta_{in}.
+  // -> d(A)/d(f^{-1}) = -[d(X X^T)/dX] + I^{(4)} + (transposed I^{(4)}).
+  const RankFourTensor d_XXt_dX =
+      I2.template times<i_, m_, j_, n_>(X) + X.template times<i_, n_, j_, m_>(I2);
+  const RankFourTensor d_Xt_dX = I2.template times<j_, m_, i_, n_>(I2);
+  const RankFourTensor dA_dfinv = -d_XXt_dX + I4 + d_Xt_dX;
+
+  // d(A^2)_{ij}/dA_{mn} = delta_{im} A_{nj} + A_{im} delta_{jn}.
+  const RankFourTensor d_AA_dA =
+      I2.template times<i_, m_, n_, j_>(A) + A.template times<i_, m_, j_, n_>(I2);
+  const RankFourTensor d_AA_dfinv = d_AA_dA * dA_dfinv;
+
+  const RankFourTensor d_dd_dfinv = -0.5 * dA_dfinv + 0.25 * d_AA_dfinv;
   d_dL_d_f_inv = d_dd_dfinv + d_dw_d_f_inv;
 }
 
@@ -609,7 +625,8 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
                                                             RankTwoTensor & dd,
                                                             RankTwoTensor & dw,
                                                             RankFourTensor & d_dL_d_f_inv,
-                                                            RankFourTensor & d_dw_d_f_inv) const
+                                                            RankFourTensor & d_dw_d_f_inv,
+                                                            bool need_jacobian) const
 {
   // See plan_outline.pdf Sec.2.4. Polar-decompose f^{-1} = r' u', with u' symmetric positive
   // definite and r' a proper rotation. The PDF's identity `log f^{-1} = -log d - log w`
@@ -636,22 +653,6 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   const RankTwoTensor log_u = MathUtils::log(uFact).get();
   const RankTwoTensor dd_spatial = -log_u;
 
-  // d(log u)/d(c') = (1/2) dlog(c'), and d(c')_{ab}/d(f^{-1})_{mn} = delta_{an} f_inv_{mb}
-  //                                                                + delta_{bn} f_inv_{ma}.
-  const RankFourTensor dlog_cprime = MathUtils::dlog(cprime);
-  const RankFourTensor d_cprime_d_finv =
-      I2.template times<a_, n_, m_, b_>(f_inv) + I2.template times<b_, n_, m_, a_>(f_inv);
-  const RankFourTensor d_dd_spatial_d_finv = -0.5 * (dlog_cprime * d_cprime_d_finv);
-
-  // ---- d(r)/d(f^{-1}) via the polar-decomposition closed form (same trick as
-  //      ComputeLagrangianObjectiveStress::polarDecomposition). ----
-  const RankTwoTensor Y = u.trace() * I2 - u;
-  const RankTwoTensor Z = r * Y;
-  const RankTwoTensor O = Z * r.transpose();
-  usingTensorIndices(i_, j_, k_, l_);
-  const RankFourTensor d_r_d_finv =
-      (O.template times<i_, k_, l_, j_>(Y) - Z.template times<i_, l_, k_, j_>(Z)) / Y.det();
-
   // ---- Deltaw = -log r via Rodrigues. ----
   // log r = phi(theta) (r - r^T) with phi(theta) = theta/(2 sin theta),  cos theta = (tr r - 1)/2.
   const Real cos_theta = MathUtils::clamp(0.5 * (r.trace() - 1.0), -1.0, 1.0);
@@ -665,36 +666,68 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   //   dphi/dr_{mn} = (dphi/dtheta)(dtheta/d cos theta)(d cos theta/dr_{mn})
   //              = psi delta_{mn}, where psi = (theta cos theta - sin theta)/(4 sin^3 theta).
   // Small-angle: phi -> 1/2, psi -> -1/12, so d(log r)/dr -> (1/2)(I^(4) - swap_ij).
+  // `d_logr_d_r` feeds only the Jacobian, so it is built only when `need_jacobian`.
   const Real small_sin = 1.0e-7;
   RankFourTensor d_logr_d_r;
   RankTwoTensor log_r;
-  const RankFourTensor swap_ij = I2.template times<j_, m_, i_, n_>(I2);
+  usingTensorIndices(i_, j_, k_, l_);
   if (std::abs(sin_theta) < small_sin)
   {
     log_r = 0.5 * A;
-    d_logr_d_r = 0.5 * (RankFourTensor::IdentityFour() - swap_ij);
+    if (need_jacobian)
+    {
+      const RankFourTensor swap_ij = I2.template times<j_, m_, i_, n_>(I2);
+      d_logr_d_r = 0.5 * (RankFourTensor::IdentityFour() - swap_ij);
+    }
   }
   else
   {
     const Real phi = theta / (2.0 * sin_theta);
-    const Real psi = (theta * cos_theta - sin_theta) / (4.0 * sin_theta * sin2);
     log_r = phi * A;
-    // (dphi/dr)_{mn} = psi delta_{mn} -> outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) * psi.
-    const RankFourTensor dphi_outer_A = A.template times<i_, j_, m_, n_>(I2);
-    d_logr_d_r = psi * dphi_outer_A + phi * (RankFourTensor::IdentityFour() - swap_ij);
+    if (need_jacobian)
+    {
+      const Real psi = (theta * cos_theta - sin_theta) / (4.0 * sin_theta * sin2);
+      const RankFourTensor swap_ij = I2.template times<j_, m_, i_, n_>(I2);
+      // (dphi/dr)_{mn} = psi delta_{mn} -> outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) * psi.
+      const RankFourTensor dphi_outer_A = A.template times<i_, j_, m_, n_>(I2);
+      d_logr_d_r = psi * dphi_outer_A + phi * (RankFourTensor::IdentityFour() - swap_ij);
+    }
   }
   dw = -log_r;
-  d_dw_d_f_inv = -(d_logr_d_r * d_r_d_finv);
 
   // ---- Rotate Deltad from spatial back to co-rotated (n) frame: log U = r' * (R log U R^T) *
-  // r'^T,
-  //      using r' = R^T from the polar of f^{-1}. The derivative of the sandwich r'*A*r'^T
-  //      w.r.t. f^{-1} expands to three rank-4 pieces (chain rule on r' AND on A). The
-  //      6-argument `times<>(RankFourTensor)` overload uses x[0..4] (one dummy at index 4),
-  //      so we reuse the same dummy label `p2_` in each sub-contraction.
+  // r'^T, using r' = R^T from the polar of f^{-1}. ----
+  dd = r * dd_spatial * r.transpose();
+
+  // Everything below is the Jacobian chain (RankFour matrix-log derivatives, the
+  // polar-decomposition dr/d(f^{-1}) closed form, and the three-piece sandwich chain rule).
+  // Skip it wholesale on residual-only sweeps.
+  if (!need_jacobian)
+    return;
+
+  // d(log u)/d(c') = (1/2) dlog(c'), and d(c')_{ab}/d(f^{-1})_{mn} = delta_{an} f_inv_{mb}
+  //                                                                + delta_{bn} f_inv_{ma}.
+  const RankFourTensor dlog_cprime = MathUtils::dlog(cprime);
+  const RankFourTensor d_cprime_d_finv =
+      I2.template times<a_, n_, m_, b_>(f_inv) + I2.template times<b_, n_, m_, a_>(f_inv);
+  const RankFourTensor d_dd_spatial_d_finv = -0.5 * (dlog_cprime * d_cprime_d_finv);
+
+  // ---- d(r)/d(f^{-1}) via the polar-decomposition closed form (same trick as
+  //      ComputeLagrangianObjectiveStress::polarDecomposition). ----
+  const RankTwoTensor Y = u.trace() * I2 - u;
+  const RankTwoTensor Z = r * Y;
+  const RankTwoTensor O = Z * r.transpose();
+  const RankFourTensor d_r_d_finv =
+      (O.template times<i_, k_, l_, j_>(Y) - Z.template times<i_, l_, k_, j_>(Z)) / Y.det();
+
+  d_dw_d_f_inv = -(d_logr_d_r * d_r_d_finv);
+
+  // The derivative of the sandwich r'*A*r'^T w.r.t. f^{-1} expands to three rank-4 pieces
+  // (chain rule on r' AND on A). The 6-argument `times<>(RankFourTensor)` overload uses
+  // x[0..4] (one dummy at index 4), so we reuse the same dummy label `p2_` in each
+  // sub-contraction.
   {
     usingTensorIndices(i2_, j2_, m2_, n2_, p2_);
-    dd = r * dd_spatial * r.transpose();
     const RankTwoTensor M = dd_spatial * r.transpose(); // dd * r^T   (p, j) shape
     const RankTwoTensor N = r * dd_spatial;             // r * dd     (i, q) shape
     // T1_{ijmn} = (dr/d_finv)_{ip,mn} * M_{pj}

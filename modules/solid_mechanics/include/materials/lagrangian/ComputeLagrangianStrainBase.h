@@ -85,11 +85,15 @@ protected:
   /// Dispatcher: compute (Deltad, Deltaw, d(Deltal)/d(f^{-1}), d(Deltaw)/d(f^{-1})) for the active
   /// kinematic approximation. The vorticity derivative is returned separately so the
   /// Jaumann objective rate can chain its own Jacobian without re-projecting from dL.
+  /// The two RankFour derivative out-parameters are filled only when `need_jacobian` is true;
+  /// on residual-only sweeps their computation (RankFour builds, matrix-log derivatives, and the
+  /// polar-decomposition chain) is skipped and the out-parameters are left untouched.
   void computeQpLargeKinematicIncrement(const RankTwoTensor & f_inv,
                                         RankTwoTensor & dd,
                                         RankTwoTensor & dw,
                                         RankFourTensor & d_dL_d_f_inv,
-                                        RankFourTensor & d_dw_d_f_inv);
+                                        RankFourTensor & d_dw_d_f_inv,
+                                        bool need_jacobian);
   /// Compute and publish the polar decomposition of _F_actual at the current qp.
   /// Always populates `_rotation` and `_stretch` (R and U). When `need_jacobian` is true,
   /// additionally populates `_d_rotation_d_F`. Consumed by the Green-Naghdi objective rate.
@@ -250,29 +254,37 @@ protected:
 
 private:
   /// Linear approximation: dL = I - f^{-1}.
+  /// The RankFour derivative out-parameters are filled only when `need_jacobian` is true.
   void computeLinearIncrement(const RankTwoTensor & f_inv,
                               RankTwoTensor & dd,
                               RankTwoTensor & dw,
                               RankFourTensor & d_dL_d_f_inv,
-                              RankFourTensor & d_dw_d_f_inv) const;
+                              RankFourTensor & d_dw_d_f_inv,
+                              bool need_jacobian) const;
   /// Quadratic approximation: dL = (I - f^{-1}) + 0.5 (I - f^{-1})^2.
+  /// The RankFour derivative out-parameters are filled only when `need_jacobian` is true.
   void computeQuadraticIncrement(const RankTwoTensor & f_inv,
                                  RankTwoTensor & dd,
                                  RankTwoTensor & dw,
                                  RankFourTensor & d_dL_d_f_inv,
-                                 RankFourTensor & d_dw_d_f_inv) const;
+                                 RankFourTensor & d_dw_d_f_inv,
+                                 bool need_jacobian) const;
   /// Rashid's approximate symmetric+skew formulas.
+  /// The RankFour derivative out-parameters are filled only when `need_jacobian` is true.
   void computeRashidApproximateIncrement(const RankTwoTensor & f_inv,
                                          RankTwoTensor & dd,
                                          RankTwoTensor & dw,
                                          RankFourTensor & d_dL_d_f_inv,
-                                         RankFourTensor & d_dw_d_f_inv) const;
+                                         RankFourTensor & d_dw_d_f_inv,
+                                         bool need_jacobian) const;
   /// "Exact" via polar decomposition of f^{-1} + matrix logs.
+  /// The RankFour derivative out-parameters are filled only when `need_jacobian` is true.
   void computeRashidEigenIncrement(const RankTwoTensor & f_inv,
                                    RankTwoTensor & dd,
                                    RankTwoTensor & dw,
                                    RankFourTensor & d_dL_d_f_inv,
-                                   RankFourTensor & d_dw_d_f_inv) const;
+                                   RankFourTensor & d_dw_d_f_inv,
+                                   bool need_jacobian) const;
 
   /// Rotation increment matched to the active `_kinematic_approximation`, suitable for
   /// publishing as `_rotation_increment` so downstream `ComputeStressBase`-style materials
