@@ -40,7 +40,8 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_F_stab_d_F_ust(
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_unstabilized")),
-    _d_F_stab_d_F_avg(getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
+    _d_F_stab_d_F_avg(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
     _d_nl_fbar(declareProperty<RankFourTensor>(_base_name + "d_nl_fbar_operator"))
 {
 }

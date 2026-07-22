@@ -67,8 +67,8 @@ ComputeLagrangianStressCauchy::computeQpPK1Stress()
     // whose coupled variable adds to F_ust AFTER F-bar (WPS strain_zz, homogenization
     // macro_grad), so the perturbation bypasses F-bar's chain.
     const RankFourTensor sigma_chain_no_fbar =
-        det_F_ust *
-        (_cauchy_jacobian[_qp] * _d_deformation_gradient_increment_d_F[_qp]).singleProductJ(F_ust_inv);
+        det_F_ust * (_cauchy_jacobian[_qp] * _d_deformation_gradient_increment_d_F[_qp])
+                        .singleProductJ(F_ust_inv);
     _pk1_jacobian_bypass_fbar[_qp] = geom + sigma_chain_no_fbar;
     // sigma chain WITH the F-bar chain -- the default `_pk1_jacobian` for disp Jacobian.
     _pk1_jacobian[_qp] =

@@ -182,7 +182,6 @@ protected:
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
 
-
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;
 

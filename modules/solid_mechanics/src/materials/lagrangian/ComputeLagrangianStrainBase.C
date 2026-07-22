@@ -245,7 +245,8 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     // residual-only sweeps the helper skips them entirely.
     RankTwoTensor dd, dw;
     RankFourTensor d_dL_d_f_inv, d_dw_d_f_inv;
-    computeQpLargeKinematicIncrement(_f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
+    computeQpLargeKinematicIncrement(
+        _f_inv[_qp], dd, dw, d_dL_d_f_inv, d_dw_d_f_inv, need_jacobian);
 
     if (need_jacobian)
     {
@@ -479,13 +480,12 @@ ComputeLagrangianStrainBase<G>::computeQuadraticIncrement(const RankTwoTensor & 
 
 template <class G>
 void
-ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(
-    const RankTwoTensor & f_inv,
-    RankTwoTensor & dd,
-    RankTwoTensor & dw,
-    RankFourTensor & d_dL_d_f_inv,
-    RankFourTensor & d_dw_d_f_inv,
-    bool need_jacobian) const
+ComputeLagrangianStrainBase<G>::computeRashidApproximateIncrement(const RankTwoTensor & f_inv,
+                                                                  RankTwoTensor & dd,
+                                                                  RankTwoTensor & dw,
+                                                                  RankFourTensor & d_dL_d_f_inv,
+                                                                  RankFourTensor & d_dw_d_f_inv,
+                                                                  bool need_jacobian) const
 {
   // See plan_outline.pdf Sec.2.3 (eq 10-15, with the corrected vorticity).
   // X = I - f^{-1}.  Symmetric part: A = X X^T - X - X^T,  Deltad = -A/2 + A^2/4.
@@ -689,7 +689,8 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
     {
       const Real psi = (theta * cos_theta - sin_theta) / (4.0 * sin_theta * sin2);
       const RankFourTensor swap_ij = I2.template times<j_, m_, i_, n_>(I2);
-      // (dphi/dr)_{mn} = psi delta_{mn} -> outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) * psi.
+      // (dphi/dr)_{mn} = psi delta_{mn} -> outer with A_{ij} gives A.times<i_, j_, m_, n_>(I2) *
+      // psi.
       const RankFourTensor dphi_outer_A = A.template times<i_, j_, m_, n_>(I2);
       d_logr_d_r = psi * dphi_outer_A + phi * (RankFourTensor::IdentityFour() - swap_ij);
     }

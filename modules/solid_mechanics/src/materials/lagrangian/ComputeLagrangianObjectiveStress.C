@@ -45,8 +45,8 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _vorticity_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "vorticity_increment")),
-    _deformation_gradient_increment(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "spatial_deformation_gradient_increment")),
+    _deformation_gradient_increment(getMaterialPropertyByName<RankTwoTensor>(
+        _base_name + "spatial_deformation_gradient_increment")),
     _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_vorticity_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
@@ -63,8 +63,8 @@ ComputeLagrangianObjectiveStress::ComputeLagrangianObjectiveStress(
   {
     _rotation = &getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation");
     _rotation_old = &getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation");
-    _d_rotation_d_F =
-        &getMaterialPropertyByName<RankFourTensor>(_base_name + "d_rotation_d_deformation_gradient");
+    _d_rotation_d_F = &getMaterialPropertyByName<RankFourTensor>(
+        _base_name + "d_rotation_d_deformation_gradient");
   }
 }
 

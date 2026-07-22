@@ -204,10 +204,9 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
       }
       // dA/dU = [ (dPK1_local + dPK1_NL) : F_ust + pk1 : dF_ust ] / 3, all per (qp, j).
       if (bbar)
-        _dA_dU_cache[qp][j] =
-            (_dpk1_total_cache[qp][j].doubleContraction(_F_ust[qp]) +
-             _pk1[qp].doubleContraction(_grad_trial_cache[qp][j])) /
-            3.0;
+        _dA_dU_cache[qp][j] = (_dpk1_total_cache[qp][j].doubleContraction(_F_ust[qp]) +
+                               _pk1[qp].doubleContraction(_grad_trial_cache[qp][j])) /
+                              3.0;
     }
   }
 }
@@ -256,8 +255,7 @@ TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialTest()
     const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
-    const RankTwoTensor F_inv =
-        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
+    const RankTwoTensor F_inv = _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int i = 0; i < _test.size(); ++i)
     {
       Real g_x = 0.0;
@@ -283,8 +281,7 @@ TotalLagrangianStressDivergenceBase<G>::computeAverageGradientSpatialPhi(unsigne
     const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
-    const RankTwoTensor F_inv =
-        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
+    const RankTwoTensor F_inv = _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int j = 0; j < _phi.size(); ++j)
     {
       Real g_x = 0.0;
@@ -328,8 +325,7 @@ TotalLagrangianStressDivergenceBase<G>::computeAvgTestPhiCross(unsigned int beta
     const Real J = _large_kinematics ? (*_F_ust_det)[qp] : 1.0;
     const Real w = J * _JxW[qp] * _coord[qp];
     V_x += w;
-    const RankTwoTensor F_inv =
-        _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
+    const RankTwoTensor F_inv = _large_kinematics ? (*_F_ust_inv)[qp] : RankTwoTensor::Identity();
     for (unsigned int bi = 0; bi < bs.size(); ++bi)
     {
       const unsigned int b = bs[bi];
@@ -411,7 +407,7 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned i
   // `_dpk1_total_cache` by `populateLocalPK1Cache(beta)`, so a single contraction covers both.
   // Without stabilization there is no non-local piece, so the local cache is contracted directly.
   Real J = grad_test.doubleContraction(_stabilize_strain ? _dpk1_total_cache[_qp][_j]
-                                                          : _dpk1_grad_trial_cache[_qp][_j]);
+                                                         : _dpk1_grad_trial_cache[_qp][_j]);
 
   // OLD-compat B-bar volumetric correction Jacobian (only in `F_bar_mode = incremental`).
   // The residual added the term R_extra = (PK1:F_ust)/3 * (avg_T - T_alpha) summed over qps.

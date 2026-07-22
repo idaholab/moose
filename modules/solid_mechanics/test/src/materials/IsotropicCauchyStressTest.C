@@ -22,9 +22,10 @@ IsotropicCauchyStressTest::validParams()
   params.addRequiredParam<Real>("mu", "Shear modulus.");
   params.addParam<MaterialPropertyName>(
       "sigma_name", "test_cauchy", "Name to publish the Cauchy stress as.");
-  params.addParam<MaterialPropertyName>("dsigma_d_dL_name",
-                                        "test_dcauchy_d_dL",
-                                        "Name to publish dsigma/d(spatial_deformation_gradient_increment) as.");
+  params.addParam<MaterialPropertyName>(
+      "dsigma_d_dL_name",
+      "test_dcauchy_d_dL",
+      "Name to publish dsigma/d(spatial_deformation_gradient_increment) as.");
   params.addParam<MaterialPropertyName>("spatial_deformation_gradient_increment",
                                         "spatial_deformation_gradient_increment",
                                         "Strain-calc's spatial velocity gradient increment.");
