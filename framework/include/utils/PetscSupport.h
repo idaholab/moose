@@ -193,6 +193,8 @@ void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
  * work. This is the reason we pass \p prefix by value
  * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
+ * @param problem Optional problem context used to reject PETSc options that are incompatible with
+ * JFNK solve types
  */
 void addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
