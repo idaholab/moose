@@ -28,8 +28,8 @@
         dual_mesh_type = barycentric
     []
 
-    [convert]
-        type = ElementsToSimplicesConverter
+    [seg]
+        type = SubdomainPerElementGenerator
         input = myDualGen
     []
 []

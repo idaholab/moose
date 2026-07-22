@@ -69,6 +69,19 @@
       detail = 'using the NetGen concave-cell treatment.'
     []
 
+    [quality]
+      type = 'RunApp'
+      input = 'dual_mesh_generator_3d_quality.i'
+      expect_out = 'Edge Length Ratio Metric values:.*'
+                   'Jacobian Metric values:.*'
+                   'Scaled Jacobian Metric values:.*'
+                   'Minimum Angle Metric values:.*'
+                   'Maximum Angle Metric values:'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while checking its polyhedral element quality metrics.'
+    []
+
     [preserve_primal_subdomains]
       type = 'Exodiff'
       input = 'dual_mesh_generator_3d_subdomain_preserve.i'

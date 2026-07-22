@@ -24,9 +24,4 @@
         dual_mesh_type = barycentric
         concave_treatment = 'split polycut netgen'
     []
-
-    [convert]
-        type = ElementsToSimplicesConverter
-        input = myDualGen
-    []
 []

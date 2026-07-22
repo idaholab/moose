@@ -19,9 +19,4 @@
     concave_treatment = 'split polycut netgen'
     preserve_primal_subdomains = '3'
   []
-
-  [convert]
-    type = ElementsToSimplicesConverter
-    input = myDualGen
-  []
 []

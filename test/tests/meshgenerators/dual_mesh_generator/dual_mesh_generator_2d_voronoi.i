@@ -22,14 +22,9 @@
         block = 10
     []
 
-    [myDualGen]
+    [dual]
         type = DualMeshGenerator
+        dual_mesh_type = Voronoi
         input = cut_center
-        dual_mesh_type = voronoi
-    []
-
-    [convert]
-        type = ElementsToSimplicesConverter
-        input = myDualGen
     []
 []
