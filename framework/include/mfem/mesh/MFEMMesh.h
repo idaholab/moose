@@ -42,7 +42,10 @@ public:
   /**
    * Build MFEM ParMesh and a placeholder MOOSE mesh.
    */
+  void init() override;
   void buildMesh() override;
+  std::vector<std::filesystem::path>
+  writeRecoveryFiles(const std::filesystem::path & file_base) const override;
 
   /**
    * Clones the mesh.

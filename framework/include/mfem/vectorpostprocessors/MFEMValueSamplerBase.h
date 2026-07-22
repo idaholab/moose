@@ -11,40 +11,29 @@
 
 #pragma once
 
-#include "MFEMVectorPostprocessor.h"
+#include "MFEMSamplerBase.h"
 
-/*
- * MFEM Postprocessor which samples values at points.
- *
- * Subclasses should override validParams and provide and use the constructor.
+/**
+ * MFEM VectorPostprocessor base class for sampling a real-valued variable at a
+ * set of points. Subclasses supply the point locations (e.g. MFEMPointValueSampler,
+ * MFEMLineValueSampler).
  */
-class MFEMValueSamplerBase : public MFEMVectorPostprocessor
+class MFEMValueSamplerBase : public MFEMSamplerBase
 {
 public:
   static InputParameters validParams();
 
   MFEMValueSamplerBase(const InputParameters & parameters, const std::vector<Point> & points);
 
-  /** Perform the interpolation in FindPointsGSLIB.
-   */
-  virtual void execute() override;
+  /// Interpolate the real variable at all query points.
+  void execute() override;
 
-  /** Store the result of the interpolation.
-   */
-  virtual void finalize() override;
+protected:
+  void finalizeValues() override;
 
 private:
-  const VariableName & _var_name;
   const mfem::GridFunction & _var;
-  mfem::ParMesh & _mesh;
-
-  mfem::FindPointsGSLIB _finder;
-  mfem::Ordering::Type _points_ordering;
-  mfem::Vector _points;
   mfem::Vector _interp_vals;
-
-  // VectorPostprocessor declared values - the values written to these are output
-  std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_points;
   std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_vals;
 };
 
