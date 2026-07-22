@@ -12,7 +12,7 @@
 #include "ElementSubdomainModifier.h"
 #include "PointInSubdomainCheckUO.h" // UO with subdomain geometry checks
 #include "Function.h"
-#include "libmesh/quadrature_gauss.h"
+#include "libmesh/enum_order.h"
 
 class SubdomainElementModifier : public ElementSubdomainModifier
 {
@@ -23,17 +23,14 @@ public:
 protected:
   virtual SubdomainID computeSubdomainID() override;
 
-  /// Convert integer to Order
-  Order intToOrder(int value);
-
   /// The user object containing subdomain-wise in/out checkers
   const PointInSubdomainCheckUO & _subdomain_id_tester;
 
   /// The geometric threshold to decide between inside/outside
   Real _lambda;
 
-  /// @brief  Quadrature order used for active‑area estimation
-  int _qrule_order;
+  /// @brief  Quadrature order used for active-area estimation
+  Order _qrule_order;
 
   /// @brief If true, mark the intercepted elements with the subdomain ID
   bool _mark_intercepted;

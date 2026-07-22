@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterceptedElementModifier.h"
+#include "SBMUtils.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", InterceptedElementModifier);
 
@@ -25,17 +26,20 @@ InterceptedElementModifier::validParams()
   params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
 
   params.addParam<Real>("threshold", 0, "Threshold for inside/outside classification.");
-  params.addRequiredParam<Real>("lambda", "Lambda for false intersection classification.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "lambda", "lambda >= 0 & lambda <= 1", "Lambda for false intersection classification.");
   params.addRequiredParam<bool>("outer_boundary", "Flag for outer boundary handling.");
   params.addParam<bool>(
       "mark_neighbor_of_intercepted",
       false,
       "Whether we need to mark the element is the element near by the intercepted element.");
 
-  params.addParam<int>("qrule_order",
-                       6 /*16 gauss points for quad element*/,
-                       "Quadrature order for generating the Gauss points to do the IN-OUT test to "
-                       "test whether the intercepted element belong to false intercepted element.");
+  params.addRangeCheckedParam<int>(
+      "qrule_order",
+      6 /*16 gauss points for quad element*/,
+      "qrule_order >= 0 & qrule_order <= 10",
+      "Quadrature order for generating the Gauss points to do the IN-OUT test to "
+      "test whether the intercepted element belong to false intercepted element.");
 
   params.addParam<UserObjectName>("in_out_test", "The name of the in-out test user object");
 
@@ -59,7 +63,7 @@ InterceptedElementModifier::InterceptedElementModifier(const InputParameters & p
     _threshold(getParam<Real>("threshold")),
     _lambda(getParam<Real>("lambda")),
     _outer_boundary(getParam<bool>("outer_boundary")),
-    _qrule_order(getParam<int>("qrule_order")),
+    _qrule_order(static_cast<Order>(getParam<int>("qrule_order"))),
     _in_out_test_base(isParamSetByUser("in_out_test")
                           ? &getUserObject<PointInPolyhedronCheckUO>("in_out_test")
                           : nullptr)
@@ -88,42 +92,11 @@ InterceptedElementModifier::computeSubdomainID()
 
   auto check_lambda_flags = [&](Real ratio_active) -> SubdomainID
   {
-    if (_lambda == 0)
+    if (MooseUtils::absoluteFuzzyEqual(_lambda, 0))
       return _subdomain_id_outside;
-    if (_lambda == 1)
+    if (MooseUtils::absoluteFuzzyEqual(_lambda, 1))
       return _subdomain_id_inside;
     return (1 - ratio_active > _lambda) ? _subdomain_id_outside : _subdomain_id_inside;
-  };
-
-  auto initFEBase = [&](const Elem * elem)
-  {
-    Order order = intToOrder(_qrule_order);
-    FEType fe_type(elem->default_order(), LAGRANGE);
-    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
-    QGauss qrule(elem->dim(), order);
-    fe->get_xyz(); // this is very important, otherwise the quadrature points are not
-                   // initialized
-    fe->get_JxW();
-    fe->attach_quadrature_rule(&qrule);
-    fe->reinit(elem);
-    return fe;
-  };
-
-  auto computeActiveAreaRatio =
-      [&](const Elem * elem, const std::function<bool(const Point &)> & is_active)
-  {
-    auto fe = initFEBase(elem);
-    const auto & JxW = fe->get_JxW();
-    const auto & q_points = fe->get_xyz();
-    double active_area = 0, total_area = 0;
-
-    for (unsigned int i = 0; i < q_points.size(); ++i)
-    {
-      if (is_active(q_points[i]))
-        active_area += JxW[i];
-      total_area += JxW[i];
-    }
-    return active_area / total_area;
   };
 
   if (_in_out_test_type == DistanceType::SIGN_DISTANCE)
@@ -152,7 +125,8 @@ InterceptedElementModifier::computeSubdomainID()
       return (_outer_boundary && val < _threshold) || (!_outer_boundary && val > _threshold);
     };
 
-    Real ratio_active = computeActiveAreaRatio(elem, is_active);
+    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+
     return check_lambda_flags(ratio_active);
   }
   else if (_in_out_test_type == DistanceType::GEOMETRY)
@@ -176,7 +150,7 @@ InterceptedElementModifier::computeSubdomainID()
              (!_outer_boundary && !_in_out_test_base->ifInside(p));
     };
 
-    Real ratio_active = computeActiveAreaRatio(elem, is_active);
+    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
 
     return check_lambda_flags(ratio_active);
   }
@@ -186,36 +160,4 @@ InterceptedElementModifier::computeSubdomainID()
   }
 
   return -1; // fallback (shouldn't reach)
-}
-
-Order
-InterceptedElementModifier::intToOrder(int value)
-{
-  switch (value)
-  {
-    case 0:
-      return CONSTANT;
-    case 1:
-      return FIRST;
-    case 2:
-      return SECOND;
-    case 3:
-      return THIRD;
-    case 4:
-      return FOURTH;
-    case 5:
-      return FIFTH;
-    case 6:
-      return SIXTH;
-    case 7:
-      return SEVENTH;
-    case 8:
-      return EIGHTH;
-    case 9:
-      return NINTH;
-    case 10:
-      return TENTH;
-    default:
-      throw std::invalid_argument("Unsupported Order value: " + std::to_string(value));
-  }
 }

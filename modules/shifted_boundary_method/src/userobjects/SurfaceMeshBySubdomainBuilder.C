@@ -108,6 +108,7 @@ SurfaceMeshBySubdomainBuilder::buildSubdomainGroupedData()
 bool
 SurfaceMeshBySubdomainBuilder::checkWatertightness() const
 {
-  return SBMUtils::checkWatertightnessFromRawElems(std::vector<const Elem *>(
-      _mesh->active_element_ptr_range().begin(), _mesh->active_element_ptr_range().end()));
+  auto elem_range = _mesh->active_element_ptr_range();
+  return SBMUtils::checkWatertightnessFromRawElems(
+      std::vector<const Elem *>(elem_range.begin(), elem_range.end()));
 }

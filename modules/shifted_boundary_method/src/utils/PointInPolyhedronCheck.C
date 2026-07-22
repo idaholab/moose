@@ -10,6 +10,8 @@
 #include "PointInPolyhedronCheck.h"
 #include "LineSegment.h"
 #include "Ball.h"
+#include "libmesh/plane.h"
+#include "libmesh/utility.h"
 
 PointInPolyhedronCheck::PointInPolyhedronCheck(
     const std::vector<std::unique_ptr<SBMBndElementBase>> & bd_elements,
@@ -35,9 +37,16 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
   _num_elements = _bd_elements.size();
   _dim = _bd_elements[0]->expectedEmbeddingMeshDim();
 
-  if (!MooseUtils::absoluteFuzzyEqual(_ray_direction(0), 1.0) or
-      !MooseUtils::absoluteFuzzyEqual(_ray_direction(1), 1.0) or
-      !MooseUtils::absoluteFuzzyEqual(_ray_direction(2), 1.0))
+  // Normalize a user-supplied ray direction so the axis-aligned test below is
+  // scale-independent (e.g. (5,0,0) is treated the same as (1,0,0)). The default
+  // (0,0,0) sentinel means "auto" and is left untouched to avoid a divide-by-zero;
+  // it falls through to PCA.
+  if (!MooseUtils::absoluteFuzzyEqual(_ray_direction.norm(), 0.0))
+    _ray_direction = _ray_direction.unit();
+
+  // An axis-aligned ray direction is used as given; anything else (including the
+  // default (0,0,0)) needs PCA to choose the ray direction automatically.
+  if (!rayDirectionIsAxisAligned())
     preparePCASVD();
   buildObbKdtreeAndMaxProjectedDiagonal(
       1e-2 /*safe protect: expanded box length in each direction and both sides*/);
@@ -56,7 +65,8 @@ PointInPolyhedronCheck::sideness(const Point & p)
 
   std::array<int, 2> counts = {0, 0};
 
-  for (int i = 0; i < 2; ++i)
+  // shoot two rays in opposite directions and count intersections with boundary elements
+  for (const auto i : make_range(2))
   {
     for (const auto & elemID : collectCandidateElementIDs(p))
     {
@@ -75,6 +85,7 @@ PointInPolyhedronCheck::sideness(const Point & p)
         counts[i]++;
     }
 
+    // If either ray has zero intersections, the point is outside the geometry
     if (counts[i] == 0)
       return SurfaceSide::OUTSIDE;
   }
@@ -85,19 +96,18 @@ PointInPolyhedronCheck::sideness(const Point & p)
     return (counts[0] % 2 == 1) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
 
   // --- (c) Check for other variation directions ---
-
   std::vector<Point> axis_dirs =
       (_dim == 3) ? std::vector<Point>{_second_variance_vector, _max_variance_vector}
                   : std::vector<Point>{_max_variance_vector};
 
-  for (std::size_t idx = 0; idx < axis_dirs.size(); ++idx)
+  for (const auto idx : index_range(axis_dirs))
   {
     const auto & dir = axis_dirs[idx];
     std::array<Point, 2> ray_starts = {
         generateRayStart(p, false /*inverted*/, std::nullopt /*forced_xyz*/, idx),
         generateRayStart(p, true /*inverted*/, std::nullopt /*forced_xyz*/, idx)};
 
-    for (int i = 0; i < 2; ++i)
+    for (const auto i : make_range(2))
     {
       int num = 0;
       for (const auto & elemID : collectCandidateElementIDs(p))
@@ -153,15 +163,15 @@ PointInPolyhedronCheck::isOutsideRayBBox(const Point & orig,
 {
   Point lb, ub;
   const auto & center = ball.center();
-  const double radius = ball.radius();
+  const Real radius = ball.radius();
 
-  for (int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     lb(i) = std::min(orig(i), orig(i) + dir(i)) - radius;
     ub(i) = std::max(orig(i), orig(i) + dir(i)) + radius;
   }
 
-  for (int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     if (center(i) < lb(i) || center(i) > ub(i))
       return true;
@@ -180,12 +190,12 @@ PointInPolyhedronCheck::isOutsideBoundingRegion(const Point & orig,
 
   const auto w = center - orig;
 
-  double b = (w * dir) / (dir * dir);
+  Real b = (w * dir) / (dir * dir);
   Point Pb = orig + b * dir;
 
-  double distance_squared = 0.0;
-  for (int i = 0; i < _dim; ++i)
-    distance_squared += std::pow(Pb(i) - center(i), 2);
+  Real distance_squared = 0.0;
+  for (const auto i : make_range(_dim))
+    distance_squared += Utility::pow<2>(Pb(i) - center(i));
 
   return (distance_squared > radius * radius);
 }
@@ -204,7 +214,7 @@ PointInPolyhedronCheck::computeGlobalBoundingBox()
   Point min_pt = bbox.min();
   Point max_pt = bbox.max();
 
-  for (unsigned int d = 0; d < 3; ++d)
+  for (const auto d : make_range(3u))
   {
     min_pt(d) -= eps;
     max_pt(d) += eps;
@@ -227,16 +237,19 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
     // Copy point to starting point
     Point starting_point = point;
 
-    int ray_dir;
-    for (int dim = 0; dim < _dim; ++dim)
+    int ray_dir = -1;
+    for (const auto dim : make_range(_dim))
       if (!_build_obb && _ray_direction(dim) == 1.0)
         ray_dir = dim;
       else if (forced_ray_direction_XYZ && forced_ray_direction_XYZ.value()(dim) == 1.0)
         ray_dir = dim;
 
+    mooseAssert(ray_dir >= 0,
+                "PointInPolyhedronCheck::generateRayStart: no axis-aligned ray direction found");
+
     // Extend starting point outside bounding box in ray_dir
 
-    const double ray_extent = max(ray_dir) - min(ray_dir);
+    const Real ray_extent = max(ray_dir) - min(ray_dir);
 
     if (max(ray_dir) + min(ray_dir) < 2 * point(ray_dir))
       starting_point(ray_dir) = inverted ? max(ray_dir) + ray_extent : min(ray_dir) - ray_extent;
@@ -268,8 +281,29 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
     direction_multiplier = inverted ? 1.0 : -1.0;
   }
 
-  Point starting_point =
-      projectPointToRayDirPlane(point, projection_plane_corner, number_to_larger_variance);
+  // Select the plane normal corresponding to number_to_larger_variance: 0 is the
+  // ray direction, _dim - 1 the second-variance axis (3D only), and _dim the
+  // maximum-variance axis.
+  Point plane_normal;
+  if (number_to_larger_variance == 0)
+    plane_normal = _ray_direction;
+  else if (_dim - number_to_larger_variance == 0)
+    plane_normal = _max_variance_vector;
+  else if (_dim - number_to_larger_variance == 1 /* for 3D only*/)
+    plane_normal = _second_variance_vector;
+  else
+    mooseError("PointInPolyhedronCheck::generateRayStart: invalid "
+               "number_to_larger_variance ",
+               number_to_larger_variance,
+               " for dimension ",
+               _dim,
+               "; expected 0, ",
+               _dim - 1,
+               ", or ",
+               _dim,
+               ".");
+
+  Point starting_point = projectPointOntoPlane(point, projection_plane_corner, plane_normal);
   return starting_point - (SAFE_FACTOR * last_axis_length * direction_multiplier) * _ray_direction;
 }
 
@@ -277,13 +311,10 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
 void
 PointInPolyhedronCheck::initializeRayDirection()
 {
-  if (MooseUtils::absoluteFuzzyEqual(_ray_direction(0), 1.0) or
-      MooseUtils::absoluteFuzzyEqual(_ray_direction(1), 1.0) or
-      MooseUtils::absoluteFuzzyEqual(_ray_direction(2), 1.0))
-  {
-    _ray_direction.unit();
+  if (rayDirectionIsAxisAligned())
+    // Axis-aligned direction: use it directly with a global axis-aligned bounding box.
+    // (_ray_direction is already normalized in the constructor.)
     _bounds = computeGlobalBoundingBox();
-  }
   else
   {
     _ray_direction = (_dim == 3) ? _min_variance_vector : _second_variance_vector;
@@ -291,31 +322,23 @@ PointInPolyhedronCheck::initializeRayDirection()
   }
 }
 
-Point
-PointInPolyhedronCheck::projectPointToRayDirPlane(const Point & point,
-                                                  const Point & point_on_the_plane,
-                                                  const int number_to_larger_variance) const
+bool
+PointInPolyhedronCheck::rayDirectionIsAxisAligned() const
 {
+  return MooseUtils::absoluteFuzzyEqual(_ray_direction(0), 1.0) or
+         MooseUtils::absoluteFuzzyEqual(_ray_direction(1), 1.0) or
+         MooseUtils::absoluteFuzzyEqual(_ray_direction(2), 1.0);
+}
 
-  Point ray_direction;
-  if (number_to_larger_variance == 0)
-    ray_direction = _ray_direction;
-  else if (_dim - number_to_larger_variance == 0)
-    ray_direction = _max_variance_vector;
-  else if (_dim - number_to_larger_variance == 1 /* for 3D only*/)
-    ray_direction = _second_variance_vector;
-
-  // Compute the vector from the plane origin to the given point
-  Point vector_to_point = point - point_on_the_plane;
-
-  // Project the vector onto the ray direction
-  Real projection_length = vector_to_point * _ray_direction;
-
-  // Subtract the projection to get the component perpendicular to the ray direction
-  Point perpendicular_component = vector_to_point - projection_length * _ray_direction;
-
-  // Add the perpendicular component to the plane origin to get the projected point
-  return point_on_the_plane + perpendicular_component;
+Point
+PointInPolyhedronCheck::projectPointOntoPlane(const Point & point_to_project,
+                                              const Point & plane_point,
+                                              const Point & plane_normal) const
+{
+  // Delegate to libMesh::Plane::closest_point, which returns the orthogonal
+  // projection of the point onto the plane. `plane_normal` is assumed to be a
+  // unit vector (closest_point does not normalize it).
+  return libMesh::Plane(plane_point, plane_normal).closest_point(point_to_project);
 }
 
 void
@@ -327,7 +350,7 @@ PointInPolyhedronCheck::preparePCASVD()
   for (const auto & elem : _bd_elements)
   {
     const auto & e = elem->elem();
-    for (unsigned int i = 0; i < e.n_nodes(); ++i)
+    for (const auto i : make_range(e.n_nodes()))
     {
       const Node * node = e.node_ptr(i);
       mooseAssert(node, "Node pointer is null!");
@@ -344,7 +367,7 @@ PointInPolyhedronCheck::preparePCASVD()
 
   // (b) Build the mean-centered matrix X (N x 3)
   DenseMatrix<Real> X(N, 3);
-  for (unsigned int i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
   {
     const Point d = nodal_points[i] - _centroid_nodal_points;
     X(i, 0) = d(0);
@@ -380,7 +403,7 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
   if (!_centroids.empty())
     mooseAssert(_centroids.size() >= 3, "Need at least three points.");
 
-  // (a) Prepare KD‑tree data (optional) and track PCA‑space extents
+  // (a) Prepare KD-tree data (optional) and track PCA-space extents
 
   // Initialize the ray direction if not set
   initializeRayDirection();
@@ -396,17 +419,17 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
 
   _max_projected_diag_length = 0.0;
 
-  for (std::size_t i = 0; i < _num_elements; ++i)
+  for (const auto i : make_range(_num_elements))
   {
-    // Per‑element data for optional KD‑tree
+    // Per-element data for optional KD-tree
     if (!_brute_force_looping_all_bndelements)
     {
       const Point & pt =
           (!_centroids.empty() ? _centroids[i] : _bd_elements[i]->elem().vertex_average());
 
-      _projected_centroids[i] = projectPointToRayDirPlane(pt, _plane_origin);
+      _projected_centroids[i] = projectPointOntoPlane(pt, _plane_origin, _ray_direction);
 
-      if (_dim == 2) // flatten Z in 2‑D mode
+      if (_dim == 2) // flatten Z in 2-D mode
         _projected_centroids[i](2) = 0.0;
 
       _max_projected_diag_length =
@@ -416,10 +439,10 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
 
     if (_build_obb)
     {
-      // Update PCA‑space bounding box
+      // Update PCA-space bounding box
       const Elem & e = _bd_elements[i]->elem();
 
-      for (unsigned int j = 0; j < e.n_nodes(); ++j)
+      for (const auto j : make_range(e.n_nodes()))
       {
         const Point d = *(e.node_ptr(j)) - _centroid_nodal_points;
         const Real u = d * _max_variance_vector;
@@ -478,7 +501,7 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
     }
   }
 
-  // (c) Finalise KD‑tree (if requested)
+  // (c) Finalise KD-tree (if requested)
   if (!_brute_force_looping_all_bndelements)
     _kd_tree = std::make_unique<KDTree>(_projected_centroids, _leaf_max_size);
 }
@@ -488,7 +511,7 @@ PointInPolyhedronCheck::collectCandidateElementIDs(const Point & query_point) co
 {
   std::vector<unsigned int> elem_ids;
 
-  // (a) Brute‑force: test every boundary element
+  // (a) Brute-force: test every boundary element
   if (_brute_force_looping_all_bndelements)
   {
     elem_ids.resize(_num_elements);
@@ -496,10 +519,10 @@ PointInPolyhedronCheck::collectCandidateElementIDs(const Point & query_point) co
     return elem_ids;
   }
 
-  // (b) KD‑tree radius search in projected PCA space
-  Point proj = projectPointToRayDirPlane(query_point, _plane_origin);
+  // (b) KD-tree radius search in projected PCA space
+  Point proj = projectPointOntoPlane(query_point, _plane_origin, _ray_direction);
   if (_dim == 2)
-    proj(2) = 0.0; // flatten Z for 2‑D
+    proj(2) = 0.0; // flatten Z for 2-D
 
   std::vector<nanoflann::ResultItem<std::size_t, Real>> matches;
   _kd_tree->radiusSearch(proj, _max_projected_diag_length, matches);

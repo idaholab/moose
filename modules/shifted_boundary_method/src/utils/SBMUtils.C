@@ -13,11 +13,38 @@
 #include "MooseParsedFunction.h"
 #include "UnsignedDistanceToSurfaceMesh.h"
 #include "SignedDistanceToSurfaceMesh.h"
+#include "libmesh/fe.h"
+#include "libmesh/quadrature_gauss.h"
 
 #include <limits>
 
 namespace SBMUtils
 {
+
+Real
+activeElementFraction(const Elem & elem,
+                      Order qrule_order,
+                      const std::function<bool(const libMesh::Point &)> & is_active)
+{
+  const FEType fe_type(elem.default_order(), LAGRANGE);
+  auto fe = FEBase::build(elem.dim(), fe_type);
+  QGauss qrule(elem.dim(), qrule_order);
+  const auto & q_points = fe->get_xyz();
+  const auto & JxW = fe->get_JxW();
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(&elem);
+
+  Real active_measure = 0.0;
+  Real total_measure = 0.0;
+  for (const auto i : index_range(q_points))
+  {
+    if (is_active(q_points[i]))
+      active_measure += JxW[i];
+    total_measure += JxW[i];
+  }
+
+  return active_measure / total_measure;
+}
 
 bool
 checkWatertightnessFromRawElems(const std::vector<const Elem *> & bd_elements)
@@ -156,9 +183,11 @@ unionSignedDistance(const std::vector<const Function *> & funcs, Real t, const P
                  func->name());
   }
 
+  mooseAssert(!funcs.empty(), "unionSignedDistance requires at least one function.");
+
   // Union signed distance: min of all signed distances
   Real min_value = funcs[0]->value(t, p);
-  for (std::size_t i = 1; i < funcs.size(); ++i)
+  for (const auto i : make_range(std::size_t(1), funcs.size()))
   {
     const Real val = funcs[i]->value(t, p);
     if (val < min_value)

@@ -12,8 +12,6 @@
 InputParameters
 PointInPolyhedronBaseUO::validParams()
 {
-  MooseEnum rayDirectionEnum("X Y Z AUTO", "AUTO", false);
-
   InputParameters params = GeneralUserObject::validParams();
 
   params.addParam<bool>("brute_force",

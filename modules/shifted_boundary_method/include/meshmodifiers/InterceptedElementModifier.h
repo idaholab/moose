@@ -11,8 +11,8 @@
 
 #include "ElementSubdomainModifier.h"
 #include "Function.h"
-#include "libmesh/quadrature_gauss.h"
 #include "PointInPolyhedronCheckUO.h"
+#include "libmesh/enum_order.h"
 
 enum class DistanceType
 {
@@ -54,11 +54,8 @@ private:
   /// Outer boundary handling flag
   bool _outer_boundary;
 
-  /// Shift vector for geometry translation
-  Point _shift_geometry;
-
   /// quadrature rule order to doing lambda-based classification to determine whether the Intercepted element belong to TrueIntercepted or FalseIntercepted
-  int _qrule_order;
+  Order _qrule_order;
 
   /// user object for in-out test
   const PointInPolyhedronCheckUO * _in_out_test_base;
@@ -68,7 +65,4 @@ private:
   /// 1. SIGN_DISTANCE: use the signed distance function to classify the element
   /// 2. GEOMETRY: use the geometry to classify the element
   DistanceType _in_out_test_type = DistanceType::NONE;
-
-  /// Convert integer to Order
-  Order intToOrder(int value);
 };

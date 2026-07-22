@@ -75,7 +75,7 @@ private:
   int _dim = -1;
 
   /// The number of elements in the boundary mesh.
-  std::size_t _num_elements = -1;
+  std::size_t _num_elements = 0;
 
   /// Ray shooting direction
   Point _ray_direction;
@@ -144,9 +144,9 @@ private:
 
   // Perform Principal Component Analysis (PCA) using Singular Value Decomposition (SVD)
   // to compute the principal directions:
-  // - _max_variance_vector: Direction with the second-largest variance (second principal
+  // - _max_variance_vector: Direction with the largest variance (first principal component).
+  // - _second_variance_vector: Direction with the second-largest variance (second principal
   // component).
-  // - _second_variance_vector: Direction with the largest variance (first principal component).
   // - _min_variance_vector: Direction with the smallest variance (typically the surface normal).
   void preparePCASVD();
 
@@ -154,6 +154,12 @@ private:
   /// this function will retain the user-defined direction.
   /// Otherwise, it will automatically determine the optimal ray direction based on the geometry.
   void initializeRayDirection();
+
+  /// Returns true if _ray_direction is (approximately) one of the coordinate axes X, Y, or Z.
+  /// Assumes _ray_direction has been normalized, so a unit vector with any component equal to 1.0
+  /// is necessarily axis-aligned. A non-axis direction (including the default (0,0,0) sentinel)
+  /// means the ray direction must be chosen automatically via PCA.
+  bool rayDirectionIsAxisAligned() const;
 
   /**
    * Computes the starting point of a ray for a given query point.
@@ -167,10 +173,11 @@ private:
                                const std::optional<Point> & forced_ray_direction_XYZ = std::nullopt,
                                const int number_to_larger_variance = 0) const;
 
-  /// Project a point onto the plane with normal `normal = normalized  _ray_direction` and passing through `origin = _plane_origin`.
-  Point projectPointToRayDirPlane(const Point & point,
-                                  const Point & point_on_the_plane,
-                                  const int number_to_larger_variance = 0) const;
+  /// Orthogonally project `point_to_project` onto the plane defined by `plane_point`
+  /// and unit normal `plane_normal`. `plane_normal` is assumed to be a unit vector.
+  Point projectPointOntoPlane(const Point & point_to_project,
+                              const Point & plane_point,
+                              const Point & plane_normal) const;
 
   /// Constructs an oriented bounding box (OBB) using the results of PCA and the KD-tree.
   /// During this process, it also finds the maximum projected diagonal length.

@@ -27,7 +27,7 @@ public:
 
   void initialSetup() override;
 
-  /// Return unsigned distance value
+  /// Return signed distance value
   Real value(Real t, const Point & p) const override;
 
 private:

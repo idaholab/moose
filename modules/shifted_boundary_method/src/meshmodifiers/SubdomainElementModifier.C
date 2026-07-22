@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubdomainElementModifier.h"
+#include "SBMUtils.h"
+
+#include <optional>
 
 registerMooseObject("ShiftedBoundaryMethodApp", SubdomainElementModifier);
 
@@ -22,13 +25,18 @@ SubdomainElementModifier::validParams()
       "subdomain_id_tester",
       "The UserObject (PointInSubdomainCheckUO) for subdomain in/out tests.");
 
-  params.addParam<Real>(
-      "lambda", 0.5, "Threshold ratio to decide between inside and outside if partially inside.");
+  params.addRangeCheckedParam<Real>(
+      "lambda",
+      0.5,
+      "lambda >= 0 & lambda <= 1",
+      "Threshold ratio to decide between inside and outside if partially inside.");
 
-  params.addParam<int>("qrule_order",
-                       9,
-                       "Quadrature order for generating the Gauss points to do the IN-OUT test to "
-                       "test whether the intercepted element belong to false intercepted element.");
+  params.addRangeCheckedParam<int>(
+      "qrule_order",
+      9,
+      "qrule_order >= 0 & qrule_order <= 10",
+      "Quadrature order for generating the Gauss points to do the IN-OUT test to "
+      "test whether the intercepted element belong to false intercepted element.");
 
   params.addParam<bool>(
       "mark_intercepted", false, "If true, mark the intercepted elements with the subdomain ID.");
@@ -42,10 +50,15 @@ SubdomainElementModifier::SubdomainElementModifier(const InputParameters & param
   : ElementSubdomainModifier(parameters),
     _subdomain_id_tester(getUserObject<PointInSubdomainCheckUO>("subdomain_id_tester")),
     _lambda(getParam<Real>("lambda")),
-    _qrule_order(getParam<int>("qrule_order")),
+    _qrule_order(static_cast<Order>(getParam<int>("qrule_order"))),
     _mark_intercepted(getParam<bool>("mark_intercepted")),
-    _subdomain_id_intercepted(getParam<SubdomainID>("subdomain_id_intercepted"))
+    _subdomain_id_intercepted(parameters.isParamValid("subdomain_id_intercepted")
+                                  ? getParam<SubdomainID>("subdomain_id_intercepted")
+                                  : Moose::INVALID_BLOCK_ID)
 {
+  if (_mark_intercepted && !isParamValid("subdomain_id_intercepted"))
+    paramError("subdomain_id_intercepted",
+               "This parameter is required when 'mark_intercepted' is true.");
 }
 
 SubdomainID
@@ -56,111 +69,63 @@ SubdomainElementModifier::computeSubdomainID()
     mooseError("SubdomainElementModifier: _current_elem is null!");
 
   const auto & all_checkers = _subdomain_id_tester.getAllSubdomainCheckers();
+  if (all_checkers.empty())
+    mooseError("SubdomainElementModifier: subdomain checker collection is empty!");
 
-  bool find_fully_inside = false;
-  bool find_fully_outside = true;
+  std::optional<SubdomainID> fully_inside_subdomain;
+  std::optional<SubdomainID> best_intercepted_subdomain;
+  Real max_ratio = 0.0;
 
-  SubdomainID fully_inside_subdomain;
-  SubdomainID best_intercepted_subdomain;
-  Real max_ratio = -1.0;
-
-  auto initFEBase = [&](const Elem * elem)
+  for (const auto & [sub_id, checker_ptr] : all_checkers)
   {
-    Order order = intToOrder(_qrule_order);
-    FEType fe_type(elem->default_order(), LAGRANGE);
-    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
-    QGauss qrule(elem->dim(), order);
-    fe->get_xyz(); // this is very important, otherwise the quadrature points are not
-                   // initialized
-    fe->get_JxW();
-    fe->attach_quadrature_rule(&qrule);
-    fe->reinit(elem);
-    return fe;
-  };
-
-  for (const auto & pair : all_checkers)
-  {
-    const auto & sub_id = pair.first;
-    const auto & checker_ptr = pair.second;
     unsigned int num_inside_nodes = 0;
-    for (unsigned int i = 0; i < elem->n_nodes(); ++i)
+    for (const auto i : make_range(elem->n_nodes()))
       if (checker_ptr->sideness(elem->point(i)) != SurfaceSide::OUTSIDE)
         ++num_inside_nodes;
 
     if (num_inside_nodes == elem->n_nodes())
     {
-      fully_inside_subdomain = sub_id;
-      find_fully_inside = true;
-      break;
+      if (!fully_inside_subdomain || sub_id < *fully_inside_subdomain)
+        fully_inside_subdomain = sub_id;
+      continue;
     }
 
-    if (num_inside_nodes != 0)
-      find_fully_outside = false;
+    // Copy the structured binding into a local variable; capturing a structured binding directly
+    // in a lambda is only allowed from C++20 onward.
+    auto * const checker = checker_ptr.get();
+    const Real ratio_active = SBMUtils::activeElementFraction(
+        *elem,
+        _qrule_order,
+        [&](const Point & point) { return checker->sideness(point) != SurfaceSide::OUTSIDE; });
+    // All nodes may be outside even when a closed geometry lies within the element or its surface
+    // crosses the element. Retain the checker if either nodes or quadrature points find activity.
+    const bool has_active_region = num_inside_nodes != 0 || ratio_active > 0.0;
+    if (!has_active_region)
+      continue;
 
-    auto computeActiveAreaRatio = [&](const Elem * elem)
-    {
-      auto fe = initFEBase(elem);
-      const auto & JxW = fe->get_JxW();
-      const auto & q_points = fe->get_xyz();
-      double active_area = 0, total_area = 0;
-
-      for (unsigned int i = 0; i < q_points.size(); ++i)
-      {
-        if (checker_ptr->sideness(q_points[i]) != SurfaceSide::OUTSIDE)
-          active_area += JxW[i];
-        total_area += JxW[i];
-      }
-
-      return active_area / total_area;
-    };
-
-    Real ratio_active = computeActiveAreaRatio(elem);
-    if (ratio_active > max_ratio)
+    if (!best_intercepted_subdomain || ratio_active > max_ratio ||
+        (ratio_active == max_ratio && sub_id < *best_intercepted_subdomain))
     {
       max_ratio = ratio_active;
       best_intercepted_subdomain = sub_id;
     }
   }
 
-  if (find_fully_inside)
-    return fully_inside_subdomain;
+  if (fully_inside_subdomain)
+    return *fully_inside_subdomain;
+
+  // If the element is outside all checked subdomains, leave its current subdomain unchanged by
+  // returning Moose::INVALID_BLOCK_ID.
+  if (!best_intercepted_subdomain)
+    return Moose::INVALID_BLOCK_ID;
 
   if (_mark_intercepted)
     return _subdomain_id_intercepted;
-  else
-    return best_intercepted_subdomain;
 
-  // TODO: take care of fully outside case
-}
+  if (MooseUtils::absoluteFuzzyEqual(_lambda, 0))
+    return Moose::INVALID_BLOCK_ID;
+  if (MooseUtils::absoluteFuzzyEqual(_lambda, 1))
+    return *best_intercepted_subdomain;
 
-Order
-SubdomainElementModifier::intToOrder(int value)
-{
-  switch (value)
-  {
-    case 0:
-      return CONSTANT;
-    case 1:
-      return FIRST;
-    case 2:
-      return SECOND;
-    case 3:
-      return THIRD;
-    case 4:
-      return FOURTH;
-    case 5:
-      return FIFTH;
-    case 6:
-      return SIXTH;
-    case 7:
-      return SEVENTH;
-    case 8:
-      return EIGHTH;
-    case 9:
-      return NINTH;
-    case 10:
-      return TENTH;
-    default:
-      throw std::invalid_argument("Unsupported Order value: " + std::to_string(value));
-  }
+  return 1.0 - max_ratio > _lambda ? Moose::INVALID_BLOCK_ID : *best_intercepted_subdomain;
 }

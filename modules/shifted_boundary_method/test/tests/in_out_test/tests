@@ -54,4 +54,15 @@
       detail = 'in 3D with lambda = 0.'
     []
   []
+
+  [invalid_lambda]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'MeshModifiers/IntercpetedESM/lambda=-0.1'
+    expect_err = "Range check failed for parameter MeshModifiers/IntercpetedESM/lambda; expression = 'lambda >= 0 & lambda <= 1'"
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall reject an InterceptedElementModifier lambda outside the '
+                  'inclusive range from zero to one.'
+  []
 []

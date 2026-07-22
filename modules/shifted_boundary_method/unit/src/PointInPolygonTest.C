@@ -56,7 +56,7 @@ TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
     EXPECT_EQ(inout_test.sideness(Point(-0.1, 0.5, 0.0)), SurfaceSide::OUTSIDE);
     EXPECT_EQ(inout_test.sideness(Point(1.5, 1.5, 0.0)), SurfaceSide::OUTSIDE);
 
-    // On edge – result depends on epsilon, should return ON
+    // On edge - result depends on epsilon, should return ON
     EXPECT_EQ(inout_test.sideness(Point(1.0, 0.5, 0.0)), SurfaceSide::ON);
   }
 }

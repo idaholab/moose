@@ -9,6 +9,8 @@
 
 #include "PointInSubdomainCheckUO.h"
 
+#include "libmesh/utility.h"
+
 registerMooseObject("ShiftedBoundaryMethodApp", PointInSubdomainCheckUO);
 
 InputParameters
@@ -38,15 +40,15 @@ PointInSubdomainCheckUO::initialSetup()
 
   for (const auto & [subdomain_id, elements] : bnd_elems_by_subdomain_id)
   {
-    auto checker =
-        std::make_unique<PointInPolyhedronCheck>(elements,
-                                                 centroids_by_subdomain_id.at(subdomain_id),
-                                                 _ray_direction,
-                                                 _brute_force,
-                                                 _eps,
-                                                 _leaf_max_size,
-                                                 _obb_file_name,
-                                                 _ray_file_name);
+    auto checker = std::make_unique<PointInPolyhedronCheck>(
+        elements,
+        libmesh_map_find(centroids_by_subdomain_id, subdomain_id),
+        _ray_direction,
+        _brute_force,
+        _eps,
+        _leaf_max_size,
+        _obb_file_name,
+        _ray_file_name);
 
     _subdomain_id_checkers[subdomain_id] = std::move(checker);
   }
@@ -55,9 +57,10 @@ PointInSubdomainCheckUO::initialSetup()
 bool
 PointInSubdomainCheckUO::ifInside(const Point & p) const
 {
-  for (const auto & [subdomain_id, checker] : _subdomain_id_checkers)
+  for (const auto & [_, checker] : _subdomain_id_checkers)
   {
-    if (checker->sideness(p) == SurfaceSide::OUTSIDE || checker->sideness(p) == SurfaceSide::ON)
+    const SurfaceSide side = checker->sideness(p);
+    if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)
       return true;
   }
   return false;
@@ -68,7 +71,8 @@ PointInSubdomainCheckUO::whichSubdomain(const Point & p) const
 {
   for (const auto & [subdomain_id, checker] : _subdomain_id_checkers)
   {
-    if (checker->sideness(p) == SurfaceSide::INSIDE || checker->sideness(p) == SurfaceSide::ON)
+    const SurfaceSide side = checker->sideness(p);
+    if (side == SurfaceSide::INSIDE || side == SurfaceSide::ON)
       return subdomain_id;
   }
   return libMesh::Elem::invalid_subdomain_id;
