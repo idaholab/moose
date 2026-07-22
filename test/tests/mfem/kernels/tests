@@ -317,7 +317,7 @@
     type = CSVDiff
     input = prob_op_block_darcy.i
     csvdiff = 'OutputData/Darcy.csv'
-    requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
+    requirement = 'The system shall be able to declare a ProblemOperatorBuilderSteady while using the MFEM block without changing the results of the MFEM Darcy problem.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
@@ -331,7 +331,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
-    requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
+    requirement = 'The system shall be able to declare a ProblemOperatorBuilderTransient while using the MFEM block without changing the results of the MFEM HeatTransfer problem.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
