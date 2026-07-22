@@ -133,52 +133,6 @@ The degree-two map and mortar active-set setting follow S. Hueber, G. Stadler, a
 linearization," *International Journal for Numerical Methods in Engineering* 84(5), 543--571
 (2010), [doi:10.1002/nme.2907](https://doi.org/10.1002/nme.2907).
 
-## Unit-Scale Comparison
-
-The two-dimensional benchmark uses two four-unit-wide, two-unit-deep elastic blocks, four unit
-mortar segments, \(E=4\), \(\nu=0\), and unit variable scaling. Reference-configuration element
-depths give \(Q=1\); interior nodal mortar weights are \(M=1\), so the PETSc multiplier scale is
-\(D=I\). Direct LU, fixed time steps, and identical \(10^{-12}\) nonlinear tolerances were used.
-A formulation-independent natural-map postprocessor checked
-
-\[
-\max_i\left(
-\left|\min(p_{n,i},C_{n,i}\bar g_i)\right|,
-\left\|p_{t,i}-\operatorname{Proj}_{B_{R_i}}(q_{t,i})\right\|
-\right),
-\]
-
-alongside unscaled displacement-equilibrium residual norms. Both formulations produced the same
-pressures, slip, and displacements within \(10^{-8}\), with common KKT and equilibrium errors below
-\(10^{-10}\), for cold activation, stick, slip, separation, the fixed close--stick--slide--reverse--
-open--reclose history, and one-, two-, and four-increment loading. Zero, plausible, and deliberately
-poor multiplier guesses all solved. A three-dimensional \(Q=1\) confirmation exercised both
-tangential multipliers, diagonal stick and slip, and a change in slip direction.
-
-Selected direct-LU counts were:
-
-| Case | Alart--Curnier | Hueber--Stadler--Wohlmuth |
-| - | - | - |
-| 2-D sliding | 13 nonlinear / 14 residual | 12 nonlinear / 13 residual |
-| 2-D sticking | 6 nonlinear / 7 residual | 7 nonlinear / 8 residual |
-| Existing 3-D physical-scale case | 6 nonlinear | 8 nonlinear |
-| Robustness sweep aggregate | 109 residual, all solved | 117 residual, all solved |
-
-Separate PETSc SVD diagnostics gave initial/active condition numbers of approximately \(76/47\)
-for Alart--Curnier and \(42/160\) for HSW. These are global Jacobian condition numbers, so
-physics-balanced scaling does not imply a condition number near one. The HSW row normalization by
-\(C_t\) removes the extra common pressure-scale factor, but the local factor \(w/C_t\) remains.
-In the diagnostic SVD solve, that factor also allowed the raw HSW residual to satisfy the nonlinear
-tolerance while the common natural-map error was still about \(10^{-1}\); the direct-LU canonical
-HSW runs did satisfy the common criterion.
-
-Alart--Curnier is the default. It solved every robustness case, reduced the aggregate residual
-evaluations from 117 to 109, was better in the sticking and existing 3-D cases, had the better
-active-state condition number, and does not attenuate the physical natural-map residual by a small
-solution-dependent weight. HSW remains selectable for comparison and compatibility. The one
-observed regression for Alart--Curnier was one additional nonlinear iteration and residual
-evaluation in the 2-D sliding case.
-
 ## PETSc KSP Behavior
 
 `KSPSetRightDiagonalScale()` retains a reference to a runtime vector. `NULL` clears it, and

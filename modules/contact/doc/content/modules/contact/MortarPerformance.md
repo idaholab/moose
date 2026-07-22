@@ -202,13 +202,13 @@ improved the complete HSW interaction even when their isolated effects differed.
 result is interaction-dependent: an ordered commit bisect can identify a different first bad
 commit depending on factor order and is not a unique causal ranking.
 
-Right scaling is also workload-dependent. Commit `a08774a60e4` experimentally restricted it to
+Right scaling is also workload-dependent. An unsubmitted experiment restricted it to
 physical strategies because removing it reduced work in the bouncing block and in the serial
 friction-function HSW run. However, the two-rank friction-function HSW candidate with user constants
 then reached its 30-nonlinear-iteration limit. Restoring right scaling made that candidate and all
-60 final 3-D matrix candidates pass. Commit `bc4e3108443` therefore reverts the restriction: PETSc
-right scaling remains active for both user and physical constants. It is not uniformly cheaper, but
-it provides demonstrated robustness in a user-constant analyst case.
+60 final 3-D matrix candidates pass. The restriction was therefore discarded: PETSc right scaling
+remains active for both user and physical constants. It is not uniformly cheaper, but it provides
+demonstrated robustness in a user-constant analyst case.
 
 #### Root-equivalent HSW experiment
 

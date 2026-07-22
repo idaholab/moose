@@ -45,9 +45,9 @@ of degree one in pressure. The Hueber--Stadler--Wohlmuth map is degree two and, 
 They therefore have the same stick and slip roots for \(w>0\). At the separated state
 \(R=\lVert\boldsymbol q_t\rVert=0\), the unguarded degree-two expression would be zero for every
 \(\boldsymbol p_t\). The implementation returns \(\boldsymbol p_t\) in that exact state so that
-separation still requires zero tangential pressure. `alart_curnier` is the default;
-`hueber_stadler_wohlmuth` selects the degree-two map. This option does not alter mortar
-dynamics, which uses separate constraints.
+separation still requires zero tangential pressure. `hueber_stadler_wohlmuth` is the default and
+`alart_curnier` selects the degree-one map. This option does not alter mortar dynamics, which uses
+separate constraints.
 
 Because the HSW expression has pressure-squared units, its assembled row is divided by the
 positive tangential pressure scale \(C_t\). This removes the extra factor under a common pressure
@@ -80,9 +80,9 @@ On the unit-scale problem, separate PETSc SVD diagnostics measured initial/activ
 condition numbers of approximately \(76/47\) for Alart--Curnier and \(42/160\) for HSW. The
 pressure scales balance units and block magnitudes; they do not imply an order-one condition number.
 The HSW factor \(w/C_t\) can still become small near contact-state transitions and attenuate the
-raw nonlinear residual. These results motivate the `alart_curnier` default while retaining
-`hueber_stadler_wohlmuth` for comparison and compatibility. Iteration counts characterize
-this benchmark and are not regression requirements.
+raw nonlinear residual. The broader analyst workloads give mixed results across the two maps, so
+`hueber_stadler_wohlmuth` remains the default for compatibility and `alart_curnier` is an explicit
+alternative. Iteration counts characterize these benchmarks and are not regression requirements.
 
 The nodal weighted tangential velocity is
 

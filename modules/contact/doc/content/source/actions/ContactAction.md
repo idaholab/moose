@@ -25,8 +25,8 @@ while retaining good convergence [!cite](puso2008segment).
 For quasistatic Coulomb mortar contact,
 [!param](/Contact/ContactAction/friction_ncp_formulation) selects the tangential nonlinear
 complementarity map independently of the source of `c_normal` and `c_tangential`.
-`alart_curnier` is the default degree-one projection map and
-`hueber_stadler_wohlmuth` is the equivalent degree-two scaled map. Both use physical pressure
+`hueber_stadler_wohlmuth` is the default degree-two scaled map and
+`alart_curnier` selects the degree-one projection map. Both use physical pressure
 multipliers and the same solver-side column and equation-row scaling. See
 [ComputeFrictionalForceLMMechanicalContact](/ComputeFrictionalForceLMMechanicalContact.md) for the
 formulas, sign convention, and separated-state guard. Mortar dynamics is unchanged and does not
