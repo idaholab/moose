@@ -150,7 +150,10 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
   _dpk1_grad_trial_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
   _grad_trial_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
   if (_stabilize_strain)
+  {
     _delta_PK1_NL_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
+    _dpk1_total_cache.assign(n_qp, std::vector<RankTwoTensor>(n_phi));
+  }
 
   // B-bar volumetric correction (incremental mode only): cache the column-independent
   // `pk1 : F_ust` per qp and the per-(qp, j) `dA/dU` term so the Jacobian inner loop reads
@@ -187,12 +190,13 @@ TotalLagrangianStressDivergenceBase<G>::populateLocalPK1Cache(unsigned int beta)
               (*_F_ust_det)[qp] * delta_sigma_nl * (*_F_ust_inv)[qp].transpose();
         else
           _delta_PK1_NL_cache[qp][j] = delta_sigma_nl;
+        // Local + non-local PK1 derivative: the single tensor the disp Jacobian contracts against.
+        _dpk1_total_cache[qp][j] = _dpk1_grad_trial_cache[qp][j] + _delta_PK1_NL_cache[qp][j];
       }
       // dA/dU = [ (dPK1_local + dPK1_NL) : F_ust + pk1 : dF_ust ] / 3, all per (qp, j).
       if (bbar)
         _dA_dU_cache[qp][j] =
-            ((_dpk1_grad_trial_cache[qp][j] + _delta_PK1_NL_cache[qp][j])
-                 .doubleContraction(_F_ust[qp]) +
+            (_dpk1_total_cache[qp][j].doubleContraction(_F_ust[qp]) +
              _pk1[qp].doubleContraction(_grad_trial_cache[qp][j])) /
             3.0;
     }
@@ -389,24 +393,16 @@ Real
 TotalLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                       unsigned int beta)
 {
-  // Cache gradTest(alpha) -- used twice below, cheap-but-not-free `G::gradOp`.
+  // gradTest(alpha) feeds the local Jacobian contraction below.
   const RankTwoTensor grad_test = gradTest(alpha);
 
-  // Local Jacobian: J_{alpha beta} = gradTest_alpha : (dPK1/d(grad u) * grad_phi_beta). The
-  // R4*R2 chain `_dpk1_d_grad_u[qp] * gradTrial(beta)` depends only on (qp, j); it was
-  // precomputed once per (qp, j) by `populateLocalPK1Cache(beta)` in the column-level
-  // precalculate hook.
-  Real J = grad_test.doubleContraction(_dpk1_grad_trial_cache[_qp][_j]);
-
-  // Non-local F-bar Jacobian contribution. The fully wrapped deltaPK1_NL per (qp, j) is
-  // precomputed in `populateLocalPK1Cache(beta)` (it depends only on (qp, j) since beta is
-  // fixed for the column) -- no per-(_i, _j) R4*R2 chain or 3x3 inverse here.
-  RankTwoTensor d_PK1_NL;
-  if (_stabilize_strain)
-  {
-    d_PK1_NL = _delta_PK1_NL_cache[_qp][_j];
-    J += grad_test.doubleContraction(d_PK1_NL);
-  }
+  // Local (+ non-local F-bar) Jacobian: J_{alpha beta} = gradTest_alpha : dPK1_total, where
+  // dPK1_total = dPK1/d(grad u) * grad_phi_beta (local) plus the wrapped non-local F-bar
+  // perturbation. Both pieces depend only on (qp, j) and are precomputed and pre-summed into
+  // `_dpk1_total_cache` by `populateLocalPK1Cache(beta)`, so a single contraction covers both.
+  // Without stabilization there is no non-local piece, so the local cache is contracted directly.
+  Real J = grad_test.doubleContraction(_stabilize_strain ? _dpk1_total_cache[_qp][_j]
+                                                          : _dpk1_grad_trial_cache[_qp][_j]);
 
   // OLD-compat B-bar volumetric correction Jacobian (only in `F_bar_mode = incremental`).
   // The residual added the term R_extra = (PK1:F_ust)/3 * (avg_T - T_alpha) summed over qps.

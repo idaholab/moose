@@ -126,6 +126,12 @@ private:
   /// `deltaPK1NonLocalFBar(...)` invocation in TL's displacement Jacobian.
   std::vector<std::vector<RankTwoTensor>> _delta_PK1_NL_cache;
 
+  /// Local + non-local PK1 derivative per (qp, j): `_dpk1_grad_trial_cache + _delta_PK1_NL_cache`.
+  /// The displacement Jacobian contracts `gradTest` against this single tensor instead of the
+  /// local and non-local pieces separately, halving the per-(_i, _j) double contractions.
+  /// Populated only when `_stabilize_strain == true` (otherwise the Jacobian uses the local cache).
+  std::vector<std::vector<RankTwoTensor>> _dpk1_total_cache;
+
   /// `pk1 : F_ust` per qp for the B-bar volumetric correction (see `cachePK1ContractionFUst`).
   /// Populated only when `F_bar_mode = incremental`.
   std::vector<Real> _pk1_ddot_F_ust;
