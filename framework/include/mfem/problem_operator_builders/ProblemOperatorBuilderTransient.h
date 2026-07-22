@@ -15,22 +15,20 @@
 #include "ProblemOperatorBase.h"
 #include "ProblemOperatorBuilderBase.h"
 
-class MFEMEigenproblem;
-
 namespace Moose::MFEM
 {
 /**
- * Steady builder required to build MFEM Problem Operators
- * used by the steady executioner
+ * Transient builder required to build MFEM Problem Operators
+ * used by the Transient executioner
  */
-class ProblemOperatorBuilderSteady : public ProblemOperatorBuilderBase
+class ProblemOperatorBuilderTransient : public ProblemOperatorBuilderBase
 {
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderSteady(const InputParameters & parameters);
+  ProblemOperatorBuilderTransient(const InputParameters & parameters);
 
-  ~ProblemOperatorBuilderSteady() = default;
+  ~ProblemOperatorBuilderTransient() = default;
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfemProb) override;
