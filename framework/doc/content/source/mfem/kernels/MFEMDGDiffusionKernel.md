@@ -16,9 +16,9 @@ This term arises from the weak form of the Laplacian operator
 !equation
 - \vec\nabla \cdot \left( k \vec\nabla u \right)
 
-This one is much the same as the [regular diffusion kernel](source/mfem/kernels/MFEMDiffusionKernel.md), except
+This kernel complements the [regular diffusion kernel](source/mfem/kernels/MFEMDiffusionKernel.md), except
 this is applied to the bilinear form via the method `AddInteriorFaceIntegrator`.
-`createBFIntegrator` returns a `mfem::DGDiffusionIntegrator` ([see mfem docs for more info](https://docs.mfem.org/html/classmfem_1_1DGDiffusionIntegrator.html)).
+`createBFIntegrator()` returns an `mfem::DGDiffusionIntegrator` ([see mfem docs for more info](https://docs.mfem.org/html/classmfem_1_1DGDiffusionIntegrator.html)).
 
 ## Example Input File Syntax
 

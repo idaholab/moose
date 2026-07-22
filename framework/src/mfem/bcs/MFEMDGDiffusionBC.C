@@ -22,7 +22,7 @@ MFEMDGDiffusionBC::validParams()
   params.addParam<MFEMScalarCoefficientName>(
       "diffusion_coefficient", "1.0", "Name of property for diffusion coefficient k");
   params.addParam<MFEMScalarCoefficientName>(
-      "boundary_coefficient", "0.0", "Name of property for dirichlet coefficient");
+      "boundary_coefficient", "0.0", "Name of property for Dirichlet coefficient");
   params.addParam<mfem::real_t>("sigma", -1.0, "Symmetry parameter. Typically +/- 1.0");
   params.addParam<mfem::real_t>(
       "kappa", "Penalty parameter. Should be non-negative. Will default to (order+1)^2");

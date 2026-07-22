@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
-  dim = 2
 []
 
 [Problem]
@@ -12,9 +11,6 @@
   [L2FESpace]
     type = MFEMScalarFESpace
     fec_type = L2
-    fec_order = FIRST
-    basis = GaussLegendre
-    ordering = NODES
   []
 []
 
@@ -58,7 +54,6 @@
     type = MFEMCGSolver
     preconditioner = boomeramg
     l_tol = 1e-16
-    l_max_its = 1000
   []
 []
 
