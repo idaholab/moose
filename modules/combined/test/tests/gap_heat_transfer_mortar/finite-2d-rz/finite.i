@@ -56,20 +56,6 @@ name = 'finite'
     new_block = 'plank block'
   []
 
-  [secondary]
-    input = block_rename
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'block_left'
-    new_block_id = '30'
-    new_block_name = 'frictionless_secondary_subdomain'
-  []
-  [primary]
-    input = secondary
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'plank_right'
-    new_block_id = '20'
-    new_block_name = 'frictionless_primary_subdomain'
-  []
 []
 
 [GlobalParams]
@@ -97,11 +83,6 @@ name = 'finite'
     block = 'frictionless_secondary_subdomain'
     scaling = 1e-7
   []
-  [frictionless_normal_lm]
-    order = ${order}
-    block = 'frictionless_secondary_subdomain'
-    use_dual = true
-  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -122,58 +103,16 @@ name = 'finite'
   []
 []
 
-[UserObjects]
-  [weighted_gap_uo]
-    type = LMWeightedGapUserObject
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    lm_variable = frictionless_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
+[Contact]
+  [frictionless]
+    primary = plank_right
+    secondary = block_left
+    formulation = mortar
+    model = frictionless
   []
 []
 
 [Constraints]
-  [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
-    weighted_gap_uo = weighted_gap_uo
-  []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = weighted_gap_uo
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = weighted_gap_uo
-  []
   [thermal_contact]
     type = GapConductanceConstraint
     variable = thermal_lm
