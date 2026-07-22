@@ -10,7 +10,6 @@
       detail = 'using the minimum time step size of input time steppers,'
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       restep = false
     []
     [multiple_time_sequences]
@@ -20,7 +19,6 @@
       detail = 'or with specific times to hit.'
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
-      recover = false
       restep = false
     []
   []

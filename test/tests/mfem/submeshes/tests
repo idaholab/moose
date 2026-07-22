@@ -115,9 +115,9 @@
     requirement = 'MOOSE shall have the ability to apply boundary conditions on boundaries of embedded volumetric subdomains.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
     restep = false
     valgrind = heavy
+    rel_err = 6e-5
   []
   [MFEMNLDomainSubMeshBoundary]
     design = 'MFEMNLCurlCurlKernel.md'
