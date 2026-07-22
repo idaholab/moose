@@ -71,12 +71,21 @@ TotalLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigne
   //                 (since f_ust = F_ust * F_ust_old^{-1} and F_ust_old is fixed w.r.t. the
   //                  current Newton iterate's disp, so deltaf_ust = deltaF_ust * F_ust_old^{-1}).
   const bool incremental = (_F_bar_mode == FBarMode::Incremental);
+  // F_ust_old[qp]^{-1} depends only on qp, but the average below runs once per trial DOF j.
+  // Precompute the per-qp inverse once instead of re-inverting the 3x3 for every (qp, j).
+  std::vector<RankTwoTensor> f_ust_old_inv;
+  if (incremental)
+  {
+    f_ust_old_inv.resize(_qrule->n_points());
+    for (const auto qp : make_range(_qrule->n_points()))
+      f_ust_old_inv[qp] = _F_ust_old[qp].inverse();
+  }
   for (auto j : make_range(_phi.size()))
     _avg_grad_trial[component][j] = StabilizationUtils::elementAverage(
-        [this, component, j, incremental](unsigned int qp)
+        [this, component, j, incremental, &f_ust_old_inv](unsigned int qp)
         {
           const RankTwoTensor g = G::gradOp(component, _grad_phi[j][qp], _phi[j][qp], _q_point[qp]);
-          return incremental ? g * _F_ust_old[qp].inverse() : g;
+          return incremental ? g * f_ust_old_inv[qp] : g;
         },
         _JxW,
         _coord);
