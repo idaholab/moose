@@ -42,7 +42,14 @@ DiffusionCG::DiffusionCG(const InputParameters & parameters)
 void
 DiffusionCG::addFEKernels()
 {
-  // Diffusion term
+  // Diffusion term(s)
+  unsigned int num_diffusion_terms = 1;
+  if (isParamValid("diffusivity_matprop"))
+    num_diffusion_terms = getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop").size();
+  else if (isParamValid("diffusivity_functor"))
+    num_diffusion_terms = getParam<std::vector<MooseFunctorName>>("diffusivity_functor").size();
+
+  for (const auto i_diff_block_group : make_range(num_diffusion_terms))
   {
     // Select the kernel type based on the user parameters
     std::string kernel_type;
@@ -50,7 +57,8 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADMatDiffusion" : "MatDiffusion";
     else if (isParamValid("diffusivity_functor"))
     {
-      const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
+      const auto & d =
+          getParam<std::vector<MooseFunctorName>>("diffusivity_functor")[i_diff_block_group];
       if (getProblem().hasFunction(d) || MooseUtils::parsesToReal(d))
         kernel_type = "FunctionDiffusion";
       else
@@ -62,17 +70,26 @@ DiffusionCG::addFEKernels()
       kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
-    assignBlocks(params, _blocks);
+    if (isParamValid("diffusivity_blocks"))
+      assignBlocks(params,
+                   getParam<std::vector<std::vector<SubdomainName>>>(
+                       "diffusivity_blocks")[i_diff_block_group]);
+    else
+      assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
     // From parameters
     if (isParamValid("diffusivity_matprop"))
       params.set<MaterialPropertyName>("diffusivity") =
-          getParam<MaterialPropertyName>("diffusivity_matprop");
+          getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop")[i_diff_block_group];
     else if (isParamValid("diffusivity_functor"))
-      params.set<FunctionName>("function") = getParam<MooseFunctorName>("diffusivity_functor");
+      params.set<FunctionName>("function") =
+          getParam<std::vector<MooseFunctorName>>("diffusivity_functor")[i_diff_block_group];
 
-    getProblem().addKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
+    const auto kernel_name =
+        prefix() + _var_name + "_diffusion" +
+        ((num_diffusion_terms > 1) ? "_" + std::to_string(i_diff_block_group) : "");
+    getProblem().addKernel(kernel_type, kernel_name, params);
   }
 
   // Source term
