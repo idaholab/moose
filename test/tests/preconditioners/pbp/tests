@@ -28,7 +28,7 @@
     type = 'RunException'
     input = 'pbp_test.i'
     cli_args = '-pc_type lu Outputs/exodus=false'
-    expect_err = "Setting PETSc option '-pc_type' is incompatible with a JFNK 'solve_type'"
+    expect_err = "PETSc option '-pc_type' requires an assembled preconditioning matrix"
     requirement = "The system shall report an error when a JFNK solve uses an incompatible "
                   "PETSc preconditioner type option."
   []

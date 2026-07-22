@@ -211,8 +211,12 @@ errorOnJFNKPCTypeOption(const FEProblemBase & problem,
     return;
 
   const auto option = prefixedPCTypeOption(prefix);
-  const std::string message =
-      "Setting PETSc option '" + option + "' is incompatible with a JFNK 'solve_type'";
+  const std::string message = "PETSc option '" + option +
+                              "' requires an assembled preconditioning matrix, but "
+                              "solve_type = JFNK uses a matrix-free Jacobian without an assembled "
+                              "preconditioning matrix. Use solve_type = PJFNK or "
+                              "-snes_mf_operator if you want matrix-free Jacobian actions with an "
+                              "assembled preconditioner.";
 
   if (param_object)
     param_object->mooseError(message);
