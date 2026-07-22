@@ -19,7 +19,7 @@ CSGRegion::regionSymbol(const RegionType region_type)
                   region_type == RegionType::INTERSECTION,
               "Unexpected region type");
 
-  constexpr std::array<char, 5> symbols = {
+  static constexpr std::array<char, 5> symbols = {
       '\0', // CSGRegion::RegionType::EMPTY (unused)
       '\0', // CSGRegion::RegionType::HALFSPACE (unused)
       '~',  // CSGRegion::RegionType::COMPLEMENT
@@ -40,7 +40,7 @@ CSGRegion::halfspaceSymbol(const CSGSurface::Halfspace halfspace)
                   halfspace == CSGSurface::Halfspace::NEGATIVE,
               "Unexpected halfspace");
 
-  constexpr std::array<char, 2> symbols = {
+  static constexpr std::array<char, 2> symbols = {
       '+', // CSGSurface::Halfspace::POSITIVE
       '-'  // CSGSurface::Halfspace::NEGATIVE
   };
@@ -94,7 +94,7 @@ CSGRegion::regionTypeName(const RegionType region_type)
                   region_type == RegionType::UNION,
               "Unexpected region type");
 
-  constexpr std::array<const char *, 5> names = {
+  static constexpr std::array<const char *, 5> names = {
       nullptr,        // RegionType::EMPTY (not used as a postfix operator)
       nullptr,        // RegionType::HALFSPACE (not used as a postfix operator)
       "COMPLEMENT",   // RegionType::COMPLEMENT

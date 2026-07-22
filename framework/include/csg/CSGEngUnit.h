@@ -51,7 +51,7 @@ public:
    * Returns "SURFACE", "CELL", or "UNIVERSE" depending on which intermediate
    * EngUnit class the concrete type derives from. Set automatically at construction.
    *
-   * @return const reference to the behavior string
+   * @return the behavior string
    */
   const std::string getBehavior() const { return _behavior; }
 

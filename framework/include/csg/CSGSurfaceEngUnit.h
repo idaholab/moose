@@ -23,10 +23,10 @@ namespace CSG
 class CSGBase; // forward declaration
 
 /**
- * CSGSurfaceEngUnit is an abstract base class for "engineering units" that are surface-like
- * or region-like. Derived classes define domain-specific surface attributes and implement
- * expandUnit() and expandedRegion() methods to produce the equivalent representation using
- * the basic CSGSurface components.
+ * CSGSurfaceEngUnit is an abstract base class for "engineering units" that can be used as surfaces
+ * in cell region definitions. Derived classes define domain-specific surface attributes and
+ * implement expandUnit() and expandedRegion() methods to produce the equivalent representation
+ * using the basic CSGSurface components.
  *
  * Derived classes must implement:
  *   - expandUnit(): construct the equivalent CSGSurface(s) and CSGRegion using
@@ -52,13 +52,17 @@ public:
   CSGSurfaceEngUnit(const std::string & name, const std::string & unit_type);
 
   /**
-   * @brief Not supported before expansion -- throws an error.
+   * @brief Always throws -- coefficients are not defined for a surface engineering unit.
    *
-   * Call CSGBase::addEngUnit() and then CSGBase::expandEngUnit() to expand this unit into
-   * a concrete surface first. Derived classes may override this if pre-expansion querying
-   * is required.
+   * A surface engineering unit is described by its attributes (see getAttributes()), not by
+   * surface-equation coefficients, so this inherited CSGSurface method has no meaningful value on a
+   * unit. Expansion does not make it callable either: CSGBase::expandEngUnit() replaces the unit
+   * with plain CSGSurface object(s), and getCoeffs() is valid on those resulting surfaces, never on
+   * the unit itself.
    *
-   * @return map of coefficients (unreachable before expansion)
+   * The override exists only to satisfy the pure-virtual CSGSurface::getCoeffs()
+   *
+   * @return never returns; always raises an error
    */
   std::unordered_map<std::string, Real> getCoeffs() const override;
 

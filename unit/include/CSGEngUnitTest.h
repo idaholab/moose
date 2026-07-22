@@ -132,6 +132,7 @@ protected:
 
   void expandUnit() override
   {
+    // We expand this universe engineering unit into the cells and surfaces it represents.
     // all cells go to _internal_base's root, which is the expanded universe
     auto c1_prt = std::make_unique<TestCellEngUnit>(getName() + "_c1_unit");
     _internal_base->addEngUnit(std::move(c1_prt)); // goes to root

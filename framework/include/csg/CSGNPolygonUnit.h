@@ -66,7 +66,7 @@ public:
   /**
    * @brief Return the polygon attributes for this object.
    *
-   * @return map containing: n_sides (unsigned int), apothem (Real)
+   * @return map containing: n_sides (int), apothem (Real)
    */
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
 

@@ -542,7 +542,7 @@ public:
     T * raw = unit.get();
 
     // must check if an engineering unit of the same name (regardless of type) exists already before
-    //  adding it any list so that we don't add to a type-list before knowing if it is actually
+    // adding it to any list so that we don't add to a type-list before knowing if it is actually
     // allowable as a unit. The addX checks below will check that the name doesn't conflict with a
     // real type unit too.
     if (_eng_unit_list.hasEngUnit(raw->getName()))
@@ -664,7 +664,9 @@ public:
    * Every occurrence of the EngUnit as a surface reference in any existing cell region is replaced
    * with the sub-region. The EngUnit is then removed from the engineering unit list and destroyed.
    *
-   * @param unit the CSGSurfaceEngUnit to expand
+   * @param unit identifies the CSGSurfaceEngUnit to expand. Passed by const reference because the
+   *   expansion does not mutate through this handle; it operates on and consumes the owned instance
+   *   re-fetched from the surface list by name.
    * @return CSGRegion formed by the expanded CSGSurface(s)
    */
   CSGRegion expandEngUnit(const CSGSurfaceEngUnit & unit);
@@ -676,7 +678,9 @@ public:
    * the EngUnit in every universe with the new expanded CSGCell. The EngUnit is then removed from
    * the engineering unit list and destroyed.
    *
-   * @param unit the CSGCellEngUnit to expand into a CSGCell
+   * @param unit identifies the CSGCellEngUnit to expand. Passed by const reference because the
+   *   expansion does not mutate through this handle; it operates on and consumes the owned instance
+   *   re-fetched from the cell list by name.
    * @return const reference to the expanded CSGCell
    */
   const CSGCell & expandEngUnit(const CSGCellEngUnit & unit);
@@ -689,7 +693,9 @@ public:
    * universe maps/outers, and the root universe pointer are replaced with new CSGUniverse. The
    * EngUnit is then removed from the engineering unit list and destroyed.
    *
-   * @param unit the CSGUniverseEngUnit to expand into a CSGUniverse
+   * @param unit identifies the CSGUniverseEngUnit to expand. Passed by const reference because the
+   *   expansion does not mutate through this handle; it operates on and consumes the owned instance
+   *   re-fetched from the universe list by name.
    * @return const reference to the expanded CSGUniverse
    */
   const CSGUniverse & expandEngUnit(const CSGUniverseEngUnit & unit);
@@ -788,6 +794,10 @@ public:
    * CSGUniverseEngUnit, or any derived type)
    * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
    * @param values tuple of transformation values (3 values for any transformation type)
+   *
+   * @note Required because engineering unit types derive from both a plain CSG base and
+   * CSGEngUnit, so passing one to the CSGObjectVariant overload is ambiguous and will not compile;
+   * this overload binds to CSGEngUnit directly to disambiguate.
    */
   void addTransformation(const CSGEngUnit & unit,
                          TransformationType type,
@@ -815,6 +825,10 @@ public:
    * CSGUniverseEngUnit, or any derived type)
    * @param distances size 3 tuple with
    * translation distances in x, y, and z directions {x, y, z}
+   *
+   * @note Required because engineering unit types derive from both a plain CSG base and
+   * CSGEngUnit, so passing one to the CSGObjectVariant overload is ambiguous and will not compile;
+   * this overload binds to CSGEngUnit directly to disambiguate.
    */
   void applyTranslation(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & distances)
   {
@@ -839,6 +853,10 @@ public:
    * @param unit The CSGEngUnit object to rotate (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
    * CSGUniverseEngUnit, or any derived type)
    * @param angles size 3 tuple {phi, theta, psi} with rotation angles in degrees
+   *
+   * @note Required because engineering unit types derive from both a plain CSG base and
+   * CSGEngUnit, so passing one to the CSGObjectVariant overload is ambiguous and will not compile;
+   * this overload binds to CSGEngUnit directly to disambiguate.
    */
   void applyRotation(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & angles)
   {
@@ -862,6 +880,10 @@ public:
    * CSGUniverseEngUnit, or any derived type)
    * @param axis Axis type (X, Y, or Z) about which to rotate
    * @param angle angle in degrees to rotate about the specified axis
+   *
+   * @note Required because engineering unit types derive from both a plain CSG base and
+   * CSGEngUnit, so passing one to the CSGObjectVariant overload is ambiguous and will not compile;
+   * this overload binds to CSGEngUnit directly to disambiguate.
    */
   void applyAxisRotation(const CSGEngUnit & unit, RotationAxisType axis, const Real angle)
   {
@@ -886,6 +908,10 @@ public:
    * @param unit The CSGEngUnit object to scale (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
    * CSGUniverseEngUnit, or any derived type)
    * @param values size 3 tuple with scaling values in x, y, and z directions {x, y, z}
+   *
+   * @note Required because engineering unit types derive from both a plain CSG base and
+   * CSGEngUnit, so passing one to the CSGObjectVariant overload is ambiguous and will not compile;
+   * this overload binds to CSGEngUnit directly to disambiguate.
    */
   void applyScaling(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & values)
   {
@@ -1044,7 +1070,8 @@ private:
       std::map<std::string, std::reference_wrapper<const CSGLattice>> & identical_lattice_refs,
       CSGBase & base);
 
-  /** @brief Get a const reference to the CSGEngUnitList object
+  /**
+   * @brief Get a const reference to the CSGEngUnitList object
    *
    * @return CSGEngUnitList
    */
@@ -1135,49 +1162,64 @@ private:
   /// Replace all region occurrences of old_surf with the tokens from sub_region across all cells in the base
   void replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegion & sub_region);
 
-  // check that surfaces used in this region are a part of this CSGBase instance
+  /// check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
 
-  // check that surface being accessed is a part of this CSGBase instance
+  /// check that surface being accessed is a part of this CSGBase instance
   bool checkSurfaceInBase(const CSGSurface & surface) const;
 
-  // check that cell being accessed is a part of this CSGBase instance
+  /// check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;
 
-  // check that engineering unit being accessed is a part of this CSGBase instance
+  /// check that engineering unit being accessed is a part of this CSGBase instance
   bool checkEngUnitInBase(const CSGEngUnit & unit) const;
 
-  // check that universe being accessed is a part of this CSGBase instance
+  /// check that universe being accessed is a part of this CSGBase instance
   bool checkUniverseInBase(const CSGUniverse & universe) const;
 
-  // check that lattice being accessed is a part of this CSGBase instance
+  /// check that lattice being accessed is a part of this CSGBase instance
   bool checkLatticeInBase(const CSGLattice & lattice) const;
 
-  // error if surface is referenced in any cell region
+  /// error if surface is referenced in any cell region
   void prepareSurfaceDeletion(const CSGSurface & surface) const;
 
-  // warn and remove cell from any universe that contains it
+  /// warn and remove cell from any universe that contains it
   void prepareCellDeletion(const CSGCell & cell);
 
-  // error if universe is the root, used in any lattice, or used as a cell fill
+  /// error if universe is the root, used in any lattice, or used as a cell fill
   void prepareUniverseDeletion(const CSGUniverse & universe) const;
 
-  // Returns the CSGSurfaceEngUnit pointer if surf is an eng unit, nullptr otherwise.
-  // Usable as a boolean check or to access the eng unit directly.
+  /**
+   * @brief Returns the CSGSurfaceEngUnit pointer if surf is an eng unit, nullptr otherwise.
+   * Usable as a boolean check or to access the eng unit directly.
+   *
+   * @param surf CSGSurface to check/get as an engineering unit
+   * @return const CSGSurfaceEngUnit* or nullptr
+   */
   const CSGSurfaceEngUnit * surfaceToEngUnit(const CSGSurface & surf) const
   {
     return dynamic_cast<const CSGSurfaceEngUnit *>(&surf);
   }
 
-  // Returns the CSGCellEngUnit pointer if cell is an eng unit, nullptr otherwise.
-  // Usable as a boolean check or to access the eng unit directly.
+  /**
+   * @brief Returns the CSGCellEngUnit pointer if cell is an eng unit, nullptr otherwise.
+   * Usable as a boolean check or to access the eng unit directly.
+   *
+   * @param cell CSGCell to check/get as an engineering unit
+   * @return const CSGCellEngUnit* or nullptr
+   */
   const CSGCellEngUnit * cellToEngUnit(const CSGCell & cell) const
   {
     return dynamic_cast<const CSGCellEngUnit *>(&cell);
   }
 
-  // Returns the CSGUniverseEngUnit pointer if univ is an eng unit, nullptr otherwise.
-  // Usable as a boolean check or to access the eng unit directly.
+  /**
+   * @brief Returns the CSGUniverseEngUnit pointer if univ is an eng unit, nullptr otherwise.
+   * Usable as a boolean check or to access the eng unit directly.
+   *
+   * @param univ CSGUniverse to check/get as an engineering unit
+   * @return const CSGUniverseEngUnit* or nullptr
+   */
   const CSGUniverseEngUnit * universeToEngUnit(const CSGUniverse & univ) const
   {
     return dynamic_cast<const CSGUniverseEngUnit *>(&univ);

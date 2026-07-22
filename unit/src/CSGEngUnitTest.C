@@ -131,7 +131,7 @@ TEST(CSGEngUnitTest, testUnivUnit)
   // no cells at all, calls to add or remove cells are disabled
   ASSERT_EQ(0, univ_unit.getAllCells().size());
   ASSERT_FALSE(univ_unit.isRoot());
-  // setName() should be functioning through CSGCell
+  // setName() should be functioning through CSGUniverse
   std::string new_name = "new_name";
   univ_unit.setName(new_name);
   ASSERT_EQ(new_name, univ_unit.getName());

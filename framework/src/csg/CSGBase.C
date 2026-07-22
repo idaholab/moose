@@ -33,8 +33,8 @@ CSGBase::CSGBase(const CSGBase & other_base)
   // Cell engineering units do not have universes and universe engineering units do not contain
   // cells in the same way that the plain objects do, so we do not need to worry about recursion.
 
-  // Bypass addCellToList because it that doesn't properly handle engineering units and also
-  // bypass addEngUnit for cells to avoid erroneously adding it to the root universe if it is not
+  // Bypass addCellToList because it doesn't properly handle engineering units and also bypass
+  // addEngUnit for cells to avoid erroneously adding it to the root universe if it is not
   // necessary.
   for (const auto & eng_unit : other_base.getAllCellEngUnits())
     _cell_list.addCell(eng_unit.get().clone());
@@ -1334,7 +1334,9 @@ CSGBase::expandAllEngUnitsCycle(std::set<std::set<std::string>> & all_type_sets)
 CSGRegion
 CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
 {
-  // Get mutable reference from the owning surface list (expandUnit() is non-const)
+  // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
+  // reference to the same object from the owning surface list to perform the expansion, which
+  // mutates and consumes the unit (expandUnit() is non-const).
   auto & mutable_unit = static_cast<CSGSurfaceEngUnit &>(_surface_list.getSurface(unit.getName()));
 
   // Derived class creates the CSGSurface object(s) in the unit's base object and sets
@@ -1380,7 +1382,9 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
 const CSGCell &
 CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 {
-  // Get mutable reference from the owning cell list (expandUnit() is non-const)
+  // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
+  // reference to the same object from the owning cell list to perform the expansion, which
+  // mutates and consumes the unit (expandUnit() is non-const).
   auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
 
   // Derived class populates an internal base object (owned by the unit) with the expanded cell (in
@@ -1420,7 +1424,9 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 const CSGUniverse &
 CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
 {
-  // Get mutable reference from the owning universe list (expandUnit() is non-const)
+  // unit is const because the eng-unit API exposes only const references; re-fetch a mutable
+  // reference to the same object from the owning universe list to perform the expansion, which
+  // mutates and consumes the unit (expandUnit() is non-const).
   auto & mutable_unit =
       static_cast<CSGUniverseEngUnit &>(_universe_list.getUniverse(unit.getName()));
 
