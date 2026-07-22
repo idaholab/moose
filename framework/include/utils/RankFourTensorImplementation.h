@@ -221,15 +221,30 @@ RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
   typedef decltype(T() * T2()) ValueType;
   RankFourTensorTempl<ValueType> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          for (auto p : make_range(N))
-            for (auto q : make_range(N))
-              result(i, j, k, l) += (*this)(i, j, p, q) * b(p, q, k, l);
+  if constexpr (std::is_same_v<T, Real> && std::is_same_v<T2, Real>)
+  {
+    // C_ijkl = A_ijpq B_pqkl. With the row-major flat storage (linear index ij*N2 + kl, where
+    // ij = i*N + j and kl = k*N + l) this is exactly an (N2 x N2) matrix product over the
+    // flattened tensors. Dispatch to Eigen's vectorized kernel instead of the six-deep loop,
+    // which recomputes the flat index via operator() ~3x per innermost iteration.
+    const Eigen::Map<const Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> a(_vals);
+    const Eigen::Map<const Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> bmat(b._vals);
+    Eigen::Map<Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> r(result._vals);
+    r.noalias() = a * bmat;
+    return result;
+  }
+  else
+  {
+    for (auto i : make_range(N))
+      for (auto j : make_range(N))
+        for (auto k : make_range(N))
+          for (auto l : make_range(N))
+            for (auto p : make_range(N))
+              for (auto q : make_range(N))
+                result(i, j, k, l) += (*this)(i, j, p, q) * b(p, q, k, l);
 
-  return result;
+    return result;
+  }
 }
 
 template <typename T>
