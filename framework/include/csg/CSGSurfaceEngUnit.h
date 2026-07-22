@@ -46,10 +46,8 @@ public:
    * @brief Construct a new CSGSurfaceEngUnit
    *
    * @param name unique name of surface (will be preserved on the registered surface)
-   * @param unit_type class name of the concrete derived type -- pass
-   *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    */
-  CSGSurfaceEngUnit(const std::string & name, const std::string & unit_type);
+  CSGSurfaceEngUnit(const std::string & name);
 
   /**
    * @brief Always throws -- coefficients are not defined for a surface engineering unit.

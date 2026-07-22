@@ -13,10 +13,8 @@
 namespace CSG
 {
 
-CSGUniverseEngUnit::CSGUniverseEngUnit(const std::string & name,
-                                       const std::string & unit_type,
-                                       bool is_root)
-  : CSGUniverse(name, is_root), CSGEngUnit("UNIVERSE", unit_type)
+CSGUniverseEngUnit::CSGUniverseEngUnit(const std::string & name, bool is_root)
+  : CSGUniverse(name, is_root), CSGEngUnit("UNIVERSE")
 {
 }
 

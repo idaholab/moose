@@ -14,8 +14,8 @@
 namespace CSG
 {
 
-CSGCellEngUnit::CSGCellEngUnit(const std::string & name, const std::string & unit_type)
-  : CSGCell(name, CSGRegion()), CSGEngUnit("CELL", unit_type)
+CSGCellEngUnit::CSGCellEngUnit(const std::string & name)
+  : CSGCell(name, CSGRegion()), CSGEngUnit("CELL")
 {
 }
 

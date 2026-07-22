@@ -58,12 +58,12 @@ public:
   /**
    * @brief Get the type name of this engineering unit.
    *
-   * Returns the class name of the concrete derived type, should be set automatically at
-   * construction using MooseUtils::prettyCppType<DerivedClass>().
-   *
-   * @return const reference to the unit type string
+   * @return the unit type string
    */
-  const std::string & getUnitType() const { return _unit_type; }
+  const std::string getUnitType() const
+  {
+    return MooseUtils::prettyCppType(libMesh::demangle(typeid(*this).name()));
+  }
 
   /**
    * @brief Get the attributes that define this engineering unit.
@@ -95,10 +95,8 @@ protected:
    *
    * @param behavior the basic CSG type this unit produces. Must be "SURFACE", "CELL",
    *   or "UNIVERSE"; set by the intermediate class, not the concrete derived class
-   * @param unit_type the class name of the concrete derived type. Set by passing
-   *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    */
-  CSGEngUnit(const std::string & behavior, const std::string & unit_type);
+  CSGEngUnit(const std::string & behavior);
 
   /**
    * @brief Expand this engineering unit into basic CSG objects stored in _internal_base.
@@ -133,9 +131,6 @@ protected:
 
   /// The basic CSG type this unit produces: "SURFACE", "CELL", or "UNIVERSE"
   MooseEnum _behavior{"SURFACE CELL UNIVERSE"};
-
-  /// The class name of the concrete derived type, set via MooseUtils::prettyCppType<T>()
-  const std::string _unit_type;
 
   friend class CSGBase;
 };

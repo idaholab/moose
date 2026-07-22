@@ -14,8 +14,7 @@
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
-  : _name(name), _surface_type(surf_type)
+CSGSurface::CSGSurface(const std::string & name) : _name(name)
 {
   CSGUtils::checkValidCSGName(name);
 }

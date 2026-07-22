@@ -68,10 +68,8 @@ protected:
    * Initializes the base CSGCell with a placeholder empty CSGRegion.
    *
    * @param name name of the cell (will be preserved on the plain CSGCell after expansion)
-   * @param unit_type class name of the concrete derived type. Pass
-   *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    */
-  CSGCellEngUnit(const std::string & name, const std::string & unit_type);
+  CSGCellEngUnit(const std::string & name);
 
   /// Cell fill and region updates are not permitted on engineering units. The geometry
   /// is defined by the derived class and produced only via expandUnit().

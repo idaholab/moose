@@ -15,8 +15,7 @@ namespace CSG
 
 CSGEngUnit::~CSGEngUnit() = default;
 
-CSGEngUnit::CSGEngUnit(const std::string & behavior, const std::string & unit_type)
-  : _internal_base(std::make_unique<CSGBase>()), _unit_type(unit_type)
+CSGEngUnit::CSGEngUnit(const std::string & behavior) : _internal_base(std::make_unique<CSGBase>())
 {
   _behavior = behavior;
 }

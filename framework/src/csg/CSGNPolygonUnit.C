@@ -14,9 +14,7 @@ namespace CSG
 {
 
 CSGNPolygonUnit::CSGNPolygonUnit(const std::string & name, int n_sides, Real apothem)
-  : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<CSGNPolygonUnit>()),
-    _n_sides(n_sides),
-    _apothem(apothem)
+  : CSGSurfaceEngUnit(name), _n_sides(n_sides), _apothem(apothem)
 {
   if (_n_sides < 3)
     mooseError("N-sided polygon engineering unit " + name + " must have 3 or more sides.");

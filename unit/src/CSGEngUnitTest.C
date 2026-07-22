@@ -282,4 +282,26 @@ TEST(CSGEngUnitTest, testEngUnitEqual)
   ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u6));
 }
 
+/// tests that type-name getters resolve to the derived type when an engineering unit is accessed
+/// through a base-class reference (getUnitType() and getSurfaceType() use typeid(*this))
+TEST(CSGEngUnitTest, testTypeThroughBase)
+{
+  // surface engineering unit: check both the CSGEngUnit and CSGSurface base references, since a
+  // surface eng unit is stored in the surface list as a plain CSGSurface
+  CSGNPolygonUnit poly("poly", 4, 1.0);
+  const CSGEngUnit & poly_eng = poly;
+  const CSGSurface & poly_surf = poly;
+  ASSERT_EQ("CSG::CSGNPolygonUnit", poly_eng.getUnitType());
+  ASSERT_EQ("CSG::CSGNPolygonUnit", poly_surf.getSurfaceType());
+
+  // cell and universe engineering units through the CSGEngUnit base reference
+  TestCellEngUnit cell_unit("cell_unit");
+  const CSGEngUnit & cell_eng = cell_unit;
+  ASSERT_EQ("CSG::TestCellEngUnit", cell_eng.getUnitType());
+
+  TestUnivEngUnit univ_unit("univ_unit");
+  const CSGEngUnit & univ_eng = univ_unit;
+  ASSERT_EQ("CSG::TestUnivEngUnit", univ_eng.getUnitType());
+}
+
 } // namespace CSG

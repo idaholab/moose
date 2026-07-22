@@ -46,11 +46,6 @@ The `getAttributes()` method returns a map of `AttributeVariant` data types (`st
 
 !alert-end!
 
-### Setting the Unit Type
-
-The type of unit must be set for `_unit_type` in the unit constructor.
-It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<EngUnitClassName>()` so that the unit type automatically matches the class that created it.
-
 ## CSGSurfaceEngUnit
 
 To define a surface-like engineering unit, define a class that derives from `CSGSurfaceEngUnit`.

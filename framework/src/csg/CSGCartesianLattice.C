@@ -17,7 +17,7 @@ CSGCartesianLattice::CSGCartesianLattice(
     const Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
     const std::optional<OuterVariant> & outer)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>(), outer), _pitch(pitch)
+  : CSGLattice(name, outer), _pitch(pitch)
 {
   setUniverses(universes); // this will set _nrow and _ncol
   if (_pitch < 0)
@@ -27,10 +27,7 @@ CSGCartesianLattice::CSGCartesianLattice(
 CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
                                          const Real pitch,
                                          const std::optional<OuterVariant> & outer)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>(), outer),
-    _pitch(pitch),
-    _nrow(0),
-    _ncol(0)
+  : CSGLattice(name, outer), _pitch(pitch), _nrow(0), _ncol(0)
 {
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");

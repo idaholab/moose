@@ -43,10 +43,7 @@ namespace CSG
 class TestSurfEngUnit : public CSGSurfaceEngUnit
 {
 public:
-  TestSurfEngUnit(const std::string & name)
-    : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<TestSurfEngUnit>())
-  {
-  }
+  TestSurfEngUnit(const std::string & name) : CSGSurfaceEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
   {
     // contents don't matter for this fake class, just need to be able to test that this method is
@@ -79,10 +76,7 @@ protected:
 class TestCellEngUnit : public CSGCellEngUnit
 {
 public:
-  TestCellEngUnit(const std::string & name)
-    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellEngUnit>())
-  {
-  }
+  TestCellEngUnit(const std::string & name) : CSGCellEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
   {
     // contents don't matter for this fake class, just need to be able to test that this method is
@@ -113,10 +107,7 @@ protected:
 class TestUnivEngUnit : public CSGUniverseEngUnit
 {
 public:
-  TestUnivEngUnit(const std::string & name)
-    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestUnivEngUnit>())
-  {
-  }
+  TestUnivEngUnit(const std::string & name) : CSGUniverseEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override
   {
     // contents don't matter for this fake class, just need to be able to test that this method is
@@ -150,17 +141,14 @@ protected:
 /**
  * A cyclic engineering unit pair for testing that circular dependencies of engineering units are
  * caught in expandAllEngUnits(). Expanding TestCycleUnivEngUnit creates a TestCycleCellEngUnit, and
- * expanding TestCycleCellEngUnit creates a TestCycleUnivEngUnit..
+ * expanding TestCycleCellEngUnit creates a TestCycleUnivEngUnit.
  */
 class TestCycleCellEngUnit;
 
 class TestCycleUnivEngUnit : public CSGUniverseEngUnit
 {
 public:
-  TestCycleUnivEngUnit(const std::string & name)
-    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestCycleUnivEngUnit>())
-  {
-  }
+  TestCycleUnivEngUnit(const std::string & name) : CSGUniverseEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
 protected:
@@ -181,10 +169,7 @@ protected:
 class TestCycleCellEngUnit : public CSGCellEngUnit
 {
 public:
-  TestCycleCellEngUnit(const std::string & name)
-    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCycleCellEngUnit>())
-  {
-  }
+  TestCycleCellEngUnit(const std::string & name) : CSGCellEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
 protected:
@@ -226,10 +211,7 @@ protected:
 class TestSurfBadExpansion : public CSGSurfaceEngUnit
 {
 public:
-  TestSurfBadExpansion(const std::string & name)
-    : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<TestSurfBadExpansion>())
-  {
-  }
+  TestSurfBadExpansion(const std::string & name) : CSGSurfaceEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
   Real evaluateSurfaceEquationAtPoint(const Point &) const override { return 1.0; }
@@ -254,10 +236,7 @@ protected:
 class TestCellBadExpansionMulti : public CSGCellEngUnit
 {
 public:
-  TestCellBadExpansionMulti(const std::string & name)
-    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellBadExpansionMulti>())
-  {
-  }
+  TestCellBadExpansionMulti(const std::string & name) : CSGCellEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
 protected:
@@ -278,10 +257,7 @@ protected:
 class TestCellBadExpansionUnlinked : public CSGCellEngUnit
 {
 public:
-  TestCellBadExpansionUnlinked(const std::string & name)
-    : CSGCellEngUnit(name, MooseUtils::prettyCppType<TestCellBadExpansionUnlinked>())
-  {
-  }
+  TestCellBadExpansionUnlinked(const std::string & name) : CSGCellEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
 protected:
@@ -302,10 +278,7 @@ protected:
 class TestUnivEngUnitBadExpansion : public CSGUniverseEngUnit
 {
 public:
-  TestUnivEngUnitBadExpansion(const std::string & name)
-    : CSGUniverseEngUnit(name, MooseUtils::prettyCppType<TestUnivEngUnitBadExpansion>())
-  {
-  }
+  TestUnivEngUnitBadExpansion(const std::string & name) : CSGUniverseEngUnit(name) {}
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
 
 protected:

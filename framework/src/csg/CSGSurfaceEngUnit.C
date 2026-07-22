@@ -12,8 +12,8 @@
 namespace CSG
 {
 
-CSGSurfaceEngUnit::CSGSurfaceEngUnit(const std::string & name, const std::string & unit_type)
-  : CSGSurface(name, unit_type), CSGEngUnit("SURFACE", unit_type)
+CSGSurfaceEngUnit::CSGSurfaceEngUnit(const std::string & name)
+  : CSGSurface(name), CSGEngUnit("SURFACE")
 {
 }
 

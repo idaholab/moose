@@ -13,17 +13,13 @@ namespace CSG
 {
 
 CSGSphere::CSGSphere(const std::string & name, const Point & center, const Real r)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGSphere>()),
-    _x0(center(0)),
-    _y0(center(1)),
-    _z0(center(2)),
-    _r(r)
+  : CSGSurface(name), _x0(center(0)), _y0(center(1)), _z0(center(2)), _r(r)
 {
   checkRadius();
 }
 
 CSGSphere::CSGSphere(const std::string & name, const Real r)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGSphere>()), _x0(0.0), _y0(0.0), _z0(0.0), _r(r)
+  : CSGSurface(name), _x0(0.0), _y0(0.0), _z0(0.0), _r(r)
 {
   checkRadius();
 }

@@ -67,11 +67,9 @@ protected:
    * @brief Constructor for derived classes.
    *
    * @param name unique name of the universe (will be preserved on the plain CSGUniverse)
-   * @param unit_type class name of the concrete derived type. Pass
-   *   MooseUtils::prettyCppType<DerivedClass>() from the derived class constructor
    * @param is_root true if this is the root universe (default false)
    */
-  CSGUniverseEngUnit(const std::string & name, const std::string & unit_type, bool is_root = false);
+  CSGUniverseEngUnit(const std::string & name, bool is_root = false);
 
   /// addCell updates are not permitted on engineering units. The geometry
   /// is defined by the derived class and produced only via expandUnit().
