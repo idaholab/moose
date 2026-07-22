@@ -100,6 +100,9 @@ protected:
   /// When true, use the physical normal stiffness as the tangential right/column scale
   const bool _dynamic_c_t;
 
+  /// Friction nonlinear complementarity formulation
+  const MooseEnum _friction_ncp_formulation;
+
   /// Frictional Lagrange's multiplier variable pointers
   std::vector<MooseVariable *> _friction_vars;
 

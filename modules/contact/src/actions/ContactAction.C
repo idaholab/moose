@@ -223,6 +223,16 @@ ContactAction::validParams()
   params.addParam<MooseEnum>("c_tangential_strategy",
                              c_tangential_strategy,
                              "Strategy for setting the tangential contact scaling.");
+  MooseEnum friction_ncp_formulation("hueber_stadler_wohlmuth alart_curnier",
+                                     "hueber_stadler_wohlmuth");
+  friction_ncp_formulation.addDocumentation(
+      "hueber_stadler_wohlmuth",
+      "Use the degree-two Hueber-Stadler-Wohlmuth scaled projection residual (default).");
+  friction_ncp_formulation.addDocumentation("alart_curnier",
+                                            "Use the degree-one Alart-Curnier projection residual.");
+  params.addParam<MooseEnum>("friction_ncp_formulation",
+                             friction_ncp_formulation,
+                             "Nonlinear complementarity formulation for Coulomb mortar friction.");
   params.addParam<std::string>(
       "secondary_elasticity_tensor_base_name",
       "",
@@ -356,7 +366,7 @@ ContactAction::validParams()
   params.addParamNamesToGroup("friction_coefficient tension_release", "Friction");
   // Mortar-specific parameters
   params.addParamNamesToGroup("c_normal c_tangential c_normal_strategy c_tangential_strategy "
-                              "normal_lm_scaling tangential_lm_scaling "
+                              "friction_ncp_formulation normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
                               "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
                               "generate_mortar_mesh segment_quadrature wear_depth debug_mesh",
@@ -500,6 +510,12 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("mortar_dynamics",
                  "Physical mortar contact scaling is not supported with 'mortar_dynamics'.");
 
+    if (isParamSetByUser("friction_ncp_formulation") &&
+        (_model != ContactModel::COULOMB || getParam<bool>("mortar_dynamics")))
+      paramError("friction_ncp_formulation",
+                 "'friction_ncp_formulation' is only valid for quasistatic Coulomb mortar "
+                 "contact.");
+
   }
   else
   {
@@ -533,6 +549,10 @@ ContactAction::ContactAction(const InputParameters & params)
     else if (params.isParamSetByUser("c_tangential_strategy"))
       paramError("c_tangential_strategy",
                  "The 'c_tangential_strategy' option can only be used with the 'mortar' "
+                 "formulation");
+    else if (params.isParamSetByUser("friction_ncp_formulation"))
+      paramError("friction_ncp_formulation",
+                 "The 'friction_ncp_formulation' option can only be used with the 'mortar' "
                  "formulation");
     else if (params.isParamSetByUser("mortar_dynamics"))
       paramError("mortar_dynamics",
@@ -1351,6 +1371,9 @@ ContactAction::addMortarContact()
         params.set<bool>("dynamic_c_t") = true;
       else
         params.set<Real>("c_t") = getParam<Real>("c_tangential");
+      if (!_mortar_dynamics)
+        params.set<MooseEnum>("friction_ncp_formulation") =
+            getParam<MooseEnum>("friction_ncp_formulation");
       params.set<bool>("compute_primal_residuals") = false;
 
       params.set<MooseEnum>("segment_quadrature") = getParam<MooseEnum>("segment_quadrature");

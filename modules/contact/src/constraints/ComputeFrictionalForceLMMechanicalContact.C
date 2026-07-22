@@ -52,6 +52,15 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
                                           "The weighted tangential velocities user object.");
   params.addParam<bool>(
       "dynamic_c_t", false, "Use the physical normal stiffness as the per-node tangential scale.");
+  MooseEnum friction_ncp_formulation("hueber_stadler_wohlmuth alart_curnier",
+                                     "hueber_stadler_wohlmuth");
+  friction_ncp_formulation.addDocumentation(
+      "hueber_stadler_wohlmuth", "Use the degree-two scaled projection residual (default).");
+  friction_ncp_formulation.addDocumentation("alart_curnier",
+                                            "Use the degree-one projection residual.");
+  params.addParam<MooseEnum>("friction_ncp_formulation",
+                             friction_ncp_formulation,
+                             "Nonlinear complementarity formulation for Coulomb friction.");
   return params;
 }
 
@@ -62,6 +71,7 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
         getUserObject<LMWeightedVelocitiesUserObject>("weighted_velocities_uo")),
     _c_t(getParam<Real>("c_t")),
     _dynamic_c_t(getParam<bool>("dynamic_c_t")),
+    _friction_ncp_formulation(getParam<MooseEnum>("friction_ncp_formulation")),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -243,9 +253,14 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const std::array<ADReal, 2> augmented_tangential_pressure = {
       friction_lm_values[0] + c_t * *tangential_vel[0] * _dt,
       friction_lm_values[1] + c_t * *tangential_vel[1] * _dt};
-  const auto friction_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      friction_lm_values, augmented_tangential_pressure, friction_limit);
-  const Real formulation_row_scale = 1.0 / tangential_scale;
+  const auto friction_residual =
+      _friction_ncp_formulation == "alart_curnier"
+          ? Moose::Mortar::Contact::alartCurnierFrictionResidual(
+                friction_lm_values, augmented_tangential_pressure, friction_limit)
+          : Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+                friction_lm_values, augmented_tangential_pressure, friction_limit);
+  const Real formulation_row_scale =
+      _friction_ncp_formulation == "alart_curnier" ? 1.0 : 1.0 / tangential_scale;
 
   const ADReal dof_residual =
       equationCompensation(*_friction_vars[0]) * formulation_row_scale * friction_residual[0];
@@ -300,9 +315,14 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const std::array<ADReal, 1> tangential_pressure = {friction_lm_value};
   const std::array<ADReal, 1> augmented_tangential_pressure = {friction_lm_value +
                                                                c_t * tangential_vel * _dt};
-  const auto friction_residual = Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
-      tangential_pressure, augmented_tangential_pressure, friction_limit);
-  const Real formulation_row_scale = 1.0 / tangential_scale;
+  const auto friction_residual =
+      _friction_ncp_formulation == "alart_curnier"
+          ? Moose::Mortar::Contact::alartCurnierFrictionResidual(
+                tangential_pressure, augmented_tangential_pressure, friction_limit)
+          : Moose::Mortar::Contact::hueberStadlerWohlmuthFrictionResidual(
+                tangential_pressure, augmented_tangential_pressure, friction_limit);
+  const Real formulation_row_scale =
+      _friction_ncp_formulation == "alart_curnier" ? 1.0 : 1.0 / tangential_scale;
   const ADReal dof_residual =
       equationCompensation(*_friction_vars[0]) * formulation_row_scale * friction_residual[0];
 
