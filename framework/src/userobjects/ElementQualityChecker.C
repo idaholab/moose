@@ -15,6 +15,8 @@
 #include "libmesh/enum_elem_quality.h"
 #include "libmesh/string_to_enum.h"
 
+#include <limits>
+
 MooseEnum
 ElementQualityChecker::QualityMetricType()
 {
@@ -61,8 +63,8 @@ ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
     _has_lower_bound(isParamValid("lower_bound")),
     _upper_bound(_has_upper_bound ? getParam<Real>("upper_bound") : 0.0),
     _lower_bound(_has_lower_bound ? getParam<Real>("lower_bound") : 0.0),
-    _m_min(0),
-    _m_max(0),
+    _m_min(std::numeric_limits<Real>::max()),
+    _m_max(std::numeric_limits<Real>::lowest()),
     _m_sum(0),
     _suppress_invalid_metric_warning(getParam<bool>("suppress_invalid_metric_warning")),
     _failure_type(getParam<MooseEnum>("failure_type").getEnum<FailureType>())
@@ -72,8 +74,8 @@ ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
 void
 ElementQualityChecker::initialize()
 {
-  _m_min = 0;
-  _m_max = 0;
+  _m_min = std::numeric_limits<Real>::max();
+  _m_max = std::numeric_limits<Real>::lowest();
   _m_sum = 0;
   _checked_elem_num = 0;
   _elem_ids.clear();
@@ -129,10 +131,10 @@ ElementQualityChecker::execute()
 
   _checked_elem_num += 1;
   _m_sum += mv;
+  if (mv < _m_min)
+    _m_min = mv;
   if (mv > _m_max)
     _m_max = mv;
-  else if (mv < _m_min)
-    _m_min = mv;
 
   // check element quality metric, save ids of elements whose quality metrics exceeds the preset
   // bounds
@@ -172,11 +174,15 @@ ElementQualityChecker::finalize()
       mooseWarning("Provided quality metric doesn't apply to following element type: " +
                    Moose::stringify(_bypassed_elem_type));
 
-  _console << libMesh::Quality::name(_m_type) << " Metric values:"
-           << "\n";
-  _console << "              Minimum: " << _m_min << "\n";
-  _console << "              Maximum: " << _m_max << "\n";
-  _console << "              Average: " << _m_sum / _checked_elem_num << "\n";
+  _console << libMesh::Quality::name(_m_type) << " Metric values:\n";
+  if (_checked_elem_num)
+  {
+    _console << "              Minimum: " << _m_min << "\n";
+    _console << "              Maximum: " << _m_max << "\n";
+    _console << "              Average: " << _m_sum / _checked_elem_num << "\n";
+  }
+  else
+    _console << "              No elements were checked.\n";
 
   if (!_elem_ids.empty())
   {
