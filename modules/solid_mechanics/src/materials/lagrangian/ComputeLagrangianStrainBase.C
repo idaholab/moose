@@ -649,9 +649,10 @@ ComputeLagrangianStrainBase<G>::computeRashidEigenIncrement(const RankTwoTensor 
   const RankTwoTensor r = f_inv * u_inv;
 
   // ---- intermediate Deltad_spatial = -log u' = R * log U * R^T (n+1 frame) ----
-  FactorizedRankTwoTensor uFact(u);
-  const RankTwoTensor log_u = MathUtils::log(uFact).get();
-  const RankTwoTensor dd_spatial = -log_u;
+  // u' = sqrt(c'), so log(u') = (1/2) log(c'). Reuse c''s already-computed factorization
+  // (`sqrt_cprime` shares c''s eigenvectors) instead of re-decomposing u -- one fewer 3x3
+  // eigensolve per qp, on both residual and Jacobian sweeps.
+  const RankTwoTensor dd_spatial = -0.5 * MathUtils::log(cprime).get();
 
   // ---- Deltaw = -log r via Rodrigues. ----
   // log r = phi(theta) (r - r^T) with phi(theta) = theta/(2 sin theta),  cos theta = (tr r - 1)/2.
