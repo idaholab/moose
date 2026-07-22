@@ -57,7 +57,7 @@ public:
     dummVar = 10;
 
     // Set the operator and solve the equation
-    _problem_data.jacobian_solver->SetOperator(probOp);
+    _problem_data.jacobian_solver->SetOperator(*probOp);
     _problem_data.jacobian_solver->GetSolver().Mult(B, X);
 
     // Set the data in the grid function
