@@ -17,6 +17,7 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "ProblemOperatorBuilderBase.h"
 
 #include <map>
 
@@ -233,6 +234,13 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Method called in AddMFEMProblemOperatorAction which will create the ProblemOperator builder.
+   */
+  void addMFEMProblemOperator(const std::string & user_object_name,
+                              const std::string & name,
+                              InputParameters & parameters);
+
+  /**
    * Method called in AddMFEMSolverAction which records a solver for later dependency-ordered
    * construction.
    */
@@ -274,6 +282,20 @@ public:
    * Return the current MFEM problem data in a const context.
    */
   const MFEMProblemData & getProblemData() const { return _problem_data; }
+
+  /**
+   * Method to get the first Problem Operator Builder object storing the
+   * method that builds the ProblemOperator in the executioner.
+   */
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder()
+  {
+    return probOpBuilder[0];
+  }
+
+  /**
+   * Checks whether problem Operator builder interface is empty.
+   */
+  bool problemOperatorBuilderIsEmpty() { return probOpBuilder.size() == 0; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -402,6 +424,11 @@ protected:
    * declaring dependencies between solver objects.
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
+
+  /**
+   * The problem operator builders for this mfem problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
 };
 
 template <typename T>
