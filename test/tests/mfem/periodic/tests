@@ -10,7 +10,7 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMPeriodicVector3D]
+  [MFEMPeriodicTranslation3D]
     type = CSVDiff
     input = periodic_cube_vector.i
     csvdiff = 'periodic_cube_vector_out.csv'
@@ -19,7 +19,7 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMPeriodicVector2D]
+  [MFEMPeriodicTranslation2D]
     type = CSVDiff
     input = periodic_square_vector.i
     csvdiff = 'periodic_square_vector_out.csv'
@@ -28,4 +28,13 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMPeriodicRotation3DMagnetostatic]
+    type = CSVDiff
+    input = curlcurl_sector_aform.i
+    csvdiff = 'curlcurl_sector_aform_out.csv'
+    requirement = 'The system shall have the ability to solve a magnetostatic problem containing rotationally periodic boundary conditions using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []  
 []
