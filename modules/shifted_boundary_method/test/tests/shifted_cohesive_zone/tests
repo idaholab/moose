@@ -1,0 +1,13 @@
+[Tests]
+  design = 'index.md'
+  [rectangle_sczm_tri_material]
+    type = 'RunApp'
+    input = 'rectangle_sczm_tri_material.i'
+    # The full example ramps to end_time = 200; run a few steps as a smoke test.
+    cli_args = 'Executioner/end_time=3'
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    recover = false
+    requirement = 'The system shall solve a shifted cohesive zone problem on a '
+                  'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action.'
+  []
+[]
