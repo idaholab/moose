@@ -38,6 +38,34 @@ advectStress(const RankTwoTensor & S0, const RankTwoTensor & dQ)
   return {S, Jinv};
 }
 
+/// Residual-only advection: solve `J(dQ) : S = S0` for the single stress RHS instead of forming
+/// the full fourth-order inverse. `Jinv` is only needed as an operator on the Jacobian, so on
+/// residual-only sweeps a one-RHS 9x9 solve replaces the 9-column inverse (~2x fewer flops on the
+/// most frequently evaluated path). Correct for any dQ: `J` maps the symmetric subspace to itself,
+/// so the solution equals `Jinv * S0` and stays symmetric even when dQ is not.
+RankTwoTensor
+advectStressSolve(const RankTwoTensor & S0, const RankTwoTensor & dQ)
+{
+  const RankFourTensor J = updateTensor(dQ);
+  // Row/col index (a, b) -> (3a + b); A_{(ij)(kl)} = J_ijkl matches RankFourTensor::operator*.
+  Eigen::Matrix<Real, 9, 9> A;
+  Eigen::Matrix<Real, 9, 1> b;
+  for (const auto i : make_range(3u))
+    for (const auto j : make_range(3u))
+    {
+      b(3 * i + j) = S0(i, j);
+      for (const auto k : make_range(3u))
+        for (const auto l : make_range(3u))
+          A(3 * i + j, 3 * k + l) = J(i, j, k, l);
+    }
+  const Eigen::Matrix<Real, 9, 1> x = A.partialPivLu().solve(b);
+  RankTwoTensor S;
+  for (const auto i : make_range(3u))
+    for (const auto j : make_range(3u))
+      S(i, j) = x(3 * i + j);
+  return S;
+}
+
 /// Derivative of the linear advection action with respect to the kinematic tensor.
 RankFourTensor
 stressAdvectionDerivative(const RankTwoTensor & S)
@@ -123,12 +151,15 @@ namespace LagrangianObjectiveRates
 Outputs
 truesdell(const Inputs & in, bool need_jacobian)
 {
-  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, in.dL);
   Outputs out;
-  out.cauchy_stress = S;
   if (!need_jacobian)
+  {
+    out.cauchy_stress = advectStressSolve(in.cauchy_stress_old + in.dS, in.dL);
     return out;
+  }
 
+  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, in.dL);
+  out.cauchy_stress = S;
   out.dcauchy_stress_d_eigenstrain = -Jinv * in.small_jacobian;
 
   const RankFourTensor U = stressAdvectionDerivative(S);
@@ -142,12 +173,15 @@ truesdell(const Inputs & in, bool need_jacobian)
 Outputs
 jaumann(const Inputs & in, bool need_jacobian)
 {
-  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, in.dW);
   Outputs out;
-  out.cauchy_stress = S;
   if (!need_jacobian)
+  {
+    out.cauchy_stress = advectStressSolve(in.cauchy_stress_old + in.dS, in.dW);
     return out;
+  }
 
+  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, in.dW);
+  out.cauchy_stress = S;
   out.dcauchy_stress_d_eigenstrain = -Jinv * in.small_jacobian;
 
   const RankFourTensor d_dW_d_dL = in.d_dW_d_F * in.d_dL_d_F.inverse();
@@ -168,12 +202,15 @@ greenNaghdi(const Inputs & in, bool need_jacobian)
   const RankTwoTensor dR = in.rotation * in.rotation_old.transpose() - I;
   const RankTwoTensor dO = dR * in.inv_df;
 
-  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, dO);
   Outputs out;
-  out.cauchy_stress = S;
   if (!need_jacobian)
+  {
+    out.cauchy_stress = advectStressSolve(in.cauchy_stress_old + in.dS, dO);
     return out;
+  }
 
+  auto [S, Jinv] = advectStress(in.cauchy_stress_old + in.dS, dO);
+  out.cauchy_stress = S;
   out.dcauchy_stress_d_eigenstrain = -Jinv * in.small_jacobian;
 
   const RankFourTensor & d_R_d_F = in.d_rotation_d_F;
