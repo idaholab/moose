@@ -18,7 +18,13 @@ LagrangianStressDivergenceBase::validParams()
   params.addRequiredParam<unsigned int>("component", "Which direction this kernel acts in");
   params.addRequiredCoupledVar("displacements", "The displacement components");
 
-  params.addParam<bool>("large_kinematics", false, "Use large displacement kinematics");
+  params.addDeprecatedParam<bool>(
+      "large_kinematics",
+      false,
+      "Use large displacement kinematics",
+      "large_kinematics is no longer set on the stress-divergence kernel; it is derived from the "
+      "ComputeLagrangianStrain calculator (the single source of truth) via the LARGE_KINEMATICS "
+      "guarantee. Remove it here and set it only on the strain calculator.");
   params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
   MooseEnum F_bar_mode("total incremental", "total");
   params.addParam<MooseEnum>(
@@ -50,7 +56,10 @@ LagrangianStressDivergenceBase::validParams()
 
 LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParameters & parameters)
   : JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>(parameters),
-    _large_kinematics(getParam<bool>("large_kinematics")),
+    GuaranteeConsumer(this),
+    // Derived from the strain calculator's guarantee in initialSetup(); the local parameter is
+    // deprecated and only consulted for a consistency cross-check.
+    _large_kinematics(false),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _F_bar_mode(getParam<MooseEnum>("F_bar_mode") == "incremental" ? FBarMode::Incremental
                                                                    : FBarMode::Total),
@@ -123,6 +132,29 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
         &getMaterialPropertyByName<Real>(_base_name + "det_unstabilized_deformation_gradient");
     _d_nl_fbar = &getMaterialPropertyByName<RankFourTensor>(_base_name + "d_nl_fbar_operator");
   }
+}
+
+void
+LagrangianStressDivergenceBase::initialSetup()
+{
+  JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>::initialSetup();
+
+  // Derive the kinematics regime from the strain calculator's LARGE_KINEMATICS guarantee -- the
+  // single source of truth. hasGuaranteedMaterialProperty is block-restricted (per subdomain) and
+  // keyed by the base_name-prefixed deformation_gradient, so a given base_name resolves against its
+  // own strain calculator.
+  _large_kinematics = hasGuaranteedMaterialProperty(_base_name + "deformation_gradient",
+                                                    Guarantee::LARGE_KINEMATICS);
+
+  // The deprecated local parameter must not silently disagree with the strain calculator.
+  if (isParamSetByUser("large_kinematics") &&
+      getParam<bool>("large_kinematics") != _large_kinematics)
+    paramError("large_kinematics",
+               "large_kinematics disagrees with the ComputeLagrangianStrain calculator (which "
+               "computes ",
+               _large_kinematics ? "large" : "small",
+               " kinematics). large_kinematics is deprecated here; set it only on the strain "
+               "calculator.");
 }
 
 void

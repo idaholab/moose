@@ -27,7 +27,6 @@ ComputeSimoHughesJ2PlasticityStress::validParams()
 ComputeSimoHughesJ2PlasticityStress::ComputeSimoHughesJ2PlasticityStress(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<ComputeLagrangianStressPK1>(parameters),
-    GuaranteeConsumer(this),
     SingleVariableReturnMappingSolution(parameters),
     _elasticity_tensor_name(_base_name + getParam<MaterialPropertyName>("elasticity_tensor")),
     _elasticity_tensor(getMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
@@ -53,6 +52,8 @@ ComputeSimoHughesJ2PlasticityStress::ComputeSimoHughesJ2PlasticityStress(
 void
 ComputeSimoHughesJ2PlasticityStress::initialSetup()
 {
+  ComputeLagrangianStressBase::initialSetup();
+
   _flow_stress_material = &getMaterial("flow_stress_material");
 
   // Enforce isotropic elastic tensor

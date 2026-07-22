@@ -24,7 +24,6 @@ ComputeStVenantKirchhoffStress::validParams()
 
 ComputeStVenantKirchhoffStress::ComputeStVenantKirchhoffStress(const InputParameters & parameters)
   : ComputeLagrangianStressPK2(parameters),
-    GuaranteeConsumer(this),
     _elasticity_tensor_name(getParam<MaterialPropertyName>("elasticity_tensor")),
     _elasticity_tensor(getMaterialProperty<RankFourTensor>(_elasticity_tensor_name))
 {
@@ -33,6 +32,8 @@ ComputeStVenantKirchhoffStress::ComputeStVenantKirchhoffStress(const InputParame
 void
 ComputeStVenantKirchhoffStress::initialSetup()
 {
+  ComputeLagrangianStressBase::initialSetup();
+
   // Enforce isotropic elastic tensor
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeStVenantKirchhoffStress requires an isotropic elasticity "

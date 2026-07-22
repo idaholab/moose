@@ -12,6 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensorForward.h"
 #include "RankFourTensorForward.h"
+#include "GuaranteeConsumer.h"
 
 /// Provide stresses in the form required for the Lagrangian kernels
 ///
@@ -51,13 +52,15 @@
 /// for small deformation kinematics, as we use it as a push-forward in the
 /// kernel.
 ///
-class ComputeLagrangianStressBase : public Material
+class ComputeLagrangianStressBase : public Material, public GuaranteeConsumer
 {
 public:
   static InputParameters validParams();
   ComputeLagrangianStressBase(const InputParameters & parameters);
 
 protected:
+  /// Derive `_large_kinematics` from the strain calculator's LARGE_KINEMATICS guarantee
+  virtual void initialSetup() override;
   /// Initialize everything with zeros
   virtual void initQpStatefulProperties() override;
   /// Update all properties (here just the stress/derivatives)
@@ -66,8 +69,10 @@ protected:
   virtual void computeQpStressUpdate() = 0;
 
 protected:
-  /// If true use large deformations
-  const bool _large_kinematics;
+  /// If true use large deformations. Derived in initialSetup() from the strain calculator's
+  /// LARGE_KINEMATICS guarantee (single source of truth); the object's own `large_kinematics`
+  /// parameter is deprecated.
+  bool _large_kinematics;
 
   /// Prepend to the material properties
   const std::string _base_name;

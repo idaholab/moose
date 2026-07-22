@@ -14,6 +14,7 @@
 #include "JvarMapInterface.h"
 #include "StabilizationUtils.h"
 #include "RankFourTensorForward.h"
+#include "GuaranteeConsumer.h"
 
 /// Base class of the "Lagrangian" kernel system
 ///
@@ -26,7 +27,8 @@
 /// most of the math has to be done in the subclasses
 ///
 class LagrangianStressDivergenceBase
-  : public JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>
+  : public JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>,
+    public GuaranteeConsumer
 {
 public:
   static InputParameters validParams();
@@ -48,6 +50,9 @@ protected:
   // Helper function to return the trial function gradient which may depend on kinematics and
   // stabilization
   virtual RankTwoTensor gradTrial(unsigned int component) = 0;
+
+  /// Derive `_large_kinematics` from the strain calculator's LARGE_KINEMATICS guarantee
+  virtual void initialSetup() override;
 
   virtual void precalculateJacobian() override;
   virtual void precalculateOffDiagJacobian(unsigned int jvar) override;
@@ -84,8 +89,10 @@ protected:
   RankTwoTensor deltaPK1NonLocalFBar(const RankTwoTensor & delta_F_avg) const;
 
 protected:
-  /// If true use large deformation kinematics
-  const bool _large_kinematics;
+  /// If true use large deformation kinematics. Derived in initialSetup() from the strain
+  /// calculator's LARGE_KINEMATICS guarantee (single source of truth); the kernel's own
+  /// `large_kinematics` parameter is deprecated.
+  bool _large_kinematics;
 
   /// If true calculate the deformation gradient derivatives for F_bar
   const bool _stabilize_strain;

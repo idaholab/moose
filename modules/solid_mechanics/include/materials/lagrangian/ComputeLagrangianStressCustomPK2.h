@@ -19,6 +19,7 @@ public:
   ComputeLagrangianStressCustomPK2(const InputParameters & parameters);
 
 protected:
+  void initialSetup() override;
   void computeQpPK1Stress() override;
   /// Override the PK1-base sigma wrap because PK1 = F_ust * PK2 has direct F_ust dependence
   /// already accounted for in `computeQpPK1Stress` -- the base's `_pk1_jacobian *=

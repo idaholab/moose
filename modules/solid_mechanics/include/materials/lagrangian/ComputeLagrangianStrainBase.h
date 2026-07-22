@@ -14,6 +14,7 @@
 #include "RankTwoTensorForward.h"
 #include "StabilizationUtils.h"
 #include "GradientOperator.h"
+#include "GuaranteeProvider.h"
 
 /// Calculate strains to use the MOOSE materials with the Lagrangian kernels
 ///
@@ -39,7 +40,7 @@
 /// gradient before calculating strains.
 ///
 template <class G>
-class ComputeLagrangianStrainBase : public Material, public G
+class ComputeLagrangianStrainBase : public Material, public G, public GuaranteeProvider
 {
 public:
   static InputParameters baseParams();

@@ -101,7 +101,6 @@
     type = ComputeLagrangianCauchyCustomStress
     custom_cauchy_stress = test_cauchy
     custom_cauchy_jacobian = test_dcauchy_d_dL
-    large_kinematics = true
   []
 []
 

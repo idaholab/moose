@@ -100,7 +100,6 @@
     type = ComputeLagrangianStressCustomPK2
     custom_pk2_stress = test_pk2
     custom_pk2_jacobian = test_dpk2_dF
-    large_kinematics = true
   []
 []
 

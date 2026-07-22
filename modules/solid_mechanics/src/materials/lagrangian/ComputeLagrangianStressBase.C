@@ -14,7 +14,13 @@ ComputeLagrangianStressBase::validParams()
 {
   InputParameters params = Material::validParams();
 
-  params.addParam<bool>("large_kinematics", false, "Use a large displacement stress update.");
+  params.addDeprecatedParam<bool>(
+      "large_kinematics",
+      false,
+      "Use a large displacement stress update.",
+      "large_kinematics is no longer set on the stress calculator; it is derived from the "
+      "ComputeLagrangianStrain calculator (the single source of truth) via the LARGE_KINEMATICS "
+      "guarantee. Remove it here and set it only on the strain calculator.");
 
   params.addParam<std::string>("base_name", "Material property base name");
 
@@ -23,7 +29,10 @@ ComputeLagrangianStressBase::validParams()
 
 ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters & parameters)
   : Material(parameters),
-    _large_kinematics(getParam<bool>("large_kinematics")),
+    GuaranteeConsumer(this),
+    // Derived from the strain calculator's guarantee in initialSetup(); the local parameter is
+    // deprecated and only consulted for a consistency cross-check.
+    _large_kinematics(false),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cauchy_stress(declareProperty<RankTwoTensor>(_base_name + "cauchy_stress")),
     _cauchy_jacobian(declareProperty<RankFourTensor>(_base_name + "cauchy_jacobian")),
@@ -44,6 +53,28 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
         getMaterialPropertyByName<RankFourTensor>(_base_name + "d_F_stab_d_F_average")),
     _d_nl_fbar(declareProperty<RankFourTensor>(_base_name + "d_nl_fbar_operator"))
 {
+}
+
+void
+ComputeLagrangianStressBase::initialSetup()
+{
+  Material::initialSetup();
+
+  // Derive the kinematics regime from the strain calculator's LARGE_KINEMATICS guarantee -- the
+  // single source of truth. Block-restricted (per subdomain) and keyed by the base_name-prefixed
+  // deformation_gradient (so a given base_name matches its own strain calculator).
+  _large_kinematics = hasGuaranteedMaterialProperty(_base_name + "deformation_gradient",
+                                                    Guarantee::LARGE_KINEMATICS);
+
+  // The deprecated local parameter must not silently disagree with the strain calculator.
+  if (isParamSetByUser("large_kinematics") &&
+      getParam<bool>("large_kinematics") != _large_kinematics)
+    paramError("large_kinematics",
+               "large_kinematics disagrees with the ComputeLagrangianStrain calculator (which "
+               "computes ",
+               _large_kinematics ? "large" : "small",
+               " kinematics). large_kinematics is deprecated here; set it only on the strain "
+               "calculator.");
 }
 
 void

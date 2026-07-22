@@ -27,8 +27,17 @@ ComputeLagrangianStressCustomPK2::ComputeLagrangianStressCustomPK2(
     _pk2(getMaterialProperty<RankTwoTensor>("custom_pk2_stress")),
     _dpk2_dF(getMaterialProperty<RankFourTensor>("custom_pk2_jacobian"))
 {
+}
+
+void
+ComputeLagrangianStressCustomPK2::initialSetup()
+{
+  // Derives _large_kinematics from the strain calculator's LARGE_KINEMATICS guarantee.
+  ComputeLagrangianStressBase::initialSetup();
+
   if (!_large_kinematics)
-    paramError("large_kinematics", "This material requires large kinematics to be enabled.");
+    mooseError("This material requires large kinematics; set large_kinematics = true on the "
+               "ComputeLagrangianStrain calculator.");
 }
 
 void

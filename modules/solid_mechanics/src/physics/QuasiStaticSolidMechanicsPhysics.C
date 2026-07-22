@@ -1075,7 +1075,7 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
     if (isParamValid("base_name"))
       wrap_params.set<std::string>("base_name") = getParam<std::string>("base_name");
     wrap_params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-    wrap_params.set<bool>("large_kinematics") = _lk_large_kinematics;
+    // large_kinematics is derived from the strain calculator's LARGE_KINEMATICS guarantee.
     wrap_params.set<MooseEnum>("objective_rate") = "rashid";
     // FINITE: the wrap runs in passthrough mode (the wrapped material's FSR already produced
     // the correctly-rotated cumulative Cauchy stress, fed by our published rotation_increment).
@@ -1257,7 +1257,7 @@ QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
   {
     params.set<bool>("use_displaced_mesh") =
         (_lk_large_kinematics && (_lk_formulation == LKFormulation::Updated));
-    params.set<bool>("large_kinematics") = _lk_large_kinematics;
+    // large_kinematics is derived from the strain calculator's LARGE_KINEMATICS guarantee.
     params.set<bool>("stabilize_strain") = _lk_locking;
     if (_lk_homogenization)
       params.set<bool>("off_diagonal_jacobian") = _lk_h_off_jac;

@@ -75,6 +75,7 @@ ComputeLagrangianStrainBase<G>::baseParams()
 template <class G>
 ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameters & parameters)
   : Material(parameters),
+    GuaranteeProvider(this),
     _ndisp(coupledComponents("displacements")),
     _disp(coupledValues("displacements")),
     _grad_disp(coupledGradients("displacements")),
@@ -156,6 +157,14 @@ ComputeLagrangianStrainBase<G>::ComputeLagrangianStrainBase(const InputParameter
   for (unsigned int i = 0; i < _homogenization_gradient_names.size(); i++)
     _homogenization_contributions[i] =
         &getMaterialProperty<RankTwoTensor>(_homogenization_gradient_names[i]);
+
+  // The strain calculator is the single source of truth for the kinematics regime. Publish a
+  // LARGE_KINEMATICS guarantee on the deformation gradient (issued in the constructor so it is in
+  // place before any consumer's initialSetup); the Lagrangian stress calculators and
+  // stress-divergence kernels derive their own `large_kinematics` from it. Small kinematics leaves
+  // the guarantee absent, which the consumers read as `large_kinematics = false`.
+  if (_large_kinematics)
+    issueGuarantee(_base_name + "deformation_gradient", Guarantee::LARGE_KINEMATICS);
 }
 
 template <class G>

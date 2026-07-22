@@ -12,8 +12,7 @@
     cli_args = "Outputs/out/file_base=L_large_stab "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
                "Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
-               "Materials/compute_stress/large_kinematics=true"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
   []
   [action_large_no_stab]
     type = Exodiff
@@ -26,8 +25,7 @@
     cli_args = "Outputs/out/file_base=L_large_nostab "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
                "Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
-               "Materials/compute_stress/large_kinematics=true"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   []
 
   [action_small_stab]

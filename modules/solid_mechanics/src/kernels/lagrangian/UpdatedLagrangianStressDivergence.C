@@ -25,16 +25,9 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
     _coord_undisplaced(_assembly_undisplaced.coordTransformation()),
     _q_point_undisplaced(_assembly_undisplaced.qPoints())
 {
-  // This kernel requires used_displaced_mesh to be true if large kinematics
-  // is on
-  if (_large_kinematics && (!getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
-               "used_displaced_mesh = true for large_kinematics = true");
-
-  // Similarly, if large kinematics is off so should use_displaced_mesh
-  if (!_large_kinematics && (getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
-               "used_displaced_mesh = false for large_kinematics = false");
+  // The use_displaced_mesh <-> large_kinematics consistency check lives in initialSetup(), since
+  // large_kinematics is now derived from the strain calculator's guarantee (not available in the
+  // constructor).
 
   // TODO: add weak plane stress support
   if (_out_of_plane_strain)
