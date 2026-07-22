@@ -112,6 +112,7 @@
     secondary_subdomain = '12'
     variable = lambda
     secondary_variable = T
+    mortar_3d_subpatch_plane = GEOMETRIC_NORMAL
     debug_mesh = true
     segment_quadrature = FIFTH
   []

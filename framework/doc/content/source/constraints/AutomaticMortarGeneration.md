@@ -58,15 +58,42 @@ Elements defined on second order geometries are curvilinear so to simplify the '
 
 Quadrature points defined on mortar segments (which live on linearized elements) are mapped back to second order elements following an analogous but reverse procedure to the one illustrated above; points are mapped from linearized elements to first order sub-elements then subsequently transformed to the original second order elements.
 
-The local plane normal for each linearized secondary subpatch is computed from the geometry of that
-subpatch. Triangular subpatches use an edge cross product; quadrilateral subpatches use the cross
-product of the bilinear center tangents so the normal represents the full bilinear subpatch instead
-of one of its two diagonals. The geometric normal is oriented to agree with the averaged secondary
-nodal normal so the primary-to-secondary orientation convention is unchanged.
+### Subpatch plane normal
 
-For sharp 3D corners with adjacent sidesets, [!param](/Constraints/EqualValueConstraint/minimum_projection_angle)
-also rejects primary and secondary subpatch pairings whose normals are too close to orthogonal
-before polygon clipping. This preserves the intended face-to-face contact on each side of the corner
-while avoiding lower-dimensional cross-corner coupling.
+The construction of the smoothed secondary nodal normals and the selection of a local subpatch
+projection plane are separate operations. MOOSE first accumulates face-normal contributions at the
+secondary nodes using the nodal `JxW` weights described above and normalizes the resulting nodal
+vectors. Changing that weighting or smoothing procedure is outside the scope of the
+[!param](/Constraints/EqualValueConstraint/mortar_3d_subpatch_plane) parameter. The parameter only
+controls how MOOSE converts the stored nodal normals or the subpatch geometry into the plane used
+for 3D projection and polygon clipping.
+
+The two available modes use the same linearized subpatch topology and center:
+
+- `AVERAGED_NODAL_NORMAL` is the default and preserves the historical MOOSE construction. At the
+  subpatch center, MOOSE evaluates the interpolated, smoothed secondary nodal-normal field by
+  summing the stored normals at the subpatch vertices and normalizing the result. This is the
+  averaged-normal plane construction described in the mortar framework of [!cite](popp2010dual).
+- `GEOMETRIC_NORMAL` is opt-in. For a triangular subpatch, MOOSE computes an edge cross product; for
+  a quadrilateral subpatch, it computes the cross product of the bilinear center tangents so that
+  the normal represents the full bilinear patch rather than one selected diagonal. The averaged
+  nodal normal is used only to choose the sign of the geometric normal and preserve MOOSE's
+  primary-to-secondary orientation convention; it does not determine the plane direction.
+
+Thus, omitting `mortar_3d_subpatch_plane`, or explicitly selecting `AVERAGED_NODAL_NORMAL`, retains
+the existing behavior. Select the geometric construction with
+
+```
+mortar_3d_subpatch_plane = GEOMETRIC_NORMAL
+```
+
+Sharp 3D corners need an additional admissibility check when geometric subpatch planes are used.
+Only in `GEOMETRIC_NORMAL` mode,
+[!param](/Constraints/EqualValueConstraint/minimum_projection_angle) rejects primary and secondary
+subpatch pairings whose geometric normals are too close to orthogonal before polygon clipping. This
+avoids cross-corner mortar segments while preserving opposing or nearly opposing face-to-face
+coupling. Geometric mode therefore requires `minimum_projection_angle` to lie between zero and
+ninety degrees. In `AVERAGED_NODAL_NORMAL` mode, the parameter retains its existing MOOSE input
+range and projection checks and does not apply this additional geometric normal-pair filter.
 
 !bibtex bibliography

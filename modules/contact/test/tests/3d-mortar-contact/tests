@@ -70,38 +70,68 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
-  [frictionless-mortar-3d-action-minimum-projection-angle]
+  [frictionless-mortar-3d-action-geometric-subpatch-plane]
     issues = '#33282'
-    requirement = 'The system shall accept a nondefault 3D mortar minimum projection angle through '
-                  'the contact action for'
-    [petrov-galerkin]
-      type = 'RunApp'
+    requirement = 'The contact action shall correctly handle geometric-normal 3D mortar subpatch '
+                  'planes by'
+    [mortar]
+      type = 'Exodiff'
       input = 'frictionless-mortar-3d-action.i'
-      check_input = true
-      recover = false # check_input does not advance a timestep
-      restep = false # check_input does not advance a timestep
-      cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-                 'Contact/mortar/minimum_projection_angle=35 '
-                 'Contact/mortar/segment_quadrature=fifth '
-                 'Outputs/file_base=frictionless-mortar-3d-minimum-projection-angle-pg-action_out'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-geometric_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-geometric'
       mesh_mode = 'REPLICATED' # see issue 24255
-      detail = 'a 3D mortar formulation using dual mortar, the Petrov-Galerkin approach, and '
-               'fifth-order segment quadrature, and'
+      detail = 'forwarding the plane mode for a Lagrange-multiplier mortar formulation,'
       valgrind = 'none'
+      recover = false
+      restep = false
     []
     [penalty]
-      type = 'RunApp'
+      type = 'Exodiff'
       input = 'frictionless-mortar-3d-action.i'
-      check_input = true
-      recover = false # check_input does not advance a timestep
-      restep = false # check_input does not advance a timestep
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-penalty-action-geometric_108_0_displaced_mortar_segment_mesh.e'
       cli_args = 'Contact/mortar/formulation=mortar_penalty '
-                 'Contact/mortar/minimum_projection_angle=35 '
-                 'Postprocessors/active="" VectorPostprocessors/active="" '
-                 'Outputs/file_base=frictionless-mortar-3d-minimum-projection-angle-penalty-action_out'
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0 Postprocessors/active="" VectorPostprocessors/active="" '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-penalty-action-geometric'
       mesh_mode = 'REPLICATED' # see issue 24255
-      detail = 'a 3D mortar-penalty formulation.'
+      detail = 'forwarding the plane mode for a mortar penalty formulation,'
       valgrind = 'none'
+      recover = false
+      restep = false
+      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/mortar'
+    []
+    [unsupported-formulation]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=kinematic '
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL'
+      expect_err = "The 'mortar_3d_subpatch_plane' option can only be used with mortar-based formulations"
+      detail = 'rejecting the option for a non-mortar formulation,'
+      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/penalty'
+    []
+    [mortar-angle-forwarding]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'forwarding the projection angle for a Lagrange-multiplier mortar formulation, and'
+    []
+    [penalty-angle-forwarding]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=mortar_penalty '
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'forwarding the projection angle for a mortar penalty formulation.'
     []
   []
   [frictionless-mortar-3d-action-lm-space]

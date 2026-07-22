@@ -1,6 +1,6 @@
 [Tests]
   design = 'Constraints/index.md EqualValueConstraint.md PenaltyEqualValueConstraint.md'
-  issues = '#13080 #21329 #33277 #33282'
+  issues = '#13080 #21329 #33277'
   [continuity_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'
@@ -65,16 +65,66 @@
                   'for a curved HEX20 mortar interface.'
     recover = false
   []
-  [continuity_sphere_hex8-debug-mesh]
-    type = 'Exodiff'
-    prereq = 'continuity_sphere_hex20-debug-mesh'
-    input = 'continuity_sphere_hex.i'
-    exodiff = 'continuity_sphere_hex8_debug_2_1_undisplaced_mortar_segment_mesh.e'
-    cli_args = 'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
-               'Outputs/file_base=continuity_sphere_hex8_debug'
-    requirement = 'The system shall be able to write out a spatially three dimensional mortar mesh '
-                  'for a curved HEX8 mortar interface.'
-    recover = false
+  [geometric-subpatch-plane]
+    issues = '#33282'
+    requirement = 'The system shall construct 3D mortar subpatch planes from geometric normals for'
+    [hex8-debug-mesh]
+      type = 'Exodiff'
+      input = 'continuity_sphere_hex.i'
+      exodiff = 'continuity_sphere_hex8_geometric_2_1_undisplaced_mortar_segment_mesh.e'
+      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Outputs/exodus=false '
+                 'Outputs/file_base=continuity_sphere_hex8_geometric'
+      detail = 'linear quadrilateral subpatches on a curved HEX8 interface, producing the expected '
+               'geometric-mode mortar segment mesh;'
+      recover = false
+    []
+    [hex20]
+      type = 'RunApp'
+      input = 'continuity_sphere_hex.i'
+      cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND '
+                 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Problem/solve=false Outputs/exodus=false '
+                 'Outputs/file_base=continuity_sphere_hex20_geometric'
+      detail = 'quadratic serendipity QUAD8 faces subdivided into linear quadrilateral subpatches;'
+      recover = false
+      restep = false
+    []
+    [hex27]
+      type = 'RunApp'
+      input = 'continuity_sphere_hex.i'
+      cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND '
+                 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Problem/solve=false Outputs/exodus=false '
+                 'Outputs/file_base=continuity_sphere_hex27_geometric'
+      detail = 'quadratic Lagrange QUAD9 faces subdivided into bilinear quadrilateral subpatches;'
+      recover = false
+      restep = false
+    []
+    [tet10]
+      type = 'RunApp'
+      input = 'continuity_tet.i'
+      cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 '
+                 'Variables/T/order=SECOND Variables/lambda/family=LAGRANGE Variables/lambda/order=SECOND '
+                 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Problem/solve=false Outputs/exodus=false '
+                 'Outputs/file_base=continuity_tet10_geometric'
+      detail = 'quadratic TRI6 faces subdivided into linear triangular subpatches; and'
+      recover = false
+      restep = false
+    []
+    [tet14]
+      type = 'RunApp'
+      input = 'continuity_tet.i'
+      cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 '
+                 'Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD '
+                 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/debug_mesh=true Problem/solve=false Outputs/exodus=false '
+                 'Outputs/file_base=continuity_tet14_geometric'
+      detail = 'cubic TRI7 faces subdivided into linear triangular subpatches.'
+      recover = false
+      restep = false
+    []
   []
   [triangulation-modes]
     issues = '#23802'
@@ -170,7 +220,7 @@
   []
   [continuity_tet10-debug-mesh]
     type = 'Exodiff'
-    prereq = 'continuity_sphere_hex8-debug-mesh'
+    prereq = 'continuity_sphere_hex20-debug-mesh'
     input = 'continuity_tet.i'
     exodiff = 'continuity_tet10_debug_107_2_undisplaced_mortar_segment_mesh.e'
     cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 '

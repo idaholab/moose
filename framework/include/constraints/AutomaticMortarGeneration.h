@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MortarSegmentInfo.h"
+#include "MortarTypes.h"
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"
@@ -76,6 +77,7 @@ public:
                             const bool debug,
                             const bool correct_edge_dropping,
                             const Real minimum_projection_angle,
+                            const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
                             const MortarSegmentTriangulationMode triangulation_mode,
                             const bool triangulate_triangles);
 
@@ -562,6 +564,9 @@ private:
   /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
+
+  /// Method used to define the local projection planes for 3D secondary subpatches.
+  const Mortar3DSubpatchPlane _mortar_3d_subpatch_plane;
 
   /// Triangulation mode used for clipped 3D mortar polygons.
   const MortarSegmentTriangulationMode _triangulation_mode;
