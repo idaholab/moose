@@ -34,7 +34,7 @@ class TestFunctor : public FunctorBase<T>
 public:
   using typename FunctorBase<T>::ValueType;
 
-  TestFunctor() : FunctorBase<T>("test"){};
+  TestFunctor() : FunctorBase<T>("test") {};
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
