@@ -23,6 +23,8 @@ public:
   virtual void act() override;
 
 protected:
+  /// Checks that \c param boundaries are in the 'boundary' parameter
+  void checkBoundaryParameterIsSubset(const std::string & param) const;
   void addMeshGenerator();
   void addRadiationObject() const;
   void addViewFactorObject() const;

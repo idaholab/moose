@@ -167,6 +167,18 @@ RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
       paramError("heat_flux_aux_block",
                  "If 'add_heat_flux_aux' is true, then this parameter must be provided.");
   }
+
+  checkBoundaryParameterIsSubset("adiabatic_boundary");
+  checkBoundaryParameterIsSubset("fixed_temperature_boundary");
+}
+
+void
+RadiationTransferAction::checkBoundaryParameterIsSubset(const std::string & param) const
+{
+  const auto boundary_names = getParam<std::vector<BoundaryName>>(param);
+  for (const auto & bname : boundary_names)
+    if (std::find(_boundary_names.begin(), _boundary_names.end(), bname) == _boundary_names.end())
+      paramError(param, "The boundaries in '" + param + "' must be a subset of 'boundary'.");
 }
 
 void
@@ -471,6 +483,7 @@ RadiationTransferAction::patchBoundaryNames(
   {
     const auto boundary_name_or_id = boundary_names_or_ids[i];
     const auto it = std::find(_boundary_names.begin(), _boundary_names.end(), boundary_name_or_id);
+    mooseAssert(it != _boundary_names.end(), boundary_name_or_id + " not found in 'boundary'.");
     const auto boundary_index = std::distance(_boundary_names.begin(), it);
     const auto n_patches = nPatch(boundary_index);
     const auto boundary_name = _mesh->getBoundaryName(ids[i]);

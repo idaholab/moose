@@ -59,7 +59,7 @@
   [nonexistent_boundary]
     type = RunException
     input = 'radiative_transfer_action.i'
-    cli_args = "GrayDiffuseRadiation/cavity/boundary='4 5 6 fake'"
+    cli_args = "GrayDiffuseRadiation/cavity/boundary='4 5 fake 7'"
     expect_err = "The provided boundary name or ID \(fake\) does not exist in the mesh"
     mesh_mode = REPLICATED # PatchSideSetGenerator is not allowed to use distributed mesh
     requirement = 'The system shall report an error if an invalid boundary is provided for the radiative heat transfer action.'
