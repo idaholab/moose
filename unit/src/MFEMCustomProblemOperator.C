@@ -163,6 +163,7 @@ public:
     InputParameters solver_params = _factory.getValidParams("MFEMMUMPS");
     solver_params.set<int>("print_level") = 0;
     _mfem_problem->addMFEMSolver("MFEMMUMPS", "linearSolver0", solver_params);
+    _mfem_problem->resolveMFEMSolvers();
 
     // Add the custom problem operator builder
     // then get it and build the operator
