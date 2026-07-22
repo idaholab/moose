@@ -3880,22 +3880,52 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
     const Real polyhedron_scale = polyhedronScale3D(side_points);
     const Real length_tol = tol * polyhedron_scale;
-    std::vector<std::vector<Point>> c0_side_points;
+    std::vector<std::vector<Point>> surface_triangles;
     std::vector<std::shared_ptr<libMesh::Polygon>> sides;
 
+    // Preserve the existing triangle-surface validation, but keep planar original polygon sides in
+    // the constructed C0Polyhedron. NetGen tetrahedra are constructed on their separate path.
     if (!(use_pre_netgen_triangulation
-              ? preNetgenC0PolyhedronSidePoints3D(side_points, c0_side_points, length_tol)
+              ? preNetgenC0PolyhedronSidePoints3D(side_points, surface_triangles, length_tol)
               : c0PolyhedronSidePoints3D(side_points,
-                                         c0_side_points,
+                                         surface_triangles,
                                          length_tol,
                                          use_dual_point_sources ? &dual_point_sources : nullptr)))
       return false;
 
+    // We have to differentiate here: If our dual (candidate) polyhedron is good enough, we want to
+    // pass its original surface to c0polyhedron. If it has nonplanar faces and neets to go through
+    // netgen tetrahedralization, then we break it down into triangles BEFORE passing it, as netgen
+    // is quite picky when it comes to surfaces
+    std::vector<std::vector<Point>> output_side_points;
+
+    for (const auto & side : side_points)
+      if (sideFaceIsNonPlanar3D(side, length_tol))
+      {
+        std::vector<std::vector<Point>> side_triangles;
+        const std::vector<std::vector<Point>> single_side{side};
+
+        if (!(use_pre_netgen_triangulation
+                  ? preNetgenC0PolyhedronSidePoints3D(single_side, side_triangles, length_tol)
+                  : c0PolyhedronSidePoints3D(single_side,
+                                             side_triangles,
+                                             length_tol,
+                                             use_dual_point_sources ? &dual_point_sources
+                                                                    : nullptr)))
+          return false;
+
+        output_side_points.insert(output_side_points.end(),
+                                  std::make_move_iterator(side_triangles.begin()),
+                                  std::make_move_iterator(side_triangles.end()));
+      }
+      else
+        output_side_points.push_back(side);
+
     const auto getOrCreateDualNode = [&](const Point & point) { return getDualNode(point).first; };
 
-    sides.reserve(c0_side_points.size());
+    sides.reserve(output_side_points.size());
 
-    for (const auto & side : c0_side_points)
+    for (const auto & side : output_side_points)
     {
       std::vector<Node *> polygon_nodes;
       polygon_nodes.reserve(side.size());
