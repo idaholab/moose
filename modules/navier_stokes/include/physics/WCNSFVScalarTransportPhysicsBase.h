@@ -58,10 +58,12 @@ protected:
 
   /// Functors for the passive scalar sources. Indexing is scalar variable index
   std::vector<MooseFunctorName> _passive_scalar_sources;
-  /// Functors for the passive scalar (coupled) sources. Inner indexing is scalar variable index
+  /// Functors for the passive scalar (coupled) sources. Outer indexing is scalar variable index
   std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources;
-  /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
-  std::vector<std::vector<Real>> _passive_scalar_sources_coef;
+  /// Coefficients multiplying for the passive scalar sources. Outer indexing is scalar variable index
+  std::vector<std::vector<Real>> _passive_scalar_coupled_sources_coef;
+  /// Subdomains for the sources. Outer indexing is scalar index, intermediate is source index, inner is subdomains
+  std::vector<std::vector<std::vector<SubdomainName>>> _passive_scalar_coupled_sources_blocks;
 
 private:
   virtual void addInitialConditions() override;
