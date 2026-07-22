@@ -1,5 +1,10 @@
 # Generalized Plane Strain
 
+!alert warning title=Deprecated
+The generalized plane strain capability described here belongs to the legacy mechanics kernels,
+which are being phased out.  For new models, use the [homogenization system](solid_mechanics/Homogenization.md)
+provided by the Lagrangian kernels instead.
+
 ## Description
 
 The generalized plane strain problem has found use in many important applications. Many different presentations can be found in the literature. The simplest one is an extension of the plane strain problem by allowing a non-vanishing constant direction strain in the out-of-plane direction [!citep](Adams1967gps). It has been further generalized by allowing two rotations degrees of freedom [!citep](Abaqus2014gps). An even more generalized form includes the anticlastic problem associated with the out-of-plane shear [!citep](Adams1984gps, Li1999gps).
@@ -147,9 +152,9 @@ The same pattern is followed for the $y$-$z$ plane case.
 
 Objects available for generalized plane strain:
 
-- [Stress Divergence Kernel](/StressDivergence.md): in-plane equilibrium equation
+- [Stress Divergence Kernel](/StressDivergenceTensors.md): in-plane equilibrium equation
 
-- [Stress Models](solid_mechanics/Stresses.md): full stress tensor calculation
+- [Stress Models](/ComputeMultipleInelasticStress.md): full stress tensor calculation
 
 Objects specific for generalized plane strain:
 
@@ -159,7 +164,7 @@ Objects specific for generalized plane strain:
 
 - [Generalized Plane Strain Off-diagonal Kernel](/GeneralizedPlaneStrainOffDiag.md): in-plane displacement variables and scalar out-of-plane strain coupling
 
-- [Strain Calculations](solid_mechanics/Strains.md): in-plane strain calculation and formation of full strain tensor considering the scalar out-of-plane strain
+- [Strain Calculations](/ComputeFiniteStrain.md): in-plane strain calculation and formation of full strain tensor considering the scalar out-of-plane strain
 
 ## How to use generalized plane strain model
 

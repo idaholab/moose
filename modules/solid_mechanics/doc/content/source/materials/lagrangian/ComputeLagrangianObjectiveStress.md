@@ -47,7 +47,7 @@ constitutive model, defined (typically) in terms of the
 mechanical strain tensor.  However, as with all constitutive models
 designed for use with the Lagrangian kernels, the user can define the
 stress update in terms of any kinematic measures provided
-by the [new material system](NewMaterialSystem.md).
+by the [strain calculator](Kinematics.md).
 
 Most objective rates take the form
 \begin{equation}

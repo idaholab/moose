@@ -5,8 +5,8 @@
 ## Overview
 
 This class wraps the information returned by MOOSE materials inheriting
-from [StressUpdateBase](Stresses.md) for use with the
-[Lagrangian kernel system](LagrangianKernelTheory.md).
+from `StressUpdateBase` for use with the
+[Lagrangian kernel system](BalanceOfLinearMomentum.md).
 To use the current MOOSE materials the user simply adds this wrapper
 object to the `[Materials]` block in their input file, in addition to the
 definition of the actual MOOSE material.
@@ -27,7 +27,7 @@ expected results for anisotropic materials or for materials "natively"
 providing a large deformation stress update, like crystal plasticity.
 For this materials users should consider writing a custom wrapper or
 transitioning the material model to inherit from the new
-material system [base classes](NewMaterialSystem.md).
+material system [base classes](ObjectiveStressRates.md).
 
 To reproduce the legacy [`StressDivergenceTensors`](/StressDivergenceTensors.md) +
 [`ComputeFiniteStrain`](/ComputeFiniteStrain.md) pipeline bit-for-bit with this

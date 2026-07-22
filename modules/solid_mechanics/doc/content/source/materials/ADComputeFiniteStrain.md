@@ -179,12 +179,7 @@ When directly using `ADComputeFiniteStrain` in an input file as shown above, the
 [ADStressDivergenceTensors](/ADStressDivergenceTensors.md) kernel must be modified
 from the default by setting the parameter `use_displaced_mesh = true`. This setting
 is required to maintain consistency in the test function gradients and the
-strain formulation. For a complete discussion of the stress divergence kernel
-settings and the corresponding strain classes, see the section on
-[Consistency Between Stress and Strain](/solid_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
-in the SolidMechanics module overview. In addition, be aware of the loading
-cycle limitations while using finite strains as outlined in the section
-[Large Strain Closed Loop Loading Cycle](/solid_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
+strain formulation.
 
 !syntax parameters /Materials/ADComputeFiniteStrain
 

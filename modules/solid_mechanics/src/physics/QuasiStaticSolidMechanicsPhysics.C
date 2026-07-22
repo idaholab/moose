@@ -341,6 +341,20 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
                    "compatibility_mode requires formulation = TOTAL (the OLD kernel system is "
                    "always total Lagrangian on the displaced mesh).");
 
+      if (_lk_large_kinematics && params.isParamSetByUser("kinematic_approximation"))
+        paramError("kinematic_approximation",
+                   "compatibility_mode derives kinematic_approximation from decomposition_method; "
+                   "do not set it explicitly.");
+      if (_lk_locking && _lk_large_kinematics &&
+          params.isParamSetByUser("volumetric_locking_correction_mode"))
+        paramError("volumetric_locking_correction_mode",
+                   "compatibility_mode derives the F-bar mode from volumetric_locking_correction; "
+                   "do not set volumetric_locking_correction_mode explicitly.");
+      if (params.isParamSetByUser("generalized_midpoint_alpha"))
+        paramError("generalized_midpoint_alpha",
+                   "compatibility_mode reproduces the legacy backward-Euler update; do not set "
+                   "generalized_midpoint_alpha explicitly.");
+
       // Validate decomposition_method <-> kinematic_approximation mapping. The NEW strain
       // calculator's `rashid_approximate` and `rashid_eigen` reproduce OLD's `TaylorExpansion`
       // and `EigenSolution` exactly; OLD's `HughesWinget` has no NEW counterpart.
@@ -1027,6 +1041,12 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
 
   params.set<bool>("stabilize_strain") = _lk_locking;
 
+  // Forward the strain time-integration options.  In compatibility mode kinematic_approximation
+  // and F_bar_mode are overridden below (and the action errors if the user also set them).
+  params.set<MooseEnum>("kinematic_approximation") = getParam<MooseEnum>("kinematic_approximation");
+  params.set<Real>("alpha") = getParam<Real>("generalized_midpoint_alpha");
+  params.set<MooseEnum>("F_bar_mode") = getParam<MooseEnum>("volumetric_locking_correction_mode");
+
   if (_lk_homogenization)
   {
     params.set<std::vector<MaterialPropertyName>>("homogenization_gradient_names") = {
@@ -1259,6 +1279,7 @@ QuasiStaticSolidMechanicsPhysics::getKernelParameters(std::string type)
         (_lk_large_kinematics && (_lk_formulation == LKFormulation::Updated));
     // large_kinematics is derived from the strain calculator's LARGE_KINEMATICS guarantee.
     params.set<bool>("stabilize_strain") = _lk_locking;
+    params.set<MooseEnum>("F_bar_mode") = getParam<MooseEnum>("volumetric_locking_correction_mode");
     if (_lk_homogenization)
       params.set<bool>("off_diagonal_jacobian") = _lk_h_off_jac;
     // Match the strain calc's F-bar mode on the kernel -- the TL kernel's OLD-compat B-bar

@@ -40,7 +40,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 | Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
 | Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](SolidMechanics/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
 
-Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](solid_mechanics/StressDivergence.md) and the [Strain Formulations](solid_mechanics/Strains.md) for more information.
+Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [balance of linear momentum](solid_mechanics/BalanceOfLinearMomentum.md) and the [kinematics](solid_mechanics/Kinematics.md) for more information.
 
 ### For the New Lagrangian Kernel system
 

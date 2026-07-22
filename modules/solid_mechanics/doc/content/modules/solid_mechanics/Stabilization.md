@@ -1,4 +1,4 @@
-# Stabilization for the Lagrangian Kernels
+# Stabilization
 
 ## The Need for Stabilization
 
@@ -52,7 +52,7 @@ Notionally, in MOOSE the $\bar{F}$ only alters the material model, though in fac
 definition of the Jacobian (but not the residual) in the [Kernel](Kernel.md).
 
 $\bar{B}$ makes this modification to the strain but then also modifies the definition of
-the residual, replacing the [original](LagrangianKernelTheory.md) small deformation stress equilibrium weak form
+the residual, replacing the [unstabilized](BalanceOfLinearMomentum.md) small deformation stress equilibrium weak form
 \begin{equation}
       R^{\alpha}=\int_{v}s_{ij}\phi_{i,j}^{\alpha}dv
 \end{equation}
@@ -71,12 +71,12 @@ in exactly the same way as the strains:
 
 The $\bar{B}$ modification results in a symmetric Jacobian (assuming that the original problem had a symmetric Jacobian).
 This is a significant advantage for codes taking advantage of the symmetry of the assembled Jacobian matrix.
-However, MOOSE does not take advantage of this symmetry and so the Lagrangian kernel system implements the $\bar{F}$ method, as
+However, MOOSE does not take advantage of this symmetry and so implements the $\bar{F}$ method instead, as
 it is somewhat easier to derive and implement in the large deformation context.
 
-## Implementation in the Lagrangian Kernel System
+## Implementation
 
-The `stabilize_strain` flag controls stabilization in the Lagrangian kernel system.  This flag must be set for
+The `stabilize_strain` flag controls stabilization.  This flag must be set for
 both the stress equilibrium kernels [TotalLagrangianStressDivergence](kernels/lagrangian/TotalLagrangianStressDivergence.md) or
 [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) and the strain calculator 
 [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md).
@@ -171,7 +171,7 @@ These plots demonstrate
 1. The problem with locking in both large and small deformations for unstabilized, linear elements.  The beam tip displacement
    is much smaller in the unstabilized problems compared to the true solution and the stabilized solutions (i.e. these elements
    are very stiff).  Moreover, mesh refinement is not effective at resolving the issue.
-2. The $\bar{F}$ stabilization implemented in the Lagrangian kernel system effectively eliminates volumetric locking for
+2. The $\bar{F}$ stabilization effectively eliminates volumetric locking for
    both the updated and total Lagrangian formulations and for both small and large deformations.  The stabilized solutions
    for each kernel type are identical, they demonstrate the proper, non-locking stiffness, and mesh refinement converges the
    problem to a stable, analytic solution.

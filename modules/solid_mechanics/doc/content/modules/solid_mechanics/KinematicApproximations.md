@@ -1,13 +1,12 @@
-# Kinematic Approximations for the Lagrangian Kernels
+# Kinematic Approximations
 
 ## Purpose
 
 The strain calculator
-[`ComputeLagrangianStrain`](/ComputeLagrangianStrain.md) for the
-[Lagrangian kernel system](LagrangianKernelTheory.md) converts the inverse
+[`ComputeLagrangianStrain`](/ComputeLagrangianStrain.md) converts the inverse
 incremental deformation gradient
 \begin{equation}
-   f^{-1}_{ij} = F^{(n)}_{iK} \, F^{(n+1) -1}_{Kj}
+   f^{-1}_{ij} = F^{(n)}_{iK} \, F^{-1}_{Kj}
 \end{equation}
 into the spatial-velocity-gradient increment $\Delta l_{ij}$ from which it
 derives the incremental strain $\Delta d_{ij} = \tfrac{1}{2}(\Delta l_{ij} + \Delta l_{ji})$
@@ -38,9 +37,8 @@ Let $X_{ij} = \delta_{ij} - f^{-1}_{ij}$ throughout.
    \Delta w = \mathrm{skew}(X).
 \end{equation}
 
-This is the first-order Taylor expansion of $-\log f^{-1}$ in $X$.
-It is the formulation the Lagrangian kernels have used since their
-introduction, and it is the default for backward compatibility.
+This is the first-order Taylor expansion of $-\log f^{-1}$ in $X$, and is the
+default.
 
 ### `quadratic`
 
@@ -85,26 +83,5 @@ This is the "exact" $-\log f^{-1}$, accurate to machine precision for any
 deformation.  It reproduces the strain and vorticity increments produced by
 [`ComputeFiniteStrain`](/ComputeFiniteStrain.md) when its
 `decomposition_method = EigenSolution`.
-
-## When to Use Which
-
-- `linear` is appropriate for most simulations.  It is the cheapest option
-  and matches the pre-existing behavior of the Lagrangian kernels.
-- `rashid_approximate` or `rashid_eigen` are the right choice when porting
-  inputs from the legacy
-  [`StressDivergenceTensors`](/StressDivergenceTensors.md) +
-  [`ComputeFiniteStrain`](/ComputeFiniteStrain.md) pipeline and bit-for-bit
-  agreement with the legacy results is required.  Pair with
-  `objective_rate = rashid` on
-  [`ComputeLagrangianObjectiveStress`](/ComputeLagrangianObjectiveStress.md)
-  (this combination is what the
-  [QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
-  selects automatically).
-- `quadratic` is available for completeness; there is no current
-  compatibility target.
-
-The `kinematic_approximation` choice is orthogonal to the
-[$\bar F$ stabilization](Stabilization.md) and to the choice of objective
-rate.
 
 !bibtex bibliography
