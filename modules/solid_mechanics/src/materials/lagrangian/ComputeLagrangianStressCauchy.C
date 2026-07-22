@@ -25,7 +25,11 @@ ComputeLagrangianStressCauchy::ComputeLagrangianStressCauchy(const InputParamete
                                                      "inverse_incremental_deformation_gradient")),
     _inv_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
-    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
+    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _F_ust_inv(getMaterialPropertyByName<RankTwoTensor>(
+        _base_name + "inverse_unstabilized_deformation_gradient")),
+    _F_ust_det(
+        getMaterialPropertyByName<Real>(_base_name + "det_unstabilized_deformation_gradient"))
 {
 }
 
@@ -51,9 +55,11 @@ ComputeLagrangianStressCauchy::computeQpPK1Stress()
                              _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
-    const RankTwoTensor F_ust_inv = _F_ust[_qp].inverse();
+    // F_ust^{-1} and det(F_ust) are published once per qp by the strain calculator; reuse them
+    // instead of recomputing a 3x3 inverse + determinant here on every residual/Jacobian sweep.
+    const RankTwoTensor & F_ust_inv = _F_ust_inv[_qp];
     const RankTwoTensor F_ust_invT = F_ust_inv.transpose();
-    const Real det_F_ust = _F_ust[_qp].det();
+    const Real det_F_ust = _F_ust_det[_qp];
     _pk1_stress[_qp] = det_F_ust * _cauchy_stress[_qp] * F_ust_invT;
 
     if (!need_jacobian)

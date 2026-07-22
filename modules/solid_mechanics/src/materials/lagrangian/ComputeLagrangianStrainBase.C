@@ -196,12 +196,13 @@ ComputeLagrangianStrainBase<G>::computeQpProperties()
     _F_ust[_qp] += (*contribution)[_qp];
   }
 
-  // Publish F_ust^{-1} and det(F_ust) for the F-bar Lagrangian kernels' spatial push-forward
-  // (grad_x = F_ust^{-T} grad_X, J_ust = det F_ust). Computed once per qp here -- shared by all
-  // displacement kernels via the material system -- instead of recomputed per test/trial in the
-  // kernel. `isPropertyActive`-gated: only the F-bar kernels mark these active, so non-stabilized
-  // runs (and any consumer that doesn't need them) pay nothing.
-  if (isPropertyActive(_F_ust_inv.id()))
+  // Publish F_ust^{-1} and det(F_ust) for the large-kinematics consumers' spatial push-forward
+  // (grad_x = F_ust^{-T} grad_X, J_ust = det F_ust) and the Cauchy -> PK1 wrap. Computed once per
+  // qp here -- shared by all displacement kernels and the stress calculator via the material
+  // system -- instead of recomputed per test/trial/qp downstream. Gated on `_large_kinematics`
+  // (every consumer reads these only on the large-kinematics path) and on `isPropertyActive` (so
+  // consumers that never request them pay nothing).
+  if (_large_kinematics && isPropertyActive(_F_ust_inv.id()))
   {
     _F_ust_inv[_qp] = _F_ust[_qp].inverse();
     _F_ust_det[_qp] = _F_ust[_qp].det();
