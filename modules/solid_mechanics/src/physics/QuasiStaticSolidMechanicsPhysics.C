@@ -124,6 +124,8 @@ QuasiStaticSolidMechanicsPhysics::validParams()
   params.addParamNamesToGroup(
       "cylindrical_axis_point1 cylindrical_axis_point2 spherical_center_point direction",
       "Coordinate system");
+  params.addParamNamesToGroup("constraint_types targets homogenized_off_diagonal_jacobian",
+                              "Homogenization");
 
   return params;
 }
@@ -292,30 +294,45 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
                  "use of formulation = TOTAL");
   }
 
-  // Cross check options to weed out incompatible choices for the new lagrangian
-  // kernel system
+  // The action drives two mutually exclusive kernel systems: the legacy
+  // StressDivergenceTensors + ComputeFiniteStrain system, and the new Lagrangian kernel system
+  // (new_system / compatibility_mode). Many parameters belong exclusively to one system; setting
+  // one that does not match the active system is almost always a copy-paste error, so reject it
+  // explicitly with a clear message instead of silently ignoring it. The lists below are the
+  // single place to register a parameter as system-specific.
+  static const std::vector<std::string> new_system_only = {
+      "formulation", "constraint_types", "targets", "homogenized_off_diagonal_jacobian"};
+  static const std::vector<std::string> legacy_only = {"use_finite_deform_jacobian",
+                                                       "global_strain"};
+
   if (_lagrangian_kernels)
   {
+    for (const auto & p : legacy_only)
+      if (params.isParamSetByUser(p))
+        paramError(p,
+                   "'",
+                   p,
+                   "' belongs to the legacy StressDivergenceTensors kernel system and cannot be "
+                   "combined with new_system = true or compatibility_mode = true. The Lagrangian "
+                   "kernel system produces the exact Jacobian natively; homogenization replaces "
+                   "global_strain.");
+
+    // use_automatic_differentiation is a value (defaults false); reject only when requested.
     if (_use_ad)
-      mooseError("The Lagrangian kernel system is not yet compatible with AD. "
-                 "Do not set the use_automatic_differentiation flag.");
+      paramError("use_automatic_differentiation",
+                 "The Lagrangian kernel system is not yet compatible with automatic "
+                 "differentiation.");
 
-    if (params.isParamSetByUser("use_finite_deform_jacobian"))
-      mooseError("The Lagrangian kernel system always produces the exact "
-                 "Jacobian.  use_finite_deform_jacobian is redundant and "
-                 " should not be set");
-    if (params.isParamSetByUser("global_strain"))
-      mooseError("The Lagrangian kernel system is not compatible with "
-                 "the global_strain option.  Use the homogenization "
-                 " system instead");
+    // decomposition_method is legal only in compatibility_mode, where it maps to the strain
+    // calculator's kinematic_approximation; plain new_system exposes those options directly on the
+    // ComputeLagrangianStrain material via `kinematic_approximation`.
     if (params.isParamSetByUser("decomposition_method") && !_compatibility_mode)
-      mooseError("The decomposition_method parameter should not be used "
-                 " with the Lagrangian kernel system.  Similar options "
-                 " for native small deformation material models are "
-                 " available as part of the ComputeLagrangianStress "
-                 " material system.");
+      paramError("decomposition_method",
+                 "decomposition_method is not used by the Lagrangian kernel system. Set the "
+                 "equivalent option on the ComputeLagrangianStrain material via "
+                 "kinematic_approximation instead.");
 
-    // compatibility_mode-specific checks
+    // compatibility_mode-specific consistency checks.
     if (_compatibility_mode)
     {
       if (params.isParamSetByUser("formulation") &&
@@ -341,14 +358,13 @@ QuasiStaticSolidMechanicsPhysics::QuasiStaticSolidMechanicsPhysics(const InputPa
   }
   else
   {
-    if (params.isParamSetByUser("formulation"))
-      mooseError("The StressDiveregenceTensor system always uses an "
-                 " updated Lagrangian formulation.  Do not set the "
-                 " formulation parameter, it is only used with the "
-                 " new Lagrangian kernel system.");
-    if (_lk_homogenization)
-      mooseError("The homogenization system can only be used with the "
-                 "new Lagrangian kernels");
+    for (const auto & p : new_system_only)
+      if (params.isParamSetByUser(p))
+        paramError(p,
+                   "'",
+                   p,
+                   "' belongs to the new Lagrangian kernel system. Set new_system = true (or "
+                   "compatibility_mode = true) to use it.");
   }
 }
 

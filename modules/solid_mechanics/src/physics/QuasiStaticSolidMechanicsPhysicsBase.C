@@ -256,6 +256,8 @@ QuasiStaticSolidMechanicsPhysicsBase::validParams()
   params.addParamNamesToGroup("add_variables displacements temperature", "Variables");
   params.addParamNamesToGroup("strain incremental use_finite_deform_jacobian eigenstrain_names",
                               "Strain");
+  params.addParamNamesToGroup("new_system compatibility_mode formulation",
+                              "Lagrangian formulation");
 
   return params;
 }
