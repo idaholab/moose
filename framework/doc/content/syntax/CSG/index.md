@@ -177,6 +177,6 @@ Each unit includes the following information:
 If engineering units are included in a model, the name of those units may be present in other component definitions as if it were the type of object that it behaves like.
 For example, below is an N-sided polygon engineering unit (3 sides in this case) which behaves like a surface.
 It is used as a surface name to define the region of the cell.
-Because the only surface in this model is actually an engineering unit, the `surfaces` output block is empty.
+Because the only surface in this model is actually an engineering unit, the `surfaces` output block is not include as there are no plain surface objects present.
 
 !listing csg_only_poly_unit_out_csg.json

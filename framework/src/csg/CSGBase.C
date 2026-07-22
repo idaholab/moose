@@ -1533,9 +1533,9 @@ CSGBase::generateOutput() const
 
   nlohmann::json csg_json;
 
-  csg_json["surfaces"] = {};
-  csg_json["cells"] = {};
-  csg_json["universes"] = {};
+  csg_json["surfaces"] = {};  // if empty (all are eng units), this will be deleted later
+  csg_json["cells"] = {};     // if empty (all are eng units), this will be deleted later
+  csg_json["universes"] = {}; // root universe always exists, so this does not get deleted later
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
@@ -1552,6 +1552,11 @@ CSGBase::generateOutput() const
     if (s.getTransformations().size() > 0)
       csg_json["surfaces"][surf_name]["transformations"] = s.getTransformationsAsStrings();
   }
+
+  // Drop the surfaces section if nothing was written (e.g. all surfaces were engineering units,
+  // which are output in the units section instead)
+  if (csg_json["surfaces"].empty())
+    csg_json.erase("surfaces");
 
   // Print out cell information
   auto all_cells = getAllCells();
@@ -1572,6 +1577,11 @@ CSGBase::generateOutput() const
     if (c.getTransformations().size())
       csg_json["cells"][cell_name]["transformations"] = c.getTransformationsAsStrings();
   }
+
+  // Drop the cells section if nothing was written (e.g. all cells were engineering units,
+  // which are output in the units section instead)
+  if (csg_json["cells"].empty())
+    csg_json.erase("cells");
 
   // Print out universe information
   auto all_univs = getAllUniverses();
