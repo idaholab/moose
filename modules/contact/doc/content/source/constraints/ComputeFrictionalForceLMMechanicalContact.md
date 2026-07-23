@@ -25,6 +25,16 @@ This object automatically enforces normal contact constraints by making calls to
 
 The preliminary recommendation is to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running *new* models, but they can be held constant once good convergence behavior has been attained.
 
+The Coulomb bound can be regularized in two ways. The
+[!param](/Constraints/ComputeFrictionalForceLMMechanicalContact/friction_elastic_slip) parameter adds
+a tangential elastic slip distance to the Lagrange-multiplier predictor, so the stick branch has a
+small compliance before reaching the Coulomb bound. The
+[!param](/Constraints/ComputeFrictionalForceLMMechanicalContact/friction_coefficient_regularization)
+parameter can reduce the effective coefficient for small slip increments; with `ARCTAN_SLIP`, use
+[!param](/Constraints/ComputeFrictionalForceLMMechanicalContact/friction_reference_slip) as the
+slip distance over which the coefficient approaches its supplied value. The regularization uses the
+current step slip increment, so timestep or load-step sensitivity should be checked.
+
 !syntax parameters /Constraints/ComputeFrictionalForceLMMechanicalContact
 
 !syntax inputs /Constraints/ComputeFrictionalForceLMMechanicalContact

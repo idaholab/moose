@@ -11,6 +11,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
+#include "ContactFrictionUtils.h"
 #include "WeightedVelocitiesUserObject.h"
 
 #include "metaphysicl/metaphysicl_version.h"
@@ -41,12 +42,26 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
       "Coupled function to evaluate friction with values from contact pressure and relative "
       "tangential velocities");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "epsilon",
       1.0e-7,
+      "epsilon > 0",
       "Minimum value of contact pressure that will trigger frictional enforcement");
   params.addRangeCheckedParam<Real>(
-      "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
+      "mu", "mu >= 0", "The friction coefficient for the Coulomb friction law");
+  params.addParam<MooseEnum>("friction_coefficient_regularization",
+                             Moose::Contact::frictionCoefficientRegularizationOptions(),
+                             "The regularization applied to the Coulomb friction coefficient.");
+  params.addRangeCheckedParam<Real>(
+      "friction_reference_slip",
+      0.0,
+      "friction_reference_slip >= 0",
+      "Reference slip increment used by friction coefficient regularization.");
+  params.addRangeCheckedParam<Real>(
+      "friction_elastic_slip",
+      0.0,
+      "friction_elastic_slip >= 0",
+      "Tangential elastic slip distance over which the Coulomb friction bound is reached.");
   params.addRequiredParam<UserObjectName>("weighted_velocities_uo",
                                           "The weighted tangential velocities user object.");
 
@@ -67,6 +82,11 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _epsilon(getParam<Real>("epsilon")),
     _mu(isParamValid("function_friction") ? std::numeric_limits<double>::quiet_NaN()
                                           : getParam<Real>("mu")),
+    _friction_coefficient_regularization(
+        getParam<MooseEnum>("friction_coefficient_regularization")
+            .getEnum<Moose::Contact::FrictionCoefficientRegularization>()),
+    _friction_reference_slip(getParam<Real>("friction_reference_slip")),
+    _friction_elastic_slip(getParam<Real>("friction_elastic_slip")),
     _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
                                                          : nullptr),
     _has_friction_function(isParamValid("function_friction")),
@@ -89,6 +109,13 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     paramError("friction_lm_dir",
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
+
+  if (_friction_coefficient_regularization !=
+          Moose::Contact::FrictionCoefficientRegularization::NONE &&
+      _friction_reference_slip <= 0.0)
+    paramError("friction_reference_slip",
+               "A positive friction_reference_slip is required when "
+               "friction_coefficient_regularization is not NONE.");
 
   _friction_vars.push_back(getVar("friction_lm", 0));
 
@@ -210,9 +237,10 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(contact_pressure,
-                                      _dof_to_real_tangential_velocity[dof][0],
-                                      _dof_to_real_tangential_velocity[dof][1]);
+  const auto & real_tangential_velocity =
+      libmesh_map_find(_weighted_velocities_uo.dofToRealVelocities(), dof);
+  ADReal mu_ad = computeFrictionValue(
+      contact_pressure, real_tangential_velocity[0], real_tangential_velocity[1]);
 
   ADReal dof_residual;
   ADReal dof_residual_dir;
@@ -225,27 +253,34 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   }
   else
   {
-    // Espilon to avoid automatic differentiation singularity
+    // Epsilon to avoid automatic differentiation singularity
     const Real epsilon_sqrt = 1.0e-48;
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
+    const auto normal_bound = max(0.0, lamdba_plus_cg);
+    const auto friction_bound = mu_ad * normal_bound;
+    const auto tangential_compliance =
+        _friction_elastic_slip > 0.0 ? _friction_elastic_slip / (friction_bound + _epsilon) : 0.0;
+
     std::array<ADReal, 2> lambda_t_plus_ctu;
-    lambda_t_plus_ctu[0] = friction_lm_values[0] + c_t * *tangential_vel[0] * _dt;
-    lambda_t_plus_ctu[1] = friction_lm_values[1] + c_t * *tangential_vel[1] * _dt;
+    lambda_t_plus_ctu[0] =
+        friction_lm_values[0] +
+        c_t * (*tangential_vel[0] * _dt - tangential_compliance * friction_lm_values[0]);
+    lambda_t_plus_ctu[1] =
+        friction_lm_values[1] +
+        c_t * (*tangential_vel[1] * _dt - tangential_compliance * friction_lm_values[1]);
 
-    const auto term_1_x = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[0];
+    const auto tangential_trial_norm =
+        sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
+             lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt);
 
-    const auto term_1_y = max(mu_ad * lamdba_plus_cg,
-                              sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                                   lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-                          friction_lm_values[1];
+    const auto term_1_x = max(friction_bound, tangential_trial_norm) * friction_lm_values[0];
 
-    const auto term_2_x = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
+    const auto term_1_y = max(friction_bound, tangential_trial_norm) * friction_lm_values[1];
 
-    const auto term_2_y = mu_ad * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
+    const auto term_2_x = friction_bound * lambda_t_plus_ctu[0];
+
+    const auto term_2_y = friction_bound * lambda_t_plus_ctu[1];
 
     dof_residual = term_1_x - term_2_x;
     dof_residual_dir = term_1_y - term_2_y;
@@ -285,8 +320,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad =
-      computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
+  const auto & real_tangential_velocity =
+      libmesh_map_find(_weighted_velocities_uo.dofToRealVelocities(), dof);
+  ADReal mu_ad = computeFrictionValue(contact_pressure, real_tangential_velocity[0], 0.0);
 
   ADReal dof_residual;
   // Primal-dual active set strategy (PDASS)
@@ -294,11 +330,17 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
     dof_residual = friction_lm_value;
   else
   {
-    const auto term_1 = max(mu_ad * (contact_pressure + c * weighted_gap),
-                            abs(friction_lm_value + c_t * tangential_vel * _dt)) *
-                        friction_lm_value;
-    const auto term_2 = mu_ad * max(0.0, contact_pressure + c * weighted_gap) *
-                        (friction_lm_value + c_t * tangential_vel * _dt);
+    const auto lambda_plus_cg = contact_pressure + c * weighted_gap;
+    const auto normal_bound = max(0.0, lambda_plus_cg);
+    const auto friction_bound = mu_ad * normal_bound;
+    const auto tangential_compliance =
+        _friction_elastic_slip > 0.0 ? _friction_elastic_slip / (friction_bound + _epsilon) : 0.0;
+    const auto lambda_t_plus_ctu =
+        friction_lm_value +
+        c_t * (tangential_vel * _dt - tangential_compliance * friction_lm_value);
+
+    const auto term_1 = max(friction_bound, abs(lambda_t_plus_ctu)) * friction_lm_value;
+    const auto term_2 = friction_bound * lambda_t_plus_ctu;
 
     dof_residual = term_1 - term_2;
   }
@@ -328,5 +370,9 @@ ComputeFrictionalForceLMMechanicalContact::computeFrictionValue(const ADReal & c
     mu_ad = _function_friction->value<ADReal>(0.0, contact_pressure, tangential_vel_magnitude, 0.0);
   }
 
-  return mu_ad;
+  const auto slip_increment =
+      sqrt(tangential_vel * tangential_vel + tangential_vel_dir * tangential_vel_dir + 1.0e-24) *
+      _dt;
+  return Moose::Contact::regularizedFrictionCoefficient(
+      mu_ad, slip_increment, _friction_coefficient_regularization, _friction_reference_slip);
 }

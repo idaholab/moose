@@ -1,7 +1,7 @@
 [Tests]
-  design = 'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md '
+  design = 'actions/ContactAction.md '
            'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md'
-  issues = '#19671'
+  issues = '#19671 #33356'
   [block-dynamics]
     type = 'Exodiff'
     exodiff = 'block-dynamics_out.e'
@@ -86,6 +86,63 @@
                   'gap time stabilization using mortar nodal geometry via the contact action.'
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
     recover = false
+  []
+  [block-dynamics-friction-regularization-action]
+    type = 'RunApp'
+    input = 'block-dynamics-friction-action.i'
+    check_input = true
+    capabilities = 'ad_size>=50'
+    cli_args = 'Contact/mechanical/friction_elastic_slip=1e-4 '
+               'Contact/mechanical/friction_coefficient_regularization=ARCTAN_SLIP '
+               'Contact/mechanical/friction_reference_slip=1e-3'
+    requirement = 'The system shall accept Coulomb friction regularization options '
+                  'for dynamic mortar frictional contact.'
+    recover = false
+    restep = false
+  []
+  [block-dynamics-friction-regularization-action-parallel]
+    type = 'RunApp'
+    input = 'block-dynamics-friction-action.i'
+    capabilities = 'ad_size>=50'
+    min_parallel = 2
+    cli_args = "Executioner/dt=0.05 Executioner/end_time=0.1 Outputs/exodus=false "
+               "BCs/leftx/function='1e-2*t' "
+               "Contact/mechanical/friction_elastic_slip=1e-4 "
+               "Contact/mechanical/friction_coefficient_regularization=ARCTAN_SLIP "
+               "Contact/mechanical/friction_reference_slip=1e-3"
+    requirement = 'The system shall communicate dynamic mortar frictional Lagrange multiplier '
+                  'real tangential velocities in parallel with regularized Coulomb friction.'
+    recover = false
+    restep = false
+  []
+  [block-dynamics-friction-regularization-direct]
+    type = 'RunApp'
+    input = 'block-dynamics-friction.i'
+    check_input = true
+    capabilities = 'ad_size>=50'
+    cli_args = 'Constraints/weighted_gap_lm/friction_elastic_slip=1e-4 '
+               'Constraints/weighted_gap_lm/friction_coefficient_regularization=ARCTAN_SLIP '
+               'Constraints/weighted_gap_lm/friction_reference_slip=1e-3'
+    requirement = 'The system shall accept Coulomb friction regularization options '
+                  'for direct dynamic mortar friction constraints.'
+    recover = false
+    restep = false
+  []
+  [block-dynamics-friction-regularization-action-run]
+    type = 'CSVDiff'
+    input = 'block-dynamics-friction-action.i'
+    csvdiff = 'block-dynamics-friction-regularization-action_mechanical_tangential_lm_0006.csv'
+    ignore_columns = 'id'
+    capabilities = 'ad_size>=50'
+    cli_args = "Executioner/dt=0.05 Executioner/end_time=0.3 Outputs/exodus=false "
+               "Outputs/csv=true Outputs/file_base=block-dynamics-friction-regularization-action "
+               "Contact/mechanical/friction_elastic_slip=1e-4 "
+               "Contact/mechanical/friction_coefficient_regularization=ARCTAN_SLIP "
+               "Contact/mechanical/friction_reference_slip=1e-3"
+    requirement = 'The system shall solve dynamic mortar frictional contact with Coulomb '
+                  'friction regularization options.'
+    recover = false
+    restep = false
   []
   [block-dynamics-friction-creep]
     type = 'Exodiff'
