@@ -2278,7 +2278,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::Status & v, void * context)
 {
   unsigned char loaded;
   dataLoad(stream, loaded, context);
-  v = static_cast<FeatureFloodCount::Status>(v);
+  v = static_cast<FeatureFloodCount::Status>(loaded);
 }
 
 template <>
@@ -2295,7 +2295,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::BoundaryIntersection & v, voi
 {
   unsigned char loaded;
   dataLoad(stream, loaded, context);
-  v = static_cast<FeatureFloodCount::BoundaryIntersection>(v);
+  v = static_cast<FeatureFloodCount::BoundaryIntersection>(loaded);
 }
 
 // Constants
