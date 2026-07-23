@@ -1,11 +1,33 @@
 [Tests]
   design = 'Physics/index.md'
-  issues = '#29019'
+  issues = '#29019 #16517'
   [cg]
     type = CSVDiff
     input = 'diffusion_multisys.i'
     csvdiff = 'diffusion_multisys_out_sample_0010.csv'
     requirement = 'The system shall be able to set up multi-system problems using a Physics syntax.'
+  []
+  [unprefixed_pc_type_prefixed_jfnk]
+    type = RunApp
+    input = 'diffusion_multisys.i'
+    cli_args = "Executioner/solve_type=JFNK
+                Physics/Diffusion/ContinuousGalerkin/diff_1/preconditioning=defer
+                Physics/Diffusion/ContinuousGalerkin/diff_2/preconditioning=defer
+                Outputs/csv=false
+                -pc_type lu"
+    absent_out = "PETSc option '-pc_type' requires an assembled preconditioning matrix"
+    requirement = "The system shall not reject an unprefixed PETSc preconditioner type option for a "
+                  "JFNK solve using prefixed solver systems."
+  []
+  [prefixed_pc_type_command_line_override]
+    type = RunApp
+    input = 'diffusion_multisys.i'
+    cli_args = "Executioner/solve_type=JFNK
+                Outputs/csv=false
+                -sys1_snes_mf_operator
+                -sys2_snes_mf_operator"
+    requirement = "The system shall allow Physics-added PETSc preconditioner type options when "
+                  "command-line PETSc options override JFNK solves to PJFNK."
   []
   [errors]
     requirement = 'The system shall return an error'
@@ -22,6 +44,13 @@
       cli_args = "Physics/Diffusion/ContinuousGalerkin/diff_1/system_names='sys1 sys2'"
       expect_err = "There should be one system name per solver variable \(potentially repeated\), or a single system name for all variables"
       detail = 'if more systems than needed are specified to a Physics action.'
+    []
+    [jfnk_physics_pc_type]
+      type = RunException
+      input = 'diffusion_multisys.i'
+      cli_args = "Executioner/solve_type=JFNK Outputs/csv=false"
+      expect_err = "PETSc option '-sys1_pc_type' requires an assembled preconditioning matrix"
+      detail = 'if a Physics adds PETSc preconditioner type options to a JFNK solve.'
     []
   []
 []

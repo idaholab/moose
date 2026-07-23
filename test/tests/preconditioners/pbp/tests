@@ -1,6 +1,6 @@
 [Tests]
   design = PhysicsBasedPreconditioner.md
-  issues = '#1048 #18777'
+  issues = '#1048 #18777 #16517'
 
   [pbp]
     requirement = "The system shall support the use of a physics based preconditioner"
@@ -22,6 +22,15 @@
 
       detail = "with mesh adaptivity."
     []
+  []
+
+  [jfnk_pc_type_error]
+    type = 'RunException'
+    input = 'pbp_test.i'
+    cli_args = '-pc_type lu Outputs/exodus=false'
+    expect_err = "PETSc option '-pc_type' requires an assembled preconditioning matrix"
+    requirement = "The system shall report an error when a JFNK solve uses an incompatible "
+                  "PETSc preconditioner type option."
   []
 
   [check_petsc_options_test]
