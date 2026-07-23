@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "FixedPointSolve.h"
+#include "LibMeshFixedPointSolve.h"
 #include "NonlinearSystemBase.h"
 
-class SecantSolve : public FixedPointSolve
+class SecantSolve : public LibMeshFixedPointSolve
 {
 public:
   SecantSolve(Executioner & ex);
@@ -78,8 +78,7 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
-                                  const bool primary) override final;
+  virtual void transformVariables(const bool primary) override final;
 
   /// Vector tag id for the most recent solution variable, pre-Secant transform, as a main app
   TagID _fxn_m1_tagid = Moose::INVALID_TAG_ID;

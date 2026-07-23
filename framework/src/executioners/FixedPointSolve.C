@@ -153,7 +153,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
-    _transformed_sys(nullptr),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
@@ -226,13 +225,6 @@ FixedPointSolve::initialSetup()
 
   allocateStorage(true);
 
-  // Add to the systems to copy if requested in the Problem
-  for (const auto i : make_range(_problem.numSolverSystems()))
-    if (_problem.needsPreviousMultiAppFixedPointIterationSolution(i))
-      _systems_to_copy_previous_solutions_for.insert(&_problem.getSolverSystem(i));
-  if (_problem.needsPreviousMultiAppFixedPointIterationAuxiliary())
-    _systems_to_copy_previous_solutions_for.insert(&_aux);
-
   if (_has_fixed_point_its)
   {
     auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
@@ -257,31 +249,11 @@ FixedPointSolve::solve()
   _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
 
   // Prepare to relax variables as a main app
-  std::set<dof_id_type> transformed_dofs;
-  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) && _transformed_vars.size() > 0)
-  {
-    // Snag all of the local dof indices for all of these variables
-    AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
-    libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
-
-    transformed_dofs = aldit.getDofIndices();
-  }
-
+  updateVariableDoFsForTransform(_transformed_vars, true);
   // Prepare to relax variables as a subapp
-  std::set<dof_id_type> secondary_transformed_dofs;
+  updateVariableDoFsForTransform(_secondary_transformed_variables, false);
   if (_secondary_relaxation_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
   {
-    if (_secondary_transformed_variables.size() > 0)
-    {
-      // Snag all of the local dof indices for all of these variables
-      AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
-      libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-      Threads::parallel_reduce(elem_range, aldit);
-
-      secondary_transformed_dofs = aldit.getDofIndices();
-    }
-
     // To detect a new time step
     if (_old_entering_time == _problem.time() &&
         _fixed_point_status != MooseFixedPointConvergenceReason::UNSOLVED)
@@ -290,7 +262,7 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      if (!_app.isUltimateMaster() && _transformed_sys)
+      if (!_app.isUltimateMaster() && !_transformed_vars.empty())
         saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
@@ -321,7 +293,7 @@ FixedPointSolve::solve()
     }
 
     // Solve a single application for one time step
-    const bool solve_converged = solveStep(transformed_dofs);
+    const bool solve_converged = solveStep();
 
     if (solve_converged)
     {
@@ -389,7 +361,7 @@ FixedPointSolve::solve()
     // Update the subapp using the fixed point algorithm
     if (_secondary_transformed_variables.size() > 0 &&
         useFixedPointAlgorithmUpdateInsteadOfPicard(false) && _old_entering_time == _problem.time())
-      transformVariables(secondary_transformed_dofs, false);
+      transformVariables(false);
 
     // Update the entering time, used to detect failed solves
     _old_entering_time = _problem.time();
@@ -401,16 +373,8 @@ FixedPointSolve::solve()
   return converged;
 }
 
-void
-FixedPointSolve::saveAllValues(const bool primary)
-{
-  if (_transformed_sys)
-    saveVariableValues(primary);
-  savePostprocessorValues(primary);
-}
-
 bool
-FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
+FixedPointSolve::solveStep()
 {
   bool auto_advance = autoAdvance();
 
@@ -474,8 +438,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   saveAllValues(true);
 
   // Save the previous fixed point iteration solution and aux variables if requested
-  for (auto * sys : _systems_to_copy_previous_solutions_for)
-    sys->copyPreviousFixedPointSolutions();
+  copyPreviousFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
@@ -495,7 +458,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 
   // Use the fixed point algorithm if the conditions (availability of values, etc) are met
   if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
-    transformVariables(transformed_dofs, true);
+    transformVariables(true);
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
@@ -629,37 +592,4 @@ FixedPointSolve::performingRelaxation(const bool primary) const
     return !MooseUtils::absoluteFuzzyEqual(_relax_factor, 1.0);
   else
     return !MooseUtils::absoluteFuzzyEqual(_secondary_relaxation_factor, 1.0);
-}
-
-void
-FixedPointSolve::findTransformedSystem(const bool primary)
-{
-  // Find the system for the transformed variables. They must all belong to the same system
-  const auto & transformed_vars = primary ? _transformed_vars : _secondary_transformed_variables;
-  if (!transformed_vars.empty())
-  {
-    if (_problem.hasAuxiliaryVariable(transformed_vars[0]))
-      _transformed_sys = &_aux;
-    else
-      _transformed_sys = &_solver_sys;
-  }
-
-  for (const auto & var_name : transformed_vars)
-    if (!_transformed_sys->hasVariable(var_name))
-    {
-      if (primary)
-        paramError("transformed_variables",
-                   "Transformed variables must all belong to the same system. Auxiliary and each "
-                   "solver system cannot be mixed");
-      else
-        mooseError("Secondary transformed variables must all belong to the same system. Auxiliary "
-                   "and each solver system cannot be mixed");
-    }
-
-  if (primary && _transformed_sys == &_aux)
-    mooseInfo("Transformation of auxiliary variables is only supported for auxiliary variables "
-              "that are only transferred from the child application");
-
-  if (_transformed_sys)
-    _systems_to_copy_previous_solutions_for.insert(_transformed_sys);
 }

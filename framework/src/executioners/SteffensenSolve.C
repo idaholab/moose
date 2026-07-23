@@ -19,12 +19,11 @@
 InputParameters
 SteffensenSolve::validParams()
 {
-  InputParameters params = FixedPointSolve::validParams();
-
+  InputParameters params = LibMeshFixedPointSolve::validParams();
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) {}
+SteffensenSolve::SteffensenSolve(Executioner & ex) : LibMeshFixedPointSolve(ex) {}
 
 void
 SteffensenSolve::allocateStorage(const bool primary)
@@ -71,7 +70,7 @@ SteffensenSolve::allocateStorage(const bool primary)
 void
 SteffensenSolve::initialSetup()
 {
-  FixedPointSolve::initialSetup();
+  LibMeshFixedPointSolve::initialSetup();
 
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
   if (!dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&convergence))
@@ -198,8 +197,7 @@ SteffensenSolve::transformPostprocessors(const bool primary)
 }
 
 void
-SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs,
-                                    const bool primary)
+SteffensenSolve::transformVariables(const bool primary)
 {
   Real relaxation_factor;
   TagID fxn_m1_tagid;
@@ -221,7 +219,7 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
   NumericVector<Number> & fxn_m1 = _transformed_sys->getVector(fxn_m1_tagid);
   NumericVector<Number> & xn_m1 = _transformed_sys->getVector(xn_m1_tagid);
 
-  for (const auto & dof : transformed_dofs)
+  for (const auto & dof : (primary ? _transformed_dofs : _secondary_transformed_dofs))
   {
     // Avoid 0 denominator issue
     Real new_value = solution(dof);
