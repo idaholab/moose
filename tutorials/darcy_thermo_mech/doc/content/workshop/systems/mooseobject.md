@@ -54,7 +54,7 @@ CustomObject::CustomObject(const InputParameters & parameters) :
 double
 CustomObject::doSomething()
 {
-  // Do some sort of import calculation here that needs a scale factor
+  // Do some sort of important calculation here that needs a scale factor
   return _scale;
 }
 ```

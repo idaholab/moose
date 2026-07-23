@@ -53,7 +53,7 @@ nodal auxiliary variables
 
 ### Nodal Auxiliary Variables
 
-Element auxiliary variables are computed at each node and are stored as linear Lagrange variables
+Nodal auxiliary variables are computed at each node and are stored as linear Lagrange variables
 
 AuxKernel objects computing nodal values can +only+ couple to nodal nonlinear variables and
 other nodal auxiliary variables
@@ -61,8 +61,8 @@ other nodal auxiliary variables
 ```text
 [AuxVariables]
   [aux]
-    order = LAGRANGE
-    family = FIRST
+    order = FIRST
+    family = LAGRANGE
   []
 []
 ```
@@ -73,7 +73,7 @@ other nodal auxiliary variables
 
 `VectorAuxKernels` can compute vector auxiliary variables.
 
-The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
+The auxiliary variable will have to use a vector-valued family, such as LAGRANGE_VEC or MONOMIAL_VEC.
 
 !style! fontsize=70%
 
