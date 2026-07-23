@@ -65,7 +65,7 @@ SamplerParameterTransfer::execute()
                 "The current sample row index is not a valid global MultiApp index.");
 
     // Populate the row of data to transfer
-    std::vector<Real> row = _sampler_ptr->getNextLocalRow();
+    std::vector<Real> row = _sampler_ptr->getSampleRow(row_index);
 
     // Get the command line arguments
     const auto args = SamplerFullSolveMultiApp::sampledCommandLineArgs(row, _parameter_names);

@@ -93,6 +93,10 @@ LoadCovarianceDataAction::act()
     auto * gp_gen = dynamic_cast<GaussianProcessSurrogate *>(model_ptr);
     if (gp_gen && model_ptr->isParamValid("filename"))
       load(*gp_gen);
+    else if (gp_gen && _app.isRecovering() && gp_gen->getGP().getCovarFunctionPtr())
+      // After surrogate model data has been restored from checkpoint (load_surrogate_data ran
+      // first), push the recovered hyperparameters into the freshly-constructed covariance object
+      gp_gen->gp().covarFunction().loadHyperParamMap(gp_gen->getGP().getHyperParamMap());
   }
 }
 

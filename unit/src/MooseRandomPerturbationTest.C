@@ -11,7 +11,10 @@
 
 #include "MooseRandomPerturbation.h"
 
+#include "DataIO.h"
 #include "randistrs.h"
+
+#include <sstream>
 
 /// Tests valid permutation
 TEST(MooseRandomPerturbation, permute)
@@ -113,6 +116,32 @@ TEST(MooseRandomPerturbation, unique)
 
     for (unsigned int test = 0; test < trial; ++test)
       EXPECT_NE(permutations[trial], permutations[test]);
+  }
+}
+
+/// Tests that dataStore/dataLoad round-trips a unique_ptr correctly
+TEST(MooseRandomPerturbation, serialize)
+{
+  unsigned int num_trials = 10;
+  unsigned int max_vector_length = 1000;
+  unsigned int seed = 1993;
+
+  mt_state state;
+  mts_seed32new(&state, seed);
+  for ([[maybe_unused]] const auto trial : make_range(num_trials))
+  {
+    auto generator_seed = static_cast<unsigned long>(mts_lrand(&state));
+    unsigned int n = rds_iuniform(&state, 1, max_vector_length);
+    auto generator = std::make_unique<MooseRandomPerturbation>(generator_seed, n);
+
+    std::stringstream ss;
+    dataStore(ss, generator, nullptr);
+
+    std::unique_ptr<MooseRandomPerturbation> restored;
+    dataLoad(ss, restored, nullptr);
+
+    for (const auto x : make_range(n))
+      EXPECT_EQ(generator->permute(x), restored->permute(x));
   }
 }
 

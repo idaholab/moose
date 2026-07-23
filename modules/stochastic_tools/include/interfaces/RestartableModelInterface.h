@@ -52,6 +52,9 @@ public:
   /// Check if we need to load model data (if the filename parameter is used)
   bool hasModelData() const;
 
+  /// Check if the filename parameter is explicitly set (ignoring recover state)
+  bool hasExplicitModelData() const;
+
 private:
   /// Reference to the MooseObject that uses this interface
   const MooseObject & _model_object;

@@ -47,6 +47,7 @@
                  parent_transient_out_runner2.csv
                  parent_transient_out_runner3.csv
                  parent_transient_out_runner4.csv'
+      prereq = transient/batch
       detail = 'individual sub-applications;'
     []
     [batch]
@@ -58,6 +59,7 @@
                  parent_transient_out_runner2.csv
                  parent_transient_out_runner3.csv
                  parent_transient_out_runner4.csv'
+      prereq = file_output/normal
       detail = 'sub-application batches;'
     []
   []

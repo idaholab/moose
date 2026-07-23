@@ -45,7 +45,7 @@ private:
   std::vector<Real> & _seed_input;
 
   /// Outputs corresponding to the seed input vector
-  std::vector<Real> _seed_outputs;
+  std::vector<Real> & _seed_outputs;
 
   /// Modified transition vector considering the seed input
   std::vector<Real> _tpm_modified;

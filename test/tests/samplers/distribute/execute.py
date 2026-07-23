@@ -73,5 +73,5 @@ if __name__ == "__main__":
         "distribute.i", "distribute_on", args.rows, args.processors, "getLocalSamples"
     )
     execute(
-        "distribute.i", "distribute_row", args.rows, args.processors, "getNextLocalRow"
+        "distribute.i", "distribute_row", args.rows, args.processors, "getSampleRow"
     )

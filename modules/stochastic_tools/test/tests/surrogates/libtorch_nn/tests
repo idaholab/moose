@@ -58,6 +58,7 @@
                "Trainers/train/standardize_output=true Outputs/file_base=standardized"
     allow_test_objects = true
     capabilities = 'libtorch'
+    prereq = train-with-rel-tol
   []
   [evaluate-standardized]
     requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network with standardized input and output parameters.'

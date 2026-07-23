@@ -29,7 +29,7 @@ Sampler::validParams()
   params.registerBase("Sampler");
   params.registerSystemAttributeName("Sampler");
 
-  // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
+  // Define the allowable limits for data returned by getSamples/getLocalSamples/getSampleRow
   // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
   // for size definition, so as start the limits will be based the max of unsigned int. Note,
   // the values here are the limits of the number of items in the complete container. dof_id_type
@@ -43,9 +43,9 @@ Sampler::validParams()
       0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the DenseMatrix returned by getLocalSamples method.");
   params.addParam<dof_id_type>(
-      "limit_get_next_local_row",
+      "limit_get_row",
       0.1 * std::numeric_limits<unsigned int>::max(),
-      "The maximum allowed number of items in the std::vector returned by getNextLocalRow method.");
+      "The maximum allowed number of items in the std::vector returned by getSampleRow method.");
 
   params.addParam<unsigned int>(
       "min_procs_per_row",
@@ -68,20 +68,27 @@ Sampler::Sampler(const InputParameters & parameters)
     SamplerInterface(this),
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
+    Restartable(this, "Samplers"),
     _min_procs_per_row(getParam<unsigned int>("min_procs_per_row") > n_processors()
                            ? n_processors()
                            : getParam<unsigned int>("min_procs_per_row")),
     _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
-    _n_rows(0),
-    _n_cols(0),
+    _generators(
+        declareRecoverableData<std::vector<std::unique_ptr<MooseRandomStateless>>>("generators")),
+    _n_local_rows(declareRecoverableData<dof_id_type>("n_local_rows")),
+    _local_row_begin(declareRecoverableData<dof_id_type>("local_row_begin")),
+    _local_row_end(declareRecoverableData<dof_id_type>("local_row_end")),
+    _n_rows(declareRecoverableData<dof_id_type>("n_rows")),
+    _n_cols(declareRecoverableData<dof_id_type>("n_cols")),
     _n_seeds(1),
-    _next_local_row_requires_state_restore(true),
     _initialized(false),
     _needs_reinit(true),
-    _has_executed(false),
+    _has_executed(declareRecoverableData<bool>("has_executed")),
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
-    _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
+    _limit_get_row(getParam<dof_id_type>("limit_get_row")),
+    _rank_config(
+        declareRecoverableData<std::pair<LocalRankConfig, LocalRankConfig>>("rank_config")),
     _auto_advance_generators(true)
 {
 }
@@ -127,12 +134,6 @@ Sampler::reinit()
   _n_local_rows = _rank_config.first.is_first_local_rank ? _rank_config.first.num_local_sims : 0;
   _local_row_begin = _rank_config.first.first_local_sim_index;
   _local_row_end = _local_row_begin + _n_local_rows;
-
-  // Set the next row iterator index
-  _next_local_row = _local_row_begin;
-
-  // Create communicator that only has processors with rows
-  _communicator.split(_n_local_rows > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
 
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
@@ -208,7 +209,6 @@ Sampler::getGlobalSamples()
                _limit_get_global_samples,
                ".");
 
-  _next_local_row_requires_state_restore = true;
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
   return output;
@@ -233,41 +233,37 @@ Sampler::getLocalSamples()
   if (_n_local_rows == 0)
     return output;
 
-  _next_local_row_requires_state_restore = true;
   computeLocalSampleMatrix(output);
   return output;
 }
 
 std::vector<Real>
-Sampler::getNextLocalRow()
+Sampler::getSampleRow(dof_id_type row_index) const
 {
   checkReinitStatus();
+  if (_n_cols > _limit_get_row)
+    paramError("limit_get_row",
+               "The number of entries in the std::vector (",
+               _n_cols,
+               ") exceeds the allowed limit of ",
+               _limit_get_row,
+               ".");
+  mooseAssert(row_index < _n_rows,
+              "Requested row " + std::to_string(row_index) + " is greater than sampler size.");
 
-  if (_next_local_row_requires_state_restore)
-  {
-    _next_local_row_requires_state_restore = false;
+  std::vector<Real> row(_n_cols, 0);
+  computeSampleRow(row_index, row);
+  return row;
+}
 
-    if (_n_cols > _limit_get_next_local_row)
-      paramError("limit_get_next_local_row",
-                 "The number of entries in the std::vector (",
-                 _n_cols,
-                 ") exceeds the allowed limit of ",
-                 _limit_get_next_local_row,
-                 ".");
-  }
-
-  std::vector<Real> output(_n_cols);
-  computeSampleRow(_next_local_row, output);
-  mooseAssert(output.size() == _n_cols, "The row of sample data is not sized correctly.");
-  _next_local_row++;
-
-  if (_next_local_row == _local_row_end)
-  {
-    _next_local_row = _local_row_begin;
-    _next_local_row_requires_state_restore = true;
-  }
-
-  return output;
+Real
+Sampler::getSample(dof_id_type row_index, dof_id_type col_index) const
+{
+  checkReinitStatus();
+  mooseAssert(row_index < _n_rows,
+              "Requested row " + std::to_string(row_index) + " is greater than sampler size.");
+  mooseAssert(col_index < _n_cols, "Column index out of range.");
+  return computeSample(row_index, col_index);
 }
 
 void
@@ -280,8 +276,6 @@ Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
     std::vector<Real> row(_n_cols, 0);
     computeSampleRow(i, row);
     mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
-    mooseAssert(!_needs_reinit,
-                "Changing the size of the sample must not occur during matrix access.");
     std::copy(row.begin(), row.end(), matrix.get_values().begin() + i * _n_cols);
   }
 }
@@ -296,22 +290,16 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
     std::vector<Real> row(_n_cols, 0);
     computeSampleRow(i, row);
     mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
-    mooseAssert(!_needs_reinit,
-                "Changing the size of the sample must not occur during matrix access.");
     std::copy(
         row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
   }
 }
 
 void
-Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
+Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data) const
 {
   for (dof_id_type j = 0; j < _n_cols; ++j)
-  {
     data[j] = computeSample(i, j);
-    mooseAssert(!_needs_reinit,
-                "Changing the size of the sample must not occur during matrix access.");
-  }
 }
 
 void
