@@ -37,12 +37,6 @@ selected strain formulation.  We recommend that users employ the
 [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
-Although not recommended, it is possible to directly use the `ComputeSmallStrain` material in an
-input file.
-
-!listing modules/solid_mechanics/test/tests/elastic_patch/elastic_patch_quadratic.i
-         block=Materials/strain
-
 !syntax parameters /Materials/ComputeSmallStrain
 
 !syntax inputs /Materials/ComputeSmallStrain

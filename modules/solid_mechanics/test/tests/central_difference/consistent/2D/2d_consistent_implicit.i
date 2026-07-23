@@ -1,5 +1,18 @@
 # Test for the central difference time integrator for a 2D mesh
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = true
+  [../]
+[]
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -11,62 +24,6 @@
   ymax = 2.0
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
-[AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-[]
-
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x disp_y'
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-  [../]
-[]
-
-[AuxKernels]
-  [./accel_x]
-    type = TestNewmarkTI
-    variable = accel_x
-    displacement = disp_x
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    variable = vel_x
-    displacement = disp_x
-  [../]
-  [./accel_y]
-    type = TestNewmarkTI
-    variable = accel_y
-    displacement = disp_y
-    first = false
-  [../]
-  [./vel_y]
-    type = TestNewmarkTI
-    variable = vel_y
-    displacement = disp_y
-  [../]
-[]
 
 [BCs]
   [./y_bot]
@@ -100,11 +57,6 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
-  [./strain_block]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x disp_y'
   [../]
   [./stress_block]
     type = ComputeFiniteStrainElasticStress

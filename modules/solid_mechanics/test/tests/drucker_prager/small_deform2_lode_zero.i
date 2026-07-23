@@ -15,19 +15,15 @@
   zmax = 0.5
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = small
   [../]
 []
 
@@ -215,11 +211,6 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress

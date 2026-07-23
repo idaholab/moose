@@ -15,6 +15,23 @@
 # The displacement at the first, second, third and fourth node at t = 0.1 are
 # -7.787499960311491942e-02, 1.955566679096475483e-02 and -4.634888180231294501e-03, respectively.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    newmark_beta = 0.422
+    newmark_gamma = 0.8
+    mass_damping_coefficient = 0.1
+    strain = SMALL
+    incremental = false
+    hht_alpha = -0.3
+    stiffness_damping_coefficient = 0.1
+  [../]
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -27,94 +44,6 @@
   ymax = 4.0
   zmin = 0.0
   zmax = 0.1
-[]
-
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-[]
-
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    hht_alpha = -0.3
-    stiffness_damping_coefficient = 0.1
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-    eta=0.1
-    alpha = -0.3
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    eta=0.1
-    alpha = -0.3
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-    eta = 0.1
-    alpha = -0.3
-  [../]
-
-[]
-
-[AuxKernels]
-  [./accel_x] # These auxkernels are only to check output
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = accel_x
-    first = false
-  [../]
-  [./accel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = accel_y
-    first = false
-  [../]
-  [./accel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = accel_z
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = vel_x
-  [../]
-  [./vel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = vel_y
-  [../]
-  [./vel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = vel_z
-  [../]
 []
 
 
@@ -211,12 +140,6 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1 0'
-  [../]
-
-  [./strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
 
   [./stress]

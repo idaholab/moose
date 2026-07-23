@@ -1,5 +1,18 @@
 # Test for the Newmark-Beta time integrator
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = true
+  [../]
+[]
+
+
 [Mesh]
   [./generated_mesh]
     type = GeneratedMeshGenerator
@@ -23,71 +36,6 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-[]
-
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
-
-[AuxKernels]
-  [./accel_x]
-    type = TestNewmarkTI
-    variable = accel_x
-    displacement = disp_x
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    variable = vel_x
-    displacement = disp_x
-  [../]
-  [./accel_y]
-    type = TestNewmarkTI
-    variable = accel_y
-    displacement = disp_y
-    first = false
-  [../]
-  [./vel_y]
-    type = TestNewmarkTI
-    variable = vel_y
-    displacement = disp_y
-  [../]
-  [./accel_z]
-    type = TestNewmarkTI
-    variable = accel_z
-    displacement = disp_z
-    first = false
-  [../]
-  [./vel_z]
-    type = TestNewmarkTI
-    variable = vel_z
-    displacement = disp_z
-  [../]
-[]
 
 [BCs]
   [./x_bot]
@@ -163,14 +111,15 @@
     poissons_ratio = 0.25
     block = 0
   [../]
-  [./strain_block]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
+  [../]
+  [./density]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = density
+    prop_values = 0
   [../]
 []
 

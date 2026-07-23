@@ -28,6 +28,10 @@
 # 0.2.
 
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3 # Dimension of the mesh
@@ -43,28 +47,7 @@
   allow_renumbering = false # So NodalVariableValue can index by id
 []
 
-[Variables] # variables that are solved
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [AuxVariables] # variables that are calculated for output
-  [./accel_x]
-  [../]
-  [./vel_x]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_z]
-  [../]
-  [./vel_z]
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -91,86 +74,21 @@
   [../]
 []
 
-[Kernels]
-  [./DynamicSolidMechanics] # zeta*K*vel + K * disp
-    displacements = 'disp_x disp_y disp_z'
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    mass_damping_coefficient = 19.63
+    strain = SMALL
+    incremental = false
     stiffness_damping_coefficient = 0.000025
-  [../]
-  [./inertia_x] # M*accel + eta*M*vel
-    type = InertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    beta = 0.25 # Newmark time integration
-    gamma = 0.5 # Newmark time integration
-    eta = 19.63
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    beta = 0.25
-    gamma = 0.5
-    eta = 19.63
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-    beta = 0.25
-    gamma = 0.5
-    eta = 19.63
   [../]
 []
 
+
 [AuxKernels]
-  [./accel_x] # Calculates and stores acceleration at the end of time step
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_x] # Calculates and stores velocity at the end of the time step
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_z]
-    type = NewmarkAccelAux
-    variable = accel_z
-    displacement = disp_z
-    velocity = vel_z
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_z]
-    type = NewmarkVelAux
-    variable = vel_z
-    acceleration = accel_z
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -259,12 +177,6 @@
     poissons_ratio = 0.3
     type = ComputeIsotropicElasticityTensor
     block = 0
-  [../]
-  [./strain]
-    #Computes the strain, assuming small strains
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     #Computes the stress, using linear elasticity
