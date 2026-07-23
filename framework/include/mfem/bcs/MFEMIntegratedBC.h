@@ -33,6 +33,11 @@ public:
   /// Get name of the trial variable (gridfunction) the bc acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
+
+  /// Method to disambiguate whether we have a regular BC or a DG BC.
+  /// DG BCs are added to (Bi)linear forms with a different method, so
+  /// we first perform this check to see what we are dealing with.
+  virtual bool IsDGBC() const { return false; }
 };
 
 #endif
