@@ -428,7 +428,7 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> _problem_operator_builders;
 };
 
 template <typename T>
