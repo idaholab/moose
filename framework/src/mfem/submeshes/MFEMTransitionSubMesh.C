@@ -9,29 +9,35 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMCutTransitionSubMesh.h"
+#include "MFEMTransitionSubMesh.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMCutTransitionSubMesh);
+registerMooseObject("MooseApp", MFEMTransitionSubMesh);
+registerMooseObjectRenamed("MooseApp",
+                           MFEMCutTransitionSubMesh,
+                           "07/23/2027 00:00",
+                           MFEMTransitionSubMesh);
 
 InputParameters
-MFEMCutTransitionSubMesh::validParams()
+MFEMTransitionSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
   params += MFEMBlockRestrictable::validParams();
   params.addClassDescription(
-      "Class to construct an MFEMSubMesh formed from the set of elements that have least one "
-      "vertex on the specified cut plane, that lie on one side of the plane, "
-      "and that are restricted to the set of user-specified subdomains.");
-  params.addRequiredParam<BoundaryName>("cut_boundary",
-                                        "The boundary associated with the mesh cut.");
+      "Class to construct an MFEMSubMesh formed from the set of elements that have at least one "
+      "vertex on the specified boundary, that lie on one side of it (the single interior side "
+      "for an exterior boundary), and that are restricted to the set of user-specified "
+      "subdomains.");
+  params.addRequiredParam<BoundaryName>(
+      "cut_boundary", "The boundary from which the transition region is constructed.");
+  params.deprecateParam("cut_boundary", "boundary", "07/23/2027");
   params.addRequiredParam<BoundaryName>(
       "transition_subdomain_boundary",
-      "Name to assign boundary of transition subdomain not shared with cut surface.");
+      "Name to assign boundary of transition subdomain not shared with the boundary surface.");
   params.addRequiredParam<SubdomainName>(
       "transition_subdomain",
       "The name of the subdomain to be created on the mesh comprised of the set of elements "
-      "adjacent to the cut surface on one side.");
+      "adjacent to the boundary on one side.");
   params.addRequiredParam<SubdomainName>(
       "closed_subdomain",
       "The name of the subdomain attribute to be created comprised of the set of all elements "
@@ -39,21 +45,21 @@ MFEMCutTransitionSubMesh::validParams()
   return params;
 }
 
-MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & parameters)
+MFEMTransitionSubMesh::MFEMTransitionSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    _cut_boundary(getParam<BoundaryName>("cut_boundary")),
-    _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
-        getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
+    _boundary(getParam<BoundaryName>("boundary")),
+    _boundary_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
+        getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_boundary)))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
-    _cut_normal(3)
+    _boundary_normal(3)
 {
 }
 
 void
-MFEMCutTransitionSubMesh::buildSubMesh()
+MFEMTransitionSubMesh::buildSubMesh()
 {
   labelMesh(const_cast<mfem::ParMesh &>(getMesh()));
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
@@ -67,24 +73,24 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 }
 
 void
-MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
+MFEMTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
   int mpi_comm_rank = getMFEMProblem().getProblemData().myid;
   int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
 
   // First determine face normal based on the first boundary element found on the cut
   // to use when determining orientation relative to the cut
-  const mfem::Array<int> & parent_cut_element_id_map = _cut_submesh->GetParentElementIDMap();
+  const mfem::Array<int> & parent_cut_element_id_map = _boundary_submesh->GetParentElementIDMap();
   int rank_with_submesh = -1;
   if (parent_cut_element_id_map.Size() > 0)
   {
     int reference_face = parent_cut_element_id_map[0];
-    _cut_normal = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
+    _boundary_normal = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
     rank_with_submesh = mpi_comm_rank;
   }
   MPI_Allreduce(MPI_IN_PLACE, &rank_with_submesh, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
-  MPI_Bcast(_cut_normal.GetData(),
-            _cut_normal.Size(),
+  MPI_Bcast(_boundary_normal.GetData(),
+            _boundary_normal.Size(),
             MFEM_MPI_REAL_T,
             rank_with_submesh,
             getMFEMProblem().getComm());
@@ -95,8 +101,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   mfem::Array<HYPRE_BigInt> gi;
   parent_mesh.GetGlobalVertexIndices(gi);
   std::unique_ptr<mfem::Table> vert_to_elem(parent_mesh.GetVertexToElementTable());
-  const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
-  for (int i = 0; i < _cut_submesh->GetNV(); ++i)
+  const mfem::Array<int> & cut_to_parent_vertex_id_map = _boundary_submesh->GetParentVertexIDMap();
+  for (int i = 0; i < _boundary_submesh->GetNV(); ++i)
   {
     int cut_vert = cut_to_parent_vertex_id_map[i];
     global_cut_vert_ids.push_back(gi[cut_vert]);
@@ -161,10 +167,10 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 }
 
 mfem::Vector
-MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
+MFEMTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
 {
   if (mesh.SpaceDimension() != 3)
-    mooseError("MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
+    mooseError("MFEMTransitionSubMesh only works in 3-dimensional meshes!");
   mfem::Vector normal;
   mfem::Array<int> face_verts;
   std::vector<mfem::Vector> v;
@@ -188,7 +194,7 @@ MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int &
 }
 
 bool
-MFEMCutTransitionSubMesh::isPositiveSideOfCut(const int & el,
+MFEMTransitionSubMesh::isPositiveSideOfCut(const int & el,
                                               const int & el_vertex_on_cut,
                                               mfem::ParMesh & parent_mesh)
 {
@@ -199,11 +205,11 @@ MFEMCutTransitionSubMesh::isPositiveSideOfCut(const int & el,
   mfem::Vector relative_center(sdim);
   for (int j = 0; j < sdim; j++)
     relative_center[j] = el_center[j] - vertex_coords[j];
-  return _cut_normal * relative_center > 0;
+  return _boundary_normal * relative_center > 0;
 }
 
 void
-MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
+MFEMTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
                                         mfem::Array<int> & transition_els)
 {
   // Generate a set of local new attributes for transition region elements
@@ -251,7 +257,7 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
 }
 
 bool
-MFEMCutTransitionSubMesh::isInDomain(const int & element,
+MFEMTransitionSubMesh::isInDomain(const int & element,
                                      const mfem::Array<int> & subdomains,
                                      const mfem::ParMesh & mesh)
 {
