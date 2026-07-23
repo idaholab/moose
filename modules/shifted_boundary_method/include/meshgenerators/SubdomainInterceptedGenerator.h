@@ -37,8 +37,8 @@ protected:
   /// Lambda parameter for false intersection classification
   Real _lambda;
 
-  /// Outer boundary handling flag
-  bool _outer_boundary;
+  /// If true, the inside subdomain is the region enclosed by the surface (negative side)
+  bool _is_domain_inside_surface;
 
   /// for multi-geometry handling
   bool _multi_geo;

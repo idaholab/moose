@@ -22,4 +22,13 @@
     requirement = 'The system shall solve a shifted cohesive zone problem with the field '
                   'correction term enabled in the ShiftedCohesiveZone interface kernel.'
   []
+
+  [rectangle_sczm_tri_material_exodus]
+    type = 'Exodiff'
+    input = 'rectangle_sczm_tri_material.i'
+    exodiff = 'rectangle_sczm_tri_material_out.e'
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    recover = false
+    requirement = 'The system shall solve a shifted cohesive zone problem and output the results in Exodus format.'
+  []
 []

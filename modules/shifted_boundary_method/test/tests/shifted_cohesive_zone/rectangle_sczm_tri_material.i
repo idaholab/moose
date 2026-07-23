@@ -43,7 +43,7 @@ dt = 1
     subdomain_id_inside = 1
     subdomain_id_outside = 2
     lambda = 0.5
-    outer_boundary = true
+    is_domain_inside_surface = true
     signed_dist_function = 'x-${x0}'
   []
 

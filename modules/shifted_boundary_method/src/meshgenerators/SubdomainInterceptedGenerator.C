@@ -27,7 +27,10 @@ SubdomainInterceptedGenerator::validParams()
 
   params.addParam<Real>("threshold", 0.0, "Threshold for inside/outside classification.");
   params.addRequiredParam<Real>("lambda", "Lambda for false intersection classification.");
-  params.addRequiredParam<bool>("outer_boundary", "Flag for outer boundary handling.");
+  params.addRequiredParam<bool>(
+      "is_domain_inside_surface",
+      "If true, the inside subdomain is the region enclosed by the surface (negative signed "
+      "distance side); if false, the inside subdomain is the exterior (positive side).");
   params.addParam<bool>("multi_geo", false, "Do you have multiple geometries to do in-out test?");
   params.addParam<bool>("keep_inside_as_inside", false, "Keep inside as inside.");
   params.addParam<bool>("keep_outside_as_outside", false, "Keep outside as outside.");
@@ -56,7 +59,7 @@ SubdomainInterceptedGenerator::SubdomainInterceptedGenerator(const InputParamete
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
     _threshold(getParam<Real>("threshold")),
     _lambda(getParam<Real>("lambda")),
-    _outer_boundary(getParam<bool>("outer_boundary")),
+    _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
     _multi_geo(getParam<bool>("multi_geo")),
     _keep_inside_as_inside(getParam<bool>("keep_inside_as_inside")),
     _keep_outside_as_outside(getParam<bool>("keep_outside_as_outside")),
@@ -110,12 +113,12 @@ SubdomainInterceptedGenerator::generate()
     // (c) Trivial inside / outside if all nodes are on the same side.
     if (max_phi < _threshold)
     {
-      elem->subdomain_id() = _outer_boundary ? outside_id : inside_id;
+      elem->subdomain_id() = _is_domain_inside_surface ? inside_id : outside_id;
       continue;
     }
     else if (min_phi > _threshold)
     {
-      elem->subdomain_id() = _outer_boundary ? inside_id : outside_id;
+      elem->subdomain_id() = _is_domain_inside_surface ? outside_id : inside_id;
       continue;
     }
 
@@ -125,7 +128,8 @@ SubdomainInterceptedGenerator::generate()
     {
       _func_params = {p(0), p(1), p(2)};
       Real phi = evaluate(_parsed_function);
-      return (_outer_boundary && phi < _threshold) || (!_outer_boundary && phi > _threshold);
+      return (_is_domain_inside_surface && phi < _threshold) ||
+             (!_is_domain_inside_surface && phi > _threshold);
     };
 
     const Real ratio_active =
