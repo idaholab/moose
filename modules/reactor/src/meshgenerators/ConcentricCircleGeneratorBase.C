@@ -254,6 +254,8 @@ ConcentricCircleGeneratorBase::assignBlockIdsNames(ReplicatedMesh & mesh,
       }
   for (unsigned i = 0; i < block_ids_new.size(); ++i)
     mesh.subdomain_name(block_ids_new[i]) = block_names[i];
+
+  mesh.unset_has_cached_elem_data(); // We changed subdomain ids
 }
 
 void

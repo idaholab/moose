@@ -110,7 +110,6 @@ MeshRepairGenerator::generate()
   if (_split_nonconvex_polygons)
     splitNonConvexPolygons(mesh);
 
-  mesh->unset_is_prepared();
   return mesh;
 }
 
@@ -187,14 +186,17 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
       }
     }
   }
+
+  // We've orphaned the nodes we just disconnected
+  mesh->unset_has_removed_orphaned_nodes();
+
+  // Merging nodes means we may have newly-adjacent neighbors
+  mesh->unset_has_neighbor_ptrs();
+
+  // We've probably invalidated our id counts
+  mesh->unset_has_synched_id_counts();
+
   _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
-  if (mesh->allow_renumbering())
-    mesh->renumber_nodes_and_elements();
-  else
-  {
-    mesh->remove_orphaned_nodes();
-    mesh->update_parallel_id_counts();
-  }
 }
 
 void
@@ -231,6 +233,8 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
       }
     }
   }
+
+  mesh->unset_has_cached_elem_data();
 }
 
 void
@@ -247,6 +251,10 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
   if (!mesh->is_serial())
     mooseError("MeshRepairGenerator requires a serial mesh for this operation. "
                "The mesh should not be distributed.");
+
+  // We're not supporting boundary info updates here, but let's scream
+  // if that's a problem.
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   for (auto elem : mesh->element_ptr_range())
   {
@@ -453,6 +461,11 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
       }
       // Element got fixed, can be deleted after (can't while using the range)
       elems_to_delete.push_back(elem);
+
+      for (auto s : make_range(elem->n_sides()))
+        if (boundary_info.n_boundary_ids(elem, s))
+          mooseError("MeshRepairGenerator does not yet support "
+                     "splitting polygons with side boundaries");
     }
   }
   // Delete the original element
@@ -461,6 +474,19 @@ MeshRepairGenerator::splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) co
   // Add the new ones
   for (auto & new_elem_ptr : elements_to_add_to_mesh)
     mesh->add_elem(std::move(new_elem_ptr));
+
+  // We may no longer be prepared
+  if (!elems_to_delete.empty())
+  {
+    // Cached data that might need to be recalculated later
+    mesh->unset_has_neighbor_ptrs();
+    mesh->unset_has_reinit_ghosting_functors();
+
+    // Cached data that might need to be recalculated later after we
+    // start supporting distributed meshes here
+    mesh->unset_has_synched_id_counts();
+    mesh->unset_has_removed_remote_elements();
+  }
 
   _console << "Number of non-convex polygons which got split into convex polygons: "
            << num_nonconvex << std::endl;

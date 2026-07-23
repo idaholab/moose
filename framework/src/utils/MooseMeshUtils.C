@@ -59,6 +59,8 @@ mergeBoundaryIDsWithSameName(MeshBase & mesh)
 
   for (const auto & [id1, id2] : same_name_ids)
     mesh.get_boundary_info().renumber_id(id2, id1);
+
+  mesh.unset_has_boundary_id_sets();
 }
 
 void
@@ -102,7 +104,7 @@ changeBoundaryId(MeshBase & mesh,
     boundary_info.remove_id(old_id);
 
   // global information may now be out of sync
-  mesh.unset_is_prepared();
+  mesh.unset_has_boundary_id_sets();
 }
 
 std::vector<boundary_id_type>
@@ -273,7 +275,7 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
       elem->subdomain_id() = new_id;
 
   // global cached information may now be out of sync
-  mesh.unset_is_prepared();
+  mesh.unset_has_cached_elem_data();
 }
 
 Point
@@ -499,7 +501,8 @@ SubdomainID
 getNextFreeSubdomainID(MeshBase & input_mesh)
 {
   // Call this to get most up to date block id information
-  input_mesh.cache_elem_data();
+  if (!input_mesh.preparation().has_cached_elem_data)
+    input_mesh.cache_elem_data();
 
   std::set<SubdomainID> preexisting_subdomain_ids;
   input_mesh.subdomain_ids(preexisting_subdomain_ids);
@@ -1405,6 +1408,11 @@ copyIntoMesh(MeshGenerator & mg,
   for (const auto & [edgeset_id, edgeset_name] : other_boundary.get_edgeset_name_map())
     boundary.set_edgeset_name_map().insert(
         std::make_pair<BoundaryID, BoundaryName>(edgeset_id + bid_offset, edgeset_name));
+
+  // libMesh copy_nodes_and_elements should have set us as unprepared
+  // as appropriate for itself, but then we've been editing boundary
+  // ids afterward
+  destination.unset_has_boundary_id_sets();
 }
 
 void

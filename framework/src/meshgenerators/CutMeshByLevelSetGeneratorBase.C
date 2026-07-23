@@ -173,7 +173,7 @@ CutMeshByLevelSetGeneratorBase::generate()
   std::vector<std::vector<unsigned int>> transition_elems_sides_list;
   if (_generate_transition_layer)
   {
-    if (!mesh.is_prepared())
+    if (!mesh.preparation().has_neighbor_ptrs)
       mesh.find_neighbors();
     // First, we need to identify the retained elements that share the boundary with the crossed
     // elements.
@@ -285,7 +285,7 @@ CutMeshByLevelSetGeneratorBase::generate()
     mesh.delete_elem(*elem_it);
 
   mesh.contract();
-  mesh.unset_is_prepared();
+  mesh.unset_has_boundary_id_sets();
   return std::move(_input);
 }
 
@@ -346,15 +346,18 @@ const Node *
 CutMeshByLevelSetGeneratorBase::nonDuplicateNodeCreator(
     ReplicatedMesh & mesh,
     std::vector<const Node *> & new_on_plane_nodes,
-    const Point & new_point) const
+    const Point & new_point,
+    processor_id_type new_pid) const
 {
   for (const auto & new_on_plane_node : new_on_plane_nodes)
   {
     if (MooseUtils::absoluteFuzzyEqual((*new_on_plane_node - new_point).norm(), 0.0))
       return new_on_plane_node;
   }
-  new_on_plane_nodes.push_back(mesh.add_point(new_point));
-  return new_on_plane_nodes.back();
+  Node * node = mesh.add_point(new_point);
+  node->processor_id() = new_pid;
+  new_on_plane_nodes.push_back(node);
+  return node;
 }
 
 void
@@ -437,15 +440,20 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(tet4_nodes_inside_plane[0]));
       new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[0]));
       new_elem_tet4->set_node(2, const_cast<Node *>(new_plane_nodes[1]));
       new_elem_tet4->set_node(3, const_cast<Node *>(new_plane_nodes[2]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+      // Copy processor_id, mapping, etc.  Do this *after* add_elem
+      // for serialized DistributedMesh compatibility.
+      elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 2)
     {
@@ -458,7 +466,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
           new_plane_nodes.push_back(nonDuplicateNodeCreator(
               mesh,
               new_on_plane_nodes,
-              pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_node_inside_plane)));
+              pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_node_inside_plane),
+              mesh.elem_ptr(elem_id)->processor_id()));
         }
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[1],
@@ -479,8 +488,12 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+        // Copy processor_id, mapping, etc.  Do this *after* add_elem
+        // for serialized DistributedMesh compatibility.
+        elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
       }
     }
     else if (tet4_nodes_inside_plane.size() == 3 && tet4_nodes_outside_plane.size() == 1)
@@ -492,7 +505,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
                                                    tet4_nodes_inside_plane[1],
@@ -512,8 +526,12 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+        // Copy processor_id, mapping, etc.  Do this *after* add_elem
+        // for serialized DistributedMesh compatibility.
+        elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
       }
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 1)
@@ -521,15 +539,20 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       auto new_plane_node = nonDuplicateNodeCreator(
           mesh,
           new_on_plane_nodes,
-          pointPairLevelSetInterception(*tet4_nodes_inside_plane[0], *tet4_nodes_outside_plane[0]));
+          pointPairLevelSetInterception(*tet4_nodes_inside_plane[0], *tet4_nodes_outside_plane[0]),
+          mesh.elem_ptr(elem_id)->processor_id());
       // A smaller Tet4 is created, this solution is unique
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_node));
       new_elem_tet4->set_node(1, const_cast<Node *>(tet4_nodes_on_plane[0]));
       new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[1]));
       new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+      // Copy processor_id, mapping, etc.  Do this *after* add_elem
+      // for serialized DistributedMesh compatibility.
+      elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 2)
     {
@@ -540,15 +563,20 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_nodes[0]));
       new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[1]));
       new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[0]));
       new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+      // Copy processor_id, mapping, etc.  Do this *after* add_elem
+      // for serialized DistributedMesh compatibility.
+      elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 1)
     {
@@ -559,7 +587,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
                                                    tet4_nodes_inside_plane[1],
@@ -578,8 +607,12 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
+
+        // Copy processor_id, mapping, etc.  Do this *after* add_elem
+        // for serialized DistributedMesh compatibility.
+        elems_tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
       }
     }
     else
