@@ -52,18 +52,22 @@ Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & m
     {
       mfem_problem.getProblemData().eqn_system =
           std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-      _problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
+      _problem_operator =
+          std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
     }
     else
     {
       mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-      _problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
+      _problem_operator =
+          std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
     }
   }
   else if (mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
   {
-    mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-    _problem_operator = std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
+    mfem_problem.getProblemData().eqn_system =
+        std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+    _problem_operator =
+        std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
   }
   else
   {

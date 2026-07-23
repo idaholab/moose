@@ -30,44 +30,44 @@
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 {
 private:
-  int dummVar = 0;
+  int _dumm_var = 0;
   // The linear and bilinear forms
-  mfem::ParBilinearForm * a;
-  mfem::ParLinearForm * b;
+  mfem::ParBilinearForm * _a;
+  mfem::ParLinearForm * _b;
 
   // The coefficient
-  mfem::ConstantCoefficient one;
+  mfem::ConstantCoefficient _one;
 
   // The boundary conditions arrays
-  mfem::Array<int> boundary_dofs;
+  mfem::Array<int> _boundary_dofs;
 
   // The operator and solution vectors (could
   // potentially use the ones in the base class)
-  mfem::OperatorHandle probOp; // The actual mfem problem operator
-  mfem::Vector B, X;
+  mfem::OperatorHandle _problem_operator; // The actual mfem problem operator
+  mfem::Vector _B, _X;
 
 public:
   // The constructor
-  CustomDummyProblemOperator(MFEMProblem & prob0);
+  CustomDummyProblemOperator(MFEMProblem & problem);
 
   // Solve the equation
   virtual void Solve() override
   {
     // Test to check if correct solve is called
-    dummVar = 10;
+    _dumm_var = 10;
 
     // Set the operator and solve the equation
-    _problem_data.jacobian_solver->SetOperator(*probOp);
-    _problem_data.jacobian_solver->GetSolver().Mult(B, X);
+    _problem_data.jacobian_solver->SetOperator(*_problem_operator);
+    _problem_data.jacobian_solver->GetSolver().Mult(_B, _X);
 
     // Set the data in the grid function
-    const std::string gFuncName = "var0";
-    auto gfunc = _problem_data.gridfunctions.GetShared(gFuncName);
-    gfunc->SetFromTrueDofs(X);
+    const std::string _grid_function_name = "var0";
+    auto _grid_function = _problem_data.gridfunctions.GetShared(_grid_function_name);
+    _grid_function->SetFromTrueDofs(_X);
   };
 
   // Get the dummy Variable
-  int & GetDumVar() { return dummVar; };
+  int & getDumVar() { return _dumm_var; };
 
   // Multiply by the operator
   void Mult(const mfem::Vector &, mfem::Vector &) const override {};
@@ -78,27 +78,27 @@ CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0)
 {
   // Retrieve the FE-space and gridFunction
-  const std::string FEspaceName = "h1";
-  const std::string gFuncName = "var0";
-  auto fes = prob0.getProblemData().fespaces.GetShared(FEspaceName);
-  auto gfunc = prob0.getProblemData().gridfunctions.GetShared(gFuncName);
+  const std::string _fe_space_name = "h1";
+  const std::string _grid_function_name = "var0";
+  auto _fes = prob0.getProblemData().fespaces.GetShared(_fe_space_name);
+  auto _grid_function = prob0.getProblemData().gridfunctions.GetShared(_grid_function_name);
 
   // Boundary conditions
-  *gfunc = 0.00;
-  fes->GetBoundaryTrueDofs(boundary_dofs);
+  *_grid_function = 0.00;
+  _fes->GetBoundaryTrueDofs(_boundary_dofs);
 
   // Build the linear form
-  b = new mfem::ParLinearForm(&(*fes));
-  b->AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
-  b->Assemble();
+  _b = new mfem::ParLinearForm(&(*_fes));
+  _b->AddDomainIntegrator(new mfem::DomainLFIntegrator(_one));
+  _b->Assemble();
 
   // Build the bilinear form
-  a = new mfem::ParBilinearForm(&(*fes));
-  a->AddDomainIntegrator(new mfem::DiffusionIntegrator);
-  a->Assemble();
+  _a = new mfem::ParBilinearForm(&(*_fes));
+  _a->AddDomainIntegrator(new mfem::DiffusionIntegrator);
+  _a->Assemble();
 
   // Form the linear system
-  a->FormLinearSystem(boundary_dofs, *gfunc, *b, probOp, X, B);
+  _a->FormLinearSystem(_boundary_dofs, *_grid_function, *_b, _problem_operator, _X, _B);
 };
 
 namespace Moose::MFEM
@@ -123,9 +123,9 @@ public:
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-  createProblemOperator(MFEMProblem & mfemProb) override
+  createProblemOperator(MFEMProblem & _mfem_problem) override
   {
-    return std::make_shared<CustomDummyProblemOperator>(mfemProb);
+    return std::make_shared<CustomDummyProblemOperator>(_mfem_problem);
   };
 };
 
@@ -143,8 +143,8 @@ class MFEMCustomProbOperatorTest : public MFEMObjectUnitTest
 {
 public:
   // The test data
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> probOpBuilder;
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> probOp;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> _problem_operator_builder;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // The test constructor
   MFEMCustomProbOperatorTest() : MFEMObjectUnitTest("MooseUnitApp")
@@ -167,11 +167,11 @@ public:
 
     // Add the custom problem operator builder
     // then get it and build the operator
-    InputParameters prob_Op_params = _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
+    InputParameters _problem_operator_params = _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
     _mfem_problem->addMFEMProblemOperator(
-        "ProblemOperatorBuilderCustomDummy", "cust_probOp", prob_Op_params);
-    probOpBuilder = _mfem_problem->getProblemOperatorBuilder();
-    probOp = probOpBuilder->createProblemOperator(*_mfem_problem);
+        "ProblemOperatorBuilderCustomDummy", "custom_problem_operator", _problem_operator_params);
+    _problem_operator_builder = _mfem_problem->getProblemOperatorBuilder();
+    _problem_operator = _problem_operator_builder->createProblemOperator(*_mfem_problem);
   };
 
 protected:
@@ -188,7 +188,7 @@ protected:
 TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
 {
   // Solver problem using the MOOSE-MFEM route
-  probOp->Solve();
+  _problem_operator->Solve();
 
   /**
    * Solve the equation using
@@ -204,39 +204,39 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
   // Dirchelet boundary condition
   mfem::Array<int> boundary_dofs0;
   fespace0.GetBoundaryTrueDofs(boundary_dofs0);
-  mfem::ParGridFunction xFunc(&fespace0);
-  xFunc = 0.0;
+  mfem::ParGridFunction x_func(&fespace0);
+  x_func = 0.0;
 
   // Setup the linear forms
-  mfem::ConstantCoefficient One(1.0);
-  mfem::ParLinearForm bForm(&fespace0);
-  bForm.AddDomainIntegrator(new mfem::DomainLFIntegrator(One));
-  bForm.Assemble();
+  mfem::ConstantCoefficient one(1.0);
+  mfem::ParLinearForm b_form(&fespace0);
+  b_form.AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
+  b_form.Assemble();
 
   // Setup the bilinear forms
-  mfem::ParBilinearForm aForm(&fespace0);
-  aForm.AddDomainIntegrator(new mfem::DiffusionIntegrator);
-  aForm.Assemble();
+  mfem::ParBilinearForm a_form(&fespace0);
+  a_form.AddDomainIntegrator(new mfem::DiffusionIntegrator);
+  a_form.Assemble();
 
   // Form the linear system
-  mfem::HypreParMatrix Amat;
-  mfem::Vector Bvec, Xvec;
-  aForm.FormLinearSystem(boundary_dofs0, xFunc, bForm, Amat, Xvec, Bvec);
+  mfem::HypreParMatrix a_mat;
+  mfem::Vector B_vec, X_vec;
+  a_form.FormLinearSystem(boundary_dofs0, x_func, b_form, a_mat, X_vec, B_vec);
 
   // Set the linear solver and solve
   mfem::MUMPSSolver SolverDir(MPI_COMM_WORLD);
-  SolverDir.SetOperator(Amat);
+  SolverDir.SetOperator(a_mat);
   SolverDir.SetPrintLevel(0);
 
   // Recover solutions
-  aForm.RecoverFEMSolution(Xvec, bForm, xFunc);
+  a_form.RecoverFEMSolution(X_vec, b_form, x_func);
 
   /**
    * Examine test results
    */
   // Check whether the Solver ran with a dummy var
-  auto probOp1 = std::static_pointer_cast<CustomDummyProblemOperator>(probOp);
-  EXPECT_EQ(probOp1->GetDumVar(), 10);
+  auto _problem_operator1 = std::static_pointer_cast<CustomDummyProblemOperator>(_problem_operator);
+  EXPECT_EQ(_problem_operator1->getDumVar(), 10);
 
   // Check number of Vertices in the mesh
   EXPECT_EQ(pmesh.GetNV(), _mfem_mesh_ptr->getMFEMParMesh().GetNV());
@@ -245,9 +245,9 @@ TEST_F(MFEMCustomProbOperatorTest, TestMFEMCustomOperators)
   EXPECT_EQ(pmesh.bdr_attributes.Size(), _mfem_mesh_ptr->getMFEMParMesh().bdr_attributes.Size());
 
   // Check the error norm of the solution
-  const std::string gFuncName = "var0";
-  auto gfunc = _mfem_problem->getProblemData().gridfunctions.GetShared(gFuncName);
-  xFunc -= *gfunc;
-  EXPECT_NEAR(xFunc.Norml2(), 0, 1.0e-7);
+  const std::string grid_function_name = "var0";
+  auto grid_function = _mfem_problem->getProblemData().gridfunctions.GetShared(grid_function_name);
+  x_func -= *grid_function;
+  EXPECT_NEAR(x_func.Norml2(), 0, 1.0e-7);
 };
 #endif
