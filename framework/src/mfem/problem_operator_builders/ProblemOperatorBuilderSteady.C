@@ -41,36 +41,36 @@ Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & mfemProb)
+Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> probOp;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // Construct a standard problem operator
-  if (mfemProb.getNumericType() == MFEMProblem::NumericType::REAL)
+  if (mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
   {
-    if (dynamic_cast<MFEMEigenproblem *>(&mfemProb))
+    if (dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
     {
-      mfemProb.getProblemData().eqn_system =
+      mfem_problem.getProblemData().eqn_system =
           std::make_shared<Moose::MFEM::EigenproblemEquationSystem>();
-      probOp = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfemProb);
+      _problem_operator = std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem);
     }
     else
     {
-      mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-      probOp = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfemProb);
+      mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+      _problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(mfem_problem);
     }
   }
-  else if (mfemProb.getNumericType() == MFEMProblem::NumericType::COMPLEX)
+  else if (mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
   {
-    mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-    probOp = std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfemProb);
+    mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+    _problem_operator = std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(mfem_problem);
   }
   else
   {
     mooseError("Unknown numeric type. "
                "Please set the Problem numeric type to either 'real' or 'complex'.");
   }
-  return probOp;
+  return _problem_operator;
 }
 
 #endif

@@ -289,13 +289,13 @@ public:
    */
   std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder()
   {
-    return probOpBuilder[0];
+    return _problem_operator_builders[0];
   }
 
   /**
    * Checks whether problem Operator builder interface is empty.
    */
-  bool problemOperatorBuilderIsEmpty() { return probOpBuilder.size() == 0; };
+  bool problemOperatorBuilderIsEmpty() { return _problem_operator_builders.size() == 0; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.

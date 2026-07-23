@@ -149,7 +149,7 @@ MFEMProblem::addMFEMProblemOperator(const std::string & user_object_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  probOpBuilder =
+  _problem_operator_builders =
       addObject<Moose::MFEM::ProblemOperatorBuilderBase>(user_object_name, name, parameters);
 }
 

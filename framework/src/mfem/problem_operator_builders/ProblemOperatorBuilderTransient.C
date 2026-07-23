@@ -37,15 +37,15 @@ Moose::MFEM::ProblemOperatorBuilderTransient::ProblemOperatorBuilderTransient(
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem & mfemProb)
+Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem & mfem_problem)
 {
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> probOp;
+  std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // Construct the problem operator
-  mfemProb.getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-      mfemProb.getProblemData().time_derivative_map);
-  probOp = std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfemProb);
-  return probOp;
+  mfem_problem.getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
+      mfem_problem.getProblemData().time_derivative_map);
+  _problem_operator = std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(mfem_problem);
+  return _problem_operator;
 }
 
 #endif
