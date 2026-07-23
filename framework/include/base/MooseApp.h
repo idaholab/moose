@@ -663,6 +663,17 @@ public:
    */
   void possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
                                        const std::filesystem::path & folder_base);
+
+  /**
+   * Registers the current mesh input fingerprint in the mesh meta data map for split mesh output.
+   */
+  void prepareSplitMeshMetaData();
+
+  /**
+   * Checks that the mesh input fingerprint stored with a pre-split mesh matches this run.
+   */
+  void checkSplitMeshMetaData(const std::filesystem::path & folder_base);
+
   /**
    * Loads all available restartable meta data if it is available with the folder base \p
    * folder_base
@@ -1475,6 +1486,12 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /// Computes the current mesh input fingerprint for split mesh consistency checks
+  std::string splitMeshInputFingerprint();
+
+  /// Computes the current canonical mesh input summary used for the split mesh fingerprint
+  std::string splitMeshInputSummary();
+
   /**
    * Internal function used to recursively create the executor objects.
    *

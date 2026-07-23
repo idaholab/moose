@@ -214,6 +214,7 @@ MeshOnlyAction::act()
     io.write(mesh_file);
 
     // Write mesh metadata
+    _app.prepareSplitMeshMetaData();
     if (processor_id() == 0)
     {
       const auto filenames = _app.writeRestartableMetaData(MooseApp::MESH_META_DATA, mesh_file);
