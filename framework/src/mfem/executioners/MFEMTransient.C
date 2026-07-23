@@ -32,14 +32,15 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_solve(*this, getProblemOperators())
 {
   // If no ProblemOperators have been added by the user, add a default
-  if (getProblemOperators().empty())
+  if (_mfem_problem.problemOperatorBuilderIsEmpty() == true)
   {
-    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-        _mfem_problem_data.time_derivative_map);
-    auto problem_operator =
-        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(_mfem_problem);
-    addProblemOperator(std::move(problem_operator));
+    InputParameters _default_params = _factory.getValidParams("ProblemOperatorBuilderTransient");
+    std::string _name = "default_transient";
+    std::string _type = "ProblemOperatorBuilderTransient";
+    _mfem_problem.addMFEMProblemOperator(_type, _name, _default_params);
   }
+  addProblemOperator(
+      _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem));
 }
 
 void

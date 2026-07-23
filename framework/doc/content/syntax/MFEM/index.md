@@ -67,6 +67,26 @@ Now we set up boundary conditions. Here, we choose scalar Dirichlet boundary con
 
 !listing test/tests/mfem/kernels/diffusion.i block=/BCs
 
+### Problem Operators and Builders
+
+The problem operator block is a custom block that allows for an abstract operator action on a
+
+solution vector, this can be a solve of an equation system, application of a preconditioner or
+
+any other custom operator the user may have. The problem operator builder is the systematic
+
+logical object that builds the problem operator by default there are two problem operator
+
+builder classes that are made automatically by inference of the executioners and equation system,
+
+however they can be explicitly input with the following examples for steady:
+
+!listing test/tests/mfem/kernels/prob_op_block_darcy.i block=/ProblemOperatorBuilder
+
+and similarly for transient problems:
+
+!listing test/tests/mfem/kernels/prob_op_block_heattransfer.i block=/ProblemOperatorBuilder
+
 ### Solver and Executioner
 
 With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. For problems with high polynomial order, setting [!param](/Solvers/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMLinearSolverBase.md).

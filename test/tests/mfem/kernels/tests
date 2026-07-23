@@ -313,4 +313,29 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMProblemOperatorBuilderSteady]
+    type = CSVDiff
+    input = prob_op_block_darcy.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall be able to declare a ProblemOperatorBuilderSteady while using the MFEM block without changing the results of the MFEM Darcy problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMProblemOperatorBuilderTransient]
+    type = XMLDiff
+    input = prob_op_block_heattransfer.i
+    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
+              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
+              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    cli_args = 'BCs/active="bottom top_dirichlet" '
+               'Executioner/dt=0.25 Executioner/end_time=1.0 '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+    requirement = 'The system shall be able to declare a ProblemOperatorBuilderTransient while using the MFEM block without changing the results of the MFEM HeatTransfer problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
 []
