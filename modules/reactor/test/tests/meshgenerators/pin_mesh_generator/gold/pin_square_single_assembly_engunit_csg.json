@@ -1,0 +1,33 @@
+{
+  "units": {
+    "pin1": {
+      "attributes": {
+        "duct_apothems": [
+          3.0,
+          3.551575
+        ],
+        "geometry_type": "Square",
+        "region_ids": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "ring_radii": [
+          2.0
+        ]
+      },
+      "behavior": "CELL",
+      "unit_type": "CSG::PinEngineeringUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1"
+      ],
+      "root": true
+    }
+  }
+}
