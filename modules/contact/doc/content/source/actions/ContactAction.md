@@ -22,6 +22,24 @@ interpolations for quadratic-element mortar contact and show that corner-node/li
 pressure fields can avoid inconsistencies that arise with quadratic contact pressure interpolations
 while retaining good convergence [!cite](puso2008segment).
 
+For quasistatic Coulomb mortar contact,
+[!param](/Contact/ContactAction/friction_ncp_formulation) selects the tangential nonlinear
+complementarity map independently of the source of `c_normal` and `c_tangential`.
+`hueber_stadler_wohlmuth` is the default degree-two scaled map and
+`alart_curnier` selects the degree-one projection map. Both use physical pressure
+multipliers and the same solver-side column and equation-row scaling. See
+[ComputeFrictionalForceLMMechanicalContact](/ComputeFrictionalForceLMMechanicalContact.md) for the
+formulas, sign convention, and separated-state guard. Mortar dynamics is unchanged and does not
+accept this option.
+
+Normal and tangential mortar multipliers remain physical pressures for both scale strategies and
+both friction maps. Outputs, samplers, restarts, field splits, heat transfer, wear, and other
+pressure consumers therefore keep the same semantics, and switching between `user` and
+`physical` scale sources across a restart does not reinterpret stored values. The
+effectively scaled active normal and sticking blocks can be nearly symmetric. Sliding friction,
+Petrov--Galerkin mortar, geometric terms, and nonsymmetric material tangents can still make the
+system nonsymmetric.
+
 For node-to-segment mechanical contact, the action offers the possibility to automatically set up
 mechanical contact pairs given a maximum distance between contacting boundary centroids.
 To use that option, the user must set `automatic_pairing_method = CENTROID`.

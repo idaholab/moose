@@ -26,7 +26,9 @@
 #include "timpi/parallel_sync.h"
 
 #include <utility>
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <unordered_map>
 #include <vector>
 
@@ -56,6 +58,91 @@ namespace Mortar
 {
 namespace Contact
 {
+
+/** Return the augmented normal pressure p_n - C_n g_bar. */
+template <typename T>
+T
+augmentedNormalPressure(const T & normal_pressure, const T & scaled_normal_gap)
+{
+  return normal_pressure - scaled_normal_gap;
+}
+
+/** Return the nonnegative Coulomb-ball radius. */
+template <typename T>
+T
+coulombFrictionRadius(const T & friction_coefficient, const T & augmented_normal_pressure)
+{
+  return friction_coefficient * std::max(T(0), augmented_normal_pressure);
+}
+
+/** Return the Euclidean norm of a tangential contact vector. */
+template <typename T, std::size_t N>
+T
+tangentialNorm(const std::array<T, N> & vector)
+{
+  T norm_squared = 0;
+  for (const auto & component : vector)
+    norm_squared += component * component;
+
+  using std::sqrt;
+  return sqrt(norm_squared);
+}
+
+/** Project a tangential contact vector onto the closed ball of radius \p radius. */
+template <typename T, std::size_t N>
+std::array<T, N>
+projectToFrictionBall(const std::array<T, N> & vector, const T & radius)
+{
+  const T norm = tangentialNorm(vector);
+  if (norm <= radius)
+    return vector;
+
+  std::array<T, N> projection;
+  for (const auto i : index_range(projection))
+    projection[i] = radius * vector[i] / norm;
+  return projection;
+}
+
+/**
+ * Return the degree-one Alart-Curnier friction residual
+ * p_t - Proj_{B_radius}(q_t).
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+alartCurnierFrictionResidual(const std::array<T, N> & tangential_pressure,
+                             const std::array<T, N> & augmented_tangential_pressure,
+                             const T & radius)
+{
+  const auto projection = projectToFrictionBall(augmented_tangential_pressure, radius);
+  std::array<T, N> residual;
+  for (const auto i : index_range(residual))
+    residual[i] = tangential_pressure[i] - projection[i];
+  return residual;
+}
+
+/**
+ * Return the degree-two Hueber-Stadler-Wohlmuth friction residual
+ * max(radius, ||q_t||) p_t - radius q_t.
+ *
+ * At radius = ||q_t|| = 0 the degree-two expression vanishes for every p_t. Returning p_t in
+ * that state preserves the Coulomb solution set during separation.
+ */
+template <typename T, std::size_t N>
+std::array<T, N>
+hueberStadlerWohlmuthFrictionResidual(const std::array<T, N> & tangential_pressure,
+                                      const std::array<T, N> & augmented_tangential_pressure,
+                                      const T & radius)
+{
+  const T augmented_norm = tangentialNorm(augmented_tangential_pressure);
+  const T weight = std::max(radius, augmented_norm);
+  if (weight == 0)
+    return tangential_pressure;
+
+  std::array<T, N> residual;
+  for (const auto i : index_range(residual))
+    residual[i] = weight * tangential_pressure[i] - radius * augmented_tangential_pressure[i];
+  return residual;
+}
 
 /**
  * This function is used to communicate velocities across processes

@@ -1,0 +1,33 @@
+[Tests]
+  design = 'MortarPerformance.md ComputeFrictionalForceLMMechanicalContact.md'
+  issues = '#32856'
+  requirement = 'The system shall provide stable three-dimensional frictional mortar performance '
+                'candidates for both nonlinear complementarity formulations.'
+  capabilities = 'ad_size>=150 & method!=dbg & mumps'
+  [hsw]
+    type = RunApp
+    input = frictional-mortar-3d.i
+    cli_args = "Constraints/friction/friction_ncp_formulation=hueber_stadler_wohlmuth Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_hsw"
+  []
+  [ac]
+    type = RunApp
+    input = frictional-mortar-3d.i
+    cli_args = "Constraints/friction/friction_ncp_formulation=alart_curnier Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_ac"
+  []
+  [function_hsw]
+    type = RunApp
+    input = frictional-mortar-3d-function.i
+    cli_args = "Constraints/friction/friction_ncp_formulation=hueber_stadler_wohlmuth Executioner/end_time=0.075 Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu strumpack NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_function_hsw"
+    capabilities = 'ad_size>=150 & method!=dbg & strumpack'
+    requirement = 'The system shall provide a stable three-dimensional pressure- and '
+                  'velocity-dependent frictional mortar performance candidate using HSW.'
+  []
+  [function_ac]
+    type = RunApp
+    input = frictional-mortar-3d-function.i
+    cli_args = "Constraints/friction/friction_ncp_formulation=alart_curnier Executioner/end_time=0.075 Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu strumpack NONZERO 1e-14 1e-5' Outputs/file_base=performance_frictional_mortar_3d_function_ac"
+    capabilities = 'ad_size>=150 & method!=dbg & strumpack'
+    requirement = 'The system shall provide a stable three-dimensional pressure- and '
+                  'velocity-dependent frictional mortar performance candidate using AC.'
+  []
+[]

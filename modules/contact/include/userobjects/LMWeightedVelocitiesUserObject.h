@@ -29,6 +29,12 @@ public:
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
+  // Resolve diamond ambiguity: WeightedVelocitiesUserObject and LMWeightedGapUserObject
+  // both override these; we pick WeightedVelocitiesUserObject's chain then add LM-specific work.
+  void initialize() override;
+  void finalize() override;
+  void computeQpIProperties() override;
+
 protected:
   /// The Lagrange multiplier variables representing the tangential contact pressure
   const MooseVariableFE<Real> * const _lm_variable_tangential_one;

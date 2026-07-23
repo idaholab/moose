@@ -2,6 +2,250 @@
 
 Results of performance studies on the mortar-based contact approach are shown here.
 
+## Friction formulation regression gate id=friction-formulation-regression-gate
+
+The performance gate for issue `#32856` was constructed on the local
+`contact-performance-benchmarks` branch from `up/next` commit
+`7b332444532bd42dee0e095a07e0999fca53a136`. The final benchmark commit is
+`95d9b569625e776acbdd0a4ca5033cd6d0e8289b`. Before splitting the original feature
+history, its tip was preserved as `adf4d40395e418bc6aa9685aefcff9f4a89dd43d` on
+`backup/automate-mortar-constants-before-bea-split`. The split
+`automate-mortar-constants-32856` branch was rebased directly onto the final benchmark commit. The
+tested feature-code commit is `bc4e31084436eda48b949668fd3b4d84234ecbd0`.
+
+The suite contains four workloads and eight `RunApp` candidates. Three are existing analyst
+problems that measure contact-algorithm robustness; the controlled problem is a correctness and
+per-step-cost check, not a robustness surrogate:
+
+- `test/tests/mortar_performance.{hsw,ac}` is a controlled small-strain problem with 800
+  alternating load cycles and 1600 fixed steps. Its geometry and material properties give the
+  physical strategies \(C_n=C_t=1\). It exercises repeated slip reversal under a sustained normal
+  preload and validates completion, fixed time steps, finite values, KKT and displacement
+  equilibrium errors, solver work, and AC/HSW physical agreement from repository-local CSV data.
+- `test/tests/pdass_problems.{hsw,ac}` runs the existing finite-strain frictional bouncing block
+  through time 11.5, preserving its \(c=c_t=10\), tolerances, time step, and PJFNK configuration.
+  MUMPS replaces only the LU factor package so that the retained trajectory is stable with MPI and
+  threads. `abort_on_solve_fail=true` makes any time-step retry fail the candidate.
+- `test/tests/3d-mortar-contact.{hsw,ac}` preserves the existing three-dimensional finite-strain
+  problem, \(c=c_t=10^4\), tolerances, time step, and PJFNK configuration. It also uses MUMPS for
+  thread-stable LU factorization and fails on a solve retry.
+- `test/tests/3d-mortar-contact.{function_hsw,function_ac}` preserves the existing
+  pressure- and velocity-dependent three-dimensional finite-strain problem, \(c=10^4\),
+  \(c_t=10^6\), tolerances, time step, and PJFNK configuration. It runs through time 0.075 with
+  STRUMPACK LU and fails on a solve retry.
+
+On the benchmark branch both candidate names execute the legacy degree-two friction residual with
+distinct output bases. On the feature branch the names and workloads are unchanged, the analyst
+cases retain their user constants, and each candidate selects
+`hueber_stadler_wohlmuth` or `alart_curnier` explicitly. There are no duplicated test entries for
+MPI, threads, or distributed meshes.
+
+The existing finite-strain input in `mortar_tm/2d/ad_frictional` was rejected because both labels
+reached the nonlinear iteration limit with two MPI ranks. The frictional field-split input was
+rejected after both labels diverged at four ranks with a distributed mesh, and refined variational
+candidates were rejected for orientation failures. Cylinder and ironing candidates were rejected
+for hidden solve retries, cutbacks, iteration-limit failures, or unsupported distributed-mesh
+behavior. These failures were not converted into allowed caveats.
+
+The selected analyst trajectories were also bounded at stable physical events. The bouncing block
+began retrying failed solves at time 12 in the longer time-14 experiment, so its endpoint is 11.5.
+The friction-function HSW case was nondeterministically brittle on the fourth step, so its endpoint
+is the preceding third step at time 0.075. Both retained trajectories remain solver-sensitive, and
+the explicit abort setting prevents a future failure inside either trajectory from being hidden by
+automatic time-step recovery.
+
+### Local execution and deterministic checks
+
+All local runs used the `mpich-mpicc` conda environment and the following base command:
+
+```bash
+./run_tests -i performance --capture-perf-graph --sep-files
+```
+
+Characterization used separate output directories and result files for these launch shapes:
+
+```bash
+OMP_NUM_THREADS=1 ./run_tests -j1 -p1 --n-threads 1 ...
+OMP_NUM_THREADS=1 ./run_tests -j2 -p2 --n-threads 1 ...
+OMP_NUM_THREADS=1 ./run_tests -j4 -p4 --n-threads 1 --distributed-mesh ...
+OMP_NUM_THREADS=2 ./run_tests -j2 -p1 --n-threads 2 ...
+OMP_NUM_THREADS=2 ./run_tests -j4 -p2 --n-threads 2 --distributed-mesh ...
+```
+
+The ellipsis contains `-i performance --capture-perf-graph --sep-files` and unique `--output-dir`
+and `--results-file` values. Here `-j` is the TestHarness total slot limit. It must be at least
+processes times threads; using `-j1` with a multi-process or multi-thread launch skips rather than
+runs the test. The explicit `OMP_NUM_THREADS` setting also controls threaded external factor
+packages independently of the libMesh thread count.
+
+Each supported launch shape was characterized three times. The exact final benchmark and feature
+serial suites passed 8/8. The exact final feature matrix for the two 3-D analyst workloads passed
+60/60: five launch shapes times three repetitions times four candidates. All 15 retained
+bouncing-block prefixes through time 11.5 were audited from right-scaled runs and were free of
+failed solves and cutbacks; the exact final serial candidates were rerun. The controlled matrix was
+unchanged by the temporary user-scaling restriction because it uses physical scaling. Every
+reported candidate had a positive `runner_run` value, readable `PerfGraphReporter` metadata, and
+the requested `OMP_NUM_THREADS` value. No retained workload had a missing output, solve retry, or
+cutback.
+
+The rebuilt contact unit executable ran 30/30 tests successfully. This includes projection roots
+and homogeneity, the corrected separation sign, two- and three-dimensional stick and slip,
+separation and reclosure, reversal, multiple increments, initial-guess variation, user/physical
+scale equivalence, row-scaling invariance, and the existing refinement and field-split checks. The
+row-scaling invariant comparison uses \(10^{-12}\) nonlinear tolerances and
+`abort_on_solve_fail=true`; this prevents a scaled residual from terminating before the unchanged
+\(10^{-8}\) physical-pressure comparison is satisfied.
+
+### Local timing and solver-work findings
+
+The table compares the exact final serial `runner_run` values. Local wall time is diagnostic only;
+the remote performance process is authoritative.
+
+| Workload | Formulation | Benchmark (s) | Feature (s) | Feature/base ratio |
+| - | - | - | - | - |
+| Bouncing block | HSW | 13.4596 | 11.9879 | 0.891 |
+| Bouncing block | AC | 13.4564 | 12.4882 | 0.928 |
+| Constant-friction 3-D | HSW | 8.5519 | 9.8711 | 1.154 |
+| Constant-friction 3-D | AC | 8.3952 | 4.6261 | 0.551 |
+| Friction-function 3-D | HSW | 11.4698 | 16.9370 | 1.477 |
+| Friction-function 3-D | AC | 11.7050 | 9.3890 | 0.802 |
+| Controlled | HSW | 20.8671 | 18.0490 | 0.865 |
+| Controlled | AC | 21.4788 | 17.9307 | 0.835 |
+
+The corresponding serial solver-work diagnostics were:
+
+| Workload | Candidate | Benchmark nonlinear / residual / linear | Feature nonlinear / residual / linear |
+| - | - | - | - |
+| Bouncing block | HSW | 165 / 211 / 950 | 159 / 205 / 909 |
+| Bouncing block | AC | 165 / 211 / 950 | 160 / 206 / 985 |
+| Constant-friction 3-D | HSW | 21 / 22 / 27 | 25 / 26 / 34 |
+| Constant-friction 3-D | AC | 21 / 22 / 27 | 10 / 11 / 21 |
+| Friction-function 3-D | HSW | 27 / 30 / 36 | 44 / 47 / 62 |
+| Friction-function 3-D | AC | 27 / 30 / 36 | 21 / 24 / 37 |
+| Controlled | HSW and AC | 7997 / 9597 / 7997 | 7997 / 9597 / 7997 |
+
+Counts that varied with launch shape are recorded as the smallest observed integer intervals over
+the three repetitions:
+
+| Workload | Candidate | Nonlinear | Residual | Diagnostic linear |
+| - | - | - | - | - |
+| Bouncing block | HSW | 125--159 | 171--205 | 800--910 |
+| Bouncing block | AC | 158--160 | 204--206 | 980--986 |
+| Constant-friction 3-D | HSW | 25 | 26 | 34 |
+| Constant-friction 3-D | AC | 10 | 11 | 21 |
+| Friction-function 3-D | HSW | 29--47 | 32--50 | 45--62 |
+| Friction-function 3-D | AC | 21 | 24 | 37 |
+
+The friction-function AC candidate consistently reaches its diagnostic linear-iteration cap of 15
+on its initial diagnostic solve. The enclosing nonlinear solve succeeds without a retry in every
+configuration, so this is a deterministic diagnostic cap rather than a failed time step.
+
+The controlled-case values observed over the final feature matrix were:
+
+| Metric | Observed interval or limit |
+| - | - |
+| Cumulative nonlinear iterations | 7997--7998; committed upper budget 8000 |
+| Residual evaluations | 9597--9598; committed upper budget 9600 |
+| Diagnostic linear iterations | 7997--7999; committed upper budget 8001 |
+| Maximum KKT error | \(5.53\times10^{-17}\) |
+| Maximum displacement-equilibrium error | \(4.39\times10^{-13}\) |
+| AC/HSW final pressure difference | at most \(10^{-15}\) |
+
+The upper budgets include an earlier characterized two-thread observation of 8000 nonlinear,
+9600 residual, and 8001 linear iterations. Only upper bounds are enforced so a future solver
+robustness improvement is accepted. Solve failure, cutback, non-finite CSV data, KKT or equilibrium
+error above \(10^{-10}\), or AC/HSW pressure difference above \(10^{-8}\) fails validation.
+
+The three analyst workloads begin from or traverse an open contact state. Their feature paths include
+the corrected positive-separation gap sign, so their off-solution problems are not physically
+equivalent to the benchmark and their counts are excluded from the solver-work acceptance
+comparison. The physically equivalent unit-scale controlled case does not exceed the benchmark
+solver-work budget. Open-gap iteration counts are still recorded as robustness diagnostics, but
+they are not used as a physical-equivalence assertion because the corrected sign changes the
+off-solution nonlinear problem.
+
+#### Feature ablation and right scaling
+
+A commit-boundary bisect and a five-factor ablation were run after the initial comparison. The
+commit immediately before `bea3df39c01` (`4cd59426986`) exactly reproduced the benchmark counts for
+both analyst workloads. Therefore none of the earlier physical-constant commits caused the
+iteration changes; all relevant behavior entered in `bea3df39c01`. Because that commit combined
+interacting changes, a diagnostic branch at `b65765f1bfd` exposed each behavior independently:
+
+- corrected versus legacy augmented-normal-pressure gap sign;
+- exact zero-degeneracy handling versus the legacy `contact_pressure < epsilon` cutoff;
+- normalized versus raw degree-two HSW rows;
+- PETSc right scaling versus no right scaling; and
+- refactored versus direct user-constant arithmetic.
+
+The direct MUMPS candidate commands were run with `OMP_NUM_THREADS=1`. A five-bit configuration
+selected the preceding factors in order, with zero meaning feature behavior and one meaning legacy
+behavior. The `00000` endpoint reproduced the feature counts, while `11111` reproduced the
+benchmark counts exactly. Each row below shows the result when only that feature is introduced onto
+the legacy endpoint and when only that feature is restored to legacy behavior from the feature
+endpoint. Values are nonlinear iterations / residual evaluations / diagnostic linear iterations.
+
+| Factor | Bouncing block: feature alone | 3-D: feature alone | Bouncing block: restored from feature | 3-D: restored from feature |
+| - | - | - | - | - |
+| Corrected gap sign | 219 / 275 / 1372 | 29 / 30 / 35 | 306 / 362 / 1900 | 26 / 27 / 35 |
+| Exact open-state handling | 300 / 356 / 1870 | 27 / 28 / 36 | 174 / 247 / 1392 | 25 / 26 / 31 |
+| HSW row normalization | 201 / 337 / 1969 | 21 / 22 / 27 | 259 / 321 / 1885 | 26 / 27 / 35 |
+| PETSc right scaling | 214 / 270 / 1331 | 21 / 22 / 27 | 222 / 278 / 1640 | 25 / 26 / 34 |
+| Refactored user-scale arithmetic | 212 / 268 / 1312 | 21 / 22 / 27 | 275 / 337 / 1996 | 25 / 26 / 34 |
+
+These ablation counts predate the final trajectory bounds and the friction-function workload, but
+they isolate the five behaviors in the original monolithic change. All five remain in the final
+feature code. The corrected sign is a physical correction. Exact open-state handling removes the
+legacy `contact_pressure < 1e-7` branch, and its isolated effect was the largest bouncing-block
+regression in the longer trajectory. HSW row normalization and refactored user-scale arithmetic
+improved the complete HSW interaction even when their isolated effects differed. Consequently the
+result is interaction-dependent: an ordered commit bisect can identify a different first bad
+commit depending on factor order and is not a unique causal ranking.
+
+Right scaling is also workload-dependent. An unsubmitted experiment restricted it to
+physical strategies because removing it reduced work in the bouncing block and in the serial
+friction-function HSW run. However, the two-rank friction-function HSW candidate with user constants
+then reached its 30-nonlinear-iteration limit. Restoring right scaling made that candidate and all
+60 final 3-D matrix candidates pass. The restriction was therefore discarded: PETSc right scaling
+remains active for both user and physical constants. It is not uniformly cheaper, but it provides
+demonstrated robustness in a user-constant analyst case.
+
+#### Root-equivalent HSW experiment
+
+An uncommitted solver-treatment experiment equilibrated the HSW row without restoring the legacy
+pressure cutoff. It retained the same roots and, with the existing \(1/C_t\) compensation, made the
+row algebraically proportional to the AC residual by the factor
+\(\max(C_t,r,\lVert q_t\rVert)\). The HSW counts became 167 / 213 / 961 for the bouncing block,
+10 / 11 / 21 for constant-friction 3-D, and 21 / 24 / 37 for friction-function 3-D. Thus it made
+both 3-D cases AC-like but worsened the final bouncing-block HSW result of 159 / 205 / 909 and
+removed the useful behavioral distinction between the projections. The experiment was reverted
+and is not present in any branch commit.
+
+#### Projection-default evidence
+
+The final serial evidence does not support a universal projection default. HSW uses one fewer
+nonlinear and residual evaluation and 76 fewer diagnostic linear iterations than AC in the
+bouncing block. AC is substantially better in both 3-D cases: 10 versus 25 nonlinear iterations in
+the constant-friction problem and 21 versus 44 in the friction-function problem. The controlled
+case cannot distinguish their robustness. The degree-one AC projection is therefore the stronger
+current 3-D candidate, while degree-two HSW remains stronger for the two-dimensional bouncing
+trajectory. A default change requires authoritative remote timing and broader representative
+analyst coverage rather than selecting from one geometry class.
+
+PerfGraph shows that the local HSW wall-time signal follows additional solve work rather than one
+new per-call hotspot. In the original longer bouncing trajectory, Jacobian assemblies increased
+from 224 to 256 and residual-kernel calls from 1908 to 2287. In constant-friction 3-D, Jacobian
+assemblies increased from 21 to 25 and residual assemblies from 49 to 60. The final
+friction-function HSW count and local wall-time signals make the same question worth checking
+remotely even though open-state paths are not equivalent-problem solver-work failures.
+
+### Remote acceptance
+
+The existing remote CI performance process must run the same `performance` suite for the
+noise-aware wall-time decision. No `CIVET_BASE_SHA` override or external CIVET recipe change is
+used. If remote CI reports a regression, rerun it once. A confirmed regression must be investigated
+with the captured PerfGraph data and revised or reverted before merge.
+
 ### Frictionless contact algorithm comparison id=frictionless_table
 
 | Constraint | Displacement | NCP function | Time (arbitrary units) | Time steps | Nonlinear iterations |
