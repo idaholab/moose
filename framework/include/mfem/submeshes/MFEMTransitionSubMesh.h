@@ -15,21 +15,22 @@
 #include "MFEMBlockRestrictable.h"
 
 /**
- * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
- * interior surface on one side, and constructs and stores an mfem::ParSubMesh object
- * associated with it.
- * Access using the getSubMesh() accessor.
+ * Modifies the MFEM Mesh to label a subdomain consisting of the one-element-wide layer of
+ * elements adjacent to a specified boundary, and constructs and stores an mfem::ParSubMesh
+ * object associated with it. The boundary may be an interior cut (in which case elements on
+ * one side are taken) or an exterior boundary of the mesh (in which case the single interior
+ * side is taken). Access using the getSubMesh() accessor.
  */
-class MFEMCutTransitionSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
+class MFEMTransitionSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
-  MFEMCutTransitionSubMesh(const InputParameters & parameters);
+  MFEMTransitionSubMesh(const InputParameters & parameters);
 
 protected:
   virtual void buildSubMesh() override;
 
-  /// Add attributes to the parent mesh representing the cut transition region
+  /// Add attributes to the parent mesh representing the transition region
   void labelMesh(mfem::ParMesh & parent_mesh);
 
   /// Set new attributes for the provided transition region elements
@@ -44,12 +45,12 @@ protected:
   /// Checks whether an element lies on the positive or negative side of the cut plane
   bool isPositiveSideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
 
-  const BoundaryName & _cut_boundary;
-  std::shared_ptr<mfem::ParSubMesh> _cut_submesh{nullptr};
+  const BoundaryName & _boundary;
+  std::shared_ptr<mfem::ParSubMesh> _boundary_submesh{nullptr};
   const BoundaryName & _transition_subdomain_boundary;
   const SubdomainName & _transition_subdomain;
   const SubdomainName & _closed_subdomain;
-  mfem::Vector _cut_normal;
+  mfem::Vector _boundary_normal;
 };
 
 #endif

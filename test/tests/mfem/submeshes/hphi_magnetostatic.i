@@ -34,8 +34,8 @@ vacuum_permeability = 1.0
 
 [SubMeshes]
   [cut]
-    type = MFEMCutTransitionSubMesh
-    cut_boundary = ${vacuum_cut_surface}
+    type = MFEMTransitionSubMesh
+    boundary = ${vacuum_cut_surface}
     block = ${initial_vacuum_domains}
     transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr
