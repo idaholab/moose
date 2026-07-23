@@ -233,6 +233,19 @@ QuasiStaticSolidMechanicsPhysicsBase::validParams()
                         "If true use the new "
                         "LagrangianStressDiverence kernels.");
 
+  params.addParam<bool>(
+      "compatibility_mode",
+      false,
+      "If true, configure the Lagrangian kernel system to reproduce the OLD "
+      "(StressDivergenceTensors + ComputeFiniteStrain) results bit-for-bit when wrapping an "
+      "old-style ComputeStressBase material like ComputeMultiPlasticityStress. Implies "
+      "`new_system = true` and `formulation = TOTAL`; auto-adds ComputeLagrangianWrappedStress "
+      "around the user-supplied stress material; sets `kinematic_approximation` from "
+      "`decomposition_method`; sets `F_bar_mode = incremental` when "
+      "`volumetric_locking_correction = true`; redirects `stress` / `mechanical_strain` output "
+      "requests to the equivalent NEW-system properties (`cauchy_stress` / "
+      "`rotated_mechanical_strain`).");
+
   MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
   params.addParam<MooseEnum>("formulation",
                              formulationType,
@@ -240,9 +253,34 @@ QuasiStaticSolidMechanicsPhysicsBase::validParams()
                              "and updated Lagrangian (UPDATED) formulations "
                              "for the new kernel system.");
 
+  MooseEnum kinematicApproximation("linear quadratic rashid_approximate rashid_eigen", "linear");
+  params.addParam<MooseEnum>(
+      "kinematic_approximation",
+      kinematicApproximation,
+      "Approximation used by the Lagrangian strain calculator to convert the incremental "
+      "deformation gradient into the strain and vorticity increments (large deformation only).");
+
+  params.addRangeCheckedParam<Real>(
+      "generalized_midpoint_alpha",
+      1.0,
+      "generalized_midpoint_alpha >= 0.5 & generalized_midpoint_alpha <= 1.0",
+      "Generalized midpoint weight for the deformation gradient in the Lagrangian strain "
+      "calculator.  1.0 = backward Euler (default), 0.5 = midpoint rule.");
+
+  MooseEnum volumetricLockingCorrectionMode("total incremental", "total");
+  params.addParam<MooseEnum>(
+      "volumetric_locking_correction_mode",
+      volumetricLockingCorrectionMode,
+      "Volumetric part averaged by the F-bar volumetric locking correction in the Lagrangian "
+      "strain calculator: the total (default) or incremental deformation gradient.");
+
   params.addParamNamesToGroup("add_variables displacements temperature", "Variables");
-  params.addParamNamesToGroup("strain incremental use_finite_deform_jacobian eigenstrain_names",
+  params.addParamNamesToGroup("strain incremental use_finite_deform_jacobian eigenstrain_names "
+                              "volumetric_locking_correction kinematic_approximation "
+                              "generalized_midpoint_alpha volumetric_locking_correction_mode",
                               "Strain");
+  params.addParamNamesToGroup("new_system compatibility_mode formulation",
+                              "Lagrangian formulation");
 
   return params;
 }

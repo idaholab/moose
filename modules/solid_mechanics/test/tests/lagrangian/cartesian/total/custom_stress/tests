@@ -1,0 +1,52 @@
+[Tests]
+  issues = '#27493'
+  design = 'source/materials/lagrangian/ComputeLagrangianStressCustomPK2.md '
+           'source/materials/lagrangian/ComputeLagrangianCauchyCustomStress.md'
+  [jacobian_custom_pk2_no_stab]
+    type = PetscJacobianTester
+    input = 'jactest_pk2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    allow_test_objects = true
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+                  'ComputeLagrangianStressCustomPK2 wrap path without F-bar stabilization, '
+                  'exercising PK1 = F_ust * PK2 and dPK1/dF_ust = del_ik PK2_lj + F_ust * '
+                  'dPK2/dF.'
+  []
+  [jacobian_custom_pk2_with_stab]
+    type = PetscJacobianTester
+    heavy = true
+    input = 'jactest_pk2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    allow_test_objects = true
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+                  'ComputeLagrangianStressCustomPK2 wrap path with F-bar stabilization, '
+                  'exercising the d(F_stab)/d(F_ust) chain in the constitutive term.'
+  []
+  [jacobian_custom_cauchy_no_stab]
+    type = PetscJacobianTester
+    input = 'jactest_cauchy.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    allow_test_objects = true
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+                  'ComputeLagrangianCauchyCustomStress wrap path without F-bar stabilization, '
+                  'exercising the dsigma/d(spatial_deformation_gradient_increment) chain.'
+  []
+  [jacobian_custom_cauchy_with_stab]
+    type = PetscJacobianTester
+    heavy = true
+    input = 'jactest_cauchy.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    allow_test_objects = true
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+                  'ComputeLagrangianCauchyCustomStress wrap path with F-bar stabilization, '
+                  'exercising the d(F_stab)/d(F_ust) chain in the sigma chain.'
+  []
+[]

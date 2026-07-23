@@ -86,7 +86,7 @@ Jacobian.
 
 The constitutive model needs to provide the Cauchy stress and the derivative of
 that stress with respect to the increment in the spatial velocity gradient.
-However, the [material system](solid_mechanics/NewMaterialSystem.md)
+However, the [material system](solid_mechanics/ObjectiveStressRates.md)
 provides a common interface to define the constitutive model with any stress and strain
 measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.

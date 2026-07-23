@@ -1,25 +1,12 @@
 # Solid Mechanics Module
 
-- [System Documentation List](solid_mechanics/systems.md)
-
 The Solid Mechanics module is a library of simulation tools that solve
 continuum mechanics problems. It provides a simple approach for implementing
-even advanced mechanics models:
-
-- Plug-n-play design enables users to incorporate the relevant physics for specific and varied simulations
-- Tensor implementation matches mathematical theory
-- Straight-forward procedure for adding new physics
-
-The solid mechanics system can be used to simulate both linear and finite strain mechanics, including
-Elasticity and Cosserat elasticity, Plasticity and micromechanics plasticity, Creep, and
-Damage due to cracking and property degradation
-
-## Explore the Capabilities and Start Modeling
+even advanced mechanics models.
 
 The +Solid Mechanics module+ is used in a variety of pure mechanics simulations
 and in combined physics simulations with the Heat Transfer, Phase Field, Contact,
-Porous Flow, and XFEM modules; use the MOOSE combined module to perform simulations
-with multiple physics modules. The following figures show results from a few
+Porous Flow, and XFEM modules. The following figures show results from a few
 different simulations performed by solid mechanics module users.
 
 !row!
@@ -39,111 +26,64 @@ different simulations performed by solid mechanics module users.
 !row-end!
 
 
+The Solid Mechanics module follows strict software quality guidelines, refer to
+[Solid Mechanics SQA](solid_mechanics/sqa/index.md) for more information.
+
 Interested in performing some of these simulations yourself? Use the links below
 to learn more about the solid mechanics module and to get started with your own
 continuum mechanics and combined physics simulations.
 
-!row!
-!col! small=12 medium=4 large=4 icon=device_hub
+## Kinematics and Governing Equations
 
-### Plug-n-Play Structure Overview class=center style=font-weight:200;
+Set up a mechanics problem with the QuasiStatic Physics, and learn the underlying theory:
 
-Familiarize yourself with the [Plug-n-Play Structure](solid_mechanics/plug_n_play.md)
-used by solid mechanics and then dive into the mathematical theory:
+- [SolidMechanics/QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
+- [Kinematics](solid_mechanics/Kinematics.md)
+- [Kinematic Approximations](solid_mechanics/KinematicApproximations.md)
+- [Stabilization](solid_mechanics/Stabilization.md)
+- [Balance of Linear Momentum](solid_mechanics/BalanceOfLinearMomentum.md)
 
-- [Strain Calculations](solid_mechanics/Strains.md)
-- [Stress Models](solid_mechanics/Stresses.md)
-- [Stress Divergence](solid_mechanics/StressDivergence.md)
-- [Tensor Definitions](solid_mechanics/TensorClasses.md)
+  - [Total Lagrangian](TotalLagrangianStressDivergence.md)
+  - [Updated Lagrangian](UpdatedLagrangianStressDivergence.md)
 
-These types of code classes make up the core of the solid mechanics module.
-
-!col-end!
-
-!col! small=12 medium=4 large=4 icon=school
-
-### Examples and Tutorials class=center style=font-weight:200;
-
-Get started running your own solid mechanics simulations by exploring the
-introductory tutorials and examples. Next browse through the information:
-
-- [Introduction](solid_mechanics/tutorials/introduction/index.md)
-- [Visualizing Tensors](solid_mechanics/VisualizingTensors.md)
-- [Setting Convergence Criteria](solid_mechanics/Convergence.md)
-- [Module Documentation List](solid_mechanics/systems.md)
-
-Now you're ready to start creating your own mechanics simulations.
-
-!col-end!
-
-!col! small=12 medium=4 large=4 icon=storage
-
-### Advanced Features class=center style=font-weight:200;
-
-Explore the different ways to use the solid mechanics module by browsing the
-introductory theory pages on the various models:
-
-- [Volumetric Locking Correction](solid_mechanics/VolumetricLocking.md)
-- [Smeared Cracking](/ComputeSmearedCrackingStress.md)
-- [Multiple Inelastic Stresses](/ComputeMultipleInelasticStress.md)
-- [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-- [Fracture Integrals](solid_mechanics/FractureIntegrals.md)
-- [Crystal Plasticity](/ComputeMultipleCrystalPlasticityStress.md)
-- [C0 Timoshenko Beam](solid_mechanics/C0TimoshenkoBeam.md)
 - [Dynamics](solid_mechanics/Dynamics.md)
-- [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
-- [Cohesive Zone Modeling](CohesiveZone/index.md)
-- [Shell elements](solid_mechanics/ShellElements.md)
-- [Reduced Order Models](/LAROMANCE.md)
+
+## Constitutive Models
+
+Select from the available stress models or add your own:
+
+- [Objective Stress Rates](solid_mechanics/ObjectiveStressRates.md)
+- [Custom Constitutive Models](solid_mechanics/CustomConstitutiveModels.md)
+- [NEML2 Constitutive Model Library](solid_mechanics/NEML2Models.md)
+- Legacy implementations
+
+  - [Smeared Cracking](/ComputeSmearedCrackingStress.md)
+  - [Multi-Surface Creep/Plasticity](/ComputeMultipleInelasticStress.md)
+  - [Crystal Plasticity](/ComputeMultipleCrystalPlasticityStress.md)
+  - [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
+  - [LAROMANCE](/LAROMANCE.md)
+
+## Advanced Features
+
+Specialized capabilities for particular problem classes:
+
+- [Generalized Midpoint Rule](solid_mechanics/GeneralizedMidpointRule.md)
+- [Homogenization](solid_mechanics/Homogenization.md)
+- Special Elements
+
+  - [C0 Timoshenko Beam](solid_mechanics/C0TimoshenkoBeam.md)
+  - [Shell Elements](solid_mechanics/ShellElements.md)
+  - [Cohesive Elements](CohesiveZone/index.md)
+
+- [Fracture Integrals](solid_mechanics/FractureIntegrals.md)
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
 - [Isogeometric Analysis](solid_mechanics/examples/cframe_iga.md)
-!col-end!
-!row-end!
 
-## New Mechanics Kernels
+## Examples and Tutorials
 
-The Solid Mechanics module currently has two, partially interoperable
-underlying systems:
+Get started with introductory tutorials and examples:
 
-- The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
-- A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels [!cite](10.1145/3716308).
-
-The current system may suffer from convergence issues caused by non-exact Jacobians for large deformations problems when not used with the Automatic Differentiation variants of the kernels and underlying materials.
-The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians and also includes:
-
-- A [common interface](solid_mechanics/LagrangianKernelTheory.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
-- An [improved material system](solid_mechanics/NewMaterialSystem.md), that provides multiple options for implementing new materials models.  The new material system can also automatically convert a small deformation material model to large deformation kinematics by integrating a user-select objective stress rate.
-- Both [total Lagrangian](/TotalLagrangianStressDivergence.md) and [updated Lagrangian](/UpdatedLagrangianStressDivergence.md) formulations.
-- A [homogenization system](/solid_mechanics/Homogenization.md) designed to enforce cell-average deformation or stress conditions over a periodic unit cell.
-- [Stabilization for linear elements](/solid_mechanics/Stabilization.md) for use in incompressible or nearly-incompressible problems through a $\bar{\boldsymbol{F}}$ formulation.
-
-The newer kernels are compatible with the existing MOOSE materials via the [ComputeLagrangianWrappedStress](/ComputeLagrangianWrappedStress.md) object.  This object maps the output from the existing MOOSE material system into the format expected
-by the Lagrangian kernels.
-
-The Lagrangian kernels are feature-complete with the original kernels -- all simulations using the original kernels should be able to be converted to use the
-Lagrangian kernels.  However, users should be aware that modules that couple to `"stress"` for the Cauchy stress using the original kernels should now either couple to `"cauchy_stress"` or `"pk1_stress"`, as appropriate, in the Lagrangian kernels.
-
-Users should consider using the new system
-for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or
-for problems where the stress update provided by the constitutive model is very expensive, as the new kernels will achieve convergence
-in many fewer nonlinear iterations, when compared to the older system.
-
-Both the new and old systems are accessible through the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md), which simplifies the process of
-setting up and running models.
-
-## Developing New Solid Mechanics Code
-
-The SolidMechanics module is being developed by users at national laboratories
-and universities around the world. Learn how to get in touch with the developers
-on the [help/contact_us.md optional=True] page.
-
-Consider becoming a developer yourself.
-The solid mechanics module uses code syntax based on tensor forms. This approach
-allows the constitutive tensor equations to be implemented, clearly and concisely,
-in the same format as written in mathematical notation.
-Follow the MOOSE standards for [contributing](framework/contributing.md).
-
-## Software Quality
-
-The Solid Mechanics module follows strict software quality guidelines, refer to
-[Solid Mechanics SQA](solid_mechanics/sqa/index.md) for more information.
+- [Introduction](solid_mechanics/tutorials/introduction/index.md)
+- [Outputting Tensor Components](solid_mechanics/VisualizingTensors.md)
+- [Setting Convergence Criteria](solid_mechanics/Convergence.md)
+- [Module Documentation List](solid_mechanics/systems.md)

@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#17472'
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
+  issues = '#17472 #33005'
   [jacobian]
     requirement = 'Jacobian is exact with relative tolerance of 1e-7 with the total Lagrangian formulation in 3D'
     [dirichlet_small_neither]
@@ -66,6 +66,22 @@
       difference_tol = 1E10
       cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
       detail = 'for large displacements, with stabilization, and Neurmann BCs'
+    []
+    [dirichlet_large_right_incremental]
+      type = PetscJacobianTester
+      input = 'dirichlet.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+      detail = 'for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and Dirichlet BCs'
+    []
+    [neumann_large_right_incremental]
+      type = PetscJacobianTester
+      input = 'neumann.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
+      detail = 'for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and Neumann BCs'
     []
   []
 []

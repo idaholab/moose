@@ -1,4 +1,4 @@
-# Stabilization for the Lagrangian Kernels
+# Stabilization
 
 ## The Need for Stabilization
 
@@ -52,7 +52,7 @@ Notionally, in MOOSE the $\bar{F}$ only alters the material model, though in fac
 definition of the Jacobian (but not the residual) in the [Kernel](Kernel.md).
 
 $\bar{B}$ makes this modification to the strain but then also modifies the definition of
-the residual, replacing the [original](LagrangianKernelTheory.md) small deformation stress equilibrium weak form
+the residual, replacing the [unstabilized](BalanceOfLinearMomentum.md) small deformation stress equilibrium weak form
 \begin{equation}
       R^{\alpha}=\int_{v}s_{ij}\phi_{i,j}^{\alpha}dv
 \end{equation}
@@ -71,12 +71,12 @@ in exactly the same way as the strains:
 
 The $\bar{B}$ modification results in a symmetric Jacobian (assuming that the original problem had a symmetric Jacobian).
 This is a significant advantage for codes taking advantage of the symmetry of the assembled Jacobian matrix.
-However, MOOSE does not take advantage of this symmetry and so the Lagrangian kernel system implements the $\bar{F}$ method, as
+However, MOOSE does not take advantage of this symmetry and so implements the $\bar{F}$ method instead, as
 it is somewhat easier to derive and implement in the large deformation context.
 
-## Implementation in the Lagrangian Kernel System
+## Implementation
 
-The `stabilize_strain` flag controls stabilization in the Lagrangian kernel system.  This flag must be set for
+The `stabilize_strain` flag controls stabilization.  This flag must be set for
 both the stress equilibrium kernels [TotalLagrangianStressDivergence](kernels/lagrangian/TotalLagrangianStressDivergence.md) or
 [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) and the strain calculator 
 [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md).
@@ -110,7 +110,46 @@ of the strain does affect the Jacobian calculated in the
 
 !alert warning
 The $\bar{F}$ stabilization triggered by the `stabilize_strain` flag should only used for linear quad and hex elements.
-$\bar{F}$ is unnecessary for higher order elements and ineffective for linear triangle and tetrahedral elements. 
+$\bar{F}$ is unnecessary for higher order elements and ineffective for linear triangle and tetrahedral elements.
+
+### `F_bar_mode`: Total vs Incremental Averaging
+
+The `F_bar_mode` parameter on
+[`ComputeLagrangianStrain`](/ComputeLagrangianStrain.md) selects which deformation
+gradient is averaged over the element when building the volumetric correction.
+Two modes are available; both apply only to large kinematics.
+
+The default, `F_bar_mode = total`, is the formulation described above: the
+*total* deformation gradient $F$ is averaged and the multiplicative correction
+$\gamma_{\text{tot}} = (\det\bar F / \det F)^{1/3}$ is applied to $F$ at each
+quadrature point.
+
+`F_bar_mode = incremental` instead averages the *incremental* deformation gradient
+$f = F\,F^{(n) -1}$ over the element:
+\begin{equation}
+   \bar f = \frac{1}{V} \int_V f \, dV,
+   \quad
+   \gamma_{\text{inc}} = \left( \frac{\det \bar f}{\det f} \right)^{1/3}.
+\end{equation}
+The stabilized total deformation gradient is then reconstructed at each quadrature
+point as $F^{\prime} = \gamma_{\text{inc}}\, F$.
+
+This incremental mode reproduces the volumetric correction used by the legacy
+[`ComputeFiniteStrain`](/ComputeFiniteStrain.md) +
+[`StressDivergenceTensors`](/StressDivergenceTensors.md) pipeline (its `_Fhat`
+F-bar) and is the right choice when porting an old input with
+`volumetric_locking_correction = true` and bit-for-bit agreement with the legacy
+results is required.  Selecting it on the strain calculator also enables a
+matching B-bar contribution in the
+[`TotalLagrangianStressDivergence`](/TotalLagrangianStressDivergence.md) residual
+so the kernel-side weak form matches the legacy `volumetric_locking_correction`
+integrand for spatially non-uniform stress.  The
+[QuasiStatic Physics action's compatibility mode](/Physics/SolidMechanics/QuasiStatic/index.md#compatibility-mode)
+sets `F_bar_mode = incremental` automatically when wrapping an OLD-style material
+with finite strain and `volumetric_locking_correction = true`.
+
+`F_bar_mode = incremental` requires `large_kinematics = true`; small kinematics
+must use the (default) `total` mode.
 
 ## Cook's Membrane: A Demonstration the Stabilization is Effective
 
@@ -132,7 +171,7 @@ These plots demonstrate
 1. The problem with locking in both large and small deformations for unstabilized, linear elements.  The beam tip displacement
    is much smaller in the unstabilized problems compared to the true solution and the stabilized solutions (i.e. these elements
    are very stiff).  Moreover, mesh refinement is not effective at resolving the issue.
-2. The $\bar{F}$ stabilization implemented in the Lagrangian kernel system effectively eliminates volumetric locking for
+2. The $\bar{F}$ stabilization effectively eliminates volumetric locking for
    both the updated and total Lagrangian formulations and for both small and large deformations.  The stabilized solutions
    for each kernel type are identical, they demonstrate the proper, non-locking stiffness, and mesh refinement converges the
    problem to a stable, analytic solution.

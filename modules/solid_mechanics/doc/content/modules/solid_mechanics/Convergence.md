@@ -13,7 +13,7 @@ cannot be less than
 R > 10^{-P}L^{d-2}\sigma
 \end{equation}
 where $P$ is the precision of MOOSE (15 for double precision), $d$ is the dimensionality of the
-problem (SolidMechanics currently only works for $d=3$), and $\sigma$ is the rough size of stress.
+problem, and $\sigma$ is the rough size of stress.
 
 For example, for J2 plasticity, $\sigma$ will be roughly the yield strength of the material, say
 $10^6$.  For a element of size 0.1, this yields $R \sim 10^{-15}\times 0.1 \times 10^{6} = 10^{-10}$.

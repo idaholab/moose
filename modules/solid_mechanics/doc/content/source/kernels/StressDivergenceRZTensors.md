@@ -17,7 +17,7 @@ The `StressDivergenceRZTensors` kernel can be automatically created with the
 mechanics quasi-static physics is recommended to ensure the consistent setting of the `use_displaced_mesh`
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
 _use_displaced_mesh_ in mechanics problems and the Solid Mechanics Physics usage, see the
-[Introduction/Stress Divergence](/solid_mechanics/StressDivergence.md) page.
+[Introduction/Stress Divergence](/solid_mechanics/BalanceOfLinearMomentum.md) page.
 
 
 ## Residual Calculation

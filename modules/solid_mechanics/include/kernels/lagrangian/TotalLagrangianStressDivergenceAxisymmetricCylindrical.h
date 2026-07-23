@@ -25,6 +25,9 @@ template <>
 void
 TotalLagrangianStressDivergenceBase<GradientOperatorAxisymmetricCylindrical>::initialSetup()
 {
+  // Derives _large_kinematics from the strain calculator's LARGE_KINEMATICS guarantee.
+  LagrangianStressDivergenceBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("This kernel should only act in axisymmetric cylindrical coordinates.");
 }

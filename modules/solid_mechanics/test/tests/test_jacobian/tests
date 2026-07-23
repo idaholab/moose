@@ -1,5 +1,5 @@
 [Tests]
-  design = "Strains.md Stresses.md"
+  design = "ComputeFiniteStrain.md ComputeFiniteStrainElasticStress.md"
   issues = "#8235"
   parallel_scheduling = true
   [smallstrain_3D]

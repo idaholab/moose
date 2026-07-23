@@ -41,8 +41,16 @@ private:
 protected:
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
-  /// Inverse deformation gradient
+  /// Inverse F-bar-stabilized deformation gradient (= _F^{-1}). Kept for any internal
+  /// consumer that still needs it; the kinematic stress-measure wrap uses _F_ust below.
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
-  /// Deformation gradient
+  /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). Drives
+  /// the constitutive update via the strain calc's `_f_inv` chain; NOT used for the
+  /// kinematic Cauchy -> PK1 wrap (that's `_F_ust`, declared on the base).
   const MaterialProperty<RankTwoTensor> & _F;
+  /// Inverse and determinant of the unstabilized deformation gradient, published by the strain
+  /// calculator (computed once per qp there). Consumed for the Cauchy -> PK1 wrap instead of
+  /// recomputing `_F_ust.inverse()`/`.det()` per qp on every residual/Jacobian sweep.
+  const MaterialProperty<RankTwoTensor> & _F_ust_inv;
+  const MaterialProperty<Real> & _F_ust_det;
 };

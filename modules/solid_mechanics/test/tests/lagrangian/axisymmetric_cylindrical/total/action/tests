@@ -9,8 +9,7 @@
     requirement = "Action produces identical results for small deformations/without stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=small_unstabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
-               "Materials/compute_stress/large_kinematics=false"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   []
   [action_small_stabilized]
     type = Exodiff
@@ -20,8 +19,7 @@
     requirement = "Action produces identical results for small deformations/with stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=small_stabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
-               "Materials/compute_stress/large_kinematics=false"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
   []
   [action_large_unstabilized]
     type = Exodiff
@@ -32,8 +30,7 @@
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=large_unstabilized "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
-               "Materials/compute_stress/large_kinematics=true"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   []
   [action_large_stabilized]
     type = Exodiff
@@ -43,7 +40,6 @@
     requirement = "Action produces identical results for large deformations/with stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=large_stabilized Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true "
-               "Materials/compute_stress/large_kinematics=true"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
   []
 []

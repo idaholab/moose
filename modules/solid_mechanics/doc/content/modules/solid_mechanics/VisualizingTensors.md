@@ -6,7 +6,7 @@ RankTwoTensor component, and RankFourAux is used to output a RankFourTensor comp
 
 ## AuxVariable Creation
 
-As an example, $\sigma_{11}, \epsilon_{22}$, and $C_{1122}$ can be visualized by first
+As an example, $\sigma_{11}, \epsilon_{22}$, and $C_{1133}$ can be visualized by first
 declaring auxiliary variables for them in the input file.
 
 Stress $\sigma_{xx}$ component:

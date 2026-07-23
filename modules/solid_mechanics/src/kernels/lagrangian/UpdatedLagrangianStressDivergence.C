@@ -25,21 +25,22 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
     _coord_undisplaced(_assembly_undisplaced.coordTransformation()),
     _q_point_undisplaced(_assembly_undisplaced.qPoints())
 {
-  // This kernel requires used_displaced_mesh to be true if large kinematics
-  // is on
-  if (_large_kinematics && (!getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
-               "used_displaced_mesh = true for large_kinematics = true");
-
-  // Similarly, if large kinematics is off so should use_displaced_mesh
-  if (!_large_kinematics && (getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
-               "used_displaced_mesh = false for large_kinematics = false");
+  // The use_displaced_mesh <-> large_kinematics consistency check lives in initialSetup(), since
+  // large_kinematics is now derived from the strain calculator's guarantee (not available in the
+  // constructor).
 
   // TODO: add weak plane stress support
   if (_out_of_plane_strain)
     mooseError("The UpdatedLagrangianStressDivergence kernels do not yet support the weak plane "
                "stress formulation. Please use the TotalLagrangianStressDivergecen kernels.");
+
+  // The UL push-forward in `precalculateJacobianDisplacement` uses `_F_avg` (= avg(F_ust))
+  // for the spatial-to-reference frame mapping; combining it with the incremental F-bar
+  // chain (which expects `_avg_grad_trial` to represent deltaf_avg, not deltaF_avg) hasn't been
+  // worked out yet. Use Total Lagrangian for incremental F-bar.
+  if (_stabilize_strain && _F_bar_mode == FBarMode::Incremental)
+    mooseError("`F_bar_mode = incremental` is not yet supported with the UpdatedLagrangian "
+               "kernels; use TotalLagrangianStressDivergence (or `F_bar_mode = total`).");
 }
 
 template <class G>
@@ -54,7 +55,10 @@ template <class G>
 RankTwoTensor
 UpdatedLagrangianStressDivergenceBase<G>::gradTrial(unsigned int component)
 {
-  return _stabilize_strain ? gradTrialStabilized(component) : gradTrialUnstabilized(component);
+  // F-bar stabilization is handled explicitly in computeQpJacobianDisplacement via the stored
+  // partial derivatives _d_F_stab_d_F_ust and _d_F_stab_d_F_avg, so gradTrial always returns
+  // the unstabilized spatial gradient.
+  return gradTrialUnstabilized(component);
 }
 
 template <class G>
@@ -63,18 +67,6 @@ UpdatedLagrangianStressDivergenceBase<G>::gradTrialUnstabilized(unsigned int com
 {
   // Without F-bar stabilization, simply return the gradient of the trial functions
   return G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
-}
-
-template <class G>
-RankTwoTensor
-UpdatedLagrangianStressDivergenceBase<G>::gradTrialStabilized(unsigned int component)
-{
-  // The base unstabilized trial function gradient
-  const auto Gb = G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
-  // The average trial function gradient
-  const auto Ga = _avg_grad_trial[component][_j];
-  // For updated Lagrangian, the modification is always linear
-  return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();
 }
 
 template <class G>
@@ -113,23 +105,47 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned
                                                                         unsigned int beta)
 {
   const auto grad_test = gradTest(alpha);
-  const auto grad_trial = gradTrial(beta);
+  const auto grad_trial = gradTrialUnstabilized(beta);
 
   //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
-  //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} f^{-1}_{km} g^beta_{ml}
+  //  J^{alpha beta}_material = phi^alpha : T : d(dL)/d(grad u) * grad_trial
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
 
-  // The material jacobian
-  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * (_f_inv[_qp] * grad_trial));
+  // Local contribution to delta(F_ust): pull the spatial trial gradient back through the
+  // literal n+1 deformation gradient (use_displaced_mesh = true uses F_actual, regardless
+  // of alpha or F-bar), then chain to F_ust via _d_F_d_grad_u (= alpha * I^(4)).
+  const RankTwoTensor delta_grad_u_local =
+      _large_kinematics ? grad_trial * _F_actual[_qp] : grad_trial;
+  const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * delta_grad_u_local;
 
-  // The geometric jacobian
+  // Non-local F-bar contribution to delta(F_avg): _avg_grad_trial is stored as
+  // avg(gradTrial_reference) * F_avg^{-1} (see precalculateJacobianDisplacement). Multiply
+  // by F_avg to recover the reference-frame averaged gradient, then chain to F_ust the
+  // same way.
+  RankTwoTensor delta_F_avg;
+  if (_stabilize_strain)
+  {
+    const RankTwoTensor delta_grad_u_avg =
+        _large_kinematics ? _avg_grad_trial[beta][_j] * _F_avg[_qp] : _avg_grad_trial[beta][_j];
+    delta_F_avg = _d_F_d_grad_u[_qp] * delta_grad_u_avg;
+  }
+
+  // Stabilized delta(F_stab) through the F-bar tangent. With F-bar off, the partials are
+  // _d_F_stab_d_F_ust = I^(4) and _d_F_stab_d_F_avg = 0, so this reduces to delta_F_ust_local.
+  const RankTwoTensor delta_F_stab =
+      _d_F_stab_d_F_ust[_qp] * delta_F_ust_local + _d_F_stab_d_F_avg[_qp] * delta_F_avg;
+
+  const RankTwoTensor delta_dL = _d_deformation_gradient_increment_d_F[_qp] * delta_F_stab;
+
+  // The material jacobian
+  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * delta_dL);
+
+  // The geometric jacobian (no F-bar stabilization in this term)
   if (_large_kinematics)
   {
-    // No stablization in the geometric jacobian
-    const auto grad_trial_ust = gradTrialUnstabilized(beta);
-    J += _stress[_qp].doubleContraction(grad_test) * grad_trial_ust.trace() -
-         _stress[_qp].doubleContraction(grad_test * grad_trial_ust);
+    J += _stress[_qp].doubleContraction(grad_test) * grad_trial.trace() -
+         _stress[_qp].doubleContraction(grad_test * grad_trial);
   }
 
   return J;
