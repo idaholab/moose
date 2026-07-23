@@ -26,8 +26,9 @@ InputParameters
 ConcentricCircleMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addParam<SubdomainName>("subdomain_name",
-                                 "Name of the subdomain assigned to all the elements");
+  params.addParam<std::vector<SubdomainName>>(
+      "subdomain_name",
+      "Name(s) of the subdomain(s) assigned to elements in each ring (and outer square)");
   MooseEnum portion(
       "full top_right top_left bottom_left bottom_right right_half left_half top_half bottom_half",
       "full");
@@ -50,6 +51,7 @@ ConcentricCircleMeshGenerator::validParams()
   params.addParam<MooseEnum>("portion", portion, "Control of which part of mesh is created");
   params.addRequiredParam<bool>(
       "preserve_volumes", "Volume of concentric circles can be preserved using this function.");
+  params.addParam<std::string>("boundary_name_prefix", "", "Prefix to prepend to boundary names");
   params.addParam<unsigned int>("smoothing_max_it", 1, "Number of Laplacian smoothing iterations");
   params.addClassDescription(
       "This ConcentricCircleMeshGenerator source code is to generate concentric "
@@ -67,7 +69,8 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _pitch(getParam<Real>("pitch")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
-    _portion(getParam<MooseEnum>("portion"))
+    _portion(getParam<MooseEnum>("portion")),
+    _boundary_name_prefix(getParam<std::string>("boundary_name_prefix"))
 {
   declareMeshProperty("use_distributed_mesh", false);
 
@@ -111,23 +114,27 @@ ConcentricCircleMeshGenerator::generate()
 
   // Creating real mesh concentric circles
   // i: index for _rings, j: index for _radii
-  std::vector<Real> total_concentric_circles;
+  std::vector<Real> radii_all_circles;
+  std::vector<Real> cum_num_rings(_radii.size());
   unsigned int j = 0;
   while (j < _radii.size())
   {
+    // Keep track of number of rings
+    cum_num_rings[j] = ((j > 0) ? cum_num_rings[j - 1] : 0) + _rings[j];
+
     unsigned int i = 0;
     if (j == 0)
       while (i < _rings[j])
       {
-        total_concentric_circles.push_back(_radii[j] / (_num_sectors / 2 + _rings[j]) *
-                                           (i + _num_sectors / 2 + 1));
+        radii_all_circles.push_back(_radii[j] / (_num_sectors / 2 + _rings[j]) *
+                                    (i + _num_sectors / 2 + 1));
         ++i;
       }
     else
       while (i < _rings[j])
       {
-        total_concentric_circles.push_back(_radii[j - 1] +
-                                           (_radii[j] - _radii[j - 1]) / _rings[j] * (i + 1));
+        radii_all_circles.push_back(_radii[j - 1] +
+                                    (_radii[j] - _radii[j - 1]) / _rings[j] * (i + 1));
         ++i;
       }
     ++j;
@@ -139,25 +146,25 @@ ConcentricCircleMeshGenerator::generate()
   if (_preserve_volumes)
   {
     Real original_radius = 0.0;
-    for (unsigned i = 0; i < total_concentric_circles.size(); ++i)
+    for (unsigned i = 0; i < radii_all_circles.size(); ++i)
     {
       // volume preserving function for the center circle
       if (i == 0)
       {
-        const Real target_area = M_PI * Utility::pow<2>(total_concentric_circles[i]);
+        const Real target_area = M_PI * Utility::pow<2>(radii_all_circles[i]);
         Real modified_radius = std::sqrt(2 * target_area / std::sin(d_angle) / _num_sectors / 4);
-        original_radius = total_concentric_circles[i];
-        total_concentric_circles[i] = modified_radius;
+        original_radius = radii_all_circles[i];
+        radii_all_circles[i] = modified_radius;
       }
       else
       {
         // volume preserving functions for outer circles
-        const Real target_area = M_PI * (Utility::pow<2>(total_concentric_circles[i]) -
-                                         Utility::pow<2>(original_radius));
+        const Real target_area =
+            M_PI * (Utility::pow<2>(radii_all_circles[i]) - Utility::pow<2>(original_radius));
         Real modified_radius = std::sqrt(target_area / std::sin(d_angle) / _num_sectors / 2 +
-                                         Utility::pow<2>(total_concentric_circles[i - 1]));
-        original_radius = total_concentric_circles[i];
-        total_concentric_circles[i] = modified_radius;
+                                         Utility::pow<2>(radii_all_circles[i - 1]));
+        original_radius = radii_all_circles[i];
+        radii_all_circles[i] = modified_radius;
       }
     }
   }
@@ -167,18 +174,18 @@ ConcentricCircleMeshGenerator::generate()
 
   if (_has_outer_square)
     num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
-                      (_num_sectors + 1) * total_concentric_circles.size() +
+                      (_num_sectors + 1) * radii_all_circles.size() +
                       Utility::pow<2>(_rings.back() + 2) + _num_sectors * (_rings.back() + 1) - 1;
   else
-    num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
-                      (_num_sectors + 1) * total_concentric_circles.size();
+    num_total_nodes =
+        Utility::pow<2>(_num_sectors / 2 + 1) + (_num_sectors + 1) * radii_all_circles.size();
 
   std::vector<Node *> nodes(num_total_nodes);
 
   unsigned node_id = 0;
 
   // for adding nodes for the square at the center of the circle
-  Real xx = total_concentric_circles[0] / (_num_sectors / 2 + 1) * _num_sectors / 2;
+  Real xx = radii_all_circles[0] / (_num_sectors / 2 + 1) * _num_sectors / 2;
   Point p1 = Point(xx, 0, 0);
   Point p2 = Point(0, xx, 0);
   Point p3 = Point(xx * std::sqrt(2.0) / 2, xx * std::sqrt(2.0) / 2, 0);
@@ -195,12 +202,12 @@ ConcentricCircleMeshGenerator::generate()
   }
 
   // for adding the outer layers of the square
-  Real current_radius = total_concentric_circles[0];
+  Real current_radius = radii_all_circles[0];
 
   // for adding the outer circles of the square.
-  for (unsigned layers = 0; layers < total_concentric_circles.size(); ++layers)
+  for (unsigned layers = 0; layers < radii_all_circles.size(); ++layers)
   {
-    current_radius = total_concentric_circles[layers];
+    current_radius = radii_all_circles[layers];
     for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
     {
       const Real x = current_radius * std::cos(num_outer_nodes * d_angle);
@@ -222,8 +229,8 @@ ConcentricCircleMeshGenerator::generate()
       const Real a1 = (_pitch / 2) * i / (_num_sectors / 2 + _rings.back() + 1);
       const Real b1 = _pitch / 2;
 
-      const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 2 - i * d_angle);
-      const Real b2 = total_concentric_circles.back() * std::sin(M_PI / 2 - i * d_angle);
+      const Real a2 = radii_all_circles.back() * std::cos(M_PI / 2 - i * d_angle);
+      const Real b2 = radii_all_circles.back() * std::sin(M_PI / 2 - i * d_angle);
 
       for (unsigned j = 0; j <= _rings.back(); ++j)
       {
@@ -244,8 +251,8 @@ ConcentricCircleMeshGenerator::generate()
       const Real a2 = _pitch / 2;
       const Real b2 = (_pitch / 2) * (_num_sectors / 2) / (_num_sectors / 2 + _rings.back() + 1);
 
-      const Real a3 = total_concentric_circles.back() * std::cos(M_PI / 4);
-      const Real b3 = total_concentric_circles.back() * std::sin(M_PI / 4);
+      const Real a3 = radii_all_circles.back() * std::cos(M_PI / 4);
+      const Real b3 = radii_all_circles.back() * std::sin(M_PI / 4);
 
       const Real a4 = ((_rings.back() + 1 - k) * a3 + k * a2) / (_rings.back() + 1);
       const Real b4 = ((_rings.back() + 1 - k) * b3 + k * b2) / (_rings.back() + 1);
@@ -267,8 +274,8 @@ ConcentricCircleMeshGenerator::generate()
       const Real b1 =
           (_pitch / 2) * (_num_sectors / 2 - i) / (_num_sectors / 2 + _rings.back() + 1);
 
-      const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 4 - i * d_angle);
-      const Real b2 = total_concentric_circles.back() * std::sin(M_PI / 4 - i * d_angle);
+      const Real a2 = radii_all_circles.back() * std::cos(M_PI / 4 - i * d_angle);
+      const Real b2 = radii_all_circles.back() * std::sin(M_PI / 4 - i * d_angle);
 
       for (unsigned j = 0; j <= _rings.back(); ++j)
       {
@@ -304,14 +311,12 @@ ConcentricCircleMeshGenerator::generate()
   // SubdomainIDs set up
   std::vector<unsigned int> subdomainIDs;
 
+  // Assign subdomains per circle (multiple rings per circle)
+  for (unsigned int i = 0; i < _rings.size() - _has_outer_square; ++i)
+    subdomainIDs.push_back(i);
+  // Assign outer square
   if (_has_outer_square)
-    for (unsigned int i = 0; i < _rings.size() - 1; ++i)
-      for (unsigned int j = 0; j < _rings[i]; ++j)
-        subdomainIDs.push_back(i + 1);
-  else
-    for (unsigned int i = 0; i < _rings.size(); ++i)
-      for (unsigned int j = 0; j < _rings[i]; ++j)
-        subdomainIDs.push_back(i + 1);
+    subdomainIDs.push_back(subdomainIDs.back() + 1);
 
   // adding elements in the square
   while (index <= limit)
@@ -378,8 +383,7 @@ ConcentricCircleMeshGenerator::generate()
   counter = 0;
   // adding elements for other concentric circles
   index = Utility::pow<2>(standard / 2 + 1);
-  limit = Utility::pow<2>(standard / 2 + 1) +
-          (_num_sectors + 1) * (total_concentric_circles.size() - 1);
+  limit = Utility::pow<2>(standard / 2 + 1) + (_num_sectors + 1) * (radii_all_circles.size() - 1);
 
   int num_nodes_boundary = Utility::pow<2>(standard / 2 + 1) + standard + 1;
 
@@ -391,9 +395,14 @@ ConcentricCircleMeshGenerator::generate()
     elem->set_node(2, nodes[index + standard + 2]);
     elem->set_node(3, nodes[index + 1]);
 
-    for (int i = 0; i < static_cast<int>(subdomainIDs.size() - 1); ++i)
-      if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
-        elem->subdomain_id() = subdomainIDs[subdomainIDs.size() - 1 - i];
+    // find ring subdomain ID from circle counter
+    for (const auto i : make_range(subdomainIDs.size() - _has_outer_square))
+    {
+      if (i > 0 && counter >= cum_num_rings[i - 1] && counter < cum_num_rings[i])
+        elem->subdomain_id() = subdomainIDs[i];
+      else if (i == 0 && counter < cum_num_rings[0])
+        elem->subdomain_id() = subdomainIDs[0];
+    }
 
     const int initial = Utility::pow<2>(standard / 2 + 1);
     const int final = Utility::pow<2>(standard / 2 + 1) + standard - 1;
@@ -425,18 +434,16 @@ ConcentricCircleMeshGenerator::generate()
   //  ACBA
 
   // adding elements for the enclosing square. (top left)
-  int initial =
-      Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
+  int initial = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size();
 
-  int initial2 =
-      Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
+  int initial2 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size();
 
   if (_has_outer_square)
   {
     if (_rings.back() != 0) // this must be condition up front.
     {
-      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
-      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size();
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
               _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
       while (index <= limit)
@@ -447,7 +454,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(1, nodes[index + 1]);
         elem->set_node(2, nodes[index + 1 + _rings.back() + 1]);
         elem->set_node(3, nodes[index + 1 + _rings.back()]);
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+        elem->subdomain_id() = subdomainIDs.back();
 
         if (index < (initial2 + static_cast<int>(_rings.back())))
           boundary_info.add_side(elem, 0, 1);
@@ -467,11 +474,10 @@ ConcentricCircleMeshGenerator::generate()
       }
 
       // adding elements for the enclosing square. (top right)
-      initial = Utility::pow<2>(standard / 2 + 1) +
-                (standard + 1) * total_concentric_circles.size() +
+      initial = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                 (_rings.back() + 1) * (standard / 2 + 1);
 
-      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
               (_rings.back() + 2);
 
@@ -483,7 +489,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(2, nodes[index + _rings.back() + 2]);
         elem->set_node(1, nodes[index + _rings.back() + 3]);
         elem->set_node(0, nodes[index + 1]);
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+        elem->subdomain_id() = subdomainIDs.back();
 
         if (index >= static_cast<int>(limit - (_rings.back() + 1)))
           boundary_info.add_side(elem, 1, 3);
@@ -502,10 +508,9 @@ ConcentricCircleMeshGenerator::generate()
 
       // adding elements for the enclosing square. (one center quad)
       int index1 = Utility::pow<2>(standard / 2 + 1) +
-                   (standard + 1) * (total_concentric_circles.size() - 1) + standard / 2;
+                   (standard + 1) * (radii_all_circles.size() - 1) + standard / 2;
 
-      int index2 = Utility::pow<2>(standard / 2 + 1) +
-                   (standard + 1) * total_concentric_circles.size() +
+      int index2 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                    (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
                    _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
 
@@ -515,11 +520,11 @@ ConcentricCircleMeshGenerator::generate()
       elem->set_node(2, nodes[index2]);
       elem->set_node(1, nodes[index2 + _rings.back() + 1]);
       elem->set_node(0, nodes[index2 + _rings.back() + 2]);
-      elem->subdomain_id() = subdomainIDs.back() + 1;
+      elem->subdomain_id() = subdomainIDs.back();
 
       // adding elements for the left mid part.
       index = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
-              (standard + 1) * (total_concentric_circles.size() - 1);
+              (standard + 1) * (radii_all_circles.size() - 1);
       limit = index + standard / 2 - 1;
 
       while (index <= limit)
@@ -530,7 +535,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(2, nodes[index + 1]);
         elem->set_node(1, nodes[index2 - _rings.back() - 1]);
         elem->set_node(0, nodes[index2]);
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+        elem->subdomain_id() = subdomainIDs.back();
 
         if (index == limit)
           boundary_info.add_side(elem, 1, 1);
@@ -543,14 +548,13 @@ ConcentricCircleMeshGenerator::generate()
 
       // adding elements for the right mid part.
       index1 = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
-               (standard + 1) * (total_concentric_circles.size() - 1);
-      index2 = Utility::pow<2>(standard / 2 + 1) +
-               (standard + 1) * total_concentric_circles.size() +
+               (standard + 1) * (radii_all_circles.size() - 1);
+      index2 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 +
                (_rings.back() + 1);
-      int index3 =
-          Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
-          (_rings.back() + 1) * (standard / 2) - 1 + (_rings.back() + 1) + (_rings.back() + 2);
+      int index3 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
+                   (_rings.back() + 1) * (standard / 2) - 1 + (_rings.back() + 1) +
+                   (_rings.back() + 2);
 
       // elements clockwise from the A sector tips
       elem = mesh->add_elem(std::make_unique<Quad4>());
@@ -558,7 +562,7 @@ ConcentricCircleMeshGenerator::generate()
       elem->set_node(1, nodes[index1 - 1]);
       elem->set_node(2, nodes[index2]);
       elem->set_node(3, nodes[index3]);
-      elem->subdomain_id() = subdomainIDs.back() + 1;
+      elem->subdomain_id() = subdomainIDs.back();
 
       if (standard == 2)
         boundary_info.add_side(elem, 1, 2);
@@ -566,14 +570,13 @@ ConcentricCircleMeshGenerator::generate()
       // adding elements for the right mid bottom part.
 
       index = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
-              (standard + 1) * (total_concentric_circles.size() - 1) - 2;
-      index1 = Utility::pow<2>(standard / 2 + 1) +
-               (standard + 1) * total_concentric_circles.size() +
+              (standard + 1) * (radii_all_circles.size() - 1) - 2;
+      index1 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 +
                (_rings.back() + 1) * 2;
 
       limit = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
-              (standard + 1) * (total_concentric_circles.size() - 1) - standard / 2;
+              (standard + 1) * (radii_all_circles.size() - 1) - standard / 2;
 
       if (standard != 2)
       {
@@ -585,7 +588,7 @@ ConcentricCircleMeshGenerator::generate()
           elem->set_node(1, nodes[index1]);
           elem->set_node(2, nodes[index1 - (_rings.back() + 1)]);
           elem->set_node(3, nodes[index + 1]);
-          elem->subdomain_id() = subdomainIDs.back() + 1;
+          elem->subdomain_id() = subdomainIDs.back();
 
           if (index == limit)
             boundary_info.add_side(elem, 0, 2);
@@ -595,7 +598,7 @@ ConcentricCircleMeshGenerator::generate()
       }
 
       // adding elements for the right low part.
-      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2;
 
       index1 = index - (_rings.back() + 2);
@@ -608,7 +611,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(2, nodes[index + 1]);
         elem->set_node(1, nodes[index + 2]);
         elem->set_node(0, nodes[index1]);
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+        elem->subdomain_id() = subdomainIDs.back();
 
         boundary_info.add_side(elem, 2, 3);
 
@@ -616,11 +619,11 @@ ConcentricCircleMeshGenerator::generate()
           boundary_info.add_side(elem, 1, 2);
       }
 
-      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 -
               (_rings.back() + 2);
 
-      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + (_rings.back() + 2) * 2 - 2;
 
       int k = 1;
@@ -631,7 +634,7 @@ ConcentricCircleMeshGenerator::generate()
         elem->set_node(2, nodes[index + (_rings.back() + 2) * k + k + 1]);
         elem->set_node(1, nodes[index + (_rings.back() + 2) * k + k + 2]);
         elem->set_node(0, nodes[index - _rings.back() - 2]);
-        elem->subdomain_id() = subdomainIDs.back() + 1;
+        elem->subdomain_id() = subdomainIDs.back();
         index = index - (_rings.back() + 2);
         ++k;
 
@@ -639,17 +642,15 @@ ConcentricCircleMeshGenerator::generate()
           boundary_info.add_side(elem, 1, 2);
       }
 
-      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 1;
-      initial = Utility::pow<2>(standard / 2 + 1) +
-                (standard + 1) * total_concentric_circles.size() +
+      initial = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                 (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 1;
-      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
               (_rings.back() + 1) * (standard / 2) * 2 + Utility::pow<2>(_rings.back() + 2) - 2 -
               _rings.back() - 1;
 
-      initial2 = Utility::pow<2>(standard / 2 + 1) +
-                 (standard + 1) * total_concentric_circles.size() +
+      initial2 = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * radii_all_circles.size() +
                  (_rings.back() + 1) * (standard / 2) * 2 + Utility::pow<2>(_rings.back() + 2) - 2 -
                  (_rings.back() + 1) * 2;
 
@@ -662,7 +663,7 @@ ConcentricCircleMeshGenerator::generate()
           elem->set_node(1, nodes[index + 1]);
           elem->set_node(2, nodes[index + 1 + _rings.back() + 1]);
           elem->set_node(3, nodes[index + 1 + _rings.back()]);
-          elem->subdomain_id() = subdomainIDs.back() + 1;
+          elem->subdomain_id() = subdomainIDs.back();
 
           if (index > initial2)
             boundary_info.add_side(elem, 2, 2);
@@ -683,57 +684,57 @@ ConcentricCircleMeshGenerator::generate()
   }
 
   // This is to set boundary names.
-  boundary_info.sideset_name(1) = "left";
-  boundary_info.sideset_name(2) = "bottom";
+  boundary_info.sideset_name(1) = _boundary_name_prefix + "left";
+  boundary_info.sideset_name(2) = _boundary_name_prefix + "bottom";
 
   if (!_has_outer_square)
-    boundary_info.sideset_name(3) = "outer";
+    boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
   else
   {
-    boundary_info.sideset_name(3) = "right";
-    boundary_info.sideset_name(4) = "top";
+    boundary_info.sideset_name(3) = _boundary_name_prefix + "right";
+    boundary_info.sideset_name(4) = _boundary_name_prefix + "top";
   }
 
   if (_portion == "top_left")
   {
     MeshTools::Modification::rotate(*mesh, 90, 0, 0);
-    boundary_info.sideset_name(1) = "bottom";
-    boundary_info.sideset_name(2) = "right";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "bottom";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "right";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "top";
-      boundary_info.sideset_name(4) = "left";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "top";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "left";
     }
   }
   else if (_portion == "bottom_left")
   {
     MeshTools::Modification::rotate(*mesh, 180, 0, 0);
-    boundary_info.sideset_name(1) = "right";
-    boundary_info.sideset_name(2) = "top";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "right";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "top";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "left";
-      boundary_info.sideset_name(4) = "bottom";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "left";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "bottom";
     }
   }
   else if (_portion == "bottom_right")
   {
     MeshTools::Modification::rotate(*mesh, 270, 0, 0);
-    boundary_info.sideset_name(1) = "top";
-    boundary_info.sideset_name(2) = "left";
+    boundary_info.sideset_name(1) = _boundary_name_prefix + "top";
+    boundary_info.sideset_name(2) = _boundary_name_prefix + "left";
 
     if (!_has_outer_square)
-      boundary_info.sideset_name(3) = "outer";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "outer";
     else
     {
-      boundary_info.sideset_name(3) = "bottom";
-      boundary_info.sideset_name(4) = "right";
+      boundary_info.sideset_name(3) = _boundary_name_prefix + "bottom";
+      boundary_info.sideset_name(4) = _boundary_name_prefix + "right";
     }
   }
 
@@ -754,10 +755,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -770,8 +771,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "bottom";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -793,10 +794,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 2, 4, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -808,8 +809,8 @@ ConcentricCircleMeshGenerator::generate()
       mesh->stitch_meshes(other_mesh, 2, 2, TOLERANCE, true, /*verbose=*/false);
 
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -841,10 +842,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 4, 2, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -857,8 +858,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "right";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -889,10 +890,10 @@ ConcentricCircleMeshGenerator::generate()
       mesh->prepare_for_use();
       other_mesh.prepare_for_use();
       mesh->stitch_meshes(other_mesh, 1, 3, TOLERANCE, true, /*verbose=*/false);
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
     }
     else
     {
@@ -905,8 +906,8 @@ ConcentricCircleMeshGenerator::generate()
 
       MeshTools::Modification::change_boundary_id(*mesh, 2, 1);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 2);
-      mesh->get_boundary_info().sideset_name(1) = "top";
-      mesh->get_boundary_info().sideset_name(2) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "top";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "outer";
     }
     other_mesh.clear();
   }
@@ -947,10 +948,10 @@ ConcentricCircleMeshGenerator::generate()
       // 'full'
       mesh->stitch_meshes(portion_bottom, 2, 4, TOLERANCE, true, /*verbose=*/false);
 
-      mesh->get_boundary_info().sideset_name(1) = "left";
-      mesh->get_boundary_info().sideset_name(2) = "bottom";
-      mesh->get_boundary_info().sideset_name(3) = "right";
-      mesh->get_boundary_info().sideset_name(4) = "top";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "left";
+      mesh->get_boundary_info().sideset_name(2) = _boundary_name_prefix + "bottom";
+      mesh->get_boundary_info().sideset_name(3) = _boundary_name_prefix + "right";
+      mesh->get_boundary_info().sideset_name(4) = _boundary_name_prefix + "top";
       portion_bottom.clear();
     }
     else
@@ -970,7 +971,7 @@ ConcentricCircleMeshGenerator::generate()
       portion_bottom.prepare_for_use();
       mesh->stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true, /*verbose=*/false);
       MeshTools::Modification::change_boundary_id(*mesh, 3, 1);
-      mesh->get_boundary_info().sideset_name(1) = "outer";
+      mesh->get_boundary_info().sideset_name(1) = _boundary_name_prefix + "outer";
       portion_bottom.clear();
     }
     portion_two.clear();
@@ -986,7 +987,18 @@ ConcentricCircleMeshGenerator::generate()
 
   // Add subdomain name
   if (isParamValid("subdomain_name"))
-    mesh->subdomain_name(0) = getParam<SubdomainName>("subdomain_name");
+  {
+    const auto & subdomain_names = getParam<std::vector<SubdomainName>>("subdomain_name");
+    if (subdomain_names.size() == subdomainIDs.size())
+      for (const auto i : index_range(subdomain_names))
+        mesh->subdomain_name(subdomainIDs[i]) = subdomain_names[i];
+    else
+      paramError("subdomain_name",
+                 "Parameter (size: " + std::to_string(subdomain_names.size()) +
+                     ") must be the same size as the number of rings (= " +
+                     std::to_string(subdomainIDs.size() - _has_outer_square) + ")" +
+                     (_has_outer_square ? " +1 if the outer square is created" : ""));
+  }
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

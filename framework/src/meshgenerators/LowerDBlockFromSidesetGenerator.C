@@ -73,7 +73,10 @@ LowerDBlockFromSidesetGenerator::generate()
   catch (MooseException & e)
   {
     if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
-      paramError("sidesets", e.what());
+      paramError("sidesets",
+                 std::string(e.what()) + "\nBoundaries in the mesh: " +
+                     Moose::stringify(MooseMeshUtils::getAllBoundaryNamesAndIDs(*mesh)));
+    // depending on the error, mesh might the lowerD and not hold too many boundaries
     else
       mooseError(e.what());
   }

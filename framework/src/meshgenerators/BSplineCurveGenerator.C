@@ -171,11 +171,11 @@ BSplineCurveGenerator::generate()
 
   // generate points using BSpline functions/class
   std::vector<Point> control_points = SplineUtils::bSplineControlPoints(
-      start_point, end_point, start_dir, end_dir, half_cps, _sharpness);
+      start_point, end_point, start_dir, end_dir, half_cps, _sharpness, name());
 
   // initialize BSpline class
   Moose::BSpline b_spline(
-      _degree, start_point, end_point, start_dir, end_dir, half_cps, _sharpness);
+      _degree, start_point, end_point, start_dir, end_dir, half_cps, _sharpness, name());
 
   // discretize t and evaluate points, assemble into nodes inside loop
   const auto n_ts = _num_elements * _order + 1;

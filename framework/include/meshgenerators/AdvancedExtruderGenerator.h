@@ -39,7 +39,7 @@ protected:
   const std::vector<unsigned int> & _num_layers;
 
   /// Subdomains to swap out for each elevation
-  const std::vector<std::vector<subdomain_id_type>> & _subdomain_swaps;
+  const std::vector<std::vector<SubdomainName>> & _subdomain_swaps;
 
   /// Boundaries to swap out for each elevation
   const std::vector<std::vector<boundary_id_type>> & _boundary_swaps;
@@ -72,6 +72,9 @@ protected:
   const RealVectorValue _end_extrusion_direction;
   /// Whether we are extruding along a curve
   bool _extrude_along_curve;
+
+  /// Whether to extrude each node along the averaged normal of the elements connected to it
+  const bool _extrude_along_node_normals;
 
   const bool _has_top_boundary;
   const BoundaryName _top_boundary;
@@ -108,4 +111,11 @@ protected:
   /// This share goes from 0 at the beginning of the extrusion to 1 at the end
   /// @param t coordinate along the curve (in the axial direction of extrusion)
   Real radialExpansionRatio(const Real t) const;
+
+  /// Compute, for each node, the extrusion direction as the average of the normals of all the
+  /// elements connected to it. The input surface mesh is expected to have consistently oriented
+  /// elements.
+  /// @param input the 2D mesh being extruded
+  /// @return a map from node id to its (unit) extrusion direction
+  std::unordered_map<dof_id_type, Point> computeNodeNormals(const MeshBase & input) const;
 };

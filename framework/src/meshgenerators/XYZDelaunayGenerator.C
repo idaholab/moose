@@ -88,8 +88,17 @@ XYZDelaunayGenerator::validParams()
       "conversion_method",
       conversion_method,
       "The method to convert 3D hole meshes into compatible meshes. Options are "
-      "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
-      "that are stitched to the generated Delaunay mesh.");
+      "ALL: convert all elements into TET4; SURFACE: convert all exterior surface elements using a "
+      "mix of pyramids and tetrahedrals.");
+  params.addParam<SubdomainName>("converted_tet_element_subdomain_name_suffix",
+                                 "to_tet",
+                                 "The suffix to be added to the original subdomain name for the "
+                                 "subdomains containing the elements converted to TET4.");
+  params.addParam<SubdomainName>(
+      "converted_pyramid_element_subdomain_name_suffix",
+      "to_pyramid",
+      "The suffix to be added to the original subdomain name for the subdomains containing the "
+      "elements converted to PYRAMID5.");
 
   params.addRangeCheckedParam<Real>(
       "desired_volume",
@@ -217,6 +226,13 @@ XYZDelaunayGenerator::generate()
                      "converting them to TET4. Consider setting convert_holes_for_stitching=true.");
         else if (_stitch_holes.size() && _stitch_holes[hole_i] && _conversion_method == "SURFACE")
         {
+          // collect the subdomain ids of the original mesh
+          std::set<subdomain_id_type> hole_mesh_original_subdomain_ids;
+          for (auto elem_it = hole_mesh.active_elements_begin();
+               elem_it != hole_mesh.active_elements_end();
+               elem_it++)
+            hole_mesh_original_subdomain_ids.emplace((*elem_it)->subdomain_id());
+
           // Create a transition layer with triangle sides on the external boundary of the hole
           BoundaryID temp_ext_bid = MooseMeshUtils::getNextFreeBoundaryID(hole_mesh);
           for (const auto & hees : hole_elem_external_sides)
@@ -224,6 +240,25 @@ XYZDelaunayGenerator::generate()
           MooseMeshElementConversionUtils::transitionLayerGenerator(
               hole_mesh, std::vector<BoundaryName>({std::to_string(temp_ext_bid)}), 1, false);
           hole_mesh.get_boundary_info().remove_id(temp_ext_bid);
+
+          // Set subdomain names on converted elements
+          try
+          {
+            MooseMeshElementConversionUtils::assignConvertedElementsSubdomainNameSuffix(
+                hole_mesh,
+                hole_mesh_original_subdomain_ids,
+                *hole_mesh_original_subdomain_ids.rbegin() + 1,
+                getParam<SubdomainName>("converted_tet_element_subdomain_name_suffix"),
+                getParam<SubdomainName>("converted_pyramid_element_subdomain_name_suffix"));
+          }
+          catch (const std::exception & e)
+          {
+            if (((std::string)e.what()).compare(26, 4, "TET4") == 0)
+              paramError("converted_tet_element_subdomain_name_suffix", e.what());
+            else // if (((std::string)e.what()).compare(26, 7, "PYRAMID5") == 0)
+              paramError("converted_pyramid_element_subdomain_name_suffix", e.what());
+          }
+
           // MeshSerializer's destructor calls delete_remote_elements()
           // For replicated meshes, we need to refresh the neighbor information
           // Also, not doing prepare_for_use() causes an error in DEBUG mode
