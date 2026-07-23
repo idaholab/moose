@@ -1,8 +1,11 @@
 nx = 16
 lambda = 1
-# Immersed circle geometry: off-grid center so the arc cuts through elements at
-# generic fractions and no node/quadrature point lands exactly on the surface.
-R = 1.3
+# Immersed ellipse geometry: distinct semi-axes make the boundary anisotropic so
+# PCA has a well-separated minor axis, giving a reproducible auto ray direction.
+# Off-grid center keeps the arc cutting elements at generic fractions with no
+# node/quadrature point landing exactly on the surface.
+a = 1.6
+b = 1.0
 cx = 2.03
 cy = 1.97
 n_seg = 48
@@ -13,8 +16,8 @@ n_seg = 48
 [Mesh]
   [shift_boundary_mesh]
     type = ParsedCurveGenerator
-    x_formula = '${cx} + ${R} * cos(t)'
-    y_formula = '${cy} + ${R} * sin(t)'
+    x_formula = '${cx} + ${a} * cos(t)'
+    y_formula = '${cy} + ${b} * sin(t)'
     section_bounding_t_values = '0 ${fparse 2*pi}'
     nums_segments = '${n_seg}'
     is_closed_loop = true

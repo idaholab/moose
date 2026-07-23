@@ -1,8 +1,12 @@
 nx = 16
 lambda = 0
-# Immersed sphere geometry: off-grid center so the surface cuts through elements
-# at generic fractions and no node/quadrature point lands exactly on it.
-R = 1.3
+# Immersed triaxial ellipsoid: three distinct semi-axes make the boundary
+# anisotropic so PCA has a well-separated shortest axis, giving a reproducible
+# auto ray direction. Off-grid center keeps the surface cutting elements at
+# generic fractions with no node/quadrature point landing exactly on it.
+ax = 1.5
+ay = 1.15
+az = 0.85
 cx = 2.03
 cy = 1.97
 cz = 2.05
@@ -13,7 +17,7 @@ cz = 2.05
 [Mesh]
   [ball]
     type = SphereMeshGenerator
-    radius = ${R}
+    radius = 1.0
     nr = 1
     elem_type = TET4
   []
@@ -28,11 +32,17 @@ cz = 2.05
     input = shell
     target_blocks = '100'
   []
+  [scale]
+    type = TransformGenerator
+    transform = SCALE
+    vector_value = '${ax} ${ay} ${az}'
+    input = extract
+  []
   [shift_boundary_mesh]
     type = TransformGenerator
     transform = TRANSLATE
     vector_value = '${cx} ${cy} ${cz}'
-    input = extract
+    input = scale
     save_with_name = 'shift_boundary_mesh'
   []
 

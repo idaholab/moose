@@ -390,6 +390,26 @@ PointInPolyhedronCheck::preparePCASVD()
   _second_variance_vector.unit();
   _min_variance_vector.unit();
 
+  // (f) Canonicalize the sign of each principal direction. SVD singular vectors
+  // are only defined up to sign, and LAPACK can return opposite signs on
+  // different platforms or versions. Because the auto-selected ray direction is
+  // one of these vectors, an unstable sign makes the in-out classification of
+  // borderline elements non-reproducible across platforms. Fix a deterministic
+  // convention: make the largest-magnitude component positive (ties broken by
+  // the lowest index).
+  auto canonicalize_sign = [](Point & v)
+  {
+    unsigned int i_max = 0;
+    for (const auto i : make_range(1, 3))
+      if (std::abs(v(i)) > std::abs(v(i_max)))
+        i_max = i;
+    if (v(i_max) < 0.0)
+      v *= -1.0;
+  };
+  canonicalize_sign(_max_variance_vector);
+  canonicalize_sign(_second_variance_vector);
+  canonicalize_sign(_min_variance_vector);
+
   mooseAssert(
       MooseUtils::absoluteFuzzyEqual(_max_variance_vector * _second_variance_vector, 0.0) &&
           MooseUtils::absoluteFuzzyEqual(_max_variance_vector * _min_variance_vector, 0.0) &&
