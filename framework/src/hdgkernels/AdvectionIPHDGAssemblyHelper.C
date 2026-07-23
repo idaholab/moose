@@ -11,7 +11,7 @@
 InputParameters
 AdvectionIPHDGAssemblyHelper::validParams()
 {
-  return AdvectionHDGAssemblyHelper::validParams();
+  return AdvectionHDGAssemblyHelperTempl<IPHDGAssemblyHelper>::validParams();
 }
 
 AdvectionIPHDGAssemblyHelper::AdvectionIPHDGAssemblyHelper(
@@ -23,7 +23,8 @@ AdvectionIPHDGAssemblyHelper::AdvectionIPHDGAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : AdvectionHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
+  : AdvectionHDGAssemblyHelperTempl<IPHDGAssemblyHelper>(
+        moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     _face_velocity(getFaceADMaterialProperty<RealVectorValue>("velocity"))
 {
 }

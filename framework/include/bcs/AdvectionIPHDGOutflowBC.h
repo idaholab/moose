@@ -10,8 +10,7 @@
 #pragma once
 
 #include "IPHDGBC.h"
-
-class AdvectionIPHDGAssemblyHelper;
+#include "AdvectionIPHDGAssemblyHelper.h"
 
 /**
  * Implements an outflow boundary condition for use with a hybridized discretization of
@@ -29,7 +28,7 @@ protected:
    */
   virtual void compute() override;
 
-  virtual AdvectionIPHDGAssemblyHelper & iphdgHelper() override;
+  virtual AdvectionIPHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<AdvectionIPHDGAssemblyHelper> _iphdg_helper;

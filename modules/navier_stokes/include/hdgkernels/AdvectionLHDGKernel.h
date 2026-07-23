@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "HybridizedDGKernel.h"
+#include "HDGKernel.h"
 
 class AdvectionLHDGAssemblyHelper;
 
 /**
  * Advection term using a cell velocity in the volume and a hybrid velocity in face fluxes.
  */
-class AdvectionLHDGKernel : public HybridizedDGKernel
+class AdvectionLHDGKernel : public HDGKernel
 {
 public:
   static InputParameters validParams();
   AdvectionLHDGKernel(const InputParameters & params);
 
 protected:
-  virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
+  virtual HDGAssemblyHelper * hdgHelper() override;
 
   /// Assembly helper implementing the L-HDG advection weak form.
   std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;

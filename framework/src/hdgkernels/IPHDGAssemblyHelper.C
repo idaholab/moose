@@ -11,7 +11,7 @@
 InputParameters
 IPHDGAssemblyHelper::validParams()
 {
-  return HybridizedDGAssemblyHelper::validParams();
+  return HDGAssemblyHelper::validParams();
 }
 
 IPHDGAssemblyHelper::IPHDGAssemblyHelper(const MooseObject * const moose_obj,
@@ -22,6 +22,6 @@ IPHDGAssemblyHelper::IPHDGAssemblyHelper(const MooseObject * const moose_obj,
                                          const THREAD_ID tid,
                                          const std::set<SubdomainID> & block_ids,
                                          const std::set<BoundaryID> & boundary_ids)
-  : HybridizedDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids)
+  : HDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids)
 {
 }

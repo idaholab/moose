@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "HybridizedDGBC.h"
-
-class IPHDGAssemblyHelper;
+#include "HDGBC.h"
+#include "IPHDGAssemblyHelper.h"
 
 /**
  * Implements a prescribed flux for an IP-HDG discretization
  */
-class IPHDGBC : public HybridizedDGBC
+class IPHDGBC : public HDGBC
 {
 public:
   static InputParameters validParams();
@@ -29,13 +28,6 @@ protected:
    */
   virtual void compute() override = 0;
 
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
-  virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
+  /// Returns the IP-HDG helper used by the common HDG boundary assembly implementation.
+  virtual IPHDGAssemblyHelper & hdgHelper() override = 0;
 };
-
-inline const IPHDGAssemblyHelper &
-IPHDGBC::iphdgHelper() const
-{
-  return const_cast<IPHDGBC *>(this)->iphdgHelper();
-}

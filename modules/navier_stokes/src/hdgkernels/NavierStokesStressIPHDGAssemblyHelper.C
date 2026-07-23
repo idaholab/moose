@@ -60,12 +60,12 @@ NavierStokesStressIPHDGAssemblyHelper::scalarVolume()
 {
   DiffusionIPHDGAssemblyHelper::scalarVolume();
 
-  for (const auto qp : make_range(_ip_qrule->n_points()))
+  for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : index_range(_scalar_re))
     {
-      _scalar_re(i) -= _ip_JxW[qp] * (_grad_scalar_phi[i][qp](_component) * _pressure_sol[qp]);
+      _scalar_re(i) -= _JxW[qp] * (_grad_scalar_phi[i][qp](_component) * _pressure_sol[qp]);
       if (_coord_sys == Moose::COORD_RZ && (_rz_radial_coord == _component))
-        _scalar_re(i) -= _pressure_sol[qp] / _ip_q_point[qp](_rz_radial_coord) * _scalar_phi[i][qp];
+        _scalar_re(i) -= _pressure_sol[qp] / _q_point[qp](_rz_radial_coord) * _scalar_phi[i][qp];
     }
 }
 
@@ -75,8 +75,8 @@ NavierStokesStressIPHDGAssemblyHelper::scalarFace()
   DiffusionIPHDGAssemblyHelper::scalarFace();
 
   for (const auto i : index_range(_scalar_re))
-    for (const auto qp : make_range(_ip_qrule_face->n_points()))
-      _scalar_re(i) += _ip_JxW_face[qp] * _pressure_face_sol[qp] * _ip_normals[qp](_component) *
+    for (const auto qp : make_range(_qrule_face->n_points()))
+      _scalar_re(i) += _JxW_face[qp] * _pressure_face_sol[qp] * _normals[qp](_component) *
                        _scalar_phi_face[i][qp];
 }
 
@@ -86,8 +86,8 @@ NavierStokesStressIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real
   DiffusionIPHDGAssemblyHelper::scalarDirichlet(dirichlet_value);
 
   for (const auto i : index_range(_scalar_re))
-    for (const auto qp : make_range(_ip_qrule_face->n_points()))
-      _scalar_re(i) += _ip_JxW_face[qp] * _pressure_face_sol[qp] * _ip_normals[qp](_component) *
+    for (const auto qp : make_range(_qrule_face->n_points()))
+      _scalar_re(i) += _JxW_face[qp] * _pressure_face_sol[qp] * _normals[qp](_component) *
                        _scalar_phi_face[i][qp];
 }
 
@@ -97,7 +97,7 @@ NavierStokesStressIPHDGAssemblyHelper::lmFace()
   DiffusionIPHDGAssemblyHelper::lmFace();
 
   for (const auto i : index_range(_lm_re))
-    for (const auto qp : make_range(_ip_qrule_face->n_points()))
-      _lm_re(i) -= _ip_JxW_face[qp] * _pressure_face_sol[qp] * _ip_normals[qp](_component) *
-                   _lm_phi_face[i][qp];
+    for (const auto qp : make_range(_qrule_face->n_points()))
+      _lm_re(i) -=
+          _JxW_face[qp] * _pressure_face_sol[qp] * _normals[qp](_component) * _lm_phi_face[i][qp];
 }

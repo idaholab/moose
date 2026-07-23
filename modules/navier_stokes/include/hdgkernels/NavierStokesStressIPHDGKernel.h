@@ -24,7 +24,7 @@ public:
   NavierStokesStressIPHDGKernel(const InputParameters & params);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper * hdgHelper() override { return _iphdg_helper.get(); }
 
 private:
   /// The assembly helper providing the required IP-HDG method implementations

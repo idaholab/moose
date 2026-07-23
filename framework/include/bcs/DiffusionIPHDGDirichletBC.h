@@ -22,7 +22,7 @@ public:
   DiffusionIPHDGDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper & hdgHelper() override { return *_iphdg_helper; }
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;

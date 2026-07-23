@@ -27,7 +27,7 @@ IPHDGPrescribedFluxBC::IPHDGPrescribedFluxBC(const InputParameters & parameters)
 void
 IPHDGPrescribedFluxBC::compute()
 {
-  auto & iphdg_helper = iphdgHelper();
+  auto & iphdg_helper = hdgHelper();
   iphdg_helper.resizeResiduals();
 
   // u, lm_u

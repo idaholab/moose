@@ -40,6 +40,9 @@ public:
   virtual std::set<std::string> additionalROVariables() override;
 
 protected:
+  /// Selects this kernel's manual assembly implementation.
+  virtual HDGAssemblyHelper * hdgHelper() override { return nullptr; }
+
   // body forces
   const Moose::Functor<Real> & _body_force_x;
   const Moose::Functor<Real> & _body_force_y;

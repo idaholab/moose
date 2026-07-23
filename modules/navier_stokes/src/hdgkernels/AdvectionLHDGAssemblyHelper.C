@@ -38,15 +38,15 @@ AdvectionLHDGAssemblyHelper::faceVelocity(const unsigned int qp) const
 {
   return _hybrid_velocity(
       Moose::ElemSideQpArg{
-          _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+          _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
       _ti.determineState());
 }
 
 void
 AdvectionLHDGAssemblyHelper::lmDirichletZero()
 {
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
     for (const auto i : index_range(_lm_re))
       // Match the zero-trace convention used by the L-HDG diffusion Dirichlet boundary condition.
-      _lm_re(i) -= _ip_JxW_face[qp] * _lm_u_sol[qp] * _lm_phi_face[i][qp];
+      _lm_re(i) -= _JxW_face[qp] * _lm_u_sol[qp] * _lm_phi_face[i][qp];
 }

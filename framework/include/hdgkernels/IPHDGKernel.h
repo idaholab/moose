@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "HybridizedDGKernel.h"
-
-class IPHDGAssemblyHelper;
+#include "HDGKernel.h"
+#include "IPHDGAssemblyHelper.h"
 
 /**
  * Base kernel for implementing an interior penalty hybridized discretization
  */
-class IPHDGKernel : public HybridizedDGKernel
+class IPHDGKernel : public HDGKernel
 {
 public:
   static InputParameters validParams();
@@ -24,13 +23,6 @@ public:
   IPHDGKernel(const InputParameters & params);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
-  virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() override;
+  /// Returns the IP-HDG helper used by the common HDG assembly implementation.
+  virtual IPHDGAssemblyHelper * hdgHelper() override = 0;
 };
-
-inline const IPHDGAssemblyHelper &
-IPHDGKernel::iphdgHelper() const
-{
-  return const_cast<IPHDGKernel *>(this)->iphdgHelper();
-}

@@ -7,53 +7,53 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HybridizedDGBC.h"
-#include "HybridizedDGAssemblyHelper.h"
+#include "HDGBC.h"
+#include "HDGAssemblyHelper.h"
 
 InputParameters
-HybridizedDGBC::validParams()
+HDGBC::validParams()
 {
   return ADIntegratedBC::validParams();
 }
 
-HybridizedDGBC::HybridizedDGBC(const InputParameters & parameters)
+HDGBC::HDGBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters), _cached_elem(nullptr), _cached_side(libMesh::invalid_uint)
 {
 }
 
 void
-HybridizedDGBC::computeResidual()
+HDGBC::computeResidual()
 {
   compute();
-  for (const auto & residual_packet : hybridizedDGHelper().taggingData())
+  for (const auto & residual_packet : hdgHelper().taggingData())
     addResiduals(_assembly, residual_packet);
 }
 
 void
-HybridizedDGBC::computeJacobian()
+HDGBC::computeJacobian()
 {
   compute();
-  for (const auto & residual_packet : hybridizedDGHelper().taggingData())
+  for (const auto & residual_packet : hdgHelper().taggingData())
     addJacobian(_assembly, residual_packet);
 }
 
 void
-HybridizedDGBC::computeResidualAndJacobian()
+HDGBC::computeResidualAndJacobian()
 {
   compute();
-  for (const auto & residual_packet : hybridizedDGHelper().taggingData())
+  for (const auto & residual_packet : hdgHelper().taggingData())
     addResidualsAndJacobian(_assembly, residual_packet);
 }
 
 void
-HybridizedDGBC::jacobianSetup()
+HDGBC::jacobianSetup()
 {
   _cached_elem = nullptr;
   _cached_side = libMesh::invalid_uint;
 }
 
 void
-HybridizedDGBC::computeOffDiagJacobian(const unsigned int)
+HDGBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
@@ -64,13 +64,13 @@ HybridizedDGBC::computeOffDiagJacobian(const unsigned int)
 }
 
 const std::unordered_set<unsigned int> &
-HybridizedDGBC::getMatPropDependencies() const
+HDGBC::getMatPropDependencies() const
 {
-  return hybridizedDGHelper().getMatPropDependencies();
+  return hdgHelper().getMatPropDependencies();
 }
 
 bool
-HybridizedDGBC::getMaterialPropertyCalled() const
+HDGBC::getMaterialPropertyCalled() const
 {
-  return hybridizedDGHelper().getMaterialPropertyCalled();
+  return hdgHelper().getMaterialPropertyCalled();
 }

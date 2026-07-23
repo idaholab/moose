@@ -27,7 +27,7 @@ public:
   MassFluxPenaltyBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
+  virtual IPHDGAssemblyHelper & hdgHelper() override;
   virtual void compute() override;
 
 private:

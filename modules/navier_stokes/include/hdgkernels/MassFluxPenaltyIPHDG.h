@@ -27,7 +27,7 @@ public:
   MassFluxPenaltyIPHDG(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
+  virtual IPHDGAssemblyHelper * hdgHelper() override;
 
 private:
   /// The assembly helper providing the required IP-HDG method implementations
