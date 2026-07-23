@@ -9,10 +9,9 @@
 
 #pragma once
 
-#include "ElementSubdomainModifier.h"
+#include "SBMElementSubdomainModifierBase.h"
 #include "Function.h"
 #include "PointInPolyhedronCheckUO.h"
-#include "libmesh/enum_order.h"
 
 enum class DistanceType
 {
@@ -21,7 +20,7 @@ enum class DistanceType
   GEOMETRY = 1
 };
 
-class InterceptedElementModifier : public ElementSubdomainModifier /*, public UserObjectInterface*/
+class InterceptedElementModifier : public SBMElementSubdomainModifierBase
 {
 public:
   static InputParameters validParams();
@@ -40,22 +39,11 @@ private:
   /// IDs for subdomain classification (outside)
   SubdomainID _subdomain_id_outside;
 
-  /// ID for intercepted elements (optional)
-  const bool _mark_intercepted;
-  /// IDs for subdomain classification (intercepted)
-  SubdomainID _subdomain_id_intercepted;
-
   /// Threshold value for classification
   Real _threshold;
 
-  /// Lambda parameter for false intersection classification
-  Real _lambda;
-
   /// Outer boundary handling flag
   bool _outer_boundary;
-
-  /// quadrature rule order to doing lambda-based classification to determine whether the Intercepted element belong to TrueIntercepted or FalseIntercepted
-  Order _qrule_order;
 
   /// user object for in-out test
   const PointInPolyhedronCheckUO * _in_out_test_base;

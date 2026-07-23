@@ -1,0 +1,15 @@
+[Tests]
+  design = 'SubdomainElementModifier.md'
+  issues = '#31937'
+
+  [grain_corner]
+    type = Exodiff
+    input = 'grain_marking.i'
+    exodiff = 'grain_marking_out.e'
+    mesh_mode = REPLICATED # SurfaceMeshBySubdomainBuilder requires a serial mesh for its In-Out test
+    recover = false
+    requirement = 'The system shall assign subdomain IDs to a background mesh from grain-boundary '
+                  'loops using per-subdomain in-out tests, marking each element with the grain that '
+                  'occupies the largest area fraction when several grains meet at interior corners.'
+  []
+[]

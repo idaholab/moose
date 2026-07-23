@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "ElementSubdomainModifier.h"
+#include "SBMElementSubdomainModifierBase.h"
 #include "PointInSubdomainCheckUO.h" // UO with subdomain geometry checks
 #include "Function.h"
-#include "libmesh/enum_order.h"
 
-class SubdomainElementModifier : public ElementSubdomainModifier
+class SubdomainElementModifier : public SBMElementSubdomainModifierBase
 {
 public:
   static InputParameters validParams();
@@ -25,16 +24,4 @@ protected:
 
   /// The user object containing subdomain-wise in/out checkers
   const PointInSubdomainCheckUO & _subdomain_id_tester;
-
-  /// The geometric threshold to decide between inside/outside
-  Real _lambda;
-
-  /// @brief  Quadrature order used for active-area estimation
-  Order _qrule_order;
-
-  /// @brief If true, mark the intercepted elements with the subdomain ID
-  bool _mark_intercepted;
-
-  /// @brief The subdomain ID to assign to intercepted elements
-  SubdomainID _subdomain_id_intercepted;
 };
