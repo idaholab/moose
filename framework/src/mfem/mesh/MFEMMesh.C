@@ -18,6 +18,7 @@ InputParameters
 MFEMMesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
+  params += MFEMTopology::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -37,13 +38,15 @@ MFEMMesh::validParams()
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
-
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters)
+  : FileMesh(parameters), MFEMTopology(parameters)
+{
+}
 
 MFEMMesh::~MFEMMesh() {}
 
@@ -54,6 +57,10 @@ MFEMMesh::buildMesh()
 
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
+
+  if (_periodic)
+    mfem_ser_mesh = mfem::Mesh::MakePeriodic(mfem_ser_mesh,
+                                             CreateTopologicallyEquivalentVertexMap(mfem_ser_mesh));
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError(

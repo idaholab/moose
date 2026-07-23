@@ -12,12 +12,13 @@
 #pragma once
 
 #include "FileMesh.h"
+#include "MFEMTopology.h"
 
 /**
  * MFEMMesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
  */
-class MFEMMesh : public FileMesh
+class MFEMMesh : public FileMesh, public MFEMTopology
 {
 public:
   static InputParameters validParams();
