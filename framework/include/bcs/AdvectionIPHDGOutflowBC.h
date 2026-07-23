@@ -9,26 +9,27 @@
 
 #pragma once
 
-#include "IPHDGBC.h"
-#include "AdvectionIPHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGBC.h"
+
+class AdvectionIPHDGAssemblyHelper;
 
 /**
  * Implements an outflow boundary condition for use with a hybridized discretization of
  * the Advection equation
  */
-class AdvectionIPHDGOutflowBC : public IPHDGBC
+class AdvectionIPHDGOutflowBC : public TwoFieldScalarHDGBC
 {
 public:
   static InputParameters validParams();
   AdvectionIPHDGOutflowBC(const InputParameters & parameters);
 
-protected:
+private:
   /**
    * compute the AD residuals
    */
-  virtual void compute() override;
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper &) override;
 
-  virtual AdvectionIPHDGAssemblyHelper & hdgHelper() override;
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<AdvectionIPHDGAssemblyHelper> _iphdg_helper;

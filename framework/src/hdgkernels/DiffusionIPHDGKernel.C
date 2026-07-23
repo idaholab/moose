@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", DiffusionIPHDGKernel);
 InputParameters
 DiffusionIPHDGKernel::validParams()
 {
-  auto params = IPHDGKernel::validParams();
+  auto params = TwoFieldScalarHDGKernel::validParams();
   params += DiffusionIPHDGAssemblyHelper::validParams();
   params.addClassDescription(
       "Adds the element and interior face weak forms for a hybridized interior penalty "
@@ -24,14 +24,14 @@ DiffusionIPHDGKernel::validParams()
 }
 
 DiffusionIPHDGKernel::DiffusionIPHDGKernel(const InputParameters & params)
-  : IPHDGKernel(params),
+  : TwoFieldScalarHDGKernel(params),
     _iphdg_helper(std::make_unique<DiffusionIPHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
-IPHDGAssemblyHelper *
+TwoFieldScalarHDGAssemblyHelper &
 DiffusionIPHDGKernel::hdgHelper()
 {
-  return _iphdg_helper.get();
+  return *_iphdg_helper;
 }

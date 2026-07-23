@@ -9,13 +9,14 @@
 
 #include "MassFluxPenaltyIPHDGAssemblyHelper.h"
 
-// MOOSE includes
 #include "MooseVariableFE.h"
+#include "SystemBase.h"
+#include "TransientInterface.h"
 
 InputParameters
 MassFluxPenaltyIPHDGAssemblyHelper::validParams()
 {
-  InputParameters params = IPHDGAssemblyHelper::validParams();
+  InputParameters params = TwoFieldScalarHDGAssemblyHelper::validParams();
   params.addRequiredParam<NonlinearVariableName>("u", "The x-velocity");
   params.addRequiredParam<NonlinearVariableName>("v", "The y-velocity");
   params.addParam<NonlinearVariableName>("w", "The z-velocity");
@@ -39,7 +40,8 @@ MassFluxPenaltyIPHDGAssemblyHelper::MassFluxPenaltyIPHDGAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : IPHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
+  : TwoFieldScalarHDGAssemblyHelper(
+        moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     ADFunctorInterface(moose_obj),
     _vel_x_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("u"))),
     _vel_y_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("v"))),

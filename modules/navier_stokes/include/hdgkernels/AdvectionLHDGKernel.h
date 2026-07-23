@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "HDGKernel.h"
+#include "TwoFieldScalarHDGKernel.h"
 
 class AdvectionLHDGAssemblyHelper;
 
 /**
- * Advection term using a cell velocity in the volume and a hybrid velocity in face fluxes.
+ * Advection term using a cell velocity in the volume and the velocity trace in face fluxes.
  */
-class AdvectionLHDGKernel : public HDGKernel
+class AdvectionLHDGKernel : public TwoFieldScalarHDGKernel
 {
 public:
   static InputParameters validParams();
   AdvectionLHDGKernel(const InputParameters & params);
 
-protected:
-  virtual HDGAssemblyHelper * hdgHelper() override;
+private:
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// Assembly helper implementing the L-HDG advection weak form.
   std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;

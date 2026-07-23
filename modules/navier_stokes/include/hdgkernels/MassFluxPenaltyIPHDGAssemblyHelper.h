@@ -9,8 +9,11 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
 #include "ADFunctorInterface.h"
+
+template <typename>
+class MooseVariableField;
 
 /*
  * Imposes a singular perturbation on the component momentum equations penalizing discontinuities in
@@ -18,7 +21,8 @@
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDGAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
+class MassFluxPenaltyIPHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper,
+                                           public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

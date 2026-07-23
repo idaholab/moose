@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the diffusion equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class DiffusionIPHDGAssemblyHelper : public IPHDGAssemblyHelper
+class DiffusionIPHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
@@ -55,6 +55,12 @@ protected:
    * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
    */
   virtual void scalarDirichlet(const Moose::Functor<Real> & dirichlet_value) override;
+
+  /// Element-interior scalar gradients at quadrature points
+  const MooseArray<ADRealVectorValue> & _grad_u_sol;
+
+  /// Element-interior scalar test-function gradients evaluated on a face
+  const MooseArray<std::vector<RealVectorValue>> & _grad_scalar_phi_face;
 
   /// The diffusivity in the element volume
   const ADMaterialProperty<Real> & _diff;

@@ -52,15 +52,20 @@ called on internal faces on a per-element basis. This means that a given interna
 visited twice, once from each element side. External boundary condition integration occurs with
 standard boundary condition classes, see [syntax/BCs/index.md].
 
-There are currently two HDG implementations in MOOSE: L-HDG and IP-HDG. Both L-HDG and IP-HDG kernel
-classes inherit from `HDGKernel` but that is where their similarity ends. L-HDG currently implements
-physics monolithically, e.g. the L-HDG discretization of the Navier-Stokes equations, both mass and
-momentum, is contained entirely within a single kernel. However, the MOOSE IP-HDG implementation is
-modular; like is typically the case in MOOSE, there is a single kernel object per PDE term. So for a
-2D setup of the Navier-Stokes equations, there are five kernels. Two advection kernels for the x-
-and y-momentum component equations, two stress kernel (which contains both viscous stress and
-pressure) for the x- and y-momentum component equations, and one advection kernel for the mass
-equation.
+`HDGKernel` is method-neutral and does not prescribe an algebraic layout. Physics term discretizations involving
+only one element-interior scalar and one scalar facet trace may instead derive from
+`TwoFieldScalarHDGKernel`, which provides common helper-backed automatic-differentiation assembly.
+There are currently two HDG implementations in MOOSE: L-HDG and IP-HDG. The IP-HDG kernels and
+L-HDG scalar advection use the common assembly provided by `TwoFieldScalarHDGKernel`. L-HDG
+diffusion and flow kernels assemble their additional vector and coupled equation blocks directly
+through `HDGKernel`.
+L-HDG currently implements flow physics monolithically, e.g. the L-HDG discretization of the
+Navier-Stokes equations, both mass and momentum, is contained entirely within a single kernel.
+However, the MOOSE IP-HDG implementation is modular; like is typically the case in MOOSE, there is a
+single kernel object per PDE term. So for a 2D setup of the Navier-Stokes equations, there are five
+kernels. Two advection kernels for the x- and y-momentum component equations, two stress kernels
+(which contain both viscous stress and pressure) for the x- and y-momentum component equations, and
+one advection kernel for the mass equation.
 
 This difference in kernel design naturally has consequences for boundary conditions. The monolithic
 kernel design for L-HDG leads to monolithic boundary conditions. Modularity for IP-HDG kernels means

@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGKernel);
 InputParameters
 NavierStokesStressIPHDGKernel::validParams()
 {
-  auto params = IPHDGKernel::validParams();
+  auto params = TwoFieldScalarHDGKernel::validParams();
   params += NavierStokesStressIPHDGAssemblyHelper::validParams();
   params.addClassDescription(
       "Adds viscous and pressure stress terms for element interiors and interior faces");
@@ -23,8 +23,14 @@ NavierStokesStressIPHDGKernel::validParams()
 }
 
 NavierStokesStressIPHDGKernel::NavierStokesStressIPHDGKernel(const InputParameters & params)
-  : IPHDGKernel(params),
+  : TwoFieldScalarHDGKernel(params),
     _iphdg_helper(std::make_unique<NavierStokesStressIPHDGAssemblyHelper>(
         this, this, this, _mesh, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
+}
+
+TwoFieldScalarHDGAssemblyHelper &
+NavierStokesStressIPHDGKernel::hdgHelper()
+{
+  return *_iphdg_helper;
 }

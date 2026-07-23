@@ -7,24 +7,27 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "Assembly.h"
+#include "MooseFunctor.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 #include "MooseObject.h"
+#include "TaggingInterface.h"
 #include "TransientInterface.h"
 
 using namespace libMesh;
 
 InputParameters
-HDGAssemblyHelper::validParams()
+TwoFieldScalarHDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<NonlinearVariableName>("face_variable", "The face variable");
   return params;
 }
 
-HDGAssemblyHelper::HDGAssemblyHelper(
+TwoFieldScalarHDGAssemblyHelper::TwoFieldScalarHDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MooseVariableDependencyInterface * const mvdi,
     const TransientInterface * const ti,
@@ -41,12 +44,10 @@ HDGAssemblyHelper::HDGAssemblyHelper(
     _u_dof_indices(_u_var.dofIndices()),
     _lm_u_dof_indices(_u_face_var.dofIndices()),
     _u_sol(_u_var.adSln()),
-    _grad_u_sol(_u_var.adGradSln()),
     _lm_u_sol(_u_face_var.adSln()),
     _scalar_phi(_u_var.phi()),
     _grad_scalar_phi(_u_var.gradPhi()),
     _scalar_phi_face(_u_var.phiFace()),
-    _grad_scalar_phi_face(_u_var.gradPhiFace()),
     _lm_phi_face(_u_face_var.phiFace()),
     _elem_volume(assembly.elemVolume()),
     _side_area(assembly.sideElemVolume()),
@@ -66,26 +67,25 @@ HDGAssemblyHelper::HDGAssemblyHelper(
 }
 
 std::array<ADResidualsPacket, 2>
-HDGAssemblyHelper::taggingData() const
+TwoFieldScalarHDGAssemblyHelper::taggingData() const
 {
   return {ADResidualsPacket{_scalar_re, _u_dof_indices, _u_var.scalingFactor()},
           ADResidualsPacket{_lm_re, _lm_u_dof_indices, _u_face_var.scalingFactor()}};
 }
 
 std::set<std::string>
-HDGAssemblyHelper::additionalROVariables()
+TwoFieldScalarHDGAssemblyHelper::additionalROVariables()
 {
   return {_u_face_var.name()};
 }
 
 void
-HDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
+TwoFieldScalarHDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{
-            _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
+        Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_lm_re))
@@ -94,13 +94,12 @@ HDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
 }
 
 void
-HDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
+TwoFieldScalarHDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto flux = flux_value(
-        Moose::ElemSideQpArg{
-            _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
+        Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_lm_re))

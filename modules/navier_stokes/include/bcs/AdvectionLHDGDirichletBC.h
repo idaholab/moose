@@ -9,22 +9,22 @@
 
 #pragma once
 
-#include "HDGBC.h"
+#include "TwoFieldScalarHDGBC.h"
 
 class AdvectionLHDGAssemblyHelper;
 
 /**
  * Weakly imposes prescribed scalar and velocity data for an L-HDG advection discretization.
  */
-class AdvectionLHDGDirichletBC : public HDGBC
+class AdvectionLHDGDirichletBC : public TwoFieldScalarHDGBC
 {
 public:
   static InputParameters validParams();
   AdvectionLHDGDirichletBC(const InputParameters & parameters);
 
-protected:
-  virtual void compute() override;
-  virtual HDGAssemblyHelper & hdgHelper() override;
+private:
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper &) override;
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// Assembly helper implementing the L-HDG advective boundary flux.
   std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;

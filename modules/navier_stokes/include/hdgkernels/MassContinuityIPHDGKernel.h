@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "IPHDGKernel.h"
+#include "TwoFieldScalarHDGKernel.h"
 
 class MassContinuityAssemblyHelper;
 
 /**
  * Implements an advection term for a interior penalty hybridized discretization
  */
-class MassContinuityIPHDGKernel : public IPHDGKernel
+class MassContinuityIPHDGKernel : public TwoFieldScalarHDGKernel
 {
 public:
   static InputParameters validParams();
   MassContinuityIPHDGKernel(const InputParameters & params);
 
-protected:
-  virtual IPHDGAssemblyHelper * hdgHelper() override;
+private:
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<MassContinuityAssemblyHelper> _iphdg_helper;

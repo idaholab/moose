@@ -9,22 +9,22 @@
 
 #pragma once
 
-#include "HDGBC.h"
+#include "TwoFieldScalarHDGBC.h"
 
 class AdvectionLHDGAssemblyHelper;
 
 /**
  * Implements an advective outflow boundary condition using the L-HDG hybrid velocity.
  */
-class AdvectionLHDGOutflowBC : public HDGBC
+class AdvectionLHDGOutflowBC : public TwoFieldScalarHDGBC
 {
 public:
   static InputParameters validParams();
   AdvectionLHDGOutflowBC(const InputParameters & parameters);
 
-protected:
-  virtual void compute() override;
-  virtual HDGAssemblyHelper & hdgHelper() override;
+private:
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper &) override;
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
 
   /// Assembly helper implementing the L-HDG advective boundary flux.
   std::unique_ptr<AdvectionLHDGAssemblyHelper> _lhdg_helper;

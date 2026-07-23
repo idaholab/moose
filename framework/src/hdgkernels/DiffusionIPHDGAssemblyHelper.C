@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DiffusionIPHDGAssemblyHelper.h"
+#include "MooseFunctor.h"
 #include "MooseTypes.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableScalar.h"
@@ -15,13 +16,15 @@
 #include "MooseMesh.h"
 #include "MooseObject.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseVariableFE.h"
+#include "TransientInterface.h"
 
 using namespace libMesh;
 
 InputParameters
 DiffusionIPHDGAssemblyHelper::validParams()
 {
-  auto params = IPHDGAssemblyHelper::validParams();
+  auto params = TwoFieldScalarHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
   params.addRequiredParam<Real>("alpha",
                                 "The stabilization coefficient required for discontinuous Galerkin "
@@ -38,7 +41,10 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : IPHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
+  : TwoFieldScalarHDGAssemblyHelper(
+        moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
+    _grad_u_sol(_u_var.adGradSln()),
+    _grad_scalar_phi_face(_u_var.gradPhiFace()),
     _diff(this->getADMaterialProperty<Real>("diffusivity")),
     _face_diff(this->getFaceADMaterialProperty<Real>("diffusivity")),
     _alpha(moose_obj->getParam<Real>("alpha"))

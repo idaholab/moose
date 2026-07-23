@@ -9,27 +9,26 @@
 
 #pragma once
 
-#include "HDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
 
 /**
  * Shared assembly for two-field hybridized DG discretizations of the advection equation.
  *
  * Derived helpers provide the face velocity appropriate to their flow discretization.
  */
-template <typename Base>
-class AdvectionHDGAssemblyHelperTempl : public Base
+class AdvectionHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
 
-  AdvectionHDGAssemblyHelperTempl(const MooseObject * moose_obj,
-                                 MooseVariableDependencyInterface * mvdi,
-                                 const TransientInterface * ti,
-                                 SystemBase & sys,
-                                 const Assembly & assembly,
-                                 THREAD_ID tid,
-                                 const std::set<SubdomainID> & block_ids,
-                                 const std::set<BoundaryID> & boundary_ids);
+  AdvectionHDGAssemblyHelper(const MooseObject * moose_obj,
+                             MooseVariableDependencyInterface * mvdi,
+                             const TransientInterface * ti,
+                             SystemBase & sys,
+                             const Assembly & assembly,
+                             THREAD_ID tid,
+                             const std::set<SubdomainID> & block_ids,
+                             const std::set<BoundaryID> & boundary_ids);
 
   virtual void scalarVolume() override;
   virtual void scalarFace() override;
@@ -40,23 +39,6 @@ public:
   void lmOutflow();
 
 protected:
-  using Base::_current_elem;
-  using Base::_current_side;
-  using Base::_grad_scalar_phi;
-  using Base::_JxW;
-  using Base::_JxW_face;
-  using Base::_lm_phi_face;
-  using Base::_lm_re;
-  using Base::_lm_u_sol;
-  using Base::_normals;
-  using Base::_q_point_face;
-  using Base::_qrule;
-  using Base::_qrule_face;
-  using Base::_scalar_phi_face;
-  using Base::_scalar_re;
-  using Base::_ti;
-  using Base::_u_sol;
-
   /**
    * @returns The velocity on the current face quadrature point
    */
@@ -75,5 +57,3 @@ protected:
   /// Constant coefficient multiplying the advected scalar, such as density.
   const Real _coeff;
 };
-
-using AdvectionHDGAssemblyHelper = AdvectionHDGAssemblyHelperTempl<HDGAssemblyHelper>;
