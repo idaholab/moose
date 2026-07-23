@@ -11,6 +11,7 @@
 
 // Moose Includes
 #include "ThreadedElementLoop.h"
+#include "MooseTypes.h"
 
 #include "libmesh/stored_range.h"
 
@@ -27,7 +28,10 @@ typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistEl
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:
-  ComputeDiracThread(FEProblemBase & feproblem, const std::set<TagID> & tags, bool _is_jacobian);
+  ComputeDiracThread(FEProblemBase & feproblem,
+                     const std::set<TagID> & vector_tags,
+                     const std::set<TagID> & matrix_tags,
+                     Moose::ComputeType compute_type);
 
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
@@ -49,10 +53,11 @@ protected:
   /// Output the order of execution of objects within the current subdomain
   void printBlockExecutionInformation() const override;
 
-  bool _is_jacobian;
+  Moose::ComputeType _compute_type;
   NonlinearSystemBase & _nl;
 
-  const std::set<TagID> & _tags;
+  const std::set<TagID> & _vector_tags;
+  const std::set<TagID> & _matrix_tags;
 
   /// Storage for DiracKernel objects
   MooseObjectTagWarehouse<DiracKernelBase> & _dirac_kernels;

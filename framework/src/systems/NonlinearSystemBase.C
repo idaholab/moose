@@ -1953,7 +1953,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _residual_ghosted->close();
   }
 
-  PARALLEL_TRY { computeDiracContributions(tags, false); }
+  PARALLEL_TRY { computeDiracContributions(tags, {}, Moose::ComputeType::Residual); }
   PARALLEL_CATCH;
 
   if (_fe_problem._has_constraints)
@@ -1993,6 +1993,21 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                                                         const std::set<TagID> & matrix_tags)
 {
   TIME_SECTION("computeResidualAndJacobianInternal", 3);
+
+  // These residual objects are only computed in the separate residual/Jacobian paths. Erroring
+  // here prevents them from being silently dropped, which would produce wrong answers
+  if (_scalar_kernels.hasActiveObjects())
+    mooseError("residual_and_jacobian_together does not yet support ScalarKernels. Their "
+               "contributions would be silently dropped. Please use "
+               "residual_and_jacobian_together = false");
+  if (_nodal_kernels.hasActiveBlockObjects() || _nodal_kernels.hasActiveBoundaryObjects())
+    mooseError("residual_and_jacobian_together does not yet support NodalKernels. Their "
+               "contributions would be silently dropped. Please use "
+               "residual_and_jacobian_together = false");
+  if (_constraints.hasActiveNodalConstraints())
+    mooseError("residual_and_jacobian_together does not yet support nodal constraints. Their "
+               "contributions would be silently dropped. Please use "
+               "residual_and_jacobian_together = false");
 
   // Make matrix ready to use
   activateAllMatrixTags();
@@ -2084,6 +2099,13 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       _fe_problem.addCachedResidual(i);
       _fe_problem.addCachedJacobian(i);
     }
+  }
+  PARALLEL_CATCH;
+
+  // residual and Jacobian contributions from DiracKernels, computed together in a single pass
+  PARALLEL_TRY
+  {
+    computeDiracContributions(vector_tags, matrix_tags, Moose::ComputeType::ResidualAndJacobian);
   }
   PARALLEL_CATCH;
 }
@@ -3167,7 +3189,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       break;
     }
 
-    computeDiracContributions(tags, true);
+    computeDiracContributions({}, tags, Moose::ComputeType::Jacobian);
 
     static bool first = true;
 
@@ -3508,7 +3530,9 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian)
+NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & vector_tags,
+                                               const std::set<TagID> & matrix_tags,
+                                               const Moose::ComputeType compute_type)
 {
   _fe_problem.clearDiracInfo();
 
@@ -3529,7 +3553,7 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, boo
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, tags, is_jacobian);
+    ComputeDiracThread cd(_fe_problem, vector_tags, matrix_tags, compute_type);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -3539,7 +3563,13 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, boo
 
     cd(range);
 
-    if (is_jacobian)
+    // AD DiracKernels computing the residual and Jacobian together cache their residual
+    // contributions (via addResidualsAndJacobian), so those must be flushed too
+    if (compute_type != Moose::ComputeType::Jacobian)
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _fe_problem.addCachedResidual(tid);
+
+    if (compute_type != Moose::ComputeType::Residual)
       for (const auto tid : make_range(libMesh::n_threads()))
         _fe_problem.addCachedJacobian(tid);
   }
