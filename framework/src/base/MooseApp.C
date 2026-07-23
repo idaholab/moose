@@ -2721,10 +2721,10 @@ MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
   if (!RestartableDataReader::isAvailable(meta_data_folder_base))
   {
     if (processor_id() == 0)
-      mooseWarning("The pre-split mesh file '",
-                   folder_base,
-                   "' does not contain mesh meta data. The mesh input cannot be checked for "
-                   "consistency with the pre-split mesh.");
+      mooseInfo("The pre-split mesh file '",
+                folder_base,
+                "' does not contain mesh meta data. The mesh input cannot be checked for "
+                "consistency with the pre-split mesh.");
     return;
   }
 
@@ -2742,10 +2742,10 @@ MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
   if (!fingerprint->loaded())
   {
     if (processor_id() == 0)
-      mooseWarning("The pre-split mesh file '",
-                   folder_base,
-                   "' does not contain a mesh input fingerprint. The mesh input cannot be checked "
-                   "for consistency with the pre-split mesh.");
+      mooseInfo("The pre-split mesh file '",
+                folder_base,
+                "' does not contain a mesh input fingerprint. The mesh input cannot be checked "
+                "for consistency with the pre-split mesh.");
     return;
   }
 
