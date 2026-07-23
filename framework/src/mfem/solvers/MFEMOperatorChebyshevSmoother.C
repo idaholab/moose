@@ -41,7 +41,7 @@ MFEMOperatorChebyshevSmoother::ConstructSolver()
 }
 
 void
-MFEMOperatorChebyshevSmoother::SetOperator(mfem::Operator & op)
+MFEMOperatorChebyshevSmoother::SetOperatorImpl(mfem::Operator & op)
 {
   _diag.SetSize(op.Height());
   op.AssembleDiagonal(_diag);

@@ -66,6 +66,14 @@ template void LinearSolverBase::SetPreconditioner(mfem::HypreGMRES &);
 template void LinearSolverBase::SetPreconditioner(mfem::HyprePCG &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
+
+void
+LinearSolverBase::UpdateEquationSystemContext()
+{
+  if (_preconditioner)
+    _preconditioner->UpdateEquationSystemContext();
+}
+
 } // namespace Moose::MFEM
 
 #endif

@@ -60,8 +60,9 @@ public:
   /// Creates a stable proxy solver; the real multigrid is built when the proxy gets an operator.
   void ConstructSolver() override;
 
+protected:
   /// Rebuilds the multigrid hierarchy for the supplied finest-level operator.
-  void SetOperator(mfem::Operator & op) override;
+  void SetOperatorImpl(mfem::Operator & op) override;
 
 private:
   /// Map assembly-level string ("legacy", "full", "element", "partial", "none")

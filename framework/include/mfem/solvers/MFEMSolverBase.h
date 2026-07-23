@@ -34,14 +34,21 @@ public:
   /// Override in derived classes to construct and set the solver options.
   virtual void ConstructSolver() = 0;
 
-  /// Updates the solver at the operator level. Default implementation sets the operator on the
-  /// wrapped MFEM solver
-  virtual void SetOperator(mfem::Operator & op) { GetSolver().SetOperator(op); }
+  /// Updates the solver and any associated weak form context at the operator level
+  void SetOperator(mfem::Operator & op);
 
   /// Solve the operator for the provided right-hand side and solution vector.
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) { GetSolver().Mult(rhs, x); }
 
 protected:
+  /// Update the solver following any changes to the weak form it is responsible for solving.
+  /// Default no-op.
+  virtual void UpdateEquationSystemContext() {}
+
+  /// Updates the solver at the operator level. Default implementation sets the operator on the
+  /// wrapped MFEM solver
+  virtual void SetOperatorImpl(mfem::Operator & op) { GetSolver().SetOperator(op); }
+
   /// Solver to be used for the problem
   std::unique_ptr<mfem::Solver> _solver;
 };

@@ -31,10 +31,11 @@ public:
 
   MFEMOperatorChebyshevSmoother(const InputParameters & parameters);
 
-  void SetOperator(mfem::Operator & op) override;
-
 protected:
   void ConstructSolver() override;
+
+  /// Rebuilds the multigrid hierarchy for the supplied finest-level operator.
+  virtual void SetOperatorImpl(mfem::Operator & op) override;
 
 private:
   /// Degree of the Chebyshev polynomial used by the MFEM smoother.

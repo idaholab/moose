@@ -32,6 +32,13 @@ SolverBase::SolverBase(const InputParameters & parameters)
   : MFEMObject(parameters), _solver{nullptr}
 {
 }
+
+void
+SolverBase::SetOperator(mfem::Operator & op)
+{
+  UpdateEquationSystemContext();
+  SetOperatorImpl(op);
+}
 } // namespace Moose::MFEM
 
 #endif
