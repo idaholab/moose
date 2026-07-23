@@ -29,7 +29,7 @@ AdvectionIPHDGPrescribedFluxBC::AdvectionIPHDGPrescribedFluxBC(const InputParame
 {
 }
 
-IPHDGAssemblyHelper &
+TwoFieldScalarHDGAssemblyHelper &
 AdvectionIPHDGPrescribedFluxBC::hdgHelper()
 {
   return *_iphdg_helper;

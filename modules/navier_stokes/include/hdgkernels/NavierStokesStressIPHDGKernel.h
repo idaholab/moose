@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "IPHDGKernel.h"
+#include "TwoFieldScalarHDGKernel.h"
 
 class NavierStokesStressIPHDGAssemblyHelper;
 
@@ -17,16 +17,15 @@ class NavierStokesStressIPHDGAssemblyHelper;
  * Implements the stress terms for a interior penalty hybridized discretization of the Navier-Stokes
  * equations
  */
-class NavierStokesStressIPHDGKernel : public IPHDGKernel
+class NavierStokesStressIPHDGKernel : public TwoFieldScalarHDGKernel
 {
 public:
   static InputParameters validParams();
   NavierStokesStressIPHDGKernel(const InputParameters & params);
 
-protected:
-  virtual IPHDGAssemblyHelper * hdgHelper() override { return _iphdg_helper.get(); }
-
 private:
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override;
+
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;
 };

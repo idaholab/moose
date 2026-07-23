@@ -14,7 +14,7 @@ AdvectionLHDGAssemblyHelper::validParams()
 {
   auto params = AdvectionHDGAssemblyHelper::validParams();
   params.addRequiredParam<MooseFunctorName>("face_velocity",
-                                            "Hybrid velocity used for numerical face fluxes");
+                                            "Velocity trace used for numerical face fluxes");
   return params;
 }
 
@@ -29,16 +29,15 @@ AdvectionLHDGAssemblyHelper::AdvectionLHDGAssemblyHelper(
     const std::set<BoundaryID> & boundary_ids)
   : AdvectionHDGAssemblyHelper(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
     ADFunctorInterface(moose_obj),
-    _hybrid_velocity(getFunctor<ADRealVectorValue>("face_velocity"))
+    _velocity_trace(getFunctor<ADRealVectorValue>("face_velocity"))
 {
 }
 
 ADRealVectorValue
 AdvectionLHDGAssemblyHelper::faceVelocity(const unsigned int qp) const
 {
-  return _hybrid_velocity(
-      Moose::ElemSideQpArg{
-          _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
+  return _velocity_trace(
+      Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
       _ti.determineState());
 }
 

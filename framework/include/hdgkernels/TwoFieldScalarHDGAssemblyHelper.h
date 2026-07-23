@@ -9,25 +9,24 @@
 
 #pragma once
 
-#include "Moose.h"
-#include "MooseTypes.h"
 #include "MooseArray.h"
-#include "MooseFunctor.h"
-#include "Function.h"
-#include "Kernel.h"
-#include "MooseVariableDependencyInterface.h"
-#include "TaggingInterface.h"
+#include "MooseFunctorForward.h"
+#include "MooseTypes.h"
 #include "ThreeMaterialPropertyInterface.h"
 
-#include "libmesh/vector_value.h"
+#include <array>
+#include <set>
+#include <string>
 #include <vector>
 
 template <typename>
 class MooseVariableFE;
-class SystemBase;
+class Assembly;
 class MooseObject;
 class MooseVariableDependencyInterface;
+class SystemBase;
 class TransientInterface;
+struct ADResidualsPacket;
 
 /**
  * Method-neutral assembly data and operations for a two-field hybridized DG discretization.
@@ -35,19 +34,19 @@ class TransientInterface;
  * The two fields are an element-interior scalar and its facet trace. Derived helpers provide the
  * method-specific volume and face weak forms.
  */
-class HDGAssemblyHelper : public ThreeMaterialPropertyInterface
+class TwoFieldScalarHDGAssemblyHelper : public ThreeMaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
 
-  HDGAssemblyHelper(const MooseObject * moose_obj,
-                    MooseVariableDependencyInterface * mvdi,
-                    const TransientInterface * ti,
-                    SystemBase & sys,
-                    const Assembly & assembly,
-                    THREAD_ID tid,
-                    const std::set<SubdomainID> & blocks_ids,
-                    const std::set<BoundaryID> & boundary_ids);
+  TwoFieldScalarHDGAssemblyHelper(const MooseObject * moose_obj,
+                                  MooseVariableDependencyInterface * mvdi,
+                                  const TransientInterface * ti,
+                                  SystemBase & sys,
+                                  const Assembly & assembly,
+                                  THREAD_ID tid,
+                                  const std::set<SubdomainID> & blocks_ids,
+                                  const std::set<BoundaryID> & boundary_ids);
 
   /// Resizes the element-interior and facet residual vectors for the current element.
   void resizeResiduals();
@@ -80,7 +79,7 @@ public:
    */
   std::set<std::string> additionalROVariables();
 
-  virtual ~HDGAssemblyHelper() = default;
+  virtual ~TwoFieldScalarHDGAssemblyHelper() = default;
 
 protected:
   /// Transient state used to evaluate boundary functors.
@@ -101,9 +100,6 @@ protected:
   /// Element-interior scalar values at quadrature points.
   const MooseArray<ADReal> & _u_sol;
 
-  /// Element-interior scalar gradients at quadrature points.
-  const MooseArray<ADRealVectorValue> & _grad_u_sol;
-
   /// Facet trace values at face quadrature points.
   const MooseArray<ADReal> & _lm_u_sol;
 
@@ -115,9 +111,6 @@ protected:
 
   /// Element-interior scalar test functions evaluated on a face.
   const MooseArray<std::vector<Real>> & _scalar_phi_face;
-
-  /// Element-interior scalar test-function gradients evaluated on a face.
-  const MooseArray<std::vector<RealVectorValue>> & _grad_scalar_phi_face;
 
   /// Facet trace test functions evaluated on a face.
   const MooseArray<std::vector<Real>> & _lm_phi_face;
@@ -166,7 +159,7 @@ protected:
 };
 
 inline void
-HDGAssemblyHelper::resizeResiduals()
+TwoFieldScalarHDGAssemblyHelper::resizeResiduals()
 {
   _scalar_re.resize(_u_dof_indices.size());
   _lm_re.resize(_lm_u_dof_indices.size());

@@ -11,18 +11,18 @@
 
 #include "ADIntegratedBC.h"
 
-class HDGAssemblyHelper;
+class TwoFieldScalarHDGAssemblyHelper;
 
 /**
  * Base boundary condition for two-field hybridized DG discretizations assembled with automatic
  * differentiation.
  */
-class HDGBC : public ADIntegratedBC
+class TwoFieldScalarHDGBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  HDGBC(const InputParameters & parameters);
+  TwoFieldScalarHDGBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -32,16 +32,13 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
   virtual bool getMaterialPropertyCalled() const override;
 
-protected:
-  /// Computes the boundary residual data in the assembly helper.
-  virtual void compute() = 0;
+private:
+  /// Computes the boundary residual data using the supplied assembly helper.
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) = 0;
 
-  /**
-   * Returns the helper used for assembly. HDG boundary conditions are always helper-backed, so a
-   * reference is used instead of the nullable kernel-helper pointer.
-   */
-  virtual HDGAssemblyHelper & hdgHelper() = 0;
-  const HDGAssemblyHelper & hdgHelper() const;
+  /// Returns the helper used for common two-field scalar HDG assembly.
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() = 0;
+  const TwoFieldScalarHDGAssemblyHelper & hdgHelper() const;
 
   virtual ADReal computeQpResidual() override { mooseError("this will never be called"); }
 
@@ -52,8 +49,8 @@ protected:
   unsigned int _cached_side;
 };
 
-inline const HDGAssemblyHelper &
-HDGBC::hdgHelper() const
+inline const TwoFieldScalarHDGAssemblyHelper &
+TwoFieldScalarHDGBC::hdgHelper() const
 {
-  return const_cast<HDGBC *>(this)->hdgHelper();
+  return const_cast<TwoFieldScalarHDGBC *>(this)->hdgHelper();
 }

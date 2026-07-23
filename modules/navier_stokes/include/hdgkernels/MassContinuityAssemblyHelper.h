@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
 #include "ADFunctorInterface.h"
 
 class MooseMesh;
@@ -20,7 +20,8 @@ class MooseMesh;
  * incompressible Navier-Stokes. These routines may be called by both HDG kernels and integrated
  * boundary conditions.
  */
-class MassContinuityAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
+class MassContinuityAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper,
+                                     public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

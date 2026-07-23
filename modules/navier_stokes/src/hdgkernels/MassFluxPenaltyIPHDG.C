@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", MassFluxPenaltyIPHDG);
 InputParameters
 MassFluxPenaltyIPHDG::validParams()
 {
-  InputParameters params = IPHDGKernel::validParams();
+  InputParameters params = TwoFieldScalarHDGKernel::validParams();
   params += MassFluxPenaltyIPHDGAssemblyHelper::validParams();
   params.addClassDescription("introduces a jump correction on internal faces for grad-div "
                              "stabilization for discontinuous Galerkin methods.");
@@ -23,14 +23,14 @@ MassFluxPenaltyIPHDG::validParams()
 }
 
 MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & params)
-  : IPHDGKernel(params),
+  : TwoFieldScalarHDGKernel(params),
     _iphdg_helper(std::make_unique<MassFluxPenaltyIPHDGAssemblyHelper>(
         this, this, this, _mesh, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
-IPHDGAssemblyHelper *
+TwoFieldScalarHDGAssemblyHelper &
 MassFluxPenaltyIPHDG::hdgHelper()
 {
-  return _iphdg_helper.get();
+  return *_iphdg_helper;
 }

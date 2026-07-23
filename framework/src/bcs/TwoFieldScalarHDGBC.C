@@ -7,53 +7,57 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HDGBC.h"
-#include "HDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGBC.h"
+#include "TaggingInterface.h"
 
 InputParameters
-HDGBC::validParams()
+TwoFieldScalarHDGBC::validParams()
 {
   return ADIntegratedBC::validParams();
 }
 
-HDGBC::HDGBC(const InputParameters & parameters)
+TwoFieldScalarHDGBC::TwoFieldScalarHDGBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters), _cached_elem(nullptr), _cached_side(libMesh::invalid_uint)
 {
 }
 
 void
-HDGBC::computeResidual()
+TwoFieldScalarHDGBC::computeResidual()
 {
-  compute();
-  for (const auto & residual_packet : hdgHelper().taggingData())
+  auto & helper = hdgHelper();
+  compute(helper);
+  for (const auto & residual_packet : helper.taggingData())
     addResiduals(_assembly, residual_packet);
 }
 
 void
-HDGBC::computeJacobian()
+TwoFieldScalarHDGBC::computeJacobian()
 {
-  compute();
-  for (const auto & residual_packet : hdgHelper().taggingData())
+  auto & helper = hdgHelper();
+  compute(helper);
+  for (const auto & residual_packet : helper.taggingData())
     addJacobian(_assembly, residual_packet);
 }
 
 void
-HDGBC::computeResidualAndJacobian()
+TwoFieldScalarHDGBC::computeResidualAndJacobian()
 {
-  compute();
-  for (const auto & residual_packet : hdgHelper().taggingData())
+  auto & helper = hdgHelper();
+  compute(helper);
+  for (const auto & residual_packet : helper.taggingData())
     addResidualsAndJacobian(_assembly, residual_packet);
 }
 
 void
-HDGBC::jacobianSetup()
+TwoFieldScalarHDGBC::jacobianSetup()
 {
   _cached_elem = nullptr;
   _cached_side = libMesh::invalid_uint;
 }
 
 void
-HDGBC::computeOffDiagJacobian(const unsigned int)
+TwoFieldScalarHDGBC::computeOffDiagJacobian(const unsigned int)
 {
   if ((_cached_elem != _current_elem) || (_cached_side != _current_side))
   {
@@ -64,13 +68,13 @@ HDGBC::computeOffDiagJacobian(const unsigned int)
 }
 
 const std::unordered_set<unsigned int> &
-HDGBC::getMatPropDependencies() const
+TwoFieldScalarHDGBC::getMatPropDependencies() const
 {
   return hdgHelper().getMatPropDependencies();
 }
 
 bool
-HDGBC::getMaterialPropertyCalled() const
+TwoFieldScalarHDGBC::getMaterialPropertyCalled() const
 {
   return hdgHelper().getMaterialPropertyCalled();
 }

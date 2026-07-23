@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", MassFluxPenaltyBC);
 InputParameters
 MassFluxPenaltyBC::validParams()
 {
-  InputParameters params = IPHDGBC::validParams();
+  InputParameters params = TwoFieldScalarHDGBC::validParams();
   params += MassFluxPenaltyIPHDGAssemblyHelper::validParams();
   params.addClassDescription("introduces a jump correction on exterior faces for grad-div "
                              "stabilization for discontinuous Galerkin methods.");
@@ -26,7 +26,7 @@ MassFluxPenaltyBC::validParams()
 }
 
 MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & params)
-  : IPHDGBC(params),
+  : TwoFieldScalarHDGBC(params),
     _iphdg_helper(std::make_unique<MassFluxPenaltyIPHDGAssemblyHelper>(
         this, this, this, _mesh, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _dirichlet_boundary(getParam<bool>("dirichlet_boundary"))
@@ -34,18 +34,17 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & params)
 }
 
 void
-MassFluxPenaltyBC::compute()
+MassFluxPenaltyBC::compute(TwoFieldScalarHDGAssemblyHelper & helper)
 {
-  auto & iphdg_helper = hdgHelper();
-  iphdg_helper.resizeResiduals();
+  helper.resizeResiduals();
 
   // u, lm_u
-  iphdg_helper.scalarFace();
+  helper.scalarFace();
   if (!_dirichlet_boundary)
-    iphdg_helper.lmFace();
+    helper.lmFace();
 }
 
-IPHDGAssemblyHelper &
+TwoFieldScalarHDGAssemblyHelper &
 MassFluxPenaltyBC::hdgHelper()
 {
   return *_iphdg_helper;

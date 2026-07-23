@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", MassContinuityIPHDGKernel);
 InputParameters
 MassContinuityIPHDGKernel::validParams()
 {
-  auto params = IPHDGKernel::validParams();
+  auto params = TwoFieldScalarHDGKernel::validParams();
   params += MassContinuityAssemblyHelper::validParams();
   params.addClassDescription("Adds element and interior face integrals for a hybridized interior "
                              "penalty discontinuous Galerkin discretization of a conservation of "
@@ -24,14 +24,14 @@ MassContinuityIPHDGKernel::validParams()
 }
 
 MassContinuityIPHDGKernel::MassContinuityIPHDGKernel(const InputParameters & params)
-  : IPHDGKernel(params),
+  : TwoFieldScalarHDGKernel(params),
     _iphdg_helper(std::make_unique<MassContinuityAssemblyHelper>(
         this, this, this, _mesh, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
-IPHDGAssemblyHelper *
+TwoFieldScalarHDGAssemblyHelper &
 MassContinuityIPHDGKernel::hdgHelper()
 {
-  return _iphdg_helper.get();
+  return *_iphdg_helper;
 }

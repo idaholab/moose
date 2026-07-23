@@ -13,7 +13,8 @@
 #include "ADFunctorInterface.h"
 
 /**
- * Supplies a hybrid-velocity face evaluation to the shared hybridized DG advection assembly.
+ * Supplies the L-HDG velocity-trace evaluation to the shared advection assembly used by both HDG
+ * kernels and boundary conditions.
  */
 class AdvectionLHDGAssemblyHelper : public AdvectionHDGAssemblyHelper, public ADFunctorInterface
 {
@@ -35,6 +36,6 @@ public:
 protected:
   virtual ADRealVectorValue faceVelocity(unsigned int qp) const override;
 
-  /// Hybrid velocity used in numerical face fluxes.
-  const Moose::Functor<ADRealVectorValue> & _hybrid_velocity;
+  /// Velocity trace used in numerical face fluxes.
+  const Moose::Functor<ADRealVectorValue> & _velocity_trace;
 };

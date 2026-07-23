@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include "IPHDGBC.h"
+#include "TwoFieldScalarHDGBC.h"
 
 /**
  * Implements a prescribed flux for an IP-HDG discretization
  */
-class IPHDGPrescribedFluxBC : public IPHDGBC
+class IPHDGPrescribedFluxBC : public TwoFieldScalarHDGBC
 {
 public:
   static InputParameters validParams();
 
   IPHDGPrescribedFluxBC(const InputParameters & parameters);
 
-protected:
+private:
   /**
    * compute the AD residuals
    */
-  virtual void compute() override;
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) override;
 
   /// Prescribed normal flux along the boundary. The default is 0 for a natural boundary
   /// condition

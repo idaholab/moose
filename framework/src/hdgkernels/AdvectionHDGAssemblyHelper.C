@@ -8,25 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AdvectionHDGAssemblyHelper.h"
-#include "IPHDGAssemblyHelper.h"
+#include "MooseFunctor.h"
 #include "MooseObject.h"
 
 using namespace libMesh;
 
-template <typename Base>
 InputParameters
-AdvectionHDGAssemblyHelperTempl<Base>::validParams()
+AdvectionHDGAssemblyHelper::validParams()
 {
-  auto params = Base::validParams();
-  params.template addRequiredParam<MaterialPropertyName>(
+  auto params = TwoFieldScalarHDGAssemblyHelper::validParams();
+  params.addRequiredParam<MaterialPropertyName>(
       "velocity", "The cell-interior velocity material property used in the volume advection term");
-  params.template addRequiredParam<Real>(
+  params.addRequiredParam<Real>(
       "coeff", "Constant coefficient multiplying the advected scalar, such as density");
   return params;
 }
 
-template <typename Base>
-AdvectionHDGAssemblyHelperTempl<Base>::AdvectionHDGAssemblyHelperTempl(
+AdvectionHDGAssemblyHelper::AdvectionHDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MooseVariableDependencyInterface * const mvdi,
     const TransientInterface * const ti,
@@ -35,15 +33,15 @@ AdvectionHDGAssemblyHelperTempl<Base>::AdvectionHDGAssemblyHelperTempl(
     const THREAD_ID tid,
     const std::set<SubdomainID> & block_ids,
     const std::set<BoundaryID> & boundary_ids)
-  : Base(moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
-    _velocity(this->template getADMaterialProperty<RealVectorValue>("velocity")),
+  : TwoFieldScalarHDGAssemblyHelper(
+        moose_obj, mvdi, ti, sys, assembly, tid, block_ids, boundary_ids),
+    _velocity(getADMaterialProperty<RealVectorValue>("velocity")),
     _coeff(moose_obj->getParam<Real>("coeff"))
 {
 }
 
-template <typename Base>
 void
-AdvectionHDGAssemblyHelperTempl<Base>::scalarVolume()
+AdvectionHDGAssemblyHelper::scalarVolume()
 {
   for (const auto qp : make_range(_qrule->n_points()))
   {
@@ -54,10 +52,8 @@ AdvectionHDGAssemblyHelperTempl<Base>::scalarVolume()
   }
 }
 
-template <typename Base>
 ADReal
-AdvectionHDGAssemblyHelperTempl<Base>::computeFlux(const unsigned int qp,
-                                                   const ADReal & face_value) const
+AdvectionHDGAssemblyHelper::computeFlux(const unsigned int qp, const ADReal & face_value) const
 {
   const auto vdotn = faceVelocity(qp) * _normals[qp];
   const auto face_phi = _coeff * face_value;
@@ -66,9 +62,8 @@ AdvectionHDGAssemblyHelperTempl<Base>::computeFlux(const unsigned int qp,
   return 0.5 * vdotn * (internal_phi + face_phi) + 0.5 * abs(vdotn) * (internal_phi - face_phi);
 }
 
-template <typename Base>
 void
-AdvectionHDGAssemblyHelperTempl<Base>::scalarFace()
+AdvectionHDGAssemblyHelper::scalarFace()
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
@@ -78,9 +73,8 @@ AdvectionHDGAssemblyHelperTempl<Base>::scalarFace()
   }
 }
 
-template <typename Base>
 void
-AdvectionHDGAssemblyHelperTempl<Base>::lmFace()
+AdvectionHDGAssemblyHelper::lmFace()
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
@@ -90,16 +84,13 @@ AdvectionHDGAssemblyHelperTempl<Base>::lmFace()
   }
 }
 
-template <typename Base>
 void
-AdvectionHDGAssemblyHelperTempl<Base>::scalarDirichlet(
-    const Moose::Functor<Real> & dirichlet_functor)
+AdvectionHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & dirichlet_functor)
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto dirichlet_value = dirichlet_functor(
-        Moose::ElemSideQpArg{
-            _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
+        Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
     const auto qp_term = _JxW_face[qp] * computeFlux(qp, dirichlet_value);
     for (const auto i : index_range(_scalar_re))
@@ -107,9 +98,8 @@ AdvectionHDGAssemblyHelperTempl<Base>::scalarDirichlet(
   }
 }
 
-template <typename Base>
 void
-AdvectionHDGAssemblyHelperTempl<Base>::lmOutflow()
+AdvectionHDGAssemblyHelper::lmOutflow()
 {
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
@@ -123,6 +113,3 @@ AdvectionHDGAssemblyHelperTempl<Base>::lmOutflow()
       _lm_re(i) += _lm_phi_face[i][qp] * qp_term;
   }
 }
-
-template class AdvectionHDGAssemblyHelperTempl<HDGAssemblyHelper>;
-template class AdvectionHDGAssemblyHelperTempl<IPHDGAssemblyHelper>;

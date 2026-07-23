@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", AdvectionLHDGDirichletBC);
 InputParameters
 AdvectionLHDGDirichletBC::validParams()
 {
-  auto params = HDGBC::validParams();
+  auto params = TwoFieldScalarHDGBC::validParams();
   params += AdvectionLHDGAssemblyHelper::validParams();
   params.addRequiredParam<MooseFunctorName>("functor", "The prescribed scalar value");
   params.addClassDescription("Weakly imposes prescribed scalar and velocity data for an L-HDG "
@@ -24,7 +24,7 @@ AdvectionLHDGDirichletBC::validParams()
 }
 
 AdvectionLHDGDirichletBC::AdvectionLHDGDirichletBC(const InputParameters & parameters)
-  : HDGBC(parameters),
+  : TwoFieldScalarHDGBC(parameters),
     _lhdg_helper(std::make_unique<AdvectionLHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _dirichlet_value(getFunctor<Real>("functor"))
@@ -32,16 +32,15 @@ AdvectionLHDGDirichletBC::AdvectionLHDGDirichletBC(const InputParameters & param
 }
 
 void
-AdvectionLHDGDirichletBC::compute()
+AdvectionLHDGDirichletBC::compute(TwoFieldScalarHDGAssemblyHelper &)
 {
-  auto & helper = *_lhdg_helper;
-  helper.resizeResiduals();
-  helper.scalarDirichlet(_dirichlet_value);
+  _lhdg_helper->resizeResiduals();
+  _lhdg_helper->scalarDirichlet(_dirichlet_value);
   // L-HDG Dirichlet traces are unused and conventionally constrained to zero.
-  helper.lmDirichletZero();
+  _lhdg_helper->lmDirichletZero();
 }
 
-HDGAssemblyHelper &
+TwoFieldScalarHDGAssemblyHelper &
 AdvectionLHDGDirichletBC::hdgHelper()
 {
   return *_lhdg_helper;

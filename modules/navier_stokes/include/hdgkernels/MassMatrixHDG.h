@@ -30,9 +30,6 @@ public:
   virtual void computeJacobianOnSide() override;
 
 protected:
-  /// Selects this kernel's manual assembly implementation.
-  virtual HDGAssemblyHelper * hdgHelper() override { return nullptr; }
-
   const VariablePhiValue & _face_phi;
   const Real _density;
   DenseMatrix<Number> _mass;

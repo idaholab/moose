@@ -10,15 +10,13 @@
 #pragma once
 
 #include "AdvectionHDGAssemblyHelper.h"
-#include "IPHDGAssemblyHelper.h"
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the advection equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class AdvectionIPHDGAssemblyHelper
-  : public AdvectionHDGAssemblyHelperTempl<IPHDGAssemblyHelper>
+class AdvectionIPHDGAssemblyHelper : public AdvectionHDGAssemblyHelper
 {
 public:
   static InputParameters validParams();
