@@ -11,6 +11,10 @@
 
 #include "ADDGKernel.h"
 
+/**
+ * Adds the centered interior-face pressure contribution for a discontinuous momentum equation
+ * whose pressure gradient is integrated by parts.
+ */
 class INSPressureGradientDGKernel : public ADDGKernel
 {
 public:
@@ -18,13 +22,17 @@ public:
 
   INSPressureGradientDGKernel(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
-  // Coupled vars
+  /// Pressure on the current element side.
   const ADVariableValue & _pressure;
+
+  /// Pressure on the neighboring element side.
   const ADVariableValue & _pressure_neighbor;
 
-  // Required parameters
+  /// Momentum component to which this pressure contribution is added.
   const unsigned _component;
 };

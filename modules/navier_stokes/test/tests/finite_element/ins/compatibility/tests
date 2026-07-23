@@ -31,4 +31,25 @@
     csvdiff = l-hdg_out.csv
     requirement = 'The system shall demonstrate compatible flow and scalar transport using an L-HDG flow discretization and an L-HDG scalar discretization with matching first-order pressure and temperature spaces and hybrid-velocity scalar fluxes.'
   []
+  [dg_stokes_rz]
+    type = MMSTest
+    input = test_rz.py
+    test_case = TestDGStokesRZ
+    required_python_packages = sympy
+    capabilities = mumps
+    heavy = true
+    requirement = 'The system shall solve the axisymmetric Stokes equations with an LBB-compatible discontinuous P1 velocity and discontinuous P0 pressure pair and attain second-order velocity and first-order pressure convergence.'
+  []
+  [pressure_gradient_bc_spherical]
+    type = RunException
+    input = pressure-gradient-bc-spherical.i
+    expect_err = 'INSPressureGradientBC does not support RSPHERICAL coordinates.'
+    requirement = 'The system shall reject the exterior pressure-face object in spherical coordinates.'
+  []
+  [pressure_gradient_dg_spherical]
+    type = RunException
+    input = pressure-gradient-dg-spherical.i
+    expect_err = 'INSPressureGradientDGKernel does not support RSPHERICAL coordinates.'
+    requirement = 'The system shall reject the interior pressure-face object in spherical coordinates.'
+  []
 []

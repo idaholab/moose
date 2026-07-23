@@ -17,11 +17,13 @@ INSPressureGradientDGKernel::validParams()
 {
   InputParameters params = ADDGKernel::validParams();
 
-  params.addClassDescription("Adds the pressure term on a interior faces. This is appropriate when "
+  params.addClassDescription("Adds the pressure term on interior faces. This is appropriate when "
                              "the pressure term is integrated by parts");
   params.addRequiredCoupledVar(NS::pressure, "The current value of the pressure");
-  params.addRequiredParam<unsigned>(
-      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  params.addRequiredRangeCheckedParam<unsigned>(
+      "component",
+      "component>=0 & component<=2",
+      "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
 
   return params;
 }
@@ -32,6 +34,13 @@ INSPressureGradientDGKernel::INSPressureGradientDGKernel(const InputParameters &
     _pressure_neighbor(adCoupledNeighborValue(NS::pressure)),
     _component(getParam<unsigned>("component"))
 {
+}
+
+void
+INSPressureGradientDGKernel::initialSetup()
+{
+  if (_mesh.getUniqueCoordSystem() == Moose::COORD_RSPHERICAL)
+    mooseError("INSPressureGradientDGKernel does not support RSPHERICAL coordinates.");
 }
 
 ADReal

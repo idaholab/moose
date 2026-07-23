@@ -11,6 +11,10 @@
 
 #include "ADIntegratedBC.h"
 
+/**
+ * Adds the exterior-face pressure contribution for a momentum equation whose pressure gradient is
+ * integrated by parts.
+ */
 class INSPressureGradientBC : public ADIntegratedBC
 {
 public:
@@ -18,12 +22,14 @@ public:
 
   INSPressureGradientBC(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual ADReal computeQpResidual() override;
 
-  // Coupled vars
+  /// Pressure evaluated on the exterior face.
   const ADVariableValue & _pressure;
 
-  // Required parameters
+  /// Momentum component to which this pressure contribution is added.
   const unsigned _component;
 };
