@@ -9,6 +9,7 @@
 
 #include "CSGNPolygonUnit.h"
 #include "CSGPlane.h"
+#include "CSGBase.h" // complete type required to call methods on _internal_base
 
 namespace CSG
 {

@@ -20,6 +20,16 @@ CSGEngUnit::CSGEngUnit(const std::string & behavior) : _internal_base(std::make_
   _behavior = behavior;
 }
 
+// Defined out of line (rather than inline in the header) because it returns the
+// std::unique_ptr<CSGBase> by value, which instantiates ~unique_ptr<CSGBase>() and therefore
+// requires CSGBase to be a complete type. CSGBase cannot be included in CSGEngUnit.h (circular
+// include), so the definition lives here where CSGBase.h is available.
+std::unique_ptr<CSGBase>
+CSGEngUnit::releaseBase()
+{
+  return std::move(_internal_base);
+}
+
 bool
 CSGEngUnit::operator==(const CSGEngUnit & other) const
 {

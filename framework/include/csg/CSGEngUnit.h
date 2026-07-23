@@ -124,7 +124,7 @@ protected:
    *
    * @return unique_ptr to the internal CSGBase
    */
-  std::unique_ptr<CSGBase> releaseBase() { return std::move(_internal_base); }
+  std::unique_ptr<CSGBase> releaseBase();
 
   /// CSGBase populated by expandUnit(); joined into the parent CSGBase by expandEngUnit()
   std::unique_ptr<CSGBase> _internal_base;

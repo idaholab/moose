@@ -12,6 +12,10 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 namespace CSG
 {
 
