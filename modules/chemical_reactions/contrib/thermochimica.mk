@@ -25,7 +25,15 @@ Thermochimica_deps := $(patsubst %.C, %.$(obj-suffix).d, $(Thermochimica_srcfile
 
 # clang static analyzer files
 Thermochimica_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(Thermochimica_srcfiles))
-
+$(Thermochimica_objects): $(APPLICATION_DIR)/contrib/thermochimica.mk
+Thermochimica_DATA_DIR ?= $(THERMOCHIMICA_DIR)/data/
+Thermochimica_OUTPUT_DIR ?= $(THERMOCHIMICA_DIR)/outputs/
+Thermochimica_DEFAULT_TOLERANCE_EPSILON ?= 1D-19
+Thermochimica_FFLAGS := -cpp \
+                        -D"DATA_DIRECTORY='$(Thermochimica_DATA_DIR)'" \
+                        -D"OUTPUT_DIRECTORY='$(Thermochimica_OUTPUT_DIR)'" \
+                        -DTHERMOCHIMICA_DEFAULT_TOLERANCE_EPSILON=$(Thermochimica_DEFAULT_TOLERANCE_EPSILON)
+$(Thermochimica_objects): libmesh_FFLAGS += $(Thermochimica_FFLAGS)
 $(Thermochimica_LIB): $(Thermochimica_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
