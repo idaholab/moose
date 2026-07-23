@@ -11,8 +11,11 @@
 
 #include "FEProblemBase.h"
 #include "ADReal.h"
+#include "AutomaticMortarGeneration.h"
 #include "RankTwoTensor.h"
+#include "MooseVariable.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
 
 #include "libmesh/dof_object.h"
 
@@ -56,6 +59,162 @@ namespace Mortar
 {
 namespace Contact
 {
+
+namespace detail
+{
+inline void
+insertDisplacementDerivative(ADReal & value,
+                             const Node & node,
+                             const MooseVariable & variable,
+                             const Real derivative)
+{
+  mooseAssert(variable.isNodal(),
+              "Nodal-normal coordinate sensitivities require nodal displacement variables.");
+
+  // Avoid consuming sparse AD storage for entries that cannot contribute to the Jacobian.
+  if (derivative == 0.0)
+    return;
+
+  const auto sys_num = variable.sys().number();
+  const auto var_num = variable.number();
+  if (!node.n_dofs(sys_num, var_num))
+    return;
+
+  Moose::derivInsert(value.derivatives(), node.dof_number(sys_num, var_num, 0), derivative);
+}
+
+inline void
+addNormalSensitivityDerivatives(
+    ADRealVectorValue & normal,
+    const AutomaticMortarGeneration::NodalNormalSensitivityStencil & sensitivities,
+    const MooseVariable & disp_x_var,
+    const MooseVariable & disp_y_var,
+    const MooseVariable * const disp_z_var)
+{
+  for (const auto & sensitivity : sensitivities)
+  {
+    mooseAssert(sensitivity.node, "Nodal normal sensitivity node must be non-null.");
+    for (const auto component : make_range(Moose::dim))
+    {
+      insertDisplacementDerivative(normal(component),
+                                   *sensitivity.node,
+                                   disp_x_var,
+                                   sensitivity.dnormal_dnode_coordinate(component, 0));
+      insertDisplacementDerivative(normal(component),
+                                   *sensitivity.node,
+                                   disp_y_var,
+                                   sensitivity.dnormal_dnode_coordinate(component, 1));
+      if (disp_z_var)
+        insertDisplacementDerivative(normal(component),
+                                     *sensitivity.node,
+                                     *disp_z_var,
+                                     sensitivity.dnormal_dnode_coordinate(component, 2));
+    }
+  }
+}
+
+} // namespace detail
+
+/**
+ * Builds and caches AD contact normals and Householder tangents for one lower-dimensional
+ * secondary element. Values always match the stored mechanical-contact geometry from
+ * AutomaticMortarGeneration; coordinate sensitivities are added only while AD derivative
+ * recording is enabled.
+ */
+class NodalNormalDerivativeCache
+{
+public:
+  void clear()
+  {
+    _secondary_elem = nullptr;
+    _do_derivatives = false;
+    _ad_normals.clear();
+    _ad_tangents.clear();
+  }
+
+  const ADRealVectorValue & normal(const AutomaticMortarGeneration & amg,
+                                   const Elem & secondary_elem,
+                                   const unsigned int nodal_index,
+                                   const MooseVariable * const disp_x_var,
+                                   const MooseVariable * const disp_y_var,
+                                   const MooseVariable * const disp_z_var,
+                                   const bool do_derivatives) const
+  {
+    prepareNormals(amg, secondary_elem, disp_x_var, disp_y_var, disp_z_var, do_derivatives);
+    mooseAssert(nodal_index < _ad_normals.size(),
+                "Nodal normal index must refer to a node on the secondary element.");
+    return _ad_normals[nodal_index];
+  }
+
+  const std::array<ADRealVectorValue, 2> & tangents(const AutomaticMortarGeneration & amg,
+                                                    const Elem & secondary_elem,
+                                                    const unsigned int nodal_index,
+                                                    const MooseVariable * const disp_x_var,
+                                                    const MooseVariable * const disp_y_var,
+                                                    const MooseVariable * const disp_z_var,
+                                                    const bool do_derivatives) const
+  {
+    prepareNormals(amg, secondary_elem, disp_x_var, disp_y_var, disp_z_var, do_derivatives);
+    if (_ad_tangents.empty())
+    {
+      _ad_tangents.resize(secondary_elem.n_nodes());
+      for (const auto i : secondary_elem.node_index_range())
+        _ad_tangents[i] = Moose::Mortar::householderTangents(_ad_normals[i]);
+    }
+
+    mooseAssert(nodal_index < _ad_tangents.size(),
+                "Nodal tangent index must refer to a node on the secondary element.");
+    return _ad_tangents[nodal_index];
+  }
+
+private:
+  void prepareNormals(const AutomaticMortarGeneration & amg,
+                      const Elem & secondary_elem,
+                      const MooseVariable * const disp_x_var,
+                      const MooseVariable * const disp_y_var,
+                      const MooseVariable * const disp_z_var,
+                      const bool do_derivatives) const
+  {
+    if (_secondary_elem == &secondary_elem && _disp_x_var == disp_x_var &&
+        _disp_y_var == disp_y_var && _disp_z_var == disp_z_var && _do_derivatives == do_derivatives)
+      return;
+
+    mooseAssert(disp_x_var && disp_y_var,
+                "Displacement variables are required for nodal normal derivatives.");
+    _secondary_elem = &secondary_elem;
+    _disp_x_var = disp_x_var;
+    _disp_y_var = disp_y_var;
+    _disp_z_var = disp_z_var;
+    _do_derivatives = do_derivatives;
+    _ad_tangents.clear();
+
+    const auto nodal_normals = amg.getNodalNormals(secondary_elem);
+    // Reconstruct the AD values so a Jacobian-to-residual transition cannot retain derivative
+    // storage through an assignment performed while AD derivative recording is disabled.
+    _ad_normals.clear();
+    _ad_normals.resize(secondary_elem.n_nodes());
+    for (const auto i : secondary_elem.node_index_range())
+    {
+      auto & ad_normal = _ad_normals[i];
+      ad_normal = nodal_normals[i];
+      if (_do_derivatives)
+        detail::addNormalSensitivityDerivatives(
+            ad_normal,
+            amg.getNodalNormalCoordinateSensitivity(*secondary_elem.node_ptr(i)),
+            *disp_x_var,
+            *disp_y_var,
+            disp_z_var);
+    }
+  }
+
+  mutable const Elem * _secondary_elem = nullptr;
+  mutable const MooseVariable * _disp_x_var = nullptr;
+  mutable const MooseVariable * _disp_y_var = nullptr;
+  mutable const MooseVariable * _disp_z_var = nullptr;
+  mutable bool _do_derivatives = false;
+  mutable std::vector<ADRealVectorValue> _ad_normals;
+  mutable std::vector<std::array<ADRealVectorValue, 2>> _ad_tangents;
+};
 
 /**
  * This function is used to communicate velocities across processes

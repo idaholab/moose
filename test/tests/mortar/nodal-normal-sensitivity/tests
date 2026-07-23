@@ -1,0 +1,137 @@
+[Tests]
+  design = 'AutomaticMortarGeneration.md'
+  issues = '#33378'
+  # These finite-difference tests modify mesh coordinates in place. Distributed contact coverage is
+  # provided separately without modifying the mesh.
+  recover = false # Setup-only finite-difference sensitivity checks do not advance the solve.
+  restep = false # Setup-only finite-difference sensitivity checks do not advance the solve.
+
+  [edge2]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = edge.i
+    cli_args = 'Mesh/second_order=false Variables/T/order=FIRST Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for EDGE2'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on EDGE2 secondary elements.'
+  []
+  [edge3]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = edge.i
+    cli_args = 'Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for EDGE3'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on EDGE3 secondary elements.'
+  []
+  [edge3_reversed]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = edge.i
+    cli_args = 'Constraints/mortar/primary_boundary=1 Constraints/mortar/secondary_boundary=2 Constraints/mortar/primary_subdomain=10 Constraints/mortar/secondary_subdomain=20 Variables/lambda/block=20 Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for EDGE3'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities when the primary and secondary interface orientations are reversed.'
+  []
+  [edge3_large_scale]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = edge.i
+    cli_args = 'UserObjects/normal_sensitivity/coordinate_scale=1e6 Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for EDGE3'
+    requirement = 'The framework shall compute scale-independent averaged mortar nodal-normal sensitivities on large EDGE3 secondary elements.'
+  []
+  [edge3_periodic]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = periodic.i
+    cli_args = 'Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for EDGE3'
+    requirement = 'The framework shall preserve the periodic orientation sign in averaged mortar nodal-normal sensitivities on EDGE3 secondary elements.'
+  []
+  [collapsed_edge]
+    type = RunException
+    mesh_mode = REPLICATED
+    input = edge.i
+    cli_args = 'UserObjects/normal_sensitivity/collapse_secondary_element=true Problem/solve=false Outputs/exodus=false'
+    expect_err = 'non-positive characteristic length'
+    requirement = 'The framework shall reject a genuinely collapsed secondary edge when constructing mortar nodal-normal sensitivities.'
+  []
+  [tri3]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = tri.i
+    cli_args = 'Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for TRI3'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on TRI3 secondary elements.'
+  []
+  [tri6]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = tri.i
+    cli_args = 'Mesh/second_order=true Mesh/left_block/elem_type=TET10 Mesh/right_block/elem_type=TET10 Variables/T/order=SECOND Variables/lambda/family=LAGRANGE Variables/lambda/order=SECOND Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for TRI6'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on TRI6 secondary elements.'
+  []
+  [tri7]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = tri.i
+    cli_args = 'Mesh/left_block/elem_type=TET14 Mesh/right_block/elem_type=TET14 Variables/T/order=THIRD Variables/lambda/family=LAGRANGE Variables/lambda/order=THIRD Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for TRI7'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on TRI7 secondary elements.'
+  []
+  [quad4]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD4'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on QUAD4 secondary elements.'
+  []
+  [quad4_reversed]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Constraints/mortar/primary_boundary=1 Constraints/mortar/secondary_boundary=2 Constraints/mortar/primary_subdomain=11 Constraints/mortar/secondary_subdomain=12 Variables/lambda/block=12 Postprocessors/L2lambda/block=12 Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD4'
+    requirement = 'The framework shall preserve three-dimensional face orientation when computing averaged mortar nodal-normal sensitivities on a reversed QUAD4 interface.'
+  []
+  [collapsed_quad]
+    type = RunException
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'UserObjects/normal_sensitivity/collapse_secondary_element=true Problem/solve=false Outputs/exodus=false'
+    expect_err = 'non-positive characteristic length'
+    requirement = 'The framework shall reject a genuinely collapsed secondary face when constructing mortar nodal-normal sensitivities.'
+  []
+  [quad8]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Mesh/file/file=spheres_hex20.e Variables/T/order=SECOND UserObjects/normal_sensitivity/representative_face_only=true Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD8'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on QUAD8 secondary elements.'
+  []
+  [quad9]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD9'
+    requirement = 'The framework shall compute coordinate-consistent averaged mortar nodal-normal sensitivities on QUAD9 secondary elements.'
+  []
+  [quad9_small_scale]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND UserObjects/normal_sensitivity/coordinate_scale=1e-6 Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD9'
+    requirement = 'The framework shall compute scale-independent averaged mortar nodal-normal sensitivities on small QUAD9 secondary elements.'
+  []
+  [quad9_large_scale]
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = quad.i
+    cli_args = 'Mesh/second_order=true Mesh/file/file=spheres_hex27.e Variables/T/order=SECOND UserObjects/normal_sensitivity/coordinate_scale=1e6 Problem/solve=false Outputs/exodus=false'
+    expect_out = 'Verified mortar nodal-normal coordinate sensitivities for QUAD9'
+    requirement = 'The framework shall compute scale-independent averaged mortar nodal-normal sensitivities on large QUAD9 secondary elements.'
+  []
+[]

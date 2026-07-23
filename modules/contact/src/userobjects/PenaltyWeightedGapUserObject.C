@@ -20,6 +20,18 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  params.set<bool>("use_nodal_normal_derivatives") = true;
+  params.set<bool>("include_secondary_face_one_ring") = true;
+  // Penalty contact has no LM constraint to contribute the nodal-normal one-ring to the matrix
+  // graph, so its weighted-gap object supplies the coupling relationship manager directly.
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  MortarConsumerInterface::setRMParams(obj_params, rm_params);
+                                  rm_params.set<bool>("include_secondary_face_one_ring") =
+                                      obj_params.get<bool>("include_secondary_face_one_ring");
+                                });
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -85,6 +97,11 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _adaptivity_normal(
         getParam<MooseEnum>("adaptivity_penalty_normal").getEnum<AdaptivityNormalPenalty>())
 {
+  // Augmented-Lagrangian multiplier and active-set updates retain their existing frozen-normal
+  // Jacobian. The nodal-normal derivative path is currently supported for pure penalty contact.
+  if (_augmented_lagrange_problem)
+    _use_nodal_normal_derivatives = false;
+
   auto check_type = [this](const auto & var, const auto & var_name)
   {
     if (!var.isNodal())

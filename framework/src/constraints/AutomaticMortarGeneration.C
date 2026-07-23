@@ -41,6 +41,7 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/statistics.h"
 #include "libmesh/equation_systems.h"
+#include "libmesh/fe_map.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -230,6 +231,84 @@ nodalQuadraturePointToSecondaryNodeMap(const Elem & secondary_elem,
 #endif
 
   return qpoint_to_node;
+}
+
+bool
+supportsNodalNormalSensitivity(const ElemType elem_type)
+{
+  switch (elem_type)
+  {
+    case EDGE2:
+    case EDGE3:
+    case TRI3:
+    case TRI6:
+    case TRI7:
+    case QUAD4:
+    case QUAD8:
+    case QUAD9:
+      return true;
+    default:
+      return false;
+  }
+}
+
+TensorValue<Real>
+areaVectorDerivative2D(const Real dphi_dxi, const Real scale)
+{
+  TensorValue<Real> derivative;
+
+  // The 2D area vector is a signed 90 degree rotation of the edge tangent. The scale contains the
+  // quadrature weight, FE side orientation, and periodic sign.
+  derivative(0, 1) = scale * dphi_dxi;
+  derivative(1, 0) = -scale * dphi_dxi;
+
+  return derivative;
+}
+
+TensorValue<Real>
+areaVectorDerivative3D(const Point & tangent_xi,
+                       const Point & tangent_eta,
+                       const Real dphi_dxi,
+                       const Real dphi_deta,
+                       const Real scale)
+{
+  TensorValue<Real> derivative;
+
+  // Each column is the area-vector variation produced by moving one coordinate component of the
+  // current mapping node while holding the remaining nodal coordinates fixed.
+  for (const auto component : make_range(3))
+  {
+    Point coordinate_variation;
+    coordinate_variation(component) = 1;
+    const Point area_variation = scale * (dphi_dxi * coordinate_variation.cross(tangent_eta) +
+                                          dphi_deta * tangent_xi.cross(coordinate_variation));
+    for (const auto normal_component : make_range(3))
+      derivative(normal_component, component) = area_variation(normal_component);
+  }
+
+  return derivative;
+}
+
+TensorValue<Real>
+normalizedVectorDerivative(const Point & normalized_vector,
+                           const Real unnormalized_norm,
+                           const TensorValue<Real> & unnormalized_derivative)
+{
+  TensorValue<Real> derivative;
+
+  // Differentiate v / ||v|| by projecting each column of dv/dx onto the tangent space of the unit
+  // sphere at normalized_vector, then divide by the unnormalized magnitude.
+  for (const auto i : make_range(3))
+    for (const auto j : make_range(3))
+    {
+      Real projection_derivative = unnormalized_derivative(i, j);
+      for (const auto k : make_range(3))
+        projection_derivative -=
+            normalized_vector(i) * normalized_vector(k) * unnormalized_derivative(k, j);
+      derivative(i, j) = projection_derivative / unnormalized_norm;
+    }
+
+  return derivative;
 }
 }
 
@@ -470,6 +549,7 @@ AutomaticMortarGeneration::clear()
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
+  _secondary_node_to_nodal_normal_sensitivity.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
   _secondary_elems_to_mortar_segments.clear();
   _secondary_ip_sub_ids.clear();
@@ -585,6 +665,26 @@ AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
   }
 
   return {{nodal_tangents_one, nodal_tangents_two}};
+}
+
+const AutomaticMortarGeneration::NodalNormalSensitivityStencil &
+AutomaticMortarGeneration::getNodalNormalCoordinateSensitivity(const Node & secondary_node) const
+{
+  std::lock_guard<std::mutex> lock(_nodal_normal_sensitivity_mutex);
+
+  auto it = _secondary_node_to_nodal_normal_sensitivity.find(&secondary_node);
+  if (it == _secondary_node_to_nodal_normal_sensitivity.end())
+  {
+    computeNodalNormalCoordinateSensitivity(secondary_node);
+    it = _secondary_node_to_nodal_normal_sensitivity.find(&secondary_node);
+  }
+  if (it == _secondary_node_to_nodal_normal_sensitivity.end())
+    mooseError("No nodal normal coordinate sensitivity stencil was computed for secondary node ",
+               secondary_node.id(),
+               ". Make sure nodal geometry has been built for this mortar interface before "
+               "requesting normal sensitivities.");
+
+  return it->second;
 }
 
 std::vector<Point>
@@ -2001,6 +2101,10 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 void
 AutomaticMortarGeneration::computeNodalGeometry()
 {
+  // Normal sensitivities depend on the current displaced geometry and must be recomputed after
+  // every nodal-geometry update.
+  _secondary_node_to_nodal_normal_sensitivity.clear();
+
   // The dimension according to Mesh::mesh_dimension().
   const auto dim = _mesh.mesh_dimension();
 
@@ -2083,6 +2187,8 @@ AutomaticMortarGeneration::computeNodalGeometry()
   // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
   // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for cases
   // where the face can be curved
+  // The JxW factor below is the nodal quadrature surface Jacobian already used by this algorithm;
+  // no additional whole-face length or area weight is applied.
   for (const auto & pr : node_to_normals_map)
   {
     // Compute normal vector
@@ -2096,59 +2202,211 @@ AutomaticMortarGeneration::computeNodalGeometry()
 
     _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
 
-    Point nodal_tangent_one;
-    Point nodal_tangent_two;
-    householderOrthogolization(nodal_normal, nodal_tangent_one, nodal_tangent_two);
-
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][0] = nodal_tangent_one;
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)] =
+        Moose::Mortar::householderTangents(nodal_normal);
   }
 }
 
 void
-AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
-                                                      Point & nodal_tangent_one,
-                                                      Point & nodal_tangent_two) const
+AutomaticMortarGeneration::computeNodalNormalCoordinateSensitivity(
+    const Node & secondary_node) const
 {
-  using std::abs;
+  const auto dim = _mesh.mesh_dimension();
+  mooseAssert(dim == 2 || dim == 3,
+              "Nodal normal coordinate sensitivities are only valid for 2D or 3D mortar.");
 
-  mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
-              "The input nodal normal should have unity norm");
+  if (_secondary_node_to_nodal_normal.empty())
+    mooseError("Nodal geometry must be computed before requesting nodal normal coordinate "
+               "sensitivities.");
 
-  const Real nx = nodal_normal(0);
-  const Real ny = nodal_normal(1);
-  const Real nz = nodal_normal(2);
+  QNodal qface(dim - 1);
+  const Real sign = _periodic ? -1 : 1;
 
-  // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
-  // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
-  // Mar 1;45(3):683-94. We choose one definition of h_vector and deal with special case.
-  const Point h_vector(nx + 1.0, ny, nz);
+  const auto incident_faces_it = _nodes_to_secondary_elem_map.find(secondary_node.id());
+  if (incident_faces_it == _nodes_to_secondary_elem_map.end())
+    mooseError("No active secondary mortar faces are incident to node ",
+               secondary_node.id(),
+               ". Make sure the complete secondary face one-ring is available on this process.");
 
-  // Avoid singularity of the equations at the end of routine by providing the solution to
-  // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
-  // on a spherical problem.
-  if (abs(h_vector(0)) < TOLERANCE)
+  Point weighted_area_vector;
+  Real weighted_area_magnitude = 0;
+  std::map<dof_id_type, TensorValue<Real>> weighted_normal_derivatives;
+
+  // Only faces in this node's secondary one-ring contribute to its averaged normal. Computing a
+  // requested stencil locally avoids rebuilding and storing the complete interface on every rank.
+  for (const auto secondary_elem : incident_faces_it->second)
   {
-    nodal_tangent_one(0) = 0;
-    nodal_tangent_one(1) = 1;
-    nodal_tangent_one(2) = 0;
+    if (!supportsNodalNormalSensitivity(secondary_elem->type()))
+      mooseError("Nodal normal coordinate sensitivities are not implemented for secondary mortar "
+                 "element ",
+                 secondary_elem->id(),
+                 " of type ",
+                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem->type()),
+                 ".");
 
-    nodal_tangent_two(0) = 0;
-    nodal_tangent_two(1) = 0;
-    nodal_tangent_two(2) = -1;
+    const Elem * const interior_parent = secondary_elem->interior_parent();
+    mooseAssert(interior_parent,
+                "No interior parent exists for element "
+                    << secondary_elem->id()
+                    << ". There may be a problem with your sideset set-up.");
 
-    return;
+    const Real element_size = secondary_elem->hmax();
+    if (element_size <= 0)
+      mooseError("Cannot compute nodal normal coordinate sensitivities for secondary mortar "
+                 "element ",
+                 secondary_elem->id(),
+                 " because it has a non-positive characteristic length.");
+
+    const auto side = interior_parent->which_side_am_i(secondary_elem);
+    FEType fe_type(secondary_elem->default_order(), LAGRANGE);
+    std::unique_ptr<FEBase> fe_face(FEBase::build(dim, fe_type));
+    fe_face->attach_quadrature_rule(&qface);
+
+    const auto & face_normals = fe_face->get_normals();
+    const auto & face_points = fe_face->get_xyz();
+    const auto & JxW = fe_face->get_JxW();
+    const auto & map_dpsidxi = fe_face->get_fe_map().get_dpsidxi();
+    const auto * const map_dpsideta = dim == 3 ? &fe_face->get_fe_map().get_dpsideta() : nullptr;
+
+    fe_face->reinit(interior_parent, side);
+
+    const auto qpoint_to_secondary_node =
+        nodalQuadraturePointToSecondaryNodeMap(*secondary_elem, face_points);
+
+    mooseAssert(face_normals.size() == face_points.size() && JxW.size() == face_points.size(),
+                "Face nodal geometry vectors must have the same size.");
+
+    // Differentiate the same parent-side map that produced face_normals and JxW. In particular,
+    // this preserves the enriched TET14-to-TRI7 face mapping, which differs from evaluating a
+    // standalone TRI7 field basis on the lower-dimensional element.
+    auto parent_side_elem = interior_parent->build_side_ptr(side);
+    const unsigned int n_mapping_shape_functions = parent_side_elem->n_nodes();
+    if (map_dpsidxi.size() != n_mapping_shape_functions ||
+        (map_dpsideta && map_dpsideta->size() != n_mapping_shape_functions))
+      mooseError("The parent-side geometric map for secondary mortar element ",
+                 secondary_elem->id(),
+                 " of type ",
+                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem->type()),
+                 " does not have one mapping shape function per element node.");
+
+    bool found_node_qp = false;
+    for (const auto qp : make_range(face_points.size()))
+    {
+      const auto secondary_node_index = qpoint_to_secondary_node[qp];
+      if (secondary_elem->node_id(secondary_node_index) != secondary_node.id())
+        continue;
+      found_node_qp = true;
+
+      // Reconstruct tangents from the same side-map shape derivatives used below. Parent-side FE
+      // tangents can use the parent reference parameterization, whose directions and scaling need
+      // not match the side-map derivatives.
+      const auto shape_derivative = [&](const auto & derivatives,
+                                        const unsigned int side_node_index) -> Real
+      {
+        if (side_node_index)
+          return derivatives[side_node_index][qp];
+
+        Real first_derivative = 0;
+        for (const auto i : make_range(1u, n_mapping_shape_functions))
+          first_derivative -= derivatives[i][qp];
+        return first_derivative;
+      };
+
+      Point tangent_xi;
+      Point tangent_eta;
+      const Point & reference_point = parent_side_elem->point(0);
+      for (const auto side_node_index : make_range(1u, n_mapping_shape_functions))
+      {
+        const Point relative_point = parent_side_elem->point(side_node_index) - reference_point;
+        tangent_xi.add_scaled(relative_point, shape_derivative(map_dpsidxi, side_node_index));
+        if (dim == 3)
+          tangent_eta.add_scaled(relative_point, shape_derivative(*map_dpsideta, side_node_index));
+      }
+
+      weighted_area_vector += sign * face_normals[qp] * JxW[qp];
+      weighted_area_magnitude += std::abs(JxW[qp]);
+
+      // Differentiate JxW * normal as an oriented edge/face area vector. Dividing JxW by the
+      // candidate magnitude recovers the fixed quadrature and orientation scale, so the resulting
+      // derivative includes changes in both the unit face normal and its nodal JxW weight.
+      if (dim == 2)
+      {
+        const Point & tangent = tangent_xi;
+        const Real tangent_norm = tangent.norm();
+        if (tangent_norm <= TOLERANCE * element_size)
+          mooseError("Cannot compute nodal normal coordinate sensitivities on degenerate "
+                     "secondary mortar edge ",
+                     secondary_elem->id(),
+                     ".");
+
+        const Point candidate_area_vector(tangent(1), -tangent(0), 0);
+        const Real orientation = candidate_area_vector * face_normals[qp] < 0 ? -1 : 1;
+        const Real scale = sign * orientation * JxW[qp] / tangent_norm;
+
+        for (const auto side_node_index : make_range(n_mapping_shape_functions))
+        {
+          const Real dphi_dxi = shape_derivative(map_dpsidxi, side_node_index);
+          if (std::abs(dphi_dxi) <= TOLERANCE)
+            continue;
+
+          weighted_normal_derivatives[parent_side_elem->node_id(side_node_index)] +=
+              areaVectorDerivative2D(dphi_dxi, scale);
+        }
+      }
+      else
+      {
+        const Point candidate_area_vector = tangent_xi.cross(tangent_eta);
+        const Real candidate_area = candidate_area_vector.norm();
+        if (candidate_area <= TOLERANCE * element_size * element_size)
+          mooseError("Cannot compute nodal normal coordinate sensitivities on degenerate "
+                     "secondary mortar face ",
+                     secondary_elem->id(),
+                     ".");
+
+        const Real orientation = candidate_area_vector * face_normals[qp] < 0 ? -1 : 1;
+        const Real scale = sign * orientation * JxW[qp] / candidate_area;
+
+        for (const auto side_node_index : make_range(n_mapping_shape_functions))
+        {
+          const Real dphi_dxi = shape_derivative(map_dpsidxi, side_node_index);
+          const Real dphi_deta = shape_derivative(*map_dpsideta, side_node_index);
+          if (std::abs(dphi_dxi) <= TOLERANCE && std::abs(dphi_deta) <= TOLERANCE)
+            continue;
+
+          weighted_normal_derivatives[parent_side_elem->node_id(side_node_index)] +=
+              areaVectorDerivative3D(tangent_xi, tangent_eta, dphi_dxi, dphi_deta, scale);
+        }
+      }
+    }
+
+    if (!found_node_qp)
+      mooseError("Secondary mortar face ",
+                 secondary_elem->id(),
+                 " was recorded in the node-to-element map for node ",
+                 secondary_node.id(),
+                 " but its nodal quadrature rule did not contain that node.");
   }
 
-  const Real h = h_vector.norm();
+  const auto normal_it = _secondary_node_to_nodal_normal.find(&secondary_node);
+  if (normal_it == _secondary_node_to_nodal_normal.end())
+    mooseError("Internal error: missing nodal geometry for secondary node ",
+               secondary_node.id(),
+               " while building its nodal normal coordinate sensitivity.");
 
-  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
-  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
-  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+  const Real weighted_area_vector_norm = weighted_area_vector.norm();
+  if (weighted_area_vector_norm <= TOLERANCE * weighted_area_magnitude)
+    mooseError("Cannot compute a normalized nodal normal sensitivity for secondary node ",
+               secondary_node.id(),
+               " because its incident face contributions cancel to a near-zero weighted normal.");
 
-  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
-  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
+  auto & stencil = _secondary_node_to_nodal_normal_sensitivity[&secondary_node];
+  stencil.reserve(weighted_normal_derivatives.size());
+  // Sum all incident-face area-vector derivatives before differentiating the final normalization;
+  // this matches the averaging and normalization order used in computeNodalGeometry().
+  for (const auto & derivative_entry : weighted_normal_derivatives)
+    stencil.push_back({&_mesh.node_ref(derivative_entry.first),
+                       normalizedVectorDerivative(
+                           normal_it->second, weighted_area_vector_norm, derivative_entry.second)});
 }
 
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary

@@ -29,6 +29,22 @@ stiffness of the materials coming into contact. Also, to ensure solution stabili
 (i.e. `use_dual = true`) are employed by default to interpolate the contact traction
 when using the contact action.
 
+For the supported quasistatic local-basis, non-augmented `mortar_penalty` path,
+Jacobian-bearing evaluations include secondary nodal-normal and tangent-basis displacement
+derivatives in the weighted gap, slip, and normal and tangential traction Jacobians by default. The
+normal and tangent directions, contact quantities, and residual values remain unchanged, and
+residual-only mode stores no AD derivatives. See
+[ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for the
+supported contact paths, element types, one-ring sparsity and AD storage considerations, and
+geometric terms whose derivatives remain frozen.
+
+The existing anti-ping-pong limiter freezes its scalar traction-rescaling coefficient. Nodal-normal
+and tangent derivatives still enter the slip vector used by that branch, but derivatives of the
+normal pressure and slip norm inside the limiter coefficient remain intentionally omitted.
+
+Augmented-Lagrangian penalty contact retains its existing frozen-normal and frozen-tangent
+Jacobian.
+
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance can be the normal gap distance (distance to exact enforcement if in contact) or
 the relative slip tolerance for slipping nodes. The AL approach solves the original MOOSE problem,

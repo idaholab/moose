@@ -844,6 +844,9 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
     params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
     params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+    const bool augmented_lagrange =
+        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
+    params.set<bool>("include_secondary_face_one_ring") = !_mortar_dynamics && !augmented_lagrange;
     addRelationshipManagers(input_rm_type, params);
   }
   else
@@ -982,6 +985,9 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_user_object")
   {
+    const bool augmented_lagrange =
+        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
+
     const auto register_mortar_uo_name = [this](const auto & bnd_pair, const auto & uo_prefix)
     {
       const auto & [primary_name, secondary_name] = bnd_pair;
@@ -993,8 +999,7 @@ ContactAction::addMortarContact()
     };
 
     // check if the correct problem class is selected if AL parameters are provided
-    if (_formulation == ContactFormulation::MORTAR_PENALTY &&
-        !dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get()))
+    if (_formulation == ContactFormulation::MORTAR_PENALTY && !augmented_lagrange)
     {
       const std::vector<std::string> params = {"penalty_multiplier",
                                                "penalty_multiplier_friction",
@@ -1106,6 +1111,8 @@ ContactAction::addMortarContact()
       if (ndisp > 2)
         uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
       uo_params.set<bool>("use_displaced_mesh") = true;
+      uo_params.set<bool>("use_nodal_normal_derivatives") = !augmented_lagrange;
+      uo_params.set<bool>("include_secondary_face_one_ring") = !augmented_lagrange;
 
       _problem->addUserObject(
           "PenaltyWeightedGapUserObject",
@@ -1128,6 +1135,8 @@ ContactAction::addMortarContact()
 
       uo_params.set<VariableName>("secondary_variable") = displacements[0];
       uo_params.set<bool>("use_displaced_mesh") = true;
+      uo_params.set<bool>("use_nodal_normal_derivatives") = !augmented_lagrange;
+      uo_params.set<bool>("include_secondary_face_one_ring") = !augmented_lagrange;
       uo_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
       uo_params.set<Real>("penalty") = getParam<Real>("penalty");
       uo_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");

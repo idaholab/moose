@@ -1,0 +1,113 @@
+[Tests]
+  issues = '#33378'
+
+  [curved_2d_direct_nodal_normal_derivatives]
+    type = RunApp
+    input = curved_2d_direct.i
+    allow_test_objects = true
+    cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true'
+    expect_out = 'Verified mechanical-contact nodal normals preserve stored values with displacement derivatives'
+    design = 'LMWeightedGapUserObject.md ComputeWeightedGapLMMechanicalContact.md NormalMortarMechanicalContact.md'
+    requirement = 'Direct mechanical mortar contact shall preserve stored nodal-normal values while differentiating averaged nodal normals and preallocating the resulting Jacobian couplings.'
+  []
+
+  [interpolated_normals_rejected_for_mechanical_contact]
+    type = RunException
+    input = curved_2d_direct.i
+    allow_test_objects = true
+    cli_args = 'UserObjects/weighted_gap_uo/interpolate_normals=true'
+    expect_err = 'Nodal-normal derivatives require normalized secondary nodal normals and cannot be combined with quadrature-point normal interpolation.'
+    design = 'LMWeightedGapUserObject.md ComputeWeightedGapLMMechanicalContact.md'
+    requirement = 'Mechanical mortar contact using averaged secondary nodal-normal derivatives shall reject quadrature-point normal interpolation.'
+  []
+
+  [curved_2d_action_nodal_normal_derivatives_jacobian]
+    type = PetscJacobianTester
+    input = curved_2d_action.i
+    allow_test_objects = true
+    cli_args = '-snes_test_err 1e-7 Problem/error_on_jacobian_nonzero_reallocation=true'
+    run_sim = true
+    ratio_tol = 0.16
+    difference_tol = 2.7
+    design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md AutomaticMortarGeneration.md'
+    requirement = 'The contact action shall preallocate averaged nodal-normal derivatives, solve an active curved two-dimensional mortar problem, and expose the terms to a finite-difference Jacobian diagnostic while the remaining mortar geometry linearization stays frozen.'
+  []
+
+  [curved_3d_friction_action_nodal_normal_derivatives_parallel]
+    type = RunException
+    input = curved_3d_action.i
+    allow_test_objects = true
+    cli_args = 'Mesh/Partitioner/nx=2 BCs/move_top_x/boundary="10 15" BCs/move_top_y/boundary="10 15" BCs/move_top_z/boundary="10 15" BCs/move_top_z/function="-0.002 * t" UserObjects/verify_nodal_normal_derivatives/require_distributed_velocity_derivatives=true UserObjects/verify_nodal_normal_derivatives/error_after_jacobian_assembly=true Problem/error_on_jacobian_nonzero_reallocation=true Executioner/line_search=basic -ksp_type preonly -snes_linesearch_damping 1e-6'
+    expect_err = 'Nodal-normal derivative checks completed after contact Jacobian assembly.'
+    capabilities = 'ad_size>=100'
+    min_parallel = 2
+    max_parallel = 2
+    mesh_mode = DISTRIBUTED
+    design = 'ContactAction.md LMWeightedVelocitiesUserObject.md ComputeFrictionalForceLMMechanicalContact.md TangentialMortarMechanicalContact.md'
+    requirement = 'Distributed three-dimensional Coulomb mortar contact shall differentiate both tangent directions and communicate derivative contributions across a partition-split QUAD4 node star.'
+  []
+
+  [curved_3d_quad4_default_ad_capacity]
+    type = RunException
+    input = curved_3d_action.i
+    allow_test_objects = true
+    cli_args = 'Mesh/top/nx=1 Mesh/top/ny=1 Mesh/bottom/nx=1 Mesh/bottom/ny=1 Problem/error_on_jacobian_nonzero_reallocation=false UserObjects/verify_nodal_normal_derivatives/error_after_jacobian_assembly=true'
+    expect_err = 'Nodal-normal derivative checks completed after contact Jacobian assembly.'
+    max_parallel = 1
+    design = 'ContactAction.md LMWeightedVelocitiesUserObject.md ComputeFrictionalForceLMMechanicalContact.md TangentialMortarMechanicalContact.md'
+    requirement = 'A standard-capacity build shall assemble three-dimensional Coulomb mortar-contact nodal-normal and tangent derivatives on a curved QUAD4 interface.'
+  []
+
+  [distributed_mortar_penalty_nodal_normal_derivatives]
+    type = RunException
+    input = curved_3d_action.i
+    allow_test_objects = true
+    cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/model=frictionless Contact/mortar/penalty=1e-3 UserObjects/verify_nodal_normal_derivatives/weighted_gap_uo=penalty_weightedgap_object_mortar UserObjects/verify_nodal_normal_derivatives/error_after_jacobian_assembly=true ICs/inactive=normal_lm Mesh/Partitioner/nx=2 Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true'
+    expect_err = 'Nodal-normal derivative checks completed after contact Jacobian assembly.'
+    capabilities = 'ad_size>=100'
+    min_parallel = 2
+    max_parallel = 2
+    mesh_mode = DISTRIBUTED
+    design = 'ContactAction.md PenaltyWeightedGapUserObject.md NormalMortarMechanicalContact.md'
+    requirement = 'Distributed frictionless mortar-penalty contact shall communicate and preallocate the averaged nodal-normal derivative couplings on a partitioned curved QUAD4 interface.'
+  []
+
+  [mortar_penalty_friction_nodal_normal_derivatives]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    allow_test_objects = true
+    cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 UserObjects/verify_nodal_normal_derivatives/weighted_gap_uo=penalty_friction_object_mortar ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 -snes_test_err 1e-7'
+    run_sim = true
+    ratio_tol = 3.5e-6
+    difference_tol = 3.5e-5
+    capabilities = 'ad_size>=100'
+    max_parallel = 1
+    design = 'ContactAction.md PenaltyFrictionUserObject.md NormalMortarMechanicalContact.md TangentialMortarMechanicalContact.md'
+    requirement = 'Serial three-dimensional mortar-penalty friction shall assemble secondary nodal-normal and both tangent-basis derivatives in its slip and traction Jacobian and agree with a finite-difference diagnostic.'
+  []
+
+  [mortar_contact_pjfnk_nodal_normal_derivatives]
+    type = RunException
+    input = curved_3d_action.i
+    allow_test_objects = true
+    cli_args = 'Executioner/solve_type=PJFNK Problem/error_on_jacobian_nonzero_reallocation=false UserObjects/verify_nodal_normal_derivatives/error_after_jacobian_assembly=true'
+    expect_err = 'Nodal-normal derivative checks completed after contact Jacobian assembly.'
+    capabilities = 'ad_size>=100'
+    max_parallel = 1
+    design = 'ContactAction.md LMWeightedVelocitiesUserObject.md ComputeWeightedGapLMMechanicalContact.md TangentialMortarMechanicalContact.md'
+    requirement = 'Three-dimensional Coulomb mortar contact shall preserve its nodal-geometry values and derivative cache across residual-only PJFNK evaluations and an explicit preconditioning Jacobian.'
+  []
+
+  [hex27_quad9_nodal_normal_derivatives]
+    type = RunApp
+    input = hex27_quad9.i
+    allow_test_objects = true
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 Mesh/top_block/elem_type=HEX27 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 Mesh/bottom_block/elem_type=HEX27 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND Variables/disp_z/order=SECOND Executioner/solve_type=NEWTON Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
+    capabilities = 'ad_size>=200'
+    expect_out = '(?s)Maximum nodal-geometry derivative dependency count: [0-9]+.*The number of nodes in contact is [1-9][0-9]*'
+    max_parallel = 1
+    mesh_mode = REPLICATED
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    requirement = 'The contact module shall solve an active HEX27 problem with QUAD9 mortar faces using a large AD container while bounding each scalar nodal-normal or tangent component to fewer than 200 derivative dependencies.'
+  []
+[]

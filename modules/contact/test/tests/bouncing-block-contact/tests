@@ -215,6 +215,8 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp_out.e'
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
+      # The nodal-normal Jacobian changes the PJFNK path while preserving the converged solution.
+      rel_err = 1e-5
       abs_zero = 5e-9
     []
     [action]

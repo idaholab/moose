@@ -26,25 +26,19 @@ MortarConsumerInterface::validParams()
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
   // On a displaced mesh this will geometrically and algebraically ghost the entire interface
-  params.addRelationshipManager(
-      "AugmentSparsityOnInterface",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params)
-      {
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-        rm_params.set<BoundaryName>("secondary_boundary") =
-            obj_params.get<BoundaryName>("secondary_boundary");
-        rm_params.set<BoundaryName>("primary_boundary") =
-            obj_params.get<BoundaryName>("primary_boundary");
-        rm_params.set<SubdomainName>("secondary_subdomain") =
-            obj_params.get<SubdomainName>("secondary_subdomain");
-        rm_params.set<SubdomainName>("primary_subdomain") =
-            obj_params.get<SubdomainName>("primary_subdomain");
-        rm_params.set<bool>("ghost_point_neighbors") =
-            obj_params.get<bool>("ghost_point_neighbors");
-        rm_params.set<bool>("ghost_higher_d_neighbors") =
-            obj_params.get<bool>("ghost_higher_d_neighbors");
-      });
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  setRMParams(obj_params, rm_params);
+                                  rm_params.set<bool>("ghost_point_neighbors") =
+                                      obj_params.get<bool>("ghost_point_neighbors");
+                                  rm_params.set<bool>("include_secondary_face_one_ring") =
+                                      obj_params.get<bool>("include_secondary_face_one_ring");
+                                  rm_params.set<bool>("ghost_higher_d_neighbors") =
+                                      obj_params.get<bool>("ghost_higher_d_neighbors");
+                                });
 
   params.addRequiredParam<BoundaryName>("primary_boundary",
                                         "The name of the primary boundary sideset.");
@@ -83,6 +77,7 @@ MortarConsumerInterface::validParams()
                         false,
                         "Whether we should ghost point neighbors of secondary face elements, and "
                         "consequently also their mortar interface couples.");
+  params.addPrivateParam<bool>("include_secondary_face_one_ring", false);
   params.addParam<Real>(
       "minimum_projection_angle",
       40.0,
@@ -101,6 +96,21 @@ MortarConsumerInterface::validParams()
       "be second order we must use cell gradients, which couples in the neighbor cells.");
 
   return params;
+}
+
+void
+MortarConsumerInterface::setRMParams(const InputParameters & obj_params,
+                                     InputParameters & rm_params)
+{
+  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+  rm_params.set<BoundaryName>("secondary_boundary") =
+      obj_params.get<BoundaryName>("secondary_boundary");
+  rm_params.set<BoundaryName>("primary_boundary") =
+      obj_params.get<BoundaryName>("primary_boundary");
+  rm_params.set<SubdomainName>("secondary_subdomain") =
+      obj_params.get<SubdomainName>("secondary_subdomain");
+  rm_params.set<SubdomainName>("primary_subdomain") =
+      obj_params.get<SubdomainName>("primary_subdomain");
 }
 
 InputParameters
