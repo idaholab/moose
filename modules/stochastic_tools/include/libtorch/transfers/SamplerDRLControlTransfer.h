@@ -1,0 +1,56 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+
+#pragma once
+
+// torch-based includes
+#include "LibtorchDRLControlTrainer.h"
+
+#include "StochasticToolsTransfer.h"
+#include "SurrogateModelInterface.h"
+
+class SamplerDRLControlTransfer : public StochasticToolsTransfer, public SurrogateModelInterface
+{
+public:
+  static InputParameters validParams();
+
+  /**
+   * Build the transfer that pushes a trained controller into subapps.
+   * @param parameters Input parameters for the transfer.
+   */
+  SamplerDRLControlTransfer(const InputParameters & parameters);
+
+  /// Execute the transfer in the standard non-batch path.
+  virtual void execute() override;
+
+  ///@{
+  /**
+   * Methods used when running in batch mode (see SamplerFullSolveMultiApp).
+   */
+  virtual void initialSetup() override;
+  virtual void initializeFromMultiapp() override;
+  virtual void executeFromMultiapp() override;
+  virtual void finalizeFromMultiapp() override;
+
+  virtual void initializeToMultiapp() override;
+  virtual void executeToMultiapp() override;
+  virtual void finalizeToMultiapp() override;
+  ///@}
+
+protected:
+  /// The name of the control object on the other app where we want to copy our neural net
+  const std::string _control_name;
+
+  /// The trainer object which will contains the control neural net
+  const LibtorchDRLControlTrainer & _trainer;
+};
+
+#endif
