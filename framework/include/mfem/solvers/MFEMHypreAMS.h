@@ -27,8 +27,6 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HypreAMS & solver) override;
 
-  void Update() override;
-
 protected:
   void ConstructSolver() override;
 

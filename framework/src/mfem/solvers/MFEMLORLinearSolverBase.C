@@ -40,18 +40,73 @@ LORLinearSolverBase<MFEMSolverType>::Update()
     if (_lor && GetPreconditioner())
       mooseError("LOR solver cannot take a preconditioner");
     if (_lor)
-      LORLinearSolverBase<MFEMSolverType>::SetLORSolver(*this, *_equation_system);
+    {
+      SetupLOR(*_equation_system);
+      LORLinearSolverBase<MFEMSolverType>::SetLORSolver(*this);
+    }
+    else
+      SetPreconditioner(static_cast<MFEMSolverType &>(GetSolver()));
   }  
+}
+
+template <>
+void
+LORLinearSolverBase<mfem::OperatorJacobiSmoother>::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+  {
+    SetupLOR(*_equation_system);
+    LORLinearSolverBase<mfem::OperatorJacobiSmoother>::SetLORSolver(*this);
+  }
+}
+
+template <>
+void
+LORLinearSolverBase<mfem::HypreBoomerAMG>::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+  {
+    SetupLOR(*_equation_system);
+    LORLinearSolverBase<mfem::HypreBoomerAMG>::SetLORSolver(*this);
+  }
+}
+
+template <>
+void
+LORLinearSolverBase<mfem::HypreAMS>::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+  {
+    SetupLOR(*_equation_system);
+    if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreAMS Solver only supports hex meshes.");
+    LORLinearSolverBase<mfem::HypreAMS>::SetLORSolver(*this);
+  }
+}
+
+template <>
+void
+LORLinearSolverBase<mfem::HypreADS>::Update()
+{
+  Moose::MFEM::LinearSolverBase::Update();
+  if (_lor)
+  {
+    SetupLOR(*_equation_system);
+    if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
+      mooseError("LOR HypreADS Solver only supports hex meshes.");
+    LORLinearSolverBase<mfem::HypreADS>::SetLORSolver(*this);
+  }
 }
 
 template <class MFEMSolverType>
 void
-LORLinearSolverBase<MFEMSolverType>::SetLORSolver(LinearSolverBase & solver_base,
-                                                  Moose::MFEM::EquationSystem & equation_system)
+LORLinearSolverBase<MFEMSolverType>::SetLORSolver(LinearSolverBase & solver_base)
 {
   if (_lor)
   {
-    SetupLOR(equation_system);
     auto lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
     SetSolverParameters(lor_solver->GetSolver());
     solver_base.SetSolver(lor_solver);
@@ -60,12 +115,10 @@ LORLinearSolverBase<MFEMSolverType>::SetLORSolver(LinearSolverBase & solver_base
 
 template <>
 void
-LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_base,
-                                                    Moose::MFEM::EquationSystem & equation_system)
+LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_base)
 {
   if (_lor)
   {
-    SetupLOR(equation_system);
     mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreGMRES>(lor_disc, _a->ParFESpace()->GetComm());
     SetSolverParameters(lor_solver->GetSolver());
@@ -75,12 +128,10 @@ LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_ba
 
 template <>
 void
-LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_base,
-                                                     Moose::MFEM::EquationSystem & equation_system)
+LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_base)
 {
   if (_lor)
   {
-    SetupLOR(equation_system);    
     mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(lor_disc, _a->ParFESpace()->GetComm());
     SetSolverParameters(lor_solver->GetSolver());
@@ -90,12 +141,10 @@ LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_b
 
 template <>
 void
-LORLinearSolverBase<mfem::HyprePCG>::SetLORSolver(LinearSolverBase & solver_base,
-                                                  Moose::MFEM::EquationSystem & equation_system)
+LORLinearSolverBase<mfem::HyprePCG>::SetLORSolver(LinearSolverBase & solver_base)
 {
   if (_lor)
   {
-    SetupLOR(equation_system);
     mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, _a->ParFESpace()->GetComm());
     SetSolverParameters(lor_solver->GetSolver());

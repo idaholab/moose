@@ -32,25 +32,20 @@ public:
 
   virtual void Update() override;
 
-  void SetLORSolver(LinearSolverBase & solver, Moose::MFEM::EquationSystem & equation_system);
+private:
+  void SetLORSolver(LinearSolverBase & solver);
 };
 
 // Template specializations required for LOR wrappers for Hypre iterative solvers that lack default
 // constructors
 template <>
-void
-LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_base,
-                                                    Moose::MFEM::EquationSystem & equation_system);
+void LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_base);
 
 template <>
-void
-LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_base,
-                                                     Moose::MFEM::EquationSystem & equation_system);
+void LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_base);
 
 template <>
-void
-LORLinearSolverBase<mfem::HyprePCG>::SetLORSolver(LinearSolverBase & solver_base,
-                                                  Moose::MFEM::EquationSystem & equation_system);
+void LORLinearSolverBase<mfem::HyprePCG>::SetLORSolver(LinearSolverBase & solver_base);
 
 } // namespace Moose::MFEM
 
