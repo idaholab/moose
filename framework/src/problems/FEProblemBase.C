@@ -1249,7 +1249,8 @@ FEProblemBase::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh())
+  const bool checkpoint_restart = _app.isRestarting() && _app.hasRestartRecoverFileBase();
+  if (!_app.isRecovering() && !_app.restoredInitialBackupMesh() && !checkpoint_restart)
   {
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
