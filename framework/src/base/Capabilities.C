@@ -254,6 +254,17 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
+    const auto doc = "Intel GPU parallel computing platform";
+#ifdef PETSC_HAVE_SYCL
+    const std::string version = QUOTE(PETSC_PKG_SYCL_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_SYCL_VERSION_MINOR) "." QUOTE(PETSC_PKG_SYCL_VERSION_SUBMINOR);
+    add_string("sycl", version, doc);
+#else
+    missing("sycl", doc, "Add the SYCL bin directory to your path and rebuild PETSc.");
+#endif
+  }
+
+  {
     const auto doc = "Kokkos performance portability programming ecosystem";
 #ifdef MOOSE_KOKKOS_ENABLED
     const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(

@@ -111,6 +111,7 @@ else ifneq ($(PETSC_HAVE_SYCL),)
   KOKKOS_COMPILER   := ICPX
   KOKKOS_CXX         = $(SYCL_COMPILER)
   KOKKOS_CXXFLAGS    = -fsycl -fsycl-targets=spir64_gen -x c++ $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CXXFLAGS   += -Wno-deprecated-declarations -Wno-macro-redefined
   KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
   KOKKOS_LDFLAGS     = -fsycl
   ifneq ($(SYCL_ARCH),)
