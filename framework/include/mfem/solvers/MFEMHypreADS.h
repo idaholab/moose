@@ -24,11 +24,11 @@ public:
 
   MFEMHypreADS(const InputParameters &);
 
-  /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::HypreADS & solver) override;
-
 protected:
   void ConstructSolver() override;
+
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::HypreADS & solver) override;
 
 private:
   const MFEMFESpace & _mfem_fespace;

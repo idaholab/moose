@@ -23,11 +23,11 @@ public:
 
   MFEMHypreFGMRES(const InputParameters & parameters);
 
-  /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::HypreFGMRES & solver) override;
-
 protected:
   void ConstructSolver() override;
+
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::HypreFGMRES & solver) override;
 };
 
 #endif

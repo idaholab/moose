@@ -27,6 +27,7 @@ public:
 
   LORLinearSolverBase(const InputParameters & parameters);
 
+protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(MFEMSolverType & solver) = 0;
 

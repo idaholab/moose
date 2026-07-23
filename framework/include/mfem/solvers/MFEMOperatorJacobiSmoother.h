@@ -23,11 +23,11 @@ public:
 
   MFEMOperatorJacobiSmoother(const InputParameters & parameters);
 
-  /// Update the wrapped MFEM solver parameters
-  virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
-
 protected:
   void ConstructSolver() override;
+
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
 };
 
 #endif

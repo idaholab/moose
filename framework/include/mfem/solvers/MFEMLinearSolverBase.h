@@ -37,17 +37,13 @@ public:
   /// Returns this solver's preconditioner
   LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
 
-  /// Update the solver following any changes to the EquationSystem it is responsible for solving.
-  virtual void UpdateEquationSystemContext()
-  {
-    if (_preconditioner)
-      _preconditioner->UpdateEquationSystemContext();
-  };
-
   /// For eigensolvers, this method calls the underlying Solve method
   virtual void Solve() { mooseError("'solve' method not used in this solver type."); }
 
 protected:
+  /// Update the solver following any changes to the EquationSystem it is responsible for solving.
+  virtual void UpdateEquationSystemContext() override;
+
   /// Preconditioner to be used for the problem
   std::shared_ptr<LinearSolverBase> _preconditioner;
 
