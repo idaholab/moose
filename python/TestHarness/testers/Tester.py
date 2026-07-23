@@ -730,6 +730,12 @@ class Tester(MooseObject, OutputInterface):
         """
         return
 
+    def postRun(self, options):
+        """
+        Entry point for after the tester has processed its results.
+        """
+        return
+
     def processResultsCommand(self, moose_dir, options):
         """method to return the commands (list) used for processing results"""
         return []
