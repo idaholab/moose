@@ -13,7 +13,7 @@ namespace CSG
 {
 
 CSGYCylinder::CSGYCylinder(const std::string & name, const Real x0, const Real z0, const Real r)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGYCylinder>()), _x0(x0), _z0(z0), _r(r)
+  : CSGSurface(name), _x0(x0), _z0(z0), _r(r)
 {
   checkRadius();
 }

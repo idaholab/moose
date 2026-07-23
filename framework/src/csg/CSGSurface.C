@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGSurface.h"
+#include "CSGEngUnit.h"
 #include "CSGUtils.h"
 
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
-  : _name(name), _surface_type(surf_type)
+CSGSurface::CSGSurface(const std::string & name) : _name(name)
 {
   CSGUtils::checkValidCSGName(name);
 }
@@ -44,6 +44,17 @@ CSGSurface::getHalfspaceFromPoint(const Point & p) const
 bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
+  // If both objects are engineering units, delegate to CSGEngUnit::operator== to avoid
+  // calling getCoeffs(), which is not supported on engineering unit types. The isEngUnit()
+  // check keeps the common plain-surface path free of any dynamic_cast; the casts below
+  // only run once we know the objects are engineering units.
+  if (isEngUnit())
+  {
+    if (other.isEngUnit())
+      return *dynamic_cast<const CSGEngUnit *>(this) == *dynamic_cast<const CSGEngUnit *>(&other);
+    return false; // an engineering unit cannot equal a plain surface
+  }
+
   return (this->getName() == other.getName()) &&
          (this->getSurfaceType() == other.getSurfaceType()) &&
          (this->getCoeffs() == other.getCoeffs()) &&

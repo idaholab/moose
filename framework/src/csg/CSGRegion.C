@@ -19,7 +19,7 @@ CSGRegion::regionSymbol(const RegionType region_type)
                   region_type == RegionType::INTERSECTION,
               "Unexpected region type");
 
-  constexpr std::array<char, 5> symbols = {
+  static constexpr std::array<char, 5> symbols = {
       '\0', // CSGRegion::RegionType::EMPTY (unused)
       '\0', // CSGRegion::RegionType::HALFSPACE (unused)
       '~',  // CSGRegion::RegionType::COMPLEMENT
@@ -40,7 +40,7 @@ CSGRegion::halfspaceSymbol(const CSGSurface::Halfspace halfspace)
                   halfspace == CSGSurface::Halfspace::NEGATIVE,
               "Unexpected halfspace");
 
-  constexpr std::array<char, 2> symbols = {
+  static constexpr std::array<char, 2> symbols = {
       '+', // CSGSurface::Halfspace::POSITIVE
       '-'  // CSGSurface::Halfspace::NEGATIVE
   };
@@ -85,6 +85,29 @@ CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_to
     }
   }
   return true;
+}
+
+std::string
+CSGRegion::regionTypeName(const RegionType region_type)
+{
+  mooseAssert(region_type == RegionType::COMPLEMENT || region_type == RegionType::INTERSECTION ||
+                  region_type == RegionType::UNION,
+              "Unexpected region type");
+
+  static constexpr std::array<const char *, 5> names = {
+      nullptr,        // RegionType::EMPTY (not used as a postfix operator)
+      nullptr,        // RegionType::HALFSPACE (not used as a postfix operator)
+      "COMPLEMENT",   // RegionType::COMPLEMENT
+      "INTERSECTION", // RegionType::INTERSECTION
+      "UNION"         // RegionType::UNION
+  };
+  static_assert(names[static_cast<std::size_t>(RegionType::COMPLEMENT)] ==
+                std::string_view("COMPLEMENT"));
+  static_assert(names[static_cast<std::size_t>(RegionType::INTERSECTION)] ==
+                std::string_view("INTERSECTION"));
+  static_assert(names[static_cast<std::size_t>(RegionType::UNION)] == std::string_view("UNION"));
+
+  return names[static_cast<std::size_t>(region_type)];
 }
 
 CSGRegion::CSGRegion()
@@ -337,6 +360,56 @@ bool
 CSGRegion::operator!=(const CSGRegion & other) const
 {
   return !(*this == other);
+}
+
+void
+CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & sub_region)
+{
+  // Rebuild _postfix_tokens, substituting each [old_surf_ref][Halfspace] pair with the
+  // tokens of sub_region (and a trailing COMPLEMENT for the positive / outside halfspace).
+  // This will also update the _surfaces list to remove the old_surf (if present) and append the
+  // surfaces from the sub-region if they are used to replace the old_surf here.
+  std::vector<PostfixTokenVariant> new_tokens;
+
+  for (std::size_t i = 0; i < _postfix_tokens.size(); ++i)
+  {
+    const auto * ref_ptr =
+        std::get_if<std::reference_wrapper<const CSGSurface>>(&_postfix_tokens[i]);
+
+    if (ref_ptr && &ref_ptr->get() == &old_surf)
+    {
+      // encountered the old_surf to be replaced, so replace with the sub_region tokens
+
+      // The next token must be the Halfspace that was applied to this surface
+      mooseAssert(i + 1 < _postfix_tokens.size() &&
+                      std::holds_alternative<CSGSurface::Halfspace>(_postfix_tokens[i + 1]),
+                  "Expected a Halfspace token after surface reference in postfix stream");
+      const auto & hs = std::get<CSGSurface::Halfspace>(_postfix_tokens[++i]);
+
+      // Insert the sub-region's token stream in place of the surface + halfspace pair
+      new_tokens.insert(
+          new_tokens.end(), sub_region._postfix_tokens.begin(), sub_region._postfix_tokens.end());
+
+      // Positive halfspace means "outside" so use complement of sub-region
+      if (hs == CSGSurface::Halfspace::POSITIVE)
+        new_tokens.push_back(RegionType::COMPLEMENT);
+    }
+    else
+      new_tokens.push_back(_postfix_tokens[i]);
+  }
+  _postfix_tokens = new_tokens;
+
+  // Update _region_type from the last token in the new stream
+  if (_postfix_tokens.empty())
+    _region_type = "EMPTY";
+  else if (const auto * rt = std::get_if<RegionType>(&_postfix_tokens.back()))
+    _region_type = regionTypeName(*rt);
+  else
+  {
+    mooseAssert(std::holds_alternative<CSGSurface::Halfspace>(_postfix_tokens.back()),
+                "Expected halfspace as last token");
+    _region_type = "HALFSPACE";
+  }
 }
 
 } // namespace CSG

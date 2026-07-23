@@ -1,0 +1,55 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "CSGEngUnit.h"
+#include "CSGBase.h"
+
+namespace CSG
+{
+
+CSGEngUnit::~CSGEngUnit() = default;
+
+CSGEngUnit::CSGEngUnit(const std::string & behavior) : _internal_base(std::make_unique<CSGBase>())
+{
+  _behavior = behavior;
+}
+
+// Defined out of line (rather than inline in the header) because it returns the
+// std::unique_ptr<CSGBase> by value, which instantiates ~unique_ptr<CSGBase>() and therefore
+// requires CSGBase to be a complete type. CSGBase cannot be included in CSGEngUnit.h (circular
+// include), so the definition lives here where CSGBase.h is available.
+std::unique_ptr<CSGBase>
+CSGEngUnit::releaseBase()
+{
+  return std::move(_internal_base);
+}
+
+bool
+CSGEngUnit::operator==(const CSGEngUnit & other) const
+{
+  if (getName() != other.getName())
+    return false;
+  if (getBehavior() != other.getBehavior())
+    return false;
+  if (getUnitType() != other.getUnitType())
+    return false;
+  if (getAttributes() != other.getAttributes())
+    return false;
+  if (getTransformations() != other.getTransformations())
+    return false;
+  return true;
+}
+
+bool
+CSGEngUnit::operator!=(const CSGEngUnit & other) const
+{
+  return !(*this == other);
+}
+
+} // namespace CSG

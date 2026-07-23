@@ -7,7 +7,11 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 
 ## Theory
 
-As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
+As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes, each described below.
+Additional components such as lattices and engineering units can also be defined.
+For a more detailed description of how surfaces, cells, universes, lattices, and engineering units are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
+
+### Surfaces
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
 Each surface inherently separates two half-space [regions](source/csg/CSGBase.md#regions): positive and negative half-spaces.
@@ -25,12 +29,18 @@ For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to def
        id=fig:intersection
        caption=Example depiction of a closed region defined by an intersection of two half-spaces.
 
+### Cells
+
 [Cells](source/csg/CSGBase.md#cells) are defined by two main characteristics: a region and a fill.
 The region is defined as described above and defines the domain of the cell.
 The fill can typically be set as void (i.e., nothing), a material (placeholder type for now, this will be expanded in future works), a [universe](source/csg/CSGBase.md#universes), or a [lattice](source/csg/CSGBase.md#lattices).
 
+### Universes
+
 [Universes](source/csg/CSGBase.md#universes) can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
 By default, every model will have a [root universe](source/csg/CSGBase.md#root-universe), which is the singular overarching universe that all other universes can be traced back to through the tree defined by universes containing cells and cells filled with universes.
+
+### Lattices
 
 [Lattices](source/csg/CSGBase.md#lattices) are another optional component.
 A lattice is the arrangement of repeated universes in a defined structure.
@@ -43,7 +53,13 @@ A visual depiction of a lattice with an outer fill is shown in [!ref](fig:lat_ou
        id=fig:lat_outer
        caption=A visual of a regular hexagonal lattice where the red lines represent the boundary of each of the lattice elements, the yellow circles are the spatial extent of the universe that fills each lattice element, and the blue is the "outer" that fills the remaining spatial domain around the lattice element universes.
 
-For a more detailed description of how surfaces, cells, universes, and lattices are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
+### Engineering Units
+
+An ["engineering unit"](source/csg/CSGBase.md#engineering-units) refers to a broad class of user-friendly domain-specific objects that can be used in place of the standard rudimentary [!ac](CSG) components.
+Each type of engineering unit is defined by a set of intuitive and domain-specific attributes that describe the geometry.
+The idea is that these attributes are much simpler for a user to define than all the necessary rudimentary CSG components, but comprehensive enough such that the unit can be automatically deconstructed into the standard [!ac](CSG) components if necessary.
+The "units" are then usable in place of a surface, cell, or universe, depending on its defined behavior.
+An example of this is defining an infinite regular [N-sided polygon](source/csg/CSGBase.md#n-sided-regular-polygon-unit) region.
 
 ## How to Generate a CSG Model
 
@@ -65,6 +81,7 @@ There are four main sections in the file:
 - [`cells`](#cells)
 - [`universes`](#universes)
 - [`lattices`](#lattices) (if any)
+- [`engineering units`](#engineering-units) (if any)
 
 Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
@@ -147,3 +164,19 @@ The additional attributes that are provided for each of these types are:
 Below is example output for a $2 \times 2$ Cartesian lattice filled with two different universes called `sq1_univ` and `sq2_univ`.
 
 !listing csg_lattice_cart_out_csg.json start="lattices" end="surfaces"
+
+### Engineering Units
+
+If any engineering units are used, they will be located in the `units` section.
+Each unit includes the following information:
+
+- `unit_type`: the type of units as defined by the class name that was used to create the unit
+- `behavior`: what type of component this unit behaves as, either `"SURFACE"`, `"CELL"`, or `"UNIVERSE"`.
+- `attributes`: a map of a unit-specific attribute names to their values.
+
+If engineering units are included in a model, the name of those units may be present in other component definitions as if it were the type of object that it behaves like.
+For example, below is an N-sided polygon engineering unit (3 sides in this case) which behaves like a surface.
+It is used as a surface name to define the region of the cell.
+Because the only surface in this model is actually an engineering unit, the `surfaces` output block is not include as there are no plain surface objects present.
+
+!listing csg_only_poly_unit_out_csg.json

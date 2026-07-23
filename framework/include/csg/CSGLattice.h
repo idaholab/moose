@@ -42,9 +42,7 @@ public:
    * @param outer optional outer universe or material name that fills space around lattice elements.
    *              If not provided, outer is assumed to be VOID.
    */
-  CSGLattice(const std::string & name,
-             const std::string & lattice_type,
-             const std::optional<OuterVariant> & outer = std::nullopt);
+  CSGLattice(const std::string & name, const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * Destructor
@@ -66,7 +64,10 @@ public:
    *
    * @return std::string type of lattice
    */
-  const std::string & getType() const { return _lattice_type; }
+  const std::string getType() const
+  {
+    return MooseUtils::prettyCppType(libMesh::demangle(typeid(*this).name()));
+  }
 
   /**
    * @brief Get the type of outer that fills the space around the lattice elements
@@ -217,9 +218,6 @@ protected:
 
   /// Name of lattice
   std::string _name;
-
-  /// Type of lattice
-  const std::string _lattice_type;
 
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
