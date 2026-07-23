@@ -64,8 +64,8 @@ public:
 
   MFEMMatrixFreeAMS(const InputParameters &);
 
-  void Update() override;
-  
+  void UpdateEquationSystemContext() override;
+
 protected:
   void ConstructSolver() override;
 
