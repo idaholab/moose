@@ -11,6 +11,8 @@
 
 #include "ADKernel.h"
 
+#include <set>
+
 /**
  * This ADKernel adds standardized methods for assembling to a primary
  * scalar variable associated with the primary variable of the ADKernel
@@ -52,6 +54,9 @@ public:
    * Computes residual and jacobian block for field and scalar variables
    */
   void computeResidualAndJacobian() override;
+
+  /// Inform MOOSE that this kernel also computes a residual for its coupled scalar variable
+  std::set<std::string> additionalROVariables() override;
 
 protected:
   /**
