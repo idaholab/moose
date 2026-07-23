@@ -102,6 +102,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
+#include <cmath>
 
 #include "petscsnes.h"
 #include <PetscDMMoose.h>
@@ -3962,6 +3963,10 @@ NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type,
 {
   parallel_object_only();
 
+  // Values may change between residual evaluations, for example when an unnormalized contact
+  // scale contains the current mortar weight. Repeated writes within this assembly must agree.
+  _ksp_right_diagonal_scale_written_dofs.clear();
+
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
@@ -4282,6 +4287,94 @@ NonlinearSystemBase::preSolve()
   assembleScalingVector();
 
   return true;
+}
+
+void
+NonlinearSystemBase::requestKSPRightDiagonalScale()
+{
+  if (_has_ksp_right_diagonal_scale)
+    return;
+
+  addVector("ksp_right_diagonal_scale", /*project=*/false, libMesh::PARALLEL);
+  _has_ksp_right_diagonal_scale = true;
+}
+
+void
+NonlinearSystemBase::resetKSPRightDiagonalScale()
+{
+  if (!_has_ksp_right_diagonal_scale)
+    return;
+
+  auto & scale = getVector("ksp_right_diagonal_scale");
+  scale = 1.0;
+  scale.close();
+  _ksp_right_diagonal_scale_values.clear();
+  _ksp_right_diagonal_scale_written_dofs.clear();
+  _ksp_right_diagonal_scale_dirty = false;
+
+  auto * const petsc_solver =
+      dynamic_cast<libMesh::PetscNonlinearSolver<Number> *>(nonlinearSolver());
+  if (!petsc_solver)
+    mooseError(
+        "KSP right diagonal scaling requires a PETSc nonlinear solver for system '", name(), "'.");
+
+  auto & petsc_scale = libMesh::cast_ref<libMesh::PetscVector<Number> &>(scale);
+  KSP ksp;
+  LibmeshPetscCall(SNESGetKSP(getSNES(), &ksp));
+  LibmeshPetscCall(KSPSetRightDiagonalScale(ksp, petsc_scale.vec()));
+}
+
+void
+NonlinearSystemBase::setKSPRightDiagonalScale(const dof_id_type dof, const Real value)
+{
+  if (!_has_ksp_right_diagonal_scale)
+    mooseError("The KSP right diagonal scale must be requested before setting its entries.");
+  if (!std::isfinite(value) || value <= 0.0)
+    mooseError("KSP right diagonal scale entry for DOF ", dof, " must be finite and positive.");
+
+  auto & scale = getVector("ksp_right_diagonal_scale");
+  if (dof < scale.first_local_index() || dof >= scale.last_local_index())
+    mooseError("KSP right diagonal scale entry for non-owned DOF ", dof, " was supplied.");
+
+  const bool first_write = _ksp_right_diagonal_scale_written_dofs.emplace(dof).second;
+  const auto value_it = _ksp_right_diagonal_scale_values.find(dof);
+  if (!first_write)
+  {
+    mooseAssert(value_it != _ksp_right_diagonal_scale_values.end(),
+                "A written right diagonal scale must have an installed value.");
+    if (!MooseUtils::relativeFuzzyEqual(value_it->second, value, 1e-12))
+      mooseError("Conflicting KSP right diagonal scales ",
+                 value_it->second,
+                 " and ",
+                 value,
+                 " were supplied for DOF ",
+                 dof,
+                 ".");
+    return;
+  }
+
+  if (value_it != _ksp_right_diagonal_scale_values.end() &&
+      MooseUtils::relativeFuzzyEqual(value_it->second, value, 1e-12))
+    return;
+
+  _ksp_right_diagonal_scale_values[dof] = value;
+  scale.set(dof, value);
+  _ksp_right_diagonal_scale_dirty = true;
+}
+
+void
+NonlinearSystemBase::closeKSPRightDiagonalScale()
+{
+  if (!_has_ksp_right_diagonal_scale)
+    return;
+
+  auto any_dirty = _ksp_right_diagonal_scale_dirty;
+  _communicator.max(any_dirty);
+  if (!any_dirty)
+    return;
+
+  getVector("ksp_right_diagonal_scale").close();
+  _ksp_right_diagonal_scale_dirty = false;
 }
 
 void
