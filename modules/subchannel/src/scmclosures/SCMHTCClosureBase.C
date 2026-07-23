@@ -62,7 +62,7 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
   info.laminar_Nu = (info.subch_type == EChannelType::CENTER)
                         ? 3.73
                         : (info.subch_type == EChannelType::EDGE ? 3.59 : 3.52);
-  /// transient range Re limits-Updated-Cheng-Todreas 2018
+  /// transition range Re limits-Updated-Cheng-Todreas 2018
   info.ReL = 320 * std::pow(10.0, (info.poD - 1.0));
   info.ReT = 1e4 * std::pow(10.0, 0.7 * (info.poD - 1.0));
 
@@ -81,6 +81,15 @@ SCMHTCClosureBase::computeHTC(const FrictionStruct & friction_args,
   if (!std::isfinite(htc) || htc < 0.0)
     mooseError(name(), ": The heat transfer coefficient must be non-negative and finite.");
   return htc;
+}
+
+Real
+SCMHTCClosureBase::turbulentReynoldsNumber(const NusseltPreInfo & info) const
+{
+  if (info.Re > info.ReL && info.Re < info.ReT)
+    return info.ReT;
+
+  return info.Re;
 }
 
 Real
