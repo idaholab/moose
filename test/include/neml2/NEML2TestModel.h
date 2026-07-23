@@ -7,7 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef NEML2_ENABLED
+// NEML2 v2->v3 migration: superseded by the Python-native model in
+// test/tests/neml2/models/test_models.py (registered into the embedded interpreter via the
+// NEML2Action 'load' parameter). NEML2 v3 has no C++ model surface, so this v2 class is guarded
+// out.
+#if 0
 
 #pragma once
 
