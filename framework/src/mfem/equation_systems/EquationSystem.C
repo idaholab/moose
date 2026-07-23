@@ -632,7 +632,7 @@ EquationSystem::ApplyDomainNLFIntegrators(
       for (auto & kernel : *kernels)
         if (auto * integ = kernel->createNLIntegrator())
         {
-          if (_solver_requires_gradient && (trial_var_name != test_var_name))
+          if (_gradient_required && (trial_var_name != test_var_name))
             mooseError("Support for off-diagonal MFEM nonlinear domain integrators in conjunction "
                        "with a nonlinear solver that requires a gradient is not currently "
                        "implemented. Kernel '",
@@ -690,7 +690,7 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
       for (auto & bc : *bcs)
         if (auto * integ = bc->createNLIntegrator())
         {
-          if (_solver_requires_gradient && (test_var_name != trial_var_name))
+          if (_gradient_required && (test_var_name != trial_var_name))
             mooseError(
                 "Support for Off-diagonal MFEM nonlinear boundary integrators in conjunction with "
                 "a nonlinear solver that requires a gradient is not currently "
@@ -709,30 +709,6 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
               ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
               : form->AddBoundaryIntegrator(std::move(integ));
         }
-}
-
-void
-EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
-{
-  if (solver.IsLOR())
-  {
-    if (Complex())
-      mooseError("LOR solve is not supported for complex equation systems.");
-    if (_test_var_names.size() > 1)
-      mooseError("LOR solve is only supported for single-variable systems");
-
-    const auto & test_var_name = _test_var_names.at(0);
-    const auto & trial_var_name = _trial_var_names.at(0);
-    mfem::ParGridFunction & trial_gf = _gfuncs->GetRef(trial_var_name);
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    solver.SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
-  }
-
-  mooseAssert(_linear_operator.Ptr(),
-              "If we are preparing a linear solver, we better have a linear operator");
-  solver.SetOperator(*_linear_operator);
 }
 
 const mfem::Vector &

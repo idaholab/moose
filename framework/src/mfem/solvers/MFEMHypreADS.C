@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreADS);
 InputParameters
 MFEMHypreADS::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreADS>::validParams();
   params.addClassDescription("Hypre auxiliary-space divergence solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMFESpaceName>("fespace", "H(div) FESpace to use in HypreADS setup.");
@@ -27,7 +27,7 @@ MFEMHypreADS::validParams()
 }
 
 MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
+  : Moose::MFEM::LORLinearSolverBase<mfem::HypreADS>(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
@@ -35,31 +35,18 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreADS::ConstructSolver()
+MFEMHypreADS::SetSolverParameters(mfem::HypreADS & solver)
 {
-  auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetPrintLevel(getParam<int>("print_level"));
-
-  _solver = std::move(solver);
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMHypreADS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMHypreADS::ConstructSolver()
 {
-  if (_lor)
-  {
-    CheckSpectralEquivalence(a);
-    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
-        mfem::Geometry::Type::CUBE)
-      mooseError("LOR HypreADS Solver only supports hex meshes.");
-
-    mfem::Array<int> ess_tdofs;
-    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreADS>(a, ess_tdofs);
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif

@@ -39,11 +39,4 @@ MFEMMUMPS::ConstructSolver()
   _solver = std::move(solver);
 }
 
-void
-MFEMMUMPS::SetupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
-{
-  if (_lor)
-    mooseError("MUMPS solver does not support LOR solve");
-}
-
 #endif

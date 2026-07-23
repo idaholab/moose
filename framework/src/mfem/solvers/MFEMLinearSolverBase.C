@@ -21,12 +21,13 @@ LinearSolverBase::validParams()
   InputParameters params = SolverBase::validParams();
   params.addClassDescription(
       "Base class for defining linear mfem::Solver derived classes for Moose.");
-  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
   return params;
 }
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
-  : SolverBase(parameters), _lor{getParam<bool>("low_order_refined")}, _preconditioner{nullptr}
+  : SolverBase(parameters),
+    _preconditioner{nullptr},
+    _equation_system(getMFEMProblem().getEquationSystem())
 {
 }
 
@@ -67,29 +68,12 @@ template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
 
 void
-LinearSolverBase::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
+LinearSolverBase::UpdateEquationSystemContext()
 {
-  if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetBasisType() != mfem::BasisType::GaussLobatto)
-      mooseError("Low-Order-Refined solver requires the FESpace basis to be GaussLobatto "
-                 "for H1 elements.");
-  }
-  else if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
-        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
-                 "and the open-basis to be IntegratedGLL for ND elements.");
-  }
-  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
-        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
-                 "and the open-basis to be IntegratedGLL for RT elements.");
-  }
+  if (_preconditioner)
+    _preconditioner->UpdateEquationSystemContext();
 }
+
 } // namespace Moose::MFEM
 
 #endif

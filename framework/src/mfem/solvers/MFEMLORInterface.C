@@ -1,0 +1,89 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#include "MFEMLORInterface.h"
+
+namespace Moose::MFEM
+{
+InputParameters
+LORInterface::validParams()
+{
+  InputParameters params = SolverBase::validParams();
+  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
+  return params;
+}
+
+LORInterface::LORInterface(const InputParameters & parameters)
+  : _lor{parameters.get<bool>("low_order_refined")}
+{
+}
+
+bool
+LORInterface::IsLOR(LinearSolverBase & solver) const
+{
+  LORInterface * lor_preconditioner = GetPreconditionerLORInterface(solver);
+  return _lor || (lor_preconditioner && lor_preconditioner->IsLOR(*solver.GetPreconditioner()));
+}
+
+LORInterface *
+LORInterface::GetPreconditionerLORInterface(LinearSolverBase & solver) const
+{
+  return dynamic_cast<LORInterface *>(solver.GetPreconditioner());
+}
+
+void
+LORInterface::SetupLOR(Moose::MFEM::EquationSystem & equation_system)
+{
+  if (equation_system.IsComplex())
+    mooseError("LOR solve is not supported for complex equation systems.");
+  if (equation_system.GetTestVarNames().size() > 1)
+    mooseError("LOR solve is only supported for single-variable systems");
+
+  const auto & test_var_name = equation_system.GetTestVarNames().at(0);
+  const auto & trial_var_name = equation_system.GetTrialVarNames().at(0);
+  mfem::ParGridFunction & trial_gf = equation_system.getGridFunction(trial_var_name);
+  _a = &equation_system.GetBilinearForm(test_var_name);
+  CheckSpectralEquivalence(*_a);
+
+  _ess_bdr_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+  _ess_bdr_markers = 0;
+  equation_system.ApplyEssentialBC(trial_var_name, trial_gf, _ess_bdr_markers);
+
+  _a->ParFESpace()->GetEssentialTrueDofs(_ess_bdr_markers, _ess_tdofs);
+}
+
+void
+LORInterface::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
+{
+  if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetBasisType() != mfem::BasisType::GaussLobatto)
+      mooseError("Low-Order-Refined solver requires the FESpace basis to be GaussLobatto "
+                 "for H1 elements.");
+  }
+  else if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for ND elements.");
+  }
+  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for RT elements.");
+  }
+}
+} // namespace Moose::MFEM
+
+#endif

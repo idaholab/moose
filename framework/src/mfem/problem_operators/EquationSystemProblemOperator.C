@@ -27,7 +27,7 @@ EquationSystemProblemOperator::Solve()
   FormEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+  SolveWithOperator(*es, _true_rhs, _true_x, es->Nonlinear());
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }

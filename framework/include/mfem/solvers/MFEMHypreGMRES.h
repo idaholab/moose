@@ -11,24 +11,28 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
-#include "MFEMHypreBoomerAMG.h"
+#include "MFEMLORLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::HypreGMRES solver.
  */
-class MFEMHypreGMRES : public Moose::MFEM::LinearSolverBase
+class MFEMHypreGMRES : public Moose::MFEM::LORLinearSolverBase<mfem::HypreGMRES>
 {
 public:
   static InputParameters validParams();
 
   MFEMHypreGMRES(const InputParameters &);
 
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
-
 protected:
   void ConstructSolver() override;
+
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::HypreGMRES & solver) override;
+
+  virtual void SetOperatorImpl(mfem::Operator & op) override
+  {
+    GetSolver().SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
+  }
 };
 
 #endif

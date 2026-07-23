@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMCGSolver);
 InputParameters
 MFEMCGSolver::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::CGSolver>::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the conjugate gradient method.");
   params.set<bool>("use_initial_guess", /*quiet_mode=*/true) = true;
@@ -31,48 +31,28 @@ MFEMCGSolver::validParams()
 }
 
 MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::CGSolver>(parameters)
 {
   ConstructSolver();
+}
+
+void
+MFEMCGSolver::SetSolverParameters(mfem::CGSolver & solver)
+{
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetRelTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
 MFEMCGSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
+  SetSolverParameters(*solver);
   SetPreconditioner(*solver);
   _solver = std::move(solver);
-}
-
-void
-MFEMCGSolver::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
-{
-  if (_lor && _preconditioner)
-    mooseError("LOR solver cannot take a preconditioner");
-
-  mfem::Array<int> ess_tdofs;
-  a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-  if (_preconditioner)
-  {
-    _preconditioner->SetupLOR(a, ess_tdofs);
-    SetPreconditioner(static_cast<mfem::CGSolver &>(*_solver));
-  }
-  else if (_lor)
-  {
-    CheckSpectralEquivalence(a);
-    auto lor_solver = new mfem::LORSolver<mfem::CGSolver>(a, ess_tdofs);
-    lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-
-    _solver.reset(lor_solver);
-  }
 }
 
 #endif

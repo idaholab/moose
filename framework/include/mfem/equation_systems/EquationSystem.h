@@ -54,6 +54,11 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyEssentialBC(const std::string & var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -77,15 +82,14 @@ public:
   virtual void ComputeNonlinearResidual(const mfem::Vector & u, mfem::Vector & residual) const;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
+  /// Get operator handle for linear component of system operator
+  mfem::OperatorHandle & GetLinearOperator() const { return _linear_operator; };
 
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
-  /// Set whether the nonlinear solver driving this equation system requires Jacobian information.
-  void SetSolverRequiresGradient(bool requires_gradient)
-  {
-    _solver_requires_gradient = requires_gradient;
-  }
+  /// Set whether an external object (such as a nonlinear solver) requires Jacobian information for this EquationSystem.
+  void SetGradientRequired(bool requires_gradient) { _gradient_required = requires_gradient; }
 
   /// Set the coefficient manager to notify when trial variables are updated, so that stored
   /// projections of solution-dependent coefficients are invalidated.
@@ -100,16 +104,25 @@ public:
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
   /**
+   * @returns a reference to the MFEM ParBilinearForm corresponding to test_var_name
+   */
+  mfem::ParBilinearForm & GetBilinearForm(const std::string & test_var_name)
+  {
+    return _blfs.GetRef(test_var_name);
+  }
+
+  /**
+   * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
+   */
+  mfem::ParGridFunction & getGridFunction(const std::string & trial_var_name)
+  {
+    return _gfuncs->GetRef(trial_var_name);
+  }
+
+  /**
    * @returns Whether nonlinear integrators are present
    */
   bool Nonlinear() const { return _non_linear; }
-
-  /**
-   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
-   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
-   * operator
-   */
-  void PrepareLinearSolver(LinearSolverBase & solver);
 
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
@@ -143,6 +156,14 @@ public:
    */
   mfem::Array<int> BuildEssentialBoundaryMarkers(const std::string & var_name) const;
 
+  /**
+   * Whether this a complex equation system
+   */
+  virtual bool IsComplex() const { return false; }
+
+  /// Build all forms comprising this EquationSystem
+  virtual void BuildEquationSystem();
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -166,11 +187,6 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
@@ -183,8 +199,6 @@ protected:
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
 
   /// Form linear components of system based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
@@ -270,11 +284,6 @@ protected:
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
-  /**
-   * Whether this a complex equation system
-   */
-  virtual bool Complex() const { return false; }
-
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.
   std::vector<std::string> _coupled_var_names;
@@ -328,14 +337,13 @@ protected:
   mutable const mfem::Vector * _linearization_point = nullptr;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
-  // Whether a nonlinear solver exists and whether it requires Jacobian/gradient information.
-  bool _solver_requires_gradient = false;
+  // Whether an external object (e.g. solver) requires Jacobian/gradient information.
+  bool _gradient_required = false;
   // Coefficient manager notified when trial variables are updated, so that stored projections
   // of solution-dependent coefficients are invalidated.
   CoefficientManager * _coefficient_manager = nullptr;
 
 private:
-  friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };

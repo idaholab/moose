@@ -51,6 +51,7 @@ InputParameters
 MFEMMatrixFreeAMS::validParams()
 {
   InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  params += Moose::MFEM::LORInterface::validParams();
   params.addClassDescription("MFEM matrix-free auxiliary-space Maxwell preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMScalarCoefficientName>(
@@ -73,6 +74,7 @@ MFEMMatrixFreeAMS::validParams()
 
 MFEMMatrixFreeAMS::MFEMMatrixFreeAMS(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
+    Moose::MFEM::LORInterface(parameters),
     _alpha_coef(getScalarCoefficient("alpha_coefficient")),
     _beta_coef(getScalarCoefficient("beta_coefficient")),
     _inner_pi_its(getParam<unsigned int>("inner_pi_iterations")),
@@ -86,17 +88,19 @@ MFEMMatrixFreeAMS::ConstructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::MatrixFreeAMS>(
       _alpha_coef, _beta_coef, _inner_pi_its, _inner_g_its);
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
   _solver = std::move(solver);
 }
 
 void
-MFEMMatrixFreeAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMMatrixFreeAMS::UpdateEquationSystemContext()
 {
-  // update the pointer to the bilinear form representing the curl-curl problem being preconditioned
+  LinearSolverBase::UpdateEquationSystemContext();
+  SetupLOR(*_equation_system);
+  // update the pointer to the bilinear form representing the curl-curl problem being
+  // preconditioned
   auto & matrix_free_ams = static_cast<Moose::MFEM::MatrixFreeAMS &>(*_solver);
-  matrix_free_ams.SetBilinearForm(a);
-  matrix_free_ams.SetBoundaryMarkers(ess_bdr_markers);
+  matrix_free_ams.SetBilinearForm(*_a);
+  matrix_free_ams.SetBoundaryMarkers(_ess_bdr_markers);
 }
 
 #endif

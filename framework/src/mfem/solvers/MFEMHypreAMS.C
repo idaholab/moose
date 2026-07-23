@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreAMS);
 InputParameters
 MFEMHypreAMS::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>::validParams();
   params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<MFEMFESpaceName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
@@ -31,7 +31,7 @@ MFEMHypreAMS::validParams()
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
+  : Moose::MFEM::LORLinearSolverBase<mfem::HypreAMS>(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                               getParam<MFEMFESpaceName>("fespace")))
 {
@@ -39,37 +39,20 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 }
 
 void
-MFEMHypreAMS::ConstructSolver()
+MFEMHypreAMS::SetSolverParameters(mfem::HypreAMS & solver)
 {
-  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
-    solver->SetSingularProblem();
-
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetPrintLevel(getParam<int>("print_level"));
-
-  _solver = std::move(solver);
+    solver.SetSingularProblem();
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetPrintLevel(getParam<int>("print_level"));
 }
 
 void
-MFEMHypreAMS::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMHypreAMS::ConstructSolver()
 {
-  if (_lor)
-  {
-    CheckSpectralEquivalence(a);
-    if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
-        mfem::Geometry::Type::CUBE)
-      mooseError("LOR HypreAMS Solver only supports hex meshes.");
-
-    mfem::Array<int> ess_tdofs;
-    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreAMS>(a, ess_tdofs);
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    if (getParam<bool>("singular"))
-      lor_solver->GetSolver().SetSingularProblem();
-
-    _solver.reset(lor_solver);
-  }
+  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 #endif
