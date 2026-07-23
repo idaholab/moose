@@ -56,7 +56,7 @@ have been built e.g. the NlSolver, the lSolver, the FEspaces, the ParGridFunctio
 operator builder function should be added in the case of non-linear problems where the operator is
 rebuilt. In the non-linear case the user would have to override and populate the `Mult` and
 the `GetGradient` functions to rebuild, fetch and apply the operators for the residual and
-jacobian. The self pointer would have be passed to the Non-linear solver via the 
+Jacobian. The self pointer would have be passed to the non-linear solver via the 
 `SetOperator(mfem::Operator &)` method in the non-linear case. The case in this example is 
 linear and the Operator is simply built in the constructor. Firstly the class needs `Form`'s,
 `Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s.
