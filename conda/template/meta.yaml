@@ -47,13 +47,13 @@ requirements:
     - libfabric {{ libfabric }} # [linux]
     - libpng
     - moose-libmesh 2026.06.05_ab36c00 mpich_0
-    - moose-wasp 2026.06.15_d8777a8 build_0
+    - moose-wasp 2026.06.21_0edc884 build_0
     - zlib
   run:
     # should eventually become 'mpich {{ mpich_version }}'
     - mpich 5.0.1
     - moose-libmesh 2026.06.05_ab36c00 mpich_0
-    - moose-wasp 2026.06.15_d8777a8 build_0
+    - moose-wasp 2026.06.21_0edc884 build_0
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]
     - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]

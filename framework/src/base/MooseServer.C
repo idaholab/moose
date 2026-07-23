@@ -122,30 +122,23 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   const auto hit_error_message_diagnostic =
       [&diagnostic, &zero_line_diagnostic, &parse_file_path](const hit::ErrorMessage & err)
   {
-    // Has a filename
-    if (err.filename)
+    // error has filename that matches document currently getting processed
+    if (err.filename && *err.filename == parse_file_path)
     {
-      // For the open file
-      if (*err.filename == parse_file_path)
+      // Has line information that is valid
+      if (err.lineinfo && err.lineinfo->start_line && err.lineinfo->start_column &&
+          err.lineinfo->end_line && err.lineinfo->end_column)
       {
-        // Has line information that is valid
-        if (err.lineinfo && err.lineinfo->start_line && err.lineinfo->start_column &&
-            err.lineinfo->end_line && err.lineinfo->end_column)
-        {
-          diagnostic(err.message,
-                     err.lineinfo->start_line - 1,
-                     err.lineinfo->start_column - 1,
-                     err.lineinfo->end_line - 1,
-                     err.lineinfo->end_column - 1);
-          return;
-        }
-      }
-      // Has a file but not for this file, no diagnostic
-      else
+        diagnostic(err.message,
+                   err.lineinfo->start_line - 1,
+                   err.lineinfo->start_column - 1,
+                   err.lineinfo->end_line - 1,
+                   err.lineinfo->end_column - 1);
         return;
+      }
     }
 
-    // Don't have a filename, or have a filename that is this file without line info
+    // no filename, or filename not matching this document, or no line info
     zero_line_diagnostic(err.prefixed_message);
   };
 
