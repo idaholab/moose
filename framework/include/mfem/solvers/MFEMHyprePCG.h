@@ -28,6 +28,11 @@ protected:
 
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HyprePCG & solver) override;
+
+  virtual void SetOperatorImpl(mfem::Operator & op) override
+  {
+    GetSolver().SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
+  }
 };
 
 #endif

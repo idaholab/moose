@@ -79,7 +79,7 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
                                        const mfem::Vector & rhs,
                                        mfem::Vector & x,
                                        const bool nonlinear,
-                                       mfem::OperatorHandle & linear_operator)
+                                       mfem::Operator * linear_operator)
 {
   // `nonlinear` describes the assembled MFEM operator, not whether the user configured a
   // nonlinear solver object. A linear problem may still intentionally be solved through the
@@ -96,7 +96,11 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
         mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
                    "none was provided.");
       auto & linear_solver = *_problem_data.jacobian_solver;
-      linear_solver.SetOperator(*linear_operator);
+      if (linear_operator)
+        linear_solver.SetOperator(*linear_operator);
+      else
+        linear_solver.SetOperator(system_operator.GetGradient(x));
+
       nonlinear_solver.SetLinearSolver(linear_solver.GetSolver());
     }
 
@@ -113,7 +117,7 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
       mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
 
     auto & linear_solver = *_problem_data.jacobian_solver;
-    linear_solver.SetOperator(*linear_operator);
+    linear_solver.SetOperator(system_operator.GetGradient(x));
     linear_solver.Mult(rhs, x);
   }
 }

@@ -72,7 +72,7 @@ protected:
                          const mfem::Vector & rhs,
                          mfem::Vector & x,
                          const bool nonlinear,
-                         mfem::OperatorHandle & linear_operator);
+                         mfem::Operator * linear_operator = nullptr);
 
   /// Reference to the current problem.
   MFEMProblem & _problem;

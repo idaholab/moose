@@ -30,6 +30,11 @@ public:
 protected:
   void ConstructSolver() override;
 
+  virtual void SetOperatorImpl(mfem::Operator & op) override
+  {
+    GetSolver().SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
+  }
+
 private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
 };
