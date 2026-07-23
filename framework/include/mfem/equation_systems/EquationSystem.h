@@ -124,13 +124,6 @@ public:
    */
   bool Nonlinear() const { return _non_linear; }
 
-  /**
-   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
-   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
-   * operator
-   */
-  void PrepareLinearSolver(LinearSolverBase & solver);
-
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
 

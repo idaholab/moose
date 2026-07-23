@@ -96,7 +96,7 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
         mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
                    "none was provided.");
       auto & linear_solver = *_problem_data.jacobian_solver;
-      linear_solver.Update();
+      linear_solver.UpdateEquationSystemContext();
       linear_solver.SetOperator(*linear_operator);
       nonlinear_solver.SetLinearSolver(linear_solver.GetSolver());
     }
@@ -114,7 +114,7 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
       mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
 
     auto & linear_solver = *_problem_data.jacobian_solver;
-    linear_solver.Update();
+    linear_solver.UpdateEquationSystemContext();
     linear_solver.SetOperator(*linear_operator);
     linear_solver.Mult(rhs, x);
   }

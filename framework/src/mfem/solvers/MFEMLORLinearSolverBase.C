@@ -32,9 +32,9 @@ LORLinearSolverBase<MFEMSolverType>::LORLinearSolverBase(const InputParameters &
 
 template <class MFEMSolverType>
 void
-LORLinearSolverBase<MFEMSolverType>::Update()
+LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::Update();
+  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (IsLOR(*this))
   {
     if (_lor && GetPreconditioner())
@@ -51,9 +51,9 @@ LORLinearSolverBase<MFEMSolverType>::Update()
 
 template <>
 void
-LORLinearSolverBase<mfem::OperatorJacobiSmoother>::Update()
+LORLinearSolverBase<mfem::OperatorJacobiSmoother>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::Update();
+  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
     SetupLOR(*_equation_system);
@@ -63,9 +63,9 @@ LORLinearSolverBase<mfem::OperatorJacobiSmoother>::Update()
 
 template <>
 void
-LORLinearSolverBase<mfem::HypreBoomerAMG>::Update()
+LORLinearSolverBase<mfem::HypreBoomerAMG>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::Update();
+  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
     SetupLOR(*_equation_system);
@@ -75,9 +75,9 @@ LORLinearSolverBase<mfem::HypreBoomerAMG>::Update()
 
 template <>
 void
-LORLinearSolverBase<mfem::HypreAMS>::Update()
+LORLinearSolverBase<mfem::HypreAMS>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::Update();
+  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
     SetupLOR(*_equation_system);
@@ -89,9 +89,9 @@ LORLinearSolverBase<mfem::HypreAMS>::Update()
 
 template <>
 void
-LORLinearSolverBase<mfem::HypreADS>::Update()
+LORLinearSolverBase<mfem::HypreADS>::UpdateEquationSystemContext()
 {
-  Moose::MFEM::LinearSolverBase::Update();
+  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
     SetupLOR(*_equation_system);

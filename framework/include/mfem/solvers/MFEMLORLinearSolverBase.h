@@ -30,7 +30,7 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(MFEMSolverType & solver) = 0;
 
-  virtual void Update() override;
+  virtual void UpdateEquationSystemContext() override;
 
 private:
   void SetLORSolver(LinearSolverBase & solver);

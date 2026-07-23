@@ -92,9 +92,9 @@ MFEMMatrixFreeAMS::ConstructSolver()
 }
 
 void
-MFEMMatrixFreeAMS::Update()
+MFEMMatrixFreeAMS::UpdateEquationSystemContext()
 {
-  LinearSolverBase::Update();
+  LinearSolverBase::UpdateEquationSystemContext();
   SetupLOR(*_equation_system);
   // update the pointer to the bilinear form representing the curl-curl problem being
   // preconditioned
