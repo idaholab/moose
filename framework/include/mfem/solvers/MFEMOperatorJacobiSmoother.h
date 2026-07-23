@@ -26,8 +26,6 @@ public:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
 
-  void Update() override;
-
 protected:
   void ConstructSolver() override;
 };
