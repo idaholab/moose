@@ -23,4 +23,6 @@ public:
   virtual void subdomainSetup() override{};
 
   bool needThreadedCopy() const override final { return true; }
+
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 4; }
 };

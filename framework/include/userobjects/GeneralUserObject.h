@@ -36,4 +36,6 @@ public:
   virtual void threadJoin(const UserObject &) override;
   virtual void subdomainSetup() override;
   ///@}
+
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override { return 5; }
 };

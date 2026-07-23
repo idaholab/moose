@@ -40,6 +40,7 @@ public:
   SideUserObject(const SideUserObject & object);
 
   virtual void compute() override;
+  virtual unsigned int getUOExecutionOrderWithinGroup() const override final { return 0; }
 
   /**
    * The parallel computation entry function called by Kokkos
