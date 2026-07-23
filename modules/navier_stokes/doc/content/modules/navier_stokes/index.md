@@ -2,7 +2,8 @@
 
 The MOOSE Navier-Stokes module is a library for the implementation of simulation tools that solve the
 Navier-Stokes equations using continuous Galerkin finite element (CGFE), discontinuous Galerkin
-finite element (DGFE), hybrid finite element, or finite volume (FV) methods. The Navier-Stokes
+finite element (DGFE), hybridized discontinuous Galerkin (HDG) finite element, or finite volume
+(FV) methods. The Navier-Stokes
 equations are usually solved using either the pressure-based, incompressible or weakly-compressible formulation (assuming a
 constant or pressure-independent fluid density), or a density-based, compressible formulation.
 
@@ -15,7 +16,7 @@ please refer to the below pages:
 - [Porous media Incompressible Finite Volume](pinsfv.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Discontinuous Galerkin Finite Element](navier_stokes/dgfe.md)
-- [Hybridized Discontinous Galerkin (HDG) Finite Element](inshdg.md)
+- [Hybridized Discontinuous Galerkin (HDG) Finite Element](inshdg.md)
 - [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
@@ -33,7 +34,7 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | PINSFE     | Newton/PJFNK | Hand-coded | incompressible                | mixing length               | porous            | CGFE   | SUPG                              |
 | NS         | Newton/PJFNK | Hand-coded | compressible                  | None                        | Not porous        | CGFE   | SUPG                              |
 | INSChorin  | Newton/PJFNK | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | Chorin predictor-corrector        |
-| INS / generic DG | Newton/PJFNK | Mixed AD/hand-coded | incompressible       | None                        | Not porous        | DGFE   | upwind face flux                  |
+| INS / generic DGFE | Newton/PJFNK | Mixed AD/hand-coded | incompressible     | None                        | Not porous        | DGFE   | upwind face flux                  |
 | INSFV      | Newton/PJFNK | AD         | incompressible                | mixing length; $k-\epsilon$ | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV     | Newton/PJFNK | AD         | weakly compressible           | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
 | Linear(WCNS)FV | SIMPLE   | N/A        | weakly compressible           | $k-\epsilon$                | Not porous        | FV     | RC velocity; limited advected   |

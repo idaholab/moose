@@ -1,6 +1,6 @@
-# Discontinuous Galerkin Finite Element Navier Stokes
+# Discontinuous Galerkin Finite Element (DGFE) Navier-Stokes
 
-MOOSE can assemble a compatible incompressible flow and temperature-transport
+MOOSE can assemble a compatible incompressible flow and energy-transport
 discretization using discontinuous finite element spaces. Unlike the
 [hybrid CG-DG discretization](hcgdgfe.md), the pressure is also discontinuous,
 so its momentum contribution requires numerical flux terms on element faces.
@@ -31,7 +31,8 @@ pressure test space, $W_h \subseteq Q_h$. The same inclusion is also required, a
 least in our experience, for a compatible free-flow discretization when mass
 conservation is not exact. Intuitively this makes sense because the discretization
 no longer satisfies the strong form of the mass conservation equation, but instead
-only does so weakly against pressure test functions. Every transport test function
+only does so weakly against pressure test functions, which are the mass-equation test functions.
+Every transport test function
 must therefore also be an admissible pressure test function for its discrete balance
 to use the same mass conservation statement. Equal transport and pressure spaces are
 sufficient but not necessary. In the example below, pressure and temperature both
@@ -90,7 +91,7 @@ fields.
 
 The `dg` test compares the outlet side averages
 against CSV gold values. Both the outlet x-velocity and outlet temperature are
-one, matching their inlet values and demonstrating mass and energy conservation
-for this configuration.
+one, matching their inlet values and demonstrating mass conservation and conservative energy
+transport for this configuration.
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/compatibility/dg-stokes.i block=Postprocessors
