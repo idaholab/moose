@@ -18,11 +18,13 @@ INSPressureGradientBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
 
   params.addClassDescription(
-      "Adds implicit pressure term on a boundary. This is appropriate on wall and inlet boundaries "
-      "when the pressure term is integrated by parts");
+      "Adds an implicit pressure term on a boundary. This is appropriate on "
+      "wall and inlet boundaries when the pressure term is integrated by parts");
   params.addRequiredCoupledVar(NS::pressure, "The current value of the pressure");
-  params.addRequiredParam<unsigned>(
-      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
+  params.addRequiredRangeCheckedParam<unsigned>(
+      "component",
+      "component>=0 & component<=2",
+      "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
 
   return params;
 }
@@ -32,6 +34,13 @@ INSPressureGradientBC::INSPressureGradientBC(const InputParameters & parameters)
     _pressure(adCoupledValue(NS::pressure)),
     _component(getParam<unsigned>("component"))
 {
+}
+
+void
+INSPressureGradientBC::initialSetup()
+{
+  if (_mesh.getUniqueCoordSystem() == Moose::COORD_RSPHERICAL)
+    mooseError("INSPressureGradientBC does not support RSPHERICAL coordinates.");
 }
 
 ADReal

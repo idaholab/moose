@@ -25,6 +25,11 @@ value of the coupled [!param](/BCs/INSPressureGradientBC/pressure) variable. The
 [!param](/BCs/INSPressureGradientBC/component) parameter selects the momentum direction: `0` for
 $x$, `1` for $y$, and `2` for $z$.
 
+In RZ coordinates, the `ADIntegratedBC` base supplies the axisymmetric coordinate measure, so this
+face term needs no additional radial contribution. The radial volume contribution produced when
+integrating the pressure gradient by parts is supplied by [PressureGradient.md]. This object does
+not support `RSPHERICAL` coordinates.
+
 ## Example
 
 The following block applies the pressure contribution to the $y$-momentum equation on the inlet

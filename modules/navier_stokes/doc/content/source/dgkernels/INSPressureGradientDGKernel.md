@@ -34,6 +34,11 @@ contribution on external boundaries. The
 [!param](/DGKernels/INSPressureGradientDGKernel/component) parameter selects the momentum
 direction: `0` for $x$, `1` for $y$, and `2` for $z$.
 
+In RZ coordinates, the `ADDGKernel` base supplies the axisymmetric coordinate measure, so these
+face terms need no additional radial contribution. The radial volume contribution produced when
+integrating the pressure gradient by parts is supplied by [PressureGradient.md]. This object does
+not support `RSPHERICAL` coordinates.
+
 ## Example
 
 The following blocks add the volume and interior-face pressure terms to the $x$-momentum
