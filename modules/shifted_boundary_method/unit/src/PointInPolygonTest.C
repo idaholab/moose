@@ -26,10 +26,11 @@ TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
   Point p2(1.0, 1.0, 0.0);
   Point p3(0.0, 1.0, 0.0);
 
+  dof_id_type node_id = 0;
   auto create_edge = [&](const Point & a, const Point & b)
   {
-    auto n0 = std::make_unique<Node>(a);
-    auto n1 = std::make_unique<Node>(b);
+    auto n0 = std::make_unique<Node>(a, node_id++);
+    auto n1 = std::make_unique<Node>(b, node_id++);
     auto e = std::make_unique<Edge2>();
     e->set_node(0) = n0.get();
     e->set_node(1) = n1.get();
@@ -71,10 +72,11 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
   Point p1(1.0, 0.0, 0.0);
   Point p2(1.0, 1.0, 0.0);
   Point p3(0.0, 1.0, 0.0);
+  dof_id_type node_id = 0;
   auto create_edge = [&](const Point & a, const Point & b)
   {
-    auto n0 = std::make_unique<Node>(a);
-    auto n1 = std::make_unique<Node>(b);
+    auto n0 = std::make_unique<Node>(a, node_id++);
+    auto n1 = std::make_unique<Node>(b, node_id++);
     auto e = std::make_unique<Edge2>();
     e->set_node(0) = n0.get();
     e->set_node(1) = n1.get();
