@@ -22,6 +22,7 @@
 #include "MFEMNonlinearSolverBase.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
+#include "DataIO.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -71,7 +72,10 @@ MFEMProblem::validParams()
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))}
+  : ExternalProblem(params),
+    _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
+    _solution_state_data(declareRestartableDataWithContext<Moose::MFEM::SolutionState>(
+        "mfem_solution_state", &_problem_data))
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();

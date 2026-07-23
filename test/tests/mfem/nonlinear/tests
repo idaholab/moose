@@ -49,7 +49,6 @@
       csvdiff = 'NLHeatTransferLinearized_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
                  'Outputs/CSV/file_base=NLHeatTransferLinearized '
@@ -61,8 +60,8 @@
       csvdiff = 'NLHeatTransfer_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
+      prereq = 'MFEMNonLinearHeatTransfer/linearized'
     []
   []
   [MFEMNonLinearHeatConduction]
@@ -78,7 +77,28 @@
                 NLHeatConduction_centre_temperature_0050.csv'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
+    restep = false
+  []
+  [MFEMNonLinearHeatConductionComplexAux]
+    design = 'EquationSystem.md'
+    issues = '#30076'
+    requirement = 'The system shall correctly checkpoint and recover a transient MFEM problem that includes a complex auxiliary variable, exercising the cmplx_gridfunctions restore path.'
+    type = CSVDiff
+    input = nlheatconduction_complex_aux.i
+    csvdiff = 'NLHeatConductionComplexAux_centre_temperature_0000.csv
+               NLHeatConductionComplexAux_centre_temperature_0010.csv
+               NLHeatConductionComplexAux_centre_temperature_0020.csv
+               NLHeatConductionComplexAux_centre_temperature_0030.csv
+               NLHeatConductionComplexAux_centre_temperature_0040.csv
+               NLHeatConductionComplexAux_centre_temperature_0050.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0000.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0010.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0020.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0030.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0040.csv
+               NLHeatConductionComplexAux_centre_complex_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
     restep = false
   []
   [MFEMNonLinearHeatConductionQuadratureFunction]

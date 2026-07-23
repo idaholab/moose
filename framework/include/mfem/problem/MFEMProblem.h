@@ -20,6 +20,11 @@
 
 #include <map>
 
+namespace Moose::MFEM
+{
+struct SolutionState;
+}
+
 class MFEMProblem : public ExternalProblem
 {
 public:
@@ -384,7 +389,6 @@ protected:
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
   MFEMProblemData _problem_data;
-
   /**
    * The numeric representation currently active for this problem.
    */
@@ -397,6 +401,9 @@ protected:
    * declaring dependencies between solver objects.
    */
   std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
+
+  /// Restartable MFEM solution state associated with this problem.
+  Moose::MFEM::SolutionState & _solution_state_data;
 };
 
 template <typename T>
