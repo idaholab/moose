@@ -79,9 +79,6 @@ ADSCZMInterfaceKernelBase::computeQpResidual(Moose::DGResidualType type)
             traction_derivatives[dof_indices_neighbor[j]] * grad_phi_neighbor[j][_qp];
     }
 
-    // std::cout << "field correction enabled, traction_global = " << _traction_global[_qp]
-    //           << ", traction_gradient = " << traction_gradient << std::endl;
-
     r += traction_gradient * surrogateDistance();
   }
 

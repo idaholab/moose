@@ -1,13 +1,25 @@
 [Tests]
   design = 'index.md'
   [rectangle_sczm_tri_material]
-    type = 'RunApp'
+    type = 'CSVDiff'
     input = 'rectangle_sczm_tri_material.i'
-    # The full example ramps to end_time = 200; run a few steps as a smoke test.
-    cli_args = 'Executioner/end_time=3'
+    csvdiff = 'rectangle_sczm_tri_material_csv.csv'
     mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
     recover = false
     requirement = 'The system shall solve a shifted cohesive zone problem on a '
-                  'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action.'
+                  'non-interface-fitted triangular mesh using the ShiftedCohesiveZone action '
+                  'with the non-AD SalehaniIrani3DCTraction law and accumulate the cohesive '
+                  'work of separation with CZMGcIntegral.'
+  []
+  [rectangle_sczm_tri_material_field_correction]
+    type = 'CSVDiff'
+    input = 'rectangle_sczm_tri_material.i'
+    cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/field_correction=true '
+               'Outputs/csv/file_base=rectangle_sczm_tri_material_fc'
+    csvdiff = 'rectangle_sczm_tri_material_fc.csv'
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    recover = false
+    requirement = 'The system shall solve a shifted cohesive zone problem with the field '
+                  'correction term enabled in the ShiftedCohesiveZone interface kernel.'
   []
 []

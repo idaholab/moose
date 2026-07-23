@@ -42,7 +42,4 @@ protected:
 
   /// @brief Flag indicating whether shifted terms are used
   bool _shifted;
-
-  /// @brief Flag indicating whether the shifted variable (u + grad_u * d) is used
-  bool _shifted_variable;
 };

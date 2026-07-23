@@ -10,9 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "libmesh/quadrature_gauss.h"
 #include "FunctionParserUtils.h"
-#include "libmesh/fe.h"
 
 class SubdomainInterceptedGenerator : public MeshGenerator, public FunctionParserUtils<false>
 {
@@ -55,7 +53,4 @@ protected:
   int _qrule_order;
 
   usingFunctionParserUtilsMembers(false);
-
-  /// @brief Convert integer to Order enum
-  static Order intToOrder(int value);
 };

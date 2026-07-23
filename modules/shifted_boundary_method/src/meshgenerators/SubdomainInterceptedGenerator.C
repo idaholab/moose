@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubdomainInterceptedGenerator.h"
+#include "SBMUtils.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", SubdomainInterceptedGenerator);
 
@@ -35,7 +36,10 @@ SubdomainInterceptedGenerator::validParams()
   params.addParam<bool>("modify_inside_only", false, "Only modify inside elements.");
 
   // Quadrature order used for active‑area estimation when an element straddles the interface
-  params.addParam<int>("qrule_order", 9, "Quadrature order used to estimate the active area.");
+  params.addRangeCheckedParam<int>("qrule_order",
+                                   9,
+                                   "qrule_order >= 0 & qrule_order <= 10",
+                                   "Quadrature order used to estimate the active area.");
 
   params.addClassDescription("Base on the signed distance function to classify elements IN and OUT "
                              "elements as different subdomains.");
@@ -73,37 +77,6 @@ SubdomainInterceptedGenerator::generate()
 {
   // Take ownership of the input mesh (already cloned by getMesh()).
   std::unique_ptr<libMesh::MeshBase> mesh = std::move(_input);
-
-  auto initFEBase = [&](const Elem * elem)
-  {
-    Order order = intToOrder(_qrule_order);
-    FEType fe_type(elem->default_order(), LAGRANGE);
-    std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
-    QGauss qrule(elem->dim(), order);
-    fe->get_xyz(); // this is very important, otherwise the quadrature points are not
-                   // initialized
-    fe->get_JxW();
-    fe->attach_quadrature_rule(&qrule);
-    fe->reinit(elem);
-    return fe;
-  };
-
-  auto computeActiveAreaRatio =
-      [&](const Elem * elem, const std::function<bool(const Point &)> & is_active)
-  {
-    auto fe = initFEBase(elem);
-    const auto & JxW = fe->get_JxW();
-    const auto & q_points = fe->get_xyz();
-    double active_area = 0, total_area = 0;
-
-    for (unsigned int i = 0; i < q_points.size(); ++i)
-    {
-      if (is_active(q_points[i]))
-        active_area += JxW[i];
-      total_area += JxW[i];
-    }
-    return active_area / total_area;
-  };
 
   for (const auto & elem : mesh->active_element_ptr_range() /*gen only run rank = 0*/)
   {
@@ -155,57 +128,14 @@ SubdomainInterceptedGenerator::generate()
       return (_outer_boundary && phi < _threshold) || (!_outer_boundary && phi > _threshold);
     };
 
-    Real ratio_active = computeActiveAreaRatio(elem, is_active);
+    const Real ratio_active =
+        SBMUtils::activeElementFraction(*elem, static_cast<Order>(_qrule_order), is_active);
 
-    // (e) Decide false / true interception based on _lambda.
-    if (_lambda == 0.0)
-      elem->subdomain_id() = outside_id;
-    else if (_lambda == 1.0)
-      elem->subdomain_id() = inside_id;
-    else
-    {
-      bool is_false_intercepted = ((1.0 - ratio_active) > _lambda);
-
-      if (is_false_intercepted)
-        elem->subdomain_id() = inside_id;
-      else
-        elem->subdomain_id() = outside_id;
-    }
+    // (e) Decide inside / outside based on the inactive fraction and _lambda.
+    elem->subdomain_id() = SBMUtils::isInactive(ratio_active, _lambda) ? outside_id : inside_id;
   }
 
   // Signal that the mesh has been modified and needs preparation.
   mesh->set_isnt_prepared();
   return mesh;
-}
-
-Order
-SubdomainInterceptedGenerator::intToOrder(int value)
-{
-  switch (value)
-  {
-    case 0:
-      return CONSTANT;
-    case 1:
-      return FIRST;
-    case 2:
-      return SECOND;
-    case 3:
-      return THIRD;
-    case 4:
-      return FOURTH;
-    case 5:
-      return FIFTH;
-    case 6:
-      return SIXTH;
-    case 7:
-      return SEVENTH;
-    case 8:
-      return EIGHTH;
-    case 9:
-      return NINTH;
-    case 10:
-      return TENTH;
-    default:
-      throw std::invalid_argument("Unsupported Order value: " + std::to_string(value));
-  }
 }

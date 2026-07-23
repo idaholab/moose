@@ -30,12 +30,7 @@ BoundaryShortestDistanceToSurface::validParams()
                         "If true, the local true normal direction will be corrected to match the "
                         "direction of the local surrogate normal.");
 
-  params.addParam<bool>(
-      "correct_true_normal_by_integral",
-      true,
-      "If true, the true normal direction will be corrected by the integral results.");
-
-  params.addParam<bool>("neglect_distance_warning",
+  params.addParam<bool>("suppress_distance_warning",
                         false,
                         "If true, warnings about large distances will be suppressed.");
 
@@ -49,9 +44,8 @@ BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
     const InputParameters & parameters)
   : SideUserObject(parameters),
     _local_true_normal_correct(getParam<bool>("local_true_normal_correct")),
-    _correct_true_normal_by_integral(getParam<bool>("correct_true_normal_by_integral")),
     _surrogate_dot_true_normal_sums_has_reduced(false),
-    _neglect_distance_warning(getParam<bool>("neglect_distance_warning")),
+    _suppress_distance_warning(getParam<bool>("suppress_distance_warning")),
     _debug_output(getParam<bool>("debug_output"))
 {
   const auto function_names = getParam<std::vector<FunctionName>>("surfaces");
@@ -83,8 +77,9 @@ BoundaryShortestDistanceToSurface::BoundaryShortestDistanceToSurface(
     paramError("flip_normals",
                "Size of flip_normals must be either 1 or match number of boundaries.");
 
-  if (_correct_true_normal_by_integral)
-    _surrogate_dot_true_normal_sums.resize(boundary_names.size(), 0.0);
+  // Accumulator for the boundary-wise integral of (surrogate normal . true normal), used in
+  // finalize() to canonicalize the sign of the true normal on each boundary.
+  _surrogate_dot_true_normal_sums.resize(boundary_names.size(), 0.0);
 }
 
 void
@@ -110,11 +105,6 @@ BoundaryShortestDistanceToSurface::execute()
       (_distance_functions.size() == 1) ? 0 : bid_index; // single function or multiple functions
 
   bool flip_normal = _flip_normals[bid_index];
-  // #ifdef DEBUG
-  std::ofstream fout;
-  if (_debug_output)
-    fout.open("boundary_distance_debug.txt", std::ios::app);
-  // #endif
 
   for (unsigned int qp = 0; qp < n_qp; qp++)
   {
@@ -130,34 +120,31 @@ BoundaryShortestDistanceToSurface::execute()
     else if (_local_true_normal_correct)
       true_normal = (true_normal * _normals[qp] < 0) ? -true_normal : true_normal;
 
-    // #ifdef DEBUG
     if (_debug_output)
     {
       const auto true_normal_dot_surrogate_normal = true_normal * _normals[qp];
-
       const auto nt_tangent = _normals[qp] - true_normal_dot_surrogate_normal * true_normal;
 
-      fout << pt(0) << " " << pt(1) << " " << pt(2) << " " << _distance_vectors[elem_side][qp](0)
-           << " " << _distance_vectors[elem_side][qp](1) << " "
-           << _distance_vectors[elem_side][qp](2) << " " << true_normal(0) << " " << true_normal(1)
-           << " " << true_normal(2) << " " << nt_tangent(0) << " " << nt_tangent(1) << " "
-           << nt_tangent(2) << " " << func->name() << std::endl;
+      _console << "[" << name() << "] surface=" << func->name() << " point=" << pt
+               << " distance=" << _distance_vectors[elem_side][qp] << " true_normal=" << true_normal
+               << " tangent=" << nt_tangent << std::endl;
     }
-    // #endif
 
-    if (_correct_true_normal_by_integral)
-    {
-      _surrogate_dot_true_normal_sums_has_reduced = false;
-      _surrogate_dot_true_normal_sums[bid_index] += _normals[qp] * true_normal * _JxW[qp];
-      _elem_side_to_bid[elem_side] = bid_index;
-    }
+    // Accumulate the integral of (surrogate normal . true normal) over this boundary so that
+    // finalize() can flip the true normals of any boundary whose integral is negative, giving a
+    // consistent global orientation.
+    _surrogate_dot_true_normal_sums_has_reduced = false;
+    _surrogate_dot_true_normal_sums[bid_index] += _normals[qp] * true_normal * _JxW[qp];
+    _elem_side_to_bid[elem_side] = bid_index;
   }
 }
 
 void
 BoundaryShortestDistanceToSurface::finalize()
 {
-  if (_correct_true_normal_by_integral && !_surrogate_dot_true_normal_sums_has_reduced)
+  // Canonicalize the global sign of the true normals: flip the normals of any boundary whose
+  // integral of (surrogate normal . true normal) is negative so they align with the surrogate.
+  if (!_surrogate_dot_true_normal_sums_has_reduced)
   {
     this->comm().sum(_surrogate_dot_true_normal_sums);
 
@@ -200,7 +187,7 @@ BoundaryShortestDistanceToSurface::surrogateDistance(const ElemSide & elem_side,
   const auto * elem = _mesh.elemPtr(elem_side.first);
   Real h = std::pow(elem->volume(), 1.0 / dim);
 
-  if (distance_it->second.at(qp).norm() > std::sqrt(dim) * h && !_neglect_distance_warning)
+  if (distance_it->second.at(qp).norm() > std::sqrt(dim) * h && !_suppress_distance_warning)
     mooseWarning(
         "Distance exceeds the estimated element scale. "
         "This may indicate an inaccurate distance function or an incorrect surface selection. "

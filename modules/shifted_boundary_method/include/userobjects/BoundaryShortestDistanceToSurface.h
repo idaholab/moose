@@ -53,9 +53,6 @@ private:
   /// @brief If true, the local true normal direction will be corrected to match the direction of the local surrogate normal.
   bool _local_true_normal_correct;
 
-  /// @brief Whether to correct the true normal by integral results.
-  bool _correct_true_normal_by_integral;
-
   /// @brief Sum of dot products between surrogate and true normals for each boundary.
   std::vector<Real> _surrogate_dot_true_normal_sums;
 
@@ -65,8 +62,8 @@ private:
   /// @brief Map from ElemSide to boundary ID index.
   mutable std::map<ElemSide, unsigned int> _elem_side_to_bid;
 
-  /// @brief Whether to neglect warnings about large distances.
-  bool _neglect_distance_warning;
+  /// @brief Whether to suppress warnings about large distances.
+  bool _suppress_distance_warning;
 
   /// @brief Whether to output debug information.
   bool _debug_output;

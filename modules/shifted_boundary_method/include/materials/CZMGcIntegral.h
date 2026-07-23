@@ -9,16 +9,20 @@
 
 #pragma once
 
-#include "CZMComputeLocalTractionIncrementalBase.h"
+#include "InterfaceMaterial.h"
 
 /**
- *
- **/
-class CZMGcIntegral : public InterfaceMaterial
+ * Accumulates the cohesive work of separation Gc = integral of traction . d(displacement jump)
+ * over the loading history using the trapezoidal rule. It reads the standard cohesive-zone
+ * properties (interface_traction and interface_displacement_jump), so it works with any local
+ * traction-separation law, in both the AD and non-AD formulations.
+ */
+template <bool is_ad>
+class CZMGcIntegralTempl : public InterfaceMaterial
 {
 public:
   static InputParameters validParams();
-  CZMGcIntegral(const InputParameters & parameters);
+  CZMGcIntegralTempl(const InputParameters & parameters);
 
 protected:
   void initQpStatefulProperties() override;
@@ -27,21 +31,24 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  /// the new interface traction value
-  const ADMaterialProperty<RealVectorValue> & _interface_traction_new;
-
-  /// the old interface traction value
+  /// The current and old interface traction (old is always non-AD)
+  ///@{
+  const GenericMaterialProperty<RealVectorValue, is_ad> & _interface_traction_new;
   const MaterialProperty<RealVectorValue> & _interface_traction_old;
+  ///@}
 
-  /// the new effective interface displacement jump
-  const ADMaterialProperty<RealVectorValue> & _interface_effective_displacement_jump_new;
+  /// The current and old interface displacement jump (old is always non-AD)
+  ///@{
+  const GenericMaterialProperty<RealVectorValue, is_ad> & _interface_displacement_jump_new;
+  const MaterialProperty<RealVectorValue> & _interface_displacement_jump_old;
+  ///@}
 
-  /// The old effective interface displacement jump
-  const MaterialProperty<RealVectorValue> & _interface_effective_displacement_jump_old;
-
-  /// The integral of the interface traction multiplied by the effective displacement jump is Gc
+  /// The accumulated integral of traction . d(displacement jump), i.e. Gc
   MaterialProperty<Real> & _gc_integral;
 
-  /// The old value of the integral of the interface traction multiplied by the effective displacement jump is Gc
+  /// The old value of the accumulated integral
   const MaterialProperty<Real> & _gc_integral_old;
 };
+
+typedef CZMGcIntegralTempl<false> CZMGcIntegral;
+typedef CZMGcIntegralTempl<true> ADCZMGcIntegral;

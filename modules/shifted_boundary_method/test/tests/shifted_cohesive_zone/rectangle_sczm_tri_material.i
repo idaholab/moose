@@ -2,10 +2,6 @@ E1 = 1e3
 E2 = 1e3
 poi = 0.3
 
-# desired_area = 0.003125
-# desired_area = 0.0015625
-# desired_area = 0.00625
-# desired_area = 0.0125
 desired_area = 0.1
 number_of_point = '${fparse int(sqrt(1/(2*desired_area))) -1}'
 
@@ -76,7 +72,7 @@ dt = 1
         strain = SMALL
         extra_vector_tags = 'ref'
         add_variables = true
-        use_automatic_differentiation = true
+        use_automatic_differentiation = false
         generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
       []
     []
@@ -84,7 +80,7 @@ dt = 1
 []
 [Physics/SolidMechanics/ShiftedCohesiveZone]
   [czm_ik]
-    use_automatic_differentiation = true
+    use_automatic_differentiation = false
     boundary = 'Block1_Block2'
   []
 []
@@ -96,30 +92,33 @@ dt = 1
     boundary = 'Block1_Block2 Block2_Block1'
     execution_order_group = 0
     execute_on = 'INITIAL'
+    # The coarse test mesh yields surrogate distances comparable to the element size.
+    suppress_distance_warning = true
   []
 []
 
 [Materials]
   [elastic_stress]
-    type = ADComputeLinearElasticStress
+    type = ComputeLinearElasticStress
   []
   [elasticity_tensor_in]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     poissons_ratio = ${poi}
     youngs_modulus = ${E1}
     block = 1
   []
   [elasticity_tensor_out]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     poissons_ratio = ${poi}
     youngs_modulus = ${E2}
     block = 2
   []
   [czm]
-    type = ExpTractionSeparation
-    Gc = 50
-    delta0 = 0.1
-    beta = 0
+    type = SalehaniIrani3DCTraction
+    normal_gap_at_maximum_normal_traction = 1
+    tangential_gap_at_maximum_shear_traction = 0.5
+    maximum_normal_traction = 500
+    maximum_shear_traction = 300
     boundary = 'Block1_Block2'
   []
   [gc_integral]
@@ -128,44 +127,25 @@ dt = 1
   []
 []
 
-# [MeshModifiers]
-#   [IntercpetedESM]
-#     type = InterceptedElementModifier
-#     subdomain_id_inside = 1
-#     subdomain_id_outside = 2
-#     lambda = 1
-#     subdomain_id_intercepted = 3
-#     outer_boundary = true
-#     execute_on = 'final'
-#     signed_dist_function = 'x-${x0}'
-#     mark_intercepted = true
-#   []
-# []
-
 [Executioner]
   type = Transient
-  # solve_type = FD
-  # automatic_scaling = false
-  # residual_and_jacobian_together = false
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu superlu_dist'
   automatic_scaling = true
-  # residual_and_jacobian_together = true
   line_search = 'none'
 
   nl_max_its = 500
   nl_abs_tol = 1e-12
   nl_rel_tol = 1e-50
   dt = ${dt}
-  end_time = 200
+  end_time = 5
   abort_on_solve_fail = true
 []
 
 [Functions]
   [displacement_with_time]
     type = ParsedFunction
-    # expression = '1e-2*sin(pi*t/160)*t'
     expression = '1e-2*t'
   []
   [signed_dist_func]
@@ -191,14 +171,14 @@ dt = 1
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
-    scaled = false
+    remove_variable_scaling = true
   []
   [react_y]
     type = TagVectorAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'react_y'
-    scaled = false
+    remove_variable_scaling = true
   []
 []
 

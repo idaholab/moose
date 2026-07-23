@@ -27,10 +27,6 @@ SideIntegralShiftedVariablePostprocessor::validParams()
   // no shifted testing
   params.addParam<bool>(
       "no_shifted", false, "Disable shifted terms (u + grad_u * d and area correction term).");
-  params.addParam<bool>("shifted_variable",
-                        true,
-                        "Integrate the shifted variable (u + grad_u * d) if true; "
-                        "otherwise, integrate the original variable u.");
 
   params.addClassDescription("Computes a surface integral of the shifted specified variable");
   return params;
@@ -47,8 +43,7 @@ SideIntegralShiftedVariablePostprocessor::SideIntegralShiftedVariablePostprocess
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _sbm_distance_uo(nullptr),
-    _shifted(!getParam<bool>("no_shifted")),
-    _shifted_variable(_shifted ? getParam<bool>("shifted_variable") : false)
+    _shifted(!getParam<bool>("no_shifted"))
 {
   addMooseVariableDependency(&mooseVariableField());
 }
@@ -76,6 +71,7 @@ SideIntegralShiftedVariablePostprocessor::computeQpIntegral()
       _shifted ? _sbm_distance_uo->trueNormal(elem_side, _qp) : RealVectorValue(_normals[_qp]);
   const auto true_dot_surrogate_normal = _shifted ? true_normal * _normals[_qp] : 1.0;
 
-  return _shifted_variable ? (_u[_qp] + _grad_u[_qp] * d) * true_dot_surrogate_normal
-                           : _u[_qp] * true_dot_surrogate_normal;
+  // When shifted terms are disabled, d is zero and true_dot_surrogate_normal is one,
+  // so this expression reduces to the integral of the original variable u.
+  return (_u[_qp] + _grad_u[_qp] * d) * true_dot_surrogate_normal;
 }
