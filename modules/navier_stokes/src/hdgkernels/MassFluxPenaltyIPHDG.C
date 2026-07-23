@@ -29,8 +29,8 @@ MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & params)
 {
 }
 
-IPHDGAssemblyHelper &
-MassFluxPenaltyIPHDG::iphdgHelper()
+IPHDGAssemblyHelper *
+MassFluxPenaltyIPHDG::hdgHelper()
 {
-  return *_iphdg_helper;
+  return _iphdg_helper.get();
 }

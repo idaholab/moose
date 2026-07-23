@@ -30,8 +30,8 @@ DiffusionIPHDGKernel::DiffusionIPHDGKernel(const InputParameters & params)
 {
 }
 
-IPHDGAssemblyHelper &
-DiffusionIPHDGKernel::iphdgHelper()
+IPHDGAssemblyHelper *
+DiffusionIPHDGKernel::hdgHelper()
 {
-  return *_iphdg_helper;
+  return _iphdg_helper.get();
 }

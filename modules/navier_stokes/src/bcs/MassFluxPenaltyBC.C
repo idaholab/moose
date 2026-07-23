@@ -36,7 +36,7 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & params)
 void
 MassFluxPenaltyBC::compute()
 {
-  auto & iphdg_helper = iphdgHelper();
+  auto & iphdg_helper = hdgHelper();
   iphdg_helper.resizeResiduals();
 
   // u, lm_u
@@ -46,7 +46,7 @@ MassFluxPenaltyBC::compute()
 }
 
 IPHDGAssemblyHelper &
-MassFluxPenaltyBC::iphdgHelper()
+MassFluxPenaltyBC::hdgHelper()
 {
   return *_iphdg_helper;
 }

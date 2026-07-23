@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", AdvectionLHDGOutflowBC);
 InputParameters
 AdvectionLHDGOutflowBC::validParams()
 {
-  auto params = HybridizedDGBC::validParams();
+  auto params = HDGBC::validParams();
   params += AdvectionLHDGAssemblyHelper::validParams();
   params.addRequiredParam<bool>("constrain_lm",
                                 "Whether to constrain the facet scalar to weakly match the cell "
@@ -26,7 +26,7 @@ AdvectionLHDGOutflowBC::validParams()
 }
 
 AdvectionLHDGOutflowBC::AdvectionLHDGOutflowBC(const InputParameters & parameters)
-  : HybridizedDGBC(parameters),
+  : HDGBC(parameters),
     _lhdg_helper(std::make_unique<AdvectionLHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _constrain_lm(getParam<bool>("constrain_lm"))
@@ -43,8 +43,8 @@ AdvectionLHDGOutflowBC::compute()
     helper.lmOutflow();
 }
 
-HybridizedDGAssemblyHelper &
-AdvectionLHDGOutflowBC::hybridizedDGHelper()
+HDGAssemblyHelper &
+AdvectionLHDGOutflowBC::hdgHelper()
 {
   return *_lhdg_helper;
 }

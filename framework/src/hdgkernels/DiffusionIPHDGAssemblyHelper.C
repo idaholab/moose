@@ -48,63 +48,62 @@ DiffusionIPHDGAssemblyHelper::DiffusionIPHDGAssemblyHelper(
 void
 DiffusionIPHDGAssemblyHelper::scalarVolume()
 {
-  for (const auto qp : make_range(_ip_qrule->n_points()))
+  for (const auto qp : make_range(_qrule->n_points()))
     for (const auto i : index_range(_scalar_re))
-      _scalar_re(i) += _ip_JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * _grad_u_sol[qp]);
+      _scalar_re(i) += _JxW[qp] * (_grad_scalar_phi[i][qp] * _diff[qp] * _grad_u_sol[qp]);
 }
 
 void
 DiffusionIPHDGAssemblyHelper::scalarFace()
 {
-  const auto h_elem = _ip_current_elem->hmax();
+  const auto h_elem = _current_elem->hmax();
 
   for (const auto i : index_range(_scalar_re))
-    for (const auto qp : make_range(_ip_qrule_face->n_points()))
+    for (const auto qp : make_range(_qrule_face->n_points()))
     {
-      _scalar_re(i) -= _ip_JxW_face[qp] * _face_diff[qp] * _scalar_phi_face[i][qp] *
-                       (_grad_u_sol[qp] * _ip_normals[qp]);
-      _scalar_re(i) -= _ip_JxW_face[qp] * _alpha / h_elem * _face_diff[qp] *
+      _scalar_re(i) -= _JxW_face[qp] * _face_diff[qp] * _scalar_phi_face[i][qp] *
+                       (_grad_u_sol[qp] * _normals[qp]);
+      _scalar_re(i) -= _JxW_face[qp] * _alpha / h_elem * _face_diff[qp] *
                        (_lm_u_sol[qp] - _u_sol[qp]) * _scalar_phi_face[i][qp];
-      _scalar_re(i) += _ip_JxW_face[qp] * (_lm_u_sol[qp] - _u_sol[qp]) * _face_diff[qp] *
-                       _grad_scalar_phi_face[i][qp] * _ip_normals[qp];
+      _scalar_re(i) += _JxW_face[qp] * (_lm_u_sol[qp] - _u_sol[qp]) * _face_diff[qp] *
+                       _grad_scalar_phi_face[i][qp] * _normals[qp];
     }
 }
 
 void
 DiffusionIPHDGAssemblyHelper::lmFace()
 {
-  const auto h_elem = _ip_current_elem->hmax();
+  const auto h_elem = _current_elem->hmax();
 
   for (const auto i : index_range(_lm_re))
-    for (const auto qp : make_range(_ip_qrule_face->n_points()))
+    for (const auto qp : make_range(_qrule_face->n_points()))
     {
-      _lm_re(i) += _ip_JxW_face[qp] * _face_diff[qp] * _grad_u_sol[qp] * _ip_normals[qp] *
+      _lm_re(i) +=
+          _JxW_face[qp] * _face_diff[qp] * _grad_u_sol[qp] * _normals[qp] * _lm_phi_face[i][qp];
+      _lm_re(i) += _JxW_face[qp] * _alpha / h_elem * _face_diff[qp] * (_lm_u_sol[qp] - _u_sol[qp]) *
                    _lm_phi_face[i][qp];
-      _lm_re(i) += _ip_JxW_face[qp] * _alpha / h_elem * _face_diff[qp] *
-                   (_lm_u_sol[qp] - _u_sol[qp]) * _lm_phi_face[i][qp];
     }
 }
 
 void
 DiffusionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
-  const auto h_elem = _ip_current_elem->hmax();
+  const auto h_elem = _current_elem->hmax();
 
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto scalar_value = dirichlet_value(
-        Moose::ElemSideQpArg{
-            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+        Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_u_dof_indices))
     {
-      _scalar_re(i) -= _ip_JxW_face[qp] * _face_diff[qp] * _scalar_phi_face[i][qp] *
-                       (_grad_u_sol[qp] * _ip_normals[qp]);
-      _scalar_re(i) -= _ip_JxW_face[qp] * _alpha / h_elem * _face_diff[qp] *
+      _scalar_re(i) -= _JxW_face[qp] * _face_diff[qp] * _scalar_phi_face[i][qp] *
+                       (_grad_u_sol[qp] * _normals[qp]);
+      _scalar_re(i) -= _JxW_face[qp] * _alpha / h_elem * _face_diff[qp] *
                        (scalar_value - _u_sol[qp]) * _scalar_phi_face[i][qp];
-      _scalar_re(i) += _ip_JxW_face[qp] * (scalar_value - _u_sol[qp]) * _face_diff[qp] *
-                       _grad_scalar_phi_face[i][qp] * _ip_normals[qp];
+      _scalar_re(i) += _JxW_face[qp] * (scalar_value - _u_sol[qp]) * _face_diff[qp] *
+                       _grad_scalar_phi_face[i][qp] * _normals[qp];
     }
   }
 }

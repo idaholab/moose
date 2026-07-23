@@ -61,11 +61,11 @@ MassFluxPenaltyIPHDGAssemblyHelper::MassFluxPenaltyIPHDGAssemblyHelper(
 void
 MassFluxPenaltyIPHDGAssemblyHelper::scalarFace()
 {
-  _hmax = _ip_current_side_elem->hmax();
+  _hmax = _current_side_elem->hmax();
 
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
-    const auto qp_term = computeQpResidualOnSide(qp) * _ip_JxW_face[qp];
+    const auto qp_term = computeQpResidualOnSide(qp) * _JxW_face[qp];
     for (const auto i : index_range(_scalar_re))
       _scalar_re(i) += qp_term * _scalar_phi_face[i][qp];
   }
@@ -74,11 +74,11 @@ MassFluxPenaltyIPHDGAssemblyHelper::scalarFace()
 void
 MassFluxPenaltyIPHDGAssemblyHelper::lmFace()
 {
-  _hmax = _ip_current_side_elem->hmax();
+  _hmax = _current_side_elem->hmax();
 
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
-    const auto qp_term = computeQpResidualOnSide(qp) * _ip_JxW_face[qp];
+    const auto qp_term = computeQpResidualOnSide(qp) * _JxW_face[qp];
     for (const auto i : index_range(_lm_re))
       _lm_re(i) -= qp_term * _lm_phi_face[i][qp];
   }
@@ -91,9 +91,8 @@ MassFluxPenaltyIPHDGAssemblyHelper::computeQpResidualOnSide(const unsigned int q
   if (_vel_z)
     soln_jump(2) = (*_vel_z)[qp];
   soln_jump -= _face_velocity(
-      Moose::ElemSideQpArg{
-          _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+      Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
       _ti.determineState());
 
-  return _gamma / _hmax * soln_jump * _ip_normals[qp] * _ip_normals[qp](_comp);
+  return _gamma / _hmax * soln_jump * _normals[qp] * _normals[qp](_comp);
 }

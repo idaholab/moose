@@ -7,19 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "IPHDGAssemblyHelper.h"
 #include "IPHDGKernel.h"
 
 InputParameters
 IPHDGKernel::validParams()
 {
-  return HybridizedDGKernel::validParams();
+  return HDGKernel::validParams();
 }
 
-IPHDGKernel::IPHDGKernel(const InputParameters & params) : HybridizedDGKernel(params) {}
-
-HybridizedDGAssemblyHelper &
-IPHDGKernel::hybridizedDGHelper()
-{
-  return iphdgHelper();
-}
+IPHDGKernel::IPHDGKernel(const InputParameters & params) : HDGKernel(params) {}

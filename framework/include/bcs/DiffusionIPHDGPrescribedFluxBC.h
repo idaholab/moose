@@ -24,7 +24,7 @@ public:
   DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
+  virtual IPHDGAssemblyHelper & hdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;

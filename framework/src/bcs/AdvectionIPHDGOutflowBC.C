@@ -37,7 +37,7 @@ AdvectionIPHDGOutflowBC::AdvectionIPHDGOutflowBC(const InputParameters & paramet
 void
 AdvectionIPHDGOutflowBC::compute()
 {
-  auto & iphdg_helper = iphdgHelper();
+  auto & iphdg_helper = hdgHelper();
   iphdg_helper.resizeResiduals();
 
   // u, lm_u
@@ -47,7 +47,7 @@ AdvectionIPHDGOutflowBC::compute()
 }
 
 AdvectionIPHDGAssemblyHelper &
-AdvectionIPHDGOutflowBC::iphdgHelper()
+AdvectionIPHDGOutflowBC::hdgHelper()
 {
   return *_iphdg_helper;
 }

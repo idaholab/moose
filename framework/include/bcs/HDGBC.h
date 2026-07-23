@@ -11,18 +11,18 @@
 
 #include "ADIntegratedBC.h"
 
-class HybridizedDGAssemblyHelper;
+class HDGAssemblyHelper;
 
 /**
  * Base boundary condition for two-field hybridized DG discretizations assembled with automatic
  * differentiation.
  */
-class HybridizedDGBC : public ADIntegratedBC
+class HDGBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  HybridizedDGBC(const InputParameters & parameters);
+  HDGBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -33,19 +33,27 @@ public:
   virtual bool getMaterialPropertyCalled() const override;
 
 protected:
+  /// Computes the boundary residual data in the assembly helper.
   virtual void compute() = 0;
 
-  virtual HybridizedDGAssemblyHelper & hybridizedDGHelper() = 0;
-  const HybridizedDGAssemblyHelper & hybridizedDGHelper() const;
+  /**
+   * Returns the helper used for assembly. HDG boundary conditions are always helper-backed, so a
+   * reference is used instead of the nullable kernel-helper pointer.
+   */
+  virtual HDGAssemblyHelper & hdgHelper() = 0;
+  const HDGAssemblyHelper & hdgHelper() const;
 
   virtual ADReal computeQpResidual() override { mooseError("this will never be called"); }
 
+  /// Element for which the complete AD Jacobian was most recently assembled.
   const Elem * _cached_elem;
+
+  /// Side for which the complete AD Jacobian was most recently assembled.
   unsigned int _cached_side;
 };
 
-inline const HybridizedDGAssemblyHelper &
-HybridizedDGBC::hybridizedDGHelper() const
+inline const HDGAssemblyHelper &
+HDGBC::hdgHelper() const
 {
-  return const_cast<HybridizedDGBC *>(this)->hybridizedDGHelper();
+  return const_cast<HDGBC *>(this)->hdgHelper();
 }

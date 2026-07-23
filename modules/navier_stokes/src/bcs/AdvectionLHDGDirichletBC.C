@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", AdvectionLHDGDirichletBC);
 InputParameters
 AdvectionLHDGDirichletBC::validParams()
 {
-  auto params = HybridizedDGBC::validParams();
+  auto params = HDGBC::validParams();
   params += AdvectionLHDGAssemblyHelper::validParams();
   params.addRequiredParam<MooseFunctorName>("functor", "The prescribed scalar value");
   params.addClassDescription("Weakly imposes prescribed scalar and velocity data for an L-HDG "
@@ -24,7 +24,7 @@ AdvectionLHDGDirichletBC::validParams()
 }
 
 AdvectionLHDGDirichletBC::AdvectionLHDGDirichletBC(const InputParameters & parameters)
-  : HybridizedDGBC(parameters),
+  : HDGBC(parameters),
     _lhdg_helper(std::make_unique<AdvectionLHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _dirichlet_value(getFunctor<Real>("functor"))
@@ -41,8 +41,8 @@ AdvectionLHDGDirichletBC::compute()
   helper.lmDirichletZero();
 }
 
-HybridizedDGAssemblyHelper &
-AdvectionLHDGDirichletBC::hybridizedDGHelper()
+HDGAssemblyHelper &
+AdvectionLHDGDirichletBC::hdgHelper()
 {
   return *_lhdg_helper;
 }

@@ -8,18 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IPHDGBC.h"
-#include "IPHDGAssemblyHelper.h"
 
 InputParameters
 IPHDGBC::validParams()
 {
-  return HybridizedDGBC::validParams();
+  return HDGBC::validParams();
 }
 
-IPHDGBC::IPHDGBC(const InputParameters & parameters) : HybridizedDGBC(parameters) {}
-
-HybridizedDGAssemblyHelper &
-IPHDGBC::hybridizedDGHelper()
-{
-  return iphdgHelper();
-}
+IPHDGBC::IPHDGBC(const InputParameters & parameters) : HDGBC(parameters) {}

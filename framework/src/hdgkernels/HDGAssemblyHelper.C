@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HybridizedDGAssemblyHelper.h"
+#include "HDGAssemblyHelper.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
@@ -17,14 +17,14 @@
 using namespace libMesh;
 
 InputParameters
-HybridizedDGAssemblyHelper::validParams()
+HDGAssemblyHelper::validParams()
 {
   auto params = emptyInputParameters();
   params.addRequiredParam<NonlinearVariableName>("face_variable", "The face variable");
   return params;
 }
 
-HybridizedDGAssemblyHelper::HybridizedDGAssemblyHelper(
+HDGAssemblyHelper::HDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MooseVariableDependencyInterface * const mvdi,
     const TransientInterface * const ti,
@@ -50,60 +50,60 @@ HybridizedDGAssemblyHelper::HybridizedDGAssemblyHelper(
     _lm_phi_face(_u_face_var.phiFace()),
     _elem_volume(assembly.elemVolume()),
     _side_area(assembly.sideElemVolume()),
-    _ip_current_elem(assembly.elem()),
-    _ip_current_side(assembly.side()),
-    _ip_current_side_elem(assembly.sideElem()),
-    _ip_JxW(assembly.JxW()),
-    _ip_qrule(assembly.qRule()),
-    _ip_q_point(assembly.qPoints()),
-    _ip_JxW_face(assembly.JxWFace()),
-    _ip_qrule_face(assembly.qRuleFace()),
-    _ip_q_point_face(assembly.qPointsFace()),
-    _ip_normals(assembly.normals())
+    _current_elem(assembly.elem()),
+    _current_side(assembly.side()),
+    _current_side_elem(assembly.sideElem()),
+    _JxW(assembly.JxW()),
+    _qrule(assembly.qRule()),
+    _q_point(assembly.qPoints()),
+    _JxW_face(assembly.JxWFace()),
+    _qrule_face(assembly.qRuleFace()),
+    _q_point_face(assembly.qPointsFace()),
+    _normals(assembly.normals())
 {
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_var));
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_u_face_var));
 }
 
 std::array<ADResidualsPacket, 2>
-HybridizedDGAssemblyHelper::taggingData() const
+HDGAssemblyHelper::taggingData() const
 {
   return {ADResidualsPacket{_scalar_re, _u_dof_indices, _u_var.scalingFactor()},
           ADResidualsPacket{_lm_re, _lm_u_dof_indices, _u_face_var.scalingFactor()}};
 }
 
 std::set<std::string>
-HybridizedDGAssemblyHelper::additionalROVariables()
+HDGAssemblyHelper::additionalROVariables()
 {
   return {_u_face_var.name()};
 }
 
 void
-HybridizedDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
+HDGAssemblyHelper::lmDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto scalar_value = dirichlet_value(
         Moose::ElemSideQpArg{
-            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+            _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_lm_re))
-      _lm_re(i) += _ip_JxW_face[qp] * (_lm_u_sol[qp] - scalar_value) * _lm_phi_face[i][qp];
+      _lm_re(i) += _JxW_face[qp] * (_lm_u_sol[qp] - scalar_value) * _lm_phi_face[i][qp];
   }
 }
 
 void
-HybridizedDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
+HDGAssemblyHelper::lmPrescribedFlux(const Moose::Functor<Real> & flux_value)
 {
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
     const auto flux = flux_value(
         Moose::ElemSideQpArg{
-            _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+            _current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
         _ti.determineState());
 
     for (const auto i : index_range(_lm_re))
-      _lm_re(i) += _ip_JxW_face[qp] * flux * _lm_phi_face[i][qp];
+      _lm_re(i) += _JxW_face[qp] * flux * _lm_phi_face[i][qp];
   }
 }

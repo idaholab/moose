@@ -30,7 +30,7 @@ DiffusionIPHDGPrescribedFluxBC::DiffusionIPHDGPrescribedFluxBC(const InputParame
 }
 
 IPHDGAssemblyHelper &
-DiffusionIPHDGPrescribedFluxBC::iphdgHelper()
+DiffusionIPHDGPrescribedFluxBC::hdgHelper()
 {
   return *_iphdg_helper;
 }

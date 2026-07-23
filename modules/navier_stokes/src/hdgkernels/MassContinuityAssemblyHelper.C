@@ -66,16 +66,16 @@ MassContinuityAssemblyHelper::MassContinuityAssemblyHelper(
 void
 MassContinuityAssemblyHelper::scalarVolume()
 {
-  for (const auto qp : make_range(_ip_qrule->n_points()))
+  for (const auto qp : make_range(_qrule->n_points()))
   {
     ADReal divergence = 0;
     for (const auto d : index_range(_interior_vel_grads))
     {
       divergence += (*_interior_vel_grads[d])[qp](d);
       if (_coord_sys == Moose::COORD_RZ && (_rz_radial_coord == d))
-        divergence += (*_interior_vels[d])[qp] / _ip_q_point[qp](_rz_radial_coord);
+        divergence += (*_interior_vels[d])[qp] / _q_point[qp](_rz_radial_coord);
     }
-    const auto qp_term = _ip_JxW[qp] * divergence;
+    const auto qp_term = _JxW[qp] * divergence;
     for (const auto i : index_range(_scalar_phi))
       _scalar_re(i) -= qp_term * _scalar_phi[i][qp];
   }
@@ -89,18 +89,17 @@ MassContinuityAssemblyHelper::scalarFace()
 void
 MassContinuityAssemblyHelper::lmFace()
 {
-  for (const auto qp : make_range(_ip_qrule_face->n_points()))
+  for (const auto qp : make_range(_qrule_face->n_points()))
   {
     ADRealVectorValue interior_vel, face_vel;
     for (const auto d : index_range(_interior_vels))
     {
       interior_vel(d) = (*_interior_vels[d])[qp];
       face_vel(d) = (*_face_vels[d])(
-          Moose::ElemSideQpArg{
-              _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
+          Moose::ElemSideQpArg{_current_elem, _current_side, qp, _qrule_face, _q_point_face[qp]},
           _ti.determineState());
     }
-    const auto qp_term = (interior_vel - face_vel) * _ip_normals[qp] * _ip_JxW_face[qp];
+    const auto qp_term = (interior_vel - face_vel) * _normals[qp] * _JxW_face[qp];
     for (const auto i : index_range(_lm_re))
       _lm_re(i) += _lm_phi_face[i][qp] * qp_term;
   }

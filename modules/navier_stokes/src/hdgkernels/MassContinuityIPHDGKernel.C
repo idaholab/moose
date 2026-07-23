@@ -30,8 +30,8 @@ MassContinuityIPHDGKernel::MassContinuityIPHDGKernel(const InputParameters & par
 {
 }
 
-IPHDGAssemblyHelper &
-MassContinuityIPHDGKernel::iphdgHelper()
+IPHDGAssemblyHelper *
+MassContinuityIPHDGKernel::hdgHelper()
 {
-  return *_iphdg_helper;
+  return _iphdg_helper.get();
 }

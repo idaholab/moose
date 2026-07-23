@@ -27,7 +27,7 @@ IPHDGDirichletBC::IPHDGDirichletBC(const InputParameters & params)
 void
 IPHDGDirichletBC::compute()
 {
-  auto & iphdg_helper = iphdgHelper();
+  auto & iphdg_helper = hdgHelper();
   iphdg_helper.resizeResiduals();
 
   // u, lm_u

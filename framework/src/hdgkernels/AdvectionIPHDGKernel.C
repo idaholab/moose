@@ -29,8 +29,8 @@ AdvectionIPHDGKernel::AdvectionIPHDGKernel(const InputParameters & params)
 {
 }
 
-IPHDGAssemblyHelper &
-AdvectionIPHDGKernel::iphdgHelper()
+IPHDGAssemblyHelper *
+AdvectionIPHDGKernel::hdgHelper()
 {
-  return *_iphdg_helper;
+  return _iphdg_helper.get();
 }
