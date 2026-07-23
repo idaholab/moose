@@ -51,6 +51,21 @@
     []
   []
 
+  [stale_split_mesh_error]
+    type = 'RunException'
+    input = 'simple_diffusion.i'
+    cli_args = '--use-split --split-file foo Mesh/nx=11 Outputs/exodus=false'
+    expect_err = 'was generated from different mesh input than the current run'
+    prereq = 'make_split'
+    min_parallel = 3
+    max_parallel = 3
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'Using a pre-split mesh with mesh input that differs from the input used to '
+                  'generate the split mesh produces an error.'
+  []
+
   [check]
     issues = '#11825'
     design = 'Mesh/splitting.md'
