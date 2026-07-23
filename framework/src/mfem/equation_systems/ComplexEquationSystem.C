@@ -51,13 +51,6 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 }
 
 void
-ComplexEquationSystem::BuildEquationSystem()
-{
-  BuildBilinearForms();
-  BuildLinearForms();
-}
-
-void
 ComplexEquationSystem::BuildLinearForms()
 {
   // Register linear forms
@@ -68,17 +61,27 @@ ComplexEquationSystem::BuildLinearForms()
                    std::make_shared<mfem::ParComplexLinearForm>(_test_pfespaces.at(i)));
     _clfs.GetRef(test_var_name) = 0.0;
   }
-  // Apply boundary conditions
-  ApplyEssentialBCs();
 
   for (auto & test_var_name : _test_var_names)
   {
-    // Apply kernels
-    auto clf = _clfs.GetShared(test_var_name);
-    ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
-    ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
-    clf->Assemble();
+    if ((_cmplx_kernels_map.Has(test_var_name) &&
+         _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) &&
+         _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    {
+      // Apply kernels
+      auto clf = _clfs.GetShared(test_var_name);
+      ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
+      ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
+      clf->Assemble();
+    }
   }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
+
+  // Eliminate trivially eliminated variables by subtracting contributions from linear forms
+  EliminateCoupledVariables();
 }
 
 void
@@ -100,6 +103,47 @@ ComplexEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, slf, _cmplx_kernels_map);
     // Assemble
     slf->Assemble();
+  }
+}
+
+void
+ComplexEquationSystem::BuildMixedBilinearForms()
+{
+  // Register mixed sesquilinear forms. Note that not all combinations may
+  // have a kernel.
+
+  // Create mslf for each test/coupled variable pair with an added kernel.
+  // Mixed sesquilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    auto test_mslfs = std::make_shared<Moose::MFEM::NamedFieldsMap<ParMixedSesquilinearForm>>();
+    for (const auto j : index_range(_coupled_var_names))
+    {
+      const auto & coupled_var_name = _coupled_var_names.at(j);
+      auto mslf = std::make_shared<ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
+                                                             _test_pfespaces.at(i));
+      // Register MixedSesquilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (_cmplx_kernels_map.Has(test_var_name) &&
+          _cmplx_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+          test_var_name != coupled_var_name)
+      {
+        mslf->SetAssemblyLevel(_assembly_level);
+        // Apply all mixed kernels with this test/trial pair
+        ApplyDomainBLFIntegrators<ParMixedSesquilinearForm>(
+            coupled_var_name, test_var_name, mslf, _cmplx_kernels_map);
+        // Assemble mixed bilinear forms
+        mslf->Assemble();
+        // Register mixed bilinear forms associated with a single trial variable
+        // for the current test variable
+        test_mslfs->Register(coupled_var_name, mslf);
+      }
+    }
+    // Register all mixed bilinear form sets associated with a single test
+    // variable
+    _mslfs.Register(test_var_name, test_mslfs);
   }
 }
 
@@ -209,6 +253,21 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
 }
 
 void
+ComplexEquationSystem::EliminateCoupledVariables()
+{
+  for (const auto & test_var_name : _test_var_names)
+    for (const auto & eliminated_var_name : _eliminated_var_names)
+      if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(eliminated_var_name) &&
+          !VectorContainsName(_test_var_names, eliminated_var_name))
+      {
+        auto & mslf = *_mslfs.Get(test_var_name)->Get(eliminated_var_name);
+        auto & clf = *_clfs.Get(test_var_name);
+        mslf.AddMult(*_cmplx_eliminated_variables.Get(eliminated_var_name), clf, -1);
+        clf.SyncAlias();
+      }
+}
+
+void
 ComplexEquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                           mfem::BlockVector & trueX,
                                           mfem::BlockVector & trueRHS)
@@ -249,26 +308,49 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   trueRHS = 0.0;
   trueRHS.SyncToBlocks();
 
-  // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
-    auto & test_var_name = _test_var_names.at(i);
+    auto test_var_name = _test_var_names.at(i);
+    for (const auto j : index_range(_trial_var_names))
+    {
+      auto trial_var_name = _trial_var_names.at(j);
 
-    mfem::Vector aux_x, aux_rhs;
-    mfem::OperatorHandle aux_a;
+      mfem::Vector aux_x, aux_rhs;
+      mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
+      std::unique_ptr<mfem::OperatorHandle> aux_a = std::make_unique<mfem::OperatorHandle>();
+      aux_lf = 0.0;
+      if (test_var_name == trial_var_name)
+      {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+        auto slf = _slfs.Get(test_var_name);
+        auto clf = _clfs.Get(test_var_name);
+        slf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *(_cmplx_var_ess_constraints.at(j)),
+                              *clf,
+                              *aux_a,
+                              aux_x,
+                              aux_rhs);
+        trueX.GetBlock(i) = aux_x;
+      }
+      else if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mslf = _mslfs.Get(test_var_name)->Get(trial_var_name);
+        mslf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
+                                          _ess_tdof_lists.at(i),
+                                          *(_cmplx_var_ess_constraints.at(j)),
+                                          aux_lf,
+                                          *aux_a,
+                                          aux_x,
+                                          aux_rhs);
+      }
+      else
+        continue;
 
-    auto slf = _slfs.Get(test_var_name);
-    slf->FormLinearSystem(_ess_tdof_lists.at(i),
-                          *_cmplx_var_ess_constraints.at(i),
-                          *_clfs.Get(test_var_name),
-                          aux_a,
-                          aux_x,
-                          aux_rhs,
-                          /*copy_interior=*/true);
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+    }
   }
+
   // Sync memory
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
