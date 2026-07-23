@@ -1,4 +1,5 @@
 # MFEM Problem Operator Builder System
+
 The `ProblemOperatorBuilder` is a builder/adapter class that is used for constructing
 problem-operators with custom inputs. This class is specifically intended for building
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
@@ -8,17 +9,20 @@ multiple are defined. The ProblemOperatorBuilder classes are built within the MF
 however the ProblemOperatos are built and owned by the MFEM executioners.
 
 ## Steady problem operator builder
+
 The ProblemOperatorBuilderSteady class is the default of the MFEMSteady executioner and does
 not need to be declared explicitly. The `ProblemOperatorBuilderSteady` class uses systematic
 logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`,
 `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
 ## Transient problem operator builder
+
 The ProblemOperatorBuilderTransient class is the default of the MFEMTransient executioner and
 does not need to be declared explicitly. The `ProblemOperatorBuilderTransient` class builds 
 the `TimeDependentEquationSystemProblemOperator`.
 
 ## Custom problem operator builder example
+
 The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test which
 is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly a
 CustomProblemOperator class must be built, if the problem is steady i.e called from the `MFEMSteady` 
@@ -107,6 +111,7 @@ CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   .
 };
 ```
+
 The rest of the constructor mirrors the MFEM ex0p example, i.e. build the forms, add the
 integrators, assemble the forms and form the linear system:
 
@@ -194,6 +199,7 @@ public:
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
 the inputs can be then put in the ProblemOperatorBuilder block of the input files.
+
 ```cpp
 namespace Moose::MFEM
 {
@@ -213,6 +219,7 @@ The constructor can be left more or less empty if the operator being built has n
 options associated with it directly (e.g. solver customisations may occur in the `MFEMProblem`
 class), but in the case there are custom inputs it can be used to retrieve the input params
 and store them.
+
 ```cpp
 namespace Moose::MFEM
 {
@@ -231,6 +238,7 @@ ProblemOperatorBuilderCustomDummy::ProblemOperatorBuilderCustomDummy(
 The last method to be built is the `createProblemOperator` it simply returns a shared pointer
 to the ProblemOperator that was defined earlier, this method is called by the executioner,
 and the resulting object is owned by the executioner.
+
 ```cpp
 namespace Moose::MFEM
 {
@@ -244,6 +252,7 @@ ProblemOperatorBuilderCustomDummy::createProblemOperator(MFEMProblem & mfemProb)
 
 Once the object has been defined, the new `ProblemOperatorBuilder` object must be registered
 to the MooseApp system:
+
 ```cpp
 namespace Moose::MFEM
 {
