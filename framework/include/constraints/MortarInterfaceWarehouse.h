@@ -75,7 +75,7 @@ public:
                              const MooseEnum & triangulation,
                              const bool triangulate_triangles,
                              const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                 Mortar3DQuadraturePointMapping::NormalProjection);
+                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

@@ -45,9 +45,9 @@
   [reference-interpolation]
     design = 'AutomaticMortarGeneration.md EqualValueConstraint.md'
     issues = '#33367'
-    requirement = 'The system shall produce the expected primal error, Lagrange multiplier error, '
-                  'and element size when 3D mortar quadrature points are mapped by parent-face '
-                  'reference interpolation for'
+    requirement = 'The system shall preserve fixed-mesh regression results for the primal error, '
+                  'Lagrange multiplier error, and element size when 3D mortar quadrature points '
+                  'are mapped by parent-face reference interpolation on'
     [hex20]
       type = 'CSVDiff'
       capabilities = 'ad_size>=200'
@@ -59,7 +59,7 @@
                  'Constraints/mortar/triangulate_triangles=true '
                  'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
                  'Outputs/file_base=continuity_sphere_hex20_reference_interpolation'
-      detail = 'a curved HEX20/QUAD8 sphere interface,'
+      detail = 'a curved HEX20 volume mesh with QUAD8 mortar-interface faces,'
       min_parallel = 2
     []
     [hex27]
@@ -73,7 +73,7 @@
                  'Constraints/mortar/triangulate_triangles=true '
                  'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
                  'Outputs/file_base=continuity_sphere_hex27_reference_interpolation'
-      detail = 'a curved HEX27/QUAD9 sphere interface, and'
+      detail = 'a curved HEX27 volume mesh with QUAD9 mortar-interface faces, and'
       min_parallel = 2
     []
     [tet10]
@@ -89,7 +89,7 @@
                  'Constraints/mortar/triangulate_triangles=true '
                  'Postprocessors/active="L2u L2lambda h" Outputs/exodus=false Outputs/csv=true '
                  'Outputs/file_base=continuity_tet10_reference_interpolation'
-      detail = 'a TET10 mesh with TRI6 parent faces.'
+      detail = 'a TET10 volume mesh with TRI6 mortar-interface faces.'
     []
   []
   [continuity_sphere_hex27-debug-mesh]

@@ -89,7 +89,7 @@ public:
                             const MortarSegmentTriangulationMode triangulation_mode,
                             const bool triangulate_triangles,
                             const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                Mortar3DQuadraturePointMapping::NormalProjection);
+                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -592,8 +592,7 @@ private:
   const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
 
   /// Reference-coordinate data used only by the reference-interpolation mapping mode.
-  std::unique_ptr<std::unordered_map<const Elem *, MortarSegmentReferencePoints>>
-      _msm_elem_to_reference_points;
+  std::unordered_map<const Elem *, MortarSegmentReferencePoints> _msm_elem_to_reference_points;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

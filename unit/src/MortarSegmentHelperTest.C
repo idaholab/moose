@@ -97,7 +97,7 @@ TEST_F(MortarSegmentHelperTest, triangleReferenceRecoverySnapsOnlyToleranceViola
   const auto ill_conditioned_result =
       referencePoint(segment_helper, Point(0.25, 0.25e-12), ill_conditioned, triangle, &reason);
   EXPECT_FALSE(ill_conditioned_result);
-  EXPECT_NE(reason.find("ill-conditioned"), std::string::npos) << reason;
+  EXPECT_NE(reason.find("degenerate"), std::string::npos) << reason;
 
   const std::vector<Point> coarse_triangle = {Point(0., 0.), Point(10., 0.), Point(0., 10.)};
   auto coarse_helper = helper(coarse_triangle);
@@ -143,6 +143,13 @@ TEST_F(MortarSegmentHelperTest, quadrilateralReferenceRecovery)
       referencePoint(coarse_helper, Point(-5.e-7, 0.25), unit_square, master, &reason);
   ASSERT_TRUE(clipping_sized_violation) << reason;
   EXPECT_DOUBLE_EQ((*clipping_sized_violation)(0), -1.);
+
+  reason.clear();
+  const auto distorted_boundary_spill = referencePoint(
+      segment_helper, bilinearPoint(distorted, 1., -1.001), distorted, master, &reason);
+  ASSERT_TRUE(distorted_boundary_spill) << reason;
+  EXPECT_DOUBLE_EQ((*distorted_boundary_spill)(0), 1.);
+  EXPECT_DOUBLE_EQ((*distorted_boundary_spill)(1), -1.);
 }
 
 TEST_F(MortarSegmentHelperTest, quadrilateralReferenceRecoveryRejectsInvalidMaps)
@@ -150,10 +157,11 @@ TEST_F(MortarSegmentHelperTest, quadrilateralReferenceRecoveryRejectsInvalidMaps
   const std::vector<Point> master = {
       Point(-1., -1.), Point(1., -1.), Point(1., 1.), Point(-1., 1.)};
   auto segment_helper = helper(master);
-  const std::array<std::vector<Point>, 3> invalid_polygons = {
+  const std::array<std::vector<Point>, 4> invalid_polygons = {
       {{Point(0., 0.), Point(1., 0.), Point(2., 0.), Point(3., 0.)},
        {Point(0., 0.), Point(1., 0.), Point(0.25, 0.25), Point(0., 1.)},
-       {Point(0., 0.), Point(1., 1.), Point(0., 1.), Point(1., 0.)}}};
+       {Point(0., 0.), Point(1., 1.), Point(0., 1.), Point(1., 0.)},
+       {Point(0., 0.), Point(1., 0.), Point(1., 1.), Point(0., 1.e-10)}}};
 
   for (const auto & polygon : invalid_polygons)
   {

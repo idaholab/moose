@@ -413,11 +413,7 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _minimum_projection_angle(minimum_projection_angle),
     _triangulation_mode(triangulation_mode),
     _triangulate_triangles(triangulate_triangles),
-    _mortar_3d_qp_mapping(mortar_3d_qp_mapping),
-    _msm_elem_to_reference_points(
-        mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::ReferenceInterpolation
-            ? std::make_unique<std::unordered_map<const Elem *, MortarSegmentReferencePoints>>()
-            : nullptr)
+    _mortar_3d_qp_mapping(mortar_3d_qp_mapping)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -467,8 +463,7 @@ AutomaticMortarGeneration::initOutput()
 void
 AutomaticMortarGeneration::clear()
 {
-  if (_msm_elem_to_reference_points)
-    _msm_elem_to_reference_points->clear();
+  _msm_elem_to_reference_points.clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();
   _nodes_to_primary_elem_map.clear();
@@ -490,14 +485,14 @@ AutomaticMortarGeneration::clear()
 const MortarSegmentReferencePoints &
 AutomaticMortarGeneration::mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const
 {
-  if (!_msm_elem_to_reference_points)
+  if (_mortar_3d_qp_mapping != Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
     mooseError("Mortar segment reference points were requested for mortar segment element ",
                mortar_segment_elem.id(),
                ", but the reference-interpolation mapping mode is not enabled.");
 
-  const auto reference_points_it = _msm_elem_to_reference_points->find(&mortar_segment_elem);
-  if (reference_points_it == _msm_elem_to_reference_points->end())
-    mooseError("No reference-point sidecar record was found for mortar segment element ",
+  const auto reference_points_it = _msm_elem_to_reference_points.find(&mortar_segment_elem);
+  if (reference_points_it == _msm_elem_to_reference_points.end())
+    mooseError("No reference-point record was found for mortar segment element ",
                mortar_segment_elem.id(),
                ". The mortar segment info and reference-point maps are not aligned.");
 
@@ -1164,7 +1159,7 @@ void
 AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 {
   const bool use_reference_interpolation =
-      _mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::ReferenceInterpolation;
+      _mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION;
 
   // Add an integer flag to mortar segment mesh to keep track of which subelem
   // of second order primal elements mortar segments correspond to
@@ -1273,21 +1268,24 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         center /= sub_elem_nodes.size();
         normal = normal.unit();
 
-        std::vector<Point> sub_elem_reference_points;
         if (use_reference_interpolation)
         {
+          std::vector<Point> sub_elem_reference_points;
           sub_elem_reference_points.reserve(sub_elem_nodes.size());
           for (const auto node_index : sub_elem_nodes)
             sub_elem_reference_points.push_back(secondary_side_elem->master_point(node_index));
-        }
 
-        mortar_segment_helper[sel] =
-            std::make_unique<MortarSegmentHelper>(std::move(nodes),
-                                                  std::move(sub_elem_reference_points),
-                                                  center,
-                                                  normal,
-                                                  _triangulation_mode,
-                                                  _triangulate_triangles);
+          mortar_segment_helper[sel] =
+              std::make_unique<MortarSegmentHelper>(std::move(nodes),
+                                                    std::move(sub_elem_reference_points),
+                                                    center,
+                                                    normal,
+                                                    _triangulation_mode,
+                                                    _triangulate_triangles);
+        }
+        else
+          mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
+              std::move(nodes), center, normal, _triangulation_mode, _triangulate_triangles);
       }
 
       /**
@@ -1529,11 +1527,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Store reference data only for retained segments.
             if (use_reference_interpolation)
             {
-              mooseAssert(_msm_elem_to_reference_points,
-                          "Reference-interpolation storage should have been allocated.");
               MortarSegmentReferencePoints reference_points{elem_to_secondary_reference_points[el],
                                                             elem_to_primary_reference_points[el]};
-              _msm_elem_to_reference_points->emplace(msm_new_elem, reference_points);
+              _msm_elem_to_reference_points.emplace(msm_new_elem, reference_points);
             }
 
             // Add this mortar segment to the secondary elem to mortar segment map
@@ -1565,8 +1561,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   } // End loop through mortar constraint pairs
 
   mooseAssert(!use_reference_interpolation ||
-                  (_msm_elem_to_reference_points &&
-                   _msm_elem_to_reference_points->size() == _msm_elem_to_info.size()),
+                  _msm_elem_to_reference_points.size() == _msm_elem_to_info.size(),
               "Mortar segment info and reference-point maps must remain aligned.");
 
   _mortar_segment_mesh->cache_elem_data();

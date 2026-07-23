@@ -93,8 +93,7 @@ MortarConsumerInterface::validParams()
       "intended for mortar mesh debugging purposes in two dimensions.");
   params += MortarConsumerInterface::triangulationParams();
 
-  MooseEnum mortar_3d_qp_mapping("normal_projection=0 reference_interpolation=1",
-                                 "normal_projection");
+  MooseEnum mortar_3d_qp_mapping(getMortar3DQuadraturePointMappingOptions(), "normal_projection");
   mortar_3d_qp_mapping.addDocumentation(
       "normal_projection",
       "Project each mortar-segment quadrature point onto the linearized primary and secondary "

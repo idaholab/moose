@@ -8,16 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "MortarSegmentHelper.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 
+#include "libmesh/fe_interface.h"
+#include "libmesh/fe_map.h"
+#include "libmesh/face_quad4.h"
+#include "libmesh/face_tri3.h"
 #include "libmesh/int_range.h"
+#include "libmesh/node.h"
 #include "libmesh/utility.h"
 #if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_triangle_interface.h"
 #include "libmesh/poly2tri_triangulator.h"
 #endif
-
-#include <Eigen/Dense>
 
 #include <algorithm>
 #include <array>
@@ -38,83 +42,15 @@ namespace
 {
 
 constexpr Real mortar_reference_mapping_tolerance = 1e-8;
-constexpr unsigned int quad_newton_max_iterations = 25;
-constexpr unsigned int quad_newton_max_backtracks = 12;
 
 bool
 isFinitePoint(const Point & point)
 {
-  for (const auto component : make_range(LIBMESH_DIM))
+  for (const auto component : make_range(Moose::dim))
     if (!std::isfinite(point(component)))
       return false;
 
   return true;
-}
-
-Real
-norm2D(const Point & point)
-{
-  return std::hypot(point(0), point(1));
-}
-
-std::array<Real, 4>
-bilinearQuadShape(const Real xi, const Real eta)
-{
-  return {{0.25 * (1. - xi) * (1. - eta),
-           0.25 * (1. + xi) * (1. - eta),
-           0.25 * (1. + xi) * (1. + eta),
-           0.25 * (1. - xi) * (1. + eta)}};
-}
-
-struct BilinearQuadEvaluation
-{
-  Point mapped_point;
-  Point dxdxi;
-  Point dxdeta;
-};
-
-BilinearQuadEvaluation
-evaluateBilinearQuad(const std::array<Point, 4> & poly, const Real xi, const Real eta)
-{
-  const auto phi = bilinearQuadShape(xi, eta);
-  const std::array<Real, 4> dphi_dxi = {
-      {-0.25 * (1. - eta), 0.25 * (1. - eta), 0.25 * (1. + eta), -0.25 * (1. + eta)}};
-  const std::array<Real, 4> dphi_deta = {
-      {-0.25 * (1. - xi), -0.25 * (1. + xi), 0.25 * (1. + xi), 0.25 * (1. - xi)}};
-
-  BilinearQuadEvaluation evaluation;
-  for (const auto i : index_range(poly))
-  {
-    evaluation.mapped_point += phi[i] * poly[i];
-    evaluation.dxdxi += dphi_dxi[i] * poly[i];
-    evaluation.dxdeta += dphi_deta[i] * poly[i];
-  }
-
-  return evaluation;
-}
-
-bool
-solve2x2(const Point & column_zero,
-         const Point & column_one,
-         const Point & rhs,
-         Real & solution_zero,
-         Real & solution_one)
-{
-  Eigen::Matrix<Real, 2, 2> jacobian;
-  jacobian << column_zero(0), column_one(0), column_zero(1), column_one(1);
-  const Eigen::JacobiSVD<Eigen::Matrix<Real, 2, 2>> svd(jacobian,
-                                                        Eigen::ComputeFullU | Eigen::ComputeFullV);
-  const auto & singular_values = svd.singularValues();
-
-  if (!singular_values.allFinite() || singular_values(0) <= 0. ||
-      singular_values(1) <= mortar_reference_mapping_tolerance * singular_values(0))
-    return false;
-
-  const Eigen::Matrix<Real, 2, 1> solution = svd.solve(Eigen::Matrix<Real, 2, 1>(rhs(0), rhs(1)));
-  solution_zero = solution(0);
-  solution_one = solution(1);
-
-  return std::isfinite(solution_zero) && std::isfinite(solution_one);
 }
 
 // Signed-area test for the 2D triangle (a, b, c). Returns twice the signed area:
@@ -1053,7 +989,8 @@ MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_no
     }
   }
 
-  // Reference mode adds coordinate maps without changing clipping or triangulation.
+  // Clip primary elem against secondary elem. Reference mode preserves the projected primary
+  // ordering so its reference points remain aligned.
   std::vector<Point> clipped_poly =
       reference_mapping ? clipProjectedPoly(primary_poly) : clipPoly(primary_nodes);
   if (clipped_poly.size() < 3)
@@ -1064,8 +1001,11 @@ MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_no
       if (!isInsideSecondary(point))
         mooseError("Clipped polygon not inside linearized secondary element");
 
+  // Compute area of clipped polygon, update remaining area fraction
   _remaining_area_fraction -= area(clipped_poly) / _secondary_area;
 
+  // Triangulate clip polygon. tri_map indices are local to clipped_poly (starting at 0); we
+  // shift them into the global node numbering after appending the polygon nodes below.
   std::vector<std::vector<unsigned int>> tri_map;
   triangulatePoly(clipped_poly, tri_map);
   if (reference_mapping && reference_mapping->minimum_segment_area > 0.)
@@ -1125,6 +1065,7 @@ MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_no
     }
   }
 
+  // Transform clipped poly back to (linearized) 3d and append to list
   const auto offset = cast_int<unsigned int>(nodes.size());
   for (const auto & point : clipped_poly)
     nodes.emplace_back((point(0) * _u) + (point(1) * _v) + _center);
@@ -1194,280 +1135,148 @@ MortarSegmentHelper::referencePoint(const Point & point,
                 std::to_string(poly.size()) + " vertices");
 
   Real minimum_edge_length = std::numeric_limits<Real>::max();
+  Point local_origin;
+  for (const auto & vertex : poly)
+    local_origin += vertex;
+  local_origin /= poly.size();
+
+  Real local_scale = 0.;
   for (const auto i : index_range(poly))
+  {
     minimum_edge_length =
-        std::min(minimum_edge_length, norm2D(poly[(i + 1) % poly.size()] - poly[i]));
+        std::min(minimum_edge_length, (poly[(i + 1) % poly.size()] - poly[i]).norm());
+    local_scale = std::max(local_scale, (poly[i] - local_origin).norm());
+  }
+
+  const Real singular_tolerance = 100. * std::numeric_limits<Real>::epsilon();
+  if (!std::isfinite(local_scale) || local_scale <= singular_tolerance)
+    return fail("the projected polygon has a zero local length scale");
   if (!std::isfinite(minimum_edge_length) ||
-      minimum_edge_length <= 100. * std::numeric_limits<Real>::epsilon())
-    return fail("the projected polygon has a zero-length edge");
+      minimum_edge_length / local_scale <= singular_tolerance)
+    return fail("the projected polygon has a zero-length edge relative to its local scale");
+
+  std::vector<Point> normalized_poly;
+  normalized_poly.reserve(poly.size());
+  for (const auto & vertex : poly)
+    normalized_poly.push_back((vertex - local_origin) / local_scale);
+  const Point normalized_point = (point - local_origin) / local_scale;
+  const Real reference_tolerance =
+      std::max(mortar_reference_mapping_tolerance, _area_tol / (minimum_edge_length * local_scale));
+  std::array<Node, 4> element_nodes;
+  const FEType fe_type(FIRST, LAGRANGE);
+  const auto recover_with_libmesh = [&](auto & element) -> std::optional<Point>
+  {
+    for (const auto i : index_range(normalized_poly))
+    {
+      element_nodes[i] = normalized_poly[i];
+      element_nodes[i].set_id(i);
+      element.set_node(i, &element_nodes[i]);
+    }
+
+    if (!element.has_invertible_map(mortar_reference_mapping_tolerance))
+      return fail("the projected sub-element map is degenerate or non-invertible");
+
+    if (element.type() == QUAD4)
+      for (const auto corner : make_range(element.n_vertices()))
+      {
+        Point tangent_xi;
+        Point tangent_eta;
+        for (const auto node : make_range(element.n_nodes()))
+        {
+          tangent_xi += FEInterface::shape_deriv(
+                            fe_type, 0, &element, node, 0, element.master_point(corner)) *
+                        element.point(node);
+          tangent_eta += FEInterface::shape_deriv(
+                             fe_type, 0, &element, node, 1, element.master_point(corner)) *
+                         element.point(node);
+        }
+
+        const Real corner_jacobian = tangent_xi.cross(tangent_eta).norm();
+        if (!std::isfinite(corner_jacobian) ||
+            corner_jacobian <= mortar_reference_mapping_tolerance)
+          return fail("the projected quadrilateral has a singular or ill-conditioned corner map");
+      }
+
+    Point local_reference = FEMap::inverse_map(
+        2, &element, normalized_point, mortar_reference_mapping_tolerance, false, false);
+    if (!isFinitePoint(local_reference))
+      return fail("libMesh inverse_map produced a non-finite reference point");
+
+    const Real inverse_map_error =
+        (FEMap::map(2, &element, local_reference) - normalized_point).norm();
+    if (!std::isfinite(inverse_map_error) || inverse_map_error > mortar_reference_mapping_tolerance)
+    {
+      std::ostringstream reason;
+      reason << "the normalized inverse-map error " << inverse_map_error << " exceeds "
+             << mortar_reference_mapping_tolerance;
+      return fail(reason.str());
+    }
+
+    if (element.type() == TRI3)
+    {
+      std::array<Real, 3> weights;
+      for (const auto i : index_range(weights))
+        weights[i] = FEInterface::shape(fe_type, &element, i, local_reference, false);
+
+      for (auto & weight : weights)
+        weight = std::clamp(weight, 0., 1.);
+      const Real weight_sum = std::accumulate(weights.begin(), weights.end(), 0.);
+      if (!std::isfinite(weight_sum) || weight_sum <= singular_tolerance)
+        return fail("clamped triangle barycentric coordinates have a zero or non-finite sum");
+      for (auto & weight : weights)
+        weight /= weight_sum;
+
+      // Preserve partition of unity after clamping tolerance-sized violations.
+      const auto corrected_weight =
+          std::distance(weights.begin(), std::max_element(weights.begin(), weights.end()));
+      weights[corrected_weight] = 1.;
+      for (const auto i : index_range(weights))
+        if (i != static_cast<unsigned int>(corrected_weight))
+          weights[corrected_weight] -= weights[i];
+
+      local_reference = Point();
+      for (const auto i : index_range(weights))
+        local_reference += weights[i] * element.master_point(i);
+    }
+    else
+    {
+      local_reference(0) = std::clamp(local_reference(0), -1., 1.);
+      local_reference(1) = std::clamp(local_reference(1), -1., 1.);
+      local_reference(2) = 0.;
+    }
+
+    if (!element.on_reference_element(local_reference, mortar_reference_mapping_tolerance))
+      return fail("the clamped inverse-map result is outside the reference element");
+
+    const Real round_trip_error =
+        (FEMap::map(2, &element, local_reference) - normalized_point).norm();
+    if (!std::isfinite(round_trip_error) || round_trip_error > reference_tolerance)
+    {
+      std::ostringstream reason;
+      reason << "the normalized inverse-map round-trip error " << round_trip_error
+             << " exceeds the clipping-consistent tolerance " << reference_tolerance;
+      return fail(reason.str());
+    }
+
+    Point parent_reference;
+    for (const auto i : index_range(normalized_poly))
+      parent_reference +=
+          FEInterface::shape(fe_type, &element, i, local_reference, false) * reference_points[i];
+
+    if (!isFinitePoint(parent_reference))
+      return fail("reference interpolation produced a non-finite parent reference point");
+
+    return parent_reference;
+  };
 
   if (poly.size() == 3)
   {
-    const Real local_scale = std::max(norm2D(poly[1] - poly[0]), norm2D(poly[2] - poly[0]));
-    const Real singular_tolerance = 100. * std::numeric_limits<Real>::epsilon();
-    if (!std::isfinite(local_scale) || local_scale <= singular_tolerance)
-      return fail("triangle inverse map is singular because its local length scale is zero");
-
-    const Point v1 = (poly[1] - poly[0]) / local_scale;
-    const Point v2 = (poly[2] - poly[0]) / local_scale;
-    const Point rhs = (point - poly[0]) / local_scale;
-    const Real snapping_tolerance = std::max(mortar_reference_mapping_tolerance,
-                                             _area_tol / (minimum_edge_length * local_scale));
-
-    std::array<Real, 3> weights;
-    if (!solve2x2(v1, v2, rhs, weights[1], weights[2]))
-      return fail("triangle inverse map has a singular or ill-conditioned Jacobian");
-    weights[0] = 1. - weights[1] - weights[2];
-
-    for (const auto weight : weights)
-      if (!std::isfinite(weight))
-        return fail("triangle inverse map produced a non-finite barycentric coordinate");
-
-    const Real recovery_residual = norm2D(weights[1] * v1 + weights[2] * v2 - rhs);
-    if (!std::isfinite(recovery_residual) || recovery_residual > mortar_reference_mapping_tolerance)
-    {
-      std::ostringstream reason;
-      reason << "triangle inverse map reconstruction has normalized residual " << recovery_residual
-             << ", exceeding " << mortar_reference_mapping_tolerance;
-      return fail(reason.str());
-    }
-
-    for (auto & weight : weights)
-      weight = std::clamp(weight, 0., 1.);
-
-    const Real weight_sum = std::accumulate(weights.begin(), weights.end(), 0.);
-    if (!std::isfinite(weight_sum) || weight_sum <= singular_tolerance)
-      return fail("clamped triangle barycentric coordinates have a zero or non-finite sum");
-
-    for (auto & weight : weights)
-      weight /= weight_sum;
-
-    // Enforce partition of unity after clamping roundoff-sized violations.
-    const auto corrected_weight =
-        std::distance(weights.begin(), std::max_element(weights.begin(), weights.end()));
-    weights[corrected_weight] = 1.;
-    for (const auto i : index_range(weights))
-      if (i != static_cast<unsigned int>(corrected_weight))
-        weights[corrected_weight] -= weights[i];
-
-    const Real snapped_residual = norm2D(weights[1] * v1 + weights[2] * v2 - rhs);
-    if (!std::isfinite(snapped_residual) || snapped_residual > snapping_tolerance)
-    {
-      std::ostringstream reason;
-      reason << "snapped triangle inverse map has normalized residual " << snapped_residual
-             << ", exceeding the clipping-consistent tolerance " << snapping_tolerance;
-      return fail(reason.str());
-    }
-
-    Point reference_point;
-    for (const auto i : index_range(weights))
-      reference_point += weights[i] * reference_points[i];
-
-    if (!isFinitePoint(reference_point))
-      return fail("triangle interpolation produced a non-finite parent reference point");
-
-    return reference_point;
+    Tri3 element;
+    return recover_with_libmesh(element);
   }
 
-  if (poly.size() == 4)
-  {
-    // Consistent corner Jacobians make this bilinear map one-to-one; extra seeds aid convergence.
-    Point local_origin;
-    for (const auto & vertex : poly)
-      local_origin += vertex;
-    local_origin /= poly.size();
-
-    Real local_scale = 0.;
-    for (const auto & vertex : poly)
-      local_scale = std::max(local_scale, norm2D(vertex - local_origin));
-
-    const Real singular_tolerance = 100. * std::numeric_limits<Real>::epsilon();
-    if (!std::isfinite(local_scale) || local_scale <= singular_tolerance)
-      return fail("quadrilateral inverse map is singular because its local length scale is zero");
-    const Real snapping_tolerance = std::max(mortar_reference_mapping_tolerance,
-                                             _area_tol / (minimum_edge_length * local_scale));
-
-    std::array<Point, 4> normalized_poly;
-    for (const auto i : index_range(normalized_poly))
-      normalized_poly[i] = (poly[i] - local_origin) / local_scale;
-    const Point normalized_point = (point - local_origin) / local_scale;
-
-    const std::array<Point, 4> reference_corners = {
-        {Point(-1., -1., 0.), Point(1., -1., 0.), Point(1., 1., 0.), Point(-1., 1., 0.)}};
-
-    int jacobian_sign = 0;
-    Real first_determinant = 0.;
-    for (const auto corner : index_range(reference_corners))
-    {
-      const auto evaluation = evaluateBilinearQuad(
-          normalized_poly, reference_corners[corner](0), reference_corners[corner](1));
-      const Real determinant =
-          evaluation.dxdxi(0) * evaluation.dxdeta(1) - evaluation.dxdxi(1) * evaluation.dxdeta(0);
-      const Real determinant_scale = norm2D(evaluation.dxdxi) * norm2D(evaluation.dxdeta);
-
-      if (!isFinitePoint(evaluation.mapped_point) || !isFinitePoint(evaluation.dxdxi) ||
-          !isFinitePoint(evaluation.dxdeta) || !std::isfinite(determinant) ||
-          !std::isfinite(determinant_scale))
-      {
-        std::ostringstream reason;
-        reason << "quadrilateral corner " << corner << " has a non-finite Jacobian";
-        return fail(reason.str());
-      }
-
-      if (determinant_scale <= singular_tolerance ||
-          std::abs(determinant) <= mortar_reference_mapping_tolerance * determinant_scale)
-      {
-        std::ostringstream reason;
-        reason << "quadrilateral corner " << corner << " has a singular Jacobian (determinant "
-               << determinant << ")";
-        return fail(reason.str());
-      }
-
-      const int current_sign = determinant > 0. ? 1 : -1;
-      if (corner == 0)
-      {
-        jacobian_sign = current_sign;
-        first_determinant = determinant;
-      }
-      else if (current_sign != jacobian_sign)
-      {
-        std::ostringstream reason;
-        reason << "quadrilateral corner Jacobians have inconsistent signs (corner 0 determinant "
-               << first_determinant << ", corner " << corner << " determinant " << determinant
-               << "); the map is concave, folded, or self-intersecting";
-        return fail(reason.str());
-      }
-    }
-
-    const std::array<Point, 5> newton_seeds = {{Point(0., 0., 0.),
-                                                Point(-1., -1., 0.),
-                                                Point(1., -1., 0.),
-                                                Point(1., 1., 0.),
-                                                Point(-1., 1., 0.)}};
-
-    const auto recover_root = [&normalized_poly, &normalized_point](
-                                  Point coordinates, std::string & reason) -> std::optional<Point>
-    {
-      for (const auto iteration : make_range(quad_newton_max_iterations))
-      {
-        const auto evaluation =
-            evaluateBilinearQuad(normalized_poly, coordinates(0), coordinates(1));
-        const Point residual = evaluation.mapped_point - normalized_point;
-        const Real residual_norm = norm2D(residual);
-
-        if (!std::isfinite(residual_norm) || !isFinitePoint(evaluation.dxdxi) ||
-            !isFinitePoint(evaluation.dxdeta))
-        {
-          reason = "Newton iteration produced a non-finite residual or Jacobian";
-          return std::nullopt;
-        }
-
-        Real delta_xi;
-        Real delta_eta;
-        const Point rhs(-residual(0), -residual(1), 0.);
-        if (!solve2x2(evaluation.dxdxi, evaluation.dxdeta, rhs, delta_xi, delta_eta))
-        {
-          std::ostringstream stream;
-          stream << "Newton iteration " << iteration << " encountered a singular Jacobian";
-          reason = stream.str();
-          return std::nullopt;
-        }
-
-        const Real full_update_norm = std::hypot(delta_xi, delta_eta);
-        if (!std::isfinite(full_update_norm))
-        {
-          reason = "Newton iteration produced a non-finite reference-space update";
-          return std::nullopt;
-        }
-
-        if (residual_norm <= mortar_reference_mapping_tolerance &&
-            full_update_norm <= mortar_reference_mapping_tolerance)
-          return coordinates;
-
-        Real step_length = 1.;
-        bool accepted_step = false;
-        for (unsigned int backtracks = 0; backtracks <= quad_newton_max_backtracks; ++backtracks)
-        {
-          const Point trial_coordinates(coordinates(0) + step_length * delta_xi,
-                                        coordinates(1) + step_length * delta_eta,
-                                        0.);
-          const auto trial_evaluation =
-              evaluateBilinearQuad(normalized_poly, trial_coordinates(0), trial_coordinates(1));
-          const Real trial_residual_norm = norm2D(trial_evaluation.mapped_point - normalized_point);
-
-          if (std::isfinite(trial_residual_norm) && trial_residual_norm < residual_norm)
-          {
-            coordinates = trial_coordinates;
-            accepted_step = true;
-            break;
-          }
-
-          if (backtracks < quad_newton_max_backtracks)
-            step_length *= 0.5;
-        }
-
-        if (!accepted_step)
-        {
-          std::ostringstream stream;
-          stream << "Newton iteration " << iteration << " failed to reduce the normalized residual "
-                 << "after " << quad_newton_max_backtracks << " half-step backtracks";
-          reason = stream.str();
-          return std::nullopt;
-        }
-      }
-
-      std::ostringstream stream;
-      stream << "Newton iteration did not converge in " << quad_newton_max_iterations
-             << " iterations";
-      reason = stream.str();
-      return std::nullopt;
-    };
-
-    std::string last_seed_failure;
-
-    for (const auto seed_index : index_range(newton_seeds))
-    {
-      std::string seed_reason;
-      const auto recovered_root = recover_root(newton_seeds[seed_index], seed_reason);
-      if (!recovered_root)
-      {
-        last_seed_failure = "seed " + std::to_string(seed_index) + ": " + seed_reason;
-        continue;
-      }
-
-      Point root(
-          std::clamp((*recovered_root)(0), -1., 1.), std::clamp((*recovered_root)(1), -1., 1.), 0.);
-      const Real snapped_residual_norm = norm2D(
-          evaluateBilinearQuad(normalized_poly, root(0), root(1)).mapped_point - normalized_point);
-      if (!std::isfinite(snapped_residual_norm) || snapped_residual_norm > snapping_tolerance)
-      {
-        std::ostringstream stream;
-        stream << "seed " << seed_index << " produced a boundary-snapped root with normalized "
-               << "residual " << snapped_residual_norm;
-        last_seed_failure = stream.str();
-        continue;
-      }
-
-      const auto phi = bilinearQuadShape(root(0), root(1));
-      Point reference_point;
-      for (const auto i : index_range(phi))
-        reference_point += phi[i] * reference_points[i];
-
-      if (!isFinitePoint(reference_point))
-      {
-        last_seed_failure = "quadrilateral interpolation produced a non-finite reference point";
-        continue;
-      }
-
-      return reference_point;
-    }
-
-    return fail("quadrilateral inverse map found no in-domain root from the center and corner "
-                "seeds; last outcome: " +
-                last_seed_failure);
-  }
-
-  mooseError("Unreachable mortar reference-point recovery branch.");
+  Quad4 element;
+  return recover_with_libmesh(element);
 }
 
 Real

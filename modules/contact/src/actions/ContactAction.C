@@ -299,8 +299,9 @@ ContactAction::validParams()
       false,
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
-  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "segment_quadrature");
-  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "mortar_3d_qp_mapping");
+  const auto mortar_constraint_params = MortarConstraintBase::validParams();
+  params.transferParam<MooseEnum>(mortar_constraint_params, "segment_quadrature");
+  params.transferParam<MooseEnum>(mortar_constraint_params, "mortar_3d_qp_mapping");
 
   // Contact surface definition
   params.addParamNamesToGroup("primary secondary displacements", "Contact Surface Definition");

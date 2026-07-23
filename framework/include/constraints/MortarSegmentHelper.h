@@ -35,12 +35,18 @@ class MortarSegmentHelperTest;
 class MortarSegmentHelper
 {
 public:
+  /**
+   * Construct a helper that generates mortar segment geometry only.
+   */
   MortarSegmentHelper(std::vector<Point> secondary_nodes,
                       const Point & center,
                       const Point & normal,
                       const MortarSegmentTriangulationMode triangulation_mode,
                       const bool triangulate_triangles);
 
+  /**
+   * Construct a helper that also tracks secondary parent-reference coordinates.
+   */
   MortarSegmentHelper(std::vector<Point> secondary_nodes,
                       std::vector<Point> secondary_reference_points,
                       const Point & center,
@@ -101,8 +107,9 @@ public:
                          std::vector<std::vector<unsigned int>> & elem_to_nodes);
 
   /**
-   * Append mortar segments and aligned parent-reference coordinates. Segments below
-   * \p minimum_segment_area are removed before mapping; retained vertices must map uniquely.
+   * Get mortar segments and aligned parent-reference coordinates by appending to the output
+   * containers. Segments below \p minimum_segment_area are removed before mapping; retained
+   * vertices must map uniquely.
    */
   void getMortarSegments(const std::vector<Point> & primary_nodes,
                          const std::vector<Point> & primary_reference_points,
@@ -136,6 +143,9 @@ public:
   }
 
 private:
+  /**
+   * Output containers and filtering data used while generating reference-coordinate mappings.
+   */
   struct ReferenceMappingData
   {
     const std::vector<Point> & primary_reference_points;
@@ -149,9 +159,16 @@ private:
                              std::vector<std::vector<unsigned int>> & elem_to_nodes,
                              ReferenceMappingData * reference_mapping);
 
+  /**
+   * Clip an already projected primary polygon against the secondary polygon. Keeping projection
+   * separate preserves the ordering shared with primary reference points.
+   */
   std::vector<Point> clipProjectedPoly(const std::vector<Point> & primary_poly) const;
 
-  /// Recover a parent-reference point, returning no value for invalid or out-of-tolerance maps.
+  /**
+   * Recover a parent-reference point from a projected sub-element map.
+   * @return No value for invalid or out-of-tolerance maps.
+   */
   std::optional<Point> referencePoint(const Point & point,
                                       const std::vector<Point> & poly,
                                       const std::vector<Point> & reference_points,

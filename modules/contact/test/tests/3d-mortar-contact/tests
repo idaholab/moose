@@ -73,16 +73,15 @@
   [frictionless-mortar-3d-action-qp-mapping]
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     issues = '#33367'
-    requirement = 'The system shall support 3D mortar quadrature point mapping options through '
-                  'the contact action'
+    requirement = 'The system shall set up 3D mortar contact while forwarding the quadrature '
+                  'point mapping option from ContactAction'
     [reference-interpolation]
       type = 'RunApp'
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
       cli_args = 'starting_point=0 Contact/mortar/mortar_3d_qp_mapping=reference_interpolation '
                  'Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
-      detail = 'by completing one time step with reference-coordinate interpolation,'
-      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'to Lagrange-multiplier mortar objects using reference interpolation,'
       valgrind = 'none'
     []
     [same-interface-conflict]
@@ -104,9 +103,7 @@
                  'Postprocessors/active="num_nl cumulative" '
                  'VectorPostprocessors/inactive=contact-pressure Executioner/end_time=0.5 '
                  'Executioner/nl_abs_tol=1e-8 Outputs/exodus=false Outputs/csv=false'
-      detail = 'by completing one penalty-mortar time step with reference-coordinate '
-               'interpolation, and'
-      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'to penalty mortar objects using reference interpolation, and'
       valgrind = 'none'
     []
     [non-mortar-error]

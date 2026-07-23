@@ -53,12 +53,14 @@ void projectQPoints3d(const Elem * msm_elem,
 /**
  * 3D mapping operator that interpolates stored parent reference points on each triangular mortar
  * segment.
- * @param reference_points Parent-face reference points stored in the AMG sidecar
+ * @param mortar_segment_elem The triangular mortar segment carrying the quadrature rule
+ * @param reference_points Parent-face reference points stored for the mortar segment
  * @param qrule_msm The rule that governs quadrature on the mortar segment element
  * @param secondary_q_pts Reference-space quadrature points on the secondary face
  * @param primary_q_pts Reference-space quadrature points on the primary face
  */
-void mapQPoints3dFromReference(const MortarSegmentReferencePoints & reference_points,
+void mapQPoints3dFromReference(const Elem & mortar_segment_elem,
+                               const MortarSegmentReferencePoints & reference_points,
                                const QBase & qrule_msm,
                                std::vector<Point> & secondary_q_pts,
                                std::vector<Point> & primary_q_pts);
@@ -183,8 +185,9 @@ loopOverMortarSegments(
       }
       else
       {
-        if (amg.mortar3DQpMapping() == Mortar3DQuadraturePointMapping::ReferenceInterpolation)
-          mapQPoints3dFromReference(amg.mortarSegmentReferencePoints(*msm_elem),
+        if (amg.mortar3DQpMapping() == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
+          mapQPoints3dFromReference(*msm_elem,
+                                    amg.mortarSegmentReferencePoints(*msm_elem),
                                     *qrule_msm,
                                     secondary_xi_pts,
                                     primary_xi_pts);
