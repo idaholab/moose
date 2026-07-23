@@ -9,6 +9,7 @@
 
 #include "SCMTriAssemblyMeshGenerator.h"
 #include "TriSubChannelMesh.h"
+#include "MooseUtils.h"
 #include <cmath>
 #include <memory>
 #include "libmesh/edge_edge2.h"
@@ -111,6 +112,13 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
 
   if (_n_cells == 0)
     paramError("n_cells", "The number of axial cells must be greater than zero");
+
+  const Real pin_gap = _pitch - _pin_diameter;
+  if (pin_gap <= 0.0)
+    paramError("pitch", "The pin pitch must be greater than the pin diameter");
+
+  if (MooseUtils::absoluteFuzzyGreaterThan(_dwire, pin_gap))
+    paramError("dwire", "The wire diameter must not exceed the pin-to-pin gap");
 
   if (total_length <= 0.0)
     mooseError("Total bundle length must be greater than zero");

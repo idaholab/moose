@@ -14,7 +14,7 @@ For $(1.1 \le P/D \le 1.5)$ and $(200 \le \mathrm{Pe} \le 2200)$, the Nusselt nu
 
 \begin{equation}
 \mathrm{Nu}
-= 24.15 \log\left[
+= 24.15 \log_{10}\left[
 -8.12 + 12.76\left(\frac{P}{D}\right) - 3.65\left(\frac{P}{D}\right)^2
 \right] + 0.0174 \left[1 - \exp\left(6 - 6\frac{P}{D}\right)
 \right]
@@ -25,7 +25,7 @@ For $(1.1 \le P/D \le 1.5)$ and $(\mathrm{Pe} \le 200)$, the correlation reduces
 
 \begin{equation}
 \mathrm{Nu}
-= 24.15 \log\left[-8.12 + 12.76\left(\frac{P}{D}\right) - 3.65\left(\frac{P}{D}\right)^2
+= 24.15 \log_{10}\left[-8.12 + 12.76\left(\frac{P}{D}\right) - 3.65\left(\frac{P}{D}\right)^2
 \right]
 \end{equation}
 
@@ -38,6 +38,8 @@ where:
 - $Pe$: Peclet number ($Pe = Re \times Pr$)
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
+
+The Borishanskii correlation uses a base-10 logarithm.
 
 !alert note
 The Borishanskii correlation is not currently implemented for computing the duct surface temperature.
