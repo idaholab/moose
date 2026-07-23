@@ -447,8 +447,12 @@ protected:
   /**
    * The problem operator builders for this mfem problem.
    */
+<<<<<<< HEAD
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
 >>>>>>> 56a2ff8acf (Hot fixes, rebuilding the ProblemOperator base class, the missing files and changes to MFEM problem)
+=======
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> _problem_operator_builders;
+>>>>>>> 823bc201ee (Update framework/include/mfem/problem/MFEMProblem.h)
 };
 
 template <typename T>
