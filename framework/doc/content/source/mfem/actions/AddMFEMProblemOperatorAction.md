@@ -5,8 +5,9 @@
 ## Overview
 
 Action called to add a ProblemOperatorBuilder that builds ProblemOperators in the executioner.
-[`ProblemOperatorBuilder`](syntax/ProblemOperatorBuilder/index.md) block in the user input. Only has an effect if
-the `Problem` type is set to [MFEMProblem.md].
+[`ProblemOperatorBuilder`](source/syntax/ProblemOperatorBuilder/index.md) block in the user input.
+Only has an effect if the `Problem` type is set to
+[MFEMProblem.md](source/mfem/problem/MFEMProblem.md).
 
 ## Example Input File Syntax
 

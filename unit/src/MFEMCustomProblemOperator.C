@@ -75,7 +75,7 @@ public:
 
 // The custom operator constructor
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
-  : Moose::MFEM::ProblemOperator(prob0)
+  : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
 {
   // Retrieve the FE-space and gridFunction
   const std::string _fe_space_name = "h1";
@@ -167,7 +167,8 @@ public:
 
     // Add the custom problem operator builder
     // then get it and build the operator
-    InputParameters _problem_operator_params = _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
+    InputParameters _problem_operator_params =
+        _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
     _mfem_problem->addMFEMProblemOperator(
         "ProblemOperatorBuilderCustomDummy", "custom_problem_operator", _problem_operator_params);
     _problem_operator_builder = _mfem_problem->getProblemOperatorBuilder();

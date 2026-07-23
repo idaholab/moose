@@ -51,33 +51,35 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 
 ```
 
-As the problemOperator is built by the MFEM executioners all registered entities in `MFEMProblem`
-have been built e.g. the NlSolver, the lSolver, the FEspaces, the ParGridFunctions etc. A custom
-operator builder function should be added in the case of non-linear problems where the operator is
-rebuilt. In the non-linear case the user would have to override and populate the `Mult` and
-the `GetGradient` functions to rebuild, fetch and apply the operators for the residual and
-Jacobian. The self pointer would have be passed to the non-linear solver via the 
-`SetOperator(mfem::Operator &)` method in the non-linear case. The case in this example is 
-linear and the Operator is simply built in the constructor. Firstly the class needs `Form`'s,
+As the problemOperator is built by the MFEM executioners all registered entities in
+[`MFEMProblem`](source/mfem/problem/MFEMProblem.md) have been built e.g. the `ParGridFunctions`.
+A custom operator builder function should be added in the case of non-linear problems where the
+operator is rebuilt. In the non-linear case the user would have to override and populate the
+`Mult` and the `GetGradient` functions to rebuild, fetch and apply the operators for the residual
+and Jacobian. The self pointer would have be passed to the non-linear solver via the
+`SetOperator(mfem::Operator &)` method in the non-linear case. The case in this example is linear
+and the Operator is simply built in the constructor. Firstly the class needs `Form`'s,
 `Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s.
 
 ```cpp
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 {
   private:
-    // Linear and bilinear forms
-    mfem::ParBilinearForm * a;
-    mfem::ParLinearForm * b;
+    int _dumm_var = 0;
+    // The linear and bilinear forms
+    mfem::ParBilinearForm * _a;
+    mfem::ParLinearForm * _b;
 
-    // Coefficient(s)
-    mfem::ConstantCoefficient one;
+    // The coefficient
+    mfem::ConstantCoefficient _one;
 
-    // Boundary condition dofs
-    mfem::Array<int> boundary_dofs;
+    // The boundary conditions arrays
+    mfem::Array<int> _boundary_dofs;
 
-    //Operator and solution vectors
-    mfem::OperatorHandle probOp;
-    mfem::Vector B, X;
+    // The operator and solution vectors (could
+    // potentially use the ones in the base class)
+    mfem::OperatorHandle _problem_operator; // The actual mfem problem operator
+    mfem::Vector _B, _X;
 
   public:
     // Constructor
@@ -99,13 +101,14 @@ for usage in the `ProblemOperator`, assuming for this example that the FE-Space 
 that we are interested in have an expected name then the constructor may look like this:
 
 ```cpp
-CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
+CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0):
+  : Moose::MFEM::ProblemOperator(prob0), ...
 {
   // Retrieve the FE-space and gridFunction
-  const std::string FEspaceName = "h1";
-  const std::string gFuncName = "var0";
-  auto fes = prob0.getProblemData().fespaces.GetShared(FEspaceName);
-  auto gfunc = prob0.getProblemData().gridfunctions.GetShared(gFuncName);
+  const std::string fe_space_name = "h1";
+  const std::string grid_function_name = "var0";
+  auto fes = prob0.getProblemData().fespaces.GetShared(fe_space_name);
+  auto grid_function = prob0.getProblemData().gridfunctions.GetShared(grid_function_name);
   .
   .
   .
@@ -117,30 +120,30 @@ integrators, assemble the forms and form the linear system:
 
 ```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
-  : Moose::MFEM::ProblemOperator(prob0)
+  : Moose::MFEM::ProblemOperator(prob0), _one(1.000)
 {
   // Retrieve the FE-space and gridFunction
-  const std::string FEspaceName = "h1";
-  const std::string gFuncName = "var0";
-  auto fes = prob0.getProblemData().fespaces.GetShared(FEspaceName);
-  auto gfunc = prob0.getProblemData().gridfunctions.GetShared(gFuncName);
+  const std::string fe_space_name = "h1";
+  const std::string grid_function_name = "var0";
+  auto fes = prob0.getProblemData().fespaces.GetShared(fe_space_name);
+  auto grid_function = prob0.getProblemData().gridfunctions.GetShared(grid_function_name);
 
   // Boundary conditions
-  *gfunc = 0.00;
-  fes->GetBoundaryTrueDofs(boundary_dofs);
+  *grid_function = 0.00;
+  fes->GetBoundaryTrueDofs(_boundary_dofs);
 
   // Build the linear form
-  b = new mfem::ParLinearForm(&(*fes));
-  b->AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
-  b->Assemble();
+  _b = new mfem::ParLinearForm(&(*fes));
+  _b->AddDomainIntegrator(new mfem::DomainLFIntegrator(_one));
+  _b->Assemble();
 
   // Build the bilinear form
-  a = new mfem::ParBilinearForm(&(*fes));
-  a->AddDomainIntegrator(new mfem::DiffusionIntegrator);
-  a->Assemble();
+  _a = new mfem::ParBilinearForm(&(*fes));
+  _a->AddDomainIntegrator(new mfem::DiffusionIntegrator);
+  _a->Assemble();
 
   // Form the linear system
-  a->FormLinearSystem(boundary_dofs, *gfunc, *b, probOp, X, B);
+  _a->FormLinearSystem(_boundary_dofs, *grid_function, *_b, _problem_operator, _X, _B);
 }
 ```
 
@@ -154,13 +157,13 @@ to acces `MFEMProblem` members.
 void CustomDummyProblemOperator::Solve() override
 {
   // Set the operator and solve the equation
-  _problem_data.jacobian_solver->SetOperator(*probOp);
-  _problem_data.jacobian_solver->GetSolver().Mult(B, X);
+  _problem_data.jacobian_solver->SetOperator(*_problem_operator);
+  _problem_data.jacobian_solver->GetSolver().Mult(_B, _X);
 
   // Set the data in the grid function
-  const std::string gFuncName = "var0";
-  auto gfunc = _problem_data.gridfunctions.GetShared(gFuncName);
-  gfunc->SetFromTrueDofs(X);
+  const std::string grid_function_name = "var0";
+  auto grid_function = _problem_data.gridfunctions.GetShared(grid_function_name);
+  grid_function->SetFromTrueDofs(_X);
 };
 
 ```
@@ -192,7 +195,7 @@ public:
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-  createProblemOperator(MFEMProblem & mfemProb) override;
+  createProblemOperator(MFEMProblem & mfem_problem) override;
 };
 }
 ```
@@ -206,7 +209,7 @@ namespace Moose::MFEM
 InputParameters ProblemOperatorBuilderCustomDummy::validParams()
 {
   InputParameters params = ProblemOperatorBuilderBase::validParams();
-  params.addParam<type1>("name", "defaultValue", "Description of param");
+  params.addParam<type1>("name", "default_value", "description of param");
   .
   .
   .
@@ -279,9 +282,9 @@ public:
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-  createProblemOperator(MFEMProblem & mfemProb) override
+  createProblemOperator(MFEMProblem & mfem_problem) override
   {
-    return std::make_shared<CustomDummyProblemOperator>(mfemProb);
+    return std::make_shared<CustomDummyProblemOperator>(mfem_problem);
   };
 };
 
