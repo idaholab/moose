@@ -34,7 +34,6 @@ heated_length = 1.0
 
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
-  n_blocks = 1
   fp = water
   compute_density = true
   compute_viscosity = true

@@ -26,7 +26,6 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 [SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
   P_out = ${P_out}
   compute_density = true
   compute_viscosity = true

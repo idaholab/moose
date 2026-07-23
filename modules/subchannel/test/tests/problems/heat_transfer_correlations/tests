@@ -59,6 +59,7 @@
       valgrind = NONE
       recover = false
       max_parallel = 1
+      heavy = true
       detail = 'and reject non-physical heat transfer coefficients from HTC closures.'
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski wire_diameter=0.003 Outputs/file_base=negative_htc_error'
     []

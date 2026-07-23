@@ -107,45 +107,44 @@ protected:
   /// Non-pure: implemented in the base (or override in a child if needed)
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const;
 
-  /// Computes diversion crossflow per gap for block iblock
-  void computeWijFromSolve(int iblock);
-  /// Computes net diversion crossflow per channel for block iblock
-  void computeSumWij(int iblock);
-  /// Computes mass flow per channel for block iblock
-  void computeMdot(int iblock);
-  /// Computes turbulent crossflow per gap for block iblock
-  void computeWijPrime(int iblock);
+  /// Computes diversion crossflow per gap
+  void computeWijFromSolve();
+  /// Computes net diversion crossflow per channel
+  void computeSumWij();
+  /// Computes mass flow per channel
+  void computeMdot();
+  /// Computes turbulent crossflow per gap
+  void computeWijPrime();
   /// Computes and validates the turbulent mixing parameter
   Real computeMixingParameter(unsigned int i_gap, unsigned int iz) const;
   /// Computes and validates the sweep-flow mixing parameter
   Real computeSweepFlowMixingParameter(unsigned int i_gap, unsigned int iz) const;
-  /// Computes Pressure Drop per channel for block iblock
-  void computeDP(int iblock);
-  /// Computes Pressure per channel for block iblock
-  void computeP(int iblock);
-  /// Computes Enthalpy per channel for block iblock
-  virtual void computeh(int iblock) = 0;
-  /// Computes Temperature per channel for block iblock
-  void computeT(int iblock);
-  /// Computes Density per channel for block iblock
-  void computeRho(int iblock);
-  /// Computes Viscosity per channel for block iblock
-  void computeMu(int iblock);
-  /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
-  void computeWijResidual(int iblock);
+  /// Computes Pressure Drop per channel
+  void computeDP();
+  /// Computes Pressure per channel
+  void computeP();
+  /// Computes Enthalpy per channel
+  virtual void computeh() = 0;
+  /// Computes Temperature per channel
+  void computeT();
+  /// Computes Density per channel
+  void computeRho();
+  /// Computes Viscosity per channel
+  void computeMu();
+  /// Computes Residual Matrix based on the lateral momentum conservation equation
+  void computeWijResidual();
   /// Function that computes the width of the duct cell that the peripheral subchannel i_ch sees
   virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) const = 0;
-  /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
-  libMesh::DenseVector<Real> residualFunction(int iblock, libMesh::DenseVector<Real> solution);
+  /// Computes Residual Vector based on the lateral momentum conservation equation and updates flow variables based on current crossflow solution
+  libMesh::DenseVector<Real> residualFunction(libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction
-  PetscErrorCode petscSnesSolver(int iblock,
-                                 const libMesh::DenseVector<Real> & solution,
+  PetscErrorCode petscSnesSolver(const libMesh::DenseVector<Real> & solution,
                                  libMesh::DenseVector<Real> & root);
   /// This is the residual Vector function in a form compatible with the SNES PETC solvers
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
   /// Computes implicit solve using PetSc
-  PetscErrorCode implicitPetscSolve(int iblock);
+  PetscErrorCode implicitPetscSolve();
 
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
@@ -191,8 +190,6 @@ protected:
 
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
-  /// number of axial blocks
-  unsigned int _n_blocks;
   libMesh::DenseMatrix<Real> _DP;
   libMesh::DenseMatrix<Real> & _Wij;
   libMesh::DenseMatrix<Real> _Wij_old;
@@ -204,7 +201,6 @@ protected:
   unsigned int _n_gaps;
   unsigned int _n_pins;
   unsigned int _n_channels;
-  unsigned int _block_size;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
@@ -232,6 +228,8 @@ protected:
   const Real & _P_tol;
   /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
+  /// Maximum iterations for the outer pressure loop
+  const int & _P_maxit;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
   /// The relative convergence tolerance, (relative decrease) for the ksp linear solver
