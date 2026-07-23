@@ -147,15 +147,22 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 BSplineCurveGenerator::generate()
 {
+  std::unique_ptr<MeshBase> start_mesh;
+  std::unique_ptr<MeshBase> end_mesh;
   if (_start_mesh_input)
-    _start_mesh = std::move(_start_mesh_input);
+    start_mesh = std::move(_start_mesh_input);
   if (_end_mesh_input)
-    _end_mesh = std::move(_end_mesh_input);
+    end_mesh = std::move(_end_mesh_input);
 
-  const auto start_point = startPoint();
-  const auto end_point = endPoint();
-  const auto start_dir = startDirection();
-  const auto end_dir = endDirection();
+  const auto start_point =
+      isParamValid("start_point") ? getParam<Point>("start_point") : startPoint(*start_mesh);
+  const auto end_point =
+      isParamValid("end_point") ? getParam<Point>("end_point") : endPoint(*end_mesh);
+  const auto start_dir = isParamValid("start_direction")
+                             ? getParam<RealVectorValue>("start_direction")
+                             : startDirection(*start_mesh);
+  const auto end_dir = isParamValid("end_direction") ? getParam<RealVectorValue>("end_direction")
+                                                     : endDirection(*end_mesh);
 
   auto mesh = buildReplicatedMesh(2);
 
@@ -238,41 +245,29 @@ BSplineCurveGenerator::generate()
 }
 
 Point
-BSplineCurveGenerator::startPoint() const
+BSplineCurveGenerator::startPoint(MeshBase & start_mesh) const
 {
-  if (isParamValid("start_point"))
-    return getParam<Point>("start_point");
-  else
-    return MooseMeshUtils::boundaryCentroidCalculator(
-        getParam<BoundaryName>("boundary_providing_start_point"), *_start_mesh);
+  return MooseMeshUtils::boundaryCentroidCalculator(
+      getParam<BoundaryName>("boundary_providing_start_point"), start_mesh);
 }
 
 Point
-BSplineCurveGenerator::endPoint() const
+BSplineCurveGenerator::endPoint(MeshBase & end_mesh) const
 {
-  if (isParamValid("end_point"))
-    return getParam<Point>("end_point");
-  else
-    return MooseMeshUtils::boundaryCentroidCalculator(
-        getParam<BoundaryName>("boundary_providing_end_point"), *_end_mesh);
+  return MooseMeshUtils::boundaryCentroidCalculator(
+      getParam<BoundaryName>("boundary_providing_end_point"), end_mesh);
 }
 
 RealVectorValue
-BSplineCurveGenerator::startDirection() const
+BSplineCurveGenerator::startDirection(MeshBase & start_mesh) const
 {
-  if (isParamValid("start_direction"))
-    return getParam<RealVectorValue>("start_direction");
-  else
-    return MooseMeshUtils::boundaryWeightedNormal(
-        getParam<BoundaryName>("boundary_providing_start_point"), *_start_mesh);
+  return MooseMeshUtils::boundaryWeightedNormal(
+      getParam<BoundaryName>("boundary_providing_start_point"), start_mesh);
 }
 
 RealVectorValue
-BSplineCurveGenerator::endDirection() const
+BSplineCurveGenerator::endDirection(MeshBase & end_mesh) const
 {
-  if (isParamValid("end_direction"))
-    return getParam<RealVectorValue>("end_direction");
-  else
-    return MooseMeshUtils::boundaryWeightedNormal(
-        getParam<BoundaryName>("boundary_providing_end_point"), *_end_mesh);
+  return MooseMeshUtils::boundaryWeightedNormal(
+      getParam<BoundaryName>("boundary_providing_end_point"), end_mesh);
 }

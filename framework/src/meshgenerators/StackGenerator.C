@@ -77,20 +77,21 @@ StackGenerator::generate()
                mesh->mesh_dimension());
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
-  _meshes.reserve(_input_names.size() - 1);
+  std::vector<std::unique_ptr<ReplicatedMesh>> meshes;
+  meshes.reserve(_input_names.size() - 1);
 
   // Read in all of the other meshes
   for (MooseIndex(_input_names) i = 1; i < _input_names.size(); ++i)
-    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
+    meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
   // Check that the casts didn't fail, and that the dimensions match
-  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
+  for (MooseIndex(meshes) i = 0; i < meshes.size(); ++i)
   {
-    if (_meshes[i] == nullptr)
+    if (meshes[i] == nullptr)
       mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ",
                  _input_names[i + 1],
                  "is not a ReplicatedMesh.");
-    if (static_cast<int>(_meshes[i]->mesh_dimension()) != dim)
+    if (static_cast<int>(meshes[i]->mesh_dimension()) != dim)
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 
@@ -102,7 +103,7 @@ StackGenerator::generate()
                       getParam<BoundaryName>("back_boundary")};
 
   std::vector<boundary_id_type> ids =
-      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
+      MooseMeshUtils::getBoundaryIDs(*meshes[0], boundary_names, true);
 
   mooseAssert(ids.size() == boundary_names.size(),
               "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
@@ -112,8 +113,8 @@ StackGenerator::generate()
   // Getting the width of each mesh
   std::vector<Real> heights;
   heights.push_back(computeWidth(*mesh, _dim) + _bottom_height);
-  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
-    heights.push_back(computeWidth(*_meshes[i], _dim) + *heights.rbegin());
+  for (MooseIndex(meshes) i = 0; i < meshes.size(); ++i)
+    heights.push_back(computeWidth(*meshes[i], _dim) + *heights.rbegin());
 
   // Move the first mesh at the provided height
   switch (_dim)
@@ -127,19 +128,18 @@ StackGenerator::generate()
   }
 
   // Move all of the other meshes in the right spots then stitch them one by one to the first one
-  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
+  for (MooseIndex(meshes) i = 0; i < meshes.size(); ++i)
   {
     switch (_dim)
     {
       case 2:
-        MeshTools::Modification::translate(*_meshes[i], 0, heights[i], 0);
+        MeshTools::Modification::translate(*meshes[i], 0, heights[i], 0);
         break;
       case 3:
-        MeshTools::Modification::translate(*_meshes[i], 0, 0, heights[i]);
+        MeshTools::Modification::translate(*meshes[i], 0, 0, heights[i]);
         break;
     }
-    mesh->stitch_meshes(
-        *_meshes[i], first, second, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    mesh->stitch_meshes(*meshes[i], first, second, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
