@@ -10,10 +10,9 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "LMWeightedGapUserObject.h"
 
 #include <unordered_map>
-
-class WeightedGapUserObject;
 
 /**
  * Computes the weighted gap that will later be used to enforce the
@@ -61,6 +60,18 @@ protected:
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof);
 
+  /// Return the positive characteristic displacement equation scaling used by contact scaling.
+  Real displacementScaling() const;
+
+  /// Return the row compensation between displacement and multiplier equations.
+  Real equationCompensation(const MooseVariable & multiplier) const;
+
+  /// Return the positive nodal normal pressure scale for \p dof.
+  Real normalContactScale(const DofObject * dof) const;
+
+  /// Return the positive mortar weight used to normalize gap and slip values.
+  Real contactNormalization() const;
+
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
   /// x-displacement on the primary face
@@ -81,6 +92,9 @@ protected:
   /// should be of a value such that its product with the gap is on the same scale as the lagrange
   /// multiplier
   const Real _c;
+
+  /// When true, c is read per-node from the UO's dofToDerivedC() instead of _c
+  const bool _use_derived_c_normal;
 
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
@@ -109,5 +123,5 @@ protected:
   const Real * _normalization_ptr = nullptr;
 
   /// The weighted gap user object
-  const WeightedGapUserObject & _weighted_gap_uo;
+  const LMWeightedGapUserObject & _weighted_gap_uo;
 };
