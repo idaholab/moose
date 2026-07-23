@@ -11,19 +11,19 @@
 
 #include "MooseVariable.h"
 
-registerMooseObject("MooseTestApp", ArrayCoupledForce);
+registerMooseObject("MooseApp", ArrayCoupledForce);
 
 InputParameters
 ArrayCoupledForce::validParams()
 {
   InputParameters params = ArrayKernel::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
-  params.addParam<bool>("is_v_array", false, "Whether v is a array variable or not");
+  params.addParam<bool>("is_v_array", false, "Whether v is an array variable or not");
   params.addRequiredParam<RealEigenVector>(
-      "coef", "Coefficent ($\\sigma$) multiplier for the coupled force term.");
+      "coef", "Coefficient ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription(
-      "Implements a source term proportional to the value of a coupled "
-      "standard variable. Weak form: $(\\vec{u}^\\ast, -\\vec{\\sigma} v)$.");
+      "Implements a source term proportional to the value of a coupled standard or array "
+      "variable. Weak form: $(\\vec{u}^\\ast, -\\vec{\\sigma} v)$.");
   return params;
 }
 
@@ -37,12 +37,12 @@ ArrayCoupledForce::ArrayCoupledForce(const InputParameters & parameters)
 {
   if (_var.number() == _v_var)
     paramError("v",
-               "Coupled variable 'v' needs to be different from 'variable' with ArrayCoupledForce, "
-               "consider using Reaction or somethig similar");
+               "Coupled variable 'v' needs to be different from 'variable' with "
+               "ArrayCoupledForce, consider using ArrayReaction or something similar");
   if (_is_v_array && getArrayVar("v", 0)->count() != _count)
     paramError("v",
                "Needs to be either a standard variable or an array variable with the same "
-               "number of components of 'variable'");
+               "number of components as 'variable'");
 }
 
 void
