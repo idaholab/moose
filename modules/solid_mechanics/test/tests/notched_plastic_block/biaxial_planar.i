@@ -255,8 +255,13 @@
   l_max_its = 200
   nl_max_its = 400
 
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
-  petsc_options_value = ' asm      2              lu            gmres     200'
+  # Trust-region Newton (with a smaller minimum trust radius than the PETSc default of 1e-12) is
+  # used here instead of the default line-search Newton because this problem drives the block to
+  # a widespread plastic failure state where the tangent stiffness is nearly singular; right at
+  # that point a line search can fail to find any accepting step length even though the Newton
+  # direction is fine, whereas trust-region shrinks and keeps trying until it converges.
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart -snes_type -snes_tr_deltamin'
+  petsc_options_value = ' asm      2              lu            gmres     200        newtontr    1e-18'
 []
 
 
