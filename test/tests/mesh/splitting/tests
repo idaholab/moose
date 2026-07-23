@@ -11,6 +11,21 @@
     design = 'Mesh/splitting.md'
     requirement = 'A mesh can be split into a specified number of files using command line options.'
   []
+  [make_split_with_boundary_names]
+    type = 'CheckFiles'
+    input = 'simple_diffusion_boundary_names.i'
+    cli_args = '--split-mesh 3 --split-file foo_boundary_names Mesh/parallel_type=replicated'
+    check_files = 'foo_boundary_names.cpa.gz/3/header.gz '
+                  'foo_boundary_names.cpa.gz/3/split-3-0.gz '
+                  'foo_boundary_names.cpa.gz/3/split-3-1.gz '
+                  'foo_boundary_names.cpa.gz/3/split-3-2.gz'
+    recover = false
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'A mesh split can be generated when the mesh input contains vector-valued '
+                  'parameters.'
+  []
   [use_split]
     requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
                   'running a simulation with the unsplit mesh when'
@@ -64,6 +79,36 @@
     design = 'Mesh/splitting.md'
     requirement = 'Using a pre-split mesh with mesh input that differs from the input used to '
                   'generate the split mesh produces an error.'
+  []
+
+  [stale_split_mesh_refinement_error]
+    type = 'RunException'
+    input = 'simple_diffusion.i'
+    cli_args = '--use-split --split-file foo -r 1 Outputs/exodus=false'
+    expect_err = 'was generated from different mesh input than the current run'
+    prereq = 'make_split'
+    min_parallel = 3
+    max_parallel = 3
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'Using a pre-split mesh with a different command-line uniform refinement level '
+                  'than the level used to generate the split mesh produces an error.'
+  []
+
+  [split_mesh_normalized_input]
+    type = 'RunApp'
+    input = 'simple_diffusion_boundary_names_spaced.i'
+    cli_args = '--use-split --split-file foo_boundary_names '
+               'UserObjects/splittester/type=SplitTester Outputs/exodus=false'
+    prereq = 'make_split_with_boundary_names'
+    min_parallel = 3
+    max_parallel = 3
+
+    issues = '#31129'
+    design = 'Mesh/splitting.md'
+    requirement = 'Using a pre-split mesh with equivalent vector-valued mesh input containing '
+                  'different whitespace is accepted.'
   []
 
   [check]
