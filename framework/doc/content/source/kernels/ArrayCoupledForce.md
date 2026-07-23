@@ -1,6 +1,6 @@
 # ArrayCoupledForce
 
-!syntax description /Kernels/ArrayCoupledForce
+## Overview
 
 `ArrayCoupledForce` implements a source term for an array variable that is proportional to a
 coupled standard or array variable. When `v` is an array variable, set
