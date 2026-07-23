@@ -57,6 +57,10 @@
 #include "Parser.h"
 #include "CSGBase.h"
 #include "Capabilities.h"
+#include "RestartableDataReader.h"
+#include "RestartableDataMap.h"
+#include "MeshGenerator.h"
+#include "MeshGeneratorSystem.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -80,6 +84,7 @@
 #endif
 
 // C++ includes
+#include <algorithm>
 #include <numeric> // std::accumulate
 #include <atomic>
 #include <fstream>
@@ -90,11 +95,110 @@
 #include <chrono>
 #include <thread>
 #include <filesystem>
+#include <cstdint>
+#include <iomanip>
+#include <set>
+#include <sstream>
 
 using namespace libMesh;
 
 namespace
 {
+const std::string split_mesh_input_fingerprint_name = "SYSTEM/_moose/split_mesh_input_fingerprint";
+const std::string split_mesh_input_summary_name = "SYSTEM/_moose/split_mesh_input_summary";
+
+std::string
+stableHash(const std::string & value)
+{
+  std::uint64_t hash = 14695981039346656037ULL;
+  for (const auto c : value)
+  {
+    hash ^= static_cast<unsigned char>(c);
+    hash *= 1099511628211ULL;
+  }
+
+  std::ostringstream oss;
+  oss << std::hex << std::setfill('0') << std::setw(16) << hash;
+  return oss.str();
+}
+
+std::string
+parameterValue(const libMesh::Parameters::Value & value)
+{
+  std::ostringstream oss;
+  value.print(oss);
+  auto str = oss.str();
+  if (!str.empty() && str.back() == ' ')
+    str.pop_back();
+  return str;
+}
+
+bool
+includeInSplitMeshFingerprint(const InputParameters & params,
+                              const std::string & name,
+                              const std::set<std::string> & ignored)
+{
+  if (ignored.count(name))
+    return false;
+  if (!params.isParamValid(name) || params.isPrivate(name))
+    return false;
+
+  return true;
+}
+
+void
+appendParametersForSplitMeshFingerprint(std::ostringstream & oss,
+                                        const InputParameters & params,
+                                        const std::set<std::string> & ignored)
+{
+  for (const auto & [name, value] : params)
+    if (includeInSplitMeshFingerprint(params, name, ignored))
+      oss << name << "=" << parameterValue(*value) << "\n";
+}
+
+class SplitMeshInputWalker : public hit::Walker
+{
+public:
+  SplitMeshInputWalker(const std::set<std::string> & ignored) : _ignored(ignored) {}
+
+  void
+  walk(const std::string & fullpath, const std::string & /* nodepath */, hit::Node * n) override
+  {
+    if (n->type() != hit::NodeType::Field || _ignored.count(n->path()))
+      return;
+
+    const auto * field = dynamic_cast<const hit::Field *>(n);
+    mooseAssert(field, "Expected a HIT field");
+    _values.emplace_back(fullpath, field->val());
+  }
+
+  const auto & values() const { return _values; }
+
+private:
+  const std::set<std::string> & _ignored;
+  std::vector<std::pair<std::string, std::string>> _values;
+};
+
+void
+appendRawMeshInputForSplitMeshFingerprint(std::ostringstream & oss,
+                                          Parser & parser,
+                                          const std::set<std::string> & ignored)
+{
+  auto * mesh_node = parser.getRoot().find("Mesh");
+  if (!mesh_node)
+    return;
+
+  SplitMeshInputWalker walker(ignored);
+  mesh_node->walk(&walker, hit::NodeType::Field);
+
+  auto values = walker.values();
+  std::sort(values.begin(), values.end());
+
+  oss << "[MeshInput]\n";
+  for (const auto & [path, value] : values)
+    oss << path << "=" << value << "\n";
+}
+
 /**
  * Return a temporary checkpoint path used to move mesh topology through CheckpointIO.
  *
@@ -2539,6 +2643,122 @@ MooseApp::possiblyLoadRestartableMetaData(const RestartableDataMapName & name,
     reader.setInput(meta_data_folder_base);
     reader.restore();
   }
+}
+
+std::string
+MooseApp::splitMeshInputSummary()
+{
+  std::ostringstream oss;
+  oss << "split-mesh-input-v1\n";
+
+  const std::set<std::string> mesh_ignored = {
+      "parallel_type", "use_split", "split_file", "_is_split"};
+  const std::set<std::string> generator_ignored = {};
+
+  appendRawMeshInputForSplitMeshFingerprint(oss, parser(), mesh_ignored);
+
+  std::vector<const Action *> setup_mesh_actions;
+  for (const auto action : _action_warehouse.getActionListByName("setup_mesh"))
+    setup_mesh_actions.push_back(action);
+
+  std::sort(setup_mesh_actions.begin(),
+            setup_mesh_actions.end(),
+            [](const auto lhs, const auto rhs)
+            {
+              return std::make_pair(lhs->name(), lhs->type()) <
+                     std::make_pair(rhs->name(), rhs->type());
+            });
+
+  for (const auto action : setup_mesh_actions)
+  {
+    oss << "[MeshAction]\n";
+    oss << "name=" << action->name() << "\n";
+    oss << "type=" << action->type() << "\n";
+    appendParametersForSplitMeshFingerprint(oss, action->parameters(), mesh_ignored);
+  }
+
+  const auto & mesh_generator_system = getMeshGeneratorSystem();
+  for (const auto & name : mesh_generator_system.getMeshGeneratorNames())
+  {
+    const auto & generator = mesh_generator_system.getMeshGenerator(name);
+    oss << "[MeshGenerator]\n";
+    oss << "name=" << generator.name() << "\n";
+    oss << "type=" << generator.type() << "\n";
+    appendParametersForSplitMeshFingerprint(oss, generator.parameters(), generator_ignored);
+  }
+
+  return oss.str();
+}
+
+std::string
+MooseApp::splitMeshInputFingerprint()
+{
+  return stableHash(splitMeshInputSummary());
+}
+
+void
+MooseApp::prepareSplitMeshMetaData()
+{
+  auto add_or_update = [this](const std::string & name, const std::string & value)
+  {
+    auto data = std::make_unique<RestartableData<std::string>>(name, nullptr, value);
+    auto & stored_data = registerRestartableData(std::move(data), 0, false, MESH_META_DATA);
+    auto * string_data = dynamic_cast<RestartableData<std::string> *>(&stored_data);
+    mooseAssert(string_data, "Unexpected restartable data type");
+    string_data->set() = value;
+  };
+
+  add_or_update(split_mesh_input_fingerprint_name, splitMeshInputFingerprint());
+  add_or_update(split_mesh_input_summary_name, splitMeshInputSummary());
+}
+
+void
+MooseApp::checkSplitMeshMetaData(const std::filesystem::path & folder_base)
+{
+  const auto & map_name = getRestartableDataMapName(MESH_META_DATA);
+  const auto meta_data_folder_base = metaDataFolderBase(folder_base, map_name);
+
+  if (!RestartableDataReader::isAvailable(meta_data_folder_base))
+  {
+    if (processor_id() == 0)
+      mooseInfo("The pre-split mesh file '",
+                folder_base,
+                "' does not contain mesh meta data. The mesh input cannot be checked for "
+                "consistency with the pre-split mesh.");
+    return;
+  }
+
+  RestartableDataMap split_mesh_meta_data;
+  auto fingerprint_data = std::make_unique<RestartableData<std::string>>(
+      split_mesh_input_fingerprint_name, nullptr, std::string());
+  auto * fingerprint = fingerprint_data.get();
+  split_mesh_meta_data.addData(std::move(fingerprint_data));
+
+  RestartableDataReader reader(*this, split_mesh_meta_data, forceRestart());
+  reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+  reader.setInput(meta_data_folder_base);
+  reader.restore();
+
+  if (!fingerprint->loaded())
+  {
+    if (processor_id() == 0)
+      mooseInfo("The pre-split mesh file '",
+                folder_base,
+                "' does not contain a mesh input fingerprint. The mesh input cannot be checked "
+                "for consistency with the pre-split mesh.");
+    return;
+  }
+
+  const auto current_fingerprint = splitMeshInputFingerprint();
+  if (fingerprint->get() != current_fingerprint)
+    mooseError("The pre-split mesh file '",
+               folder_base,
+               "' was generated from different mesh input than the current run.\n\n",
+               "Stored mesh input fingerprint: ",
+               fingerprint->get(),
+               "\nCurrent mesh input fingerprint: ",
+               current_fingerprint,
+               "\n\nRegenerate the split mesh with --split-mesh, or run without --use-split.");
 }
 
 void

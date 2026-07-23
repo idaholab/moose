@@ -146,6 +146,9 @@ FileMesh::buildMesh()
       if (getParam<bool>("clear_spline_nodes"))
         MeshTools::clear_spline_nodes(getMesh());
 
+      if (_is_split)
+        _app.checkSplitMeshMetaData(_file_name);
+
       _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, _file_name);
 
       if (restarting)
