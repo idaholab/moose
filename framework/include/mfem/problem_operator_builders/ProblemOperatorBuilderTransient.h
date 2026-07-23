@@ -31,7 +31,7 @@ public:
   ~ProblemOperatorBuilderTransient() = default;
 
   /// Returns a pointer to the operator's equation system.
-  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfemProb) override;
+  std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;
 };
 }
 
