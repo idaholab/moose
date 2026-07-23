@@ -11,6 +11,7 @@
 #include "ReportingIDGeneratorUtils.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
+#include "libmesh/mesh_serializer.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -380,13 +381,11 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
 std::unique_ptr<MeshBase>
 PatternedCartesianMeshGenerator::generate()
 {
-  std::vector<std::unique_ptr<ReplicatedMesh>> meshes(_input_names.size());
+  std::vector<std::unique_ptr<MeshBase>> meshes(_input_names.size());
   for (const auto i : index_range(_input_names))
   {
     mooseAssert(_mesh_ptrs[i] && (*_mesh_ptrs[i]).get(), "nullptr mesh");
-    meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_mesh_ptrs[i]));
-    if (!meshes[i])
-      paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
+    meshes[i] = std::move(*_mesh_ptrs[i]);
     // throw an error message if the input mesh does not have a flat side up
     if (hasMeshProperty<bool>("flat_side_up", _input_names[i]))
       if (!getMeshProperty<bool>("flat_side_up", _input_names[i]))
@@ -395,6 +394,12 @@ PatternedCartesianMeshGenerator::generate()
                    _input_names[i],
                    "' does not have a flat side facing up, which is not supported.");
   }
+
+  // Serialize any distributed input meshes for the duration of stitching
+  std::vector<std::unique_ptr<libMesh::MeshSerializer>> serializers;
+  serializers.reserve(meshes.size());
+  for (auto & m : meshes)
+    serializers.push_back(std::make_unique<libMesh::MeshSerializer>(*m));
 
   std::vector<Real> pitch_array;
   std::vector<unsigned int> num_sectors_per_side_array;
@@ -613,7 +618,7 @@ PatternedCartesianMeshGenerator::generate()
   std::vector<Real> control_drum_positions_y;
   std::vector<std::vector<Real>> control_drum_azimuthals;
 
-  std::unique_ptr<ReplicatedMesh> out_mesh;
+  std::unique_ptr<UnstructuredMesh> out_mesh;
 
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
@@ -623,7 +628,7 @@ PatternedCartesianMeshGenerator::generate()
     for (unsigned int j = 0; j < _pattern[i].size(); j++)
     {
       const auto pattern = _pattern[i][j];
-      ReplicatedMesh & pattern_mesh = *meshes[pattern];
+      auto & pattern_mesh = *meshes[pattern];
 
       // No pattern boundary, so no need to wrap with a peripheral mesh
       // Use the inputs as they stand and translate accordingly later
@@ -638,7 +643,8 @@ PatternedCartesianMeshGenerator::generate()
 
         if (j == 0 && i == 0)
         {
-          out_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
+          auto clone_out = pattern_mesh.clone();
+          out_mesh = dynamic_pointer_cast<UnstructuredMesh>(clone_out);
           if (_assign_control_drum_id && _generate_core_metadata)
             out_mesh->add_elem_integer(
                 "control_drum_id",
@@ -713,7 +719,8 @@ PatternedCartesianMeshGenerator::generate()
 
         if (on_periphery)
         {
-          auto tmp_peripheral_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
+          auto tmp_clone = pattern_mesh.clone();
+          auto tmp_peripheral_mesh = dynamic_pointer_cast<UnstructuredMesh>(tmp_clone);
           addPeripheralMesh(*tmp_peripheral_mesh,
                             pattern,
                             pitch_array.front(),
@@ -1023,14 +1030,14 @@ PatternedCartesianMeshGenerator::generate()
     setMeshProperty("interface_boundary_ids", interface_boundary_ids);
   }
 
+  out_mesh->allow_remote_element_removal(_mesh->allowRemoteElementRemoval());
   out_mesh->unset_is_prepared();
-  auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
-  return mesh;
+  return out_mesh;
 }
 
 void
 PatternedCartesianMeshGenerator::addPeripheralMesh(
-    ReplicatedMesh & mesh,
+    UnstructuredMesh & mesh,
     const unsigned int pattern,
     const Real pitch,
     const std::vector<Real> & extra_dist,
@@ -1156,7 +1163,7 @@ PatternedCartesianMeshGenerator::positionSetup(
 
 void
 PatternedCartesianMeshGenerator::addReportingIDs(
-    MeshBase & mesh, const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
+    MeshBase & mesh, const std::vector<std::unique_ptr<MeshBase>> & from_meshes) const
 {
   const unsigned int num_reporting_ids = _reporting_id_names.size();
   for (unsigned int i = 0; i < num_reporting_ids; ++i)

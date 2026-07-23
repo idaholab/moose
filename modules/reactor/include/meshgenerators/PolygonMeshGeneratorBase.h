@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
-#include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_quad8.h"
@@ -522,7 +521,7 @@ protected:
    * @param quad_elem_type type of quad element to be created
    * @return a mesh with the peripheral region added to a hexagon input mesh
    */
-  std::unique_ptr<ReplicatedMesh>
+  std::unique_ptr<MeshBase>
   buildSimplePeripheral(const unsigned int num_sectors_per_side,
                         const unsigned int peripheral_invervals,
                         const std::vector<std::pair<Real, Real>> & position_inner,
