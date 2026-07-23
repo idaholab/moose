@@ -33,6 +33,8 @@ public:
 
   virtual void act() override;
 
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
 protected:
   const NEML2ActionCommon & getCommonAction() const;
 
@@ -114,6 +116,15 @@ protected:
 
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
+
+  /// Interfaces this sub-block action applies to
+  const std::vector<BoundaryName> _interface;
+
+  /// If true, only create the boundary (interface) material and batch interface side data
+  const bool _interface_only;
+
+  /// MATERIAL inputs supplied by a true InterfaceMaterial (read from INTERFACE_MATERIAL_DATA)
+  const std::vector<MaterialPropertyName> _interface_material_inputs;
 
   /// Input variables to skip (i.e., not to set up mappings for)
   std::vector<std::string> _skip_input_variables;
