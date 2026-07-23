@@ -41,10 +41,10 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (_mfem_problem.problemOperatorBuilderIsEmpty() == true)
   {
-    InputParameters def_params = _factory.getValidParams("ProblemOperatorBuilderSteady");
-    std::string Name = "default_steady";
-    std::string Type = "ProblemOperatorBuilderSteady";
-    _mfem_problem.addMFEMProblemOperator(Type, Name, def_params);
+    InputParameters _default_params = _factory.getValidParams("ProblemOperatorBuilderSteady");
+    std::string _name = "default_steady";
+    std::string _type = "ProblemOperatorBuilderSteady";
+    _mfem_problem.addMFEMProblemOperator(_type, _name, _default_params);
   }
   addProblemOperator(
       _mfem_problem.getProblemOperatorBuilder()->createProblemOperator(_mfem_problem));
