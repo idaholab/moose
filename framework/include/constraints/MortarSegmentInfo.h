@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseEnum.h"
+
 // Forward declarations
 namespace libMesh
 {
@@ -32,6 +34,10 @@ enum class MortarSegmentTriangulationMode : unsigned char
   EarClipping,
   Vertex
 };
+
+CreateMooseEnumClass(Mortar3DQuadraturePointMapping,
+                     NORMAL_PROJECTION = 0,
+                     REFERENCE_INTERPOLATION = 1);
 
 /**
  * Holds xi^(1), xi^(2), and other data for a given mortar segment.

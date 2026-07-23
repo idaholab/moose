@@ -2003,7 +2003,9 @@ public:
       const bool correct_edge_dropping,
       const Real minimum_projection_angle,
       const MooseEnum & triangulation,
-      const bool triangulate_triangles);
+      const bool triangulate_triangles,
+      const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
+          Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Return the undisplaced or displaced mortar generation object associated with the provided
