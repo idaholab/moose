@@ -1,0 +1,71 @@
+# Pre-commit hooks for MOOSE. See https://pre-commit.com.
+#
+# Install once per clone:
+#     pip install pre-commit   # (already pinned in requirements.txt)
+#     pre-commit install
+#
+# The tool versions below mirror the pins in requirements.txt so that humans,
+# coding agents, and CIVET share a single source of truth for formatting/linting.
+
+# Global exclude: vendored / submodule / generated trees.
+exclude: |
+  (?x)^(
+    libmesh/|
+    petsc/|
+    large_media/|
+    framework/contrib/|
+    python/contrib/|
+    framework/doc/content/contrib/|
+    modules/[^/]+/contrib/
+  )
+
+repos:
+  # ---- Generic hygiene ----
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: (?x)(^|/)gold/
+      - id: end-of-file-fixer
+        exclude: (?x)(^|/)gold/
+      - id: check-merge-conflict
+      - id: check-yaml
+        # --unsafe: syntax-only check that tolerates MOOSE's custom !include/!template
+        # YAML tags. conda recipes are jinja-templated and are not valid YAML.
+        args: [--unsafe]
+        exclude: ^conda/
+
+  # ---- C++ (MOOSE uses the .C extension for sources) ----
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v19.1.7  # mirrors clang-format in requirements.txt
+    hooks:
+      - id: clang-format
+        # types_or: [text] ensures .C files are included regardless of how the
+        # identify library tags that ambiguous extension.
+        files: \.(C|K|h)$
+        types_or: [text]
+
+  # ---- Python: Ruff (lint, autofix) then Black (format) ----
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.15  # mirrors ruff in requirements.txt
+    hooks:
+      - id: ruff
+        # Honors the restricted [tool.ruff] include/exclude list in pyproject.toml.
+        args: [--fix]
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.5.1  # mirrors black in requirements.txt
+    hooks:
+      - id: black
+        # Honors [tool.black] extend-exclude in pyproject.toml.
+
+  # ---- Copyright headers (reuse the existing MOOSE script) ----
+  - repo: local
+    hooks:
+      - id: check-copyright
+        name: check/insert MOOSE copyright headers
+        entry: framework/scripts/fixup_headers.py -u
+        language: script
+        files: \.(C|K|h|py)$
+        exclude: ^test/tests/test_harness/validation_badpython\.py$
+        pass_filenames: true
