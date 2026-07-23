@@ -153,19 +153,49 @@ axial_shape_scale = 1.33449883449883
 []
 
 [Postprocessors]
-  [total_pin_power]
-    type = ElementIntegralVariablePostprocessor
-    variable = q_prime
-    block = fuel_pins
-  []
-  [outlet_mean_temperature]
-    type = SCMPlanarMean
+  # For nrings = 2, channels 0-5 are center channels and the perimeter channels then alternate
+  # edge/corner. Sample one center, one edge, and one corner channel at the outlet.
+  [T_center_out]
+    type = SubChannelPointValue
     variable = T
+    index = 0
+    execute_on = 'timestep_end'
     height = ${core_length}
   []
-  [assembly_pressure_drop]
-    type = SubChannelDelta
-    variable = P
+  [T_edge_out]
+    type = SubChannelPointValue
+    variable = T
+    index = 6
+    execute_on = 'timestep_end'
+    height = ${core_length}
+  []
+  [T_corner_out]
+    type = SubChannelPointValue
+    variable = T
+    index = 7
+    execute_on = 'timestep_end'
+    height = ${core_length}
+  []
+  [mdot_center_out]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 0
+    execute_on = 'timestep_end'
+    height = ${core_length}
+  []
+  [mdot_edge_out]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 6
+    execute_on = 'timestep_end'
+    height = ${core_length}
+  []
+  [mdot_corner_out]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 7
+    execute_on = 'timestep_end'
+    height = ${core_length}
   []
 []
 
@@ -174,6 +204,6 @@ axial_shape_scale = 1.33449883449883
 []
 
 [Outputs]
-  csv = false
+  csv = true
   exodus = false
 []

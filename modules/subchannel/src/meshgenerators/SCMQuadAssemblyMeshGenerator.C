@@ -251,7 +251,8 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
    * Build channel-gap connectivity directly from the rectilinear channel grid.
    *
    * Each gap separates exactly two neighboring channels. The east-west pass connects channels that
-   * share a vertical face, and the north-south pass connects channels that share a horizontal face.
+   * are adjacent in the x direction, and the north-south pass connects channels that are adjacent
+   * in the y direction.
    * As each gap is created, both the reverse map (_gap_to_chan_map) and the forward channel maps
    * (_chan_to_gap_map) are filled, and opposite crossflow signs are assigned to the two channels.
    *

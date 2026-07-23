@@ -507,6 +507,8 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
         } // if
       } // for
 
+      // Check whether the edge channel's first pin is also a corner pin. This second corner lookup
+      // is only needed while the edge channel still needs another perimeter gap.
       if (_chan_to_gap_map[i].size() < 3)
       {
         for (unsigned int k = 0; k < _n_channels; k++)

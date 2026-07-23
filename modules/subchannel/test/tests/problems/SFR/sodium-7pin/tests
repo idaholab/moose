@@ -2,11 +2,13 @@
   design = 'TriSubChannel1PhaseProblem.md SCMTriAssemblyMeshGenerator.md'
   issues = '#33388'
   [case1_scm]
-    type = RunApp
+    type = CSVDiff
     input = case1_scm.i
+    csvdiff = case1_scm_out.csv
     cli_args = '--error --error-override --compute-device=cpu'
+    rel_err = 1e-5
     allow_warnings = true
     recover = false
-    requirement = 'The system shall solve a 7-pin triangular subchannel assembly without invalid gap connectivity.'
+    requirement = 'The system shall solve a 7-pin triangular subchannel assembly and preserve the center, edge, and corner outlet temperature and mass flow rate.'
   []
 []
