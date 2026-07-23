@@ -27,6 +27,8 @@
 #include "EFAFuncs.h"
 #include "EFAError.h"
 
+#include <algorithm>
+
 ElementFragmentAlgorithm::ElementFragmentAlgorithm(std::ostream & os) : _ostream(os) {}
 
 ElementFragmentAlgorithm::~ElementFragmentAlgorithm()
@@ -52,6 +54,15 @@ ElementFragmentAlgorithm::~ElementFragmentAlgorithm()
     delete mit->second;
     mit->second = nullptr;
   }
+  // Free embedded nodes that were purged from _embedded_nodes during
+  // class C (phantom-cut) cleanup but kept alive across the run because
+  // inherited cut-plane faces may have referenced them as edge endpoints.
+  // The element destructors below only delete face/edge containers; they do
+  // not dereference edge endpoint pointers, so freeing the endpoint nodes
+  // first is safe.
+  for (EFANode * n : _purged_embedded_nodes)
+    delete n;
+  _purged_embedded_nodes.clear();
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
   {
@@ -280,13 +291,75 @@ ElementFragmentAlgorithm::addFragFaceIntersection(
 void
 ElementFragmentAlgorithm::updatePhysicalLinksAndFragments()
 {
-  // loop over the elements in the mesh
+  // Three phases.  prepareForFragmentUpdate may classify an embedded node
+  // in three ways (see EFAFragment3D::removeInvalidEmbeddedNodes):
+  //   - Class A (lone-edge, emb_faces.size() == 1): handled fragment-locally
+  //     inside prepareForFragmentUpdate; the EFANode stays alive and in
+  //     _embedded_nodes, and does NOT appear in invalid_emb here.
+  //   - Class B (over-shared, emb_faces.size() > 2): aborts via EFAError --
+  //     non-manifold fragment topology that has not been observed in any
+  //     failing input and is left as an error to avoid masking upstream bugs.
+  //   - Class C (phantom cut, counter == 0, emb_faces.size() == 2): appended
+  //     to invalid_emb; handled globally in phase (2) below.
+  //
+  //  (1) prepareForFragmentUpdate on every element: combine crack-tip faces
+  //      and collect class C invalid embedded nodes into invalid_emb.  No
+  //      state shared across elements is mutated for class C yet.
+  //
+  //  (2) Global sweep for class C: for each invalid embedded node, call
+  //      purgeEmbeddedNodeReferences on EVERY element to scrub references
+  //      from its edges/faces/fragments, then remove the node from
+  //      _embedded_nodes WITHOUT freeing the EFANode object.  The
+  //      walk-all-elements is required because the same embedded node can
+  //      sit on edges of elements that are more than one hop from the
+  //      element where it was identified as invalid: each
+  //      markCutFacesByGeometry entry on an element propagates the cut only
+  //      one hop, but multiple independent entries can spread the same node
+  //      across a wider set of elements.  Single-hop propagation inside
+  //      EFAElement3D::removeEmbeddedNode is therefore insufficient.  See
+  //      the block comment at the Efa::deleteFromMap call below for why the
+  //      EFANode object is not freed mid-run; it is parked in
+  //      _purged_embedded_nodes and freed in ~ElementFragmentAlgorithm.
+  //
+  //  (3) updateFragments on every element to actually split.  Because every
+  //      class C node has already been purged from every element's faces and
+  //      fragments (and class A has been fixed fragment-locally), no split
+  //      can capture a doomed node as a face vertex.
+  std::vector<EFANode *> invalid_emb;
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
+    eit->second->prepareForFragmentUpdate(_crack_tip_elements, _embedded_nodes, invalid_emb);
+
+  if (!invalid_emb.empty())
   {
-    EFAElement * curr_elem = eit->second;
-    curr_elem->updateFragments(_crack_tip_elements, _embedded_nodes);
-  } // loop over all elements
+    // Deduplicate -- the same node may be flagged by more than one element.
+    std::sort(invalid_emb.begin(), invalid_emb.end());
+    invalid_emb.erase(std::unique(invalid_emb.begin(), invalid_emb.end()), invalid_emb.end());
+
+    for (EFANode * emb : invalid_emb)
+    {
+      for (eit = _elements.begin(); eit != _elements.end(); ++eit)
+        eit->second->purgeEmbeddedNodeReferences(emb);
+      // Remove from the map but do not free the EFANode here.  An embedded
+      // node from a prior step may serve as an edge endpoint
+      // (_edge_node1/_edge_node2) on a cut-plane face inherited into this
+      // step's fragment.  purgeEmbeddedNodeReferences only scrubs the
+      // _embedded_nodes[] intersection lists; it cannot clear endpoint
+      // pointers without breaking the face polygon.  Freeing the EFANode
+      // mid-run would leave dangling endpoints and crash inside
+      // EFAEdge::hasIntersection (which dereferences endpoint->parent()
+      // ->category()).  Defer the delete to ~ElementFragmentAlgorithm by
+      // parking the node in _purged_embedded_nodes; all elements (and the
+      // edges that reference these nodes) are freed there too, so by the
+      // time we free these EFANodes no edge endpoint is ever dereferenced
+      // again.
+      Efa::deleteFromMap(_embedded_nodes, emb, false /* do not free object */);
+      _purged_embedded_nodes.push_back(emb);
+    }
+  }
+
+  for (eit = _elements.begin(); eit != _elements.end(); ++eit)
+    eit->second->updateFragments(_crack_tip_elements, _embedded_nodes);
 }
 
 void
