@@ -9,25 +9,25 @@ however the ProblemOperatos are built and owned by the MFEM executioners.
 
 ## Steady problem operator builder
 The ProblemOperatorBuilderSteady class is the default of the MFEMSteady executioner and does
-not need to be declared explicitly. The `ProblemOperatorBuilderSteady` class uses	 
-systematic logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`
-, `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
+not need to be declared explicitly. The `ProblemOperatorBuilderSteady` class uses systematic
+logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`,
+`ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
 ## Transient problem operator builder
-The ProblemOperatorBuilderTransient class is the default of the MFEMTransient executioner and does
-not need to be declared explicitly. The `ProblemOperatorBuilderTransient` class builds the 
-`TimeDependentEquationSystemProblemOperator`.
+The ProblemOperatorBuilderTransient class is the default of the MFEMTransient executioner and
+does not need to be declared explicitly. The `ProblemOperatorBuilderTransient` class builds 
+the `TimeDependentEquationSystemProblemOperator`.
 
 ## Custom problem operator builder example
-The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test
-which is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp).
-Firstly a CustomProblemOperator class must be built, if the problem is steady i.e called from
-the MFEMSteady executioner (as in this example) then the `ProblemOperator` class inherits from 
-`Moose::MFEM::ProblemOperator`. If the CustomProblemOperator class is transient i.e. called from
-the MFEMTransient executioner then the class must inherit from `Moose::MFEM::TimeDependentProblemOperator`.
-For this case the problem is steady and an example class may look as follows:
+The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test which
+is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly a
+CustomProblemOperator class must be built, if the problem is steady i.e called from the `MFEMSteady` 
+executioner then the `ProblemOperator` class inherits from `Moose::MFEM::ProblemOperator`. If the
+CustomProblemOperator class is transient i.e. called from the `MFEMTransient` executioner then
+the class must inherit from `Moose::MFEM::TimeDependentProblemOperator`. For this case the problem
+is steady and an example class may look as follows:
 
-```
+```cpp
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 {
   private:
@@ -57,7 +57,7 @@ jacobian. The self pointer would have be passed to the Non-linear solver via the
 linear and the Operator is simply built in the constructor. Firstly the class needs `Form`'s,
 `Coefficient`'s, BC `Array`s, `Operator`s and solution/forcing `Vector`s.
 
-```
+```cpp
 class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 {
   private:
@@ -94,7 +94,7 @@ Both the FE-Spaces and `GridFunction`s are owned by the `MFEMProblem` and need t
 for usage in the `ProblemOperator`, assuming for this example that the FE-Space and `GridFunction`
 that we are interested in have an expected name then the constructor may look like this:
 
-```
+```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
 {
   // Retrieve the FE-space and gridFunction
@@ -110,7 +110,7 @@ CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
 The rest of the constructor mirrors the MFEM ex0p example, i.e. build the forms, add the
 integrators, assemble the forms and form the linear system:
 
-```
+```cpp
 CustomDummyProblemOperator::CustomDummyProblemOperator(MFEMProblem & prob0)
   : Moose::MFEM::ProblemOperator(prob0)
 {
@@ -145,7 +145,7 @@ During construction as the `Moose::MFEM::ProblemOperator` class was constructed 
 the class inherits a reference to the `MFEMProblem` namely `_problem_data` it can be used
 to acces `MFEMProblem` members.
 
-```
+```cpp
 void CustomDummyProblemOperator::Solve() override
 {
   // Set the operator and solve the equation
@@ -167,7 +167,7 @@ must inherit from `ProblemOperatorBuilderBase` making it an `MFEMObject` and by 
 that has a fixed signature that is called by the executioner. All of the code must
 be within the `Moose::MFEM` namespace for simplicity. An example minimal class looks like:
 
-```
+```cpp
 namespace Moose::MFEM
 {
 class ProblemOperatorBuilderCustomDummy : public ProblemOperatorBuilderBase
@@ -189,12 +189,12 @@ public:
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
   createProblemOperator(MFEMProblem & mfemProb) override;
 };
-};
+}
 ```
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
 the inputs can be then put in the ProblemOperatorBuilder block of the input files.
-```
+```cpp
 namespace Moose::MFEM
 {
 InputParameters ProblemOperatorBuilderCustomDummy::validParams()
@@ -213,10 +213,11 @@ The constructor can be left more or less empty if the operator being built has n
 options associated with it directly (e.g. solver customisations may occur in the `MFEMProblem`
 class), but in the case there are custom inputs it can be used to retrieve the input params
 and store them.
-```
+```cpp
 namespace Moose::MFEM
 {
-ProblemOperatorBuilderCustomDummy::ProblemOperatorBuilderCustomDummy(const InputParameters & parameters)
+ProblemOperatorBuilderCustomDummy::ProblemOperatorBuilderCustomDummy(
+  const InputParameters & parameters)
   : ProblemOperatorBuilderBase(parameters) 
 {
   param1 = getParam<type1>("name");
@@ -230,7 +231,7 @@ ProblemOperatorBuilderCustomDummy::ProblemOperatorBuilderCustomDummy(const Input
 The last method to be built is the `createProblemOperator` it simply returns a shared pointer
 to the ProblemOperator that was defined earlier, this method is called by the executioner,
 and the resulting object is owned by the executioner.
-```
+```cpp
 namespace Moose::MFEM
 {
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
@@ -243,14 +244,14 @@ ProblemOperatorBuilderCustomDummy::createProblemOperator(MFEMProblem & mfemProb)
 
 Once the object has been defined, the new `ProblemOperatorBuilder` object must be registered
 to the MooseApp system:
-```
+```cpp
 namespace Moose::MFEM
 {
   registerMooseObject("MooseApp", ProblemOperatorBuilderCustomDummy);
 };
 ```
 In the unit test example the complete code looks like this:
-```
+```cpp
 namespace Moose::MFEM
 {
 class ProblemOperatorBuilderCustomDummy : public ProblemOperatorBuilderBase
