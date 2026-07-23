@@ -21,9 +21,13 @@ public:
   void act() override;
 
 protected:
+  /// Return the first displacement component that is in the generalized plane
+  unsigned int inPlaneDisplacementIndex() const;
+
   std::vector<VariableName> _displacements;
 
   /// Number of displacement variables
   unsigned int _ndisp;
   const unsigned int _out_of_plane_direction;
+  const bool _use_ad;
 };

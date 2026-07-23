@@ -345,8 +345,6 @@ QuasiStaticSolidMechanicsPhysics::act()
   {
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
-      if (_use_ad)
-        paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
       // Set the action parameters
       const std::string type = "GeneralizedPlaneStrainAction";
       auto action_params = _action_factory.getValidParams(type);
@@ -364,6 +362,7 @@ QuasiStaticSolidMechanicsPhysics::act()
                                      "factor",
                                      "pressure_factor"});
       action_params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      action_params.set<bool>("use_automatic_differentiation") = _use_ad;
 
       if (parameters().isParamSetByUser("out_of_plane_pressure"))
         action_params.set<FunctionName>("out_of_plane_pressure") =
@@ -1022,10 +1021,8 @@ QuasiStaticSolidMechanicsPhysics::actStressDivergenceTensorsStrain()
            _planar_formulation == PlanarFormulation::PlaneStrain ||
            _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
   {
-    if (_use_ad && (_planar_formulation == PlanarFormulation::PlaneStrain ||
-                    _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain))
-      paramError("use_automatic_differentiation",
-                 "AD not setup for use with PlaneStrain or GeneralizedPlaneStrain");
+    if (_use_ad && _planar_formulation == PlanarFormulation::PlaneStrain)
+      paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
 
     std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
         {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputePlaneSmallStrain"},

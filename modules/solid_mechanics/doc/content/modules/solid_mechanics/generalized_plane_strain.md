@@ -2,15 +2,26 @@
 
 ## Description
 
-The generalized plane strain problem has found use in many important applications. Many different presentations can be found in the literature. The simplest one is an extension of the plane strain problem by allowing a non-vanishing constant direction strain in the out-of-plane direction [!citep](Adams1967gps). It has been further generalized by allowing two rotations degrees of freedom [!citep](Abaqus2014gps). An even more generalized form includes the anticlastic problem associated with the out-of-plane shear [!citep](Adams1984gps, Li1999gps).
+Generalized plane strain extends plane strain by allowing a nonzero constant
+strain in the out-of-plane direction [!citep](Adams1967gps). Other formulations
+add two rotational degrees of freedom [!citep](Abaqus2014gps) or include the
+anticlastic problem associated with out-of-plane shear [!citep](Adams1984gps, Li1999gps).
 
-In the [solid mechanics module](solid_mechanics/index.md), the simplest form was implemented, i.e. an extra degree of freedom representing the out-of-plane direct strain is included in addition to the conventional plane strain problem [!citep](Li2005gps).
+The [solid mechanics module](solid_mechanics/index.md) implements the form with
+one extra degree of freedom representing the direct out-of-plane strain
+[!citep](Li2005gps).
 
 ## Formulation
 
-For description, we introduce the coordinate system so that the $x$-$y$ plane is positioned transverse to the perpendicular out-of-plane direction and the $z$-axis runs in this out-of-plane direction. Under the simplest generalized plane strain conditions, the in-plane stresses are not functions of $z$, implying that the in-plane strains are not functions of $z$ from the constitutive relationship for linearly elastic and homogeneous materials. +The generalized plane strain problem is 2D in presentation, defined in a 2D domain+.
+For the usual $x$-$y$ model plane, the $z$ axis is the out-of-plane direction.
+Under generalized plane strain conditions, the in-plane stresses are not
+functions of $z$, and the direct out-of-plane strain is represented by a scalar
+variable. The model is solved on a 2D domain.
 
-The generalized plane strain formulation also works when the coordinate system is such that the $x$-$z$ or $y$-$z$ planes are positioned transverse to the perpendicular out-of-plane direction.  In these cases the $y$-axis or $x$-axis runs in the out-of-plane direction, respectively.
+The formulation also works when the model plane is $x$-$z$ or $y$-$z$. In those
+cases the out-of-plane direction is the $y$ axis or $x$ axis, respectively. In
+RZ axisymmetry, the out-of-plane generalized plane strain direction is the axial
+$y$ direction.
 
 ## $x$-$y$ plane generalized plane strain problem
 
@@ -78,19 +89,36 @@ A further condition is required associated with the out-of-plane direction. If a
 \begin{equation}
 \epsilon_{zz} = \bar{\epsilon}_{zz}
 \end{equation}
-Alternatively, a force as the stress resultant $\bar{N}_{z}$ in the $z$-direction can be prescribed, the condition is the equilibrium condition in $z$-direction, given as
+Alternatively, a force as the stress resultant $\bar{N}_{z}$ in the $z$-direction can be prescribed. The condition is the equilibrium condition in $z$-direction, given as
 \begin{equation}
 \label{eqn:xy_equilibrium}
 N_{z} = \int_{A}{\sigma_{zz}dA} = \bar{N}_{z}
 \end{equation}
 The stress resultant $N_{z}$ conjugates with constant strain $\epsilon_{zz}$.
 
-The formulation above for the generalized plane strain problem shares many similarities with that of the conventional plane stress or plane strain problem. +All the differences are associated with the introduction of an additional degree of freedom for the out-of-plane direction+.
+The formulation above shares the in-plane mechanics of a conventional plane
+strain problem and adds the scalar degree of freedom for the out-of-plane
+direction.
+
+When an out-of-plane pressure $p_o$ is prescribed, the scalar residual is written
+as
+\begin{equation}
+  R_s = \int_A \left( \sigma_{oo} + p_o \right) dA = 0,
+\end{equation}
+where $o$ is the selected out-of-plane direction. Positive out-of-plane pressure
+is applied toward the body. In Cartesian coordinates, $o=x$, $o=y$, and $o=z$
+use $\sigma_{xx}$, $\sigma_{yy}$, and $\sigma_{zz}$, respectively. In RZ
+axisymmetry, $o=y$, and the scalar residual is integrated with the RZ coordinate
+weighting.
 
 ### Implementation
 
-The out-of-plane strain is a scalar variable, and it can be added to the standard system of equations for a mechanics problem, where $\boldsymbol{u}_x$ and $\boldsymbol{u}_y$ represent
-the displacement vectors in the $x$ and $y$ directions, $\boldsymbol{f}_x$ and $\boldsymbol{f}_y$ represent the corresponding reaction forces. The discussion here is for the case where the two-dimensional model lies in the $x$-$y$ plane,  The partitioned linearized system of equations, in which the block entries in the stiffness matrix are represented by subscripted $\boldsymbol{K}$ terms, can be written including the scalar strain variable as follows:
+The out-of-plane strain is a scalar variable in the standard system of equations
+for a mechanics problem, where $\boldsymbol{u}_x$ and $\boldsymbol{u}_y$
+represent the displacement vectors in the $x$ and $y$ directions, and
+$\boldsymbol{f}_x$ and $\boldsymbol{f}_y$ represent the corresponding reaction
+forces. For a two-dimensional model in the $x$-$y$ plane, the partitioned
+linearized system can be written as follows:
 
 \begin{equation}
 \left[
@@ -143,7 +171,7 @@ N_{y} = \int_{A}{\sigma_{yy}dA} = \bar{N}_{y}
 \end{equation}
 The same pattern is followed for the $y$-$z$ plane case.
 
-## List of MOOSE objects used in the implementation
+## MOOSE Objects
 
 Objects available for generalized plane strain:
 
@@ -161,8 +189,41 @@ Objects specific for generalized plane strain:
 
 - [Strain Calculations](solid_mechanics/Strains.md): in-plane strain calculation and formation of full strain tensor considering the scalar out-of-plane strain
 
-## How to use generalized plane strain model
+Objects specific to the AD generalized plane strain path:
+
+- [ADGeneralizedPlaneStrain.md]: scalar out-of-plane equilibrium condition and
+  AD coupling terms
+
+!table id=gps_legacy_objects caption=Legacy generalized plane strain objects created by the action
+| Object | Role |
+| --- | --- |
+| [GeneralizedPlaneStrainOffDiag.md] | Off-diagonal coupling between in-plane displacement variables and the scalar out-of-plane strain. |
+| [GeneralizedPlaneStrain.md] | Scalar out-of-plane equilibrium residual. |
+| [GeneralizedPlaneStrainUserObject.md] | Residual and diagonal Jacobian data for the scalar kernel. |
+
+!table id=gps_ad_objects caption=AD generalized plane strain objects created by the action
+| Object | Role |
+| --- | --- |
+| [ADGeneralizedPlaneStrain.md] | Scalar out-of-plane equilibrium residual and AD coupling terms. |
+
+The AD path requires AD stress materials. [ADGeneralizedPlaneStrain.md] owns the
+scalar residual assembly through `ADKernelScalarBase`, including displaced-mesh
+quadrature weights when requested. The out-of-plane pressure material used by
+[ADGeneralizedPlaneStrain.md] is a regular `Real` material property, so it is
+treated as derivative-free in the scalar equation.
+
+## How to Use Generalized Plane Strain
 
 The [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) can be used to set up a generalized plane strain model. The [QuasiStaticSolidMechanicsPhysics](/QuasiStaticSolidMechanicsPhysics.md) which considers the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md) as Meta-Action can also be used.
+
+The following test-spec block shows a modern QuasiStatic small-strain input run
+in AD mode.
+
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/tests start=[generalized_plane_strain_small_ad] end=[] include-end=true
+
+The following standalone action input uses AD mode and lets the action create the
+missing scalar out-of-plane strain variable.
+
+!listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_auto_scalar.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
 !bibtex bibliography

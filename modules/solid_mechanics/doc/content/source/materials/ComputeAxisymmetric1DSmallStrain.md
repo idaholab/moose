@@ -1,29 +1,38 @@
-# Compute Axisymmetric 1D Small Strain
+# ComputeAxisymmetric1DSmallStrain / ADComputeAxisymmetric1DSmallStrain
 
 !syntax description /Materials/ComputeAxisymmetric1DSmallStrain
 
 ## Description
 
-The material `ComputeAxisymmetric1DSmallStrain` calculates the small total
-strain for 1D Axisymmetric systems and is intended for use with
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
-This material assumes symmetry about the $z$-axis.
-This 'strain calculator' material computes the strain within the cylindrical
-coordinate system and relies on the specialized
-[Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
-divergence calculation.
+`ComputeAxisymmetric1DSmallStrain` computes the small total strain for a 1D
+axisymmetric generalized plane strain model. When the solid mechanics action is
+used with `use_automatic_differentiation = true`, the action selects
+`ADComputeAxisymmetric1DSmallStrain` for the same strain formulation.
 
-!alert warning title=Symmetry Assumed About the $z$-axis
-The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
-cylindrical coordinate system. This symmetry orientation is required for the
-calculation of the residual and of the jacobian.
-See [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) for the
-residual equation and the germane discussion.
+This material assumes symmetry about the $z$ axis and must be used on blocks
+with `COORD_TYPE = RZ`. The radial coordinate is the physical $x$ coordinate.
+In the 1D strain tensor, MOOSE maps the radial strain to the `rr` or `xx`
+component, the generalized plane strain to the axial `yy` component, and the
+hoop strain to the `zz` component. The stress divergence is handled by the
+axisymmetric RZ kernels, such as [StressDivergenceRZTensors](/StressDivergenceRZTensors.md).
+
+The out-of-plane strain can be supplied by either
+[!param](/Materials/ComputeAxisymmetric1DSmallStrain/scalar_out_of_plane_strain)
+or [!param](/Materials/ComputeAxisymmetric1DSmallStrain/out_of_plane_strain),
+but not both. Scalar out-of-plane strain values are commonly used by
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
+models. If multiple scalar components are coupled,
+[!param](/Materials/ComputeAxisymmetric1DSmallStrain/subblock_index_provider)
+selects which scalar component applies to the current element; without that
+user object, component 0 is used.
+
+For the AD object, current displacement and out-of-plane strain values are AD
+values. This total small-strain formulation does not use an old-state strain.
 
 ## 1D Axisymmetric Strain Formulation
 
-The axisymmetric model uses the cylindrical coordinates, $r$, $z$, and $\theta$,
-where the linear section formed by the $r$ axis is rotated about the $z$ axis in
+The axisymmetric model uses the cylindrical coordinates, $r$, $z$, and
+$\theta$, where the line in the $r$ direction is rotated about the $z$ axis in
 the $\theta$ direction.
 
 The definition of a small total linearized strain is
@@ -31,8 +40,7 @@ The definition of a small total linearized strain is
   \label{eqn:def_small_total_strain}
   \epsilon_{ij} = \frac{1}{2} \left( u_{i,j} + u_{j,i}  \right)
 \end{equation}
-In this axisymmetric 1D formulation, the strain tensor is diagonal. [eqn:def_small_total_strain]
-is therefore implemented in a straight-forward manner as
+In this axisymmetric 1D formulation, the strain tensor is diagonal:
 \begin{equation}
   \label{eqn:1d_axisym_strain}
   \epsilon_{ij} = \begin{bmatrix}
@@ -41,7 +49,7 @@ is therefore implemented in a straight-forward manner as
                     0 & 0 & \epsilon_{\theta \theta}
                   \end{bmatrix}
 \end{equation}
-where the components of the strain tensor in [eqn:1d_axisym_strain] are given as
+with components
 \begin{equation}
   \label{eqn:strain_components}
   \begin{aligned}
@@ -50,35 +58,18 @@ where the components of the strain tensor in [eqn:1d_axisym_strain] are given as
   \epsilon_{\theta \theta} & = \frac{u_r}{X_r}
   \end{aligned}
 \end{equation}
-where $\epsilon|^{op}$ is a prescribed out-of-plane strain value: this strain
-value can be given either as a scalar variable or a nonlinear variable.
-The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-problems use scalar variables.
-The value of the strain $\epsilon_{\theta \theta}$ depends on the displacement
-and position in the radial direction.
+where $\epsilon|^{op}$ is the supplied out-of-plane strain. In the MOOSE tensor
+storage for this 1D formulation, the generalized plane strain component is
+stored in `yy` and the hoop component is stored in `zz`.
 
-!alert note title=Notation Order Change
-The axisymmetric system changes the order of the displacement vector from
-$(u_r, u_{\theta}, u_z)$, usually seen in textbooks, to $(u_r, u_z, u_{\theta})$.
-Take care to follow this convention in your input files and when adding
-eigenstrains or extra stresses.
+## Example Input File Syntax
 
-
-## Example Input File
-
-!alert note title=Use RZ Coordinate Type
-The coordinate type in the Problem block of the input file must be set to
-+`COORD_TYPE = RZ`+.
-
-The common use of the `ComputeAxisymmetric1DSmallStrain` class is with the
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) system;
-this type of simulation uses the scalar strain variables
+The following generalized plane strain test uses the scalar out-of-plane strain
+option with `ComputeAxisymmetric1DSmallStrain`.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Materials/strain
 
-which uses a scalar variable for the coupled out-of-plane strain; the argument
-for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
-variable:
+The coupled scalar variable is defined in the same input file.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_small.i block=Variables/scalar_strain_yy
 

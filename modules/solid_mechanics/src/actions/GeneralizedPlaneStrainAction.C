@@ -12,13 +12,18 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
+
+#include <set>
 
 registerMooseAction("SolidMechanicsApp", GeneralizedPlaneStrainAction, "add_scalar_kernel");
 
 registerMooseAction("SolidMechanicsApp", GeneralizedPlaneStrainAction, "add_kernel");
 
 registerMooseAction("SolidMechanicsApp", GeneralizedPlaneStrainAction, "add_user_object");
+
+registerMooseAction("SolidMechanicsApp", GeneralizedPlaneStrainAction, "add_variables_physics");
 
 InputParameters
 GeneralizedPlaneStrainAction::validParams()
@@ -66,6 +71,10 @@ GeneralizedPlaneStrainAction::validParams()
   params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
                                         "The tag names for extra vectors that the absolute value "
                                         "of the residual should be accumulated into");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Use automatic differentiation to assemble the generalized plane strain "
+                        "equation and its coupling terms");
 
   return params;
 }
@@ -74,8 +83,19 @@ GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters
   : Action(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
-    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction")),
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
+}
+
+unsigned int
+GeneralizedPlaneStrainAction::inPlaneDisplacementIndex() const
+{
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    if (i != _out_of_plane_direction)
+      return i;
+
+  paramError("displacements", "No in-plane displacement is available to anchor the action");
 }
 
 void
@@ -84,10 +104,130 @@ GeneralizedPlaneStrainAction::act()
   // user object name
   const std::string uo_name = _name + "_GeneralizedPlaneStrainUserObject";
 
+  if (_current_task == "add_variables_physics")
+  {
+    if (_use_ad)
+    {
+      std::set<SubdomainID> block_ids;
+      if (isParamValid("block"))
+        for (const auto & block : getParam<std::vector<SubdomainName>>("block"))
+        {
+          const auto id = _mesh->getSubdomainID(block);
+          if (id == Moose::INVALID_BLOCK_ID)
+            paramError("block", "Subdomain '", block, "' was not found in the mesh");
+          block_ids.insert(id);
+        }
+
+      const auto & subdomains = block_ids.empty() ? _problem->mesh().meshSubdomains() : block_ids;
+      if (subdomains.empty())
+        mooseError("No subdomains found for the generalized plane strain action");
+
+      const auto coord_system = _problem->getCoordSystem(*subdomains.begin());
+      for (const auto subdomain : subdomains)
+        if (_problem->getCoordSystem(subdomain) != coord_system)
+          paramError("block",
+                     "Generalized plane strain requires all selected subdomains to use the same "
+                     "coordinate system");
+
+      if (coord_system == Moose::COORD_RZ)
+      {
+        if (_ndisp != 1)
+          paramError("displacements",
+                     "One radial displacement is required for 1D axisymmetric generalized plane "
+                     "strain");
+      }
+      else if (coord_system == Moose::COORD_XYZ)
+      {
+        const unsigned int required_displacements = _out_of_plane_direction == 2 ? 2 : 3;
+        if (_ndisp != required_displacements)
+          paramError("displacements",
+                     required_displacements,
+                     " displacement variables are required when the out-of-plane direction is ",
+                     getParam<MooseEnum>("out_of_plane_direction"));
+      }
+      else
+        paramError("out_of_plane_direction",
+                   "Generalized plane strain supports only Cartesian and axisymmetric coordinate "
+                   "systems");
+    }
+
+    const auto anchor_displacement = inPlaneDisplacementIndex();
+    const auto & anchor_variable = _problem->getVariable(
+        0, _displacements[anchor_displacement], Moose::VarKindType::VAR_SOLVER);
+    const auto solver_sys_num = anchor_variable.sys().number();
+    if (!_problem->isSolverSystemNonlinear(solver_sys_num))
+      paramError("displacements", "The in-plane displacements must be nonlinear variables");
+
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      if (i != _out_of_plane_direction &&
+          _problem->getVariable(0, _displacements[i], Moose::VarKindType::VAR_SOLVER)
+                  .sys()
+                  .number() != solver_sys_num)
+        paramError("displacements",
+                   "All in-plane displacements must belong to the same nonlinear system");
+
+    auto & nonlinear_system = _problem->getNonlinearSystemBase(solver_sys_num);
+    const auto & scalar_variable = getParam<VariableName>("scalar_out_of_plane_strain");
+    if (nonlinear_system.hasScalarVariable(scalar_variable))
+      return;
+    if (_problem->hasScalarVariable(scalar_variable))
+      paramError("scalar_out_of_plane_strain",
+                 "Variable '",
+                 scalar_variable,
+                 "' already exists but is not a nonlinear scalar variable in system '",
+                 nonlinear_system.name(),
+                 "'");
+    if (_problem->hasVariable(scalar_variable))
+      paramError("scalar_out_of_plane_strain",
+                 "Variable '",
+                 scalar_variable,
+                 "' already exists as a field variable; a scalar variable is required");
+
+    InputParameters params = _factory.getValidParams("MooseVariableScalar");
+    params.set<MooseEnum>("family") = "SCALAR";
+    params.set<MooseEnum>("order") = "FIRST";
+    params.set<SolverSystemName>("solver_sys") = nonlinear_system.name();
+    _problem->addVariable("MooseVariableScalar", scalar_variable, params);
+  }
+
   //
   // Add off diagonal Jacobian kernels
   //
-  if (_current_task == "add_kernel")
+  else if (_current_task == "add_kernel" && _use_ad)
+  {
+    const std::string k_type = "ADGeneralizedPlaneStrain";
+    InputParameters params = _factory.getValidParams(k_type);
+
+    params.applyParameters(parameters(),
+                           {"scalar_out_of_plane_strain",
+                            "out_of_plane_pressure",
+                            "out_of_plane_pressure_function",
+                            "factor",
+                            "pressure_factor"});
+    params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
+        getParam<VariableName>("scalar_out_of_plane_strain")};
+
+    if (parameters().isParamSetByUser("out_of_plane_pressure"))
+      params.set<FunctionName>("out_of_plane_pressure") =
+          getParam<FunctionName>("out_of_plane_pressure");
+    if (parameters().isParamSetByUser("out_of_plane_pressure_function"))
+      params.set<FunctionName>("out_of_plane_pressure_function") =
+          getParam<FunctionName>("out_of_plane_pressure_function");
+    if (parameters().isParamSetByUser("factor"))
+      params.set<Real>("factor") = getParam<Real>("factor");
+    if (parameters().isParamSetByUser("pressure_factor"))
+      params.set<Real>("pressure_factor") = getParam<Real>("pressure_factor");
+
+    const auto anchor_displacement = inPlaneDisplacementIndex();
+    params.set<NonlinearVariableName>("variable") = _displacements[anchor_displacement];
+    _problem->addKernel(k_type, _name + "_ADGeneralizedPlaneStrain", params);
+  }
+  else if (_use_ad && (_current_task == "add_user_object" || _current_task == "add_scalar_kernel"))
+  {
+    // ADKernelScalarBase assembles both the elemental resultant and the scalar equation, so the
+    // legacy UserObject and ScalarKernel are intentionally unnecessary in AD mode.
+  }
+  else if (_current_task == "add_kernel")
   {
     std::string k_type = "GeneralizedPlaneStrainOffDiag";
     InputParameters params = _factory.getValidParams(k_type);

@@ -1,38 +1,49 @@
-# Compute Axisymmetric 1D Finite Strain
+# ComputeAxisymmetric1DFiniteStrain / ADComputeAxisymmetric1DFiniteStrain
 
 !syntax description /Materials/ComputeAxisymmetric1DFiniteStrain
 
 ## Description
 
-The material `ComputeAxisymmetric1DFiniteStrain` calculates the finite strain for
-1D Axisymmetric systems and is intended for use with
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
-This material assumes symmetry about the $z$-axis.
-This 'strain calculator' material computes the strain within the cylindrical
-coordinate system and relies on the specialized
-[Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
-divergence calculation.
+`ComputeAxisymmetric1DFiniteStrain` computes the finite strain increment and
+rotation increment for a 1D axisymmetric generalized plane strain model. When
+the solid mechanics action is used with `use_automatic_differentiation = true`,
+the action selects `ADComputeAxisymmetric1DFiniteStrain` for the same strain
+formulation.
 
-!alert warning title=Symmetry Assumed About the $z$-axis
-The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
-cylindrical coordinate system. This symmetry orientation is required for the
-calculation of the residual and of the jacobian.
-See [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) for the
-residual equation and the germane discussion.
+This material assumes symmetry about the $z$ axis and must be used on blocks
+with `COORD_TYPE = RZ`. The radial coordinate is the physical $x$ coordinate.
+In the 1D strain tensor, MOOSE maps the radial strain to the `rr` or `xx`
+component, the generalized plane strain to the axial `yy` component, and the
+hoop strain to the `zz` component. The stress divergence is handled by the
+axisymmetric RZ kernels, such as [StressDivergenceRZTensors](/StressDivergenceRZTensors.md).
+
+The out-of-plane strain can be supplied by either
+[!param](/Materials/ComputeAxisymmetric1DFiniteStrain/scalar_out_of_plane_strain)
+or [!param](/Materials/ComputeAxisymmetric1DFiniteStrain/out_of_plane_strain),
+but not both. Scalar out-of-plane strain values are commonly used by
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
+models. If multiple scalar components are coupled,
+[!param](/Materials/ComputeAxisymmetric1DFiniteStrain/subblock_index_provider)
+selects which scalar component applies to the current element; without that
+user object, component 0 is used.
+
+For the AD object, current displacement and out-of-plane strain values are AD
+values. Old state values used to form the finite strain increment remain
+regular values.
 
 ## 1D Axisymmetric Strain Formulation
 
-The axisymmetric model uses the cylindrical coordinates, $r$, $z$, and $\theta$,
-where the linear section formed by the $r$ axis is rotated about the $z$ axis in
-the $\theta$ direction.
-The incremental deformation gradient for the 1D axisymmetric system is defined as
+The axisymmetric model uses the cylindrical coordinates, $r$, $z$, and
+$\theta$, where the line in the $r$ direction is rotated about the $z$ axis in
+the $\theta$ direction. The incremental deformation gradient for the 1D
+axisymmetric system is
 \begin{equation}
   \label{eqn:incremental_deformation_grad}
-  \hat{\boldsymbol{F}} = \boldsymbol{A} : \bar{\boldsymbol{F}}^{-1} + \boldsymbol{I}
+  \hat{\boldsymbol{F}} = \boldsymbol{A} \cdot \bar{\boldsymbol{F}}^{-1}
 \end{equation}
-where $\boldsymbol{I}$ is the Rank-2 identity tensor, and the deformation gradient,
-$\boldsymbol{A}$, and the old deformation gradient,
-$\bar{\boldsymbol{F}}$, are given as
+where $\boldsymbol{I}$ is the Rank-2 identity tensor, and the deformation
+gradient, $\boldsymbol{A}$, and the old deformation gradient,
+$\bar{\boldsymbol{F}}$, are
 \begin{equation}
   \label{eqn:deform_grads}
   \boldsymbol{A} = \begin{bmatrix}
@@ -47,59 +58,40 @@ $\bar{\boldsymbol{F}}$, are given as
                 0 & 0 & \epsilon_{\theta \theta}|_{old}
               \end{bmatrix} + \boldsymbol{I}
 \end{equation}
-Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
-the previous time step.
-The components of the tensors in [eqn:deform_grads] are given as
+The old deformation gradient uses strain-expression values from the previous
+time step. The tensor components are
 \begin{equation}
   \label{eqn:strain_components}
   \begin{aligned}
   \epsilon_{rr} & = u_{r,r} \\
-  \epsilon_{zz} & = \exp \left[ \epsilon|^{op} - 1.0  \right] \\
+  \epsilon_{zz} & = \exp \left( \epsilon|^{op} \right) - 1 \\
   \epsilon_{\theta \theta} & = \frac{u_r}{X_r}
   \end{aligned}
 \end{equation}
-where $\epsilon|^{op}$ is a prescribed out-of-plane strain value: this strain
-value can be given either as a scalar variable or a nonlinear variable.
-The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-problems use scalar variables.
-The value of the strain $\epsilon_{\theta \theta}$ depends on the displacement
-and position in the radial direction.
+where $\epsilon|^{op}$ is the supplied out-of-plane strain. In the MOOSE tensor
+storage for this 1D formulation, the generalized plane strain component is
+stored in `yy` and the hoop component is stored in `zz`. The finite-strain
+out-of-plane deformation component is computed as
+$\exp(\epsilon|^{op}) - 1$, not $\exp(\epsilon|^{op} - 1)$.
 
-!alert note title=Notation Order Change
-The axisymmetric system changes the order of the displacement vector from
-$(u_r, u_{\theta}, u_z)$, usually seen in textbooks, to $(u_r, u_z, u_{\theta})$.
-Take care to follow this convention in your input files and when adding
-eigenstrains or extra stresses.
+After the incremental deformation gradient is calculated for the 1D geometry,
+the deformation gradient is passed to the strain and rotation calculations used
+by the default 3D Cartesian finite strain model, as described in
+[ComputeFiniteStrain.md].
 
+## Example Input File Syntax
 
-Once the incremental deformation gradient ([eqn:incremental_deformation_grad])
-is calculated for the 1D geometry, the deformation gradient is passed to the
-strain and rotation methods used by default 3D Cartesian simulations, as
-described in the [Finite Strain Class](ComputeFiniteStrain.md) documentation.
-
-## Example Input File
-
-!alert note title=Use RZ Coordinate Type
-The coordinate type in the Problem block of the input file must be set to
-+`COORD_TYPE = RZ`+.
-
-The common use of the `ComputeAxisymmetric1DFiniteStrain` class is with the
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) system;
-this type of simulation uses the scalar strain variables
+The following generalized plane strain test uses the scalar out-of-plane strain
+option with `ComputeAxisymmetric1DFiniteStrain`.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_finite.i block=Materials/strain
 
-which uses a scalar variable for the coupled out-of-plane strain; the argument
-for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
-variable:
+The coupled scalar variable is defined in the same input file.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_finite.i block=Variables/scalar_strain_yy
-
 
 !syntax parameters /Materials/ComputeAxisymmetric1DFiniteStrain
 
 !syntax inputs /Materials/ComputeAxisymmetric1DFiniteStrain
 
 !syntax children /Materials/ComputeAxisymmetric1DFiniteStrain
-
-!bibtex bibliography
