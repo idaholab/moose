@@ -841,8 +841,13 @@ class ApptainerGenerator:
         # Add extra conditional vars
         self.add_definition_vars(jinja_data)
 
-        # Use jinja to fill the definition file
+        # jinja2 filter for converting to a bool
+        def to_bool(value):
+            return str(value).strip().lower() in ("true", "1", "yes", "on")
+
+        # Setup jinja2 environment
         jinja_env = jinja2.Environment()
+        jinja_env.filters["to_bool"] = to_bool
         definition_template = jinja_env.from_string(definition)
         jinja_env.trim_blocks = True
         jinja_env.lstrip_blocks = True
