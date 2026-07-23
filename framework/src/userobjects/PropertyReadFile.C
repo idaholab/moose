@@ -323,19 +323,24 @@ PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_n
 Real
 PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
 {
+  return getBlockData(elem->subdomain_id(), prop_num);
+}
+
+Real
+PropertyReadFile::getBlockData(const SubdomainID subdomain_id, unsigned int prop_num) const
+{
   unsigned int offset = 0;
   if (!_block_zero)
     offset = 1;
 
-  unsigned int elem_subdomain_id = elem->subdomain_id();
-  if (elem_subdomain_id >= _nblock + offset)
+  if (subdomain_id >= _nblock + offset)
     paramError("nblock",
                "Element block id ",
-               elem_subdomain_id,
+               subdomain_id,
                " greater than than total number of blocks in mesh: ",
                _nblock,
                ". Blocks should be numbered consecutively, starting from 0.");
-  return _reader.getData(elem_subdomain_id - offset)[prop_num];
+  return _reader.getData(subdomain_id - offset)[prop_num];
 }
 
 Real
