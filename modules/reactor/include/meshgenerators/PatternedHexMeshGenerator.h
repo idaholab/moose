@@ -114,7 +114,7 @@ protected:
    * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
    * @return a mesh of the hexagon unit mesh with peripheral region added.
    */
-  void addPeripheralMesh(ReplicatedMesh & mesh,
+  void addPeripheralMesh(UnstructuredMesh & mesh,
                          const unsigned int pattern, //_pattern{i][j]
                          const Real pitch,           // pitch_array.front()
                          const std::vector<Real> & extra_dist,
@@ -146,5 +146,5 @@ protected:
    * @param from_meshes meshes to take reporting IDs from
    */
   void addReportingIDs(MeshBase & mesh,
-                       const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const;
+                       const std::vector<std::unique_ptr<MeshBase>> & from_meshes) const;
 };

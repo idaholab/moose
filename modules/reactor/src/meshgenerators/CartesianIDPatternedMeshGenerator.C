@@ -9,6 +9,8 @@
 
 #include "CartesianIDPatternedMeshGenerator.h"
 #include "ReportingIDGeneratorUtils.h"
+#include "libmesh/mesh_serializer.h"
+#include "libmesh/mesh_tools.h"
 
 registerMooseObject("ReactorApp", CartesianIDPatternedMeshGenerator);
 
@@ -81,20 +83,70 @@ CartesianIDPatternedMeshGenerator::generate()
         "id_name", "An element integer with the name '", _element_id_name, "' already exists");
   }
 
-  // patternedMeshGenerator for Carterisan lattice does not support duct structures
-  const bool has_assembly_duct = false;
-  const std::set<subdomain_id_type> duct_block_ids;
-  // asssign reporting IDs to individual elements
-  ReportingIDGeneratorUtils::assignReportingIDs(*mesh,
-                                                extra_id_index,
-                                                _assign_type,
-                                                _use_exclude_id,
-                                                _exclude_ids,
-                                                has_assembly_duct,
-                                                duct_block_ids,
-                                                _meshes,
-                                                _pattern,
-                                                _id_pattern);
+  // Build a per-tile ID lookup from the utility helpers.  The flat integer_ids vectors
+  // returned by the helpers contain n_elem(tile) identical values per tile in row-major
+  // order; here we only need the representative value for each (row, col) position.
+  const auto bbox = MeshTools::create_bounding_box(*_meshes[0]);
+  const Real min_x = bbox.min()(0);
+  const Real min_y = bbox.min()(1);
+
+  // Populate tile_id[i][j] using the appropriate utility helper.
+  std::vector<std::vector<dof_id_type>> tile_id(_pattern.size());
+  if (_assign_type == ReportingIDGeneratorUtils::AssignType::cell)
+  {
+    const auto integer_ids = ReportingIDGeneratorUtils::getCellwiseIntegerIDs(
+        _meshes, _pattern, _use_exclude_id, _exclude_ids);
+    dof_id_type k = 0;
+    for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    {
+      tile_id[i].resize(_pattern[i].size());
+      for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
+      {
+        tile_id[i][j] = integer_ids[k];
+        k += _meshes[_pattern[i][j]]->n_elem();
+      }
+    }
+  }
+  else if (_assign_type == ReportingIDGeneratorUtils::AssignType::pattern)
+  {
+    const auto integer_ids = ReportingIDGeneratorUtils::getPatternIntegerIDs(_meshes, _pattern);
+    dof_id_type k = 0;
+    for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    {
+      tile_id[i].resize(_pattern[i].size());
+      for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
+      {
+        tile_id[i][j] = integer_ids[k];
+        k += _meshes[_pattern[i][j]]->n_elem();
+      }
+    }
+  }
+  else // manual
+  {
+    const auto integer_ids =
+        ReportingIDGeneratorUtils::getManualIntegerIDs(_meshes, _pattern, _id_pattern);
+    dof_id_type k = 0;
+    for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    {
+      tile_id[i].resize(_pattern[i].size());
+      for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
+      {
+        tile_id[i][j] = integer_ids[k];
+        k += _meshes[_pattern[i][j]]->n_elem();
+      }
+    }
+  }
+
+  // Assign by centroid so the result is correct regardless of element iteration order.
+  // This is necessary in distributed mode where element_ptr_range is not tile-major.
+  libMesh::MeshSerializer mesh_serializer(*mesh);
+  for (auto & elem : mesh->element_ptr_range())
+  {
+    const auto c = elem->vertex_average();
+    const int col = static_cast<int>((c(0) - min_x) / _x_width);
+    const int row = static_cast<int>((min_y + _y_width - c(1)) / _y_width);
+    elem->set_extra_integer(extra_id_index, tile_id[row][col]);
+  }
 
   return mesh;
 }

@@ -1149,7 +1149,7 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
   }
 }
 
-std::unique_ptr<ReplicatedMesh>
+std::unique_ptr<MeshBase>
 PolygonMeshGeneratorBase::buildSimplePeripheral(
     const unsigned int num_sectors_per_side,
     const unsigned int peripheral_invervals,

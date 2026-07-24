@@ -13,7 +13,7 @@ using namespace libMesh;
 
 std::vector<dof_id_type>
 ReportingIDGeneratorUtils::getCellwiseIntegerIDs(
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+    const std::vector<std::unique_ptr<MeshBase>> & meshes,
     const std::vector<std::vector<unsigned int>> & pattern,
     const bool use_exclude_id,
     const std::vector<bool> & exclude_ids)
@@ -37,7 +37,7 @@ ReportingIDGeneratorUtils::getCellwiseIntegerIDs(
 
 std::vector<dof_id_type>
 ReportingIDGeneratorUtils::getPatternIntegerIDs(
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+    const std::vector<std::unique_ptr<MeshBase>> & meshes,
     const std::vector<std::vector<unsigned int>> & pattern)
 {
   dof_id_type n = 0;
@@ -54,7 +54,7 @@ ReportingIDGeneratorUtils::getPatternIntegerIDs(
 
 std::vector<dof_id_type>
 ReportingIDGeneratorUtils::getManualIntegerIDs(
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
+    const std::vector<std::unique_ptr<MeshBase>> & meshes,
     const std::vector<std::vector<unsigned int>> & pattern,
     const std::vector<std::vector<dof_id_type>> & id_pattern)
 {
@@ -71,9 +71,8 @@ ReportingIDGeneratorUtils::getManualIntegerIDs(
 }
 
 std::set<SubdomainID>
-ReportingIDGeneratorUtils::getCellBlockIDs(
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
-    const std::vector<std::vector<unsigned int>> & pattern)
+ReportingIDGeneratorUtils::getCellBlockIDs(const std::vector<std::unique_ptr<MeshBase>> & meshes,
+                                           const std::vector<std::vector<unsigned int>> & pattern)
 {
   std::set<SubdomainID> blks;
   for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
@@ -120,7 +119,7 @@ ReportingIDGeneratorUtils::assignReportingIDs(
     const std::vector<bool> & exclude_ids,
     const bool has_assembly_boundary,
     const std::set<subdomain_id_type> background_block_ids,
-    const std::vector<std::unique_ptr<ReplicatedMesh>> & input_meshes,
+    const std::vector<std::unique_ptr<MeshBase>> & input_meshes,
     const std::vector<std::vector<unsigned int>> & pattern,
     const std::vector<std::vector<dof_id_type>> & id_pattern)
 {

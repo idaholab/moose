@@ -125,7 +125,7 @@ private:
   Real _z_cell_size = 1.0;
 
   /// Lookup from packed yz-grid cell index to triangles that could intersect the +x query ray.
-  std::unordered_map<dof_id_type, std::vector<dof_id_type>> _ray_grid;
+  std::unordered_map<std::uint64_t, std::vector<dof_id_type>> _ray_grid;
 
   MeshBase & _mesh;
 
