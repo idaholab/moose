@@ -11,7 +11,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
-#include "WeightedGapUserObject.h"
+#include "NonlinearSystemBase.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
@@ -22,6 +22,8 @@
 #endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
+
+#include <cmath>
 
 registerMooseObject("ContactApp", ComputeWeightedGapLMMechanicalContact);
 
@@ -63,6 +65,10 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.addParam<bool>("use_derived_c_normal",
+                        false,
+                        "Read c_normal per-node from the weighted gap UO's dofToDerivedC() map "
+                        "instead of using the scalar 'c' parameter.");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
@@ -80,12 +86,13 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _secondary_disp_z(_has_disp_z ? &adCoupledValue("disp_z") : nullptr),
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _c(getParam<Real>("c")),
+    _use_derived_c_normal(getParam<bool>("use_derived_c_normal")),
     _normalize_c(getParam<bool>("normalize_c")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
-    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
+    _weighted_gap_uo(getUserObject<LMWeightedGapUserObject>("weighted_gap_uo"))
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
@@ -95,6 +102,11 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))
       mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
+
+  if (!_use_derived_c_normal && (!std::isfinite(_c) || _c <= 0.0))
+    paramError("c", "The user-supplied normal contact pressure scale must be positive and finite.");
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).requestKSPRightDiagonalScale();
 }
 
 ADReal
@@ -158,6 +170,8 @@ ComputeWeightedGapLMMechanicalContact::post()
 
     enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
 }
 
 void
@@ -179,19 +193,81 @@ ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
 
     enforceConstraintOnDof(dof_object);
   }
+
+  _fe_problem.getNonlinearSystemBase(_sys.number()).closeKSPRightDiagonalScale();
+}
+
+Real
+ComputeWeightedGapLMMechanicalContact::displacementScaling() const
+{
+  const std::array<Real, 3> scalings = {_disp_x_var->scalingFactor(),
+                                        _disp_y_var->scalingFactor(),
+                                        _disp_z_var ? _disp_z_var->scalingFactor() : 1.0};
+  const auto num_displacements = _disp_z_var ? 3 : 2;
+  Real log_sum = 0.0;
+  for (const auto i : make_range(num_displacements))
+  {
+    if (!std::isfinite(scalings[i]) || scalings[i] <= 0.0)
+      mooseError("Mortar contact scaling requires positive, finite displacement variable scaling "
+                 "factors.");
+    log_sum += std::log(scalings[i]);
+  }
+
+  if (MooseUtils::relativeFuzzyEqual(scalings[0], scalings[1], 1e-12) &&
+      (!_disp_z_var || MooseUtils::relativeFuzzyEqual(scalings[0], scalings[2], 1e-12)))
+    return scalings[0];
+
+  // A contact pressure contributes to every displacement component. Use one symmetric
+  // characteristic scale for its multiplier equation when component scalings differ.
+  return std::exp(log_sum / num_displacements);
+}
+
+Real
+ComputeWeightedGapLMMechanicalContact::equationCompensation(const MooseVariable & multiplier) const
+{
+  const Real multiplier_scaling = multiplier.scalingFactor();
+  if (!std::isfinite(multiplier_scaling) || multiplier_scaling <= 0.0)
+    mooseError("Mortar contact scaling requires positive, finite Lagrange multiplier scaling "
+               "factors.");
+  return displacementScaling() / multiplier_scaling;
+}
+
+Real
+ComputeWeightedGapLMMechanicalContact::contactNormalization() const
+{
+  const Real normalization = *_normalization_ptr;
+  if (!std::isfinite(normalization) || normalization <= 0.0)
+    mooseError("Mortar contact requires positive, finite nodal mortar weights.");
+  return normalization;
+}
+
+Real
+ComputeWeightedGapLMMechanicalContact::normalContactScale(const DofObject * const dof) const
+{
+  const Real scale = _use_derived_c_normal
+                         ? libmesh_map_find(_weighted_gap_uo.dofToDerivedC(), dof)[0]
+                         : _c * (_normalize_c ? 1.0 : contactNormalization());
+  if (!std::isfinite(scale) || scale <= 0.0)
+    mooseError("Mortar contact requires positive, finite nodal normal pressure scales.");
+  return scale;
 }
 
 void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+
+  const Real normal_scale = normalContactScale(dof);
+  const Real c = normal_scale / contactNormalization();
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  _fe_problem.getNonlinearSystemBase(_sys.number())
+      .setKSPRightDiagonalScale(dof_index, normal_scale);
+
+  const ADReal dof_residual = equationCompensation(*_var) * std::min(lm_value, weighted_gap * c);
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
