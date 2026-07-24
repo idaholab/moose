@@ -219,18 +219,16 @@ PorousFlowWaterNCG::gasProperties(const ADReal & pressure,
   const ADReal Yncg = gas.mass_fraction[_gas_fluid_component];
   const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
 
-  // NCG density, viscosity and enthalpy calculated using partial pressure
+  // NCG density and viscosity calculated using partial pressure
   // Yncg * gas_poreressure (Dalton's law)
   ADReal ncg_density, ncg_viscosity;
   _ncg_fp.rho_mu_from_p_T(Yncg * pressure, temperature, ncg_density, ncg_viscosity);
-  ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(Yncg * pressure, temperature);
 
-  // Vapor density, viscosity and enthalpy calculated using partial pressure
+  // Vapor density and viscosity calculated using partial pressure
   // X1 * psat (Raoult's law)
   ADReal vapor_density, vapor_viscosity;
 
   _water_fp.rho_mu_from_p_T((1.0 - Xncg) * psat, temperature, vapor_density, vapor_viscosity);
-  ADReal vapor_enthalpy = _water_fp.h_from_p_T((1.0 - Xncg) * psat, temperature);
 
   // Density is just the sum of individual component densities
   gas.density = ncg_density + vapor_density;
@@ -238,12 +236,21 @@ PorousFlowWaterNCG::gasProperties(const ADReal & pressure,
   // Viscosity of the gas phase is a weighted sum of the individual viscosities
   gas.viscosity = Yncg * ncg_viscosity + (1.0 - Yncg) * vapor_viscosity;
 
-  // Enthalpy of the gas phase is a weighted sum of the individual enthalpies
-  gas.enthalpy = Yncg * ncg_enthalpy + (1.0 - Yncg) * vapor_enthalpy;
+  mooseAssert(gas.density.value() > 0.0, "Gas density must be greater than zero");
+
+  if (_compute_enthalpy || _compute_internal_energy)
+  {
+    // Component enthalpies calculated using their partial pressures
+    const ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(Yncg * pressure, temperature);
+    const ADReal vapor_enthalpy = _water_fp.h_from_p_T((1.0 - Xncg) * psat, temperature);
+
+    // Enthalpy of the gas phase is a weighted sum of the individual enthalpies
+    gas.enthalpy = Yncg * ncg_enthalpy + (1.0 - Yncg) * vapor_enthalpy;
+  }
 
   //  Internal energy of the gas phase (e = h - pv)
-  mooseAssert(gas.density.value() > 0.0, "Gas density must be greater than zero");
-  gas.internal_energy = gas.enthalpy - pressure / gas.density;
+  if (_compute_internal_energy)
+    gas.internal_energy = gas.enthalpy - pressure / gas.density;
 }
 
 void
@@ -263,18 +270,23 @@ PorousFlowWaterNCG::liquidProperties(const ADReal & pressure,
   liquid.density = liquid_density;
   liquid.viscosity = liquid_viscosity;
 
-  // Enthalpy does include a contribution due to the enthalpy of dissolution
-  const ADReal hdis = enthalpyOfDissolution(temperature);
+  mooseAssert(liquid.density.value() > 0.0, "Liquid density must be greater than zero");
 
-  const ADReal water_enthalpy = _water_fp.h_from_p_T(pressure, temperature);
-  const ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(pressure, temperature);
+  if (_compute_enthalpy || _compute_internal_energy)
+  {
+    // Enthalpy does include a contribution due to the enthalpy of dissolution
+    const ADReal hdis = enthalpyOfDissolution(temperature);
 
-  const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
-  liquid.enthalpy = (1.0 - Xncg) * water_enthalpy + Xncg * (ncg_enthalpy + hdis);
+    const ADReal water_enthalpy = _water_fp.h_from_p_T(pressure, temperature);
+    const ADReal ncg_enthalpy = _ncg_fp.h_from_p_T(pressure, temperature);
+
+    const ADReal Xncg = liquid.mass_fraction[_gas_fluid_component];
+    liquid.enthalpy = (1.0 - Xncg) * water_enthalpy + Xncg * (ncg_enthalpy + hdis);
+  }
 
   //  Internal energy of the liquid phase (e = h - pv)
-  mooseAssert(liquid.density.value() > 0.0, "Liquid density must be greater than zero");
-  liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
+  if (_compute_internal_energy)
+    liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
 ADReal
