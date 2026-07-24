@@ -12,9 +12,8 @@
 #include "NEML2Utils.h"
 #include "InputParameters.h"
 
-#ifdef NEML2_ENABLED
-#include "neml2/models/Model.h"
-#endif
+// NEML2 v3 exchanges plain at::Tensor across its C++ API; at::Tensor is available via
+// NEML2Utils.h (which includes ATen) when NEML2 is enabled.
 
 /**
  * Common interface for inserting gathered MOOSE data into the NEML2 material model.
@@ -36,11 +35,11 @@ public:
   /// Name of the NEML2 variable/parameter
   const std::string & NEML2Name() const { return _neml2_name; }
 
-  /// Convert data gathered from MOOSE into neml2::Tensor
-  virtual neml2::Tensor gatheredData() const = 0;
+  /// Convert data gathered from MOOSE into an at::Tensor (shape (batch, *base_shape))
+  virtual at::Tensor gatheredData() const = 0;
 
-  /// Insert the gathered data into the NEML2 material model
-  void insertInto(std::map<std::string, neml2::Tensor> &) const;
+  /// Insert the gathered data into the NEML2 model input map
+  void insertInto(std::map<std::string, at::Tensor> &) const;
 
 private:
   /// Name of the input variable or model parameter

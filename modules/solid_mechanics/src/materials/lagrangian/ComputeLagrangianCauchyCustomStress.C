@@ -38,5 +38,9 @@ void
 ComputeLagrangianCauchyCustomStress::computeQpCauchyStress()
 {
   _cauchy_stress[_qp] = _custom_stress[_qp];
-  _cauchy_jacobian[_qp] = _custom_jacobian[_qp];
+  // `_cauchy_jacobian` is consumed only during Jacobian assembly (the Cauchy base's sigma->PK1
+  // wrap reads it under the same guard), so skip the copy on residual-only sweeps.
+  if (_fe_problem.currentlyComputingJacobian() ||
+      _fe_problem.currentlyComputingResidualAndJacobian())
+    _cauchy_jacobian[_qp] = _custom_jacobian[_qp];
 }

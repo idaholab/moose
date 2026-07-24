@@ -10,12 +10,70 @@
     capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
+  # cpp-aoti compile-then-run pipeline: compile the NEML2TestModel to an AOTI artifact, then
+  # evaluate it through the cpp-aoti runtime and check it reproduces the cpp-eager result (the
+  # run loads the artifact, so it implicitly verifies the compile produced it). Requires the
+  # activated neml2 conda environment (neml2-compile on PATH).
+  [aoti_compile]
+    requirement = 'The framework shall compile a NEML2 model to ahead-of-time (AOTI) artifacts.'
+    type = RunCommand
+    command = 'neml2-compile --model model models/custom_model.i --device cpu --output-dir aoti_artifacts --load models/test_models.py -d product:A'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
+  [aoti_run]
+    requirement = 'The framework shall evaluate a NEML2 model through the cpp-aoti runtime, reproducing the cpp-eager result.'
+    type = Exodiff
+    prereq = 'aoti_compile'
+    input = 'custom_model_aoti.i'
+    exodiff = 'custom_model_aoti_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
+  # Same cpp-aoti artifact, but with device_batch > 0 so the work is dispatched in
+  # device-batch-sized chunks through NEML2's MPISimpleScheduler (device = 'cpu' -> this
+  # rank chunks its local batch on the CPU). Chunk boundaries cannot change the result, so
+  # it reuses aoti_run's gold; prereq = aoti_run serializes the shared output file.
+  [aoti_dispatch]
+    requirement = 'The framework shall dispatch cpp-aoti NEML2 evaluation in device-batch-sized chunks (device_batch > 0) via the MPI work scheduler, reproducing the unchunked result.'
+    type = Exodiff
+    prereq = 'aoti_run'
+    input = 'custom_model_aoti.i'
+    cli_args = 'NEML2/all/device_batch=32'
+    exodiff = 'custom_model_aoti_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
+  # The same cpp-aoti artifact accepted via its self-describing forms rather than the stub .i: the
+  # artifact folder itself, and the metadata.json inside it. Both must reproduce the stub result
+  # (same gold). prereq chains onto aoti_dispatch to serialize the shared output file. Unlike the
+  # stub (whose artifact_path is an absolute machine path), these reference the relative folder.
+  [aoti_run_folder]
+    requirement = 'The framework shall load a cpp-aoti NEML2 artifact directly from the artifact folder, without the neml2-compile stub.'
+    type = Exodiff
+    prereq = 'aoti_dispatch'
+    input = 'custom_model_aoti.i'
+    cli_args = 'NEML2/all/input=aoti_artifacts/model'
+    exodiff = 'custom_model_aoti_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
+  [aoti_run_metadata]
+    requirement = 'The framework shall load a cpp-aoti NEML2 artifact from the metadata.json inside the artifact folder.'
+    type = Exodiff
+    prereq = 'aoti_run_folder'
+    input = 'custom_model_aoti.i'
+    cli_args = 'NEML2/all/input=aoti_artifacts/model/metadata.json'
+    exodiff = 'custom_model_aoti_out.e'
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+  []
   [neml2_error]
     requirement = 'The framework shall be capable of capturing errors that occur during the evaluation of a NEML2 model.'
     type = RunException
     input = 'custom_model.i'
     cli_args = 'NEML2/all/model=error'
-    expect_err = 'NEML2 model execution failed on at least one processor'
+    expect_err = 'NEML2 model evaluation failed with a non-recoverable error'
     collections = 'SYSTEM'
     capabilities = 'libtorch & neml2'
     valgrind = none
@@ -36,6 +94,27 @@
     expect_err = 'Trying to infer MOOSE data type for NEML2 variable A\. The name matches multiple types \(function variable\s*\)'
     collections = 'SYSTEM'
     capabilities = 'libtorch & neml2'
+  []
+  [stateful_consistency]
+    issues = '#33197'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall report a clear error, rather than crashing during stateful '
+                  'material property initialization, when a NEML2 model is configured such that '
+    [initialize_outputs_not_an_output]
+      detail = 'a variable requested via initialize_outputs is not a model output, or'
+      type = RunException
+      input = 'custom_model.i'
+      cli_args = 'NEML2/all/initialize_outputs=nonexistent NEML2/all/initialize_output_values=B'
+      expect_err = "'nonexistent' is not an output of the NEML2 model and therefore cannot be initialized"
+      capabilities = 'libtorch & neml2'
+    []
+    [stateful_input_without_output]
+      detail = 'the old value of a variable is consumed as an input while the variable is neither a current input nor an output.'
+      type = RunException
+      input = 'stateful_consistency.i'
+      expect_err = "takes the old value of 'foo' \(foo~1\) as an input, but the model neither takes 'foo' as a current input nor produces it as an output"
+      capabilities = 'libtorch & neml2'
+    []
   []
   [model_parameter]
     requirement = 'The framework shall be capable of using MOOSE data as NEML2 model parameters.'
@@ -93,29 +172,28 @@
     capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
-  [scheduler]
-    issues = '#27493'
-    requirement = 'The framework shall be capable of evaluating NEML2 models in heterogeneous computing environments'
-    [simple_scheduler]
-      detail = 'with NEML2 SimpleScheduler which dispatches to a single device'
-      type = Exodiff
-      input = 'custom_model.i'
-      cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=false NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
-      exodiff = 'simple_scheduler_out.e'
+  [dump_inputs_on_failure]
+    issues = '#30793'
+    requirement = 'The framework shall, when a NEML2 constitutive update fails to converge and '
+                  'dump_inputs_on_failure is enabled, '
+    [dump]
+      detail = 'serialize the batch of NEML2 input tensors to a per-rank TorchScript file, and'
+      type = RunException
+      input = 'dump_inputs_on_failure.i'
+      expect_err = 'Input tensors dumped to'
       capabilities = 'libtorch & neml2'
-      recover = false
-      valgrind = heavy
+      valgrind = none
     []
-    [simple_scheduler_async]
-      detail = 'with NEML2 SimpleScheduler which asynchronously dispatches to a single device'
-      prereq = 'scheduler/simple_scheduler'
-      type = Exodiff
-      input = 'custom_model.i'
-      cli_args = 'NEML2/scheduler=simple NEML2/async_dispatch=true NEML2/all/model=model_non_ad Outputs/file_base=simple_scheduler_out'
-      exodiff = 'simple_scheduler_out.e'
+    [replay]
+      detail = 'provide boilerplate to re-evaluate the model offline on exactly that batch and read '
+               'the per-entry convergence mask and best-effort iterate off the raised '
+               'ConvergenceError when NEML2_CAPTURE_SOLVE_FAILURE is set.'
+      type = PythonUnitTest
+      input = 'debug_dumped_inputs.py'
+      prereq = 'dump_inputs_on_failure/dump'
+      required_python_packages = 'neml2 torch'
       capabilities = 'libtorch & neml2'
-      recover = false
-      valgrind = heavy
+      valgrind = none
     []
   []
 []

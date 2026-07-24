@@ -92,6 +92,17 @@ public:
   Real getBlockData(const Elem * const elem, const unsigned int prop_num) const;
 
   /**
+   * This function retrieves block-based properties by subdomain id directly (no element / point
+   * lookup). Preferred when the current subdomain is already known (e.g. a material being computed
+   * on a block), which avoids the fragile and unnecessary point-location that getData/getBlockData
+   * do via the element.
+   * @param subdomain_id the mesh block (subdomain) id to get data for
+   * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the block
+   */
+  Real getBlockData(const SubdomainID subdomain_id, const unsigned int prop_num) const;
+
+  /**
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
    * @return the minimum distance between two points
