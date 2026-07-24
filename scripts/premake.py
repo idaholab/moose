@@ -8,7 +8,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess, os, platform, re, sys, traceback
+import subprocess, os, platform, re, shutil, sys, traceback
 from datetime import date
 
 
@@ -52,7 +52,7 @@ class PreMake:
         Separated out on purpose so that we can mock it in unit tests,
         running tests even when conda doesn't exist.
         """
-        cmd = ["conda", "list", "--json"]
+        cmd = PreMake.condaListCommand()
         process = subprocess.run(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
         )
@@ -69,6 +69,33 @@ class PreMake:
         return json.loads(process.stdout)
 
     @staticmethod
+    def condaListCommand():
+        """
+        Gets the available conda-compatible package-list command.
+
+        MOOSE environments may be managed by conda, mamba, or micromamba. Prefer
+        explicit environment variables when available, then search PATH.
+        """
+        candidates = []
+        for env_var in ("CONDA_EXE", "MAMBA_EXE"):
+            exe = os.environ.get(env_var)
+            if exe:
+                candidates.append(exe)
+        candidates.extend(["conda", "mamba", "micromamba"])
+
+        for exe in candidates:
+            if os.path.isabs(exe) and os.access(exe, os.X_OK):
+                return [exe, "list", "--json"]
+
+            found = shutil.which(exe)
+            if found:
+                return [found, "list", "--json"]
+
+        raise FileNotFoundError(
+            "Failed to find conda, mamba, or micromamba for package version checks"
+        )
+
+    @staticmethod
     def getCondaEnv():
         """
         Gets the conda package environment in the form of a dict of
@@ -82,7 +109,11 @@ class PreMake:
         conda_env = None
 
         if os.environ.get("CONDA_PREFIX") is not None:
-            conda_list = PreMake.condaList()
+            try:
+                conda_list = PreMake.condaList()
+            except FileNotFoundError as e:
+                PreMake.warn(str(e))
+                return None
 
             conda_env = {}
             for entry in conda_list:
