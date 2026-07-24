@@ -14,40 +14,6 @@
 
 namespace Moose::MFEM
 {
-template <class MFEMSolverType>
-InputParameters
-LORLinearSolverBase<MFEMSolverType>::validParams()
-{
-  InputParameters params = LinearSolverBase::validParams();
-  params += LORInterface::validParams();
-  return params;
-}
-
-template <class MFEMSolverType>
-LORLinearSolverBase<MFEMSolverType>::LORLinearSolverBase(const InputParameters & parameters)
-  : LinearSolverBase(parameters), LORInterface(parameters)
-{
-}
-
-template <class MFEMSolverType>
-void
-LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
-{
-  Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
-  if (IsLOR(*this))
-  {
-    if (_lor && GetPreconditioner())
-      mooseError("LOR solver cannot take a preconditioner");
-    if (_lor)
-    {
-      SetupLOR(_equation_system);
-      LORLinearSolverBase<MFEMSolverType>::SetLORSolver(*this);
-    }
-    else
-      SetPreconditioner(static_cast<MFEMSolverType &>(GetSolver()));
-  }
-}
-
 template <>
 void
 LORLinearSolverBase<mfem::OperatorJacobiSmoother>::UpdateEquationSystemContext()
@@ -97,18 +63,6 @@ LORLinearSolverBase<mfem::HypreADS>::UpdateEquationSystemContext()
     if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");
     LORLinearSolverBase<mfem::HypreADS>::SetLORSolver(*this);
-  }
-}
-
-template <class MFEMSolverType>
-void
-LORLinearSolverBase<MFEMSolverType>::SetLORSolver(LinearSolverBase & solver_base)
-{
-  if (_lor)
-  {
-    auto lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
-    SetSolverParameters(lor_solver->GetSolver());
-    solver_base.SetSolver(lor_solver);
   }
 }
 
