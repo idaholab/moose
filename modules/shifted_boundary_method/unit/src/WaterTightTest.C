@@ -38,8 +38,8 @@ TEST(WaterTightTest, TwoDGeoOpenAndClose)
     for (const auto & [id1, id2] : open_edges)
     {
       auto edge = new Edge2();
-      edge->set_node(0) = node_ptrs[id1];
-      edge->set_node(1) = node_ptrs[id2];
+      edge->set_node(0, node_ptrs[id1]);
+      edge->set_node(1, node_ptrs[id2]);
       mesh->add_elem(edge); // Mesh owns the element
     }
 
@@ -65,8 +65,8 @@ TEST(WaterTightTest, TwoDGeoOpenAndClose)
     for (const auto & [id1, id2] : closed_edges)
     {
       auto edge = new Edge2();
-      edge->set_node(0) = node_ptrs[id1];
-      edge->set_node(1) = node_ptrs[id2];
+      edge->set_node(0, node_ptrs[id1]);
+      edge->set_node(1, node_ptrs[id2]);
       mesh->add_elem(edge); // Mesh owns the element
     }
 
@@ -103,9 +103,9 @@ TEST(WaterTightTest, ThreeDGeoOpenAndClose)
     for (const auto & [id1, id2, id3] : open_faces)
     {
       auto tri = new Tri3();
-      tri->set_node(0) = node_ptrs[id1];
-      tri->set_node(1) = node_ptrs[id2];
-      tri->set_node(2) = node_ptrs[id3];
+      tri->set_node(0, node_ptrs[id1]);
+      tri->set_node(1, node_ptrs[id2]);
+      tri->set_node(2, node_ptrs[id3]);
       mesh->add_elem(tri); // Mesh owns the element
     }
 
@@ -131,9 +131,9 @@ TEST(WaterTightTest, ThreeDGeoOpenAndClose)
     for (const auto & [id1, id2, id3] : closed_faces)
     {
       auto tri = new Tri3();
-      tri->set_node(0) = node_ptrs[id1];
-      tri->set_node(1) = node_ptrs[id2];
-      tri->set_node(2) = node_ptrs[id3];
+      tri->set_node(0, node_ptrs[id1]);
+      tri->set_node(1, node_ptrs[id2]);
+      tri->set_node(2, node_ptrs[id3]);
       mesh->add_elem(tri); // Mesh owns the element
     }
 

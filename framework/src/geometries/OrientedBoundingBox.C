@@ -165,8 +165,8 @@ OrientedBoundingBox::writeRayAlongShortestAxis(const fs::path & ray_path,
   libMesh::Node * n0 = mesh.add_point(start, 0);
   libMesh::Node * n1 = mesh.add_point(end, 1);
   auto edge = libMesh::Elem::build(libMesh::EDGE2);
-  edge->set_node(0) = n0;
-  edge->set_node(1) = n1;
+  edge->set_node(0, n0);
+  edge->set_node(1, n1);
   mesh.add_elem(std::move(edge));
   mesh.prepare_for_use();
 

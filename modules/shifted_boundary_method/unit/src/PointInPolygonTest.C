@@ -32,8 +32,8 @@ TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
     auto n0 = std::make_unique<Node>(a, node_id++);
     auto n1 = std::make_unique<Node>(b, node_id++);
     auto e = std::make_unique<Edge2>();
-    e->set_node(0) = n0.get();
-    e->set_node(1) = n1.get();
+    e->set_node(0, n0.get());
+    e->set_node(1, n1.get());
     bd_elements.emplace_back(std::make_unique<SBMBndEdge2>(e.get()));
     nodes.push_back(std::move(n0));
     nodes.push_back(std::move(n1));
@@ -78,8 +78,8 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
     auto n0 = std::make_unique<Node>(a, node_id++);
     auto n1 = std::make_unique<Node>(b, node_id++);
     auto e = std::make_unique<Edge2>();
-    e->set_node(0) = n0.get();
-    e->set_node(1) = n1.get();
+    e->set_node(0, n0.get());
+    e->set_node(1, n1.get());
     bd_elements.emplace_back(std::make_unique<SBMBndEdge2>(e.get()));
     nodes.push_back(std::move(n0));
     nodes.push_back(std::move(n1));

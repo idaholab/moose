@@ -38,8 +38,8 @@ TEST(SBMBndElementTest, Edge2Normal)
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
 
-  edge->set_node(0) = n0.get();
-  edge->set_node(1) = n1.get();
+  edge->set_node(0, n0.get());
+  edge->set_node(1, n1.get());
 
   SBMBndEdge2 bnd_edge(edge.get());
   Point n = bnd_edge.normal();
@@ -74,9 +74,9 @@ TEST(SBMBndElementTest, Tri3Normal)
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
   std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0), 2));
 
-  tri->set_node(0) = n0.get();
-  tri->set_node(1) = n1.get();
-  tri->set_node(2) = n2.get();
+  tri->set_node(0, n0.get());
+  tri->set_node(1, n1.get());
+  tri->set_node(2, n2.get());
 
   SBMBndTri3 bnd_tri(tri.get());
   Point n = bnd_tri.normal();
@@ -110,8 +110,8 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 1.0, 0.0), 1));
 
-  edge->set_node(0) = n0.get();
-  edge->set_node(1) = n1.get();
+  edge->set_node(0, n0.get());
+  edge->set_node(1, n1.get());
 
   SBMBndEdge2 bnd_edge(edge.get());
   Point n = bnd_edge.normal();
@@ -150,8 +150,8 @@ TEST(SBMBndElementTest, Edge2DistanceNodeFallback)
   std::unique_ptr<Edge2> edge(new Edge2());
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
-  edge->set_node(0) = n0.get();
-  edge->set_node(1) = n1.get();
+  edge->set_node(0, n0.get());
+  edge->set_node(1, n1.get());
 
   SBMBndEdge2 bnd_edge(edge.get());
 
@@ -172,9 +172,9 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 1.0), 1));
   std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 1.0), 2));
 
-  tri->set_node(0) = n0.get();
-  tri->set_node(1) = n1.get();
-  tri->set_node(2) = n2.get();
+  tri->set_node(0, n0.get());
+  tri->set_node(1, n1.get());
+  tri->set_node(2, n2.get());
 
   SBMBndTri3 bnd_tri(tri.get());
   Point n = bnd_tri.normal();
@@ -222,9 +222,9 @@ TEST(SBMBndElementTest, ProjectedBoundingBoxDiagonal)
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
   std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0), 2));
-  tri->set_node(0) = n0.get();
-  tri->set_node(1) = n1.get();
-  tri->set_node(2) = n2.get();
+  tri->set_node(0, n0.get());
+  tri->set_node(1, n1.get());
+  tri->set_node(2, n2.get());
 
   SBMBndTri3 bnd_tri(tri.get());
 
@@ -248,8 +248,8 @@ TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
   std::unique_ptr<Edge2> edge(new Edge2());
   std::unique_ptr<Node> e0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> e1(new Node(Point(1.0, 0.0, 0.0), 1));
-  edge->set_node(0) = e0.get();
-  edge->set_node(1) = e1.get();
+  edge->set_node(0, e0.get());
+  edge->set_node(1, e1.get());
   SBMBndEdge2 bnd_edge(edge.get());
   const SBMBndElementBase & edge_base = bnd_edge;
 
@@ -266,9 +266,9 @@ TEST(SBMBndElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
   std::unique_ptr<Node> t0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> t1(new Node(Point(1.0, 0.0, 0.0), 1));
   std::unique_ptr<Node> t2(new Node(Point(0.0, 1.0, 0.0), 2));
-  tri->set_node(0) = t0.get();
-  tri->set_node(1) = t1.get();
-  tri->set_node(2) = t2.get();
+  tri->set_node(0, t0.get());
+  tri->set_node(1, t1.get());
+  tri->set_node(2, t2.get());
   SBMBndTri3 bnd_tri(tri.get());
   const SBMBndElementBase & tri_base = bnd_tri;
 
@@ -291,10 +291,10 @@ TEST(SBMBndElementTest, ConstructionRejectsUnsupportedSideType)
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
   std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0), 2));
   std::unique_ptr<Node> n3(new Node(Point(0.0, 0.0, 1.0), 3));
-  tet->set_node(0) = n0.get();
-  tet->set_node(1) = n1.get();
-  tet->set_node(2) = n2.get();
-  tet->set_node(3) = n3.get();
+  tet->set_node(0, n0.get());
+  tet->set_node(1, n1.get());
+  tet->set_node(2, n2.get());
+  tet->set_node(3, n3.get());
 
   EXPECT_THROW(
       {
@@ -319,8 +319,8 @@ TEST(SBMBndElementTest, UnsupportedGeometryDispatchersThrow)
   std::unique_ptr<Edge2> edge(new Edge2());
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
-  edge->set_node(0) = n0.get();
-  edge->set_node(1) = n1.get();
+  edge->set_node(0, n0.get());
+  edge->set_node(1, n1.get());
 
   // Placeholder unit normal; the dispatchers under test never consult it.
   SBMBndUnsupportedForTest bnd(edge.get(), Point(0.0, 0.0, 1.0));
