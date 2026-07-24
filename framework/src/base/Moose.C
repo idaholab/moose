@@ -491,8 +491,7 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerMooseObjectTask(
-      "add_mfem_problem_operator", Moose::MFEM::ProblemComposerBase, false);
+  registerMooseObjectTask("add_mfem_problem_operator", Moose::MFEM::ProblemComposerBase, false);
   addTaskDependency("add_mfem_problem_operator", "init_mesh");
   addTaskDependency("add_variable", "add_mfem_problem_operator");
   addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
