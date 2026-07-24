@@ -154,6 +154,28 @@ sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
+
+bool
+nodeOnBoundary(const MooseMesh & mesh, const Node & node, const BoundaryName & bname)
+{
+  const auto & boundary_info = mesh.getMesh().get_boundary_info();
+
+  const BoundaryID bid = boundary_info.get_id_by_name(bname);
+
+  if (bid == libMesh::BoundaryInfo::invalid_id)
+    return false;
+
+  std::vector<boundary_id_type> node_bids;
+  boundary_info.boundary_ids(&node, node_bids);
+
+  return std::find(node_bids.begin(), node_bids.end(), bid) != node_bids.end();
+}
+
+bool
+isEnrichmentVariableName(const std::string & name)
+{
+  return MooseUtils::startsWith(name, "enrich");
+}
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -8631,6 +8653,76 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
     }
 }
 
+void
+FEProblemBase::zeroEnrichmentOnBoundary(const BoundaryName & bname)
+{
+  if (_nl.empty())
+    return;
+
+  auto & nl = *_nl[0];
+  auto & sys = nl.system();
+
+  NumericVector<Number> & current_solution = *sys.current_local_solution;
+  NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & older_solution = nl.solutionOlder();
+
+  const auto & vars = nl.getVariables(/*tid=*/0);
+
+  unsigned int n_zeroed = 0;
+
+  for (const auto & node : _mesh.getMesh().local_node_ptr_range())
+  {
+    if (!nodeOnBoundary(_mesh, *node, bname))
+      continue;
+
+    const std::set<SubdomainID> & sids = _mesh.getNodeBlockIds(*node);
+
+    for (auto * var : vars)
+    {
+      if (!var->isNodal())
+        continue;
+
+      if (!isEnrichmentVariableName(var->name()))
+        continue;
+
+      const std::set<SubdomainID> & var_subdomains = nl.getSubdomainsForVar(var->number());
+
+      std::set<SubdomainID> intersect;
+      std::set_intersection(var_subdomains.begin(),
+                            var_subdomains.end(),
+                            sids.begin(),
+                            sids.end(),
+                            std::inserter(intersect, intersect.begin()));
+
+      if (!var_subdomains.empty() && intersect.empty())
+        continue;
+
+      const unsigned int n_comp = node->n_comp(sys.number(), var->number());
+      for (const auto component : make_range(n_comp))
+      {
+        const dof_id_type dof = node->dof_number(sys.number(), var->number(), component);
+        current_solution.set(dof, 0.0);
+        old_solution.set(dof, 0.0);
+
+        if (isTransient())
+          older_solution.set(dof, 0.0);
+
+        ++n_zeroed;
+      }
+    }
+  }
+
+  current_solution.close();
+  old_solution.close();
+  if (isTransient())
+    older_solution.close();
+
+  sys.update();
+
+  _console << "Zeroed " << n_zeroed << " enrichment DOFs on boundary '" << bname
+           << "' (current/old/older)\n";
+}
+
 bool
 FEProblemBase::updateMeshXFEM()
 {
@@ -8655,10 +8747,27 @@ FEProblemBase::updateMeshXFEM()
       restoreSolutions();
       _console << "\nXFEM update complete: Mesh modified" << std::endl;
     }
+  }
+  // Changing near-tip enrichment requires repeating the solution, even if the mesh is not updated
+  bool crack_front_advanced = false;
+  if (!updated)
+  {
+    crack_front_advanced = _xfem->didNearTipEnrichmentChange();
+    if (crack_front_advanced)
+      _console << "\nXFEM update complete: Mesh not modified but advancing crack changed near-tip "
+                  "enrichment"
+               << std::endl;
     else
       _console << "\nXFEM update complete: Mesh not modified" << std::endl;
   }
-  return updated;
+
+  if (haveXFEM())
+    _xfem->executeSubdomainModifiers();
+  // After the interface sideset is rebuilt, enforce zero enrichment there.
+  if (updated)
+    zeroEnrichmentOnBoundary("enriched_interface");
+
+  return (updated || crack_front_advanced);
 }
 
 void
