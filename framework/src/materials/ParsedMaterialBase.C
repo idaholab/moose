@@ -59,13 +59,7 @@ ParsedMaterialBase::validParams()
       "Vector of postprocessor names used in the parsed function");
 
   // Function expression
-  params.addDeprecatedCustomTypeParam<std::string>(
-      "function",
-      "FunctionExpression",
-      "Parsed function (see FParser) expression for the parsed material",
-      "'function' is deprecated, use 'expression' instead");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addCustomTypeParam<std::string>(
+  params.addRequiredCustomTypeParam<std::string>(
       "expression",
       "FunctionExpression",
       "Parsed function (see FParser) expression for the parsed material");
@@ -74,8 +68,7 @@ ParsedMaterialBase::validParams()
 }
 
 ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters)
-  : _function_param(parameters.isParamValid("function") ? "function" : "expression"),
-    _function(parameters.get<std::string>(_function_param))
+  : _function(parameters.get<std::string>("expression"))
 {
   // get constant vectors
   _constant_names = parameters.get<std::vector<std::string>>("constant_names");

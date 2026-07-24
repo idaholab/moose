@@ -119,7 +119,7 @@
     constant_expressions = '1e-6 5 1 0.1'
     expression = 'sk_b:= length_scale*k_b; sk_p2:= length_scale*k_p2; sk_int:= k_int*length_scale; if(phase2>0.1,if(phase2>0.95,sk_p2,sk_int),sk_b)'
     outputs = exodus
-    f_name = thermal_conductivity
+    property_name = thermal_conductivity
     coupled_variables = phase2
   []
 []

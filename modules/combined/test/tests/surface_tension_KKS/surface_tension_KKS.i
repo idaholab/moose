@@ -245,7 +245,7 @@
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    f_name = fe_m
+    property_name = fe_m
     coupled_variables = ' '
   [../]
 # Total free energy of the matrix
@@ -268,7 +268,7 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = ppt
-    f_name = fe_p
+    property_name = fe_p
     coupled_variables = ' '
   [../]
 
@@ -284,7 +284,7 @@
   [./Total_elastic_energy]
     type = DerivativeTwoPhaseMaterial
     eta = eta
-    f_name = f_el_mat
+    property_name = f_el_mat
     fa_name = fe_m
     fb_name = fe_p
     outputs = exodus
