@@ -1,0 +1,17 @@
+[Tests]
+  design = 'MortarPerformance.md ComputeFrictionalForceLMMechanicalContact.md'
+  issues = '#32856'
+  requirement = 'The system shall provide stable bouncing-block frictional mortar performance '
+                'candidates for both nonlinear complementarity formulations.'
+  capabilities = 'mumps'
+  [hsw]
+    type = RunApp
+    input = frictional_bouncing_block.i
+    cli_args = "Constraints/weighted_gap_lm/friction_ncp_formulation=hueber_stadler_wohlmuth Executioner/end_time=11.5 Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-15 1e-5' Outputs/file_base=performance_frictional_bouncing_block_hsw"
+  []
+  [ac]
+    type = RunApp
+    input = frictional_bouncing_block.i
+    cli_args = "Constraints/weighted_gap_lm/friction_ncp_formulation=alart_curnier Executioner/end_time=11.5 Executioner/abort_on_solve_fail=true Executioner/petsc_options_value='lu mumps NONZERO 1e-15 1e-5' Outputs/file_base=performance_frictional_bouncing_block_ac"
+  []
+[]

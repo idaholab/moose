@@ -23,6 +23,29 @@ have nodal boundary conditions (which introduce values of unity on the diagonals
 entries from your physics (kernels) are very large. You want your condition number to be as close to
 unity as possible.
 
+### Developer right column scaling id=ksp-right-diagonal-scaling
+
+Objects that require a known per-degree-of-freedom change of linear-solver coordinates can use
+`requestKSPRightDiagonalScale()`, `setKSPRightDiagonalScale()`, and
+`closeKSPRightDiagonalScale()`. If \(D\) is the resulting positive diagonal vector, PETSc
+solves
+
+\[
+(JD)y=b,\qquad x=Dy,
+\]
+
+without permanently changing the physical Jacobian or solution representation. The vector is reset
+to one before each nonlinear solve. Contributors may set only owned entries, repeated contributors
+within one mortar assembly must provide the same value, and every value must be positive and finite.
+An entry may be refreshed between assemblies; an unchanged value does not modify the vector state.
+
+PETSc temporarily applies \(D\) to both the operator and preconditioning matrix. A nonzero physical
+initial guess is mapped by \(D^{-1}\), and the final correction is mapped back by \(D\). The
+matrices and their object states are restored before final views and residual reporting. Unchanged
+matrix and scale states permit preconditioner reuse; changing either forces a rebuild. An attached
+right or near nullspace must be invariant under \(D\). Transpose and multiple-right-hand-side solves
+currently reject an active right scale.
+
 ### Automatic scaling id=auto-scaling
 
 To address a poor condition number, which can often be the result of poor relative scaling between variables, you

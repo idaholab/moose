@@ -10,6 +10,10 @@
 #pragma once
 
 #include "WeightedGapUserObject.h"
+#include "RankFourTensor.h"
+#include "MaterialProperty.h"
+
+#include <array>
 
 template <typename>
 class MooseVariableFE;
@@ -33,7 +37,20 @@ public:
   virtual void reinit() override {}
   virtual Real getNormalContactPressure(const Node * const /*node*/) const override;
 
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void timestepSetup() override;
+  virtual void meshChanged() override;
+
+  /**
+   * Per-node physical normal stiffness scale and its accumulated mortar weight.
+   * Only populated when derive_c_from_elasticity = true; after finalize() the scale has already
+   * been divided by the accumulated weight.
+   */
+  const std::unordered_map<const DofObject *, std::array<Real, 2>> & dofToDerivedC() const;
+
 protected:
+  virtual void computeQpIProperties() override;
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return true; }
 
@@ -47,6 +64,23 @@ protected:
    */
   void verifyLagrange(const MooseVariable & var, const std::string & var_name) const;
 
+  // Non-virtual helpers so diamond-derived classes can call them without re-entering the base chain
+  void clearDerivedC();
+  void finalizeDerivedC();
+  void accumulateDerivedCIfNeeded();
+
+  /// Whether to derive the physical normal stiffness from elasticity tensor material properties
+  const bool _derive_c_from_elasticity;
+
+  /// Whether the elasticity tensor material property was declared as an AD property
+  const bool _use_automatic_differentiation;
+
+  /// Per-node accumulated (physical stiffness scale * weight, weight)
+  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_derived_c;
+
+  /// Whether the physical stiffness scale must be refreshed at the next mortar execution
+  bool _derived_c_needs_update = true;
+
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;
 
@@ -55,4 +89,26 @@ protected:
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;
+
+private:
+  template <bool is_ad>
+  void fetchElasticityTensorProperties(const std::string & sec_name, const std::string & pri_name);
+
+  template <bool is_ad>
+  void accumulateDerivedC();
+
+  /// Non-AD elasticity tensor on secondary side (non-null when !_use_automatic_differentiation)
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_secondary = nullptr;
+  /// Non-AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, false> * _elasticity_tensor_primary = nullptr;
+  /// AD elasticity tensor on secondary side (non-null when _use_automatic_differentiation)
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_secondary_ad = nullptr;
+  /// AD elasticity tensor on primary side
+  const GenericMaterialProperty<RankFourTensor, true> * _elasticity_tensor_primary_ad = nullptr;
 };
+
+inline const std::unordered_map<const DofObject *, std::array<Real, 2>> &
+LMWeightedGapUserObject::dofToDerivedC() const
+{
+  return _dof_to_derived_c;
+}

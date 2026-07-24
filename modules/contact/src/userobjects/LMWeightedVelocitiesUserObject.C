@@ -62,3 +62,25 @@ LMWeightedVelocitiesUserObject::contactTangentialPressureDirTwo() const
 {
   return _lm_variable_tangential_two->adSlnLower();
 }
+
+void
+LMWeightedVelocitiesUserObject::initialize()
+{
+  WeightedVelocitiesUserObject::initialize();
+  LMWeightedGapUserObject::clearDerivedC();
+}
+
+void
+LMWeightedVelocitiesUserObject::finalize()
+{
+  WeightedVelocitiesUserObject::finalize();
+  if (_derive_c_from_elasticity && _derived_c_needs_update)
+    LMWeightedGapUserObject::finalizeDerivedC();
+}
+
+void
+LMWeightedVelocitiesUserObject::computeQpIProperties()
+{
+  WeightedVelocitiesUserObject::computeQpIProperties();
+  LMWeightedGapUserObject::accumulateDerivedCIfNeeded();
+}
