@@ -51,6 +51,13 @@ protected:
   const SubdomainName & _transition_subdomain;
   const SubdomainName & _closed_subdomain;
   mfem::Vector _boundary_normal;
+
+  /// True if the supplied boundary lies on the exterior of the mesh (only one side has
+  /// elements), in which case no side selection is performed.
+  bool _exterior_boundary{false};
+
+  /// Number of element-thick layers grown inward from the boundary (exterior boundaries only).
+  const unsigned int _num_layers;
 };
 
 #endif
