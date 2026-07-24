@@ -18,6 +18,65 @@ The operations currently implemented are:
 
 - merging boundaries with the same name but different boundary IDs.
 
+- repairing sliver (near-degenerate) first-order 2D elements (`TRI3`, `QUAD4`, polygons). An element is flagged as a
+  sliver if its area is below [!param](/Mesh/MeshRepairGenerator/sliver_element_area_fraction) times the mesh
+  surface-area scale, or if every vertex other than the two ends of its longest edge lies within
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) times the longest-edge length from that edge. Either test
+  can be disabled by setting its tolerance to 0. Each sliver is removed and absorbed into the element sharing its
+  longest edge, keeping the surface conformal (no holes or hanging nodes). A triangle sliver sharing a triangle neighbor
+  splits that neighbor into two triangles, so an all-triangle mesh stays all-triangle. Otherwise the neighbor absorbs
+  the sliver's remaining vertices into the shared edge and is promoted by its new vertex count: a triangle becomes a
+  quadrilateral, and anything else becomes a polygon. If the longest edge is on a surface boundary (no neighbor to
+  absorb the sliver), the sliver is left in place.
+
+- repairing sliver (near-degenerate) `TET4` elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A tetrahedron is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or if the
+  vertex opposite its largest face lies within [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) times
+  sqrt(largest-face area) of that face. Each sliver is repaired by an **edge collapse**: one of its edges is collapsed
+  (a node is merged onto another existing node), removing the sliver while keeping a valid, conformal, all-tetrahedral,
+  manifold mesh. A collapse is committed only if it does not invert or re-sliver any neighboring tetrahedron, does not
+  create a non-manifold configuration, and does not move/remove a boundary node (the mesh boundary is never distorted);
+  the [!param](/Mesh/MeshRepairGenerator/tet_collapse_volume_floor) parameter sets the relative volume below which a
+  reshaped neighbor is rejected. Slivers with no admissible collapse (for example a flat sliver all of whose nodes are
+  on the boundary, or a true flat sliver whose every collapse would invert a neighbor) are left in place and reported.
+  Edge collapse (rather than polyhedron-based absorption) is used for tetrahedra because the union of a flat tet with a
+  neighbor is non-convex, and libMesh polyhedra must be convex. Only first-order `TET4` slivers are handled this way.
+
+- repairing flat sliver `PYRAMID5` elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A pyramid is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or if its apex
+  lies within [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) times sqrt(base area) of its quad base. Each
+  sliver is repaired by **absorbing it into the element across its quad base** (a hexahedron, prism, polyhedron, or
+  another pyramid): the shared quad face is dissolved and the neighbor is replaced by a `C0Polyhedron` made of its
+  remaining faces plus the pyramid's four triangular cap faces. No node is moved, so the surrounding elements stay
+  conformal. Here the union *is* convex (a neighbor capped by a shallow pyramid lid), so polyhedron absorption is valid.
+  The absorption is committed only if the apex projects inside the quad-base footprint and the resulting polyhedron is a
+  sound cell (positive volume, invertible mapping); a pyramid with no element across its quad base, or for which the
+  union would be invalid, is left in place and reported.
+
+- repairing sliver `PRISM6` (wedge) elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A wedge is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or by the
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol) test, and is then classified and repaired one of two ways.
+  A **flat** wedge (its top triangle squashed onto the bottom) is repaired by **collapsing** the top triangle onto the
+  bottom so the elements above and below it meet; the collapse is a sub-tolerance move (it cannot distort the boundary by
+  more than the sliver's own thickness) and is committed only if the three quad sides are unshared and it inverts or
+  degenerates no neighbor, otherwise the wedge is left in place. A **thin-cross-section** wedge (a "blade", whose
+  triangular cross-section is itself a sliver) is repaired by **absorbing it into the element across its longest quad
+  side** (the 3D analog of absorbing a 2D sliver triangle into its longest-edge neighbor), which becomes a
+  `C0Polyhedron`. A wedge with no admissible repair is left in place and reported.
+
+- repairing flat-slab sliver `HEX8` elements (also gated by
+  [!param](/Mesh/MeshRepairGenerator/fix_sliver_elements)). A hexahedron is flagged as a sliver if its volume is below
+  [!param](/Mesh/MeshRepairGenerator/sliver_element_volume_fraction) times the mesh bounding-box volume, or if one of its
+  three pairs of opposite faces is separated by less than [!param](/Mesh/MeshRepairGenerator/sliver_element_flap_tol)
+  times sqrt(face area) (a slab thin in one axis direction). It is repaired by **collapsing that squashed pair of
+  opposite faces together** so the elements on either side of the slab meet; like the wedge collapse this is a
+  sub-tolerance move, committed only if the four connecting side faces are unshared and it inverts or degenerates no
+  neighbor, otherwise the hexahedron is left in place. (A hex thin in more than one direction, or whose collapse would
+  distort a shared side, is left in place and reported.)
+
 - renumbering the nodes and elements to have a contiguous ordering.
 
 - splitting non-convex polygons into convex polygons
