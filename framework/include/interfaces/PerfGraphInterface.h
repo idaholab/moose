@@ -12,9 +12,11 @@
 #include "Moose.h"
 #include "PerfGuard.h"
 
+// Note that with concurrent multiapps, everything is a threaded section
 #ifndef MOOSE_NO_PERF_GRAPH
 #define TIME_SECTION1(id)                                                                          \
-  mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");   \
+  mooseAssert(!Threads::in_threads || !this->_pg_moose_app.perfGraph().active(),                   \
+              "PerfGraph timing cannot be used within threaded sections");                         \
   PerfGuard time_guard(this->_pg_moose_app.perfGraph(), id);
 #define CHECK_TIME_SECTION(id, section_name)                                                       \
   mooseAssert(moose::internal::getPerfGraphRegistry().sectionInfo(id)._name ==                     \

@@ -117,7 +117,6 @@ MFEMSteady::execute()
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
   _mfem_problem.timestepSetup();
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_mfem_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
   {
     _last_solve_converged = false;
@@ -133,7 +132,6 @@ MFEMSteady::execute()
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;

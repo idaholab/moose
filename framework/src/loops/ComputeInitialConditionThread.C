@@ -34,7 +34,7 @@ void
 ComputeInitialConditionThread::operator()(const ConstElemRange & range)
 {
   ParallelUniqueId puid;
-  _tid = puid.id;
+  _tid = 0; // puid.id;
   const auto current_ic_state = _fe_problem.getCurrentICState();
 
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
