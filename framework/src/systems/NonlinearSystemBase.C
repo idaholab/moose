@@ -76,6 +76,7 @@
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
 #include "FVScalarLagrangeMultiplierInterface.h"
+#include "FVObject.h"
 #include "GeneralUserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
@@ -222,6 +223,19 @@ NonlinearSystemBase::turnOffJacobian()
   nonlinearSolver()->jacobian = NULL;
 }
 
+std::vector<SetupInterface *>
+NonlinearSystemBase::getFVSetupObjects(THREAD_ID tid)
+{
+  std::vector<SetupInterface *> fv_objects;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribFVObject>(true)
+      .template condition<AttribSysNum>(number())
+      .template condition<AttribThread>(tid)
+      .queryInto(fv_objects);
+  return fv_objects;
+}
+
 void
 NonlinearSystemBase::initialSetup()
 {
@@ -246,27 +260,8 @@ NonlinearSystemBase::initialSetup()
       _integrated_bcs.initialSetup(tid);
 
       if (_fe_problem.haveFV())
-      {
-        std::vector<FVElementalKernel *> fv_elemental_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVElementalKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_elemental_kernels);
-
-        for (auto * fv_kernel : fv_elemental_kernels)
-          fv_kernel->initialSetup();
-
-        std::vector<FVFluxKernel *> fv_flux_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVFluxKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_flux_kernels);
-
-        for (auto * fv_kernel : fv_flux_kernels)
-          fv_kernel->initialSetup();
-      }
+        for (auto * fv_object : getFVSetupObjects(tid))
+          fv_object->initialSetup();
     }
 
     _scalar_kernels.initialSetup();
@@ -350,35 +345,8 @@ NonlinearSystemBase::timestepSetup()
     _integrated_bcs.timestepSetup(tid);
 
     if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->timestepSetup();
-      for (auto * ik : iks)
-        ik->timestepSetup();
-      for (auto * kernel : kernels)
-        kernel->timestepSetup();
-    }
+      for (auto * fv_object : getFVSetupObjects(tid))
+        fv_object->timestepSetup();
   }
   _scalar_kernels.timestepSetup();
   _constraints.timestepSetup();
@@ -413,35 +381,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
     _integrated_bcs.customSetup(exec_type, tid);
 
     if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->customSetup(exec_type);
-      for (auto * ik : iks)
-        ik->customSetup(exec_type);
-      for (auto * kernel : kernels)
-        kernel->customSetup(exec_type);
-    }
+      for (auto * fv_object : getFVSetupObjects(tid))
+        fv_object->customSetup(exec_type);
   }
   _scalar_kernels.customSetup(exec_type);
   _constraints.customSetup(exec_type);

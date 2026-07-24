@@ -454,6 +454,30 @@ private:
   bool _initd;
 };
 
+/**
+ * An attribute specifying that an object belongs to the finite volume system, i.e. that it
+ * inherits the FVObject marker class. Querying on this retrieves every finite volume family
+ * (kernels, boundary conditions, interface kernels) at once, so that a new family is covered
+ * without having to be added to each query by hand.
+ */
+class AttribFVObject : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key k) { _val = k; }
+
+  AttribFVObject(TheWarehouse & w) : Attribute(w, "fv_object"), _val(false) {}
+  AttribFVObject(TheWarehouse & w, Key k) : Attribute(w, "fv_object"), _val(k) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribFVObject);
+
+private:
+  Key _val;
+};
+
 class AttribVar : public Attribute
 {
 public:

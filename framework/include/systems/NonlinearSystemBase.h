@@ -1080,6 +1080,14 @@ protected:
 
 private:
   /**
+   * Retrieve every finite volume object belonging to this system on thread \p tid, as
+   * SetupInterfaces, so that the setup methods can be dispatched to all finite volume families
+   * with a single query. Objects are identified by the FVObject marker class, so a family added
+   * in the future is picked up here without this query having to change.
+   */
+  std::vector<SetupInterface *> getFVSetupObjects(THREAD_ID tid);
+
+  /**
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
   void findImplicitGeometricCouplingEntries(

@@ -14,6 +14,7 @@
 #include "Assembly.h"
 #include "ADFunctorInterface.h"
 #include "FVRelationshipManagerInterface.h"
+#include "FVObject.h"
 
 class SubProblem;
 
@@ -32,7 +33,8 @@ class SubProblem;
 class FVKernel : public ResidualObject,
                  public BlockRestrictable,
                  public ADFunctorInterface,
-                 public FVRelationshipManagerInterface
+                 public FVRelationshipManagerInterface,
+                 public FVObject
 {
 public:
   static InputParameters validParams();
