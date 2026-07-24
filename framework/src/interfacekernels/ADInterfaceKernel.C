@@ -56,8 +56,8 @@ ADInterfaceKernelTempl<T>::ADInterfaceKernelTempl(const InputParameters & parame
     _grad_neighbor_value(_neighbor_var.adGradSlnNeighbor()),
     _phi_neighbor(_assembly.phiFaceNeighbor(_neighbor_var)),
     _test_neighbor(_neighbor_var.phiFaceNeighbor()),
-    _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor())
-
+    _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor()),
+    _same_system(_var.sys().number() == _neighbor_var.sys().number())
 {
   _subproblem.haveADObjects(true);
 
@@ -119,7 +119,8 @@ ADInterfaceKernelTempl<T>::computeResidual()
   computeElemNeighResidual(Moose::Element);
 
   // Compute the residual for the neighbor
-  computeElemNeighResidual(Moose::Neighbor);
+  if (_same_system)
+    computeElemNeighResidual(Moose::Neighbor);
 }
 
 template <typename T>
@@ -187,7 +188,8 @@ ADInterfaceKernelTempl<T>::computeJacobian()
   precalculateJacobian();
 
   computeElemNeighJacobian(Moose::ElementElement);
-  computeElemNeighJacobian(Moose::NeighborNeighbor);
+  if (_same_system)
+    computeElemNeighJacobian(Moose::NeighborNeighbor);
 }
 
 template <typename T>
@@ -266,6 +268,11 @@ ADInterfaceKernelTempl<T>::computeNeighborOffDiagJacobian(unsigned int jvar)
   // this return
   if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
       !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
+    return;
+
+  // We don't care about any contribution to the neighbor Jacobian rows if it's not in the system
+  // we are currently working with (the variable's system)
+  if (!_same_system)
     return;
 
   if (jvar != _neighbor_var.number())
