@@ -22,13 +22,17 @@
 #include "libmesh/enum_solver_package.h"
 #include "libmesh/petsc_solver_exception.h"
 
+#include "mtwist.h"
+
 using namespace libMesh;
 
 template <>
 void
-dataStore(std::ostream & stream, Real & v, void * /*context*/)
+dataStore<mt_state>(std::ostream & stream, mt_state & foo, void * ctx)
 {
-  stream.write((char *)&v, sizeof(v));
+  dataStore(stream, foo.statevec, ctx);
+  dataStore(stream, foo.stateptr, ctx);
+  dataStore(stream, foo.initialized, ctx);
 }
 
 template <>
@@ -57,13 +61,6 @@ dataStore(std::ostream & stream, UserObjectName & v, void * context)
 {
   auto & name = static_cast<std::string &>(v);
   dataStore(stream, name, context);
-}
-
-template <>
-void
-dataStore(std::ostream & stream, bool & v, void * /*context*/)
-{
-  stream.write((char *)&v, sizeof(v));
 }
 
 template <>
@@ -153,7 +150,7 @@ dataStore(std::ostream & stream, const Elem *& e, void * context)
       mooseError("Can't output Elems with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -170,7 +167,7 @@ dataStore(std::ostream & stream, const Node *& n, void * context)
       mooseError("Can't output Nodes with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -187,7 +184,7 @@ dataStore(std::ostream & stream, Elem *& e, void * context)
       mooseError("Can't output Elems with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -204,7 +201,7 @@ dataStore(std::ostream & stream, Node *& n, void * context)
       mooseError("Can't output Nodes with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -296,14 +293,22 @@ dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
 template void dataStore(std::ostream & stream, VectorValue<Real> & v, void * context);
 template void dataStore(std::ostream & stream, VectorValue<ADReal> & v, void * context);
 
+template <>
 void
-dataStore(std::ostream & stream, Point & p, void * context)
+dataStore(std::ostream & stream, const Point & p, void * context)
 {
   for (const auto i : make_range(Moose::dim))
   {
     Real r = p(i);
     dataStore(stream, r, context);
   }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, Point & p, void * context)
+{
+  dataStore(stream, const_cast<const Point &>(p), context);
 }
 
 template <>
@@ -322,11 +327,11 @@ dataStore(std::ostream & stream, libMesh::Parameters & p, void * context)
     auto & key = const_cast<std::string &>(it->first);
     auto type = it->second->type();
 
-    storeHelper(stream, key, context);
-    storeHelper(stream, type, context);
+    dataStore(stream, key, context);
+    dataStore(stream, type, context);
 
 #define storescalar(ptype)                                                                         \
-  else if (it->second->type() == demangle(typeid(ptype).name())) storeHelper(                      \
+  else if (it->second->type() == demangle(typeid(ptype).name())) dataStore(                        \
       stream,                                                                                      \
       (dynamic_cast<libMesh::Parameters::Parameter<ptype> *>(MooseUtils::get(it->second)))->get(), \
       context)
@@ -393,9 +398,11 @@ dataStore(std::ostream & stream,
 
 template <>
 void
-dataLoad(std::istream & stream, Real & v, void * /*context*/)
+dataLoad<mt_state>(std::istream & stream, mt_state & foo, void * ctx)
 {
-  stream.read((char *)&v, sizeof(v));
+  dataLoad(stream, foo.statevec, ctx);
+  dataLoad(stream, foo.stateptr, ctx);
+  dataLoad(stream, foo.initialized, ctx);
 }
 
 template <>
@@ -427,13 +434,6 @@ dataLoad(std::istream & stream, UserObjectName & v, void * context)
 {
   auto & name = static_cast<std::string &>(v);
   dataLoad(stream, name, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, bool & v, void * /*context*/)
-{
-  stream.read((char *)&v, sizeof(v));
 }
 
 template <>
@@ -499,7 +499,7 @@ dataLoad(std::istream & stream, const Elem *& e, void * context)
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     e = mesh->elemPtr(id);
@@ -519,7 +519,7 @@ dataLoad(std::istream & stream, const Node *& n, void * context)
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     n = mesh->nodePtr(id);
@@ -539,7 +539,7 @@ dataLoad(std::istream & stream, Elem *& e, void * context)
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     e = mesh->elemPtr(id);
@@ -559,7 +559,7 @@ dataLoad(std::istream & stream, Node *& n, void * context)
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     n = mesh->nodePtr(id);
@@ -665,6 +665,7 @@ dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
 template void dataLoad(std::istream & stream, VectorValue<Real> & v, void * context);
 template void dataLoad(std::istream & stream, VectorValue<ADReal> & v, void * context);
 
+template <>
 void
 dataLoad(std::istream & stream, Point & p, void * context)
 {
@@ -689,14 +690,14 @@ dataLoad(std::istream & stream, libMesh::Parameters & p, void * context)
   for (unsigned int i = 0; i < size; i++)
   {
     std::string key, type;
-    loadHelper(stream, key, context);
-    loadHelper(stream, type, context);
+    dataLoad(stream, key, context);
+    dataLoad(stream, type, context);
 
 #define loadscalar(ptype)                                                                          \
   else if (type == demangle(typeid(ptype).name())) do                                              \
   {                                                                                                \
     ptype & value = p.set<ptype>(key);                                                             \
-    loadHelper(stream, value, context);                                                            \
+    dataLoad(stream, value, context);                                                              \
   }                                                                                                \
   while (0)
 

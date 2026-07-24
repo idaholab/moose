@@ -763,11 +763,19 @@ template <>
 void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template <>
 void dataStore(std::ostream & stream, BoundingBox & bbox, void * context);
+template <>
+void dataStore(std::ostream & stream, FeatureFloodCount::Status &, void *);
+template <>
+void dataStore(std::ostream & stream, FeatureFloodCount::BoundaryIntersection &, void *);
 
 template <>
 void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template <>
 void dataLoad(std::istream & stream, BoundingBox & bbox, void * context);
+template <>
+void dataLoad(std::istream & stream, FeatureFloodCount::Status &, void *);
+template <>
+void dataLoad(std::istream & stream, FeatureFloodCount::BoundaryIntersection &, void *);
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>
