@@ -11,7 +11,6 @@
 
 #include "MFEMLORLinearSolverBase.h"
 #include "MFEMProblem.h"
-#include "MFEMMatrixFreeAMS.h"
 
 namespace Moose::MFEM
 {

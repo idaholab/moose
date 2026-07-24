@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMSolverBase.h"
-#include "MFEMLORInterface.h"
 #include "EquationSystem.h"
 
 class MFEMProblemSolve;

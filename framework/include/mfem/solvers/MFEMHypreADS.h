@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 #include "MFEMFESpace.h"
 
 /**
