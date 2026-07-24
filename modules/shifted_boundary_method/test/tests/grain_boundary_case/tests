@@ -1,0 +1,14 @@
+[Tests]
+  design = 'index.md'
+  [grain_boundary_sczm_coarse_lambda1]
+    type = 'CSVDiff'
+    input = 'grain_boundary_sczm_coarse_lambda1.i'
+    csvdiff = 'grain_boundary_sczm_coarse_lambda1_csv.csv'
+    mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh
+    recover = false
+    requirement = 'The system shall solve a shifted cohesive zone problem on a polycrystalline '
+                  'grain structure whose grain IDs are assigned from a boundary mesh with '
+                  'SubdomainGrainIDGenerator, using the ShiftedCohesiveZone action with the '
+                  'non-AD BiLinearMixedModeTraction law.'
+  []
+[]

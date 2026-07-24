@@ -9,10 +9,11 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "SBMSubdomainGeneratorBase.h"
 #include "FunctionParserUtils.h"
 
-class SubdomainInterceptedGenerator : public MeshGenerator, public FunctionParserUtils<false>
+class SubdomainInterceptedGenerator : public SBMSubdomainGeneratorBase,
+                                      public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -21,8 +22,6 @@ public:
   std::unique_ptr<libMesh::MeshBase> generate() override;
 
 protected:
-  std::unique_ptr<libMesh::MeshBase> & _input;
-
   /// Parsed function
   SymFunctionPtr _parsed_function;
 
@@ -48,9 +47,6 @@ protected:
   // Only modify outside elements (for multi-geometry handling)
   bool _modify_outside_only;
   bool _modify_inside_only;
-
-  /// @brief  Quadrature order used for active‑area estimation
-  int _qrule_order;
 
   usingFunctionParserUtilsMembers(false);
 };

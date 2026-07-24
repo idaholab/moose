@@ -15,10 +15,9 @@ registerMooseObject("ShiftedBoundaryMethodApp", SubdomainInterceptedGenerator);
 InputParameters
 SubdomainInterceptedGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SBMSubdomainGeneratorBase::validParams();
   params += FunctionParserUtils<false>::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("signed_dist_function",
                                        "Signed Distance Function to evaluate");
 
@@ -38,12 +37,6 @@ SubdomainInterceptedGenerator::validParams()
   params.addParam<bool>("modify_outside_only", false, "Only modify outside elements.");
   params.addParam<bool>("modify_inside_only", false, "Only modify inside elements.");
 
-  // Quadrature order used for active‑area estimation when an element straddles the interface
-  params.addRangeCheckedParam<int>("qrule_order",
-                                   9,
-                                   "qrule_order >= 0 & qrule_order <= 10",
-                                   "Quadrature order used to estimate the active area.");
-
   params.addClassDescription("Base on the signed distance function to classify elements IN and OUT "
                              "elements as different subdomains.");
 
@@ -51,9 +44,8 @@ SubdomainInterceptedGenerator::validParams()
 }
 
 SubdomainInterceptedGenerator::SubdomainInterceptedGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+  : SBMSubdomainGeneratorBase(parameters),
     FunctionParserUtils<false>(parameters),
-    _input(getMesh("input")),
     _parsed_function(std::make_shared<SymFunction>()),
     _subdomain_id_inside(getParam<SubdomainID>("subdomain_id_inside")),
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
@@ -64,8 +56,7 @@ SubdomainInterceptedGenerator::SubdomainInterceptedGenerator(const InputParamete
     _keep_inside_as_inside(getParam<bool>("keep_inside_as_inside")),
     _keep_outside_as_outside(getParam<bool>("keep_outside_as_outside")),
     _modify_outside_only(getParam<bool>("modify_outside_only")),
-    _modify_inside_only(getParam<bool>("modify_inside_only")),
-    _qrule_order(getParam<int>("qrule_order"))
+    _modify_inside_only(getParam<bool>("modify_inside_only"))
 {
   setParserFeatureFlags(_parsed_function);
 
@@ -132,8 +123,7 @@ SubdomainInterceptedGenerator::generate()
              (!_is_domain_inside_surface && phi > _threshold);
     };
 
-    const Real ratio_active =
-        SBMUtils::activeElementFraction(*elem, static_cast<Order>(_qrule_order), is_active);
+    const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
 
     // (e) Decide inside / outside based on the inactive fraction and _lambda.
     elem->subdomain_id() = SBMUtils::isInactive(ratio_active, _lambda) ? outside_id : inside_id;
