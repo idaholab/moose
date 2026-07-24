@@ -17,14 +17,18 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include "ProblemOperatorBuilderBase.h"
+#include "ProblemComposerBase.h"
 
 #include <map>
 
 namespace Moose::MFEM
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
 struct SolutionState;
+=======
+class ProblemComposerBase;
+>>>>>>> 34ef824000 (changes to name from ProblemOperatorBuilders to MFEMProblemComposers, change of source files, names, unit test, directories, minimal change to documentation)
 }
 =======
 class ProblemOperatorBuilderBase;
@@ -293,18 +297,18 @@ public:
   const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
-   * Method to get the first Problem Operator Builder object storing the
+   * Method to get the first Problem Composer object storing the
    * method that builds the ProblemOperator in the executioner.
    */
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> getProblemOperatorBuilder()
+  std::shared_ptr<Moose::MFEM::ProblemComposerBase> getProblemComposer()
   {
-    return _problem_operator_builders[0];
+    return _problem_composers[0];
   }
 
   /**
-   * Checks whether problem Operator builder interface is empty.
+   * Checks whether problem composer interface is empty.
    */
-  bool problemOperatorBuilderIsEmpty() { return _problem_operator_builders.size() == 0; };
+  bool problemOperatorBuilderIsEmpty() { return _problem_composers.size() == 0; };
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -448,11 +452,15 @@ protected:
    * The problem operator builders for this mfem problem.
    */
 <<<<<<< HEAD
+<<<<<<< HEAD
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> probOpBuilder;
 >>>>>>> 56a2ff8acf (Hot fixes, rebuilding the ProblemOperator base class, the missing files and changes to MFEM problem)
 =======
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase>> _problem_operator_builders;
 >>>>>>> 823bc201ee (Update framework/include/mfem/problem/MFEMProblem.h)
+=======
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemComposerBase>> _problem_composers;
+>>>>>>> 34ef824000 (changes to name from ProblemOperatorBuilders to MFEMProblemComposers, change of source files, names, unit test, directories, minimal change to documentation)
 };
 
 template <typename T>

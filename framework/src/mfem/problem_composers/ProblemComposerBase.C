@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "ProblemOperatorBuilderBase.h"
+#include "ProblemComposerBase.h"
 #include "MFEMProblem.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -17,17 +17,16 @@
 #include "libmesh/restore_warnings.h"
 
 InputParameters
-Moose::MFEM::ProblemOperatorBuilderBase::validParams()
+Moose::MFEM::ProblemComposerBase::validParams()
 {
   InputParameters params = MFEMObject::validParams();
-  params.registerBase("Moose::MFEM::ProblemOperatorBuilderBase");
-  params.registerSystemAttributeName("Moose::MFEM::ProblemOperatorBuilderBase");
+  params.registerBase("Moose::MFEM::ProblemComposerBase");
+  params.registerSystemAttributeName("Moose::MFEM::ProblemComposerBase");
   params.addParam<VariableName>("variable", "Variable labelling the problem operator builder");
   return params;
 }
 
-Moose::MFEM::ProblemOperatorBuilderBase::ProblemOperatorBuilderBase(
-    const InputParameters & parameters)
+Moose::MFEM::ProblemComposerBase::ProblemComposerBase(const InputParameters & parameters)
   : MFEMObject(parameters)
 {
 }

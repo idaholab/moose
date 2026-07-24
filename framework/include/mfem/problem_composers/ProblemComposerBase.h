@@ -22,14 +22,14 @@ class ProblemOperatorBase;
  * Interface required to build MFEM Problem Operators
  * used by the executioner
  */
-class ProblemOperatorBuilderBase : public MFEMObject
+class ProblemComposerBase : public MFEMObject
 {
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderBase(const InputParameters & parameters);
+  ProblemComposerBase(const InputParameters & parameters);
 
-  ~ProblemOperatorBuilderBase() = default;
+  ~ProblemComposerBase() = default;
 
   /// Returns a pointer to the operator's equation system.
   virtual std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem &) = 0;
