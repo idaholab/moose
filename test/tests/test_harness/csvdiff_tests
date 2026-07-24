@@ -25,6 +25,15 @@
     ignore_columns = z_field
     requirement = 'comparison file shall instruct csvdiff to ignore missing fields'
   []
+  [test_csvdiff_comparison_abs_tol]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    comparison_file = csvdiff_comparison_abs_tol.cmp
+    requirement = 'The system shall allow the user to specify absolute tolerances for CSV file testing in a comparison file.'
+    issues = '#32561'
+    prereq = 'test_csvdiff_spec_abs_tol'
+  []
   [test_csvdiff_comparison_floor]
     type = CSVDiff
     input = csvdiff_comparison_floor.i
@@ -59,6 +68,19 @@
   []
 
   # Spec file overrides
+  [test_csvdiff_spec_abs_tol]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    rel_err = 1e-6  # fail for val1, fail for val2
+    abs_err = 1e-10 # pass for val1, fail for val2
+    override_columns = 'val2'
+    override_abs_err = '1e-7'
+    override_rel_err = '1e-6'
+    override_abs_zero = '0'
+    requirement = 'The system shall allow the user to specify absolute tolerances for CSV file testing in the test specifications file.'
+    issues = '#32561'
+  []
   [test_csvdiff_spec_override_global_relative]
     type = CSVDiff
     input = csvdiff_spec_override_global_relative.i

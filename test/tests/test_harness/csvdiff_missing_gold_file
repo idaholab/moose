@@ -1,0 +1,7 @@
+[Tests]
+  [csvdiff_missing_gold_file]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = does_not_exist.csv
+  []
+[]
