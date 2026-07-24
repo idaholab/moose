@@ -24,8 +24,8 @@ SubdomainPerElementGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",
-                                                    "New subdomain IDs of all elements");
+  params.addParam<std::vector<SubdomainID>>("subdomain_ids",
+                                            "New subdomain IDs of all elements");
   params.addParam<std::vector<dof_id_type>>("element_ids", "New element IDs of all elements");
   params.addClassDescription(
       "Allows the user to assign each element the subdomain ID of their choice");
@@ -42,7 +42,15 @@ SubdomainPerElementGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  std::vector<SubdomainID> bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
+  std::vector<SubdomainID> bids;
+  if (isParamValid("subdomain_ids"))
+    bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
+  else
+  {
+    bids.resize(mesh->n_elem());
+    for (const auto i : make_range(mesh->n_elem()))
+      bids[i] = i;
+  }
 
   // Generate a list of elements to which new subdomain IDs are to be assigned
   std::vector<Elem *> elements;

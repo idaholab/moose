@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MooseMeshXYCuttingUtils.h"
 #include "MooseMeshUtils.h"
+#include "MooseMeshElementConversionUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -17,6 +18,7 @@
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/face_c0polygon.h"
 
 using namespace libMesh;
 
@@ -1009,6 +1011,211 @@ lineRemoverCutElem(ReplicatedMesh & mesh,
 
   if (improve_boundary_tri_elems)
     boundaryTriElemImprover(mesh, new_boundary_id);
+}
+
+void
+lineRemoverCutElemPoly(ReplicatedMesh & mesh,
+                       const std::vector<Real> & cut_line_params,
+                       const dof_id_type poly_subdomain_id_shift,
+                       const SubdomainName poly_elem_subdomain_name_suffix,
+                       const subdomain_id_type block_id_to_remove,
+                       const boundary_id_type new_boundary_id)
+{
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const auto bdry_side_list = boundary_info.build_side_list();
+
+  // Classify vertex w.r.t. the cut line: -1 retained, 0 on the line, +1 removed.
+  auto classify = [&cut_line_params](const Point & p) -> short
+  {
+    if (pointOnLine(p(0), p(1), cut_line_params[0], cut_line_params[1], cut_line_params[2]))
+      return 0;
+    return lineSideDeterminator(p(0),
+                                p(1),
+                                cut_line_params[0],
+                                cut_line_params[1],
+                                cut_line_params[2],
+                                true)
+               ? +1
+               : -1;
+  };
+
+  // First pass: identify elements that need to be cut and mark fully-removed ones.
+  std::set<subdomain_id_type> original_subdomain_ids;
+  std::vector<dof_id_type> cross_elems;
+  for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
+       elem_it++)
+  {
+    Elem * elem = *elem_it;
+    original_subdomain_ids.emplace(elem->subdomain_id());
+
+    const auto n_v = elem->n_vertices();
+    unsigned int n_on = 0, n_rm = 0;
+    for (const auto i : make_range(n_v))
+    {
+      if (!MooseUtils::absoluteFuzzyEqual(elem->point(i)(2), 0.0))
+        mooseError("MooseMeshXYCuttingUtils::lineRemoverCutElemPoly() only works for 2D meshes "
+                   "in the XY plane.");
+      const short c = classify(elem->point(i));
+      if (c == 0)
+        ++n_on;
+      else if (c > 0)
+        ++n_rm;
+    }
+    const unsigned int n_retain = n_v - n_on - n_rm;
+
+    if (n_retain == 0)
+      elem->subdomain_id() = block_id_to_remove;
+    else if (n_rm > 0)
+    {
+      if (elem->default_order() != Order::FIRST)
+        mooseError("Only first order elements are supported for cutting.");
+      cross_elems.push_back(elem->id());
+    }
+  }
+
+  // Dedup intersection nodes across elements that share a cut original edge. Key by the
+  // (lower, higher) ids of the original edge's endpoints.
+  std::map<std::pair<dof_id_type, dof_id_type>, Node *> cross_nodes;
+  auto get_cross_node = [&mesh, &cut_line_params, &cross_nodes](Node * a, Node * b) -> Node *
+  {
+    const auto key = std::make_pair(std::min(a->id(), b->id()), std::max(a->id(), b->id()));
+    auto it = cross_nodes.find(key);
+    if (it != cross_nodes.end())
+      return it->second;
+    const Point p = twoPointandLineIntersection(
+        *a, *b, cut_line_params[0], cut_line_params[1], cut_line_params[2]);
+    Node * n = mesh.add_point(p);
+    cross_nodes[key] = n;
+    return n;
+  };
+
+  // Second pass: clip each crossed element and replace it with a C0Polygon.
+  for (const auto elem_id : cross_elems)
+  {
+    Elem * orig_elem = mesh.elem_ptr(elem_id);
+    const auto n_v = orig_elem->n_vertices();
+
+    // Original boundary ids per side, to inherit
+    std::vector<std::vector<boundary_id_type>> elem_side_list(n_v);
+    {
+      auto range = std::equal_range(bdry_side_list.begin(),
+                                    bdry_side_list.end(),
+                                    elem_id,
+                                    MooseMeshElementConversionUtils::BCTupleKeyComp());
+      for (auto i = range.first; i != range.second; ++i)
+        elem_side_list[std::get<1>(*i)].push_back(std::get<2>(*i));
+    }
+
+    std::vector<short> cls(n_v);
+    for (const auto i : make_range(n_v))
+      cls[i] = classify(orig_elem->point(i));
+
+    // For each retained/cross node we emit, remember the original side index it "belongs to"
+    // for the purpose of boundary inheritance:
+    //   - an original vertex v_i is at the start of original side i, so its outgoing edge
+    //     lies on original side i (so we tag it with i);
+    //   - a cross node created on original side i is in the middle of that side, so the edge
+    //     entering it from the retained vertex lies on side i too (so we tag the *previous*
+    //     emitted vertex with i and tag the cross with -1, meaning the edge leaving the cross
+    //     is the new cut edge).
+    // The convention is: edge from out[k] to out[k+1] inherits boundary ids from origin[k].
+    // Special values: -1 = the new cut line, -2 = "same as the next emitted vertex" (a vertex
+    // already on the cut line that ends a retained run before the next out-going crossing).
+    std::vector<Node *> out;
+    std::vector<int> origin; // per emitted vertex
+
+    auto emit = [&out, &origin](Node * n, int side) {
+      // Skip consecutive duplicates (e.g. a cross-into-the-cut-line node that coincides with
+      // an on-line vertex previously emitted).
+      if (!out.empty() && out.back() == n)
+      {
+        origin.back() = side;
+        return;
+      }
+      out.push_back(n);
+      origin.push_back(side);
+    };
+
+    for (const auto i : make_range(n_v))
+    {
+      const auto j = (i + 1) % n_v;
+      Node * vi = orig_elem->node_ptr(i);
+      Node * vj = orig_elem->node_ptr(j);
+      const bool i_ret = (cls[i] <= 0); // retained or on the line
+      const bool j_ret = (cls[j] <= 0);
+
+      if (i_ret && j_ret)
+      {
+        emit(vi, static_cast<int>(i));
+        // edge vi -> vj is original side i; vj will be emitted on the next iteration with its
+        // own side index.
+      }
+      else if (i_ret && !j_ret)
+      {
+        emit(vi, static_cast<int>(i));
+        Node * cross = (cls[i] == 0) ? vi : get_cross_node(vi, vj);
+        // The edge vi -> cross lies on original side i; the edge cross -> next-emitted-vertex
+        // is the new cut edge.
+        emit(cross, -1);
+      }
+      else if (!i_ret && j_ret)
+      {
+        Node * cross = (cls[j] == 0) ? vj : get_cross_node(vi, vj);
+        // The edge into cross was the cut line (tagged on the previous emit); the edge from
+        // cross to vj lies on original side i.
+        emit(cross, static_cast<int>(i));
+      }
+      // else: both removed -> skip
+    }
+
+    if (out.size() < 3)
+      mooseError("Element ",
+                 elem_id,
+                 " produced a degenerate clipped polygon (fewer than 3 vertices). The cut "
+                 "geometry is degenerate.");
+
+    // Build the C0Polygon. Each new side k spans out[k] -> out[(k+1) % out.size()].
+    auto polygon = std::make_unique<libMesh::C0Polygon>(out.size());
+    for (const auto k : index_range(out))
+      polygon->set_node(k, out[k]);
+    polygon->subdomain_id() = orig_elem->subdomain_id() + poly_subdomain_id_shift;
+    Elem * new_elem = mesh.add_elem(std::move(polygon));
+
+    for (const auto k : index_range(out))
+    {
+      const int side = origin[k];
+      if (side == -1)
+        boundary_info.add_side(new_elem, k, new_boundary_id);
+      else if (side >= 0)
+        for (const auto & bid : elem_side_list[side])
+          boundary_info.add_side(new_elem, k, bid);
+    }
+
+    orig_elem->subdomain_id() = block_id_to_remove;
+  }
+
+  // Apply the suffix to subdomains that received polygon-converted elements
+  for (const auto & sub_id : original_subdomain_ids)
+  {
+    const subdomain_id_type new_sid = sub_id + poly_subdomain_id_shift;
+    if (!MooseMeshUtils::hasSubdomainID(mesh, new_sid))
+      continue;
+    const SubdomainName new_name = (mesh.subdomain_name(sub_id).empty()
+                                        ? std::to_string(sub_id)
+                                        : mesh.subdomain_name(sub_id)) +
+                                   '_' + poly_elem_subdomain_name_suffix;
+    if (MooseMeshUtils::hasSubdomainName(mesh, new_name))
+      throw MooseException("The new subdomain name already exists in the mesh.");
+    mesh.subdomain_name(new_sid) = new_name;
+  }
+
+  // Delete elements marked for removal
+  for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
+       elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
+       elem_it++)
+    mesh.delete_elem(*elem_it);
+
+  mesh.contract();
 }
 
 void
