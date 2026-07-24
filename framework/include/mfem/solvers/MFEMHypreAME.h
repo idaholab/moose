@@ -43,13 +43,17 @@ public:
   /// Retrieves the computed eigenvalues
   virtual void GetEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const override
   {
-    _eigensolver->GetEigenvalues(eigenvalues);
+    mfem::Array<mfem::real_t> computed;
+    _eigensolver->GetEigenvalues(computed);
+    eigenvalues.SetSize(_num_modes);
+    for (int i = 0; i < _num_modes; ++i)
+      eigenvalues[i] = computed[i * _mode_stride];
   }
 
   /// Retrieves the computed eigenvector corresponding to the given index
   virtual const mfem::HypreParVector & GetEigenvector(int index) const override
   {
-    return _eigensolver->GetEigenvector(index);
+    return _eigensolver->GetEigenvector(index * _mode_stride);
   }
 
 protected:
