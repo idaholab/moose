@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#30850'
+  issues = '#30850 #32934'
   design = 'NEML2/index.md NEML2Action.md'
 
   [explicit_dynamics]
@@ -40,6 +40,34 @@
     input = 'moose_adaptivity.i'
     exodiff = 'moose_adaptivity_exodus.e moose_adaptivity_exodus.e-s002'
     valgrind = heavy
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+
+  [slug_2d]
+    type = Exodiff
+    requirement = 'The system shall run a 2D NEML2-driven explicit-dynamics impact problem with manage_state_advance enabled and an integrated boundary condition.'
+    input = 'slug_2d.i'
+    exodiff = 'slug_2d_out.e'
+    capabilities = 'neml2'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+  []
+
+  [auto_output]
+    type = Exodiff
+    requirement = 'The system shall output a NEML2 model result as a MOOSE material property in the explicit-dynamics finite-element interpolation path, where outputs have a 2D batch shape.'
+    input = 'auto_output.i'
+    exodiff = 'auto_output_exodus.e'
+    capabilities = 'neml2'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    recover = false
+  []
+  [state_advance]
+    type = Exodiff
+    requirement = 'The system shall initialize uncached managed state history on the first step of a NEML2 explicit-dynamics simulation with manage_state_advance enabled.'
+    input = 'state_advance.i'
+    exodiff = 'state_advance_exodus.e'
+    capabilities = 'neml2'
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     recover = false
   []
