@@ -43,7 +43,7 @@ packages:
       - conda/libmesh-vtk
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.25.2
+    version: 3.26.0
     build_number: 0
     conda: conda/petsc
     templates:
@@ -63,7 +63,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2026.06.05_ab36c00
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/meta.yaml.template: conda/libmesh/meta.yaml
@@ -112,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.06.16
+    version: 2026.07.23
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml

@@ -34,7 +34,8 @@ each instance:
 
 - C++ formatting: `git clang-format <base>` (uses `.clang-format`)
 - Python formatting: `black .` (uses `pyproject.toml`)
-- No trailing whitespace / tabs, and the "every commit references an issue" check
+- No trailing whitespace / tabs, and the check that at least one commit on a development branch
+  references an issue
 
 Focus human/AI review on the semantic standards CI can't see: naming, const-correctness,
 access control, API design, C-vs-C++ construct choices, tests, and documentation.
@@ -97,9 +98,9 @@ changed:
 
 ## Step 2 - Gather MOOSE context
 
-- **Linked issue(s).** Read the issue(s) the commits reference - they are your spec for judging
-  whether the change is complete and correctly scoped. (CI already enforces that a reference
-  exists, so don't spend review time policing its presence.)
+- **Linked issue(s).** Read the issue(s) referenced anywhere in the development branch - they are
+  your spec for judging whether the change is complete and correctly scoped. CI requires at least
+  one commit in the branch to reference an issue.
 - **Newly registered objects.** Find new user-facing objects in the diff:
   `git diff <base>...HEAD | grep -E '^\+.*register(MooseObject|.*Action)\('`.
   Each new object drives both a documentation check (Step 3E) and a testing check (Step 3D).
@@ -116,6 +117,7 @@ diff touches that area.
 **A. Design, scope, and user interface** (`reviewing.md`)
 - Is the high-level design sound, and proportionate scrutiny applied (changes affecting many
   users or that others will build on deserve more)?
+- Judge completeness against the stated scope.
 - Scrutinize the **user interface**: new input parameters, their names, defaults, and whether
   `validParams` documentation strings make them self-explanatory. Interface mistakes are
   expensive because users depend on them.
