@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "ProblemOperatorBuilderSteady.h"
+#include "SteadyProblemComposer.h"
 #include "MFEMProblem.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -24,24 +24,23 @@
 
 namespace Moose::MFEM
 {
-registerMooseObject("MooseApp", ProblemOperatorBuilderSteady);
+registerMooseObject("MooseApp", SteadyProblemComposer);
 }
 
 InputParameters
-Moose::MFEM::ProblemOperatorBuilderSteady::validParams()
+Moose::MFEM::SteadyProblemComposer::validParams()
 {
-  InputParameters params = ProblemOperatorBuilderBase::validParams();
+  InputParameters params = ProblemComposerBase::validParams();
   return params;
 }
 
-Moose::MFEM::ProblemOperatorBuilderSteady::ProblemOperatorBuilderSteady(
-    const InputParameters & parameters)
-  : ProblemOperatorBuilderBase(parameters)
+Moose::MFEM::SteadyProblemComposer::SteadyProblemComposer(const InputParameters & parameters)
+  : ProblemComposerBase(parameters)
 {
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::ProblemOperatorBuilderSteady::createProblemOperator(MFEMProblem & mfem_problem)
+Moose::MFEM::SteadyProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 

@@ -15,9 +15,9 @@
 
 /**
  * This class allows us to have a section of the input file like the following
- * specifying the problem operator builder to use and its options.
+ * specifying the problem composer to use and its options.
  *
- * [ProblemOperatorBuilder]
+ * [ProblemComposer]
  * []
  */
 class AddMFEMProblemOperatorAction : public MooseObjectAction

@@ -89,9 +89,9 @@
   []
 []
 
-[ProblemOperatorBuilder]
+[MFEMProblemComposer]
   [default_transient]
-    type = ProblemOperatorBuilderTransient
+    type = TransientProblemComposer
   []
 []
 

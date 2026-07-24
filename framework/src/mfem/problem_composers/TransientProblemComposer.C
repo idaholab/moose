@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "ProblemOperatorBuilderTransient.h"
+#include "TransientProblemComposer.h"
 #include "MFEMProblem.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -20,24 +20,23 @@
 
 namespace Moose::MFEM
 {
-registerMooseObject("MooseApp", ProblemOperatorBuilderTransient);
+registerMooseObject("MooseApp", TransientProblemComposer);
 }
 
 InputParameters
-Moose::MFEM::ProblemOperatorBuilderTransient::validParams()
+Moose::MFEM::TransientProblemComposer::validParams()
 {
-  InputParameters params = ProblemOperatorBuilderBase::validParams();
+  InputParameters params = ProblemComposerBase::validParams();
   return params;
 }
 
-Moose::MFEM::ProblemOperatorBuilderTransient::ProblemOperatorBuilderTransient(
-    const InputParameters & parameters)
-  : ProblemOperatorBuilderBase(parameters)
+Moose::MFEM::TransientProblemComposer::TransientProblemComposer(const InputParameters & parameters)
+  : ProblemComposerBase(parameters)
 {
 }
 
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-Moose::MFEM::ProblemOperatorBuilderTransient::createProblemOperator(MFEMProblem & mfem_problem)
+Moose::MFEM::TransientProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
 {
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 

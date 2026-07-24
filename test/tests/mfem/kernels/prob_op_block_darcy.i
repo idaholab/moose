@@ -83,9 +83,9 @@
   []
 []
 
-[ProblemOperatorBuilder]
+[MFEMProblemComposer]
   [default_steady]
-    type = ProblemOperatorBuilderSteady
+    type = SteadyProblemComposer
   []
 []
 

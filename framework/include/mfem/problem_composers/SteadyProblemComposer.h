@@ -13,22 +13,24 @@
 
 #include "MFEMEigenproblem.h"
 #include "ProblemOperatorBase.h"
-#include "ProblemOperatorBuilderBase.h"
+#include "ProblemComposerBase.h"
+
+class MFEMEigenproblem;
 
 namespace Moose::MFEM
 {
 /**
- * Transient builder required to build MFEM Problem Operators
- * used by the Transient executioner
+ * Steady builder required to build MFEM Problem Operators
+ * used by the steady executioner
  */
-class ProblemOperatorBuilderTransient : public ProblemOperatorBuilderBase
+class SteadyProblemComposer : public ProblemComposerBase
 {
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderTransient(const InputParameters & parameters);
+  SteadyProblemComposer(const InputParameters & parameters);
 
-  ~ProblemOperatorBuilderTransient() = default;
+  ~SteadyProblemComposer() = default;
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<ProblemOperatorBase> createProblemOperator(MFEMProblem & mfem_problem) override;

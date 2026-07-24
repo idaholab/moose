@@ -11,7 +11,7 @@
 
 #include "libmesh/ignore_warnings.h"
 #include "MFEMProblem.h"
-#include "ProblemOperatorBuilderBase.h"
+#include "ProblemComposerBase.h"
 #include "ProblemOperator.h"
 #include "ProblemOperatorBase.h"
 #include "libmesh/ignore_warnings.h"
@@ -107,17 +107,17 @@ namespace Moose::MFEM
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
  */
-class ProblemOperatorBuilderCustomDummy : public ProblemOperatorBuilderBase
+class ProblemOperatorBuilderCustomDummy : public ProblemComposerBase
 {
 public:
   static InputParameters validParams()
   {
-    InputParameters params = ProblemOperatorBuilderBase::validParams();
+    InputParameters params = ProblemComposerBase::validParams();
     return params;
   };
 
   ProblemOperatorBuilderCustomDummy(const InputParameters & parameters)
-    : ProblemOperatorBuilderBase(parameters) {};
+    : ProblemComposerBase(parameters) {};
 
   ~ProblemOperatorBuilderCustomDummy() = default;
 
@@ -143,7 +143,7 @@ class MFEMCustomProbOperatorTest : public MFEMObjectUnitTest
 {
 public:
   // The test data
-  std::shared_ptr<Moose::MFEM::ProblemOperatorBuilderBase> _problem_operator_builder;
+  std::shared_ptr<Moose::MFEM::ProblemComposerBase> _problem_composer;
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase> _problem_operator;
 
   // The test constructor
@@ -171,8 +171,8 @@ public:
         _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
     _mfem_problem->addMFEMProblemOperator(
         "ProblemOperatorBuilderCustomDummy", "custom_problem_operator", _problem_operator_params);
-    _problem_operator_builder = _mfem_problem->getProblemOperatorBuilder();
-    _problem_operator = _problem_operator_builder->createProblemOperator(*_mfem_problem);
+    _problem_composer = _mfem_problem->getProblemComposer();
+    _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
   };
 
 protected:
