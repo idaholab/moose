@@ -1,0 +1,149 @@
+[Tests]
+  issues = '#31938'
+  design = 'modules/shifted_boundary_method/index.md'
+  [sbm_test]
+    requirement = 'The system shall be capable of performing point-in-polyhedron in-out testing to '
+                  'reclassify elements inside/outside a closed surface for different lambda cut '
+                  'fractions'
+    [2D_lambda_1]
+      type = 'Exodiff'
+      input = '2D_lambda1.i'
+      exodiff = '2D_lambda1_out.e'
+      mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
+      recover = false
+      detail = 'in 2D with lambda = 1.'
+    []
+    [2D_lambda_0p5]
+      type = 'Exodiff'
+      input = '2D_lambda0p5.i'
+      exodiff = '2D_lambda0p5_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 2D with lambda = 0.5.'
+    []
+    [2D_lambda_0]
+      type = 'Exodiff'
+      input = '2D_lambda0.i'
+      exodiff = '2D_lambda0_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 2D with lambda = 0.'
+    []
+    [3D_lambda_1]
+      type = 'Exodiff'
+      input = '3D_lambda1.i'
+      exodiff = '3D_lambda1_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 1.'
+    []
+    [3D_lambda_0p5]
+      type = 'Exodiff'
+      input = '3D_lambda0p5.i'
+      exodiff = '3D_lambda0p5_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 0.5.'
+    []
+    [3D_lambda_0]
+      type = 'Exodiff'
+      input = '3D_lambda0.i'
+      exodiff = '3D_lambda0_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D with lambda = 0.'
+    []
+  []
+
+  [auto_reproducibility]
+    requirement = 'The system shall produce an in-out classification from the automatically selected '
+                  'PCA ray direction that matches the classification from an explicit axis-aligned '
+                  'ray, confirming the auto direction is reproducible for an anisotropic surface'
+    [2D_auto_matches_fixed]
+      type = 'Exodiff'
+      input = '2D_lambda0p5.i'
+      cli_args = 'UserObjects/inout_test/ray_direction="1 0 0" '
+                 'Outputs/file_base=2D_auto_matches_fixed_out'
+      exodiff = '2D_auto_matches_fixed_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 2D.'
+    []
+    [3D_auto_matches_fixed]
+      type = 'Exodiff'
+      input = '3D_lambda0p5.i'
+      cli_args = 'UserObjects/inout_test/ray_direction="1 0 0" '
+                 'Outputs/file_base=3D_auto_matches_fixed_out'
+      exodiff = '3D_auto_matches_fixed_out.e'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'in 3D.'
+    []
+  []
+
+  [invalid_lambda]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'MeshModifiers/IntercpetedESM/lambda=-0.1'
+    expect_err = "Range check failed for parameter MeshModifiers/IntercpetedESM/lambda; expression = 'lambda >= 0 & lambda <= 1'"
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall reject an InterceptedElementModifier lambda outside the '
+                  'inclusive range from zero to one.'
+  []
+
+  [signed_function]
+    type = 'Exodiff'
+    input = '2D_signed_function.i'
+    exodiff = '2D_signed_function_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall reclassify elements inside/outside a surface described by a '
+                  'signed level-set function supplied to InterceptedElementModifier instead of a '
+                  'geometric in-out user object.'
+  []
+
+  [mark_intercepted]
+    type = 'Exodiff'
+    input = '2D_mark_intercepted.i'
+    exodiff = '2D_mark_intercepted_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall assign a dedicated intercepted subdomain ID to elements the '
+                  'surface cuts through when mark_intercepted is enabled.'
+  []
+
+  [debug_mesh_output]
+    type = 'Exodiff'
+    input = '2D_lambda0p5.i'
+    cli_args = 'UserObjects/inout_test/obb_file_name=debug_obb.e '
+               'UserObjects/inout_test/ray_file_name=debug_ray.e '
+               'Outputs/file_base=debug_mesh_output_out'
+    exodiff = 'debug_obb.e debug_ray.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall write the oriented bounding box and ray meshes used by the '
+                  'in-out test to file when the corresponding file names are provided.'
+  []
+
+  [obb_write]
+    type = 'Exodiff'
+    input = '2D_obb_write.i'
+    exodiff = 'obb_bounds.e ray_bounds.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall write the oriented bounding box (QUAD4) and shortest-axis ray '
+                  '(EDGE2) meshes built for the in-out test to standalone mesh files.'
+  []
+
+  [mark_intercepted_missing_id]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'MeshModifiers/IntercpetedESM/mark_intercepted=true'
+    expect_err = "This parameter must be specified when 'mark_intercepted' is true."
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when mark_intercepted is enabled without '
+                  'specifying the intercepted subdomain ID.'
+  []
+[]

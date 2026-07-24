@@ -11,6 +11,9 @@
 
 #include "MooseMesh.h"
 #include "MooseTypes.h"
+#include "libmesh/enum_order.h"
+
+#include <functional>
 
 class Function;
 class FunctionInterface;
@@ -23,6 +26,11 @@ class Point;
 namespace SBMUtils
 {
 bool checkWatertightnessFromRawElems(const std::vector<const Elem *> & bd_elements);
+
+/// Compute the fraction of an element's quadrature-weighted measure satisfying a predicate.
+Real activeElementFraction(const Elem & elem,
+                           Order qrule_order,
+                           const std::function<bool(const libMesh::Point &)> & is_active);
 
 /// Build a list of distance functions based on names specified in input.
 std::vector<const Function *>
@@ -51,4 +59,9 @@ RealVectorValue closestDistanceVector(const std::vector<const Function *> & func
 RealVectorValue closestTrueNormalVector(const std::vector<const Function *> & funcs,
                                         const libMesh::Point & pt,
                                         Real t);
+
+/// Computes the union signed distance by taking the minimum of all
+/// signed distance functions. This definition is valid for overlapping
+/// geometries and preserves the correct union boundary.
+Real unionSignedDistance(const std::vector<const Function *> & funcs, Real t, const Point & p);
 }

@@ -1,0 +1,78 @@
+[Tests]
+  design = 'SubdomainElementModifier.md'
+  issues = '#31937'
+
+  [grain_corner]
+    type = Exodiff
+    input = 'grain_marking.i'
+    exodiff = 'grain_marking_out.e'
+    mesh_mode = REPLICATED # SurfaceMeshBySubdomainBuilder requires a serial mesh for its In-Out test
+    recover = false
+    requirement = 'The system shall assign subdomain IDs to a background mesh from grain-boundary '
+                  'loops using per-subdomain in-out tests, marking each element with the grain that '
+                  'occupies the largest area fraction when several grains meet at interior corners.'
+  []
+
+  [mark_intercepted]
+    type = Exodiff
+    input = 'grain_marking.i'
+    cli_args = 'Mesh/add_subdomain_ids="1 2 3 4 5 9" '
+               'MeshModifiers/assign_subdomains/mark_intercepted=true '
+               'MeshModifiers/assign_subdomains/subdomain_id_intercepted=9 '
+               'Outputs/file_base=grain_mark_intercepted_out'
+    exodiff = 'grain_mark_intercepted_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall assign a dedicated intercepted subdomain ID to background '
+                  'elements straddling a grain boundary when mark_intercepted is enabled in '
+                  'SubdomainElementModifier.'
+  []
+
+  [watertight_report]
+    type = RunApp
+    input = 'grain_marking.i'
+    cli_args = 'UserObjects/surface_builder/check_watertightness=true'
+    expect_out = 'watertight'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report whether the SurfaceMeshBySubdomainBuilder surface mesh '
+                  'is watertight when watertightness checking is enabled.'
+  []
+
+  [error_test]
+    requirement = 'The system shall throw an error '
+
+    [distributed_surface_mesh]
+      type = RunException
+      input = 'grain_marking.i'
+      cli_args = 'Mesh/parallel_type=DISTRIBUTED'
+      expect_err = 'mesh is distributed'
+      recover = false
+      detail = 'if the SurfaceMeshBySubdomainBuilder surface mesh is distributed, since it requires '
+               'a replicated mesh for its In-Out test.'
+    []
+
+    [dim_mismatch]
+      type = RunException
+      input = 'grain_marking.i'
+      cli_args = 'Mesh/boundary_mesh/file=../distance_calc/cube_surface.msh'
+      expect_err = 'Mismatch between embedding mesh dimension'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if the embedding mesh dimension does not match the surface mesh dimension plus one.'
+    []
+
+    [unsupported_element_type]
+      type = RunException
+      input = 'grain_marking.i'
+      cli_args = 'Mesh/background_mesh/dim=3 Mesh/background_mesh/zmin=-0.4 '
+                 'Mesh/background_mesh/zmax=0.4 Mesh/background_mesh/nz=6 '
+                 'Mesh/boundary_mesh/file=../distance_calc/quad_surface.msh'
+      expect_err = 'Unsupported element type in SurfaceMeshBySubdomainBuilder'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if the SurfaceMeshBySubdomainBuilder surface mesh contains element types other than '
+               'EDGE2 or TRI3.'
+    []
+  []
+[]
