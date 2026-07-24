@@ -71,4 +71,21 @@ protected:
    * where c = log(a/(b-a))
    */
   const bool _ensure_positive;
+
+  /**
+   * Minimum allowed porosity.  The ensure_positive transform above only acts for
+   * decay > 0, so chemistry-driven porosity (which enters through "a" and "b", not
+   * "decay") is otherwise unbounded below and can go negative once pore space is
+   * filled by precipitated mineral.  If the computed porosity is less than this
+   * value it is set to this value instead.  Defaults to no floor.
+   */
+  const Real _porosity_min;
+
+  /**
+   * If the porosity_min floor is active the porosity derivatives are set to
+   * _zero_modifier times their unfloored values (rather than exactly zero) to
+   * hint to the Newton process that porosity is not strictly constant, which aids
+   * convergence.
+   */
+  const Real _zero_modifier;
 };

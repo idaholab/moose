@@ -105,6 +105,18 @@ public:
   /// Return the list of aux variables in this physics
   const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
 
+  /**
+   * @brief Return the names of the UserObjects this Physics adds to the problem.
+   *
+   * A Physics that adds a UserObject that another object may reference in its constructor must
+   * declare that UserObject's name here so the construction order can be resolved regardless of
+   * input file order. This is consulted before the 'add_user_object' task runs, so it must be
+   * computable without adding the objects (i.e. from the Physics name, blocks and variables, all
+   * known after init_physics). The default is empty: a Physics that adds no such UserObject need
+   * not override.
+   */
+  virtual std::vector<UserObjectName> getSuppliedUserObjects() const { return {}; }
+
 protected:
   /// Return whether the Physics is solved using a transient
   bool isTransient() const;
@@ -139,6 +151,16 @@ protected:
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
+
+  /**
+   * @brief Add a UserObject supplied by this Physics to the problem.
+   *
+   * Forwards to FEProblemBase::addUserObject. Use this instead of getProblem().addUserObject() so
+   * that any UserObject this Physics supplies is (in a debug build) checked to have been declared
+   * in getSuppliedUserObjects(), keeping the declaration and the construction consistent.
+   */
+  void
+  addUserObject(const std::string & uo_type, const std::string & uo_name, InputParameters & params);
 
   /// Keep track of the name of the solver variable defined in the Physics
   void saveSolverVariableName(const VariableName & var_name)

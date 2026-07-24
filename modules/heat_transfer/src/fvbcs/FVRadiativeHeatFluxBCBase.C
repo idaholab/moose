@@ -13,7 +13,7 @@
 InputParameters
 FVRadiativeHeatFluxBCBase::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = FVQpFluxBC::validParams();
   params.addCoupledVar("temperature", "temperature variable");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
   params.addRequiredParam<MooseFunctorName>("Tinfinity",
@@ -24,13 +24,11 @@ FVRadiativeHeatFluxBCBase::validParams()
 }
 
 FVRadiativeHeatFluxBCBase::FVRadiativeHeatFluxBCBase(const InputParameters & parameters)
-  : FVFluxBC(parameters),
+  : FVQpFluxBC(parameters),
     _T(isParamValid("temperature") ? adCoupledValue("temperature") : _u),
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
     _tinf(getFunctor<ADReal>("Tinfinity"))
 {
-  if (!isParamValid("temperature"))
-    _var.requireQpComputations();
 }
 
 ADReal

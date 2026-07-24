@@ -9,24 +9,27 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
  * PorousFlowEffectiveStressCoupling computes
  * -coefficient*effective_porepressure*grad_component(test)
- * where component is the spatial component (not
- * a fluid component!)
+ * where component is the spatial component (not a fluid component!)
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowEffectiveStressCoupling : public Kernel
+template <bool is_ad>
+class PorousFlowEffectiveStressCouplingTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowEffectiveStressCoupling(const InputParameters & parameters);
+  PorousFlowEffectiveStressCouplingTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -40,11 +43,16 @@ protected:
   const unsigned int _component;
 
   /// Effective porepressure
-  const MaterialProperty<Real> & _pf;
+  const GenericMaterialProperty<Real, is_ad> & _pf;
 
-  /// d(effective porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real>> & _dpf_dvar;
+  /// d(effective porepressure)/(d porflow variable) -- null for AD
+  const MaterialProperty<std::vector<Real>> * const _dpf_dvar;
 
   /// Whether an RZ coordinate system is being used
   const bool _rz;
+
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowEffectiveStressCouplingTempl<false> PorousFlowEffectiveStressCoupling;
+typedef PorousFlowEffectiveStressCouplingTempl<true> ADPorousFlowEffectiveStressCoupling;

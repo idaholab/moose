@@ -28,13 +28,17 @@ public:
   virtual void initialize() override;
   virtual void preExecute() override;
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
 protected:
   /// Outputs residual norm to console
   void outputResidualNorm(const std::string & execute_on_str, Real old_norm, Real new_norm) const;
 
-  /// Computes and prints the user-specified postprocessor assessing convergence
+  /**
+   * Computes and prints the user-specified postprocessor assessing convergence
+   *
+   * @param[in] iter  Iteration index; equal to 0 for first iteration
+   */
   void computeCustomConvergencePostprocessor(unsigned int iter);
 
   /// Minimum fixed point iterations
@@ -58,9 +62,9 @@ protected:
 
   /// Initial residual norm
   Real _fixed_point_initial_norm;
-  /// Full history of residual norm after evaluation of timestep_begin
+  /// Full history of residual norm after evaluation of timestep_begin, indexed by iteration index
   std::vector<Real> _fixed_point_timestep_begin_norm;
-  /// Full history of residual norm after evaluation of timestep_end
+  /// Full history of residual norm after evaluation of timestep_end, indexed by iteration index
   std::vector<Real> _fixed_point_timestep_end_norm;
 
   /// Postprocessor value for user-defined fixed point convergence check

@@ -1,5 +1,6 @@
 # MaternHalfIntCovariance
 
+!if function=hasCapability('libtorch')
 !syntax description /Covariance/MaternHalfIntCovariance
 
 ## Overview
@@ -30,8 +31,14 @@ r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right
 
 !listing test/tests/surrogates/gaussian_process/GP_Matern_half_int.i block=Covariance
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Covariance/MaternHalfIntCovariance
 
 !syntax inputs /Covariance/MaternHalfIntCovariance
 
 !syntax children /Covariance/MaternHalfIntCovariance
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

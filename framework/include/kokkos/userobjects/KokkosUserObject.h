@@ -11,7 +11,7 @@
 
 #include "KokkosMesh.h"
 #include "KokkosAssembly.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 #include "KokkosDispatcher.h"
 
 #include "UserObjectBase.h"

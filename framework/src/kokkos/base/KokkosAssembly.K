@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "BoundaryRestrictable.h"
@@ -232,6 +233,9 @@ Assembly::initShape()
 
   for (unsigned int nl = 0; nl < _problem.numNonlinearSystems(); ++nl)
     getFETypes(_problem.getNonlinearSystemBase(nl).system());
+
+  for (unsigned int linear = 0; linear < _problem.numLinearSystems(); ++linear)
+    getFETypes(_problem.getLinearSystem(linear).system());
 
   getFETypes(_problem.getAuxiliarySystem().system());
 

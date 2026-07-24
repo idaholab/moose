@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "FVQpFluxBC.h"
 
 /**
  * Boundary condition for radiative heat flux where temperature and the
  * temperature of a body in radiative heat transfer are specified.
  */
-class FVRadiativeHeatFluxBCBase : public FVFluxBC
+class FVRadiativeHeatFluxBCBase : public FVQpFluxBC
 {
 public:
   static InputParameters validParams();

@@ -21,7 +21,7 @@ public:
 
   PostprocessorSteadyStateConvergence(const InputParameters & parameters);
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
 protected:
   /// Post-processor to use for convergence criteria

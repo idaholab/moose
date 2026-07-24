@@ -35,14 +35,19 @@
 #ifdef KOKKOS_ENABLE_CUDA
 #define MemSpace ::Kokkos::CudaSpace
 #define ExecSpace ::Kokkos::Cuda
+#define KOKKOS_VIRTUAL_FUNCTION KOKKOS_FUNCTION virtual
 #endif
 #ifdef KOKKOS_ENABLE_HIP
 #define MemSpace ::Kokkos::HIPSpace
 #define ExecSpace ::Kokkos::HIP
+#define KOKKOS_VIRTUAL_FUNCTION KOKKOS_FUNCTION virtual
 #endif
 #ifdef KOKKOS_ENABLE_SYCL
 #define MemSpace ::Kokkos::SYCLDeviceUSMSpace
 #define ExecSpace ::Kokkos::SYCL
+#define KOKKOS_VIRTUAL_FUNCTION                                                                    \
+  KOKKOS_FUNCTION SYCL_EXT_ONEAPI_FUNCTION_PROPERTY(                                               \
+      sycl::ext::oneapi::experimental::indirectly_callable) virtual
 #endif
 #else
 #define MemSpace ::Kokkos::HostSpace
@@ -51,6 +56,7 @@
 #define KOKKOS_FUNCTION
 #undef KOKKOS_INLINE_FUNCTION
 #define KOKKOS_INLINE_FUNCTION inline
+#define KOKKOS_VIRTUAL_FUNCTION KOKKOS_FUNCTION virtual
 #undef KOKKOS_IF_ON_HOST
 #define KOKKOS_IF_ON_HOST(code)                                                                    \
   if (!omp_get_level())                                                                            \

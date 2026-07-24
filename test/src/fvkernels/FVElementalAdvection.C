@@ -14,7 +14,7 @@ registerMooseObject("MooseTestApp", FVElementalAdvection);
 InputParameters
 FVElementalAdvection::validParams()
 {
-  InputParameters params = FVElementalKernel::validParams();
+  InputParameters params = FVQpElementalKernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params.addParam<MaterialPropertyName>(
       "advected_quantity",
@@ -29,7 +29,7 @@ FVElementalAdvection::validParams()
 }
 
 FVElementalAdvection::FVElementalAdvection(const InputParameters & params)
-  : FVElementalKernel(params),
+  : FVQpElementalKernel(params),
     _velocity(getParam<RealVectorValue>("velocity")),
     _prop(params.isParamSetByUser("advected_quantity")
               ? &getADMaterialProperty<Real>("advected_quantity")

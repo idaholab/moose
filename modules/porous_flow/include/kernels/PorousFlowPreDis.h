@@ -9,25 +9,32 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "PorousFlowLumpedKernelBase.h"
 #include "PorousFlowDictator.h"
 
 /**
  * Kernel = sum (stoichiometry * density * porosity_old * saturation * reaction_rate)
  * where the sum is over secondary chemical species in
  * a precipitation-dissolution reaction system.
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowPreDis : public TimeKernel
+template <bool is_ad>
+class PorousFlowPreDisTempl : public PorousFlowLumpedKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPreDis(const InputParameters & parameters);
+  PorousFlowPreDisTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// Derivative of residual wrt PorousFlow variable pvar (non-AD path only)
+  Real computeQpJac(unsigned int pvar);
 
   /// Density of the mineral species
   const std::vector<Real> _mineral_density;
@@ -38,28 +45,26 @@ protected:
   /// Aqueous phase number
   const unsigned int _aq_ph;
 
-  /// Old value of porosity
+  /// Old value of porosity (always non-AD: old values carry no current-timestep derivatives)
   const MaterialProperty<Real> & _porosity_old;
 
-  /// Saturation
-  const MaterialProperty<std::vector<Real>> & _saturation;
+  /// Saturation (AD or non-AD)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation;
 
-  /// d(saturation)/d(PorousFlow var)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
+  /// d(saturation)/d(PorousFlow var) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 
-  /// Reaction rate of the yielding the secondary species
-  const MaterialProperty<std::vector<Real>> & _reaction_rate;
+  /// Reaction rate of the yielding the secondary species (AD or non-AD)
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _reaction_rate;
 
-  /// d(reaction rate)/d(porflow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dreaction_rate_dvar;
+  /// d(reaction rate)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dreaction_rate_dvar;
 
   /// Stoichiometric coefficients
   const std::vector<Real> _stoichiometry;
 
-  /**
-   * Derivative of residual with respect to PorousFlow variable number pvar
-   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param pvar take the derivative of the residual wrt this PorousFlow variable
-   */
-  Real computeQpJac(unsigned int pvar);
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowPreDisTempl<false> PorousFlowPreDis;
+typedef PorousFlowPreDisTempl<true> ADPorousFlowPreDis;

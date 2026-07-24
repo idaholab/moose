@@ -103,7 +103,6 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
 
     nonlinear_solver.SetOperator(equation_system);
     nonlinear_solver.Mult(rhs, x);
-    return;
   }
   else
   {
@@ -116,7 +115,7 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
 
     auto & linear_solver = *_problem_data.jacobian_solver;
     equation_system.PrepareLinearSolver(linear_solver);
-    linear_solver.GetSolver().Mult(rhs, x);
+    linear_solver.Mult(rhs, x);
   }
 }
 

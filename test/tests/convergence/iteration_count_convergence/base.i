@@ -44,6 +44,7 @@
     type = SuppliedStatusConvergence
     min_iterations = 2
     max_iterations = 4
+    verbose = true
   []
 []
 
@@ -54,9 +55,4 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'hypre'
   nonlinear_convergence = test_conv
-[]
-
-[Outputs]
-  csv = true
-  execute_on = 'FINAL'
 []

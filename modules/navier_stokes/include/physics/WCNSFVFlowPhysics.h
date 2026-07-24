@@ -27,6 +27,8 @@ public:
   /// Return the number of algebraic ghosting layers needed
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
+  virtual std::vector<UserObjectName> getSuppliedUserObjects() const override;
+
 private:
   virtual void addSolverVariables() override;
   virtual void addFVKernels() override;

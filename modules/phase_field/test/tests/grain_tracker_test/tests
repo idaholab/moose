@@ -163,7 +163,7 @@
     input = 'grain_tracker_remapping_test.i'
     cli_args = 'Outputs/file_base=gt_recover_parallel_out Outputs/checkpoint=true --test-checkpoint-half-transient'
 
-    min_parallel = 8 # Test distributed merge work with grain tracker
+    min_parallel = 6 # Test distributed merge work with grain tracker
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
@@ -183,7 +183,7 @@
     prereq = 'test_recovery_parallel_part1'
     delete_output_before_running = false
 
-    min_parallel = 8 # Test distributed merge work with grain tracker
+    min_parallel = 6 # Test distributed merge work with grain tracker
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'

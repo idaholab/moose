@@ -291,9 +291,7 @@ public:
 
   virtual std::type_index propertyType() override
   {
-    static const std::type_index type = typeid(*this);
-
-    return type;
+    return std::type_index(typeid(MaterialProperty<T, dimension>));
   }
 
   virtual void init(const PropRecord & record, const StorageKey & key) override;

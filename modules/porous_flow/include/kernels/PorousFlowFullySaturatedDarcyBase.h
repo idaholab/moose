@@ -9,79 +9,83 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
- * Darcy advective flux for a fully-saturated,
- * single phase, single component fluid.
- * No upwinding or relative-permeability is used.
+ * Darcy advective flux for a fully-saturated, single-phase, single-component
+ * fluid.  No upwinding or relative-permeability effects are included.
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowFullySaturatedDarcyBase : public Kernel
+template <bool is_ad>
+class PorousFlowFullySaturatedDarcyBaseTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFullySaturatedDarcyBase(const InputParameters & parameters);
+  PorousFlowFullySaturatedDarcyBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /**
-   * The mobility of the fluid = density / viscosity
-   */
-  virtual Real mobility() const;
+  /// Fluid mobility = (density *) 1/viscosity.  Virtual so DarcyFlow can multiply by mass frac.
+  virtual GenericReal<is_ad> mobility() const;
 
-  /**
-   * The derivative of the mobility with respect to the PorousFlow variable pvar
-   * @param pvar Take the derivative with respect to this PorousFlow variable
-   */
-  virtual Real dmobility(unsigned pvar) const;
+  /// d(mobility)/d(PorousFlow variable pvar) -- only used on the non-AD path
+  virtual Real dmobility(unsigned int pvar) const;
 
-  /// If true then the mobility contains the fluid density, otherwise it doesn't
+  /// If true the mobility includes fluid density (mass flux); otherwise volume flux
   const bool _multiply_by_density;
 
-  /// Permeability of porous material
-  const MaterialProperty<RealTensorValue> & _permeability;
+  /// Permeability tensor
+  const GenericMaterialProperty<RealTensorValue, is_ad> & _permeability;
 
-  /// d(permeabiity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_dvar;
+  /// d(permeability)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<RealTensorValue>> * const _dpermeability_dvar;
 
-  /// d(permeabiity)/d(grad(PorousFlow variable))
-  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
+  /// d(permeability)/d(grad PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> * const _dpermeability_dgradvar;
 
-  /// Fluid density for each phase (at the qp)
-  const MaterialProperty<std::vector<Real>> & _density;
+  /// Fluid density for each phase
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _density;
 
-  /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the qp)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _ddensity_dvar;
+  /// d(density)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _ddensity_dvar;
 
-  /// Viscosity of the fluid at the qp
-  const MaterialProperty<std::vector<Real>> & _viscosity;
+  /// Fluid viscosity for each phase
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _viscosity;
 
-  /// Derivative of the fluid viscosity  wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dviscosity_dvar;
+  /// d(viscosity)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dviscosity_dvar;
 
-  /// Quadpoint pore pressure in each phase
-  const MaterialProperty<std::vector<Real>> & _pp;
+  /// Quadpoint pore pressure for each phase
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _pp;
 
-  /// Gradient of the pore pressure in each phase
-  const MaterialProperty<std::vector<RealGradient>> & _grad_p;
+  /// Gradient of pore pressure for each phase
+  const GenericMaterialProperty<std::vector<RealGradient>, is_ad> & _grad_p;
 
-  /// Derivative of Grad porepressure in each phase wrt grad(PorousFlow variables)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dgrad_p_dgrad_var;
+  /// d(grad p)/d(grad PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dgrad_p_dgrad_var;
 
-  /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
+  /// d(grad p)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrad_p_dvar;
 
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// Gravity pointing downwards
+  /// Gravitational acceleration vector (downward)
   const RealVectorValue _gravity;
 
-  /// Flag to check whether permeabiity derivatives are non-zero
+  /// Whether permeability has non-zero derivatives w.r.t. primary variables
   const bool _perm_derivs;
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowFullySaturatedDarcyBaseTempl<false> PorousFlowFullySaturatedDarcyBase;
+typedef PorousFlowFullySaturatedDarcyBaseTempl<true> ADPorousFlowFullySaturatedDarcyBase;

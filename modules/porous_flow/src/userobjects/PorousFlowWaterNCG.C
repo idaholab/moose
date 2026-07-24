@@ -310,7 +310,7 @@ PorousFlowWaterNCG::saturation(const ADReal & pressure,
                                std::vector<FluidStateProperties> & fsp) const
 {
   auto & gas = fsp[_gas_phase_number];
-  auto & liquid = fsp[_aqueous_fluid_component];
+  auto & liquid = fsp[_aqueous_phase_number];
 
   // Approximate liquid density as saturation isn't known yet, by using the gas
   // pressure rather than the liquid pressure. This does result in a small error

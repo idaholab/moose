@@ -11,6 +11,8 @@
 
 #include "MFEMVariable.h"
 #include "MFEMProblem.h"
+#include "MFEMFESpace.h"
+#include "MFEMFESpaceHierarchy.h"
 #include "MooseVariableBase.h"
 #include "MFEMVectorMagnitudeCoefficient.h"
 
@@ -21,8 +23,12 @@ MFEMVariable::validParams()
 {
   InputParameters params = MFEMObject::validParams();
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
-  params.addRequiredParam<MFEMFESpaceName>("fespace",
-                                           "The finite element space this variable is defined on.");
+  params.addParam<MFEMFESpaceName>("fespace",
+                                   "The finite element space this variable is defined on.");
+  params.addParam<std::string>(
+      "fespace_hierarchy",
+      "Name of a FESpaceHierarchy; the variable lives on its finest level. "
+      "Mutually exclusive with 'fespace'.");
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
@@ -37,9 +43,6 @@ MFEMVariable::validParams()
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
   : MFEMObject(parameters),
-    _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<MFEMFESpaceName>("fespace"))),
-    _gridfunction(buildGridFunction()),
     _time_derivative_name(
         isParamValid("time_derivative")
             ? getParam<VariableName>("time_derivative")
@@ -47,22 +50,45 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
                   getMFEMProblem().getProblemData().time_derivative_map.createTimeDerivativeName(
                       name())))
 {
+  const bool has_fespace = isParamSetByUser("fespace");
+  const bool has_hierarchy = isParamSetByUser("fespace_hierarchy");
+
+  if (has_fespace && has_hierarchy)
+    paramError("fespace_hierarchy", "Cannot specify both 'fespace' and 'fespace_hierarchy'.");
+  if (!has_fespace && !has_hierarchy)
+    paramError("fespace", "Either 'fespace' or 'fespace_hierarchy' must be provided.");
+
+  if (has_fespace)
+  {
+    const auto & fespace = getMFEMProblem().getMFEMObject<MFEMFESpace>(
+        "MFEMFESpace", getParam<MFEMFESpaceName>("fespace"));
+    _par_fespace = fespace.getFESpace();
+    _is_scalar = fespace.isScalar();
+  }
+  else
+  {
+    const auto & hierarchy_name = getParam<std::string>("fespace_hierarchy");
+    const auto & hierarchy = getMFEMProblem().getMFEMObject<MFEMFESpaceHierarchy>(
+        "MFEMFESpaceHierarchy", hierarchy_name);
+    _par_fespace = getMFEMProblem().getProblemData().fespaces.GetShared(hierarchy_name);
+    _is_scalar = hierarchy.isScalar();
+  }
+
+  _gridfunction = buildGridFunction();
   *_gridfunction = 0.0;
 }
 
 const std::shared_ptr<mfem::ParGridFunction>
 MFEMVariable::buildGridFunction()
 {
-  return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
+  return std::make_shared<mfem::ParGridFunction>(_par_fespace.get());
 }
 
 void
 MFEMVariable::declareCoefficients()
 {
-  // Get continuity type to
-  const MFEMFESpace & mfem_fespace = getFESpace();
-  const int cont_type = mfem_fespace.getFEC()->GetContType();
-  if (getFESpace().isScalar())
+  const int cont_type = _par_fespace->FEColl()->GetContType();
+  if (_is_scalar)
   {
     getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         name(), getGridFunction().get());

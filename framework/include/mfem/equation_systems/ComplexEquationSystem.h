@@ -18,7 +18,6 @@ mixed and nonlinear forms) and build methods
 */
 class ComplexEquationSystem : public EquationSystem
 {
-
 public:
   ComplexEquationSystem() = default;
   ~ComplexEquationSystem() = default;

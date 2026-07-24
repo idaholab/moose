@@ -57,7 +57,8 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
     _aqueous_phase_number(getParam<unsigned int>("aqueous_phase_number")),
     _consistent_fe_type(false),
-    _fe_type(0)
+    _fe_type(0),
+    _is_fv(false)
 {
   _moose_var_num.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
@@ -66,6 +67,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
   if (_num_variables > 0)
   {
     _consistent_fe_type = true;
+    _is_fv = getFieldVar("porous_flow_vars", 0)->isFV();
     _fe_type = FEType(getFieldVar("porous_flow_vars", 0)->feType());
     for (unsigned int i = 1; i < _num_variables; ++i)
       if (getFieldVar("porous_flow_vars", i)->feType() != _fe_type)
@@ -175,4 +177,10 @@ FEType
 PorousFlowDictator::feType() const
 {
   return _fe_type;
+}
+
+bool
+PorousFlowDictator::isFV() const
+{
+  return _is_fv;
 }

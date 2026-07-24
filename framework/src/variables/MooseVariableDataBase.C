@@ -181,6 +181,8 @@ MooseVariableDataBase<OutputType>::vectorTagValue(TagID tag) const
   if (tag >= _need_vector_tag_u.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
 
+  _var.requireQpComputations();
+
   _need_vector_tag_u[tag] = true;
 
   if (_sys.hasVector(tag))
@@ -196,6 +198,8 @@ MooseVariableDataBase<OutputType>::vectorTagDofValue(TagID tag) const
   if (tag >= _need_vector_tag_dof_u.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
 
+  _var.requireQpComputations();
+
   _need_vector_tag_dof_u[tag] = true;
 
   if (_sys.hasVector(tag))
@@ -210,6 +214,8 @@ MooseVariableDataBase<OutputType>::vectorTagGradient(TagID tag) const
 {
   if (tag >= _need_vector_tag_grad.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
+
+  _var.requireQpComputations();
 
   _need_vector_tag_grad[tag] = true;
 
@@ -228,6 +234,8 @@ MooseVariableDataBase<OutputType>::matrixTagValue(TagID tag) const
     _need_matrix_tag_u.resize(tag + 1, false);
     const_cast<MooseVariableDataBase<OutputType> *>(this)->_matrix_tag_u.resize(tag + 1);
   }
+
+  _var.requireQpComputations();
 
   _need_matrix_tag_u[tag] = true;
 
@@ -308,6 +316,8 @@ MooseVariableDataBase<OutputType>::sln(Moose::SolutionState state) const
   auto functor = [this](TagID tag_id) -> const FieldVariableValue &
   { return vectorTagValue(tag_id); };
 
+  _var.requireQpComputations();
+
   return const_cast<MooseVariableDataBase<OutputType> *>(this)
       ->stateToTagHelper<FieldVariableValue>(state, functor);
 }
@@ -319,6 +329,8 @@ MooseVariableDataBase<OutputType>::gradSln(Moose::SolutionState state) const
   auto functor = [this](TagID tag_id) -> const FieldVariableGradient &
   { return vectorTagGradient(tag_id); };
 
+  _var.requireQpComputations();
+
   return const_cast<MooseVariableDataBase<OutputType> *>(this)
       ->stateToTagHelper<FieldVariableGradient>(state, functor);
 }
@@ -328,6 +340,8 @@ const typename MooseVariableDataBase<OutputType>::DofValues &
 MooseVariableDataBase<OutputType>::vectorTagDofValue(Moose::SolutionState state) const
 {
   auto functor = [this](TagID tag_id) -> const DofValues & { return vectorTagDofValue(tag_id); };
+
+  _var.requireQpComputations();
 
   return const_cast<MooseVariableDataBase<OutputType> *>(this)->stateToTagHelper<DofValues>(
       state, functor);

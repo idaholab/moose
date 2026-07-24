@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", FVOrthogonalDiffusion);
 InputParameters
 FVOrthogonalDiffusion::validParams()
 {
-  InputParameters params = FVFluxKernel::validParams();
+  InputParameters params = FVQpFluxKernel::validParams();
   params.addClassDescription("Imposes an orthogonal diffusion term.");
   params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
   params.addParam<MaterialPropertyName>(
@@ -24,7 +24,7 @@ FVOrthogonalDiffusion::validParams()
 }
 
 FVOrthogonalDiffusion::FVOrthogonalDiffusion(const InputParameters & parameters)
-  : FVFluxKernel(parameters),
+  : FVQpFluxKernel(parameters),
     _coeff_elem(getADMaterialProperty<Real>("coeff")),
     _coeff_neighbor(getNeighborADMaterialProperty<Real>("coeff")),
     _diff_quant_elem(isParamValid("diffusing_quantity")

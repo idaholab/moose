@@ -9,6 +9,8 @@
 
 #include "PorousFlowPorosityExponentialBase.h"
 
+#include <limits>
+
 InputParameters
 PorousFlowPorosityExponentialBase::validParams()
 {
@@ -25,6 +27,23 @@ PorousFlowPorosityExponentialBase::validParams()
                         "Modify the usual exponential relationships that "
                         "governs porosity so that porosity is always "
                         "positive");
+  params.addParam<Real>(
+      "porosity_min",
+      std::numeric_limits<Real>::lowest(),
+      "Minimum allowed value of the porosity: if the computed porosity is less than this value, "
+      "porosity is set to this value instead.  By default no floor is imposed.  The "
+      "ensure_positive "
+      "transform only acts for decay > 0, so chemistry-driven (precipitation) porosity is "
+      "otherwise "
+      "unbounded below and can become negative once pore space is filled by mineral; set this to a "
+      "small positive value in that case.");
+  params.addParam<Real>("zero_modifier",
+                        1E-3,
+                        "If the porosity_min floor is active, the porosity derivatives are set to "
+                        "zero_modifier times their unfloored values (rather than exactly zero) to "
+                        "hint to the Newton-Krylov nonlinear solver that porosity "
+                        "is not strictly constant, which aids convergence");
+  params.addParamNamesToGroup("zero_modifier", "Advanced");
   params.addClassDescription("Base class Material for porosity that is computed via an exponential "
                              "relationship with coupled variables (strain, porepressure, "
                              "temperature, chemistry)");
@@ -35,7 +54,9 @@ PorousFlowPorosityExponentialBase::PorousFlowPorosityExponentialBase(
     const InputParameters & parameters)
   : PorousFlowPorosityBase(parameters),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
-    _ensure_positive(getParam<bool>("ensure_positive"))
+    _ensure_positive(getParam<bool>("ensure_positive")),
+    _porosity_min(getParam<Real>("porosity_min")),
+    _zero_modifier(getParam<Real>("zero_modifier"))
 {
 }
 
@@ -55,6 +76,9 @@ PorousFlowPorosityExponentialBase::initQpStatefulProperties()
     const Real expx = std::exp(-decay / c);
     _porosity[_qp] = a + (b - a) * std::exp(c * (1.0 - expx));
   }
+
+  if (_porosity[_qp] < _porosity_min)
+    _porosity[_qp] = _porosity_min;
 }
 
 void
@@ -100,6 +124,19 @@ PorousFlowPorosityExponentialBase::computeQpProperties()
       const Real expx = std::exp(-decay / c);
       const Real dc = (a - b) * (da * b / a - db) / std::pow(a, 2);
       (*_dporosity_dvar)[_qp][v] += (b - a) * exp_term * dc * (1 - expx - expx / c);
+    }
+  }
+
+  // Apply the porosity floor last, after the unfloored derivatives above have been
+  // formed.  When floored, soften the derivatives with _zero_modifier so the Newton
+  // process still sees porosity as weakly varying (cf. PorousFlowPorosityLinear).
+  if (_porosity[_qp] < _porosity_min)
+  {
+    _porosity[_qp] = _porosity_min;
+    for (unsigned int v = 0; v < _num_var; ++v)
+    {
+      (*_dporosity_dvar)[_qp][v] *= _zero_modifier;
+      (*_dporosity_dgradvar)[_qp][v] *= _zero_modifier;
     }
   }
 }

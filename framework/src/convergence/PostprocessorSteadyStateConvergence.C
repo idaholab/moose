@@ -35,10 +35,10 @@ PostprocessorSteadyStateConvergence::PostprocessorSteadyStateConvergence(
 }
 
 Convergence::MooseConvergenceStatus
-PostprocessorSteadyStateConvergence::checkConvergence(unsigned int iter)
+PostprocessorSteadyStateConvergence::checkConvergence(unsigned int n_iter)
 {
   // Often post-processors checking steady conditions are falsely 0 on INITIAL
-  if (iter == 0)
+  if (n_iter == 0)
     return MooseConvergenceStatus::ITERATING;
 
   if (std::abs(_postprocessor) <= _tol)

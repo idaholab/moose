@@ -1,5 +1,7 @@
 # Gaussian Process Surrogate
 
+!if! function=hasCapability('libtorch')
+
 This example walks through the creation of a few gaussian process surrogates on a simple example system with an analytical solution for comparison. The first surrogate considers a single input parameter to be varied, which lends itself to a simple visual interpretation of the surrogate behavior. The next surrogate extends this idea to two input parameters being modeled. Lastly the full system is modeled with all input parameters, and compared to the analytical solution using sampling. It's recommended users be familiar with the basic surrogate framework, such as [examples/surrogate_creation.md], [examples/surrogate_training.md], and [examples/surrogate_evaluate.md].
 
 ## Problem Statement
@@ -106,3 +108,8 @@ To showcase more optimization options available in [GaussianProcessTrainer.md], 
 in this process. The parameters for Adam (number of iterations, learning rate, etc.) can be set using the following syntax:
 
 !listing examples/surrogates/gaussian_process/GP_normal_mc.i block=Trainers
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

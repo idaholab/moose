@@ -31,9 +31,7 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
   : FVBoundaryCondition(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
         this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
-    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    _u(_var.adSln()),
-    _u_neighbor(_var.adSlnNeighbor())
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs())
 {
   if (_var.kind() == Moose::VarKindType::VAR_AUXILIARY)
     paramError("variable",
@@ -119,48 +117,6 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
   addResidualsAndJacobian(_assembly, std::array<ADReal, 1>{{r}}, dof_indices, _var.scalingFactor());
-}
-
-const ADReal &
-FVFluxBC::uOnUSub() const
-{
-  mooseAssert(_face_info, "The face info has not been set");
-  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
-  mooseAssert(
-      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
-      "The variable " << _var.name()
-                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
-                      << this->name());
-  mooseAssert(_qp == 0,
-              "At the time of writing, we only support one quadrature point, which should "
-              "correspond to the location of the cell centroid. If that changes, we should "
-              "probably change the body of FVFluxBC::uOnUSub");
-
-  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
-    return _u[_qp];
-  else
-    return _u_neighbor[_qp];
-}
-
-const ADReal &
-FVFluxBC::uOnGhost() const
-{
-  mooseAssert(_face_info, "The face info has not been set");
-  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
-  mooseAssert(
-      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
-      "The variable " << _var.name()
-                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
-                      << this->name());
-  mooseAssert(_qp == 0,
-              "At the time of writing, we only support one quadrature point, which should "
-              "correspond to the location of the cell centroid. If that changes, we should "
-              "probably change the body of FVFluxBC::uOnGhost");
-
-  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
-    return _u_neighbor[_qp];
-  else
-    return _u[_qp];
 }
 
 Moose::ElemArg

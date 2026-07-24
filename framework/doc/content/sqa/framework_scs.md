@@ -495,4 +495,5 @@ class MyClass:
 - Every class with virtual methods must have a virtual destructor
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
+    - When defining inline or template methods in a header file, definitions that span more than one line must be placed outside of the class definition (after the closing brace), not inside the class body.
 - Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless proof is provided that it can't fail.

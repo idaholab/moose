@@ -1,5 +1,6 @@
 # ExponentialCovariance
 
+!if function=hasCapability('libtorch')
 !syntax description /Covariance/ExponentialCovariance
 
 ## Overview
@@ -32,8 +33,14 @@ When $\gamma = 2$ is equivalent to [](SquaredExponentialCovariance.md), save a f
 
 !listing test/tests/surrogates/gaussian_process/GP_exponential.i block=Covariance
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Covariance/ExponentialCovariance
 
 !syntax inputs /Covariance/ExponentialCovariance
 
 !syntax children /Covariance/ExponentialCovariance
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

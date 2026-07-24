@@ -547,7 +547,9 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
   _problem.execute(EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE);
 
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-  const auto status = convergence.checkConvergence(_fixed_point_it);
+  // checkConvergence expects the number of iterations performed, not the iteration index:
+  const auto n_iter = _fixed_point_it + 1;
+  const auto status = convergence.checkConvergence(n_iter);
   switch (status)
   {
     case Convergence::MooseConvergenceStatus::CONVERGED:

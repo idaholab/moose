@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosVector.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 
 // #define DEVICE_ASSEMBLY
 

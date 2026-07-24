@@ -12,7 +12,7 @@ import mock
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, floats, heading, autolink, modal
+from MooseDocs.extensions import core, command, floats, heading, autolink, modal
 from MooseDocs import base, common
 
 logging.basicConfig()
@@ -135,6 +135,54 @@ class TestShortcutLink(MooseDocsTestCase):
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
         self.assertToken(ast(0)(0), "ShortcutLink", size=0, key="not_a_file")
+
+
+class TestFileCommand(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats, heading, autolink, modal]
+
+    def testSourceLink(self):
+        ast = self.tokenize("[!file](framework/Makefile)")
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), "Paragraph", size=1)
+        self.assertToken(
+            ast(0)(0),
+            "ModalSourceLink",
+            size=0,
+            src=common.check_filenames("framework/Makefile"),
+            language=None,
+            title=None,
+        )
+
+        ast = self.tokenize("[!file language=make title=Makefile](framework/Makefile)")
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), "Paragraph", size=1)
+        self.assertToken(
+            ast(0)(0),
+            "ModalSourceLink",
+            size=0,
+            src=common.check_filenames("framework/Makefile"),
+            language="make",
+            title="Makefile",
+        )
+
+    def testMaterialize(self):
+        _, res = self.execute(
+            "[!file title=Makefile](framework/Makefile)",
+            renderer=base.MaterializeRenderer(),
+        )
+
+        self.assertSize(res, 2)
+        uid = res(1)["id"]
+        self.assertHTMLTag(
+            res(0, 0),
+            "a",
+            size=1,
+            href="#{}".format(uid),
+            string="(framework/Makefile)",
+            class_="moose-source-filename tooltipped modal-trigger",
+        )
+        self.assertHTMLTag(res(1), "div", size=2, class_="moose-modal modal", id_=uid)
+        self.assertHTMLTag(res(1, 0, 0), "h4", size=1, string="Makefile")
 
 
 class TestLink(MooseDocsTestCase):

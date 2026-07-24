@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "GaussianProcessTrainer.h"
 #include "Sampler.h"
@@ -37,6 +38,10 @@ GaussianProcessTrainer::validParams()
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
+  params.addParam<MooseEnum>(
+      "optimizer",
+      MooseEnum("adam=0 legacy_adam=1", "adam"),
+      "The Adam optimizer semantics to use for Gaussian process hyperparameter tuning.");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
       0,
@@ -53,7 +58,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
     _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
+    _training_params(declareModelData<torch::Tensor>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
@@ -61,7 +66,13 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate"))),
+        getParam<Real>("learning_rate"),
+        0.9,
+        0.999,
+        1e-7,
+        1e-4,
+        getParam<MooseEnum>("optimizer")
+            .getEnum<StochasticTools::GaussianProcess::OptimizerType>())),
     _sampler_row(getSamplerData())
 {
   // Error Checking
@@ -125,16 +136,22 @@ GaussianProcessTrainer::postTrain()
   _communicator.allgather(_params_buffer);
   _communicator.allgather(_data_buffer);
 
-  _training_params.resize(_params_buffer.size(), _n_dims);
-  _training_data.resize(_data_buffer.size(), _n_outputs);
+  _training_params = torch::empty({long(_params_buffer.size()), _n_dims}, at::kDouble);
+  _training_data = torch::empty({long(_data_buffer.size()), _n_outputs}, at::kDouble);
 
-  for (auto ii : make_range(_training_params.rows()))
+  auto params_accessor = _training_params.accessor<Real, 2>();
+  auto data_accessor = _training_data.accessor<Real, 2>();
+
+  for (auto ii : make_range(_training_params.sizes()[0]))
   {
     for (auto jj : make_range(_n_dims))
-      _training_params(ii, jj) = _params_buffer[ii][jj];
+      params_accessor[ii][jj] = _params_buffer[ii][jj];
     for (auto jj : make_range(_n_outputs))
-      _training_data(ii, jj) = _data_buffer[ii][jj];
+      data_accessor[ii][jj] = _data_buffer[ii][jj];
   }
+
+  LibtorchUtils::moveToLibtorchDevice(_training_params, _app.getLibtorchDevice());
+  LibtorchUtils::moveToLibtorchDevice(_training_data, _app.getLibtorchDevice());
 
   // Standardize (center and scale) training params
   if (_standardize_params)
@@ -142,7 +159,6 @@ GaussianProcessTrainer::postTrain()
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.paramStandardizer().set(0, 1, _n_dims);
-
   // Standardize (center and scale) training data
   if (_standardize_data)
     _gp.standardizeData(_training_data);
@@ -153,3 +169,5 @@ GaussianProcessTrainer::postTrain()
   // Setup the covariance
   _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
+
+#endif

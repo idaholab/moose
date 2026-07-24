@@ -183,6 +183,16 @@
     issues = "#10847"
     design = 'PorousFlowAqueousPreDisMineral.md PorousFlowPorosity.md'
   []
+  [precipitation_porosity_change_min]
+    type = CSVDiff
+    input = precipitation_porosity_change.i
+    prereq = precipitation_porosity_change
+    cli_args = 'Materials/porosity/porosity_min=0.5 Outputs/file_base=precipitation_porosity_change_min'
+    csvdiff = precipitation_porosity_change_min.csv
+    requirement = "The system shall be able to place a lower bound on the porosity computed from mineral precipitation, so that chemistry-driven porosity cannot become negative as the precipitated mineral fills the pore space."
+    issues = "#33240"
+    design = 'PorousFlowPorosity.md'
+  []
   [dissolution]
     type = CSVDiff
     input = dissolution.i

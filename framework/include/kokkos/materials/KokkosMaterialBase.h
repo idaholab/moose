@@ -12,6 +12,7 @@
 #include "KokkosTypes.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosDispatcher.h"
+#include "KokkosFESystem.h"
 
 #include "MaterialBase.h"
 
@@ -24,7 +25,7 @@ namespace Moose::Kokkos
 class MaterialBase : public ::MaterialBase,
                      public MeshHolder,
                      public AssemblyHolder,
-                     public SystemHolder
+                     public FESystemHolder
 {
 public:
   static InputParameters validParams();

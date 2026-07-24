@@ -59,7 +59,7 @@ MultiPostprocessorConvergence::initialSetup()
 }
 
 Convergence::MooseConvergenceStatus
-MultiPostprocessorConvergence::checkConvergenceInner(unsigned int /*iter*/)
+MultiPostprocessorConvergence::checkConvergenceInner(unsigned int /*n_iter*/)
 {
   bool all_converged = true;
   std::ostringstream oss;

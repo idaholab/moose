@@ -101,6 +101,12 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid, 0)),
     _mesh(_subproblem.mesh())
 {
+  // Propagation of the aux kernel value into the auxiliary system must go through a presized
+  // MooseArray that is only properfly sized for FV variables if we're doing "qp" calculations. I'm
+  // quoting "qp" because it's a briefer metaphorical representation (perhaps not a good one) of the
+  // more precise requirement that variable data be pre-sized/operator[] indexable
+  _var.requireQpComputations();
+
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 

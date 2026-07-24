@@ -32,10 +32,13 @@ The following adaptive Monte Carlo samplers have been implemented in MOOSE:
   efficiently propagate to regions of the input parameter space that are most significant
   for either failure characterization or optimization. See [ParallelSubsetSimulation](ParallelSubsetSimulation.md) for more information.
 
+!if! function=hasCapability('libtorch')
 - +Active Learning in Adaptive Importance Sampling (AIS-AL)+
 
   Similar to the AIS method, except that instead of calling the full model every time, a Gaussian Process surrogate is called as part
   of an active learning scheme. See [AISActiveLearning](AISActiveLearning.md) for more information.
+
+!if-end!
 
 !syntax parameters /Reporters/AdaptiveMonteCarloDecision
 

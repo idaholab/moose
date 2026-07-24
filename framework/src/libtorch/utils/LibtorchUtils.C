@@ -11,33 +11,103 @@
 
 #include "LibtorchUtils.h"
 
+#include <algorithm>
+#include <functional>
+#include <numeric>
+
 namespace LibtorchUtils
 {
 
-template <typename DataType>
-void
-vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach)
+namespace
 {
-  auto options = torch::TensorOptions();
+
+template <typename DataType>
+torch::TensorOptions
+tensorOptions()
+{
   if constexpr (std::is_same<DataType, double>::value)
-    options = torch::TensorOptions().dtype(at::kDouble);
+    return torch::TensorOptions().dtype(at::kDouble);
   else if constexpr (std::is_same<DataType, float>::value)
-    options = torch::TensorOptions().dtype(at::kFloat);
+    return torch::TensorOptions().dtype(at::kFloat);
   else
     static_assert(Moose::always_false<DataType>,
-                  "vectorToTensor is not implemented for the given data type!");
+                  "Tensor conversion is not implemented for the given data type!");
+}
 
-  // We need to clone here because from_blob() doesn't take ownership of the pointer so if it
-  // vector goes out of scope before tensor, we get unwanted behavior
-  tensor = torch::from_blob(vector.data(), {long(vector.size()), 1}, options).clone();
+template <typename DataType>
+void
+checkTensorShape(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
+{
+  const auto expected_numel =
+      std::accumulate(sizes.begin(), sizes.end(), int64_t{1}, std::multiplies<int64_t>());
+
+  if (expected_numel != cast_int<int64_t>(vector.size()))
+    mooseError("The requested tensor shape is incompatible with the vector size.");
+}
+
+} // namespace
+
+template <typename DataType>
+torch::Tensor
+vectorToTensorCopy(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
+{
+  checkTensorShape(vector, sizes);
+
+  const auto options = tensorOptions<DataType>();
+  auto tensor = torch::empty(sizes, options);
+
+  if (!vector.empty())
+    std::copy(vector.begin(), vector.end(), tensor.template data_ptr<DataType>());
+
+  return tensor;
+}
+
+// Explicitly instantiate for DataType=Real
+template torch::Tensor vectorToTensorCopy<Real>(const std::vector<Real> & vector,
+                                                c10::IntArrayRef sizes);
+
+template <typename DataType>
+void
+vectorToTensor(const std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach)
+{
+  tensor = vectorToTensorCopy(vector, {long(vector.size()), 1});
 
   if (detach)
-    tensor.detach();
+    tensor = tensor.detach();
 }
 
 // Explicitly instantiate for DataType=Real
 template void
-vectorToTensor<Real>(std::vector<Real> & vector, torch::Tensor & tensor, const bool detach);
+vectorToTensor<Real>(const std::vector<Real> & vector, torch::Tensor & tensor, const bool detach);
+
+template <typename DataType>
+torch::Tensor
+vectorToTensorView(std::vector<DataType> & vector, c10::IntArrayRef sizes)
+{
+  checkTensorShape(vector, sizes);
+
+  const auto options = tensorOptions<DataType>();
+  if (vector.empty())
+    return torch::empty(sizes, options);
+
+  return torch::from_blob(vector.data(), sizes, options);
+}
+
+// Explicitly instantiate for DataType=Real
+template torch::Tensor vectorToTensorView<Real>(std::vector<Real> & vector, c10::IntArrayRef sizes);
+
+void
+moveToLibtorchDevice(torch::Tensor & tensor, const torch::DeviceType device_type)
+{
+  tensor = tensor.to(device_type);
+}
+
+torch::Tensor
+toCPUContiguous(const torch::Tensor & tensor)
+{
+  // CPU accessors can handle strides, but data_ptr()-based reads require dense logical order.
+  return tensor.detach().to(tensor.options().device(at::kCPU)).contiguous();
+}
 
 template <typename DataType>
 void

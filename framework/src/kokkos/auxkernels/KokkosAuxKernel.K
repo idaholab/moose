@@ -24,7 +24,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
   : ::AuxKernelBase(parameters),
     MeshHolder(*_mesh.getKokkosMesh()),
     AssemblyHolder(_sys.feProblem().kokkosAssembly()),
-    SystemHolder(_sys.feProblem().getKokkosSystems()),
+    FESystemHolder(_sys.feProblem().getKokkosFESystems()),
     _nodal(_var.isNodal()),
     _test(),
     _u(_var, Moose::SOLUTION_TAG, _var.isNodal()),
@@ -40,13 +40,18 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
   auto tag = _sys.feProblem().addVectorTag("parallel_solution", Moose::VECTOR_TAG_SOLUTION);
 
   _kokkos_var.init(_var, tag);
+
+  // Kokkos aux kernels currently only consume variable information through finite element bases and
+  // quadrature points
+  for (auto * const var : getMooseVariableDependencies())
+    var->requireQpComputations();
 }
 
 AuxKernel::AuxKernel(const AuxKernel & object)
   : ::AuxKernelBase(object, {}),
     MeshHolder(object),
     AssemblyHolder(object),
-    SystemHolder(object),
+    FESystemHolder(object),
     _nodal(object._nodal),
     _kokkos_var(object._kokkos_var),
     _test(object._test),

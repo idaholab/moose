@@ -41,20 +41,8 @@ MFEMNewtonNonlinearSolver::ConstructSolver()
 }
 
 void
-MFEMNewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
-{
-  GetSolver().SetOperator(op);
-}
-
-void
 MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
   static_cast<mfem::NewtonSolver &>(GetSolver()).SetSolver(solver);
-}
-
-void
-MFEMNewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
-{
-  GetSolver().Mult(rhs, x);
 }
 #endif

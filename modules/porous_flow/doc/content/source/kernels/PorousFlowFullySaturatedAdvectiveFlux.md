@@ -12,6 +12,9 @@ The factor $(\rho)$ appears in parentheses because it is optional and controlled
 
 [Full upwinding](upwinding.md) is used in this Kernel.  See the [numerical stabilization lead page](stabilization.md) page for more details.
 
+!alert note
+This Kernel requires a nodal (Lagrange) variable, because upwinding associates each element degree of freedom with a mesh node; using a non-nodal variable (such as a monomial variable) is an error.
+
 This Kernel may be added automatically by the [PorousFlowFullySaturated](PorousFlowFullySaturated.md) Action: see more discussion on that page.
 
 !syntax parameters /Kernels/PorousFlowFullySaturatedAdvectiveFlux
