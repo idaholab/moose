@@ -208,6 +208,20 @@
       expect_err = 'direction cannot be set if extruding along curve!'
       detail = 'the extrusion direction is specified along with a curve to extrude along,'
     []
+    [param_node_normals_with_curve]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/extrude_along_node_normals=true --mesh-only"
+      expect_err = 'extrude_along_node_normals cannot be set if extruding along curve!'
+      detail = 'the extrusion is requested along the node normals along with a curve to extrude along,'
+    []
+    [param_node_normals_not_2d]
+      type = RunException
+      input = extrude_along_normals.i
+      cli_args = "Mesh/gmg/dim=1 --mesh-only"
+      expect_err = 'only supported for 2D surface meshes'
+      detail = 'the extrusion is requested along the node normals of a mesh that is not a 2D surface,'
+    []
   []
   [named_boundaries]
     type = Exodiff
@@ -253,5 +267,15 @@
     recover = false
     issues = '#31112'
     requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
+  []
+  [extrude_along_node_normals]
+    type = Exodiff
+    input = 'extrude_along_normals.i'
+    exodiff = 'extrude_along_normals_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    issues = '#33150'
+    requirement = 'The system shall be able to extrude each node of a 2D surface mesh along the averaged normal of the elements it is connected to, for example to create boundary layers.'
+    mesh_mode = 'REPLICATED'
   []
 []
