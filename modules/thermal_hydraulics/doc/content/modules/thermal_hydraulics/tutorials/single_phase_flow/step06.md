@@ -1,6 +1,6 @@
 # Step 6: Custom Closures
 
-+Complete input file for this step:+ [06_custom_closures.i](thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i)
++Complete input file for this step:+ [!file text=06_custom_closures.i](thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i)
 
 ## Closure System
 

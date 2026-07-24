@@ -19,7 +19,7 @@ If dependence on time is desired, [ControlLogic](ControlLogic/index.md) can be u
 do this, supply the name of a [ConstantFunction.md] and then control that function
 using the value of the time function ([GetFunctionValueControl.md] followed by [SetRealValueControl.md]).
 See the `motor` component in
-[open_brayton_cycle.i](test/tests/problems/brayton_cycle/open_brayton_cycle.i)
+[!file text=open_brayton_cycle.i](test/tests/problems/brayton_cycle/open_brayton_cycle.i)
 for an example.
 
 !syntax parameters /Components/ShaftConnectedMotor

@@ -29,7 +29,7 @@ cd ~/projects/moose/module/level_set/examples/rotating_circle
 
 Adding SUPG stabilization---set the [theory](/level_set/theory.md) for details---mitigates the oscillations
 present in the first step, as shown in [circle_rotate_supg_out]. Adding the SUPG stabilization is
-trivial simply add the time and advection SUPG kernels to the input file ([circle_rotate_supg.i])
+trivial simply add the time and advection SUPG kernels to the input file ([!file](circle_rotate_supg.i))
 shown previously, the kernels block will then appear as:
 
 !listing modules/level_set/examples/rotating_circle/circle_rotate_supg.i block=Kernels
@@ -45,7 +45,7 @@ the use of the MOOSE [MultiApp](/MultiApps/index.md). The enable reinitializatio
 required: a parent and sub-application.
 
 The parent input file must add the necessary [MultiApps](/MultiApps/index.md) and
-[Transfers](/Transfers/index.md) blocks. For the problem at hand ([circle_rotate_parent.i]) this
+[Transfers](/Transfers/index.md) blocks. For the problem at hand ([!file](circle_rotate_parent.i)) this
 easily accomplished by adding the following to the input file from the first step (i.e., do not
 include the SUPG kernels).
 

@@ -40,7 +40,7 @@ The `optional` and `exact` settings are similarly applied when handling alternat
 !devel settings module=MooseDocs.extensions.autolink
        object=PageLinkComponent
        id=link-settings
-       caption=Available settings for automatic links. Note that the `language` setting has no effect unless the link is a [source file](#source).
+       caption=Available settings for automatic links.
 
 !alert warning title=Try not to abuse alternative links.
 The `alternative` setting should not be used as a means to circumvent potentially broken content configurations, but rather consciously under special circumstances. For example, its main purpose is to provide a fallback when developing sites designed with [multiple configurations](MooseDocs/config.md#multiconfigs) and cross-links between them, but expeditiously building only one of those configurations such that certain content is only conditionally unavailable.
@@ -79,38 +79,27 @@ Note that explicit URLs like `https://www.google.com/` are not supported for aut
 !devel settings module=MooseDocs.extensions.autolink
        object=PageShortcutLinkComponent
        id=shortcut-link-settings
-       caption=Available settings for automatic link shortcuts. Note that the `language` setting has no effect unless the link is a [source file](#source).
+       caption=Available settings for automatic link shortcuts.
 
 !alert note title=Applicable settings
-The `alternative`, `optional`, and `exact` settings given in both [link-settings] and [shortcut-link-settings] have no effect when the link is a local bookmark, e.g., `[#bookmark]`, nor when it is a [source link](#source). Furthermore, the `language` setting is only applicable to source links.
+The `alternative`, `optional`, and `exact` settings given in both [link-settings] and [shortcut-link-settings] have no effect when the link is a local bookmark, e.g., `[#bookmark]`.
 
-## Automatic Source Content id=source
+## Source File Links id=source
 
-If a filename is used within a link or shortcut link and the file is contained in the git repository
-a bottom extending modal window will be created that displays the complete text, as shown in
-[example-file-link].
+The `!file` command creates a link to a bottom extending modal window that displays complete source
+file text, as shown in [example-file-link]. Optional settings may be used to specify the source
+language, link text, and modal title.
 
 !devel! example id=example-file-link
-                caption=Example showing source code links to modal windows with complete source code.
-[/Diffusion.C]
-
-[Diffusion Kernel](/Diffusion.C)
-!devel-end!
-
-The `!file` command provides an explicit source file link that creates the same modal window without
-relying on automatic link fallback behavior. Optional settings may be used to specify the source
-language and modal title.
-
-!devel! example id=example-explicit-file-link
                 caption=Example showing explicit source code links to modal windows with complete source code.
 [!file](framework/src/kernels/Diffusion.C)
 
-[!file language=python title=run_tests](test/run_tests)
+[!file text=Diffusion Kernel title=Diffusion.C](framework/src/kernels/Diffusion.C)
 !devel-end!
 
 Similar to the [python/MooseDocs/extensions/listing.md], the optional `language` setting can be used to specify the coding language to use for syntax highlighting as demonstrated in [example-file-link-language].
 
 !devel! example id=example-file-link-language
                 caption=Example showing source code link that sets the language to use for syntax highlighting.
-[`run_tests`](/test/run_tests language=python)
+[!file language=python title=run_tests](test/run_tests)
 !devel-end!

@@ -128,7 +128,7 @@ The values for $\gamma_{\alpha i \beta j}$ for the other interfaces can be speci
 ## Example input file
 
 An example input file can be found here:
-[GrandPotentialPFM/GrandPotentialMultiphase.i]
+[!file](GrandPotentialPFM/GrandPotentialMultiphase.i)
 
 ## Version with strict mass conservation
 
@@ -145,4 +145,4 @@ c_A = \sum_{\beta = 1}^N h_\beta \left(\frac{\mu_A}{V_a^2 k_A^\beta} + c_A^{\bet
 \end{equation}
 
 An example input file can be found here:
-[modules/phase_field/examples/multiphase/GrandPotential3Phase_masscons.i]
+[!file](modules/phase_field/examples/multiphase/GrandPotential3Phase_masscons.i)

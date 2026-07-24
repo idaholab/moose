@@ -36,14 +36,14 @@ extensions, which provides an extraordinary amount of flexibility about how your
 
 As a good example of how to resolve content conflicts, consider the main
 MOOSE website along with the [workshop/index.md alternative=missing_config.md].
-It is possible to build the [main site configuration](modules/doc/config.yml language=yaml) by
+It is possible to build the [!file text=main site configuration language=yaml](modules/doc/config.yml) by
 itself by running the following commands:
 
 !listing language=bash
 cd modules/doc
 ./moosedocs.py build --config config.yml
 
-Or the [workshop configuration](tutorials/darcy_thermo_mech/doc/config.yml language=yaml) by
+Or the [!file text=workshop configuration language=yaml](tutorials/darcy_thermo_mech/doc/config.yml) by
 
 !listing language=bash
 cd tutorials/darcy_thermo_mech/doc

@@ -5,9 +5,9 @@
 As shown in the
 [Brayton Cycle modelingguide](modules/thermal_hydraulics/examples/brayton_cycle/brayton_cycle.md),
 and the given input files
-[closed_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/closed_brayton_cycle.i)
+[!file text=closed_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/closed_brayton_cycle.i)
 and
-[open_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i),
+[!file text=open_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i),
 a Brayton Cycle Power Conversion Unit (PCU) consists of a motor, compressor,
 turbine, and generator all coupled by a single shaft.
 
@@ -55,7 +55,7 @@ drastically over-speeding the system above the rated speed of 96,000 RPM.
 ## Input File description
 
 The recuperated Brayton Cycle example is executed with the input file
-[recuperated_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i).
+[!file text=recuperated_brayton_cycle.i](thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i).
 Shown below in [brayton_cycle_diagram] is a diagram of the modeled system.
 
 !media thermal_hydraulics/modeling_guide/recuperated_brayton_cycle/brayton_cycle_diagram.png

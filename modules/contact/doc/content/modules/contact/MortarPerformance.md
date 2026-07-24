@@ -175,9 +175,9 @@ The recommended PETSc options for use with `NodeFaceConstraint` based contact ar
 
 The effects of scaling on non-linear solve convergence are shown below for
 different kinds of contact formulations. The results are based on the input files for
-[RANFS](/ranfs-and-scaling/bouncing-block-ranfs.i),
-[kinematic](/bouncing-block-kinematic.i), and
-[tangential penalty](/bouncing-block-tan-pen.i),
+[!file text=RANFS](/ranfs-and-scaling/bouncing-block-ranfs.i),
+[!file text=kinematic](/bouncing-block-kinematic.i), and
+[!file text=tangential penalty](/bouncing-block-tan-pen.i),
 running with two processes.
 
 | Scheme | Cumulative nonlinear iterations | Cumulative linear iterations | Initial condition number | Variable Scaling Factor |

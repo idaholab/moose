@@ -116,17 +116,17 @@ variables, the `adCoupled*` methods should be used. For example, to retrieve a
 coupled value, instead of using `coupledValue("v")` in the `ADKernel`
 constructor, `adCoupledValue("v")` should be used. `adCoupledGradient` should
 replace `coupledGradient`, etc. An example of coupling in an AD variable can be found in
-[`ADCoupledConvection.C`](test/src/kernels/ADCoupledConvection.C) and
-[`ADCoupledConvection.h`](test/include/kernels/ADCoupledConvection.h). Moreover,
+[!file text=`ADCoupledConvection.C`](test/src/kernels/ADCoupledConvection.C) and
+[!file text=`ADCoupledConvection.h`](test/include/kernels/ADCoupledConvection.h). Moreover,
 material properties that may depend on the nonlinear variables should be
 retrieved using `getADMaterialProperty` instead of `getMaterialProperty`. They
 should be declared in materials using `declareADProperty`. Example AD material
 source and header files can be found
-[here](test/src/materials/ADCoupledMaterial.C) and
-[here](test/include/materials/ADCoupledMaterial.h); example kernel source and
+[!file text=here](test/src/materials/ADCoupledMaterial.C) and
+[!file text=here](test/include/materials/ADCoupledMaterial.h); example kernel source and
 header files that use AD material properties can be found
-[here](test/src/kernels/ADMatDiffusionTest.C) and
-[here](test/include/kernels/ADMatDiffusionTest.h). The object central to AD
+[!file text=here](test/src/kernels/ADMatDiffusionTest.C) and
+[!file text=here](test/include/kernels/ADMatDiffusionTest.h). The object central to AD
 computing objects is `ADReal` which is defined in [`MooseTypes`](/MooseTypes.md).
 
 ### Traditional Hand-coded Jacobians id=hand_coded_jac

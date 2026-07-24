@@ -123,14 +123,8 @@ class TestShortcutLink(MooseDocsTestCase):
         ast = self.tokenize("[framework/Makefile]")
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(
-            ast(0)(0),
-            "ModalSourceLink",
-            size=0,
-            src=common.check_filenames("framework/Makefile"),
-        )
+        self.assertToken(ast(0)(0), "ShortcutLink", size=0, key="framework/Makefile")
 
-        # If a file is not given, it should fall through to a regular link
         ast = self.tokenize("[not_a_file]")
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
@@ -165,6 +159,19 @@ class TestFileCommand(MooseDocsTestCase):
             title="Makefile",
         )
 
+        ast = self.tokenize("[!file text=`Makefile`](framework/Makefile)")
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), "Paragraph", size=1)
+        self.assertToken(
+            ast(0)(0),
+            "ModalSourceLink",
+            size=1,
+            src=common.check_filenames("framework/Makefile"),
+            language=None,
+            title=None,
+        )
+        self.assertToken(ast(0, 0, 0), "Monospace", size=0, content="Makefile")
+
     def testMaterialize(self):
         _, res = self.execute(
             "[!file title=Makefile](framework/Makefile)",
@@ -179,6 +186,24 @@ class TestFileCommand(MooseDocsTestCase):
             size=1,
             href="#{}".format(uid),
             string="(framework/Makefile)",
+            class_="moose-source-filename tooltipped modal-trigger",
+        )
+        self.assertHTMLTag(res(1), "div", size=2, class_="moose-modal modal", id_=uid)
+        self.assertHTMLTag(res(1, 0, 0), "h4", size=1, string="Makefile")
+
+        _, res = self.execute(
+            "[!file text=make title=Makefile](framework/Makefile)",
+            renderer=base.MaterializeRenderer(),
+        )
+
+        self.assertSize(res, 2)
+        uid = res(1)["id"]
+        self.assertHTMLTag(
+            res(0, 0),
+            "a",
+            size=1,
+            href="#{}".format(uid),
+            string="make",
             class_="moose-source-filename tooltipped modal-trigger",
         )
         self.assertHTMLTag(res(1), "div", size=2, class_="moose-modal modal", id_=uid)
@@ -298,15 +323,9 @@ class TestLink(MooseDocsTestCase):
         ast = self.tokenize("[make](framework/Makefile)")
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
-        self.assertToken(
-            ast(0, 0),
-            "ModalSourceLink",
-            size=1,
-            src=common.check_filenames("framework/Makefile"),
-        )
+        self.assertToken(ast(0)(0), "Link", size=1, url="framework/Makefile")
         self.assertToken(ast(0, 0, 0), "Word", size=0, content="make")
 
-        # If a file is not given, it should fall through to a regular link
         ast = self.tokenize("[text](not_a_file)")
         self.assertSize(ast, 1)
         self.assertToken(ast(0), "Paragraph", size=1)
