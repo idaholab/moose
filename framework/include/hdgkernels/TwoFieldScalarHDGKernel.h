@@ -11,25 +11,21 @@
 
 #include "HDGKernel.h"
 
-class IPHDGAssemblyHelper;
+class TwoFieldScalarHDGAssemblyHelper;
 
 /**
- * Base kernel for implementing an interior penalty hybridized discretization
+ * Base kernel for helper-backed HDG discretizations with an element-interior scalar and scalar
+ * facet trace.
  */
-class IPHDGKernel : public HDGKernel
+class TwoFieldScalarHDGKernel : public HDGKernel
 {
 public:
   static InputParameters validParams();
 
-  IPHDGKernel(const InputParameters & params);
+  TwoFieldScalarHDGKernel(const InputParameters & parameters);
+
   virtual void computeResidual() override;
-  /**
-   * Compute this object's entire element interior Jacobian, both on- and off-diagonal
-   */
   virtual void computeJacobian() override;
-  /**
-   * Forwards to \p computeJacobian() the first time this is called for a given element
-   */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidualAndJacobian() override;
   virtual void jacobianSetup() override;
@@ -41,26 +37,23 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
   virtual bool getMaterialPropertyCalled() const override;
 
-protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
+private:
+  /// Returns the helper used for common two-field scalar HDG assembly.
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() = 0;
+  const TwoFieldScalarHDGAssemblyHelper & hdgHelper() const;
 
-  /**
-   * compute the AD residuals on the element interior
-   */
-  void compute();
+  /// Assembles the element-interior residual data.
+  void compute(TwoFieldScalarHDGAssemblyHelper & helper);
 
-  /**
-   * compute the AD residuals on the element sides
-   */
-  void computeOnSide();
+  /// Assembles the face residual data.
+  void computeOnSide(TwoFieldScalarHDGAssemblyHelper & helper);
 
-  /// A data member used for determining when to compute the Jacobian
+  /// Used to assemble the complete AD Jacobian only once per element.
   const Elem * _cached_elem;
 };
 
-inline const IPHDGAssemblyHelper &
-IPHDGKernel::iphdgHelper() const
+inline const TwoFieldScalarHDGAssemblyHelper &
+TwoFieldScalarHDGKernel::hdgHelper() const
 {
-  return const_cast<IPHDGKernel *>(this)->iphdgHelper();
+  return const_cast<TwoFieldScalarHDGKernel *>(this)->hdgHelper();
 }

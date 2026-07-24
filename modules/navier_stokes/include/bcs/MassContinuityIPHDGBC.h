@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "IPHDGBC.h"
+#include "TwoFieldScalarHDGBC.h"
 #include "MassContinuityAssemblyHelper.h"
 
 /**
  * Applies a Dirichlet value for velocity to mass conservation terms on boundary faces
  */
-class MassContinuityIPHDGBC : public IPHDGBC
+class MassContinuityIPHDGBC : public TwoFieldScalarHDGBC
 {
 public:
   static InputParameters validParams();
   MassContinuityIPHDGBC(const InputParameters & parameters);
 
-protected:
-  virtual void compute() override;
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+private:
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) override;
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() override { return *_iphdg_helper; }
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<MassContinuityAssemblyHelper> _iphdg_helper;

@@ -12,7 +12,7 @@
 #include "Kernel.h"
 
 /**
- * A kernel for hybridized finite element formulations
+ * Base kernel for hybridized finite element formulations.
  */
 class HDGKernel : public Kernel
 {
@@ -21,6 +21,9 @@ public:
 
   HDGKernel(const InputParameters & parameters);
 
+  virtual void computeResidual() override = 0;
+  virtual void computeJacobian() override = 0;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override = 0;
   virtual void computeResidualOnSide() = 0;
   virtual void computeJacobianOnSide() = 0;
   virtual void computeResidualAndJacobianOnSide();

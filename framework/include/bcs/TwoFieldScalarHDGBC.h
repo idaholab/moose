@@ -11,17 +11,18 @@
 
 #include "ADIntegratedBC.h"
 
-class IPHDGAssemblyHelper;
+class TwoFieldScalarHDGAssemblyHelper;
 
 /**
- * Implements a prescribed flux for an IP-HDG discretization
+ * Base boundary condition for two-field hybridized DG discretizations assembled with automatic
+ * differentiation.
  */
-class IPHDGBC : public ADIntegratedBC
+class TwoFieldScalarHDGBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  IPHDGBC(const InputParameters & parameters);
+  TwoFieldScalarHDGBC(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -31,26 +32,25 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
   virtual bool getMaterialPropertyCalled() const override;
 
-protected:
-  /**
-   * compute the AD residuals
-   */
-  virtual void compute() = 0;
+private:
+  /// Computes the boundary residual data using the supplied assembly helper.
+  virtual void compute(TwoFieldScalarHDGAssemblyHelper & helper) = 0;
 
-  virtual IPHDGAssemblyHelper & iphdgHelper() = 0;
-  const IPHDGAssemblyHelper & iphdgHelper() const;
+  /// Returns the helper used for common two-field scalar HDG assembly.
+  virtual TwoFieldScalarHDGAssemblyHelper & hdgHelper() = 0;
+  const TwoFieldScalarHDGAssemblyHelper & hdgHelper() const;
 
   virtual ADReal computeQpResidual() override { mooseError("this will never be called"); }
 
-  /// A data member used for determining when to compute the Jacobian
+  /// Element for which the complete AD Jacobian was most recently assembled.
   const Elem * _cached_elem;
 
-  /// A cache variable to prevent multiple computations of Jacobians
+  /// Side for which the complete AD Jacobian was most recently assembled.
   unsigned int _cached_side;
 };
 
-inline const IPHDGAssemblyHelper &
-IPHDGBC::iphdgHelper() const
+inline const TwoFieldScalarHDGAssemblyHelper &
+TwoFieldScalarHDGBC::hdgHelper() const
 {
-  return const_cast<IPHDGBC *>(this)->iphdgHelper();
+  return const_cast<TwoFieldScalarHDGBC *>(this)->hdgHelper();
 }

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "TwoFieldScalarHDGAssemblyHelper.h"
 #include "ADFunctorInterface.h"
 
 /*
@@ -18,7 +18,8 @@
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDGAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
+class MassFluxPenaltyIPHDGAssemblyHelper : public TwoFieldScalarHDGAssemblyHelper,
+                                           public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

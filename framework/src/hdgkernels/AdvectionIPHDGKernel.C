@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", AdvectionIPHDGKernel);
 InputParameters
 AdvectionIPHDGKernel::validParams()
 {
-  auto params = IPHDGKernel::validParams();
+  auto params = TwoFieldScalarHDGKernel::validParams();
   params += AdvectionIPHDGAssemblyHelper::validParams();
   params.addClassDescription("Adds element and interior face integrals for a hybridized interior "
                              "penalty discontinuous Galerkin discretization of an advection term.");
@@ -23,14 +23,14 @@ AdvectionIPHDGKernel::validParams()
 }
 
 AdvectionIPHDGKernel::AdvectionIPHDGKernel(const InputParameters & params)
-  : IPHDGKernel(params),
+  : TwoFieldScalarHDGKernel(params),
     _iphdg_helper(std::make_unique<AdvectionIPHDGAssemblyHelper>(
         this, this, this, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
-IPHDGAssemblyHelper &
-AdvectionIPHDGKernel::iphdgHelper()
+TwoFieldScalarHDGAssemblyHelper &
+AdvectionIPHDGKernel::hdgHelper()
 {
   return *_iphdg_helper;
 }
