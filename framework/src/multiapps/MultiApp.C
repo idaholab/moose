@@ -246,6 +246,11 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
+  params.addParam<unsigned int>("execution_order_group",
+                                0,
+                                "Execution order group. If Problem/num_concurrent_multiapps>1, "
+                                "multiple multiapps may be executed synchronously.");
+
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});

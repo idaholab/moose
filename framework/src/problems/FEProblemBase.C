@@ -125,6 +125,7 @@
 #include "Checkpoint.h"
 #include "MortarInterfaceWarehouse.h"
 #include "AutomaticMortarGeneration.h"
+#include "DependencyResolver.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -140,6 +141,7 @@
 
 // C++
 #include <cstring> // for "Jacobian" exception test
+#include <thread>
 
 using namespace libMesh;
 
@@ -270,6 +272,12 @@ FEProblemBase::validParams()
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
                         "(default: false)");
+  params.addParam<bool>("execute_siblings_transfer_after_source_multiapp_execution",
+                        false,
+                        "Whether to execute the siblings transfer staggered with the multiapp "
+                        "execution, after the 'from_multiapp' of the transfer executes");
+  params.addParam<unsigned int>(
+      "num_concurrent_multiapps", 1, "Number of concurrent multiapps to solve at once");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -457,6 +465,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _execute_siblings_transfer_after_source_multiapp_execution(
+        getParam<bool>("execute_siblings_transfer_after_source_multiapp_execution")),
+    _num_concurrent_multiapps(getParam<unsigned int>("num_concurrent_multiapps")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -1483,8 +1494,6 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
-    execTransfers(EXEC_INITIAL);
-
     bool converged = execMultiApps(EXEC_INITIAL);
     if (!converged)
       mooseError("failed to converge initial MultiApp");
@@ -5790,8 +5799,6 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 {
   parallel_object_only();
 
-  parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -5852,17 +5859,43 @@ FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 }
 
 void
-FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction)
+FEProblemBase::execMultiAppTransfers(ExecFlagType type,
+                                     Transfer::DIRECTION direction,
+                                     const MultiAppName & source_app,
+                                     bool skip_transfers_with_source_app_executing_on_type)
 {
+  // Keep track of whether a transfer is actually executed to avoid extraneous console output
+  bool is_executing_a_transfer = false;
   bool to_multiapp = direction == MultiAppTransfer::TO_MULTIAPP;
   bool from_multiapp = direction == MultiAppTransfer::FROM_MULTIAPP;
+
+  // Build console output
   std::string string_direction;
+  std::string additional_source_info = "";
   if (to_multiapp)
     string_direction = " To ";
   else if (from_multiapp)
     string_direction = " From ";
   else
     string_direction = " Between ";
+  if (!source_app.empty())
+    additional_source_info = " from app. '" + source_app + "'";
+
+  // This lambda only checks the source app, since the exec_type selection is done in the warehouse
+  auto executeThisTransfer =
+      [&source_app, &type, &skip_transfers_with_source_app_executing_on_type](auto & transfer)
+  {
+    mooseAssert(transfer->getExecuteOnEnum().contains(type), "Should execute on this schedule");
+    if (!transfer->hasFromMultiApp())
+      return true;
+    if (skip_transfers_with_source_app_executing_on_type &&
+        (transfer->getFromMultiApp()->getExecuteOnEnum().contains(type) ||
+         !transfer->getFromMultiApp()->enabled()))
+      return false;
+    if (source_app.empty() || transfer->getFromName() == source_app)
+      return true;
+    return false;
+  };
 
   const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
                                               : from_multiapp ? _from_multi_app_transfers[type]
@@ -5877,7 +5910,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
     if (_verbose_multiapps)
     {
       _console << COLOR_CYAN << "\nTransfers on " << Moose::stringify(type) << string_direction
-               << "MultiApps" << COLOR_DEFAULT << ":" << std::endl;
+               << "MultiApps" << additional_source_info << COLOR_DEFAULT << ":" << std::endl;
 
       VariadicTable<std::string, std::string, std::string, std::string> table(
           {"Name", "Type", "From", "To"});
@@ -5887,6 +5920,11 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
       {
         auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
 
+        // Don't add transfer to table if it won't execute
+        if (!executeThisTransfer(multiapp_transfer))
+          continue;
+
+        is_executing_a_transfer = true;
         table.addRow(multiapp_transfer->name(),
                      multiapp_transfer->type(),
                      multiapp_transfer->getFromName(),
@@ -5894,28 +5932,32 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
       }
 
       // Print it
-      table.print(_console);
+      if (is_executing_a_transfer)
+        table.print(_console);
     }
 
     for (const auto & transfer : transfers)
     {
+      auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
+      if (!executeThisTransfer(multiapp_transfer))
+        continue;
+
       transfer->setCurrentDirection(direction);
       transfer->execute();
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    if (_verbose_multiapps)
+    if (_verbose_multiapps && is_executing_a_transfer)
       _console << COLOR_CYAN << "Transfers on " << Moose::stringify(type) << " Are Finished\n"
                << COLOR_DEFAULT << std::endl;
   }
-  else if (_multi_apps[type].getActiveObjects().size())
-  {
-    if (_verbose_multiapps)
-      _console << COLOR_CYAN << "\nNo Transfers on " << Moose::stringify(type) << string_direction
-               << "MultiApps\n"
-               << COLOR_DEFAULT << std::endl;
-  }
+
+  if (_multi_apps[type].getActiveObjects().size() && !is_executing_a_transfer && _verbose_multiapps)
+    _console << COLOR_CYAN << "\nNo "
+             << (skip_transfers_with_source_app_executing_on_type ? "early " : "")
+             << "Transfers on " << Moose::stringify(type) << string_direction << "MultiApps\n"
+             << COLOR_DEFAULT << std::endl;
 }
 
 std::vector<std::shared_ptr<Transfer>>
@@ -5952,21 +5994,90 @@ FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
 }
 
 bool
-FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
+FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 {
   // Active MultiApps
   const std::vector<MooseSharedPointer<MultiApp>> & multi_apps =
-      _multi_apps[type].getActiveObjects();
+      _multi_apps[exec_on].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (const auto & multi_app : multi_apps)
     multi_app->preTransfer(_dt, _time);
 
   // Execute Transfers _to_ MultiApps
-  execMultiAppTransfers(type, MultiAppTransfer::TO_MULTIAPP);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::TO_MULTIAPP);
 
-  // Execute Transfers _between_ Multiapps
-  execMultiAppTransfers(type, MultiAppTransfer::BETWEEN_MULTIAPP);
+  // Execute Transfers _beween_ MultiApps for the multiapps that don't execute on this flag
+  // NOTE: these is usually no need to execute a transfer unless the multiapp providing its
+  // data also executed. But we need to obey what the user requested for the execution schedule,
+  // hence the two executions
+  if (_execute_siblings_transfer_after_source_multiapp_execution)
+    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
+  else
+    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
+
+  // Order the multiapps based on their execution group
+
+  // Gather the execution groups
+  // std::set<unsigned int> execution_groups;
+  // for (const auto & multi_app : multi_apps)
+  //   execution_groups.insert(multi_apps->getParam<unsigned int>("execution_order_group"));
+
+  // Build the ordered multiapp groups
+  std::map<unsigned int, std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
+  // ordered_multi_apps.resize(execution_groups.size());
+
+  for (const auto & multi_app : multi_apps)
+    ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
+        multi_app);
+
+  // // Add all the apps executing on 'exec_on' to the resolution
+  // for (const auto & multi_app : multi_apps)
+  //   resolver.addItem(multi_app);
+  // // Add all the dependencies found from active transfers executing on 'exec_on'
+  // for (const auto & sibling_transfer : _between_multi_app_transfers[exec_on].getActiveObjects())
+  // {
+  //   auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(sibling_transfer.get());
+  //   resolver.addEdge(multiapp_transfer->getFromMultiApp(), multiapp_transfer->getToMultiApp());
+  // }
+
+  // std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
+  // if (_execute_siblings_transfer_after_source_multiapp_execution && multi_apps.size())
+  //   try
+  //   {
+  //     ordered_multi_apps = resolver.getSortedValuesSets();
+  //   }
+  //   catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
+  //   {
+  //     mooseInfo("Cyclic dependencies detected in multiapps and siblings transfers"
+  //               "\nPlease execute one of the transfers between multiapps on a different "
+  //               "'execute_on' to break the cycle.");
+  //     ordered_multi_apps.resize(0);
+  //   }
+
+  // Follow the original execution order
+  // if (!_execute_siblings_transfer_after_source_multiapp_execution || ordered_multi_apps.size() ==
+  // 0)
+  // {
+  //   ordered_multi_apps.resize(multi_apps.size());
+  //   for (const auto i : index_range(multi_apps))
+  //     ordered_multi_apps[i] = {multi_apps[i]};
+  // }
+
+  // Check that concurrent multiapps will even be used
+  if (multi_apps.size() && _num_concurrent_multiapps > 1)
+  {
+    bool has_concurrent_apps = false;
+    for (const auto & [group, multi_app_group] : ordered_multi_apps)
+      if (multi_app_group.size() > 1)
+        has_concurrent_apps = true;
+    if (!has_concurrent_apps)
+      paramInfo(
+          "num_concurrent_multiapps",
+          "Due to the specified multiapp execution groups, or differences in execution schedules, "
+          "concurrent multiapps are not actually used on " +
+              Moose::stringify(exec_on));
+  }
 
   // Execute MultiApps
   if (multi_apps.size())
@@ -5974,17 +6085,94 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
     TIME_SECTION("execMultiApps", 1, "Executing MultiApps", false);
 
     if (_verbose_multiapps)
-      _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(type)
+      _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(exec_on)
                << COLOR_DEFAULT << std::endl;
 
     bool success = true;
 
-    for (const auto & multi_app : multi_apps)
+    for (const auto & [group_id, multi_app_group] : ordered_multi_apps)
     {
-      success = multi_app->solveStep(_dt, _time, auto_advance);
-      // no need to finish executing the subapps if one fails
-      if (!success)
+      // We need the atomic to be able to 'exit' early in case of failures
+      std::atomic<bool> group_success{true};
+      if (_verbose_multiapps && ordered_multi_apps.size() > 1)
+        _console << COLOR_CYAN << "\nExecuting MultiApps group " << Moose::stringify(group_id)
+                 << COLOR_DEFAULT << std::endl;
+
+      if (multi_app_group.size() > 1)
+      {
+        // Let the user know about concurrent multiapp use (new option: help them set it up)
+        if (_verbose_multiapps)
+        {
+          _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
+          for (const auto & multi_app : multi_app_group)
+            _console << multi_app->name() << " ";
+          _console << COLOR_DEFAULT << std::endl;
+        }
+
+        // Avoid race conditions on output
+        if (_num_concurrent_multiapps > 1)
+          for (const auto & multi_app : multi_app_group)
+            for (const auto app_i : make_range(multi_app->numLocalApps()))
+              multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
+      }
+
+      unsigned num_threads = _num_concurrent_multiapps;
+      std::vector<std::thread> threads;
+
+      const auto N = multi_app_group.size();
+      const auto chunk = (multi_app_group.size() + num_threads - 1) / num_threads;
+
+      for (const auto t : make_range(num_threads))
+      {
+        // Don't solve step if a single failure occurred
+        if (!group_success.load(std::memory_order_relaxed))
+          continue;
+
+        const auto begin = t * chunk;
+        const auto end = std::min(begin + chunk, N);
+        const auto & app_group = multi_app_group;
+
+        threads.emplace_back(
+            [begin, end, this, app_group, &group_success, &auto_advance]()
+            {
+              for (const auto i : make_range(begin, end))
+              {
+                // as far as libMesh is concerned, we're not
+                // {
+                //   Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+                //   libMesh::Threads::in_threads = false;
+                // }
+
+                auto & multi_app = app_group[i];
+                bool local = multi_app->solveStep(_dt, _time, auto_advance);
+                if (!local)
+                  group_success.store(false, std::memory_order_relaxed);
+              }
+            });
+      }
+
+      // join all
+      for (auto & th : threads)
+        th.join();
+
+      // No need to solve the other groups if this group failed
+      if (!group_success)
+      {
+        success = false;
         break;
+      }
+
+      // Output outside of threaded regions
+      if (_num_concurrent_multiapps > 1)
+        for (const auto & multi_app : multi_app_group)
+          for (const auto app_i : make_range(multi_app->numLocalApps()))
+            multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
+                .outputStep(EXEC_TIMESTEP_END);
+
+      // Execute Transfers _between_ Multiapps after each app executes
+      if (_execute_siblings_transfer_after_source_multiapp_execution)
+        for (const auto & multi_app : multi_app_group)
+          execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
@@ -5995,12 +6183,13 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
       return false;
 
     if (_verbose_multiapps)
-      _console << COLOR_CYAN << "Finished Executing MultiApps on " << Moose::stringify(type) << "\n"
+      _console << COLOR_CYAN << "Finished Executing MultiApps on " << Moose::stringify(exec_on)
+               << "\n"
                << COLOR_DEFAULT << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
-  execMultiAppTransfers(type, MultiAppTransfer::FROM_MULTIAPP);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::FROM_MULTIAPP);
 
   // If we made it here then everything passed
   return true;
@@ -6119,20 +6308,6 @@ FEProblemBase::computeMultiAppsDT(ExecFlagType type)
     smallest_dt = std::min(smallest_dt, multi_app->computeDT());
 
   return smallest_dt;
-}
-
-void
-FEProblemBase::execTransfers(ExecFlagType type)
-{
-  if (_transfers[type].hasActiveObjects())
-  {
-    TIME_SECTION("execTransfers", 3, "Executing Transfers");
-
-    const auto & transfers = _transfers[type].getActiveObjects();
-
-    for (const auto & transfer : transfers)
-      transfer->execute();
-  }
 }
 
 void
@@ -7534,8 +7709,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
       }
 
-      execTransfers(EXEC_LINEAR);
-
       execMultiApps(EXEC_LINEAR);
 
       for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -7773,8 +7946,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       for (const auto & it : _random_data_objects)
         it.second->updateSeeds(EXEC_LINEAR);
 
-      execTransfers(EXEC_LINEAR);
-
       execMultiApps(EXEC_LINEAR);
 
       for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -7928,7 +8099,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         if (_displaced_problem)
           _displaced_problem->setCurrentlyComputingJacobian(true);
 
-        execTransfers(EXEC_NONLINEAR);
         execMultiApps(EXEC_NONLINEAR);
 
         for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -8130,7 +8300,6 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_NONLINEAR);
 
-  execTransfers(EXEC_NONLINEAR);
   execMultiApps(EXEC_NONLINEAR);
 
   computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);

@@ -92,7 +92,6 @@ MFEMTransient::takeStep(Real input_dt)
   _time -= _dt;
 
   _problem.onTimestepBegin();
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
   {
     _last_solve_converged = false;
@@ -115,7 +114,6 @@ MFEMTransient::takeStep(Real input_dt)
   }
 
   _problem.execute(EXEC_TIMESTEP_END);
-  _problem.execTransfers(EXEC_TIMESTEP_END);
   _problem.execMultiApps(EXEC_TIMESTEP_END, true);
 
   if (lastSolveConverged())
