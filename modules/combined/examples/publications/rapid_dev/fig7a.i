@@ -243,14 +243,14 @@
   # elastic free energies
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
-    f_name = Fe1
+    property_name = Fe1
     coupled_variables = ''
     base_name = phase1
     derivative_order = 2
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
-    f_name = Fe2
+    property_name = Fe2
     coupled_variables = ''
     base_name = phase2
     derivative_order = 2
@@ -275,7 +275,7 @@
   # global chemical free energy
   [./global_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = F
+    property_name = F
     fa_name = F1
     fb_name = F2
     eta = eta
@@ -292,7 +292,7 @@
 
   [./elastic_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = Fe
+    property_name = Fe
     fa_name = Fe1
     fb_name = Fe2
     eta = eta
