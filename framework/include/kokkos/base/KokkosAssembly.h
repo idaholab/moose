@@ -188,6 +188,66 @@ public:
     return _grad_phi_face(subdomain, elem_type, fe_type);
   }
   /**
+   * Get the vector shape functions of a FE type for an element type and subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The vector shape functions at quadrature points
+   */
+  KOKKOS_FUNCTION const auto &
+  getVectorPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  {
+    return _vector_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the face vector shape functions of a FE type for an element type and subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The vector shape functions of all sides at quadrature points
+   */
+  KOKKOS_FUNCTION const auto & getVectorPhiFace(ContiguousSubdomainID subdomain,
+                                                unsigned int elem_type,
+                                                unsigned int fe_type) const
+  {
+    return _vector_phi_face(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the gradient of vector shape functions of a FE type for an element type and subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The gradient of vector shape functions at quadrature points
+   */
+  KOKKOS_FUNCTION const auto & getVectorGradPhi(ContiguousSubdomainID subdomain,
+                                                unsigned int elem_type,
+                                                unsigned int fe_type) const
+  {
+    return _vector_grad_phi(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get the gradient of face vector shape functions of a FE type for an element type and subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @returns The gradient of vector shape functions of all sides at quadrature points
+   */
+  KOKKOS_FUNCTION const auto & getVectorGradPhiFace(ContiguousSubdomainID subdomain,
+                                                    unsigned int elem_type,
+                                                    unsigned int fe_type) const
+  {
+    return _vector_grad_phi_face(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Get whether a cached FE type is vector-valued
+   * @param fe_type The FE type ID
+   * @returns Whether the FE type is vector-valued
+   */
+  KOKKOS_FUNCTION bool isVectorFEType(unsigned int fe_type) const
+  {
+    return _is_vector_fe_type[fe_type];
+  }
+  /**
    * Get the inverse of Jacobian matrix of an element quadrature point
    * @param info The element information object
    * @param qp The local quadrature point index
@@ -357,6 +417,11 @@ private:
   Array3D<Array<Array2D<Real>>> _phi_face;
   Array3D<Array2D<Real3>> _grad_phi;
   Array3D<Array<Array2D<Real3>>> _grad_phi_face;
+  Array3D<Array2D<Real3>> _vector_phi;
+  Array3D<Array<Array2D<Real3>>> _vector_phi_face;
+  Array3D<Array2D<Real33>> _vector_grad_phi;
+  Array3D<Array<Array2D<Real33>>> _vector_grad_phi_face;
+  Array<bool> _is_vector_fe_type;
   Array2D<unsigned int> _n_dofs;
   ///@}
   /**
