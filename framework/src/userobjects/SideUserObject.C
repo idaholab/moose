@@ -11,6 +11,9 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
+#include "FEProblemBase.h"
+#include "MaterialBase.h"
+#include "MaterialWarehouse.h"
 
 InputParameters
 SideUserObject::validParams()
@@ -43,6 +46,43 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
     _current_side_volume(_assembly.sideElemVolume()),
     _current_boundary_id(_assembly.currentBoundaryID())
 {
+}
+
+void
+SideUserObject::initialSetup()
+{
+  UserObject::initialSetup();
+  checkNoInterfaceMaterialPropertyDependencies();
+}
+
+void
+SideUserObject::checkNoInterfaceMaterialPropertyDependencies() const
+{
+  const auto & consumed_props = getMatPropDependencies();
+  if (consumed_props.empty())
+    return;
+
+  const auto & interface_materials = _fe_problem.getInterfaceMaterialsWarehouse();
+  const auto & registry = _fe_problem.getMaterialPropertyRegistry();
+
+  for (const auto bnd_id : boundaryIDs())
+  {
+    if (!interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+      continue;
+
+    for (const auto & material : interface_materials.getActiveBoundaryObjects(bnd_id, _tid))
+      for (const auto supplied_prop : material->getSuppliedPropIDs())
+        if (consumed_props.count(supplied_prop))
+          paramError("boundary",
+                     "Side user object '",
+                     name(),
+                     "' consumes material property '",
+                     registry.getName(supplied_prop),
+                     "', which is declared by interface material '",
+                     material->name(),
+                     "'. Side user objects do not execute in an interface material context; use an "
+                     "InterfaceUserObject or InterfacePostprocessor for interface quantities.");
+  }
 }
 
 void
