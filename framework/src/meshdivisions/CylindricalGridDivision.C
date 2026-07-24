@@ -89,9 +89,15 @@ CylindricalGridDivision::CylindricalGridDivision(const InputParameters & paramet
 
   // Check axis
   if (!MooseUtils::absoluteFuzzyEqual(_direction.norm_sq(), 1))
-    paramError("axis_direction", "Axis must have a norm of 1");
+  {
+    paramWarning("axis_direction", "Axis must have a norm of 1. Renormalizing.");
+    _direction /= _direction.norm();
+  }
   if (!MooseUtils::absoluteFuzzyEqual(_azim_dir.norm_sq(), 1))
-    paramError("azimuthal_start", "Azimuthal axis must have a norm of 1");
+  {
+    paramWarning("azimuthal_start", "Azimuthal axis must have a norm of 1. Renormalizing.");
+    _azim_dir /= _azim_dir.norm();
+  }
 
   // Check non-negative size
   if (_max_r < _min_r)
