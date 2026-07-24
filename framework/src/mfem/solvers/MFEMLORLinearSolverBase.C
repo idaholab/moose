@@ -41,7 +41,7 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
       mooseError("LOR solver cannot take a preconditioner");
     if (_lor)
     {
-      SetupLOR(*_equation_system);
+      SetupLOR(_equation_system);
       LORLinearSolverBase<MFEMSolverType>::SetLORSolver(*this);
     }
     else
@@ -56,7 +56,7 @@ LORLinearSolverBase<mfem::OperatorJacobiSmoother>::UpdateEquationSystemContext()
   Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
-    SetupLOR(*_equation_system);
+    SetupLOR(_equation_system);
     LORLinearSolverBase<mfem::OperatorJacobiSmoother>::SetLORSolver(*this);
   }
 }
@@ -68,7 +68,7 @@ LORLinearSolverBase<mfem::HypreBoomerAMG>::UpdateEquationSystemContext()
   Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
-    SetupLOR(*_equation_system);
+    SetupLOR(_equation_system);
     LORLinearSolverBase<mfem::HypreBoomerAMG>::SetLORSolver(*this);
   }
 }
@@ -80,7 +80,7 @@ LORLinearSolverBase<mfem::HypreAMS>::UpdateEquationSystemContext()
   Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
-    SetupLOR(*_equation_system);
+    SetupLOR(_equation_system);
     if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");
     LORLinearSolverBase<mfem::HypreAMS>::SetLORSolver(*this);
@@ -94,7 +94,7 @@ LORLinearSolverBase<mfem::HypreADS>::UpdateEquationSystemContext()
   Moose::MFEM::LinearSolverBase::UpdateEquationSystemContext();
   if (_lor)
   {
-    SetupLOR(*_equation_system);
+    SetupLOR(_equation_system);
     if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() != mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreADS Solver only supports hex meshes.");
     LORLinearSolverBase<mfem::HypreADS>::SetLORSolver(*this);

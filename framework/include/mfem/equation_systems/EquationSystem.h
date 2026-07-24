@@ -119,7 +119,7 @@ public:
 =======
    * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
    */
-  mfem::ParGridFunction & getGridFunction(const std::string & trial_var_name)
+  mfem::ParGridFunction & GetGridFunction(const std::string & trial_var_name)
   {
     return _gfuncs->GetRef(trial_var_name);
   }

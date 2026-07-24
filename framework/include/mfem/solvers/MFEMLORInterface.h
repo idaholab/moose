@@ -38,7 +38,7 @@ public:
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
   /// no-op; override in solvers or preconditioners that construct LOR-related data from the
   /// bilinear form.
-  virtual void SetupLOR(Moose::MFEM::EquationSystem & equation_system);
+  virtual void SetupLOR(std::shared_ptr<Moose::MFEM::EquationSystem> equation_system);
 
 protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
