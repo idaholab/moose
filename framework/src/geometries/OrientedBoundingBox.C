@@ -8,8 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OrientedBoundingBox.h"
-#include <fstream>
 #include <cmath>
+
+#include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_generation.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+#include "libmesh/enum_elem_type.h"
 
 namespace fs = std::filesystem;
 
@@ -104,86 +109,71 @@ OrientedBoundingBox::getMaximalCorner() const
 }
 
 void
-OrientedBoundingBox::writeVTK(const fs::path & path) const
+OrientedBoundingBox::writeMesh(const fs::path & path,
+                               const libMesh::Parallel::Communicator & comm) const
 {
-  mooseAssert(_dim == 2 || _dim == 3, "writeVTK supports only 2D or 3D boxes.");
+  mooseAssert(_dim == 2 || _dim == 3, "writeMesh supports only 2D or 3D boxes.");
 
-  // Compute corner points
-  std::vector<Point> corner;
-  const unsigned int corner_count = 1u << _dim;
-  for (unsigned mask = 0; mask < corner_count; ++mask)
-  {
-    Point p = _minimal_corner;
-    for (unsigned axis = 0; axis < _dim; ++axis)
-      if (mask & (1u << axis))
-        p += _len[axis] * _dirs[axis];
-    corner.push_back(p);
-  }
-
-  fs::create_directories(path.parent_path());
-  std::ofstream out(path);
-  mooseAssert(out.is_open(), "Unable to open '" + path.string() + "' for writing.");
-
-  out << "# vtk DataFile Version 3.0\nOrientedBoundingBox\nASCII\n";
-  out << "DATASET UNSTRUCTURED_GRID\n";
-  out << "POINTS " << corner.size() << " float\n";
-  for (const auto & p : corner)
-    out << p(0) << ' ' << p(1) << ' ' << p(2) << '\n';
-
-  if (_dim == 3)
-  {
-    static const unsigned face[6][4] = {
-        {0, 1, 3, 2}, {4, 5, 7, 6}, {0, 1, 5, 4}, {1, 3, 7, 5}, {3, 2, 6, 7}, {2, 0, 4, 6}};
-
-    out << "CELLS 6 30\n";
-    for (const auto & f : face)
-      out << "4 " << f[0] << ' ' << f[1] << ' ' << f[2] << ' ' << f[3] << '\n';
-
-    out << "CELL_TYPES 6\n";
-    for (int i = 0; i < 6; ++i)
-      out << "9\n";
-  }
+  // Build a single reference element (unit square in 2D, unit cube in 3D) and let
+  // libMesh own the node ordering, connectivity, and output format.
+  libMesh::ReplicatedMesh mesh(comm, _dim);
+  if (_dim == 2)
+    libMesh::MeshTools::Generation::build_square(mesh, 1, 1, 0., 1., 0., 1., libMesh::QUAD4);
   else
+    libMesh::MeshTools::Generation::build_cube(
+        mesh, 1, 1, 1, 0., 1., 0., 1., 0., 1., libMesh::HEX8);
+
+  // Map each reference corner onto the oriented box:
+  //   x = origin + sum_axis r_axis * len_axis * dir_axis
+  for (auto * node : mesh.node_ptr_range())
   {
-    static const unsigned edge[4][2] = {{0, 1}, {1, 3}, {3, 2}, {2, 0}};
-
-    out << "CELLS 4 12\n";
-    for (const auto & e : edge)
-      out << "2 " << e[0] << ' ' << e[1] << '\n';
-
-    out << "CELL_TYPES 4\n";
-    for (int i = 0; i < 4; ++i)
-      out << "3\n";
+    const Point reference = *node;
+    Point mapped = _minimal_corner;
+    for (const auto axis : make_range(_dim))
+      mapped += reference(axis) * _len[axis] * _dirs[axis];
+    *node = mapped;
   }
+
+  if (!path.parent_path().empty())
+  {
+    std::error_code ec;
+    fs::create_directories(path.parent_path(), ec);
+  }
+  mesh.write(path.string());
 }
 
 void
-OrientedBoundingBox::writeRayAlongShortestAxis(const fs::path & ray_path) const
+OrientedBoundingBox::writeRayAlongShortestAxis(const fs::path & ray_path,
+                                               const libMesh::Parallel::Communicator & comm) const
 {
   mooseAssert(_dim == 2 || _dim == 3, "Ray writing only supports 2D or 3D");
 
-  unsigned i_min = 0;
-  for (unsigned i = 1; i < _dim; ++i)
+  unsigned int i_min = 0;
+  for (const auto i : make_range(1u, _dim))
     if (_len[i] < _len[i_min])
       i_min = i;
 
   Point start = _minimal_corner;
-  for (unsigned i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
     if (i != i_min)
       start += 0.5 * _len[i] * _dirs[i];
 
-  const Point dir = _dirs[i_min];
-  const Real ray_length = _len[i_min];
-  const Point end = start + ray_length * dir;
+  const Point end = start + _len[i_min] * _dirs[i_min];
 
-  std::filesystem::create_directories(ray_path.parent_path());
-  std::ofstream out(ray_path);
-  mooseAssert(out.is_open(), "Unable to open '" + ray_path.string() + "' for writing.");
+  // A single EDGE2 spanning the ray; libMesh owns the output format.
+  libMesh::ReplicatedMesh mesh(comm, 1);
+  libMesh::Node * n0 = mesh.add_point(start, 0);
+  libMesh::Node * n1 = mesh.add_point(end, 1);
+  auto edge = libMesh::Elem::build(libMesh::EDGE2);
+  edge->set_node(0) = n0;
+  edge->set_node(1) = n1;
+  mesh.add_elem(std::move(edge));
+  mesh.prepare_for_use();
 
-  out << "# vtk DataFile Version 3.0\nRay\nASCII\n";
-  out << "DATASET POLYDATA\n";
-  out << "POINTS 2 float\n";
-  out << start(0) << ' ' << start(1) << ' ' << start(2) << '\n';
-  out << end(0) << ' ' << end(1) << ' ' << end(2) << '\n';
-  out << "LINES 1 3\n2 0 1\n";
+  if (!ray_path.parent_path().empty())
+  {
+    std::error_code ec;
+    fs::create_directories(ray_path.parent_path(), ec);
+  }
+  mesh.write(ray_path.string());
 }

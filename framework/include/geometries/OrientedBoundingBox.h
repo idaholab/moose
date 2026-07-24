@@ -11,6 +11,14 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 
+namespace libMesh
+{
+namespace Parallel
+{
+class Communicator;
+}
+}
+
 /**
  * @brief Oriented bounding box in 2 D or 3 D.
  *
@@ -78,22 +86,36 @@ struct OrientedBoundingBox
   void print(std::ostream & os) const;
 
   /**
-   * @brief Write the oriented box surface to an ASCII VTK file.
+   * @brief Write the oriented box as a single libMesh element to a mesh file.
    *
-   * - **3-D:** exports 6 `VTK_QUAD` faces (cell type 9)
-   * - **2-D:** exports 4 `VTK_LINE` edges (cell type 3)
+   * Builds one reference element (QUAD4 in 2-D, HEX8 in 3-D), maps its corners
+   * onto the oriented box, and delegates file output to libMesh's mesh writer.
+   * The output format is chosen from the file extension (use `.e` for
+   * ExodusII, which is always available). Writing is collective, so all ranks
+   * on comm must call it.
+   *
+   * @param path Output path; extension selects the libMesh writer.
+   * @param comm Communicator the temporary mesh is built and written on.
    */
-  void writeVTK(const std::filesystem::path & path) const;
+  void writeMesh(const std::filesystem::path & path,
+                 const libMesh::Parallel::Communicator & comm) const;
 
   /**
-   * @brief Write a line-segment VTK representing a "ray" emanating from the box.
+   * @brief Write a single-EDGE2 mesh representing a "ray" emanating from the box.
    *
    * (a) The ray originates at the centre of the face (2-D) or face-centre (3-D)
    *     orthogonal to the shortest axis.
    * (b) It is aligned with that shortest axis and its length equals the
    *     corresponding edge length.
+   *
+   * The output format is chosen from the file extension (use `.e` for
+   * ExodusII). Writing is collective, so all ranks on comm must call it.
+   *
+   * @param ray_path Output path; extension selects the libMesh writer.
+   * @param comm     Communicator the temporary mesh is built and written on.
    */
-  void writeRayAlongShortestAxis(const std::filesystem::path & ray_path) const;
+  void writeRayAlongShortestAxis(const std::filesystem::path & ray_path,
+                                 const libMesh::Parallel::Communicator & comm) const;
 
   /**
    * @brief Get the length of the projection of a point onto axis i.

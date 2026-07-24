@@ -48,7 +48,8 @@ PointInSubdomainCheckUO::initialSetup()
         _eps,
         _leaf_max_size,
         _obb_file_name,
-        _ray_file_name);
+        _ray_file_name,
+        &comm());
 
     _subdomain_id_checkers[subdomain_id] = std::move(checker);
   }

@@ -36,7 +36,8 @@ public:
                          const Real eps_on_surface = libMesh::TOLERANCE,
                          const int leaf_max_size = 10,
                          const FileName & obb_file_name = "",
-                         const FileName & ray_file_name = "");
+                         const FileName & ray_file_name = "",
+                         const libMesh::Parallel::Communicator * comm = nullptr);
 
   /// Main function: Determine if a point is inside the geometry
   SurfaceSide sideness(const Point & p);
@@ -95,6 +96,10 @@ private:
 
   /// The file name for the ray
   FileName _ray_file_name;
+
+  /// Communicator used only for writing the debug OBB/ray mesh files.
+  /// Null when no debug output is requested.
+  const libMesh::Parallel::Communicator * _comm = nullptr;
 
   /// The oriented bounding box (OBB).
   OrientedBoundingBox _obb_bounds;

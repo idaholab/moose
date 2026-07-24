@@ -21,7 +21,8 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
     const Real eps_on_surface,
     const int leaf_max_size,
     const FileName & obb_file_name,
-    const FileName & ray_file_name)
+    const FileName & ray_file_name,
+    const libMesh::Parallel::Communicator * comm)
   : _bd_elements(bd_elements),
     _centroids(centroids),
     _ray_direction(ray_direction),
@@ -30,6 +31,7 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
     _leaf_max_size(leaf_max_size),
     _obb_file_name(obb_file_name),
     _ray_file_name(ray_file_name),
+    _comm(comm),
     _plane_origin(Point(0.0, 0.0, 0.0))
 {
   mooseAssert(!_bd_elements.empty(),
@@ -510,14 +512,18 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
 
     if (_obb_file_name != "")
     {
+      if (!_comm)
+        mooseError("A communicator is required to write the OBB mesh file '", _obb_file_name, "'.");
       std::filesystem::path obb_path(_obb_file_name.c_str());
-      _obb_bounds.writeVTK(obb_path);
+      _obb_bounds.writeMesh(obb_path, *_comm);
     }
 
     if (_ray_file_name != "")
     {
+      if (!_comm)
+        mooseError("A communicator is required to write the ray mesh file '", _ray_file_name, "'.");
       std::filesystem::path ray_path(_ray_file_name.c_str());
-      _obb_bounds.writeRayAlongShortestAxis(ray_path);
+      _obb_bounds.writeRayAlongShortestAxis(ray_path, *_comm);
     }
   }
 

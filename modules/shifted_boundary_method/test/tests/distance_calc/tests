@@ -119,5 +119,16 @@
                'that was configured without a KDTree.'
     []
 
+    [signed_distance_invalid_strategy]
+      type = 'RunException'
+      input = '2D_signed_distance.i'
+      cli_args = 'UserObjects/signed_distance_to_surface/surfaces=dist_square'
+      expect_err = 'was not a valid signed distance strategy'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if a signed distance is requested from a function that is neither a ParsedFunction '
+               'nor a SignedDistanceToSurfaceMesh.'
+    []
+
   []
 []
