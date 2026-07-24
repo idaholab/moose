@@ -34,7 +34,7 @@ MFEMMeshTest::SetUp()
   const char * argv[2] = {"foo", "\0"};
   _app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
-  _mesh_type = "MFEMMesh";
+  _mesh_type = "MFEMFileMesh";
 }
 
 /**

@@ -6,7 +6,7 @@ kappa_r = 12.7201964951406889525742371916
 kappa_i = -7.86151377757423297509831172647
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/inline-quad.mesh
 []
 

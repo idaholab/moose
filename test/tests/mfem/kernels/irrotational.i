@@ -4,7 +4,7 @@ centre_x = -0.75
 centre_y = 0.1
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/vortex.msh
 []
 

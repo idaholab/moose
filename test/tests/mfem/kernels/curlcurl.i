@@ -2,7 +2,7 @@
 # based on MFEM Example 3.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/small_fichera.mesh
 []
 
