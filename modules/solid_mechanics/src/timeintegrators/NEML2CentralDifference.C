@@ -112,4 +112,15 @@ NEML2CentralDifference::evaluateRHSResidual()
   _fe_problem.setCurrentAlgebraicNodeRange(nullptr);
 }
 
+void
+NEML2CentralDifference::constructRanges()
+{
+  // NEML2 has its own way of handling elem and node ranges, independent of the blocks upon
+  // variables are defined
+  _no_elem.clear();
+  _elem_range = std::make_unique<libMesh::ConstElemRange>(&_no_elem);
+  _no_node.clear();
+  _node_range = std::make_unique<libMesh::ConstNodeRange>(&_no_node);
+}
+
 #endif // NEML2_ENABLED
