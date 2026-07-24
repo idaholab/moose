@@ -96,12 +96,13 @@
   [weighted_gap]
     requirement = 'The system shall support a variationally consistent weighted gap implementation '
                   'of the zero-penetration contact constraint'
-    issues = '#16961'
+    issues = '#16961 #33322'
     [equal_order]
       type = 'Exodiff'
       input = frictionless-weighted-gap.i
       exodiff = 'frictionless-weighted-gap_out.e'
       detail = 'using equal, first order bases for displacements and the lagrange multiplier'
+      recover = false # Recover can restart from an early checkpoint and output extra adaptive steps
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
     []
@@ -115,6 +116,26 @@
                  "Postprocessors/active=''"
       capabilities = 'ad_size>=73'
       restep = false # Issue #31054
+    []
+    [fischer_burmeister_exact_touch_normal_ncp]
+      type = 'RunApp'
+      input = frictionless-weighted-gap.i
+      detail = 'using the Fischer-Burmeister normal complementarity function at exact initial '
+               'contact'
+      cli_args = "starting_point=0 offset=0 Mesh/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Executioner/end_time=0.1 Executioner/dt=0.1 "
+                 "Constraints/weighted_gap_lm/normal_ncp_function=FISCHER_BURMEISTER "
+                 "Postprocessors/active='' Outputs/exodus=false"
+    []
+    [smooth_normal_ncp_requires_width]
+      type = 'RunException'
+      input = frictionless-weighted-gap.i
+      expect_err = 'A positive normal_ncp_smoothing_width is required when normal_ncp_function is '
+                   'a smooth NCP function.'
+      detail = 'and report an error if a smooth normal complementarity function is selected '
+               'without a positive smoothing width'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Constraints/weighted_gap_lm/normal_ncp_function=SMOOTH_MIN Outputs/exodus=false"
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -207,7 +228,7 @@
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
                   'with dual bases'
-    issues = '#17495'
+    issues = '#17495 #33322'
 
     [verbose]
       type = 'Exodiff'
@@ -224,6 +245,16 @@
       detail = 'using the contact action'
       cli_args = "Postprocessors/active=''"
       custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
+    []
+    [action_smooth_fischer_burmeister_normal_ncp]
+      type = 'RunApp'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
+      detail = 'using the contact action with a smooth Fischer-Burmeister normal '
+               'complementarity function'
+      cli_args = "Executioner/end_time=5 "
+                 "Contact/frictional/normal_ncp_function=SMOOTH_FISCHER_BURMEISTER "
+                 "Contact/frictional/normal_ncp_smoothing_width=1e-8 Postprocessors/active='' "
+                 "Outputs/exodus=false"
     []
   []
   [split_secondary]

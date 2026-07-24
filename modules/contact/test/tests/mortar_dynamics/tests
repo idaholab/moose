@@ -41,6 +41,20 @@
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
   []
+  [block-dynamics-action-smooth-min-normal-ncp]
+    type = 'RunApp'
+    input = 'block-dynamics-action.i'
+    issues = '#33322'
+    cli_args = 'Contact/mechanical/mortar_dynamics=true Contact/mechanical/newmark_beta=0.25 '
+               'Contact/mechanical/newmark_gamma=0.5 '
+               'Contact/mechanical/normal_ncp_function=SMOOTH_MIN '
+               'Contact/mechanical/normal_ncp_smoothing_width=1e-8 Executioner/dt=0.05 '
+               'Executioner/end_time=0.05 Outputs/exodus=false'
+    requirement = 'The system shall solve dynamic mortar frictionless contact with a smooth min '
+                  'normal complementarity function via the contact mechanics action.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
+  []
   [block-dynamics-action-beta-error]
     type = RunException
     input = 'block-dynamics-action.i'

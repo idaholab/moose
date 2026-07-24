@@ -16,6 +16,13 @@ where $\,\dot{}\,$ denotes the first time derivative, $\Delta t$ is the time ste
 
 The `capture_tolerance` is an optional contact parameter used in dynamic contact constraints to determine when to impose the persistency condition for normal contact.
 
+The normal complementarity equation is enforced with the same
+[!param](/Constraints/ComputeDynamicWeightedGapLMMechanicalContact/normal_ncp_function)
+and
+[!param](/Constraints/ComputeDynamicWeightedGapLMMechanicalContact/normal_ncp_smoothing_width)
+options described for
+[ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md).
+
 For relevant, general equations, see [!citep](tal2018dynamic). Also, for discussion on the relevance of normal contact constraint stabilization for energy conservation and contact force accuracy, in the context of mortar constraints, see [!citep](recuero2022practical).
 
 !syntax parameters /Constraints/ComputeDynamicWeightedGapLMMechanicalContact

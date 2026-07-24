@@ -75,6 +75,19 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.addParam<MooseEnum>(
+      "normal_ncp_function",
+      Moose::Mortar::Contact::normalNCPFunctionOptions(),
+      "The nonlinear complementarity problem function used to enforce the normal weighted-gap "
+      "constraint.");
+  params.addRangeCheckedParam<Real>(
+      "normal_ncp_smoothing_width",
+      0.0,
+      "normal_ncp_smoothing_width >= 0",
+      "Width of the smooth transition for smooth normal NCP functions, in the same scale as the "
+      "normal Lagrange multiplier and the effective scaled weighted gap argument. This value is "
+      "not normalized internally; choose it as a small factor, typically 1e-8 to 1e-4, times a "
+      "representative normal Lagrange multiplier or representative effective scaled weighted gap.");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   return params;
@@ -92,6 +105,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c")),
+    _normal_ncp_function(getParam<MooseEnum>("normal_ncp_function")
+                             .getEnum<Moose::Mortar::Contact::NormalNCPFunction>()),
+    _normal_ncp_smoothing_width(getParam<Real>("normal_ncp_smoothing_width")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
@@ -111,6 +127,12 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
   if (!useDual())
     mooseError("Dynamic mortar contact constraints requires the use of Lagrange multipliers dual "
                "interpolation");
+
+  if (Moose::Mortar::Contact::normalNCPSmoothingRequired(_normal_ncp_function) &&
+      _normal_ncp_smoothing_width <= 0)
+    paramError("normal_ncp_smoothing_width",
+               "A positive normal_ncp_smoothing_width is required when normal_ncp_function is a "
+               "smooth NCP function.");
 }
 
 void
@@ -388,7 +410,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofOb
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  const ADReal dof_residual = Moose::Mortar::Contact::normalNCPResidual(
+      lm_value, weighted_gap * c, _normal_ncp_function, _normal_ncp_smoothing_width);
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},
