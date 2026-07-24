@@ -20,7 +20,7 @@
       recover = false
       cli_args = 'Outputs/csv/file_base=cube_rf
                   Mesh/b2dd/use_auto_area_func=true'
-      
+
       detail = 'from a flat 2D boundary in a given 3D mesh with refinement'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
     []
@@ -34,7 +34,7 @@
       recover = false
       cli_args = 'Outputs/csv/file_base=curved_surf
                   Mesh/final_generator=bd_1'
-      
+
       detail = 'from a curved 2D boundary in a given 3D mesh without a reference level set'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
     []
@@ -49,7 +49,7 @@
       cli_args = 'Outputs/csv/file_base=curved_surf_ls
                   Mesh/final_generator=bd_1
                   Mesh/bd_1/level_set="x^2+y^2-1"'
-      
+
       detail = 'from a curved 2D boundary in a given 3D mesh with a reference level set'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
     []
@@ -62,7 +62,7 @@
       override_abs_zero = '1.0e-10'
       recover = false
       cli_args = 'Outputs/csv/file_base=sphere_surf'
-      
+
       detail = 'from a curved 2D boundary in a given 3D mesh with a hole boundary in the same mesh'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
     []
@@ -80,7 +80,7 @@
                   Mesh/bd_3/level_set="x^2+y^2-1"
                   Mesh/bd_4/level_set="x^2+y^2-1"'
 
-      detail = 'from an arbitrary 2D boundary in a given 3D mesh. And the output put meshes '
+      detail = 'from an arbitrary 2D boundary in a given 3D mesh. And the output meshes '
                'can be combined to be used as input for 3D Delaunay mesh generation'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
       valgrind = none # see #31360
