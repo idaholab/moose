@@ -97,3 +97,32 @@ We only execute kernel objects because objects like `BoundaryConditions`,
 introduce global constraints for things like Dirichlet conditions or hanging
 nodes in mesh adaptivity. We want our scaling factors to represent our physics,
 not penalties or constraints.
+
+### PETSc KSP right diagonal scaling id=ksp-right-diagonal-scaling
+
+MOOSE objects can request a PETSc KSP right diagonal scale through the
+`NonlinearSystemBase` developer API. For a linearized system
+
+\[
+Jx = b,
+\]
+
+the scale \(D\) applies the change of variables
+
+\[
+(JD)y = b, \qquad x = Dy.
+\]
+
+An object must call `requestKSPRightDiagonalScale()` before the nonlinear solve
+begins. During residual assembly, it can call `setKSPRightDiagonalScale()` for
+locally owned degrees of freedom and then collectively call
+`closeKSPRightDiagonalScale()`. Scale entries must be finite and positive.
+Repeated writes of the same value are accepted, while conflicting writes to the
+same degree of freedom produce an error.
+
+At the beginning of every nonlinear solve, MOOSE resets the requested vector to
+one and attaches it to the PETSc KSP. Consequently, contributors must repopulate
+any non-unit entries during each solve, and values may change between solves.
+This API requires a PETSc nonlinear solver and supports ordinary `KSPSolve()`;
+PETSc transpose and multiple-right-hand-side KSP solves do not support this
+scaling mode.
