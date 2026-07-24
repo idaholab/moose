@@ -1,7 +1,7 @@
-# MFEM Problem Operator Builder System
+# MFEM Problem Composer System
 
-The `ProblemOperatorBuilder` is a builder/adapter class that is used for constructing
-problem-operators with custom inputs. This class is specifically intended for building
+The `MFEMProblemComposer` is a builder/adapter class that is used for constructing
+problem-operators with custom inputs. This class is specifically intended for composing
 user defined custom operators which may be raw `mfem::Operator`'s optimised for specific
 purposes e.g. MHD with customised inputs. The Operators may need thin layer access to the MOOSE
 multi-physics system. As of yet only a single problem operator per MFEM problem is used, even if
@@ -10,15 +10,15 @@ however the ProblemOperatos are built and owned by the MFEM executioners.
 
 ## Steady problem operator builder
 
-The ProblemOperatorBuilderSteady class is the default of the MFEMSteady executioner and does
-not need to be declared explicitly. The `ProblemOperatorBuilderSteady` class uses systematic
+The `SteadyProblemComposer` class is the default of the MFEMSteady executioner and does
+not need to be declared explicitly. The `SteadyProblemComposer` class uses systematic
 logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`,
 `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
 ## Transient problem operator builder
 
-The ProblemOperatorBuilderTransient class is the default of the MFEMTransient executioner and
-does not need to be declared explicitly. The `ProblemOperatorBuilderTransient` class builds 
+The `TransientProblemComposer` class is the default of the MFEMTransient executioner and
+does not need to be declared explicitly. The `TransientProblemComposer` class builds 
 the `TimeDependentEquationSystemProblemOperator`.
 
 ## Custom problem operator builder example
@@ -52,7 +52,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
 ```
 
 As the problemOperator is built by the MFEM executioners all registered entities in
-[`MFEMProblem`](source/mfem/problem/MFEMProblem.md) have been built e.g. the `ParGridFunctions`.
+[`MFEMProblem`](mfem/problem/MFEMProblem.md) have been built e.g. the `ParGridFunctions`.
 A custom operator builder function should be added in the case of non-linear problems where the
 operator is rebuilt. In the non-linear case the user would have to override and populate the
 `Mult` and the `GetGradient` functions to rebuild, fetch and apply the operators for the residual
@@ -169,9 +169,9 @@ void CustomDummyProblemOperator::Solve() override
 
 ```
 
-Once the `ProblemOperator` has been built the `ProblemOperatorBuilder` class is needed,
+Once the `ProblemOperator` has been built the `ProblemComposer` class is needed,
 this class is constructed by `MFEMProblem` and called by the executioner. The builder class
-must inherit from `ProblemOperatorBuilderBase` making it an `MFEMObject` and by proxy a 
+must inherit from `ProblemComposer` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
 that has a fixed signature that is called by the executioner. All of the code must
 be within the `Moose::MFEM` namespace for simplicity. An example minimal class looks like:
@@ -179,7 +179,7 @@ be within the `Moose::MFEM` namespace for simplicity. An example minimal class l
 ```cpp
 namespace Moose::MFEM
 {
-class ProblemOperatorBuilderCustomDummy : public ProblemOperatorBuilderBase
+class CustomDummyProblemComposer : public ProblemComposerBase
 {
 private:
   type1 param1;
@@ -190,9 +190,9 @@ private:
 public:
   static InputParameters validParams();
 
-  ProblemOperatorBuilderCustomDummy(const InputParameters & parameters);
+  CustomDummyProblemComposer(const InputParameters & parameters);
 
-  ~ProblemOperatorBuilderCustomDummy() = default;
+  ~CustomDummyProblemComposer() = default;
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
@@ -202,14 +202,14 @@ public:
 ```
 
 The `validParams()` method can be used to generate custom inputs for the problem operator,
-the inputs can be then put in the ProblemOperatorBuilder block of the input files.
+the inputs can be then put in the ProblemComposer block of the input files.
 
 ```cpp
 namespace Moose::MFEM
 {
-InputParameters ProblemOperatorBuilderCustomDummy::validParams()
+InputParameters CustomDummyProblemComposer::validParams()
 {
-  InputParameters params = ProblemOperatorBuilderBase::validParams();
+  InputParameters params = ProblemComposerBase::validParams();
   params.addParam<type1>("name", "default_value", "description of param");
   .
   .
@@ -227,9 +227,9 @@ and store them.
 ```cpp
 namespace Moose::MFEM
 {
-ProblemOperatorBuilderCustomDummy::ProblemOperatorBuilderCustomDummy(
+CustomDummyProblemComposer::CustomDummyProblemComposer(
   const InputParameters & parameters)
-  : ProblemOperatorBuilderBase(parameters) 
+  : ProblemComposerBase(parameters) 
 {
   param1 = getParam<type1>("name");
   .
@@ -247,7 +247,7 @@ and the resulting object is owned by the executioner.
 namespace Moose::MFEM
 {
 std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
-ProblemOperatorBuilderCustomDummy::createProblemOperator(MFEMProblem & mfemProb) override
+CustomDummyProblemComposer::createProblemOperator(MFEMProblem & mfemProb) override
 {
   return std::make_shared<CustomDummyProblemOperator>(mfemProb, param1, ...);
 }
@@ -260,26 +260,26 @@ to the MooseApp system:
 ```cpp
 namespace Moose::MFEM
 {
-  registerMooseObject("MooseApp", ProblemOperatorBuilderCustomDummy);
+  registerMooseObject("MooseApp", CustomDummyProblemComposer);
 };
 ```
 In the unit test example the complete code looks like this:
 ```cpp
 namespace Moose::MFEM
 {
-class ProblemOperatorBuilderCustomDummy : public ProblemOperatorBuilderBase
+class CustomDummyProblemComposer : public ProblemComposerBase
 {
 public:
   static InputParameters validParams()
   {
-    InputParameters params = ProblemOperatorBuilderBase::validParams();
+    InputParameters params = ProblemComposerBase::validParams();
     return params;
   };
 
-  ProblemOperatorBuilderCustomDummy(const InputParameters & parameters)
-    : ProblemOperatorBuilderBase(parameters) {};
+  CustomDummyProblemComposer(const InputParameters & parameters)
+    : ProblemComposerBase(parameters) {};
 
-  ~ProblemOperatorBuilderCustomDummy() = default;
+  ~CustomDummyProblemComposer() = default;
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
@@ -289,6 +289,6 @@ public:
   };
 };
 
-registerMooseObject("MooseApp", ProblemOperatorBuilderCustomDummy);
+registerMooseObject("MooseApp", CustomDummyProblemComposer);
 };
 ```
