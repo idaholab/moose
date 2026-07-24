@@ -8394,6 +8394,7 @@ FEProblemBase::createMortarInterface(
     const bool debug,
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
+    const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MooseEnum & triangulation,
     const bool triangulate_triangles)
 {
@@ -8408,6 +8409,7 @@ FEProblemBase::createMortarInterface(
                                                debug,
                                                correct_edge_dropping,
                                                minimum_projection_angle,
+                                               mortar_3d_subpatch_plane,
                                                triangulation,
                                                triangulate_triangles);
   else
@@ -8419,6 +8421,7 @@ FEProblemBase::createMortarInterface(
                                                debug,
                                                correct_edge_dropping,
                                                minimum_projection_angle,
+                                               mortar_3d_subpatch_plane,
                                                triangulation,
                                                triangulate_triangles);
 }

@@ -70,6 +70,70 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-action-geometric-subpatch-plane]
+    issues = '#33282'
+    requirement = 'The contact action shall correctly handle geometric-normal 3D mortar subpatch '
+                  'planes by'
+    [mortar]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-action-geometric_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-action-geometric'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'forwarding the plane mode for a Lagrange-multiplier mortar formulation,'
+      valgrind = 'none'
+      recover = false
+      restep = false
+    []
+    [penalty]
+      type = 'Exodiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      exodiff = 'frictionless-mortar-3d-penalty-action-geometric_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/formulation=mortar_penalty '
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
+                 'Executioner/end_time=0 Postprocessors/active="" VectorPostprocessors/active="" '
+                 'Outputs/exodus=false Outputs/csv=false '
+                 'Outputs/file_base=frictionless-mortar-3d-penalty-action-geometric'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'forwarding the plane mode for a mortar penalty formulation,'
+      valgrind = 'none'
+      recover = false
+      restep = false
+      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/mortar'
+    []
+    [unsupported-formulation]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=kinematic '
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL'
+      expect_err = "The 'mortar_3d_subpatch_plane' option can only be used with mortar-based formulations"
+      detail = 'rejecting the option for a non-mortar formulation,'
+      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/penalty'
+    []
+    [mortar-angle-forwarding]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'forwarding the projection angle for a Lagrange-multiplier mortar formulation, and'
+    []
+    [penalty-angle-forwarding]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=mortar_penalty '
+                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'forwarding the projection angle for a mortar penalty formulation.'
+    []
+  []
   [frictionless-mortar-3d-action-lm-space]
     requirement = 'The system shall support the contact action Lagrange multiplier space option '
                   'for 3D mortar contact'
@@ -140,6 +204,7 @@
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact when triangulate_triangles is disabled,'
       valgrind = 'none'
+      recover = false # this check intentionally stops after initial debug mesh generation
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-action-triangulation/centroid-with-retessellation'
     []
@@ -231,6 +296,7 @@
                  'UserObjects/weighted_gap_uo/triangulate_triangles=false'
       detail = 'centroid-based triangulation that leaves already-triangular clipped polygons '
                'intact,'
+      recover = false # this check intentionally stops after initial debug mesh generation
       restep = false # this check intentionally stops after initial debug mesh generation
       prereq = 'frictionless-mortar-3d-debug-mesh-triangulation/centroid-with-retessellation'
     []

@@ -30,6 +30,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "MortarInterfaceWarehouse.h"
+#include "MortarTypes.h"
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
@@ -2002,6 +2003,7 @@ public:
       const bool debug,
       const bool correct_edge_dropping,
       const Real minimum_projection_angle,
+      const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
       const MooseEnum & triangulation,
       const bool triangulate_triangles);
 

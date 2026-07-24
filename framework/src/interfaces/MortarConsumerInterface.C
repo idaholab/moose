@@ -13,6 +13,7 @@
 #include "MooseObject.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
+#include "MortarTypes.h"
 #include "MortarInterfaceWarehouse.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
@@ -89,8 +90,15 @@ MortarConsumerInterface::validParams()
       "Parameter to control which angle (in degrees) is admissible for the creation of mortar "
       "segments.  If set to a value close to zero, very oblique projections are allowed, which "
       "can result in mortar segments solving physics not meaningfully, and overprojection of "
-      "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
-      "intended for mortar mesh debugging purposes in two dimensions.");
+      "primary nodes onto the mortar segment mesh in extreme cases. In 3D with "
+      "mortar_3d_subpatch_plane = GEOMETRIC_NORMAL, this parameter also controls which primary "
+      "and secondary subpatch normal pairings are admissible before polygon clipping.");
+  params.addParam<MooseEnum>(
+      "mortar_3d_subpatch_plane",
+      MooseEnum(getMortar3DSubpatchPlaneOptions(), "AVERAGED_NODAL_NORMAL"),
+      "Method used to construct the local 3D mortar subpatch planes used for projection and "
+      "clipping. AVERAGED_NODAL_NORMAL uses the averaged nodal normal on each secondary subpatch. "
+      "GEOMETRIC_NORMAL uses the geometric normal of each linear or bilinear secondary subpatch.");
   params += MortarConsumerInterface::triangulationParams();
 
   params.addParam<bool>(
@@ -175,6 +183,19 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
   const bool displaced = moose_object->isParamValid("use_displaced_mesh")
                              ? moose_object->getParam<bool>("use_displaced_mesh")
                              : false;
+  const auto minimum_projection_angle = moose_object->getParam<Real>("minimum_projection_angle");
+  const auto mortar_3d_subpatch_plane =
+      moose_object->getParam<MooseEnum>("mortar_3d_subpatch_plane")
+          .getEnum<Mortar3DSubpatchPlane>();
+
+  // Only geometric 3D mode interprets this value as an angle between subpatch normals. Preserve
+  // the historical unrestricted parameter behavior for averaged-normal and 2D mortar interfaces.
+  if (_mci_mesh.dimension() == 3 &&
+      mortar_3d_subpatch_plane == Mortar3DSubpatchPlane::GEOMETRIC_NORMAL &&
+      (minimum_projection_angle < 0.0 || minimum_projection_angle > 90.0))
+    moose_object->paramError("minimum_projection_angle",
+                             "Must be between 0 and 90 degrees when "
+                             "mortar_3d_subpatch_plane = GEOMETRIC_NORMAL.");
 
   // Create the mortar interface if it hasn't already been created
   _mci_fe_problem.createMortarInterface(
@@ -184,7 +205,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<bool>("periodic"),
       moose_object->getParam<bool>("debug_mesh"),
       moose_object->getParam<bool>("correct_edge_dropping"),
-      moose_object->getParam<Real>("minimum_projection_angle"),
+      minimum_projection_angle,
+      mortar_3d_subpatch_plane,
       moose_object->getParam<MooseEnum>("triangulation"),
       moose_object->getParam<bool>("triangulate_triangles"));
 

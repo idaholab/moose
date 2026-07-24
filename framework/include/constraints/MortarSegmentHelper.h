@@ -97,6 +97,11 @@ public:
   const Point & center() const { return _center; }
 
   /**
+   * Get the unit normal of the projection plane.
+   */
+  const Point & normal() const { return _normal; }
+
+  /**
    * Get area fraction remaining after clipping against primary elements
    */
   Real remainder() const { return _remaining_area_fraction; }
@@ -116,7 +121,7 @@ private:
   Point _center;
 
   /**
-   * Normal at geometric center of secondary element
+   * Unit normal of the plane used to project and clip the linearized secondary subpatch.
    */
   Point _normal;
 

@@ -19,6 +19,65 @@
       detail = 'three dimensional mortar mesh.'
     []
   []
+  [adjacent_corner_mortar_segment_mesh]
+    issues = '#33282'
+    requirement = 'The system shall be able to build a three dimensional mortar segment mesh for '
+                  'adjacent corner sidesets'
+    [statistics]
+      type = JSONDiff
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      jsondiff = 'mortar_stats_reporter_3d_adjacent_corner_sidesets_out.json'
+      keep_reporter_types = true
+      absent_out = 'Some secondary elements on mortar interface'
+      detail = 'with stable reported segment statistics and no missing-primary warning, and'
+    []
+    [missing_primary]
+      type = RunException
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      cli_args = 'Mesh/primary_lower/sidesets=primary_top Constraints/mortar/primary_boundary=primary_top'
+      expect_err = 'Some secondary elements on mortar interface were unable to identify'
+      prereq = 'adjacent_corner_mortar_segment_mesh/statistics'
+      detail = 'with a missing-primary diagnostic when part of the primary corner interface is absent.'
+    []
+  []
+  [mortar_interface_consistency]
+    issues = '#33282'
+    requirement = 'The system shall reject inconsistent settings on constraints that share the '
+                  'same primary and secondary mortar interface for'
+    [subpatch-plane]
+      type = RunException
+      input = 'mortar_subpatch_plane_mismatch.i'
+      expect_err = 'same primary/secondary mortar interface.*mortar_3d_subpatch_plane'
+      detail = 'the 3D mortar subpatch plane mode and'
+    []
+    [projection-angle]
+      type = RunException
+      input = 'mortar_subpatch_plane_mismatch.i'
+      cli_args = 'Constraints/mortar_averaged/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar_averaged/minimum_projection_angle=35'
+      expect_err = 'multiple values of.*minimum_projection_angle'
+      detail = 'the minimum projection angle.'
+    []
+  []
+  [mortar_subpatch_plane_angle_validation]
+    issues = '#33282'
+    requirement = 'The system shall preserve the historical minimum projection angle input range '
+                  'unless the angle is used for geometric 3D subpatch filtering by'
+    [averaged-normal]
+      type = RunApp
+      input = 'mortar_stats_reporter_3d.i'
+      cli_args = 'Constraints/mortar/minimum_projection_angle=-40'
+      detail = 'accepting an unrestricted angle with averaged nodal normals and'
+    []
+    [geometric-normal]
+      type = RunException
+      input = 'mortar_stats_reporter_3d.i'
+      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'requiring an angle between zero and ninety degrees with geometric normals.'
+    []
+  []
   [mortar_segment_mesh]
     requirement = 'When requested through a mortar constraint, the system shall be able to write out a spatially'
     [2d]
