@@ -57,6 +57,9 @@ The test: Every changed line should trace directly to the user's request.
 - Add comments when the code alone does not make clear what's happening.
 - Add Doxygen comments for classes and class members whose purpose is not
   obvious from their names.
+- Prefer one positive, operative statement in comments and documentation. Add
+  inverse or contrastive wording only when it clarifies a genuine ambiguity or
+  exception.
 - Use ASCII characters.
 
 ## 5. Code Style
