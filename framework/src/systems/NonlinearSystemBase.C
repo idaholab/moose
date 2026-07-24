@@ -4286,6 +4286,8 @@ NonlinearSystemBase::preSolve()
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
 
+  resetKSPRightDiagonalScale();
+
   return true;
 }
 

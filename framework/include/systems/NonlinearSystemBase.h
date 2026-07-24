@@ -94,9 +94,6 @@ public:
   /** Request the parallel per-DOF vector used for PETSc KSP right diagonal scaling. */
   void requestKSPRightDiagonalScale();
 
-  /** Reset the requested KSP right diagonal scale to one and attach it to the PETSc KSP. */
-  void resetKSPRightDiagonalScale();
-
   /** Set an owned entry of the KSP right diagonal scale, checking repeated writes. */
   void setKSPRightDiagonalScale(dof_id_type dof, Real value);
 
@@ -920,18 +917,6 @@ protected:
   /// Copy of the residual vector, or nullptr if a copy is not needed
   std::unique_ptr<NumericVector<Number>> _residual_copy;
 
-  /// Whether an object has requested solver-side per-DOF right scaling
-  bool _has_ksp_right_diagonal_scale = false;
-
-  /// Whether this rank has unclosed right scaling vector writes
-  bool _ksp_right_diagonal_scale_dirty = false;
-
-  /// Last installed values, used to avoid changing an unchanged scale vector
-  std::unordered_map<dof_id_type, Real> _ksp_right_diagonal_scale_values;
-
-  /// Entries written during the current mortar assembly, used to detect conflicting contributors
-  std::unordered_set<dof_id_type> _ksp_right_diagonal_scale_written_dofs;
-
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
   /// \f$ {du^dotdot}\over{du} \f$
@@ -1109,6 +1094,9 @@ protected:
   std::unique_ptr<libMesh::DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
+  /** Reset the requested KSP right diagonal scale to one and attach it to the PETSc KSP. */
+  void resetKSPRightDiagonalScale();
+
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
@@ -1120,6 +1108,18 @@ private:
    * Setup group scaling containers
    */
   void setupScalingData();
+
+  /// Whether an object has requested solver-side per-DOF right scaling
+  bool _has_ksp_right_diagonal_scale = false;
+
+  /// Whether this rank has unclosed right scaling vector writes
+  bool _ksp_right_diagonal_scale_dirty = false;
+
+  /// Last installed values, used to avoid changing an unchanged scale vector
+  std::unordered_map<dof_id_type, Real> _ksp_right_diagonal_scale_values;
+
+  /// Entries written during the current mortar assembly, used to detect conflicting contributors
+  std::unordered_set<dof_id_type> _ksp_right_diagonal_scale_written_dofs;
 
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
