@@ -16,7 +16,8 @@
 /**
  * Wrapper for mfem::OperatorJacobiSmoother solver.
  */
-class MFEMOperatorJacobiSmoother : public Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>
+class MFEMOperatorJacobiSmoother
+  : public Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>
 {
 public:
   static InputParameters validParams();

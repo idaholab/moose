@@ -17,7 +17,8 @@ registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
 InputParameters
 MFEMOperatorJacobiSmoother::validParams()
 {
-  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::validParams();
+  InputParameters params =
+      Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
   params.addParam<mfem::real_t>(
       "damping",

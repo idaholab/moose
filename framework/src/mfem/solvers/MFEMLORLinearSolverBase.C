@@ -15,7 +15,7 @@
 
 namespace Moose::MFEM
 {
-template <class MFEMSolverType>  
+template <class MFEMSolverType>
 InputParameters
 LORLinearSolverBase<MFEMSolverType>::validParams()
 {
@@ -46,7 +46,7 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
     }
     else
       SetPreconditioner(static_cast<MFEMSolverType &>(GetSolver()));
-  }  
+  }
 }
 
 template <>

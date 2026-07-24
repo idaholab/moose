@@ -30,6 +30,11 @@ protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HypreAMS & solver) override;
 
+  virtual void SetOperatorImpl(mfem::Operator & op) override
+  {
+    GetSolver().SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
+  }
+
 private:
   const MFEMFESpace & _mfem_fespace;
 };
