@@ -515,7 +515,12 @@ TransientBase::takeStep(Real input_dt)
   if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
   {
     if (lastSolveConverged())
+    {
       _time_stepper->acceptStep();
+      // Predictors that cache accepted-step data need to see the converged new solution before
+      // the transient state is advanced below.
+      _problem.predictorTimestepAccepted();
+    }
     else
       _time_stepper->rejectStep();
   }

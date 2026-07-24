@@ -8356,6 +8356,18 @@ FEProblemBase::predictorCleanup(NumericVector<Number> & /*ghosted_solution*/)
 }
 
 void
+FEProblemBase::predictorTimestepAccepted()
+{
+  // A predictor is owned by a nonlinear system, but keep the dispatch unique in case future
+  // multi-system setups share a predictor-like object.
+  std::set<Predictor *> predictors;
+  for (auto & nl : _nl)
+    if (auto * const predictor = nl->getPredictor())
+      if (predictors.insert(predictor).second)
+        predictor->timestepAccepted();
+}
+
+void
 FEProblemBase::addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem)
 {
   parallel_object_only();
