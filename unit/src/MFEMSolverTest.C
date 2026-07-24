@@ -102,11 +102,11 @@ public:
     mfem::Vector B, X;
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-    solver.SetupLOR();
+    solver.SetOperator(*A);
+
     auto solver_ptr = dynamic_cast<SolverType *>(&solver.GetSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
-    solver_ptr->SetOperator(*A);
     solver_ptr->Mult(B, X);
 
     mfem::Vector Y(X.Size());
@@ -400,7 +400,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   mfem::Vector B, X;
   a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
-  solver.SetupLOR(a, ess_bdr_markers);
+  solver.SetOperator(*A);
 
   auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.GetSolver());
   // Test MFEMKernel returns an integrator of the expected type

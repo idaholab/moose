@@ -114,7 +114,10 @@ ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
       mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
 
     auto & linear_solver = *_problem_data.jacobian_solver;
-    linear_solver.SetOperator(system_operator.GetGradient(x));
+    if (linear_operator)
+      linear_solver.SetOperator(*linear_operator);
+    else
+      linear_solver.SetOperator(system_operator.GetGradient(x));
     linear_solver.Mult(rhs, x);
   }
 }
