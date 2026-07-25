@@ -9,9 +9,6 @@
 
 #pragma once
 
-#include "MooseMesh.h"
-#include "libmesh/point.h"
-
 #include "PointInPolyhedronBaseUO.h"
 #include "SurfaceMeshBySubdomainBuilder.h"
 #include "PointInPolyhedronCheck.h"
@@ -38,7 +35,7 @@ public:
   }
 
 protected:
-  /// Builder providing subdomain-wise boundary elements
+  /// Builder providing subdomain-wise SurfaceElementSets
   const SurfaceMeshBySubdomainBuilder & _builder;
 
   /// Each subdomain has its own PointInPolyhedronCheck

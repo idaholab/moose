@@ -82,7 +82,7 @@
       type = 'RunException'
       input = '2D_distance_refine.i'
       cli_args = 'Mesh/boundary_mesh/file=quad_surface.msh'
-      expect_err = 'does not match the expected mesh dimension'
+      expect_err = 'does not match the surface mesh dimension'
       mesh_mode = REPLICATED
       recover = false
       detail = 'if the embedding mesh dimension does not match the SBM surface mesh dimension plus one.'
@@ -92,7 +92,7 @@
       type = 'RunException'
       input = '3D_distance_refine.i'
       cli_args = 'Mesh/boundary_mesh/file=quad_surface.msh'
-      expect_err = 'Unsupported element type in SBMSurfaceMeshBuilder'
+      expect_err = 'unsupported element type'
       mesh_mode = REPLICATED
       recover = false
       detail = 'if the SBM surface mesh contains element types other than EDGE2 or TRI3.'

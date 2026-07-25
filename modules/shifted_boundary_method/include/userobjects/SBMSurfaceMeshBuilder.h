@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "libmesh/mesh.h"
+#include "BoundaryMeshBuilder.h"
 #include "KDTree.h"
-#include "SBMBndElementBase.h"
 
-class SBMSurfaceMeshBuilder : public GeneralUserObject
+/**
+ * BoundaryMeshBuilder specialization that additionally builds a centroid KD-tree
+ * over the whole-mesh SurfaceElementSet, used by UnsignedDistanceToSurfaceMesh
+ * for nearest-boundary-element lookups.
+ */
+class SBMSurfaceMeshBuilder : public BoundaryMeshBuilder
 {
 public:
   static InputParameters validParams();
   SBMSurfaceMeshBuilder(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void initialize() override {}
-  virtual void execute() override {}
-  virtual void finalize() override {}
 
   /// Returns a mutable reference because KDTree::neighborSearch is non-const (nanoflann's
   /// knnSearch threads internal scratch state through the call). The operation is logically
@@ -36,55 +36,13 @@ public:
   /// check this in initialSetup and mooseError with a friendly message naming both objects.
   bool hasKDTree() const { return _kd_tree != nullptr; }
 
-  /// Get the SBM boundary elements
-  const std::vector<std::unique_ptr<SBMBndElementBase>> & getBoundaryElements() const;
-
-  /// Get the centroids of the boundary elements
-  const std::vector<Point> & getCentroids() const;
-
-  /**
-   * @brief Checks whether the boundary mesh is "closed" -- i.e. has no open
-   *        edges or faces.
-   *
-   * The implementation walks every side of every boundary element and returns
-   * false as soon as it finds a side with no neighbor. On a manifold surface
-   * mesh this is equivalent to watertightness; non-manifold input
-   * (e.g. T-junctions, three faces sharing an edge) is not validated here
-   * because the SBM workflow expects boundary meshes extracted from manifold
-   * sidesets.
-   *
-   * @return true if every side has a neighbor; false otherwise.
-   */
-  bool checkWatertightness() const;
-
 protected:
-  /// Holds the mesh to ensure boundary element pointers remain valid.
-  /// Avoid extracting raw MeshBase* from a function returning std::unique_ptr<MeshBase>,
-  /// as it can lead to dangling pointers. Use std::unique_ptr to manage ownership safely.
-  std::unique_ptr<MeshBase> _mesh;
-
   /// The KDTree is constructed using the centroids of the elements in the boundary mesh.
   std::unique_ptr<KDTree> _kd_tree;
-
-  /// The boundary elements are stored in a vector of unique pointers to SBMBndElementBase.
-  std::vector<std::unique_ptr<SBMBndElementBase>> _boundary_elements;
-
-  /// The centroids of the elements in the boundary mesh are stored in a vector of Points. The sequence is the same as in _boundary_elements.
-  std::vector<Point> _centroids;
 
   /// Configures KDTree leaf node size for performance tuning.
   const int _leaf_max_size;
 
-  /// The name of a mesh saved via MeshGenerator `save_mesh_as` parameter.
-  const std::string _bnd_mesh_name;
-
-  /// The flag to check the watertightness of the mesh.
-  const bool _check_watertightness;
-
-  /// whether we want to build a kd-tree or not
+  /// Whether to build the centroid KD-tree.
   const bool _build_kd_tree;
-
-private:
-  /// The dimension of the embedding mesh (2D or 3D).
-  const unsigned int _dim_embedding_mesh;
 };

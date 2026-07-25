@@ -11,28 +11,24 @@
 
 #include "MooseMesh.h"
 #include "libmesh/point.h"
-#include "SBMBndElementBase.h"
+#include "SurfaceElement.h"
+#include "SurfaceSide.h"
 #include "KDTree.h"
 #include "OrientedBoundingBox.h"
 #include "MooseError.h"
 
 class Ball;
 
-/// The side of the surface where the point is located.
-enum class SurfaceSide
-{
-  INSIDE,
-  OUTSIDE,
-  ON
-};
-
+/// Ray-casting point-in-solid engine over a closed surface mesh represented as a
+/// collection of SurfaceElement wrappers. The ray direction is either supplied
+/// axis-aligned (e.g. (1,0,0)) and used directly with an axis-aligned bounding box,
+/// or auto-selected via PCA when a non-axis (or default (0,0,0)) direction is given.
 struct PointInPolyhedronCheck final
 {
 public:
-  PointInPolyhedronCheck(const std::vector<std::unique_ptr<SBMBndElementBase>> & bd_elements,
+  PointInPolyhedronCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
                          const std::vector<Point> & centroids,
                          const Point ray_direction,
-                         bool brute_force_looping_all_bndelements = false,
                          const Real eps_on_surface = libMesh::TOLERANCE,
                          const int leaf_max_size = 10,
                          const FileName & obb_file_name = "",
@@ -40,7 +36,7 @@ public:
                          const libMesh::Parallel::Communicator * comm = nullptr);
 
   /// Main function: Determine if a point is inside the geometry
-  SurfaceSide sideness(const Point & p);
+  SurfaceSide sideness(const Point & p) const;
 
 private:
   /// Maximum direction and second maximum direction from PCA
@@ -66,10 +62,10 @@ private:
   /// The maximum diagonal length of the projected bounding box from the boundary elements.
   Real _max_projected_diag_length;
 
-  /// pass into the constructor for the sbm boundary elements
-  const std::vector<std::unique_ptr<SBMBndElementBase>> & _bd_elements;
+  /// pass into the constructor for the surface elements
+  const std::vector<std::unique_ptr<SurfaceElement>> & _bd_elements;
 
-  /// pass into the constructor for the sbm boundary centroids
+  /// pass into the constructor for the surface element centroids
   const std::vector<Point> & _centroids;
 
   /// The dimension of the embedding mesh.
@@ -80,10 +76,6 @@ private:
 
   /// Ray shooting direction
   Point _ray_direction;
-
-  /// Brute force means that we loop over all boundary elements
-  /// to check if the point is inside.
-  bool _brute_force_looping_all_bndelements;
 
   /// Epsilon value for checking if a point is on the surface of the geometry
   Real _eps_on_surface;
@@ -128,12 +120,12 @@ private:
   Point _min_variance_vector;
 
   /// For bounding region checks (e.g., sphere/circle around element)
-  Ball computeBoundingBall(const SBMBndElementBase * elem) const;
+  Ball computeBoundingBall(const SurfaceElement * elem) const;
 
   /// Ray-element intersection (e.g., ray-line for 2D, ray-triangle for 3D)
   bool rayIntersectGeometry(const Point & ray_start,
                             const Point & ray_end,
-                            const SBMBndElementBase * elem) const;
+                            const SurfaceElement * elem) const;
 
   /// Check if point is outside global bounding box
   bool isOutsideBoundingBox(const Point & query_point) const;
@@ -188,6 +180,6 @@ private:
   /// During this process, it also finds the maximum projected diagonal length.
   void buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_box_length);
 
-  /// Depends on brute force or kd-tree to collect candidate element IDs to check intersections.
+  /// Use the kd-tree to collect candidate element IDs to check intersections.
   std::vector<unsigned int> collectCandidateElementIDs(const Point & query_point) const;
 };

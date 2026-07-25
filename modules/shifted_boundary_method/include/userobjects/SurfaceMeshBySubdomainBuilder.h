@@ -9,57 +9,31 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "libmesh/mesh.h"
-#include "KDTree.h"
-#include "SBMBndElementBase.h"
-#include "SBMBndEdge2.h"
-#include "SBMBndTri3.h"
-#include "SBMUtils.h"
+#include "BoundaryMeshBuilder.h"
 
-class SurfaceMeshBySubdomainBuilder : public GeneralUserObject
+#include <unordered_map>
+
+/**
+ * BoundaryMeshBuilder specialization that groups the surface elements by
+ * subdomain, building one SurfaceElementSet per subdomain instead of a single
+ * whole-mesh set.
+ */
+class SurfaceMeshBySubdomainBuilder : public BoundaryMeshBuilder
 {
 public:
   static InputParameters validParams();
   SurfaceMeshBySubdomainBuilder(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-  virtual void initialize() override {}
-  virtual void execute() override {}
-  virtual void finalize() override {}
-
-  const std::unordered_map<subdomain_id_type, std::vector<Point>> & getCentroidsBySubdomain() const
+  /// Per-subdomain SurfaceElementSets. Valid after initialSetup().
+  const std::unordered_map<subdomain_id_type, SurfaceElementSet> &
+  getSurfaceElementSetsBySubdomain() const
   {
-    return _centroids_by_subdomain;
-  }
-
-  const std::unordered_map<subdomain_id_type, std::vector<dof_id_type>> &
-  getElemIdMapBySubdomain() const
-  {
-    return _elem_id_map_by_subdomain;
-  }
-
-  const std::unordered_map<subdomain_id_type, std::vector<std::unique_ptr<SBMBndElementBase>>> &
-  getBoundaryElementsBySubdomain() const
-  {
-    return _boundary_elements_by_subdomain;
+    return _sets_by_subdomain;
   }
 
 protected:
-  void buildSubdomainGroupedData();
-  bool checkWatertightness() const;
+  /// Build one SurfaceElementSet per subdomain instead of a whole-mesh set.
+  virtual void buildDefaultSet() override;
 
-  std::unique_ptr<MeshBase> _mesh;
-
-  std::unordered_map<subdomain_id_type, std::vector<Point>> _centroids_by_subdomain;
-  std::unordered_map<subdomain_id_type, std::vector<dof_id_type>> _elem_id_map_by_subdomain;
-  std::unordered_map<subdomain_id_type, std::vector<std::unique_ptr<SBMBndElementBase>>>
-      _boundary_elements_by_subdomain;
-
-  int _leaf_max_size;
-  std::string _bnd_mesh_name;
-  bool _check_watertightness;
-  unsigned int _dim_embedding_mesh;
-
-  bool _check_replicated;
+  std::unordered_map<subdomain_id_type, SurfaceElementSet> _sets_by_subdomain;
 };

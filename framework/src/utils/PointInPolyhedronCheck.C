@@ -14,10 +14,9 @@
 #include "libmesh/utility.h"
 
 PointInPolyhedronCheck::PointInPolyhedronCheck(
-    const std::vector<std::unique_ptr<SBMBndElementBase>> & bd_elements,
+    const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
     const std::vector<Point> & centroids,
     const Point ray_direction,
-    bool brute_force_looping_all_bndelements,
     const Real eps_on_surface,
     const int leaf_max_size,
     const FileName & obb_file_name,
@@ -26,7 +25,6 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
   : _bd_elements(bd_elements),
     _centroids(centroids),
     _ray_direction(ray_direction),
-    _brute_force_looping_all_bndelements(brute_force_looping_all_bndelements),
     _eps_on_surface(eps_on_surface),
     _leaf_max_size(leaf_max_size),
     _obb_file_name(obb_file_name),
@@ -55,7 +53,7 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
 }
 
 SurfaceSide
-PointInPolyhedronCheck::sideness(const Point & p)
+PointInPolyhedronCheck::sideness(const Point & p) const
 {
   if (isOutsideBoundingBox(p))
     return SurfaceSide::OUTSIDE;
@@ -139,14 +137,14 @@ PointInPolyhedronCheck::sideness(const Point & p)
 bool
 PointInPolyhedronCheck::rayIntersectGeometry(const Point & ray_start,
                                              const Point & ray_end,
-                                             const SBMBndElementBase * elem) const
+                                             const SurfaceElement * elem) const
 {
   LineSegment ray_segment(ray_start, ray_end);
   return elem->intersect(ray_segment);
 }
 
 Ball
-PointInPolyhedronCheck::computeBoundingBall(const SBMBndElementBase * elem) const
+PointInPolyhedronCheck::computeBoundingBall(const SurfaceElement * elem) const
 {
   return elem->computeBoundingBall();
 }
@@ -436,15 +434,13 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
   Real v_min = u_min, v_max = u_max;
   Real w_min = u_min, w_max = u_max;
 
-  if (!_brute_force_looping_all_bndelements)
-    _projected_centroids.resize(_num_elements);
+  _projected_centroids.resize(_num_elements);
 
   _max_projected_diag_length = 0.0;
 
   for (const auto i : make_range(_num_elements))
   {
-    // Per-element data for optional KD-tree
-    if (!_brute_force_looping_all_bndelements)
+    // Per-element KD-tree data
     {
       const Point & pt =
           (!_centroids.empty() ? _centroids[i] : _bd_elements[i]->elem().vertex_average());
@@ -527,9 +523,8 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
     }
   }
 
-  // (c) Finalise KD-tree (if requested)
-  if (!_brute_force_looping_all_bndelements)
-    _kd_tree = std::make_unique<KDTree>(_projected_centroids, _leaf_max_size);
+  // (c) Finalise KD-tree
+  _kd_tree = std::make_unique<KDTree>(_projected_centroids, _leaf_max_size);
 }
 
 std::vector<unsigned int>
@@ -537,15 +532,7 @@ PointInPolyhedronCheck::collectCandidateElementIDs(const Point & query_point) co
 {
   std::vector<unsigned int> elem_ids;
 
-  // (a) Brute-force: test every boundary element
-  if (_brute_force_looping_all_bndelements)
-  {
-    elem_ids.resize(_num_elements);
-    std::iota(elem_ids.begin(), elem_ids.end(), 0); // 0, 1, 2, ...
-    return elem_ids;
-  }
-
-  // (b) KD-tree radius search in projected PCA space
+  // KD-tree radius search in projected PCA space
   Point proj = projectPointOntoPlane(query_point, _plane_origin, _ray_direction);
   if (_dim == 2)
     proj(2) = 0.0; // flatten Z for 2-D

@@ -52,8 +52,9 @@ n_seg = 48
   [InOutTest]
     type = PointInPolyhedronCheckUO
     builder = TreeBuilder
-    # Fixed axis-aligned ray avoids the PCA/SVD direction ambiguity of an
-    # isotropic shape (circle), which is not reproducible across platforms.
+    # A user-selected axis-aligned ray avoids the PCA/SVD direction ambiguity of
+    # an isotropic shape (circle), which is not reproducible across platforms.
+    point_containment_method = user_selected_ray
     ray_direction = '1 0 0'
   []
 []

@@ -9,9 +9,6 @@
 
 #include "SBMSurfaceMeshBuilder.h"
 #include "InputParameters.h"
-#include "SBMBndEdge2.h"
-#include "SBMBndTri3.h"
-#include "SBMUtils.h"
 
 // Register object
 registerMooseObject("ShiftedBoundaryMethodApp", SBMSurfaceMeshBuilder);
@@ -19,14 +16,10 @@ registerMooseObject("ShiftedBoundaryMethodApp", SBMSurfaceMeshBuilder);
 InputParameters
 SBMSurfaceMeshBuilder::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = BoundaryMeshBuilder::validParams();
   params.addClassDescription(
-      "Constructs a KDTree and boundary elements from a pre-existing surface mesh. "
-      "The surface mesh is specified in the Mesh block.");
-
-  params.addRequiredParam<std::string>(
-      "surface_mesh",
-      "The name of the surface mesh saved via the MeshGenerator's `save_mesh_as` parameter.");
+      "Constructs boundary elements and a centroid KDTree from a pre-existing surface mesh. "
+      "The surface mesh is specified in the Mesh block via `save_mesh_as`.");
 
   /// Add a parameter for leaf_max_size for nanoflann
   params.addParam<int>(
@@ -36,12 +29,6 @@ SBMSurfaceMeshBuilder::validParams()
       "Smaller values yield deeper trees with faster queries but slower build times; "
       "larger values result in shallower trees with faster builds but slower queries. "
       "Benchmarking is recommended to find an optimal tradeoff for your use case.");
-
-  /// Checking watertightness is not mandatory, but it is a good practice to ensure the mesh is valid for In-Out test.
-  params.addParam<bool>(
-      "check_watertightness",
-      false,
-      "Check if the mesh is watertight. If false, the mesh may not be suitable for In-Out tests.");
 
   /// Add a parameter to control whether to build a kd-tree or not
   params.addParam<bool>(
@@ -54,84 +41,21 @@ SBMSurfaceMeshBuilder::validParams()
 }
 
 SBMSurfaceMeshBuilder::SBMSurfaceMeshBuilder(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : BoundaryMeshBuilder(parameters),
     _leaf_max_size(getParam<int>("leaf_max_size")),
-    _bnd_mesh_name(getParam<std::string>("surface_mesh")),
-    _check_watertightness(getParam<bool>("check_watertightness")),
-    _build_kd_tree(getParam<bool>("build_kd_tree")),
-    _dim_embedding_mesh(_fe_problem.mesh().dimension() /*MooseMesh*/)
+    _build_kd_tree(getParam<bool>("build_kd_tree"))
 {
 }
 
 void
 SBMSurfaceMeshBuilder::initialSetup()
 {
-  auto & mesh_generator_system = _app.getMeshGeneratorSystem();
+  // Build the mesh + whole-mesh SurfaceElementSet (and run shared validation).
+  BoundaryMeshBuilder::initialSetup();
 
-  _mesh = mesh_generator_system.getSavedMesh(_bnd_mesh_name);
-
-  // A saved mesh produced by a MeshGenerator (as opposed to a file) may be unprepared,
-  // leaving mesh_dimension() stale and element neighbor links unset. Prepare it so both
-  // the dimension check below and the neighbor-based watertightness test are reliable.
-  _mesh->prepare_for_use();
-
-  const auto expected_dim_embedding_mesh = _mesh->mesh_dimension() + 1;
-
-  if (!_mesh->is_replicated())
-    mooseError(
-        "The mesh is distributed. Please use a serial mesh for SBMSurfaceMeshBuilder, which is "
-        "important for our In-Out test later.");
-
-  if (_dim_embedding_mesh != expected_dim_embedding_mesh)
-    mooseError("The original mesh dimension (",
-               _dim_embedding_mesh,
-               ") does not match the expected mesh dimension (",
-               expected_dim_embedding_mesh,
-               ").");
-
-  const std::size_t num_elems = _mesh->n_elem();
-
-  _centroids.resize(num_elems);
-  _boundary_elements.resize(num_elems);
-
-  int i = 0;
-  for (auto elem_it = _mesh->active_elements_begin(); elem_it != _mesh->active_elements_end();
-       ++elem_it)
-  {
-    const Elem * elem = *elem_it;
-
-    const auto centroid = elem->vertex_average();
-    if (_build_kd_tree)
-      _centroids[i] = centroid;
-
-    if (elem->type() == EDGE2)
-      _boundary_elements[i] = std::make_unique<SBMBndEdge2>(elem);
-    else if (elem->type() == TRI3)
-      _boundary_elements[i] = std::make_unique<SBMBndTri3>(elem);
-    else
-      mooseError("Unsupported element type in SBMSurfaceMeshBuilder::initialSetup()");
-
-    ++i;
-  }
-
+  // The centroid KD-tree is aligned index-for-index with surfaceElementSet().elements().
   if (_build_kd_tree)
-    _kd_tree = std::make_unique<KDTree>(_centroids, _leaf_max_size);
-
-  if (_check_watertightness)
-  {
-    bool watertight = checkWatertightness();
-    if (!watertight)
-      mooseInfo("The mesh is not watertight. It may not be suitable for In-Out tests.");
-    else
-      mooseInfo("The mesh is watertight. It is suitable for In-Out tests.");
-  }
-}
-
-bool
-SBMSurfaceMeshBuilder::checkWatertightness() const
-{
-  return SBMUtils::checkWatertightnessFromRawElems(std::vector<const Elem *>(
-      _mesh->active_element_ptr_range().begin(), _mesh->active_element_ptr_range().end()));
+    _kd_tree = std::make_unique<KDTree>(surfaceElementSet().centroids(), _leaf_max_size);
 }
 
 KDTree &
@@ -139,16 +63,4 @@ SBMSurfaceMeshBuilder::getKDTree() const
 {
   mooseAssert(_kd_tree, "KDTree not built; callers must guard with hasKDTree() first.");
   return *_kd_tree;
-}
-
-const std::vector<std::unique_ptr<SBMBndElementBase>> &
-SBMSurfaceMeshBuilder::getBoundaryElements() const
-{
-  return _boundary_elements;
-}
-
-const std::vector<Point> &
-SBMSurfaceMeshBuilder::getCentroids() const
-{
-  return _centroids;
 }

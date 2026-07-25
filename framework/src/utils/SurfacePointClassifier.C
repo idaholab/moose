@@ -1,0 +1,68 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SurfacePointClassifier.h"
+#include "SurfaceElementSet.h"
+#include "PointInPolyhedronCheck.h"
+#include "TriangleManifold.h"
+#include "MooseError.h"
+
+SurfacePointClassifier::SurfacePointClassifier(MeshBase & mesh,
+                                               const SurfaceElementSet * set,
+                                               PointContainmentMethod method,
+                                               Real tolerance,
+                                               const PcaRayOptions & pca)
+  : _method(method)
+{
+  switch (_method)
+  {
+    case PointContainmentMethod::PCA_RAY:
+    case PointContainmentMethod::USER_SELECTED_RAY:
+    {
+      if (!set)
+        mooseError("SurfacePointClassifier: a SurfaceElementSet is required for the pca_ray and "
+                   "user_selected_ray methods.");
+
+      // pca_ray passes the (0,0,0) "auto" sentinel (PCA selection); user_selected_ray
+      // passes the user's ray direction through pca.ray_direction.
+      _pca = std::make_unique<PointInPolyhedronCheck>(set->elements(),
+                                                      set->centroids(),
+                                                      pca.ray_direction,
+                                                      tolerance,
+                                                      pca.leaf_max_size,
+                                                      pca.obb_file_name,
+                                                      pca.ray_file_name,
+                                                      pca.comm);
+
+      _bounding_box = set->boundingBox();
+      _num_elements = set->size();
+      break;
+    }
+
+    case PointContainmentMethod::FIXED_X_RAY:
+    {
+      _tri = std::make_unique<TriangleManifold>(mesh, tolerance);
+      _bounding_box = _tri->boundingBox();
+      _num_elements = _tri->numTriangles();
+      break;
+    }
+  }
+}
+
+SurfacePointClassifier::~SurfacePointClassifier() = default;
+
+SurfaceSide
+SurfacePointClassifier::sideness(const Point & point) const
+{
+  if (_tri)
+    return _tri->sideness(point);
+
+  mooseAssert(_pca, "SurfacePointClassifier: no backend was constructed.");
+  return _pca->sideness(point);
+}

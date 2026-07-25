@@ -46,7 +46,6 @@ n_seg = 48
 
   [inout_test]
     type = PointInPolyhedronCheckUO
-    brute_force = true
     builder = TreeBuilder
     obb_file_name = 'obb_bounds.e'
     ray_file_name = 'ray_bounds.e'

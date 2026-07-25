@@ -49,7 +49,6 @@ n_seg = 48
 
   [inout_test]
     type = PointInPolyhedronCheckUO
-    brute_force = true
     builder = TreeBuilder
   []
 []

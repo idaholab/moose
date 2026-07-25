@@ -56,7 +56,7 @@
       type = RunException
       input = 'grain_marking.i'
       cli_args = 'Mesh/boundary_mesh/file=../distance_calc/cube_surface.msh'
-      expect_err = 'Mismatch between embedding mesh dimension'
+      expect_err = 'does not match the surface mesh dimension'
       mesh_mode = REPLICATED
       recover = false
       detail = 'if the embedding mesh dimension does not match the surface mesh dimension plus one.'
@@ -68,7 +68,7 @@
       cli_args = 'Mesh/background_mesh/dim=3 Mesh/background_mesh/zmin=-0.4 '
                  'Mesh/background_mesh/zmax=0.4 Mesh/background_mesh/nz=6 '
                  'Mesh/boundary_mesh/file=../distance_calc/quad_surface.msh'
-      expect_err = 'Unsupported element type in SurfaceMeshBySubdomainBuilder'
+      expect_err = 'unsupported element type'
       mesh_mode = REPLICATED
       recover = false
       detail = 'if the SurfaceMeshBySubdomainBuilder surface mesh contains element types other than '
