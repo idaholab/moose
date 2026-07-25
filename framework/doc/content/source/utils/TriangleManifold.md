@@ -19,6 +19,6 @@ points, and `sideness()`, which returns `SurfaceSide::INSIDE`, `::OUTSIDE`, or
 and `contains()` agree (`contains() == sideness() != OUTSIDE`).
 
 This engine backs the `fixed_x_ray` method of [PointInPolyhedronCheckUO.md]
-(via [SurfacePointClassifier.md]). It supports only 3-D `TRI3` surfaces. The
+(via [PointContainmentClassifier.md]). It supports only 3-D `TRI3` surfaces. The
 referenced mesh must be serialized and must outlive the object; any geometric
 transforms should be applied to the mesh before construction.

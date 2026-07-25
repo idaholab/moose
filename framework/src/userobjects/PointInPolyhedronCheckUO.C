@@ -66,6 +66,6 @@ PointInPolyhedronCheckUO::initialSetup()
   // the builder never builds the whole-mesh set that would go unused.
   const SurfaceElementSet * const set =
       (_method == PointContainmentMethod::FIXED_X_RAY) ? nullptr : &_builder.surfaceElementSet();
-  _classifier = std::make_unique<SurfacePointClassifier>(
+  _classifier = std::make_unique<PointContainmentClassifier>(
       _builder.mesh(), set, _method, _tolerance, pcaRayOptions());
 }

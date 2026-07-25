@@ -1,6 +1,6 @@
-# SurfacePointClassifier
+# PointContainmentClassifier
 
-`SurfacePointClassifier` is a thin facade that unifies the point-containment
+`PointContainmentClassifier` is a thin facade that unifies the point-containment
 backends behind a single API and result type (`SurfaceSide`). Given a
 builder-owned surface mesh and, for the ray-casting methods, a `SurfaceElementSet`,
 it constructs exactly one backend and dispatches `sideness()` and `contains()` to

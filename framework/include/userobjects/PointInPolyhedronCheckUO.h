@@ -10,13 +10,13 @@
 #pragma once
 
 #include "PointInPolyhedronBaseUO.h"
-#include "SurfacePointClassifier.h"
+#include "PointContainmentClassifier.h"
 
 class BoundaryMeshBuilder;
 
 /**
  * Determines whether a point is inside a single closed surface mesh provided by a
- * BoundaryMeshBuilder. Owns one SurfacePointClassifier (the selected backend) and
+ * BoundaryMeshBuilder. Owns one PointContainmentClassifier (the selected backend) and
  * overrides UserObject::spatialValue() so it works directly with
  * SpatialUserObjectAux (1 for INSIDE/ON, 0 for OUTSIDE).
  */
@@ -42,5 +42,5 @@ protected:
   const BoundaryMeshBuilder & _builder;
 
   /// The selected point-containment backend, built in initialSetup().
-  std::unique_ptr<SurfacePointClassifier> _classifier;
+  std::unique_ptr<PointContainmentClassifier> _classifier;
 };

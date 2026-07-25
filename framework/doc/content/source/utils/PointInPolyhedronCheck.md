@@ -14,6 +14,6 @@ directions use an axis-aligned bounding-box fast path. The engine supports both
 2-D `EDGE2` and 3-D `TRI3` surfaces.
 
 This engine backs the `pca_ray` and `user_selected_ray` methods of
-[PointInPolyhedronCheckUO.md] through the [SurfacePointClassifier.md] facade. It
+[PointInPolyhedronCheckUO.md] through the [PointContainmentClassifier.md] facade. It
 can also be used directly by C++ callers that need an arbitrary ray direction,
 which is not exposed at the input-file layer.

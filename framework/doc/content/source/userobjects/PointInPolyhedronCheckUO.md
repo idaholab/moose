@@ -34,6 +34,21 @@ controls how close to the surface a point is treated as on it, and
 in-out test requires a closed, replicated surface mesh, run these cases with
 `mesh_mode = REPLICATED`.
 
+The containment result is available through the standard spatial user object
+interface. A [SpatialUserObjectAux.md] evaluates it at mesh nodes or element
+centroids and stores the result in an auxiliary variable. A
+[SpatialUserObjectVectorPostprocessor.md] evaluates it at explicitly specified
+points and writes the values in the same order as the `points` parameter. Both
+interfaces report `1` for `SurfaceSide::INSIDE` or `SurfaceSide::ON` and `0` for
+`SurfaceSide::OUTSIDE`.
+
+The following complete input creates a closed surface, configures a
+`PointInPolyhedronCheckUO`, stores mesh-wide classifications in the `inside`
+auxiliary variable, and evaluates one interior and one exterior point with a
+vector postprocessor:
+
+!listing test/tests/userobjects/point_in_polyhedron/fixed_x_ray.i
+
 !syntax description /UserObjects/PointInPolyhedronCheckUO
 
 !syntax parameters /UserObjects/PointInPolyhedronCheckUO

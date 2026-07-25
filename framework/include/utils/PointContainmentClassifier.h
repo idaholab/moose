@@ -60,7 +60,7 @@ struct PcaRayOptions
  * and the uniform contains() mapping; the ray/solid-angle math lives entirely in
  * the backends (PointInPolyhedronCheck and TriangleManifold).
  */
-class SurfacePointClassifier
+class PointContainmentClassifier
 {
 public:
   /**
@@ -70,13 +70,13 @@ public:
    * backend and must also outlive this object) and ignored (may be null) for
    * FIXED_X_RAY.
    */
-  SurfacePointClassifier(libMesh::MeshBase & mesh,
-                         const SurfaceElementSet * set,
-                         PointContainmentMethod method,
-                         Real tolerance,
-                         const PcaRayOptions & pca = {});
+  PointContainmentClassifier(libMesh::MeshBase & mesh,
+                             const SurfaceElementSet * set,
+                             PointContainmentMethod method,
+                             Real tolerance,
+                             const PcaRayOptions & pca = {});
 
-  ~SurfacePointClassifier();
+  ~PointContainmentClassifier();
 
   /// Classify a query point relative to the closed surface.
   SurfaceSide sideness(const Point & point) const;

@@ -82,10 +82,22 @@ cz = 2.0
   []
 []
 
+[VectorPostprocessors]
+  [point_containment]
+    type = SpatialUserObjectVectorPostprocessor
+    userobject = in_out_test
+    points = '${cx} ${cy} ${cz}
+              0 0 0'
+    execute_on = initial
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
   exodus = true
+  csv = true
+  execute_on = initial
 []

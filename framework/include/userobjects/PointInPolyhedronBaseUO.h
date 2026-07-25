@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "SurfacePointClassifier.h"
+#include "PointContainmentClassifier.h"
 
 /**
  * Common base class providing shared parameters and validation for

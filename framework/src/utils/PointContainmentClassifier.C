@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SurfacePointClassifier.h"
+#include "PointContainmentClassifier.h"
 #include "SurfaceElementSet.h"
 #include "PointInPolyhedronCheck.h"
 #include "TriangleManifold.h"
 #include "MooseError.h"
 
-SurfacePointClassifier::SurfacePointClassifier(MeshBase & mesh,
-                                               const SurfaceElementSet * set,
-                                               PointContainmentMethod method,
-                                               Real tolerance,
-                                               const PcaRayOptions & pca)
+PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
+                                                        const SurfaceElementSet * set,
+                                                        PointContainmentMethod method,
+                                                        Real tolerance,
+                                                        const PcaRayOptions & pca)
   : _method(method)
 {
   switch (_method)
@@ -26,7 +26,7 @@ SurfacePointClassifier::SurfacePointClassifier(MeshBase & mesh,
     case PointContainmentMethod::USER_SELECTED_RAY:
     {
       if (!set)
-        mooseError("SurfacePointClassifier: a SurfaceElementSet is required for the pca_ray and "
+        mooseError("PointContainmentClassifier: a SurfaceElementSet is required for the pca_ray and "
                    "user_selected_ray methods.");
 
       // pca_ray passes the (0,0,0) "auto" sentinel (PCA selection); user_selected_ray
@@ -55,14 +55,14 @@ SurfacePointClassifier::SurfacePointClassifier(MeshBase & mesh,
   }
 }
 
-SurfacePointClassifier::~SurfacePointClassifier() = default;
+PointContainmentClassifier::~PointContainmentClassifier() = default;
 
 SurfaceSide
-SurfacePointClassifier::sideness(const Point & point) const
+PointContainmentClassifier::sideness(const Point & point) const
 {
   if (_tri)
     return _tri->sideness(point);
 
-  mooseAssert(_pca, "SurfacePointClassifier: no backend was constructed.");
+  mooseAssert(_pca, "PointContainmentClassifier: no backend was constructed.");
   return _pca->sideness(point);
 }

@@ -1,6 +1,7 @@
 [Tests]
   issues = '#33397'
-  design = 'PointInPolyhedronCheckUO.md BoundaryMeshBuilder.md'
+  design = 'PointInPolyhedronCheckUO.md BoundaryMeshBuilder.md '
+           'SpatialUserObjectVectorPostprocessor.md'
 
   [fixed_x_ray]
     type = 'Exodiff'
@@ -10,6 +11,18 @@
     recover = false
     requirement = 'The system shall classify points as inside or outside a closed 3D TRI3 surface '
                   'mesh using the fixed_x_ray (TriangleManifold) point-in-polyhedron method.'
+  []
+
+  [spatial_point_sampling]
+    type = 'CSVDiff'
+    input = 'fixed_x_ray.i'
+    cli_args = 'Outputs/file_base=spatial_point_sampling'
+    csvdiff = 'spatial_point_sampling_point_containment_0000.csv'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall report one for points inside or on a closed surface and zero '
+                  'for points outside it when a point-containment user object is sampled at '
+                  'specified locations by a spatial user object vector postprocessor.'
   []
 
   [fixed_x_ray_debug_files_ignored]
