@@ -19,7 +19,7 @@ SBMSurfaceMeshBuilder::validParams()
   InputParameters params = BoundaryMeshBuilder::validParams();
   params.addClassDescription(
       "Constructs boundary elements and a centroid KDTree from a pre-existing surface mesh. "
-      "The surface mesh is specified in the Mesh block via `save_mesh_as`.");
+      "The surface mesh is specified in the Mesh block via `save_with_name`.");
 
   /// Add a parameter for leaf_max_size for nanoflann
   params.addParam<int>(

@@ -2,7 +2,7 @@
 # driven by a signed level-set function (signed_dist_function) instead of a
 # geometric in-out UserObject. This exercises the SIGN_DISTANCE branch of
 # InterceptedElementModifier::computeSubdomainID. The level set is negative
-# inside the ellipse and positive outside, matching outer_boundary = true.
+# inside the ellipse and positive outside, matching is_domain_inside_surface = true.
 nx = 16
 lambda = 0.5
 a = 1.6
@@ -42,7 +42,7 @@ cy = 1.97
     subdomain_id_inside = 1
     subdomain_id_outside = 2
     lambda = ${lambda}
-    outer_boundary = true
+    is_domain_inside_surface = true
     signed_dist_function = level_set
     execute_on = 'INITIAL'
     execution_order_group = 0

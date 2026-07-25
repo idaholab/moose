@@ -23,7 +23,7 @@ BoundaryMeshBuilder::validParams()
 
   params.addRequiredParam<std::string>(
       "surface_mesh",
-      "The name of the surface mesh saved via the MeshGenerator's `save_mesh_as` parameter.");
+      "The name of the surface mesh saved via the MeshGenerator's `save_with_name` parameter.");
 
   params.addParam<bool>(
       "check_watertightness",

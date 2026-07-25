@@ -43,3 +43,9 @@ SignedDistanceToSurfaceMesh::value(Real t, const Point & p) const
 {
   return UnsignedDistanceToSurfaceMesh::value(t, p) * (_in_out_test->ifInside(p) ? -1.0 : 1.0);
 }
+
+RealGradient
+SignedDistanceToSurfaceMesh::gradient(Real t, const Point & p) const
+{
+  return UnsignedDistanceToSurfaceMesh::gradient(t, p) * (_in_out_test->ifInside(p) ? -1.0 : 1.0);
+}

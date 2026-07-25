@@ -69,8 +69,8 @@ PointInPolyhedronBaseUO::PointInPolyhedronBaseUO(const InputParameters & paramet
 {
   if (_leaf_max_size <= 0)
     paramError("leaf_max_size", "must be greater than zero.");
-  if (_tolerance < 0.0)
-    paramError("tolerance", "must be non-negative.");
+  if (_tolerance <= 0.0)
+    paramError("tolerance", "must be greater than zero.");
 
   const bool ray_direction_set = !_ray_direction.absolute_fuzzy_equals(Point(0.0, 0.0, 0.0));
 

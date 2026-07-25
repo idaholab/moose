@@ -26,11 +26,11 @@ InterceptedElementModifier::validParams()
   params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
 
   params.addParam<Real>("threshold", 0, "Threshold for inside/outside classification.");
-  params.addRequiredParam<bool>("outer_boundary", "Flag for outer boundary handling.");
-  params.addParam<bool>(
-      "mark_neighbor_of_intercepted",
-      false,
-      "Whether we need to mark the element is the element near by the intercepted element.");
+  params.addRequiredParam<bool>(
+      "is_domain_inside_surface",
+      "When true, the retained (inside) domain is the region enclosed by the surface (signed "
+      "distance below 'threshold', or points reported inside by the in-out test); when false, the "
+      "retained domain is the region outside the surface.");
 
   params.addParam<UserObjectName>("in_out_test", "The name of the in-out test user object");
 
@@ -45,7 +45,7 @@ InterceptedElementModifier::InterceptedElementModifier(const InputParameters & p
     _subdomain_id_inside(getParam<SubdomainID>("subdomain_id_inside")),
     _subdomain_id_outside(getParam<SubdomainID>("subdomain_id_outside")),
     _threshold(getParam<Real>("threshold")),
-    _outer_boundary(getParam<bool>("outer_boundary")),
+    _is_domain_inside_surface(getParam<bool>("is_domain_inside_surface")),
     _in_out_test_base(isParamSetByUser("in_out_test")
                           ? &getUserObject<PointInPolyhedronCheckUO>("in_out_test")
                           : nullptr)
@@ -57,12 +57,22 @@ InterceptedElementModifier::InterceptedElementModifier(const InputParameters & p
 void
 InterceptedElementModifier::initialSetup()
 {
+  // Run the base class setup (reinitialize subdomains/variables, moving boundary maps,
+  // reinitialization strategy, and parameter consistency checks) before our own.
+  SBMElementSubdomainModifierBase::initialSetup();
+
+  // Exactly one geometry source must be provided.
+  if (_in_out_test_base && _parsed_function)
+    mooseError("InterceptedElementModifier: provide exactly one geometry source, but both "
+               "'signed_dist_function' and 'in_out_test' were set.");
+
   if (_in_out_test_base)
     _in_out_test_type = DistanceType::GEOMETRY;
   else if (_parsed_function)
     _in_out_test_type = DistanceType::SIGN_DISTANCE;
   else
-    mooseError("InterceptedElementModifier: _in_out_test_base and _parsed_function are null!");
+    mooseError("InterceptedElementModifier: provide exactly one geometry source, but neither "
+               "'signed_dist_function' nor 'in_out_test' was set.");
 }
 
 SubdomainID
@@ -80,53 +90,67 @@ InterceptedElementModifier::computeSubdomainID()
     Real min_val = std::numeric_limits<Real>::max();
     Real max_val = std::numeric_limits<Real>::lowest();
 
-    for (unsigned int node = 0; node < elem->n_nodes(); ++node)
+    for (const auto node : make_range(elem->n_nodes()))
     {
       Real val = _parsed_function->value(_t, elem->point(node));
       min_val = std::min(min_val, val);
       max_val = std::max(max_val, val);
     }
 
-    if (max_val < _threshold)
-      return _outer_boundary ? _subdomain_id_inside : _subdomain_id_outside;
-    else if (min_val > _threshold)
-      return _outer_boundary ? _subdomain_id_outside : _subdomain_id_inside;
-
-    if (_mark_intercepted /*optional*/)
-      return _subdomain_id_intercepted;
-
+    const bool all_nodes_active = (_is_domain_inside_surface && max_val < _threshold) ||
+                                  (!_is_domain_inside_surface && min_val > _threshold);
+    const bool all_nodes_inactive = (_is_domain_inside_surface && min_val > _threshold) ||
+                                    (!_is_domain_inside_surface && max_val < _threshold);
     auto is_active = [&](const Point & p)
     {
       Real val = _parsed_function->value(_t, p);
-      return (_outer_boundary && val < _threshold) || (!_outer_boundary && val > _threshold);
+      return (_is_domain_inside_surface && val < _threshold) ||
+             (!_is_domain_inside_surface && val > _threshold);
     };
 
     const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+    // Same-side nodes do not rule out a surface crossing the element or enclosing a region within
+    // it. Quadrature sampling detects most such cases, but may miss very small regions. Exact
+    // endpoint comparisons are intentional: activeElementFraction returns exactly zero or one when
+    // no or all quadrature points are active, respectively.
+    if (all_nodes_active && ratio_active == 1.0)
+      return _subdomain_id_inside;
+    if (all_nodes_inactive && ratio_active == 0.0)
+      return _subdomain_id_outside;
+
+    if (_mark_intercepted /*optional*/)
+      return _subdomain_id_intercepted;
 
     return check_lambda_flags(ratio_active);
   }
   else if (_in_out_test_type == DistanceType::GEOMETRY)
   {
-    unsigned int active_nodes = 0;
-    for (unsigned int node = 0; node < elem->n_nodes(); ++node)
+    unsigned int inside_nodes = 0;
+    for (const auto node : make_range(elem->n_nodes()))
       if (_in_out_test_base->ifInside(elem->point(node)))
-        ++active_nodes;
+        ++inside_nodes;
 
-    if (active_nodes == elem->n_nodes())
-      return _outer_boundary ? _subdomain_id_inside : _subdomain_id_outside;
-    else if (active_nodes == 0)
-      return _outer_boundary ? _subdomain_id_outside : _subdomain_id_inside;
-
-    if (_mark_intercepted /*optional*/)
-      return _subdomain_id_intercepted;
+    const unsigned int active_nodes =
+        _is_domain_inside_surface ? inside_nodes : elem->n_nodes() - inside_nodes;
 
     auto is_active = [&](const Point & p)
     {
-      return (_outer_boundary && _in_out_test_base->ifInside(p)) ||
-             (!_outer_boundary && !_in_out_test_base->ifInside(p));
+      return (_is_domain_inside_surface && _in_out_test_base->ifInside(p)) ||
+             (!_is_domain_inside_surface && !_in_out_test_base->ifInside(p));
     };
 
     const Real ratio_active = SBMUtils::activeElementFraction(*elem, _qrule_order, is_active);
+    // Same-side nodes do not rule out a surface crossing the element or enclosing a region within
+    // it. Quadrature sampling detects most such cases, but may miss very small regions. Exact
+    // endpoint comparisons are intentional: activeElementFraction returns exactly zero or one when
+    // no or all quadrature points are active, respectively.
+    if (active_nodes == elem->n_nodes() && ratio_active == 1.0)
+      return _subdomain_id_inside;
+    if (active_nodes == 0 && ratio_active == 0.0)
+      return _subdomain_id_outside;
+
+    if (_mark_intercepted /*optional*/)
+      return _subdomain_id_intercepted;
 
     return check_lambda_flags(ratio_active);
   }

@@ -3,7 +3,7 @@
 `BoundaryMeshBuilder` owns a saved surface (boundary) mesh and the surface-element
 wrappers built from it, exposing both for reuse by point-containment and
 distance user objects. It is the sole retriever of the saved mesh: a mesh saved
-through a [MeshGenerator](syntax/Mesh/index.md)'s `save_mesh_as` parameter has
+through a [MeshGenerator](syntax/Mesh/index.md)'s `save_with_name` parameter has
 single-retrieval semantics, so exactly one object may own it. Consumers hold a
 non-owning reference to this builder rather than retrieving the saved mesh again.
 

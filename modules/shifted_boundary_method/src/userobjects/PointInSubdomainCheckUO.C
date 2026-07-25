@@ -11,6 +11,8 @@
 
 #include "libmesh/utility.h"
 
+#include <filesystem>
+
 registerMooseObject("ShiftedBoundaryMethodApp", PointInSubdomainCheckUO);
 
 InputParameters
@@ -48,16 +50,33 @@ PointInSubdomainCheckUO::initialSetup()
                                   ? _ray_direction
                                   : Point(0.0, 0.0, 0.0);
 
+  // Each subdomain gets its own checker, so the OBB/ray debug meshes must go to
+  // distinct files; otherwise later subdomains overwrite earlier ones. Insert the
+  // subdomain id before the extension (e.g. "obb.e" -> "obb_2.e"). An empty name
+  // means "no debug output" and is left untouched.
+  const auto per_subdomain_name = [](const FileName & base, subdomain_id_type id) -> FileName
+  {
+    if (base.empty())
+      return base;
+    std::filesystem::path p(base.c_str());
+    p.replace_filename(p.stem().string() + "_" + std::to_string(id) + p.extension().string());
+    return p.string();
+  };
+
   for (const auto & [subdomain_id, set] : _builder.getSurfaceElementSetsBySubdomain())
+  {
+    const FileName obb_file = per_subdomain_name(_obb_file_name, subdomain_id);
+    const FileName ray_file = per_subdomain_name(_ray_file_name, subdomain_id);
     _subdomain_id_checkers[subdomain_id] =
         std::make_unique<AdaptiveRayContainmentCheck>(set.elements(),
                                                       set.centroids(),
                                                       ray_direction,
                                                       _tolerance,
                                                       _leaf_max_size,
-                                                      _obb_file_name,
-                                                      _ray_file_name,
+                                                      obb_file,
+                                                      ray_file,
                                                       &comm());
+  }
 }
 
 bool

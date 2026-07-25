@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31937'
-  design = 'UnsignedDistanceToSurfaceMesh.md ShortestDistanceToSurface.md'
+  design = 'UnsignedDistanceToSurfaceMesh.md SignedDistanceToSurfaceMesh.md ShortestDistanceToSurface.md'
 
   [distance_test]
     requirement = 'The system shall compute '
@@ -47,7 +47,9 @@
       exodiff = '2D_signed_distance_out.e'
       mesh_mode = REPLICATED # SBMSurfaceMeshBuilder requires a serial mesh for its In-Out test
       recover = false
-      detail = 'a signed distance field in 2D using a point-in-polyhedron in-out test to set the sign.'
+      detail = 'a signed distance field in 2D using a point-in-polyhedron in-out test to set the '
+               'sign, including a gradient that points outward across the surface on both the '
+               'interior and exterior sides.'
     []
 
   []

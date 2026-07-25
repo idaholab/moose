@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SubdomainElementModifier.md'
+  design = 'SubdomainElementModifier.md SurfaceMeshBySubdomainBuilder.md PointInSubdomainCheckUO.md'
   issues = '#31937'
 
   [grain_corner]
@@ -26,6 +26,19 @@
     requirement = 'The system shall assign a dedicated intercepted subdomain ID to background '
                   'elements straddling a grain boundary when mark_intercepted is enabled in '
                   'SubdomainElementModifier.'
+  []
+
+  [subdomain_point_query]
+    type = Exodiff
+    input = 'subdomain_point_query.i'
+    exodiff = 'subdomain_point_query_out.e'
+    allow_test_objects = true
+    mesh_mode = REPLICATED # PointInSubdomainCheckUO requires a serial mesh for its In-Out test
+    recover = false
+    requirement = 'The system shall report, for an arbitrary point, which grain (subdomain) of a '
+                  'SurfaceMeshBySubdomainBuilder surface mesh contains it and whether it lies inside '
+                  'any grain, returning the invalid-subdomain sentinel and a not-inside result for '
+                  'points outside every grain.'
   []
 
   [watertight_report]

@@ -16,7 +16,7 @@ background-mesh elements to subdomains.
 ## Usage
 
 Set the `builder` parameter to the name of a `SurfaceMeshBySubdomainBuilder` user object.
-The `eps` tolerance controls how close to a surface a point is treated as on it, and
+The `tolerance` parameter controls how close to a surface a point is treated as on it, and
 `leaf_max_size` tunes the per-subdomain KDTree. Because the in-out test requires closed,
 replicated surface meshes, run these tests with `mesh_mode = REPLICATED`.
 

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31938'
-  design = 'modules/shifted_boundary_method/index.md'
+  design = 'InterceptedElementModifier.md PointInPolyhedronCheckUO.md SBMSurfaceMeshBuilder.md'
   [sbm_test]
     requirement = 'The system shall be capable of performing point-in-polyhedron in-out testing to '
                   'reclassify elements inside/outside a closed surface for different lambda cut '
@@ -56,16 +56,20 @@
   []
 
   [auto_reproducibility]
-    requirement = 'The system shall produce an in-out classification from the automatically selected '
-                  'PCA ray direction that matches the classification from an explicit axis-aligned '
-                  'ray, confirming the auto direction is reproducible for an anisotropic surface'
+    requirement = 'The system shall produce an in-out classification from an explicit axis-aligned '
+                  'ray that matches the classification from the automatically selected PCA ray '
+                  'direction, confirming the auto direction is reproducible for an anisotropic surface'
+    # These recipes run the explicit user_selected_ray method and exodiff the result directly against
+    # the PCA gold produced by sbm_test (the default point_containment_method is pca_ray), so the
+    # comparison genuinely asserts that the auto-selected direction reproduces the axis-aligned one.
+    # prereq serializes them with the PCA runs to avoid racing on the shared output file.
     [2D_auto_matches_fixed]
       type = 'Exodiff'
       input = '2D_lambda0p5.i'
       cli_args = 'UserObjects/inout_test/point_containment_method=user_selected_ray '
-                 'UserObjects/inout_test/ray_direction="1 0 0" '
-                 'Outputs/file_base=2D_auto_matches_fixed_out'
-      exodiff = '2D_auto_matches_fixed_out.e'
+                 'UserObjects/inout_test/ray_direction="1 0 0"'
+      exodiff = '2D_lambda0p5_out.e'
+      prereq = 'sbm_test/2D_lambda_0p5'
       mesh_mode = REPLICATED
       recover = false
       detail = 'in 2D.'
@@ -74,9 +78,9 @@
       type = 'Exodiff'
       input = '3D_lambda0p5.i'
       cli_args = 'UserObjects/inout_test/point_containment_method=user_selected_ray '
-                 'UserObjects/inout_test/ray_direction="1 0 0" '
-                 'Outputs/file_base=3D_auto_matches_fixed_out'
-      exodiff = '3D_auto_matches_fixed_out.e'
+                 'UserObjects/inout_test/ray_direction="1 0 0"'
+      exodiff = '3D_lambda0p5_out.e'
+      prereq = 'sbm_test/3D_lambda_0p5'
       mesh_mode = REPLICATED
       recover = false
       detail = 'in 3D.'
@@ -92,6 +96,17 @@
     recover = false
     requirement = 'The system shall reject an InterceptedElementModifier lambda outside the '
                   'inclusive range from zero to one.'
+  []
+
+  [zero_tolerance]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'UserObjects/inout_test/tolerance=0'
+    expect_err = "tolerance.*must be greater than zero"
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall reject a non-positive tolerance for the point-in-polyhedron '
+                  'in-out test.'
   []
 
   [signed_function]
@@ -113,6 +128,25 @@
     recover = false
     requirement = 'The system shall assign a dedicated intercepted subdomain ID to elements the '
                   'surface cuts through when mark_intercepted is enabled.'
+  []
+
+  [enclosed_surface]
+    type = Exodiff
+    input = '2D_enclosed_surface.i'
+    exodiff = '2D_enclosed_surface_out.e'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall classify an element as intercepted when a closed surface lies '
+                  'within the element without enclosing any element nodes.'
+  []
+
+  [enclosed_surface_function]
+    type = Exodiff
+    input = '2D_enclosed_surface_function.i'
+    exodiff = '2D_enclosed_surface_function_out.e'
+    recover = false
+    requirement = 'The system shall classify an element as intercepted when a closed signed '
+                  'level-set surface lies within the element without enclosing any element nodes.'
   []
 
   [debug_mesh_output]
@@ -147,5 +181,27 @@
     recover = false
     requirement = 'The system shall report an error when mark_intercepted is enabled without '
                   'specifying the intercepted subdomain ID.'
+  []
+
+  [no_in_out_test]
+    type = 'RunException'
+    input = 'intercepted_no_test.i'
+    expect_err = 'provide exactly one geometry source, but neither'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when an InterceptedElementModifier is configured '
+                  'with neither an in-out test user object nor a signed distance function.'
+  []
+
+  [both_geometry_sources]
+    type = 'RunException'
+    input = '2D_lambda0p5.i'
+    cli_args = 'Functions/level_set/type=ParsedFunction Functions/level_set/expression=x '
+               'MeshModifiers/IntercpetedESM/signed_dist_function=level_set'
+    expect_err = 'provide exactly one geometry source, but both'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when an InterceptedElementModifier is configured '
+                  'with both an in-out test user object and a signed distance function.'
   []
 []

@@ -42,8 +42,10 @@ private:
   /// Threshold value for classification
   Real _threshold;
 
-  /// Outer boundary handling flag
-  bool _outer_boundary;
+  /// When true, the retained (inside) domain is the region enclosed by the surface
+  /// (signed distance below threshold, or points reported inside by the in-out test);
+  /// when false, the retained domain is the region outside the surface.
+  bool _is_domain_inside_surface;
 
   /// user object for in-out test
   const PointInPolyhedronCheckUO * _in_out_test_base;

@@ -31,6 +31,12 @@ public:
   using UnsignedDistanceToSurfaceMesh::value;
   Real value(Real t, const Point & p) const override;
 
+  /// Return the spatial gradient of the signed distance function. The signed
+  /// distance gradient points in the direction of increasing signed value
+  /// (outward across the surface) on both sides, so the inherited unsigned
+  /// gradient must be negated for interior points.
+  RealGradient gradient(Real t, const Point & p) const override;
+
 private:
   /// user object for in-out test
   const PointInPolyhedronCheckUO * _in_out_test;

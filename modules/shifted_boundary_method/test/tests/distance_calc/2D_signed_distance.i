@@ -87,6 +87,13 @@ n_seg = 48
     order = CONSTANT
     family = MONOMIAL
   []
+  # Vector field capturing the signed-distance gradient direction. Sampling the
+  # gradient at every element centroid exercises points both inside and outside
+  # the circle, so the gold pins down the outward-pointing direction on both sides.
+  [signed_distance_grad]
+    order = CONSTANT
+    family = MONOMIAL_VEC
+  []
 []
 
 [AuxKernels]
@@ -100,6 +107,12 @@ n_seg = 48
     type = ElementCentroidToSurfaceDistanceAux
     distance_to_surface = distance_to_surface
     variable = unsigned_distance
+    execute_on = 'INITIAL timestep_begin'
+  []
+  [signed_dist_grad]
+    type = FunctorElementalGradientAux
+    functor = sign_dist_square
+    variable = signed_distance_grad
     execute_on = 'INITIAL timestep_begin'
   []
 []
