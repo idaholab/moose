@@ -74,5 +74,16 @@
       detail = 'if the SurfaceMeshBySubdomainBuilder surface mesh contains element types other than '
                'EDGE2 or TRI3.'
     []
+
+    [fixed_x_ray_unsupported]
+      type = RunException
+      input = 'grain_marking.i'
+      cli_args = 'UserObjects/subdomain_tester/point_containment_method=fixed_x_ray'
+      expect_err = 'fixed_x_ray is not supported by PointInSubdomainCheckUO'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'if the fixed_x_ray method is requested for PointInSubdomainCheckUO, which performs '
+               'per-subdomain ray-casting and cannot use the whole-mesh TriangleManifold engine.'
+    []
   []
 []

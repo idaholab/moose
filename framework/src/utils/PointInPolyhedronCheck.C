@@ -385,10 +385,10 @@ PointInPolyhedronCheck::preparePCASVD()
   _second_variance_vector = Point(VT(1, 0), VT(1, 1), VT(1, 2)); // second largest variance
   _min_variance_vector = Point(VT(2, 0), VT(2, 1), VT(2, 2));    // min variance
 
-  // (e) normalized it to be safe
-  _max_variance_vector.unit();
-  _second_variance_vector.unit();
-  _min_variance_vector.unit();
+  // (e) normalize them to be safe (unit() returns a normalized copy)
+  _max_variance_vector = _max_variance_vector.unit();
+  _second_variance_vector = _second_variance_vector.unit();
+  _min_variance_vector = _min_variance_vector.unit();
 
   // (f) Canonicalize the sign of each principal direction. SVD singular vectors
   // are only defined up to sign, and LAPACK can return opposite signs on

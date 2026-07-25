@@ -79,13 +79,13 @@ cz = 2.0
     type = PointInPolyhedronCheckUO
     builder = surface_builder
     point_containment_method = fixed_x_ray
-    # fixed_x_ray uses the TriangleManifold engine, which does not emit OBB/ray
-    # debug files; supplying these names must be ignored (info message only).
-    obb_file_name = 'should_not_be_written_obb.e'
-    ray_file_name = 'should_not_be_written_ray.e'
   []
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Outputs]
+  exodus = true
 []

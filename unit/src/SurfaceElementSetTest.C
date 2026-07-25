@@ -52,6 +52,35 @@ makeTwoTriangleMesh(const Parallel::Communicator & comm)
   return mesh;
 }
 
+void
+addEdge(MeshBase & mesh, Node * n0, Node * n1)
+{
+  Elem * e = mesh.add_elem(new Edge2);
+  e->set_node(0, n0);
+  e->set_node(1, n1);
+}
+
+// Two EDGE2 elements along the x-axis (a one-dimensional surface mesh embedded in
+// 2D). Node bounding box is [0,2] x {0} x {0}; per-element centroids are the edge
+// midpoints.
+std::unique_ptr<ReplicatedMesh>
+makeTwoEdgeMesh(const Parallel::Communicator & comm)
+{
+  auto mesh = std::make_unique<ReplicatedMesh>(comm);
+  mesh->set_mesh_dimension(1);
+  mesh->set_spatial_dimension(2);
+
+  Node * n0 = mesh->add_point(Point(0, 0, 0));
+  Node * n1 = mesh->add_point(Point(1, 0, 0));
+  Node * n2 = mesh->add_point(Point(2, 0, 0));
+
+  addEdge(*mesh, n0, n1); // centroid (0.5, 0, 0)
+  addEdge(*mesh, n1, n2); // centroid (1.5, 0, 0)
+
+  mesh->prepare_for_use();
+  return mesh;
+}
+
 } // namespace
 
 TEST_F(SurfaceElementSetTest, fromMesh)
@@ -62,6 +91,9 @@ TEST_F(SurfaceElementSetTest, fromMesh)
   ASSERT_EQ(set.size(), std::size_t{2});
   ASSERT_EQ(set.elements().size(), std::size_t{2});
   ASSERT_EQ(set.centroids().size(), std::size_t{2});
+
+  // A TRI3 surface is embedded in a 3D mesh (element dim + 1).
+  EXPECT_EQ(set.elements()[0]->expectedEmbeddingMeshDim(), 3u);
 
   // Centroids align index-for-index with elements (element iteration order).
   for (const auto i : index_range(set.elements()))
@@ -75,6 +107,32 @@ TEST_F(SurfaceElementSetTest, fromMesh)
   EXPECT_NEAR(bb.min()(2), 0.0, 1e-8);
   EXPECT_NEAR(bb.max()(0), 1.0, 1e-8);
   EXPECT_NEAR(bb.max()(1), 1.0, 1e-8);
+  EXPECT_NEAR(bb.max()(2), 0.0, 1e-8);
+}
+
+TEST_F(SurfaceElementSetTest, fromMeshEdge2)
+{
+  auto mesh = makeTwoEdgeMesh(_app->comm());
+  const auto set = SurfaceElementSet::fromMesh(*mesh);
+
+  ASSERT_EQ(set.size(), std::size_t{2});
+  ASSERT_EQ(set.elements().size(), std::size_t{2});
+  ASSERT_EQ(set.centroids().size(), std::size_t{2});
+
+  EXPECT_TRUE(set.elements()[0]->elem().type() == EDGE2);
+  // An EDGE2 surface is embedded in a 2D mesh (element dim + 1).
+  EXPECT_EQ(set.elements()[0]->expectedEmbeddingMeshDim(), 2u);
+
+  for (const auto i : index_range(set.elements()))
+    EXPECT_TRUE(set.centroids()[i].absolute_fuzzy_equals(set.elements()[i]->elem().vertex_average(),
+                                                         1e-12));
+
+  const auto & bb = set.boundingBox();
+  EXPECT_NEAR(bb.min()(0), 0.0, 1e-8);
+  EXPECT_NEAR(bb.max()(0), 2.0, 1e-8);
+  EXPECT_NEAR(bb.min()(1), 0.0, 1e-8);
+  EXPECT_NEAR(bb.max()(1), 0.0, 1e-8);
+  EXPECT_NEAR(bb.min()(2), 0.0, 1e-8);
   EXPECT_NEAR(bb.max()(2), 0.0, 1e-8);
 }
 
