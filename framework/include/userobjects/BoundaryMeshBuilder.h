@@ -45,9 +45,10 @@ public:
   /// the builder itself does not modify it after initialSetup().
   MeshBase & mesh() const;
 
-  /// The whole-mesh SurfaceElementSet, built lazily on first call. Subclasses
-  /// that override buildDefaultSet() with a different grouping may leave this
-  /// empty (calling this then trips an assertion).
+  /// The whole-mesh SurfaceElementSet, built lazily on first call. Must be called
+  /// only from the single-threaded setup phase (e.g. initialSetup()): the lazy
+  /// build is not re-entrant. Subclasses that override buildDefaultSet() with a
+  /// different grouping may leave this empty (calling this then trips an assertion).
   const SurfaceElementSet & surfaceElementSet() const;
 
 protected:

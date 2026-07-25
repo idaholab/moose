@@ -74,10 +74,10 @@ public:
   Real getProjectedBoundingBoxDiagonal(const Point & normal_dir) const;
 
 private:
-  ///< Pointer to the libMesh element representing this surface face. Derived
-  ///< classes access it through elem() rather than this field directly.
+  /// Pointer to the libMesh element representing this surface face. Derived
+  /// classes access it through elem() rather than this field directly.
   const Elem * _elem;
-  ///< Unit normal vector of the surface element, computed eagerly in the
-  ///< derived constructor and passed through the base constructor.
+  /// Unit normal vector of the surface element, computed eagerly in the
+  /// derived constructor and passed through the base constructor.
   const Point _normal;
 };
