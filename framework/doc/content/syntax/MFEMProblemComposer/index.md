@@ -8,20 +8,20 @@ multi-physics system. As of yet only a single problem operator per MFEM problem 
 multiple are defined. The ProblemOperatorBuilder classes are built within the MFEMProblem class 
 however the ProblemOperatos are built and owned by the MFEM executioners.
 
-## Steady problem operator builder
+## Steady problem composer
 
 The `SteadyProblemComposer` class is the default of the MFEMSteady executioner and does
 not need to be declared explicitly. The `SteadyProblemComposer` class uses systematic
 logic to build one of 3 possible ProblemOperators they are the `EquationSystemProblemOperator`,
 `ComplexEquationSystemProblemOperator` and `EigenproblemESProblemOperator`.
 
-## Transient problem operator builder
+## Transient problem composer
 
 The `TransientProblemComposer` class is the default of the MFEMTransient executioner and
 does not need to be declared explicitly. The `TransientProblemComposer` class builds 
 the `TimeDependentEquationSystemProblemOperator`.
 
-## Custom problem operator builder example
+## Custom problem operator composer example
 
 The custom problem operator example will follow the `MFEMCustomProblemOperator.C` unit-test which
 is based on MFEM's [ex0p](https://github.com/mfem/mfem/blob/master/examples/ex0p.cpp). Firstly a
@@ -171,7 +171,7 @@ void CustomDummyProblemOperator::Solve() override
 
 Once the `ProblemOperator` has been built the `ProblemComposer` class is needed,
 this class is constructed by `MFEMProblem` and called by the executioner. The builder class
-must inherit from `ProblemComposer` making it an `MFEMObject` and by proxy a 
+must inherit from `ProblemComposerBase` making it an `MFEMObject` and by proxy a 
 `MooseObject` thus it has a fixed signature constructor and destructor, it has one method
 that has a fixed signature that is called by the executioner. All of the code must
 be within the `Moose::MFEM` namespace for simplicity. An example minimal class looks like:
