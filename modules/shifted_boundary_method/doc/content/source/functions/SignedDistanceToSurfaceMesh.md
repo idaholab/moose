@@ -5,7 +5,7 @@ arbitrary surface mesh. It extends
 [`UnsignedDistanceToSurfaceMesh`](functions/UnsignedDistanceToSurfaceMesh.md) by
 multiplying the unsigned nearest-boundary distance by a sign obtained from an in-out test
 user object (via `in_out_test`, a
-[`PointInPolyhedronCheckUO`](userobjects/PointInPolyhedronCheckUO.md)): the value is
+[`PointInPolyhedronCheckUO`](PointInPolyhedronCheckUO.md)): the value is
 negative inside the surface and positive outside. As with the unsigned function, the
 gradient evaluates to the unit vector pointing from the boundary toward the query point.
 

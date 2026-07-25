@@ -4,7 +4,7 @@
 background mesh as inside or outside a geometry and assigns it one of two subdomain IDs
 (`subdomain_id_inside` or `subdomain_id_outside`). The geometry is described either by a
 signed-distance `Function` (via `signed_dist_function`) or by an in-out test user object
-(via `in_out_test`, a [`PointInPolyhedronCheckUO`](userobjects/PointInPolyhedronCheckUO.md)).
+(via `in_out_test`, a [`PointInPolyhedronCheckUO`](PointInPolyhedronCheckUO.md)).
 
 For each element the modifier:
 

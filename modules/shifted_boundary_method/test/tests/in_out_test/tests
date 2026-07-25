@@ -129,13 +129,13 @@
   []
 
   [obb_write]
-    type = 'Exodiff'
+    type = 'CheckFiles'
     input = '2D_obb_write.i'
-    exodiff = 'obb_bounds.e ray_bounds.e'
+    check_files = 'obb_bounds.e ray_bounds.e'
     mesh_mode = REPLICATED
     recover = false
-    requirement = 'The system shall write the oriented bounding box (QUAD4) and shortest-axis ray '
-                  '(EDGE2) meshes built for the in-out test to standalone mesh files.'
+    requirement = 'The system shall write the oriented bounding box and shortest-axis ray meshes '
+                  'built for the in-out test to standalone mesh files.'
   []
 
   [mark_intercepted_missing_id]

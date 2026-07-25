@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#33397'
+  design = 'PointInPolyhedronCheckUO.md BoundaryMeshBuilder.md'
+
+  [fixed_x_ray_debug_files_ignored]
+    type = 'CheckFiles'
+    input = 'fixed_x_ray.i'
+    expect_out = 'fixed_x_ray does not produce OBB/ray debug files'
+    check_not_exists = 'should_not_be_written_obb.e should_not_be_written_ray.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall perform point-in-polyhedron classification with the fixed_x_ray '
+                  'method against a closed TRI3 surface mesh, reporting via an informational message '
+                  'that the requested OBB and ray debug files are ignored, and writing no such debug '
+                  'files, because that method does not produce them.'
+  []
+
+  [fixed_x_ray_rejects_non_tri3]
+    type = 'RunException'
+    input = 'fixed_x_ray_non_tri3.i'
+    expect_err = 'fixed_x_ray .* supports only TRI3 surface elements'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall report an error when the fixed_x_ray point-in-polyhedron method '
+                  'is applied to a surface mesh that contains element types other than TRI3, since '
+                  'that method supports triangulated surfaces only.'
+  []
+[]

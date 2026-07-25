@@ -10,6 +10,9 @@
 #include "PointInPolyhedronCheckUO.h"
 #include "BoundaryMeshBuilder.h"
 
+#include "libmesh/elem.h"
+#include "libmesh/string_to_enum.h"
+
 registerMooseObject("MooseApp", PointInPolyhedronCheckUO);
 
 InputParameters
@@ -38,11 +41,25 @@ PointInPolyhedronCheckUO::initialSetup()
   // The fixed_x_ray backend (TriangleManifold) handles only 3D TRI3 surface
   // meshes (mesh_dimension 2). Reject 2D EDGE2 surfaces here with a clear
   // message; use pca_ray or user_selected_ray for 2D instead.
-  if (_method == PointContainmentMethod::FIXED_X_RAY && _builder.mesh().mesh_dimension() != 2)
-    paramError("point_containment_method",
-               "fixed_x_ray (the TriangleManifold engine) supports only 3D TRI3 surface meshes. "
-               "For a 2D (EDGE2) surface use pca_ray, or user_selected_ray with "
-               "ray_direction = '1 0 0'.");
+  if (_method == PointContainmentMethod::FIXED_X_RAY)
+  {
+    if (_builder.mesh().mesh_dimension() != 2)
+      paramError("point_containment_method",
+                 "fixed_x_ray (the TriangleManifold engine) supports only 3D TRI3 surface meshes. "
+                 "For a 2D (EDGE2) surface use pca_ray, or user_selected_ray with "
+                 "ray_direction = '1 0 0'.");
+
+    // TriangleManifold accepts TRI3 only. Validate the element type up front so an
+    // unsupported surface (e.g. QUAD4) fails with a method-aware message here rather
+    // than inside the later manifold construction.
+    for (const auto * elem : _builder.mesh().active_element_ptr_range())
+      if (elem->type() != TRI3)
+        paramError("point_containment_method",
+                   "fixed_x_ray (the TriangleManifold engine) supports only TRI3 surface elements, "
+                   "but the surface mesh contains ",
+                   libMesh::Utility::enum_to_string(elem->type()),
+                   ". Use pca_ray or user_selected_ray instead.");
+  }
 
   // The fixed_x_ray (TriangleManifold) backend classifies from the mesh directly
   // and ignores the SurfaceElementSet. Skip surfaceElementSet() in that case so
