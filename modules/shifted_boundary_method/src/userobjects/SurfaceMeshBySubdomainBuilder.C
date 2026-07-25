@@ -27,6 +27,17 @@ SurfaceMeshBySubdomainBuilder::SurfaceMeshBySubdomainBuilder(const InputParamete
 }
 
 void
+SurfaceMeshBySubdomainBuilder::initialSetup()
+{
+  // Run the shared mesh setup/validation. The base no longer builds a set
+  // eagerly, so build the per-subdomain grouping here: this builder's consumers
+  // read it via getSurfaceElementSetsBySubdomain(), not surfaceElementSet(), so
+  // the base class's lazy trigger would never fire.
+  BoundaryMeshBuilder::initialSetup();
+  buildDefaultSet();
+}
+
+void
 SurfaceMeshBySubdomainBuilder::buildDefaultSet()
 {
   // Group active elements by subdomain, then build one SurfaceElementSet per group.

@@ -44,6 +44,11 @@ PointInPolyhedronCheckUO::initialSetup()
                "For a 2D (EDGE2) surface use pca_ray, or user_selected_ray with "
                "ray_direction = '1 0 0'.");
 
+  // The fixed_x_ray (TriangleManifold) backend classifies from the mesh directly
+  // and ignores the SurfaceElementSet. Skip surfaceElementSet() in that case so
+  // the builder never builds the whole-mesh set that would go unused.
+  const SurfaceElementSet * const set =
+      (_method == PointContainmentMethod::FIXED_X_RAY) ? nullptr : &_builder.surfaceElementSet();
   _classifier = std::make_unique<SurfacePointClassifier>(
-      _builder.mesh(), &_builder.surfaceElementSet(), _method, _tolerance, pcaRayOptions());
+      _builder.mesh(), set, _method, _tolerance, pcaRayOptions());
 }

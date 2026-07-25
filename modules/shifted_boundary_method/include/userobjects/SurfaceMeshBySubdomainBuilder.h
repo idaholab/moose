@@ -24,6 +24,8 @@ public:
   static InputParameters validParams();
   SurfaceMeshBySubdomainBuilder(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   /// Per-subdomain SurfaceElementSets. Valid after initialSetup().
   const std::unordered_map<subdomain_id_type, SurfaceElementSet> &
   getSurfaceElementSetsBySubdomain() const

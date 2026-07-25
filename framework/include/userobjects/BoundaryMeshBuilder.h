@@ -45,9 +45,9 @@ public:
   /// the builder itself does not modify it after initialSetup().
   MeshBase & mesh() const;
 
-  /// The whole-mesh SurfaceElementSet. Valid after initialSetup() for the base
-  /// class; subclasses that override buildDefaultSet() with a different grouping
-  /// may leave this empty.
+  /// The whole-mesh SurfaceElementSet, built lazily on first call. Subclasses
+  /// that override buildDefaultSet() with a different grouping may leave this
+  /// empty (calling this then trips an assertion).
   const SurfaceElementSet & surfaceElementSet() const;
 
 protected:
@@ -66,8 +66,10 @@ protected:
   /// The owned boundary mesh, kept alive so SurfaceElement pointers stay valid.
   std::unique_ptr<MeshBase> _mesh;
 
-  /// The whole-mesh SurfaceElementSet (populated by buildDefaultSet()).
-  std::unique_ptr<SurfaceElementSet> _set;
+  /// The whole-mesh SurfaceElementSet. Built lazily by surfaceElementSet() (or
+  /// eagerly by a subclass) via buildDefaultSet(); mutable so the const accessor
+  /// can populate it on first use.
+  mutable std::unique_ptr<SurfaceElementSet> _set;
 
   /// The name of a mesh saved via a MeshGenerator's `save_mesh_as` parameter.
   const std::string _bnd_mesh_name;

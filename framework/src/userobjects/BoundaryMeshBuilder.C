@@ -69,8 +69,6 @@ BoundaryMeshBuilder::initialSetup()
                expected_dim_embedding_mesh,
                ").");
 
-  buildDefaultSet();
-
   if (_check_watertightness)
   {
     if (checkWatertightness())
@@ -107,6 +105,11 @@ BoundaryMeshBuilder::mesh() const
 const SurfaceElementSet &
 BoundaryMeshBuilder::surfaceElementSet() const
 {
+  // Build the whole-mesh set on first use so backends that never need it (e.g.
+  // the fixed_x_ray TriangleManifold engine) pay no allocation for it.
+  if (!_set)
+    const_cast<BoundaryMeshBuilder *>(this)->buildDefaultSet();
+
   mooseAssert(_set,
               "BoundaryMeshBuilder '" + name() +
                   "': the whole-mesh SurfaceElementSet is not available. A subclass may have "
