@@ -186,6 +186,35 @@ TEST_F(TriangleManifoldTest, surfacePoint)
   EXPECT_TRUE(manifold.contains(Point(0.5, 0.5, 0.0)));
 }
 
+TEST_F(TriangleManifoldTest, sideness)
+{
+  auto mesh = makeUnitCubeMesh(_app->comm());
+  TriangleManifold manifold(*mesh, 1e-10);
+
+  // Interior and clearly-exterior points resolve to INSIDE / OUTSIDE.
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.5)), SurfaceSide::INSIDE);
+  EXPECT_EQ(manifold.sideness(Point(1.5, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+  EXPECT_EQ(manifold.sideness(Point(-0.5, 0.5, 0.5)), SurfaceSide::OUTSIDE);
+
+  // contains() maps INSIDE (and ON) to true, OUTSIDE to false.
+  EXPECT_EQ(manifold.contains(Point(0.5, 0.5, 0.5)),
+            manifold.sideness(Point(0.5, 0.5, 0.5)) != SurfaceSide::OUTSIDE);
+  EXPECT_EQ(manifold.contains(Point(1.5, 0.5, 0.5)),
+            manifold.sideness(Point(1.5, 0.5, 0.5)) != SurfaceSide::OUTSIDE);
+}
+
+TEST_F(TriangleManifoldTest, sidenessOnSurface)
+{
+  auto mesh = makeUnitCubeMesh(_app->comm());
+  TriangleManifold manifold(*mesh, 1e-6);
+
+  // Points on a face interior and at a vertex are categorized as ON, and still
+  // count as contained.
+  EXPECT_EQ(manifold.sideness(Point(0.5, 0.5, 0.0)), SurfaceSide::ON);
+  EXPECT_EQ(manifold.sideness(Point(0.0, 0.0, 0.0)), SurfaceSide::ON);
+  EXPECT_TRUE(manifold.contains(Point(0.5, 0.5, 0.0)));
+}
+
 TEST_F(TriangleManifoldTest, boundingBox)
 {
   auto mesh = makeUnitCubeMesh(_app->comm());
