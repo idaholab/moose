@@ -107,7 +107,7 @@ namespace Moose::MFEM
  * Custom Dummy Operator builder required to build MFEM Problem Operators
  * used by the executioner
  */
-class ProblemOperatorBuilderCustomDummy : public ProblemComposerBase
+class CustomDummyProblemComposer : public ProblemComposerBase
 {
 public:
   static InputParameters validParams()
@@ -116,10 +116,10 @@ public:
     return params;
   };
 
-  ProblemOperatorBuilderCustomDummy(const InputParameters & parameters)
+  CustomDummyProblemComposer(const InputParameters & parameters)
     : ProblemComposerBase(parameters) {};
 
-  ~ProblemOperatorBuilderCustomDummy() = default;
+  ~CustomDummyProblemComposer() = default;
 
   /// Returns a pointer to the operator's equation system.
   std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
@@ -129,7 +129,7 @@ public:
   };
 };
 
-registerMooseObject("MooseApp", ProblemOperatorBuilderCustomDummy);
+registerMooseObject("MooseApp", CustomDummyProblemComposer);
 };
 
 /*****************************************************************
@@ -168,9 +168,9 @@ public:
     // Add the custom problem operator builder
     // then get it and build the operator
     InputParameters _problem_operator_params =
-        _factory.getValidParams("ProblemOperatorBuilderCustomDummy");
+        _factory.getValidParams("CustomDummyProblemComposer");
     _mfem_problem->addMFEMProblemOperator(
-        "ProblemOperatorBuilderCustomDummy", "custom_problem_operator", _problem_operator_params);
+        "CustomDummyProblemComposer", "custom_problem_operator", _problem_operator_params);
     _problem_composer = _mfem_problem->getProblemComposer();
     _problem_operator = _problem_composer->createProblemOperator(*_mfem_problem);
   };
