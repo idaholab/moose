@@ -23,7 +23,7 @@ class Ball;
 /// collection of SurfaceElement wrappers. The ray direction is either supplied
 /// axis-aligned (e.g. (1,0,0)) and used directly with an axis-aligned bounding box,
 /// or auto-selected via PCA when a non-axis (or default (0,0,0)) direction is given.
-struct AdaptiveRayContainmentCheck final
+class AdaptiveRayContainmentCheck final
 {
 public:
   AdaptiveRayContainmentCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
