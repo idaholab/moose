@@ -132,7 +132,7 @@ InterceptedElementModifier::computeSubdomainID()
   }
   else
   {
-    mooseError("InterceptedElementModifier: Unknown PointInPolyhedronCheck type!");
+    mooseError("InterceptedElementModifier: Unknown AdaptiveRayContainmentCheck type!");
   }
 
   return -1; // fallback (shouldn't reach)

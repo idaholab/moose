@@ -22,15 +22,15 @@ namespace libMesh
 class MeshBase;
 }
 class SurfaceElementSet;
-class PointInPolyhedronCheck;
+class AdaptiveRayContainmentCheck;
 class TriangleManifold;
 
 /// Backend algorithm used for point-containment queries.
 enum class PointContainmentMethod
 {
-  /// PointInPolyhedronCheck with a PCA-selected ray (default SBM behavior).
+  /// AdaptiveRayContainmentCheck with a PCA-selected ray (default SBM behavior).
   PCA_RAY,
-  /// PointInPolyhedronCheck with a user-supplied ray_direction (axis-aligned
+  /// AdaptiveRayContainmentCheck with a user-supplied ray_direction (axis-aligned
   /// directions use the AABB fast path; non-axis directions fall back to PCA
   /// selection inside the engine).
   USER_SELECTED_RAY,
@@ -58,7 +58,7 @@ struct PcaRayOptions
  * Selects and constructs exactly one backend and exposes a single result type
  * (SurfaceSide). It adds no geometry logic of its own beyond backend selection
  * and the uniform contains() mapping; the ray/solid-angle math lives entirely in
- * the backends (PointInPolyhedronCheck and TriangleManifold).
+ * the backends (AdaptiveRayContainmentCheck and TriangleManifold).
  */
 class PointContainmentClassifier
 {
@@ -94,8 +94,8 @@ private:
   const PointContainmentMethod _method;
 
   /// One of the two backends is constructed; the other stays null.
-  std::unique_ptr<PointInPolyhedronCheck> _pca; ///< PCA_RAY or USER_SELECTED_RAY
-  std::unique_ptr<TriangleManifold> _tri;       ///< FIXED_X_RAY
+  std::unique_ptr<AdaptiveRayContainmentCheck> _pca; ///< PCA_RAY or USER_SELECTED_RAY
+  std::unique_ptr<TriangleManifold> _tri;            ///< FIXED_X_RAY
 
   /// Cached method-independent AABB and element count for the accessors.
   libMesh::BoundingBox _bounding_box;

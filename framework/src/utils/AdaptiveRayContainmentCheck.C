@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PointInPolyhedronCheck.h"
+#include "AdaptiveRayContainmentCheck.h"
 #include "LineSegment.h"
 #include "Ball.h"
 #include "libmesh/plane.h"
 #include "libmesh/utility.h"
 
-PointInPolyhedronCheck::PointInPolyhedronCheck(
+AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
     const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
     const std::vector<Point> & centroids,
     const Point ray_direction,
@@ -32,8 +32,9 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
     _comm(comm),
     _plane_origin(Point(0.0, 0.0, 0.0))
 {
-  mooseAssert(!_bd_elements.empty(),
-              "PointInPolyhedronCheck: boundary elements should not be empty or uninitialized.");
+  mooseAssert(
+      !_bd_elements.empty(),
+      "AdaptiveRayContainmentCheck: boundary elements should not be empty or uninitialized.");
   _num_elements = _bd_elements.size();
   _dim = _bd_elements[0]->expectedEmbeddingMeshDim();
 
@@ -53,7 +54,7 @@ PointInPolyhedronCheck::PointInPolyhedronCheck(
 }
 
 SurfaceSide
-PointInPolyhedronCheck::sideness(const Point & p) const
+AdaptiveRayContainmentCheck::sideness(const Point & p) const
 {
   if (isOutsideBoundingBox(p))
     return SurfaceSide::OUTSIDE;
@@ -131,35 +132,35 @@ PointInPolyhedronCheck::sideness(const Point & p) const
 
   std::ostringstream oss;
   oss << p;
-  mooseError("PointInPolyhedronCheck: No decision could be made for point " + oss.str());
+  mooseError("AdaptiveRayContainmentCheck: No decision could be made for point " + oss.str());
 }
 
 bool
-PointInPolyhedronCheck::rayIntersectGeometry(const Point & ray_start,
-                                             const Point & ray_end,
-                                             const SurfaceElement * elem) const
+AdaptiveRayContainmentCheck::rayIntersectGeometry(const Point & ray_start,
+                                                  const Point & ray_end,
+                                                  const SurfaceElement * elem) const
 {
   LineSegment ray_segment(ray_start, ray_end);
   return elem->intersect(ray_segment);
 }
 
 Ball
-PointInPolyhedronCheck::computeBoundingBall(const SurfaceElement * elem) const
+AdaptiveRayContainmentCheck::computeBoundingBall(const SurfaceElement * elem) const
 {
   return elem->computeBoundingBall();
 }
 
 bool
-PointInPolyhedronCheck::isOutsideBoundingBox(const Point & query_point) const
+AdaptiveRayContainmentCheck::isOutsideBoundingBox(const Point & query_point) const
 {
   return (_build_obb) ? !_obb_bounds.contains(query_point, _eps_on_surface)
                       : !_bounds.contains_point(query_point);
 }
 
 bool
-PointInPolyhedronCheck::isOutsideRayBBox(const Point & orig,
-                                         const Point & dir,
-                                         const Ball & ball) const
+AdaptiveRayContainmentCheck::isOutsideRayBBox(const Point & orig,
+                                              const Point & dir,
+                                              const Ball & ball) const
 {
   Point lb, ub;
   const auto & center = ball.center();
@@ -181,9 +182,9 @@ PointInPolyhedronCheck::isOutsideRayBBox(const Point & orig,
 }
 
 bool
-PointInPolyhedronCheck::isOutsideBoundingRegion(const Point & orig,
-                                                const Point & dir,
-                                                const Ball & ball) const
+AdaptiveRayContainmentCheck::isOutsideBoundingRegion(const Point & orig,
+                                                     const Point & dir,
+                                                     const Ball & ball) const
 {
   const auto & center = ball.center();
   const auto radius = ball.radius();
@@ -201,7 +202,7 @@ PointInPolyhedronCheck::isOutsideBoundingRegion(const Point & orig,
 }
 
 BoundingBox
-PointInPolyhedronCheck::computeGlobalBoundingBox()
+AdaptiveRayContainmentCheck::computeGlobalBoundingBox()
 {
   _bounds_ready = true;
   const auto & first_elem = _bd_elements[0]->elem();
@@ -224,10 +225,10 @@ PointInPolyhedronCheck::computeGlobalBoundingBox()
 }
 
 const Point
-PointInPolyhedronCheck::generateRayStart(const Point & point,
-                                         const bool inverted,
-                                         const std::optional<Point> & forced_ray_direction_XYZ,
-                                         const int number_to_larger_variance) const
+AdaptiveRayContainmentCheck::generateRayStart(const Point & point,
+                                              const bool inverted,
+                                              const std::optional<Point> & forced_ray_direction_XYZ,
+                                              const int number_to_larger_variance) const
 {
   if (!_build_obb || forced_ray_direction_XYZ.has_value()) // Ray direction is X, Y, or Z
   {
@@ -244,8 +245,9 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
       else if (forced_ray_direction_XYZ && forced_ray_direction_XYZ.value()(dim) == 1.0)
         ray_dir = dim;
 
-    mooseAssert(ray_dir >= 0,
-                "PointInPolyhedronCheck::generateRayStart: no axis-aligned ray direction found");
+    mooseAssert(
+        ray_dir >= 0,
+        "AdaptiveRayContainmentCheck::generateRayStart: no axis-aligned ray direction found");
 
     // Extend starting point outside bounding box in ray_dir
 
@@ -292,7 +294,7 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
   else if (_dim - number_to_larger_variance == 1 /* for 3D only*/)
     plane_normal = _second_variance_vector;
   else
-    mooseError("PointInPolyhedronCheck::generateRayStart: invalid "
+    mooseError("AdaptiveRayContainmentCheck::generateRayStart: invalid "
                "number_to_larger_variance ",
                number_to_larger_variance,
                " for dimension ",
@@ -309,7 +311,7 @@ PointInPolyhedronCheck::generateRayStart(const Point & point,
 
 ///  Automatically set the ray direction if _ray_direction is not set previously.
 void
-PointInPolyhedronCheck::initializeRayDirection()
+AdaptiveRayContainmentCheck::initializeRayDirection()
 {
   if (rayDirectionIsAxisAligned())
     // Axis-aligned direction: use it directly with a global axis-aligned bounding box.
@@ -323,7 +325,7 @@ PointInPolyhedronCheck::initializeRayDirection()
 }
 
 bool
-PointInPolyhedronCheck::rayDirectionIsAxisAligned() const
+AdaptiveRayContainmentCheck::rayDirectionIsAxisAligned() const
 {
   return MooseUtils::absoluteFuzzyEqual(_ray_direction(0), 1.0) or
          MooseUtils::absoluteFuzzyEqual(_ray_direction(1), 1.0) or
@@ -331,9 +333,9 @@ PointInPolyhedronCheck::rayDirectionIsAxisAligned() const
 }
 
 Point
-PointInPolyhedronCheck::projectPointOntoPlane(const Point & point_to_project,
-                                              const Point & plane_point,
-                                              const Point & plane_normal) const
+AdaptiveRayContainmentCheck::projectPointOntoPlane(const Point & point_to_project,
+                                                   const Point & plane_point,
+                                                   const Point & plane_normal) const
 {
   // Delegate to libMesh::Plane::closest_point, which returns the orthogonal
   // projection of the point onto the plane. `plane_normal` is assumed to be a
@@ -342,7 +344,7 @@ PointInPolyhedronCheck::projectPointOntoPlane(const Point & point_to_project,
 }
 
 void
-PointInPolyhedronCheck::preparePCASVD()
+AdaptiveRayContainmentCheck::preparePCASVD()
 {
   Point centroid_sum;
 
@@ -418,7 +420,7 @@ PointInPolyhedronCheck::preparePCASVD()
 }
 
 void
-PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_box_length)
+AdaptiveRayContainmentCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_box_length)
 {
   if (!_centroids.empty())
     mooseAssert(_centroids.size() >= 3, "Need at least three points.");
@@ -528,7 +530,7 @@ PointInPolyhedronCheck::buildObbKdtreeAndMaxProjectedDiagonal(const Real expand_
 }
 
 std::vector<unsigned int>
-PointInPolyhedronCheck::collectCandidateElementIDs(const Point & query_point) const
+AdaptiveRayContainmentCheck::collectCandidateElementIDs(const Point & query_point) const
 {
   std::vector<unsigned int> elem_ids;
 

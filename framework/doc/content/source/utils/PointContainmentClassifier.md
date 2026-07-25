@@ -6,7 +6,7 @@ builder-owned surface mesh and, for the ray-casting methods, a `SurfaceElementSe
 it constructs exactly one backend and dispatches `sideness()` and `contains()` to
 it:
 
-- `pca_ray` and `user_selected_ray` construct a [PointInPolyhedronCheck.md]
+- `pca_ray` and `user_selected_ray` construct a [AdaptiveRayContainmentCheck.md]
   (ray-casting engine), differing only by the ray direction passed in;
 - `fixed_x_ray` constructs a [TriangleManifold.md] engine (fixed +x ray, 3-D
   `TRI3` surfaces only).

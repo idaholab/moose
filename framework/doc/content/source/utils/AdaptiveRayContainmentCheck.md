@@ -1,6 +1,6 @@
-# PointInPolyhedronCheck
+# AdaptiveRayContainmentCheck
 
-`PointInPolyhedronCheck` is the ray-casting engine for point-in-solid queries
+`AdaptiveRayContainmentCheck` is the ray-casting engine for point-in-solid queries
 against a closed surface mesh. It operates on the surface-element wrappers and
 centroids held by a `SurfaceElementSet`, and classifies a query point as
 `SurfaceSide::INSIDE`, `::OUTSIDE`, or `::ON`.

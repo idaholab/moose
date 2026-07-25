@@ -42,21 +42,22 @@ PointInSubdomainCheckUO::PointInSubdomainCheckUO(const InputParameters & paramet
 void
 PointInSubdomainCheckUO::initialSetup()
 {
-  // Map the selected ray backend to the ray direction PointInPolyhedronCheck expects:
+  // Map the selected ray backend to the ray direction AdaptiveRayContainmentCheck expects:
   // pca_ray -> (0,0,0) "auto" sentinel; user_selected_ray -> the user's ray_direction.
   const Point ray_direction = (_method == PointContainmentMethod::USER_SELECTED_RAY)
                                   ? _ray_direction
                                   : Point(0.0, 0.0, 0.0);
 
   for (const auto & [subdomain_id, set] : _builder.getSurfaceElementSetsBySubdomain())
-    _subdomain_id_checkers[subdomain_id] = std::make_unique<PointInPolyhedronCheck>(set.elements(),
-                                                                                    set.centroids(),
-                                                                                    ray_direction,
-                                                                                    _tolerance,
-                                                                                    _leaf_max_size,
-                                                                                    _obb_file_name,
-                                                                                    _ray_file_name,
-                                                                                    &comm());
+    _subdomain_id_checkers[subdomain_id] =
+        std::make_unique<AdaptiveRayContainmentCheck>(set.elements(),
+                                                      set.centroids(),
+                                                      ray_direction,
+                                                      _tolerance,
+                                                      _leaf_max_size,
+                                                      _obb_file_name,
+                                                      _ray_file_name,
+                                                      &comm());
 }
 
 bool

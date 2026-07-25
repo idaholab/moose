@@ -23,17 +23,17 @@ class Ball;
 /// collection of SurfaceElement wrappers. The ray direction is either supplied
 /// axis-aligned (e.g. (1,0,0)) and used directly with an axis-aligned bounding box,
 /// or auto-selected via PCA when a non-axis (or default (0,0,0)) direction is given.
-struct PointInPolyhedronCheck final
+struct AdaptiveRayContainmentCheck final
 {
 public:
-  PointInPolyhedronCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
-                         const std::vector<Point> & centroids,
-                         const Point ray_direction,
-                         const Real eps_on_surface = libMesh::TOLERANCE,
-                         const int leaf_max_size = 10,
-                         const FileName & obb_file_name = "",
-                         const FileName & ray_file_name = "",
-                         const libMesh::Parallel::Communicator * comm = nullptr);
+  AdaptiveRayContainmentCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
+                              const std::vector<Point> & centroids,
+                              const Point ray_direction,
+                              const Real eps_on_surface = libMesh::TOLERANCE,
+                              const int leaf_max_size = 10,
+                              const FileName & obb_file_name = "",
+                              const FileName & ray_file_name = "",
+                              const libMesh::Parallel::Communicator * comm = nullptr);
 
   /// Main function: Determine if a point is inside the geometry
   SurfaceSide sideness(const Point & p) const;

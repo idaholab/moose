@@ -11,7 +11,7 @@
 
 #include "PointInPolyhedronBaseUO.h"
 #include "SurfaceMeshBySubdomainBuilder.h"
-#include "PointInPolyhedronCheck.h"
+#include "AdaptiveRayContainmentCheck.h"
 
 /// Performs in-out testing and identifies the subdomain containing a point.
 class PointInSubdomainCheckUO : public PointInPolyhedronBaseUO
@@ -28,7 +28,7 @@ public:
   /// Determine which subdomain the point belongs to (returns "OUTSIDE" if none)
   virtual subdomain_id_type whichSubdomain(const Point & p) const;
 
-  const std::unordered_map<subdomain_id_type, std::unique_ptr<PointInPolyhedronCheck>> &
+  const std::unordered_map<subdomain_id_type, std::unique_ptr<AdaptiveRayContainmentCheck>> &
   getAllSubdomainCheckers() const
   {
     return _subdomain_id_checkers;
@@ -38,7 +38,7 @@ protected:
   /// Builder providing subdomain-wise SurfaceElementSets
   const SurfaceMeshBySubdomainBuilder & _builder;
 
-  /// Each subdomain has its own PointInPolyhedronCheck
-  std::unordered_map<subdomain_id_type, std::unique_ptr<PointInPolyhedronCheck>>
+  /// Each subdomain has its own AdaptiveRayContainmentCheck
+  std::unordered_map<subdomain_id_type, std::unique_ptr<AdaptiveRayContainmentCheck>>
       _subdomain_id_checkers;
 };

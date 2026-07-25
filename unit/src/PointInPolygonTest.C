@@ -11,11 +11,11 @@
 #include "SurfaceEdge2.h"
 #include "MooseMesh.h"
 #include "libmesh/edge_edge2.h"
-#include "PointInPolyhedronCheck.h"
+#include "AdaptiveRayContainmentCheck.h"
 
 using namespace libMesh;
 
-TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
+TEST(AdaptiveRayContainmentCheck, RectangleAdaptiveRayContainmentCheck)
 {
   std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
   std::vector<std::unique_ptr<Node>> nodes;
@@ -45,7 +45,7 @@ TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
   create_edge(p2, p3);
   create_edge(p3, p0);
 
-  PointInPolyhedronCheck inout_test(
+  AdaptiveRayContainmentCheck inout_test(
       bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0) /*ray_dir*/);
 
   // Inside
@@ -59,7 +59,7 @@ TEST(PointInPolyhedronCheck, RectanglePointInPolyhedronCheck)
   EXPECT_EQ(inout_test.sideness(Point(1.0, 0.5, 0.0)), SurfaceSide::ON);
 }
 
-TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
+TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
 {
   std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
   std::vector<std::unique_ptr<Node>> nodes;
@@ -90,14 +90,14 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
   Point edge_point(1 + 1e-9, 0.5, 0.0);
 
   {
-    PointInPolyhedronCheck test_libmesh_eps(
+    AdaptiveRayContainmentCheck test_libmesh_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0));
     EXPECT_TRUE(test_libmesh_eps.sideness(edge_point) == SurfaceSide::ON);
   }
 
   {
     Real small_eps = 1e-15;
-    PointInPolyhedronCheck test_small_eps(
+    AdaptiveRayContainmentCheck test_small_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), small_eps);
     // Expect it is NOT considered ON due to small epsilon
     EXPECT_TRUE(test_small_eps.sideness(edge_point) != SurfaceSide::ON);
@@ -105,7 +105,7 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
 
   {
     Real large_eps = 1e-3;
-    PointInPolyhedronCheck test_large_eps(
+    AdaptiveRayContainmentCheck test_large_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), large_eps);
     // Expect it IS considered ON due to larger epsilon
     EXPECT_TRUE(test_large_eps.sideness(edge_point) == SurfaceSide::ON);
@@ -114,14 +114,14 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
   Point edge_point2(1 + 1e-5, 0.5, 0.0);
 
   {
-    PointInPolyhedronCheck test_libmesh_eps(
+    AdaptiveRayContainmentCheck test_libmesh_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0));
     EXPECT_TRUE(test_libmesh_eps.sideness(edge_point2) != SurfaceSide::ON);
   }
 
   {
     Real small_eps = 1e-15;
-    PointInPolyhedronCheck test_small_eps(
+    AdaptiveRayContainmentCheck test_small_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), small_eps);
     // Expect it is NOT considered ON due to small epsilon
     EXPECT_TRUE(test_small_eps.sideness(edge_point2) != SurfaceSide::ON);
@@ -129,7 +129,7 @@ TEST(PointInPolyhedronCheck, EpsSensitivityOnEdge)
 
   {
     Real large_eps = 1e-2;
-    PointInPolyhedronCheck test_large_eps(
+    AdaptiveRayContainmentCheck test_large_eps(
         bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), large_eps);
     // Expect it IS considered ON due to larger epsilon
     EXPECT_TRUE(test_large_eps.sideness(edge_point2) == SurfaceSide::ON);

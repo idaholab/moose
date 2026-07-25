@@ -9,15 +9,15 @@
 
 #include "PointContainmentClassifier.h"
 #include "SurfaceElementSet.h"
-#include "PointInPolyhedronCheck.h"
+#include "AdaptiveRayContainmentCheck.h"
 #include "TriangleManifold.h"
 #include "MooseError.h"
 
 PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
-                                                        const SurfaceElementSet * set,
-                                                        PointContainmentMethod method,
-                                                        Real tolerance,
-                                                        const PcaRayOptions & pca)
+                                                       const SurfaceElementSet * set,
+                                                       PointContainmentMethod method,
+                                                       Real tolerance,
+                                                       const PcaRayOptions & pca)
   : _method(method)
 {
   switch (_method)
@@ -26,19 +26,20 @@ PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
     case PointContainmentMethod::USER_SELECTED_RAY:
     {
       if (!set)
-        mooseError("PointContainmentClassifier: a SurfaceElementSet is required for the pca_ray and "
-                   "user_selected_ray methods.");
+        mooseError(
+            "PointContainmentClassifier: a SurfaceElementSet is required for the pca_ray and "
+            "user_selected_ray methods.");
 
       // pca_ray passes the (0,0,0) "auto" sentinel (PCA selection); user_selected_ray
       // passes the user's ray direction through pca.ray_direction.
-      _pca = std::make_unique<PointInPolyhedronCheck>(set->elements(),
-                                                      set->centroids(),
-                                                      pca.ray_direction,
-                                                      tolerance,
-                                                      pca.leaf_max_size,
-                                                      pca.obb_file_name,
-                                                      pca.ray_file_name,
-                                                      pca.comm);
+      _pca = std::make_unique<AdaptiveRayContainmentCheck>(set->elements(),
+                                                           set->centroids(),
+                                                           pca.ray_direction,
+                                                           tolerance,
+                                                           pca.leaf_max_size,
+                                                           pca.obb_file_name,
+                                                           pca.ray_file_name,
+                                                           pca.comm);
 
       _bounding_box = set->boundingBox();
       _num_elements = set->size();
