@@ -11,8 +11,8 @@ Only has an effect if the `Problem` type is set to
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/prob_op_block_darcy.i block=Problem MFEMProblemComposer
-!listing test/tests/mfem/kernels/prob_op_block_heattransfer.i block=Problem MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=Problem MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=Problem MFEMProblemComposer
 
 !syntax parameters /MFEMProblemComposer/AddMFEMProblemOperatorAction
 

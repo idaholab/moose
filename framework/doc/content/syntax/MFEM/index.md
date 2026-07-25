@@ -76,11 +76,11 @@ are two problem operator composer classes that are made automatically by inferen
 executioners and equation system, however they can be explicitly input with the following
 examples for steady:
 
-!listing test/tests/mfem/kernels/prob_op_block_darcy.i block=/MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_darcy.i block=/MFEMProblemComposer
 
 and similarly for transient problems:
 
-!listing test/tests/mfem/kernels/prob_op_block_heattransfer.i block=/MFEMProblemComposer
+!listing test/tests/mfem/problemcomposers/prob_op_block_heattransfer.i block=/MFEMProblemComposer
 
 ### Solver and Executioner
 
