@@ -1,10 +1,18 @@
 nx = 16
-# Immersed circle geometry: off-grid center so no element centroid lands exactly
-# on the surface, keeping the in-out sign reproducible across platforms.
+# Asymmetric immersed geometry: a non-circular closed curve. A circle is maximally
+# symmetric (every diameter is a symmetry axis), so an element centroid can sit
+# exactly on a symmetry axis and become equidistant to two surface segments. That
+# KDTree nearest-segment tie is broken only by floating-point round-off, which
+# differs across platforms and flips the gradient direction. Deforming the boundary
+# with a radial modulation removes all symmetry, so every centroid has a unique
+# nearest segment and the in-out sign / gradient stay reproducible across platforms.
 R = 1.3
 cx = 2.03
 cy = 1.97
-n_seg = 48
+# Control the boundary asymmetry (radial modulation amplitudes).
+a = 0.18
+b = 0.10
+n_seg = 64
 [Problem]
   solve = false
 []
@@ -12,8 +20,8 @@ n_seg = 48
 [Mesh]
   [shift_boundary_mesh]
     type = ParsedCurveGenerator
-    x_formula = '${cx} + ${R} * cos(t)'
-    y_formula = '${cy} + ${R} * sin(t)'
+    x_formula = '${cx} + ${R} * (1 + ${a} * cos(t) + ${b} * sin(2*t)) * cos(t)'
+    y_formula = '${cy} + ${R} * (1 + ${a} * cos(t) + ${b} * sin(2*t)) * sin(t)'
     section_bounding_t_values = '0 ${fparse 2*pi}'
     nums_segments = '${n_seg}'
     is_closed_loop = true
