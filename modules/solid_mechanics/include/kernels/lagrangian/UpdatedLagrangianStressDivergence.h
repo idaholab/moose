@@ -67,11 +67,10 @@ protected:
   // @}
 
 private:
-  /// The unstabilized trial function gradient
+  /// The unstabilized trial function gradient. F-bar stabilization is handled explicitly in
+  /// computeQpJacobianDisplacement via the strain-calculator F-bar partials, so the UL kernel
+  /// does not need a separate gradTrialStabilized helper.
   virtual RankTwoTensor gradTrialUnstabilized(unsigned int component);
-
-  /// The stabilized trial function gradient
-  virtual RankTwoTensor gradTrialStabilized(unsigned int component);
 };
 
 template <>
@@ -88,8 +87,20 @@ template <>
 inline void
 UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>::initialSetup()
 {
+  // Derives _large_kinematics from the strain calculator's LARGE_KINEMATICS guarantee.
+  LagrangianStressDivergenceBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError("This kernel should only act in Cartesian coordinates.");
+
+  // The updated Lagrangian kernel integrates on the displaced mesh iff large kinematics is on;
+  // large_kinematics is derived from the strain calculator, so validate the pairing here.
+  if (_large_kinematics && !getParam<bool>("use_displaced_mesh"))
+    mooseError("The UpdatedLagrangianStressDivergence kernels require use_displaced_mesh = true "
+               "for large_kinematics = true");
+  if (!_large_kinematics && getParam<bool>("use_displaced_mesh"))
+    mooseError("The UpdatedLagrangianStressDivergence kernels require use_displaced_mesh = false "
+               "for large_kinematics = false");
 }
 
 typedef UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>

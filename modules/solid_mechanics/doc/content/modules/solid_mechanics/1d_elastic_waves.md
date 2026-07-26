@@ -44,7 +44,7 @@ The cantilever beam shown in [cantilever] is subjected to a time harmonic force 
 
 The analytic solution for the free vibration of a cantilever is known, see [Euler Bernoulli beam](https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory).  The analytic eigenvalues, $\omega_n$, are given by
 \begin{equation}
-  \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
+  \omega_n=k^2_n\sqrt\frac{EI}{\rho A L^4}
 \end{equation}
 where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
 For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
@@ -144,7 +144,7 @@ By assuming [eq2] is a solution to [eq1], we can solve [eq1] in the frequency do
     E\frac{\partial^2 U}{\partial x^2}-\rho\omega^2 U=0.
 \label{eq3}
 \end{equation}
-[eq3] is easily solved in MOOSE where $U$ is the state variable.  The first term on the right hand side is still captured by the [StressDivergence.md] kernel.  The second RHS term, $\rho\omega^2 U$, is captured by the [Reaction](/Reaction.md) kernel where the `Reaction` rate is given by $-\omega^2$.  [eq3] is only valid for small displacements and linear elasticity.  A damping term can also be included in [eq1] and [eq3].
+[eq3] is easily solved in MOOSE where $U$ is the state variable.  The first term on the right hand side is still captured by the [StressDivergenceTensors.md] kernel.  The second RHS term, $\rho\omega^2 U$, is captured by the [Reaction](/Reaction.md) kernel where the `Reaction` rate is given by $-\omega^2$.  [eq3] is only valid for small displacements and linear elasticity.  A damping term can also be included in [eq1] and [eq3].
 
 The boundary conditions also need to be converted to the frequency domain through a Fourier transform.  A time harmonic Neumann BC given by
 \begin{equation}
@@ -188,7 +188,7 @@ For the boundary condition, we apply the Sommerfeld radiation condition on the l
 \end{equation}
 The frequency domain version of [eq6] is
 \begin{equation}
-    \frac{\partial U}{\partial x} U= ik\sqrt\frac{\rho}{E} U \qquad \text{at} \, x=0,
+    \frac{\partial U}{\partial x}= ik\sqrt\frac{\rho}{E} U \qquad \text{at} \, x=0,
     \label{eq7}
 \end{equation}
 
@@ -207,7 +207,7 @@ The Sommerfeld boundary conditions are given by
    U_i=0 \, \qquad \text{at} \, x=L,
    \label{eq9}
 \end{equation}
-Note that this decomposition is exact and no information is lost from the decomposition into real and imaginary parts. The real and imaginary [StressDivergence.md] kernels are shown in [listing1].  Care must be taken in defining these kernels and the respective displacements for the problem.  Setting the displacements in the `[GlobalParams]` block could have unintended consequences and should be set in the individual kernels that use them.  Also note that, as a result of the radiation BCs on left, $U_r$ and $U_i$ are coupled, hence the two systems in [eq8] are needed.  The Sommerfeld radiation BCs are applied using a [CoupledVarNeumannBC.md] in [listing2].
+Note that this decomposition is exact and no information is lost from the decomposition into real and imaginary parts. The real and imaginary [StressDivergenceTensors.md] kernels are shown in [listing1].  Care must be taken in defining these kernels and the respective displacements for the problem.  Setting the displacements in the `[GlobalParams]` block could have unintended consequences and should be set in the individual kernels that use them.  Also note that, as a result of the radiation BCs on left, $U_r$ and $U_i$ are coupled, hence the two systems in [eq8] are needed.  The Sommerfeld radiation BCs are applied using a [CoupledVarNeumannBC.md] in [listing2].
 
 !listing examples/wave_propagation/1D_elastic_wave_propagation.i block=Kernels id=listing1 caption=Real and imaginary `StressDivergence` and `Reaction` Kernels.
 

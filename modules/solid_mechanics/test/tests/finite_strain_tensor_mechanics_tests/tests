@@ -1,5 +1,5 @@
 [Tests]
-  design = 'StressDivergence.md'
+  design = 'StressDivergenceTensors.md'
   [./rotation_test]
     type = 'Exodiff'
     input = 'elastic_rotation.i'

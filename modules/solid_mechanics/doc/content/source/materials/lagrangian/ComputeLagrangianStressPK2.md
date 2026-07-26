@@ -14,7 +14,7 @@ It provides the Green-Lagrange strain
 \end{equation}
 as an additional kinematic measure available for the user to use in
 the course of the defining the stress update.
-See [here](NewMaterialSystem.md) for a complete description of the Lagrangian
+See [here](ObjectiveStressRates.md) for a complete description of the Lagrangian
 kernel material system and for detailed instructions on how to implement
 a new material model.
 

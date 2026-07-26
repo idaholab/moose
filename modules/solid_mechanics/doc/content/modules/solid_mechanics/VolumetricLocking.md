@@ -1,5 +1,10 @@
 # Volumetric Locking Correction
 
+!alert warning title=Deprecated
+This volumetric locking correction belongs to the legacy mechanics kernels, which are being phased
+out.  For new models, use the [$\bar{\boldsymbol{F}}$ stabilization for linear elements](solid_mechanics/Stabilization.md)
+provided by the Lagrangian kernels instead.
+
 Volumetric locking is the over stiffening of elements when the material is close to being
 incompressible (Poisson's ratio $\nu$ nearing 0.5). This stiffening happens when a fully integrated element
 (such as Hex8 elements with 8 quadrature points or Quad4 elements with 4 quadrature points) is
