@@ -230,6 +230,17 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
+  [./except7]
+    type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = except7.i
+    expect_err = 'GeochemistrySpatialReactor does not know about node'
+    match_literal = true
+    requirement = 'An error will be thrown if a quantity is requested from a block-restricted spatial reaction solver at a node outside its blocks'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]
   [./spatial_block]
     type = CSVDiff
     # skip test if test is being run out-of-tree. Issue Ref: #25279
