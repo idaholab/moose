@@ -79,28 +79,6 @@
     compute_devices = 'cpu'
     restep = false
   []
-  [MFEMNonLinearHeatConductionComplexAux]
-    design = 'EquationSystem.md'
-    issues = '#30076'
-    requirement = 'The system shall correctly checkpoint and recover a transient MFEM problem that includes a complex auxiliary variable, exercising the cmplx_gridfunctions restore path.'
-    type = CSVDiff
-    input = nlheatconduction_complex_aux.i
-    csvdiff = 'NLHeatConductionComplexAux_centre_temperature_0000.csv
-               NLHeatConductionComplexAux_centre_temperature_0010.csv
-               NLHeatConductionComplexAux_centre_temperature_0020.csv
-               NLHeatConductionComplexAux_centre_temperature_0030.csv
-               NLHeatConductionComplexAux_centre_temperature_0040.csv
-               NLHeatConductionComplexAux_centre_temperature_0050.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0000.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0010.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0020.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0030.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0040.csv
-               NLHeatConductionComplexAux_centre_complex_temperature_0050.csv'
-    capabilities = 'mfem'
-    compute_devices = 'cpu'
-    restep = false
-  []
   [MFEMNonLinearHeatConductionQuadratureFunction]
     design = 'MFEMScalarQuadratureFunction.md'
     requirement = 'The system shall re-project quadrature function coefficients on each nonlinear iteration such that solution-dependent coefficients stored on quadrature points reproduce the reference nonlinear solve.'

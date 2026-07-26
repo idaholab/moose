@@ -2974,9 +2974,9 @@ MooseMesh::init()
 }
 
 std::vector<std::filesystem::path>
-MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base) const
+MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
 {
-  CheckpointIO io(const_cast<MeshBase &>(getMesh()), false);
+  CheckpointIO io(getMesh(), false);
   io.write(file_base);
   return {};
 }

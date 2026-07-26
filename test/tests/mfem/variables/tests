@@ -13,6 +13,22 @@
     recover = false
     restep = false
   []
+  [MFEMComplexAuxVariableRecovery]
+    type = CSVDiff
+    input = complex_aux_recovery.i
+    cli_args = 'Executioner/end_time=2.0 '
+               'Outputs/csv=true '
+               'Outputs/file_base=ComplexAuxRecovery '
+               'Outputs/ParaViewDataCollection/enable=false'
+    csvdiff = 'ComplexAuxRecovery_complex_state_sample_0001.csv
+               ComplexAuxRecovery_complex_state_sample_0002.csv'
+    design = 'EquationSystem.md'
+    issues = '#30076'
+    requirement = 'The system shall correctly checkpoint and recover the state of a complex auxiliary variable in a transient MFEM problem.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    restep = false
+  []
   [MFEMDiffusionAltSyntax]
     type = XMLDiff
     input = ../kernels/diffusion.i

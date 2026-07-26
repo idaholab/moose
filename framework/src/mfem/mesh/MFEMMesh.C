@@ -53,18 +53,13 @@ MFEMMesh::~MFEMMesh() {}
 void
 MFEMMesh::init()
 {
-  // _mesh must be constructed by the action system before init() is called.
-  // MFEMMesh is always used within the normal MOOSE action system, so the fringe
-  // case of a mesh built outside that system does not apply here.
-  mooseAssert(_mesh, "MooseMesh base mesh must be constructed before MFEMMesh::init()");
-
   // MooseMesh::init() handles the libMesh dummy mesh:
   //   - recovery:    reads the libMesh mesh back from its checkpoint file
   //   - normal run:  calls buildMesh(), which for MFEMMesh builds both the
   //                  dummy libMesh mesh and the MFEM ParMesh
   MooseMesh::init();
 
-  if (_app.isRecovering() && recoveryAllowed() && _app.isUltimateMaster())
+  if (_app.isRecovering() && allowRecovery() && _app.isUltimateMaster())
   {
     // MooseMesh::init() already restored the libMesh dummy mesh from its checkpoint.
     // Now restore the MFEM parallel mesh from its own checkpoint file.
@@ -130,7 +125,7 @@ MFEMMesh::buildMesh()
 }
 
 std::vector<std::filesystem::path>
-MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base) const
+MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
 {
   MooseMesh::writeRecoveryFiles(file_base);
 

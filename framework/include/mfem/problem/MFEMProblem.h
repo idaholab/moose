@@ -378,6 +378,12 @@ public:
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
 protected:
+  /**
+   * Verify that a primary variable's numeric type matches the problem's equation system.
+   */
+  void validateVariableNumericType(const std::string & var_type,
+                                   const std::string & var_name) const;
+
   struct MFEMSolverDefinition
   {
     std::string type;
@@ -389,6 +395,7 @@ protected:
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
   MFEMProblemData _problem_data;
+
   /**
    * The numeric representation currently active for this problem.
    */

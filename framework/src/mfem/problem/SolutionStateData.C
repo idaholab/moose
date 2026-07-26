@@ -12,6 +12,10 @@
 #include "DataIO.h"
 #include "MFEMProblemData.h"
 
+#include "libmesh/int_range.h"
+
+using libMesh::make_range;
+
 namespace
 {
 void
@@ -21,7 +25,7 @@ storeGridFunction(std::ostream & stream, mfem::ParGridFunction & gridfunction, v
   dataStore(stream, size, context);
 
   const auto * values = gridfunction.HostRead();
-  for (int i = 0; i < size; ++i)
+  for (const auto i : make_range(size))
   {
     auto value = values[i];
     dataStore(stream, value, context);
@@ -37,7 +41,7 @@ loadGridFunction(std::istream & stream, mfem::ParGridFunction & gridfunction, vo
               "MFEM restartable GridFunction size mismatch during restore.");
 
   auto * values = gridfunction.HostWrite();
-  for (int i = 0; i < size; ++i)
+  for (const auto i : make_range(size))
     dataLoad(stream, values[i], context);
 }
 }
@@ -47,7 +51,6 @@ void
 dataStore(std::ostream & stream, Moose::MFEM::SolutionState & /*state*/, void * context)
 {
   auto * const data = static_cast<MFEMProblemData *>(context);
-  mooseAssert(data, "Missing MFEMProblemData context for solution restart storage.");
 
   auto num_gridfunctions = data->gridfunctions.size();
   dataStore(stream, num_gridfunctions, context);
@@ -74,7 +77,6 @@ void
 dataLoad(std::istream & stream, Moose::MFEM::SolutionState & /*state*/, void * context)
 {
   auto * const data = static_cast<MFEMProblemData *>(context);
-  mooseAssert(data, "Missing MFEMProblemData context for solution restart load.");
 
   int num_gridfunctions = 0;
   dataLoad(stream, num_gridfunctions, context);

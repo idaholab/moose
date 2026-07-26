@@ -45,7 +45,7 @@ public:
   void init() override;
   void buildMesh() override;
   std::vector<std::filesystem::path>
-  writeRecoveryFiles(const std::filesystem::path & file_base) const override;
+  writeRecoveryFiles(const std::filesystem::path & file_base) override;
 
   /**
    * Clones the mesh.

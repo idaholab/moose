@@ -13,6 +13,8 @@
 #include "MFEMProblem.h"
 #include "MFEMVectorUtils.h"
 
+#include "mfem/fem/fespace.hpp"
+
 InputParameters
 MFEMComplexValueSamplerBase::validParams()
 {
@@ -27,7 +29,7 @@ MFEMComplexValueSamplerBase::MFEMComplexValueSamplerBase(const InputParameters &
     _imag_interp_vals(points.size())
 {
   const auto val_dim = _var.real().VectorDim();
-  for (int i = 0; i < val_dim; i++)
+  for (const auto i : make_range(val_dim))
   {
     auto & real_declared = this->declareVector(_var_name + "_real_" + std::to_string(i));
     real_declared.resize(points.size());
@@ -37,6 +39,12 @@ MFEMComplexValueSamplerBase::MFEMComplexValueSamplerBase(const InputParameters &
     imag_declared.resize(points.size());
     _declared_imag_vals.push_back(imag_declared);
   }
+}
+
+bool
+MFEMComplexValueSamplerBase::isFESpaceDiscontinuous() const
+{
+  return _var.real().FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
 }
 
 void
@@ -55,8 +63,8 @@ MFEMComplexValueSamplerBase::finalizeValues()
   const auto val_dims = _var.real().VectorDim();
   const auto num_points = _declared_points[0].get().size();
   const auto val_fespace_ordering = _var.real().FESpace()->GetOrdering();
-  for (int i_dim = 0; i_dim < val_dims; i_dim++)
-    for (size_t i_point = 0; i_point < num_points; i_point++)
+  for (const auto i_dim : index_range(_declared_real_vals))
+    for (const auto i_point : index_range(_declared_points[0].get()))
     {
       const auto idx =
           Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);

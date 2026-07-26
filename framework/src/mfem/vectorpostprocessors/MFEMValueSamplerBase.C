@@ -17,16 +17,6 @@
 
 #include "mfem/fem/fespace.hpp"
 
-namespace
-{
-/** Enum for values returned by gslib for point location relative to mesh
- */
-enum class GSLibLocationCode : unsigned int
-{
-  BORDER = 1,
-};
-} // namespace
-
 InputParameters
 MFEMValueSamplerBase::validParams()
 {
@@ -39,17 +29,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _var(*getMFEMProblem().getGridFunction(_var_name)),
     _interp_vals(points.size())
 {
-  const bool fe_boundary_discontinuous =
-      _var.FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
-
-  const auto point_codes = _finder.GetCode();
-  for (const auto i : index_range(points))
-    if (GSLibLocationCode(point_codes[i]) == GSLibLocationCode::BORDER && fe_boundary_discontinuous)
-      mooseWarning("MFEMValueSamplerBase found a point on an element boundary but "
-                   "the FE space is discontinuous at boundaries: ",
-                   points[i],
-                   ".");
-
+  // declare value vectors for outputting
   const auto val_dim = _var.VectorDim();
   for (int i = 0; i < val_dim; i++)
   {
@@ -57,6 +37,12 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     declared.resize(points.size());
     _declared_vals.push_back(declared);
   }
+}
+
+bool
+MFEMValueSamplerBase::isFESpaceDiscontinuous() const
+{
+  return _var.FESpace()->FEColl()->GetContType() != mfem::FiniteElementCollection::CONTINUOUS;
 }
 
 void

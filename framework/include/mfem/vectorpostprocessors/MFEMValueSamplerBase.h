@@ -32,8 +32,13 @@ protected:
   void finalizeValues() override;
 
 private:
+  bool isFESpaceDiscontinuous() const override;
+
+  /// Grid function being sampled.
   const mfem::GridFunction & _var;
+  /// Values interpolated from the grid function.
   mfem::Vector _interp_vals;
+  /// VectorPostprocessor output columns for the variable components.
   std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_vals;
 };
 

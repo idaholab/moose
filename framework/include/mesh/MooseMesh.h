@@ -189,7 +189,7 @@ public:
    * Derived classes may extend this to write additional backend-specific files.
    */
   virtual std::vector<std::filesystem::path>
-  writeRecoveryFiles(const std::filesystem::path & file_base) const;
+  writeRecoveryFiles(const std::filesystem::path & file_base);
 
   /**
    * Returns MeshBase::mesh_dimension(), (not
@@ -1567,7 +1567,10 @@ public:
   bool possiblyRebuildNodeToElemMap();
 
 protected:
-  bool recoveryAllowed() const { return _allow_recovery; }
+  /**
+   * Returns whether this mesh is allowed to read a recovery file.
+   */
+  bool allowRecovery() const { return _allow_recovery; }
 
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
