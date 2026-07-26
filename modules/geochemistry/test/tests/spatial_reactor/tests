@@ -230,4 +230,14 @@
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
+  [./spatial_block]
+    type = CSVDiff
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = spatial_block.i
+    csvdiff = 'spatial_block_out.csv'
+    requirement = 'The AuxVariables and AuxKernels added by the spatial reaction solver action shall be restricted to the same blocks as the reactor, so that quantities are not reported at nodes the reactor does not time-step'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]
 []
