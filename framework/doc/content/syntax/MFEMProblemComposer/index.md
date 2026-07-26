@@ -46,7 +46,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
     virtual void Solve() override;
 
     // Mult by the operator
-    void Mult(const mfem::Vector &, mfem::Vector y) const override {};
+    void Mult(const mfem::Vector & x, mfem::Vector & y) const override {};
 };
 
 ```
@@ -90,7 +90,7 @@ class CustomDummyProblemOperator : public Moose::MFEM::ProblemOperator
     virtual void Solve() override;
 
     // Mult by the operator
-    void Mult(const mfem::Vector &, mfem::Vector y) const override {};
+    void Mult(const mfem::Vector & x, mfem::Vector & y) const override {};
 };
 
 ```
