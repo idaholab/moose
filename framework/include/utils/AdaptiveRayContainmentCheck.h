@@ -138,9 +138,6 @@ private:
   /// min variance vector (only used for 3D)
   Point _min_variance_vector;
 
-  /// For bounding region checks (e.g., sphere/circle around element)
-  Ball computeBoundingBall(const SurfaceElement * elem) const;
-
   /// Ray-element intersection (e.g., ray-line for 2D, ray-triangle for 3D)
   bool rayIntersectGeometry(const Point & ray_start,
                             const Point & ray_end,
@@ -176,14 +173,14 @@ private:
   std::optional<SurfaceSide> sidenessFromRayPair(const Point & p,
                                                  const std::array<Point, 2> & ray_starts) const;
 
-  /// Count how many times the segment from `ray_start` to `p` crosses the surface, scanning the
-  /// KD-tree candidates pruned against a ray aligned with `bbox_dir`. If a candidate element
-  /// contains `p`, sets `point_on_surface` and returns early. Shared by sidenessFromRayPair and
-  /// the auto probe.
+  /// Count how many times the segment from `ray_start` to `p` crosses the surface. The primary
+  /// direction uses KD-tree candidates; PCA fallback directions scan all elements because the
+  /// KD-tree projection is aligned only with the primary direction. If a candidate element
+  /// contains `p`, sets `point_on_surface` and returns early.
   int countCrossings(const Point & ray_start,
-                     const Point & bbox_dir,
                      const Point & p,
-                     bool & point_on_surface) const;
+                     bool & point_on_surface,
+                     const bool use_primary_direction = true) const;
 
   /// Ray start strictly outside the global AABB along `unit_direction`, for any direction.
   /// The 8 AABB corners are projected onto the direction to find the box extent, and the
@@ -194,14 +191,14 @@ private:
   rayStartOutsideAABB(const Point & point, const Point & unit_direction, const bool inverted) const;
 
   /**
-   * Computes the starting point of an OBB-based ray (auto/PCA policy) for a given query
-   * point. The point is projected onto an OBB face and displaced along the ray direction so
-   * the ray originates outside the geometry. `number_to_larger_variance` selects which
-   * variance axis defines the projection plane.
+   * Computes the starting point of an OBB-based ray (auto/PCA policy) for a given query point.
+   * The point is projected onto the OBB face normal to `ray_direction`, selected by `obb_axis`,
+   * and displaced along that same direction so the ray originates outside the geometry.
    */
-  const Point generateRayStart(const Point & point,
-                               const bool inverted = false,
-                               const int number_to_larger_variance = 0) const;
+  Point rayStartOutsideOBB(const Point & point,
+                           const Point & ray_direction,
+                           const unsigned int obb_axis,
+                           const bool inverted = false) const;
 
   /// Orthogonally project `point_to_project` onto the plane defined by `plane_point`
   /// and unit normal `plane_normal`. `plane_normal` is assumed to be a unit vector.

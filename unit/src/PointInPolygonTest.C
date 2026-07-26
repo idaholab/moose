@@ -45,8 +45,10 @@ TEST(AdaptiveRayContainmentCheck, RectangleAdaptiveRayContainmentCheck)
   create_edge(p2, p3);
   create_edge(p3, p0);
 
-  AdaptiveRayContainmentCheck inout_test(
-      bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0) /*ray_dir*/);
+  // USER_SPECIFIED: shoot the ray along +x exactly (no PCA), matching the old
+  // explicit-direction constructor this test was written against.
+  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  AdaptiveRayContainmentCheck inout_test(bd_elements, std::vector<Point>(), ray_opts);
 
   // Inside
   EXPECT_EQ(inout_test.sideness(Point(0.5, 0.5, 0.0)), SurfaceSide::INSIDE);
@@ -57,6 +59,48 @@ TEST(AdaptiveRayContainmentCheck, RectangleAdaptiveRayContainmentCheck)
 
   // On edge - result depends on epsilon, should return ON
   EXPECT_EQ(inout_test.sideness(Point(1.0, 0.5, 0.0)), SurfaceSide::ON);
+}
+
+TEST(AdaptiveRayContainmentCheck, PcaFallbackUsesFallbackDirection)
+{
+  std::vector<std::unique_ptr<SurfaceElement>> bd_elements;
+  std::vector<std::unique_ptr<Node>> nodes;
+  std::vector<std::unique_ptr<Edge2>> edges;
+
+  // A tall U-shaped polygon makes x the primary (second-variance) PCA direction. The extra
+  // collinear vertices at (1.625, 0) and (2, 4) keep the x-y covariance zero. The query is outside
+  // in the opening and aligned with (2, 4), so the opposite primary rays have nonzero crossing
+  // counts of two and three. The fallback y ray must escape through the opening without crossing
+  // the surface.
+  const std::array<Point, 10> polygon = {Point(0.0, 0.0, 0.0),
+                                         Point(1.625, 0.0, 0.0),
+                                         Point(3.0, 0.0, 0.0),
+                                         Point(3.0, 6.0, 0.0),
+                                         Point(2.0, 6.0, 0.0),
+                                         Point(2.0, 4.0, 0.0),
+                                         Point(2.0, 2.0, 0.0),
+                                         Point(1.0, 2.0, 0.0),
+                                         Point(1.0, 6.0, 0.0),
+                                         Point(0.0, 6.0, 0.0)};
+
+  dof_id_type node_id = 0;
+  for (const auto i : index_range(polygon))
+  {
+    auto n0 = std::make_unique<Node>(polygon[i], node_id++);
+    auto n1 = std::make_unique<Node>(polygon[(i + 1) % polygon.size()], node_id++);
+    auto edge = std::make_unique<Edge2>();
+    edge->set_node(0, n0.get());
+    edge->set_node(1, n1.get());
+    bd_elements.emplace_back(std::make_unique<SurfaceEdge2>(edge.get()));
+    nodes.push_back(std::move(n0));
+    nodes.push_back(std::move(n1));
+    edges.push_back(std::move(edge));
+  }
+
+  const RayDirectionOptions ray_options{RayDirectionMode::AUTO_PCA, Point()};
+  AdaptiveRayContainmentCheck containment(bd_elements, std::vector<Point>(), ray_options);
+
+  EXPECT_EQ(containment.sideness(Point(1.5, 4.0, 0.0)), SurfaceSide::OUTSIDE);
 }
 
 TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
@@ -87,18 +131,21 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
   create_edge(p2, p3);
   create_edge(p3, p0);
 
+  // USER_SPECIFIED: shoot the ray along +x exactly (no PCA), matching the old
+  // explicit-direction constructor this test was written against.
+  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+
   Point edge_point(1 + 1e-9, 0.5, 0.0);
 
   {
-    AdaptiveRayContainmentCheck test_libmesh_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0));
+    AdaptiveRayContainmentCheck test_libmesh_eps(bd_elements, std::vector<Point>(), ray_opts);
     EXPECT_TRUE(test_libmesh_eps.sideness(edge_point) == SurfaceSide::ON);
   }
 
   {
     Real small_eps = 1e-15;
     AdaptiveRayContainmentCheck test_small_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), small_eps);
+        bd_elements, std::vector<Point>(), ray_opts, small_eps);
     // Expect it is NOT considered ON due to small epsilon
     EXPECT_TRUE(test_small_eps.sideness(edge_point) != SurfaceSide::ON);
   }
@@ -106,7 +153,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
   {
     Real large_eps = 1e-3;
     AdaptiveRayContainmentCheck test_large_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), large_eps);
+        bd_elements, std::vector<Point>(), ray_opts, large_eps);
     // Expect it IS considered ON due to larger epsilon
     EXPECT_TRUE(test_large_eps.sideness(edge_point) == SurfaceSide::ON);
   }
@@ -114,15 +161,14 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
   Point edge_point2(1 + 1e-5, 0.5, 0.0);
 
   {
-    AdaptiveRayContainmentCheck test_libmesh_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0));
+    AdaptiveRayContainmentCheck test_libmesh_eps(bd_elements, std::vector<Point>(), ray_opts);
     EXPECT_TRUE(test_libmesh_eps.sideness(edge_point2) != SurfaceSide::ON);
   }
 
   {
     Real small_eps = 1e-15;
     AdaptiveRayContainmentCheck test_small_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), small_eps);
+        bd_elements, std::vector<Point>(), ray_opts, small_eps);
     // Expect it is NOT considered ON due to small epsilon
     EXPECT_TRUE(test_small_eps.sideness(edge_point2) != SurfaceSide::ON);
   }
@@ -130,7 +176,7 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
   {
     Real large_eps = 1e-2;
     AdaptiveRayContainmentCheck test_large_eps(
-        bd_elements, std::vector<Point>(), Point(1.0, 0.0, 0.0), large_eps);
+        bd_elements, std::vector<Point>(), ray_opts, large_eps);
     // Expect it IS considered ON due to larger epsilon
     EXPECT_TRUE(test_large_eps.sideness(edge_point2) == SurfaceSide::ON);
   }

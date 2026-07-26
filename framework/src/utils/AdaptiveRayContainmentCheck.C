@@ -78,9 +78,11 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
     return SurfaceSide::OUTSIDE;
 
   const std::array<Point, 2> ray_starts =
-      _auto_ray_direction ? std::array<Point, 2>{generateRayStart(p), generateRayStart(p, true)}
-                          : std::array<Point, 2>{rayStartOutsideAABB(p, _ray_direction, false),
-                                                 rayStartOutsideAABB(p, _ray_direction, true)};
+      _auto_ray_direction
+          ? std::array<Point, 2>{rayStartOutsideOBB(p, _ray_direction, _dim - 1, false),
+                                 rayStartOutsideOBB(p, _ray_direction, _dim - 1, true)}
+          : std::array<Point, 2>{rayStartOutsideAABB(p, _ray_direction, false),
+                                 rayStartOutsideAABB(p, _ray_direction, true)};
 
   if (const auto side = sidenessFromRayPair(p, ray_starts))
     return *side;
@@ -99,22 +101,19 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
   // The primary rays disagreed on parity. Probe the remaining PCA variance directions: if any
   // probe ray escapes without crossing the surface, the point is outside. Otherwise the query is
   // undecidable.
-  const std::vector<Point> axis_dirs =
-      (_dim == 3) ? std::vector<Point>{_second_variance_vector, _max_variance_vector}
-                  : std::vector<Point>{_max_variance_vector};
-
-  for (const auto idx : index_range(axis_dirs))
+  for (const auto obb_axis : make_range(static_cast<unsigned int>(_dim - 1)))
   {
-    const auto & dir = axis_dirs[idx];
-    const std::array<Point, 2> probe_starts = {generateRayStart(p, false /*inverted*/, idx),
-                                               generateRayStart(p, true /*inverted*/, idx)};
+    const Point fallback_direction = _obb_bounds.getAxisDirection(obb_axis);
+    const std::array<Point, 2> probe_starts = {
+        rayStartOutsideOBB(p, fallback_direction, obb_axis, false),
+        rayStartOutsideOBB(p, fallback_direction, obb_axis, true)};
 
-    for (const auto i : make_range(2))
+    for (const auto & probe_start : probe_starts)
     {
       // p is never on the surface here (the primary pair already returned ON if it were), so the
       // point_on_surface flag stays false and the probe only uses the crossing count.
       bool point_on_surface = false;
-      if (countCrossings(probe_starts[i], dir, p, point_on_surface) == 0)
+      if (countCrossings(probe_start, p, point_on_surface, false) == 0)
         return SurfaceSide::OUTSIDE;
     }
   }
@@ -134,7 +133,7 @@ AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
   for (const auto i : make_range(2))
   {
     bool point_on_surface = false;
-    counts[i] = countCrossings(ray_starts[i], p - ray_starts[i], p, point_on_surface);
+    counts[i] = countCrossings(ray_starts[i], p, point_on_surface);
 
     if (point_on_surface)
       return SurfaceSide::ON;
@@ -153,20 +152,26 @@ AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
 
 int
 AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
-                                            const Point & bbox_dir,
                                             const Point & p,
-                                            bool & point_on_surface) const
+                                            bool & point_on_surface,
+                                            const bool use_primary_direction) const
 {
   point_on_surface = false;
   int count = 0;
-  for (const auto & elemID : collectCandidateElementIDs(p))
-  {
-    const auto & elem = _bd_elements[elemID].get();
-    const auto ball = computeBoundingBall(elem);
+  const auto candidate_ids =
+      use_primary_direction ? collectCandidateElementIDs(p) : std::vector<unsigned int>{};
+  const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
+  const Point segment_direction = p - ray_start;
 
-    if (isOutsideRayBBox(ray_start, bbox_dir, ball))
+  for (const auto candidate : make_range(num_candidates))
+  {
+    const auto elem_id = use_primary_direction ? candidate_ids[candidate] : candidate;
+    const auto & elem = _bd_elements[elem_id].get();
+    const auto ball = elem->computeBoundingBall();
+
+    if (isOutsideRayBBox(ray_start, segment_direction, ball))
       continue;
-    if (isOutsideBoundingRegion(ray_start, bbox_dir, ball))
+    if (isOutsideBoundingRegion(ray_start, segment_direction, ball))
       continue;
 
     if (elem->elem().contains_point(p, _eps_on_surface))
@@ -188,12 +193,6 @@ AdaptiveRayContainmentCheck::rayIntersectGeometry(const Point & ray_start,
 {
   LineSegment ray_segment(ray_start, ray_end);
   return elem->intersect(ray_segment);
-}
-
-Ball
-AdaptiveRayContainmentCheck::computeBoundingBall(const SurfaceElement * elem) const
-{
-  return elem->computeBoundingBall();
 }
 
 bool
@@ -270,25 +269,26 @@ AdaptiveRayContainmentCheck::computeGlobalBoundingBox()
   return BoundingBox(min_pt, max_pt);
 }
 
-const Point
-AdaptiveRayContainmentCheck::generateRayStart(const Point & point,
-                                              const bool inverted,
-                                              const int number_to_larger_variance) const
+Point
+AdaptiveRayContainmentCheck::rayStartOutsideOBB(const Point & point,
+                                                const Point & ray_direction,
+                                                const unsigned int obb_axis,
+                                                const bool inverted) const
 {
   mooseAssert(_build_obb,
-              "AdaptiveRayContainmentCheck::generateRayStart: OBB-based ray start is only used by "
-              "the auto (PCA) policy.");
+              "AdaptiveRayContainmentCheck::rayStartOutsideOBB: OBB-based ray start is only used "
+              "by the auto (PCA) policy.");
+  mooseAssert(obb_axis < static_cast<unsigned int>(_dim),
+              "AdaptiveRayContainmentCheck::rayStartOutsideOBB: invalid OBB axis index.");
 
-  const Real SAFE_FACTOR = 1.1;
-
-  const Real last_axis_length = _obb_bounds.getAxisLength(_dim - 1 - number_to_larger_variance);
-  const Real half_axis_length = last_axis_length / 2.0;
+  const Real safe_factor = 1.1;
+  const Real axis_length = _obb_bounds.getAxisLength(obb_axis);
+  const Real half_axis_length = axis_length / 2.0;
 
   Point projection_plane_corner;
   Real direction_multiplier;
 
-  if (_obb_bounds.getProjectedLength(point, _dim - 1 - number_to_larger_variance) <
-      half_axis_length)
+  if (_obb_bounds.getProjectedLength(point, obb_axis) < half_axis_length)
   {
     projection_plane_corner =
         inverted ? _obb_bounds.getMaximalCorner() : _obb_bounds.getMinimalCorner();
@@ -301,30 +301,9 @@ AdaptiveRayContainmentCheck::generateRayStart(const Point & point,
     direction_multiplier = inverted ? 1.0 : -1.0;
   }
 
-  // Select the plane normal corresponding to number_to_larger_variance: 0 is the
-  // ray direction, _dim - 1 the second-variance axis (3D only), and _dim the
-  // maximum-variance axis.
-  Point plane_normal;
-  if (number_to_larger_variance == 0)
-    plane_normal = _ray_direction;
-  else if (_dim - number_to_larger_variance == 0)
-    plane_normal = _max_variance_vector;
-  else if (_dim - number_to_larger_variance == 1 /* for 3D only*/)
-    plane_normal = _second_variance_vector;
-  else
-    mooseError("AdaptiveRayContainmentCheck::generateRayStart: invalid "
-               "number_to_larger_variance ",
-               number_to_larger_variance,
-               " for dimension ",
-               _dim,
-               "; expected 0, ",
-               _dim - 1,
-               ", or ",
-               _dim,
-               ".");
-
-  Point starting_point = projectPointOntoPlane(point, projection_plane_corner, plane_normal);
-  return starting_point - (SAFE_FACTOR * last_axis_length * direction_multiplier) * _ray_direction;
+  const Point projected_point =
+      projectPointOntoPlane(point, projection_plane_corner, ray_direction);
+  return projected_point - safe_factor * axis_length * direction_multiplier * ray_direction;
 }
 
 ///  Finalize the ray direction (auto -> PCA, user -> as given) and its bounding box.
