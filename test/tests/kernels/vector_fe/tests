@@ -168,7 +168,7 @@
     input = 'coupled_scalar_vector_jacobian.i'
     recover = false
     state = 'const_positive'
-    ratio_tol = 1e-7
+    ratio_tol = 5e-6 # loose tolerance due to compiler optimization
     difference_tol = 5e-6
     design = "syntax/Variables/index.md "
     issues = "#10049"
