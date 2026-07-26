@@ -62,6 +62,56 @@
                   'EDGE2 surface mesh using the default pca_ray point-in-polyhedron method.'
   []
 
+  [user_selected_ray]
+    requirement = 'The system shall use the ray direction supplied to the user_selected_ray '
+                  'point-in-polyhedron method exactly, rather than the automatically selected '
+                  'direction, by'
+    [honored_neg_x]
+      type = 'CSVDiff'
+      input = 'user_ray_direction.i'
+      cli_args = 'UserObjects/in_out_test/ray_direction="-1 0 0" Outputs/file_base=user_ray_neg_x'
+      csvdiff = 'user_ray_neg_x.csv'
+      mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+      recover = false
+      detail = 'reporting a negative axis direction as given, which the auto (PCA) direction would '
+               'not match,'
+    []
+    [honored_oblique]
+      type = 'CSVDiff'
+      input = 'user_ray_direction.i'
+      cli_args = 'UserObjects/in_out_test/ray_direction="1 1 0" Outputs/file_base=user_ray_oblique'
+      csvdiff = 'user_ray_oblique.csv'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'accepting and normalizing an oblique (non-axis) direction, and'
+    []
+    [oblique_matches_auto]
+      type = 'Exodiff'
+      input = 'pca_ray_2d.i'
+      cli_args = 'UserObjects/in_out_test/point_containment_method=user_selected_ray '
+                 'UserObjects/in_out_test/ray_direction="1 1 0"'
+      exodiff = 'pca_ray_2d_out.e'
+      prereq = 'pca_ray_2d'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'producing the same closed-surface in-out result from an oblique direction as the '
+               'automatically selected direction.'
+    []
+  []
+
+  [user_ray_rejects_out_of_plane]
+    type = 'RunException'
+    input = 'pca_ray_2d.i'
+    cli_args = 'UserObjects/in_out_test/point_containment_method=user_selected_ray '
+               'UserObjects/in_out_test/ray_direction="0 0 1"'
+    expect_err = 'ray_direction for a 2D surface must lie in the mesh plane'
+    mesh_mode = REPLICATED
+    recover = false
+    requirement = 'The system shall report an error when a user_selected_ray direction for a 2D '
+                  'surface mesh has a nonzero out-of-plane (z) component, since such a ray cannot '
+                  'test containment in the mesh plane.'
+  []
+
   [fixed_x_ray_rejects_2d]
     type = 'RunException'
     input = 'pca_ray_2d.i'
@@ -90,7 +140,7 @@
       type = 'RunException'
       input = 'fixed_x_ray.i'
       cli_args = 'UserObjects/in_out_test/tolerance=-1'
-      expect_err = 'tolerance.*must be non-negative'
+      expect_err = 'tolerance.*must be greater than zero'
       mesh_mode = REPLICATED
       recover = false
       detail = 'a negative surface tolerance,'

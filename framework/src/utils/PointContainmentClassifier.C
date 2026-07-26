@@ -30,8 +30,8 @@ PointContainmentClassifier::PointContainmentClassifier(MeshBase & mesh,
             "PointContainmentClassifier: a SurfaceElementSet is required for the pca_ray and "
             "user_selected_ray methods.");
 
-      // pca_ray passes the (0,0,0) "auto" sentinel (PCA selection); user_selected_ray
-      // passes the user's ray direction through pca.ray_direction.
+      // pca_ray uses AUTO_PCA; user_selected_ray passes the user's direction as USER_SPECIFIED.
+      // Both are carried in pca.ray_direction (a RayDirectionOptions).
       _pca = std::make_unique<AdaptiveRayContainmentCheck>(set->elements(),
                                                            set->centroids(),
                                                            pca.ray_direction,
@@ -66,4 +66,13 @@ PointContainmentClassifier::sideness(const Point & point) const
 
   mooseAssert(_pca, "PointContainmentClassifier: no backend was constructed.");
   return _pca->sideness(point);
+}
+
+Point
+PointContainmentClassifier::rayDirection() const
+{
+  if (!_pca)
+    mooseError("PointContainmentClassifier::rayDirection() is only defined for the pca_ray and "
+               "user_selected_ray methods; the fixed_x_ray method has no ray-casting backend.");
+  return _pca->rayDirection();
 }

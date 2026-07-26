@@ -22,7 +22,9 @@ PointInSubdomainTestAux::validParams()
 
   MooseEnum methods("which_subdomain if_inside");
   params.addRequiredParam<MooseEnum>(
-      "method", methods, "Which PointInSubdomainCheckUO accessor to call at each element centroid.");
+      "method",
+      methods,
+      "Which PointInSubdomainCheckUO accessor to call at each element centroid.");
 
   params.addClassDescription("Test-only AuxKernel that exposes the PointInSubdomainCheckUO "
                              "whichSubdomain and ifInside accessors for coverage testing.");

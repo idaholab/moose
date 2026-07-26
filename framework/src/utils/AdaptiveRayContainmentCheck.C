@@ -13,10 +13,13 @@
 #include "libmesh/plane.h"
 #include "libmesh/utility.h"
 
+#include <cmath>
+#include <limits>
+
 AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
     const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
     const std::vector<Point> & centroids,
-    const Point ray_direction,
+    const RayDirectionOptions & ray_options,
     const Real eps_on_surface,
     const int leaf_max_size,
     const FileName & obb_file_name,
@@ -24,7 +27,7 @@ AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
     const libMesh::Parallel::Communicator * comm)
   : _bd_elements(bd_elements),
     _centroids(centroids),
-    _ray_direction(ray_direction),
+    _ray_direction(ray_options.direction),
     _eps_on_surface(eps_on_surface),
     _leaf_max_size(leaf_max_size),
     _obb_file_name(obb_file_name),
@@ -38,16 +41,31 @@ AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
   _num_elements = _bd_elements.size();
   _dim = _bd_elements[0]->expectedEmbeddingMeshDim();
 
-  // Normalize a user-supplied ray direction so the axis-aligned test below is
-  // scale-independent (e.g. (5,0,0) is treated the same as (1,0,0)). The default
-  // (0,0,0) sentinel means "auto" and is left untouched to avoid a divide-by-zero;
-  // it falls through to PCA.
-  if (!MooseUtils::absoluteFuzzyEqual(_ray_direction.norm(), 0.0))
-    _ray_direction = _ray_direction.unit();
+  _auto_ray_direction = (ray_options.mode == RayDirectionMode::AUTO_PCA);
 
-  // An axis-aligned ray direction is used as given; anything else (including the
-  // default (0,0,0)) needs PCA to choose the ray direction automatically.
-  if (!rayDirectionIsAxisAligned())
+  if (!_auto_ray_direction)
+  {
+    // USER_SPECIFIED policy: use the direction exactly. Validate only that it is usable, then
+    // normalize. Degeneracy (a ray grazing a vertex/edge or tangent to the surface) is the
+    // user's responsibility; the engine never auto-corrects or switches the direction.
+    for (const auto i : make_range(3u))
+      if (!std::isfinite(_ray_direction(i)))
+        mooseError(
+            "AdaptiveRayContainmentCheck: a user-selected ray_direction must be finite; got ",
+            _ray_direction,
+            ".");
+    if (MooseUtils::absoluteFuzzyEqual(_ray_direction.norm(), 0.0))
+      mooseError("AdaptiveRayContainmentCheck: a user-selected ray_direction must be non-zero.");
+    if (_dim == 2 && !MooseUtils::absoluteFuzzyEqual(_ray_direction(2), 0.0))
+      mooseError("AdaptiveRayContainmentCheck: a user-selected ray_direction for a 2D surface must "
+                 "lie in the mesh plane (its z component must be zero); got ",
+                 _ray_direction,
+                 ".");
+    _ray_direction = _ray_direction.unit();
+  }
+
+  // PCA is only used to auto-select the direction; a user-selected ray never runs it.
+  if (_auto_ray_direction)
     preparePCASVD();
   buildObbKdtreeAndMaxProjectedDiagonal(
       1e-2 /*safe protect: expanded box length in each direction and both sides*/);
@@ -59,73 +77,44 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
   if (isOutsideBoundingBox(p))
     return SurfaceSide::OUTSIDE;
 
-  // --- (a) Define first two rays ---
-  std::array<Point, 2> ray_starts = {generateRayStart(p), generateRayStart(p, true)};
+  const std::array<Point, 2> ray_starts =
+      _auto_ray_direction ? std::array<Point, 2>{generateRayStart(p), generateRayStart(p, true)}
+                          : std::array<Point, 2>{rayStartOutsideAABB(p, _ray_direction, false),
+                                                 rayStartOutsideAABB(p, _ray_direction, true)};
 
-  std::array<Point, 2> ray_dirs = {p - ray_starts[0], p - ray_starts[1]};
+  if (const auto side = sidenessFromRayPair(p, ray_starts))
+    return *side;
 
-  std::array<int, 2> counts = {0, 0};
-
-  // shoot two rays in opposite directions and count intersections with boundary elements
-  for (const auto i : make_range(2))
+  if (!_auto_ray_direction)
   {
-    for (const auto & elemID : collectCandidateElementIDs(p))
-    {
-      const auto & elem = _bd_elements[elemID].get();
-      const auto ball = computeBoundingBall(elem);
-
-      if (isOutsideRayBBox(ray_starts[i], ray_dirs[i], ball))
-        continue;
-      if (isOutsideBoundingRegion(ray_starts[i], ray_dirs[i], ball))
-        continue;
-
-      if (elem->elem().contains_point(p, _eps_on_surface))
-        return SurfaceSide::ON;
-
-      if (rayIntersectGeometry(ray_starts[i], p, elem))
-        counts[i]++;
-    }
-
-    // If either ray has zero intersections, the point is outside the geometry
-    if (counts[i] == 0)
-      return SurfaceSide::OUTSIDE;
+    std::ostringstream oss;
+    oss << p;
+    mooseError("AdaptiveRayContainmentCheck: the user-selected ray_direction ",
+               _ray_direction,
+               " gives an ambiguous (grazing or tangent) intersection at point ",
+               oss.str(),
+               "; choose a different ray_direction or use the auto (pca_ray) method.");
   }
 
-  // --- (b) Immediate decisions ---
-  // If both counts are odd or both are even, decide based on parity
-  if ((counts[0] % 2) == (counts[1] % 2))
-    return (counts[0] % 2 == 1) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
-
-  // --- (c) Check for other variation directions ---
-  std::vector<Point> axis_dirs =
+  // The primary rays disagreed on parity. Probe the remaining PCA variance directions: if any
+  // probe ray escapes without crossing the surface, the point is outside. Otherwise the query is
+  // undecidable.
+  const std::vector<Point> axis_dirs =
       (_dim == 3) ? std::vector<Point>{_second_variance_vector, _max_variance_vector}
                   : std::vector<Point>{_max_variance_vector};
 
   for (const auto idx : index_range(axis_dirs))
   {
     const auto & dir = axis_dirs[idx];
-    std::array<Point, 2> ray_starts = {
-        generateRayStart(p, false /*inverted*/, std::nullopt /*forced_xyz*/, idx),
-        generateRayStart(p, true /*inverted*/, std::nullopt /*forced_xyz*/, idx)};
+    const std::array<Point, 2> probe_starts = {generateRayStart(p, false /*inverted*/, idx),
+                                               generateRayStart(p, true /*inverted*/, idx)};
 
     for (const auto i : make_range(2))
     {
-      int num = 0;
-      for (const auto & elemID : collectCandidateElementIDs(p))
-      {
-        const auto & elem = _bd_elements[elemID].get();
-        const auto ball = computeBoundingBall(elem);
-
-        if (isOutsideRayBBox(ray_starts[i], dir, ball))
-          continue;
-        if (isOutsideBoundingRegion(ray_starts[i], dir, ball))
-          continue;
-
-        if (rayIntersectGeometry(ray_starts[i], p, elem))
-          num++;
-      }
-
-      if (num == 0)
+      // p is never on the surface here (the primary pair already returned ON if it were), so the
+      // point_on_surface flag stays false and the probe only uses the crossing count.
+      bool point_on_surface = false;
+      if (countCrossings(probe_starts[i], dir, p, point_on_surface) == 0)
         return SurfaceSide::OUTSIDE;
     }
   }
@@ -133,6 +122,63 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
   std::ostringstream oss;
   oss << p;
   mooseError("AdaptiveRayContainmentCheck: No decision could be made for point " + oss.str());
+}
+
+std::optional<SurfaceSide>
+AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
+                                                 const std::array<Point, 2> & ray_starts) const
+{
+  std::array<int, 2> counts = {0, 0};
+
+  // Shoot the two (opposite) rays and count intersections with the boundary elements.
+  for (const auto i : make_range(2))
+  {
+    bool point_on_surface = false;
+    counts[i] = countCrossings(ray_starts[i], p - ray_starts[i], p, point_on_surface);
+
+    if (point_on_surface)
+      return SurfaceSide::ON;
+
+    // A ray that never crosses the closed surface proves the point is outside.
+    if (counts[i] == 0)
+      return SurfaceSide::OUTSIDE;
+  }
+
+  // Consistent parity gives a definite decision; conflicting parity is undecided (nullopt) and
+  // left to the caller's policy.
+  if ((counts[0] % 2) == (counts[1] % 2))
+    return (counts[0] % 2 == 1) ? SurfaceSide::INSIDE : SurfaceSide::OUTSIDE;
+  return std::nullopt;
+}
+
+int
+AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
+                                            const Point & bbox_dir,
+                                            const Point & p,
+                                            bool & point_on_surface) const
+{
+  point_on_surface = false;
+  int count = 0;
+  for (const auto & elemID : collectCandidateElementIDs(p))
+  {
+    const auto & elem = _bd_elements[elemID].get();
+    const auto ball = computeBoundingBall(elem);
+
+    if (isOutsideRayBBox(ray_start, bbox_dir, ball))
+      continue;
+    if (isOutsideBoundingRegion(ray_start, bbox_dir, ball))
+      continue;
+
+    if (elem->elem().contains_point(p, _eps_on_surface))
+    {
+      point_on_surface = true;
+      return count;
+    }
+
+    if (rayIntersectGeometry(ray_start, p, elem))
+      count++;
+  }
+  return count;
 }
 
 bool
@@ -227,39 +273,11 @@ AdaptiveRayContainmentCheck::computeGlobalBoundingBox()
 const Point
 AdaptiveRayContainmentCheck::generateRayStart(const Point & point,
                                               const bool inverted,
-                                              const std::optional<Point> & forced_ray_direction_XYZ,
                                               const int number_to_larger_variance) const
 {
-  if (!_build_obb || forced_ray_direction_XYZ.has_value()) // Ray direction is X, Y, or Z
-  {
-    const auto & min = _bounds.min();
-    const auto & max = _bounds.max();
-
-    // Copy point to starting point
-    Point starting_point = point;
-
-    int ray_dir = -1;
-    for (const auto dim : make_range(_dim))
-      if (!_build_obb && _ray_direction(dim) == 1.0)
-        ray_dir = dim;
-      else if (forced_ray_direction_XYZ && forced_ray_direction_XYZ.value()(dim) == 1.0)
-        ray_dir = dim;
-
-    mooseAssert(
-        ray_dir >= 0,
-        "AdaptiveRayContainmentCheck::generateRayStart: no axis-aligned ray direction found");
-
-    // Extend starting point outside bounding box in ray_dir
-
-    const Real ray_extent = max(ray_dir) - min(ray_dir);
-
-    if (max(ray_dir) + min(ray_dir) < 2 * point(ray_dir))
-      starting_point(ray_dir) = inverted ? max(ray_dir) + ray_extent : min(ray_dir) - ray_extent;
-    else
-      starting_point(ray_dir) = inverted ? min(ray_dir) - ray_extent : max(ray_dir) + ray_extent;
-
-    return starting_point;
-  }
+  mooseAssert(_build_obb,
+              "AdaptiveRayContainmentCheck::generateRayStart: OBB-based ray start is only used by "
+              "the auto (PCA) policy.");
 
   const Real SAFE_FACTOR = 1.1;
 
@@ -309,27 +327,48 @@ AdaptiveRayContainmentCheck::generateRayStart(const Point & point,
   return starting_point - (SAFE_FACTOR * last_axis_length * direction_multiplier) * _ray_direction;
 }
 
-///  Automatically set the ray direction if _ray_direction is not set previously.
+///  Finalize the ray direction (auto -> PCA, user -> as given) and its bounding box.
 void
 AdaptiveRayContainmentCheck::initializeRayDirection()
 {
-  if (rayDirectionIsAxisAligned())
-    // Axis-aligned direction: use it directly with a global axis-aligned bounding box.
-    // (_ray_direction is already normalized in the constructor.)
-    _bounds = computeGlobalBoundingBox();
-  else
+  if (_auto_ray_direction)
   {
+    // Auto ray: adopt the PCA-selected direction and use the oriented bounding box.
     _ray_direction = (_dim == 3) ? _min_variance_vector : _second_variance_vector;
     _build_obb = true;
   }
+  else
+    // User-selected axis-aligned ray: keep the user's (normalized) direction and use a
+    // global axis-aligned bounding box.
+    _bounds = computeGlobalBoundingBox();
 }
 
-bool
-AdaptiveRayContainmentCheck::rayDirectionIsAxisAligned() const
+Point
+AdaptiveRayContainmentCheck::rayStartOutsideAABB(const Point & point,
+                                                 const Point & unit_direction,
+                                                 const bool inverted) const
 {
-  return MooseUtils::absoluteFuzzyEqual(_ray_direction(0), 1.0) or
-         MooseUtils::absoluteFuzzyEqual(_ray_direction(1), 1.0) or
-         MooseUtils::absoluteFuzzyEqual(_ray_direction(2), 1.0);
+  // Project the 8 AABB corners onto the direction to find the box's extent along it. The ray
+  // start is then placed just past the far side, so it is provably outside the box while moving
+  // only the distance needed (a full-diagonal displacement would make unnecessarily long rays).
+  const Point & lo = _bounds.min();
+  const Point & hi = _bounds.max();
+
+  Real min_projection = std::numeric_limits<Real>::max();
+  Real max_projection = std::numeric_limits<Real>::lowest();
+  for (const auto c : make_range(8u))
+  {
+    const Point corner(
+        (c & 1u) ? hi(0) : lo(0), (c & 2u) ? hi(1) : lo(1), (c & 4u) ? hi(2) : lo(2));
+    const Real projection = corner * unit_direction;
+    min_projection = std::min(min_projection, projection);
+    max_projection = std::max(max_projection, projection);
+  }
+
+  // Scale-aware padding so the start never lands exactly on the box boundary.
+  const Real padding = _eps_on_surface + 1e-2 * (max_projection - min_projection);
+  const Real target = inverted ? max_projection + padding : min_projection - padding;
+  return point + (target - point * unit_direction) * unit_direction;
 }
 
 Point

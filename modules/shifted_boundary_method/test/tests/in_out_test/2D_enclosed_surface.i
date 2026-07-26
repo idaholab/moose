@@ -1,5 +1,5 @@
 # A closed curve lies entirely within one coarse element, so every element node is outside while
-# interior quadrature points are inside. The element must still be classified as intercepted.
+# interior quadrature points are inside. The element must still be marked as intercepted.
 radius = 0.3
 n_seg = 32
 

@@ -14,9 +14,14 @@ The `point_containment_method` parameter selects the classification backend:
 - `pca_ray` (default) casts a ray from the query point and counts surface-element
   crossings, using a direction chosen automatically from a principal-component
   analysis of the surface. Supports 2-D `EDGE2` and 3-D `TRI3` surfaces.
-- `user_selected_ray` uses the same ray-casting engine with the direction given
-  by the `ray_direction` parameter. Axis-aligned directions use the
-  bounding-box fast path. Supports 2-D `EDGE2` and 3-D `TRI3` surfaces.
+- `user_selected_ray` uses the same ray-casting engine but with the direction
+  given by the `ray_direction` parameter, used exactly as supplied (no automatic
+  selection or replacement). Any finite, non-zero direction is allowed, including
+  oblique ones; for a 2-D surface the direction must lie in the mesh plane (zero
+  `z` component). The user is responsible for avoiding directions that graze a
+  vertex or edge or run tangent to the surface; such an ambiguous query is
+  reported as an error rather than silently redirected. Supports 2-D `EDGE2` and
+  3-D `TRI3` surfaces.
 - `fixed_x_ray` uses the [TriangleManifold.md] engine (a fixed +x ray with a
   solid-angle fallback). This engine supports only 3-D `TRI3` surfaces and does
   not produce OBB/ray debug files.

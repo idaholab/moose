@@ -39,10 +39,14 @@ PointInPolyhedronBaseUO::validParams()
       "'ray_direction' parameter; 'fixed_x_ray' uses the TriangleManifold engine (fixed +x ray, "
       "TRI3 surfaces only).");
 
-  params.addParam<Point>("ray_direction",
-                         Point(0.0, 0.0, 0.0),
-                         "Ray direction for the 'user_selected_ray' method. Axis-aligned "
-                         "directions use the AABB fast path; other methods ignore this parameter.");
+  params.addParam<Point>(
+      "ray_direction",
+      Point(0.0, 0.0, 0.0),
+      "Ray direction for the 'user_selected_ray' method, used exactly as given (no "
+      "auto-selection). Any finite non-zero direction is allowed, including oblique; for a 2D "
+      "surface it must lie in the mesh plane (zero z component). The user is responsible for "
+      "avoiding directions that graze vertices/edges or are tangent to the surface. Other "
+      "methods ignore this parameter.");
 
   params.addParam<Real>("tolerance",
                         libMesh::TOLERANCE,
@@ -93,11 +97,12 @@ PcaRayOptions
 PointInPolyhedronBaseUO::pcaRayOptions() const
 {
   PcaRayOptions options;
-  // pca_ray keeps the (0,0,0) "auto" sentinel; user_selected_ray passes the
-  // user's direction through to the ray-casting engine.
-  options.ray_direction = (_method == PointContainmentMethod::USER_SELECTED_RAY)
-                              ? _ray_direction
-                              : Point(0.0, 0.0, 0.0);
+  // pca_ray auto-selects the direction (AUTO_PCA); user_selected_ray passes the user's
+  // direction through to the ray-casting engine to be used exactly (USER_SPECIFIED).
+  options.ray_direction.mode = (_method == PointContainmentMethod::USER_SELECTED_RAY)
+                                   ? RayDirectionMode::USER_SPECIFIED
+                                   : RayDirectionMode::AUTO_PCA;
+  options.ray_direction.direction = _ray_direction;
   options.leaf_max_size = _leaf_max_size;
   options.obb_file_name = _obb_file_name;
   options.ray_file_name = _ray_file_name;

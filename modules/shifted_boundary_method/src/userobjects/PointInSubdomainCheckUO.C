@@ -44,11 +44,13 @@ PointInSubdomainCheckUO::PointInSubdomainCheckUO(const InputParameters & paramet
 void
 PointInSubdomainCheckUO::initialSetup()
 {
-  // Map the selected ray backend to the ray direction AdaptiveRayContainmentCheck expects:
-  // pca_ray -> (0,0,0) "auto" sentinel; user_selected_ray -> the user's ray_direction.
-  const Point ray_direction = (_method == PointContainmentMethod::USER_SELECTED_RAY)
-                                  ? _ray_direction
-                                  : Point(0.0, 0.0, 0.0);
+  // Map the selected ray backend to the ray-direction intent AdaptiveRayContainmentCheck expects:
+  // pca_ray -> AUTO_PCA; user_selected_ray -> USER_SPECIFIED with the user's ray_direction.
+  RayDirectionOptions ray_options;
+  ray_options.mode = (_method == PointContainmentMethod::USER_SELECTED_RAY)
+                         ? RayDirectionMode::USER_SPECIFIED
+                         : RayDirectionMode::AUTO_PCA;
+  ray_options.direction = _ray_direction;
 
   // Each subdomain gets its own checker, so the OBB/ray debug meshes must go to
   // distinct files; otherwise later subdomains overwrite earlier ones. Insert the
@@ -70,7 +72,7 @@ PointInSubdomainCheckUO::initialSetup()
     _subdomain_id_checkers[subdomain_id] =
         std::make_unique<AdaptiveRayContainmentCheck>(set.elements(),
                                                       set.centroids(),
-                                                      ray_direction,
+                                                      ray_options,
                                                       _tolerance,
                                                       _leaf_max_size,
                                                       obb_file,

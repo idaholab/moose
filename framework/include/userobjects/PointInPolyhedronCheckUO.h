@@ -31,6 +31,10 @@ public:
   /// Classify a point against the surface.
   SurfaceSide sideness(const Point & p) const { return _classifier->sideness(p); }
 
+  /// The resolved ray direction used by the ray-casting backend (see
+  /// PointContainmentClassifier::rayDirection).
+  Point rayDirection() const { return _classifier->rayDirection(); }
+
   /// Whether the point is inside or on the surface. (ON is treated as inside.)
   virtual bool ifInside(const Point & p) const { return _classifier->contains(p); }
 

@@ -15,20 +15,30 @@
 #include "SurfaceSide.h"
 #include "KDTree.h"
 #include "OrientedBoundingBox.h"
+#include "RayDirectionOptions.h"
 #include "MooseError.h"
+
+#include <array>
+#include <optional>
 
 class Ball;
 
 /// Ray-casting point-in-solid engine over a closed surface mesh represented as a
-/// collection of SurfaceElement wrappers. The ray direction is either supplied
-/// axis-aligned (e.g. (1,0,0)) and used directly with an axis-aligned bounding box,
-/// or auto-selected via PCA when a non-axis (or default (0,0,0)) direction is given.
+/// collection of SurfaceElement wrappers. The shooting direction follows one of two
+/// explicit policies (RayDirectionMode):
+///  - AUTO_PCA: the engine auto-selects a robust direction via PCA, builds an oriented
+///    bounding box (OBB), and may use a parity-tie fallback along other variance axes.
+///  - USER_SPECIFIED: the caller's direction is used exactly. There is no PCA, no OBB,
+///    and no fallback; the engine uses a global axis-aligned bounding box (AABB) and, on
+///    a genuinely ambiguous (grazing/tangent) query, errors rather than silently changing
+///    direction. The direction is validated only to be finite, non-zero, and in-plane for
+///    a 2D surface.
 class AdaptiveRayContainmentCheck final
 {
 public:
   AdaptiveRayContainmentCheck(const std::vector<std::unique_ptr<SurfaceElement>> & bd_elements,
                               const std::vector<Point> & centroids,
-                              const Point ray_direction,
+                              const RayDirectionOptions & ray_options,
                               const Real eps_on_surface = libMesh::TOLERANCE,
                               const int leaf_max_size = 10,
                               const FileName & obb_file_name = "",
@@ -37,6 +47,10 @@ public:
 
   /// Main function: Determine if a point is inside the geometry
   SurfaceSide sideness(const Point & p) const;
+
+  /// The resolved ray direction actually used for shooting: the (normalized) user
+  /// direction for a user-selected ray, or the PCA-selected direction for an auto ray.
+  const Point & rayDirection() const { return _ray_direction; }
 
 private:
   /// Maximum direction and second maximum direction from PCA
@@ -102,8 +116,13 @@ private:
   /// Whether the bounding box has been computed and is ready for use.
   bool _bounds_ready = false;
 
-  /// If the ray x-dir, y-dir, or z-dir is set to 1.0, we just need to build the Axis-Aligned Bounding Box (AABB)
-  /// and do not need to build Oriented Bounding Box (OBB)
+  /// Whether the ray direction is auto-selected via PCA (true) or user-selected (false).
+  /// Set once in the constructor from the RayDirectionOptions mode. Only an auto ray runs
+  /// PCA and may have its direction chosen automatically.
+  bool _auto_ray_direction = false;
+
+  /// When the ray direction is auto-selected (PCA) we build an Oriented Bounding Box (OBB);
+  /// a user-selected ray uses only the global Axis-Aligned Bounding Box (AABB) instead.
   bool _build_obb = false;
 
   /// The origin of the plane used to ensure that every projected point is correctly aligned and lies on the same plane.
@@ -147,27 +166,41 @@ private:
   // - _min_variance_vector: Direction with the smallest variance (typically the surface normal).
   void preparePCASVD();
 
-  /// Sets the ray direction for ray shooting. If the ray direction is explicitly provided by the user as a Point,
-  /// this function will retain the user-defined direction.
-  /// Otherwise, it will automatically determine the optimal ray direction based on the geometry.
+  /// Finalizes the ray direction and the matching bounding box. For an auto ray it sets
+  /// _ray_direction to the PCA-selected direction and requests the OBB; for a user-selected
+  /// ray it retains the user's direction and builds the global AABB.
   void initializeRayDirection();
 
-  /// Returns true if _ray_direction is (approximately) one of the coordinate axes X, Y, or Z.
-  /// Assumes _ray_direction has been normalized, so a unit vector with any component equal to 1.0
-  /// is necessarily axis-aligned. A non-axis direction (including the default (0,0,0) sentinel)
-  /// means the ray direction must be chosen automatically via PCA.
-  bool rayDirectionIsAxisAligned() const;
+  /// Determine sideness from a pair of opposite rays. A conflicting parity returns std::nullopt
+  /// so the caller can apply the selected ambiguity policy.
+  std::optional<SurfaceSide> sidenessFromRayPair(const Point & p,
+                                                 const std::array<Point, 2> & ray_starts) const;
+
+  /// Count how many times the segment from `ray_start` to `p` crosses the surface, scanning the
+  /// KD-tree candidates pruned against a ray aligned with `bbox_dir`. If a candidate element
+  /// contains `p`, sets `point_on_surface` and returns early. Shared by sidenessFromRayPair and
+  /// the auto probe.
+  int countCrossings(const Point & ray_start,
+                     const Point & bbox_dir,
+                     const Point & p,
+                     bool & point_on_surface) const;
+
+  /// Ray start strictly outside the global AABB along `unit_direction`, for any direction.
+  /// The 8 AABB corners are projected onto the direction to find the box extent, and the
+  /// start is placed just past the far side (a scale-aware padding), moving only the
+  /// distance needed. `inverted` shoots from the opposite side. `unit_direction` must be
+  /// normalized.
+  Point
+  rayStartOutsideAABB(const Point & point, const Point & unit_direction, const bool inverted) const;
 
   /**
-   * Computes the starting point of a ray for a given query point.
-   * The ray is cast in the orthogonal direction to the binning direction.
-   * The starting point is initialized to the input point and then displaced
-   * along the ray direction to ensure it starts outside the bounding box,
-   * guaranteeing it originates outside the geometry.
+   * Computes the starting point of an OBB-based ray (auto/PCA policy) for a given query
+   * point. The point is projected onto an OBB face and displaced along the ray direction so
+   * the ray originates outside the geometry. `number_to_larger_variance` selects which
+   * variance axis defines the projection plane.
    */
   const Point generateRayStart(const Point & point,
                                const bool inverted = false,
-                               const std::optional<Point> & forced_ray_direction_XYZ = std::nullopt,
                                const int number_to_larger_variance = 0) const;
 
   /// Orthogonally project `point_to_project` onto the plane defined by `plane_point`

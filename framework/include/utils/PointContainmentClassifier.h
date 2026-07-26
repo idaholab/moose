@@ -11,6 +11,7 @@
 
 #include "SurfaceSide.h"
 #include "MooseTypes.h"
+#include "RayDirectionOptions.h"
 
 #include "libmesh/bounding_box.h"
 #include "libmesh/parallel.h"
@@ -30,9 +31,9 @@ enum class PointContainmentMethod
 {
   /// AdaptiveRayContainmentCheck with a PCA-selected ray (default SBM behavior).
   PCA_RAY,
-  /// AdaptiveRayContainmentCheck with a user-supplied ray_direction (axis-aligned
-  /// directions use the AABB fast path; non-axis directions fall back to PCA
-  /// selection inside the engine).
+  /// AdaptiveRayContainmentCheck with a user-supplied ray_direction, used exactly as given
+  /// (no PCA, no auto-selection). Any finite non-zero direction is accepted, including oblique;
+  /// for a 2D surface it must lie in the mesh plane.
   USER_SELECTED_RAY,
   /// TriangleManifold engine (fixed +x ray parity + solid-angle fallback). TRI3
   /// surfaces only.
@@ -42,10 +43,9 @@ enum class PointContainmentMethod
 /// PCA/ray-backend tuning + debug output; ignored by FIXED_X_RAY (TriangleManifold).
 struct PcaRayOptions
 {
-  /// Ray direction for the ray-casting engine. The (0,0,0) sentinel means "auto"
-  /// (PCA selection) and is used by PCA_RAY; USER_SELECTED_RAY passes the user's
-  /// direction here.
-  Point ray_direction = Point(0.0, 0.0, 0.0);
+  /// Ray-direction intent for the ray-casting engine: AUTO_PCA for PCA_RAY, or USER_SPECIFIED
+  /// with the user's direction for USER_SELECTED_RAY.
+  RayDirectionOptions ray_direction;
   int leaf_max_size = 10;
   FileName obb_file_name = "";
   FileName ray_file_name = "";
@@ -89,6 +89,11 @@ public:
 
   /// Number of surface elements (triangles) backing the classifier.
   std::size_t numElements() const { return _num_elements; }
+
+  /// The resolved ray direction of the ray-casting backend (user-selected direction for
+  /// USER_SELECTED_RAY, PCA-selected direction for PCA_RAY). Errors for FIXED_X_RAY, which
+  /// has no such backend.
+  Point rayDirection() const;
 
 private:
   const PointContainmentMethod _method;
