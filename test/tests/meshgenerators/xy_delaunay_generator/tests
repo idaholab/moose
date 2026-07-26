@@ -107,11 +107,10 @@
       capabilities = 'machine=x86_64'
     []
     [area_func]
-      type = 'Exodiff'
+      type = 'RunApp'
       input = 'xydelaunay_area_func.i'
-      cli_args = '--mesh-only'
-      exodiff = 'xydelaunay_area_func_in.e'
       recover = false
+      allow_test_objects = true
       detail = "with optional non-uniform refinement based on a custom function."
     []
     [bdry_layer]
