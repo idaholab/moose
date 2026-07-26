@@ -28,6 +28,10 @@ InputParameters
 AddTimeIndependentReactionSolverAction::validParams()
 {
   InputParameters params = AddGeochemistrySolverAction::validParams();
+  // this action builds its own single-node mesh, so restricting the reactor to a subset of it is
+  // meaningless
+  params.suppressParameter<std::vector<SubdomainName>>("block");
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.set<ExecFlagEnum>("execute_console_output_on") = EXEC_FINAL;
   params.set<bool>("solver_info") = true;
   params.addParam<Real>("temperature", 25.0, "The temperature (degC) of the aqueous solution");
@@ -93,12 +97,6 @@ AddTimeIndependentReactionSolverAction::act()
     const std::string class_name = "GeochemistryTimeIndependentReactor";
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
-    if (isParamValid("boundary"))
-      params.set<std::vector<BoundaryName>>("boundary") =
-          getParam<std::vector<BoundaryName>>("boundary");
     params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
     if (isParamValid("swap_out_of_basis"))
       params.set<std::vector<std::string>>("swap_out_of_basis") =

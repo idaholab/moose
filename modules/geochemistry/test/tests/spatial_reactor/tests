@@ -238,7 +238,7 @@
     expect_err = 'GeochemistrySpatialReactor does not know about node'
     match_literal = true
     requirement = 'An error will be thrown if a quantity is requested from a block-restricted spatial reaction solver at a node outside its blocks'
-    issues = '#15693'
+    issues = '#15693 #33427'
     design = 'GeochemistrySpatialReactor.md'
   [../]
   [./spatial_block]
@@ -248,7 +248,7 @@
     input = spatial_block.i
     csvdiff = 'spatial_block_out.csv'
     requirement = 'The AuxVariables and AuxKernels added by the spatial reaction solver action shall be restricted to the same blocks as the reactor, so that quantities are not reported at nodes the reactor does not time-step'
-    issues = '#15693'
+    issues = '#15693 #33427'
     design = 'GeochemistrySpatialReactor.md'
   [../]
 []

@@ -562,4 +562,15 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
+  [./except_block]
+    type = RunException
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    capabilities = 'installation_type=in_tree'
+    input = 'except_block.i'
+    expect_err = "parameter 'TimeIndependentReactionSolver/block' is private and cannot be set"
+    match_literal = true
+    requirement = 'An error will be thrown if a batch reaction solver, which builds its own single-node mesh, is given a block restriction'
+    issues = '#15290 #15261 #33427'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
 []
