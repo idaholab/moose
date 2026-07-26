@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Problem/index.md'
-  issues = '#33355'
+  issues = '#33021'
   [MFEMSteadyProblemComposer]
     type = CSVDiff
     input = prob_op_block_darcy.i
