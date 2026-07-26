@@ -55,6 +55,9 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       mooseError("Timesequencestepper does not allow the start time to be modified.");
 
     auto current_input_sequence = buildSequence(times);
+    // Count the leading sequence entries already reached at the current time. Entries no greater
+    // than _time + _timestep_tolerance are complete, so this count is also the index of the first
+    // future entry, or sequence.size() if every entry is complete.
     const auto completed_prefix_size = [this](const auto & sequence)
     {
       return std::distance(sequence.begin(),
@@ -142,21 +145,31 @@ bool
 TimeSequenceStepperBase::advanceToFutureTime(Real time, Real tolerance, Real & next_time)
 {
   refreshSequence();
-  synchronizeCurrentStep(time, tolerance);
-  if (_current_step + 1 >= _time_sequence.size())
+  const auto first_future = findFirstFutureTime(time, tolerance);
+  if (first_future == _time_sequence.cend())
     return false;
 
-  next_time = _time_sequence[_current_step + 1];
+  next_time = *first_future;
   return true;
+}
+
+std::vector<Real>::const_iterator
+TimeSequenceStepperBase::findFirstFutureTime(Real time, Real tolerance) const
+{
+  return std::partition_point(_time_sequence.begin(),
+                              _time_sequence.end(),
+                              [time, tolerance](const auto sequence_time)
+                              { return sequence_time - time <= tolerance; });
 }
 
 void
 TimeSequenceStepperBase::synchronizeCurrentStep(Real time, Real tolerance)
 {
-  _current_step = 0;
-  while (_current_step + 1 < _time_sequence.size() &&
-         _time_sequence[_current_step + 1] - time <= tolerance)
-    increaseCurrentStep();
+  const auto first_future = findFirstFutureTime(time, tolerance);
+  _current_step =
+      first_future == _time_sequence.cbegin()
+          ? 0
+          : static_cast<unsigned int>(std::distance(_time_sequence.cbegin(), first_future) - 1);
 }
 
 Real
@@ -173,7 +186,9 @@ TimeSequenceStepperBase::acceptStep()
 {
   TimeStepper::acceptStep();
   refreshSequence();
-  synchronizeCurrentStep(_time, _timestep_tolerance);
+  while (_current_step + 1 < _time_sequence.size() &&
+         _time_sequence[_current_step + 1] - _time <= _timestep_tolerance)
+    increaseCurrentStep();
 }
 
 Real

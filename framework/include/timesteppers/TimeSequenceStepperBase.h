@@ -35,7 +35,13 @@ public:
   /// Get the next time in the input time sequence
   virtual Real getNextTimeInSequence();
 
-  /// Advance past sequence times that have already been reached and return the next time, if any
+  /**
+   * Return the first sequence time that has not yet been reached, if any
+   *
+   * The search does not advance the current sequence position.
+   *
+   * @return Whether a future sequence time was found and assigned to \p next_time
+   */
   bool advanceToFutureTime(Real time, Real tolerance, Real & next_time);
 
   virtual void init() override {}
@@ -45,13 +51,29 @@ protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
 
-  /// Refresh a dynamically changing time sequence before it is used
+  /**
+   * Re-read a time sequence source that can change during the simulation
+   *
+   * This hook is called before the stored sequence is accessed. The default implementation is a
+   * no-op for fixed sequences. Derived classes with dynamic sources should retrieve the current
+   * time points and pass them to updateSequence(), which rebuilds the canonical sequence and
+   * synchronizes the current step.
+   */
   virtual void refreshSequence() {}
 
   /// Build the canonical time sequence for the current start and end times
   std::vector<Real> buildSequence(const std::vector<Real> & times) const;
 
-  /// Set the cursor to the last sequence time reached within tolerance
+  /// Find the first sequence time greater than \p time by more than \p tolerance
+  std::vector<Real>::const_iterator findFirstFutureTime(Real time, Real tolerance) const;
+
+  /**
+   * Set the current sequence position from \p time
+   *
+   * `_current_step` is the cursor into `_time_sequence`: it indexes the last sequence time
+   * considered reached. Sequence times less than or equal to \p time plus \p tolerance are treated
+   * as reached, so `_current_step + 1` identifies the next future time when one exists.
+   */
   void synchronizeCurrentStep(Real time, Real tolerance);
 
   /// Whether to use the final dt past the last t in sequence
