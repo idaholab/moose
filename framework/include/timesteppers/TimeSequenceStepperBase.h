@@ -25,19 +25,18 @@ public:
   void setupSequence(const std::vector<Real> & times);
   void updateSequence(const std::vector<Real> & times);
 
-  // Clear the time sequence array, usually use when time sequence need to be updated during the
-  // simulation
+  // Clear the time sequence array, usually used when the time sequence needs to be updated during
+  // the simulation
   void resetSequence();
 
   // Increase the current step count by one
   void increaseCurrentStep() { _current_step++; };
 
-  // Get the time of the current step from input time sequence
-  virtual Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
+  /// Get the next time in the input time sequence
+  virtual Real getNextTimeInSequence();
 
-  /// Advance past sequence times that have already been reached and report whether a future
-  /// sequence time remains.
-  bool advanceToFutureTime(Real time, Real tolerance);
+  /// Advance past sequence times that have already been reached and return the next time, if any
+  bool advanceToFutureTime(Real time, Real tolerance, Real & next_time);
 
   virtual void init() override {}
   virtual void acceptStep() override;
@@ -45,7 +44,15 @@ public:
 protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
-  virtual Real computeFailedDT() override;
+
+  /// Refresh a dynamically changing time sequence before it is used
+  virtual void refreshSequence() {}
+
+  /// Build the canonical time sequence for the current start and end times
+  std::vector<Real> buildSequence(const std::vector<Real> & times) const;
+
+  /// Set the cursor to the last sequence time reached within tolerance
+  void synchronizeCurrentStep(Real time, Real tolerance);
 
   /// Whether to use the final dt past the last t in sequence
   const bool _use_last_dt_after_last_t;

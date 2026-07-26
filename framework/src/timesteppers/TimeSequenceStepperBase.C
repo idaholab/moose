@@ -40,117 +40,53 @@ TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & paramet
 void
 TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 {
-  // The half-transient test mechanism runs the simulation to the midpoint of a doubled time
-  // range, saves a checkpoint, then recovers and runs the second half. Double end_time here so
-  // that the full doubled range is available when building the sequence; the half-point is
-  // imposed at the bottom of this function.
+  // In case of half transient, transient's end time needs to be reset to
+  // be able to imprint TimeSequenceStepperBase's end time
   if (_app.testCheckpointHalfTransient())
     _executioner.endTime() = _executioner.endTime() * 2.0 - _executioner.getStartTime();
 
-  if ((!_app.isRestarting() && !_app.isRecovering()) || _time_sequence.empty())
-  {
-    // Fresh run: build _time_sequence directly from the input times.
+  if (_time_sequence.empty() || (!_app.isRestarting() && !_app.isRecovering()))
     updateSequence(times);
-  }
   else if (_app.isRecovering())
-  {
-    // Recover: the checkpoint has _time_sequence and _current_step, but both may be unreliable:
-    //   - computeFailedDT() may have inserted intermediate retry points that are not in the
-    //     input, shifting what _current_step points to relative to the new sequence.
-    //   - When multiple TimeSequenceSteppers coexist under CompositionDT, each one doubles
-    //     and then resets _executioner.endTime() in sequence. The cascade means later steppers
-    //     build their sequences against a partially-reduced end time, filtering out time points
-    //     that should appear in the full run. Using the saved sequence on recover would
-    //     permanently lose those points.
-    // Solution: rebuild the sequence fresh from the input (using the correct, un-cascaded
-    // end_time), then recompute _current_step by scanning for the last sequence entry that
-    // is at or before the recovered simulation time.
-
-    if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
-      mooseError("Timesequencestepper does not allow the start time to be modified.");
-
-    Real end_time = _executioner.endTime();
-
-    // Make sure time sequence is in ascending order.
-    for (unsigned int j = 0; j + 1 < times.size(); ++j)
-      if (times[j + 1] <= times[j])
-        mooseError("time_sequence must be in ascending order.");
-
-    _time_sequence.clear();
-    _time_sequence.push_back(_executioner.getStartTime());
-    for (const auto time : times)
-      if (time > _executioner.getStartTime() && time <= end_time)
-        _time_sequence.push_back(time);
-    // Push end_time as a sentinel so that computeDT() always has a valid [_current_step+1]
-    // to read, even when _current_step sits on the last user-specified time point.
-    if (!_set_end_time)
-      _time_sequence.push_back(end_time);
-
-    // _current_step must index the last entry that has already been reached. Scan forward
-    // until we find an entry strictly after the recovered time.
-    // absoluteFuzzyLessThan(a, b) is true when a < b - tol, so its negation covers a >= b - tol,
-    // i.e. _time_sequence[j] is within tolerance of or behind _time.
-    _current_step = 0;
-    for (unsigned int j = 1; j < _time_sequence.size(); ++j)
-    {
-      if (!MooseUtils::absoluteFuzzyLessThan(_time, _time_sequence[j]))
-        _current_step = j;
-      else
-        break;
-    }
-  }
+    synchronizeCurrentStep(_time, _timestep_tolerance);
   else
   {
-    // Restart: the simulation is being continued from a checkpoint written during a deliberate
-    // restart (not a crash recovery). The user may supply a modified future sequence, but the
-    // completed portion must be identical to the original run so that the restarted solution is
-    // consistent with what was computed before the restart point.
     if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
       mooseError("Timesequencestepper does not allow the start time to be modified.");
 
-    Real end_time = _executioner.endTime();
-
-    // Make sure time sequence is in ascending order.
-    for (unsigned int j = 0; j + 1 < times.size(); ++j)
-      if (times[j + 1] <= times[j])
-        mooseError("time_sequence must be in ascending order.");
-
-    // Build the full sequence that the current input implies for this run.
-    std::vector<Real> current_input_sequence;
-    current_input_sequence.push_back(_executioner.getStartTime());
-    for (const auto time : times)
-      if (time > _executioner.getStartTime() && time <= end_time)
-        current_input_sequence.push_back(time);
-    if (!_set_end_time)
-      current_input_sequence.push_back(end_time);
-
-    if (current_input_sequence.size() < _current_step + 1)
-      mooseError("The timesequence provided in the restart file must be identical to "
-                 "the one in the old file up to entry number ",
-                 _current_step + 1,
-                 " but there are only ",
-                 current_input_sequence.size(),
-                 " value(s) provided for the timesequence in the restart input.");
-
-    // Verify that the new input agrees with the completed steps from the checkpoint.
-    const std::vector<Real> saved_time_sequence = _time_sequence;
-
-    for (unsigned int j = 0; j <= _current_step; ++j)
+    auto current_input_sequence = buildSequence(times);
+    const auto completed_prefix_size = [this](const auto & sequence)
     {
-      if (!MooseUtils::absoluteFuzzyEqual(current_input_sequence[j], saved_time_sequence[j]))
+      return std::distance(sequence.begin(),
+                           std::find_if(sequence.begin(),
+                                        sequence.end(),
+                                        [this](const auto sequence_time)
+                                        { return sequence_time - _time > _timestep_tolerance; }));
+    };
+
+    const auto saved_prefix_size = completed_prefix_size(_time_sequence);
+    const auto current_prefix_size = completed_prefix_size(current_input_sequence);
+    if (current_prefix_size != saved_prefix_size)
+      mooseError("The timesequence provided in the restart file must be identical to "
+                 "the one in the old file through the restart time, but it contains ",
+                 current_prefix_size,
+                 " completed value(s) instead of ",
+                 saved_prefix_size,
+                 ".");
+
+    for (const auto j : make_range(saved_prefix_size))
+      if (!MooseUtils::absoluteFuzzyEqual(current_input_sequence[j], _time_sequence[j]))
         mooseError("The timesequence provided in the restart file must be identical to "
-                   "the one in the old file up to entry number ",
-                   _current_step + 1,
-                   " but entry ",
+                   "the one in the old file through the restart time, but entry ",
                    j + 1,
                    " is ",
                    current_input_sequence[j],
-                   " in the restart input but ",
-                   saved_time_sequence[j],
+                   " in the restart input and ",
+                   _time_sequence[j],
                    " in the restarted input.");
-    }
 
     _time_sequence = std::move(current_input_sequence);
+    synchronizeCurrentStep(_time, _timestep_tolerance);
   }
 
   // Set end time to last time in sequence if requested
@@ -160,8 +96,6 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     end_time = _time_sequence.back();
   }
 
-  // For the half-transient test mechanism, clamp end_time to the sequence midpoint so the
-  // first half of the run stops there and writes a checkpoint.
   if (_app.testCheckpointHalfTransient())
   {
     unsigned int half = (_time_sequence.size() - 1) / 2;
@@ -169,28 +103,33 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   }
 }
 
-void
-TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
+std::vector<Real>
+TimeSequenceStepperBase::buildSequence(const std::vector<Real> & times) const
 {
-  Real start_time = _executioner.getStartTime();
-  Real end_time = _executioner.endTime();
+  const Real start_time = _executioner.getStartTime();
+  const Real end_time = _executioner.endTime();
 
   // make sure time sequence is in strictly ascending order
   if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
     paramError("time_sequence", "Time points must be in strictly ascending order.");
 
-  _time_sequence.push_back(start_time);
-  for (unsigned int j = 0; j < times.size(); ++j)
-  {
-    if (times[j] > start_time && times[j] <= end_time)
-      _time_sequence.push_back(times[j]);
-  }
+  std::vector<Real> sequence{start_time};
+  for (const auto time : times)
+    if (time > start_time && time <= end_time)
+      sequence.push_back(time);
 
-  // Always push end_time as a sentinel even if it duplicates the last user-specified time.
-  // computeDT() reads _time_sequence[_current_step + 1], so _current_step must never point
-  // to the last element; the sentinel guarantees that invariant holds.
+  // Always append end_time as a sentinel, even when it duplicates the last supplied time.
   if (!_set_end_time)
-    _time_sequence.push_back(end_time);
+    sequence.push_back(end_time);
+
+  return sequence;
+}
+
+void
+TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
+{
+  _time_sequence = buildSequence(times);
+  synchronizeCurrentStep(_time, _timestep_tolerance);
 }
 
 void
@@ -200,30 +139,41 @@ TimeSequenceStepperBase::resetSequence()
 }
 
 bool
-TimeSequenceStepperBase::advanceToFutureTime(Real time, Real tolerance)
+TimeSequenceStepperBase::advanceToFutureTime(Real time, Real tolerance, Real & next_time)
 {
-  // Advance _current_step past any sequence entries that have already been reached (within
-  // tolerance). Used by CompositionDT to find the nearest upcoming sequence time across all
-  // active TimeSequenceSteppers.
-  while (_current_step + 1 < _time_sequence.size() && getNextTimeInSequence() - time <= tolerance)
-    increaseCurrentStep();
+  refreshSequence();
+  synchronizeCurrentStep(time, tolerance);
+  if (_current_step + 1 >= _time_sequence.size())
+    return false;
 
-  return getNextTimeInSequence() - time > tolerance;
+  next_time = _time_sequence[_current_step + 1];
+  return true;
+}
+
+void
+TimeSequenceStepperBase::synchronizeCurrentStep(Real time, Real tolerance)
+{
+  _current_step = 0;
+  while (_current_step + 1 < _time_sequence.size() &&
+         _time_sequence[_current_step + 1] - time <= tolerance)
+    increaseCurrentStep();
+}
+
+Real
+TimeSequenceStepperBase::getNextTimeInSequence()
+{
+  refreshSequence();
+  mooseAssert(_current_step + 1 < _time_sequence.size(),
+              "The time sequence must contain a future time");
+  return _time_sequence[_current_step + 1];
 }
 
 void
 TimeSequenceStepperBase::acceptStep()
 {
   TimeStepper::acceptStep();
-  // Advance _current_step to the last sequence entry that is strictly less than the just-accepted
-  // time, so that _time_sequence[_current_step] == _time after a normal step. Using
-  // absoluteFuzzyLessThan (a < b - tol) means we stop AT the current time rather than advancing
-  // past it, which keeps computeDT() returning the correct next interval.
-  // The loop (rather than a single increment) handles recover, where the simulation may resume
-  // several sequence points ahead of the initial _current_step.
-  while (_current_step + 1 < _time_sequence.size() &&
-         MooseUtils::absoluteFuzzyLessThan(_time_sequence[_current_step], _time))
-    increaseCurrentStep();
+  refreshSequence();
+  synchronizeCurrentStep(_time, _timestep_tolerance);
 }
 
 Real
@@ -235,35 +185,18 @@ TimeSequenceStepperBase::computeInitialDT()
 Real
 TimeSequenceStepperBase::computeDT()
 {
-  // _current_step always points to the last completed sequence time, so [_current_step + 1]
-  // is the next target. The sentinel end_time appended by updateSequence/setupSequence
-  // ensures this read is always in bounds.
+  refreshSequence();
+  mooseAssert(_current_step + 1 < _time_sequence.size(),
+              "The time sequence must contain a future time");
+  const auto next_time = _time_sequence[_current_step + 1];
+
   if (_use_last_dt_after_last_t)
   {
     // last *provided* time value index; actual last index corresponds to end time
     const auto last_t_index = _time_sequence.size() - 2;
     if (_current_step + 1 > last_t_index)
       return _time_sequence[last_t_index] - _time_sequence[last_t_index - 1];
-    else
-      return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
   }
-  else
-    return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
-}
 
-Real
-TimeSequenceStepperBase::computeFailedDT()
-{
-  if (computeDT() <= _dt_min)
-    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
-
-  // Cut the time step by the cutback factor (typically 0.5) and insert a new intermediate
-  // target into the sequence immediately after _current_step. The next computeDT() call
-  // will then return the shorter interval to the inserted point.
-  Real dt = _cutback_factor_at_failure * computeDT();
-  if (dt < _dt_min)
-    dt = _dt_min;
-  _time_sequence.insert(_time_sequence.begin() + _current_step + 1,
-                        _time_sequence[_current_step] + dt);
-  return computeDT();
+  return next_time - _time;
 }
