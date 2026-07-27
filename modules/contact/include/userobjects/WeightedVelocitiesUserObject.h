@@ -31,12 +31,12 @@ public:
   dofToWeightedVelocities() const;
 
   /**
-   * Return cached contact tangents for the supplied lower-dimensional secondary element node.
+   * Return contact tangents for the supplied lower-dimensional secondary element node.
    * Stored values are the existing mechanical-contact nodal tangents; derivatives are included
    * when the internal quasistatic normal-derivative path and AD derivative recording are enabled.
    */
-  const std::array<ADRealVectorValue, 2> & contactTangents(const Elem & lower_secondary_elem,
-                                                           unsigned int nodal_index) const;
+  std::array<ADRealVectorValue, 2> contactTangents(const Elem & lower_secondary_elem,
+                                                   unsigned int nodal_index) const;
 
   /**
    * @return The contact force at quadrature points on the mortar segment
@@ -79,9 +79,6 @@ protected:
 
   /// The value of the real tangential velocity vectors at the current node
   ADRealVectorValue _qp_real_tangential_velocity_nodal;
-
-  /// Tangents derived from the AD nodal normals
-  mutable std::unordered_map<const Node *, std::array<ADRealVectorValue, 2>> _ad_nodal_tangents;
 
   /// Reference to the EquationSystem object
   SystemBase & _sys;

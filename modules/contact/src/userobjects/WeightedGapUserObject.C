@@ -15,6 +15,10 @@
 #include "MortarContactUtils.h"
 #include "AutomaticMortarGeneration.h"
 #include "ADUtils.h"
+#include "ConstraintWarehouse.h"
+#include "ComputeDynamicWeightedGapLMMechanicalContact.h"
+#include "MortarConstraintBase.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/quadrature.h"
 
@@ -52,7 +56,8 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
     _coord(_assembly.mortarCoordTransformation()),
-    _use_nodal_normal_derivatives(getParam<bool>("use_nodal_normal_derivatives"))
+    _use_nodal_normal_derivatives(getParam<bool>("use_nodal_normal_derivatives") &&
+                                  !isParamValid("penetration_tolerance"))
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
@@ -93,6 +98,45 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
+
+  // Dynamic mortar uses the same weighted-gap and weighted-velocity user objects but retains its
+  // existing frozen-direction Jacobian. Identify every mortar constraint that consumes this user
+  // object, then disable the new derivatives if a dynamic constraint acts on the same interface.
+  if (_use_nodal_normal_derivatives)
+  {
+    const auto & constraints =
+        _fe_problem.getNonlinearSystemBase(_sys.number()).getConstraintWarehouse();
+    std::set<std::pair<SubdomainID, SubdomainID>> consumed_interfaces;
+    for (const auto & constraint : constraints.getObjects())
+    {
+      bool consumes_this_object = false;
+      for (const auto parameter_name : {"weighted_gap_uo", "weighted_velocities_uo"})
+        if (constraint->isParamValid(parameter_name) &&
+            constraint->getParam<UserObjectName>(parameter_name) == name())
+        {
+          consumes_this_object = true;
+          break;
+        }
+
+      if (consumes_this_object)
+        if (const auto * const mortar_constraint =
+                dynamic_cast<const MortarConstraintBase *>(constraint.get());
+            mortar_constraint)
+          consumed_interfaces.emplace(mortar_constraint->primarySubdomain(),
+                                      mortar_constraint->secondarySubdomain());
+    }
+
+    for (const auto & constraint : constraints.getObjects())
+      if (const auto * const dynamic_constraint =
+              dynamic_cast<const ComputeDynamicWeightedGapLMMechanicalContact *>(constraint.get());
+          dynamic_constraint &&
+          consumed_interfaces.count(
+              {dynamic_constraint->primarySubdomain(), dynamic_constraint->secondarySubdomain()}))
+      {
+        _use_nodal_normal_derivatives = false;
+        break;
+      }
+  }
 }
 
 void
@@ -180,21 +224,19 @@ WeightedGapUserObject::contactNormal(const Elem & lower_secondary_elem,
 {
   mooseAssert(nodal_index < lower_secondary_elem.n_nodes(),
               "Nodal normal index must refer to a node on the secondary element.");
+  mooseAssert(usesNodalNormalDerivatives(),
+              "AD contact normals should only be requested while recording nodal-normal "
+              "derivatives.");
   const Node * const node = lower_secondary_elem.node_ptr(nodal_index);
   const auto normal_it = _ad_nodal_normals.find(node);
   if (normal_it != _ad_nodal_normals.end())
     return normal_it->second;
 
-  if (usesNodalNormalDerivatives())
-  {
-    amg().computeADNodalNormals([this](const Node & coordinate_node)
-                                { return nodalCoordinate(coordinate_node); },
-                                _ad_nodal_normals);
-    return libmesh_map_find(_ad_nodal_normals, node);
-  }
-
-  const auto normal = amg().getNodalNormals(lower_secondary_elem)[nodal_index];
-  return _ad_nodal_normals.emplace(node, normal).first->second;
+  amg().computeADNodalNormals(
+      [this](const Node & coordinate_node, const Point & geometry_coordinate)
+      { return nodalCoordinate(coordinate_node, geometry_coordinate); },
+      _ad_nodal_normals);
+  return libmesh_map_find(_ad_nodal_normals, node);
 }
 
 const ADRealVectorValue &
@@ -204,11 +246,12 @@ WeightedGapUserObject::contactNormal(const unsigned int nodal_index) const
 }
 
 ADPoint
-WeightedGapUserObject::nodalCoordinate(const Node & node) const
+WeightedGapUserObject::nodalCoordinate(const Node & node, const Point & geometry_coordinate) const
 {
-  ADPoint point = node;
-  if (!usesNodalNormalDerivatives())
-    return point;
+  mooseAssert(usesNodalNormalDerivatives(),
+              "AD nodal coordinates should only be requested while recording nodal-normal "
+              "derivatives.");
+  ADPoint point = geometry_coordinate;
 
   const std::array<std::pair<const MooseVariable *, unsigned int>, 3> displacement_variables{
       {{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};

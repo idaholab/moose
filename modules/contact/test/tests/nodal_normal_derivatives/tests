@@ -4,20 +4,18 @@
   [interpolated_normals_rejected]
     type = RunException
     input = ../3d-mortar-contact/frictionless-mortar-3d.i
-    cli_args = 'UserObjects/weighted_gap_uo/interpolate_normals=true'
+    cli_args = 'Constraints/normal_lm/interpolate_normals=true'
     expect_err = 'cannot be combined with quadrature-point normal interpolation'
     max_parallel = 1
-    design = 'LMWeightedGapUserObject.md'
+    design = 'ComputeWeightedGapLMMechanicalContact.md'
     requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
   []
 
   [curved_3d_parallel]
-    type = PetscJacobianTester
+    type = RunApp
     input = curved_3d_action.i
     cli_args = 'Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic'
-    run_sim = true
-    ratio_tol = 4e-6
-    difference_tol = 4e-5
+    expect_out = 'Solve Converged!'
     capabilities = 'ad_size>=100'
     min_parallel = 2
     max_parallel = 2
@@ -39,13 +37,26 @@
     requirement = 'Three-dimensional mortar-penalty friction shall include secondary nodal-normal and tangent-basis derivatives in its contact Jacobian.'
   []
 
+  [mortar_lm_friction_jacobian]
+    type = PetscJacobianTester
+    input = curved_3d_action.i
+    cli_args = 'Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true -snes_test_err 1e-7'
+    run_sim = true
+    ratio_tol = 3.5e-6
+    difference_tol = 3.5e-5
+    capabilities = 'ad_size>=100'
+    max_parallel = 1
+    design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md AutomaticMortarGeneration.md'
+    requirement = 'Three-dimensional mortar Lagrange-multiplier friction shall include secondary nodal-normal and both tangent-basis derivatives in its contact Jacobian.'
+  []
+
   [mortar_contact_pjfnk]
     type = RunApp
     input = curved_3d_action.i
     cli_args = 'Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=false Executioner/solve_type=PJFNK'
     expect_out = 'Solve Converged!'
     max_parallel = 1
-    design = 'ContactAction.md LMWeightedGapUserObject.md'
+    design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md AutomaticMortarGeneration.md'
     requirement = 'Three-dimensional mortar contact shall support residual-only PJFNK evaluations and explicit preconditioning Jacobians with nodal-normal derivatives.'
   []
 

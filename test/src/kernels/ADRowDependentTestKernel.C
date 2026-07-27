@@ -15,17 +15,34 @@ ADRowDependentTestKernel::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription(
-      "Tests Jacobian assembly when each residual row has different AD derivative support.");
+      "Tests Jacobian assembly with configurable AD derivative support across residual rows.");
+  params.addParam<bool>(
+      "heterogeneous_support",
+      true,
+      "Whether each residual row depends on a different set of degrees of freedom.");
   return params;
 }
 
 ADRowDependentTestKernel::ADRowDependentTestKernel(const InputParameters & parameters)
-  : ADKernel(parameters), _ad_dof_values(_var.adDofValues())
+  : ADKernel(parameters),
+    _ad_dof_values(_var.adDofValues()),
+    _heterogeneous_support(getParam<bool>("heterogeneous_support"))
 {
 }
 
 ADReal
 ADRowDependentTestKernel::computeQpResidual()
 {
-  return _test[_i][_qp] * _ad_dof_values[_i];
+  if (_heterogeneous_support)
+    return _test[_i][_qp] * _ad_dof_values[_i];
+
+  ADReal value = _ad_dof_values[_i];
+  if (_i % 2)
+    for (std::size_t j = 0; j < _ad_dof_values.size(); ++j)
+      value += 0.1 * _ad_dof_values[j];
+  else
+    for (std::size_t j = _ad_dof_values.size(); j-- > 0;)
+      value += 0.1 * _ad_dof_values[j];
+
+  return _test[_i][_qp] * value;
 }
