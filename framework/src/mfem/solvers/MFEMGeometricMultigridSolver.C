@@ -56,8 +56,6 @@ MFEMGeometricMultigridSolver::validParams()
 
   params.addRequiredParam<std::string>("variable",
                                        "Name of the trial variable this preconditioner acts on.");
-  params.addRequiredParam<std::string>(
-      "fespace_hierarchy", "Name of the MFEMFESpaceHierarchy that defines the level structure.");
   params.addRequiredParam<std::vector<MFEMSolverName>>(
       "smoothers",
       "Names of LinearSolverBase objects used as smoothers on the interior levels "
@@ -80,8 +78,12 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
     _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
   // Co-own the hierarchy so it outlives this solver.
-  const auto & hierarchy_name = getParam<std::string>("fespace_hierarchy");
-  _hierarchy = getMFEMProblem().getProblemData().fespace_hierarchies.GetShared(hierarchy_name);
+  if (auto * hierarchy_name = getMFEMProblem()
+                                  .getMFEMObject<MFEMVariable>("MooseVariableBase", _var_name)
+                                  .queryParam<std::string>("fespace_hierarchy"))
+    _hierarchy = getMFEMProblem().getProblemData().fespace_hierarchies.GetShared(*hierarchy_name);
+  else
+    paramError("variable", "must be associated with an MFEMFESpaceHierarchy.");
 
   // Parse assembly levels, optionally expanding a single input value to all levels.
   const int N = _hierarchy->GetNumLevels();
