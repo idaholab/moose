@@ -14,10 +14,17 @@
 #include "libmesh/point.h"
 #include "libmesh/int_range.h"
 
+#include <array>
+#include <optional>
+#include <string>
 #include <vector>
 
 using libMesh::Point;
 using libMesh::Real;
+
+#ifdef MOOSE_UNIT_TEST
+class MortarSegmentHelperTest;
+#endif
 
 /**
  * This class supports defining mortar segment mesh elements in 3D by projecting secondary and
@@ -28,7 +35,20 @@ using libMesh::Real;
 class MortarSegmentHelper
 {
 public:
-  MortarSegmentHelper(const std::vector<Point> secondary_nodes,
+  /**
+   * Construct a helper that generates mortar segment geometry only.
+   */
+  MortarSegmentHelper(std::vector<Point> secondary_nodes,
+                      const Point & center,
+                      const Point & normal,
+                      const MortarSegmentTriangulationMode triangulation_mode,
+                      const bool triangulate_triangles);
+
+  /**
+   * Construct a helper that also tracks secondary parent-reference coordinates.
+   */
+  MortarSegmentHelper(std::vector<Point> secondary_nodes,
+                      std::vector<Point> secondary_reference_points,
                       const Point & center,
                       const Point & normal,
                       const MortarSegmentTriangulationMode triangulation_mode,
@@ -87,6 +107,19 @@ public:
                          std::vector<std::vector<unsigned int>> & elem_to_nodes);
 
   /**
+   * Get mortar segments and aligned parent-reference coordinates by appending to the output
+   * containers. Segments below \p minimum_segment_area are removed before mapping; retained
+   * vertices must map uniquely.
+   */
+  void getMortarSegments(const std::vector<Point> & primary_nodes,
+                         const std::vector<Point> & primary_reference_points,
+                         std::vector<Point> & nodes,
+                         std::vector<std::vector<unsigned int>> & elem_to_nodes,
+                         std::vector<std::array<Point, 3>> & elem_to_secondary_reference_points,
+                         std::vector<std::array<Point, 3>> & elem_to_primary_reference_points,
+                         Real minimum_segment_area = 0.);
+
+  /**
    * Compute area of polygon
    */
   Real area(const std::vector<Point> & nodes) const;
@@ -110,6 +143,41 @@ public:
   }
 
 private:
+  /**
+   * Output containers and filtering data used while generating reference-coordinate mappings.
+   */
+  struct ReferenceMappingData
+  {
+    const std::vector<Point> & primary_reference_points;
+    std::vector<std::array<Point, 3>> & elem_to_secondary_reference_points;
+    std::vector<std::array<Point, 3>> & elem_to_primary_reference_points;
+    Real minimum_segment_area;
+  };
+
+  void getMortarSegmentsImpl(const std::vector<Point> & primary_nodes,
+                             std::vector<Point> & nodes,
+                             std::vector<std::vector<unsigned int>> & elem_to_nodes,
+                             ReferenceMappingData * reference_mapping);
+
+  /**
+   * Clip an already projected primary polygon against the secondary polygon. Keeping projection
+   * separate preserves the ordering shared with primary reference points.
+   */
+  std::vector<Point> clipProjectedPoly(const std::vector<Point> & primary_poly) const;
+
+  /**
+   * Recover a parent-reference point from a projected sub-element map.
+   * @return No value for invalid or out-of-tolerance maps.
+   */
+  std::optional<Point> referencePoint(const Point & point,
+                                      const std::vector<Point> & poly,
+                                      const std::vector<Point> & reference_points,
+                                      std::string * failure_reason = nullptr) const;
+
+#ifdef MOOSE_UNIT_TEST
+  friend class MortarSegmentHelperTest;
+#endif
+
   /**
    * Geometric center of secondary element
    */
@@ -168,4 +236,7 @@ private:
    * List of projected points on the linearized secondary element
    */
   std::vector<Point> _secondary_poly;
+
+  /// Parent reference points corresponding to _secondary_poly.
+  std::vector<Point> _secondary_reference_points;
 };

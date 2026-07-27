@@ -70,6 +70,51 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-action-qp-mapping]
+    design = 'ContactAction.md AutomaticMortarGeneration.md'
+    issues = '#33367'
+    requirement = 'The system shall set up 3D mortar contact while forwarding the quadrature '
+                  'point mapping option from ContactAction'
+    [reference-interpolation]
+      type = 'RunApp'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      cli_args = 'starting_point=0 Contact/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Executioner/end_time=0.5 Outputs/exodus=false Outputs/csv=false'
+      detail = 'to Lagrange-multiplier mortar objects using reference interpolation,'
+      valgrind = 'none'
+    []
+    [same-interface-conflict]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action-mapping-conflict.i'
+      capabilities = 'ad_size>=150'
+      cli_args = 'Contact/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Outputs/exodus=false Outputs/csv=false'
+      expect_err = "We do not currently support multiple values of 'mortar_3d_qp_mapping' on the same boundary primary-secondary surface pair."
+      detail = 'by rejecting a mapping mode that conflicts with another mortar consumer on the '
+               'same interface,'
+    []
+    [penalty-mortar]
+      type = 'RunApp'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      cli_args = 'starting_point=0 Contact/mortar/formulation=mortar_penalty '
+                 'Contact/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Postprocessors/active="num_nl cumulative" '
+                 'VectorPostprocessors/inactive=contact-pressure Executioner/end_time=0.5 '
+                 'Executioner/nl_abs_tol=1e-8 Outputs/exodus=false Outputs/csv=false'
+      detail = 'to penalty mortar objects using reference interpolation, and'
+      valgrind = 'none'
+    []
+    [non-mortar-error]
+      type = 'RunException'
+      input = 'frictionless-mortar-3d-action.i'
+      cli_args = 'Contact/mortar/formulation=kinematic '
+                 'Contact/mortar/mortar_3d_qp_mapping=reference_interpolation'
+      expect_err = "The 'mortar_3d_qp_mapping' option can only be used with mortar-based formulations."
+      detail = 'by rejecting it for non-mortar contact formulations.'
+    []
+  []
   [frictionless-mortar-3d-action-lm-space]
     requirement = 'The system shall support the contact action Lagrange multiplier space option '
                   'for 3D mortar contact'

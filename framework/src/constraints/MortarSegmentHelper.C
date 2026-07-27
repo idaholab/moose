@@ -8,8 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "MortarSegmentHelper.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 
+#include "libmesh/fe_interface.h"
+#include "libmesh/fe_map.h"
+#include "libmesh/face_quad4.h"
+#include "libmesh/face_tri3.h"
 #include "libmesh/int_range.h"
+#include "libmesh/node.h"
 #include "libmesh/utility.h"
 #if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
 #include "libmesh/replicated_mesh.h"
@@ -24,13 +30,28 @@
 #include <map>
 #include <numeric>
 #include <optional>
+#include <sstream>
 #include <set>
+#include <string>
 #include <unordered_map>
+#include <utility>
 
 using namespace libMesh;
 
 namespace
 {
+
+constexpr Real mortar_reference_mapping_tolerance = 1e-8;
+
+bool
+isFinitePoint(const Point & point)
+{
+  for (const auto component : make_range(Moose::dim))
+    if (!std::isfinite(point(component)))
+      return false;
+
+  return true;
+}
 
 // Signed-area test for the 2D triangle (a, b, c). Returns twice the signed area:
 // positive if a->b->c is counter-clockwise, negative if clockwise, zero if
@@ -267,7 +288,18 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
 
 } // namespace
 
-MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_nodes,
+MortarSegmentHelper::MortarSegmentHelper(std::vector<Point> secondary_nodes,
+                                         const Point & center,
+                                         const Point & normal,
+                                         const MortarSegmentTriangulationMode triangulation_mode,
+                                         const bool triangulate_triangles)
+  : MortarSegmentHelper(
+        std::move(secondary_nodes), {}, center, normal, triangulation_mode, triangulate_triangles)
+{
+}
+
+MortarSegmentHelper::MortarSegmentHelper(std::vector<Point> secondary_nodes,
+                                         std::vector<Point> secondary_reference_points,
                                          const Point & center,
                                          const Point & normal,
                                          const MortarSegmentTriangulationMode triangulation_mode,
@@ -276,8 +308,13 @@ MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_node
     _normal(normal),
     _debug(false),
     _triangulation_mode(triangulation_mode),
-    _triangulate_triangles(triangulate_triangles)
+    _triangulate_triangles(triangulate_triangles),
+    _secondary_reference_points(std::move(secondary_reference_points))
 {
+  mooseAssert(_secondary_reference_points.empty() ||
+                  secondary_nodes.size() == _secondary_reference_points.size(),
+              "Each projected secondary node needs one parent reference point.");
+
   _secondary_poly.clear();
   _secondary_poly.reserve(secondary_nodes.size());
 
@@ -405,13 +442,14 @@ MortarSegmentHelper::projectPrimaryPoly(const std::vector<Point> & primary_nodes
 std::vector<Point>
 MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
 {
-  std::vector<Point> primary_poly = projectPrimaryPoly(primary_nodes);
+  return clipProjectedPoly(projectPrimaryPoly(primary_nodes));
+}
 
+std::vector<Point>
+MortarSegmentHelper::clipProjectedPoly(const std::vector<Point> & primary_poly) const
+{
   if (isDisjoint(primary_poly))
-  {
-    primary_poly.clear();
-    return primary_poly;
-  }
+    return {};
 
   // Initialize clipped poly with secondary poly (secondary is target poly)
   std::vector<Point> clipped_poly = _secondary_poly;
@@ -893,14 +931,74 @@ MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
                                        std::vector<Point> & nodes,
                                        std::vector<std::vector<unsigned int>> & elem_to_nodes)
 {
-  // Clip primary elem against secondary elem
-  std::vector<Point> clipped_poly = clipPoly(primary_nodes);
+  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, nullptr);
+}
+
+void
+MortarSegmentHelper::getMortarSegments(
+    const std::vector<Point> & primary_nodes,
+    const std::vector<Point> & primary_reference_points,
+    std::vector<Point> & nodes,
+    std::vector<std::vector<unsigned int>> & elem_to_nodes,
+    std::vector<std::array<Point, 3>> & elem_to_secondary_reference_points,
+    std::vector<std::array<Point, 3>> & elem_to_primary_reference_points,
+    const Real minimum_segment_area)
+{
+  ReferenceMappingData reference_mapping{primary_reference_points,
+                                         elem_to_secondary_reference_points,
+                                         elem_to_primary_reference_points,
+                                         minimum_segment_area};
+  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, &reference_mapping);
+}
+
+void
+MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_nodes,
+                                           std::vector<Point> & nodes,
+                                           std::vector<std::vector<unsigned int>> & elem_to_nodes,
+                                           ReferenceMappingData * const reference_mapping)
+{
+  std::vector<Point> primary_poly;
+  std::vector<Point> primary_poly_reference_points;
+
+  if (reference_mapping)
+  {
+    if (primary_nodes.size() != reference_mapping->primary_reference_points.size())
+      mooseError("Reference-interpolation mortar segment generation requires one primary "
+                 "reference point per primary sub-element node.");
+    if (_secondary_poly.size() != _secondary_reference_points.size())
+      mooseError("Reference-interpolation mortar segment generation requires one secondary "
+                 "reference point per secondary sub-element node.");
+    if (reference_mapping->elem_to_secondary_reference_points.size() != elem_to_nodes.size() ||
+        reference_mapping->elem_to_primary_reference_points.size() != elem_to_nodes.size())
+      mooseError("Reference-interpolation mortar segment outputs must be aligned before appending "
+                 "new segments.");
+
+    // Keep reference points in the projected polygon's orientation.
+    const Point e1 = primary_nodes[0] - primary_nodes[1];
+    const Point e2 = primary_nodes[2] - primary_nodes[1];
+    const Real orient = e2.cross(e1) * _u.cross(_v);
+    const auto n_verts = primary_nodes.size();
+
+    primary_poly = projectPrimaryPoly(primary_nodes);
+    primary_poly_reference_points.reserve(reference_mapping->primary_reference_points.size());
+    for (const auto n : index_range(primary_nodes))
+    {
+      const auto primary_node_index = (orient > 0) ? n : n_verts - 1 - n;
+      primary_poly_reference_points.push_back(
+          reference_mapping->primary_reference_points[primary_node_index]);
+    }
+  }
+
+  // Clip primary elem against secondary elem. Reference mode preserves the projected primary
+  // ordering so its reference points remain aligned.
+  std::vector<Point> clipped_poly =
+      reference_mapping ? clipProjectedPoly(primary_poly) : clipPoly(primary_nodes);
   if (clipped_poly.size() < 3)
     return;
 
   if (_debug)
-    for (auto pt : clipped_poly)
-      if (!isInsideSecondary(pt))
+    for (const auto & point : clipped_poly)
+      if (!isInsideSecondary(point))
         mooseError("Clipped polygon not inside linearized secondary element");
 
   // Compute area of clipped polygon, update remaining area fraction
@@ -910,13 +1008,67 @@ MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
   // shift them into the global node numbering after appending the polygon nodes below.
   std::vector<std::vector<unsigned int>> tri_map;
   triangulatePoly(clipped_poly, tri_map);
+  if (reference_mapping && reference_mapping->minimum_segment_area > 0.)
+    tri_map.erase(
+        std::remove_if(tri_map.begin(),
+                       tri_map.end(),
+                       [&clipped_poly, reference_mapping](const std::vector<unsigned int> & tri)
+                       {
+                         mooseAssert(tri.size() == 3,
+                                     "Mortar segment triangulation should only produce TRI3 maps.");
+                         return triangleAreaHelper(clipped_poly[tri[0]],
+                                                   clipped_poly[tri[1]],
+                                                   clipped_poly[tri[2]]) <
+                                reference_mapping->minimum_segment_area;
+                       }),
+        tri_map.end());
   if (tri_map.empty())
     return;
 
+  std::vector<Point> secondary_node_reference_points;
+  std::vector<Point> primary_node_reference_points;
+  if (reference_mapping)
+  {
+    secondary_node_reference_points.reserve(clipped_poly.size());
+    primary_node_reference_points.reserve(clipped_poly.size());
+
+    const auto recover_reference_point = [this](const Point & projected_point,
+                                                const std::vector<Point> & poly,
+                                                const std::vector<Point> & reference_points,
+                                                const char * const parent_name,
+                                                const std::size_t node_index)
+    {
+      std::string failure_reason;
+      const auto reference_point =
+          referencePoint(projected_point, poly, reference_points, &failure_reason);
+      if (!reference_point)
+        mooseError("Unable to recover the ",
+                   parent_name,
+                   " parent reference point for retained 3D mortar overlap vertex ",
+                   node_index,
+                   " at projected point ",
+                   projected_point,
+                   ". Reason: ",
+                   failure_reason,
+                   ". Reference interpolation does not fall back to normal projection.");
+
+      return *reference_point;
+    };
+
+    for (const auto node_index : index_range(clipped_poly))
+    {
+      const auto & point = clipped_poly[node_index];
+      secondary_node_reference_points.push_back(recover_reference_point(
+          point, _secondary_poly, _secondary_reference_points, "secondary", node_index));
+      primary_node_reference_points.push_back(recover_reference_point(
+          point, primary_poly, primary_poly_reference_points, "primary", node_index));
+    }
+  }
+
   // Transform clipped poly back to (linearized) 3d and append to list
   const auto offset = cast_int<unsigned int>(nodes.size());
-  for (auto pt : clipped_poly)
-    nodes.emplace_back((pt(0) * _u) + (pt(1) * _v) + _center);
+  for (const auto & point : clipped_poly)
+    nodes.emplace_back((point(0) * _u) + (point(1) * _v) + _center);
 
   for (const auto & tri : tri_map)
   {
@@ -925,7 +1077,206 @@ MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
     for (const auto local_index : tri)
       shifted_tri.push_back(offset + local_index);
     elem_to_nodes.push_back(std::move(shifted_tri));
+
+    if (reference_mapping)
+    {
+      mooseAssert(tri.size() == 3, "Mortar segment triangulation should only produce TRI3 maps.");
+      std::array<Point, 3> elem_secondary_reference_points;
+      std::array<Point, 3> elem_primary_reference_points;
+      for (const auto n : index_range(tri))
+      {
+        const auto local_node = tri[n];
+        elem_secondary_reference_points[n] = secondary_node_reference_points[local_node];
+        elem_primary_reference_points[n] = primary_node_reference_points[local_node];
+      }
+
+      reference_mapping->elem_to_secondary_reference_points.push_back(
+          elem_secondary_reference_points);
+      reference_mapping->elem_to_primary_reference_points.push_back(elem_primary_reference_points);
+    }
   }
+}
+
+std::optional<Point>
+MortarSegmentHelper::referencePoint(const Point & point,
+                                    const std::vector<Point> & poly,
+                                    const std::vector<Point> & reference_points,
+                                    std::string * const failure_reason) const
+{
+  mooseAssert(poly.size() == reference_points.size(),
+              "Projected point and reference point containers should be the same size.");
+
+  if (failure_reason)
+    failure_reason->clear();
+
+  const auto fail = [failure_reason](const std::string & reason) -> std::optional<Point>
+  {
+    if (failure_reason)
+      *failure_reason = reason;
+    return std::nullopt;
+  };
+
+  if (!isFinitePoint(point))
+    return fail("the projected target point contains a non-finite coordinate");
+
+  for (const auto i : index_range(poly))
+  {
+    if (!isFinitePoint(poly[i]))
+      return fail("projected polygon vertex " + std::to_string(i) +
+                  " contains a non-finite coordinate");
+    if (!isFinitePoint(reference_points[i]))
+      return fail("parent reference vertex " + std::to_string(i) +
+                  " contains a non-finite coordinate");
+  }
+
+  if (poly.size() != 3 && poly.size() != 4)
+    return fail("reference point recovery only supports triangular and quadrilateral mortar "
+                "sub-elements, but received " +
+                std::to_string(poly.size()) + " vertices");
+
+  Real minimum_edge_length = std::numeric_limits<Real>::max();
+  Point local_origin;
+  for (const auto & vertex : poly)
+    local_origin += vertex;
+  local_origin /= poly.size();
+
+  Real local_scale = 0.;
+  for (const auto i : index_range(poly))
+  {
+    minimum_edge_length =
+        std::min(minimum_edge_length, (poly[(i + 1) % poly.size()] - poly[i]).norm());
+    local_scale = std::max(local_scale, (poly[i] - local_origin).norm());
+  }
+
+  const Real singular_tolerance = 100. * std::numeric_limits<Real>::epsilon();
+  if (!std::isfinite(local_scale) || local_scale <= singular_tolerance)
+    return fail("the projected polygon has a zero local length scale");
+  if (!std::isfinite(minimum_edge_length) ||
+      minimum_edge_length / local_scale <= singular_tolerance)
+    return fail("the projected polygon has a zero-length edge relative to its local scale");
+
+  std::vector<Point> normalized_poly;
+  normalized_poly.reserve(poly.size());
+  for (const auto & vertex : poly)
+    normalized_poly.push_back((vertex - local_origin) / local_scale);
+  const Point normalized_point = (point - local_origin) / local_scale;
+  const Real reference_tolerance =
+      std::max(mortar_reference_mapping_tolerance, _area_tol / (minimum_edge_length * local_scale));
+  std::array<Node, 4> element_nodes;
+  const FEType fe_type(FIRST, LAGRANGE);
+  const auto recover_with_libmesh = [&](auto & element) -> std::optional<Point>
+  {
+    for (const auto i : index_range(normalized_poly))
+    {
+      element_nodes[i] = normalized_poly[i];
+      element_nodes[i].set_id(i);
+      element.set_node(i, &element_nodes[i]);
+    }
+
+    if (!element.has_invertible_map(mortar_reference_mapping_tolerance))
+      return fail("the projected sub-element map is degenerate or non-invertible");
+
+    if (element.type() == QUAD4)
+      for (const auto corner : make_range(element.n_vertices()))
+      {
+        Point tangent_xi;
+        Point tangent_eta;
+        for (const auto node : make_range(element.n_nodes()))
+        {
+          tangent_xi += FEInterface::shape_deriv(
+                            fe_type, 0, &element, node, 0, element.master_point(corner)) *
+                        element.point(node);
+          tangent_eta += FEInterface::shape_deriv(
+                             fe_type, 0, &element, node, 1, element.master_point(corner)) *
+                         element.point(node);
+        }
+
+        const Real corner_jacobian = tangent_xi.cross(tangent_eta).norm();
+        if (!std::isfinite(corner_jacobian) ||
+            corner_jacobian <= mortar_reference_mapping_tolerance)
+          return fail("the projected quadrilateral has a singular or ill-conditioned corner map");
+      }
+
+    Point local_reference = FEMap::inverse_map(
+        2, &element, normalized_point, mortar_reference_mapping_tolerance, false, false);
+    if (!isFinitePoint(local_reference))
+      return fail("libMesh inverse_map produced a non-finite reference point");
+
+    const Real inverse_map_error =
+        (FEMap::map(2, &element, local_reference) - normalized_point).norm();
+    if (!std::isfinite(inverse_map_error) || inverse_map_error > mortar_reference_mapping_tolerance)
+    {
+      std::ostringstream reason;
+      reason << "the normalized inverse-map error " << inverse_map_error << " exceeds "
+             << mortar_reference_mapping_tolerance;
+      return fail(reason.str());
+    }
+
+    if (element.type() == TRI3)
+    {
+      std::array<Real, 3> weights;
+      for (const auto i : index_range(weights))
+        weights[i] = FEInterface::shape(fe_type, &element, i, local_reference, false);
+
+      for (auto & weight : weights)
+        weight = std::clamp(weight, 0., 1.);
+      const Real weight_sum = std::accumulate(weights.begin(), weights.end(), 0.);
+      if (!std::isfinite(weight_sum) || weight_sum <= singular_tolerance)
+        return fail("clamped triangle barycentric coordinates have a zero or non-finite sum");
+      for (auto & weight : weights)
+        weight /= weight_sum;
+
+      // Preserve partition of unity after clamping tolerance-sized violations.
+      const auto corrected_weight =
+          std::distance(weights.begin(), std::max_element(weights.begin(), weights.end()));
+      weights[corrected_weight] = 1.;
+      for (const auto i : index_range(weights))
+        if (i != static_cast<unsigned int>(corrected_weight))
+          weights[corrected_weight] -= weights[i];
+
+      local_reference = Point();
+      for (const auto i : index_range(weights))
+        local_reference += weights[i] * element.master_point(i);
+    }
+    else
+    {
+      local_reference(0) = std::clamp(local_reference(0), -1., 1.);
+      local_reference(1) = std::clamp(local_reference(1), -1., 1.);
+      local_reference(2) = 0.;
+    }
+
+    if (!element.on_reference_element(local_reference, mortar_reference_mapping_tolerance))
+      return fail("the clamped inverse-map result is outside the reference element");
+
+    const Real round_trip_error =
+        (FEMap::map(2, &element, local_reference) - normalized_point).norm();
+    if (!std::isfinite(round_trip_error) || round_trip_error > reference_tolerance)
+    {
+      std::ostringstream reason;
+      reason << "the normalized inverse-map round-trip error " << round_trip_error
+             << " exceeds the clipping-consistent tolerance " << reference_tolerance;
+      return fail(reason.str());
+    }
+
+    Point parent_reference;
+    for (const auto i : index_range(normalized_poly))
+      parent_reference +=
+          FEInterface::shape(fe_type, &element, i, local_reference, false) * reference_points[i];
+
+    if (!isFinitePoint(parent_reference))
+      return fail("reference interpolation produced a non-finite parent reference point");
+
+    return parent_reference;
+  };
+
+  if (poly.size() == 3)
+  {
+    Tri3 element;
+    return recover_with_libmesh(element);
+  }
+
+  Quad4 element;
+  return recover_with_libmesh(element);
 }
 
 Real

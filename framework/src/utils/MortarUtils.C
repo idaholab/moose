@@ -11,6 +11,7 @@
 #include "MooseLagrangeHelpers.h"
 
 #include "libmesh/enum_to_string.h"
+#include "libmesh/fe_interface.h"
 #include "metaphysicl/dualnumberarray.h"
 #include "Eigen/Dense"
 
@@ -22,6 +23,109 @@ namespace Moose
 {
 namespace Mortar
 {
+std::vector<unsigned int>
+getMortarSubElementNodeIndices(const Elem & parent_elem, const unsigned int sub_elem)
+{
+  if (sub_elem >= parent_elem.n_sub_elem())
+    mooseError("Invalid 3D mortar sub-element index ",
+               sub_elem,
+               " for parent element ",
+               parent_elem.id(),
+               " of type ",
+               libMesh::Utility::enum_to_string<ElemType>(parent_elem.type()),
+               ", which has ",
+               parent_elem.n_sub_elem(),
+               " sub-elements.");
+
+  switch (parent_elem.type())
+  {
+    case TRI3:
+      return {0, 1, 2};
+    case QUAD4:
+      return {0, 1, 2, 3};
+    case TRI6:
+    case TRI7:
+      switch (sub_elem)
+      {
+        case 0:
+          return {0, 3, 5};
+        case 1:
+          return {3, 4, 5};
+        case 2:
+          return {3, 1, 4};
+        case 3:
+          return {5, 4, 2};
+        default:
+          mooseError("Invalid 3D mortar triangular sub-element index ", sub_elem, ".");
+      }
+    case QUAD8:
+      switch (sub_elem)
+      {
+        case 0:
+          return {0, 4, 7};
+        case 1:
+          return {4, 1, 5};
+        case 2:
+          return {5, 2, 6};
+        case 3:
+          return {7, 6, 3};
+        case 4:
+          return {4, 5, 6, 7};
+        default:
+          mooseError("Invalid 3D mortar QUAD8 sub-element index ", sub_elem, ".");
+      }
+    case QUAD9:
+      switch (sub_elem)
+      {
+        case 0:
+          return {0, 4, 8, 7};
+        case 1:
+          return {4, 1, 5, 8};
+        case 2:
+          return {8, 5, 2, 6};
+        case 3:
+          return {7, 8, 6, 3};
+        default:
+          mooseError("Invalid 3D mortar QUAD9 sub-element index ", sub_elem, ".");
+      }
+    default:
+      mooseError("Parent face element ",
+                 parent_elem.id(),
+                 " has unsupported type ",
+                 libMesh::Utility::enum_to_string<ElemType>(parent_elem.type()),
+                 " for 3D mortar sub-element topology.");
+  }
+}
+
+void
+mapQPoints3dFromReference(const Elem & mortar_segment_elem,
+                          const MortarSegmentReferencePoints & reference_points,
+                          const QBase & qrule_msm,
+                          std::vector<Point> & secondary_q_pts,
+                          std::vector<Point> & primary_q_pts)
+{
+  mooseAssert(mortar_segment_elem.type() == TRI3,
+              "Reference interpolation expects triangular mortar segments.");
+  const FEType fe_type(FIRST, LAGRANGE);
+
+  for (const auto qp : make_range(qrule_msm.n_points()))
+  {
+    Point secondary_qp;
+    Point primary_qp;
+
+    for (const auto n : index_range(reference_points.secondary_reference_points))
+    {
+      const auto phi =
+          FEInterface::shape(fe_type, &mortar_segment_elem, n, qrule_msm.qp(qp), false);
+      secondary_qp += phi * reference_points.secondary_reference_points[n];
+      primary_qp += phi * reference_points.primary_reference_points[n];
+    }
+
+    secondary_q_pts.push_back(secondary_qp);
+    primary_q_pts.push_back(primary_qp);
+  }
+}
+
 void
 projectQPoints3d(const Elem * const msm_elem,
                  const Elem * const primal_elem,
@@ -40,66 +144,6 @@ projectQPoints3d(const Elem * const msm_elem,
   // Get sub-elem (for second order meshes, otherwise trivial)
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
   const ElemType primal_type = primal_elem->type();
-
-  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::vector<unsigned int>
-  {
-    switch (primal_type)
-    {
-      case TRI3:
-        return {{0, 1, 2}};
-      case QUAD4:
-        return {{0, 1, 2, 3}};
-      case TRI6:
-      case TRI7:
-        switch (sub_elem)
-        {
-          case 0:
-            return {{0, 3, 5}};
-          case 1:
-            return {{3, 4, 5}};
-          case 2:
-            return {{3, 1, 4}};
-          case 3:
-            return {{5, 4, 2}};
-          default:
-            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
-        }
-      case QUAD8:
-        switch (sub_elem)
-        {
-          case 0:
-            return {{0, 4, 7}};
-          case 1:
-            return {{4, 1, 5}};
-          case 2:
-            return {{5, 2, 6}};
-          case 3:
-            return {{7, 6, 3}};
-          case 4:
-            return {{4, 5, 6, 7}};
-          default:
-            mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
-        }
-      case QUAD9:
-        switch (sub_elem)
-        {
-          case 0:
-            return {{0, 4, 8, 7}};
-          case 1:
-            return {{4, 1, 5, 8}};
-          case 2:
-            return {{8, 5, 2, 6}};
-          case 3:
-            return {{7, 8, 6, 3}};
-          default:
-            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
-        }
-      default:
-        mooseError("get_sub_elem_indices: Face element type: ",
-                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
-                   " invalid for 3D mortar");
-    }
-  };
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
@@ -195,7 +239,7 @@ projectQPoints3d(const Elem * const msm_elem,
   };
 
   // Get sub-elem node indices
-  auto sub_elem_node_indices = get_sub_elem_node_indices();
+  const auto sub_elem_node_indices = getMortarSubElementNodeIndices(*primal_elem, sub_elem);
 
   // Loop through quadrature points on msm_elem
   for (auto qp : make_range(qrule_msm.n_points()))
