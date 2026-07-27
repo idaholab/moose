@@ -2973,13 +2973,19 @@ c0PolyhedronSidePoints3D(const std::vector<std::vector<Point>> & side_points,
 static std::shared_ptr<libMesh::Polygon>
 buildC0Polygon3D(std::vector<Node *> nodes)
 {
-  // Polyhedron face keys retain polygon node order. Give independently constructed triangular
-  // neighbors the same key; larger polygons must retain their cyclic geometric order.
-  if (nodes.size() == 3)
-    std::sort(nodes.begin(),
-              nodes.end(),
-              [](const Node * const node0, const Node * const node1)
-              { return node0->id() < node1->id(); });
+  // Polyhedron face keys retain polygon node order. Canonicalize cyclic rotations and reversals
+  // so independently constructed neighbors share a key without changing geometric adjacency.
+  if (nodes.size() >= 3)
+  {
+    const auto first_node = std::min_element(nodes.begin(),
+                                             nodes.end(),
+                                             [](const Node * const node0, const Node * const node1)
+                                             { return node0->id() < node1->id(); });
+    std::rotate(nodes.begin(), first_node, nodes.end());
+
+    if (nodes.back()->id() < nodes[1]->id())
+      std::reverse(nodes.begin() + 1, nodes.end());
+  }
 
   auto polygon = std::make_shared<libMesh::C0Polygon>(nodes.size());
 
