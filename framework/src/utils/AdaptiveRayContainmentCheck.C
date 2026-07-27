@@ -161,8 +161,8 @@ AdaptiveRayContainmentCheck::isOnSurface(const Point & p) const
 
 int
 AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
-                                             const Point & ray_end,
-                                             const bool use_primary_direction) const
+                                            const Point & ray_end,
+                                            const bool use_primary_direction) const
 {
   int count = 0;
   const auto candidate_ids =

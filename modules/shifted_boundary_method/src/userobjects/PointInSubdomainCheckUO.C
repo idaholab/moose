@@ -44,13 +44,10 @@ PointInSubdomainCheckUO::PointInSubdomainCheckUO(const InputParameters & paramet
 void
 PointInSubdomainCheckUO::initialSetup()
 {
-  // Map the selected ray backend to the ray-direction intent AdaptiveRayContainmentCheck expects:
-  // pca_ray -> AUTO_PCA; user_selected_ray -> USER_SPECIFIED with the user's ray_direction.
-  RayDirectionOptions ray_options;
-  ray_options.mode = (_method == PointContainmentMethod::USER_SELECTED_RAY)
-                         ? RayDirectionMode::USER_SPECIFIED
-                         : RayDirectionMode::AUTO_PCA;
-  ray_options.direction = _ray_direction;
+  // The shared ray-backend tuning/debug options (method -> ray-direction intent,
+  // leaf size, comm) come from the base class; only the debug file names are
+  // specialized per subdomain below.
+  const PcaRayOptions base_options = pcaRayOptions();
 
   // Each subdomain gets its own checker, so the OBB/ray debug meshes must go to
   // distinct files; otherwise later subdomains overwrite earlier ones. Insert the
@@ -67,17 +64,14 @@ PointInSubdomainCheckUO::initialSetup()
 
   for (const auto & [subdomain_id, set] : _builder.getSurfaceElementSetsBySubdomain())
   {
-    const FileName obb_file = per_subdomain_name(_obb_file_name, subdomain_id);
-    const FileName ray_file = per_subdomain_name(_ray_file_name, subdomain_id);
-    _subdomain_id_checkers[subdomain_id] =
-        std::make_unique<AdaptiveRayContainmentCheck>(set.elements(),
-                                                      set.centroids(),
-                                                      ray_options,
-                                                      _tolerance,
-                                                      _leaf_max_size,
-                                                      obb_file,
-                                                      ray_file,
-                                                      &comm());
+    PcaRayOptions options = base_options;
+    options.obb_file_name = per_subdomain_name(_obb_file_name, subdomain_id);
+    options.ray_file_name = per_subdomain_name(_ray_file_name, subdomain_id);
+
+    // fixed_x_ray is rejected in the constructor, so only the ray backends reach here;
+    // the facade's mesh argument is used only by fixed_x_ray and is unreferenced.
+    _subdomain_id_checkers[subdomain_id] = std::make_unique<PointContainmentClassifier>(
+        _builder.mesh(), &set, _method, _tolerance, options);
   }
 }
 

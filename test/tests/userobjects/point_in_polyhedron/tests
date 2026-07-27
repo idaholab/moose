@@ -145,6 +145,15 @@
       recover = false
       detail = 'a negative surface tolerance,'
     []
+    [zero_tolerance]
+      type = 'RunException'
+      input = 'fixed_x_ray.i'
+      cli_args = 'UserObjects/in_out_test/tolerance=0'
+      expect_err = 'tolerance.*must be greater than zero'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'a zero surface tolerance,'
+    []
     [user_ray_without_direction]
       type = 'RunException'
       input = 'fixed_x_ray.i'
