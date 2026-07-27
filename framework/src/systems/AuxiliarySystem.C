@@ -920,7 +920,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
     // Block Elemental AuxKernels
     PARALLEL_TRY
     {
-      ConstElemRange & range = *_mesh.getActiveLocalElementRange();
+      const ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, true);
       try
       {

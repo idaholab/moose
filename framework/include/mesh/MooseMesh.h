@@ -440,7 +440,7 @@ public:
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */
-  libMesh::ConstElemRange * getActiveLocalElementRange();
+  const libMesh::ConstElemRange * getActiveLocalElementRange();
   libMesh::NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   libMesh::ConstNodeRange * getLocalNodeRange();
@@ -1641,11 +1641,9 @@ protected:
   std::set<Node *> _semilocal_node_list;
 
   /**
-   * A range for use with threading.  We do this so that it doesn't have
-   * to get rebuilt all the time (which takes time).
+   * Ranges for use with threading, cached so they don't have to get
+   * rebuilt all the time (which takes time).
    */
-  std::unique_ptr<libMesh::ConstElemRange> _active_local_elem_range;
-
   std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
   std::unique_ptr<libMesh::NodeRange> _active_node_range;
   std::unique_ptr<libMesh::ConstNodeRange> _local_node_range;

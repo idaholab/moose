@@ -73,7 +73,7 @@ ElementLoopUserObject::preElement(const Elem * elem)
 void
 ElementLoopUserObject::execute()
 {
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
   try
   {

@@ -171,7 +171,7 @@ DOFMapOutput::output()
         // get the list of unique DOFs for this variable
         // Start by looking at local DOFs
         std::set<dof_id_type> dofs;
-        ConstElemRange * active_local_elems = _mesh.getActiveLocalElementRange();
+        const ConstElemRange * active_local_elems = _mesh.getActiveLocalElementRange();
         for (const auto & elem : *active_local_elems)
         {
           if (elem->subdomain_id() == *sd)
