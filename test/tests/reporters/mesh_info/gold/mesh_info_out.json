@@ -1,21 +1,21 @@
 {
-    "number_of_parts": 2,
+    "number_of_parts": 4,
     "part": 0,
     "reporters": {
         "mesh_info": {
             "type": "MeshInfo",
             "values": {
-                "local_sideset_elems": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
+                "elems": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::ElemInfo, MeshInfo::ElemInfoItems>"
+                },
+                "local_elems": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::ElemInfo, MeshInfo::ElemInfoItems>"
                 },
                 "local_sidesets": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
-                },
-                "local_subdomain_elems": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<short, std::pair<unsigned long, unsigned int>>, MeshInfo::DomainInfoItems>"
                 },
                 "local_subdomains": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
                 },
                 "num_dofs": {
                     "type": "unsigned int"
@@ -24,12 +24,6 @@
                     "type": "unsigned int"
                 },
                 "num_dofs_constrained": {
-                    "type": "unsigned int"
-                },
-                "num_dofs_local_auxiliary": {
-                    "type": "unsigned int"
-                },
-                "num_dofs_local_nonlinear": {
                     "type": "unsigned int"
                 },
                 "num_dofs_nonlinear": {
@@ -41,6 +35,12 @@
                 "num_local_dofs": {
                     "type": "unsigned int"
                 },
+                "num_local_dofs_auxiliary": {
+                    "type": "unsigned int"
+                },
+                "num_local_dofs_nonlinear": {
+                    "type": "unsigned int"
+                },
                 "num_local_elements": {
                     "type": "unsigned int"
                 },
@@ -50,17 +50,11 @@
                 "num_nodes": {
                     "type": "unsigned int"
                 },
-                "sideset_elems": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
-                },
                 "sidesets": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo>"
-                },
-                "subdomain_elems": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<short, std::pair<unsigned long, unsigned int>>, MeshInfo::DomainInfoItems>"
                 },
                 "subdomains": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo>"
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
                 }
             }
         }
@@ -68,24 +62,22 @@
     "time_steps": [
         {
             "mesh_info": {
-                "local_sideset_elems": null,
+                "elems": null,
+                "local_elems": null,
                 "local_sidesets": null,
-                "local_subdomain_elems": null,
                 "local_subdomains": null,
                 "num_dofs": 0,
                 "num_dofs_auxiliary": 0,
                 "num_dofs_constrained": 0,
-                "num_dofs_local_auxiliary": 0,
-                "num_dofs_local_nonlinear": 0,
                 "num_dofs_nonlinear": 0,
                 "num_elements": 0,
                 "num_local_dofs": 0,
+                "num_local_dofs_auxiliary": 0,
+                "num_local_dofs_nonlinear": 0,
                 "num_local_elements": 0,
                 "num_local_nodes": 0,
                 "num_nodes": 0,
-                "sideset_elems": null,
                 "sidesets": null,
-                "subdomain_elems": null,
                 "subdomains": null
             },
             "time": 0.0,
@@ -93,104 +85,504 @@
         },
         {
             "mesh_info": {
-                "local_sideset_elems": [
+                "elems": [
                     {
                         "id": 0,
-                        "name": "bottom",
-                        "sides": [
-                            {
-                                "elem_id": 0,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 1,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 2,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 3,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 4,
-                                "side": 0
-                            }
-                        ]
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 1,
+                        "subdomain_id": 1
                     },
                     {
                         "id": 2,
-                        "name": "top",
-                        "sides": [
-                            {
-                                "elem_id": 45,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 46,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 47,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 48,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 49,
-                                "side": 2
-                            }
-                        ]
+                        "subdomain_id": 1
                     },
                     {
                         "id": 3,
-                        "name": "left",
-                        "sides": [
-                            {
-                                "elem_id": 0,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 5,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 10,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 15,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 20,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 25,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 30,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 35,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 40,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 45,
-                                "side": 3
-                            }
-                        ]
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 4,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 5,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 6,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 7,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 8,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 9,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 10,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 11,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 12,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 13,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 14,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 15,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 16,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 17,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 18,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 19,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 20,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 21,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 22,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 23,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 24,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 25,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 26,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 27,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 28,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 29,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 30,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 31,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 32,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 33,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 34,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 35,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 36,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 37,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 38,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 39,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 40,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 41,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 42,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 43,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 44,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 45,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 46,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 47,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 48,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 49,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 50,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 51,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 52,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 53,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 54,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 55,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 56,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 57,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 58,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 59,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 60,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 61,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 62,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 63,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 64,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 65,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 66,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 67,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 68,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 69,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 70,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 71,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 72,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 73,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 74,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 75,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 76,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 77,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 78,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 79,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 80,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 81,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 82,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 83,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 84,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 85,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 86,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 87,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 88,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 89,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 90,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 91,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 92,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 93,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 94,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 95,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 96,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 97,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 98,
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 99,
+                        "subdomain_id": 0
+                    }
+                ],
+                "local_elems": [
+                    {
+                        "id": 0,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 1,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 2,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 3,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 4,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 5,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 6,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 7,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 8,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 9,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 10,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 11,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 12,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 13,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 14,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 15,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 16,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 17,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 18,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 19,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 20,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 21,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 22,
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 23,
+                        "subdomain_id": 1
                     }
                 ],
                 "local_sidesets": [
@@ -199,273 +591,27 @@
                         "name": "bottom"
                     },
                     {
-                        "id": 2,
-                        "name": "top"
-                    },
-                    {
                         "id": 3,
                         "name": "left"
                     }
                 ],
-                "local_subdomain_elems": [
-                    {
-                        "elems": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6,
-                            7,
-                            8,
-                            9,
-                            10,
-                            11,
-                            12,
-                            13,
-                            14,
-                            15,
-                            16,
-                            17,
-                            18,
-                            19,
-                            20,
-                            21,
-                            22,
-                            23,
-                            24,
-                            25,
-                            26,
-                            27,
-                            28,
-                            29,
-                            30,
-                            31,
-                            32,
-                            33,
-                            34,
-                            35,
-                            36,
-                            37,
-                            38,
-                            39,
-                            40,
-                            41,
-                            42,
-                            43,
-                            44,
-                            45,
-                            46,
-                            47,
-                            48,
-                            49
-                        ],
-                        "id": 0
-                    }
-                ],
                 "local_subdomains": [
                     {
-                        "id": 0
+                        "id": 1,
+                        "name": "foo"
                     }
                 ],
                 "num_dofs": 221,
                 "num_dofs_auxiliary": 100,
                 "num_dofs_constrained": 0,
-                "num_dofs_local_auxiliary": 50,
-                "num_dofs_local_nonlinear": 66,
                 "num_dofs_nonlinear": 121,
                 "num_elements": 100,
-                "num_local_dofs": 116,
-                "num_local_elements": 50,
-                "num_local_nodes": 66,
+                "num_local_dofs": 59,
+                "num_local_dofs_auxiliary": 24,
+                "num_local_dofs_nonlinear": 35,
+                "num_local_elements": 24,
+                "num_local_nodes": 35,
                 "num_nodes": 121,
-                "sideset_elems": [
-                    {
-                        "id": 0,
-                        "name": "bottom",
-                        "sides": [
-                            {
-                                "elem_id": 0,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 1,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 2,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 3,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 4,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 50,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 51,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 52,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 53,
-                                "side": 0
-                            },
-                            {
-                                "elem_id": 54,
-                                "side": 0
-                            }
-                        ]
-                    },
-                    {
-                        "id": 1,
-                        "name": "right",
-                        "sides": [
-                            {
-                                "elem_id": 54,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 59,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 64,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 69,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 74,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 79,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 84,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 89,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 94,
-                                "side": 1
-                            },
-                            {
-                                "elem_id": 99,
-                                "side": 1
-                            }
-                        ]
-                    },
-                    {
-                        "id": 2,
-                        "name": "top",
-                        "sides": [
-                            {
-                                "elem_id": 45,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 46,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 47,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 48,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 49,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 95,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 96,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 97,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 98,
-                                "side": 2
-                            },
-                            {
-                                "elem_id": 99,
-                                "side": 2
-                            }
-                        ]
-                    },
-                    {
-                        "id": 3,
-                        "name": "left",
-                        "sides": [
-                            {
-                                "elem_id": 0,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 5,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 10,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 15,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 20,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 25,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 30,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 35,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 40,
-                                "side": 3
-                            },
-                            {
-                                "elem_id": 45,
-                                "side": 3
-                            }
-                        ]
-                    }
-                ],
                 "sidesets": [
                     {
                         "id": 0,
@@ -484,116 +630,13 @@
                         "name": "left"
                     }
                 ],
-                "subdomain_elems": [
-                    {
-                        "elems": [
-                            0,
-                            1,
-                            2,
-                            3,
-                            4,
-                            5,
-                            6,
-                            7,
-                            8,
-                            9,
-                            10,
-                            11,
-                            12,
-                            13,
-                            14,
-                            15,
-                            16,
-                            17,
-                            18,
-                            19,
-                            20,
-                            21,
-                            22,
-                            23,
-                            24,
-                            25,
-                            26,
-                            27,
-                            28,
-                            29,
-                            30,
-                            31,
-                            32,
-                            33,
-                            34,
-                            35,
-                            36,
-                            37,
-                            38,
-                            39,
-                            40,
-                            41,
-                            42,
-                            43,
-                            44,
-                            45,
-                            46,
-                            47,
-                            48,
-                            49,
-                            50,
-                            51,
-                            52,
-                            53,
-                            54,
-                            55,
-                            56,
-                            57,
-                            58,
-                            59,
-                            60,
-                            61,
-                            62,
-                            63,
-                            64,
-                            65,
-                            66,
-                            67,
-                            68,
-                            69,
-                            70,
-                            71,
-                            72,
-                            73,
-                            74,
-                            75,
-                            76,
-                            77,
-                            78,
-                            79,
-                            80,
-                            81,
-                            82,
-                            83,
-                            84,
-                            85,
-                            86,
-                            87,
-                            88,
-                            89,
-                            90,
-                            91,
-                            92,
-                            93,
-                            94,
-                            95,
-                            96,
-                            97,
-                            98,
-                            99
-                        ],
-                        "id": 0
-                    }
-                ],
                 "subdomains": [
                     {
                         "id": 0
+                    },
+                    {
+                        "id": 1,
+                        "name": "foo"
                     }
                 ]
             },

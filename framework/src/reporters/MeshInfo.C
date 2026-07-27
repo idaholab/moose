@@ -12,8 +12,29 @@
 #include "libmesh/system.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/parallel_sync.h"
+#include "libmesh/parallel_algebra.h"
+#include "libmesh/elem_side_builder.h"
+#include "libmesh/enum_elem_quality.h"
+#include "libmesh/enum_to_string.h"
 
 registerMooseObject("MooseApp", MeshInfo);
+
+/// Element qualities with a bound (min or max) to support on domains (sidesets, subdomains)
+const std::vector<MeshInfo::DomainQuality> MeshInfo::domain_qualities{
+    {libMesh::ElemQuality::MIN_ANGLE, MeshInfo::BoundType::MIN},
+    {libMesh::ElemQuality::MAX_ANGLE, MeshInfo::BoundType::MAX},
+    {libMesh::ElemQuality::JACOBIAN, MeshInfo::BoundType::MIN},
+    {libMesh::ElemQuality::JACOBIAN, MeshInfo::BoundType::MAX}};
+/// Element qualities to support on elems
+const std::vector<libMesh::ElemQuality> MeshInfo::elem_qualities{libMesh::ElemQuality::MIN_ANGLE,
+                                                                 libMesh::ElemQuality::MAX_ANGLE,
+                                                                 libMesh::ElemQuality::JACOBIAN};
+
+std::string
+elemQualityToString(const libMesh::ElemQuality eq)
+{
+  return MooseUtils::toLower(libMesh::Utility::enum_to_string(eq));
+}
 
 InputParameters
 MeshInfo::validParams()
@@ -22,15 +43,69 @@ MeshInfo::validParams()
   params.addClassDescription(
       "Report mesh information, such as the number of elements, nodes, and degrees of freedom.");
 
-  MultiMooseEnum items(
-      "num_dofs num_dofs_nonlinear num_dofs_auxiliary num_elements num_nodes num_local_dofs "
-      "num_local_dofs_nonlinear num_local_dofs_auxiliary num_local_elements num_local_nodes "
-      "local_sidesets local_sideset_elems sidesets sideset_elems local_subdomains "
-      "local_subdomain_elems subdomains subdomain_elems");
+  MultiMooseEnum items("elems num_dofs num_dofs_nonlinear num_dofs_auxiliary num_dofs_constrained "
+                       "num_elements num_nodes num_local_dofs num_local_dofs_nonlinear "
+                       "num_local_dofs_auxiliary num_local_elements num_local_nodes local_elems "
+                       "local_sidesets local_subdomains sidesets subdomains");
   params.addParam<MultiMooseEnum>(
       "items",
       items,
-      "The iteration information to output, if nothing is provided everything will be output.");
+      "The iteration information to output; if not provided, everything will be output.");
+
+  // Elem parameters
+  {
+    {
+      MultiMooseEnum items("all bounding_box elem_type nodes points volume");
+      params.addParam<MultiMooseEnum>(
+          "elem_items", items, "Items to include when outputting elem information");
+    }
+
+    {
+      std::vector<std::string> elem_qualities;
+      elem_qualities.reserve(MeshInfo::elem_qualities.size());
+      std::transform(MeshInfo::elem_qualities.begin(),
+                     MeshInfo::elem_qualities.end(),
+                     std::back_inserter(elem_qualities),
+                     [](const auto v) { return elemQualityToString(v); });
+      std::sort(elem_qualities.begin(), elem_qualities.end());
+      MultiMooseEnum items("all " + MooseUtils::stringJoin(elem_qualities, " "));
+      params.addParam<MultiMooseEnum>(
+          "elem_qualities", items, "Element qualities to include when outputting elem information");
+    }
+  }
+
+  // Domain parameters (sidesets, subdomains)
+  {
+    static const std::array<std::string, 2> domain_names{"sideset", "subdomain"};
+
+    // [sideset,subdomain]_items
+    {
+      MultiMooseEnum items(
+          "all bounding_box elems elem_types min_volume max_volume num_elems volume");
+      for (const auto & name : domain_names)
+        params.addParam<MultiMooseEnum>(
+            name + "_items", items, "Items to include when outputting " + name + " information");
+    }
+    // [sideset,subdomain]_qualities
+    {
+      // Convert each entry in MeshInfo::domain_qualities to a human string, like:
+      // {libMesh::ElemQuality::MIN_ANGLE, MeshInfo::BoundType::MIN} -> "min_min_angle"
+      std::vector<std::string> domain_qualities;
+      domain_qualities.reserve(MeshInfo::domain_qualities.size());
+      std::transform(MeshInfo::domain_qualities.begin(),
+                     MeshInfo::domain_qualities.end(),
+                     std::back_inserter(domain_qualities),
+                     [](const auto & v) { return v.itemName(); });
+      std::sort(domain_qualities.begin(), domain_qualities.end());
+
+      MultiMooseEnum items("all " + MooseUtils::stringJoin(domain_qualities, " "));
+      for (const auto & name : domain_names)
+        params.addParam<MultiMooseEnum>(name + "_qualities",
+                                        items,
+                                        "Element qualities to include when outputting " + name +
+                                            " information");
+    }
+  }
 
   return params;
 }
@@ -38,6 +113,13 @@ MeshInfo::validParams()
 MeshInfo::MeshInfo(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _items(getParam<MultiMooseEnum>("items")),
+    _elem_items(getParam<MultiMooseEnum>("elem_items")),
+    _sideset_items(getParam<MultiMooseEnum>("sideset_items")),
+    _subdomain_items(getParam<MultiMooseEnum>("subdomain_items")),
+    _elem_qualities(getParam<MultiMooseEnum>("elem_qualities")),
+    _sideset_qualities(getParam<MultiMooseEnum>("sideset_qualities")),
+    _subdomain_qualities(getParam<MultiMooseEnum>("subdomain_qualities")),
+
     _num_dofs(declareHelper<unsigned int>("num_dofs", REPORTER_MODE_REPLICATED)),
     _num_dofs_nl(declareHelper<unsigned int>("num_dofs_nonlinear", REPORTER_MODE_REPLICATED)),
     _num_dofs_aux(declareHelper<unsigned int>("num_dofs_auxiliary", REPORTER_MODE_REPLICATED)),
@@ -47,355 +129,781 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
     _num_node(declareHelper<unsigned int>("num_nodes", REPORTER_MODE_REPLICATED)),
     _num_local_dofs(declareHelper<unsigned int>("num_local_dofs", REPORTER_MODE_DISTRIBUTED)),
     _num_local_dofs_nl(
-        declareHelper<unsigned int>("num_dofs_local_nonlinear", REPORTER_MODE_DISTRIBUTED)),
+        declareHelper<unsigned int>("num_local_dofs_nonlinear", REPORTER_MODE_DISTRIBUTED)),
     _num_local_dofs_aux(
-        declareHelper<unsigned int>("num_dofs_local_auxiliary", REPORTER_MODE_DISTRIBUTED)),
+        declareHelper<unsigned int>("num_local_dofs_auxiliary", REPORTER_MODE_DISTRIBUTED)),
     _num_local_elem(declareHelper<unsigned int>("num_local_elements", REPORTER_MODE_DISTRIBUTED)),
     _num_local_node(declareHelper<unsigned int>("num_local_nodes", REPORTER_MODE_DISTRIBUTED)),
 
-    _local_sidesets(declareHelper<std::map<BoundaryID, SidesetInfo>>("local_sidesets",
-                                                                     REPORTER_MODE_DISTRIBUTED)),
-    _local_sideset_elems(declareHelper<std::map<BoundaryID, SidesetInfo>>(
-        "local_sideset_elems", REPORTER_MODE_DISTRIBUTED)),
-    _sidesets(declareHelper<std::map<BoundaryID, SidesetInfo>>("sidesets", REPORTER_MODE_ROOT)),
-    _sideset_elems(
-        declareHelper<std::map<BoundaryID, SidesetInfo>>("sideset_elems", REPORTER_MODE_ROOT)),
-
-    _local_subdomains(declareHelper<std::map<SubdomainID, SubdomainInfo>>(
-        "local_subdomains", REPORTER_MODE_DISTRIBUTED)),
-    _local_subdomain_elems(declareHelper<std::map<SubdomainID, SubdomainInfo>>(
-        "local_subdomain_elems", REPORTER_MODE_DISTRIBUTED)),
-    _subdomains(
-        declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomains", REPORTER_MODE_ROOT)),
-    _subdomain_elems(
-        declareHelper<std::map<SubdomainID, SubdomainInfo>>("subdomain_elems", REPORTER_MODE_ROOT)),
+    _elem_infos(initCombinedInfos<ElemInfos>("elems", _elem_items, _elem_qualities)),
+    _sideset_infos(initCombinedInfos<SidesetInfos>("sidesets", _sideset_items, _sideset_qualities)),
+    _subdomain_infos(
+        initCombinedInfos<SubdomainInfos>("subdomains", _subdomain_items, _subdomain_qualities)),
 
     _equation_systems(_fe_problem.es()),
     _nonlinear_system(_fe_problem.es().get_system("nl0")),
     _aux_system(_fe_problem.es().get_system("aux0")),
     _mesh(_fe_problem.mesh().getMesh())
 {
+  if (_elem_items.isValid() && !hasItem("elems", _items) && !hasItem("local_elems", _items))
+    paramError("elem_items", "Should not be provided without an elems item enabled");
+  if (_elem_qualities.isValid() && !hasItem("elems", _items) && !hasItem("local_elems", _items))
+    paramError("elem_qualities", "Should not be provided without an elems item enabled");
+  if (_sideset_items.isValid() && !hasItem("sidesets", _items) &&
+      !hasItem("local_sidesets", _items))
+    paramError("sideset_items", "Should not be provided without a sidesets item enabled");
+  if (_sideset_qualities.isValid() && !hasItem("sidesets", _items) &&
+      !hasItem("local_sidesets", _items))
+    paramError("sideset_qualities", "Should not be provided without a sidesets item enabled");
+  if (_subdomain_items.isValid() && !hasItem("subdomains", _items) &&
+      !hasItem("local_subdomains", _items))
+    paramError("subdomain_items", "Should not be provided without a subdomains item enabled");
+  if (_subdomain_qualities.isValid() && !hasItem("subdomains", _items) &&
+      !hasItem("local_subdomains", _items))
+    paramError("subdomain_qualities", "Should not be provided without a subdomains item enabled");
+}
+
+MeshInfo::DomainQuality::DomainQuality(const libMesh::ElemQuality elem_quality,
+                                       const BoundType bound_type)
+  : std::pair<libMesh::ElemQuality, BoundType>(elem_quality, bound_type)
+{
+}
+
+std::string
+MeshInfo::DomainQuality::itemName() const
+{
+  return (boundType() == BoundType::MAX ? std::string("max") : std::string("min")) + "_" +
+         elemQualityToString(elemQuality());
+}
+
+void
+MeshInfo::DomainQuality::updateValue(std::map<DomainQuality, Real> & quality_map,
+                                     const Real value) const
+{
+  static const Real default_max = 0;
+  static const Real default_min = std::numeric_limits<Real>::max();
+  const bool is_max = boundType() == BoundType::MAX;
+  auto & entry = quality_map.try_emplace(*this, (is_max ? default_max : default_min)).first->second;
+  if (is_max)
+    entry = std::max(entry, value);
+  else
+    entry = std::min(entry, value);
+}
+
+MeshInfo::ElemContainingInfoItems::ElemContainingInfoItems(const MultiMooseEnum & items)
+  : bounding_box(MeshInfo::hasItem("bounding_box", items)),
+    volume(MeshInfo::hasItem("volume", items))
+{
+}
+
+MeshInfo::DomainInfoItems::DomainInfoItems(const MultiMooseEnum & items,
+                                           const MultiMooseEnum & qualities)
+  : MeshInfo::ElemContainingInfoItems(items),
+    elems(MeshInfo::hasItem("elems", items)),
+    elem_types(MeshInfo::hasItem("elem_types", items)),
+    max_volume(MeshInfo::hasItem("max_volume", items)),
+    min_volume(MeshInfo::hasItem("min_volume", items)),
+    num_elems(MeshInfo::hasItem("num_elems", items))
+{
+  std::copy_if(MeshInfo::domain_qualities.begin(),
+               MeshInfo::domain_qualities.end(),
+               std::back_inserter(this->qualities),
+               [&](const auto & v) { return MeshInfo::hasItem(v.itemName(), qualities); });
+}
+
+MeshInfo::ElemInfoItems::ElemInfoItems(const MultiMooseEnum & items,
+                                       const MultiMooseEnum & qualities)
+  : MeshInfo::ElemContainingInfoItems(items),
+    elem_type(MeshInfo::hasItem("elem_type", items)),
+    nodes(MeshInfo::hasItem("nodes", items)),
+    points(MeshInfo::hasItem("points", items))
+{
+  std::copy_if(MeshInfo::elem_qualities.begin(),
+               MeshInfo::elem_qualities.end(),
+               std::back_inserter(this->qualities),
+               [&](const auto v) { return MeshInfo::hasItem(elemQualityToString(v), qualities); });
+}
+
+template <typename InfoMapType, class InfoItemsType>
+MeshInfo::CombinedInfos<InfoMapType, InfoItemsType>::CombinedInfos(InfoMapType * local,
+                                                                   InfoMapType * global,
+                                                                   const InfoItemsType & items)
+  : local(local), global(global), items(items)
+{
+}
+
+template <class CombinedInfosType>
+CombinedInfosType
+MeshInfo::initCombinedInfos(const std::string & name,
+                            const MultiMooseEnum & items,
+                            const MultiMooseEnum & qualities)
+{
+  using info_map_type = typename CombinedInfosType::info_map_type;
+  const typename CombinedInfosType::items_type dii(items, qualities);
+  return CombinedInfosType(
+      declareHelper<info_map_type>("local_" + name, REPORTER_MODE_DISTRIBUTED, dii),
+      declareHelper<info_map_type>(name, REPORTER_MODE_ROOT, dii),
+      dii);
+}
+
+void
+MeshInfo::possiblyAddElemInfo()
+{
+  auto local_ptr = _elem_infos.local;
+  auto global_ptr = _elem_infos.global;
+
+  // Nothing to do
+  if (!local_ptr && !global_ptr)
+    return;
+
+  // Clear all entries first
+  for (auto value_ptr : {local_ptr, global_ptr})
+    if (value_ptr)
+      value_ptr->map.clear();
+
+  const auto & items = _elem_infos.items;
+
+  // Fill the local information
+  std::map<dof_id_type, ElemInfo> local_info;
+  for (const auto elem_ptr : *_fe_problem.mesh().getActiveLocalElementRange())
+  {
+    auto & elem = *elem_ptr;
+    mooseAssert(!local_info.count(elem.id()), "Should not exist in map");
+
+    auto & entry = local_info[elem.id()];
+    entry.id = elem.id();
+    entry.subdomain_id = elem.subdomain_id();
+    entry.qualities.reserve(items.qualities.size());
+    for (const auto quality : items.qualities)
+      entry.qualities.emplace_back(quality, elem.quality(quality));
+    if (items.bounding_box)
+      entry.bounding_box = elem.loose_bounding_box();
+    if (items.volume)
+      entry.volume = elem.volume();
+    if (items.elem_type)
+      entry.elem_type = elem.type();
+    if (items.nodes)
+    {
+      entry.nodes.reserve(elem.n_nodes());
+      for (const auto & node : elem.node_ref_range())
+        entry.nodes.push_back(node.id());
+    }
+    if (items.points)
+    {
+      entry.points.reserve(elem.n_nodes());
+      for (const auto & node : elem.node_ref_range())
+        entry.points.emplace_back(node);
+    }
+  }
+
+  // For local, copy over everything we have. It's just local information.
+  if (local_ptr)
+    local_ptr->map = local_info;
+
+  // For global entries, need to accumulate data
+  if (global_ptr)
+  {
+    // initialize with ID and subdomain_id
+    {
+      std::vector<std::pair<dof_id_type, subdomain_id_type>> data;
+      data.reserve(local_info.size());
+      for (auto & [id, info] : local_info)
+        data.emplace_back(id, info.subdomain_id);
+      comm().gather(0, data);
+      for (const auto & [id, subdomain_id] : data)
+      {
+        auto & entry = global_ptr->map.emplace(id, id).first->second;
+        entry.subdomain_id = subdomain_id;
+      }
+    }
+
+    const auto gather = [&](const auto && get_value, const auto && set_value)
+    {
+      using T = std::remove_reference_t<std::invoke_result_t<decltype(get_value), ElemInfo &>>;
+      std::vector<std::pair<dof_id_type, T>> data;
+      data.reserve(local_info.size());
+      for (auto & [id, info] : local_info)
+        data.emplace_back(id, get_value(info));
+      comm().gather(0, data);
+      for (const auto & [id, value] : data)
+        set_value(global_ptr->map.at(id), value);
+    };
+
+    // qualities
+    if (items.qualities.size())
+      gather(
+          [](const auto & info)
+          {
+            std::vector<std::pair<std::underlying_type_t<libMesh::ElemQuality>, Real>> values;
+            values.reserve(info.qualities.size());
+            values.insert(values.end(), info.qualities.begin(), info.qualities.end());
+            // for (const auto & [quality, value] : info.qualities)
+            //   values.emplace_back(quality, value);
+            return values;
+          },
+          [](auto & info, const auto & value)
+          {
+            info.qualities.reserve(value.size());
+            for (const auto & [elem_quality, quality_value] : value)
+              info.qualities.emplace_back(static_cast<libMesh::ElemQuality>(elem_quality),
+                                          quality_value);
+          });
+    // bounding_box
+    if (items.bounding_box)
+      gather([](const auto & info)
+             { return std::make_pair(info.bounding_box.min(), info.bounding_box.max()); },
+             [](auto & info, const auto & value)
+             {
+               info.bounding_box.min() = value.first;
+               info.bounding_box.max() = value.second;
+             });
+    // elem_type
+    if (items.elem_type)
+      gather([](const auto & info) { return static_cast<int>(info.elem_type); },
+             [](auto & info, const auto & value)
+             { info.elem_type = static_cast<libMesh::ElemType>(value); });
+    // volume
+    if (items.volume)
+      gather([](const auto & info) { return info.volume; },
+             [](auto & info, const auto & value) { info.volume = value; });
+    // nodes
+    if (items.nodes)
+      gather([](const auto & info) { return info.nodes; },
+             [](auto & info, const auto & value) { info.nodes = value; });
+    // points
+    if (items.points)
+      gather([](const auto & info) { return info.points; },
+             [](auto & info, const auto & value) { info.points = value; });
+  }
+}
+
+template <class CombinedInfosType>
+void
+MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
+{
+  constexpr bool is_sidesets = std::is_same_v<CombinedInfosType, SidesetInfos>;
+  using id_type = typename CombinedInfosType::id_type;
+  using info_type = typename CombinedInfosType::info_type;
+  using map_type = typename CombinedInfosType::map_type;
+
+  auto & local = infos.local;
+  auto & global = infos.global;
+
+  // Nothing to do
+  if (!local && !global)
+    return;
+
+  // Helper for either getting an entry from one of the maps or inserting if it doesn't exist
+  const auto get_or_insert_info = [](map_type & map, const id_type id) -> info_type &
+  { return map.try_emplace(id, id).first->second; };
+
+  // Clear all entries first
+  for (auto value_ptr : {local, global})
+    if (value_ptr)
+      value_ptr->map.clear();
+
+  const auto & items = infos.items;
+
+  // Fill the local information
+  map_type local_info;
+  {
+    const auto compute_volume = items.max_volume || items.min_volume || items.volume;
+
+    // Helper for adding an element to the info
+    const auto add = [&](const auto id, const libMesh::Elem & elem, auto && elems_entry)
+    {
+      auto & entry = get_or_insert_info(local_info, id);
+      const Real volume = compute_volume ? elem.volume() : 0;
+      if (items.bounding_box)
+        entry.bounding_box.union_with(elem.loose_bounding_box());
+      for (const auto & quality : items.qualities)
+        quality.updateValue(entry.qualities, elem.quality(quality.elemQuality()));
+      if (items.elems)
+        entry.elems.emplace_back(std::move(elems_entry));
+      if (items.elem_types)
+        entry.elem_types.insert(elem.type());
+      if (items.min_volume)
+        entry.min_volume = std::min(entry.min_volume, volume);
+      if (items.max_volume)
+        entry.max_volume = std::max(entry.max_volume, volume);
+      if (items.num_elems)
+        ++entry.num_elems;
+      if (items.volume)
+        entry.volume += volume;
+    };
+
+    // Add elements for subdomains and sidesets
+    auto & mesh = _fe_problem.mesh();
+    if constexpr (is_sidesets)
+    {
+      libMesh::ElemSideBuilder side_builder;
+      for (const auto & bnd_elem : as_range(mesh.bndElemsBegin(), mesh.bndElemsEnd()))
+      {
+        const auto & elem = *bnd_elem->_elem;
+        if (elem.processor_id() == processor_id())
+        {
+          const auto side = bnd_elem->_side;
+          add(bnd_elem->_bnd_id, side_builder(elem, side), std::make_pair(elem.id(), side));
+        }
+      }
+    }
+    else
+    {
+      for (const auto & elem : *mesh.getActiveLocalElementRange())
+        add(elem->subdomain_id(), *elem, elem->id());
+    }
+  }
+
+  // For local, copy over everything we have. It's just local information.
+  if (local)
+    local->map = local_info;
+
+  // For global entries, need to accumulate data
+  if (global)
+  {
+    bool did_gather = false;
+    const auto gather = [&](const auto && get_value, const auto && set_value)
+    {
+      using T = std::remove_reference_t<std::invoke_result_t<decltype(get_value), info_type &>>;
+      std::vector<std::pair<id_type, T>> data;
+      data.reserve(local_info.size());
+      for (auto & [id, info] : local_info)
+        data.emplace_back(id, get_value(info));
+      comm().gather(0, data);
+      for (const auto & [id, value] : data)
+        set_value(get_or_insert_info(global->map, id), value);
+      did_gather = true;
+    };
+
+    // bounding_box
+    if (items.bounding_box)
+      gather([](const auto & info)
+             { return std::make_pair(info.bounding_box.min(), info.bounding_box.max()); },
+             [](auto & info, const auto & value)
+             { info.bounding_box.union_with(BoundingBox(value.first, value.second)); });
+    // qualities
+    if (items.qualities.size())
+      gather(
+          [](const auto & info)
+          {
+            std::vector<std::tuple<std::underlying_type_t<decltype(DomainQuality::first)>,
+                                   std::underlying_type_t<decltype(DomainQuality::second)>,
+                                   Real>>
+                values;
+            values.reserve(info.qualities.size());
+            for (const auto & [bounded_quality, value] : info.qualities)
+              values.emplace_back(
+                  bounded_quality.elemQuality(), bounded_quality.boundType(), value);
+            return values;
+          },
+          [](auto & info, const auto & value)
+          {
+            for (const auto & [elem_quality, bound_type, quality_value] : value)
+            {
+              const DomainQuality dq(static_cast<libMesh::ElemQuality>(elem_quality),
+                                     static_cast<BoundType>(bound_type));
+              dq.updateValue(info.qualities, quality_value);
+            }
+          });
+    // elems
+    if (items.elems)
+      gather([](const auto & info) { return info.elems; },
+             [](auto & info, const auto & value)
+             { info.elems.insert(info.elems.end(), value.begin(), value.end()); });
+    // elem_types
+    if (items.elem_types)
+      gather(
+          [](const auto & info)
+          {
+            std::vector<int> values;
+            values.reserve(info.elem_types.size());
+            std::transform(info.elem_types.begin(),
+                           info.elem_types.end(),
+                           std::back_inserter(values),
+                           [](const auto v) { return static_cast<int>(v); });
+            return values;
+          },
+          [](auto & info, const auto & value)
+          {
+            std::transform(value.begin(),
+                           value.end(),
+                           std::inserter(info.elem_types, info.elem_types.end()),
+                           [](const auto v) { return static_cast<libMesh::ElemType>(v); });
+          });
+    // max_volume
+    if (items.max_volume)
+      gather([](const auto & info) { return info.max_volume; },
+             [](auto & info, const auto & value)
+             { info.max_volume = std::max(info.max_volume, value); });
+    // min_volume
+    if (items.min_volume)
+      gather([](const auto & info) { return info.min_volume; },
+             [](auto & info, const auto & value)
+             { info.min_volume = std::min(info.min_volume, value); });
+    // num_elems
+    if (items.num_elems)
+      gather([](const auto & info) { return info.num_elems; },
+             [](auto & info, const auto & value) { info.num_elems += value; });
+    // volume
+    if (items.volume)
+      gather([](const auto & info) { return info.volume; },
+             [](auto & info, const auto & value) { info.volume += value; });
+
+    // If we haven't gathered anything at all (no items), we didn't insert
+    // any IDs so we need to do that now
+    if (!did_gather)
+    {
+      std::vector<id_type> data;
+      data.reserve(local_info.size());
+      std::transform(local_info.begin(),
+                     local_info.end(),
+                     std::back_inserter(data),
+                     [](const auto v) { return v.first; });
+      comm().gather(0, data);
+      for (const auto id : data)
+        get_or_insert_info(global->map, id);
+    }
+
+    // For global sidesets, we could technically have sidesets that contain no
+    // sides, which we wouldn't have picked up in the local build above. In
+    // a previous implementation of MeshInfo, we still reported these. So, keep
+    // reporting them.
+    if constexpr (is_sidesets)
+      for (const auto id : _mesh.get_boundary_info().get_global_boundary_ids())
+        get_or_insert_info(global->map, id);
+  }
+
+  for (auto to : {local, global})
+    if (to)
+    {
+      // Add sideset/subdomain names
+      for (auto & [id, info] : to->map)
+        if constexpr (is_sidesets)
+          info.name = _mesh.get_boundary_info().get_sideset_name(id);
+        else
+          info.name = _mesh.subdomain_name(id);
+
+      // Sort "elems" if elems requested
+      if (items.elems)
+        for (auto & id_info_pair : to->map)
+          std::sort(id_info_pair.second.elems.begin(), id_info_pair.second.elems.end());
+    }
 }
 
 void
 MeshInfo::execute()
 {
-  _num_dofs_nl = _nonlinear_system.n_dofs();
-  _num_dofs_aux = _aux_system.n_dofs();
-  _num_dofs = _equation_systems.n_dofs();
-  _num_dofs_constrained = 0;
-  for (auto s : make_range(_equation_systems.n_systems()))
-    _num_dofs_constrained += _equation_systems.get_system(s).n_constrained_dofs();
+  if (_num_dofs)
+    *_num_dofs = _equation_systems.n_dofs();
+  if (_num_dofs_nl)
+    *_num_dofs_nl = _nonlinear_system.n_dofs();
+  if (_num_dofs_aux)
+    *_num_dofs_aux = _aux_system.n_dofs();
+  if (_num_dofs_constrained)
+  {
+    *_num_dofs_constrained = 0;
+    for (auto s : make_range(_equation_systems.n_systems()))
+      *_num_dofs_constrained += _equation_systems.get_system(s).n_constrained_dofs();
+  }
 
-  _num_node = _mesh.n_nodes();
-  _num_elem = _mesh.n_elem();
-  _num_local_dofs_nl = _nonlinear_system.n_local_dofs();
-  _num_local_dofs_aux = _aux_system.n_local_dofs();
-  _num_local_dofs = _num_local_dofs_nl + _num_local_dofs_aux;
-  _num_local_node = _mesh.n_local_nodes();
-  _num_local_elem = _mesh.n_local_elem();
+  if (_num_elem)
+    *_num_elem = _mesh.n_elem();
+  if (_num_node)
+    *_num_node = _mesh.n_nodes();
+  if (_num_local_dofs)
+    *_num_local_dofs = _nonlinear_system.n_local_dofs() + _aux_system.n_local_dofs();
+  if (_num_local_dofs_nl)
+    *_num_local_dofs_nl = _nonlinear_system.n_local_dofs();
+  if (_num_local_dofs_aux)
+    *_num_local_dofs_aux = _aux_system.n_local_dofs();
+  if (_num_local_elem)
+    *_num_local_elem = _mesh.n_local_elem();
+  if (_num_local_node)
+    *_num_local_node = _mesh.n_local_nodes();
 
-  possiblyAddSidesetInfo();
-  possiblyAddSubdomainInfo();
+  possiblyAddElemInfo();
+  possiblyAddDomainInfo(_sideset_infos);
+  possiblyAddDomainInfo(_subdomain_infos);
 }
 
-void
-MeshInfo::possiblyAddSidesetInfo()
+bool
+MeshInfo::hasItem(const std::string & name, const MultiMooseEnum & items)
 {
-  // Helper for adding the sideset names to a given map of sidesets
-  auto add_sideset_names = [&](std::map<BoundaryID, SidesetInfo> & sidesets)
+  mooseAssert(items.find(name) != items.items().end(), "Invalid item: " << name);
+  if (items.isValid())
+    return items.isValueSet(name) || items.isValueSet("all");
+  return items.find("all") == items.items().end();
+}
+
+/// JSON serialization for info maps
+template <class InfoType>
+void
+toJSONInfoBase(nlohmann::json & json, const InfoType & info)
+{
+  json["id"] = info.id;
+}
+template <class InfoType, class InfoItemsType>
+void
+toJSONElemContainingInfo(nlohmann::json & json, const InfoType & info, const InfoItemsType & items)
+{
+  toJSONInfoBase(json, info);
+  if (items.bounding_box)
+    json["bounding_box"] = info.bounding_box;
+  if (items.volume)
+    json["volume"] = info.volume;
+}
+void
+to_json(nlohmann::json & json, const MeshInfo::ElemInfoMap & info_map)
+{
+  const auto & items = info_map.items;
+  for (const auto & [id, info] : info_map.map)
   {
-    for (auto & pair : sidesets)
-      pair.second.name = _mesh.get_boundary_info().get_sideset_name(pair.second.id);
-  };
+    mooseAssert(id == info.id, "Inconsistent id");
 
-  // Helper for sorting all of the sides in each sideset
-  auto sort_sides = [](std::map<BoundaryID, SidesetInfo> & sidesets)
+    nlohmann::json info_json;
+    toJSONElemContainingInfo(info_json, info, items);
+    info_json["subdomain_id"] = info.subdomain_id;
+
+    // qualities
+    if (info.qualities.size())
+      for (const auto & [quality, value] : info.qualities)
+        info_json["qualities"][elemQualityToString(quality)] = value;
+    // elem_type
+    if (items.elem_type)
+      info_json["elem_type"] = libMesh::Utility::enum_to_string(info.elem_type);
+    // nodes
+    if (items.nodes)
+      info_json["nodes"] = info.nodes;
+    // points
+    if (items.points)
+      info_json["points"] = info.points;
+
+    json.push_back(std::move(info_json));
+  }
+}
+template <class DomainInfoMapType>
+void
+toJSONDomainInfoMap(nlohmann::json & json, const DomainInfoMapType & info_map)
+{
+  constexpr bool is_sideset = std::is_same_v<DomainInfoMapType, MeshInfo::SidesetInfoMap>;
+  const auto & items = info_map.items;
+
+  for (const auto & [id, info] : info_map.map)
   {
-    for (auto & pair : sidesets)
-      std::sort(pair.second.sides.begin(), pair.second.sides.end());
-  };
+    mooseAssert(id == info.id, "Inconsistent id");
 
-  const bool include_all = !_items.isValid();
+    nlohmann::json info_json;
+    toJSONElemContainingInfo(info_json, info, items);
 
-  if (include_all || _items.isValueSet("local_sidesets") ||
-      _items.isValueSet("local_sideset_elems") || _items.isValueSet("sideset_elems"))
-  {
-    _local_sidesets.clear();
-    _local_sideset_elems.clear();
-    _sideset_elems.clear();
-
-    // Fill the local sideset information; all cases need it
-    std::map<BoundaryID, SidesetInfo> sidesets;
-    for (const auto & bnd_elem :
-         as_range(_fe_problem.mesh().bndElemsBegin(), _fe_problem.mesh().bndElemsEnd()))
-      if (bnd_elem->_elem->processor_id() == processor_id())
+    if (info.name.size())
+      info_json["name"] = info.name;
+    // qualities
+    if (items.qualities.size())
+      for (const auto & [bounded_quality, value] : info.qualities)
+        info_json["qualities"][bounded_quality.itemName()] = value;
+    // elems
+    if (items.elems)
+    {
+      auto & elems_json = info_json["elems"];
+      if constexpr (is_sideset)
       {
-        auto & entry = sidesets[bnd_elem->_bnd_id];
-        entry.id = bnd_elem->_bnd_id;
-        entry.sides.emplace_back(bnd_elem->_elem->id(), bnd_elem->_side);
+        for (const auto & elem_entry : info.elems)
+          elems_json.push_back({{"elem_id", elem_entry.first}, {"side", elem_entry.second}});
       }
-
-    // For local sidesets: copy over the local info, remove the sides, and add the names
-    if (include_all || _items.isValueSet("local_sidesets"))
-    {
-      // Copy over the local sideset info, remove the sides, and add the names
-      _local_sidesets = sidesets;
-      for (auto & pair : _local_sidesets)
-        pair.second.sides.clear();
-      add_sideset_names(_local_sidesets);
+      else
+        elems_json = info.elems;
     }
-
-    // For local sideset elems: copy over the local info, and add the names
-    if (include_all || _items.isValueSet("local_sideset_elems"))
+    // elem_types
+    if (items.elem_types)
     {
-      _local_sideset_elems = sidesets;
-      sort_sides(_local_sideset_elems);
-      add_sideset_names(_local_sideset_elems);
+      std::vector<std::string> elem_types;
+      elem_types.reserve(info.elem_types.size());
+      std::transform(info.elem_types.begin(),
+                     info.elem_types.end(),
+                     std::back_inserter(elem_types),
+                     [](const auto v) { return libMesh::Utility::enum_to_string(v); });
+      std::sort(elem_types.begin(), elem_types.end());
+      info_json["elem_types"] = elem_types;
     }
+    // max_volume
+    if (items.max_volume)
+      info_json["max_volume"] = info.max_volume;
+    // min_volume
+    if (items.min_volume)
+      info_json["min_volume"] = info.min_volume;
+    // min_volume
+    if (items.num_elems)
+      info_json["num_elems"] = info.num_elems;
 
-    // For the global sideset elems, we need to communicate all of the elems
-    if (include_all || _items.isValueSet("sideset_elems"))
-    {
-      // Set up a structure for sending each (id, elem id, side) tuple to root
-      std::map<processor_id_type,
-               std::vector<std::tuple<boundary_id_type, dof_id_type, unsigned int>>>
-          send_info;
-      // Avoid empty sends
-      if (!sidesets.empty())
-      {
-        auto & root_info = send_info[0];
-        for (const auto & pair : sidesets)
-          for (const auto & side : pair.second.sides)
-            root_info.emplace_back(pair.second.id, side.first, side.second);
-      }
-
-      // Take the received information and insert it into _sideset_elems
-      auto accumulate_info =
-          [this](processor_id_type,
-                 const std::vector<std::tuple<boundary_id_type, dof_id_type, unsigned int>> & info)
-      {
-        for (const auto & tuple : info)
-        {
-          const auto id = std::get<0>(tuple);
-          auto & entry = _sideset_elems[id];
-          entry.id = id;
-          entry.sides.emplace_back(std::get<1>(tuple), std::get<2>(tuple));
-        }
-      };
-
-      // Push the information and insert it into _sideset_elems on root
-      Parallel::push_parallel_vector_data(comm(), send_info, accumulate_info);
-
-      sort_sides(_sideset_elems);
-      add_sideset_names(_sideset_elems);
-    }
-  }
-
-  // For global sideset information without elements, we can simplify communication.
-  // All we need are the boundary IDs from libMesh (may not be reduced, so take the union)
-  // and then add the names (global)
-  if (include_all || _items.isValueSet("sidesets"))
-  {
-    _sidesets.clear();
-
-    auto boundary_ids = _mesh.get_boundary_info().get_boundary_ids();
-    comm().set_union(boundary_ids, 0);
-    if (processor_id() == 0)
-    {
-      for (const auto id : boundary_ids)
-        _sidesets[id].id = id;
-      add_sideset_names(_sidesets);
-    }
+    json.push_back(std::move(info_json));
   }
 }
-
 void
-to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo> & sidesets)
+to_json(nlohmann::json & json, const MeshInfo::SidesetInfoMap & info_map)
 {
-  for (const auto & pair : sidesets)
-  {
-    const MeshInfo::SidesetInfo & sideset_info = pair.second;
-
-    nlohmann::json sideset_json;
-    sideset_json["id"] = sideset_info.id;
-    if (sideset_info.name.size())
-      sideset_json["name"] = sideset_info.name;
-    if (sideset_info.sides.size())
-    {
-      auto & sides_json = sideset_json["sides"];
-
-      for (const std::pair<dof_id_type, unsigned int> & pair : sideset_info.sides)
-      {
-        nlohmann::json side_json;
-        side_json["elem_id"] = pair.first;
-        side_json["side"] = pair.second;
-        sides_json.push_back(side_json);
-      }
-    }
-
-    json.push_back(sideset_json);
-  }
+  toJSONDomainInfoMap(json, info_map);
+}
+void
+to_json(nlohmann::json & json, const MeshInfo::SubdomainInfoMap & info_map)
+{
+  toJSONDomainInfoMap(json, info_map);
 }
 
+/// Data store and load for DomainQuality
 void
-dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataStore(std::ostream & stream, MeshInfo::DomainQuality & beq, void *)
 {
-  storeHelper(stream, sideset_info.id, context);
-  storeHelper(stream, sideset_info.name, context);
-  storeHelper(stream, sideset_info.sides, context);
+  int value;
+
+  value = static_cast<int>(beq.elemQuality());
+  dataStore(stream, value, nullptr);
+
+  value = static_cast<int>(beq.boundType());
+  dataStore(stream, value, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::DomainQuality & beq, void *)
+{
+  int value;
+
+  dataLoad(stream, value, nullptr);
+  beq.elemQuality() = static_cast<libMesh::ElemQuality>(value);
+
+  dataLoad(stream, value, nullptr);
+  beq.boundType() = static_cast<MeshInfo::BoundType>(value);
 }
 
+/// Data store and load for node, elem, sideset, subdomain info entries
+template <typename T>
 void
-dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataStoreInfoBase(std::ostream & stream, T & info)
 {
-  loadHelper(stream, sideset_info.id, context);
-  loadHelper(stream, sideset_info.name, context);
-  loadHelper(stream, sideset_info.sides, context);
+  dataStore(stream, info.id, nullptr);
+}
+template <typename T>
+void
+dataStoreElemContainingInfo(std::ostream & stream, T & info)
+{
+  dataStoreInfoBase(stream, info);
+  dataStore(stream, info.bounding_box, nullptr);
+  dataStore(stream, info.volume, nullptr);
+}
+void
+dataStore(std::ostream & stream, MeshInfo::ElemInfo & info, void *)
+{
+  dataStoreElemContainingInfo(stream, info);
+  dataStore(stream, info.subdomain_id, nullptr);
+  dataStore(stream, info.qualities, nullptr);
+  dataStore(stream, info.elem_type, nullptr);
+  dataStore(stream, info.nodes, nullptr);
+  dataStore(stream, info.points, nullptr);
+}
+template <typename T>
+void
+dataStoreDomainInfo(std::ostream & stream, T & info)
+{
+  dataStoreElemContainingInfo(stream, info);
+  dataStore(stream, info.name, nullptr);
+  dataStore(stream, info.qualities, nullptr);
+  dataStore(stream, info.elems, nullptr);
+  dataStore(stream, info.elem_types, nullptr);
+  dataStore(stream, info.min_volume, nullptr);
+  dataStore(stream, info.max_volume, nullptr);
+  dataStore(stream, info.num_elems, nullptr);
+}
+void
+dataStore(std::ostream & stream, MeshInfo::SidesetInfo & info, void *)
+{
+  dataStoreDomainInfo(stream, info);
+}
+void
+dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & info, void *)
+{
+  dataStoreDomainInfo(stream, info);
+}
+template <typename T>
+void
+dataLoadInfoBase(std::istream & stream, T & info)
+{
+  dataLoad(stream, info.id, nullptr);
+}
+template <typename T>
+void
+dataLoadElemContainingInfo(std::istream & stream, T & info)
+{
+  dataLoadInfoBase(stream, info);
+  dataLoad(stream, info.bounding_box, nullptr);
+  dataLoad(stream, info.volume, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::ElemInfo & info, void *)
+{
+  dataLoadElemContainingInfo(stream, info);
+  dataLoad(stream, info.subdomain_id, nullptr);
+  dataLoad(stream, info.qualities, nullptr);
+  dataLoad(stream, info.elem_type, nullptr);
+  dataLoad(stream, info.nodes, nullptr);
+  dataLoad(stream, info.points, nullptr);
+}
+template <typename T>
+void
+dataLoadDomainInfo(std::istream & stream, T & info)
+{
+  dataLoadElemContainingInfo(stream, info);
+  dataLoad(stream, info.name, nullptr);
+  dataLoad(stream, info.qualities, nullptr);
+  dataLoad(stream, info.elems, nullptr);
+  dataLoad(stream, info.elem_types, nullptr);
+  dataLoad(stream, info.min_volume, nullptr);
+  dataLoad(stream, info.max_volume, nullptr);
+  dataLoad(stream, info.num_elems, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::SidesetInfo & info, void *)
+{
+  dataLoadDomainInfo(stream, info);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & info, void *)
+{
+  dataLoadDomainInfo(stream, info);
 }
 
+/// Data store and load for info maps
 void
-MeshInfo::possiblyAddSubdomainInfo()
+dataStore(std::ostream & stream, MeshInfo::ElemInfoMap & info_map, void *)
 {
-  // Helper for adding the subdomain names to a given map of subdomains
-  auto add_subdomain_names = [&](std::map<SubdomainID, SubdomainInfo> & subdomains)
-  {
-    for (auto & pair : subdomains)
-      pair.second.name = _mesh.subdomain_name(pair.second.id);
-  };
-
-  // Helper for sorting all of the elems in each subdomain
-  auto sort_elems = [](std::map<SubdomainID, SubdomainInfo> & subdomains)
-  {
-    for (auto & pair : subdomains)
-      std::sort(pair.second.elems.begin(), pair.second.elems.end());
-  };
-
-  const bool include_all = !_items.isValid();
-
-  if (include_all || _items.isValueSet("local_subdomains") ||
-      _items.isValueSet("local_subdomain_elems") || _items.isValueSet("subdomain_elems"))
-  {
-    _local_subdomains.clear();
-    _local_subdomain_elems.clear();
-    _subdomain_elems.clear();
-
-    // Fill the local subdomain information; all cases need it
-    std::map<SubdomainID, SubdomainInfo> subdomains;
-    for (const auto & elem : *_fe_problem.mesh().getActiveLocalElementRange())
-    {
-      auto & entry = subdomains[elem->subdomain_id()];
-      entry.id = elem->subdomain_id();
-      entry.elems.push_back(elem->id());
-    }
-
-    // For local subdomains: copy over the local info, remove the elems, and add the names
-    if (include_all || _items.isValueSet("local_subdomains"))
-    {
-      _local_subdomains = subdomains;
-      for (auto & pair : _local_subdomains)
-        pair.second.elems.clear();
-      add_subdomain_names(_local_subdomains);
-    }
-
-    // For local subdomain elems: copy over the local info, and add the names
-    if (include_all || _items.isValueSet("local_subdomain_elems"))
-    {
-      _local_subdomain_elems = subdomains;
-      sort_elems(_local_subdomain_elems);
-      add_subdomain_names(_local_subdomain_elems);
-    }
-
-    // For the global subdomain elems, we need to communicate all of the elems
-    if (include_all || _items.isValueSet("subdomain_elems"))
-    {
-      // Set up a structure for sending each (id, elem id) to root
-      std::map<processor_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> send_info;
-      // Avoid creating empty entry
-      if (!subdomains.empty())
-      {
-        auto & root_info = send_info[0];
-        for (const auto & pair : subdomains)
-          for (const auto elem_id : pair.second.elems)
-            root_info.emplace_back(pair.second.id, elem_id);
-      }
-
-      // Take the received information and insert it into _subdomain_elems
-      auto accumulate_info =
-          [this](processor_id_type,
-                 const std::vector<std::pair<subdomain_id_type, dof_id_type>> & info)
-      {
-        for (const auto & subdomain_elem_pair : info)
-        {
-          auto & entry = _subdomain_elems[subdomain_elem_pair.first];
-          entry.id = subdomain_elem_pair.first;
-          entry.elems.emplace_back(subdomain_elem_pair.second);
-        }
-      };
-
-      // Push the information and insert it into _subdomain_elems on root
-      Parallel::push_parallel_vector_data(comm(), send_info, accumulate_info);
-
-      if (processor_id() == 0)
-      {
-        sort_elems(_subdomain_elems);
-        add_subdomain_names(_subdomain_elems);
-      }
-    }
-  }
-
-  // For global subdomain information without elements, we can simplify communication.
-  // All we need are the subdomain IDs from libMesh and then add the names (global)
-  if (include_all || _items.isValueSet("subdomains"))
-  {
-    _subdomains.clear();
-
-    std::set<subdomain_id_type> subdomain_ids;
-    _mesh.subdomain_ids(subdomain_ids);
-
-    if (processor_id() == 0)
-    {
-      for (const auto id : subdomain_ids)
-        _subdomains[id].id = id;
-      add_subdomain_names(_subdomains);
-    }
-  }
+  dataStore(stream, info_map.map, nullptr);
+}
+void
+dataStore(std::ostream & stream, MeshInfo::SidesetInfoMap & info_map, void *)
+{
+  dataStore(stream, info_map.map, nullptr);
+}
+void
+dataStore(std::ostream & stream, MeshInfo::SubdomainInfoMap & info_map, void *)
+{
+  dataStore(stream, info_map.map, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::ElemInfoMap & info_map, void *)
+{
+  dataLoad(stream, info_map.map, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::SidesetInfoMap & info_map, void *)
+{
+  dataLoad(stream, info_map.map, nullptr);
+}
+void
+dataLoad(std::istream & stream, MeshInfo::SubdomainInfoMap & info_map, void *)
+{
+  dataLoad(stream, info_map.map, nullptr);
 }
 
-void
-to_json(nlohmann::json & json, const std::map<SubdomainID, MeshInfo::SubdomainInfo> & subdomains)
-{
-  for (const auto & pair : subdomains)
-  {
-    const MeshInfo::SubdomainInfo & subdomain_info = pair.second;
-
-    nlohmann::json subdomain_json;
-    subdomain_json["id"] = subdomain_info.id;
-    if (subdomain_info.name.size())
-      subdomain_json["name"] = subdomain_info.name;
-    if (subdomain_info.elems.size())
-    {
-      auto & sides_json = subdomain_json["elems"];
-      for (const auto & id : subdomain_info.elems)
-        sides_json.push_back(id);
-    }
-
-    json.push_back(subdomain_json);
-  }
-}
-
-void
-dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
-{
-  storeHelper(stream, subdomain_info.id, context);
-  storeHelper(stream, subdomain_info.name, context);
-  storeHelper(stream, subdomain_info.elems, context);
-}
-
-void
-dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
-{
-  loadHelper(stream, subdomain_info.id, context);
-  loadHelper(stream, subdomain_info.name, context);
-  loadHelper(stream, subdomain_info.elems, context);
-}
+template MeshInfo::SidesetInfos MeshInfo::initCombinedInfos<MeshInfo::SidesetInfos>(
+    const std::string &, const MultiMooseEnum &, const MultiMooseEnum &);
+template MeshInfo::SubdomainInfos MeshInfo::initCombinedInfos<MeshInfo::SubdomainInfos>(
+    const std::string &, const MultiMooseEnum &, const MultiMooseEnum &);
+template void MeshInfo::possiblyAddDomainInfo<MeshInfo::SidesetInfos>(MeshInfo::SidesetInfos &);
+template void MeshInfo::possiblyAddDomainInfo<MeshInfo::SubdomainInfos>(MeshInfo::SubdomainInfos &);

@@ -21,6 +21,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/bounding_box.h"
 
 using namespace libMesh;
 
@@ -304,6 +305,13 @@ dataStore(std::ostream & stream, Point & p, void * context)
     Real r = p(i);
     dataStore(stream, r, context);
   }
+}
+
+void
+dataStore(std::ostream & stream, libMesh::BoundingBox & p, void * context)
+{
+  dataStore(stream, p.min(), context);
+  dataStore(stream, p.max(), context);
 }
 
 template <>
@@ -674,6 +682,13 @@ dataLoad(std::istream & stream, Point & p, void * context)
     dataLoad(stream, r, context);
     p(i) = r;
   }
+}
+
+void
+dataLoad(std::istream & stream, libMesh::BoundingBox & bbox, void * context)
+{
+  dataLoad(stream, bbox.min(), context);
+  dataLoad(stream, bbox.max(), context);
 }
 
 template <>

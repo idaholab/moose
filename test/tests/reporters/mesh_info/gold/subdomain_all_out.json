@@ -1,0 +1,253 @@
+{
+    "number_of_parts": 4,
+    "part": 0,
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "local_subdomains": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
+                },
+                "subdomains": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "local_subdomains": null,
+                "subdomains": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "local_subdomains": [
+                    {
+                        "bounding_box": {
+                            "max": {
+                                "x": 0.5280034028856657,
+                                "y": 0.48411899620945537,
+                                "z": 0.0
+                            },
+                            "min": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        },
+                        "elem_types": [
+                            "QUAD4"
+                        ],
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23
+                        ],
+                        "id": 1,
+                        "max_volume": 0.015514930279253882,
+                        "min_volume": 0.007022858705364182,
+                        "name": "foo",
+                        "num_elems": 24,
+                        "qualities": {
+                            "max_jacobian": 0.015514930279253882,
+                            "max_max_angle": 90.0,
+                            "min_jacobian": 0.007022858705364182,
+                            "min_min_angle": 90.0
+                        },
+                        "volume": 0.25561647740018517
+                    }
+                ],
+                "subdomains": [
+                    {
+                        "bounding_box": {
+                            "max": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 0.0
+                            },
+                            "min": {
+                                "x": 0.0,
+                                "y": 0.48411899620945537,
+                                "z": 0.0
+                            }
+                        },
+                        "elem_types": [
+                            "QUAD4"
+                        ],
+                        "elems": [
+                            60,
+                            61,
+                            62,
+                            63,
+                            64,
+                            65,
+                            66,
+                            67,
+                            68,
+                            69,
+                            70,
+                            71,
+                            72,
+                            73,
+                            74,
+                            75,
+                            76,
+                            77,
+                            78,
+                            79,
+                            80,
+                            81,
+                            82,
+                            83,
+                            84,
+                            85,
+                            86,
+                            87,
+                            88,
+                            89,
+                            90,
+                            91,
+                            92,
+                            93,
+                            94,
+                            95,
+                            96,
+                            97,
+                            98,
+                            99
+                        ],
+                        "id": 0,
+                        "max_volume": 0.0227154094218556,
+                        "min_volume": 0.006611882063148393,
+                        "num_elems": 40,
+                        "qualities": {
+                            "max_jacobian": 0.0227154094218556,
+                            "max_max_angle": 90.0,
+                            "min_jacobian": 0.006611882063148386,
+                            "min_min_angle": 90.0
+                        },
+                        "volume": 0.5158810037905447
+                    },
+                    {
+                        "bounding_box": {
+                            "max": {
+                                "x": 1.0,
+                                "y": 0.48411899620945537,
+                                "z": 0.0
+                            },
+                            "min": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            }
+                        },
+                        "elem_types": [
+                            "QUAD4"
+                        ],
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25,
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31,
+                            32,
+                            33,
+                            34,
+                            35,
+                            36,
+                            37,
+                            38,
+                            39,
+                            40,
+                            41,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            49,
+                            50,
+                            51,
+                            52,
+                            53,
+                            54,
+                            55,
+                            56,
+                            57,
+                            58,
+                            59
+                        ],
+                        "id": 1,
+                        "max_volume": 0.015514930279253882,
+                        "min_volume": 0.0037322350532374483,
+                        "name": "foo",
+                        "num_elems": 60,
+                        "qualities": {
+                            "max_jacobian": 0.015514930279253882,
+                            "max_max_angle": 90.0,
+                            "min_jacobian": 0.003732235053237445,
+                            "min_min_angle": 90.0
+                        },
+                        "volume": 0.48411899620945537
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

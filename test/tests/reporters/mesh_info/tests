@@ -1,29 +1,233 @@
 [Tests]
-  issues = '#11323 #16886 #16887'
+  issues = '#11323 #16886 #16887 #33437'
   design = 'MeshInfo.md'
   [info]
-    requirement = "The system shall include the ability to report mesh information:"
+    requirement = "The system shall include the ability to report mesh information that"
 
     [default]
       type = JSONDiff
       input = mesh_info.i
-      jsondiff = 'mesh_info_out.json mesh_info_out.json.1'
-      min_parallel = 2
-      max_parallel = 2
+      jsondiff = 'mesh_info_out.json
+                  mesh_info_out.json.1
+                  mesh_info_out.json.2
+                  mesh_info_out.json.3'
+      min_parallel = 4
+      max_parallel = 4
       keep_reporter_types = true
 
-      detail = "that outputs all information be default and"
+      detail = "outputs all information be default"
     []
 
-    [limit]
+    [limit_items_out]
       type = JSONDiff
       input = mesh_info.i
-      jsondiff = limit_out.json
-      cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_out'
+      jsondiff = limit_items_out.json
+      cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_items_out'
       skip_keys = 'part number_of_parts'
       keep_reporter_types = true
 
-      detail = "that outputs specific information."
+      detail = "outputs specific items"
+    []
+
+    [elem_all]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'elem_all_out.json
+                  elem_all_out.json.1
+                  elem_all_out.json.2
+                  elem_all_out.json.3'
+      min_parallel = 4
+      max_parallel = 4
+      cli_args = 'Reporters/mesh_info/items="local_elems elems"
+                  Reporters/mesh_info/elem_items=all
+                  Reporters/mesh_info/elem_qualities=all
+                  Outputs/file_base=elem_all_out'
+      keep_reporter_types = true
+
+      detail = "includes all extra information about elems"
+    []
+
+    [elem_items]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'elem_items_out.json
+                  elem_items_out.json.1'
+      min_parallel = 2
+      max_parallel = 2
+      cli_args = 'Reporters/mesh_info/items="local_elems"
+                  Reporters/mesh_info/elem_items="elem_type volume"
+                  Outputs/file_base=elem_items_out'
+      keep_reporter_types = true
+
+      detail = "includes selected extra information about elems"
+    []
+
+    [elem_qualities]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'elem_qualities_out.json
+                  elem_qualities_out.json.1'
+      min_parallel = 2
+      max_parallel = 2
+      cli_args = 'Reporters/mesh_info/items="local_elems"
+                  Reporters/mesh_info/elem_qualities="min_angle jacobian"
+                  Outputs/file_base=elem_qualities_out'
+      skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
+      detail = "includes selected elem quality information"
+    []
+
+    [sideset_all]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'sideset_all_out.json
+                  sideset_all_out.json.1
+                  sideset_all_out.json.2
+                  sideset_all_out.json.3'
+      min_parallel = 4
+      max_parallel = 4
+      cli_args = 'Reporters/mesh_info/items="local_sidesets sidesets"
+                  Reporters/mesh_info/sideset_items=all
+                  Reporters/mesh_info/sideset_qualities=all
+                  Outputs/file_base=sideset_all_out'
+      keep_reporter_types = true
+
+      detail = "includes all extra information about sidesets"
+    []
+
+    [sideset_items]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'sideset_items_out.json'
+      cli_args = 'Reporters/mesh_info/items="sidesets"
+                  Reporters/mesh_info/sideset_items="min_volume max_volume"
+                  Outputs/file_base=sideset_items_out'
+      skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
+      detail = "includes selected extra information about sidesets"
+    []
+
+    [sideset_qualities]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'sideset_qualities_out.json'
+      cli_args = 'Reporters/mesh_info/items="sidesets"
+                  Reporters/mesh_info/sideset_qualities="min_jacobian max_jacobian"
+                  Outputs/file_base=sideset_qualities_out'
+      skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
+      detail = "includes selected sideset quality information"
+    []
+
+    [subdomain_all]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'subdomain_all_out.json
+                  subdomain_all_out.json.1
+                  subdomain_all_out.json.2
+                  subdomain_all_out.json.3'
+      min_parallel = 4
+      max_parallel = 4
+      cli_args = 'Reporters/mesh_info/items="local_subdomains subdomains"
+                  Reporters/mesh_info/subdomain_items=all
+                  Reporters/mesh_info/subdomain_qualities=all
+                  Outputs/file_base=subdomain_all_out'
+      keep_reporter_types = true
+
+      detail = "includes all extra information about subdomains"
+    []
+
+    [subdomain_items]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'subdomain_items_out.json'
+      cli_args = 'Reporters/mesh_info/items="subdomains"
+                  Reporters/mesh_info/subdomain_items="min_volume max_volume"
+                  Outputs/file_base=subdomain_items_out'
+      skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
+      detail = "includes selected extra information about subdomains"
+    []
+
+    [subdomain_qualities]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = 'subdomain_qualities_out.json'
+      cli_args = 'Reporters/mesh_info/items="subdomains"
+                  Reporters/mesh_info/subdomain_qualities="min_min_angle max_max_angle"
+                  Outputs/file_base=subdomain_qualities_out'
+      skip_keys = 'part number_of_parts'
+      keep_reporter_types = true
+
+      detail = "includes selected subdomain quality information"
+    []
+  []
+
+  [errors]
+    requirement = "The system shall report a reasonable error when outputting mesh information to JSON when"
+
+    [elem_items_no_elems]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=subdomains
+                  Reporters/mesh_info/elem_items=points'
+      expect_err = "elem_items: Should not be provided without an elems item enabled"
+
+      detail = 'requesting elem items without requesting elem'
+    []
+
+    [elem_qualities_no_elems]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=subdomains
+                  Reporters/mesh_info/elem_qualities=min_angle'
+      expect_err = "elem_qualities: Should not be provided without an elems item enabled"
+
+      detail = 'requesting elem quality items without requesting elems'
+    []
+
+    [sideset_items_no_sidesets]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=subdomains
+                  Reporters/mesh_info/sideset_items=elems'
+      expect_err = "sideset_items: Should not be provided without a sidesets item enabled"
+
+      detail = 'requesting sideset items without requesting sidesets'
+    []
+
+    [sideset_qualities_no_sidesets]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=subdomains
+                  Reporters/mesh_info/sideset_qualities=min_min_angle'
+      expect_err = "sideset_qualities: Should not be provided without a sidesets item enabled"
+
+      detail = 'requesting sideset quality items without requesting sidesets'
+    []
+
+    [subdomain_items_no_subdomains]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=sidesets
+                  Reporters/mesh_info/subdomain_items=elems'
+      expect_err = "subdomain_items: Should not be provided without a subdomains item enabled"
+
+      detail = 'requesting subdomain items without requesting subdomains'
+    []
+
+    [subdomain_qualities_no_subdomains]
+      type = RunException
+      input = mesh_info.i
+      cli_args = 'Reporters/mesh_info/items=sidesets
+                  Reporters/mesh_info/subdomain_qualities=min_min_angle'
+      expect_err = "subdomain_qualities: Should not be provided without a subdomains item enabled"
+
+      detail = 'requesting subdomain quality items without requesting subdomains'
     []
   []
 []

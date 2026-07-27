@@ -1,0 +1,61 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "sidesets": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<short, std::pair<unsigned long, unsigned int>>, MeshInfo::DomainInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "sidesets": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "sidesets": [
+                    {
+                        "id": 0,
+                        "name": "bottom",
+                        "qualities": {
+                            "max_jacobian": 1.0,
+                            "min_jacobian": 1.0
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "name": "right",
+                        "qualities": {
+                            "max_jacobian": 1.0,
+                            "min_jacobian": 1.0
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "name": "top",
+                        "qualities": {
+                            "max_jacobian": 1.0,
+                            "min_jacobian": 1.0
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "name": "left",
+                        "qualities": {
+                            "max_jacobian": 1.0,
+                            "min_jacobian": 1.0
+                        }
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

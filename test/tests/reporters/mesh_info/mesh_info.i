@@ -6,6 +6,16 @@
     dim = 2
     nx = 10
     ny = 10
+    bias_x = 0.9
+    bias_y = 1.1
+  []
+
+  [add_block]
+    type = ParsedSubdomainMeshGenerator
+    input = generate
+    combinatorial_geometry = 'y < 0.5'
+    block_id = 1
+    block_name = foo
   []
 
   # For consistent partitioning across platforms
