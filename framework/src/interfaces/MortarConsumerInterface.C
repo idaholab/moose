@@ -13,7 +13,7 @@
 #include "MooseObject.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
-#include "MortarTypes.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MortarInterfaceWarehouse.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
@@ -95,10 +95,10 @@ MortarConsumerInterface::validParams()
       "and secondary subpatch normal pairings are admissible before polygon clipping.");
   params.addParam<MooseEnum>(
       "mortar_3d_subpatch_plane",
-      MooseEnum(getMortar3DSubpatchPlaneOptions(), "AVERAGED_NODAL_NORMAL"),
+      MooseEnum(getMortar3DSubpatchPlaneOptions(), "GEOMETRIC_NORMAL"),
       "Method used to construct the local 3D mortar subpatch planes used for projection and "
-      "clipping. AVERAGED_NODAL_NORMAL uses the averaged nodal normal on each secondary subpatch. "
-      "GEOMETRIC_NORMAL uses the geometric normal of each linear or bilinear secondary subpatch.");
+      "clipping. GEOMETRIC_NORMAL uses the geometric normal of each linear or bilinear secondary "
+      "subpatch. AVERAGED_NODAL_NORMAL uses the averaged nodal normal on each secondary subpatch.");
   params += MortarConsumerInterface::triangulationParams();
 
   MooseEnum mortar_3d_qp_mapping(getMortar3DQuadraturePointMappingOptions(), "normal_projection");
@@ -203,8 +203,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<MooseEnum>("mortar_3d_subpatch_plane")
           .getEnum<Mortar3DSubpatchPlane>();
 
-  // Only geometric 3D mode interprets this value as an angle between subpatch normals. Preserve
-  // the historical unrestricted parameter behavior for averaged-normal and 2D mortar interfaces.
+  // Only geometric 3D mode interprets this value as an angle between subpatch normals. Averaged
+  // normal and 2D interfaces continue to use the other projection-angle checks.
   if (_mci_mesh.dimension() == 3 &&
       mortar_3d_subpatch_plane == Mortar3DSubpatchPlane::GEOMETRIC_NORMAL &&
       (minimum_projection_angle < 0.0 || minimum_projection_angle > 90.0))

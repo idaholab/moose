@@ -11,5 +11,5 @@
 #include "MooseEnum.h"
 
 // Selects the normal used to define each local secondary subpatch plane during 3D mortar segment
-// mesh generation. Keep AVERAGED_NODAL_NORMAL first/default to preserve the historical behavior.
-CreateMooseEnumClass(Mortar3DSubpatchPlane, AVERAGED_NODAL_NORMAL, GEOMETRIC_NORMAL);
+// mesh generation.
+CreateMooseEnumClass(Mortar3DSubpatchPlane, GEOMETRIC_NORMAL, AVERAGED_NODAL_NORMAL);

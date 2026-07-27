@@ -115,19 +115,19 @@
       detail = 'by rejecting it for non-mortar contact formulations.'
     []
   []
-  [frictionless-mortar-3d-action-geometric-subpatch-plane]
+  [frictionless-mortar-3d-action-subpatch-plane-forwarding]
     issues = '#33282'
-    requirement = 'The contact action shall correctly handle geometric-normal 3D mortar subpatch '
-                  'planes by'
+    requirement = 'The contact action shall correctly forward the selected 3D mortar subpatch '
+                  'plane mode by'
     [mortar]
       type = 'Exodiff'
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
-      exodiff = 'frictionless-mortar-3d-action-geometric_108_0_displaced_mortar_segment_mesh.e'
-      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+      exodiff = 'frictionless-mortar-3d-action-averaged_108_0_displaced_mortar_segment_mesh.e'
+      cli_args = 'Contact/mortar/mortar_3d_subpatch_plane=AVERAGED_NODAL_NORMAL '
                  'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-action-geometric'
+                 'Outputs/file_base=frictionless-mortar-3d-action-averaged'
       mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'forwarding the plane mode for a Lagrange-multiplier mortar formulation,'
       valgrind = 'none'
@@ -138,19 +138,19 @@
       type = 'Exodiff'
       input = 'frictionless-mortar-3d-action.i'
       capabilities = 'ad_size>=150 & method!=dbg'
-      exodiff = 'frictionless-mortar-3d-penalty-action-geometric_108_0_displaced_mortar_segment_mesh.e'
+      exodiff = 'frictionless-mortar-3d-penalty-action-averaged_108_0_displaced_mortar_segment_mesh.e'
       cli_args = 'Contact/mortar/formulation=mortar_penalty '
-                 'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Contact/mortar/mortar_3d_subpatch_plane=AVERAGED_NODAL_NORMAL '
                  'Contact/mortar/minimum_projection_angle=35 Contact/mortar/debug_mesh=true '
                  'Executioner/end_time=0 Postprocessors/active="" VectorPostprocessors/active="" '
                  'Outputs/exodus=false Outputs/csv=false '
-                 'Outputs/file_base=frictionless-mortar-3d-penalty-action-geometric'
+                 'Outputs/file_base=frictionless-mortar-3d-penalty-action-averaged'
       mesh_mode = 'REPLICATED' # see issue 24255
       detail = 'forwarding the plane mode for a mortar penalty formulation,'
       valgrind = 'none'
       recover = false
       restep = false
-      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/mortar'
+      prereq = 'frictionless-mortar-3d-action-subpatch-plane-forwarding/mortar'
     []
     [unsupported-formulation]
       type = 'RunException'
@@ -159,7 +159,7 @@
                  'Contact/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL'
       expect_err = "The 'mortar_3d_subpatch_plane' option can only be used with mortar-based formulations"
       detail = 'rejecting the option for a non-mortar formulation,'
-      prereq = 'frictionless-mortar-3d-action-geometric-subpatch-plane/penalty'
+      prereq = 'frictionless-mortar-3d-action-subpatch-plane-forwarding/penalty'
     []
     [mortar-angle-forwarding]
       type = 'RunException'

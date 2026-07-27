@@ -61,21 +61,21 @@
   []
   [mortar_subpatch_plane_angle_validation]
     issues = '#33282'
-    requirement = 'The system shall preserve the historical minimum projection angle input range '
-                  'unless the angle is used for geometric 3D subpatch filtering by'
+    requirement = 'The system shall validate the minimum projection angle according to the selected '
+                  '3D mortar subpatch-plane mode by'
     [averaged-normal]
       type = RunApp
       input = 'mortar_stats_reporter_3d.i'
-      cli_args = 'Constraints/mortar/minimum_projection_angle=-40'
+      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=AVERAGED_NODAL_NORMAL '
+                 'Constraints/mortar/minimum_projection_angle=-40'
       detail = 'accepting an unrestricted angle with averaged nodal normals and'
     []
-    [geometric-normal]
+    [geometric-default]
       type = RunException
       input = 'mortar_stats_reporter_3d.i'
-      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
-                 'Constraints/mortar/minimum_projection_angle=-1'
+      cli_args = 'Constraints/mortar/minimum_projection_angle=-1'
       expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
-      detail = 'requiring an angle between zero and ninety degrees with geometric normals.'
+      detail = 'requiring an angle between zero and ninety degrees with the default geometric normal.'
     []
   []
   [mortar_segment_mesh]

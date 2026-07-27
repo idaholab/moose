@@ -1212,8 +1212,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // Construct the KD tree.
     kd_tree.buildIndex();
 
-    // Return the unoriented geometric normal of a linearized subpatch. In geometric mode the
-    // caller uses the averaged nodal normal only to recover the established side orientation.
+    // Return the unoriented geometric normal of a linearized subpatch. These expressions are the
+    // TRI3 and QUAD4 mapping tangents evaluated at the reference center, equivalent to evaluating
+    // the first-order finite-element normal there without constructing a temporary element.
     auto get_sub_elem_geometric_normal = [](const std::vector<Point> & nodes)
     {
       Point dxdxi;
@@ -1295,9 +1296,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         Point normal;
         std::vector<Point> nodes(sub_elem_nodes.size());
 
-        // Loop through sub_element nodes, collect points and compute center and normal. Keeping
-        // this sum and normalization as the default preserves the historical MOOSE plane
-        // construction.
+        // Collect the sub-element points and evaluate its center and averaged nodal normal.
         for (auto iv : make_range(sub_elem_nodes.size()))
         {
           const auto n = sub_elem_nodes[iv];
@@ -1477,7 +1476,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           for (auto s_el : make_range(secondary_side_elem->n_sub_elem()))
           {
             // Nearby primary candidates can include adjacent corner faces. Those faces may clip to
-            // numerical slivers, but they are not valid face-to-face mortar pairs for this search.
+            // numerical slivers, which we do not consider valid face-to-face mortar pairs for this
+            // search.
             if (use_geometric_subpatch_normals &&
                 std::abs(primary_sub_elem_normal * mortar_segment_helper[s_el]->normal()) <
                     minimum_subpatch_normal_alignment)
@@ -1533,10 +1533,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           {
             const auto & node_map = elem_to_node_map[el];
             if (node_map.size() != 3)
-              mooseError("Active mortar segments only supports TRI elements, 3 nodes expected "
-                         "but: ",
-                         node_map.size(),
-                         " provided.");
+              mooseError(
+                  "Active mortar segments only supports TRI elements, 3 nodes expected but: ",
+                  node_map.size(),
+                  " provided.");
 
             const Point e1 = nodal_points[node_map[1]] - nodal_points[node_map[0]];
             const Point e2 = nodal_points[node_map[2]] - nodal_points[node_map[0]];
@@ -1631,8 +1631,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             // Store reference data only for retained segments.
             if (use_reference_interpolation)
             {
-              MortarSegmentReferencePoints reference_points{
-                  elem_to_secondary_reference_points[el], elem_to_primary_reference_points[el]};
+              MortarSegmentReferencePoints reference_points{elem_to_secondary_reference_points[el],
+                                                            elem_to_primary_reference_points[el]};
               _msm_elem_to_reference_points.emplace(msm_new_elem, reference_points);
             }
 

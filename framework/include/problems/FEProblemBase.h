@@ -30,7 +30,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "MortarInterfaceWarehouse.h"
-#include "MortarTypes.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"

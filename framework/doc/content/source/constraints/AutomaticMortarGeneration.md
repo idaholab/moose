@@ -117,25 +117,29 @@ for 3D projection and polygon clipping.
 
 The two available modes use the same linearized subpatch topology and center:
 
-- `AVERAGED_NODAL_NORMAL` is the default and preserves the historical MOOSE construction. At the
-  subpatch center, MOOSE evaluates the interpolated, smoothed secondary nodal-normal field by
-  summing the stored normals at the subpatch vertices and normalizing the result. This is the
-  averaged-normal plane construction described in the mortar framework of [!cite](popp2010dual).
-- `GEOMETRIC_NORMAL` is opt-in. For a triangular subpatch, MOOSE computes an edge cross product; for
-  a quadrilateral subpatch, it computes the cross product of the bilinear center tangents so that
-  the normal represents the full bilinear patch rather than one selected diagonal. The averaged
-  nodal normal is used only to choose the sign of the geometric normal and preserve MOOSE's
-  primary-to-secondary orientation convention; it does not determine the plane direction.
+- `GEOMETRIC_NORMAL` is the default. For a triangular subpatch, MOOSE computes an edge cross
+  product; for a quadrilateral subpatch, it computes the cross product of the bilinear center
+  tangents so that the normal represents the full bilinear patch rather than one selected
+  diagonal. The averaged nodal normal is used only to choose the sign of the geometric normal and
+  preserve MOOSE's primary-to-secondary orientation convention; it does not determine the plane
+  direction.
+- `AVERAGED_NODAL_NORMAL` evaluates the interpolated, smoothed secondary nodal-normal field at the
+  subpatch center by summing the stored normals at the subpatch vertices and normalizing the
+  result. This is the averaged-normal plane construction described in the mortar framework of
+  [!cite](popp2010dual).
 
-Thus, omitting `mortar_3d_subpatch_plane`, or explicitly selecting `AVERAGED_NODAL_NORMAL`, retains
-the existing behavior. Select the geometric construction with
+Thus, omitting `mortar_3d_subpatch_plane` selects the geometric construction. Select the
+averaged-normal construction with
 
 ```
-mortar_3d_subpatch_plane = GEOMETRIC_NORMAL
+mortar_3d_subpatch_plane = AVERAGED_NODAL_NORMAL
 ```
+
+For both modes, overlap polygons below the mortar-segment area tolerance are discarded, do not seed
+the breadth-first primary-element search, and do not leave orphan nodes in the mortar segment mesh.
 
 Sharp 3D corners need an additional admissibility check when geometric subpatch planes are used.
-Only in `GEOMETRIC_NORMAL` mode,
+In `GEOMETRIC_NORMAL` mode,
 [!param](/Constraints/EqualValueConstraint/minimum_projection_angle) rejects primary and secondary
 subpatch pairings whose geometric normals are too close to orthogonal before polygon clipping. This
 avoids cross-corner mortar segments while preserving opposing or nearly opposing face-to-face

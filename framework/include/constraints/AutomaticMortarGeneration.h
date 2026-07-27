@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MortarSegmentInfo.h"
-#include "MortarTypes.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"

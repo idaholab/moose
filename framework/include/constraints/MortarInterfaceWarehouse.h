@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MortarTypes.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseTypes.h"
 #include "MooseHashing.h"
 #include "MortarSegmentInfo.h"
