@@ -36,12 +36,14 @@ repos:
         args: [--unsafe]
         exclude: ^conda/
 
-  # ---- C++ (MOOSE uses the .C extension for sources) ----
+  # ---- C++ sources ----
+  # .C files use the standard host compiler; .K files contain Kokkos code and
+  # use the device compiler when Kokkos is enabled.
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.7  # mirrors clang-format in requirements.txt
     hooks:
       - id: clang-format
-        # types_or: [text] ensures .C files are included regardless of how the
+        # types_or: [text] ensures .C and .K files are included regardless of how the
         # identify library tags that ambiguous extension.
         files: \.(C|K|h)$
         types_or: [text]
