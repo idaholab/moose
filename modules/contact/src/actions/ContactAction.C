@@ -867,9 +867,10 @@ ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_t
     params.set<Real>("minimum_projection_angle") = getParam<Real>("minimum_projection_angle");
     params.set<MooseEnum>("mortar_3d_subpatch_plane") =
         getParam<MooseEnum>("mortar_3d_subpatch_plane");
-    const bool augmented_lagrange =
+    const bool augmented_penalty =
+        _formulation == ContactFormulation::MORTAR_PENALTY &&
         dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
-    params.set<bool>("ghost_point_neighbors") = !_mortar_dynamics && !augmented_lagrange;
+    params.set<bool>("ghost_point_neighbors") = !_mortar_dynamics && !augmented_penalty;
     addRelationshipManagers(input_rm_type, params);
   }
   else
@@ -1008,9 +1009,6 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_user_object")
   {
-    const bool augmented_lagrange =
-        dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get());
-
     const auto register_mortar_uo_name = [this](const auto & bnd_pair, const auto & uo_prefix)
     {
       const auto & [primary_name, secondary_name] = bnd_pair;
@@ -1022,7 +1020,8 @@ ContactAction::addMortarContact()
     };
 
     // check if the correct problem class is selected if AL parameters are provided
-    if (_formulation == ContactFormulation::MORTAR_PENALTY && !augmented_lagrange)
+    if (_formulation == ContactFormulation::MORTAR_PENALTY &&
+        !dynamic_cast<AugmentedLagrangianContactProblemInterface *>(_problem.get()))
     {
       const std::vector<std::string> params = {"penalty_multiplier",
                                                "penalty_multiplier_friction",
@@ -1038,9 +1037,7 @@ ContactAction::addMortarContact()
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-      const std::string uo_type =
-          _mortar_dynamics ? "DynamicLMWeightedGapUserObject" : "LMWeightedGapUserObject";
-      auto uo_params = _factory.getValidParams(uo_type);
+      auto uo_params = _factory.getValidParams("LMWeightedGapUserObject");
 
       uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
@@ -1064,15 +1061,13 @@ ContactAction::addMortarContact()
       if (getParam<bool>("use_petrov_galerkin"))
         uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
-      _problem->addUserObject(uo_type,
+      _problem->addUserObject("LMWeightedGapUserObject",
                               register_mortar_uo_name(_boundary_pairs[0], "lm_weightedgap_object_"),
                               uo_params);
     }
     else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-      const std::string uo_type = _mortar_dynamics ? "DynamicLMWeightedVelocitiesUserObject"
-                                                   : "LMWeightedVelocitiesUserObject";
-      auto uo_params = _factory.getValidParams(uo_type);
+      auto uo_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
       uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
@@ -1104,7 +1099,7 @@ ContactAction::addMortarContact()
         uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       const auto uo_name = _problem->addUserObject(
-          uo_type,
+          "LMWeightedVelocitiesUserObject",
           register_mortar_uo_name(_boundary_pairs[0], "lm_weightedvelocities_object_"),
           uo_params);
     }

@@ -45,10 +45,9 @@ components of the NCP function onto the same level and achieve optimal
 convergence in the non-linear solve.
 
 Mechanical mortar contact uses normalized, weighted secondary nodal normals to evaluate the
-weighted gap. For supported quasistatic local-basis contact, Jacobian evaluations include
-the displacement derivatives of the nodal normal directions by default. This behavior applies to
-the `mortar` and non-augmented `mortar_penalty` formulations with `frictionless` or `coulomb`
-contact and
+weighted gap. Supported quasistatic local-basis contact includes the displacement derivatives of
+the nodal normal directions in Jacobian evaluations. This behavior applies to the `mortar` and
+non-augmented `mortar_penalty` formulations with `frictionless` or `coulomb` contact and
 [!param](/Constraints/ComputeWeightedGapLMMechanicalContact/interpolate_normals) set to `false`.
 The normal, tangent, weighted-gap, tangential-velocity, traction, and residual values at a fixed
 solution state remain unchanged. Residual evaluations contain no derivatives of the normal or
@@ -75,9 +74,6 @@ The existing mortar test functions, coordinate factors, and dual or Petrov-Galer
 are unchanged; their weighted contributions are already contained in \(\boldsymbol{G}_A\).
 
 Dynamic mortar through [ContactAction](/ContactAction.md) retains its existing Jacobian behavior.
-Direct dynamic-contact inputs must use
-[DynamicLMWeightedGapUserObject](/DynamicLMWeightedGapUserObject.md) or
-[DynamicLMWeightedVelocitiesUserObject](/DynamicLMWeightedVelocitiesUserObject.md), as appropriate.
 Augmented-Lagrangian penalty, Cartesian-LM, cohesive-zone, and nonmortar contact also retain their
 existing Jacobian behavior. Quadrature-point normal interpolation is not supported for this
 local-basis contact path. The displacement variables must be nodal nonlinear variables in the

@@ -144,9 +144,9 @@ protected:
   const ADRealVectorValue & contactNormal(unsigned int nodal_index) const;
 
   /**
-   * Return a current nodal coordinate seeded with displacement derivatives when required.
+   * Add displacement derivatives to the coordinate used for the stored mortar nodal geometry.
    */
-  ADPoint nodalCoordinate(const Node & node) const;
+  ADPoint nodalCoordinate(const Node & node, const Point & geometry_coordinate) const;
 
   /// The base finite element problem
   FEProblemBase & _fe_problem;

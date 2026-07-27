@@ -19,7 +19,6 @@
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "Output.h"
-#include "ADUtils.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/explicit_system.h"
@@ -478,6 +477,7 @@ AutomaticMortarGeneration::clear()
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
+  _nodal_geometry_coordinate_snapshot.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
   _secondary_elems_to_mortar_segments.clear();
   _secondary_ip_sub_ids.clear();
@@ -2133,36 +2133,167 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 void
 AutomaticMortarGeneration::computeNodalGeometry()
 {
-  for (const Elem * const secondary_elem :
-       as_range(_mesh.active_elements_begin(), _mesh.active_elements_end()))
+  // The dimension according to Mesh::mesh_dimension().
+  const auto dim = _mesh.mesh_dimension();
+
+  mooseAssert(dim == 2 || dim == 3,
+              "AutomaticMortarGeneration::computeNodalGeometry() is only valid for "
+              "mortar constraints on 2D or 3D meshes.");
+  // A nodal lower-dimensional nodal quadrature rule to be used on faces.
+  QNodal qface(dim - 1);
+
+  // A map from the node id to the attached elemental normals/weights evaluated at the node. Th
+  // length of the vector will correspond to the number of elements attached to the node. If it is a
+  // vertex node, for a 1D mortar mesh, the vector length will be two. If it is an interior node,
+  // the vector will be length 1. The first member of the pair is that element's normal at the node.
+  // The second member is that element's JxW at the node
+  std::map<dof_id_type, std::vector<std::pair<Point, Real>>> node_to_normals_map;
+
+  /// The _periodic flag tells us whether we want to inward vs outward facing normals
+  Real sign = _periodic ? -1 : 1;
+
+  _nodal_geometry_coordinate_snapshot.clear();
+
+  // First loop over lower-dimensional secondary side elements and compute/save the outward normal
+  // for each one. We loop over all active elements currently, but this procedure could be
+  // parallelized as well.
+  for (MeshBase::const_element_iterator el = _mesh.active_elements_begin(),
+                                        end_el = _mesh.active_elements_end();
+       el != end_el;
+       ++el)
   {
+    const Elem * secondary_elem = *el;
+
+    // If this is not one of the lower-dimensional secondary side elements, go on to the next one.
     if (!_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
+    // We will create an FE object and attach the nodal quadrature rule such that we can get out the
+    // normals at the element nodes
+    FEType nnx_fe_type(secondary_elem->default_order(), LAGRANGE);
+    std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
+    nnx_fe_face->attach_quadrature_rule(&qface);
+    const auto & face_normals = nnx_fe_face->get_normals();
+    const auto & face_points = nnx_fe_face->get_xyz();
+
+    const auto & JxW = nnx_fe_face->get_JxW();
+
+    // Which side of the parent are we? We need to know this to know
+    // which side to reinit.
     const Elem * interior_parent = secondary_elem->interior_parent();
     mooseAssert(interior_parent,
                 "No interior parent exists for element "
                     << secondary_elem->id()
                     << ". There may be a problem with your sideset set-up.");
 
-    // This map is also used by methods that need the lower-dimensional secondary element.
+    // Map to get lower dimensional element from interior parent on secondary surface
+    // This map can be used to provide a handle to methods in this class that need to
+    // operate on lower dimensional elements.
     _secondary_element_to_secondary_lowerd_element.emplace(interior_parent->id(), secondary_elem);
+
+    // Look up which side of the interior parent secondary_elem is.
+    auto s = interior_parent->which_side_am_i(secondary_elem);
+
+    // Save the coordinates used for the Real nodal geometry. The AD path later combines these raw
+    // values with displacement derivatives instead of reading coordinates from a newer mesh state.
+    auto parent_side_elem = interior_parent->build_side_ptr(s);
+    for (const auto & node : parent_side_elem->node_ref_range())
+      _nodal_geometry_coordinate_snapshot.emplace(&node, node);
+
+    // Reinit the face FE object on side s.
+    nnx_fe_face->reinit(interior_parent, s);
+
+    // Match by physical location instead of assuming that parent-side nodal
+    // quadrature ordering and lower-dimensional side-element node ordering are
+    // identical.
+    const auto qpoint_to_secondary_node =
+        nodalQuadraturePointToSecondaryNodeMap(*secondary_elem, face_points);
+
+    mooseAssert(face_normals.size() == face_points.size() && JxW.size() == face_points.size(),
+                "Face nodal geometry vectors must have the same size.");
+
+    for (const auto qp : make_range(face_points.size()))
+    {
+      const auto n = qpoint_to_secondary_node[qp];
+      auto & normals_and_weights_vec = node_to_normals_map[secondary_elem->node_id(n)];
+      normals_and_weights_vec.push_back(std::make_pair(sign * face_normals[qp], JxW[qp]));
+    }
   }
 
-  std::unordered_map<const Node *, ADRealVectorValue> nodal_normals;
-  computeADNodalNormals([](const Node & node) { return ADPoint(node); }, nodal_normals);
-
-  for (const auto & [node, ad_nodal_normal] : nodal_normals)
+  // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
+  // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for cases
+  // where the face can be curved
+  for (const auto & pr : node_to_normals_map)
   {
-    const Point nodal_normal = MetaPhysicL::raw_value(ad_nodal_normal);
-    _secondary_node_to_nodal_normal[node] = nodal_normal;
-    _secondary_node_to_hh_nodal_tangents[node] = Moose::Mortar::householderTangents(nodal_normal);
+    // Compute normal vector
+    const auto & node_id = pr.first;
+    const auto & normals_and_weights_vec = pr.second;
+
+    Point nodal_normal;
+    for (const auto & norm_and_weight : normals_and_weights_vec)
+      nodal_normal += norm_and_weight.first * norm_and_weight.second;
+    nodal_normal = nodal_normal.unit();
+
+    _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
+
+    Point nodal_tangent_one;
+    Point nodal_tangent_two;
+    householderOrthogolization(nodal_normal, nodal_tangent_one, nodal_tangent_two);
+
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][0] = nodal_tangent_one;
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
   }
 }
 
 void
+AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
+                                                      Point & nodal_tangent_one,
+                                                      Point & nodal_tangent_two) const
+{
+  using std::abs;
+
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
+              "The input nodal normal should have unity norm");
+
+  const Real nx = nodal_normal(0);
+  const Real ny = nodal_normal(1);
+  const Real nz = nodal_normal(2);
+
+  // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
+  // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
+  // Mar 1;45(3):683-94. We choose one definition of h_vector and deal with special case.
+  const Point h_vector(nx + 1.0, ny, nz);
+
+  // Avoid singularity of the equations at the end of routine by providing the solution to
+  // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
+  // on a spherical problem.
+  if (abs(h_vector(0)) < TOLERANCE)
+  {
+    nodal_tangent_one(0) = 0;
+    nodal_tangent_one(1) = 1;
+    nodal_tangent_one(2) = 0;
+
+    nodal_tangent_two(0) = 0;
+    nodal_tangent_two(1) = 0;
+    nodal_tangent_two(2) = -1;
+
+    return;
+  }
+
+  const Real h = h_vector.norm();
+
+  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
+  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
+  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+
+  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
+  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
+}
+
+void
 AutomaticMortarGeneration::computeADNodalNormals(
-    const std::function<ADPoint(const Node &)> & coordinate,
+    const std::function<ADPoint(const Node &, const Point &)> & coordinate,
     std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const
 {
   const auto dim = _mesh.mesh_dimension();
@@ -2230,7 +2361,11 @@ AutomaticMortarGeneration::computeADNodalNormals(
       std::vector<ADPoint> side_points;
       side_points.reserve(n_mapping_shape_functions);
       for (const auto side_node_index : make_range(n_mapping_shape_functions))
-        side_points.push_back(coordinate(parent_side_elem->node_ref(side_node_index)));
+      {
+        const Node & node = parent_side_elem->node_ref(side_node_index);
+        side_points.push_back(
+            coordinate(node, libmesh_map_find(_nodal_geometry_coordinate_snapshot, &node)));
+      }
 
       for (const auto qp : make_range(face_points.size()))
       {
@@ -2247,8 +2382,8 @@ AutomaticMortarGeneration::computeADNodalNormals(
                                    (*map_dpsideta)[side_node_index][qp]);
         }
 
-        auto area_vector = dim == 2 ? Moose::faceAreaVector(tangent_xi)
-                                    : Moose::faceAreaVector(tangent_xi, tangent_eta);
+        auto area_vector = dim == 2 ? ADRealVectorValue(tangent_xi(1), -tangent_xi(0), 0)
+                                    : tangent_xi.cross(tangent_eta);
         const Real area = MetaPhysicL::raw_value(area_vector.norm());
         const Real degeneracy_tolerance =
             dim == 2 ? TOLERANCE * element_size : TOLERANCE * element_size * element_size;
@@ -2280,14 +2415,13 @@ AutomaticMortarGeneration::computeADNodalNormals(
                  " because its incident face contributions cancel to a near-zero weighted normal.");
 
     auto nodal_normal = weighted_area_vector.unit();
-    if (!_secondary_node_to_nodal_normal.empty())
-    {
-      const auto & stored_normal =
-          libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
-      if ((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() >= 100 * TOLERANCE)
-        mooseError("AD and stored secondary nodal normals must use the same geometry.");
-    }
-
+    const auto & stored_normal = libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
+    mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() < 100 * TOLERANCE,
+                "The stored and AD secondary nodal normals must use the same geometry state.");
+    // Preserve the existing contact direction exactly while retaining the derivatives produced by
+    // the equivalent AD area-vector calculation.
+    for (const auto component : make_range(3u))
+      nodal_normal(component).value() = stored_normal(component);
     nodal_normals.emplace(secondary_node, std::move(nodal_normal));
   }
 }

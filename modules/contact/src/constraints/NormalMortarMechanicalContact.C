@@ -31,8 +31,7 @@ NormalMortarMechanicalContact::validParams()
 NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
-    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
-        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
+    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
   if (getParam<bool>("interpolate_normals"))
     paramError("interpolate_normals",
