@@ -26,6 +26,11 @@ public:
   virtual void SetTimeStep(mfem::real_t & dt) { _dt = dt; };
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
 
+  virtual TimeDependentEquationSystem * TimeDependent() const override
+  {
+    return const_cast<TimeDependentEquationSystem *>(this);
+  }
+
 protected:
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;

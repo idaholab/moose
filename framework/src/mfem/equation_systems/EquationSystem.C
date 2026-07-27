@@ -718,7 +718,7 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
   {
     if (Complex())
       mooseError("LOR solve is not supported for complex equation systems.");
-    if (_test_var_names.size() > 1)
+    if (Multivariate())
       mooseError("LOR solve is only supported for single-variable systems");
 
     const auto & test_var_name = _test_var_names.at(0);
@@ -761,12 +761,6 @@ EquationSystem::BuildNonlinearFormForFESpace(const std::string & var_name,
   ApplyDomainNLFIntegrators(var_name, nlf, _kernels_map, std::nullopt);
   ApplyBoundaryNLFIntegrators(var_name, nlf, _integrated_bc_map, std::nullopt);
   return nlf;
-}
-
-bool
-EquationSystem::HasMixedBilinearForms(const std::string & var_name) const
-{
-  return _mblfs.Has(var_name) && _mblfs.GetRef(var_name).begin() != _mblfs.GetRef(var_name).end();
 }
 
 mfem::Array<int>

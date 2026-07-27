@@ -26,6 +26,9 @@ namespace Moose::MFEM
 {
 class CoefficientManager;
 class LinearSolverBase;
+class ComplexEquationSystem;
+class EigenproblemEquationSystem;
+class TimeDependentEquationSystem;
 
 /**
  * Owns the weak-form mathematics of a MOOSE MFEM problem.
@@ -100,11 +103,6 @@ public:
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
   /**
-   * @returns Whether nonlinear integrators are present
-   */
-  bool Nonlinear() const { return _non_linear; }
-
-  /**
    * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
    * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
    * operator
@@ -133,15 +131,21 @@ public:
                                mfem::AssemblyLevel assembly_level);
 
   /**
-   * Returns true if the equation system has active mixed bilinear form contributions for var_name.
-   */
-  bool HasMixedBilinearForms(const std::string & var_name) const;
-
-  /**
    * Build and return the essential boundary attribute marker array for a given trial variable.
    * The returned array has size == pmesh.bdr_attributes.Max() with 1 at essential boundaries.
    */
   mfem::Array<int> BuildEssentialBoundaryMarkers(const std::string & var_name) const;
+
+  /// @returns A pointer to the complex equation system, nullptr if not such
+  virtual ComplexEquationSystem * Complex() const { return nullptr; }
+  /// @returns A pointer to the eigenproblem equation system, nullptr if not such
+  virtual EigenproblemEquationSystem * Eigen() const { return nullptr; }
+  /// @returns A pointer to the time-dependent equation system, nullptr if not such
+  virtual TimeDependentEquationSystem * TimeDependent() const { return nullptr; }
+  /// @returns Whether this is a multivariate (maybe mixed) equation system
+  bool Multivariate() const { return _test_var_names.size() > 1; }
+  /// @returns Whether nonlinear integrators are present in the equation system
+  bool Nonlinear() const { return _non_linear; }
 
 protected:
   /// Add coupled variable to EquationSystem.
@@ -269,11 +273,6 @@ protected:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
-
-  /**
-   * Whether this a complex equation system
-   */
-  virtual bool Complex() const { return false; }
 
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.

@@ -103,7 +103,10 @@ public:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
           integrated_bc_map);
 
-  virtual bool Complex() const override { return true; }
+  virtual ComplexEquationSystem * Complex() const override
+  {
+    return const_cast<ComplexEquationSystem *>(this);
+  }
 
 protected:
   // Complex Linear and Bilinear Forms

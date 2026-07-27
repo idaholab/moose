@@ -30,6 +30,11 @@ public:
   /// Prepare the provided eigensolver
   void PrepareEigensolver(EigensolverBase & solver);
 
+  EigenproblemEquationSystem * Eigen() const override
+  {
+    return const_cast<EigenproblemEquationSystem *>(this);
+  }
+
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
