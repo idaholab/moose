@@ -602,8 +602,7 @@ PhysicsBase::addPetscPairsToPetscOptions(
         _problem->mesh().dimension(),
         _problem->getSolverSystem(solver_sys_num).prefix(),
         *this,
-        po,
-        _problem.get());
+        po);
 }
 
 bool

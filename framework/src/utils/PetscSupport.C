@@ -178,68 +178,38 @@ prefixHasCommandLineOption(::PetscOptions command_line_options,
                        : petscOptionsHasName(command_line_options, option, prefix.substr(1));
 }
 
+std::optional<std::string>
+prefixCommandLineOptionValue(::PetscOptions command_line_options,
+                             const std::string & prefix,
+                             const std::string & option)
+{
+  checkPrefix(prefix);
+
+  char value[PETSC_MAX_PATH_LEN];
+  PetscBool set = PETSC_FALSE;
+  const auto petsc_prefix = prefix == "-" ? std::string() : prefix.substr(1);
+  const char * const prefix_ptr = petsc_prefix.empty() ? nullptr : petsc_prefix.c_str();
+  LibmeshPetscCallA(
+      PETSC_COMM_WORLD,
+      PetscOptionsGetString(
+          command_line_options, prefix_ptr, option.c_str(), value, sizeof(value), &set));
+
+  if (set)
+    return value;
+
+  return std::nullopt;
+}
+
 bool
-prefixTargetsJFNKSolver(const FEProblemBase & problem, const std::string & prefix)
+commandLinePCTypeImpliesPreconditioningMatrix(::PetscOptions command_line_options,
+                                              const std::string & prefix)
 {
-  checkPrefix(prefix);
+  const auto pc_type = prefixCommandLineOptionValue(command_line_options, prefix, "-pc_type");
+  if (!pc_type)
+    return false;
 
-  const auto solver_prefix = prefix.substr(1);
-  for (const auto sys_index : make_range(problem.numSolverSystems()))
-    if (problem.solverParams(sys_index)._type == Moose::ST_JFNK)
-    {
-      const auto & solver_system = problem.getSolverSystem(sys_index);
-      if (solver_system.prefix() == solver_prefix)
-        return true;
-    }
-
-  return false;
-}
-
-std::string
-prefixedPCTypeOption(const std::string & prefix)
-{
-  checkPrefix(prefix);
-  return prefix + "pc_type";
-}
-
-void
-errorOnJFNKPCTypeOption(const FEProblemBase & problem,
-                        const std::string & prefix,
-                        const ParallelParamObject * const param_object = nullptr)
-{
-  if (!prefixTargetsJFNKSolver(problem, prefix))
-    return;
-
-  const auto option = prefixedPCTypeOption(prefix);
-  const std::string message = "PETSc option '" + option +
-                              "' requires an assembled preconditioning matrix, but "
-                              "solve_type = JFNK uses a matrix-free Jacobian without an assembled "
-                              "preconditioning matrix. Use solve_type = PJFNK or "
-                              "-snes_mf_operator if you want matrix-free Jacobian actions with an "
-                              "assembled preconditioner.";
-
-  if (param_object)
-    param_object->mooseError(message);
-  else
-    mooseError(message);
-}
-
-void
-errorOnJFNKPCTypeOption(::PetscOptions options, FEProblemBase & problem)
-{
-  if (petscOptionsHasName(options, "-pc_type"))
-    errorOnJFNKPCTypeOption(problem, "-");
-
-  for (const auto sys_index : make_range(problem.numSolverSystems()))
-  {
-    if (problem.solverParams(sys_index)._type != Moose::ST_JFNK)
-      continue;
-
-    const auto & solver_system = problem.getSolverSystem(sys_index);
-    const auto solver_prefix = solver_system.prefix();
-    if (!solver_prefix.empty() && petscOptionsHasName(options, "-pc_type", solver_prefix))
-      errorOnJFNKPCTypeOption(problem, "-" + solver_prefix);
-  }
+  const auto lower_pc_type = MooseUtils::toLower(*pc_type);
+  return lower_pc_type != "none" && lower_pc_type != "shell";
 }
 
 bool
@@ -362,6 +332,17 @@ stringify(const MffdType & t)
   return "";
 }
 
+std::optional<std::string>
+commandLinePetscOptionValue(const std::string & prefix, const std::string & option)
+{
+  auto command_line_options = commandLinePetscOptions();
+
+  const auto result = prefixCommandLineOptionValue(command_line_options, '-' + prefix, option);
+
+  LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsDestroy(&command_line_options));
+  return result;
+}
+
 void
 setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
@@ -422,7 +403,6 @@ addPetscOptionsFromCommandline(FEProblemBase * const problem)
     return;
   }
 
-  errorOnJFNKPCTypeOption(command_line_options, *problem);
   errorOnUnprefixedMatTypeOption(command_line_options, *problem);
 
   // Some vector/matrix-type options may have been consumed before the PETSc database rebuild.
@@ -784,7 +764,7 @@ storePetscOptions(FEProblemBase & fe_problem,
 
   // Then process the option-value pairs
   addPetscPairsToPetscOptions(
-      petsc_pair_options, fe_problem.mesh().dimension(), prefix, param_object, po, &fe_problem);
+      petsc_pair_options, fe_problem.mesh().dimension(), prefix, param_object, po);
 }
 
 void
@@ -812,6 +792,9 @@ setSolveTypeFromCommandLine(FEProblemBase & fe_problem)
       fe_problem.solverParams(i)._type = Moose::ST_PJFNK;
     else if (prefixHasCommandLineOption(command_line_options, prefix, "-snes_mf"))
       fe_problem.solverParams(i)._type = Moose::ST_JFNK;
+    else if (fe_problem.solverParams(i)._type == Moose::ST_JFNK &&
+             commandLinePCTypeImpliesPreconditioningMatrix(command_line_options, prefix))
+      fe_problem.solverParams(i)._type = Moose::ST_PJFNK;
   }
 
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscOptionsDestroy(&command_line_options));
@@ -939,8 +922,7 @@ addPetscPairsToPetscOptions(
     const unsigned int mesh_dimension,
     std::string prefix,
     const ParallelParamObject & param_object,
-    PetscOptions & po,
-    const FEProblemBase * const problem)
+    PetscOptions & po)
 {
   prefix.insert(prefix.begin(), '-');
   checkPrefix(prefix);
@@ -965,8 +947,6 @@ addPetscPairsToPetscOptions(
   for (const auto & [option_name, option_value] : petsc_pair_options)
   {
     checkUserProvidedPetscOption(option_name, param_object);
-    if (problem && option_name == "-pc_type")
-      errorOnJFNKPCTypeOption(*problem, prefix, &param_object);
 
     new_options.clear();
     const std::string prefixed_option_name =

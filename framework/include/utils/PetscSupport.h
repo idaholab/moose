@@ -21,6 +21,9 @@
 
 #include <petscksp.h>
 
+#include <optional>
+#include <string>
+
 // Forward declarations
 class FEProblemBase;
 class NonlinearSystemBase;
@@ -193,16 +196,13 @@ void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
  * work. This is the reason we pass \p prefix by value
  * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
- * @param problem Optional problem context used to reject PETSc options that are incompatible with
- * JFNK solve types
  */
 void addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
     std::string prefix,
     const ParallelParamObject & param_object,
-    PetscOptions & petsc_options,
-    const FEProblemBase * problem = nullptr);
+    PetscOptions & petsc_options);
 
 /**
  * Returns the valid petsc line search options as a set of strings
@@ -273,6 +273,13 @@ void registerPetscCitation(const std::string & bibtex);
  * bookkeeping for command-line '-vec_type' and '*mat_type' options.
  */
 void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
+
+/**
+ * Returns the command-line value for PETSc option \p option with solver prefix \p prefix if it was
+ * supplied.
+ */
+std::optional<std::string> commandLinePetscOptionValue(const std::string & prefix,
+                                                       const std::string & option);
 
 /**
  * Setup which side we want to apply preconditioner

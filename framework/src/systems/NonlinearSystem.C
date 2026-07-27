@@ -18,6 +18,7 @@
 #include "ComputeFDResidualFunctor.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
 
@@ -353,6 +354,11 @@ NonlinearSystem::converged()
 void
 NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 {
+  const auto command_line_pc_type =
+      Moose::PetscSupport::commandLinePetscOptionValue(prefix(), "-pc_type");
+  if (command_line_pc_type && MooseUtils::toLower(*command_line_pc_type) != "shell")
+    return;
+
   nonlinearSolver()->attach_preconditioner(preconditioner);
 }
 

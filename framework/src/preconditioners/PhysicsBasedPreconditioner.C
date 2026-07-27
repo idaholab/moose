@@ -13,6 +13,7 @@
 #include "ComputeJacobianBlocksThread.h"
 #include "FEProblem.h"
 #include "MooseEnum.h"
+#include "MooseUtils.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
@@ -135,7 +136,13 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
 
   _nl.attachPreconditioner(this);
 
-  if (_fe_problem.solverParams(_nl.number())._type != Moose::ST_JFNK)
+  const auto solve_type = _fe_problem.solverParams(_nl.number())._type;
+  const auto command_line_pc_type =
+      Moose::PetscSupport::commandLinePetscOptionValue(_nl.prefix(), "-pc_type");
+  const auto command_line_pc_type_displaces_pbp =
+      command_line_pc_type && MooseUtils::toLower(*command_line_pc_type) != "shell";
+  if (solve_type != Moose::ST_JFNK &&
+      !(solve_type == Moose::ST_PJFNK && command_line_pc_type_displaces_pbp))
     mooseError("PBP must be used with JFNK solve type");
 }
 

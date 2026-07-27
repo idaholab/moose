@@ -24,13 +24,13 @@
     []
   []
 
-  [jfnk_pc_type_error]
-    type = 'RunException'
+  [jfnk_command_line_pc_type]
+    type = 'RunApp'
     input = 'pbp_test.i'
-    cli_args = '-pc_type lu Outputs/exodus=false'
-    expect_err = "PETSc option '-pc_type' requires an assembled preconditioning matrix"
-    requirement = "The system shall report an error when a JFNK solve uses an incompatible "
-                  "PETSc preconditioner type option."
+    cli_args = '-pc_type lu Outputs/exodus=false -ksp_view'
+    expect_out = 'PC Object:.*?type: lu'
+    requirement = "The system shall allow a command-line PETSc preconditioner type option to "
+                  "displace a physics based shell preconditioner for a JFNK solve."
   []
 
   [check_petsc_options_test]
