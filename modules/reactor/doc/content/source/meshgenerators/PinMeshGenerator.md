@@ -70,7 +70,17 @@ This is the resulting "region_id" extra element integer layout, which was chosen
 
 ## Constructive Solid Geometry (CSG)
 
-`PinMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains PinMeshGenerator to represent the pin structure as a CSG object. Radially, a separate CSG surface is created for each entry in [!param](/Mesh/PinMeshGenerator/ring_radii) and [!param](/Mesh/PinMeshGenerator/duct_halfpitch), where the outer hexagonal / Cartesian boundary defines the outermost radial surface. Each of these radial and axial surfaces are then used to define a separate CSG cell of the geometry. All CSG cells are added to the root universe that is part of the output CSG object. Each cell is filled with a material named `"rgmb_region_[REGION_ID]"`, where `[REGION_ID]` refers to the region ID of that particular radial and axial region of the pincell. Currently, sector-wise generation of CSG regions are not currently supported by `PinMeshGenerator`.
+`PinMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains PinMeshGenerator to represent the pin structure as a CSG object. The generation of the CSG object is controlled by the `PinEngineeringUnit` object, which can represent the pin using engineering units or as expanded CSG surfaces, cells, and universes. How the CSG object is represented is set by [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/expand_units).
+
+In the engineering unit representation, the ouput CSG object stores the following attributes on the pin using `getAttributes():
+
+- `ring_radii`: the radii of all ring regions in the pin cell
+- `duct_apothems`: the apothems (center to flat distances) of all duct and outer pin boundary layers
+- `region_ids`: a 2-D vector of region IDs corresponding to the radial and axial zones of the pin cell. Inner indexing is radial zones (rings, background, and ducts), while outer index is axial zones.
+- `geometry_type`: String representing the geometry of the pin cell ("Hex" for hexagonal pins or "Square" for square pins)
+- `axial_boundaries`: Length of each axial region, where the bottom-most region is assumed to start at 0. Only gets outputted for extruded geometries.
+
+The base CSG representation creates a separate cell for each radial and axial region. Radially, a separate CSG surface is created for each entry in [!param](/Mesh/PinMeshGenerator/ring_radii) and [!param](/Mesh/PinMeshGenerator/duct_halfpitch), where the outer hexagonal / Cartesian boundary defines the outermost radial surface. Each of these radial and axial surfaces are then used to define a separate CSG cell of the geometry. Each of these cells is filled with a material named "rgmb_region_<REGION_ID>", where `<REGION_ID>` is the region ID of that particular radial and axial region of the pincell. All CSG cells are added to a single universe named `<PIN_NAME>_univ`, where `<PIN_NAME>` is the name of the `PinMeshGenerator` object. This universe is then placed into a single cell named `<PIN_NAME>_root_cell`, that constrains the pin universe to the outer radial and axial extents of the pin cell. This cell is the only cell defined in the root universe.  Currently, sector-wise generation of CSG regions are not currently supported by `PinMeshGenerator`.
 
 !syntax parameters /Mesh/PinMeshGenerator
 
