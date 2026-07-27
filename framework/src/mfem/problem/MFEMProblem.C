@@ -42,16 +42,13 @@ getMFEMSolverDependencies(const InputParameters & parameters)
 
   for (const auto & [param_name, _] : parameters)
   {
-    if (parameters.isPrivate(param_name) || !parameters.isParamValid(param_name))
+    if (parameters.isPrivate(param_name))
       continue;
 
-    if (parameters.have_parameter<MFEMSolverName>(param_name))
-      dependencies.push_back(parameters.get<MFEMSolverName>(param_name));
-    else if (parameters.have_parameter<std::vector<MFEMSolverName>>(param_name))
-    {
-      const auto & names = parameters.get<std::vector<MFEMSolverName>>(param_name);
-      dependencies.insert(dependencies.end(), names.begin(), names.end());
-    }
+    if (auto * name = parameters.queryParam<MFEMSolverName>(param_name))
+      dependencies.push_back(*name);
+    else if (auto * names = parameters.queryParam<std::vector<MFEMSolverName>>(param_name))
+      dependencies.insert(dependencies.end(), names->begin(), names->end());
   }
 
   return dependencies;
