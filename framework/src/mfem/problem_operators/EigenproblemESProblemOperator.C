@@ -18,7 +18,7 @@ namespace Moose::MFEM
 void
 EigenproblemESProblemOperator::Solve()
 {
-  BuildEquationSystemOperator();
+  FormEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
   if (es->GetTestVarNames().size() > 1)
@@ -32,7 +32,7 @@ EigenproblemESProblemOperator::Solve()
 }
 
 void
-EigenproblemESProblemOperator::BuildEquationSystemOperator()
+EigenproblemESProblemOperator::FormEquationSystemOperator()
 {
   GetEquationSystem()->BuildEquationSystem();
   GetEquationSystem()->BuildEigenproblemJacobian(_true_x);

@@ -25,6 +25,8 @@
 #include "libmesh/parameters.h"
 #include "libmesh/numeric_vector.h"
 
+#include "LibtorchUtils.h"
+
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
@@ -439,6 +441,10 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, ADReal & dn, void * context);
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void dataStore(std::ostream & stream, torch::Tensor & t, void * context);
+#endif
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
 
@@ -809,6 +815,10 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, ADReal & dn, void * context);
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void dataLoad(std::istream & stream, torch::Tensor & t, void * context);
+#endif
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
 template <>

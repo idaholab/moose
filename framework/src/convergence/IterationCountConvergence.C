@@ -38,26 +38,26 @@ IterationCountConvergence::IterationCountConvergence(const InputParameters & par
 }
 
 Convergence::MooseConvergenceStatus
-IterationCountConvergence::checkConvergence(unsigned int iter)
+IterationCountConvergence::checkConvergence(unsigned int n_iter)
 {
-  const auto status_inner = checkConvergenceInner(iter);
+  const auto status_inner = checkConvergenceInner(n_iter);
 
   std::ostringstream oss;
   switch (status_inner)
   {
     case MooseConvergenceStatus::ITERATING:
-      if (iter >= _max_iterations)
+      if (n_iter >= _max_iterations)
       {
         if (_converge_at_max_iterations)
         {
-          oss << "Converged due to iterations (" << iter << ") >= max iterations ("
+          oss << "Converged due to iterations (" << n_iter << ") >= max iterations ("
               << _max_iterations << ") and 'converge_at_max_iterations' = 'true'.";
           verboseOutput(oss);
           return MooseConvergenceStatus::CONVERGED;
         }
         else
         {
-          oss << "Diverged due to iterations (" << iter << ") >= max iterations ("
+          oss << "Diverged due to iterations (" << n_iter << ") >= max iterations ("
               << _max_iterations << ").";
           verboseOutput(oss);
           return MooseConvergenceStatus::DIVERGED;
@@ -68,9 +68,9 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
       break;
 
     case MooseConvergenceStatus::CONVERGED:
-      if (iter < _min_iterations)
+      if (n_iter < _min_iterations)
       {
-        oss << "Still iterating because iterations (" << iter << ") < min iterations ("
+        oss << "Still iterating because iterations (" << n_iter << ") < min iterations ("
             << _min_iterations << ").";
         verboseOutput(oss);
         return MooseConvergenceStatus::ITERATING;
@@ -89,7 +89,7 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
 }
 
 Convergence::MooseConvergenceStatus
-IterationCountConvergence::checkConvergenceInner(unsigned int /*iter*/)
+IterationCountConvergence::checkConvergenceInner(unsigned int /*n_iter*/)
 {
   return MooseConvergenceStatus::ITERATING;
 }

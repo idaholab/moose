@@ -143,6 +143,14 @@ public:
       coef->SetTime(time);
   }
 
+  /// Apply a function to every coefficient created by this map.
+  template <class F>
+  void apply(F && func)
+  {
+    for (auto & coef : this->_iterable_coefficients)
+      func(*coef);
+  }
+
 private:
   using PWData = std::tuple<std::shared_ptr<Tpw>, std::map<const std::string, std::shared_ptr<T>>>;
   std::map<const std::string, std::variant<std::shared_ptr<T>, PWData>> _coefficients;

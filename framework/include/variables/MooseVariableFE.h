@@ -148,6 +148,8 @@ public:
 
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
+  bool supportsQpBasedLoops() const override { return true; }
+  bool supportsGeometricInfoBasedLoops() const override { return false; }
   libMesh::FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
   const Node * const & node() const { return _element_data->node(); }
   const dof_id_type & nodalDofIndex() const override { return _element_data->nodalDofIndex(); }

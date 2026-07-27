@@ -12,7 +12,7 @@ order systems.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion.i block=Preconditioner Solvers
+!listing test/tests/mfem/kernels/diffusion.i block=Solvers
 
 !syntax parameters /Solvers/MFEMHypreBoomerAMG
 

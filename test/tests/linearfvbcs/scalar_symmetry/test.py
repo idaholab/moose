@@ -121,7 +121,7 @@ class TestAdvection2DSymmetryNonOrthogonal(unittest.TestCase):
         df1 = run_spatial(
             "advection-2d-symmetry.i",
             5,
-            "Mesh/gmg/elem_type=TRI3 Convergence/linear/max_iterations=20",
+            "Mesh/gmg/elem_type=TRI3 Convergence/linear/max_iterations=21",
             file_base="advection-2d-symmetry",
         )
         fig = mms.ConvergencePlot(xlabel="Element Size  ($h$)", ylabel="$L_2$ Error")

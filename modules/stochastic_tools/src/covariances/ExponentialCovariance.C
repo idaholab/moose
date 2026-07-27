@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "ExponentialCovariance.h"
 #include <cmath>
@@ -40,12 +41,12 @@ ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
 }
 
 void
-ExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
-                                               const RealEigenMatrix & x,
-                                               const RealEigenMatrix & xp,
+ExponentialCovariance::computeCovarianceMatrix(torch::Tensor & K,
+                                               const torch::Tensor & x,
+                                               const torch::Tensor & xp,
                                                const bool is_self_covariance) const
 {
-  if ((unsigned)x.cols() != _length_factor.size())
+  if ((unsigned)x.sizes()[1] != _length_factor.numel())
     mooseError("length_factor size does not match dimension of trainer input.");
 
   ExponentialFunction(
@@ -53,41 +54,28 @@ ExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
 }
 
 void
-ExponentialCovariance::ExponentialFunction(RealEigenMatrix & K,
-                                           const RealEigenMatrix & x,
-                                           const RealEigenMatrix & xp,
-                                           const std::vector<Real> & length_factor,
-                                           const Real sigma_f_squared,
-                                           const Real sigma_n_squared,
-                                           const Real gamma,
+ExponentialCovariance::ExponentialFunction(torch::Tensor & K,
+                                           const torch::Tensor & x,
+                                           const torch::Tensor & xp,
+                                           const torch::Tensor & length_factor,
+                                           const torch::Tensor & sigma_f_squared,
+                                           const torch::Tensor & sigma_n_squared,
+                                           const torch::Tensor & gamma,
                                            const bool is_self_covariance)
 {
-  unsigned int num_samples_x = x.rows();
-  unsigned int num_samples_xp = xp.rows();
-  unsigned int num_params_x = x.cols();
-
-  mooseAssert(num_params_x == xp.cols(),
+  mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / length_factor[kk], 2);
-      r_scaled = sqrt(r_scaled);
-      K(ii, jj) = sigma_f_squared * std::exp(-pow(r_scaled, gamma));
-    }
-    if (is_self_covariance)
-      K(ii, ii) += sigma_n_squared;
-  }
+  const auto l_factor = length_factor.unsqueeze(0);
+  K = torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
+  K = sigma_f_squared * torch::exp(-torch::pow(K, gamma));
+  if (is_self_covariance)
+    K.diagonal().add_(sigma_n_squared);
 }
 
 bool
-ExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
-                                       const RealEigenMatrix & x,
+ExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
+                                       const torch::Tensor & x,
                                        const std::string & hyper_param_name,
                                        unsigned int ind) const
 {
@@ -98,13 +86,29 @@ ExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
 
   if (name_without_prefix == "noise_variance")
   {
-    ExponentialFunction(dKdhp, x, x, _length_factor, 0, 1, _gamma, true);
+    const auto options = x.options().dtype(at::kDouble);
+    ExponentialFunction(dKdhp,
+                        x,
+                        x,
+                        _length_factor,
+                        torch::tensor(0.0, options),
+                        torch::tensor(1.0, options),
+                        _gamma,
+                        true);
     return true;
   }
 
   if (name_without_prefix == "signal_variance")
   {
-    ExponentialFunction(dKdhp, x, x, _length_factor, 1, 0, _gamma, false);
+    const auto options = x.options().dtype(at::kDouble);
+    ExponentialFunction(dKdhp,
+                        x,
+                        x,
+                        _length_factor,
+                        torch::tensor(1.0, options),
+                        torch::tensor(0.0, options),
+                        _gamma,
+                        false);
     return true;
   }
 
@@ -118,36 +122,31 @@ ExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
 }
 
 void
-ExponentialCovariance::computedKdlf(RealEigenMatrix & K,
-                                    const RealEigenMatrix & x,
-                                    const std::vector<Real> & length_factor,
-                                    const Real sigma_f_squared,
-                                    const Real gamma,
+ExponentialCovariance::computedKdlf(torch::Tensor & K,
+                                    const torch::Tensor & x,
+                                    const torch::Tensor & length_factor,
+                                    const torch::Tensor & sigma_f_squared,
+                                    const torch::Tensor & gamma,
                                     const int ind)
 {
-  unsigned int num_samples_x = x.rows();
-  unsigned int num_params_x = x.cols();
+  mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
-  mooseAssert(ind < x.cols(), "Incorrect length factor index");
+  const auto l_factor = length_factor.unsqueeze(0);
+  const auto scaled_distance = torch::cdist(torch::div(x, l_factor), torch::div(x, l_factor), 2.0);
+  const auto nonzero_distance = scaled_distance > 0;
+  const auto safe_scaled_distance =
+      torch::where(nonzero_distance, scaled_distance, torch::ones_like(scaled_distance));
+  const auto coordinate = x.select(1, ind);
+  const auto coordinate_distance_squared =
+      torch::pow(coordinate.unsqueeze(1) - coordinate.unsqueeze(0), 2);
+  const auto length_factor_ind = length_factor.select(0, ind);
 
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_x; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x(ii, kk) - x(jj, kk)) / length_factor[kk], 2);
-      r_scaled = sqrt(r_scaled);
-      if (r_scaled != 0)
-      {
-        K(ii, jj) = gamma * std::pow(r_scaled, gamma - 2) * sigma_f_squared *
-                    std::exp(-pow(r_scaled, gamma));
-        K(ii, jj) =
-            std::pow(x(ii, ind) - x(jj, ind), 2) / std::pow(length_factor[ind], 3) * K(ii, jj);
-      }
-      else // avoid div by 0. 0/0=0 scenario.
-        K(ii, jj) = 0;
-    }
-  }
+  const auto dK_dlength_factor = coordinate_distance_squared / torch::pow(length_factor_ind, 3) *
+                                 gamma * torch::pow(safe_scaled_distance, gamma - 2.0) *
+                                 sigma_f_squared *
+                                 torch::exp(-torch::pow(safe_scaled_distance, gamma));
+
+  K = torch::where(nonzero_distance, dK_dlength_factor, torch::zeros_like(dK_dlength_factor));
 }
+
+#endif

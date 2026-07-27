@@ -161,7 +161,7 @@ public:
    * Get the number of components
    * @returns The number of components
    */
-  KOKKOS_FUNCTION unsigned int components() { return _components; }
+  KOKKOS_FUNCTION unsigned int components() const { return _components; }
   /**
    * Get the vector tag ID
    * @returns The vector tag ID

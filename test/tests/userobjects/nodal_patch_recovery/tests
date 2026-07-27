@@ -8,4 +8,15 @@
                   'material properties that are defined at quadrature points.'
     design = 'NodalPatchRecoveryMaterialProperty.md'
   []
+  [nodal_patch_recovery_partition_corners]
+    type = Exodiff
+    input = nodal_patch_recovery_partition_corners.i
+    exodiff = nodal_patch_recovery_partition_corners_out.e
+    min_parallel = 8
+    issues = '#33316'
+    requirement = 'The system shall correctly ghost the elements needed for nodal patch '
+                  'recovery on a 3D structured mesh whose partitioning creates elements '
+                  'that share only a node with a locally owned element, not a face.'
+    design = 'NodalPatchRecoveryMaterialProperty.md'
+  []
 []

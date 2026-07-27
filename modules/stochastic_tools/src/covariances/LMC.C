@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LMC.h"
 #include "MooseRandom.h"
@@ -39,55 +40,51 @@ LMC::LMC(const InputParameters & parameters)
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
-    const std::string a_coeff_name_with_prefix = _name + ":" + a_coeff_name;
-    _a_coeffs.push_back(
-        &addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true));
-
-    auto & acoeff_vector = _hp_map_vector_real[a_coeff_name_with_prefix];
+    std::vector<Real> acoeff_values(_num_outputs);
     for (const auto out_i : make_range(_num_outputs))
-      acoeff_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      acoeff_values[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+    auto & acoeff_vector = addVectorRealHyperParameter(a_coeff_name, acoeff_values, true);
+    _a_coeffs.push_back(&acoeff_vector);
   }
 
   // Then add and initialize the lambda coefficients in the (aa^T+lambda*I) matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string lambda_name = "lambda_" + std::to_string(exp_i);
-    const std::string lambda_name_with_prefix = _name + ":" + lambda_name;
-    _lambdas.push_back(
-        &addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true));
-
-    auto & lambda_vector = _hp_map_vector_real[lambda_name_with_prefix];
+    std::vector<Real> lambda_values(_num_outputs);
     for (const auto out_i : make_range(_num_outputs))
-      lambda_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      lambda_values[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+    auto & lambda_vector = addVectorRealHyperParameter(lambda_name, lambda_values, true);
+    _lambdas.push_back(&lambda_vector);
   }
 }
 
 void
-LMC::computeCovarianceMatrix(RealEigenMatrix & K,
-                             const RealEigenMatrix & x,
-                             const RealEigenMatrix & xp,
+LMC::computeCovarianceMatrix(torch::Tensor & K,
+                             const torch::Tensor & x,
+                             const torch::Tensor & xp,
                              const bool is_self_covariance) const
 {
+  const auto options = x.options().dtype(at::kDouble);
   // Create temporary vectors for constructing the covariance matrix
-  RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), xp.rows());
-  RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-  K = RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
-  RealEigenMatrix K_working =
-      RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
+  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, options);
+  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, options);
+  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, options);
+  torch::Tensor K_working;
 
   // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     _covariance_functions[exp_i]->computeCovarianceMatrix(K_params, x, xp, is_self_covariance);
     computeBMatrix(B, exp_i);
-    MathUtils::kron(K_working, B, K_params);
+    K_working = torch::kron(B, K_params);
     K += K_working;
   }
 }
 
 bool
-LMC::computedKdhyper(RealEigenMatrix & dKdhp,
-                     const RealEigenMatrix & x,
+LMC::computedKdhyper(torch::Tensor & dKdhp,
+                     const torch::Tensor & x,
                      const std::string & hyper_param_name,
                      unsigned int ind) const
 {
@@ -106,8 +103,9 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
     const std::string lambda_prefix = "lambda_";
 
     // Allocate storage for the factors of the total gradient matrix
-    RealEigenMatrix dBdhp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), x.rows());
+    const auto options = x.options().dtype(at::kDouble);
+    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]}, options);
 
     if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
@@ -123,15 +121,16 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
       computeLambdaGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
-    MathUtils::kron(dKdhp, dBdhp, K_params);
+    dKdhp = torch::kron(dBdhp, K_params);
     return true;
   }
   else
   {
     // Allocate storage for the matrix factors
-    RealEigenMatrix B_tmp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix dKdhp_sub = RealEigenMatrix::Zero(x.rows(), x.rows());
+    const auto options = x.options().dtype(at::kDouble);
+    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]}, options);
 
     // First, check the dependent covariances
     bool found = false;
@@ -149,7 +148,7 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
       B += B_tmp;
     }
 
-    MathUtils::kron(dKdhp, B, dKdhp_sub);
+    dKdhp = torch::kron(B, dKdhp_sub);
 
     return true;
   }
@@ -158,39 +157,40 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
 }
 
 void
-LMC::computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const
+LMC::computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
   const auto & lambda_coeffs = *_lambdas[exp_i];
-
-  for (const auto row_i : make_range(_num_outputs))
-    for (const auto col_i : make_range(_num_outputs))
-    {
-      Bmat(row_i, col_i) = a_coeffs[row_i] * a_coeffs[col_i];
-      if (row_i == col_i)
-        Bmat(row_i, col_i) += lambda_coeffs[col_i];
-    }
+  Bmat = torch::outer(a_coeffs, a_coeffs) + torch::diag(lambda_coeffs);
 }
 
 void
-LMC::computeAGradient(RealEigenMatrix & grad,
+LMC::computeAGradient(torch::Tensor & grad,
                       const unsigned int exp_i,
                       const unsigned int index) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
-  // Add asserts here
-  grad.setZero();
-  for (const auto col_i : make_range(_num_outputs))
-    grad(index, col_i) = a_coeffs[col_i];
-  const RealEigenMatrix transpose = grad.transpose();
-  grad = grad + transpose;
+  mooseAssert(cast_int<int64_t>(index) < a_coeffs.numel(), "Incorrect LMC coefficient index.");
+  auto basis = torch::zeros_like(a_coeffs);
+  const auto index_tensor =
+      torch::tensor({cast_int<int64_t>(index)},
+                    torch::TensorOptions().dtype(torch::kLong).device(a_coeffs.device()));
+  basis.index_fill_(0, index_tensor, 1.0);
+  grad = torch::outer(basis, a_coeffs) + torch::outer(a_coeffs, basis);
 }
 
 void
-LMC::computeLambdaGradient(RealEigenMatrix & grad,
-                           const unsigned int /*exp_i*/,
+LMC::computeLambdaGradient(torch::Tensor & grad,
+                           const unsigned int exp_i,
                            const unsigned int index) const
 {
-  grad.setZero();
-  grad(index, index) = 1.0;
+  mooseAssert(index < _num_outputs, "Incorrect LMC lambda index.");
+  auto basis = torch::zeros_like(*_lambdas[exp_i]);
+  const auto index_tensor =
+      torch::tensor({cast_int<int64_t>(index)},
+                    torch::TensorOptions().dtype(torch::kLong).device(_lambdas[exp_i]->device()));
+  basis.index_fill_(0, index_tensor, 1.0);
+  grad = torch::diag(basis);
 }
+
+#endif

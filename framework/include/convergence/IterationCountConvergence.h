@@ -21,7 +21,7 @@ public:
 
   IterationCountConvergence(const InputParameters & parameters);
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override final;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override final;
 
 protected:
   /**
@@ -29,9 +29,9 @@ protected:
    *
    * Derived classes are responsible for overriding this instead of \c checkConvergence().
    *
-   * @param[in] iter   Iteration index
+   * @param[in] n_iter   Number of iterations performed
    */
-  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int iter);
+  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int n_iter);
 
   /// Minimum number of iterations
   const unsigned int _min_iterations;

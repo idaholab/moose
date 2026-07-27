@@ -35,19 +35,16 @@
     type = TotalLagrangianStressDivergence
     variable = disp_x
     component = 0
-    large_kinematics = true
   []
   [sdy]
     type = TotalLagrangianStressDivergence
     variable = disp_y
     component = 1
-    large_kinematics = true
   []
   [sdz]
     type = TotalLagrangianStressDivergence
     variable = disp_z
     component = 2
-    large_kinematics = true
   []
 []
 
@@ -244,7 +241,6 @@
   []
   [compute_stress]
     type = ComputeLagrangianLinearElasticStress
-    large_kinematics = true
   []
   [compute_strain]
     type = ComputeLagrangianStrain

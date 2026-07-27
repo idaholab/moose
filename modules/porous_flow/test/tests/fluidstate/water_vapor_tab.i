@@ -208,6 +208,7 @@
   []
   [internal_energy]
     type = PorousFlowMatrixInternalEnergy
+    at_nodes = true # Needed as there are no kernels
     density = 2500
     specific_heat_capacity = 1200
   []

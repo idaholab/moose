@@ -9,7 +9,7 @@ This `Kernel` implements the weak form of
 where all parameters are defined in the [nomenclature](/nomenclature.md).
 
 !alert note
-A fully-upwinded version is implemented, where the mobility of the upstream nodes is used.
+A fully-upwinded version is implemented, where the mobility of the upstream nodes is used.  This Kernel requires a nodal (Lagrange) variable, because upwinding associates each element degree of freedom with a mesh node; using a non-nodal variable (such as a monomial variable) is an error.
 
 See [upwinding](/upwinding.md) for details.  Other Kernels implement [Kuzmin-Turek TVD stabilization](kt.md).
 

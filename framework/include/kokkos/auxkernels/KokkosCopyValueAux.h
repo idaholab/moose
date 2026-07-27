@@ -35,7 +35,7 @@ protected:
   const Moose::Kokkos::VariableValue _v;
 
   /// A reference to the variable to copy from
-  const MooseVariable & _source_variable;
+  const MooseVariableBase & _source_variable;
 };
 
 template <typename Derived>

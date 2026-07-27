@@ -28,7 +28,7 @@ comparisons against Hypre's AMS preconditioner for 2D problems, can be found in
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/curlcurl.i block=Preconditioner Solvers
+!listing test/tests/mfem/kernels/curlcurl.i block=Solvers
 
 !syntax parameters /Solvers/MFEMMatrixFreeAMS
 

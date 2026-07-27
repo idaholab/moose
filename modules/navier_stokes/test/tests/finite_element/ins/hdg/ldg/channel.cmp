@@ -1,0 +1,13 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+NODAL VARIABLES relative 3e-5 floor 1e-10
+	grad_vel_x_x  # min:               0 @ t1,n1	max:       5.3924209 @ t2,n1219
+	grad_vel_x_y  # min:               0 @ t1,n1	max:       18.607579 @ t2,n1219
+	grad_vel_y_x  # min:               0 @ t1,n1	max:       5.4461271 @ t2,n1221
+	grad_vel_y_y  # min:               0 @ t1,n1	max:       5.3924209 @ t2,n1219
+	p             # min:               0 @ t1,n1	max:       60.159971 @ t2,n1219
+	vel_x         # min:               0 @ t1,n1	max:       1.5162029 @ t2,n602
+	vel_y         # min:               0 @ t1,n1	max:      0.43064956 @ t2,n3
+

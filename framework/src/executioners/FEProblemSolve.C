@@ -173,24 +173,6 @@ FEProblemSolve::validParams()
                                 "until the number of linear iterations "
                                 "exceeds this number");
 
-  // Multi-system fixed point
-  // Defaults to false because of the difficulty of defining a good multi-system convergence
-  // criterion, unless we add a default one to the simulation?
-  params.addParam<bool>(
-      "multi_system_fixed_point",
-      false,
-      "Whether to perform fixed point (Picard) iterations between the nonlinear systems.");
-  params.addRangeCheckedParam<std::vector<Real>>(
-      "multi_system_fixed_point_relaxation_factor",
-      {1.0},
-      "multi_system_fixed_point_relaxation_factor>0 & multi_system_fixed_point_relaxation_factor<2",
-      "Relaxation factor(s) applied to system solution updates during multi-system fixed point "
-      "iterations; 1 disables relaxation. If one value is provided it is applied to every system; "
-      "otherwise the vector must match the number/order of systems being solved.");
-  params.addParam<ConvergenceName>(
-      "multi_system_fixed_point_convergence",
-      "Convergence object to determine the convergence of the multi-system fixed point iteration.");
-
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
@@ -205,9 +187,6 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
-  params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence "
-                              "multi_system_fixed_point_relaxation_factor",
-                              "Multiple solver system");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;
@@ -215,17 +194,8 @@ FEProblemSolve::validParams()
 
 FEProblemSolve::FEProblemSolve(Executioner & ex)
   : MultiSystemSolveObject(ex),
-    _num_grid_steps(cast_int<unsigned int>(getParam<unsigned int>("num_grids") - 1)),
-    _using_multi_sys_fp_iterations(getParam<bool>("multi_system_fixed_point")),
-    _multi_sys_fp_convergence(nullptr) // has not been created yet
+    _num_grid_steps(cast_int<unsigned int>(getParam<unsigned int>("num_grids") - 1))
 {
-  if (_pars.isParamSetByUser("multi_system_fixed_point_relaxation_factor") &&
-      !_using_multi_sys_fp_iterations)
-    paramError("Can't use relaxation factors because multisystem fixed point iteration hasn't been "
-               "enabled!");
-
-  setupMultiSystemFixedPointRelaxationFactors();
-
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
       _moose_line_searches.end())
     _problem.addLineSearch(_pars);
@@ -454,36 +424,23 @@ FEProblemSolve::convergenceSetup()
   }
 }
 
-void
-FEProblemSolve::setupMultiSystemFixedPointRelaxationFactors()
-{
-  _multi_sys_fp_relax_factors =
-      getParam<std::vector<Real>>("multi_system_fixed_point_relaxation_factor");
-  if (_multi_sys_fp_relax_factors.size() == 1)
-    _multi_sys_fp_relax_factors.resize(_systems.size(), _multi_sys_fp_relax_factors[0]);
-  else if (_multi_sys_fp_relax_factors.size() != _systems.size())
-    paramError("multi_system_fixed_point_relaxation_factor",
-               "Must provide either 1 value or " + Moose::stringify(_systems.size()) +
-                   " values (one per system in the solve order).");
-}
-
 bool
 FEProblemSolve::solve()
 {
   // Outer loop for multi-grid convergence
   bool converged = false;
-  unsigned int num_fp_multisys_iters = 0;
+  unsigned int fp_iter = 0;
 
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
-    num_fp_multisys_iters = 0;
+    fp_iter = 0;
     converged = false;
     while (!converged)
     {
       if (_using_multi_sys_fp_iterations)
-        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << num_fp_multisys_iters
-                 << ":" << COLOR_DEFAULT << "\n"
+        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << fp_iter << ":"
+                 << COLOR_DEFAULT << "\n"
                  << std::endl;
 
       // Loop over each system
@@ -559,13 +516,14 @@ FEProblemSolve::solve()
       {
         _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE);
 
-        const auto convergence_status =
-            _multi_sys_fp_convergence->checkConvergence(num_fp_multisys_iters);
+        // checkConvergence expects the number of iterations performed, not the iteration index:
+        const auto n_fp_iter = fp_iter + 1;
+        const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
         converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
         if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
           break;
       }
-      num_fp_multisys_iters++;
+      fp_iter++;
     }
 
     if (grid_step != _num_grid_steps)

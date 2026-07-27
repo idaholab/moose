@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
@@ -19,25 +19,30 @@
  * Alternately, after some number of upwind-downwind swaps,
  * another type of handling of the mobility may be employed
  * (see fallback_scheme, below)
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowDarcyBase : public Kernel
+template <bool is_ad>
+class PorousFlowDarcyBaseTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDarcyBase(const InputParameters & parameters);
+  PorousFlowDarcyBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void timestepSetup() override;
-  virtual Real computeQpResidual() override;
+  virtual void jacobianSetup() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /// The Darcy part of the flux (this is the non-upwinded part)
-  virtual Real darcyQp(unsigned int ph) const;
+  virtual GenericReal<is_ad> darcyQp(unsigned int ph) const;
 
-  /// Jacobian of the Darcy part of the flux
+  /// Jacobian of the Darcy part of the flux -- non-AD path only
   virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph) const;
 
   /**
@@ -46,10 +51,10 @@ protected:
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    */
-  virtual Real mobility(unsigned nodenum, unsigned phase) const;
+  virtual GenericReal<is_ad> mobility(unsigned nodenum, unsigned phase) const;
 
   /**
-   * The derivative of mobility with respect to PorousFlow variable pvar
+   * The derivative of mobility with respect to PorousFlow variable pvar -- non-AD path only
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    * @param pvar the PorousFlow variable pvar
@@ -65,7 +70,7 @@ protected:
   using ResidualObject::computeResidualAndJacobian;
 
   /**
-   * Computation of the residual and Jacobian.
+   * Computation of the residual and Jacobian (non-AD path only).
    *
    * If res_or_jac=CALCULATE_JACOBIAN then the residual
    * gets calculated anyway (becuase we have to know which
@@ -82,43 +87,43 @@ protected:
   void computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar);
 
   /// Permeability of porous material
-  const MaterialProperty<RealTensorValue> & _permeability;
+  const GenericMaterialProperty<RealTensorValue, is_ad> & _permeability;
 
-  /// d(permeabiity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_dvar;
+  /// d(permeabiity)/d(PorousFlow variable) -- null for AD path
+  const MaterialProperty<std::vector<RealTensorValue>> * const _dpermeability_dvar;
 
-  /// d(permeabiity)/d(grad(PorousFlow variable))
-  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
+  /// d(permeabiity)/d(grad(PorousFlow variable)) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> * const _dpermeability_dgradvar;
 
   /// Fluid density for each phase (at the node)
-  const MaterialProperty<std::vector<Real>> & _fluid_density_node;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density_node;
 
-  /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the node)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_node_dvar;
+  /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the node) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_node_dvar;
 
   /// Fluid density for each phase (at the qp)
-  const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_density_qp;
 
-  /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the qp)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_qp_dvar;
+  /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the qp) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_qp_dvar;
 
   /// Viscosity of each component in each phase
-  const MaterialProperty<std::vector<Real>> & _fluid_viscosity;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_viscosity;
 
-  /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
+  /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_viscosity_dvar;
 
   /// Nodal pore pressure in each phase
-  const MaterialProperty<std::vector<Real>> & _pp;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _pp;
 
   /// Gradient of the pore pressure in each phase
-  const MaterialProperty<std::vector<RealGradient>> & _grad_p;
+  const GenericMaterialProperty<std::vector<RealGradient>, is_ad> & _grad_p;
 
-  /// Derivative of Grad porepressure in each phase wrt grad(PorousFlow variables)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dgrad_p_dgrad_var;
+  /// Derivative of Grad porepressure in each phase wrt grad(PorousFlow variables) -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dgrad_p_dgrad_var;
 
-  /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
+  /// Derivative of Grad porepressure in each phase wrt PorousFlow variables -- null for AD path
+  const MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrad_p_dvar;
 
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
@@ -155,12 +160,12 @@ protected:
    * during the formation of the residual and Jacobian.
    * _proto_flux[num_phases][num_nodes]
    */
-  std::vector<std::vector<Real>> _proto_flux;
+  std::vector<std::vector<GenericReal<is_ad>>> _proto_flux;
 
   /**
    * Derivative of _proto_flux with respect to nodal variables.
    * This gets modified with the mobility and its derivative during
-   * computation of MOOSE's Jacobian
+   * computation of MOOSE's Jacobian. Only used on the non-AD path.
    */
   std::vector<std::vector<std::vector<Real>>> _jacobian;
 
@@ -180,7 +185,8 @@ protected:
 
   /**
    * Calculate the residual or Jacobian using full upwinding
-   * @param res_or_jac whether to compute the residual or jacobian
+   * @param res_or_jac whether to compute the residual or jacobian (non-AD: CALCULATE_JACOBIAN
+   *   fills _jacobian; AD: always pass CALCULATE_RESIDUAL)
    * @param ph fluid phase number
    * @param pvar differentiate wrt to this PorousFlow variable (when computing the jacobian)
    */
@@ -203,4 +209,51 @@ protected:
    * @param pvar differentiate wrt to this PorousFlow variable (when computing the jacobian)
    */
   void harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned int pvar);
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
+
+private:
+  /// Build proto fluxes (without mobility weighting) for all phases and nodes
+  void computeProtoFluxWithoutMobility();
+
+  /// Ensure per-element upwind/downwind counters are allocated for this element
+  void initializeUpwindTracking(unsigned elem, unsigned int num_nodes);
+
+  /// Update upwind/downwind counters from the sign of _proto_flux
+  void updateUpwindCounts(unsigned elem, unsigned int num_nodes);
+
+  /// Compute per-phase maximum upwind/downwind swap counts for this element
+  std::vector<unsigned> computeMaxSwaps(unsigned elem, unsigned int num_nodes) const;
+
+  /// Apply selected upwinding/fallback scheme for all phases
+  void
+  applyUpwinding(const std::vector<unsigned> & max_swaps, JacRes res_or_jac, unsigned int pvar);
+
+  /**
+   * For the AD path: fills _proto_flux (per-phase, per-node ADReal) by integrating
+   * darcyQp and applying the upwinding scheme with GenericReal<is_ad> mobility.
+   * Also optionally records upwind/downwind counts for the fallback-scheme heuristic.
+   * @param do_counting whether to update _num_upwinds/_num_downwinds
+   */
+  void adComputeProtoFlux(bool do_counting);
+
+  /**
+   * For the AD path: performs the proto-flux/upwinding pass and hands the per-node
+   * ADReal residuals to addJacobianWithoutConstraints, which extracts every Jacobian
+   * block (diagonal and off-diagonal) from the ADReal derivatives in a single pass.
+   */
+  void adComputeJacobian();
+
+  /// Assemble the real-valued residual vector from _proto_flux into the tagged local residual
+  /// (and apply save_in). Shared by the AD and non-AD residual paths.
+  void assembleProtoFluxResidual();
+
+  /// Element pointer cached on the first AD computeOffDiagJacobian() call for an element so
+  /// that the remaining off-diagonal calls (one per coupled variable) become no-ops; the
+  /// single AD pass already filled all blocks. Reset each Jacobian evaluation in jacobianSetup().
+  const Elem * _my_elem_darcy = nullptr;
 };
+
+typedef PorousFlowDarcyBaseTempl<false> PorousFlowDarcyBase;
+typedef PorousFlowDarcyBaseTempl<true> ADPorousFlowDarcyBase;

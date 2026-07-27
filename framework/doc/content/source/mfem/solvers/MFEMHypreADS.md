@@ -15,7 +15,7 @@ order systems.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/graddiv.i block=FESpace Preconditioner Solvers
+!listing test/tests/mfem/kernels/graddiv.i block=FESpace Solvers
 
 !syntax parameters /Solvers/MFEMHypreADS
 

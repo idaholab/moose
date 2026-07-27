@@ -6,13 +6,11 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
 #include "GeneralReporter.h"
 #include "AdaptiveImportanceSampler.h"
 #include "ParallelSubsetSimulation.h"
-#include "ActiveLearningGPDecision.h"
 
 /**
  * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo

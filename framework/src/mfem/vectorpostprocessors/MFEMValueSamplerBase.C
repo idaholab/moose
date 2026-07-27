@@ -10,13 +10,24 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMValueSamplerBase.h"
+
 #include "MFEMProblem.h"
 #include "MFEMVectorUtils.h"
+#include "MooseError.h"
 
 #include "mfem/fem/fespace.hpp"
 
 namespace
 {
+/** Enum for values returned by gslib for point location relative to mesh
+ */
+enum class GSLibLocationCode : unsigned int
+{
+  INTERNAL = 0,
+  BORDER = 1,
+  NOT_FOUND = 2,
+};
+
 void
 MFEMVectorToPostprocessorPoints(
     const mfem::Vector & mfem_points,
@@ -35,6 +46,22 @@ MFEMVectorToPostprocessorPoints(
     }
   }
 }
+
+mfem::FindPointsGSLIB::AvgType
+getAvgType(const MooseEnum & avg_type)
+{
+  if (avg_type == "NONE")
+    return mfem::FindPointsGSLIB::AvgType::NONE;
+  else if (avg_type == "ARITHMETIC")
+    return mfem::FindPointsGSLIB::AvgType::ARITHMETIC;
+  else if (avg_type == "HARMONIC")
+    return mfem::FindPointsGSLIB::AvgType::HARMONIC;
+  else
+    mooseError(
+        "Unknown average type: ",
+        avg_type,
+        ", this is an internal MOOSE error, new enum variants must be handled by this function.");
+}
 }
 
 InputParameters
@@ -47,6 +74,14 @@ MFEMValueSamplerBase::validParams()
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>(
       "point_ordering", ordering, "Ordering style to use for point vector DoFs.");
+  MooseEnum avg_type("NONE ARITHMETIC HARMONIC", "ARITHMETIC", false);
+  params.addParam<MooseEnum>("average_type",
+                             avg_type,
+                             "Average type used when sampling L2 functions at element boundaries.");
+  params.addParam<double>("mesh_boundary_tolerance",
+                          1e-8,
+                          "Distance from point to mesh boundary below which the point is "
+                          "considered to be on the boundary rather than outside the mesh.");
 
   return params;
 }
@@ -67,18 +102,35 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   if (getMFEMProblem().mesh().shouldDisplace())
     mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
 
+  _finder.SetL2AvgType(getAvgType(getParam<MooseEnum>("average_type")));
+  _finder.SetDistanceToleranceForPointsFoundOnBoundary(getParam<double>("mesh_boundary_tolerance"));
+
   // set up points vector
   _mesh.EnsureNodes();
   _finder.Setup(_mesh);
   _finder.FindPoints(_points, _points_ordering);
 
+  bool fe_boundary_discontinuous =
+      _var.FESpace()->FEColl()->GetContType() == mfem::FiniteElementCollection::DISCONTINUOUS;
+
   // check all points were found
   mfem::Array<unsigned int> point_codes = _finder.GetCode();
   for (size_t i = 0; i < points.size(); i++)
   {
-    if (point_codes[i] > 1)
+    switch (GSLibLocationCode(point_codes[i]))
     {
-      mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+      case GSLibLocationCode::INTERNAL:
+        break;
+      case GSLibLocationCode::BORDER:
+        if (fe_boundary_discontinuous)
+          mooseWarning("MFEMValueSamplerBase found a point on an element boundary but "
+                       "the FE space is discontinuous at boundaries: ",
+                       points[i],
+                       ".");
+        break;
+      default:
+        mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+        break;
     }
   }
 

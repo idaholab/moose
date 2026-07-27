@@ -34,6 +34,11 @@ protected:
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
+  /// Apply `compatibility_mode` remapping to a property name pulled from the `_rank_two_*`
+  /// output tables: in compat mode the NEW pipeline writes Cauchy stress + rotated mechanical
+  /// strain under different names than the OLD pipeline. Outside compat mode this is the identity.
+  std::string remapCompatOutputProp(const std::string & prop_name) const;
+
   /**
    * Helper function to decode `generate_outputs` options using a "table" of
    * scalar output quantities and a "setup" lambda that performs the input parameter
@@ -135,7 +140,11 @@ protected:
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
 
-  /// New or old kernel system
+  /// OLD-compat shim: auto-configures the Lagrangian kernel system to reproduce
+  /// `StressDivergenceTensors + ComputeFiniteStrain + ComputeStressBase` bit-for-bit when set.
+  const bool _compatibility_mode;
+
+  /// New or old kernel system. True if `new_system = true` OR `compatibility_mode = true`.
   const bool _lagrangian_kernels;
 
   /// Simplified flag for small/large deformations, Lagrangian kernel system
@@ -150,7 +159,7 @@ protected:
   const LKFormulation _lk_formulation;
 
   /// Simplified volumetric locking correction flag for new kernels
-  bool _lk_locking;
+  const bool _lk_locking;
 
   /// Flag indicating if the homogenization system is present for new kernels
   bool _lk_homogenization;
@@ -166,6 +175,8 @@ protected:
   // Other homogenization info
   MultiMooseEnum _constraint_types;
   std::vector<FunctionName> _targets;
+  /// Whether to use the off diagonal scalar jacobian for the homogenization system
+  const bool _lk_h_off_jac;
 };
 
 template <typename T, typename T2>

@@ -35,7 +35,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
       !_kokkos_nodal_aux_storage[type].hasActiveObjects())
     return;
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   // Resolve dependencies
 
@@ -71,7 +71,8 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
-  for (auto & system : systems)
+  auto & kokkos_fe_systems = _fe_problem.getKokkosFESystems();
+  for (auto & system : kokkos_fe_systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -117,7 +118,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   {
     TIME_SECTION("KokkosCopy", 1);
 
-    for (auto & system : systems)
+    for (auto & system : kokkos_fe_systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
     systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
@@ -127,7 +128,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   // Clear
 
-  for (auto & system : systems)
+  for (auto & system : kokkos_fe_systems.constructedEntries())
   {
     system.clearActiveVariables();
     system.clearActiveSolutionTags();

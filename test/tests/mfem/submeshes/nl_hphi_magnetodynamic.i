@@ -125,14 +125,11 @@ e_c = 1.0
   []
 []
 
-[Preconditioner]
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = CoilHCurlFESpace
   []
-[]
-
-[Solvers]
   [pcg]
     type = MFEMHyprePCG
     preconditioner = ams

@@ -6,3 +6,11 @@
     converge_at_max_iterations = true
   []
 []
+
+[Outputs]
+  [csv]
+    type = CSV
+    file_base = max_iterations_converge_out
+    execute_on = 'FINAL'
+  []
+[]

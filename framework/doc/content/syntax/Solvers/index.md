@@ -41,10 +41,10 @@ class and therefore the valid parameters for that block.
 
 ## MFEM Usage
 
-For MFEM problems, solver objects are created through
-`AddMFEMSolverAction` and stored directly on the `MFEMProblem`. Linear
-and nonlinear solver objects share the same top-level syntax, but they
-play different roles at solve time:
+For MFEM problems, solver objects are declared through `AddMFEMSolverAction`
+and constructed after their dependencies have been resolved. Linear and
+nonlinear solver objects share the same top-level syntax, but they play
+different roles at solve time:
 
 - linear solver objects wrap `mfem::Solver` implementations used for
   assembled linear systems
@@ -53,6 +53,9 @@ play different roles at solve time:
 
 Some nonlinear solvers also depend on a separate linear solver. For
 example, `mfem::NewtonSolver` requires the user to provide a Jacobian solver.
+Solver references are detected from parameters typed as `MFEMSolverName` or
+`std::vector<MFEMSolverName>`, and solvers not referenced by another solver are
+selected as the problem driver solver candidates.
 Others, such as the current `mfem::PetscNonlinearSolver` implementation, manage
 their own internal linear solver stack.
 

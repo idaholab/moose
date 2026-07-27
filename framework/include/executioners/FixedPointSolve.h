@@ -51,7 +51,7 @@ public:
   /**
    * Get the number of fixed point iterations performed
    * Because this returns the number of fixed point iterations, rather than the current
-   * iteration count (which starts at 0), increment by 1.
+   * iteration index (which starts at 0), shift by 1.
    *
    * @return Number of fixed point iterations performed
    */
@@ -234,9 +234,9 @@ protected:
   std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
 
   ///@{ Variables used by the fixed point iteration
-  /// fixed point iteration counter
+  /// Current fixed point iteration index; 0 for the first iteration
   unsigned int _fixed_point_it;
-  /// fixed point iteration counter for the main app
+  /// Current fixed point iteration index for the main app; 0 for the first iteration
   unsigned int _main_fixed_point_it;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;

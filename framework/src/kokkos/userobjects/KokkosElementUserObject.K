@@ -32,6 +32,10 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters)
     ::RandomInterface(parameters, _fe_problem, _tid, false),
     ::ElementIDInterface(this)
 {
+  // Kokkos user objects currently only consume variable information through finite element bases
+  // and quadrature points
+  for (auto * const var : getMooseVariableDependencies())
+    var->requireQpComputations();
 }
 
 ElementUserObject::ElementUserObject(const ElementUserObject & object)

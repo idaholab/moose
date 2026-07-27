@@ -40,8 +40,8 @@ private:
   void RecoverEigenproblemSolution(GridFunctions & gridfunctions, EigensolverBase * eigensolver);
 
 protected:
-  /// Add kernels/bcs and assemble the linear part of the equation system
-  void BuildEquationSystemOperator();
+  /// Form the equation-system operator used by the eigensolver.
+  void FormEquationSystemOperator();
 };
 
 } // namespace Moose::MFEM

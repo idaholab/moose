@@ -9,21 +9,25 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
  * Kernel = grad(test) * thermal_conductivity * grad(temperature)
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowHeatConduction : public Kernel
+template <bool is_ad>
+class PorousFlowHeatConductionTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowHeatConduction(const InputParameters & parameters);
+  PorousFlowHeatConductionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -31,17 +35,23 @@ protected:
   const PorousFlowDictator & _dictator;
 
   /// Thermal conductivity at the quadpoints
-  const MaterialProperty<RealTensorValue> & _la;
+  const GenericMaterialProperty<RealTensorValue, is_ad> & _la;
 
-  /// d(thermal conductivity at the quadpoints)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealTensorValue>> & _dla_dvar;
+  /// d(thermal conductivity at the quadpoints)/d(PorousFlow variable) -- null for AD
+  const MaterialProperty<std::vector<RealTensorValue>> * const _dla_dvar;
 
   /// grad(temperature)
-  const MaterialProperty<RealGradient> & _grad_t;
+  const GenericMaterialProperty<RealGradient, is_ad> & _grad_t;
 
-  /// d(gradT)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dgrad_t_dvar;
+  /// d(gradT)/d(PorousFlow variable) -- null for AD
+  const MaterialProperty<std::vector<RealGradient>> * const _dgrad_t_dvar;
 
-  /// d(gradT)/d(grad PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dgrad_t_dgradvar;
+  /// d(gradT)/d(grad PorousFlow variable) -- null for AD
+  const MaterialProperty<std::vector<Real>> * const _dgrad_t_dgradvar;
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowHeatConductionTempl<false> PorousFlowHeatConduction;
+typedef PorousFlowHeatConductionTempl<true> ADPorousFlowHeatConduction;

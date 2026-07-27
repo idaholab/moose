@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "FVQpFluxBC.h"
 
 /**
  * Constant velocity scalar advection boundary conditions
  */
-class FVBurgersOutflowBC : public FVFluxBC
+class FVBurgersOutflowBC : public FVQpFluxBC
 {
 public:
   FVBurgersOutflowBC(const InputParameters & parameters);

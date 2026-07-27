@@ -81,4 +81,20 @@
     recover = false
     restep = false
   []
+  [MFEMNonLinearHeatConductionQuadratureFunction]
+    design = 'MFEMScalarQuadratureFunction.md'
+    requirement = 'The system shall re-project quadrature function coefficients on each nonlinear iteration such that solution-dependent coefficients stored on quadrature points reproduce the reference nonlinear solve.'
+    type = CSVDiff
+    input = nlheatconduction_qf.i
+    csvdiff = 'NLHeatConductionQF_centre_temperature_0000.csv
+                NLHeatConductionQF_centre_temperature_0010.csv
+                NLHeatConductionQF_centre_temperature_0020.csv
+                NLHeatConductionQF_centre_temperature_0030.csv
+                NLHeatConductionQF_centre_temperature_0040.csv
+                NLHeatConductionQF_centre_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    restep = false
+  []
 []

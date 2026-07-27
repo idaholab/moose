@@ -5,8 +5,7 @@
 ## Description
 
 The `CriticalTimeStep` postprocessor is used to compute the value of the minimum
-time step for explicit integration scheme. Please refer to
-[CriticalTimeStepMath](/CriticalTimeStepMath.md) for the theoretical details.
+time step for explicit integration scheme.
 
 !syntax parameters /Postprocessors/CriticalTimeStep
 

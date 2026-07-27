@@ -2085,29 +2085,33 @@ Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
 
   mooseAssert(coupled_vars_it != _coupled_vars.end(),
               "Trying to get a coupled var " << name_to_use << " that doesn't exist");
+  mooseAssert(comp < coupled_vars_it->second.size(),
+              "Component index outside of coupled variables vector");
+  auto * const base_var = coupled_vars_it->second[comp];
 
-  if (auto coupled_var = dynamic_cast<T *>(coupled_vars_it->second[comp]))
+  if (auto coupled_var = dynamic_cast<T *>(base_var))
     return coupled_var;
   else
   {
     for (auto & var : _coupled_standard_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a standard variable, try a "
                    "'coupled[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_vector_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a vector variable, try a "
                    "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_array_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_fv_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a finite volume variable, which the coupled[...] routine "
                    "used does not support. Try using the functor system routines instead.");
-    mooseError(
-        "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
+    mooseError("Variable '",
+               base_var->name(),
+               "' is of a different C++ type than you tried to fetch it as.");
   }
 }
 

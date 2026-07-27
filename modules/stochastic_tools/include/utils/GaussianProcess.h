@@ -6,13 +6,15 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
 #include "Standardizer.h"
-#include <Eigen/Dense>
 
 #include "CovarianceFunctionBase.h"
+
+#include "LibtorchUtils.h"
 
 namespace StochasticTools
 {
@@ -25,7 +27,15 @@ namespace StochasticTools
 class GaussianProcess
 {
 public:
+  using HyperParameterMap = CovarianceFunctionBase::HyperParameterMap;
+
   GaussianProcess();
+
+  enum class OptimizerType
+  {
+    Adam,
+    LegacyAdam
+  };
 
   /**
    * Initializes the most important structures in the Gaussian Process: the
@@ -46,8 +56,6 @@ public:
   /// hyperparameter-tuning
   struct GPOptimizerOptions
   {
-    /// Default constructor
-    GPOptimizerOptions();
     /**
      * Construct a new GPOptimizerOptions object using
      * input parameters that will control the optimization
@@ -59,22 +67,24 @@ public:
      * @param b1 Tuning constant for the Adam algorithm
      * @param b2 Tuning constant for the Adam algorithm
      * @param eps Tuning constant for the Adam algorithm
-     * @param lambda Tuning constant for the Adam algorithm
+     * @param lambda Legacy MOOSE shrink constant for the Adam algorithm
+     * @param optimizer_type The Adam optimizer mode to use
      */
-    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+    GPOptimizerOptions(const unsigned int show_every_nth_iteration = 0,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
                        const Real eps = 1e-7,
-                       const Real lambda = 0.0);
+                       const Real lambda = 1e-4,
+                       const OptimizerType optimizer_type = OptimizerType::Adam);
 
     /// Switch to enable verbose output for parameter tuning at every n-th iteration
-    const unsigned int show_every_nth_iteration = false;
+    const unsigned int show_every_nth_iteration = 0;
     /// The number of iterations for Adam optimizer
     const unsigned int num_iter = 1000;
-    /// The batch isize for Adam optimizer
+    /// The batch size for Adam optimizer
     const unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
     const Real learning_rate = 1e-3;
@@ -84,8 +94,10 @@ public:
     const Real b2 = 0.999;
     /// Tuning parameter from the paper
     const Real eps = 1e-7;
-    /// Tuning parameter from the paper
-    const Real lambda = 0.0;
+    /// Legacy MOOSE shrink parameter
+    const Real lambda = 1e-4;
+    /// Adam optimizer mode to use
+    const OptimizerType optimizer_type = OptimizerType::Adam;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -95,15 +107,15 @@ public:
    *                      covariance matrix.
    * @param opts The optimizer options.
    */
-  void setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                             const RealEigenMatrix & training_data,
+  void setupCovarianceMatrix(const torch::Tensor & training_params,
+                             const torch::Tensor & training_data,
                              const GPOptimizerOptions & opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
    * @param input The vector/matrix which right multiples the inverse of the covariance matrix.
    */
-  void setupStoredMatrices(const RealEigenMatrix & input);
+  void setupStoredMatrices(const torch::Tensor & input);
 
   /**
    * Finds and links the covariance function to this object. Used mainly in the
@@ -128,41 +140,39 @@ public:
    * @param parameters The vector/matrix of input data.
    * @param keep_moments If previously computed or new moments are to be used.
    */
-  void standardizeParameters(RealEigenMatrix & parameters, bool keep_moments = false);
+  void standardizeParameters(torch::Tensor & parameters, bool keep_moments = false);
 
   /**
    * Standardizes the vector of responses (y values).
    * @param data The vector/matrix of input data.
    * @param keep_moments If previously computed or new moments are to be used.
    */
-  void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
+  void standardizeData(torch::Tensor & data, bool keep_moments = false);
 
-  // Tune hyperparameters using Adam
-  void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                           const RealEigenMatrix & training_data,
+  // Tune hyperparameters using Adam with manually supplied gradients
+  void tuneHyperParamsAdam(const torch::Tensor & training_params,
+                           const torch::Tensor & training_data,
                            const GPOptimizerOptions & opts);
 
   // Computes the loss function
-  Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  Real getLoss(torch::Tensor & inputs, torch::Tensor & outputs);
 
   // Computes Gradient of the loss function
-  std::vector<Real> getGradient(RealEigenMatrix & inputs) const;
+  std::vector<Real> getGradient(torch::Tensor & inputs) const;
 
-  /// Function used to convert the hyperparameter maps in this object to
-  /// vectors
+  /// Function used to convert the hyperparameter map in this object to
+  /// a flat vector
   void mapToVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
-      const std::unordered_map<std::string, Real> & scalar_map,
-      const std::unordered_map<std::string, std::vector<Real>> & vector_map,
+      const HyperParameterMap & hyperparam_map,
       std::vector<Real> & vec) const;
 
-  /// Function used to convert the vectors back to hyperparameter maps
+  /// Function used to convert the vector back to the hyperparameter map
   void vecToMap(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
-      std::unordered_map<std::string, Real> & scalar_map,
-      std::unordered_map<std::string, std::vector<Real>> & vector_map,
+      HyperParameterMap & hyperparam_map,
       const std::vector<Real> & vec) const;
 
   /// @{
@@ -171,9 +181,9 @@ public:
    */
   const StochasticTools::Standardizer & getParamStandardizer() const { return _param_standardizer; }
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
-  const RealEigenMatrix & getK() const { return _K; }
-  const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
-  const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
+  const torch::Tensor & getK() const { return _K; }
+  const torch::Tensor & getKResultsSolve() const { return _K_results_solve; }
+  const torch::Tensor & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
@@ -188,11 +198,7 @@ public:
   }
   const unsigned int & getCovarNumOutputs() const { return _num_outputs; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
-  const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
-  const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
-  {
-    return _hyperparam_vec_map;
-  }
+  const HyperParameterMap & getHyperParamMap() const { return _hyperparam_map; }
   const std::vector<Real> & getLengthScales() const { return _length_scales; }
   ///@}
 
@@ -203,9 +209,9 @@ public:
    */
   StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
   StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
-  RealEigenMatrix & K() { return _K; }
-  RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
-  Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
+  torch::Tensor & K() { return _K; }
+  torch::Tensor & KResultsSolve() { return _K_results_solve; }
+  torch::Tensor & KCholeskyDecomp() { return _K_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
@@ -217,11 +223,7 @@ public:
   {
     return _tuning_data;
   }
-  std::unordered_map<std::string, Real> & hyperparamMap() { return _hyperparam_map; }
-  std::unordered_map<std::string, std::vector<Real>> & hyperparamVectorMap()
-  {
-    return _hyperparam_vec_map;
-  }
+  HyperParameterMap & hyperparamMap() { return _hyperparam_map; }
   std::vector<Real> & lengthScales() { return _length_scales; }
   ///@}
 
@@ -233,7 +235,7 @@ protected:
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
   /// Number of tunable hyperparameters
-  unsigned int _num_tunable;
+  unsigned int _num_tunable = 0;
 
   /// Type of covariance function used for this GP
   std::string _covar_type;
@@ -248,13 +250,10 @@ protected:
   std::map<UserObjectName, std::string> _dependent_covar_types;
 
   /// The number of outputs of the GP
-  unsigned int _num_outputs;
+  unsigned int _num_outputs = 0;
 
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> _hyperparam_vec_map;
+  /// Hyperparameters. Stored as tensors for use in surrogate reload/reporting.
+  HyperParameterMap _hyperparam_map;
 
   /// Standardizer for use with params (x)
   StochasticTools::Standardizer _param_standardizer;
@@ -263,22 +262,16 @@ protected:
   StochasticTools::Standardizer _data_standardizer;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  RealEigenMatrix _K;
+  torch::Tensor _K;
 
   /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix _K_results_solve;
+  torch::Tensor _K_results_solve;
 
-  /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
-
-  /// Paramaters (x) used for training, along with statistics
-  const RealEigenMatrix * _training_params;
-
-  /// Data (y) used for training
-  const RealEigenMatrix * _training_data;
+  /// Cholesky decomposition libtorch tensor object
+  torch::Tensor _K_cho_decomp;
 
   /// The batch size for Adam optimization
-  unsigned int _batch_size;
+  unsigned int _batch_size = 0;
 
   /// To return the GP length scales for active learning
   std::vector<Real> _length_scales;
@@ -287,11 +280,8 @@ protected:
 } // StochasticTools namespac
 
 template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-
-template <>
 void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
 template <>
 void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+
+#endif

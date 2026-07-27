@@ -25,6 +25,9 @@ template <>
 inline void
 TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>::initialSetup()
 {
+  // Derives _large_kinematics from the strain calculator's LARGE_KINEMATICS guarantee.
+  LagrangianStressDivergenceBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError("This kernel should only act in Cartesian coordinates.");
 }

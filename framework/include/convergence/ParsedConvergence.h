@@ -24,7 +24,7 @@ public:
 
   ParsedConvergence(const InputParameters & parameters);
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
   virtual void initialSetup() override;
 
@@ -50,12 +50,12 @@ protected:
   /**
    * Updates non-constant symbol values
    *
-   * @param[in] iter   Iteration index
+   * @param[in] n_iter   Number of iterations performed
    */
-  void updateSymbolValues(unsigned int iter);
+  void updateSymbolValues(unsigned int n_iter);
   void updatePostprocessorSymbolValues();
   void updateFunctionSymbolValues();
-  void updateConvergenceSymbolValues(unsigned int iter);
+  void updateConvergenceSymbolValues(unsigned int n_iter);
 
   /**
    * Converts a Real value to a bool. Error results if value is not 0 or 1.

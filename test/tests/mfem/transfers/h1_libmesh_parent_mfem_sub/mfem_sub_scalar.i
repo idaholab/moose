@@ -42,13 +42,10 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [gmres]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

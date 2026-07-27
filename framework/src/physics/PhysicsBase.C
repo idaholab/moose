@@ -230,6 +230,23 @@ PhysicsBase::act()
 }
 
 void
+PhysicsBase::addUserObject(const std::string & uo_type,
+                           const std::string & uo_name,
+                           InputParameters & params)
+{
+  mooseAssert(
+      [&]()
+      {
+        const auto supplied = getSuppliedUserObjects();
+        return std::find(supplied.begin(), supplied.end(), uo_name) != supplied.end();
+      }(),
+      "The UserObject '" + uo_name + "' added by Physics '" + name() +
+          "' was not declared in getSuppliedUserObjects(). Declare it there so its construction "
+          "order can be resolved.");
+  getProblem().addUserObject(uo_type, uo_name, params);
+}
+
+void
 PhysicsBase::prepareCopyVariablesFromMesh() const
 {
   if (getParam<bool>("initialize_variables_from_mesh_file"))

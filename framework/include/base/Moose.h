@@ -14,6 +14,7 @@
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
+#include <csignal>
 #include <limits>
 #include <memory>
 #include <set>
@@ -170,7 +171,7 @@ inline constexpr std::size_t invalid_size_t = std::numeric_limits<std::size_t>::
  * Used by the signal handler to determine if we should write a checkpoint file out at any point
  * during operation.
  */
-extern int interrupt_signal_number;
+extern volatile std::sig_atomic_t interrupt_signal_number;
 
 /**
  * Set to false (the default) to display an error message only once for each error call code

@@ -1,0 +1,30 @@
+Applications:
+    shifted_boundary_method:
+        exe_directory: ${MOOSE_DIR}/modules/shifted_boundary_method
+        content_directory: ${MOOSE_DIR}/modules/shifted_boundary_method/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/shifted_boundary_method_srs.md
+    software_design_description: sqa/shifted_boundary_method_sdd.md
+    software_test_plan: sqa/shifted_boundary_method_stp.md
+    requirements_traceability_matrix: sqa/shifted_boundary_method_rtm.md
+    verification_validation_report: sqa/shifted_boundary_method_vvr.md
+    failure_analysis_report: sqa/shifted_boundary_method_far.md
+    software_library_list: sqa/shifted_boundary_method_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    shifted_boundary_method:
+        directories:
+            - ${MOOSE_DIR}/modules/shifted_boundary_method/test
+        log_default: WARNING
+        show_warning: false

@@ -20,7 +20,6 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::validParams()
   params.addRequiredParam<Real>("specific_heat_capacity",
                                 "Specific heat capacity of the rock grains (J/kg/K).");
   params.addRequiredParam<Real>("density", "Density of the rock grains");
-  params.set<bool>("at_nodes") = is_ad ? false : true;
   params.addPrivateParam<std::string>("pf_material_type", "matrix_internal_energy");
   params.addClassDescription("This Material calculates the internal energy of solid rock grains, "
                              "which is specific_heat_capacity * density * temperature.  Kernels "
@@ -36,8 +35,8 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::PorousFlowMatrixInternalEnergyTempl(
     _cp(getParam<Real>("specific_heat_capacity")),
     _density(getParam<Real>("density")),
     _heat_cap(_cp * _density),
-    _temperature(is_ad ? getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature_qp")
-                       : getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature_nodal")),
+    _temperature(getGenericMaterialProperty<Real, is_ad>(
+        _dictator.isFV() ? "PorousFlow_temperature_qp" : "PorousFlow_temperature_nodal")),
     _dtemperature_dvar(
         is_ad ? nullptr
               : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
@@ -46,8 +45,6 @@ PorousFlowMatrixInternalEnergyTempl<is_ad>::PorousFlowMatrixInternalEnergyTempl(
                         : &declareProperty<std::vector<Real>>(
                               "dPorousFlow_matrix_internal_energy_nodal_dvar"))
 {
-  if (!is_ad && _nodal_material != true)
-    mooseError("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");
 }
 
 template <bool is_ad>

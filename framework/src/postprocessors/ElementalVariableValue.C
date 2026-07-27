@@ -29,7 +29,9 @@ ElementalVariableValue::validParams()
 ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
-    _var_name(parameters.get<VariableName>("variable")),
+    _var(libMesh::cast_ref<MooseVariableField<Real> &>(
+        _subproblem.getActualFieldVariable(_tid, getParam<VariableName>("variable")))),
+    _var_sln(_var.sln()),
     _value(0)
 {
   // This class may be too dangerous to use if renumbering is enabled,
@@ -58,12 +60,9 @@ ElementalVariableValue::execute()
     _subproblem.prepare(_element, _tid);
     _subproblem.reinitElem(_element, _tid);
 
-    MooseVariableField<Real> & var = static_cast<MooseVariableField<Real> &>(
-        _subproblem.getActualFieldVariable(_tid, _var_name));
-    const VariableValue & u = var.sln();
-    unsigned int n = u.size();
+    unsigned int n = _var_sln.size();
     for (unsigned int i = 0; i < n; i++)
-      _value += u[i];
+      _value += _var_sln[i];
     _value /= n;
   }
 }

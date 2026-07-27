@@ -11,6 +11,7 @@
 
 #include "KokkosUserObject.h"
 
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 
@@ -20,7 +21,8 @@ namespace Moose::Kokkos
 class GeneralUserObject : public UserObject,
                           public MeshHolder,
                           public AssemblyHolder,
-                          public SystemHolder,
+                          public FESystemHolder,
+                          public ::CoupleableMooseVariableDependencyIntermediateInterface,
                           public ::MaterialPropertyInterface,
                           public ::TransientInterface
 {

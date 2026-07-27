@@ -24,17 +24,17 @@ public:
   MFEMHypreAME(const InputParameters & parameters);
 
   /// Sets the operator for the eigensolver and propagates it to the preconditioner.
-  virtual void SetOperator(mfem::OperatorHandle & op) override
+  virtual void SetOperator(mfem::Operator & op) override
   {
     if (_preconditioner)
       _preconditioner->SetOperator(op);
-    _eigensolver->SetOperator(*op.As<mfem::HypreParMatrix>());
+    _eigensolver->SetOperator(libMesh::cast_ref<mfem::HypreParMatrix &>(op));
   }
 
   /// Sets the mass matrix for the eigensolver
-  virtual void SetMassMatrix(mfem::OperatorHandle & mass) override
+  virtual void SetMassMatrix(mfem::Operator & mass) override
   {
-    _eigensolver->SetMassMatrix(*mass.As<mfem::HypreParMatrix>());
+    _eigensolver->SetMassMatrix(libMesh::cast_ref<mfem::HypreParMatrix &>(mass));
   }
 
   /// Solves the eigenvalue problem

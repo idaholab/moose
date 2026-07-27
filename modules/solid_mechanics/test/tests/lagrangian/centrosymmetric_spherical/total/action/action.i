@@ -50,7 +50,6 @@
   []
   [compute_stress]
     type = ComputeLagrangianLinearElasticStress
-    large_kinematics = true
   []
 []
 

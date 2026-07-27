@@ -1,8 +1,4 @@
-# Radiation Transfer Action
+# RadiationTransferAction
 
-## Description
-
-The `RadiationTransferAction` action sets up radiative heat transfer problems
-solved by the net radiation method. See the description,
-example use, and parameters on the
-[GrayDiffuseRadiation](/GrayDiffuseRadiation/index.md) system documentation page.
+This action corresponds to the
+[GrayDiffuseRadiation](/GrayDiffuseRadiation/index.md) system; see its documentation page for more information.

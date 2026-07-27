@@ -13,7 +13,7 @@
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosAssembly.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 
 #include "AuxKernelBase.h"
 
@@ -38,7 +38,7 @@ namespace Moose::Kokkos
 class AuxKernel : public ::AuxKernelBase,
                   public MeshHolder,
                   public AssemblyHolder,
-                  public SystemHolder
+                  public FESystemHolder
 {
 public:
   static InputParameters validParams();

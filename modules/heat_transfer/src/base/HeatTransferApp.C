@@ -64,11 +64,12 @@ HeatTransferApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_secondary_flux_vector");
 
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "append_mesh_generator");
-  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "setup_mesh_complete");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_user_object");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_bc");
   registerSyntaxTask(
       "RadiationTransferAction", "GrayDiffuseRadiation/*", "add_ray_boundary_condition");
+  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_aux_variable");
+  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_aux_kernel");
 
   registerSyntaxTask(
       "MortarGapHeatTransferAction", "MortarGapHeatTransfer/*", "append_mesh_generator");

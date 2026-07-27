@@ -10,7 +10,7 @@ Action called to add an MFEM solver object to an MFEM problem, parsing content i
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/curlcurl.i block=Problem FESpaces Preconditioner Solvers
+!listing test/tests/mfem/kernels/curlcurl.i block=Problem FESpaces Solvers
 
 !syntax parameters /Solvers/AddMFEMSolverAction
 

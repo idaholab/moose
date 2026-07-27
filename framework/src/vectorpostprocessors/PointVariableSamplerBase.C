@@ -41,16 +41,19 @@ PointVariableSamplerBase::PointVariableSamplerBase(const InputParameters & param
                                  false,
                                  "variable",
                                  Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var_slns(_coupled_moose_vars.size(), nullptr)
 {
   addMooseVariableDependency(&mooseVariableField());
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());
 
-  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+  for (const auto i : index_range(_coupled_moose_vars))
   {
-    var_names[i] = _coupled_moose_vars[i]->name();
-    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
+    const auto * const var = _coupled_moose_vars[i];
+    var_names[i] = var->name();
+    SamplerBase::checkForStandardFieldVariableType(var);
+    _var_slns[i] = &libMesh::cast_ptr<const MooseVariableField<Real> *>(var)->sln();
   }
 
   // Initialize the data structures in SamplerBase
@@ -63,10 +66,9 @@ PointVariableSamplerBase::initialize()
   PointSamplerBase::initialize();
 
   // Check for elemental variables, which are ill-defined on faces for this object
-  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+  for (const auto * const var : _coupled_moose_vars)
   {
-    const auto continuity =
-        _assembly.getFE(_coupled_moose_vars[i]->feType(), _mesh.dimension())->get_continuity();
+    const auto continuity = _assembly.getFE(var->feType(), _mesh.dimension())->get_continuity();
     if (continuity != libMesh::C_ZERO && continuity != libMesh::C_ONE)
       _discontinuous_at_faces = true;
   }
@@ -105,9 +107,8 @@ PointVariableSamplerBase::execute()
         _subproblem.setCurrentSubdomainID(elem, 0);
         _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
 
-        for (MooseIndex(_coupled_moose_vars) j = 0; j < _coupled_moose_vars.size(); ++j)
-          values[j] = (dynamic_cast<MooseVariableField<Real> *>(_coupled_moose_vars[j]))->sln()[0] *
-                      _pp_value; // The zero is for the "qp"
+        for (const auto j : index_range(_coupled_moose_vars))
+          values[j] = (*_var_slns[j])[0] * _pp_value; // The zero is for the "qp"
 
         _found_points[i] = true;
       }

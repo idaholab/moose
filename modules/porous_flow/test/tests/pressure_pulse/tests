@@ -8,6 +8,24 @@
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics.'
   []
+  [pressure_pulse_1d_lumped_not_nodal]
+    type = 'RunException'
+    input = 'pressure_pulse_1d.i'
+    cli_args = "Kernels/active=mass0 Variables/pp/family=MONOMIAL Variables/pp/order=CONSTANT BCs/active=''"
+    expect_err = "The variable 'pp' is not a nodal .Lagrange. variable"
+    issues = '#33122 #33370'
+    design = 'porous_flow/mass_lumping.md PorousFlowDictator.md'
+    requirement = 'The system shall produce an error if a mass-lumped PorousFlow kernel is applied to a non-nodal variable.'
+  []
+  [pressure_pulse_1d_upwind_not_nodal]
+    type = 'RunException'
+    input = 'pressure_pulse_1d.i'
+    cli_args = "Kernels/active=flux Variables/pp/family=MONOMIAL Variables/pp/order=CONSTANT BCs/active=''"
+    expect_err = "The variable 'pp' is not a nodal .Lagrange. variable"
+    issues = '#33122 #33370'
+    design = 'porous_flow/upwinding.md PorousFlowDictator.md'
+    requirement = 'The system shall produce an error if a fully-upwinded PorousFlow flux kernel is applied to a non-nodal variable.'
+  []
   [pressure_pulse_1d_action]
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_action.i'
@@ -164,6 +182,16 @@
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative.'
+  []
+  [pressure_pulse_1d_fully_saturated_2_AD]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_fully_saturated_2_AD.i'
+    csvdiff = 'pressure_pulse_1d_fully_saturated_2.csv'
+    prereq = pressure_pulse_1d_fully_saturated_2
+    rel_err = 1.0E-5
+    issues = '#6845'
+    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
+    requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the AD-templated fully-saturated Darcy and mass time derivative kernels, producing an identical solution to the non-AD formulation.'
   []
   [pressure_pulse_1d_adapt]
     type = 'CSVDiff'

@@ -19,11 +19,18 @@ public:
   ComputeLagrangianStressCustomPK2(const InputParameters & parameters);
 
 protected:
+  void initialSetup() override;
   void computeQpPK1Stress() override;
+  /// Override the PK1-base sigma wrap because PK1 = F_ust * PK2 has direct F_ust dependence
+  /// already accounted for in `computeQpPK1Stress` -- the base's `_pk1_jacobian *=
+  /// _d_F_stab_d_F_ust` post-multiplication would corrupt the Jacobian, and the cauchy
+  /// wrap needs F_ust on both sides (sigma = F_ust * PK2 * F_ust^T / J_ust).
+  void computeQpCauchyStress() override;
 
 protected:
   /// 2nd PK stress
   const MaterialProperty<RankTwoTensor> & _pk2;
-  /// 2nd PK tangent (dS/dF)
+  /// 2nd PK tangent dPK2/d(F_stab). The user/NEML2 differentiates w.r.t. the strain calc's
+  /// `_F` (= F-bar-stabilized when F-bar is on; equal to F_ust otherwise).
   const MaterialProperty<RankFourTensor> & _dpk2_dF;
 };
