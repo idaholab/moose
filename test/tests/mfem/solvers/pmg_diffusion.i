@@ -99,7 +99,6 @@
     fespace_hierarchy = h1_hierarchy
     smoothers = 'chebyshev'
     coarse_solver = coarse
-    assembly_levels = 'legacy'
   []
   [main]
     type = MFEMCGSolver

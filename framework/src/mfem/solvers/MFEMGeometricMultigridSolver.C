@@ -65,8 +65,9 @@ MFEMGeometricMultigridSolver::validParams()
       "N-1 (one per interior level, ordered coarse-to-fine).");
   params.addRequiredParam<MFEMSolverName>(
       "coarse_solver", "Name of the LinearSolverBase used on the coarsest level.");
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addParam<std::vector<std::string>>(
       "assembly_levels",
+      {"legacy"},
       "Assembly level for each level in the hierarchy. Valid values: 'legacy', 'full', "
       "'element', 'partial', 'none'. May have length 1 (used on all N levels) or N.");
   return params;
@@ -113,20 +114,8 @@ MFEMGeometricMultigridSolver::ConstructSolver()
 mfem::AssemblyLevel
 MFEMGeometricMultigridSolver::ParseAssemblyLevel(const std::string & s) const
 {
-  if (s == "legacy")
-    return mfem::AssemblyLevel::LEGACY;
-  if (s == "full")
-    return mfem::AssemblyLevel::FULL;
-  if (s == "element")
-    return mfem::AssemblyLevel::ELEMENT;
-  if (s == "partial")
-    return mfem::AssemblyLevel::PARTIAL;
-  if (s == "none")
-    return mfem::AssemblyLevel::NONE;
-  paramError("assembly_levels",
-             "unknown assembly level '",
-             s,
-             "'. Valid values: legacy, full, element, partial, none.");
+  static MooseEnum assembly_levels("legacy full element partial none", "legacy");
+  return (assembly_levels = s).getEnum<mfem::AssemblyLevel>();
 }
 
 void
