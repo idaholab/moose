@@ -182,7 +182,7 @@ offset = -0.05
 
 [UserObjects]
   [weighted_vel_uo]
-    type = DynamicLMWeightedVelocitiesUserObject
+    type = LMWeightedVelocitiesUserObject
     primary_boundary = 20
     secondary_boundary = 10
     primary_subdomain = 4

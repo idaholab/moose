@@ -62,14 +62,6 @@ protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
   /**
-   * Add an element to the coupling map. Coupling functors pass an invalid processor id and include
-   * local and remote elements; ghosting functors pass a real processor id and include only remote
-   * elements.
-   */
-  void
-  addElement(const processor_id_type p, const Elem * const elem, map_type & coupled_elements) const;
-
-  /**
    * Ghost the mortar interface couplings of the provided element
    */
   void ghostMortarInterfaceCouplings(const processor_id_type p,
@@ -80,9 +72,9 @@ protected:
   /**
    * Query the mortar interface couplings of the query element. If a lower dimensional secondary
    * element is found, then we search for its point neighbors, which we ghost, as well as all of the
-   * mortar interface couplings of the point neighbors. This kind of ghosting is required for mortar
-   * nodal auxiliary kernels. It also supplies the complete secondary face one-ring required by
-   * nodal-normal derivatives.
+   * point neighbors, their interior parents, and the point neighbors' mortar interface couplings.
+   * This kind of ghosting is required for mortar nodal auxiliary kernels and nodal-normal contact
+   * Jacobians.
    */
   void ghostLowerDSecondaryElemPointNeighbors(const processor_id_type p,
                                               const Elem * const query_elem,
@@ -107,8 +99,8 @@ protected:
   /// the matrix sparsity pattern
   const bool _is_coupling_functor;
 
-  /// Whether to ghost point neighbors of secondary lower subdomain elements and their cross mortar
-  /// interface counterparts, including the complete secondary face one-ring
+  /// Whether to ghost point neighbors of secondary lower subdomain elements and their
+  /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
   const bool _ghost_point_neighbors;
 
   /// Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing

@@ -82,13 +82,12 @@ householderTangents(const Vector & normal)
     return {{Vector(0, 1, 0), Vector(0, 0, -1)}};
 
   const auto h = h_vector.norm();
-  const auto h2 = h * h;
-  return {{Vector(-2.0 * h_vector(0) * h_vector(1) / h2,
-                  1.0 - 2.0 * h_vector(1) * h_vector(1) / h2,
-                  -2.0 * h_vector(1) * h_vector(2) / h2),
-           Vector(-2.0 * h_vector(0) * h_vector(2) / h2,
-                  -2.0 * h_vector(1) * h_vector(2) / h2,
-                  1.0 - 2.0 * h_vector(2) * h_vector(2) / h2)}};
+  return {{Vector(-2.0 * h_vector(0) * h_vector(1) / (h * h),
+                  1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h),
+                  -2.0 * h_vector(1) * h_vector(2) / (h * h)),
+           Vector(-2.0 * h_vector(0) * h_vector(2) / (h * h),
+                  -2.0 * h_vector(1) * h_vector(2) / (h * h),
+                  1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h))}};
 }
 }
 }
@@ -277,11 +276,12 @@ public:
   /**
    * Build the normalized JxW-weighted secondary nodal normals from AD nodal coordinates.
    *
-   * The coordinate functor supplies the current coordinate and, when requested by its caller,
-   * displacement derivatives for every node in the secondary face one-ring.
+   * The coordinate functor combines the node's displacement degrees of freedom with the coordinate
+   * snapshot used to compute the stored nodal geometry. This keeps residual values and their
+   * derivatives evaluated at the same geometry state.
    */
   void
-  computeADNodalNormals(const std::function<ADPoint(const Node &)> & coordinate,
+  computeADNodalNormals(const std::function<ADPoint(const Node &, const Point &)> & coordinate,
                         std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const;
 
   /**
@@ -552,6 +552,9 @@ private:
   /// (Householder approach).
   std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
 
+  /// Coordinates used to construct the stored nodal normals
+  std::unordered_map<const Node *, Point> _nodal_geometry_coordinate_snapshot;
+
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
@@ -586,6 +589,12 @@ private:
    */
   void projectPrimaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
                                      SubdomainID lower_dimensional_secondary_subdomain_id);
+
+  /**
+   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
+   */
+  void
+  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
   /**
    * Process aligned nodes

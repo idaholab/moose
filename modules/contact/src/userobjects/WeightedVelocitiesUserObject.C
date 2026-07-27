@@ -54,21 +54,16 @@ WeightedVelocitiesUserObject::WeightedVelocitiesUserObject(const InputParameters
                "'use_displaced_mesh' must be true for the WeightedVelocitiesUserObject object");
 }
 
-const std::array<ADRealVectorValue, 2> &
+std::array<ADRealVectorValue, 2>
 WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
                                               const unsigned int nodal_index) const
 {
   mooseAssert(nodal_index < lower_secondary_elem.n_nodes(),
               "Nodal tangent index must refer to a node on the secondary element.");
-  const Node * const node = lower_secondary_elem.node_ptr(nodal_index);
-  const auto tangent_it = _ad_nodal_tangents.find(node);
-  if (tangent_it != _ad_nodal_tangents.end())
-    return tangent_it->second;
-
-  return _ad_nodal_tangents
-      .emplace(node,
-               Moose::Mortar::householderTangents(contactNormal(lower_secondary_elem, nodal_index)))
-      .first->second;
+  mooseAssert(usesNodalNormalDerivatives(),
+              "AD contact tangents should only be requested while recording nodal-normal "
+              "derivatives.");
+  return Moose::Mortar::householderTangents(contactNormal(lower_secondary_elem, nodal_index));
 }
 
 void
@@ -129,7 +124,7 @@ WeightedVelocitiesUserObject::computeQpIProperties()
 
   if (usesNodalNormalDerivatives())
   {
-    const auto & tangents = contactTangents(*_lower_secondary_elem, _i);
+    const auto tangents = contactTangents(*_lower_secondary_elem, _i);
     for (const auto direction : make_range(_3d ? 2 : 1))
     {
       _dof_to_weighted_tangential_velocity[dof][direction] +=
@@ -169,7 +164,6 @@ WeightedVelocitiesUserObject::selfInitialize()
 void
 WeightedVelocitiesUserObject::initialize()
 {
-  _ad_nodal_tangents.clear();
   // Clear weighted gaps
   WeightedGapUserObject::initialize();
   selfInitialize();
