@@ -77,11 +77,16 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
     _smoother_names(getParam<std::vector<MFEMSolverName>>("smoothers")),
     _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
+  auto & problem = getMFEMProblem();
+  auto eq_sys = problem.getProblemData().eqn_system;
+
+  if (eq_sys->Eigen() || eq_sys->Complex())
+    mooseError("GeometricMultigridSolver '", name(), "': requires a real, non-eigen eq. system");
+
   // Co-own the hierarchy so it outlives this solver.
-  if (auto * hierarchy_name = getMFEMProblem()
-                                  .getMFEMObject<MFEMVariable>("MooseVariableBase", _var_name)
+  if (auto * hierarchy_name = problem.getMFEMObject<MFEMVariable>("MooseVariableBase", _var_name)
                                   .queryParam<std::string>("fespace_hierarchy"))
-    _hierarchy = getMFEMProblem().getProblemData().fespace_hierarchies.GetShared(*hierarchy_name);
+    _hierarchy = problem.getProblemData().fespace_hierarchies.GetShared(*hierarchy_name);
   else
     paramError("variable", "must be associated with an MFEMFESpaceHierarchy.");
 
@@ -132,10 +137,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   auto & problem = getMFEMProblem();
   auto eq_sys = problem.getProblemData().eqn_system;
 
-  if (eq_sys->Eigen() || eq_sys->Complex() || eq_sys->Nonlinear() || eq_sys->Multivariate())
-    mooseError("GeometricMultigridSolver '",
-               name(),
-               "': requires a real, univariate, linear, and non-eigenproblem equation system");
+  if (eq_sys->Nonlinear() || eq_sys->Multivariate())
+    mooseError("GeometricMultigridSolver '", name(), "': requires a univariate, linear eq. system");
 
   const int N = _hierarchy->GetNumLevels();
   const int finest_level = _hierarchy->GetFinestLevelIndex();
