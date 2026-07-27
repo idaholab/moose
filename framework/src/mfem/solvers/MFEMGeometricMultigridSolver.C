@@ -84,6 +84,7 @@ MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters
 
   // Parse assembly levels, optionally expanding a single input value to all levels.
   const int N = _hierarchy->GetNumLevels();
+  mooseAssert(N, "Malformed MFEMFESpaceHierarchy w/ no levels");
   const auto & asm_strs = getParam<std::vector<std::string>>("assembly_levels");
   const int n_asm = asm_strs.size();
   if (n_asm != 1 && n_asm != N)
@@ -146,9 +147,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
                "': requires a real, univariate, linear, and non-eigenproblem equation system");
 
   const int N = _hierarchy->GetNumLevels();
-  if (N < 1)
-    paramError("fespace_hierarchy", "hierarchy must contain at least one level.");
-  const int finest_level = N - 1;
+  const int finest_level = _hierarchy->GetFinestLevelIndex();
 
   // Validate smoother vector length (levels 1 to N-1 each need a smoother).
   const int n_smooth = _smoother_names.size();

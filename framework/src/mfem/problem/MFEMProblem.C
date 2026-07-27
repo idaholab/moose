@@ -136,9 +136,8 @@ MFEMProblem::addMFEMSolver(const std::string & solver_type,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  if (!_mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters})
-           .second)
-    mooseError("Multiple MFEM solvers named '", name, "' were provided.");
+  mooseAssert(!_mfem_solver_definitions.count(name), "Multiple MFEM solvers named '" + name + "'.");
+  _mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters});
 }
 
 void
@@ -182,8 +181,8 @@ MFEMProblem::resolveMFEMSolvers()
   }
 
   auto & problem_data = getProblemData();
-  problem_data.jacobian_solver = nullptr;
-  problem_data.nonlinear_solver = nullptr;
+  mooseAssert(!problem_data.jacobian_solver, "MFEM linear solver driver already assigned");
+  mooseAssert(!problem_data.nonlinear_solver, "MFEM nonlinear solver driver already assigned");
 
   for (const auto & solver_name : *sorted_solver_names)
   {
