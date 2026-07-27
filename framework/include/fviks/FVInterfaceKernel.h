@@ -28,7 +28,6 @@
 #include "ADFunctorInterface.h"
 #include "FVFaceResidualObject.h"
 #include "FaceArgInterface.h"
-#include "FVObject.h"
 
 #include <set>
 
@@ -59,8 +58,7 @@ class FVInterfaceKernel : public MooseObject,
                           public TwoMaterialPropertyInterface,
                           public ADFunctorInterface,
                           public FVFaceResidualObject,
-                          public FaceArgProducerInterface,
-                          public FVObject
+                          public FaceArgProducerInterface
 {
 public:
   /**

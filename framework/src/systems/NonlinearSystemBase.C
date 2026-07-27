@@ -75,8 +75,9 @@
 #include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
+#include "FVBoundaryCondition.h"
+#include "FVInterfaceKernel.h"
 #include "FVScalarLagrangeMultiplierInterface.h"
-#include "FVObject.h"
 #include "GeneralUserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
@@ -103,6 +104,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
+#include <type_traits>
 
 #include "petscsnes.h"
 #include <PetscDMMoose.h>
@@ -111,6 +113,31 @@ extern PetscErrorCode DMCreate_Moose(DM);
 EXTERN_C_END
 
 using namespace libMesh;
+
+namespace
+{
+template <typename T>
+void
+appendFVSetupObjects(TheWarehouse & warehouse,
+                     const std::string & system_name,
+                     const unsigned int system_number,
+                     const THREAD_ID tid,
+                     std::vector<SetupInterface *> & results)
+{
+  static_assert(std::is_base_of_v<MooseObject, T>);
+  static_assert(std::is_base_of_v<SetupInterface, T>);
+
+  std::vector<T *> objects;
+  warehouse.query()
+      .template condition<AttribSystem>(system_name)
+      .template condition<AttribSysNum>(system_number)
+      .template condition<AttribThread>(tid)
+      .queryInto(objects);
+
+  for (auto * object : objects)
+    results.push_back(object);
+}
+}
 
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
@@ -227,12 +254,16 @@ std::vector<SetupInterface *>
 NonlinearSystemBase::getFVSetupObjects(THREAD_ID tid)
 {
   std::vector<SetupInterface *> fv_objects;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribFVObject>(true)
-      .template condition<AttribSysNum>(number())
-      .template condition<AttribThread>(tid)
-      .queryInto(fv_objects);
+  auto & warehouse = _fe_problem.theWarehouse();
+
+  appendFVSetupObjects<FVElementalKernel>(
+      warehouse, "FVElementalKernel", number(), tid, fv_objects);
+  appendFVSetupObjects<FVFluxKernel>(warehouse, "FVFluxKernel", number(), tid, fv_objects);
+  appendFVSetupObjects<FVBoundaryCondition>(warehouse, "FVDirichletBC", number(), tid, fv_objects);
+  appendFVSetupObjects<FVBoundaryCondition>(warehouse, "FVFluxBC", number(), tid, fv_objects);
+  appendFVSetupObjects<FVInterfaceKernel>(
+      warehouse, "FVInterfaceKernel", number(), tid, fv_objects);
+
   return fv_objects;
 }
 

@@ -27,7 +27,6 @@
 #include "ADFunctorInterface.h"
 #include "FaceArgInterface.h"
 #include "MooseVariableInterface.h"
-#include "FVObject.h"
 
 // Forward declarations
 template <typename>
@@ -59,8 +58,7 @@ class FVBoundaryCondition : public MooseObject,
                             public MooseVariableInterface<Real>,
                             public MooseVariableDependencyInterface,
                             public ADFunctorInterface,
-                            public FaceArgProducerInterface,
-                            public FVObject
+                            public FaceArgProducerInterface
 {
 public:
   /**

@@ -47,12 +47,13 @@ FVSetupCount::FVSetupCount(const InputParameters & params)
 const FVSetupCounter &
 FVSetupCount::getCounter() const
 {
-  std::vector<FVSetupCounter *> fv_objects;
-  _fe_problem.theWarehouse()
-      .query()
-      .condition<AttribFVObject>(true)
-      .condition<AttribName>(_object_name)
-      .queryInto(fv_objects);
+  std::vector<MooseObject *> named_objects;
+  _fe_problem.theWarehouse().query().condition<AttribName>(_object_name).queryInto(named_objects);
+
+  std::vector<const FVSetupCounter *> fv_objects;
+  for (auto * object : named_objects)
+    if (const auto * counter = dynamic_cast<const FVSetupCounter *>(object))
+      fv_objects.push_back(counter);
 
   if (fv_objects.size() == 1)
     return *fv_objects[0];

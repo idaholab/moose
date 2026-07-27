@@ -30,7 +30,6 @@
 #include "DomainUserObject.h"
 #include "MortarUserObject.h"
 #include "FVInterpolationMethod.h"
-#include "FVObject.h"
 #include "ExecFlagRegistry.h"
 
 #include <algorithm>
@@ -474,25 +473,6 @@ AttribResidualObject::isMatch(const Attribute & other) const
 
 bool
 AttribResidualObject::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
-}
-
-void
-AttribFVObject::initFrom(const MooseObject * obj)
-{
-  _val = dynamic_cast<const FVObject *>(obj) != nullptr;
-}
-
-bool
-AttribFVObject::isMatch(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribFVObject *>(&other);
-  return a && (a->_val == _val);
-}
-
-bool
-AttribFVObject::isEqual(const Attribute & other) const
 {
   return isMatch(other);
 }

@@ -848,7 +848,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
   _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
   _the_warehouse->registerAttribute<AttribResidualObject>("residual_object");
-  _the_warehouse->registerAttribute<AttribFVObject>("fv_object", false);
   _the_warehouse->registerAttribute<AttribSorted>("sorted");
   _the_warehouse->registerAttribute<AttribDisplaced>("displaced", -1);
 
