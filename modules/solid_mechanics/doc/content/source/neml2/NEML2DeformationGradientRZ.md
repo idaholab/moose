@@ -2,7 +2,15 @@
 
 !if! function=hasCapability('neml2')
 
-Axisymmetric (RZ) version of [NEML2DeformationGradient.md]. For a batch of material points, calculate the deformation gradient from displacement gradients on the reference configuration. In addition to the in-plane components, the out-of-plane hoop stretch is included:
+!syntax description /UserObjects/NEML2DeformationGradientRZ
+
+## Description
+
+This object is the axisymmetric (RZ) version of
+[NEML2DeformationGradient.md]. For a batch of material points, it calculates
+the deformation gradient from displacement gradients on the reference
+configuration. In addition to the in-plane components, it includes the
+out-of-plane hoop stretch:
 
 !equation
 F_{\theta\theta} = 1 + \dfrac{u_r}{r}
@@ -11,16 +19,21 @@ Pair with [NEML2StressDivergenceRZ.md] and a total-Lagrangian NEML2 model that o
 
 ## Limitations
 
-- Requires an axisymmetric (RZ) coordinate system and exactly two displacement variables (radial, axial), ordered consistently with the coordinate axes.
+- Requires an axisymmetric (RZ) coordinate system and exactly two displacement
+  variables in coordinate-axis order: one radial and one axial.
 - No torsion: the circumferential displacement is assumed to be zero.
 
-## Syntax
+## Parameters
 
 !syntax parameters /UserObjects/NEML2DeformationGradientRZ
 
-## Example input files
+## Inputs
 
 !syntax inputs /UserObjects/NEML2DeformationGradientRZ
+
+## Child Objects
+
+!syntax children /UserObjects/NEML2DeformationGradientRZ
 
 !if-end!
 

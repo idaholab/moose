@@ -1,6 +1,3 @@
-# Large-deformation (total Lagrangian) explicit dynamics through the NEML2
-# nodal-force path: F gathered by NEML2DeformationGradient, PK1 assembled by
-# NEML2StressDivergence against the cached reference-configuration quadrature.
 !include 'expdyn.i'
 
 [Functions]

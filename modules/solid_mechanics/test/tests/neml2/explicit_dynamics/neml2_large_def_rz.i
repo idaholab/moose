@@ -1,6 +1,3 @@
-# Large-deformation (total Lagrangian) axisymmetric explicit dynamics through
-# the NEML2 nodal-force path: F (including the hoop stretch 1 + u_r/r) gathered
-# by NEML2DeformationGradientRZ, PK1 assembled by NEML2StressDivergenceRZ.
 !include 'expdyn_rz.i'
 
 [Functions]

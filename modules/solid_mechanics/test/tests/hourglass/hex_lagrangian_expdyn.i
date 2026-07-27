@@ -1,6 +1,3 @@
-# Regular-MOOSE reduced-integration explicit dynamics on HEX8: total-Lagrangian
-# kernels + St. Venant-Kirchhoff stress at a single quadrature point, stabilized
-# by HourglassCorrectionHex8. A 1x1x4 column is pulled axially.
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true

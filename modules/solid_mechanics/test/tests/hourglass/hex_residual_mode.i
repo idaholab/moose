@@ -1,6 +1,4 @@
 [Mesh]
-  # Single HEX8 element exercising the hourglass correction with a pure
-  # Flanagan-Belytschko mode (selected via the IC function from the tests spec).
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
@@ -52,7 +50,7 @@
 []
 
 [Problem]
-  kernel_coverage_check = FALSE
+  kernel_coverage_check = false
   solve = false
 []
 

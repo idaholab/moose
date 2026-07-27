@@ -1,6 +1,3 @@
-# Reduced-integration (single quadrature point) variant of neml2_rz.i with the
-# batched hourglass stabilization. Must match moose_rz_hourglass.i, which uses
-# the per-element HourglassCorrectionQuad4 kernel.
 !include 'neml2_rz.i'
 
 [UserObjects]

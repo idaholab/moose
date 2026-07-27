@@ -1,5 +1,4 @@
 [Mesh]
-  # Single QUAD4 element rotated by 37 degrees; IC uses inverse-rotated coords to recreate g1.
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -53,7 +52,7 @@
 []
 
 [Problem]
-  kernel_coverage_check = FALSE
+  kernel_coverage_check = false
   solve = false
 []
 
@@ -78,4 +77,3 @@
   csv = true
   execute_on = 'INITIAL'
 []
-

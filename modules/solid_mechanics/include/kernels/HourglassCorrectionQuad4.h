@@ -13,10 +13,9 @@
 #include <array>
 
 /**
- * Advanced hourglass correction for QUAD4 elements that computes the correction
- * for a single displacement component (x or y). It uses the current geometry (via
- * _current_elem) to compute an affine displacement field, isolates the hourglass modes,
- * and scales the penalty dynamically.
+ * Hourglass correction for underintegrated QUAD4 elements that computes the correction for a
+ * single displacement component. It projects the classical hourglass vector out of the affine
+ * displacement space and scales the penalty using the current element geometry.
  */
 class HourglassCorrectionQuad4 : public Kernel
 {
@@ -38,9 +37,6 @@ protected:
   /// Displacement variable (applied component-wise: x or y)
   const MooseVariable::DofValues & _v;
 
-  /// Hourglass mode vectors for a QUAD4 element (unnormalized)
-  /// Mode 1: [ 1, -1,  1, -1 ]
-  const std::array<Real, 4> _g1;
-  /// Mode 2: [ 1,  1, -1, -1 ]
-  const std::array<Real, 4> _g2;
+  /// Classical QUAD4 hourglass vector [1, -1, 1, -1] in libMesh node ordering
+  const std::array<Real, 4> _gamma;
 };

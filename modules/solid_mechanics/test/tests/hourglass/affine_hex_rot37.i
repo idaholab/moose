@@ -1,7 +1,4 @@
 [Mesh]
-  # 2x2x2 HEX8 block rotated 37 degrees: an affine displacement field must
-  # produce identically zero hourglass residual (rotation invariance + affine
-  # annihilation).
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
@@ -67,7 +64,7 @@
 []
 
 [Problem]
-  kernel_coverage_check = FALSE
+  kernel_coverage_check = false
   solve = false
 []
 

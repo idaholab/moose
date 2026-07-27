@@ -21,8 +21,8 @@
  * Batched hourglass stabilization for underintegrated (single quadrature point)
  * QUAD4 (2 displacements, incl. RZ) and HEX8 (3 displacements) elements in the
  * NEML2 nodal-force path. Per element and displacement component, the best-fit
- * affine part of the nodal displacement is removed and the non-affine hourglass
- * modes are penalized with a rotation-invariant scale, following
+ * classical mode vectors are projected out of the affine displacement space and
+ * the remaining hourglass modes are penalized with a rotation-invariant scale, following
  * HourglassCorrectionQuad4 (Flanagan-Belytschko-style control with a
  * least-squares affine fit). Operates on the displaced geometry.
  */

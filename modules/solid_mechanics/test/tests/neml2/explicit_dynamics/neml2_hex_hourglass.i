@@ -1,5 +1,3 @@
-# Reduced-integration 3D HEX8 explicit dynamics through the NEML2 nodal-force
-# path with batched hourglass stabilization. Twin: moose_hex_hourglass.i.
 !include 'expdyn3d.i'
 
 [NEML2]

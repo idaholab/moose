@@ -28,10 +28,16 @@ NEML2SmallStrainRZ::validParams()
 NEML2SmallStrainRZ::NEML2SmallStrainRZ(const InputParameters & parameters)
   : NEML2SmallStrain(parameters), _radial_coord(_subproblem.getAxisymmetricRadialCoord())
 {
-  auto disp_vars = getParam<std::vector<NonlinearVariableName>>("displacements");
+  for (const auto sid : _neml2_assembly.blockIDs())
+    if (_subproblem.getCoordSystem(sid) != Moose::COORD_RZ)
+      paramError("assembly",
+                 "NEML2SmallStrainRZ requires every assembly block to use the axisymmetric (RZ) "
+                 "coordinate system.");
+
+  const auto disp_vars = getParam<std::vector<NonlinearVariableName>>("displacements");
   if (disp_vars.size() != 2)
     paramError("displacements",
-               "exactly 2 displacement variables (radial, axial) required, got ",
+               "exactly 2 displacement variables in coordinate-axis order are required, got ",
                disp_vars.size());
 
   _disp_r = &_fe.getValue(disp_vars[_radial_coord]);
@@ -44,7 +50,7 @@ NEML2SmallStrainRZ::forward()
   NEML2SmallStrain::forward();
 
   // hoop strain = u_r / r; quadrature points are strictly inside elements, so r > 0
-  auto r = _neml2_assembly.qPoints().base_index({_radial_coord});
+  const auto r = _neml2_assembly.qPoints().base_index({_radial_coord});
   _output.base_index_put_({2}, *_disp_r / r);
 }
 

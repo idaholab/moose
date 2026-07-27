@@ -24,10 +24,10 @@ NEML2StressDivergence::validParams()
   InputParameters params = NEML2PostKernel::validParams();
   params.addClassDescription(
       "This user object calculates the stress divergence for a given set of displacement "
-      "variables and assemble the contribution into the residual vector.");
+      "variables and assembles the contribution into the residual vector.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "displacements",
-      "The displacements variables whose function space will be used to define the test "
+      "The displacement variables whose function spaces will be used to define the test "
       "functions.");
   params.addRequiredParam<std::string>("stress",
                                        "The name of the NEML2 variable to use as the stress.");

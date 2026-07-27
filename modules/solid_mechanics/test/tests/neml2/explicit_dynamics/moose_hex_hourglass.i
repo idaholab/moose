@@ -1,5 +1,3 @@
-# Reduced-integration 3D HEX8 explicit dynamics with per-element hourglass
-# stabilization (HourglassCorrectionHex8); NEML2 twin: neml2_hex_hourglass.i.
 !include 'expdyn3d.i'
 
 [Kernels]

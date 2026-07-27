@@ -1,8 +1,3 @@
-# Matched reference for neml2_large_def.i: the SAME St. Venant-Kirchhoff NEML2
-# model through the conventional coupling — F gathered from the Lagrangian
-# strain material's deformation_gradient property, PK2 returned as a material
-# property, PK1 = F S formed by ComputeLagrangianStressCustomPK2, assembled by
-# TotalLagrangianStressDivergence on the reference configuration.
 !include 'expdyn.i'
 
 [GlobalParams]
