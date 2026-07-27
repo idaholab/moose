@@ -138,24 +138,12 @@ void
 MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 {
   auto & problem = getMFEMProblem();
-  auto & pd = problem.getProblemData();
+  auto eq_sys = problem.getProblemData().eqn_system;
 
-  auto * eq_sys = dynamic_cast<Moose::MFEM::EquationSystem *>(pd.eqn_system.get());
-  if (!eq_sys)
+  if (eq_sys->Eigen() || eq_sys->Complex() || eq_sys->Nonlinear() || eq_sys->Multivariate())
     mooseError("GeometricMultigridSolver '",
                name(),
-               "': requires a standard (non-complex, non-time-dependent) EquationSystem.");
-
-  if (eq_sys->Nonlinear())
-    mooseError("GeometricMultigridSolver '",
-               name(),
-               "': nonlinear equation systems are not currently supported.");
-
-  if (eq_sys->HasMixedBilinearForms(_var_name))
-    paramError("variable",
-               "mixed bilinear form contributions are not supported for variable '",
-               _var_name,
-               "'. Block multigrid is required for saddle-point / mixed-field problems.");
+               "': requires a real, univariate, linear, and non-eigenproblem equation system");
 
   const int N = _hierarchy->GetNumLevels();
   if (N < 1)

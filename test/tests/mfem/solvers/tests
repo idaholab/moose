@@ -15,7 +15,7 @@
   [MFEMPMGRejectsNonlinear]
     type = RunException
     input = pmg_nonlinear_error.i
-    expect_err = "GeometricMultigridSolver 'pmg': nonlinear equation systems are not currently supported."
+    expect_err = "GeometricMultigridSolver 'pmg': requires a real, univariate, linear, and non-eigenproblem equation system"
     requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
                   'nonlinear equation system.'
     capabilities = 'mfem'
