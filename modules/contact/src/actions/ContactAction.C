@@ -56,15 +56,6 @@ static unsigned int contact_userobject_counter = 0;
 // Counter for distinct contact action objects
 static unsigned int contact_action_counter = 0;
 
-namespace
-{
-bool
-supportsFrictionRegularization(const ContactFormulation formulation)
-{
-  return formulation == ContactFormulation::MORTAR;
-}
-}
-
 // For mortar subdomains
 registerMooseAction("ContactApp", ContactAction, "append_mesh_generator");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
@@ -141,19 +132,20 @@ ContactAction::validParams()
       "iterations for penalizing relative slip distance if the node is under stick conditions.(a "
       "value larger than one, e.g., 10, tends to speed up convergence.)");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
-  params.addParam<MooseEnum>("friction_coefficient_regularization",
-                             Moose::Contact::frictionCoefficientRegularizationOptions(),
-                             "The regularization applied to the Coulomb friction coefficient.");
-  params.addRangeCheckedParam<Real>(
-      "friction_reference_slip",
-      0.0,
-      "friction_reference_slip >= 0",
-      "Reference slip increment used by friction coefficient regularization.");
+  params.addParam<MooseEnum>(
+      "friction_coefficient_regularization",
+      Moose::Contact::frictionCoefficientRegularizationOptions(),
+      "The regularization applied to the quasistatic mortar Coulomb friction "
+      "coefficient.");
+  params.addRangeCheckedParam<Real>("friction_reference_slip",
+                                    0.0,
+                                    "friction_reference_slip >= 0",
+                                    "Positive slip-increment scale used by ARCTAN_SLIP.");
   params.addRangeCheckedParam<Real>(
       "friction_elastic_slip",
       0.0,
       "friction_elastic_slip >= 0",
-      "Tangential elastic slip distance over which the Coulomb friction bound is reached.");
+      "Maximum reversible tangential slip before reaching the Coulomb capacity.");
   params.addParam<Real>("tension_release",
                         0.0,
                         "Tension release threshold.  A node in contact "
@@ -424,27 +416,40 @@ ContactAction::ContactAction(const InputParameters & params)
   const auto friction_coefficient_regularization =
       getParam<MooseEnum>("friction_coefficient_regularization")
           .getEnum<Moose::Contact::FrictionCoefficientRegularization>();
+  const auto friction_reference_slip = getParam<Real>("friction_reference_slip");
+  const auto friction_elastic_slip = getParam<Real>("friction_elastic_slip");
   const bool has_friction_regularization =
-      params.isParamSetByUser("friction_elastic_slip") ||
-      params.isParamSetByUser("friction_coefficient_regularization") ||
-      params.isParamSetByUser("friction_reference_slip");
+      friction_elastic_slip > 0.0 || friction_coefficient_regularization !=
+                                         Moose::Contact::FrictionCoefficientRegularization::NONE;
 
   if (_model != ContactModel::COULOMB && has_friction_regularization)
     paramError("model",
                "The friction regularization options can only be used with the 'coulomb' model.");
 
   if (_model == ContactModel::COULOMB && has_friction_regularization &&
-      !supportsFrictionRegularization(_formulation))
+      _formulation != ContactFormulation::MORTAR)
     paramError("formulation",
                "The friction regularization options are only supported with the 'mortar' "
                "formulation.");
 
   if (friction_coefficient_regularization !=
           Moose::Contact::FrictionCoefficientRegularization::NONE &&
-      getParam<Real>("friction_reference_slip") <= 0.0)
+      friction_reference_slip <= 0.0)
     paramError("friction_reference_slip",
                "A positive friction_reference_slip is required when "
                "friction_coefficient_regularization is not NONE.");
+
+  if (friction_coefficient_regularization !=
+          Moose::Contact::FrictionCoefficientRegularization::NONE &&
+      friction_elastic_slip > 0.0)
+    paramError("friction_coefficient_regularization",
+               "friction_coefficient_regularization and friction_elastic_slip are mutually "
+               "exclusive.");
+
+  if (_mortar_dynamics && has_friction_regularization)
+    paramError(friction_elastic_slip > 0.0 ? "friction_elastic_slip"
+                                           : "friction_coefficient_regularization",
+               "Friction regularization is not supported with mortar_dynamics.");
 
   if (_formulation == ContactFormulation::MORTAR_PENALTY)
   {
@@ -1284,7 +1289,7 @@ ContactAction::addMortarContact()
         params.applySpecificParameters(
             parameters(), {"newmark_beta", "newmark_gamma", "capture_tolerance", "wear_depth"});
       else
-      { // We need user objects for quasistatic constraints
+      {
         params.set<UserObjectName>("weighted_gap_uo") = "lm_weightedvelocities_object_" + name();
         params.set<UserObjectName>("weighted_velocities_uo") =
             "lm_weightedvelocities_object_" + name();
@@ -1318,10 +1323,11 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
-      params.set<MooseEnum>("friction_coefficient_regularization") =
-          getParam<MooseEnum>("friction_coefficient_regularization");
-      params.set<Real>("friction_reference_slip") = getParam<Real>("friction_reference_slip");
-      params.set<Real>("friction_elastic_slip") = getParam<Real>("friction_elastic_slip");
+      if (!_mortar_dynamics)
+        params.applySpecificParameters(parameters(),
+                                       {"friction_coefficient_regularization",
+                                        "friction_reference_slip",
+                                        "friction_elastic_slip"});
       params.applySpecificParameters(parameters(),
                                      {"triangulation",
                                       "triangulate_triangles",

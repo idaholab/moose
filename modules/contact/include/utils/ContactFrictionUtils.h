@@ -9,13 +9,11 @@
 
 #pragma once
 
-#include "MooseError.h"
 #include "MooseEnum.h"
 #include "MooseTypes.h"
+#include "ADReal.h"
 
-#include "libmesh/libmesh.h"
-
-#include <cmath>
+#include <array>
 
 namespace Moose
 {
@@ -24,35 +22,31 @@ namespace Contact
 
 CreateMooseEnumClass(FrictionCoefficientRegularization, NONE, ARCTAN_SLIP);
 
-inline MooseEnum
-frictionCoefficientRegularizationOptions()
+/// Orthonormal material frame ordered as first tangent, second tangent, and normal.
+using ContactTangentialFrame = std::array<RealVectorValue, 3>;
+
+struct ElasticSlipReturn
 {
-  MooseEnum options(getFrictionCoefficientRegularizationOptions(), "NONE");
-  options.addDocumentation("NONE", "Use the supplied Coulomb friction coefficient.");
-  options.addDocumentation(
-      "ARCTAN_SLIP",
-      "Scale the Coulomb friction coefficient by an arctangent function of the slip increment.");
-  return options;
-}
+  /// Tangential LM vector, aligned with relative slip; secondary physical traction is its negative.
+  ADRealVectorValue multiplier;
+  RealVectorValue elastic_gap;
+};
 
-template <typename TMu, typename TSlip>
-auto
-regularizedFrictionCoefficient(const TMu & mu,
-                               const TSlip & slip_increment,
-                               const FrictionCoefficientRegularization regularization,
-                               const Real reference_slip) -> decltype(mu + mu * slip_increment)
-{
-  using std::atan;
-  using Result = decltype(mu + mu * slip_increment);
+MooseEnum frictionCoefficientRegularizationOptions();
 
-  if (regularization == FrictionCoefficientRegularization::NONE)
-    return Result(mu);
+ContactTangentialFrame buildContactTangentialFrame(const Elem & elem,
+                                                   const Point & reference_point,
+                                                   const RealVectorValue & preferred_normal);
 
-  mooseAssert(reference_slip > 0.0,
-              "Friction coefficient regularization requires a positive reference slip");
+ADReal tangentialSlipMagnitude(const ADRealVectorValue & slip);
 
-  return mu * (2.0 / libMesh::pi) * atan(slip_increment / reference_slip);
-}
+ElasticSlipReturn elasticSlipReturnMap(const ADRealVectorValue & trial_elastic_gap,
+                                       const ADReal & friction_coefficient,
+                                       const ADReal & contact_pressure,
+                                       Real elastic_slip);
+
+ADReal
+arctanFrictionCoefficient(const ADReal & mu, const ADReal & slip_increment, Real reference_slip);
 
 } // namespace Contact
 } // namespace Moose

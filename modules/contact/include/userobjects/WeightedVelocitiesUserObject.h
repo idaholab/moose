@@ -30,9 +30,7 @@ public:
   const std::unordered_map<const DofObject *, std::array<ADReal, 2>> &
   dofToWeightedVelocities() const;
 
-  /**
-   * Get the degree of freedom to physical tangential velocities information
-   */
+  /// Get the degree of freedom to interpolated physical tangential velocities.
   const std::unordered_map<const DofObject *, std::array<ADReal, 2>> & dofToRealVelocities() const;
 
   /**

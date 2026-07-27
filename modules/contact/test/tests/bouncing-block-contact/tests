@@ -226,72 +226,253 @@
       custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
   []
-  [coulomb_friction_regularization_lm_mortar]
-    requirement = 'The contact action shall support Coulomb friction regularization options for '
-                  'mortar Lagrange multiplier contact'
+  [coulomb_friction_regularization_validation]
+    requirement = 'The Coulomb mortar Lagrange multiplier contact input shall validate friction regularization settings'
     issues = '#33356'
     design = 'actions/ContactAction.md constraints/ComputeFrictionalForceLMMechanicalContact.md'
 
-    [accept]
-      type = 'RunApp'
+    [action_mutual_exclusion_error]
+      type = 'RunException'
       input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
-      check_input = true
-      cli_args = 'Contact/frictional/friction_elastic_slip=1e-4 '
-                 'Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP '
-                 'Contact/frictional/friction_reference_slip=1e-3'
-      detail = 'by accepting Lagrange multiplier mortar friction regularization options'
+      cli_args = 'Contact/frictional/friction_elastic_slip=1e-4 Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP Contact/frictional/friction_reference_slip=1e-3'
+      expect_err = 'friction_coefficient_regularization and friction_elastic_slip are mutually exclusive'
+      detail = 'by rejecting simultaneous regularizations through the contact action'
+    []
+    [direct_mutual_exclusion_error]
+      type = 'RunException'
+      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
+      cli_args = 'Constraints/frictional_normal_lm/friction_elastic_slip=1e-4 Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP Constraints/frictional_normal_lm/friction_reference_slip=1e-3'
+      expect_err = 'friction_coefficient_regularization and friction_elastic_slip are mutually exclusive'
+      detail = 'and on a directly configured constraint'
     []
     [missing_reference_slip_error]
       type = 'RunException'
       input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
       cli_args = 'Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP'
-      expect_err = 'A positive friction_reference_slip is required when '
-                   'friction_coefficient_regularization is not NONE'
-      detail = 'and by requiring a positive reference slip when the friction coefficient is '
-               'regularized'
+      expect_err = 'A positive friction_reference_slip is required when friction_coefficient_regularization is not NONE'
+      detail = 'by requiring a positive ARCTAN reference slip'
     []
-    [bad_epsilon_error]
+    [higher_order_lm_error]
       type = 'RunException'
-      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
-      cli_args = 'Constraints/frictional_normal_lm/epsilon=0'
-      expect_err = "Range check failed for parameter Constraints/frictional_normal_lm/epsilon; "
-                   "expression = 'epsilon > 0', value = 0"
-      detail = 'and by rejecting a nonpositive friction enforcement epsilon'
+      input = frictionless-mortar-action-lm-space.i
+      cli_args = 'Contact/contact_action/model=coulomb Contact/contact_action/friction_coefficient=0.1 Contact/contact_action/friction_elastic_slip=1e-4 Contact/contact_action/lm_space=MATCH_DISPLACEMENT'
+      expect_err = 'Friction regularization currently requires first-order nodal mortar Lagrange multipliers'
+      detail = 'and by rejecting unsupported higher-order multiplier spaces'
     []
-    [nonpositive_reference_slip_error]
-      type = 'RunException'
-      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp.i
-      cli_args = 'Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP '
-                 'Constraints/frictional_normal_lm/friction_reference_slip=0'
-      expect_err = 'A positive friction_reference_slip is required when '
-                   'friction_coefficient_regularization is not NONE'
-      detail = 'and by rejecting nonpositive reference slip for regularized friction'
-    []
-    [negative_reference_slip_error]
-      type = 'RunException'
-      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
-      cli_args = 'Contact/frictional/friction_reference_slip=-1'
-      expect_err = "Contact/frictional/friction_reference_slip: Range check failed; expression = "
-                   "'friction_reference_slip >= 0', value = -1"
-      detail = 'and by rejecting negative reference slip even without coefficient regularization'
-    []
-    [run]
-      type = 'RunApp'
-      input = frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.i
-      cli_args = "Postprocessors/active='' Executioner/end_time=60 "
-                 "Outputs/exodus=false "
-                 "Contact/frictional/friction_elastic_slip=1e-4 "
-                 "Contact/frictional/friction_coefficient_regularization=ARCTAN_SLIP "
-                 "Contact/frictional/friction_reference_slip=1e-3"
-      detail = 'and by solving a short regularized mortar Lagrange multiplier contact problem.'
-      # This short regression shares its input's default checkpoint base with an existing recover test.
+  []
+  [coulomb_friction_arctan_slip]
+    requirement = 'The Coulomb mortar Lagrange multiplier contact implementation shall regularize the friction coefficient using the current tangential slip increment'
+    issues = '#33356'
+    design = 'actions/ContactAction.md constraints/ComputeFrictionalForceLMMechanicalContact.md'
+
+    [close_slide_open]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "starting_point=0 offset=0.01 Constraints/frictional_normal_lm/mu=0.05 "
+                 "Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/frictional_normal_lm/friction_reference_slip=1e-4 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Variables/frictional_tangential_lm/scaling=1e-4 Functions/normal_loading/x='0 1 2 3 4' "
+                 "Functions/normal_loading/y='0.01 -0.01 -0.01 0.01 0.01' "
+                 "Functions/tangential_loading/x='0 1 2 3 4' Functions/tangential_loading/y='0 0 2e-4 2e-4 2e-4' "
+                 "Executioner/end_time=4 Executioner/dt=0.05 Executioner/dtmin=0.05 "
+                 "Executioner/nl_max_its=60 Executioner/solve_type=NEWTON "
+                 "Executioner/line_search=basic Outputs/out/time_step_interval=20 Outputs/active=out "
+                 "Outputs/file_base=frictional-arctan-slip-close-slide-open"
+      csvdiff = 'frictional-arctan-slip-close-slide-open.csv'
+      rel_err = 1e-5
+      abs_zero = 1e-10
+      detail = 'and by retaining a well-scaled tangential multiplier equation through contact release'
       recover = false
       restep = false
     []
+    [close_slide_open_refined]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      prereq = 'coulomb_friction_arctan_slip/close_slide_open'
+      cli_args = "starting_point=0 offset=0.01 Constraints/frictional_normal_lm/mu=0.05 "
+                 "Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/frictional_normal_lm/friction_reference_slip=1e-4 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Variables/frictional_tangential_lm/scaling=1e-4 Functions/normal_loading/x='0 1 2 3 4' "
+                 "Functions/normal_loading/y='0.01 -0.01 -0.01 0.01 0.01' "
+                 "Functions/tangential_loading/x='0 1 2 3 4' Functions/tangential_loading/y='0 0 2e-4 2e-4 2e-4' "
+                 "Executioner/end_time=4 Executioner/dt=0.025 Executioner/dtmin=0.025 "
+                 "Executioner/nl_max_its=60 Executioner/solve_type=NEWTON "
+                 "Executioner/line_search=basic Outputs/out/time_step_interval=40 Outputs/active=out "
+                 "Outputs/file_base=frictional-arctan-slip-close-slide-open-refined"
+      csvdiff = 'frictional-arctan-slip-close-slide-open-refined.csv'
+      rel_err = 1e-8
+      abs_zero = 1e-10
+      detail = 'and by showing the documented load-step sensitivity on the same refined history'
+      recover = false
+      restep = false
+    []
+    [small_reference_default]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "starting_point=0 offset=0.01 Constraints/frictional_normal_lm/mu=0.05 "
+                 "Constraints/frictional_normal_lm/friction_coefficient_regularization=NONE "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Variables/frictional_tangential_lm/scaling=1e-4 Functions/normal_loading/x='0 1 2' "
+                 "Functions/normal_loading/y='0.01 -0.01 -0.01' "
+                 "Functions/tangential_loading/x='0 1 2' Functions/tangential_loading/y='0 0 2e-4' "
+                 "Executioner/end_time=2 Executioner/dt=0.05 Executioner/dtmin=0.05 "
+                 "Executioner/nl_max_its=60 Executioner/solve_type=NEWTON "
+                 "Executioner/line_search=basic Outputs/out/time_step_interval=20 "
+                 "Outputs/file_base=frictional-arctan-slip-small-limit"
+      csvdiff = 'frictional-arctan-slip-small-limit.csv'
+      rel_err = 1e-5
+      abs_zero = 1e-10
+      detail = 'and by defining the unregularized small-reference-slip limit'
+      recover = false
+      restep = false
+    []
+    [small_reference_limit]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      prereq = 'coulomb_friction_arctan_slip/small_reference_default'
+      cli_args = "starting_point=0 offset=0.01 Constraints/frictional_normal_lm/mu=0.05 "
+                 "Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/frictional_normal_lm/friction_reference_slip=1e-10 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Variables/frictional_tangential_lm/scaling=1e-4 Functions/normal_loading/x='0 1 2' "
+                 "Functions/normal_loading/y='0.01 -0.01 -0.01' "
+                 "Functions/tangential_loading/x='0 1 2' Functions/tangential_loading/y='0 0 2e-4' "
+                 "Executioner/end_time=2 Executioner/dt=0.05 Executioner/dtmin=0.05 "
+                 "Executioner/nl_max_its=60 Executioner/solve_type=NEWTON "
+                 "Executioner/line_search=basic Outputs/out/time_step_interval=20 "
+                 "Outputs/file_base=frictional-arctan-slip-small-limit"
+      csvdiff = 'frictional-arctan-slip-small-limit.csv'
+      rel_err = 1e-5
+      abs_zero = 1e-10
+      detail = 'and by converging to the unregularized result as the reference slip vanishes'
+      recover = false
+      restep = false
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "starting_point=0 offset=0.01 Constraints/frictional_normal_lm/mu=0.05 "
+                 "Constraints/frictional_normal_lm/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/frictional_normal_lm/friction_reference_slip=1e-4 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Variables/frictional_tangential_lm/scaling=1e-4 Functions/normal_loading/x='0 1 2 3 4' "
+                 "Functions/normal_loading/y='0.01 -0.01 -0.01 0.01 0.01' "
+                 "Functions/tangential_loading/x='0 1 2 3 4' Functions/tangential_loading/y='0 0 2e-4 2e-4 2e-4' "
+                 "Executioner/end_time=1.1 Executioner/dt=0.05 Executioner/dtmin=0.05 "
+                 "Executioner/nl_max_its=60 Executioner/solve_type=NEWTON "
+                 "Executioner/line_search=basic Outputs/active=''"
+      run_sim = true
+      only_final_jacobian = true
+      ratio_tol = 3e-3
+      difference_tol = 1
+      detail = 'and by differentiating its normalized projection residual at nonzero slip'
+    []
+  []
+  [coulomb_friction_elastic_slip]
+    requirement = 'The Coulomb mortar Lagrange multiplier contact implementation shall provide stateful reversible tangential elastic slip'
+    issues = '#33356'
+    design = 'actions/ContactAction.md constraints/ComputeFrictionalForceLMMechanicalContact.md'
+
+    [elastic_slip_load_hold]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = 'Outputs/out/time_step_interval=10'
+      csvdiff = 'frictional-elastic-slip-load-hold_out.csv'
+      rel_err = 1e-8
+      abs_zero = 1e-10
+      detail = 'by matching elastic stick, hold, unload, and reload results with zero enforcement epsilon'
+    []
+    [elastic_slip_load_hold_refined]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      prereq = 'coulomb_friction_elastic_slip/elastic_slip_load_hold'
+      cli_args = 'Executioner/dt=0.05 Executioner/dtmin=0.05 Outputs/out/time_step_interval=20'
+      csvdiff = 'frictional-elastic-slip-load-hold_out.csv'
+      rel_err = 2e-2
+      abs_zero = 1e-3
+      detail = 'and by reproducing the reaction history with refined load steps'
+      recover = false
+    []
+    [elastic_slip_slide_unload]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "Constraints/frictional_normal_lm/mu=0.01 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=1e-4 "
+                 "Functions/tangential_loading/x='0 1 1.6 2 3 4' Functions/tangential_loading/y='0 0 5e-3 4.75e-3 4.75e-3 4.75e-3' "
+                 "Executioner/end_time=3 Executioner/dt=0.05 Executioner/dtmin=0.00625 "
+                 "Executioner/nl_max_its=80 Outputs/out/time_step_interval=10 "
+                 "Outputs/file_base=frictional-elastic-slip-slide-unload"
+      csvdiff = 'frictional-elastic-slip-slide-unload.csv'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'and by reaching the Coulomb cap, unloading, and holding the returned state'
+    []
+    [elastic_slip_small_limit_default]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "Constraints/frictional_normal_lm/friction_elastic_slip=0 "
+                 "Functions/tangential_loading/x='0 1 2' "
+                 "Functions/tangential_loading/y='0 0 2e-4' "
+                 "Executioner/end_time=2 Executioner/dt=0.025 Executioner/dtmin=0.00625 "
+                 "Executioner/nl_max_its=80 Outputs/out/time_step_interval=40 "
+                 "Outputs/file_base=frictional-elastic-slip-small-limit"
+      csvdiff = 'frictional-elastic-slip-small-limit.csv'
+      rel_err = 1e-3
+      abs_zero = 1e-10
+      detail = 'and by defining the exact-LM-stick small-elastic-slip limit'
+      recover = false
+      restep = false
+    []
+    [elastic_slip_small_limit]
+      type = 'CSVDiff'
+      input = frictional-elastic-slip-load-hold.i
+      prereq = 'coulomb_friction_elastic_slip/elastic_slip_small_limit_default'
+      cli_args = "Constraints/frictional_normal_lm/friction_elastic_slip=1e-5 "
+                 "Functions/tangential_loading/x='0 1 2' Functions/tangential_loading/y='0 0 2e-4' "
+                 "Executioner/end_time=2 Executioner/dt=0.025 Executioner/dtmin=0.00625 "
+                 "Executioner/nl_max_its=80 Outputs/out/time_step_interval=40 "
+                 "Outputs/file_base=frictional-elastic-slip-small-limit"
+      csvdiff = 'frictional-elastic-slip-small-limit.csv'
+      rel_err = 1e-3
+      abs_zero = 1e-10
+      detail = 'and by converging toward exact LM stick as the allowable elastic slip decreases'
+      recover = false
+      restep = false
+    []
+    [elastic_slip_stick_jacobian]
+      type = 'PetscJacobianTester'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "Functions/tangential_loading/x='0 1 1.1' "
+                 "Functions/tangential_loading/y='0 0 5e-5' Executioner/end_time=1.1 "
+                 "Executioner/dt=0.1 Executioner/dtmin=0.1 Executioner/solve_type=NEWTON "
+                 "Outputs/active=''"
+      run_sim = true
+      only_final_jacobian = true
+      ratio_tol = 3e-3
+      difference_tol = 1
+      detail = 'and by retaining the assembled stick-branch displacement derivatives'
+    []
+    [elastic_slip_slide_jacobian]
+      type = 'PetscJacobianTester'
+      input = frictional-elastic-slip-load-hold.i
+      cli_args = "Constraints/frictional_normal_lm/mu=0.01 "
+                 "Constraints/frictional_normal_lm/friction_elastic_slip=1e-4 "
+                 "Functions/tangential_loading/x='0 1 1.1' "
+                 "Functions/tangential_loading/y='0 0 5e-3' Executioner/end_time=1.1 "
+                 "Executioner/dt=0.1 Executioner/dtmin=0.1 Executioner/nl_max_its=80 "
+                 "Executioner/solve_type=NEWTON Outputs/active=''"
+      run_sim = true
+      only_final_jacobian = true
+      # The constitutive derivatives are retained, while the material frame is intentionally frozen.
+      ratio_tol = 3e-2
+      difference_tol = 1
+      detail = 'and by retaining the sliding-branch constitutive derivatives with a frozen frame'
+    []
   []
   [coulomb_friction_regularization_action_errors]
-    requirement = 'The contact action shall reject friction regularization options for unsupported '
-                  'contact models and formulations'
+    requirement = 'The contact action shall reject friction regularization options for unsupported contact models and formulations'
     issues = '#33356'
     design = 'actions/ContactAction.md'
 
@@ -302,33 +483,13 @@
       expect_err = "The friction regularization options can only be used with the 'coulomb' model"
       detail = 'by rejecting friction regularization for non-Coulomb contact'
     []
-    [ranfs_regularization_error]
-      type = 'RunException'
-      input = bouncing-block-ranfs.i
-      cli_args = 'Contact/top_bottom/model=coulomb Contact/top_bottom/friction_coefficient=0.1 '
-                 'Contact/top_bottom/friction_elastic_slip=1e-4'
-      expect_err = "The friction regularization options are only supported with the 'mortar' "
-                   "formulation"
-      detail = 'and by rejecting friction regularization for RANFS contact'
-    []
-    [node_face_penalty_regularization_error]
-      type = 'RunException'
-      input = bouncing-block-ranfs.i
-      cli_args = 'Contact/top_bottom/model=coulomb Contact/top_bottom/formulation=penalty '
-                 'Contact/top_bottom/friction_coefficient=0.1 '
-                 'Contact/top_bottom/friction_elastic_slip=1e-4'
-      expect_err = "The friction regularization options are only supported with the 'mortar' "
-                   "formulation"
-      detail = 'and by rejecting friction regularization for node-face penalty contact'
-    []
     [mortar_penalty_regularization_error]
       type = 'RunException'
       input = frictionless-penalty-weighted-gap-action.i
-      cli_args = 'Contact/weighted_gap/model=coulomb Contact/weighted_gap/friction_coefficient=0.1 '
-                 'Contact/weighted_gap/friction_elastic_slip=1e-4'
+      cli_args = 'Contact/weighted_gap/model=coulomb Contact/weighted_gap/friction_coefficient=0.1 Contact/weighted_gap/friction_elastic_slip=1e-4'
       expect_err = "The friction regularization options are only supported with the 'mortar' "
                    "formulation"
-      detail = 'and by rejecting friction regularization for mortar-penalty contact.'
+      detail = 'and by rejecting friction regularization for a non-LM mortar formulation.'
     []
   []
   [split_secondary]

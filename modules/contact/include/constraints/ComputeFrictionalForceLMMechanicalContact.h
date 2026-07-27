@@ -12,8 +12,10 @@
 #include "ComputeWeightedGapLMMechanicalContact.h"
 #include "Function.h"
 #include "ContactFrictionUtils.h"
+#include "TwoVector.h"
 
 class WeightedVelocitiesUserObject;
+class LMWeightedVelocitiesUserObject;
 
 /**
  * Computes frictional constraints (and normal contact constraints by calling its parent object)
@@ -25,6 +27,8 @@ public:
 
   ComputeFrictionalForceLMMechanicalContact(const InputParameters & parameters);
   void residualSetup() override;
+  void timestepSetup() override;
+  void meshChanged() override;
   void post() override;
 
   /**
@@ -66,8 +70,20 @@ protected:
    * dependent friction.
    */
   ADReal computeFrictionValue(const ADReal & contact_pressure,
-                              const ADReal & tangential_vel,
-                              const ADReal & tangential_vel_dir);
+                              const ADReal & function_tangential_vel,
+                              const ADReal & function_tangential_vel_dir);
+
+  std::array<ADReal, 2> computeElasticSlipResidual(const DofObject * dof,
+                                                   const std::array<ADReal, 2> & tangential_lm,
+                                                   const ADReal & friction_coefficient,
+                                                   const ADReal & contact_pressure,
+                                                   unsigned int num_tangents);
+
+  /// A map from node to two weighted tangential velocities
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
+
+  /// A map from node to two interpolated, physical tangential velocities
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_real_tangential_velocity;
 
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
@@ -86,6 +102,9 @@ protected:
 
   /// The weighted gap user object
   const WeightedVelocitiesUserObject & _weighted_velocities_uo;
+
+  /// LM-specific data provider used only when friction regularization is active.
+  const LMWeightedVelocitiesUserObject * _lm_weighted_velocities_uo;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
@@ -125,6 +144,11 @@ protected:
 
   /// Tangential elastic slip distance before reaching the Coulomb bound
   const Real _friction_elastic_slip;
+
+  using ElasticSlipStateMap = std::unordered_map<dof_id_type, TwoVector>;
+  ElasticSlipStateMap & _committed_elastic_slip_state;
+  ElasticSlipStateMap & _candidate_elastic_slip_state;
+  int & _candidate_elastic_slip_step;
 
   /// input function
   const Function * const _function_friction;
