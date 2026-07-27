@@ -10,7 +10,7 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
-  [MFEMTransientProblemComposer]
+  [MFEMTransientProblemComposerTSequence]
     type = CSVDiff
     input = 'prob_op_mfem_multiple_timesequences.i'
     csvdiff = 'mfem_multiple_timesequences.csv'
@@ -21,4 +21,21 @@
     recover = false
     restep = false
   []
+  [MFEMTransientProblemComposerConduction]
+    type = CSVDiff
+    input = prob_op_block_heattransfer.i
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
+    cli_args = 'BCs/active="bottom top_dirichlet" '
+               'Executioner/dt=0.25 Executioner/end_time=1.0 '
+               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
+    requirement = 'The system shall have the ability to solve a transient heat conduction using the problem composer block using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
+
 []
