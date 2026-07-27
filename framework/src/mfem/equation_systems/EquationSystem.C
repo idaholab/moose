@@ -722,11 +722,7 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
       mooseError("LOR solve is only supported for single-variable systems");
 
     const auto & test_var_name = _test_var_names.at(0);
-    const auto & trial_var_name = _trial_var_names.at(0);
-    mfem::ParGridFunction & trial_gf = _gfuncs->GetRef(trial_var_name);
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
+    mfem::Array<int> global_ess_markers = BuildEssentialBoundaryMarkers(test_var_name);
     solver.SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
   }
 
@@ -770,9 +766,7 @@ EquationSystem::BuildNonlinearFormForFESpace(const std::string & var_name,
 bool
 EquationSystem::HasMixedBilinearForms(const std::string & var_name) const
 {
-  if (!_mblfs.Has(var_name))
-    return false;
-  return _mblfs.GetRef(var_name).begin() != _mblfs.GetRef(var_name).end();
+  return _mblfs.Has(var_name) && _mblfs.GetRef(var_name).begin() != _mblfs.GetRef(var_name).end();
 }
 
 mfem::Array<int>

@@ -341,9 +341,7 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
   // variables can say `fespace = <hierarchy_name>` without a separate FESpace definition.
   // The aliasing shared_ptr keeps the hierarchy alive as long as this entry lives.
   auto finest = std::shared_ptr<mfem::ParFiniteElementSpace>(
-      hierarchy_shared,
-      &static_cast<mfem::ParFiniteElementSpace &>(
-          hierarchy_obj->getHierarchy().GetFinestFESpace()));
+      hierarchy_shared, &hierarchy_obj->getHierarchy().GetFinestFESpace());
   getProblemData().fespaces.Register(name, finest);
 }
 

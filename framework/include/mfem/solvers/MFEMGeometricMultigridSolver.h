@@ -13,9 +13,6 @@
 
 #include "MFEMLinearSolverBase.h"
 #include "MFEMFESpaceHierarchy.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem/fem/multigrid.hpp"
-#include "libmesh/restore_warnings.h"
 
 /**
  * P-multigrid / geometric multigrid preconditioner backed by

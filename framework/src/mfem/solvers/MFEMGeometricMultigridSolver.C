@@ -126,7 +126,6 @@ MFEMGeometricMultigridSolver::ParseAssemblyLevel(const std::string & s) const
              "unknown assembly level '",
              s,
              "'. Valid values: legacy, full, element, partial, none.");
-  return mfem::AssemblyLevel::LEGACY;
 }
 
 void
@@ -213,13 +212,9 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 
     // Build level operator.
     mfem::Operator * level_op = nullptr;
-    bool own_op = false;
 
     if (level == finest_level)
-    {
       level_op = const_cast<mfem::Operator *>(&op);
-      own_op = false;
-    }
     else
     {
       auto blf =
@@ -228,7 +223,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
       blf->FormSystemMatrix(level_tdofs, *level_op_handle);
       level_op = level_op_handle->Ptr();
-      own_op = false; // owned by level_op_handle or blf
       new_level_ops.push_back(std::move(level_op_handle));
       new_blfs.push_back(std::move(blf));
     }
@@ -238,7 +232,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     auto & level_smoother = get_smoother(level);
     level_smoother.SetOperator(*level_op);
 
-    mg_ptr->AddLevel(level_op, &level_smoother.GetSolver(), own_op, /*ownSmoother=*/false);
+    mg_ptr->AddLevel(
+        level_op, &level_smoother.GetSolver(), /*ownOperator=*/false, /*ownSmoother=*/false);
   }
 
   // Atomically replace:
