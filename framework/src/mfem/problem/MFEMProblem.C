@@ -308,7 +308,7 @@ MFEMProblem::addFESpace(const std::string & type,
   if (getProblemData().fespace_hierarchies.Has(name))
     mooseError("Cannot add FESpace '",
                name,
-               "': a FESpaceHierarchy with the same name already exists. "
+               "': an MFEMFESpaceHierarchy with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
 
   auto & mfem_fespace = *addObject<MFEMFESpace>(type, name, parameters).front();
@@ -324,7 +324,7 @@ MFEMProblem::addFESpaceHierarchy(const std::string & type,
                                  InputParameters & parameters)
 {
   if (getProblemData().fespaces.Has(name))
-    mooseError("Cannot add FESpaceHierarchy '",
+    mooseError("Cannot add MFEMFESpaceHierarchy '",
                name,
                "': a FESpace with the same name already exists. "
                "FESpaces and FESpaceHierarchies share the fespaces namespace.");
