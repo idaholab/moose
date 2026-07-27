@@ -306,6 +306,44 @@
     abs_zero = 1.0e-5
     valgrind = 'none'
   []
+  [frictional-mortar-3d-function-arctan-slip]
+    requirement = 'The system shall evaluate function-based friction from normalized physical slip '
+                  'with ARCTAN coefficient regularization by'
+    design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md'
+    issues = '#33356'
+    [result]
+      type = 'CSVDiff'
+      input = 'frictional-mortar-3d-function.i'
+      cli_args = "Constraints/friction/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/friction/friction_reference_slip=1e-4 Executioner/end_time=0.025 "
+                 "Outputs/exodus=false Outputs/file_base=frictional-mortar-3d-function-arctan-slip "
+                 "VectorPostprocessors/active=frictional-pressure "
+                 "VectorPostprocessors/frictional-pressure/execute_on=TIMESTEP_END"
+      csvdiff = 'frictional-mortar-3d-function-arctan-slip_frictional-pressure_0001.csv'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      detail = 'matching the tangential traction at nonzero slip,'
+      recover = false
+      restep = false
+      valgrind = 'none'
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'frictional-mortar-3d-function.i'
+      cli_args = "Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 "
+                 "Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 "
+                 "Constraints/friction/friction_coefficient_regularization=ARCTAN_SLIP "
+                 "Constraints/friction/friction_reference_slip=1e-4 Executioner/end_time=0.025 "
+                 "Outputs/active=''"
+      capabilities = 'ad_size>=150 & method!=dbg'
+      detail = 'and retaining the function and slip-increment derivatives away from branch changes.'
+      run_sim = true
+      only_final_jacobian = true
+      ratio_tol = 5e-3
+      difference_tol = 100
+      recover = false
+      restep = false
+    []
+  []
   [frictional-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'

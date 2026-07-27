@@ -316,11 +316,17 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const bool regularized =
       _friction_elastic_slip > 0.0 || _friction_coefficient_regularization !=
                                           Moose::Contact::FrictionCoefficientRegularization::NONE;
-  const auto & function_velocity =
-      regularized ? libmesh_map_find(_weighted_velocities_uo.dofToRealVelocities(), dof)
-                  : _dof_to_real_tangential_velocity[dof];
-  const ADReal base_mu =
-      computeFrictionValue(contact_pressure, function_velocity[0], function_velocity[1]);
+  ADReal base_mu;
+  if (regularized && _has_friction_function)
+  {
+    const ADReal slip_rate =
+        _dt > 0.0 ? _lm_weighted_velocities_uo->tangentialSlipIncrement(dof) / _dt : 0.0;
+    base_mu = computeFrictionValue(contact_pressure, slip_rate, 0.0);
+  }
+  else
+    base_mu = computeFrictionValue(contact_pressure,
+                                   _dof_to_real_tangential_velocity[dof][0],
+                                   _dof_to_real_tangential_velocity[dof][1]);
 
   ADReal dof_residual;
   ADReal dof_residual_dir;
@@ -434,10 +440,15 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const bool regularized =
       _friction_elastic_slip > 0.0 || _friction_coefficient_regularization !=
                                           Moose::Contact::FrictionCoefficientRegularization::NONE;
-  const auto & function_velocity =
-      regularized ? libmesh_map_find(_weighted_velocities_uo.dofToRealVelocities(), dof)
-                  : _dof_to_real_tangential_velocity[dof];
-  const ADReal base_mu = computeFrictionValue(contact_pressure, function_velocity[0], 0.0);
+  ADReal base_mu;
+  if (regularized && _has_friction_function)
+  {
+    const ADReal slip_rate =
+        _dt > 0.0 ? _lm_weighted_velocities_uo->tangentialSlipIncrement(dof) / _dt : 0.0;
+    base_mu = computeFrictionValue(contact_pressure, slip_rate, 0.0);
+  }
+  else
+    base_mu = computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
 
   ADReal dof_residual;
   // Primal-dual active set strategy (PDASS)

@@ -40,7 +40,8 @@ weakly integrated current-minus-old relative displacement at corresponding morta
 \end{equation}
 
 Here $s$ and $p$ denote the secondary and primary sides. Disabling both options preserves the
-existing LM-PDASS and `function_friction` paths.
+existing LM-PDASS and `function_friction` paths. When regularization and `function_friction` are
+combined, the function's relative-velocity argument is $\|\Delta\boldsymbol{g}_t\|/\Delta t$.
 
 ### Slip-increment coefficient regularization
 
