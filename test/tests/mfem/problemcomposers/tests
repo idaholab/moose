@@ -14,7 +14,6 @@
     type = CSVDiff
     input = 'prob_op_mfem_multiple_timesequences.i'
     csvdiff = 'mfem_multiple_timesequences.csv'
-    detail = 'or with specific times to hit.'
     requirement = 'The system shall be able to declare a TransientProblemComposer while using the MFEM block without changing the results of the MFEM HeatTransfer problem.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
