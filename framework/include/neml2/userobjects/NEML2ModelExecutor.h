@@ -91,7 +91,7 @@ protected:
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
-  /// Advance state on device (rather than via MOSOE material properties)
+  /// Advance state on device (rather than via MOOSE material properties)
   const bool _manage_state_advance;
 
   /// State variables whose uncached history seeds to the second-order identity instead of zero

@@ -10,8 +10,10 @@
 #include "NEML2ModelExecutor.h"
 #include "MOOSEToNEML2.h"
 #include "NEML2Utils.h"
-#include <string>
+
+#include <algorithm>
 #include <sstream>
+#include <string>
 
 #ifdef NEML2_ENABLED
 #include <ATen/ATen.h>
@@ -280,6 +282,10 @@ NEML2ModelExecutor::seedUncachedHistory()
   for (const auto & [name, val] : _in)
     if (val.defined())
       gathered.push_back(val);
+  if (gathered.empty())
+    mooseError("Cannot seed managed NEML2 history for executor '",
+               name(),
+               "' because no gathered input has a defined tensor.");
   const auto batch = neml2::utils::broadcast_dynamic_sizes(gathered);
   const auto opts = gathered.front().options();
   const auto sep = model().settings().history_separator();

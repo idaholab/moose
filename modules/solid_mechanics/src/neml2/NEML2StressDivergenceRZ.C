@@ -33,9 +33,17 @@ NEML2StressDivergenceRZ::validParams()
 NEML2StressDivergenceRZ::NEML2StressDivergenceRZ(const InputParameters & parameters)
   : NEML2StressDivergence(parameters), _radial_coord(_subproblem.getAxisymmetricRadialCoord())
 {
+  for (const auto sid : _neml2_assembly.blockIDs())
+    if (_subproblem.getCoordSystem(sid) != Moose::COORD_RZ)
+      paramError(
+          "assembly",
+          "NEML2StressDivergenceRZ requires every assembly block to use the axisymmetric (RZ) "
+          "coordinate system.");
+
   if (_ndisp != 2)
-    paramError(
-        "displacements", "exactly 2 displacement variables (radial, axial) required, got ", _ndisp);
+    paramError("displacements",
+               "exactly 2 displacement variables in coordinate-axis order are required, got ",
+               _ndisp);
 
   _test_r = &_fe.getPhi(_disp_vars[_radial_coord]);
 }

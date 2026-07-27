@@ -1,6 +1,3 @@
-# Matched reference for neml2_large_def_rz.i: the SAME St. Venant-Kirchhoff
-# NEML2 model through the conventional coupling with the Lagrangian
-# axisymmetric kernel system on the reference configuration.
 !include 'expdyn_rz.i'
 
 [GlobalParams]

@@ -210,6 +210,7 @@ NEML2FEInterpolation::initialize()
     return;
 
   _ndofe.clear();
+  _nnodes = 0;
   _moose_node_coords.clear();
   _moose_dof_map.clear();
   _moose_dof_map_global.clear();
@@ -240,11 +241,12 @@ void
 NEML2FEInterpolation::threadJoin(const UserObject & y)
 {
   const auto & other = static_cast<const NEML2FEInterpolation &>(y);
-  mooseAssert(_fem_context_up_to_date == other._fem_context_up_to_date,
-              "NEML2FEInterpolation becomes out of sync with other thread");
 
   if (_fem_context_up_to_date)
     return;
+
+  mooseAssert(_fem_context_up_to_date == other._fem_context_up_to_date,
+              "NEML2FEInterpolation becomes out of sync with other thread");
 
   auto merge_map_vecs = [](auto & map1, const auto & map2)
   {
@@ -256,10 +258,20 @@ NEML2FEInterpolation::threadJoin(const UserObject & y)
   };
 
   merge_map_vecs(_moose_dof_map, other._moose_dof_map);
+  merge_map_vecs(_moose_dof_map_global, other._moose_dof_map_global);
   _moose_node_coords.insert(
       _moose_node_coords.end(), other._moose_node_coords.begin(), other._moose_node_coords.end());
   if (other._nnodes)
+  {
+    if (_nnodes && _nnodes != other._nnodes)
+      mooseError("getNodeCoordinates requires a uniform node count across threads, but found "
+                 "elements with ",
+                 _nnodes,
+                 " and ",
+                 other._nnodes,
+                 " nodes.");
     _nnodes = other._nnodes;
+  }
   merge_map_vecs(_moose_phi, other._moose_phi);
   merge_map_vecs(_moose_grad_phi, other._moose_grad_phi);
 }

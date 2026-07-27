@@ -61,15 +61,22 @@ void
 NEML2Assembly::threadJoin(const UserObject & y)
 {
   const auto & other = static_cast<const NEML2Assembly &>(y);
-  mooseAssert(_up_to_date == other._up_to_date,
-              "NEML2Assembly becomes out of sync with other thread");
 
   if (_up_to_date)
     return;
 
+  mooseAssert(_up_to_date == other._up_to_date,
+              "NEML2Assembly becomes out of sync with other thread");
+
+  if (other._nelem)
+  {
+    if (_nelem)
+      mooseAssert(_nqp == other._nqp,
+                  "The number of quadrature points per element must be the same in all threads.");
+    else
+      _nqp = other._nqp;
+  }
   _nelem += other._nelem;
-  mooseAssert(_nqp == other._nqp,
-              "The number of quadrature points per element must be the same in all threads.");
 
   _moose_JxWxT.insert(_moose_JxWxT.end(), other._moose_JxWxT.begin(), other._moose_JxWxT.end());
   _moose_q_points.insert(

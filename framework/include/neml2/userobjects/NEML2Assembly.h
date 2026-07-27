@@ -72,7 +72,8 @@ protected:
   /// number of quadrature points per element
   int64_t _nqp;
 
-  /// JxWxT (product of Jacobian determinant, quadrature weight, and coordinate transformation factor) for each element, qp
+  /// JxWxT (Jacobian determinant, quadrature weight, and coordinate transformation factor)
+  /// for each element and quadrature point
   std::vector<Real> _moose_JxWxT;
   neml2::Tensor _neml2_JxWxT;
 

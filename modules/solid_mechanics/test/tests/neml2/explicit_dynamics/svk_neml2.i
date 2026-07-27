@@ -1,8 +1,3 @@
-# St. Venant-Kirchhoff total-Lagrangian elasticity:
-#   E = 1/2 (F^T F - I),  S = C : E,  P = F S
-# Outputs both the PK2 stress as a full R2 ('neml2_stress', for the
-# conventional coupling via ComputeLagrangianStressCustomPK2) and the PK1
-# stress ('pk1', for the NEML2 nodal-force path).
 [Models]
   [gl_strain]
     type = GreenLagrangeStrain

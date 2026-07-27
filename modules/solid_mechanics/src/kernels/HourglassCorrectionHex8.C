@@ -9,7 +9,12 @@
 
 #include "HourglassCorrectionHex8.h"
 
+// libMesh includes
+#include "libmesh/string_to_enum.h"
+
+#include <algorithm>
 #include <cmath>
+#include <limits>
 
 registerMooseObject("SolidMechanicsApp", HourglassCorrectionHex8);
 
@@ -21,10 +26,12 @@ HourglassCorrectionHex8::validParams()
       "Hourglass correction for underintegrated HEX8 elements: removes the least-squares affine "
       "part of the elemental displacement and penalizes the four Flanagan-Belytschko hourglass "
       "modes with a rotation-invariant scale. 3D companion of HourglassCorrectionQuad4.");
-  params.addParam<Real>("penalty", 1.0, "Base penalty parameter");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
+      "penalty", 1.0, "penalty >= 0", "Dimensionless hourglass penalty coefficient");
+  params.addRangeCheckedParam<Real>(
       "shear_modulus",
       1.0,
+      "shear_modulus > 0",
       "Shear modulus used in the hourglass stabilization scaling. Defaults to 1.0,"
       " so existing penalty-based behavior is preserved when unspecified.");
   params.set<bool>("use_displaced_mesh") = true;
@@ -48,11 +55,26 @@ HourglassCorrectionHex8::HourglassCorrectionHex8(const InputParameters & paramet
 Real
 HourglassCorrectionHex8::computeQpResidual()
 {
-  // Ensure single quadrature point integration and a HEX8 element.
-  mooseAssert(_qp == 0, "This kernel must only be used with single quadrature point integration.");
-  mooseAssert(_current_elem->type() == libMesh::HEX8,
-              "This kernel only operates on HEX8 elements.");
-  mooseAssert(_v.size() == 8, "This kernel requires 8 nodal DOF values.");
+  if (_qrule->n_points() != 1)
+    mooseError("HourglassCorrectionHex8 requires single-point quadrature, but the current "
+               "quadrature rule has ",
+               _qrule->n_points(),
+               " points.");
+  if (_current_elem->type() != libMesh::HEX8)
+    mooseError("HourglassCorrectionHex8 only supports HEX8 elements, but element ",
+               _current_elem->id(),
+               " has type ",
+               libMesh::Utility::enum_to_string(_current_elem->type()),
+               ".");
+  if (_v.size() != 8)
+    mooseError("HourglassCorrectionHex8 requires eight nodal degrees of freedom, but variable '",
+               _var.name(),
+               "' has ",
+               _v.size(),
+               " on element ",
+               _current_elem->id(),
+               ".");
+  mooseAssert(_qp == 0, "Single-point quadrature must only have quadrature point zero.");
 
   // 1) Geometry about centroid and invariant metrics
   const Point center = _current_elem->vertex_average();
@@ -71,9 +93,10 @@ HourglassCorrectionHex8::computeQpResidual()
   const Real det = A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1]) -
                    A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0]) +
                    A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
-  const Real eps = 1e-12;
+  const Real relative_tolerance = 1e-12;
+  const Real tiny = std::numeric_limits<Real>::min();
   std::array<std::array<Real, 3>, 3> M;
-  if (std::abs(det) > eps)
+  if (std::abs(det) > relative_tolerance * std::max(A[0][0] * A[1][1] * A[2][2], tiny))
   {
     const Real inv = 1.0 / det;
     M[0][0] = (A[1][1] * A[2][2] - A[1][2] * A[2][1]) * inv;
@@ -93,66 +116,42 @@ HourglassCorrectionHex8::computeQpResidual()
       for (const auto b : make_range(3))
         M[a][b] = 0.0;
     for (const auto a : make_range(3))
-      M[a][a] = 1.0 / std::max(A[a][a], eps);
+      M[a][a] = 1.0 / std::max(A[a][a], tiny);
   }
 
-  // 2) Least-squares affine fit: u_affine_i = avg + grad . dx_i
-  Real avg = 0.0;
-  for (const auto i : make_range(8))
-    avg += _v[i];
-  avg /= 8.0;
-
-  std::array<Real, 3> b{};
-  for (const auto i : make_range(8))
-    for (const auto a : make_range(3))
-      b[a] += _v[i] * dx[i](a);
-  std::array<Real, 3> grad;
-  for (const auto a : make_range(3))
-    grad[a] = M[a][0] * b[0] + M[a][1] * b[1] + M[a][2] * b[2];
-
-  std::array<Real, 8> u_hg;
-  for (const auto i : make_range(8))
+  // 2) Project each classical hourglass vector out of the affine displacement space.
+  std::array<std::array<Real, 8>, 4> projected_gamma;
+  for (const auto m : make_range(4))
   {
-    const Real u_aff = avg + grad[0] * dx[i](0) + grad[1] * dx[i](1) + grad[2] * dx[i](2);
-    u_hg[i] = _v[i] - u_aff;
+    std::array<Real, 3> p{};
+    for (const auto i : make_range(8))
+      for (const auto a : make_range(3))
+        p[a] += _gamma[m][i] * dx[i](a);
+
+    std::array<Real, 3> projection;
+    for (const auto a : make_range(3))
+      projection[a] = M[a][0] * p[0] + M[a][1] * p[1] + M[a][2] * p[2];
+
+    for (const auto i : make_range(8))
+      projected_gamma[m][i] = _gamma[m][i] - projection[0] * dx[i](0) - projection[1] * dx[i](1) -
+                              projection[2] * dx[i](2);
   }
 
-  // 3) Hourglass projections onto the four Flanagan-Belytschko modes
+  // 3) Hourglass amplitudes
   std::array<Real, 4> H{};
   for (const auto m : make_range(4))
     for (const auto i : make_range(8))
-      H[m] += _gamma[m][i] * u_hg[i];
+      H[m] += projected_gamma[m][i] * _v[i];
 
-  // 4) Rotation-invariant scaling c = penalty * mu * V / h^2, with
-  //    h^2 = trace(A)/3 and V = 8 * det(B), the one-point quadrature JxW of the
-  //    trilinear map (exact volume for parallelepipeds). Using the same V as
-  //    the quadrature weight keeps this kernel bitwise-consistent with the
-  //    batched NEML2HourglassCorrection.
-  static constexpr std::array<Real, 8> sx = {-1, 1, 1, -1, -1, 1, 1, -1};
-  static constexpr std::array<Real, 8> sy = {-1, -1, 1, 1, -1, -1, 1, 1};
-  static constexpr std::array<Real, 8> sz = {-1, -1, -1, -1, 1, 1, 1, 1};
-  std::array<std::array<Real, 3>, 3> B{};
-  for (const auto i : make_range(8))
-  {
-    const Point x = _current_elem->node_ref(i);
-    for (const auto a : make_range(3))
-    {
-      B[0][a] += sx[i] * x(a) / 8.0;
-      B[1][a] += sy[i] * x(a) / 8.0;
-      B[2][a] += sz[i] * x(a) / 8.0;
-    }
-  }
-  const Real detB = B[0][0] * (B[1][1] * B[2][2] - B[1][2] * B[2][1]) -
-                    B[0][1] * (B[1][0] * B[2][2] - B[1][2] * B[2][0]) +
-                    B[0][2] * (B[1][0] * B[2][1] - B[1][1] * B[2][0]);
-  const Real vol = 8.0 * std::abs(detB);
-  const Real h2 = std::max((A[0][0] + A[1][1] + A[2][2]) / 3.0, eps);
-  const Real c = _penalty * _mu * (vol / h2);
+  // 4) Pointwise scale. Kernel assembly supplies the one-point JxWxT measure, yielding the
+  // integrated coefficient penalty * mu * volume / h^2.
+  const Real h2 = std::max((A[0][0] + A[1][1] + A[2][2]) / 3.0, tiny);
+  const Real c = _penalty * _mu / h2;
 
   // 5) Residual contribution at node _i
   Real r = 0.0;
   for (const auto m : make_range(4))
-    r += _gamma[m][_i] * H[m];
+    r += projected_gamma[m][_i] * H[m];
   return c * r;
 }
 

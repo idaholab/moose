@@ -1,4 +1,3 @@
-# 3D HEX8 explicit dynamics base: a 2x2x2 cube pulled on the +z face.
 N = 2
 
 [GlobalParams]
