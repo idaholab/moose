@@ -83,7 +83,7 @@ private:
     MGProxy(MFEMGeometricMultigridSolver & owner);
 
     /// Updates the concrete MFEM multigrid object used by Mult().
-    void setMG(mfem::GeometricMultigrid & mg);
+    void SetMG(mfem::GeometricMultigrid & mg);
 
     /// Rebuilds the owner's multigrid hierarchy for the new outer-solver operator.
     void SetOperator(const mfem::Operator & op) override;

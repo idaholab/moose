@@ -25,7 +25,7 @@ MFEMGeometricMultigridSolver::MGProxy::MGProxy(MFEMGeometricMultigridSolver & ow
 }
 
 void
-MFEMGeometricMultigridSolver::MGProxy::setMG(mfem::GeometricMultigrid & mg)
+MFEMGeometricMultigridSolver::MGProxy::SetMG(mfem::GeometricMultigrid & mg)
 {
   _mg = &mg;
   height = mg.Height();
@@ -230,6 +230,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   _mg = std::move(mg);
   _level_ops = std::move(new_level_ops);
   _level_blfs = std::move(new_blfs);
-  _mg_proxy->setMG(*_mg);
+  _mg_proxy->SetMG(*_mg);
 }
 #endif
