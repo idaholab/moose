@@ -41,8 +41,7 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
     _direction(getParam<MooseEnum>("direction")),
-    _weighted_velocities_uo(const_cast<WeightedVelocitiesUserObject &>(
-        getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo")))
+    _weighted_velocities_uo(getUserObject<WeightedVelocitiesUserObject>("weighted_velocities_uo"))
 {
   if (getParam<bool>("interpolate_normals"))
     paramError("interpolate_normals",
@@ -57,7 +56,7 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
   {
     if (_weighted_velocities_uo.usesNodalNormalDerivatives())
     {
-      const auto & tangents =
+      const auto tangents =
           _weighted_velocities_uo.contactTangents(*_lower_secondary_elem, geometry_index);
       return tangents[_direction](_component) / tangents[_direction].norm();
     }

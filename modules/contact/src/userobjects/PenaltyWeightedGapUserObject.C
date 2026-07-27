@@ -29,7 +29,16 @@ PenaltyWeightedGapUserObject::validParams()
                                 Moose::RelationshipManagerType::COUPLING,
                                 [](const InputParameters & obj_params, InputParameters & rm_params)
                                 {
-                                  MortarConsumerInterface::setRMParams(obj_params, rm_params);
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                  rm_params.set<BoundaryName>("secondary_boundary") =
+                                      obj_params.get<BoundaryName>("secondary_boundary");
+                                  rm_params.set<BoundaryName>("primary_boundary") =
+                                      obj_params.get<BoundaryName>("primary_boundary");
+                                  rm_params.set<SubdomainName>("secondary_subdomain") =
+                                      obj_params.get<SubdomainName>("secondary_subdomain");
+                                  rm_params.set<SubdomainName>("primary_subdomain") =
+                                      obj_params.get<SubdomainName>("primary_subdomain");
                                   // penetration_tolerance is required exactly for
                                   // augmented-Lagrange contact, which retains the existing
                                   // frozen-normal geometry.
@@ -102,10 +111,6 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _adaptivity_normal(
         getParam<MooseEnum>("adaptivity_penalty_normal").getEnum<AdaptivityNormalPenalty>())
 {
-  // Disable nodal-normal derivatives for augmented-Lagrangian contact.
-  if (_augmented_lagrange_problem)
-    _use_nodal_normal_derivatives = false;
-
   auto check_type = [this](const auto & var, const auto & var_name)
   {
     if (!var.isNodal())
