@@ -5,8 +5,8 @@
 ## Summary
 
 `ProblemComposerBase` is the base object of the builder classes that build `ProblemOperatorBase`
-derived classes when called inside the `Executioner` block, but are configured and
-stored inside the `MFEMProblem`.
+derived classes when called inside the `Executioner` block through the method `createProblemOperator`
+, but are configured and stored inside the `MFEMProblem`.
 
 These can be used with standard equation system problem operators, or user defined 
 custom ones, for example usage on custom operators refer to the Unit-test
