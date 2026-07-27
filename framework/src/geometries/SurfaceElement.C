@@ -12,6 +12,8 @@
 #include "GeometryBase.h"
 #include "LineSegment.h"
 
+#include <algorithm>
+
 SurfaceElement::SurfaceElement(const Elem * elem, const Point & normal)
   : _elem(elem), _normal(normal)
 {
@@ -23,22 +25,25 @@ SurfaceElement::SurfaceElement(const Elem * elem, const Point & normal)
 Real
 SurfaceElement::getProjectedBoundingBoxDiagonal(const Point & normal_dir) const
 {
-  BoundingBox bbox = _elem->loose_bounding_box();
+  const BoundingBox bbox = _elem->loose_bounding_box();
+  const Point d = bbox.second - bbox.first; // (dx, dy, dz), each >= 0
 
-  const Point & min_pt = bbox.first;
-  const Point & max_pt = bbox.second;
+  // The longest diagonal of the projected AABB (its shadow on the plane orthogonal to
+  // normal_dir) is the search radius that must cover this element's projected footprint.
+  // Projecting only the main diagonal (dx, dy, dz) underestimates it whenever that diagonal
+  // is nearly parallel to normal_dir. The projected footprint diameter is the max projected
+  // length over all four space diagonals (dx, +/-dy, +/-dz); their negatives have identical
+  // projected length, so these four combinations are exhaustive.
+  Real max_projected = 0.0;
+  for (const Real sy : {1.0, -1.0})
+    for (const Real sz : {1.0, -1.0})
+    {
+      const Point diag(d(0), sy * d(1), sz * d(2));
+      const Point tangent_vec = diag - normal_dir * (diag * normal_dir);
+      max_projected = std::max(max_projected, tangent_vec.norm());
+    }
 
-  // Step (a): Calculate box_vec
-  Point box_vec = max_pt - min_pt;
-
-  // Step (b): Project box_vec onto normal_dir
-  Real normal_scale = box_vec * normal_dir;
-  Point normal_box_vec = normal_dir * normal_scale;
-
-  // Step (c): Calculate tangent_vec and its norm
-  Point tangent_vec = box_vec - normal_box_vec;
-
-  return tangent_vec.norm();
+  return max_projected;
 }
 
 bool

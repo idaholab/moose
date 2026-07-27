@@ -159,11 +159,13 @@ TEST(SurfaceElementTest, Tri3NormalTilted)
 
 TEST(SurfaceElementTest, ProjectedBoundingBoxDiagonal)
 {
-  // Tri3 spanning [0,1] x [0,1] in the z=0 plane. Bounding-box diagonal is
-  // (1,1,0); projected onto a plane orthogonal to z (i.e. removing the
-  // z-component, which is already zero) the tangential diagonal has norm
-  // sqrt(2). Projecting onto a plane orthogonal to the diagonal direction
-  // itself zeroes out the projection.
+  // Tri3 spanning [0,1] x [0,1] in the z=0 plane. The result is the diameter of
+  // the AABB shadow on the plane orthogonal to normal_dir, i.e. the longest of the
+  // four projected space diagonals. For normal_dir = z, the (1,1,0) diagonal stays
+  // in-plane with norm sqrt(2). For normal_dir along the (1,1,0) diagonal, that
+  // diagonal projects to zero, but the (1,-1,0) diagonal is orthogonal to normal_dir
+  // and still projects to sqrt(2); the footprint diameter is therefore sqrt(2), not
+  // zero (projecting only the main diagonal would wrongly report zero here).
   std::unique_ptr<Tri3> tri(new Tri3());
   std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
   std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
@@ -181,8 +183,54 @@ TEST(SurfaceElementTest, ProjectedBoundingBoxDiagonal)
   const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
   EXPECT_NEAR(
       surface_tri.getProjectedBoundingBoxDiagonal(Point(inv_sqrt2, inv_sqrt2, 0.0) /*normal_dir*/),
-      0.0,
+      std::sqrt(2.0),
       1e-12);
+}
+
+TEST(SurfaceElementTest, ProjectedBoundingBoxDiagonalAlignedEdge)
+{
+  // Edge2 whose AABB main diagonal (max - min) is (1,1,0). Shooting the ray exactly
+  // along that diagonal makes the main-diagonal projection vanish, but the orthogonal
+  // (1,-1,0) space diagonal still has tangential norm sqrt(2). The result must be
+  // sqrt(2); reporting only the single main diagonal would underestimate it to 0 and
+  // shrink the KD-tree search radius enough to miss real ray/element crossings.
+  std::unique_ptr<Edge2> edge(new Edge2());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 1.0, 0.0), 1));
+  edge->set_node(0, n0.get());
+  edge->set_node(1, n1.get());
+  SurfaceEdge2 surface_edge(edge.get());
+
+  const double inv_sqrt2 = 1.0 / std::sqrt(2.0);
+  EXPECT_NEAR(
+      surface_edge.getProjectedBoundingBoxDiagonal(Point(inv_sqrt2, inv_sqrt2, 0.0) /*normal_dir*/),
+      std::sqrt(2.0),
+      1e-12);
+}
+
+TEST(SurfaceElementTest, ProjectedBoundingBoxDiagonalTilted3D)
+{
+  // Tri3 with AABB [0,1]^3 (main diagonal (1,1,1)). Shooting along the main diagonal
+  // zeroes its projection, but the other space diagonals, e.g. (1,1,-1), keep a large
+  // tangential component, so the exhaustive four-diagonal maximum is nonzero. This
+  // exercises the 3D case the single-main-diagonal formula would underestimate.
+  std::unique_ptr<Tri3> tri(new Tri3());
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 1.0, 0.0), 1));
+  std::unique_ptr<Node> n2(new Node(Point(0.0, 0.0, 1.0), 2));
+  tri->set_node(0, n0.get());
+  tri->set_node(1, n1.get());
+  tri->set_node(2, n2.get());
+  SurfaceTri3 surface_tri(tri.get());
+
+  const Point main_diag(1.0, 1.0, 1.0);
+  const Point normal_dir = main_diag / main_diag.norm();
+
+  // Expected: max over the four space diagonals (1, +/-1, +/-1) of the tangential norm.
+  // The main diagonal (1,1,1) projects to 0; e.g. (1,1,-1) projects to a length of
+  // sqrt(8/3). That is the diameter of the projected AABB shadow.
+  const Real expected = std::sqrt(8.0 / 3.0);
+  EXPECT_NEAR(surface_tri.getProjectedBoundingBoxDiagonal(normal_dir), expected, 1e-12);
 }
 
 TEST(SurfaceElementTest, BaseDynamicDispatcherIntersectAndBoundingBall)
