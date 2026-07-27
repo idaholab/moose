@@ -48,7 +48,6 @@ protected:
 private:
   friend class EigenproblemESProblemOperator;
 
-  mfem::Array<int> _global_ess_markers;
   /// The mass operator (e.g. the RHS operator for a generalized eigenproblem)
   mfem::OperatorHandle _mass_rhs;
 };

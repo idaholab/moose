@@ -210,25 +210,23 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
                                  mfem::Array<int> & global_ess_markers)
 {
   if (_essential_bc_map.Has(var_name))
-  {
-    auto & bcs = _essential_bc_map.GetRef(var_name);
-    for (auto & bc : bcs)
+    for (auto & bc : _essential_bc_map.GetRef(var_name))
     {
       // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
-        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
+      for (const auto i : make_range(ess_bdrs.Size()))
+        global_ess_markers[i] |= ess_bdrs[i];
     }
-  }
 }
 
 void
 EquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
+  _ess_markers.resize(_trial_var_names.size());
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
@@ -240,12 +238,11 @@ EquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
+    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the global_ess_markers array
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    // essential boundaries to the _ess_markers array
+    ApplyEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
@@ -722,8 +719,7 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
       mooseError("LOR solve is only supported for single-variable systems");
 
     const auto & test_var_name = _test_var_names.at(0);
-    mfem::Array<int> global_ess_markers = BuildEssentialBoundaryMarkers(test_var_name);
-    solver.SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
+    solver.SetupLOR(*_blfs.Get(test_var_name), GetEssentialBoundaryMarkers(test_var_name));
   }
 
   mooseAssert(_linear_operator.Ptr(),
@@ -763,21 +759,14 @@ EquationSystem::BuildNonlinearFormForFESpace(const std::string & var_name,
   return nlf;
 }
 
-mfem::Array<int>
-EquationSystem::BuildEssentialBoundaryMarkers(const std::string & var_name) const
+mfem::Array<int> &
+EquationSystem::GetEssentialBoundaryMarkers(const std::string & var_name)
 {
-  const int n_bdr = _gfuncs->Get(var_name)->ParFESpace()->GetParMesh()->bdr_attributes.Max();
-  mfem::Array<int> global_markers(n_bdr);
-  global_markers = 0;
+  for (const auto i : index_range(_trial_var_names))
+    if (_trial_var_names.at(i) == var_name)
+      return _ess_markers.at(i);
 
-  if (_essential_bc_map.Has(var_name))
-    for (const auto & bc : _essential_bc_map.GetRef(var_name))
-    {
-      const mfem::Array<int> & bc_markers = bc->getBoundaryMarkers();
-      for (int i = 0; i < n_bdr; ++i)
-        global_markers[i] = std::max(global_markers[i], bc_markers[i]);
-    }
-  return global_markers;
+  mooseError("No essential boundary markers found for variable '", var_name, "'.");
 }
 
 } // namespace Moose::MFEM

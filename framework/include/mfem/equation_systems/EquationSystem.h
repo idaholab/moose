@@ -131,10 +131,10 @@ public:
                                mfem::AssemblyLevel assembly_level);
 
   /**
-   * Build and return the essential boundary attribute marker array for a given trial variable.
+   * Return the essential boundary attribute marker array for a given trial variable.
    * The returned array has size == pmesh.bdr_attributes.Max() with 1 at essential boundaries.
    */
-  mfem::Array<int> BuildEssentialBoundaryMarkers(const std::string & var_name) const;
+  mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
   /// @returns A pointer to the complex equation system, nullptr if not such
   virtual ComplexEquationSystem * Complex() const { return nullptr; }
@@ -301,6 +301,7 @@ protected:
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
+  std::vector<mfem::Array<int>> _ess_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
   /// Arrays to store kernels to act on each component of weak form.

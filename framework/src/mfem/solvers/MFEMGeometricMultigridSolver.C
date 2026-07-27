@@ -158,7 +158,7 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
   };
 
   // Obtain essential boundary attribute markers from the equation system.
-  mfem::Array<int> ess_bdr = eq_sys->BuildEssentialBoundaryMarkers(_var_name);
+  mfem::Array<int> & ess_bdr = eq_sys->GetEssentialBoundaryMarkers(_var_name);
 
   auto & finest_fespace =
       static_cast<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(finest_level));
