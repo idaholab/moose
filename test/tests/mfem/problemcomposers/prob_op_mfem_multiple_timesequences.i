@@ -98,13 +98,13 @@
 
     [Timesequence2]
       type = CSVTimeSequenceStepper
-      file_name = timesequence.csv
+      file_name = gold/timesequence.csv
       column_name = time
     []
 
     [Timesequence3]
       type = ExodusTimeSequenceStepper
-      mesh = timesequence.e
+      mesh = gold/timesequence.e
     []
   []
 []
