@@ -181,3 +181,25 @@ TEST(AdaptiveRayContainmentCheck, EpsSensitivityOnEdge)
     EXPECT_TRUE(test_large_eps.sideness(edge_point2) == SurfaceSide::ON);
   }
 }
+
+TEST(AdaptiveRayContainmentCheck, EmptyBoundaryElementsThrow)
+{
+  // An empty boundary set must be rejected with a runtime error rather than
+  // dereferencing _bd_elements[0], which is undefined behavior in opt builds
+  // where the constructor's internal check would otherwise be compiled out.
+  std::vector<std::unique_ptr<SurfaceElement>> empty_bd_elements;
+  const RayDirectionOptions ray_opts{RayDirectionMode::USER_SPECIFIED, Point(1.0, 0.0, 0.0)};
+  EXPECT_THROW(
+      {
+        try
+        {
+          AdaptiveRayContainmentCheck check(empty_bd_elements, std::vector<Point>(), ray_opts);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_NE(std::string(e.what()).find("must not be empty"), std::string::npos);
+          throw;
+        }
+      },
+      std::exception);
+}

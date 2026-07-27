@@ -35,9 +35,12 @@ AdaptiveRayContainmentCheck::AdaptiveRayContainmentCheck(
     _comm(comm),
     _plane_origin(Point(0.0, 0.0, 0.0))
 {
-  mooseAssert(
-      !_bd_elements.empty(),
-      "AdaptiveRayContainmentCheck: boundary elements should not be empty or uninitialized.");
+  // Runtime (not mooseAssert) check: this precondition depends on caller-supplied input and
+  // guards the _bd_elements[0] dereference below. mooseAssert is compiled out in opt builds,
+  // which would leave that dereference as out-of-bounds undefined behavior on an empty set.
+  if (_bd_elements.empty())
+    mooseError(
+        "AdaptiveRayContainmentCheck: boundary elements must not be empty or uninitialized.");
   _num_elements = _bd_elements.size();
   _dim = _bd_elements[0]->expectedEmbeddingMeshDim();
 
