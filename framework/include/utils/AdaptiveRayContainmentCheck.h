@@ -173,13 +173,17 @@ private:
   std::optional<SurfaceSide> sidenessFromRayPair(const Point & p,
                                                  const std::array<Point, 2> & ray_starts) const;
 
-  /// Count how many times the segment from `ray_start` to `p` crosses the surface. The primary
-  /// direction uses KD-tree candidates; PCA fallback directions scan all elements because the
-  /// KD-tree projection is aligned only with the primary direction. If a candidate element
-  /// contains `p`, sets `point_on_surface` and returns early.
+  /// True if `p` lies on the surface (within `_eps_on_surface`), i.e. some candidate element
+  /// contains it. This is a property of `p` alone (independent of any ray), so `sideness()`
+  /// tests it once up front rather than re-deriving it on every ray cast.
+  bool isOnSurface(const Point & p) const;
+
+  /// Count how many times the segment from `ray_start` to `ray_end` crosses the surface. The
+  /// primary direction uses KD-tree candidates; PCA fallback directions scan all elements because
+  /// the KD-tree projection is aligned only with the primary direction. Callers must rule out the
+  /// on-surface case (via isOnSurface) before interpreting the count.
   int countCrossings(const Point & ray_start,
-                     const Point & p,
-                     bool & point_on_surface,
+                     const Point & ray_end,
                      const bool use_primary_direction = true) const;
 
   /// Ray start strictly outside the global AABB along `unit_direction`, for any direction.

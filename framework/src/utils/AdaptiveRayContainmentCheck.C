@@ -80,6 +80,11 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
   if (isOutsideBoundingBox(p))
     return SurfaceSide::OUTSIDE;
 
+  // Whether p sits on the surface is a property of p alone, so decide it once here rather than
+  // re-testing it on every ray cast below.
+  if (isOnSurface(p))
+    return SurfaceSide::ON;
+
   const std::array<Point, 2> ray_starts =
       _auto_ray_direction
           ? std::array<Point, 2>{rayStartOutsideOBB(p, _ray_direction, _dim - 1, false),
@@ -112,13 +117,8 @@ AdaptiveRayContainmentCheck::sideness(const Point & p) const
         rayStartOutsideOBB(p, fallback_direction, obb_axis, true)};
 
     for (const auto & probe_start : probe_starts)
-    {
-      // p is never on the surface here (the primary pair already returned ON if it were), so the
-      // point_on_surface flag stays false and the probe only uses the crossing count.
-      bool point_on_surface = false;
-      if (countCrossings(probe_start, p, point_on_surface, false) == 0)
+      if (countCrossings(probe_start, p, false) == 0)
         return SurfaceSide::OUTSIDE;
-    }
   }
 
   std::ostringstream oss;
@@ -132,14 +132,11 @@ AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
 {
   std::array<int, 2> counts = {0, 0};
 
-  // Shoot the two (opposite) rays and count intersections with the boundary elements.
+  // Shoot the two (opposite) rays and count intersections with the boundary elements. p has
+  // already been ruled on-surface by sideness(), so the count is always meaningful here.
   for (const auto i : make_range(2))
   {
-    bool point_on_surface = false;
-    counts[i] = countCrossings(ray_starts[i], p, point_on_surface);
-
-    if (point_on_surface)
-      return SurfaceSide::ON;
+    counts[i] = countCrossings(ray_starts[i], p);
 
     // A ray that never crosses the closed surface proves the point is outside.
     if (counts[i] == 0)
@@ -153,18 +150,25 @@ AdaptiveRayContainmentCheck::sidenessFromRayPair(const Point & p,
   return std::nullopt;
 }
 
+bool
+AdaptiveRayContainmentCheck::isOnSurface(const Point & p) const
+{
+  for (const auto elem_id : collectCandidateElementIDs(p))
+    if (_bd_elements[elem_id].get()->elem().contains_point(p, _eps_on_surface))
+      return true;
+  return false;
+}
+
 int
 AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
-                                            const Point & p,
-                                            bool & point_on_surface,
-                                            const bool use_primary_direction) const
+                                             const Point & ray_end,
+                                             const bool use_primary_direction) const
 {
-  point_on_surface = false;
   int count = 0;
   const auto candidate_ids =
-      use_primary_direction ? collectCandidateElementIDs(p) : std::vector<unsigned int>{};
+      use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
   const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
-  const Point segment_direction = p - ray_start;
+  const Point segment_direction = ray_end - ray_start;
 
   for (const auto candidate : make_range(num_candidates))
   {
@@ -177,13 +181,7 @@ AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
     if (isOutsideBoundingRegion(ray_start, segment_direction, ball))
       continue;
 
-    if (elem->elem().contains_point(p, _eps_on_surface))
-    {
-      point_on_surface = true;
-      return count;
-    }
-
-    if (rayIntersectGeometry(ray_start, p, elem))
+    if (rayIntersectGeometry(ray_start, ray_end, elem))
       count++;
   }
   return count;
