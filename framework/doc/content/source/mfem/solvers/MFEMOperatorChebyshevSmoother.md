@@ -11,6 +11,10 @@ so that this interval can be selected from the operator supplied at setup time.
 
 This object is a good candidate to be used as a smoother inside [MFEMGeometricMultigridSolver.md].
 
+## Example Input File Syntax
+
+!listing test/tests/mfem/solvers/pmg_diffusion.i block=Solvers
+
 !syntax parameters /Solvers/MFEMOperatorChebyshevSmoother
 
 !syntax inputs /Solvers/MFEMOperatorChebyshevSmoother
