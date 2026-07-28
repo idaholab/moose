@@ -34,7 +34,7 @@ protected:
   virtual void UpdateEquationSystemContext() override;
 
 private:
-  void SetLORSolver(LinearSolverBase & solver);
+  void SetLORSolver();
 };
 
 template <class MFEMSolverType>
@@ -52,6 +52,9 @@ LORLinearSolverBase<MFEMSolverType>::LORLinearSolverBase(const InputParameters &
 {
 }
 
+template <typename T, typename... Ts>
+constexpr bool is_any_of_v = (std::is_same_v<T, Ts> || ...);
+
 template <class MFEMSolverType>
 void
 LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
@@ -64,49 +67,36 @@ LORLinearSolverBase<MFEMSolverType>::UpdateEquationSystemContext()
     if (_lor)
     {
       SetupLOR(_equation_system);
-      LORLinearSolverBase<MFEMSolverType>::SetLORSolver(*this);
+      if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreAMS, mfem::HypreADS>)
+        if (_a->ParFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
+            mfem::Geometry::Type::CUBE)
+          mooseError("LOR HypreAMS/ADS Solver only supports hex meshes.");
+      SetLORSolver();
     }
-    else
+    else if constexpr (!is_any_of_v<MFEMSolverType,
+                                    mfem::OperatorJacobiSmoother,
+                                    mfem::HypreBoomerAMG,
+                                    mfem::HypreAMS,
+                                    mfem::HypreADS>)
       SetPreconditioner(static_cast<MFEMSolverType &>(GetSolver()));
   }
 }
 
 template <class MFEMSolverType>
 void
-LORLinearSolverBase<MFEMSolverType>::SetLORSolver(LinearSolverBase & solver_base)
+LORLinearSolverBase<MFEMSolverType>::SetLORSolver()
 {
-  if (_lor)
+  mfem::LORSolver<MFEMSolverType> * lor_solver;
+  if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreGMRES, mfem::HypreFGMRES, mfem::HyprePCG>)
   {
-    auto lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
-    SetSolverParameters(lor_solver->GetSolver());
-    solver_base.SetSolver(lor_solver);
+    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
+    lor_solver = new mfem::LORSolver<MFEMSolverType>(lor_disc, _a->ParFESpace()->GetComm());
   }
+  else
+    lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
+  SetSolverParameters(lor_solver->GetSolver());
+  SetSolver(lor_solver);
 }
-
-// Template specializations required for context updates for solvers that cannot take
-// preconditioners
-template <>
-void LORLinearSolverBase<mfem::OperatorJacobiSmoother>::UpdateEquationSystemContext();
-
-template <>
-void LORLinearSolverBase<mfem::HypreBoomerAMG>::UpdateEquationSystemContext();
-
-template <>
-void LORLinearSolverBase<mfem::HypreAMS>::UpdateEquationSystemContext();
-
-template <>
-void LORLinearSolverBase<mfem::HypreADS>::UpdateEquationSystemContext();
-
-// Template specializations required for LOR wrappers for Hypre iterative solvers that lack default
-// constructors
-template <>
-void LORLinearSolverBase<mfem::HypreGMRES>::SetLORSolver(LinearSolverBase & solver_base);
-
-template <>
-void LORLinearSolverBase<mfem::HypreFGMRES>::SetLORSolver(LinearSolverBase & solver_base);
-
-template <>
-void LORLinearSolverBase<mfem::HyprePCG>::SetLORSolver(LinearSolverBase & solver_base);
 
 } // namespace Moose::MFEM
 

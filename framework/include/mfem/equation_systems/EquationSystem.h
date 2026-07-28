@@ -106,7 +106,7 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
-  // Getter for block true offsets associated with the EquationSystem operator
+  /// Getter for block true offsets associated with the EquationSystem operator
   const mfem::Array<int> & GetBlockOffsets() const { return _block_true_offsets; }
 
   /**
