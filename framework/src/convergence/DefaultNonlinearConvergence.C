@@ -157,11 +157,11 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetNumberFunctionEvals(snes, &nfuncs));
 
   // Get tolerances from SNES
-  PetscReal rel_step_tol;
+  PetscReal abs_tol, rel_tol, rel_step_tol;
   PetscInt max_its, max_funcs;
   LibmeshPetscCallA(
       _fe_problem.comm().get(),
-      SNESGetTolerances(snes, &_abs_tol, &_rel_tol, &rel_step_tol, &max_its, &max_funcs));
+      SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs));
 
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   PetscBool force_iteration = PETSC_FALSE;
@@ -227,7 +227,7 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
     oss << "Failed to converge, residual norm is NaN\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  else if (checkResidualConvergence(n_iter, fnorm, ref_residual, _rel_tol, _abs_tol, oss))
+  else if (checkResidualConvergence(n_iter, fnorm, ref_residual, rel_tol, abs_tol, oss))
     status = MooseConvergenceStatus::CONVERGED;
   else if (nfuncs >= max_funcs)
   {
