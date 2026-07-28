@@ -51,6 +51,19 @@ void projectQPoints3d(const Elem * msm_elem,
                       std::vector<Point> & q_pts);
 
 /**
+ * 3D projection operator using the data retained when constructing the mortar segment.
+ * @param projection_normal Exact normal supplied to the clipping helper
+ * @param clipping_area_tolerance Area tolerance used by the clipping helper
+ */
+void projectQPoints3d(const Elem * msm_elem,
+                      const Elem * primal_elem,
+                      unsigned int sub_elem_index,
+                      const Point & projection_normal,
+                      Real clipping_area_tolerance,
+                      const QBase & qrule_msm,
+                      std::vector<Point> & q_pts);
+
+/**
  * 3D mapping operator that interpolates stored parent reference points on each triangular mortar
  * segment.
  * @param mortar_segment_elem The triangular mortar segment carrying the quadrature rule
@@ -193,14 +206,24 @@ loopOverMortarSegments(
                                     primary_xi_pts);
         else
         {
-          // Map independently because the parent-face linearizations differ.
+          const auto secondary_sub_elem = msm_elem->get_extra_integer(secondary_sub_elem_index);
+          const auto & projection_data =
+              amg.subpatchProjectionData(*msinfo.secondary_elem, secondary_sub_elem);
+
           projectQPoints3d(msm_elem,
                            msinfo.secondary_elem,
                            secondary_sub_elem_index,
+                           projection_data.normal,
+                           projection_data.area_tolerance,
                            *qrule_msm,
                            secondary_xi_pts);
-          projectQPoints3d(
-              msm_elem, msinfo.primary_elem, primary_sub_elem_index, *qrule_msm, primary_xi_pts);
+          projectQPoints3d(msm_elem,
+                           msinfo.primary_elem,
+                           primary_sub_elem_index,
+                           projection_data.normal,
+                           projection_data.area_tolerance,
+                           *qrule_msm,
+                           primary_xi_pts);
         }
       }
 
@@ -325,7 +348,7 @@ loopOverMortarSegments(
       act();
 
     } // End loop over msm segments on secondary face elem
-  }   // End loop over (active) secondary elems
+  } // End loop over (active) secondary elems
 }
 
 /**

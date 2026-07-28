@@ -130,6 +130,16 @@ public:
   const Point & center() const { return _center; }
 
   /**
+   * Get the exact normal supplied for projection and clipping.
+   */
+  const Point & normal() const { return _normal; }
+
+  /**
+   * Get the area tolerance used for clipping.
+   */
+  Real areaTolerance() const { return _area_tol; }
+
+  /**
    * Get area fraction remaining after clipping against primary elements
    */
   Real remainder() const { return _remaining_area_fraction; }
@@ -184,7 +194,7 @@ private:
   Point _center;
 
   /**
-   * Normal at geometric center of secondary element
+   * Exact normal supplied for projection and clipping
    */
   Point _normal;
 

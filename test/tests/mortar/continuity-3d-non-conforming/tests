@@ -92,6 +92,14 @@
       detail = 'a TET10 volume mesh with TRI6 mortar-interface faces.'
     []
   []
+  [normal-projection-distorted-quad]
+    type = 'RunApp'
+    input = 'normal_projection_distorted_quad.i'
+    design = 'AutomaticMortarGeneration.md'
+    issues = '#33438'
+    requirement = 'The system shall map a retained 3D mortar quadrature point to the unique '
+                  'in-domain inverse of each distorted QUAD4 parent face.'
+  []
   [continuity_sphere_hex27-debug-mesh]
     type = 'Exodiff'
     input = 'continuity_sphere_hex.i'

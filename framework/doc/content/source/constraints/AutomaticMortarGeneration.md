@@ -66,13 +66,27 @@ by solving
 
 !equation id=normal-projection-quadrature-mapping
 \left[\boldsymbol{x}_{i,\mathrm{lin}}(\hat{\boldsymbol{\xi}}_{i,q}) -
-\boldsymbol{x}_m(\boldsymbol{\eta}_q)\right] \times \boldsymbol{n}_m = \boldsymbol{0},
+\boldsymbol{x}_m(\boldsymbol{\eta}_q)\right] \times \boldsymbol{n} = \boldsymbol{0},
 \qquad i \in \{p,s\},
 
-where $\boldsymbol{n}_m$ is the mortar-segment normal. This projects the mortar quadrature point
-along $\boldsymbol{n}_m$ onto each local first-order parent-face linearization. MOOSE then transforms
+where $\boldsymbol{n}$ is the normal used to construct and clip the secondary sub-face. MOOSE
+stores this exact normal when building the mortar segment mesh and reuses it to project onto both local
+first-order parent-face linearizations. TRI3 sub-elements use a direct affine inverse. For QUAD4
+sub-elements, MOOSE solves the bilinear map
+
+!equation
+\boldsymbol{x}(\xi,\eta)=\boldsymbol{a}+\boldsymbol{b}\xi+\boldsymbol{c}\eta+
+\boldsymbol{d}\xi\eta
+
+analytically and requires one valid root in the sub-element reference domain. An exterior root is
+snapped to the boundary and accepted only if its normalized physical projection residual is below
+$\epsilon_{\mathrm{clip}}=\max(10^{-8}, A_{\mathrm{tol}}/(\ell_{\min}L))$. Here
+$A_{\mathrm{tol}}$ is the clipping area tolerance, $\ell_{\min}$ is the shortest projected edge,
+and $L$ is the projection length scale. Larger residuals produce an error. MOOSE then transforms
 $\hat{\boldsymbol{\xi}}_{i,q}$ to the parent-face reference coordinate
-$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields.
+$\boldsymbol{\xi}_{i,q}$ used to evaluate the finite element fields. This procedure projects onto
+the same faceted sub-elements used for clipping; it is not an exact normal projection onto the full
+curved parent face.
 
 With `reference_interpolation`, each retained mortar-segment vertex $a$ stores its primary and
 secondary parent-face reference coordinates $\boldsymbol{\xi}_{i,a}$ recovered during clipping.
@@ -88,7 +102,7 @@ MOOSE interpolates those coordinates directly:
 This mode preserves the barycentric correspondence established at the clipped mortar-segment
 vertices; it does not project the physical quadrature point again. On curved parent faces, the two
 evaluation points lie on their respective finite element faces but need not align along
-$\boldsymbol{n}_m$. MOOSE reports an error if a retained mortar segment cannot build a complete
+$\boldsymbol{n}$. MOOSE reports an error if a retained mortar segment cannot build a complete
 reference map; it does not fall back to `normal_projection`.
 
 !bibtex bibliography
