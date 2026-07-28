@@ -1315,6 +1315,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(
               std::move(nodes), center, normal, _triangulation_mode, _triangulate_triangles);
 
+        // Retain the helper's exact clipping metadata for assembly-time QP projection.
         if (subpatch_projection_data)
           (*subpatch_projection_data)[sel] = {mortar_segment_helper[sel]->normal(),
                                               mortar_segment_helper[sel]->areaTolerance()};

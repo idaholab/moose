@@ -1,3 +1,4 @@
+# These distorted faces exercise a bilinear inverse with an exterior root and one in-domain root.
 [Mesh]
   [secondary_element]
     type = ElementGenerator

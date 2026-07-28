@@ -238,6 +238,7 @@ realPolynomialRoots(const Real quadratic, const Real linear, const Real constant
   discriminant = std::max(discriminant, Real(0));
 
   const Real sqrt_discriminant = std::sqrt(discriminant);
+  // Avoid cancellation in one root and recover the other through Vieta's relation.
   const Real q = -0.5 * (b + std::copysign(sqrt_discriminant, b));
   if (std::abs(q) <= coefficient_tolerance)
   {
@@ -326,6 +327,7 @@ prepareQuadrilateralMap(const std::array<Point, 4> & points,
         msm_elem, parent_elem, sub_elem, "the projected QUAD4 has invalid coefficients");
   map.affine = map.mixed.norm() <= coefficient_tolerance * map.scale;
 
+  // The bilinear Jacobian is affine, so nonzero corner determinants with one sign exclude folding.
   Real orientation = 0;
   for (const auto xi : {-1.0, 1.0})
     for (const auto eta : {-1.0, 1.0})
@@ -390,6 +392,7 @@ inverseMapQuadrilateral(const BilinearMap & map,
     const Real violation = quadReferenceViolation(candidate);
     if (violation > 0)
     {
+      // Permit snapping only when the boundary point still satisfies the clipping tolerance.
       candidate(0) = std::clamp(candidate(0), Real(-1), Real(1));
       candidate(1) = std::clamp(candidate(1), Real(-1), Real(1));
       if (evaluateBilinear(map, translated_center, candidate(0), candidate(1)).norm() >
@@ -411,8 +414,8 @@ inverseMapQuadrilateral(const BilinearMap & map,
   }
   else
   {
-    // Eliminating eta gives a quadratic in xi; reverse elimination is needed only when its
-    // reconstruction direction vanishes.
+    // Eliminate eta first; reverse the elimination if that form is indeterminate or cannot
+    // reconstruct and validate every root.
     const auto xi_roots =
         realPolynomialRoots(cross2D(map.xi, map.mixed),
                             cross2D(translated_center, map.mixed) + cross2D(map.xi, map.eta),
@@ -447,6 +450,7 @@ inverseMapQuadrilateral(const BilinearMap & map,
     }
   }
 
+  // Prefer the exact in-domain inverse over a clipping-tolerance candidate.
   if (candidate_count == 1 && !too_many_candidates)
     return candidates[0];
 
@@ -496,6 +500,8 @@ projectQPoints3d(const Elem * const msm_elem,
                  const QBase & qrule_msm,
                  std::vector<Point> & q_pts)
 {
+  // This compatibility path has no clipping metadata, so reconstruct the segment normal and use
+  // the base reference tolerance.
   const Point first_edge = msm_elem->point(0) - msm_elem->point(1);
   const Point second_edge = msm_elem->point(2) - msm_elem->point(1);
   const Point normal = second_edge.cross(first_edge);
@@ -534,6 +540,8 @@ projectQPoints3d(const Elem * const msm_elem,
     mooseError("Invalid clipping area tolerance for mortar segment ", msm_elem->id(), ".");
   const Point normal = projection_normal / normal_norm;
 
+  // Express the subpatch in a normalized clipping-plane basis before analytical inversion, making
+  // tolerances independent of translation and element scale.
   Point longest_projected_edge;
   Real length_scale = 0;
   Real minimum_edge_length = std::numeric_limits<Real>::max();
@@ -560,6 +568,7 @@ projectQPoints3d(const Elem * const msm_elem,
                    primal_elem->id(),
                    " is singular when projected along the mortar clipping normal.");
 
+  // Convert the helper's physical area tolerance to the normalized projection-residual scale.
   const Real clipping_tolerance = std::max(
       minimum_reference_tolerance, clipping_area_tolerance / (minimum_edge_length * length_scale));
   const Point first_tangent = longest_projected_edge / length_scale;
@@ -616,6 +625,7 @@ projectQPoints3d(const Elem * const msm_elem,
                                                          qp,
                                                          clipping_tolerance);
 
+    // Map the first-order subpatch coordinate through its vertices in the parent reference domain.
     Point parent_reference_point;
     for (const auto node : index_range(sub_elem_node_indices))
       parent_reference_point +=

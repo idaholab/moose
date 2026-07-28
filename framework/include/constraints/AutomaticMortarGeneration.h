@@ -61,7 +61,7 @@ struct MortarSegmentReferencePoints
 };
 
 /**
- * Projection data retained from construction of one secondary subpatch.
+ * Exact clipping data retained per secondary subpatch for normal projection during assembly.
  */
 struct SubpatchProjectionData
 {
@@ -484,7 +484,7 @@ private:
   /// build_mortar_segment_mesh().
   std::unordered_map<const Elem *, MortarSegmentInfo> _msm_elem_to_info;
 
-  /// Projection data indexed by secondary face and subpatch.
+  /// Clipping data indexed by secondary face and subpatch, allocated only for normal projection.
   std::unordered_map<const Elem *, std::vector<SubpatchProjectionData>>
       _secondary_elem_to_subpatch_projection_data;
 
