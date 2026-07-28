@@ -35,6 +35,7 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
 {
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
   const Real Pe = pre.Re * pre.Pr;
+  const Real turbulent_Pe = turbulentReynoldsNumber(pre) * pre.Pr;
 
   if (pre.poD < 1.1 || pre.poD > 1.5)
     flagSolutionWarning(
@@ -52,20 +53,22 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
   // Peclet number correction term
   const Real corr_prefactor = 0.0174 * (1.0 - std::exp(6.0 - 6.0 * pre.poD));
 
-  if (Pe >= 200.0 && Pe <= 2200.0)
+  if (Pe > 2200.0)
+    flagSolutionWarning(
+        "Peclet number (Pe) above recommended range for the Borishanskii correlation.");
+
+  if (turbulent_Pe >= 200.0 && turbulent_Pe <= 2200.0)
   {
-    NuT += corr_prefactor * std::pow(Pe - 200.0, 0.9);
+    NuT += corr_prefactor * std::pow(turbulent_Pe - 200.0, 0.9);
   }
-  else if (Pe < 200.0)
+  else if (turbulent_Pe < 200.0)
   {
     // do nothing, no extra term
   }
   else // Pe > 2200
   {
-    flagSolutionWarning(
-        "Peclet number (Pe) above recommended range for the Borishanskii correlation.");
-    // Still apply the same correlation formula, but with warning
-    NuT += corr_prefactor * std::pow(Pe - 200.0, 0.9);
+    // Still apply the same correlation formula at the turbulent endpoint.
+    NuT += corr_prefactor * std::pow(turbulent_Pe - 200.0, 0.9);
   }
 
   return blendTurbulentNusseltNumber(pre, NuT);
