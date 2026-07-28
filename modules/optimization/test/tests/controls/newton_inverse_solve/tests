@@ -1,0 +1,28 @@
+[Tests]
+  design = 'NewtonInversionControl.md'
+  issues = '#33205'
+
+  [newton_linear]
+    type = CSVDiff
+    input = main_linear.i
+    csvdiff = main_linear_out.csv
+    requirement = "The system shall solve a scalar inverse coupling problem using a finite-"
+                  "difference Newton Control driven by fixed-point iteration."
+  []
+  [newton_nonlinear]
+    type = CSVDiff
+    input = main_newton.i
+    csvdiff = main_newton_out.csv
+    requirement = "The system shall solve a nonlinear scalar inverse problem, where the sub-app "
+                  "output depends nonlinearly on the parameter, using a finite-difference Newton "
+                  "Control."
+  []
+  [secant_fails_where_newton_succeeds]
+    type = RunException
+    input = main_secant.i
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = "The system shall demonstrate that the secant-based inversion Control fails to "
+                  "converge within a fixed iteration budget on a nonlinear problem that the finite-"
+                  "difference Newton Control solves."
+  []
+[]
