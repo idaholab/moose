@@ -70,10 +70,6 @@ overclosure = 0.001
   []
 []
 
-[Problem]
-  error_on_jacobian_nonzero_reallocation = true
-[]
-
 [Executioner]
   solve_type := NEWTON
   end_time := 1

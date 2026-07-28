@@ -115,7 +115,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
     mooseAssert(coupled_elem,
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-    if (coupled_elem->processor_id() != p || (_is_coupling_functor && _ghost_point_neighbors))
+    if (coupled_elem->processor_id() != p)
       coupled_elements.emplace(coupled_elem, _null_mat);
   }
 }
@@ -137,20 +137,23 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
   if (query_elem->subdomain_id() == secondary_subdomain_id)
     secondary_lower_elems.push_back(query_elem);
 
-  // A secondary parent can own a shared nodal row even when its face has no mortar segment and is
-  // therefore absent from the mortar coupling map.
-  if (const auto find_it =
-          amg._secondary_element_to_secondary_lowerd_element.find(query_elem->id());
-      find_it != amg._secondary_element_to_secondary_lowerd_element.end())
-  {
-    // Relationship managers may operate on a mesh clone, so remap the AMG face by ID.
-    const Elem * const secondary_lower_elem = _mesh->elem_ptr(find_it->second->id());
-    mooseAssert(secondary_lower_elem,
-                "The secondary lower-dimensional element with id "
-                    << find_it->second->id()
-                    << " does not exist in the relationship manager mesh.");
-    secondary_lower_elems.push_back(secondary_lower_elem);
-  }
+  // A secondary parent can have more than one boundary face, including faces with no mortar
+  // segment. Gather all of its faces because each may contribute to a shared nodal-normal row.
+  const auto & nodes_to_secondary_elems = amg.nodesToSecondaryElem();
+  for (const auto & node : query_elem->node_ref_range())
+    if (const auto node_it = nodes_to_secondary_elems.find(node.id());
+        node_it != nodes_to_secondary_elems.end())
+      for (const Elem * const amg_secondary_elem : node_it->second)
+        if (amg_secondary_elem->interior_parent()->id() == query_elem->id())
+        {
+          // Relationship managers may operate on a mesh clone, so remap the AMG face by ID.
+          const Elem * const secondary_lower_elem = _mesh->elem_ptr(amg_secondary_elem->id());
+          mooseAssert(secondary_lower_elem,
+                      "The secondary lower-dimensional element with id "
+                          << amg_secondary_elem->id()
+                          << " does not exist in the relationship manager mesh.");
+          secondary_lower_elems.push_back(secondary_lower_elem);
+        }
 
   const auto & mic = amg.mortarInterfaceCoupling();
   if (const auto find_it = mic.find(query_elem->id()); find_it != mic.end())
@@ -173,7 +176,8 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
       if (neigh->subdomain_id() != secondary_subdomain_id)
         continue;
 
-      if (_is_coupling_functor || neigh->processor_id() != p)
+      // Ghosting functors return only remote elements, even when used to augment coupling.
+      if (neigh->processor_id() != p)
         coupled_elements.emplace(neigh, _null_mat);
 
       // Every point-neighbor face contributes to the smoothed nodal normal, even when it has no
@@ -182,7 +186,7 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
       const Elem * const interior_parent = neigh->interior_parent();
       mooseAssert(interior_parent,
                   "A lower-dimensional secondary mortar element must have an interior parent.");
-      if (_is_coupling_functor || interior_parent->processor_id() != p)
+      if (interior_parent->processor_id() != p)
         coupled_elements.emplace(interior_parent, _null_mat);
 
       ghostMortarInterfaceCouplings(p, neigh, coupled_elements, amg);

@@ -73,6 +73,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  _weighted_velocities_uo.includeNodalNormalDerivatives();
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",

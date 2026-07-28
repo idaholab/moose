@@ -396,8 +396,9 @@
   [frictional-mortar-3d-pg]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d_pg.i'
-    # Nodal-normal derivatives change the nonlinear path but not the converged contact fields.
-    cli_args = 'Executioner/nl_max_its=35'
+    # The differentiated nodal directions converge on iteration 30 without leaving room to accept
+    # the step.
+    cli_args = 'Executioner/nl_max_its=31'
     capabilities = 'ad_size>=150 & method!=dbg'
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
               'frictional-mortar-3d_pg_out_frictional-pressure-3d_0001.csv '
@@ -440,7 +441,7 @@
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
     cli_args = 'Contact/mortar/use_petrov_galerkin=true '
-               'Executioner/nl_max_its=35 '
+               'Executioner/nl_max_its=31 '
                'Outputs/file_base=frictional-mortar-3d_pg_out'
     capabilities = 'ad_size>=150'
     csvdiff = 'frictional-mortar-3d_pg_out_contact-pressure_0001.csv '
