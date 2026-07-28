@@ -26,7 +26,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & uo);
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
   /// The function evaluated at each TRI centroid to restrict area
