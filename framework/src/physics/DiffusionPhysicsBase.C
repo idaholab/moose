@@ -23,9 +23,13 @@ DiffusionPhysicsBase::validParams()
   params.addParam<FunctionName>("initial_condition", "Initial condition for the diffused variable");
 
   // Diffusivity
-  params.addParam<MaterialPropertyName>("diffusivity_matprop",
-                                        "Material property defining the diffusion coefficient");
-  params.addParam<MooseFunctorName>("diffusivity_functor", "Functor specifying the diffusivity");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "diffusivity_matprop",
+      "Material property(ies) defining the diffusion coefficient (on each group of blocks)");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "diffusivity_functor", "Functor(s) specifying the diffusivity (on each group of blocks)");
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
+      "diffusivity_blocks", "Subdomains on which each diffusivity is defined");
 
   // Source term
   params.addParam<MooseFunctorName>("source_functor", "Source term in the diffusion problem");
@@ -74,6 +78,12 @@ DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
   checkVectorParamsNoOverlap<BoundaryName>({"neumann_boundaries", "dirichlet_boundaries"});
   if (isParamSetByUser("source_coef"))
     checkParamsBothSetOrNotSet("source_functor", "source_coef");
+  if (isParamValid("diffusivity_matprop"))
+    checkVectorParamsSameLength<MaterialPropertyName, std::vector<SubdomainName>>(
+        "diffusivity_matprop", "diffusivity_blocks");
+  else if (isParamValid("diffusivity_functor"))
+    checkVectorParamsSameLength<MooseFunctorName, std::vector<SubdomainName>>("diffusivity_functor",
+                                                                              "diffusivity_blocks");
 
   addRequiredPhysicsTask("add_preconditioning");
   addRequiredPhysicsTask("add_postprocessor");
@@ -110,11 +120,22 @@ DiffusionPhysicsBase::addPostprocessors()
     auto params = _factory.getValidParams(pp_type);
     params.set<std::vector<VariableName>>("variable") = {_var_name};
     if (isParamValid("diffusivity_matprop"))
-      params.set<MaterialPropertyName>("diffusivity") =
-          getParam<MaterialPropertyName>("diffusivity_matprop");
+    {
+      const auto & diffusivities =
+          getParam<std::vector<MaterialPropertyName>>("diffusivity_matprop");
+      if (diffusivities.size() != 1)
+        paramError("diffusivity_matprop",
+                   "Computing diffusive fluxes is not implemented for multiple diffusivities");
+      params.set<MaterialPropertyName>("diffusivity") = diffusivities[0];
+    }
     else if (isParamValid("diffusivity_functor"))
-      params.set<MooseFunctorName>("functor_diffusivity") =
-          getParam<MooseFunctorName>("diffusivity_functor");
+    {
+      const auto & diffusivities = getParam<std::vector<MooseFunctorName>>("diffusivity_functor");
+      if (diffusivities.size() != 1)
+        paramError("diffusivity_functor",
+                   "Computing diffusive fluxes is not implemented for multiple diffusivities");
+      params.set<MooseFunctorName>("functor_diffusivity") = diffusivities[0];
+    }
     else
       params.set<MooseFunctorName>("functor_diffusivity") = "1";
     params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};

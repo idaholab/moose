@@ -148,8 +148,11 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
       for (const auto i : index_range(_passive_scalar_coupled_sources[scalar_i]))
       {
         params.set<MooseFunctorName>("v") = _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_sources_coef.size())
-          params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_coef.size())
+          params.set<Real>("coef") = _passive_scalar_coupled_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_blocks.size())
+          params.set<std::vector<SubdomainName>>("block") =
+              _passive_scalar_coupled_sources_blocks[scalar_i][i];
         getProblem().addFVKernel(kernel_type,
                                  prefix() + "ins_" + _passive_scalar_names[scalar_i] +
                                      "_coupled_source_" + std::to_string(i),
