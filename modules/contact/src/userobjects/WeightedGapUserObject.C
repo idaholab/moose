@@ -15,10 +15,6 @@
 #include "MortarContactUtils.h"
 #include "AutomaticMortarGeneration.h"
 #include "ADUtils.h"
-#include "ConstraintWarehouse.h"
-#include "ComputeDynamicWeightedGapLMMechanicalContact.h"
-#include "MortarConstraintBase.h"
-#include "NonlinearSystemBase.h"
 
 #include "libmesh/quadrature.h"
 
@@ -56,35 +52,42 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
     _coord(_assembly.mortarCoordTransformation()),
-    _use_nodal_normal_derivatives(getParam<bool>("use_nodal_normal_derivatives") &&
-                                  !isParamValid("penetration_tolerance"))
+    _use_nodal_normal_derivatives(false)
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
                "'use_displaced_mesh' must be true for the WeightedGapUserObject object");
 
-  if (_use_nodal_normal_derivatives)
-  {
-    if (getParam<bool>("interpolate_normals"))
-      paramError(
-          "interpolate_normals",
-          "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
-          "combined with quadrature-point normal interpolation.");
+  if (getParam<bool>("use_nodal_normal_derivatives") && !isParamValid("penetration_tolerance"))
+    includeNodalNormalDerivatives();
+}
 
-    const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
-        {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
-    for (const auto & [variable, parameter_name] : displacement_variables)
-      if (variable)
-      {
-        if (!variable->isNodal())
-          paramError(parameter_name,
-                     "Nodal-normal derivatives require a nodal displacement variable.");
-        if (&variable->sys() != &_sys)
-          paramError(parameter_name,
-                     "Nodal-normal derivatives require displacement variables in the nonlinear "
-                     "system assembled by this contact object.");
-      }
-  }
+void
+WeightedGapUserObject::includeNodalNormalDerivatives() const
+{
+  if (_use_nodal_normal_derivatives)
+    return;
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
+
+  const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
+      {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
+  for (const auto & [variable, parameter_name] : displacement_variables)
+    if (variable)
+    {
+      if (!variable->isNodal())
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require a nodal displacement variable.");
+      if (&variable->sys() != &_sys)
+        paramError(parameter_name,
+                   "Nodal-normal derivatives require displacement variables in the nonlinear "
+                   "system assembled by this contact object.");
+    }
+
+  _use_nodal_normal_derivatives = true;
 }
 
 bool
@@ -98,45 +101,6 @@ WeightedGapUserObject::initialSetup()
 {
   MortarUserObject::initialSetup();
   _test = &test();
-
-  // Dynamic mortar uses the same weighted-gap and weighted-velocity user objects but retains its
-  // existing frozen-direction Jacobian. Identify every mortar constraint that consumes this user
-  // object, then disable the new derivatives if a dynamic constraint acts on the same interface.
-  if (_use_nodal_normal_derivatives)
-  {
-    const auto & constraints =
-        _fe_problem.getNonlinearSystemBase(_sys.number()).getConstraintWarehouse();
-    std::set<std::pair<SubdomainID, SubdomainID>> consumed_interfaces;
-    for (const auto & constraint : constraints.getObjects())
-    {
-      bool consumes_this_object = false;
-      for (const auto parameter_name : {"weighted_gap_uo", "weighted_velocities_uo"})
-        if (constraint->isParamValid(parameter_name) &&
-            constraint->getParam<UserObjectName>(parameter_name) == name())
-        {
-          consumes_this_object = true;
-          break;
-        }
-
-      if (consumes_this_object)
-        if (const auto * const mortar_constraint =
-                dynamic_cast<const MortarConstraintBase *>(constraint.get());
-            mortar_constraint)
-          consumed_interfaces.emplace(mortar_constraint->primarySubdomain(),
-                                      mortar_constraint->secondarySubdomain());
-    }
-
-    for (const auto & constraint : constraints.getObjects())
-      if (const auto * const dynamic_constraint =
-              dynamic_cast<const ComputeDynamicWeightedGapLMMechanicalContact *>(constraint.get());
-          dynamic_constraint &&
-          consumed_interfaces.count(
-              {dynamic_constraint->primarySubdomain(), dynamic_constraint->secondarySubdomain()}))
-      {
-        _use_nodal_normal_derivatives = false;
-        break;
-      }
-  }
 }
 
 void
@@ -209,7 +173,7 @@ WeightedGapUserObject::computeQpIProperties()
   auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
 
   if (usesNodalNormalDerivatives())
-    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * contactNormal(_i);
+    weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * contactNormal(*_lower_secondary_elem, _i);
   else
     weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
@@ -237,12 +201,6 @@ WeightedGapUserObject::contactNormal(const Elem & lower_secondary_elem,
       { return nodalCoordinate(coordinate_node, geometry_coordinate); },
       _ad_nodal_normals);
   return libmesh_map_find(_ad_nodal_normals, node);
-}
-
-const ADRealVectorValue &
-WeightedGapUserObject::contactNormal(const unsigned int nodal_index) const
-{
-  return contactNormal(*_lower_secondary_elem, nodal_index);
 }
 
 ADPoint

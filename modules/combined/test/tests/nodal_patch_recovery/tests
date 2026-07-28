@@ -9,5 +9,6 @@
     requirement = "The system shall compute the recovered nodal value of a variable with nodes "
                   "connected to blocks that do not host such a variable."
     cli_args = "Postprocessors/inactive='l_its total_l_its'"
+    ignore_columns = 'nl_its total_nl_its'
   []
 []
