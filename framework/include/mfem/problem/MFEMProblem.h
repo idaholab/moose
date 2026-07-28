@@ -295,6 +295,12 @@ public:
   }
 
   /**
+   * Computes the residual using whatever is sitting in the current solution vector then returns the
+   * L2 norm.
+   */
+  virtual Real computeResidualL2Norm() override;
+
+  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();

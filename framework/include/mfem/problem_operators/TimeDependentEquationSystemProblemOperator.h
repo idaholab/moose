@@ -34,7 +34,8 @@ public:
   virtual void Init(mfem::BlockVector & X) override;
   virtual void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override;
   virtual void Solve() override;
-
+  virtual mfem::real_t computeResidualL2Norm() override;
+  
   [[nodiscard]] virtual Moose::MFEM::TimeDependentEquationSystem *
   GetEquationSystem() const override
   {

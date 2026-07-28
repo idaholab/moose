@@ -55,7 +55,7 @@
   type = MFEMSteady
   fixed_point_min_its = 3
   fixed_point_max_its = 3
-  disable_fixed_point_residual_norm_check = true
+  disable_fixed_point_residual_norm_check = false
   accept_on_max_fixed_point_iteration = true
 []
 

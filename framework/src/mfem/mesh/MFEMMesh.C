@@ -144,10 +144,22 @@ MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
 void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
 {
+  // store the old one
+  if (!_old_displacement.FESpace()) {
+    // hacky const conversion
+    auto* fespace = displacement.FESpace();
+
+    _old_displacement.SetSpace( const_cast<mfem::FiniteElementSpace*>(fespace) );
+    _old_displacement = 0.0;
+  }
+
   _mfem_par_mesh->EnsureNodes();
   mfem::GridFunction * nodes = _mfem_par_mesh->GetNodes();
 
   *nodes += displacement;
+  *nodes -= _old_displacement;
+
+  _old_displacement = displacement;
 }
 
 void

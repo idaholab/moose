@@ -59,6 +59,7 @@ public:
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
   virtual void Solve() = 0;
+  virtual mfem::real_t computeResidualL2Norm() {return 0.0;}
 
   mfem::Array<int> _block_true_offsets_test;
   mfem::Array<int> _block_true_offsets_trial;

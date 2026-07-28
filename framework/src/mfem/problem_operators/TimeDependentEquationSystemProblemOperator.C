@@ -77,6 +77,15 @@ TimeDependentEquationSystemProblemOperator::FormEquationSystemOperator(mfem::rea
   GetEquationSystem()->FormSystem(_true_x, _true_rhs);
 }
 
+mfem::real_t
+TimeDependentEquationSystemProblemOperator::computeResidualL2Norm()
+{
+  mfem::Vector residual;
+  GetEquationSystem()->Mult(_true_x, residual);
+  residual -= _true_rhs;
+  return residual.Norml2();
+}
+
 } // namespace Moose::MFEM
 
 #endif
