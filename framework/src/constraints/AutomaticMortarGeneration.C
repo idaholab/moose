@@ -2194,8 +2194,8 @@ AutomaticMortarGeneration::computeNodalGeometry()
     // Look up which side of the interior parent secondary_elem is.
     auto s = interior_parent->which_side_am_i(secondary_elem);
 
-    // Save the coordinates used for the Real nodal geometry. The AD path later combines these raw
-    // values with displacement derivatives instead of reading coordinates from a newer mesh state.
+    // Save the coordinates used for the Real nodal geometry. The AD path later adds displacement
+    // derivatives to these same values so both paths use the same geometry state.
     auto parent_side_elem = interior_parent->build_side_ptr(s);
     for (const auto & node : parent_side_elem->node_ref_range())
       _nodal_geometry_coordinate_snapshot.emplace(&node, node);
@@ -2395,9 +2395,6 @@ AutomaticMortarGeneration::computeADNodalNormals(
         const Real orientation =
             MetaPhysicL::raw_value(area_vector) * face_normals[qp] < 0 ? -1 : 1;
 
-        // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
-        // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for
-        // cases where the face can be curved
         weighted_area_vectors[secondary_node] += sign * orientation * qweights[qp] * area_vector;
         weighted_area_magnitudes[secondary_node] += std::abs(qweights[qp]) * area;
       }

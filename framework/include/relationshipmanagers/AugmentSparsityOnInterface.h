@@ -79,7 +79,6 @@ protected:
   void ghostLowerDSecondaryElemPointNeighbors(const processor_id_type p,
                                               const Elem * const query_elem,
                                               map_type & coupled_elements,
-                                              BoundaryID secondary_boundary_id,
                                               SubdomainID secondary_subdomain_id,
                                               const AutomaticMortarGeneration & amg) const;
 

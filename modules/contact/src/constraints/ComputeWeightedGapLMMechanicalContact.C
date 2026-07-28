@@ -89,6 +89,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
     _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
+  _weighted_gap_uo.includeNodalNormalDerivatives();
+
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",

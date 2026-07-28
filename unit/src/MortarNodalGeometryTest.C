@@ -12,7 +12,7 @@
 #include "ADUtils.h"
 #include "AutomaticMortarGeneration.h"
 
-TEST(ADUtilsTest, mortarHouseholderTangents)
+TEST(MortarNodalGeometryTest, householderTangents)
 {
   constexpr dof_id_type derivative_index = 0;
   constexpr Real epsilon = 1e-7;

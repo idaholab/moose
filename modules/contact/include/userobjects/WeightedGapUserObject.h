@@ -51,6 +51,9 @@ public:
   /// Whether this user object includes derivatives of the secondary nodal normals
   bool usesNodalNormalDerivatives() const;
 
+  /// Enable nodal-normal derivatives for a supported quasistatic contact constraint
+  void includeNodalNormalDerivatives() const;
+
   /**
    * Return the cached contact normal for the supplied lower-dimensional secondary element node.
    * The stored value is the existing mechanical-contact nodal normal. Coordinate derivatives are
@@ -139,11 +142,6 @@ protected:
   }
 
   /**
-   * Return the contact normal for the current quadrature point/test index.
-   */
-  const ADRealVectorValue & contactNormal(unsigned int nodal_index) const;
-
-  /**
    * Add displacement derivatives to the coordinate used for the stored mortar nodal geometry.
    */
   ADPoint nodalCoordinate(const Node & node, const Point & geometry_coordinate) const;
@@ -209,7 +207,7 @@ protected:
   mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;
 
   /// Whether this formulation uses nodal normal derivatives while preserving stored normal values
-  bool _use_nodal_normal_derivatives;
+  mutable bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
   /// Lagrange multiplier). We have this member so that we don't do virtual calls during inner
