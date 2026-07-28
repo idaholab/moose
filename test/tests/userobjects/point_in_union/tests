@@ -71,6 +71,17 @@
                   'representations, namely a meshed closed surface and a signed level-set function.'
   []
 
+  [mesh_and_msh]
+    type = 'Exodiff'
+    input = 'union_mesh_and_msh.i'
+    exodiff = 'union_mesh_and_msh_out.e'
+    mesh_mode = REPLICATED # a replicated surface mesh is required for point containment
+    recover = false
+    requirement = 'The system shall classify a point as contained when it is inside either a '
+                  'generator-built closed surface mesh or a non-convex closed surface mesh read '
+                  'from a file, combined in a union.'
+  []
+
   [invalid_parameters]
     requirement = 'The system shall report an error for an invalid union point-containment parameter '
                   'combination, namely'
