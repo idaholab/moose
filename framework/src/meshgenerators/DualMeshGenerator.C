@@ -3210,8 +3210,6 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             if (normal * (elem_centroid - face_centroid) > 0.0)
               normal = -1.0 * normal;
 
-            // NetGen chord repairs also need the primal surface for inside/outside checks, even
-            // when surface-diagonal preservation is not requested.
             if (_preserve_diagonals || use_netgen)
             {
               std::vector<Point> triangle = {side_face_points[point_indices[0]],
@@ -3488,7 +3486,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
   struct PrimalEdgeSide3D
   {
-    // Retains the primal-edge identity of a dual side until all neighboring cells are buffered.
+    // Retain the primal-edge identity until both dual cells sharing this side are buffered.
     EdgeSubdomainKey edge_key;
     std::size_t side_index;
     Point midpoint;
@@ -4131,6 +4129,9 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
 
         // Keep NetGen's tetrahedral decomposition, but store each child as a four-sided
         // C0Polyhedron so it retains its source subdomain with the other dual polyhedra.
+        /* This tet4->C0polyhedron conversion is time consuming, but necessary for Exodus output,
+         * which assumes all elements in a subdomain have the same blockt type, and netgen which
+         * creates tets from ill-behaving polyhedra. */
         std::vector<std::shared_ptr<libMesh::Polygon>> tet_sides;
         tet_sides.reserve(tet->n_sides());
 
@@ -4953,7 +4954,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
     };
 
     const auto replacePrimalEdgeSideWithFan = [&](std::vector<std::vector<Point>> & side_points,
-                                                  const PrimalEdgeSide3D & primal_edge_side)
+                                                  const PrimalEdgeSide3D & primal_edge_side,
+                                                  const Real length_tol)
     {
       if (primal_edge_side.replaced || primal_edge_side.side_index >= side_points.size())
         return false;
@@ -4974,7 +4976,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                             {primal_edge_side.midpoint,
                              replaced_side[i],
                              replaced_side[(i + 1) % replaced_side.size()]},
-                            primal_boundary_length_tol);
+                            length_tol);
 
           if (replaced_side_points.size() != previous_side_count + replaced_side.size())
             return false;
@@ -4984,6 +4986,11 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
       return true;
     };
 
+    /*
+     * NetGen requires a conforming triangular surface. First try the exact boundary-chord repair.
+     * A primal-edge midpoint fan is a fallback only when the cell cannot be built without changing
+     * this shared face and the fan makes both cells sharing it conforming.
+     */
     if (use_netgen)
     {
       using PrimalEdgeSideLocation3D = std::pair<std::size_t, std::size_t>;
@@ -5050,6 +5057,8 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
             *validation_mesh, dual_cell.polycut_side_points, true, false, false);
       };
 
+      // This here is the bad centroid-centroid check. We have to remove the triangles, re-map them
+      // to the primal vertices, and double check our shape is still closed.
       const auto repairBoundaryChord = [&](const std::size_t target_cell_index)
       {
         auto & target_cell = split_dual_cell_side_points[target_cell_index];
@@ -5131,6 +5140,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                  triangle_indices[1] != parent_surface_triangles.size();
         };
 
+        // This actually searches for the centroid-centroid configuration that would cause problems
         for (const auto & central_edge_side : target_cell.primal_edge_sides)
         {
           if (central_edge_side.replaced ||
@@ -5361,19 +5371,70 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                                dual_cell.primal_elems) != SurfaceConformance3D::nonconforming)
           continue;
 
-        if (repairBoundaryChord(cell_index))
+        repairBoundaryChord(cell_index);
+      }
+
+      for (const auto cell_index : index_range(split_dual_cell_side_points))
+      {
+        auto & dual_cell = split_dual_cell_side_points[cell_index];
+
+        if (dual_cell.has_boundary_chord_split_plan ||
+            surfaceConformance(dual_cell.polycut_side_points,
+                               dual_cell.output_subdomain_id,
+                               dual_cell.primal_elems) != SurfaceConformance3D::nonconforming)
           continue;
 
         if (directTreatmentCanBuild(dual_cell) || nonNetgenTreatmentCanBuild(dual_cell))
           continue;
+
+        const Real tol = std::max(_geometry_relative_tol, Real(1e-12));
+        const Real polyhedron_scale = polyhedronScale3D(dual_cell.polycut_side_points);
+        const Real length_tol = tol * polyhedron_scale;
+        const auto samePointRing = [&](const std::vector<Point> & ring0,
+                                       const std::vector<Point> & ring1,
+                                       const Real ring_tol)
+        {
+          if (ring0.size() != ring1.size() || ring0.empty())
+            return false;
+
+          for (const auto start : index_range(ring1))
+          {
+            if (!samePoint3D(ring0.front(), ring1[start], ring_tol))
+              continue;
+
+            bool same_forward = true;
+            bool same_reverse = true;
+
+            for (const auto i : index_range(ring0))
+            {
+              same_forward = same_forward &&
+                             samePoint3D(ring0[i], ring1[(start + i) % ring1.size()], ring_tol);
+              same_reverse =
+                  same_reverse &&
+                  samePoint3D(ring0[i], ring1[(start + ring1.size() - i) % ring1.size()], ring_tol);
+            }
+
+            if (same_forward || same_reverse)
+              return true;
+          }
+
+          return false;
+        };
 
         for (const auto primal_edge_side_index : index_range(dual_cell.primal_edge_sides))
         {
           const auto & primal_edge_side = dual_cell.primal_edge_sides[primal_edge_side_index];
 
           if (repaired_primal_edges.count(primal_edge_side.edge_key) || primal_edge_side.replaced ||
-              primal_edge_side.side_index >= dual_cell.polycut_side_points.size() ||
-              !isBodyCentroidRing(dual_cell.polycut_side_points[primal_edge_side.side_index]))
+              primal_edge_side.side_index >= dual_cell.polycut_side_points.size())
+            continue;
+
+          const auto & body_ring = dual_cell.polycut_side_points[primal_edge_side.side_index];
+
+          // A planar body-centroid face remains unchanged. Use the primal-edge midpoint only to
+          // retriangulate a twisted face when the current triangulation makes the full shell
+          // nonconforming.
+          if (!isBodyCentroidRing(body_ring) || !sideFaceIsNonPlanar3D(body_ring, length_tol))
             continue;
 
           const auto locations_it = edge_side_locations.find(primal_edge_side.edge_key);
@@ -5387,7 +5448,7 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
           std::vector<std::size_t> replaced_side_indices;
           std::vector<std::size_t> side_index_offsets;
           std::vector<std::vector<std::vector<Point>>> candidate_cell_side_points;
-          bool valid_repair = true;
+          bool valid_fallback = true;
 
           for (const auto & location : locations_it->second)
           {
@@ -5398,35 +5459,58 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                           affected_cell_indices.end(),
                           location.first) != affected_cell_indices.end())
             {
-              valid_repair = false;
+              valid_fallback = false;
               break;
             }
 
             const auto & affected_edge_side = affected_cell.primal_edge_sides[location.second];
-            auto candidate_side_points = affected_cell.polycut_side_points;
 
             if (affected_edge_side.replaced ||
-                affected_edge_side.side_index >= affected_cell.polycut_side_points.size() ||
-                !isBodyCentroidRing(
-                    affected_cell.polycut_side_points[affected_edge_side.side_index]) ||
-                !replacePrimalEdgeSideWithFan(candidate_side_points, affected_edge_side) ||
+                affected_edge_side.side_index >= affected_cell.polycut_side_points.size())
+            {
+              valid_fallback = false;
+              break;
+            }
+
+            const auto & affected_body_ring =
+                affected_cell.polycut_side_points[affected_edge_side.side_index];
+            const Real affected_polyhedron_scale =
+                polyhedronScale3D(affected_cell.polycut_side_points);
+            const Real affected_length_tol = tol * affected_polyhedron_scale;
+            auto candidate_side_points = affected_cell.polycut_side_points;
+
+            /* So there are actually many, many cases (and many polyhedra in the ATR Butterfly
+             * Valve) where a dual polyhedron candidate cannot be simply broken down into
+             * tetrahedra, without adding any nodes. So, as a very last-resort fallback, here we
+             * allow a diagonal midpoint node (see line 4982) to be added on the face formed by body
+             * centroids only. It's sort of cheating, but if you look at the candidates that fail
+             * without the extra point, you'd see how disgusting these polyhedra are. Multiple
+             * reentrant edges, complete lack of symmetry, etc. */
+            if (!isBodyCentroidRing(affected_body_ring) ||
+                !samePoint3D(
+                    primal_edge_side.midpoint, affected_edge_side.midpoint, affected_length_tol) ||
+                !samePointRing(
+                    body_ring, affected_body_ring, std::max(length_tol, affected_length_tol)) ||
+                !replacePrimalEdgeSideWithFan(
+                    candidate_side_points, affected_edge_side, affected_length_tol) ||
                 surfaceConformance(candidate_side_points,
                                    affected_cell.output_subdomain_id,
                                    affected_cell.primal_elems) != SurfaceConformance3D::conforming)
             {
-              valid_repair = false;
+              valid_fallback = false;
               break;
             }
 
             affected_cell_indices.push_back(location.first);
             affected_edge_side_indices.push_back(location.second);
             replaced_side_indices.push_back(affected_edge_side.side_index);
-            side_index_offsets.push_back(
-                affected_cell.polycut_side_points[affected_edge_side.side_index].size() - 1);
+            side_index_offsets.push_back(affected_body_ring.size() - 1);
             candidate_cell_side_points.push_back(std::move(candidate_side_points));
           }
 
-          if (!valid_repair)
+          if (!valid_fallback ||
+              std::find(affected_cell_indices.begin(), affected_cell_indices.end(), cell_index) ==
+                  affected_cell_indices.end())
             continue;
 
           for (const auto candidate_index : index_range(affected_cell_indices))
@@ -5437,12 +5521,26 @@ DualMeshGenerator::generate3D(std::unique_ptr<MeshBase> input_mesh)
                 std::move(candidate_cell_side_points[candidate_index]);
 
             for (auto & recorded_edge_side : affected_cell.primal_edge_sides)
-              if (!recorded_edge_side.replaced &&
-                  recorded_edge_side.side_index > replaced_side_indices[candidate_index])
+              if (recorded_edge_side.side_index > replaced_side_indices[candidate_index])
                 recorded_edge_side.side_index += side_index_offsets[candidate_index];
 
             affected_cell.primal_edge_sides[affected_edge_side_indices[candidate_index]].replaced =
                 true;
+
+            // The fan introduces new surface edges, so any concave edge found on the old side set
+            // is no longer a valid split candidate.
+            const Real affected_polyhedron_scale =
+                polyhedronScale3D(affected_cell.polycut_side_points);
+            const Real affected_length_tol = tol * affected_polyhedron_scale;
+            PolyCutEdge3D refreshed_concave_edge;
+            affected_cell.has_concave_edge =
+                affected_cell.searched_concave_edge &&
+                findConcavePolyhedronEdge3D(affected_cell.polycut_side_points,
+                                            boundary_normal_dot_tol,
+                                            affected_length_tol,
+                                            refreshed_concave_edge);
+            affected_cell.concave_edge =
+                affected_cell.has_concave_edge ? refreshed_concave_edge : PolyCutEdge3D{};
           }
 
           repaired_primal_edges.insert(primal_edge_side.edge_key);
