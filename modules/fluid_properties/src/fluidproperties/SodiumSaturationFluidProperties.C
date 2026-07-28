@@ -160,11 +160,11 @@ Real
 SodiumSaturationFluidProperties::p_from_v_e(Real v, Real e) const
 {
   Real temperature = T_from_v_e(v, e);
-  Real v_T, d2v_dT2, d3v_dT3;
-  specific_volume_derivatives(temperature, v, v_T, d2v_dT2, d3v_dT3);
+  Real dv_dT, d2v_dT2, d3v_dT3;
+  specific_volume_derivatives(temperature, v, dv_dT, d2v_dT2, d3v_dT3);
 
   const Real h = h_from_p_T(_reference_pressure, temperature);
-  return _reference_pressure + (h - _reference_pressure * v - e) / (temperature * v_T);
+  return _reference_pressure + (h - _reference_pressure * v - e) / (temperature * dv_dT);
 }
 
 void
@@ -174,15 +174,15 @@ SodiumSaturationFluidProperties::p_from_v_e(
   Real temperature, dT_dv, dT_de;
   T_from_v_e(v, e, temperature, dT_dv, dT_de);
 
-  Real v_T, d2v_dT2, d3v_dT3;
-  specific_volume_derivatives(temperature, v, v_T, d2v_dT2, d3v_dT3);
+  Real dv_dT, d2v_dT2, d3v_dT3;
+  specific_volume_derivatives(temperature, v, dv_dT, d2v_dT2, d3v_dT3);
 
   const Real h = h_from_p_T(_reference_pressure, temperature);
   const Real cp = cp0_from_T(temperature);
   const Real numerator = h - _reference_pressure * v - e;
-  const Real denominator = temperature * v_T;
-  const Real dnumerator_dv = (cp - _reference_pressure * v_T) * dT_dv;
-  const Real ddenominator_dv = (v_T + temperature * d2v_dT2) * dT_dv;
+  const Real denominator = temperature * dv_dT;
+  const Real dnumerator_dv = (cp - _reference_pressure * dv_dT) * dT_dv;
+  const Real ddenominator_dv = (dv_dT + temperature * d2v_dT2) * dT_dv;
 
   pressure = _reference_pressure + numerator / denominator;
   dp_dv = (dnumerator_dv * denominator - numerator * ddenominator_dv) / (denominator * denominator);

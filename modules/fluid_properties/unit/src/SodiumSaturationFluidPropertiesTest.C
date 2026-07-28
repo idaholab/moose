@@ -15,7 +15,10 @@
 /**
  * Test that the fluid name is correctly returned
  */
-TEST_F(SodiumSaturationFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "sodium_sat"); }
+TEST_F(SodiumSaturationFluidPropertiesTest, fluidName)
+{
+  EXPECT_EQ(_fp->fluidName(), "sodium_sat");
+}
 
 /**
  * Test that the molar mass is correctly returned
@@ -168,6 +171,7 @@ TEST_F(SodiumSaturationFluidPropertiesTest, pressureExtension)
   Real s, ds_dp, ds_dT;
   _fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
 
+  DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
   REL_TEST(h - h0, (p - p0) * (v - T * dv_dT), REL_TOL_SAVED_VALUE);
   REL_TEST(dh_dp, v - T * dv_dT, REL_TOL_DERIVATIVE);
   REL_TEST(dh_dT, _fp->cp_from_p_T(p, T), REL_TOL_DERIVATIVE);
@@ -206,8 +210,9 @@ TEST_F(SodiumSaturationFluidPropertiesTest, specificEntropy)
   REL_TEST(_fp->rho_from_p_s(p, s), 1 / v, REL_TOL_SAVED_VALUE);
 
   DERIV_TEST(_fp->s_from_p_T, p, T, REL_TOL_DERIVATIVE);
-  DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
-  DERIV_TEST(_fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE);
+  // Larger perturbations keep the finite differences above cancellation and inversion noise.
+  DERIV_TEST_CUSTOM_PERTURBATION(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE, 2e-6);
+  DERIV_TEST_CUSTOM_PERTURBATION(_fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE, 1e-5);
 }
 
 /**
