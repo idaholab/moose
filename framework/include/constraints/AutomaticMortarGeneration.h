@@ -591,12 +591,6 @@ private:
                                      SubdomainID lower_dimensional_secondary_subdomain_id);
 
   /**
-   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
-   */
-  void
-  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
-
-  /**
    * Process aligned nodes
    * @returns whether mortar segment(s) were created
    */

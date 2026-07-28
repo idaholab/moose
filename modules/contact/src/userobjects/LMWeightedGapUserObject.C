@@ -33,6 +33,7 @@ LMWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription(
       "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
+  params.set<bool>("allow_nodal_normal_derivatives") = true;
   params += LMWeightedGapUserObject::newParams();
   return params;
 }

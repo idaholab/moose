@@ -196,8 +196,7 @@ depend on different sparse sets of degrees of freedom. MOOSE first forms the
 union of those derivative indices so that every row uses one local matrix
 column layout. Missing row entries are zero while libMesh applies constraints;
 only the resulting nonzero entries are then cached. Residual batches with the
-same derivative support retain the direct common-layout path even if the
-support indices were inserted in a different order.
+same derivative support retain the direct common-layout path.
 
 ## AD in MOOSE
 

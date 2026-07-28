@@ -98,8 +98,8 @@ protected:
   /// the matrix sparsity pattern
   const bool _is_coupling_functor;
 
-  /// Whether to ghost point neighbors of secondary lower subdomain elements and their
-  /// cross mortar interface counterparts for applications such as mortar nodal auxiliary kernels
+  /// Whether to ghost secondary face point neighbors, their interior parents, and their
+  /// cross-interface counterparts
   const bool _ghost_point_neighbors;
 
   /// Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing

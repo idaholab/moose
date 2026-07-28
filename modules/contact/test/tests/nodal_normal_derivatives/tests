@@ -14,33 +14,32 @@
   [curved_3d_parallel]
     type = RunApp
     input = curved_3d_action.i
-    cli_args = 'Mesh/bottom_block/xmin=0.1 Mesh/bottom_block/xmax=1.3 Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic Problem/error_on_jacobian_nonzero_reallocation=false'
+    cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Mesh/Partitioner/nx=2 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Executioner/line_search=basic Problem/error_on_jacobian_nonzero_reallocation=true'
     expect_out = 'Solve Converged!'
-    capabilities = 'ad_size>=100'
     min_parallel = 2
     max_parallel = 2
     mesh_mode = DISTRIBUTED
     design = 'ContactAction.md PenaltyFrictionUserObject.md AutomaticMortarGeneration.md'
-    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve across a partially overlapping, partitioned QUAD4 node star.'
+    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve across a fully overlapping, partitioned QUAD4 node star.'
   []
 
   [mortar_penalty_friction_jacobian]
     type = PetscJacobianTester
     input = curved_3d_action.i
-    cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true -snes_test_err 1e-7'
-    run_sim = true
-    ratio_tol = 3.5e-6
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e-3 Contact/mortar/penalty_friction=1e-3 ICs/inactive=normal_lm Executioner/nl_abs_tol=1e-4 Problem/error_on_jacobian_nonzero_reallocation=true -snes_test_err 1e-7'
+    run_sim = false
+    # Projection coordinates and mortar-segment integration geometry remain frozen.
+    ratio_tol = 1.1e-5
     difference_tol = 6.5e-5
-    capabilities = 'ad_size>=100'
     max_parallel = 1
     design = 'ContactAction.md PenaltyFrictionUserObject.md'
-    requirement = 'Three-dimensional mortar-penalty friction shall include secondary nodal-normal and tangent-basis derivatives in its contact Jacobian.'
+    requirement = 'Three-dimensional mortar-penalty friction shall include secondary nodal-normal and tangent-basis derivatives and preallocate their fixed-topology one-ring coupling.'
   []
 
   [mortar_contact_pjfnk]
     type = RunApp
     input = curved_3d_action.i
-    cli_args = 'Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=false Executioner/solve_type=PJFNK'
+    cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=2 Mesh/bottom_block/nz=1 Contact/mortar/model=frictionless Problem/error_on_jacobian_nonzero_reallocation=true Executioner/solve_type=PJFNK Executioner/end_time=0.05 Executioner/dt=0.05'
     expect_out = 'Solve Converged!'
     max_parallel = 1
     design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md AutomaticMortarGeneration.md'

@@ -51,7 +51,8 @@ public:
   /// Whether this user object includes derivatives of the secondary nodal normals
   bool usesNodalNormalDerivatives() const;
 
-  /// Enable nodal-normal derivatives for a supported quasistatic contact constraint
+  /// Enable derivatives during construction of a supported quasistatic contact constraint.
+  /// Dynamic contact uses the same user object classes and intentionally leaves this disabled.
   void includeNodalNormalDerivatives() const;
 
   /**
@@ -206,7 +207,10 @@ protected:
   /// AD nodal normals computed from the secondary face one-ring
   mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;
 
-  /// Whether this formulation uses nodal normal derivatives while preserving stored normal values
+  /// Whether this concrete user object supports nodal-normal derivatives
+  const bool _allow_nodal_normal_derivatives;
+
+  /// Set once while supported contact constraints are constructed, before user object execution
   mutable bool _use_nodal_normal_derivatives;
 
   /// Whether the weighted gap is associated with nodes or elements (like for a CONSTANT MONOMIAL
