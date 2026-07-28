@@ -161,6 +161,36 @@ AdaptiveRayContainmentCheck::isOnSurface(const Point & p) const
   return false;
 }
 
+template <typename CrossingTest>
+int
+AdaptiveRayContainmentCheck::countFilteredCrossings(const Point & ray_start,
+                                                    const Point & ray_end,
+                                                    const bool use_primary_direction,
+                                                    CrossingTest is_crossing) const
+{
+  const auto candidate_ids =
+      use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
+  const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
+  const Point segment_direction = ray_end - ray_start;
+
+  int count = 0;
+  for (const auto candidate : make_range(num_candidates))
+  {
+    const auto elem_id = use_primary_direction ? candidate_ids[candidate] : candidate;
+    const auto & surface = _bd_elements[elem_id].get();
+    const auto ball = surface->computeBoundingBall();
+
+    if (isOutsideRayBBox(ray_start, segment_direction, ball))
+      continue;
+    if (isOutsideBoundingRegion(ray_start, segment_direction, ball))
+      continue;
+
+    if (is_crossing(surface))
+      ++count;
+  }
+  return count;
+}
+
 int
 AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
                                             const Point & ray_end,
@@ -172,27 +202,10 @@ AdaptiveRayContainmentCheck::countCrossings(const Point & ray_start,
   if (_dim == 2)
     return countCrossings2D(ray_start, ray_end, use_primary_direction);
 
-  int count = 0;
-  const auto candidate_ids =
-      use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
-  const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
-  const Point segment_direction = ray_end - ray_start;
+  const auto ray_hits_surface = [this, &ray_start, &ray_end](const SurfaceElement * surface)
+  { return rayIntersectGeometry(ray_start, ray_end, surface); };
 
-  for (const auto candidate : make_range(num_candidates))
-  {
-    const auto elem_id = use_primary_direction ? candidate_ids[candidate] : candidate;
-    const auto & elem = _bd_elements[elem_id].get();
-    const auto ball = elem->computeBoundingBall();
-
-    if (isOutsideRayBBox(ray_start, segment_direction, ball))
-      continue;
-    if (isOutsideBoundingRegion(ray_start, segment_direction, ball))
-      continue;
-
-    if (rayIntersectGeometry(ray_start, ray_end, elem))
-      count++;
-  }
-  return count;
+  return countFilteredCrossings(ray_start, ray_end, use_primary_direction, ray_hits_surface);
 }
 
 int
@@ -200,29 +213,14 @@ AdaptiveRayContainmentCheck::countCrossings2D(const Point & ray_start,
                                               const Point & ray_end,
                                               const bool use_primary_direction) const
 {
-  const auto candidate_ids =
-      use_primary_direction ? collectCandidateElementIDs(ray_end) : std::vector<unsigned int>{};
-  const auto num_candidates = use_primary_direction ? candidate_ids.size() : _num_elements;
-
   // The ray goes from ray_start (placed outside the geometry) to the query point p = ray_end, so
   // the crossings on the segment are exactly those of the half-line from p toward ray_start.
   const Point & p = ray_end;
   const Point dir = ray_end - ray_start; // start -> p
 
-  int count = 0;
-
-  for (const auto candidate : make_range(num_candidates))
+  const auto edge_crosses_ray = [&p, &dir](const SurfaceElement * surface)
   {
-    const auto elem_id = use_primary_direction ? candidate_ids[candidate] : candidate;
-    const auto & surf = _bd_elements[elem_id].get();
-    const auto ball = surf->computeBoundingBall();
-
-    if (isOutsideRayBBox(ray_start, dir, ball))
-      continue;
-    if (isOutsideBoundingRegion(ray_start, dir, ball))
-      continue;
-
-    const Elem & e = surf->elem();
+    const Elem & e = surface->elem();
     const Point a = e.point(0) - p;
     const Point b = e.point(1) - p;
 
@@ -234,18 +232,17 @@ AdaptiveRayContainmentCheck::countCrossings2D(const Point & ray_start,
     const Real side_a = dir.cross(a)(2);
     const Real side_b = dir.cross(b)(2);
     if ((side_a > 0.0) == (side_b > 0.0))
-      continue;
+      return false;
 
     // The edge crosses the ray line; keep it only if the crossing lies on the ray_start side of p
     // (on the segment [ray_start, p]), i.e. opposite the +dir direction that points from start to
     // p.
     const Real t = side_a / (side_a - side_b);
     const Point crossing = a + t * (b - a); // crossing point relative to p
-    if (dir * crossing < 0.0)
-      ++count;
-  }
+    return dir * crossing < 0.0;
+  };
 
-  return count;
+  return countFilteredCrossings(ray_start, ray_end, use_primary_direction, edge_crosses_ray);
 }
 
 bool

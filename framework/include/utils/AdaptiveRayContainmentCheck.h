@@ -186,6 +186,17 @@ private:
                      const Point & ray_end,
                      const bool use_primary_direction = true) const;
 
+  /// Shared traversal for the 2D and 3D crossing counts: walk the candidate elements (KD-tree
+  /// candidates for the primary direction, all elements otherwise), apply the ray-bbox and
+  /// bounding-region pruning, and count those for which is_crossing(surface) is true. The
+  /// per-dimension crossing test is supplied by the caller so the pruning loop lives in exactly one
+  /// place. Defined in the .C: only the two in-file callers instantiate it.
+  template <typename CrossingTest>
+  int countFilteredCrossings(const Point & ray_start,
+                             const Point & ray_end,
+                             const bool use_primary_direction,
+                             CrossingTest is_crossing) const;
+
   /// 2D crossing count using a half-open side-based crossing rule: an edge is counted when its two
   /// endpoints lie on strictly opposite sides of the ray line (a vertex or collinear edge exactly on
   /// the line is thus counted consistently, with no tolerance) and the crossing is on the ray_start
