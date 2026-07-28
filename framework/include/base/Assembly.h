@@ -3138,17 +3138,14 @@ Assembly::cacheJacobian(const Residuals & residuals,
   {
     const auto & current_dofs = residuals[i].derivatives().nude_indices();
     if (current_dofs.size() != first_dofs.size() ||
-        (!std::equal(first_dofs.begin(), first_dofs.end(), current_dofs.begin()) &&
-         !std::is_permutation(
-             first_dofs.begin(), first_dofs.end(), current_dofs.begin(), current_dofs.end())))
+        !std::equal(first_dofs.begin(), first_dofs.end(), current_dofs.begin()))
     {
       supports_match = false;
       break;
     }
   }
 
-  // Keep the original common-layout path whenever every row has the same derivative support. The
-  // ordering reported by an individual sparse AD container does not define a different support.
+  // Keep the original common-layout path whenever every row has the same derivative support.
   if (supports_match)
     _column_indices.assign(first_dofs.begin(), first_dofs.end());
   else

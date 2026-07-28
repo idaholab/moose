@@ -1728,31 +1728,28 @@ AutomaticMortarGeneration::buildCouplingInformation()
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
+    // Rows attached to a secondary node or either volume parent may need the complete secondary
+    // face-star coupling, even when this lower-dimensional face is owned by another processor.
+    std::set<processor_id_type> secondary_face_coupling_processors{
+        secondary_elem->processor_id(),
+        secondary_elem->interior_parent()->processor_id(),
+        primary_elem->interior_parent()->processor_id()};
+    for (const auto n : secondary_elem->node_index_range())
+      secondary_face_coupling_processors.insert(secondary_elem->node_ptr(n)->processor_id());
+
     // LowerSecondary
-    coupling_info[secondary_elem->processor_id()].emplace_back(
-        secondary_elem->id(), secondary_elem->interior_parent()->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(
-          secondary_elem->interior_parent()->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(),
+                                            secondary_elem->interior_parent()->id());
 
     // LowerPrimary
-    coupling_info[secondary_elem->processor_id()].emplace_back(
-        secondary_elem->id(), primary_elem->interior_parent()->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(
-          primary_elem->interior_parent()->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(),
+                                            primary_elem->interior_parent()->id());
 
     // Lower-LowerDimensionalPrimary
-    coupling_info[secondary_elem->processor_id()].emplace_back(secondary_elem->id(),
-                                                               primary_elem->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(primary_elem->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(), primary_elem->id());
 
     // SecondaryLower
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
@@ -1769,6 +1766,14 @@ AutomaticMortarGeneration::buildCouplingInformation()
     // PrimarySecondary
     coupling_info[primary_elem->interior_parent()->processor_id()].emplace_back(
         primary_elem->interior_parent()->id(), secondary_elem->interior_parent()->id());
+  }
+
+  // A face pair may produce several mortar segments. Remove repeated entries before communication.
+  for (auto & [processor, couplings] : coupling_info)
+  {
+    libmesh_ignore(processor);
+    std::sort(couplings.begin(), couplings.end());
+    couplings.erase(std::unique(couplings.begin(), couplings.end()), couplings.end());
   }
 
   // Push the coupling information
@@ -2235,60 +2240,9 @@ AutomaticMortarGeneration::computeNodalGeometry()
     nodal_normal = nodal_normal.unit();
 
     _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
-
-    Point nodal_tangent_one;
-    Point nodal_tangent_two;
-    householderOrthogolization(nodal_normal, nodal_tangent_one, nodal_tangent_two);
-
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][0] = nodal_tangent_one;
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)] =
+        Moose::Mortar::householderTangents(nodal_normal);
   }
-}
-
-void
-AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
-                                                      Point & nodal_tangent_one,
-                                                      Point & nodal_tangent_two) const
-{
-  using std::abs;
-
-  mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
-              "The input nodal normal should have unity norm");
-
-  const Real nx = nodal_normal(0);
-  const Real ny = nodal_normal(1);
-  const Real nz = nodal_normal(2);
-
-  // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
-  // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
-  // Mar 1;45(3):683-94. We choose one definition of h_vector and deal with special case.
-  const Point h_vector(nx + 1.0, ny, nz);
-
-  // Avoid singularity of the equations at the end of routine by providing the solution to
-  // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
-  // on a spherical problem.
-  if (abs(h_vector(0)) < TOLERANCE)
-  {
-    nodal_tangent_one(0) = 0;
-    nodal_tangent_one(1) = 1;
-    nodal_tangent_one(2) = 0;
-
-    nodal_tangent_two(0) = 0;
-    nodal_tangent_two(1) = 0;
-    nodal_tangent_two(2) = -1;
-
-    return;
-  }
-
-  const Real h = h_vector.norm();
-
-  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
-  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
-  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-
-  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
-  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
 }
 
 void
