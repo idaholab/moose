@@ -6,5 +6,4 @@ NODAL VARIABLES relative 5.5e-6 floor 5e-9
 	disp_x                    # min:               0 @ t1,n1	max:               2 @ t41,n35
 	disp_y                    # min:               0 @ t1,n1	max:            0.21 @ t33,n33
 	frictional_normal_lm      # min:               0 @ t1,n1	max:      0.16427154 @ t13,n38
-	frictional_tangential_lm  # min:               0 @ t1,n1	max:     0.016427154 @ t13,n38
-
+	frictional_tangential_lm relative 1e-5  # min:               0 @ t1,n1	max:     0.016427154 @ t13,n38

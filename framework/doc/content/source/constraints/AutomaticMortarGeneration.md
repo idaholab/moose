@@ -19,17 +19,18 @@ elements.
 ## Nodal normal derivatives
 
 `AutomaticMortarGeneration` constructs a unit normal at each secondary mortar node from the
-oriented area vectors of the incident secondary faces,
+nodal-quadrature normals and weights of the incident secondary faces,
 
 !equation
 \boldsymbol{a}_A = \sum_{e \in \operatorname{star}(A)}
-  w_{eA}\boldsymbol{A}_{eA}, \qquad
+  J_{eA}\boldsymbol{n}_{eA}, \qquad
 \boldsymbol{n}_A = \frac{\boldsymbol{a}_A}{\lVert\boldsymbol{a}_A\rVert}.
 
 For supported mechanical-contact Jacobian evaluations, the face tangents are formed from AD nodal
-coordinates. AD then differentiates the edge rotation or face cross product, nodal-quadrature
-weighting, summation over the secondary face star, and final normalization. The stored nodal-normal
-value is retained, so residual and Jacobian evaluations use the same contact direction.
+coordinates. The equivalent quadrature-weighted oriented area vector is formed from an edge
+rotation in 2D or a tangent cross product in 3D. AD then differentiates the area weighting,
+summation over the secondary face star, and final normalization. The stored nodal-normal value is
+retained, so residual and Jacobian evaluations use the same contact direction.
 
 The incident-face set and orientation signs are fixed during an evaluation. Mortar segment
 topology, projections, integration measures, moving overlap boundaries, and active-set changes are

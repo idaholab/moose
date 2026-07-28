@@ -31,6 +31,7 @@ WeightedGapUserObject::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
+  params.addPrivateParam<bool>("allow_nodal_normal_derivatives", false);
   params.addPrivateParam<bool>("use_nodal_normal_derivatives", false);
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
@@ -52,6 +53,7 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
     _secondary_disp_z(_has_disp_z ? &_disp_z_var->adSln() : nullptr),
     _primary_disp_z(_has_disp_z ? &_disp_z_var->adSlnNeighbor() : nullptr),
     _coord(_assembly.mortarCoordTransformation()),
+    _allow_nodal_normal_derivatives(getParam<bool>("allow_nodal_normal_derivatives")),
     _use_nodal_normal_derivatives(false)
 {
   if (!getParam<bool>("use_displaced_mesh"))
@@ -67,6 +69,9 @@ WeightedGapUserObject::includeNodalNormalDerivatives() const
 {
   if (_use_nodal_normal_derivatives)
     return;
+
+  if (!_allow_nodal_normal_derivatives)
+    mooseError("Nodal-normal derivatives are not supported by user object '", name(), "'.");
 
   if (getParam<bool>("interpolate_normals"))
     paramError("interpolate_normals",

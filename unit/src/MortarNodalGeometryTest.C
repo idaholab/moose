@@ -12,7 +12,7 @@
 #include "ADUtils.h"
 #include "AutomaticMortarGeneration.h"
 
-TEST(MortarNodalGeometryTest, householderTangents)
+TEST(MortarNodalGeometryTest, weightedNormalAndHouseholderTangents)
 {
   constexpr dof_id_type derivative_index = 0;
   constexpr Real epsilon = 1e-7;
@@ -21,8 +21,13 @@ TEST(MortarNodalGeometryTest, householderTangents)
   const auto tangents = [](const auto & perturbed_coordinate)
   {
     using T = std::decay_t<decltype(perturbed_coordinate)>;
-    const libMesh::VectorValue<T> normal =
-        libMesh::VectorValue<T>(perturbed_coordinate, -0.3, 0.8).unit();
+    const libMesh::VectorValue<T> first_area =
+        libMesh::VectorValue<T>(perturbed_coordinate, -0.3, 0.8)
+            .cross(libMesh::VectorValue<T>(0.2, 0.9, -0.1));
+    const libMesh::VectorValue<T> second_area =
+        libMesh::VectorValue<T>(0.1, perturbed_coordinate, 0.7)
+            .cross(libMesh::VectorValue<T>(-0.6, 0.3, 0.2));
+    const libMesh::VectorValue<T> normal = (0.7 * first_area + 1.2 * second_area).unit();
     return std::make_pair(normal, Moose::Mortar::householderTangents(normal));
   };
 

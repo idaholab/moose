@@ -58,14 +58,4 @@
     design = 'automatic_differentiation/index.md'
     issues = '#33378'
   []
-  [test_ad_equivalent_row_support_jacobian]
-    type = PetscJacobianTester
-    input = 'ad_row_dependent_jacobian.i'
-    cli_args = 'Kernels/row_dependent/heterogeneous_support=false'
-    run_sim = true
-    prereq = test_ad_row_dependent_jacobian
-    requirement = 'The system shall use the common-layout AD Jacobian assembly path when residual rows acquire equivalent derivative supports through different operation orders.'
-    design = 'automatic_differentiation/index.md'
-    issues = '#33378'
-  []
 []

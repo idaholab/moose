@@ -48,8 +48,9 @@ MortarConstraintBase::validParams()
   // variable, the process that owns the node needs to have local copies of any lower-d elements
   // that have the connected node. Note that the geometric ghosting done here is different than that
   // done by the AugmentSparsityOnInterface RM, even when ghost_point_neighbors is true. The latter
-  // ghosts equal-manifold lower-dimensional secondary element point neighbors and their interface
-  // couplings. This ghosts lower-dimensional point neighbors of higher-dimensional elements.
+  // ghosts equal-manifold lower-dimensional secondary element point neighbors, their interior
+  // parents, and their interface couplings. This ghosts lower-dimensional point neighbors of
+  // higher-dimensional elements.
   // Neither is guaranteed to be a superset of the other. For instance ghosting of lower-d point
   // neighbors (AugmentSparsityOnInterface with ghost_point_neighbors = true) is only guaranteed to
   // ghost those lower-d point neighbors on *processes that own lower-d elements*. And you may have

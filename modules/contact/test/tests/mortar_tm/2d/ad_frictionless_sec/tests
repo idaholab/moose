@@ -49,7 +49,7 @@
       run_sim = true
       heavy = true
       valgrind = 'heavy'
-      detail = 'using the small strain formulation and compare its assembled Jacobian against finite differences.'
+      detail = 'using the small strain formulation and compare the Jacobian against finite differences while holding mortar projections and integration geometry fixed.'
     []
     [finite-jac]
       type = 'PetscJacobianTester'
@@ -61,7 +61,7 @@
       run_sim = true
       heavy = true
       valgrind = 'heavy'
-      detail = 'using the finite strain formulation and compare its assembled Jacobian against finite differences.'
+      detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
     []
   []
   [stiff]

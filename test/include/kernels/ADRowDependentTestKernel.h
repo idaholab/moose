@@ -24,5 +24,4 @@ protected:
   ADReal computeQpResidual() override;
 
   const MooseArray<ADReal> & _ad_dof_values;
-  const bool _heterogeneous_support;
 };
