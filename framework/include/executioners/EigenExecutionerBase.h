@@ -130,9 +130,6 @@ protected:
   FEProblemBase & _problem;
   MooseEigenSystem & _eigen_sys;
 
-  /// Convergence object corresponding to \c _eigen_sys
-  DefaultNonlinearConvergence * _eigen_sys_conv;
-
   /// dummy solve object for properly setting PETSc options
   FEProblemSolve _feproblem_solve;
 
@@ -170,4 +167,8 @@ protected:
   void chebyshev(Chebyshev_Parameters & params,
                  unsigned int iter,
                  const PostprocessorValue * solution_diff);
+
+private:
+  /// Convergence object corresponding to \c _eigen_sys
+  DefaultNonlinearConvergence * _eigen_sys_conv;
 };
