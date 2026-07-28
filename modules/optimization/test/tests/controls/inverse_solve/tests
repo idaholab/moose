@@ -1,0 +1,33 @@
+[Tests]
+  design = 'SecantInversionControl.md'
+  issues = '#33205'
+
+  [inverse_solve]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out.csv
+    requirement = "The system shall solve a scalar inverse coupling problem by using a Control to "
+                  "adjust a parameter with the secant method, driven by fixed-point iteration, so "
+                  "that a sub-app output matches a target function at each time step."
+  []
+  [error_on_max_iteration]
+    type = RunException
+    input = main.i
+    cli_args = 'Convergence/inv_conv/max_iterations=1 Executioner/dtmin=0.3 Outputs/csv=false'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    requirement = "The system shall, when the fixed-point iteration cannot converge within the "
+                  "maximum number of iterations and the time step cannot be reduced further, "
+                  "cut the time step and error out."
+  []
+  [accept_on_max_iteration]
+    type = RunApp
+    input = main.i
+    cli_args = 'Convergence/inv_conv/max_iterations=1 '
+               'Convergence/inv_conv/converge_at_max_iterations=true '
+               'Outputs/csv=false'
+    # Reuses main.i, so its recover checkpoint would collide with the inverse_solve recover test.
+    recover = false
+    requirement = "The system shall, when the fixed-point iteration reaches the maximum number of "
+                  "iterations and accept-on-max is enabled, accept the best estimate and continue."
+  []
+[]
