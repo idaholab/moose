@@ -115,7 +115,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(
     mooseAssert(coupled_elem,
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-    if (_is_coupling_functor || coupled_elem->processor_id() != p)
+    if (coupled_elem->processor_id() != p || (_is_coupling_functor && _ghost_point_neighbors))
       coupled_elements.emplace(coupled_elem, _null_mat);
   }
 }
@@ -125,89 +125,69 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(
     const processor_id_type p,
     const Elem * const query_elem,
     map_type & coupled_elements,
-    const BoundaryID secondary_boundary_id,
     const SubdomainID secondary_subdomain_id,
     const AutomaticMortarGeneration & amg) const
 {
-  // I hypothesize that node processor ids are tied to higher dimensional element processor
-  // ids over lower dimensional element processor ids based on debugging experience.
-  // Consequently we need to be checking for higher dimensional elements and whether they are
-  // along our secondary boundary. From there we will query the AMG object's
-  // mortar-interface-coupling container to get the secondary lower-dimensional element, and
-  // then we will ghost it's point neighbors and their mortar interface couples
-
-  // It's possible that one higher-dimensional element could have multiple lower-dimensional
-  // elements from multiple sides. Morever, even if there is only one lower-d element per
-  // higher-d element, the unordered_multimap that holds the coupling information can have
-  // duplicate key-value pairs if there are multiple mortar segments per secondary face. So to
-  // prevent attempting to insert into the coupled elements map multiple times with the same
-  // element, we'll keep track of the elements we've handled. We're going to use a tree-based
-  // set here since the number of lower-d elements handled should never exceed the number of
-  // element sides (which is small)
+  // Node ownership can follow a higher-dimensional parent, so the query may be a secondary face,
+  // its interior parent, or a paired primary parent. Start from every associated secondary face so
+  // the coupling graph contains the complete nodal-normal support in either row direction.
+  // Multiple mortar segments can also produce duplicate face couplings, which are handled below.
   std::set<dof_id_type> secondary_lower_elems_handled;
-  const BoundaryInfo & binfo = _mesh->get_boundary_info();
-  for (auto side : query_elem->side_index_range())
+  std::vector<const Elem *> secondary_lower_elems;
+  if (query_elem->subdomain_id() == secondary_subdomain_id)
+    secondary_lower_elems.push_back(query_elem);
+
+  // A secondary parent can own a shared nodal row even when its face has no mortar segment and is
+  // therefore absent from the mortar coupling map.
+  if (const auto find_it =
+          amg._secondary_element_to_secondary_lowerd_element.find(query_elem->id());
+      find_it != amg._secondary_element_to_secondary_lowerd_element.end())
   {
-    if (!binfo.has_boundary_id(query_elem, side, secondary_boundary_id))
-      // We're not a higher-dimensional element along the secondary face, or at least this
-      // side isn't
+    // Relationship managers may operate on a mesh clone, so remap the AMG face by ID.
+    const Elem * const secondary_lower_elem = _mesh->elem_ptr(find_it->second->id());
+    mooseAssert(secondary_lower_elem,
+                "The secondary lower-dimensional element with id "
+                    << find_it->second->id()
+                    << " does not exist in the relationship manager mesh.");
+    secondary_lower_elems.push_back(secondary_lower_elem);
+  }
+
+  const auto & mic = amg.mortarInterfaceCoupling();
+  if (const auto find_it = mic.find(query_elem->id()); find_it != mic.end())
+    for (const auto coupled_elem_id : find_it->second)
+      if (const Elem * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+          coupled_elem && coupled_elem->subdomain_id() == secondary_subdomain_id)
+        secondary_lower_elems.push_back(coupled_elem);
+
+  for (const Elem * const secondary_lower_elem : secondary_lower_elems)
+  {
+    if (!secondary_lower_elems_handled.insert(secondary_lower_elem->id()).second)
       continue;
 
-    const auto & mic = amg.mortarInterfaceCoupling();
-    auto find_it = mic.find(query_elem->id());
-    if (find_it == mic.end())
-      continue;
+    std::set<const Elem *> secondary_lower_elem_point_neighbors;
+    secondary_lower_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
+    secondary_lower_elem_point_neighbors.insert(secondary_lower_elem);
 
-    const auto & coupled_set = find_it->second;
-    for (const auto coupled_elem_id : coupled_set)
+    for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
     {
-      auto * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
-
-      if (coupled_elem->subdomain_id() != secondary_subdomain_id)
-      {
-        // We support higher-d-secondary to higher-d-primary coupling now, e.g.
-        // if we get here, coupled_elem is not actually a secondary lower elem; it's a
-        // primary higher-d elem
-        mooseAssert(coupled_elem->dim() == query_elem->dim(), "These should be matching dim");
-        continue;
-      }
-
-      auto insert_pr = secondary_lower_elems_handled.insert(coupled_elem_id);
-
-      // If insertion didn't happen, then we've already handled this element
-      if (!insert_pr.second)
+      if (neigh->subdomain_id() != secondary_subdomain_id)
         continue;
 
-      // We've already ghosted the secondary lower-d element itself if it needed to be
-      // outside of the _ghost_point_neighbors logic. But now we must make sure to ghost the
-      // point neighbors of the secondary lower-d element and their mortar interface
-      // couplings
-      std::set<const Elem *> secondary_lower_elem_point_neighbors;
-      coupled_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
+      if (_is_coupling_functor || neigh->processor_id() != p)
+        coupled_elements.emplace(neigh, _null_mat);
 
-      for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
-      {
-        if (_is_coupling_functor || neigh->processor_id() != p)
-          coupled_elements.emplace(neigh, _null_mat);
+      // Every point-neighbor face contributes to the smoothed nodal normal, even when it has no
+      // mortar segment. Its interior parent therefore contributes displacement derivatives and
+      // must be present in the coupling graph independently of the mortar coupling map.
+      const Elem * const interior_parent = neigh->interior_parent();
+      mooseAssert(interior_parent,
+                  "A lower-dimensional secondary mortar element must have an interior parent.");
+      if (_is_coupling_functor || interior_parent->processor_id() != p)
+        coupled_elements.emplace(interior_parent, _null_mat);
 
-        // Every point-neighbor face contributes to the smoothed nodal normal, even when it has no
-        // mortar segment. Its interior parent therefore contributes displacement derivatives and
-        // must be present in the coupling graph independently of the mortar coupling map.
-        const Elem * const interior_parent = neigh->interior_parent();
-        mooseAssert(interior_parent,
-                    "A lower-dimensional secondary mortar element must have an interior parent.");
-        if (_is_coupling_functor || interior_parent->processor_id() != p)
-          coupled_elements.emplace(interior_parent, _null_mat);
-
-        ghostMortarInterfaceCouplings(p, neigh, coupled_elements, amg);
-      }
-    } // end iteration over mortar interface couplings
-
-    // We actually should have added all the lower-dimensional elements associated with the
-    // higher-dimensional element, so we can stop iterating over sides
-    return;
-
-  } // end for side_index_range
+      ghostMortarInterfaceCouplings(p, neigh, coupled_elements, amg);
+    }
+  }
 }
 
 void
@@ -380,12 +360,12 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 
       if (_ghost_point_neighbors)
         ghostLowerDSecondaryElemPointNeighbors(
-            p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
+            p, elem, coupled_elements, secondary_subdomain_id, *amg);
       if (_ghost_higher_d_neighbors)
         ghostHigherDNeighbors(
             p, elem, coupled_elements, secondary_boundary_id, secondary_subdomain_id, *amg);
     } // end for loop over input range
-  }   // end if amg
+  } // end if amg
 }
 
 bool
