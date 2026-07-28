@@ -104,9 +104,14 @@ using namespace libMesh;
 
 namespace
 {
+// Store both values so ordinary checks can compare a compact token while the canonical summary
+// remains available in the mesh metadata for debugging and reproducing mismatches.
 const std::string split_mesh_input_fingerprint_name = "SYSTEM/_moose/split_mesh_input_fingerprint";
 const std::string split_mesh_input_summary_name = "SYSTEM/_moose/split_mesh_input_summary";
 
+/**
+ * Computes a deterministic hash for canonicalized split mesh input data.
+ */
 std::string
 stableHash(const std::string & value)
 {
@@ -122,6 +127,9 @@ stableHash(const std::string & value)
   return oss.str();
 }
 
+/**
+ * Converts a parameter value to the same string representation used in input summaries.
+ */
 std::string
 parameterValue(const libMesh::Parameters::Value & value)
 {
@@ -133,6 +141,9 @@ parameterValue(const libMesh::Parameters::Value & value)
   return str;
 }
 
+/**
+ * Determines whether a parameter should participate in split mesh consistency checks.
+ */
 bool
 includeInSplitMeshFingerprint(const InputParameters & params,
                               const std::string & name,
@@ -146,6 +157,9 @@ includeInSplitMeshFingerprint(const InputParameters & params,
   return true;
 }
 
+/**
+ * Appends sorted, user-visible parameter values to the split mesh input summary.
+ */
 void
 appendParametersForSplitMeshFingerprint(std::ostringstream & oss,
                                         const InputParameters & params,
@@ -156,29 +170,52 @@ appendParametersForSplitMeshFingerprint(std::ostringstream & oss,
       oss << name << "=" << parameterValue(*value) << "\n";
 }
 
+/**
+ * Collects canonical Mesh block field values from the parsed input file.
+ */
 class SplitMeshInputWalker : public hit::Walker
 {
 public:
+  /**
+   * Constructs a walker that skips fields with paths present in \p ignored.
+   */
   SplitMeshInputWalker(const std::set<std::string> & ignored) : _ignored(ignored) {}
 
   void
-  walk(const std::string & fullpath, const std::string & /* nodepath */, hit::Node * n) override
-  {
-    if (n->type() != hit::NodeType::Field || _ignored.count(n->path()))
-      return;
+  walk(const std::string & fullpath, const std::string & /* nodepath */, hit::Node * n) override;
 
-    const auto * field = dynamic_cast<const hit::Field *>(n);
-    mooseAssert(field, "Expected a HIT field");
-    _values.emplace_back(fullpath, MooseUtils::removeExtraWhitespace(field->val()));
-  }
-
+  /**
+   * Gets the collected input paths and normalized values.
+   */
   const auto & values() const { return _values; }
 
 private:
+  /// Mesh input field paths excluded from the split mesh fingerprint.
   const std::set<std::string> & _ignored;
+
+  /// Collected pairs of input paths and normalized values.
   std::vector<std::pair<std::string, std::string>> _values;
 };
 
+/**
+ * Records a canonical value for each non-ignored Mesh block field.
+ */
+void
+SplitMeshInputWalker::walk(const std::string & fullpath,
+                           const std::string & /* nodepath */,
+                           hit::Node * n)
+{
+  if (n->type() != hit::NodeType::Field || _ignored.count(n->path()))
+    return;
+
+  const auto * field = dynamic_cast<const hit::Field *>(n);
+  mooseAssert(field, "Expected a HIT field");
+  _values.emplace_back(fullpath, MooseUtils::removeExtraWhitespace(field->val()));
+}
+
+/**
+ * Appends canonical Mesh block input values to the split mesh input summary.
+ */
 void
 appendMeshInputForSplitMeshFingerprint(std::ostringstream & oss,
                                        Parser & parser,
